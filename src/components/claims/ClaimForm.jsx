@@ -43,7 +43,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel }) {
   const [showTPModal, setShowTPModal] = useState(false);
   const [isLookingUpVehicle, setIsLookingUpVehicle] = useState(false);
   const [vehicleLookupError, setVehicleLookupError] = useState(null);
-  const [aiExtractDialog, setAiExtractDialog] = useState({ isOpen: false, data: null }); // UPDATED state
+  const [aiExtractDialog, setAiExtractDialog] = useState({ isOpen: false, data: null });
   const queryClient = useQueryClient();
 
   // Check if user is internal - with loading state
@@ -80,6 +80,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel }) {
     vehicle_use: '',
     courtesy_car_required: false,
     has_third_party: false, // Added to control third-party step
+    requires_indemnity: false, // NEW
     file_urls: [],
     insurer: '',
     claim_ref: '',
@@ -169,6 +170,15 @@ export default function ClaimForm({ claim, onSubmit, onCancel }) {
     authority_cost_gross: 0,
     final_repair_cost: 0,
     total_invoice_repairer: 0,
+    // NEW: Indemnity fields
+    indemnity_driver_dob: '',
+    indemnity_registered_owner: '',
+    indemnity_pending_prosecutions: '',
+    indemnity_dvla_medical_restrictions: '',
+    indemnity_full_license_12_months: false,
+    indemnity_convictions_last_5_years: false,
+    indemnity_vehicle_use_at_incident: '',
+    indemnity_vehicle_modifications: '',
   });
 
   // If editing existing claim, skip the wizard
@@ -461,6 +471,10 @@ export default function ClaimForm({ claim, onSubmit, onCancel }) {
       dynamicSteps.push({ title: "Third Party", key: "third_party" });
     }
 
+    if (formData.requires_indemnity) { // NEW
+      dynamicSteps.push({ title: "Indemnity", key: "indemnity" }); // NEW
+    }
+
     dynamicSteps.push({ title: "Review", key: "review" });
 
     return dynamicSteps.map((step, index) => ({
@@ -650,12 +664,22 @@ export default function ClaimForm({ claim, onSubmit, onCancel }) {
                 />
                 <label htmlFor="has_third_party_edit" className="text-sm text-gray-600">Third Party Involved</label>
               </div>
+              <div className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  id="requires_indemnity_edit"
+                  checked={formData.requires_indemnity}
+                  onChange={(e) => handleCheckboxChange('requires_indemnity', e.target.checked)}
+                  className="neomorph-inset"
+                />
+                <label htmlFor="requires_indemnity_edit" className="text-sm text-gray-600">Indemnity Details Required</label>
+              </div>
             </div>
 
             {/* Client Details */}
             <div className="neomorph-flat p-6 space-y-4">
               <h3 className="font-bold text-gray-700 mb-4">Client Details</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:col-span-3 gap-4">
                 <div>
                   <label className="block text-sm text-gray-600 mb-2">Client Name *</label>
                   {isInternalUser ? (
@@ -995,6 +1019,97 @@ export default function ClaimForm({ claim, onSubmit, onCancel }) {
               </div>
             )}
 
+            {/* NEW: Indemnity Details (Edit Mode) */}
+            {formData.requires_indemnity && (
+              <div className="neomorph-flat p-6 space-y-4">
+                <h3 className="font-bold text-gray-700 mb-4">Indemnity Details</h3>
+                <p className="text-sm text-gray-500 mb-4">Please provide the following details for indemnity purposes.</p>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm text-gray-600 mb-2">Driver's Date of Birth</label>
+                    <Input
+                      type="date"
+                      value={formData.indemnity_driver_dob}
+                      onChange={(e) => handleChange('indemnity_driver_dob', e.target.value)}
+                      className="neomorph-inset px-4 py-3 text-gray-700 border-0"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-600 mb-2">Registered Owner (Full Name)</label>
+                    <Input
+                      value={formData.indemnity_registered_owner}
+                      onChange={(e) => handleChange('indemnity_registered_owner', e.target.value)}
+                      className="neomorph-inset px-4 py-3 text-gray-700 border-0"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm text-gray-600 mb-2">Any pending prosecutions, endorsements or disqualifications?</label>
+                  <Textarea
+                    value={formData.indemnity_pending_prosecutions}
+                    onChange={(e) => handleChange('indemnity_pending_prosecutions', e.target.value)}
+                    className="neomorph-inset px-4 py-3 text-gray-700 border-0 h-24"
+                    placeholder="e.g., None, or describe any pending issues"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm text-gray-600 mb-2">Any DVLA medical restrictions?</label>
+                  <Textarea
+                    value={formData.indemnity_dvla_medical_restrictions}
+                    onChange={(e) => handleChange('indemnity_dvla_medical_restrictions', e.target.value)}
+                    className="neomorph-inset px-4 py-3 text-gray-700 border-0 h-24"
+                    placeholder="e.g., None, or describe restrictions"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="checkbox"
+                      id="indemnity_full_license_12_months_edit"
+                      checked={formData.indemnity_full_license_12_months}
+                      onChange={(e) => handleCheckboxChange('indemnity_full_license_12_months', e.target.checked)}
+                      className="neomorph-inset"
+                    />
+                    <label htmlFor="indemnity_full_license_12_months_edit" className="text-sm text-gray-600">Held full UK/EU driving license for 12+ months</label>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="checkbox"
+                      id="indemnity_convictions_last_5_years_edit"
+                      checked={formData.indemnity_convictions_last_5_years}
+                      onChange={(e) => handleCheckboxChange('indemnity_convictions_last_5_years', e.target.checked)}
+                      className="neomorph-inset"
+                    />
+                    <label htmlFor="indemnity_convictions_last_5_years_edit" className="text-sm text-gray-600">No motoring convictions in the last 5 years</label>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm text-gray-600 mb-2">Vehicle Use at Time of Incident</label>
+                  <Input
+                    value={formData.indemnity_vehicle_use_at_incident}
+                    onChange={(e) => handleChange('indemnity_vehicle_use_at_incident', e.target.value)}
+                    className="neomorph-inset px-4 py-3 text-gray-700 border-0"
+                    placeholder="e.g., Personal, Commuting, Business"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm text-gray-600 mb-2">Vehicle Modifications</label>
+                  <Textarea
+                    value={formData.indemnity_vehicle_modifications}
+                    onChange={(e) => handleChange('indemnity_vehicle_modifications', e.target.value)}
+                    className="neomorph-inset px-4 py-3 text-gray-700 border-0 h-24"
+                    placeholder="e.g., None, or describe any modifications"
+                  />
+                </div>
+              </div>
+            )}
+
             {/* File Uploads */}
             <div className="neomorph-flat p-6 space-y-4">
               <h3 className="font-bold text-gray-700 mb-4">File Uploads</h3>
@@ -1282,6 +1397,18 @@ export default function ClaimForm({ claim, onSubmit, onCancel }) {
                       className="neomorph-inset"
                     />
                     <label htmlFor="has_third_party" className="text-sm text-gray-600">Third party involved</label>
+                  </div>
+
+                  {/* NEW: Requires Indemnity checkbox */}
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="checkbox"
+                      id="requires_indemnity"
+                      checked={formData.requires_indemnity}
+                      onChange={(e) => handleCheckboxChange('requires_indemnity', e.target.checked)}
+                      className="neomorph-inset"
+                    />
+                    <label htmlFor="requires_indemnity" className="text-sm text-gray-600">Indemnity details required</label>
                   </div>
                 </div>
               </div>
@@ -1726,6 +1853,96 @@ export default function ClaimForm({ claim, onSubmit, onCancel }) {
               </div>
             )}
 
+            {/* NEW: Step: Indemnity (conditional) */}
+            {formData.requires_indemnity && currentStep === getStepNumber("indemnity") && (
+              <div className="neomorph-flat p-6 space-y-6">
+                <h3 className="text-xl font-bold text-gray-700 mb-4">Indemnity Details</h3>
+                <p className="text-sm text-gray-500 mb-4">Please provide the following details for indemnity purposes.</p>
+
+                <div>
+                  <label className="block text-sm text-gray-600 mb-2">Driver's Date of Birth</label>
+                  <Input
+                    type="date"
+                    value={formData.indemnity_driver_dob}
+                    onChange={(e) => handleChange('indemnity_driver_dob', e.target.value)}
+                    className="neomorph-inset px-4 py-3 text-gray-700 border-0"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm text-gray-600 mb-2">Registered Owner (Full Name)</label>
+                  <Input
+                    value={formData.indemnity_registered_owner}
+                    onChange={(e) => handleChange('indemnity_registered_owner', e.target.value)}
+                    className="neomorph-inset px-4 py-3 text-gray-700 border-0"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm text-gray-600 mb-2">Any pending prosecutions, endorsements or disqualifications?</label>
+                  <Textarea
+                    value={formData.indemnity_pending_prosecutions}
+                    onChange={(e) => handleChange('indemnity_pending_prosecutions', e.target.value)}
+                    className="neomorph-inset px-4 py-3 text-gray-700 border-0 h-24"
+                    placeholder="e.g., None, or describe any pending issues"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm text-gray-600 mb-2">Any DVLA medical restrictions?</label>
+                  <Textarea
+                    value={formData.indemnity_dvla_medical_restrictions}
+                    onChange={(e) => handleChange('indemnity_dvla_medical_restrictions', e.target.value)}
+                    className="neomorph-inset px-4 py-3 text-gray-700 border-0 h-24"
+                    placeholder="e.g., None, or describe restrictions"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="checkbox"
+                      id="indemnity_full_license_12_months"
+                      checked={formData.indemnity_full_license_12_months}
+                      onChange={(e) => handleCheckboxChange('indemnity_full_license_12_months', e.target.checked)}
+                      className="neomorph-inset"
+                    />
+                    <label htmlFor="indemnity_full_license_12_months" className="text-sm text-gray-600">Held full UK/EU driving license for 12+ months</label>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="checkbox"
+                      id="indemnity_convictions_last_5_years"
+                      checked={formData.indemnity_convictions_last_5_years}
+                      onChange={(e) => handleCheckboxChange('indemnity_convictions_last_5_years', e.target.checked)}
+                      className="neomorph-inset"
+                    />
+                    <label htmlFor="indemnity_convictions_last_5_years" className="text-sm text-gray-600">No motoring convictions in the last 5 years</label>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm text-gray-600 mb-2">Vehicle Use at Time of Incident</label>
+                  <Input
+                    value={formData.indemnity_vehicle_use_at_incident}
+                    onChange={(e) => handleChange('indemnity_vehicle_use_at_incident', e.target.value)}
+                    className="neomorph-inset px-4 py-3 text-gray-700 border-0"
+                    placeholder="e.g., Personal, Commuting, Business"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm text-gray-600 mb-2">Any vehicle modifications?</label>
+                  <Textarea
+                    value={formData.indemnity_vehicle_modifications}
+                    onChange={(e) => handleChange('indemnity_vehicle_modifications', e.target.value)}
+                    className="neomorph-inset px-4 py-3 text-gray-700 border-0 h-24"
+                    placeholder="e.g., None, or describe any modifications"
+                  />
+                </div>
+              </div>
+            )}
+
             {/* Final Step: Review */}
             {currentStep === steps.length && (
               <div className="neomorph-flat p-6 space-y-6">
@@ -1769,18 +1986,17 @@ export default function ClaimForm({ claim, onSubmit, onCancel }) {
                     </div>
                   )}
 
-                  {/* Bodyshop is now optional for wizard, show if data exists */}
-                  {formData.bodyshop && (
-                    <div className="neomorph-inset p-4">
-                      <p className="text-sm text-gray-500 mb-2">Bodyshop</p>
-                      <p className="font-medium text-gray-700">{formData.bodyshop}</p>
-                    </div>
-                  )}
-
                   {formData.has_third_party && formData.tp_name && (
                     <div className="neomorph-inset p-4">
                       <p className="text-sm text-gray-500 mb-2">Third Party</p>
                       <p className="font-medium text-gray-700">{formData.tp_name}</p>
+                    </div>
+                  )}
+
+                  {formData.requires_indemnity && (
+                    <div className="neomorph-inset p-4">
+                      <p className="text-sm text-gray-500 mb-2">Indemnity Required</p>
+                      <p className="font-medium text-gray-700">Yes</p>
                     </div>
                   )}
                 </div>
