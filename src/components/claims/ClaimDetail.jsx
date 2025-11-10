@@ -37,6 +37,7 @@ import ClaimBodyshopForm from './ClaimBodyshopForm';
 import ClaimEstimateForm from './ClaimEstimateForm';
 import ClaimStatusForm from './ClaimStatusForm'; // NEW: Imported ClaimStatusForm
 import ClaimVehicleDamageForm from './ClaimVehicleDamageForm'; // NEW: Imported ClaimVehicleDamageForm
+import ClaimIndemnityForm from './ClaimIndemnityForm'; // NEW: Imported ClaimIndemnityForm
 import NotesSection from '../shared/NotesSection';
 import PartsRequestModal from './PartsRequestModal';
 import EstimateRequestModal from './EstimateRequestModal';
@@ -131,6 +132,7 @@ const DETAIL_SECTIONS = [
   { id: 'vehicleDamage', label: 'Vehicle Damage', icon: AlertTriangle }, // NEW SECTION
   { id: 'insurance', label: 'Insurance Details', icon: Shield },
   { id: 'referrer', label: 'Referrer Details', icon: Briefcase },
+  { id: 'indemnity', label: 'Indemnity Details', icon: Shield }, // NEW
   { id: 'thirdparty', label: 'Third Party Details', icon: Users },
   { id: 'financials', label: 'Financials', icon: DollarSign },
   { id: 'dates', label: 'Key Dates', icon: Calendar },
@@ -523,6 +525,63 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
               <DetailRow label="Referrer Ref" value={claim.referrer_ref} />
               <DetailRow label="File Handler" value={claim.file_handler} />
               <DetailRow label="% to Referrer" value={claim.percent_to_referrer} />
+            </div>
+          </EditableSection>
+        );
+
+      case 'indemnity': // NEW CASE
+        if (!claim.requires_indemnity) {
+          return (
+            <div className="neomorph-flat p-4 md:p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <Shield className="w-5 h-5 text-gold" />
+                <h3 className="font-bold">Indemnity Details</h3>
+              </div>
+              <div className="text-center py-12 text-gray-500">
+                <p>This claim does not require indemnity checks.</p>
+              </div>
+            </div>
+          );
+        }
+        
+        return (
+          <EditableSection 
+            title="Indemnity Details" 
+            icon={Shield} 
+            claim={claim} 
+            onUpdate={handleUpdate} 
+            EditComponent={ClaimIndemnityForm} 
+            canEdit={canEdit}
+          >
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+              <DetailRow label="Driver's Date of Birth" value={claim.indemnity_driver_dob} isDate />
+              <DetailRow label="Registered Owner/Keeper" value={claim.indemnity_registered_owner} />
+            </div>
+            <div className="mt-2 space-y-3">
+              <div className="py-3 px-4 rounded-lg glass-inset">
+                <div className="text-xs font-semibold text-foreground-muted mb-2">Pending Prosecutions?</div>
+                <div className="text-sm leading-relaxed whitespace-pre-wrap">{claim.indemnity_pending_prosecutions || '-'}</div>
+              </div>
+              <div className="py-3 px-4 rounded-lg glass-inset">
+                <div className="text-xs font-semibold text-foreground-muted mb-2">Told not to drive by DVLA/Medical?</div>
+                <div className="text-sm leading-relaxed whitespace-pre-wrap">{claim.indemnity_dvla_medical_restrictions || '-'}</div>
+              </div>
+              <div className="py-3 px-4 rounded-lg glass-inset">
+                <div className="text-xs font-semibold text-foreground-muted mb-2">Held full UK/EU license for 12+ months?</div>
+                <div className="text-sm leading-relaxed whitespace-pre-wrap">{claim.indemnity_full_license_12_months ? 'Yes' : 'No'}</div>
+              </div>
+              <div className="py-3 px-4 rounded-lg glass-inset">
+                <div className="text-xs font-semibold text-foreground-muted mb-2">Motoring convictions/points in last 5 years?</div>
+                <div className="text-sm leading-relaxed whitespace-pre-wrap">{claim.indemnity_convictions_last_5_years || '-'}</div>
+              </div>
+              <div className="py-3 px-4 rounded-lg glass-inset">
+                <div className="text-xs font-semibold text-foreground-muted mb-2">Vehicle use at time of incident</div>
+                <div className="text-sm leading-relaxed whitespace-pre-wrap">{claim.indemnity_vehicle_use_at_incident || '-'}</div>
+              </div>
+              <div className="py-3 px-4 rounded-lg glass-inset">
+                <div className="text-xs font-semibold text-foreground-muted mb-2">Vehicle modifications?</div>
+                <div className="text-sm leading-relaxed whitespace-pre-wrap">{claim.indemnity_vehicle_modifications || '-'}</div>
+              </div>
             </div>
           </EditableSection>
         );
