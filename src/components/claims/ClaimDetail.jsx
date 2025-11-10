@@ -1,0 +1,873 @@
+
+import React, { useState, useEffect } from 'react';
+import { Button } from "@/components/ui/button";
+import {
+    ArrowLeft,
+    Edit,
+    User,
+    Car,
+    Shield,
+    Users,
+    Wrench,
+    Calendar,
+    DollarSign,
+    ChevronDown,
+    Package,
+    Calculator,
+    Mail,
+    Briefcase, // Added Briefcase icon for Referrer section
+    FileText, // Added for dropdown menu
+    Archive,  // Added for dropdown menu
+    Trash2,    // Added for dropdown menu
+    Clock, // Added for Time Logs section
+    AlertTriangle // NEW: Added AlertTriangle icon for Vehicle Damage section
+} from "lucide-react";
+import { format } from "date-fns";
+import StatusBadge from "../shared/StatusBadge";
+import UpdateStatusBadge from '../shared/UpdateStatusBadge';
+import { base44 } from "@/api/base44Client";
+import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
+import ClaimClientForm from './ClaimClientForm';
+import ClaimVehicleForm from './ClaimVehicleForm';
+import ClaimInsuranceForm from './ClaimInsuranceForm';
+import ClaimReferrerForm from './ClaimReferrerForm'; // Imported new Referrer form
+import ClaimFinancialsForm from './ClaimFinancialsForm';
+import ClaimDatesForm from './ClaimDatesForm';
+import ClaimBodyshopForm from './ClaimBodyshopForm';
+import ClaimEstimateForm from './ClaimEstimateForm';
+import ClaimStatusForm from './ClaimStatusForm'; // NEW: Imported ClaimStatusForm
+import ClaimVehicleDamageForm from './ClaimVehicleDamageForm'; // NEW: Imported ClaimVehicleDamageForm
+import NotesSection from '../shared/NotesSection';
+import PartsRequestModal from './PartsRequestModal';
+import EstimateRequestModal from './EstimateRequestModal';
+import FileAttachmentModal from '../shared/FileAttachmentModal'; // Updated import
+import DragDropOverlay from '../shared/DragDropOverlay';
+import TimeLogSection from '../shared/TimeLogSection';
+import EmailComposerModal from '../shared/EmailComposerModal';
+import NotesModal from '../shared/NotesModal'; // Updated import from NotesButton to NotesModal
+import UpdateTrackingModal from './UpdateTrackingModal'; // NEW import
+import UpdateOverrideModal from './UpdateOverrideModal';
+import ClaimUpdatesModal from '../shared/ClaimUpdatesModal';
+import InstructionTemplateModal from './InstructionTemplateModal'; // NEW import
+import { Textarea } from "@/components/ui/textarea"; // Added Textarea import
+import { formatUKRegistration } from '../shared/formatRegistration';
+
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+const EditableSection = ({ title, icon: Icon, claim, onUpdate, children, EditComponent, canEdit = true }) => {
+    const [isEditing, setIsEditing] = useState(false);
+
+    const handleSave = (updatedData) => {
+        // Merge the updated data into the existing claim object
+        onUpdate({ ...claim, ...updatedData });
+        setIsEditing(false);
+    };
+
+    return (
+        <div className="neomorph-flat p-4 md:p-6">
+            <div className="flex justify-between items-center mb-4"> {/* Added mb-4 for spacing */}
+                <div // Changed from button to div as it's no longer collapsible
+                    className="flex items-center gap-3 text-left flex-grow"
+                >
+                    <Icon className="w-5 h-5 text-gold" />
+                    <h3 className="font-bold">{title}</h3>
+                </div>
+                <div className='flex items-center gap-2'>
+                    {!isEditing && EditComponent && canEdit && ( // Only show edit button if not editing, EditComponent is provided, and canEdit is true
+                        <Button variant="ghost" size="icon" onClick={() => { setIsEditing(true); }} className="h-8 w-8 hover:text-gold">
+                            <Edit className="w-4 h-4" />
+                        </Button>
+                    )}
+                    {/* Removed collapse/expand button as section is no longer collapsible */}
+                </div>
+            </div>
+            {/* Content is always rendered, no longer conditional on isOpen */}
+            <div className=""> {/* Removed mt-4 pt-4 border-t border-gray-300 border-opacity-50 */}
+                {isEditing ? (
+                    <EditComponent claim={claim} onSave={handleSave} onCancel={() => setIsEditing(false)} />
+                ) : (
+                    children
+                )}
+            </div>
+        </div>
+    );
+};
+
+function DetailRow({ label, value, isCurrency = false, isDate = false, isStatus = false }) {
+    let displayValue = value;
+    if (isCurrency && typeof value === 'number') {
+        displayValue = `£${value.toFixed(2)}`;
+    } else if (isDate && value) {
+        try {
+            displayValue = format(new Date(value), 'dd/MM/yyyy');
+        } catch (e) {
+            displayValue = 'Invalid Date';
+        }
+    }
+
+    if (value === null || typeof value === 'undefined' || value === '') {
+        displayValue = '-';
+    }
+
+    return (
+        <div className="py-3 px-4 rounded-lg hover:bg-surface-hover transition-colors">
+            <div className="text-xs font-semibold text-foreground-muted mb-1">{label}</div>
+            <div className="text-sm font-medium">
+                {isStatus ? <StatusBadge status={displayValue} /> : displayValue}
+            </div>
+        </div>
+    );
+}
+
+const DETAIL_SECTIONS = [
+  { id: 'status', label: 'Status & Overview', icon: Clock },
+  { id: 'client', label: 'Client Details', icon: User },
+  { id: 'vehicle', label: 'Vehicle Details', icon: Car },
+  { id: 'vehicleDamage', label: 'Vehicle Damage', icon: AlertTriangle }, // NEW SECTION
+  { id: 'insurance', label: 'Insurance Details', icon: Shield },
+  { id: 'referrer', label: 'Referrer Details', icon: Briefcase },
+  { id: 'thirdparty', label: 'Third Party Details', icon: Users },
+  { id: 'financials', label: 'Financials', icon: DollarSign },
+  { id: 'dates', label: 'Key Dates', icon: Calendar },
+  { id: 'bodyshop', label: 'Bodyshop Details', icon: Wrench },
+  { id: 'estimate', label: 'Estimate Details', icon: Calculator },
+  { id: 'timelogs', label: 'Time Logs', icon: Clock },
+];
+
+export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser = true }) {
+  const [isPartsModalOpen, setIsPartsModalOpen] = useState(false);
+  const [isEstimateModalOpen, setIsEstimateModalOpen] = useState(false);
+  const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
+  const [isAttachmentsOpen, setIsAttachmentsOpen] = useState(false);
+  const [isNotesOpen, setIsNotesOpen] = useState(false);
+  const [isClaimUpdatesOpen, setIsClaimUpdatesOpen] = useState(false);
+  const [startTime] = useState(new Date());
+  const [currentDuration, setCurrentDuration] = useState(0);
+  const [selectedSection, setSelectedSection] = useState('status');
+  const durationRef = React.useRef(0);
+  const hasSavedRef = React.useRef(false);
+  const queryClient = useQueryClient();
+  const [isOverrideModalOpen, setIsOverrideModalOpen] = useState(false);
+  const [isUpdateTrackingOpen, setIsUpdateTrackingOpen] = useState(false);
+  const [isInstructionModalOpen, setIsInstructionModalOpen] = useState(false); // NEW state
+
+  const canEdit = isInternalUser;
+
+  const isClosedStatus = ['Completed', 'Cancelled', 'Total Loss'].includes(claim.job_status);
+
+  // Keep ref updated with latest duration
+  React.useEffect(() => {
+    durationRef.current = currentDuration;
+  }, [currentDuration]);
+
+  // Background timer - still tracks time but doesn't display
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentDuration(prev => prev + 1);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const { data: linkedEstimate } = useQuery({
+    queryKey: ['estimate', claim.linked_estimate_id],
+    queryFn: () => claim.linked_estimate_id ? base44.entities.Estimate.get(claim.linked_estimate_id) : null,
+    enabled: !!claim.linked_estimate_id,
+  });
+
+  const { data: linkedEngineering } = useQuery({
+    queryKey: ['engineering', claim.linked_engineering_id],
+    queryFn: () => claim.linked_engineering_id ? base44.entities.Engineering.get(claim.linked_engineering_id) : null,
+    enabled: !!claim.linked_engineering_id,
+  });
+
+  const { data: linkedParts } = useQuery({
+    queryKey: ['part', claim.linked_parts_id],
+    queryFn: () => claim.linked_parts_id ? base44.entities.Part.get(claim.linked_parts_id) : null,
+    enabled: !!claim.linked_parts_id,
+  });
+
+  // Modified onUpdate handler to automatically log status changes
+  const handleUpdate = async (updatedData) => {
+    const statusChanged = updatedData.job_status && updatedData.job_status !== claim.job_status;
+    
+    // If status changed, create an automatic ClaimUpdate record
+    if (statusChanged) {
+      const oldStatus = claim.job_status || 'New';
+      const newStatus = updatedData.job_status;
+      
+      try {
+        await base44.entities.ClaimUpdate.create({
+          claim_id: claim.id,
+          update_type: 'Status Change',
+          description: `Status changed from "${oldStatus}" to "${newStatus}"`,
+          next_steps: '',
+          due_date_for_next_action: ''
+        });
+        
+        queryClient.invalidateQueries({ queryKey: ['claimUpdates', claim.id] });
+      } catch (error) {
+        console.error('Failed to log status change:', error);
+      }
+    }
+    
+    // Call the original onUpdate
+    onUpdate(updatedData);
+  };
+
+  const archiveMutation = useMutation({
+    mutationFn: () => base44.entities.Claim.update(claim.id, { archived: !claim.archived }),
+    onSuccess: (updatedClaim) => {
+      queryClient.invalidateQueries({ queryKey: ['claims'] });
+      handleUpdate({ ...claim, archived: updatedClaim.archived }); // Use handleUpdate
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: () => base44.entities.Claim.delete(claim.id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['claims'] });
+      onClose();
+    },
+  });
+
+  // Save time log when component unmounts (navigating away or closing)
+  React.useEffect(() => {
+    return () => {
+      // Synchronously save the time log on unmount
+      const duration = durationRef.current;
+      if (duration > 0 && !hasSavedRef.current) {
+        hasSavedRef.current = true; // Mark as saved to prevent multiple saves
+        base44.entities.TimeLog.create({
+          parent_id: claim.id,
+          parent_type: 'Claim',
+          duration_seconds: duration,
+          started_at: startTime.toISOString(),
+          ended_at: new Date().toISOString()
+        }).catch(error => {
+          console.error('Failed to save time log on unmount:', error);
+        });
+      }
+    };
+  }, []); // Empty dependency array - only run on mount/unmount
+
+  const handleOverrideSave = (overrideData) => {
+    handleUpdate({ ...claim, ...overrideData, last_updated_at: new Date().toISOString() }); // Use handleUpdate
+  };
+
+  const handleClaimUpdateCreated = (newStatus) => {
+    // When an official update is created, update the claim's last_updated_at
+    const now = new Date();
+    const fortyEightHoursFromNow = new Date(now.getTime() + 48 * 60 * 60 * 1000);
+    
+    const updateData = {
+      ...claim,
+      last_updated_at: now.toISOString(),
+      next_update_due_at: fortyEightHoursFromNow.toISOString(),
+      update_status_flag: 'Green'
+    };
+    
+    // If a new status was provided, update it
+    if (newStatus) {
+      updateData.job_status = newStatus;
+    }
+    
+    handleUpdate(updateData); // Use handleUpdate
+  };
+
+  // Auto-refresh update status every minute
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      if (claim && !['Completed', 'Cancelled', 'Total Loss'].includes(claim.job_status)) {
+        // This will trigger a re-render and recalculate status
+        queryClient.invalidateQueries({ queryKey: ['claims'] });
+      }
+    }, 60000); // Check every minute
+
+    return () => clearInterval(interval);
+  }, [claim, queryClient]);
+
+  const handleClose = async () => {
+    // Save time log before closing
+    const duration = durationRef.current;
+    if (duration > 0 && !hasSavedRef.current) {
+      hasSavedRef.current = true; // Mark as saved to prevent multiple saves
+      try {
+        await base44.entities.TimeLog.create({
+          parent_id: claim.id,
+          parent_type: 'Claim',
+          duration_seconds: duration,
+          started_at: startTime.toISOString(),
+          ended_at: new Date().toISOString()
+        });
+      } catch (error) {
+        console.error('Failed to save time log on close:', error);
+      }
+    }
+    onClose();
+  };
+
+  const handleArchive = () => {
+    const action = claim.archived ? 'restore' : 'archive';
+    if (window.confirm(`Are you sure you want to ${action} this claim?`)) {
+      archiveMutation.mutate();
+    }
+  };
+
+  const handleDelete = () => {
+    if (window.confirm('Are you sure you want to permanently delete this claim? This action cannot be undone.')) {
+      deleteMutation.mutate();
+    }
+  };
+
+  const handleFilesUploaded = (newFileUrls) => {
+    const currentUrls = Array.isArray(claim.file_urls) ? claim.file_urls : [];
+    const updatedUrls = [...currentUrls, ...newFileUrls];
+    handleUpdate({ ...claim, file_urls: updatedUrls }); // Use handleUpdate
+  };
+
+  const handleFileRemove = (urlToRemove) => {
+    const currentUrls = Array.isArray(claim.file_urls) ? claim.file_urls : [];
+    const updatedUrls = currentUrls.filter(url => url !== urlToRemove);
+    handleUpdate({ ...claim, file_urls: updatedUrls }); // Use handleUpdate
+  };
+
+  const handlePartCreated = (createdPart) => {
+    handleUpdate({ ...claim, linked_parts_id: createdPart.id }); // Use handleUpdate
+    queryClient.invalidateQueries({ queryKey: ['parts'] });
+  };
+
+  const handleEstimateCreated = (createdEstimate) => {
+    handleUpdate({ ...claim, linked_estimate_id: createdEstimate.id }); // Use handleUpdate
+    queryClient.invalidateQueries({ queryKey: ['estimates'] });
+  };
+
+  const handleAIExtract = (extractedData) => {
+    console.log('AI extracted data from attachment:', extractedData);
+    
+    const fields = Object.entries(extractedData)
+      .filter(([_, value]) => value !== null && value !== undefined && value !== '')
+      .map(([key, value]) => `${key}: ${value}`)
+      .join('\n');
+    
+    if (window.confirm(`AI found the following data:\n\n${fields}\n\nDo you want to update the claim with this data?`)) {
+      handleUpdate({ ...claim, ...extractedData });
+    }
+  };
+
+  // Helper function to generate page URLs based on entity type
+  const createPageUrl = (entityType) => {
+    switch (entityType) {
+      case 'Estimating':
+        return '/estimating';
+      case 'Engineering':
+        return '/engineering';
+      case 'Parts':
+        return '/parts';
+      // Add other cases as needed
+      default:
+        return '/dashboard'; // Fallback or a generic home page
+    }
+  };
+
+  // Helper function to open linked item in new window
+  const openLinkedItem = (pageUrl, itemId) => {
+    const url = `${pageUrl}?id=${itemId}`;
+    window.open(url, '_blank');
+  };
+
+  const renderSelectedSection = () => {
+    switch (selectedSection) {
+      case 'status':
+        return (
+          <EditableSection 
+            title="Status & Overview" 
+            icon={Clock} 
+            claim={claim} 
+            onUpdate={handleUpdate}
+            EditComponent={ClaimStatusForm} 
+            canEdit={canEdit}
+          >
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+              <DetailRow label="Job Status" value={claim.job_status} isStatus />
+              <DetailRow label="Claim Type" value={claim.claim_type} />
+              <DetailRow label="Date of Loss" value={claim.loss_date} isDate />
+              <DetailRow label="Time of Loss" value={claim.loss_time} />
+              <DetailRow label="Use of Vehicle" value={claim.vehicle_use} />
+              <DetailRow label="Courtesy Car Required" value={claim.courtesy_car_required ? 'Yes' : 'No'} />
+            </div>
+            <div className="mt-2 py-3 px-4 rounded-lg glass-inset">
+              <div className="text-xs font-semibold text-foreground-muted mb-2">Incident Location</div>
+              <div className="text-sm font-medium mb-3">{claim.incident_location || '-'}</div>
+              <div className="text-xs font-semibold text-foreground-muted mb-2">Circumstances</div>
+              <div className="text-sm leading-relaxed whitespace-pre-wrap">
+                {claim.circumstances || '-'}
+              </div>
+            </div>
+          </EditableSection>
+        );
+
+      case 'client':
+        return (
+          <EditableSection title="Client Details" icon={User} claim={claim} onUpdate={handleUpdate} EditComponent={ClaimClientForm} canEdit={canEdit}>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+              <DetailRow label="Client Name" value={claim.client_name} />
+              <DetailRow label="Client Phone" value={claim.client_phone} />
+              <DetailRow label="Client Email" value={claim.client_email} />
+              <DetailRow label="Driver/Contact" value={claim.driver_contact_name} />
+              <DetailRow label="VAT Status" value={claim.client_vat_status} />
+              <DetailRow label="Business Division" value={claim.business_division} />
+            </div>
+            <div className="mt-2 py-3 px-4 rounded-lg glass-inset">
+              <div className="text-xs font-semibold text-foreground-muted mb-2">Address</div>
+              <div className="text-sm leading-relaxed space-y-0.5">
+                {claim.client_address_line_1 && <div>{claim.client_address_line_1}</div>}
+                {claim.client_address_line_2 && <div>{claim.client_address_line_2}</div>}
+                {claim.client_town && <div>{claim.client_town}</div>}
+                {claim.client_county && <div>{claim.client_county}</div>}
+                {claim.client_postcode && <div>{claim.client_postcode}</div>}
+                {!claim.client_address_line_1 && !claim.client_town && !claim.client_postcode && '-'}
+              </div>
+            </div>
+          </EditableSection>
+        );
+
+      case 'vehicle':
+        return (
+          <EditableSection title="Vehicle Details" icon={Car} claim={claim} onUpdate={handleUpdate} EditComponent={ClaimVehicleForm} canEdit={canEdit}>
+            {/* Basic Vehicle Info */}
+            <div className="mb-6">
+              <h4 className="text-sm font-semibold text-gray-600 mb-3">Basic Information</h4>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+                <DetailRow label="Make/Model" value={claim.make_model} />
+                <DetailRow label="Make (DVLA)" value={claim.vehicle_make} />
+                <DetailRow label="Model (DVLA)" value={claim.vehicle_model} />
+                <DetailRow label="Colour" value={claim.vehicle_colour} />
+                <DetailRow label="Fuel Type" value={claim.vehicle_fuel_type} />
+                <DetailRow label="Year of Manufacture" value={claim.vehicle_year_of_manufacture} />
+                <DetailRow label="Vehicle Type" value={claim.vehicle_type} />
+              </div>
+            </div>
+
+            {/* Technical Details */}
+            <div className="mb-6">
+              <h4 className="text-sm font-semibold text-gray-600 mb-3">Technical Details</h4>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+                <DetailRow label="Engine Capacity (CC)" value={claim.vehicle_engine_capacity} />
+                <DetailRow label="CO2 Emissions (g/km)" value={claim.vehicle_co2_emissions} />
+                <DetailRow label="Euro Status" value={claim.vehicle_euro_status} />
+                <DetailRow label="Wheelplan" value={claim.vehicle_wheelplan} />
+                <DetailRow label="Revenue Weight (kg)" value={claim.vehicle_revenue_weight} />
+              </div>
+            </div>
+
+            {/* MOT & Tax Status */}
+            <div className="mb-6">
+              <h4 className="text-sm font-semibold text-gray-600 mb-3">MOT & Tax Status</h4>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+                <DetailRow label="MOT Status" value={claim.vehicle_mot_status} />
+                <DetailRow label="MOT Expiry Date" value={claim.vehicle_mot_expiry_date} isDate />
+                <DetailRow label="Tax Status" value={claim.vehicle_tax_status} />
+                <DetailRow label="Tax Due Date" value={claim.vehicle_tax_due_date} isDate />
+                <DetailRow label="Last V5C Issued" value={claim.vehicle_date_of_last_v5c_issued} isDate />
+              </div>
+            </div>
+          </EditableSection>
+        );
+
+      case 'vehicleDamage': // NEW CASE
+        return (
+          <EditableSection 
+            title="Vehicle Damage" 
+            icon={AlertTriangle} 
+            claim={claim} 
+            onUpdate={handleUpdate} 
+            EditComponent={ClaimVehicleDamageForm} 
+            canEdit={canEdit}
+          >
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+              <DetailRow label="Courtesy Car (CC) Needed" value={claim.courtesy_car_required ? 'Yes' : 'No'} />
+              <DetailRow label="Undriveable / Drivable" value={claim.unroadworthy ? 'Undriveable' : 'Drivable'} />
+            </div>
+            <div className="mt-2 py-3 px-4 rounded-lg glass-inset">
+              <div className="text-xs font-semibold text-foreground-muted mb-2">Vehicle Location</div>
+              <div className="text-sm mb-3">{claim.vehicle_location || '-'}</div>
+              <div className="text-xs font-semibold text-foreground-muted mb-2">Damage Description</div>
+              <div className="text-sm leading-relaxed whitespace-pre-wrap">{claim.vehicle_damage || '-'}</div>
+            </div>
+          </EditableSection>
+        );
+
+      case 'insurance':
+        return (
+          <EditableSection title="Insurance Details" icon={Shield} claim={claim} onUpdate={handleUpdate} EditComponent={ClaimInsuranceForm} canEdit={canEdit}>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+              <DetailRow label="Insurer" value={claim.insurer} />
+              <DetailRow label="Claim Ref" value={claim.claim_ref} />
+              <DetailRow label="Policy Number" value={claim.policy_number} />
+              <DetailRow label="Policy Excess" value={claim.policy_excess} isCurrency />
+            </div>
+          </EditableSection>
+        );
+
+      case 'referrer':
+        return (
+          <EditableSection title="Referrer Details" icon={Briefcase} claim={claim} onUpdate={handleUpdate} EditComponent={ClaimReferrerForm} canEdit={canEdit}>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+              <DetailRow label="Referrer" value={claim.referrer} />
+              <DetailRow label="Referrer Email" value={claim.referrer_email} />
+              <DetailRow label="Referrer Ref" value={claim.referrer_ref} />
+              <DetailRow label="File Handler" value={claim.file_handler} />
+              <DetailRow label="% to Referrer" value={claim.percent_to_referrer} />
+            </div>
+          </EditableSection>
+        );
+
+      case 'thirdparty':
+        return (
+          <EditableSection title="Third Party Details" icon={Users} claim={claim} onUpdate={handleUpdate} EditComponent={({claim: currentClaim, onSave, onCancel}) => <div>Not implemented yet <Button onClick={onCancel}>Back</Button></div>} canEdit={canEdit}>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+              <DetailRow label="TP Name" value={claim.tp_name} />
+              <DetailRow label="TP Phone" value={claim.tp_phone} />
+              <DetailRow label="TP Email" value={claim.tp_email} />
+              <DetailRow label="TP Driver/Contact" value={claim.tp_driver_contact} />
+              <DetailRow label="TP Vehicle" value={claim.tp_make_model} />
+            </div>
+            <div className="mt-2 py-3 px-4 rounded-lg glass-inset">
+              <div className="text-xs font-semibold text-foreground-muted mb-2">TP Address</div>
+              <div className="text-sm leading-relaxed space-y-0.5 mb-3">
+                {claim.tp_address_line_1 && <div>{claim.tp_address_line_1}</div>}
+                {claim.tp_address_line_2 && <div>{claim.tp_address_line_2}</div>}
+                {claim.tp_town && <div>{claim.tp_town}</div>}
+                {claim.tp_county && <div>{claim.tp_county}</div>}
+                {claim.tp_postcode && <div>{claim.tp_postcode}</div>}
+                {!claim.tp_address_line_1 && !claim.tp_town && !claim.tp_postcode && '-'}
+              </div>
+              <div className="text-xs font-semibold text-foreground-muted mb-2">TP Damage Description</div>
+              <div className="text-sm leading-relaxed whitespace-pre-wrap">{claim.tp_vehicle_damage || '-'}</div>
+            </div>
+          </EditableSection>
+        );
+
+      case 'financials':
+        return (
+          <EditableSection title="Financials" icon={DollarSign} claim={claim} onUpdate={handleUpdate} EditComponent={ClaimFinancialsForm} canEdit={canEdit}>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+              <DetailRow label="Est. Cost (Net)" value={claim.estimate_cost_net} isCurrency />
+              <DetailRow label="Auth. Cost (Net)" value={claim.authority_cost_net} isCurrency />
+              <DetailRow label="Est. Cost (Gross)" value={claim.estimate_cost_gross} isCurrency />
+              <DetailRow label="Auth. Cost (Gross)" value={claim.authority_cost_gross} isCurrency />
+              <DetailRow label="Final Repair Cost" value={claim.final_repair_cost} isCurrency />
+              <DetailRow label="Repairer Referral Fee" value={claim.referral_fee_repairer ? `${claim.referral_fee_repairer}%` : '-'} />
+              <DetailRow label="Total to Invoice Repairer" value={claim.total_invoice_repairer} isCurrency />
+              <DetailRow label="Invoice Status" value={claim.invoice_status} isStatus />
+              <DetailRow label="Invoice Amount" value={claim.invoice_amount} isCurrency />
+            </div>
+          </EditableSection>
+        );
+
+      case 'dates':
+        return (
+          <EditableSection title="Key Dates" icon={Calendar} claim={claim} onUpdate={handleUpdate} EditComponent={ClaimDatesForm} canEdit={canEdit}>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+              <DetailRow label="Date Received" value={claim.date_received} isDate />
+              <DetailRow label="Loss Date" value={claim.loss_date} isDate />
+              <DetailRow label="Estimate Completed" value={claim.estimate_completed} isDate />
+              <DetailRow label="Authority Received" value={claim.authority_received} isDate />
+              <DetailRow label="Bodyshop Instructed" value={claim.bs_instructed} isDate />
+              <DetailRow label="Booking In Date (BID)" value={claim.booking_in_date} isDate />
+              <DetailRow label="On-Site Date" value={claim.on_site_date} isDate />
+              <DetailRow label="Est. Completion (ECD)" value={claim.ecd} isDate />
+              <DetailRow label="Completion Date" value={claim.completion_date} isDate />
+            </div>
+          </EditableSection>
+        );
+
+      case 'bodyshop':
+        return (
+          <EditableSection title="Bodyshop Details" icon={Wrench} claim={claim} onUpdate={handleUpdate} EditComponent={ClaimBodyshopForm} canEdit={canEdit}>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+              <DetailRow label="Bodyshop" value={claim.bodyshop} />
+              <DetailRow label="Bodyshop Email" value={claim.bodyshop_email} />
+              <DetailRow label="Authorising Party" value={claim.authorising_party} />
+            </div>
+          </EditableSection>
+        );
+
+      case 'estimate':
+        return (
+          <EditableSection title="Estimate Details" icon={Calculator} claim={claim} onUpdate={handleUpdate} EditComponent={ClaimEstimateForm} canEdit={canEdit}>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+              <DetailRow label="Audatex Code" value={claim.audatex_code} />
+              <DetailRow label="Estimate Fee" value={claim.est_fee} isCurrency />
+            </div>
+            <div className="mt-2 py-3 px-4 rounded-lg glass-inset">
+              <div className="text-xs font-semibold text-foreground-muted mb-2">Artura Estimate URL</div>
+              <div className="text-sm break-all">{claim.artura_est_url || '-'}</div>
+            </div>
+          </EditableSection>
+        );
+
+      case 'timelogs':
+        return <TimeLogSection parentId={claim.id} parentType="Claim" />;
+
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <DragDropOverlay onFilesUploaded={handleFilesUploaded}>
+      <PartsRequestModal
+        claim={claim}
+        isOpen={isPartsModalOpen}
+        onClose={() => setIsPartsModalOpen(false)}
+        onPartCreated={handlePartCreated}
+      />
+      <EstimateRequestModal
+        claim={claim}
+        isOpen={isEstimateModalOpen}
+        onClose={() => setIsEstimateModalOpen(false)}
+        onEstimateCreated={handleEstimateCreated}
+      />
+      <EmailComposerModal
+        isOpen={isEmailModalOpen}
+        onClose={() => setIsEmailModalOpen(false)}
+        itemType="Claim"
+        itemData={claim}
+      />
+      <FileAttachmentModal
+        fileUrls={claim.file_urls || []}
+        onRemove={handleFileRemove}
+        isOpen={isAttachmentsOpen}
+        onClose={() => setIsAttachmentsOpen(false)}
+        enableAI={true}
+        analysisType="claim"
+        onAIExtract={handleAIExtract}
+        existingData={claim}
+      />
+      <NotesModal
+        parentId={claim.id}
+        parentType="Claim"
+        isOpen={isNotesOpen}
+        onClose={() => setIsNotesOpen(false)}
+      />
+      
+      <UpdateOverrideModal
+        isOpen={isOverrideModalOpen}
+        onClose={() => setIsOverrideModalOpen(false)}
+        claim={claim}
+        onSave={handleOverrideSave}
+      />
+
+      <ClaimUpdatesModal
+        claimId={claim.id}
+        currentStatus={claim.job_status}
+        isOpen={isClaimUpdatesOpen}
+        onClose={() => setIsClaimUpdatesOpen(false)}
+        onUpdateCreated={handleClaimUpdateCreated}
+      />
+
+      <UpdateTrackingModal
+        claim={claim}
+        isOpen={isUpdateTrackingOpen}
+        onClose={() => setIsUpdateTrackingOpen(false)}
+        onSetOverride={() => {
+          setIsUpdateTrackingOpen(false);
+          setIsOverrideModalOpen(true);
+        }}
+        canEdit={canEdit}
+      />
+
+      <InstructionTemplateModal
+        claim={claim}
+        isOpen={isInstructionModalOpen}
+        onClose={() => setIsInstructionModalOpen(false)}
+      />
+
+      <div className="h-full flex flex-col gap-4 md:gap-6">
+          {/* Header - Fixed/Sticky */}
+          <div className="neomorph p-3 md:p-6 flex-shrink-0 sticky top-0 z-10 bg-background">
+              <div className="flex flex-col gap-3">
+                  {/* Top Row: Back button + Title */}
+                  <div className="flex items-center gap-2 md:gap-4">
+                      <Button onClick={handleClose} className="neomorph-flat p-2 flex-shrink-0">
+                          <ArrowLeft className="w-4 h-4" />
+                      </Button>
+                      <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <h1 className="text-base md:text-2xl font-bold truncate">{formatUKRegistration(claim.reg) || 'Claim Details'}</h1>
+                            {claim.job_number && (
+                              <span className="text-xs md:text-sm font-mono px-2 py-0.5 md:py-1 rounded bg-gold/20 text-gold font-semibold">
+                                {claim.job_number}
+                              </span>
+                            )}
+                          </div>
+                      </div>
+                  </div>
+
+                  {/* Status Row */}
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <StatusBadge status={claim.job_status || 'New'} />
+                    {!isClosedStatus && claim.update_status_flag && (
+                      <button
+                        onClick={() => setIsUpdateTrackingOpen(true)}
+                        className="neomorph-flat hover:neomorph transition-all cursor-pointer"
+                        title="Update Tracking"
+                      >
+                        <UpdateStatusBadge status={claim.update_status_flag} small />
+                      </button>
+                    )}
+                    {claim.archived && (
+                      <span className="neomorph-flat px-2 md:px-3 py-0.5 md:py-1 text-xs font-medium text-gray-600">
+                        Archived
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Action Buttons Row */}
+                  <div className="flex items-center gap-1.5 md:gap-2 flex-wrap">
+                      <Button 
+                        onClick={() => setIsClaimUpdatesOpen(true)}
+                        className="neomorph-flat px-2 md:px-4 py-1.5 md:py-3 bg-accent/10 hover:bg-accent/20 font-medium text-accent text-xs md:text-sm"
+                        title="Official Updates"
+                      >
+                        Updates
+                      </Button>
+                      <Button 
+                        onClick={() => setIsNotesOpen(true)}
+                        className="neomorph-flat p-1.5 md:p-3"
+                        title="Internal Notes"
+                      >
+                        <Edit className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                      </Button>
+                      <Button 
+                        onClick={() => setIsAttachmentsOpen(true)}
+                        className="neomorph-flat p-1.5 md:p-3"
+                        title="View Attachments"
+                      >
+                        <FileText className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                      </Button>
+                      <Button 
+                        onClick={() => setIsEmailModalOpen(true)}
+                        className="neomorph-flat p-1.5 md:p-3"
+                        title="Send Email"
+                      >
+                        <Mail className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                      </Button>
+                      {canEdit && (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button className="neomorph-flat p-1.5 md:p-3">
+                              <ChevronDown className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-56">
+                            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsInstructionModalOpen(true); }}>
+                              <FileText className="w-4 h-4 mr-2" />
+                              Generate Instructions
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsEstimateModalOpen(true); }}>
+                              <Calculator className="w-4 h-4 mr-2" />
+                              Request Estimate
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsPartsModalOpen(true); }}>
+                              <Package className="w-4 h-4 mr-2" />
+                              Log Parts Issue
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleArchive(); }} disabled={archiveMutation.isLoading}>
+                              <Archive className="w-4 h-4 mr-2" />
+                              {claim.archived ? 'Unarchive' : 'Archive'}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleDelete(); }} disabled={deleteMutation.isLoading} className="text-red-600">
+                              <Trash2 className="w-4 h-4 mr-2" />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      )}
+                  </div>
+              </div>
+          </div>
+
+        {/* Linked Cases - Fixed (if present) */}
+        {(linkedEstimate || linkedEngineering || linkedParts) && (
+          <div className="neomorph p-4 flex-shrink-0">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="w-4 h-4 text-gold">🔗</span>
+              <h3 className="font-medium">Linked Cases</h3>
+            </div>
+            <div className="flex gap-3 flex-wrap">
+              {linkedEstimate && (
+                <button
+                  onClick={() => openLinkedItem(createPageUrl('Estimating'), linkedEstimate.id)}
+                  className="neomorph-flat px-4 py-2 text-sm hover:neomorph transition-all cursor-pointer"
+                  title="Click to open in new window"
+                >
+                  <span className="text-gray-500">Estimate:</span>{' '}
+                  <span className="font-medium text-green-600 underline">{linkedEstimate.name}</span>
+                </button>
+              )}
+              {linkedEngineering && (
+                <button
+                  onClick={() => openLinkedItem(createPageUrl('Engineering'), linkedEngineering.id)}
+                  className="neomorph-flat px-4 py-2 text-sm hover:neomorph transition-all cursor-pointer"
+                  title="Click to open in new window"
+                >
+                  <span className="text-gray-500">Engineering:</span>{' '}
+                  <span className="font-medium text-purple-600 underline">{linkedEngineering.reference}</span>
+                </button>
+              )}
+              {linkedParts && (
+                <button
+                  onClick={() => openLinkedItem(createPageUrl('Parts'), linkedParts.id)}
+                  className="neomorph-flat px-4 py-2 text-sm hover:neomorph transition-all cursor-pointer"
+                  title="Click to open in new window"
+                >
+                  <span className="text-gray-500">Parts:</span>{' '}
+                  <span className="font-medium text-orange-600 underline">{linkedParts.vehicle_ref}</span>
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Section Selector - Fixed */}
+        <div className="neomorph p-4 flex-shrink-0">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button className="w-full neomorph-flat p-3 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  {React.createElement(DETAIL_SECTIONS.find(s => s.id === selectedSection)?.icon || User, { className: "w-5 h-5" })}
+                  <span className="font-medium">{DETAIL_SECTIONS.find(s => s.id === selectedSection)?.label || 'Select Section'}</span>
+                </div>
+                <ChevronDown className="w-4 h-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-full" align="start">
+              {DETAIL_SECTIONS.map(section => (
+                <DropdownMenuItem
+                  key={section.id}
+                  onSelect={() => setSelectedSection(section.id)}
+                  className={selectedSection === section.id ? 'bg-glass-hover' : ''}
+                >
+                  <section.icon className="w-4 h-4 mr-2" />
+                  {section.label}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+
+        {/* Selected Section Content - Scrollable */}
+        <div className="flex-1 overflow-y-auto min-h-0 pr-1">
+          {renderSelectedSection()}
+        </div>
+      </div>
+    </DragDropOverlay>
+  );
+}
