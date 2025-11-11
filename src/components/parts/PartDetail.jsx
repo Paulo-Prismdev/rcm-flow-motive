@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Edit, Package, FileText, DollarSign, Calendar, ChevronDown, ChevronUp, Link as LinkIcon, Mail, Send, Users, Archive, Trash2, Clock } from "lucide-react";
+import { ArrowLeft, Edit, Package, FileText, DollarSign, Calendar, ChevronDown, ChevronUp, Link as LinkIcon, Mail, Send, Users, Archive, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import StatusBadge from "../shared/StatusBadge";
 import PartBasicInfoForm from './PartBasicInfoForm';
@@ -11,7 +11,6 @@ import PartSupplierForm from './PartSupplierForm';
 import NotesModal from '../shared/NotesModal';
 import FileAttachmentModal from '../shared/FileAttachmentModal';
 import TimeLogSection from '../shared/TimeLogSection';
-import ItemActivityLog from '../shared/ItemActivityLog'; // New import
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from "react-router-dom";
@@ -81,15 +80,14 @@ function DetailRow({ label, value, isDate = false, isCurrency = false, isTime = 
     );
 }
 
-export default function PartDetail({ part, onClose, onUpdate, onArchive, onDelete, isInternalUser = true }) {
+export default function PartDetail({ part, onClose, onUpdate, isInternalUser = true }) {
   const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
-  const [isSendingToSuppliers, setIsSendingToSuppliers] = useState(false);
+  const [isSendingToSuppliers, setIsSendingToSuppliers] = useState(false); // This state isn't used in the provided outline but is in the original
   const [startTime] = useState(new Date());
   const [currentDuration, setCurrentDuration] = useState(0);
   const [showSupplierTracking, setShowSupplierTracking] = useState(false);
   const [isAttachmentsOpen, setIsAttachmentsOpen] = useState(false);
   const [isNotesOpen, setIsNotesOpen] = useState(false);
-  const [isActivityLogOpen, setIsActivityLogOpen] = useState(false); // New state
   const durationRef = useRef(0);
   const hasSavedRef = useRef(0);
   const queryClient = useQueryClient();
@@ -135,6 +133,34 @@ export default function PartDetail({ part, onClose, onUpdate, onArchive, onDelet
         relevantConfig.associated_supplier_names.includes(supplier.name)
       )
     : [];
+
+  // Archive Mutation
+  const archiveMutation = useMutation({
+    mutationFn: () => base44.entities.Part.update(part.id, { archived: !part.archived }),
+    onSuccess: (updatedPart) => {
+      queryClient.invalidateQueries({ queryKey: ['parts'] });
+      // The onUpdate prop is used to update the parent component's state (e.g., the part object in a list)
+      // We pass the relevant change (archived status) back.
+      onUpdate({ ...part, archived: updatedPart.archived });
+    },
+    onError: (error) => {
+        console.error("Failed to toggle archive status:", error);
+        // Optionally show an error message to the user
+    }
+  });
+
+  // Delete Mutation
+  const deleteMutation = useMutation({
+    mutationFn: () => base44.entities.Part.delete(part.id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['parts'] });
+      onClose(); // Close the detail view after successful deletion
+    },
+    onError: (error) => {
+        console.error("Failed to delete part:", error);
+        // Optionally show an error message to the user
+    }
+  });
 
   // Build the available statuses list - default + active custom statuses
   const defaultStatuses = [
@@ -210,6 +236,19 @@ export default function PartDetail({ part, onClose, onUpdate, onArchive, onDelet
     onUpdate({ ...part, file_urls: updatedUrls });
   };
 
+  const handleArchive = () => {
+    const action = part.archived ? 'restore' : 'archive';
+    if (window.confirm(`Are you sure you want to ${action} this part request?`)) {
+      archiveMutation.mutate();
+    }
+  };
+
+  const handleDelete = () => {
+    if (window.confirm('Are you sure you want to permanently delete this part request? This action cannot be undone.')) {
+      deleteMutation.mutate();
+    }
+  };
+
   const handleSendToLinkedSuppliers = async () => {
     if (linkedSuppliers.length === 0) {
       alert('No linked suppliers found for this manufacturer. Please configure supplier links in the Parts Manufacturer Links page.');
@@ -265,7 +304,7 @@ Artura Pro Team`;
     window.location.href = `mailto:${encodeURIComponent(supplierEmails)}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
   };
 
-  const getFileName = (url) => (url ? new URL(url).pathname.split('/').pop() : "File");
+  const getFileName = (url) => (url ? new URL(url).pathname.split('/').pop() : "File"); // This function is defined but not used in the provided code.
 
   const suppliersWithStock = part.suppliers_with_stock || [];
 
@@ -289,18 +328,9 @@ Artura Pro Team`;
         isOpen={isNotesOpen}
         onClose={() => setIsNotesOpen(false)}
       />
-      <ItemActivityLog
-        isOpen={isActivityLogOpen}
-        onClose={() => setIsActivityLogOpen(false)}
-        entityType="Part"
-        entityId={part.id}
-        entityReference={part.vehicle_ref || part.job_number}
-      />
-
-      <div className="h-full flex flex-col gap-4">
-        {/* Header */}
-        <div className="neomorph p-4 md:p-6 flex-shrink-0">
-          <div className="flex items-center gap-4 mb-4">
+      <div className="space-y-6">
+        <div className="neomorph p-4 md:p-6">
+          <div className="flex items-start justify-between gap-4">
             <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
               <Button onClick={handleClose} className="neomorph-flat p-2 md:p-3 flex-shrink-0">
                 <ArrowLeft className="w-4 h-4" />
@@ -322,54 +352,58 @@ Artura Pro Team`;
                 </div>
               </div>
             </div>
-          </div>
-
-          <div className="flex items-center gap-2 flex-wrap">
-            <Timer onTimeUpdate={setCurrentDuration} />
-            <Button
-              onClick={() => setIsAttachmentsOpen(true)}
-              className="neomorph-flat p-2 md:p-3"
-              title="View Attachments"
-            >
-              <FileText className="w-4 h-4" />
-            </Button>
-            <Button
-              onClick={() => setIsNotesOpen(true)}
-              className="neomorph-flat p-2 md:p-3"
-              title="Updates & Notes"
-            >
-              <Edit className="w-4 h-4" />
-            </Button>
-            <Button
-              onClick={() => setIsEmailModalOpen(true)}
-              className="neomorph-flat p-2 md:p-3"
-              title="Send Email"
-            >
-              <Mail className="w-4 h-4" />
-            </Button>
-            {isInternalUser && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button className="neomorph-flat p-2 md:p-3">
-                    <ChevronDown className="w-4 h-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsActivityLogOpen(true); }}>
-                    <Clock className="w-4 h-4 mr-2" />
-                    Activity History
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onArchive({ id: part.id, archived: !part.archived }); }}>
-                    <Archive className="w-4 h-4 mr-2" />
-                    {part.archived ? 'Unarchive' : 'Archive'}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onDelete(part.id); }} className="text-red-600">
-                    <Trash2 className="w-4 h-4 mr-2" />
-                    Delete
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <Timer onTimeUpdate={setCurrentDuration} />
+              <Button
+                onClick={() => setIsAttachmentsOpen(true)}
+                className="neomorph-flat p-2 md:p-3"
+                title="View Attachments"
+              >
+                <FileText className="w-4 h-4" />
+              </Button>
+              <Button
+                onClick={() => setIsNotesOpen(true)}
+                className="neomorph-flat p-2 md:p-3"
+                title="Updates & Notes"
+              >
+                <Edit className="w-4 h-4" />
+              </Button>
+              <Button
+                onClick={() => setIsEmailModalOpen(true)}
+                className="neomorph-flat p-2 md:p-3"
+                title="Send Email"
+              >
+                <Mail className="w-4 h-4" />
+              </Button>
+              {canEdit && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button className="neomorph-flat p-2 md:p-3">
+                      <ChevronDown className="w-4 h-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setShowSupplierTracking(!showSupplierTracking); }}>
+                      <Users className="w-4 h-4 mr-2" />
+                      Supplier Tracking
+                      {suppliersWithStock.length > 0 && (
+                        <span className="ml-auto text-xs font-bold text-green-600">
+                          {suppliersWithStock.length}
+                        </span>
+                      )}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleArchive(); }} disabled={archiveMutation.isLoading}>
+                      <Archive className="w-4 h-4 mr-2" />
+                      {part.archived ? 'Unarchive' : 'Archive'}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleDelete(); }} disabled={deleteMutation.isLoading} className="text-red-600">
+                      <Trash2 className="w-4 h-4 mr-2" />
+                      Delete
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+            </div>
           </div>
         </div>
 
