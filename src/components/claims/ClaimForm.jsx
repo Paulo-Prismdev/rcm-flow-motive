@@ -170,13 +170,13 @@ export default function ClaimForm({ claim, onSubmit, onCancel }) {
     authority_cost_gross: 0,
     final_repair_cost: 0,
     total_invoice_repairer: 0,
-    // NEW: Indemnity fields
+    // NEW: Indemnity fields - FIXED: strings instead of booleans
     indemnity_driver_dob: '',
     indemnity_registered_owner: '',
     indemnity_pending_prosecutions: '',
     indemnity_dvla_medical_restrictions: '',
-    indemnity_full_license_12_months: false,
-    indemnity_convictions_last_5_years: false,
+    indemnity_full_license_12_months: '',
+    indemnity_convictions_last_5_years: '',
     indemnity_vehicle_use_at_incident: '',
     indemnity_vehicle_modifications: '',
   });
@@ -1046,46 +1046,43 @@ export default function ClaimForm({ claim, onSubmit, onCancel }) {
                 </div>
 
                 <div>
-                  <label className="block text-sm text-gray-600 mb-2">Any pending prosecutions, endorsements or disqualifications?</label>
+                  <label className="block text-sm text-gray-600 mb-2">Any pending prosecutions?</label>
                   <Textarea
                     value={formData.indemnity_pending_prosecutions}
                     onChange={(e) => handleChange('indemnity_pending_prosecutions', e.target.value)}
                     className="neomorph-inset px-4 py-3 text-gray-700 border-0 h-24"
-                    placeholder="e.g., None, or describe any pending issues"
+                    placeholder="Enter details (or 'None' if none)..."
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm text-gray-600 mb-2">Any DVLA medical restrictions?</label>
+                  <label className="block text-sm text-gray-600 mb-2">DVLA/medical restrictions?</label>
                   <Textarea
                     value={formData.indemnity_dvla_medical_restrictions}
                     onChange={(e) => handleChange('indemnity_dvla_medical_restrictions', e.target.value)}
                     className="neomorph-inset px-4 py-3 text-gray-700 border-0 h-24"
-                    placeholder="e.g., None, or describe restrictions"
+                    placeholder="Enter details (or 'None' if none)..."
                   />
                 </div>
 
-                <div className="flex flex-col gap-3">
-                  <div className="flex items-center gap-3">
-                    <input
-                      type="checkbox"
-                      id="indemnity_full_license_12_months_edit"
-                      checked={formData.indemnity_full_license_12_months}
-                      onChange={(e) => handleCheckboxChange('indemnity_full_license_12_months', e.target.checked)}
-                      className="neomorph-inset"
-                    />
-                    <label htmlFor="indemnity_full_license_12_months_edit" className="text-sm text-gray-600">Held full UK/EU driving license for 12+ months</label>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <input
-                      type="checkbox"
-                      id="indemnity_convictions_last_5_years_edit"
-                      checked={formData.indemnity_convictions_last_5_years}
-                      onChange={(e) => handleCheckboxChange('indemnity_convictions_last_5_years', e.target.checked)}
-                      className="neomorph-inset"
-                    />
-                    <label htmlFor="indemnity_convictions_last_5_years_edit" className="text-sm text-gray-600">No motoring convictions in the last 5 years</label>
-                  </div>
+                <div>
+                  <label className="block text-sm text-gray-600 mb-2">Held full UK/EU license for 12+ months?</label>
+                  <Textarea
+                    value={formData.indemnity_full_license_12_months}
+                    onChange={(e) => handleChange('indemnity_full_license_12_months', e.target.value)}
+                    className="neomorph-inset px-4 py-3 text-gray-700 border-0 h-24"
+                    placeholder="Enter details..."
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm text-gray-600 mb-2">Motoring convictions/points in last 5 years?</label>
+                  <Textarea
+                    value={formData.indemnity_convictions_last_5_years}
+                    onChange={(e) => handleChange('indemnity_convictions_last_5_years', e.target.value)}
+                    className="neomorph-inset px-4 py-3 text-gray-700 border-0 h-24"
+                    placeholder="Enter details (or 'None' if none)..."
+                  />
                 </div>
 
                 <div>
@@ -1104,7 +1101,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel }) {
                     value={formData.indemnity_vehicle_modifications}
                     onChange={(e) => handleChange('indemnity_vehicle_modifications', e.target.value)}
                     className="neomorph-inset px-4 py-3 text-gray-700 border-0 h-24"
-                    placeholder="e.g., None, or describe any modifications"
+                    placeholder="Enter details (or 'None' if none)..."
                   />
                 </div>
               </div>
@@ -1879,12 +1876,12 @@ export default function ClaimForm({ claim, onSubmit, onCancel }) {
                 </div>
 
                 <div>
-                  <label className="block text-sm text-gray-600 mb-2">Any pending prosecutions, endorsements or disqualifications?</label>
+                  <label className="block text-sm text-gray-600 mb-2">Any pending prosecutions?</label>
                   <Textarea
                     value={formData.indemnity_pending_prosecutions}
                     onChange={(e) => handleChange('indemnity_pending_prosecutions', e.target.value)}
                     className="neomorph-inset px-4 py-3 text-gray-700 border-0 h-24"
-                    placeholder="e.g., None, or describe any pending issues"
+                    placeholder="Enter details or 'None'"
                   />
                 </div>
 
@@ -1894,31 +1891,28 @@ export default function ClaimForm({ claim, onSubmit, onCancel }) {
                     value={formData.indemnity_dvla_medical_restrictions}
                     onChange={(e) => handleChange('indemnity_dvla_medical_restrictions', e.target.value)}
                     className="neomorph-inset px-4 py-3 text-gray-700 border-0 h-24"
-                    placeholder="e.g., None, or describe restrictions"
+                    placeholder="Enter details or 'None'"
                   />
                 </div>
 
-                <div className="flex flex-col gap-3">
-                  <div className="flex items-center gap-3">
-                    <input
-                      type="checkbox"
-                      id="indemnity_full_license_12_months"
-                      checked={formData.indemnity_full_license_12_months}
-                      onChange={(e) => handleCheckboxChange('indemnity_full_license_12_months', e.target.checked)}
-                      className="neomorph-inset"
-                    />
-                    <label htmlFor="indemnity_full_license_12_months" className="text-sm text-gray-600">Held full UK/EU driving license for 12+ months</label>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <input
-                      type="checkbox"
-                      id="indemnity_convictions_last_5_years"
-                      checked={formData.indemnity_convictions_last_5_years}
-                      onChange={(e) => handleCheckboxChange('indemnity_convictions_last_5_years', e.target.checked)}
-                      className="neomorph-inset"
-                    />
-                    <label htmlFor="indemnity_convictions_last_5_years" className="text-sm text-gray-600">No motoring convictions in the last 5 years</label>
-                  </div>
+                <div>
+                  <label className="block text-sm text-gray-600 mb-2">Held full UK/EU license for 12+ months?</label>
+                  <Textarea
+                    value={formData.indemnity_full_license_12_months}
+                    onChange={(e) => handleChange('indemnity_full_license_12_months', e.target.value)}
+                    className="neomorph-inset px-4 py-3 text-gray-700 border-0 h-24"
+                    placeholder="Enter details..."
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm text-gray-600 mb-2">Motoring convictions/points in last 5 years?</label>
+                  <Textarea
+                    value={formData.indemnity_convictions_last_5_years}
+                    onChange={(e) => handleChange('indemnity_convictions_last_5_years', e.target.value)}
+                    className="neomorph-inset px-4 py-3 text-gray-700 border-0 h-24"
+                    placeholder="Enter details or 'None'"
+                  />
                 </div>
 
                 <div>
@@ -1937,7 +1931,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel }) {
                     value={formData.indemnity_vehicle_modifications}
                     onChange={(e) => handleChange('indemnity_vehicle_modifications', e.target.value)}
                     className="neomorph-inset px-4 py-3 text-gray-700 border-0 h-24"
-                    placeholder="e.g., None, or describe any modifications"
+                    placeholder="Enter details or 'None'"
                   />
                 </div>
               </div>
