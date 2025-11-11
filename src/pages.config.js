@@ -14,6 +14,7 @@ import UserProfile from './pages/UserProfile';
 import EmployeeManagement from './pages/EmployeeManagement';
 import Messages from './pages/Messages';
 import PdfTemplateManager from './pages/PdfTemplateManager';
+import ChaserEmailSettings from './pages/ChaserEmailSettings';
 import Layout from './Layout.jsx';
 
 
@@ -34,6 +35,7 @@ export const PAGES = {
     "EmployeeManagement": EmployeeManagement,
     "Messages": Messages,
     "PdfTemplateManager": PdfTemplateManager,
+    "ChaserEmailSettings": ChaserEmailSettings,
 }
 
 export const pagesConfig = {
