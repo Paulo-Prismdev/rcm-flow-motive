@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -9,6 +10,7 @@ import ClaimForm from '../components/claims/ClaimForm';
 import StatusBadge from '../components/shared/StatusBadge';
 import UpdateStatusBadge from '../components/shared/UpdateStatusBadge';
 import { formatUKRegistration } from '../components/shared/formatRegistration';
+import { logActivity } from '../components/shared/ActivityLogger';
 
 // Helper function to calculate update status
 const calculateUpdateStatus = (claim) => {
@@ -143,7 +145,16 @@ export default function ClaimsPage() {
 
   const createMutation = useMutation({
     mutationFn: (newClaim) => base44.entities.Claim.create(newClaim),
-    onSuccess: () => {
+    onSuccess: async (createdClaim) => {
+      // Log creation activity
+      await logActivity({
+        action_type: 'Create',
+        entity_type: 'Claim',
+        entity_id: createdClaim.id,
+        entity_reference: createdClaim.reg || createdClaim.job_number,
+        description: `Created new claim for vehicle ${createdClaim.reg || 'N/A'}`
+      });
+      
       queryClient.invalidateQueries({ queryKey: ['claims'] });
       setShowForm(false);
     },
