@@ -331,6 +331,16 @@ function ChaserEmailRuleForm({ rule, onSubmit, onCancel }) {
     setFormData({ ...formData, [field]: currentValue + placeholder });
   };
 
+  const placeholders = [
+    '{{claim.job_number}}',
+    '{{claim.reg}}',
+    '{{claim.client_name}}',
+    '{{claim.make_model}}',
+    '{{claim.insurer}}',
+    '{{claim.referrer}}',
+    '{{claim.claim_ref}}'
+  ];
+
   return (
     <div className="h-full flex flex-col gap-4">
       <div className="neomorph p-6 flex-shrink-0">
@@ -466,12 +476,11 @@ function ChaserEmailRuleForm({ rule, onSubmit, onCancel }) {
                 <strong>Available Placeholders:</strong> Click to insert
               </p>
               <div className="flex flex-wrap gap-2">
-                {['{{claim.job_number}}', '{{claim.reg}}', '{{claim.client_name}}', '{{claim.make_model}}', '{{claim.insurer}}', '{{claim.referrer}}', '{{claim.claim_ref}}''].map(placeholder => (
+                {placeholders.map(placeholder => (
                   <button
                     key={placeholder}
                     type="button"
                     onClick={() => {
-                      // Insert into subject or body based on which field was last focused
                       const lastFocused = document.activeElement;
                       if (lastFocused?.name === 'email_subject_template') {
                         insertPlaceholder('email_subject_template', placeholder);
