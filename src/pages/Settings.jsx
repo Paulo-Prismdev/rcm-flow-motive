@@ -11,6 +11,7 @@ import { base44 } from "@/api/base44Client";
 import EmailTemplates from "./EmailTemplates";
 import PartManufacturerConfigManagement from "./PartManufacturerConfigManagement";
 import UserManagement from "./UserManagement";
+import ChaserEmailSettings from "./ChaserEmailSettings";
 
 export default function Settings() {
   const [activeMainTab, setActiveMainTab] = useState("status");
@@ -26,6 +27,7 @@ export default function Settings() {
   const mainTabs = [
     { id: "status", label: "Status Settings" },
     { id: "email", label: "Email Templates" },
+    { id: "chasers", label: "Chaser Emails" },
     { id: "manufacturers", label: "Manufacturer Links" },
     { id: "users", label: "User Management", permission: canManagePermissions },
   ];
@@ -41,6 +43,7 @@ export default function Settings() {
 
   const mainTabComponents = {
     email: <EmailTemplates />,
+    chasers: <ChaserEmailSettings />,
     manufacturers: <PartManufacturerConfigManagement />,
     users: <UserManagement />,
   };
