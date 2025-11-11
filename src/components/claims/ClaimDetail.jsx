@@ -50,6 +50,7 @@ import UpdateTrackingModal from './UpdateTrackingModal'; // NEW import
 import UpdateOverrideModal from './UpdateOverrideModal';
 import ClaimUpdatesModal from '../shared/ClaimUpdatesModal';
 import InstructionTemplateModal from './InstructionTemplateModal'; // NEW import
+import ItemActivityLog from '../shared/ItemActivityLog';
 import { Textarea } from "@/components/ui/textarea"; // Added Textarea import
 import { formatUKRegistration } from '../shared/formatRegistration';
 
@@ -157,6 +158,7 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
   const [isOverrideModalOpen, setIsOverrideModalOpen] = useState(false);
   const [isUpdateTrackingOpen, setIsUpdateTrackingOpen] = useState(false);
   const [isInstructionModalOpen, setIsInstructionModalOpen] = useState(false); // NEW state
+  const [isActivityLogOpen, setIsActivityLogOpen] = useState(false);
 
   const canEdit = isInternalUser;
 
@@ -748,6 +750,14 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
         onClose={() => setIsInstructionModalOpen(false)}
       />
 
+      <ItemActivityLog
+        isOpen={isActivityLogOpen}
+        onClose={() => setIsActivityLogOpen(false)}
+        entityType="Claim"
+        entityId={claim.id}
+        entityReference={claim.reg || claim.job_number}
+      />
+
       <div className="h-full flex flex-col gap-4 md:gap-6">
           {/* Header - Fixed/Sticky */}
           <div className="neomorph p-3 md:p-6 flex-shrink-0 sticky top-0 z-10 bg-background">
@@ -826,6 +836,10 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="w-56">
+                            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsActivityLogOpen(true); }}>
+                              <Clock className="w-4 h-4 mr-2" />
+                              Activity History
+                            </DropdownMenuItem>
                             <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsInstructionModalOpen(true); }}>
                               <FileText className="w-4 h-4 mr-2" />
                               Generate Instructions

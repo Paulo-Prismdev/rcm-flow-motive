@@ -23,6 +23,7 @@ import NotesModal from '../shared/NotesModal';
 import FileAttachmentModal from '../shared/FileAttachmentModal';
 // New import for PartsModal
 import PartsModal from '../shared/PartsModal'; // Assuming PartsModal exists as it's being opened
+import ItemActivityLog from '../shared/ItemActivityLog';
 
 
 // New EditableSection component
@@ -96,11 +97,12 @@ const DETAIL_SECTIONS = [
     { id: 'timelogs', label: 'Time Logs', icon: Clock },
 ];
 
-export default function EstimateDetail({ estimate, onClose, onUpdate, isInternalUser = true }) {
+export default function EstimateDetail({ estimate, onClose, onUpdate, onArchive, onDelete, isInternalUser = true }) {
   const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
   const [isAttachmentsOpen, setIsAttachmentsOpen] = useState(false);
   const [isNotesOpen, setIsNotesOpen] = useState(false);
   const [isPartsModalOpen, setIsPartsModalOpen] = useState(false); // Added state for PartsModal
+  const [isActivityLogOpen, setIsActivityLogOpen] = useState(false);
   const [startTime] = useState(new Date());
   const [currentDuration, setCurrentDuration] = useState(0);
   const [selectedSection, setSelectedSection] = useState('job');
@@ -108,12 +110,8 @@ export default function EstimateDetail({ estimate, onClose, onUpdate, isInternal
   const hasSavedRef = React.useRef(false);
   const queryClient = useQueryClient();
 
-  const canEdit = isInternalUser;
-
-  // Effect to keep durationRef updated with currentDuration state
-  React.useEffect(() => {
-    durationRef.current = currentDuration;
-  }, [currentDuration]);
+  // The `canEdit` prop is effectively the same as `isInternalUser` for this component.
+  // We'll keep `isInternalUser` for consistency with the outline.
 
   // Background timer - still tracks time but doesn't display
   React.useEffect(() => {
@@ -122,22 +120,6 @@ export default function EstimateDetail({ estimate, onClose, onUpdate, isInternal
     }, 1000);
     return () => clearInterval(interval);
   }, []);
-
-  const archiveMutation = useMutation({
-    mutationFn: () => base44.entities.Estimate.update(estimate.id, { archived: !estimate.archived }),
-    onSuccess: (updatedEstimate) => {
-      queryClient.invalidateQueries({ queryKey: ['estimates'] });
-      onUpdate({ ...estimate, archived: updatedEstimate.archived });
-    },
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: () => base44.entities.Estimate.delete(estimate.id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['estimates'] });
-      onClose();
-    },
-  });
 
   // Modified: useEffect cleanup to save time log on unmount
   React.useEffect(() => {
@@ -181,13 +163,13 @@ export default function EstimateDetail({ estimate, onClose, onUpdate, isInternal
   const handleArchive = () => {
     const action = estimate.archived ? 'restore' : 'archive';
     if (window.confirm(`Are you sure you want to ${action} this estimate?`)) {
-      archiveMutation.mutate();
+      onArchive({ id: estimate.id, archived: !estimate.archived });
     }
   };
 
   const handleDelete = () => {
     if (window.confirm('Are you sure you want to permanently delete this estimate? This action cannot be undone.')) {
-      deleteMutation.mutate();
+      onDelete(estimate.id);
     }
   };
 
@@ -226,7 +208,7 @@ export default function EstimateDetail({ estimate, onClose, onUpdate, isInternal
             estimate={estimate}
             onUpdate={onUpdate}
             EditComponent={EstimateJobForm}
-            canEdit={canEdit}
+            canEdit={isInternalUser} // Use isInternalUser here
           >
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
               <DetailRow label="Make/Model" value={estimate.make_model} />
@@ -246,7 +228,7 @@ export default function EstimateDetail({ estimate, onClose, onUpdate, isInternal
             estimate={estimate}
             onUpdate={onUpdate}
             EditComponent={EstimateFinancialsForm}
-            canEdit={canEdit}
+            canEdit={isInternalUser} // Use isInternalUser here
           >
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
               <DetailRow label="Estimate Value" value={estimate.estimate_value} isCurrency />
@@ -270,7 +252,7 @@ export default function EstimateDetail({ estimate, onClose, onUpdate, isInternal
             estimate={estimate}
             onUpdate={onUpdate}
             EditComponent={EstimateDatesForm}
-            canEdit={canEdit}
+            canEdit={isInternalUser} // Use isInternalUser here
           >
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
               <DetailRow label="Date Received" value={estimate.date_received} isDate />
@@ -316,76 +298,87 @@ export default function EstimateDetail({ estimate, onClose, onUpdate, isInternal
         onClose={() => setIsPartsModalOpen(false)}
         estimate={estimate}
       />
-      <div className="space-y-6">
-          <div className="neomorph p-3 md:p-6 sticky top-0 z-10 bg-background">
-              <div className="flex flex-col gap-3">
+      <ItemActivityLog
+        isOpen={isActivityLogOpen}
+        onClose={() => setIsActivityLogOpen(false)}
+        entityType="Estimate"
+        entityId={estimate.id}
+        entityReference={estimate.name || estimate.job_number || 'Estimate'}
+      />
+
+      <div className="h-full flex flex-col gap-4">
+          {/* Header */}
+          <div className="neomorph p-4 md:p-6 flex-shrink-0">
+              <div className="flex items-center gap-4 mb-4">
                   {/* Top Row: Back button + Title */}
-                  <div className="flex items-center gap-2 md:gap-4">
-                      <Button onClick={handleClose} className="neomorph-flat p-2 flex-shrink-0">
-                          <ArrowLeft className="w-4 h-4" />
-                      </Button>
-                      <div className="flex-1 min-w-0">
-                          <h1 className="text-base md:text-2xl font-bold truncate">{estimate.name || 'Estimate'}</h1>
-                      </div>
+                  <Button onClick={handleClose} className="neomorph-flat p-2 flex-shrink-0">
+                      <ArrowLeft className="w-4 h-4" />
+                  </Button>
+                  <div className="flex-1 min-w-0">
+                      <h1 className="text-base md:text-2xl font-bold truncate">{estimate.name || 'Estimate'}</h1>
                   </div>
+              </div>
 
-                  {/* Status Row */}
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <StatusBadge status={estimate.status || 'New'} />
-                    {estimate.archived && (
-                      <span className="neomorph-flat px-2 md:px-3 py-0.5 md:py-1 text-xs font-medium text-gray-600">
-                        Archived
-                      </span>
-                    )}
-                  </div>
+              {/* Status Row */}
+              <div className="flex items-center gap-2 flex-wrap mb-4">
+                <StatusBadge status={estimate.status || 'New'} />
+                {estimate.archived && (
+                  <span className="neomorph-flat px-2 md:px-3 py-0.5 md:py-1 text-xs font-medium text-gray-600">
+                    Archived
+                  </span>
+                )}
+              </div>
 
-                  {/* Action Buttons Row */}
-                  <div className="flex items-center gap-1.5 md:gap-2 flex-wrap">
-                      <Button
-                        onClick={() => setIsAttachmentsOpen(true)}
-                        className="neomorph-flat p-1.5 md:p-3"
-                        title="View Attachments"
-                      >
-                        <FileText className="w-3.5 h-3.5 md:w-4 md:h-4" />
-                      </Button>
-                      <Button
-                        onClick={() => setIsNotesOpen(true)}
-                        className="neomorph-flat p-1.5 md:p-3"
-                        title="Updates & Notes"
-                      >
-                        <Edit className="w-3.5 h-3.5 md:w-4 md:h-4" />
-                      </Button>
-                      <Button
-                        onClick={() => setIsEmailModalOpen(true)}
-                        className="neomorph-flat p-1.5 md:p-3"
-                        title="Send Email"
-                      >
-                        <Mail className="w-3.5 h-3.5 md:w-4 md:h-4" />
-                      </Button>
-                      {canEdit && (
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button className="neomorph-flat p-1.5 md:p-3">
-                              <ChevronDown className="w-3.5 h-3.5 md:w-4 md:h-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-56">
-                            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsPartsModalOpen(true); }}>
-                                <Package className="w-4 h-4 mr-2" />
-                                Log Parts Issue
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleArchive(); }} disabled={archiveMutation.isLoading}>
-                              <Archive className="w-4 h-4 mr-2" />
-                              {estimate.archived ? 'Unarchive' : 'Archive'}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleDelete(); }} disabled={deleteMutation.isLoading} className="text-red-600">
-                              <Trash2 className="w-4 h-4 mr-2" />
-                              Delete
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      )}
-                  </div>
+              {/* Action Buttons Row */}
+              <div className="flex items-center gap-2 flex-wrap">
+                  <Button
+                    onClick={() => setIsAttachmentsOpen(true)}
+                    className="neomorph-flat p-1.5 md:p-3"
+                    title="View Attachments"
+                  >
+                    <FileText className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                  </Button>
+                  <Button
+                    onClick={() => setIsNotesOpen(true)}
+                    className="neomorph-flat p-1.5 md:p-3"
+                    title="Updates & Notes"
+                  >
+                    <Edit className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                  </Button>
+                  <Button
+                    onClick={() => setIsEmailModalOpen(true)}
+                    className="neomorph-flat p-1.5 md:p-3"
+                    title="Send Email"
+                  >
+                    <Mail className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                  </Button>
+                  {isInternalUser && (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button className="neomorph-flat p-2">
+                          <ChevronDown className="w-4 h-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-56">
+                        <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsActivityLogOpen(true); }}>
+                            <Clock className="w-4 h-4 mr-2" />
+                            Activity History
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsPartsModalOpen(true); }}>
+                            <Package className="w-4 h-4 mr-2" />
+                            Request Parts
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleArchive(); }}>
+                          <Archive className="w-4 h-4 mr-2" />
+                          {estimate.archived ? 'Unarchive' : 'Archive'}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleDelete(); }} className="text-red-600">
+                          <Trash2 className="w-4 h-4 mr-2" />
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  )}
               </div>
           </div>
 
@@ -424,4 +417,3 @@ export default function EstimateDetail({ estimate, onClose, onUpdate, isInternal
     </DragDropOverlay>
   );
 }
-
