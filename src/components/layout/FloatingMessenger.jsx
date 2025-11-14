@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -72,6 +71,7 @@ export default function FloatingMessenger({ currentUser, isOpen, onClose }) {
   const { data: allUsers = [] } = useQuery({
     queryKey: ['users'],
     queryFn: () => base44.entities.User.list(),
+    enabled: !!currentUser && isOpen,
   });
 
   const internalUsers = allUsers.filter(u => 
@@ -82,13 +82,13 @@ export default function FloatingMessenger({ currentUser, isOpen, onClose }) {
   const { data: messages = [] } = useQuery({
     queryKey: ['messages'],
     queryFn: () => base44.entities.Message.list('-created_date', 5000),
-    refetchInterval: 3000,
-    enabled: !!currentUser,
+    refetchInterval: isOpen ? 5000 : false,
+    enabled: !!currentUser && isOpen,
   });
 
   // Initialize department channels - only create if they don't exist yet
   useEffect(() => {
-    if (currentUser && allUsers.length > 0 && messages.length > 0) {
+    if (currentUser && allUsers.length > 0 && messages.length > 0 && isOpen) {
       const allInternalEmails = allUsers
         .filter(u => u.user_type === 'internal' || u.role === 'admin')
         .map(u => u.email);
@@ -113,12 +113,12 @@ export default function FloatingMessenger({ currentUser, isOpen, onClose }) {
             is_department_channel: true,
             department: dept,
             read_by: [],
-            created_date: new Date().toISOString(), // Added created_date
+            created_date: new Date().toISOString(),
           }).catch(() => {});
         }
       });
     }
-  }, [currentUser, allUsers, messages]);
+  }, [currentUser, allUsers, messages, isOpen]);
 
   const conversations = React.useMemo(() => {
     if (!currentUser) return [];
@@ -214,7 +214,7 @@ export default function FloatingMessenger({ currentUser, isOpen, onClose }) {
   });
 
   useEffect(() => {
-    if (selectedConversation && currentUser) {
+    if (selectedConversation && currentUser && isOpen) {
       const unreadMessages = conversationMessages.filter(m => {
         if (m.sender_email === currentUser.email) return false;
         if (selectedConversation.type === 'channel') {
@@ -227,7 +227,7 @@ export default function FloatingMessenger({ currentUser, isOpen, onClose }) {
         markAsReadMutation.mutate(unreadMessages.map(m => m.id));
       }
     }
-  }, [selectedConversation, conversationMessages, currentUser]);
+  }, [selectedConversation, conversationMessages, currentUser, isOpen]);
 
   useEffect(() => {
     if (isOpen) {
@@ -254,7 +254,7 @@ export default function FloatingMessenger({ currentUser, isOpen, onClose }) {
       conversation_id: selectedConversation.id,
       conversation_type: selectedConversation.type,
       reply_to_message_id: replyingTo?.id,
-      created_date: new Date().toISOString(), // Add created_date
+      created_date: new Date().toISOString(),
     };
 
     if (selectedConversation.type === 'channel') {
@@ -287,7 +287,7 @@ export default function FloatingMessenger({ currentUser, isOpen, onClose }) {
         conversation_id: selectedConversation.id,
         conversation_type: selectedConversation.type,
         attachment_urls: [result.file_url],
-        created_date: new Date().toISOString(), // Add created_date
+        created_date: new Date().toISOString(),
       };
 
       if (selectedConversation.type === 'channel') {
@@ -765,7 +765,7 @@ function CreateChannelModal({ isOpen, onClose, currentUser, allUsers }) {
       channel_members: members,
       is_department_channel: false,
       read_by: [currentUser.email],
-      created_date: new Date().toISOString(), // Add created_date
+      created_date: new Date().toISOString(),
     });
   };
 
