@@ -64,12 +64,16 @@ export default function Layout({ children }) {
     queryFn: () => base44.auth.me(),
   });
 
-  // Query messages for unread count
+  // Simplified messages query - only fetch when messenger is about to open
+  // This prevents unnecessary WebSocket connections
   const { data: messages = [] } = useQuery({
     queryKey: ['messages'],
     queryFn: () => base44.entities.Message.list('-created_date', 5000),
-    refetchInterval: 30000,
+    refetchInterval: messagesOpen ? 5000 : 60000, // Only refetch frequently when messenger is open
     enabled: !!currentUser && (currentUser.user_type === 'internal' || currentUser.role === 'admin'),
+    staleTime: 30000, // Consider data fresh for 30 seconds
+    retry: 1, // Only retry once to avoid connection loops
+    retryDelay: 5000, // Wait 5 seconds before retrying
   });
 
   // Calculate unread messages count
@@ -375,8 +379,6 @@ export default function Layout({ children }) {
           align-items: baseline;
           gap: 0.5rem;
         }
-
-        /* REMOVED .header-actions class that was causing the conflict */
 
         /* ============================================
            NAVIGATION STYLES
