@@ -18,6 +18,14 @@ export default function ClaimExcessContributionForm({ claim, onSave, onCancel })
     onSave(formData);
   };
 
+  const handlePaidCheckboxChange = (checked) => {
+    setFormData({ 
+      ...formData, 
+      excess_contribution_paid: checked,
+      excess_contribution_paid_date: checked ? new Date().toISOString().split('T')[0] : formData.excess_contribution_paid_date
+    });
+  };
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -55,7 +63,7 @@ export default function ClaimExcessContributionForm({ claim, onSave, onCancel })
                 type="checkbox"
                 id="excess_contribution_paid"
                 checked={formData.excess_contribution_paid}
-                onChange={(e) => setFormData({ ...formData, excess_contribution_paid: e.target.checked })}
+                onChange={(e) => handlePaidCheckboxChange(e.target.checked)}
                 className="w-5 h-5"
               />
               <label htmlFor="excess_contribution_paid" className="text-sm text-gray-600">
