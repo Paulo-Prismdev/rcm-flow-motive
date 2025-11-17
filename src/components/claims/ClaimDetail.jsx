@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import {
@@ -15,12 +14,13 @@ import {
     Package,
     Calculator,
     Mail,
-    Briefcase, // Added Briefcase icon for Referrer section
-    FileText, // Added for dropdown menu
-    Archive,  // Added for dropdown menu
-    Trash2,    // Added for dropdown menu
-    Clock, // Added for Time Logs section
-    AlertTriangle // NEW: Added AlertTriangle icon for Vehicle Damage section
+    Briefcase,
+    FileText,
+    Archive,
+    Trash2,
+    Clock,
+    AlertTriangle,
+    Percent
 } from "lucide-react";
 import { format } from "date-fns";
 import StatusBadge from "../shared/StatusBadge";
@@ -30,27 +30,28 @@ import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import ClaimClientForm from './ClaimClientForm';
 import ClaimVehicleForm from './ClaimVehicleForm';
 import ClaimInsuranceForm from './ClaimInsuranceForm';
-import ClaimReferrerForm from './ClaimReferrerForm'; // Imported new Referrer form
+import ClaimReferrerForm from './ClaimReferrerForm';
 import ClaimFinancialsForm from './ClaimFinancialsForm';
 import ClaimDatesForm from './ClaimDatesForm';
 import ClaimBodyshopForm from './ClaimBodyshopForm';
 import ClaimEstimateForm from './ClaimEstimateForm';
-import ClaimStatusForm from './ClaimStatusForm'; // NEW: Imported ClaimStatusForm
-import ClaimVehicleDamageForm from './ClaimVehicleDamageForm'; // NEW: Imported ClaimVehicleDamageForm
-import ClaimIndemnityForm from './ClaimIndemnityForm'; // NEW: Imported ClaimIndemnityForm
+import ClaimStatusForm from './ClaimStatusForm';
+import ClaimVehicleDamageForm from './ClaimVehicleDamageForm';
+import ClaimIndemnityForm from './ClaimIndemnityForm';
+import ClaimExcessContributionForm from './ClaimExcessContributionForm';
 import NotesSection from '../shared/NotesSection';
 import PartsRequestModal from './PartsRequestModal';
 import EstimateRequestModal from './EstimateRequestModal';
-import FileAttachmentModal from '../shared/FileAttachmentModal'; // Updated import
+import FileAttachmentModal from '../shared/FileAttachmentModal';
 import DragDropOverlay from '../shared/DragDropOverlay';
 import TimeLogSection from '../shared/TimeLogSection';
 import EmailComposerModal from '../shared/EmailComposerModal';
-import NotesModal from '../shared/NotesModal'; // Updated import from NotesButton to NotesModal
-import UpdateTrackingModal from './UpdateTrackingModal'; // NEW import
+import NotesModal from '../shared/NotesModal';
+import UpdateTrackingModal from './UpdateTrackingModal';
 import UpdateOverrideModal from './UpdateOverrideModal';
 import ClaimUpdatesModal from '../shared/ClaimUpdatesModal';
-import InstructionTemplateModal from './InstructionTemplateModal'; // NEW import
-import { Textarea } from "@/components/ui/textarea"; // Added Textarea import
+import InstructionTemplateModal from './InstructionTemplateModal';
+import { Textarea } from "@/components/ui/textarea";
 import { formatUKRegistration } from '../shared/formatRegistration';
 
 import {
@@ -64,31 +65,28 @@ const EditableSection = ({ title, icon: Icon, claim, onUpdate, children, EditCom
     const [isEditing, setIsEditing] = useState(false);
 
     const handleSave = (updatedData) => {
-        // Merge the updated data into the existing claim object
         onUpdate({ ...claim, ...updatedData });
         setIsEditing(false);
     };
 
     return (
         <div className="neomorph-flat p-4 md:p-6">
-            <div className="flex justify-between items-center mb-4"> {/* Added mb-4 for spacing */}
-                <div // Changed from button to div as it's no longer collapsible
+            <div className="flex justify-between items-center mb-4">
+                <div
                     className="flex items-center gap-3 text-left flex-grow"
                 >
                     <Icon className="w-5 h-5 text-gold" />
                     <h3 className="font-bold">{title}</h3>
                 </div>
                 <div className='flex items-center gap-2'>
-                    {!isEditing && EditComponent && canEdit && ( // Only show edit button if not editing, EditComponent is provided, and canEdit is true
+                    {!isEditing && EditComponent && canEdit && (
                         <Button variant="ghost" size="icon" onClick={() => { setIsEditing(true); }} className="h-8 w-8 hover:text-gold">
                             <Edit className="w-4 h-4" />
                         </Button>
                     )}
-                    {/* Removed collapse/expand button as section is no longer collapsible */}
                 </div>
             </div>
-            {/* Content is always rendered, no longer conditional on isOpen */}
-            <div className=""> {/* Removed mt-4 pt-4 border-t border-gray-300 border-opacity-50 */}
+            <div className="">
                 {isEditing ? (
                     <EditComponent claim={claim} onSave={handleSave} onCancel={() => setIsEditing(false)} />
                 ) : (
@@ -129,10 +127,11 @@ const DETAIL_SECTIONS = [
   { id: 'status', label: 'Status & Overview', icon: Clock },
   { id: 'client', label: 'Client Details', icon: User },
   { id: 'vehicle', label: 'Vehicle Details', icon: Car },
-  { id: 'vehicleDamage', label: 'Vehicle Damage', icon: AlertTriangle }, // NEW SECTION
+  { id: 'vehicleDamage', label: 'Vehicle Damage', icon: AlertTriangle },
   { id: 'insurance', label: 'Insurance Details', icon: Shield },
+  { id: 'excessContribution', label: 'Excess Contribution', icon: Percent },
   { id: 'referrer', label: 'Referrer Details', icon: Briefcase },
-  { id: 'indemnity', label: 'Indemnity Details', icon: Shield }, // NEW
+  { id: 'indemnity', label: 'Indemnity Details', icon: Shield },
   { id: 'thirdparty', label: 'Third Party Details', icon: Users },
   { id: 'financials', label: 'Financials', icon: DollarSign },
   { id: 'dates', label: 'Key Dates', icon: Calendar },
@@ -156,18 +155,16 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
   const queryClient = useQueryClient();
   const [isOverrideModalOpen, setIsOverrideModalOpen] = useState(false);
   const [isUpdateTrackingOpen, setIsUpdateTrackingOpen] = useState(false);
-  const [isInstructionModalOpen, setIsInstructionModalOpen] = useState(false); // NEW state
+  const [isInstructionModalOpen, setIsInstructionModalOpen] = useState(false);
 
   const canEdit = isInternalUser;
 
   const isClosedStatus = ['Completed', 'Cancelled', 'Total Loss'].includes(claim.job_status);
 
-  // Keep ref updated with latest duration
   React.useEffect(() => {
     durationRef.current = currentDuration;
   }, [currentDuration]);
 
-  // Background timer - still tracks time but doesn't display
   React.useEffect(() => {
     const interval = setInterval(() => {
       setCurrentDuration(prev => prev + 1);
@@ -193,11 +190,9 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
     enabled: !!claim.linked_parts_id,
   });
 
-  // Modified onUpdate handler to automatically log status changes
   const handleUpdate = async (updatedData) => {
     const statusChanged = updatedData.job_status && updatedData.job_status !== claim.job_status;
     
-    // If status changed, create an automatic ClaimUpdate record
     if (statusChanged) {
       const oldStatus = claim.job_status || 'New';
       const newStatus = updatedData.job_status;
@@ -217,7 +212,6 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
       }
     }
     
-    // Call the original onUpdate
     onUpdate(updatedData);
   };
 
@@ -225,7 +219,7 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
     mutationFn: () => base44.entities.Claim.update(claim.id, { archived: !claim.archived }),
     onSuccess: (updatedClaim) => {
       queryClient.invalidateQueries({ queryKey: ['claims'] });
-      handleUpdate({ ...claim, archived: updatedClaim.archived }); // Use handleUpdate
+      handleUpdate({ ...claim, archived: updatedClaim.archived });
     },
   });
 
@@ -237,13 +231,11 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
     },
   });
 
-  // Save time log when component unmounts (navigating away or closing)
   React.useEffect(() => {
     return () => {
-      // Synchronously save the time log on unmount
       const duration = durationRef.current;
       if (duration > 0 && !hasSavedRef.current) {
-        hasSavedRef.current = true; // Mark as saved to prevent multiple saves
+        hasSavedRef.current = true;
         base44.entities.TimeLog.create({
           parent_id: claim.id,
           parent_type: 'Claim',
@@ -255,14 +247,13 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
         });
       }
     };
-  }, []); // Empty dependency array - only run on mount/unmount
+  }, []);
 
   const handleOverrideSave = (overrideData) => {
-    handleUpdate({ ...claim, ...overrideData, last_updated_at: new Date().toISOString() }); // Use handleUpdate
+    handleUpdate({ ...claim, ...overrideData, last_updated_at: new Date().toISOString() });
   };
 
   const handleClaimUpdateCreated = (newStatus) => {
-    // When an official update is created, update the claim's last_updated_at
     const now = new Date();
     const fortyEightHoursFromNow = new Date(now.getTime() + 48 * 60 * 60 * 1000);
     
@@ -273,31 +264,27 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
       update_status_flag: 'Green'
     };
     
-    // If a new status was provided, update it
     if (newStatus) {
       updateData.job_status = newStatus;
     }
     
-    handleUpdate(updateData); // Use handleUpdate
+    handleUpdate(updateData);
   };
 
-  // Auto-refresh update status every minute
   React.useEffect(() => {
     const interval = setInterval(() => {
       if (claim && !['Completed', 'Cancelled', 'Total Loss'].includes(claim.job_status)) {
-        // This will trigger a re-render and recalculate status
         queryClient.invalidateQueries({ queryKey: ['claims'] });
       }
-    }, 60000); // Check every minute
+    }, 60000);
 
     return () => clearInterval(interval);
   }, [claim, queryClient]);
 
   const handleClose = async () => {
-    // Save time log before closing
     const duration = durationRef.current;
     if (duration > 0 && !hasSavedRef.current) {
-      hasSavedRef.current = true; // Mark as saved to prevent multiple saves
+      hasSavedRef.current = true;
       try {
         await base44.entities.TimeLog.create({
           parent_id: claim.id,
@@ -329,22 +316,22 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
   const handleFilesUploaded = (newFileUrls) => {
     const currentUrls = Array.isArray(claim.file_urls) ? claim.file_urls : [];
     const updatedUrls = [...currentUrls, ...newFileUrls];
-    handleUpdate({ ...claim, file_urls: updatedUrls }); // Use handleUpdate
+    handleUpdate({ ...claim, file_urls: updatedUrls });
   };
 
   const handleFileRemove = (urlToRemove) => {
     const currentUrls = Array.isArray(claim.file_urls) ? claim.file_urls : [];
     const updatedUrls = currentUrls.filter(url => url !== urlToRemove);
-    handleUpdate({ ...claim, file_urls: updatedUrls }); // Use handleUpdate
+    handleUpdate({ ...claim, file_urls: updatedUrls });
   };
 
   const handlePartCreated = (createdPart) => {
-    handleUpdate({ ...claim, linked_parts_id: createdPart.id }); // Use handleUpdate
+    handleUpdate({ ...claim, linked_parts_id: createdPart.id });
     queryClient.invalidateQueries({ queryKey: ['parts'] });
   };
 
   const handleEstimateCreated = (createdEstimate) => {
-    handleUpdate({ ...claim, linked_estimate_id: createdEstimate.id }); // Use handleUpdate
+    handleUpdate({ ...claim, linked_estimate_id: createdEstimate.id });
     queryClient.invalidateQueries({ queryKey: ['estimates'] });
   };
 
@@ -361,7 +348,6 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
     }
   };
 
-  // Helper function to generate page URLs based on entity type
   const createPageUrl = (entityType) => {
     switch (entityType) {
       case 'Estimating':
@@ -370,13 +356,11 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
         return '/engineering';
       case 'Parts':
         return '/parts';
-      // Add other cases as needed
       default:
-        return '/dashboard'; // Fallback or a generic home page
+        return '/dashboard';
     }
   };
 
-  // Helper function to open linked item in new window
   const openLinkedItem = (pageUrl, itemId) => {
     const url = `${pageUrl}?id=${itemId}`;
     window.open(url, '_blank');
@@ -441,7 +425,6 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
       case 'vehicle':
         return (
           <EditableSection title="Vehicle Details" icon={Car} claim={claim} onUpdate={handleUpdate} EditComponent={ClaimVehicleForm} canEdit={canEdit}>
-            {/* Basic Vehicle Info */}
             <div className="mb-6">
               <h4 className="text-sm font-semibold text-gray-600 mb-3">Basic Information</h4>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
@@ -455,7 +438,6 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
               </div>
             </div>
 
-            {/* Technical Details */}
             <div className="mb-6">
               <h4 className="text-sm font-semibold text-gray-600 mb-3">Technical Details</h4>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
@@ -467,7 +449,6 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
               </div>
             </div>
 
-            {/* MOT & Tax Status */}
             <div className="mb-6">
               <h4 className="text-sm font-semibold text-gray-600 mb-3">MOT & Tax Status</h4>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
@@ -481,7 +462,7 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
           </EditableSection>
         );
 
-      case 'vehicleDamage': // NEW CASE
+      case 'vehicleDamage':
         return (
           <EditableSection 
             title="Vehicle Damage" 
@@ -516,6 +497,37 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
           </EditableSection>
         );
 
+      case 'excessContribution':
+        return (
+          <EditableSection 
+            title="Excess Contribution" 
+            icon={Percent} 
+            claim={claim} 
+            onUpdate={handleUpdate} 
+            EditComponent={ClaimExcessContributionForm} 
+            canEdit={canEdit}
+          >
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+              <DetailRow label="Contribution Amount" value={claim.excess_contribution_amount} isCurrency />
+              <DetailRow label="Payment Method" value={claim.excess_contribution_method || 'None'} />
+              <DetailRow label="Contribution Paid" value={claim.excess_contribution_paid ? 'Yes' : 'No'} />
+              <DetailRow label="Date Paid" value={claim.excess_contribution_paid_date} isDate />
+            </div>
+            {claim.excess_contribution_method === 'Via Repairer' && (
+              <div className="mt-2 py-3 px-4 rounded-lg glass-inset">
+                <div className="text-xs font-semibold text-foreground-muted mb-2">Invoice from Repairer</div>
+                <div className="text-sm">{claim.excess_contribution_invoice_received ? 'Received ✓' : 'Not Received'}</div>
+              </div>
+            )}
+            {claim.excess_contribution_notes && (
+              <div className="mt-2 py-3 px-4 rounded-lg glass-inset">
+                <div className="text-xs font-semibold text-foreground-muted mb-2">Notes</div>
+                <div className="text-sm leading-relaxed whitespace-pre-wrap">{claim.excess_contribution_notes}</div>
+              </div>
+            )}
+          </EditableSection>
+        );
+
       case 'referrer':
         return (
           <EditableSection title="Referrer Details" icon={Briefcase} claim={claim} onUpdate={handleUpdate} EditComponent={ClaimReferrerForm} canEdit={canEdit}>
@@ -529,7 +541,7 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
           </EditableSection>
         );
 
-      case 'indemnity': // NEW CASE
+      case 'indemnity':
         if (!claim.requires_indemnity) {
           return (
             <div className="neomorph-flat p-4 md:p-6">
@@ -749,10 +761,8 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
       />
 
       <div className="h-full flex flex-col gap-4 md:gap-6">
-          {/* Header - Fixed/Sticky */}
           <div className="neomorph p-3 md:p-6 flex-shrink-0 sticky top-0 z-10 bg-background">
               <div className="flex flex-col gap-3">
-                  {/* Top Row: Back button + Title */}
                   <div className="flex items-center gap-2 md:gap-4">
                       <Button onClick={handleClose} className="neomorph-flat p-2 flex-shrink-0">
                           <ArrowLeft className="w-4 h-4" />
@@ -769,7 +779,6 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
                       </div>
                   </div>
 
-                  {/* Status Row */}
                   <div className="flex items-center gap-2 flex-wrap">
                     <StatusBadge status={claim.job_status || 'New'} />
                     {!isClosedStatus && claim.update_status_flag && (
@@ -788,7 +797,6 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
                     )}
                   </div>
 
-                  {/* Action Buttons Row */}
                   <div className="flex items-center gap-1.5 md:gap-2 flex-wrap">
                       <Button 
                         onClick={() => setIsClaimUpdatesOpen(true)}
@@ -853,7 +861,6 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
               </div>
           </div>
 
-        {/* Linked Cases - Fixed (if present) */}
         {(linkedEstimate || linkedEngineering || linkedParts) && (
           <div className="neomorph p-4 flex-shrink-0">
             <div className="flex items-center gap-2 mb-3">
@@ -895,7 +902,6 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
           </div>
         )}
 
-        {/* Section Selector - Fixed */}
         <div className="neomorph p-4 flex-shrink-0">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -922,7 +928,6 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
           </DropdownMenu>
         </div>
 
-        {/* Selected Section Content - Scrollable */}
         <div className="flex-1 overflow-y-auto min-h-0 pr-1">
           {renderSelectedSection()}
         </div>
