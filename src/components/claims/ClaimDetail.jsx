@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import {
@@ -20,7 +21,7 @@ import {
     Trash2,
     Clock,
     AlertTriangle,
-    Percent
+    BadgePercent // Changed from Percent to BadgePercent
 } from "lucide-react";
 import { format } from "date-fns";
 import StatusBadge from "../shared/StatusBadge";
@@ -129,7 +130,7 @@ const DETAIL_SECTIONS = [
   { id: 'vehicle', label: 'Vehicle Details', icon: Car },
   { id: 'vehicleDamage', label: 'Vehicle Damage', icon: AlertTriangle },
   { id: 'insurance', label: 'Insurance Details', icon: Shield },
-  { id: 'excessContribution', label: 'Excess Contribution', icon: Percent },
+  { id: 'excessContribution', label: 'Excess Contribution', icon: BadgePercent }, // Changed from Percent to BadgePercent
   { id: 'referrer', label: 'Referrer Details', icon: Briefcase },
   { id: 'indemnity', label: 'Indemnity Details', icon: Shield },
   { id: 'thirdparty', label: 'Third Party Details', icon: Users },
@@ -501,7 +502,7 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
         return (
           <EditableSection 
             title="Excess Contribution" 
-            icon={Percent} 
+            icon={BadgePercent} // Changed from Percent to BadgePercent
             claim={claim} 
             onUpdate={handleUpdate} 
             EditComponent={ClaimExcessContributionForm} 
