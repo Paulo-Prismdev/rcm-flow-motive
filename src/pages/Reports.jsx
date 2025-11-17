@@ -89,7 +89,7 @@ export default function Reports() {
       : 0;
 
     const totalValue = filteredClaims.reduce((sum, claim) => {
-      return sum + (claim.final_repair_cost || claim.authority_cost_gross || 0);
+      return sum + (claim.authority_cost_net || 0);
     }, 0);
 
     const avgValue = total > 0 ? totalValue / total : 0;
@@ -267,11 +267,11 @@ export default function Reports() {
 
             <div className="glass p-6">
               <div className="flex items-center justify-between mb-2">
-                <h3 className="text-sm text-foreground-muted">Total Value</h3>
+                <h3 className="text-sm text-foreground-muted">Avg Repair Value</h3>
                 <TrendingUp className="w-5 h-5 text-green-500" />
               </div>
-              <p className="text-3xl font-bold">£{metrics.totalValue.toLocaleString(undefined, {maximumFractionDigits: 0})}</p>
-              <p className="text-xs text-foreground-muted mt-1">Avg: £{metrics.avgValue.toLocaleString(undefined, {maximumFractionDigits: 0})}</p>
+              <p className="text-3xl font-bold">£{metrics.avgValue.toLocaleString(undefined, {maximumFractionDigits: 0})}</p>
+              <p className="text-xs text-foreground-muted mt-1">Total: £{metrics.totalValue.toLocaleString(undefined, {maximumFractionDigits: 0})}</p>
             </div>
 
             <div className="glass p-6">
