@@ -5,15 +5,6 @@ const DELAY_BETWEEN_REQUESTS = 2000; // 2 seconds to be safe
 
 async function geocodeAddress(address) {
   try {
-    const response = await fetch('https://nominatim.openstreetmap.org/search', {
-      method: 'GET',
-      headers: {
-        'User-Agent': 'ART-TEC-One-App/1.0'
-      },
-      body: null,
-      signal: AbortSignal.timeout(10000)
-    });
-
     const params = new URLSearchParams({
       q: address,
       format: 'json',
@@ -23,18 +14,18 @@ async function geocodeAddress(address) {
 
     const url = `https://nominatim.openstreetmap.org/search?${params.toString()}`;
     
-    const geoResponse = await fetch(url, {
+    const response = await fetch(url, {
       headers: {
         'User-Agent': 'ART-TEC-One-App/1.0'
       },
       signal: AbortSignal.timeout(10000)
     });
 
-    if (!geoResponse.ok) {
-      throw new Error(`Geocoding failed: ${geoResponse.status}`);
+    if (!response.ok) {
+      throw new Error(`Geocoding failed: ${response.status}`);
     }
 
-    const data = await geoResponse.json();
+    const data = await response.json();
     
     if (data.length > 0) {
       return {
