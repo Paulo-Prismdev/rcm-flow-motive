@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -77,13 +76,23 @@ export default function ClaimClientForm({ claim, onSave, onCancel }) {
         </div>
       </div>
 
-      <div>
-        <label className="block text-sm text-foreground-muted mb-2">Driver/Contact Name</label>
-        <Input
-          value={formData.driver_contact_name || ''} // Ensure default to empty string
-          onChange={(e) => handleChange('driver_contact_name', e.target.value)}
-          className="neomorph-inset px-4 py-3 border-0"
-        />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm text-foreground-muted mb-2">Driver/Contact Name</label>
+          <Input
+            value={formData.driver_contact_name || ''} // Ensure default to empty string
+            onChange={(e) => handleChange('driver_contact_name', e.target.value)}
+            className="neomorph-inset px-4 py-3 border-0"
+          />
+        </div>
+        <div>
+          <label className="block text-sm text-foreground-muted mb-2">Driving License Number</label>
+          <Input
+            value={formData.client_driving_license || ''}
+            onChange={(e) => handleChange('client_driving_license', e.target.value)}
+            className="neomorph-inset px-4 py-3 border-0"
+          />
+        </div>
       </div>
 
       <div>
