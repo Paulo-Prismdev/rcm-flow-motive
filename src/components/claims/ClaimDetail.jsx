@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import {
@@ -405,6 +404,7 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
               <DetailRow label="Client Name" value={claim.client_name} />
               <DetailRow label="Client Phone" value={claim.client_phone} />
               <DetailRow label="Client Email" value={claim.client_email} />
+              <DetailRow label="Driving License" value={claim.client_driving_license} />
               <DetailRow label="Driver/Contact" value={claim.driver_contact_name} />
               <DetailRow label="VAT Status" value={claim.client_vat_status} />
               <DetailRow label="Business Division" value={claim.business_division} />
