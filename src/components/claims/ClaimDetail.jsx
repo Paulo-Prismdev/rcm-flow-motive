@@ -43,6 +43,7 @@ import NotesSection from '../shared/NotesSection';
 import PartsRequestModal from './PartsRequestModal';
 import EstimateRequestModal from './EstimateRequestModal';
 import FileAttachmentModal from '../shared/FileAttachmentModal';
+import DocumentManagementModal from '../shared/DocumentManagementModal';
 import DragDropOverlay from '../shared/DragDropOverlay';
 import TimeLogSection from '../shared/TimeLogSection';
 import EmailComposerModal from '../shared/EmailComposerModal';
@@ -145,6 +146,7 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
   const [isEstimateModalOpen, setIsEstimateModalOpen] = useState(false);
   const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
   const [isAttachmentsOpen, setIsAttachmentsOpen] = useState(false);
+  const [isDocManagementOpen, setIsDocManagementOpen] = useState(false);
   const [isNotesOpen, setIsNotesOpen] = useState(false);
   const [isClaimUpdatesOpen, setIsClaimUpdatesOpen] = useState(false);
   const [startTime] = useState(new Date());
@@ -722,6 +724,12 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
         onAIExtract={handleAIExtract}
         existingData={claim}
       />
+      <DocumentManagementModal
+        parentId={claim.id}
+        parentType="Claim"
+        isOpen={isDocManagementOpen}
+        onClose={() => setIsDocManagementOpen(false)}
+      />
       <NotesModal
         parentId={claim.id}
         parentType="Claim"
@@ -814,9 +822,9 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
                         <Edit className="w-3.5 h-3.5 md:w-4 md:h-4" />
                       </Button>
                       <Button 
-                        onClick={() => setIsAttachmentsOpen(true)}
+                        onClick={() => setIsDocManagementOpen(true)}
                         className="neomorph-flat p-1.5 md:p-3"
-                        title="View Attachments"
+                        title="Document Management"
                       >
                         <FileText className="w-3.5 h-3.5 md:w-4 md:h-4" />
                       </Button>
