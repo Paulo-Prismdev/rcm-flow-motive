@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Calendar, Download, Filter, TrendingUp, BarChart3, PieChart as PieChartIcon } from 'lucide-react';
+import { Calendar, Download, Filter, TrendingUp, BarChart3, PieChart as PieChartIcon, X } from 'lucide-react';
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { format, differenceInDays, parseISO } from 'date-fns';
 
@@ -166,6 +166,17 @@ export default function Reports() {
   const uniqueReferrers = [...new Set(claims.map(c => c.referrer).filter(Boolean))];
   const uniqueInsurers = [...new Set(claims.map(c => c.insurer).filter(Boolean))];
 
+  const hasActiveFilters = dateFrom || dateTo || filterClaimType !== 'all' || filterStatus !== 'all' || filterReferrer !== 'all' || filterInsurer !== 'all';
+
+  const clearFilters = () => {
+    setDateFrom('');
+    setDateTo('');
+    setFilterClaimType('all');
+    setFilterStatus('all');
+    setFilterReferrer('all');
+    setFilterInsurer('all');
+  };
+
   return (
     <div className="h-full flex flex-col gap-4">
       {/* Header */}
@@ -175,10 +186,18 @@ export default function Reports() {
             <h1 className="text-2xl font-bold">Claims Reports & Analytics</h1>
             <p className="text-sm text-foreground-muted mt-1">Comprehensive insights into your claims data</p>
           </div>
-          <Button onClick={handleExport} className="glass-button flex items-center gap-2">
-            <Download className="w-4 h-4" />
-            Export CSV
-          </Button>
+          <div className="flex items-center gap-2">
+            {hasActiveFilters && (
+              <Button onClick={clearFilters} className="glass-button flex items-center gap-2">
+                <X className="w-4 h-4" />
+                Clear Filters
+              </Button>
+            )}
+            <Button onClick={handleExport} className="glass-button flex items-center gap-2">
+              <Download className="w-4 h-4" />
+              Export CSV
+            </Button>
+          </div>
         </div>
 
         {/* Filters */}
