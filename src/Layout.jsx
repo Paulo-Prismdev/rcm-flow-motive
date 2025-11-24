@@ -29,6 +29,7 @@ import Notifications from "./components/layout/Notifications";
 import UserProfile from "./components/layout/UserProfile";
 import ThemeToggle from "./components/layout/ThemeToggle";
 import FloatingMessenger from "./components/layout/FloatingMessenger";
+import RepairerLayout from "./components/repairer/RepairerLayout";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -54,7 +55,7 @@ const allDepartments = [
   { name: "Map", url: createPageUrl("BodyshopMap"), icon: Search, permission: "Map" },
 ];
 
-export default function Layout({ children }) {
+export default function Layout({ children, currentPageName }) {
   const location = useLocation();
   const [searchOpen, setSearchOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -66,6 +67,21 @@ export default function Layout({ children }) {
     queryKey: ['currentUser'],
     queryFn: () => base44.auth.me(),
   });
+
+  // If user is a bodyshop/repairer and accessing the repairer portal, use the repairer layout
+  if (currentUser?.user_type === 'bodyshop' && currentPageName === 'RepairerPortal') {
+    return (
+      <RepairerLayout>
+        {children}
+      </RepairerLayout>
+    );
+  }
+
+  // If user is a bodyshop type, redirect them to RepairerPortal
+  if (currentUser?.user_type === 'bodyshop' && currentPageName !== 'RepairerPortal') {
+    window.location.href = createPageUrl('RepairerPortal');
+    return null;
+  }
 
   // Simplified messages query - only fetch when messenger is about to open
   // This prevents unnecessary WebSocket connections
