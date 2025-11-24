@@ -370,6 +370,23 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
 
   const renderSelectedSection = () => {
     switch (selectedSection) {
+      case 'thirdpartyPursuit':
+        // Only show for fault claims
+        if (claim.claim_type !== 'Fault Claim') {
+          return (
+            <div className="neomorph-flat p-4 md:p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <Users className="w-5 h-5 text-gold" />
+                <h3 className="font-bold">Third Party Pursuit</h3>
+              </div>
+              <div className="text-center py-12 text-gray-500">
+                <p>Third party pursuit is only applicable for Fault Claims.</p>
+              </div>
+            </div>
+          );
+        }
+        return <ThirdPartyPursuitSection claim={claim} onUpdate={handleUpdate} />;
+
       case 'status':
         return (
           <EditableSection 
