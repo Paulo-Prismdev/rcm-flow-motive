@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Plus, Search, Archive, FileDown, Filter, X } from 'lucide-react';
+import { Plus, Search, Archive, FileDown, Filter, X, AlertTriangle } from 'lucide-react';
 import ClaimDetail from '../components/claims/ClaimDetail';
 import ClaimForm from '../components/claims/ClaimForm';
 import StatusBadge from '../components/shared/StatusBadge';
@@ -459,6 +459,13 @@ export default function ClaimsPage() {
                         <StatusBadge status={claim.job_status || 'New'} />
                         {!isClosedStatus && updateStatus && (
                           <UpdateStatusBadge status={updateStatus} small />
+                        )}
+                        {claim.claim_type === 'Fault Claim' && 
+                         claim.third_party_pursuit_status === 'Awaiting Details' && (
+                          <span className="flex items-center gap-1 px-2 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-medium animate-pulse">
+                            <AlertTriangle className="w-3 h-3" />
+                            3rd Party Pending
+                          </span>
                         )}
                       </div>
                       
