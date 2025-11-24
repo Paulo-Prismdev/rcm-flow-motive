@@ -146,6 +146,10 @@ export default function FloatingMessenger({ currentUser, isOpen, onClose }) {
           });
         }
       } else if (msg.conversation_type === 'direct') {
+        // Only show DM if current user is a participant
+        const participants = [msg.sender_email, ...(msg.channel_members || [])];
+        if (!participants.includes(currentUser.email)) return;
+        
         const otherUserEmail = msg.sender_email === currentUser.email ? msg.channel_members?.[0] : msg.sender_email;
         const convId = msg.conversation_id;
         
