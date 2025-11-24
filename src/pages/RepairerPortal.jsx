@@ -60,7 +60,20 @@ export default function RepairerPortal() {
     enabled: !!currentUser?.linked_bodyshop_id,
   });
 
-  if (!currentUser?.linked_bodyshop_id) {
+  const isLoading = !currentUser || claimsLoading || estimatesLoading || partsLoading;
+
+  if (!currentUser) {
+    return (
+      <div className="h-full flex items-center justify-center">
+        <div className="neomorph p-8 text-center">
+          <div className="animate-spin w-8 h-8 border-4 border-accent border-t-transparent rounded-full mx-auto"></div>
+          <p className="mt-4 text-foreground-muted">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!currentUser.linked_bodyshop_id) {
     return (
       <div className="h-full flex items-center justify-center">
         <div className="neomorph p-8 text-center max-w-md">
