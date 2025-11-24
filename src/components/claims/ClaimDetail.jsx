@@ -46,16 +46,15 @@ import EstimateRequestModal from './EstimateRequestModal';
 import FileAttachmentModal from '../shared/FileAttachmentModal';
 import DragDropOverlay from '../shared/DragDropOverlay';
 import TimeLogSection from '../shared/TimeLogSection';
+import ClaimTasksSection from '../tasks/ClaimTasksSection';
 import EmailComposerModal from '../shared/EmailComposerModal';
 import NotesModal from '../shared/NotesModal';
 import UpdateTrackingModal from './UpdateTrackingModal';
 import UpdateOverrideModal from './UpdateOverrideModal';
 import ClaimUpdatesModal from '../shared/ClaimUpdatesModal';
 import InstructionTemplateModal from './InstructionTemplateModal';
-import ClaimTasksSection from '../tasks/ClaimTasksSection';
 import { Textarea } from "@/components/ui/textarea";
 import { formatUKRegistration } from '../shared/formatRegistration';
-import { ListTodo } from "lucide-react";
 
 import {
   DropdownMenu,
@@ -125,6 +124,8 @@ function DetailRow({ label, value, isCurrency = false, isDate = false, isStatus 
         </div>
     );
 }
+
+import { ListTodo } from "lucide-react";
 
 const DETAIL_SECTIONS = [
   { id: 'status', label: 'Status & Overview', icon: Clock },
@@ -372,17 +373,17 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
   };
 
   const renderSelectedSection = () => {
-    switch (selectedSection) {
-      case 'tasks':
-        return (
-          <ClaimTasksSection 
-            claimId={claim.id} 
-            claimJobNumber={claim.job_number} 
-            claimReg={claim.reg} 
-          />
-        );
+        switch (selectedSection) {
+          case 'tasks':
+            return (
+              <ClaimTasksSection 
+                claimId={claim.id} 
+                claimJobNumber={claim.job_number} 
+                claimReg={claim.reg} 
+              />
+            );
 
-      case 'thirdpartyPursuit':
+          case 'thirdpartyPursuit':
         // Only show for fault claims
         if (claim.claim_type !== 'Fault Claim') {
           return (
