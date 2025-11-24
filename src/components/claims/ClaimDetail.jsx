@@ -47,6 +47,7 @@ import FileAttachmentModal from '../shared/FileAttachmentModal';
 import DragDropOverlay from '../shared/DragDropOverlay';
 import TimeLogSection from '../shared/TimeLogSection';
 import ClaimTasksSection from '../tasks/ClaimTasksSection';
+import TasksModal from '../tasks/TasksModal';
 import EmailComposerModal from '../shared/EmailComposerModal';
 import NotesModal from '../shared/NotesModal';
 import UpdateTrackingModal from './UpdateTrackingModal';
@@ -129,7 +130,6 @@ import { ListTodo } from "lucide-react";
 
 const DETAIL_SECTIONS = [
   { id: 'status', label: 'Status & Overview', icon: Clock },
-  { id: 'tasks', label: 'Tasks', icon: ListTodo },
   { id: 'thirdpartyPursuit', label: 'Third Party Pursuit', icon: Users },
   { id: 'client', label: 'Client Details', icon: User },
   { id: 'vehicle', label: 'Vehicle Details', icon: Car },
@@ -162,6 +162,7 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
   const [isOverrideModalOpen, setIsOverrideModalOpen] = useState(false);
   const [isUpdateTrackingOpen, setIsUpdateTrackingOpen] = useState(false);
   const [isInstructionModalOpen, setIsInstructionModalOpen] = useState(false);
+  const [isTasksModalOpen, setIsTasksModalOpen] = useState(false);
 
   const canEdit = isInternalUser;
 
@@ -374,15 +375,6 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
 
   const renderSelectedSection = () => {
         switch (selectedSection) {
-          case 'tasks':
-            return (
-              <ClaimTasksSection 
-                claimId={claim.id} 
-                claimJobNumber={claim.job_number} 
-                claimReg={claim.reg} 
-              />
-            );
-
           case 'thirdpartyPursuit':
         // Only show for fault claims
         if (claim.claim_type !== 'Fault Claim') {
@@ -788,10 +780,18 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
       />
 
       <InstructionTemplateModal
-        claim={claim}
-        isOpen={isInstructionModalOpen}
-        onClose={() => setIsInstructionModalOpen(false)}
-      />
+                claim={claim}
+                isOpen={isInstructionModalOpen}
+                onClose={() => setIsInstructionModalOpen(false)}
+              />
+
+              <TasksModal
+                claimId={claim.id}
+                claimJobNumber={claim.job_number}
+                claimReg={claim.reg}
+                isOpen={isTasksModalOpen}
+                onClose={() => setIsTasksModalOpen(false)}
+              />
 
       <div className="h-full flex flex-col gap-4 md:gap-6">
           <div className="neomorph p-3 md:p-6 flex-shrink-0 sticky top-0 z-10 bg-background">
@@ -867,18 +867,22 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="w-56">
-                            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsInstructionModalOpen(true); }}>
-                              <FileText className="w-4 h-4 mr-2" />
-                              Generate Instructions
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsEstimateModalOpen(true); }}>
-                              <Calculator className="w-4 h-4 mr-2" />
-                              Request Estimate
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsPartsModalOpen(true); }}>
-                              <Package className="w-4 h-4 mr-2" />
-                              Log Parts Issue
-                            </DropdownMenuItem>
+                                                            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsTasksModalOpen(true); }}>
+                                                              <ListTodo className="w-4 h-4 mr-2" />
+                                                              Manage Tasks
+                                                            </DropdownMenuItem>
+                                                            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsInstructionModalOpen(true); }}>
+                                                              <FileText className="w-4 h-4 mr-2" />
+                                                              Generate Instructions
+                                                            </DropdownMenuItem>
+                                                            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsEstimateModalOpen(true); }}>
+                                                              <Calculator className="w-4 h-4 mr-2" />
+                                                              Request Estimate
+                                                            </DropdownMenuItem>
+                                                            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsPartsModalOpen(true); }}>
+                                                              <Package className="w-4 h-4 mr-2" />
+                                                              Log Parts Issue
+                                                            </DropdownMenuItem>
                             <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleArchive(); }} disabled={archiveMutation.isLoading}>
                               <Archive className="w-4 h-4 mr-2" />
                               {claim.archived ? 'Unarchive' : 'Archive'}
