@@ -2,13 +2,17 @@ import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { AlertTriangle, UserPlus, ExternalLink, Check, X } from "lucide-react";
+import { AlertTriangle, UserPlus, ExternalLink, Check, X, Search, Loader, XCircle } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { formatUKRegistration } from '../shared/formatRegistration';
 
 export default function ThirdPartyPursuitSection({ claim, onUpdate }) {
   const [isCreatingClaim, setIsCreatingClaim] = useState(false);
+  const [isRejectingCapture, setIsRejectingCapture] = useState(false);
+  const [rejectReason, setRejectReason] = useState('');
+  const [isLookingUpVehicle, setIsLookingUpVehicle] = useState(false);
+  const [vehicleLookupError, setVehicleLookupError] = useState(null);
   const [tpFormData, setTpFormData] = useState({
     tp_name: claim.tp_name || '',
     tp_phone: claim.tp_phone || '',
@@ -24,6 +28,57 @@ export default function ThirdPartyPursuitSection({ claim, onUpdate }) {
   });
   
   const queryClient = useQueryClient();
+
+  // Vehicle lookup for third party
+  const handleVehicleLookup = async () => {
+    if (!tpFormData.tp_reg || tpFormData.tp_reg.trim().length < 3) {
+      setVehicleLookupError('Please enter a valid registration number');
+      return;
+    }
+
+    setIsLookingUpVehicle(true);
+    setVehicleLookupError(null);
+
+    try {
+      const response = await base44.functions.invoke('lookupVehicleData', {
+        registrationNumber: tpFormData.tp_reg,
+      });
+
+      const result = response.data;
+
+      if (result.success) {
+        setTpFormData(prev => ({
+          ...prev,
+          tp_make_model: result.make_model || '',
+        }));
+        setVehicleLookupError(null);
+      } else {
+        setVehicleLookupError(result.message || 'Vehicle not found');
+      }
+    } catch (error) {
+      console.error('Vehicle lookup error:', error);
+      const errorMessage = error.response?.data?.message || error.message || 'Unable to lookup vehicle. Please try again.';
+      setVehicleLookupError(errorMessage);
+    } finally {
+      setIsLookingUpVehicle(false);
+    }
+  };
+
+  // Reject third party capture
+  const handleRejectCapture = () => {
+    if (!rejectReason.trim()) {
+      alert('Please provide a reason for not capturing third party details');
+      return;
+    }
+    
+    onUpdate({
+      ...claim,
+      third_party_pursuit_status: 'N/A',
+      tp_capture_rejected_reason: rejectReason,
+    });
+    setIsRejectingCapture(false);
+    setRejectReason('');
+  };
 
   // Check if third party details are sufficient
   const hasTPDetails = claim.tp_name && (claim.tp_phone || claim.tp_email);
@@ -117,6 +172,34 @@ export default function ThirdPartyPursuitSection({ claim, onUpdate }) {
     return null;
   }
 
+  // If rejected, show the reason
+  if (claim.third_party_pursuit_status === 'N/A' && claim.tp_capture_rejected_reason) {
+    return (
+      <div className="neomorph-flat p-4 md:p-6 border-l-4 border-gray-400">
+        <div className="flex items-center gap-3 mb-4">
+          <XCircle className="w-5 h-5 text-gray-500" />
+          <h3 className="font-bold">Third-Party Capture Not Required</h3>
+        </div>
+        <div className="neomorph-inset p-3 rounded-lg">
+          <p className="text-xs font-semibold text-foreground-muted mb-1">Reason:</p>
+          <p className="text-sm">{claim.tp_capture_rejected_reason}</p>
+        </div>
+        <Button
+          onClick={() => {
+            onUpdate({
+              ...claim,
+              third_party_pursuit_status: 'Awaiting Details',
+              tp_capture_rejected_reason: '',
+            });
+          }}
+          className="neomorph-flat px-4 py-2 mt-4 text-sm"
+        >
+          Re-enable Third Party Capture
+        </Button>
+      </div>
+    );
+  }
+
   // If a TP claim already exists, show the link
   if (claim.linked_third_party_claim_id && linkedTPClaim) {
     return (
@@ -192,14 +275,41 @@ export default function ThirdPartyPursuitSection({ claim, onUpdate }) {
               className="neomorph-inset"
             />
           </div>
-          <div>
+          <div className="md:col-span-2">
             <label className="text-xs font-semibold text-foreground-muted mb-1 block">Vehicle Registration</label>
-            <Input
-              value={tpFormData.tp_reg}
-              onChange={(e) => handleInputChange('tp_reg', e.target.value.toUpperCase())}
-              placeholder="e.g. AB12 CDE"
-              className="neomorph-inset"
-            />
+            <div className="flex gap-2">
+              <Input
+                value={tpFormData.tp_reg}
+                onChange={(e) => {
+                  handleInputChange('tp_reg', e.target.value.toUpperCase());
+                  setVehicleLookupError(null);
+                }}
+                placeholder="e.g. AB12 CDE"
+                className="neomorph-inset flex-1"
+              />
+              <Button
+                type="button"
+                onClick={handleVehicleLookup}
+                disabled={isLookingUpVehicle || !tpFormData.tp_reg || tpFormData.tp_reg.length < 3}
+                className="neomorph-flat px-4 py-2"
+                title="Lookup vehicle details from DVLA"
+              >
+                {isLookingUpVehicle ? (
+                  <Loader className="w-4 h-4 animate-spin" />
+                ) : (
+                  <>
+                    <Search className="w-4 h-4 mr-2" />
+                    Lookup
+                  </>
+                )}
+              </Button>
+            </div>
+            {vehicleLookupError && (
+              <p className="text-xs text-orange-600 mt-1">{vehicleLookupError}</p>
+            )}
+            {tpFormData.tp_make_model && !vehicleLookupError && (
+              <p className="text-xs text-green-600 mt-1">✓ {tpFormData.tp_make_model}</p>
+            )}
           </div>
           <div>
             <label className="text-xs font-semibold text-foreground-muted mb-1 block">Vehicle Make/Model</label>
@@ -317,13 +427,52 @@ export default function ThirdPartyPursuitSection({ claim, onUpdate }) {
           <p className="text-sm">{claim.tp_name} {claim.tp_phone && `• ${claim.tp_phone}`}</p>
         </div>
       )}
-      <Button
-        onClick={() => setIsCreatingClaim(true)}
-        className="neomorph-flat px-4 py-2 flex items-center gap-2"
-      >
-        <UserPlus className="w-4 h-4" />
-        {hasTPDetails ? 'Review Details & Create Claim' : 'Enter Third-Party Details'}
-      </Button>
+      <div className="flex gap-3 flex-wrap">
+        <Button
+          onClick={() => setIsCreatingClaim(true)}
+          className="neomorph-flat px-4 py-2 flex items-center gap-2"
+        >
+          <UserPlus className="w-4 h-4" />
+          {hasTPDetails ? 'Review Details & Create Claim' : 'Enter Third-Party Details'}
+        </Button>
+        <Button
+          onClick={() => setIsRejectingCapture(true)}
+          className="neomorph-flat px-4 py-2 flex items-center gap-2 text-gray-600"
+        >
+          <XCircle className="w-4 h-4" />
+          Not Applicable
+        </Button>
+      </div>
+
+      {isRejectingCapture && (
+        <div className="mt-4 neomorph-inset p-4 rounded-lg">
+          <p className="text-sm font-medium mb-2">Why is third-party capture not applicable?</p>
+          <Textarea
+            value={rejectReason}
+            onChange={(e) => setRejectReason(e.target.value)}
+            placeholder="e.g. Third party details unavailable, Single vehicle accident, etc."
+            className="neomorph-inset mb-3"
+            rows={3}
+          />
+          <div className="flex gap-2">
+            <Button
+              onClick={handleRejectCapture}
+              className="neomorph-flat px-4 py-2 text-sm"
+            >
+              Confirm
+            </Button>
+            <Button
+              onClick={() => {
+                setIsRejectingCapture(false);
+                setRejectReason('');
+              }}
+              className="neomorph-flat px-4 py-2 text-sm text-gray-600"
+            >
+              Cancel
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
