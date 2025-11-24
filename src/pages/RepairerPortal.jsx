@@ -35,19 +35,19 @@ export default function RepairerPortal() {
 
   const { data: claims = [] } = useQuery({
     queryKey: ['repairerClaims', currentUser?.linked_bodyshop_id],
-    queryFn: () => base44.entities.Claim.filter({ bodyshop_id: currentUser.linked_bodyshop_id }, '-created_date'),
+    queryFn: () => base44.entities.Claim.list('-created_date', 5000),
     enabled: !!currentUser?.linked_bodyshop_id,
   });
 
   const { data: estimates = [] } = useQuery({
     queryKey: ['repairerEstimates', currentUser?.linked_bodyshop_id],
-    queryFn: () => base44.entities.Estimate.filter({ repairer_id: currentUser.linked_bodyshop_id }, '-created_date'),
+    queryFn: () => base44.entities.Estimate.list('-created_date', 5000),
     enabled: !!currentUser?.linked_bodyshop_id,
   });
 
   const { data: parts = [] } = useQuery({
     queryKey: ['repairerParts', currentUser?.linked_bodyshop_id],
-    queryFn: () => base44.entities.Part.filter({ bodyshop_company_id: currentUser.linked_bodyshop_id }, '-created_date'),
+    queryFn: () => base44.entities.Part.list('-created_date', 5000),
     enabled: !!currentUser?.linked_bodyshop_id,
   });
 
