@@ -68,21 +68,6 @@ export default function Layout({ children, currentPageName }) {
     queryFn: () => base44.auth.me(),
   });
 
-  // If user is a bodyshop/repairer and accessing the repairer portal, use the repairer layout
-  if (currentUser?.user_type === 'bodyshop' && currentPageName === 'RepairerPortal') {
-    return (
-      <RepairerLayout>
-        {children}
-      </RepairerLayout>
-    );
-  }
-
-  // If user is a bodyshop type, redirect them to RepairerPortal
-  if (currentUser?.user_type === 'bodyshop' && currentPageName !== 'RepairerPortal') {
-    window.location.href = createPageUrl('RepairerPortal');
-    return null;
-  }
-
   // Simplified messages query - only fetch when messenger is about to open
   // This prevents unnecessary WebSocket connections
   const { data: messages = [] } = useQuery({
@@ -147,6 +132,21 @@ export default function Layout({ children, currentPageName }) {
       }
     };
   }, [departments]);
+
+  // If user is a bodyshop/repairer and accessing the repairer portal, use the repairer layout
+  if (currentUser?.user_type === 'bodyshop' && currentPageName === 'RepairerPortal') {
+    return (
+      <RepairerLayout>
+        {children}
+      </RepairerLayout>
+    );
+  }
+
+  // If user is a bodyshop type, redirect them to RepairerPortal
+  if (currentUser?.user_type === 'bodyshop' && currentPageName !== 'RepairerPortal') {
+    window.location.href = createPageUrl('RepairerPortal');
+    return null;
+  }
 
   return (
     <StatusConfigProvider>
