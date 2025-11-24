@@ -33,21 +33,30 @@ export default function RepairerPortal() {
     enabled: !!currentUser?.linked_bodyshop_id,
   });
 
-  const { data: claims = [] } = useQuery({
+  const { data: claims = [], isLoading: claimsLoading } = useQuery({
     queryKey: ['repairerClaims', currentUser?.linked_bodyshop_id],
-    queryFn: () => base44.entities.Claim.list('-created_date', 5000),
+    queryFn: async () => {
+      const allClaims = await base44.entities.Claim.list('-created_date', 5000);
+      return allClaims.filter(c => c.bodyshop_id === currentUser.linked_bodyshop_id);
+    },
     enabled: !!currentUser?.linked_bodyshop_id,
   });
 
-  const { data: estimates = [] } = useQuery({
+  const { data: estimates = [], isLoading: estimatesLoading } = useQuery({
     queryKey: ['repairerEstimates', currentUser?.linked_bodyshop_id],
-    queryFn: () => base44.entities.Estimate.list('-created_date', 5000),
+    queryFn: async () => {
+      const allEstimates = await base44.entities.Estimate.list('-created_date', 5000);
+      return allEstimates.filter(e => e.repairer_id === currentUser.linked_bodyshop_id);
+    },
     enabled: !!currentUser?.linked_bodyshop_id,
   });
 
-  const { data: parts = [] } = useQuery({
+  const { data: parts = [], isLoading: partsLoading } = useQuery({
     queryKey: ['repairerParts', currentUser?.linked_bodyshop_id],
-    queryFn: () => base44.entities.Part.list('-created_date', 5000),
+    queryFn: async () => {
+      const allParts = await base44.entities.Part.list('-created_date', 5000);
+      return allParts.filter(p => p.bodyshop_company_id === currentUser.linked_bodyshop_id);
+    },
     enabled: !!currentUser?.linked_bodyshop_id,
   });
 
