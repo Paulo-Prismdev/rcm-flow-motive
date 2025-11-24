@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -67,6 +66,7 @@ export default function UserProfile() {
       tagged_in_notes: true,
       status_changes: true,
       new_assignments: true,
+      task_assignments: true,
       invoice_updates: true,
       estimate_requests: true,
       parts_updates: false,
@@ -91,6 +91,7 @@ export default function UserProfile() {
           tagged_in_notes: true,
           status_changes: true,
           new_assignments: true,
+          task_assignments: true,
           invoice_updates: true,
           estimate_requests: true,
           parts_updates: false,
@@ -680,6 +681,24 @@ export default function UserProfile() {
                 <span className="toggle-slider"></span>
                 <span className="toggle-label" style={{ color: formData.notification_preferences.new_assignments ? 'var(--accent)' : 'var(--foreground-muted)' }}>
                   {formData.notification_preferences.new_assignments ? 'On' : 'Off'}
+                </span>
+              </label>
+            </div>
+
+            <div className="flex items-center justify-between p-4 glass-inset rounded-lg">
+              <div className="flex-1">
+                <p className="font-medium">Task Assignments</p>
+                <p className="text-sm text-foreground-muted">When tasks are assigned to you</p>
+              </div>
+              <label className="toggle-switch">
+                <input
+                  type="checkbox"
+                  checked={formData.notification_preferences.task_assignments}
+                  onChange={() => handleNotificationToggle('task_assignments')}
+                />
+                <span className="toggle-slider"></span>
+                <span className="toggle-label" style={{ color: formData.notification_preferences.task_assignments ? 'var(--accent)' : 'var(--foreground-muted)' }}>
+                  {formData.notification_preferences.task_assignments ? 'On' : 'Off'}
                 </span>
               </label>
             </div>
