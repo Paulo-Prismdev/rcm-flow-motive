@@ -16,6 +16,8 @@ import {
 import { format } from 'date-fns';
 import StatusBadge from '../components/shared/StatusBadge';
 import { formatUKRegistration } from '../components/shared/formatRegistration';
+import RepairerEstimateForm from '../components/repairer/RepairerEstimateForm';
+import RepairerPartsForm from '../components/repairer/RepairerPartsForm';
 
 export default function RepairerPortal() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -529,25 +531,6 @@ function RepairerProductsTab() {
           Contact Us
         </button>
       </div>
-    </div>
-  );
-}
-
-// Placeholder forms - will be implemented in separate components
-function RepairerEstimateForm({ bodyshopId, bodyshopName, onClose }) {
-  return (
-    <div className="neomorph-inset p-4">
-      <p className="text-center text-foreground-muted">Estimate request form coming soon...</p>
-      <button onClick={onClose} className="mt-4 neomorph-flat px-4 py-2 w-full">Cancel</button>
-    </div>
-  );
-}
-
-function RepairerPartsForm({ bodyshopId, bodyshopName, onClose }) {
-  return (
-    <div className="neomorph-inset p-4">
-      <p className="text-center text-foreground-muted">Parts request form coming soon...</p>
-      <button onClick={onClose} className="mt-4 neomorph-flat px-4 py-2 w-full">Cancel</button>
     </div>
   );
 }
