@@ -22,6 +22,7 @@ import {
   Sun,
   Moon,
   BarChart3,
+  CheckSquare,
 } from "lucide-react";
 import GlobalSearch from "./components/layout/GlobalSearch";
 import Notifications from "./components/layout/Notifications";
@@ -44,6 +45,7 @@ import UserTypeFixer from './components/shared/UserTypeFixer';
 const allDepartments = [
   { name: "Dashboard", url: createPageUrl("Dashboard"), icon: LayoutDashboard, permission: "Dashboard" },
   { name: "Claims", url: createPageUrl("Claims"), icon: FileText, permission: "Claims" },
+  { name: "My Tasks", url: createPageUrl("Tasks"), icon: CheckSquare, permission: "Claims" },
   { name: "Estimating", url: createPageUrl("Estimating"), icon: Calculator, permission: "Estimating" },
   { name: "Engineering", url: createPageUrl("Engineering"), icon: Wrench, permission: "Engineering" },
   { name: "Parts", url: createPageUrl("Parts"), icon: Package, permission: "Parts" },
