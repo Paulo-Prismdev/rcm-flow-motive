@@ -10,6 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { StatusConfigProvider } from '../shared/StatusConfigContext';
 
 export default function RepairerLayout({ children }) {
   const { data: currentUser } = useQuery({
@@ -24,6 +25,7 @@ export default function RepairerLayout({ children }) {
   });
 
   return (
+    <StatusConfigProvider>
     <div className="h-screen flex flex-col bg-background text-foreground overflow-hidden">
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
@@ -167,5 +169,6 @@ export default function RepairerLayout({ children }) {
         </div>
       </main>
     </div>
+    </StatusConfigProvider>
   );
 }
