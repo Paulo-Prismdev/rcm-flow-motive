@@ -2,10 +2,13 @@ import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { AlertTriangle, UserPlus, ExternalLink, Check, X, Search, Loader, XCircle } from "lucide-react";
+import { AlertTriangle, UserPlus, ExternalLink, Check, X, Search, Loader, XCircle, AlertCircle } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { formatUKRegistration } from '../shared/formatRegistration';
+import ClientCombobox from '../shared/ClientCombobox';
+import InsurerCombobox from '../shared/InsurerCombobox';
+import AddressLookupInput from '../shared/AddressLookupInput';
 
 export default function ThirdPartyPursuitSection({ claim, onUpdate }) {
   const [isCreatingClaim, setIsCreatingClaim] = useState(false);
@@ -19,12 +22,17 @@ export default function ThirdPartyPursuitSection({ claim, onUpdate }) {
     tp_email: claim.tp_email || '',
     tp_reg: claim.tp_reg || '',
     tp_make_model: claim.tp_make_model || '',
+    tp_vehicle_colour: claim.tp_vehicle_colour || '',
+    tp_vehicle_year: claim.tp_vehicle_year || '',
     tp_insurer: claim.tp_insurer || '',
     tp_policy_number: claim.tp_policy_number || '',
     tp_address_line_1: claim.tp_address_line_1 || '',
+    tp_address_line_2: claim.tp_address_line_2 || '',
     tp_town: claim.tp_town || '',
+    tp_county: claim.tp_county || '',
     tp_postcode: claim.tp_postcode || '',
     tp_vehicle_damage: claim.tp_vehicle_damage || '',
+    tp_vehicle_location: claim.tp_vehicle_location || '',
   });
   
   const queryClient = useQueryClient();
@@ -50,6 +58,8 @@ export default function ThirdPartyPursuitSection({ claim, onUpdate }) {
         setTpFormData(prev => ({
           ...prev,
           tp_make_model: result.make_model || '',
+          tp_vehicle_colour: result.colour || '',
+          tp_vehicle_year: result.year_of_manufacture || '',
         }));
         setVehicleLookupError(null);
       } else {
@@ -80,6 +90,29 @@ export default function ThirdPartyPursuitSection({ claim, onUpdate }) {
     setRejectReason('');
   };
 
+  // Handle client selection from combobox
+  const handleClientSelect = (client) => {
+    setTpFormData(prev => ({
+      ...prev,
+      tp_name: client.name || '',
+      tp_phone: client.phone || '',
+      tp_email: client.email || '',
+      tp_address_line_1: client.address_line_1 || '',
+      tp_address_line_2: client.address_line_2 || '',
+      tp_town: client.town || '',
+      tp_county: client.county || '',
+      tp_postcode: client.postcode || '',
+    }));
+  };
+
+  // Handle vehicle location change
+  const handleVehicleLocationChange = (addressData) => {
+    setTpFormData(prev => ({
+      ...prev,
+      tp_vehicle_location: addressData.display_name || addressData.address || '',
+    }));
+  };
+
   // Check if third party details are sufficient
   const hasTPDetails = claim.tp_name && (claim.tp_phone || claim.tp_email);
 
@@ -103,21 +136,40 @@ export default function ThirdPartyPursuitSection({ claim, onUpdate }) {
 
   const createTPClaimMutation = useMutation({
     mutationFn: async (tpData) => {
-      // Create the new third-party claim
+      // Generate job number for the new claim
+      let jobNumber = '';
+      try {
+        const response = await base44.functions.invoke('generateJobNumber', {
+          entityType: 'Claim'
+        });
+        if (response.data.success) {
+          jobNumber = response.data.job_number;
+        }
+      } catch (error) {
+        console.error('Failed to generate job number:', error);
+      }
+
+      // Create the new third-party claim with full mapping
       const newClaim = await base44.entities.Claim.create({
+        job_number: jobNumber,
         claim_type: 'Third Party',
         linked_original_claim_id: claim.id,
-        // Third party becomes the client
+        // Third party becomes the client - full address mapping
         client_name: tpData.tp_name,
         client_phone: tpData.tp_phone,
         client_email: tpData.tp_email,
         client_address_line_1: tpData.tp_address_line_1,
+        client_address_line_2: tpData.tp_address_line_2,
         client_town: tpData.tp_town,
+        client_county: tpData.tp_county,
         client_postcode: tpData.tp_postcode,
-        // Their vehicle details
+        // Their vehicle details - full mapping
         reg: tpData.tp_reg,
         make_model: tpData.tp_make_model,
+        vehicle_colour: tpData.tp_vehicle_colour,
+        vehicle_year_of_manufacture: tpData.tp_vehicle_year ? parseInt(tpData.tp_vehicle_year) : null,
         vehicle_damage: tpData.tp_vehicle_damage,
+        vehicle_location: tpData.tp_vehicle_location,
         // Insurance
         insurer: tpData.tp_insurer,
         policy_number: tpData.tp_policy_number,
@@ -133,13 +185,26 @@ export default function ThirdPartyPursuitSection({ claim, onUpdate }) {
       return newClaim;
     },
     onSuccess: (newClaim) => {
-      // Update original claim with link and status
+      // Update original claim with link and status, mapping all TP fields
       onUpdate({
         ...claim,
         linked_third_party_claim_id: newClaim.id,
         third_party_pursuit_status: 'Claim Created',
-        // Also save the TP details to original claim
-        ...tpFormData,
+        // Save all TP details to original claim
+        tp_name: tpFormData.tp_name,
+        tp_phone: tpFormData.tp_phone,
+        tp_email: tpFormData.tp_email,
+        tp_reg: tpFormData.tp_reg,
+        tp_make_model: tpFormData.tp_make_model,
+        tp_insurer: tpFormData.tp_insurer,
+        tp_policy_number: tpFormData.tp_policy_number,
+        tp_address_line_1: tpFormData.tp_address_line_1,
+        tp_address_line_2: tpFormData.tp_address_line_2,
+        tp_town: tpFormData.tp_town,
+        tp_county: tpFormData.tp_county,
+        tp_postcode: tpFormData.tp_postcode,
+        tp_vehicle_damage: tpFormData.tp_vehicle_damage,
+        tp_vehicle_location: tpFormData.tp_vehicle_location,
       });
       queryClient.invalidateQueries({ queryKey: ['claims'] });
       setIsCreatingClaim(false);
@@ -150,7 +215,20 @@ export default function ThirdPartyPursuitSection({ claim, onUpdate }) {
     mutationFn: async () => {
       return onUpdate({
         ...claim,
-        ...tpFormData,
+        tp_name: tpFormData.tp_name,
+        tp_phone: tpFormData.tp_phone,
+        tp_email: tpFormData.tp_email,
+        tp_reg: tpFormData.tp_reg,
+        tp_make_model: tpFormData.tp_make_model,
+        tp_insurer: tpFormData.tp_insurer,
+        tp_policy_number: tpFormData.tp_policy_number,
+        tp_address_line_1: tpFormData.tp_address_line_1,
+        tp_address_line_2: tpFormData.tp_address_line_2,
+        tp_town: tpFormData.tp_town,
+        tp_county: tpFormData.tp_county,
+        tp_postcode: tpFormData.tp_postcode,
+        tp_vehicle_damage: tpFormData.tp_vehicle_damage,
+        tp_vehicle_location: tpFormData.tp_vehicle_location,
         third_party_pursuit_status: 'Details Obtained',
       });
     },
@@ -247,99 +325,52 @@ export default function ThirdPartyPursuitSection({ claim, onUpdate }) {
           Enter the third-party's details. Once saved, you can create a separate claim to manage their repairs.
         </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          <div>
-            <label className="text-xs font-semibold text-foreground-muted mb-1 block">Name *</label>
-            <Input
+        {/* Third Party Client Details */}
+        <div className="neomorph-inset p-4 mb-4">
+          <h4 className="font-semibold text-sm mb-3">Third Party Details</h4>
+          
+          <div className="mb-3">
+            <label className="text-xs font-semibold text-foreground-muted mb-1 block">Search Existing Client</label>
+            <ClientCombobox
               value={tpFormData.tp_name}
-              onChange={(e) => handleInputChange('tp_name', e.target.value)}
-              placeholder="Third party name"
-              className="neomorph-inset"
+              onChange={handleClientSelect}
             />
+            <p className="text-xs text-foreground-muted mt-1">Select existing or enter details below</p>
           </div>
-          <div>
-            <label className="text-xs font-semibold text-foreground-muted mb-1 block">Phone</label>
-            <Input
-              value={tpFormData.tp_phone}
-              onChange={(e) => handleInputChange('tp_phone', e.target.value)}
-              placeholder="Phone number"
-              className="neomorph-inset"
-            />
-          </div>
-          <div>
-            <label className="text-xs font-semibold text-foreground-muted mb-1 block">Email</label>
-            <Input
-              value={tpFormData.tp_email}
-              onChange={(e) => handleInputChange('tp_email', e.target.value)}
-              placeholder="Email address"
-              className="neomorph-inset"
-            />
-          </div>
-          <div className="md:col-span-2">
-            <label className="text-xs font-semibold text-foreground-muted mb-1 block">Vehicle Registration</label>
-            <div className="flex gap-2">
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs font-semibold text-foreground-muted mb-1 block">Name *</label>
               <Input
-                value={tpFormData.tp_reg}
-                onChange={(e) => {
-                  handleInputChange('tp_reg', e.target.value.toUpperCase());
-                  setVehicleLookupError(null);
-                }}
-                placeholder="e.g. AB12 CDE"
-                className="neomorph-inset flex-1"
+                value={tpFormData.tp_name}
+                onChange={(e) => handleInputChange('tp_name', e.target.value)}
+                placeholder="Third party name"
+                className="neomorph-inset"
               />
-              <Button
-                type="button"
-                onClick={handleVehicleLookup}
-                disabled={isLookingUpVehicle || !tpFormData.tp_reg || tpFormData.tp_reg.length < 3}
-                className="neomorph-flat px-4 py-2"
-                title="Lookup vehicle details from DVLA"
-              >
-                {isLookingUpVehicle ? (
-                  <Loader className="w-4 h-4 animate-spin" />
-                ) : (
-                  <>
-                    <Search className="w-4 h-4 mr-2" />
-                    Lookup
-                  </>
-                )}
-              </Button>
             </div>
-            {vehicleLookupError && (
-              <p className="text-xs text-orange-600 mt-1">{vehicleLookupError}</p>
-            )}
-            {tpFormData.tp_make_model && !vehicleLookupError && (
-              <p className="text-xs text-green-600 mt-1">✓ {tpFormData.tp_make_model}</p>
-            )}
+            <div>
+              <label className="text-xs font-semibold text-foreground-muted mb-1 block">Phone</label>
+              <Input
+                value={tpFormData.tp_phone}
+                onChange={(e) => handleInputChange('tp_phone', e.target.value)}
+                placeholder="Phone number"
+                className="neomorph-inset"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-foreground-muted mb-1 block">Email</label>
+              <Input
+                type="email"
+                value={tpFormData.tp_email}
+                onChange={(e) => handleInputChange('tp_email', e.target.value)}
+                placeholder="Email address"
+                className="neomorph-inset"
+              />
+            </div>
           </div>
-          <div>
-            <label className="text-xs font-semibold text-foreground-muted mb-1 block">Vehicle Make/Model</label>
-            <Input
-              value={tpFormData.tp_make_model}
-              onChange={(e) => handleInputChange('tp_make_model', e.target.value)}
-              placeholder="e.g. Ford Focus"
-              className="neomorph-inset"
-            />
-          </div>
-          <div>
-            <label className="text-xs font-semibold text-foreground-muted mb-1 block">Their Insurer</label>
-            <Input
-              value={tpFormData.tp_insurer}
-              onChange={(e) => handleInputChange('tp_insurer', e.target.value)}
-              placeholder="Insurance company"
-              className="neomorph-inset"
-            />
-          </div>
-          <div>
-            <label className="text-xs font-semibold text-foreground-muted mb-1 block">Their Policy Number</label>
-            <Input
-              value={tpFormData.tp_policy_number}
-              onChange={(e) => handleInputChange('tp_policy_number', e.target.value)}
-              placeholder="Policy number"
-              className="neomorph-inset"
-            />
-          </div>
-          <div>
-            <label className="text-xs font-semibold text-foreground-muted mb-1 block">Address</label>
+
+          <div className="mt-3">
+            <label className="text-xs font-semibold text-foreground-muted mb-1 block">Address Line 1</label>
             <Input
               value={tpFormData.tp_address_line_1}
               onChange={(e) => handleInputChange('tp_address_line_1', e.target.value)}
@@ -347,35 +378,157 @@ export default function ThirdPartyPursuitSection({ claim, onUpdate }) {
               className="neomorph-inset"
             />
           </div>
-          <div>
-            <label className="text-xs font-semibold text-foreground-muted mb-1 block">Town/City</label>
+          <div className="mt-3">
+            <label className="text-xs font-semibold text-foreground-muted mb-1 block">Address Line 2</label>
             <Input
-              value={tpFormData.tp_town}
-              onChange={(e) => handleInputChange('tp_town', e.target.value)}
-              placeholder="Town or city"
+              value={tpFormData.tp_address_line_2}
+              onChange={(e) => handleInputChange('tp_address_line_2', e.target.value)}
+              placeholder="Optional"
               className="neomorph-inset"
             />
           </div>
-          <div>
-            <label className="text-xs font-semibold text-foreground-muted mb-1 block">Postcode</label>
-            <Input
-              value={tpFormData.tp_postcode}
-              onChange={(e) => handleInputChange('tp_postcode', e.target.value.toUpperCase())}
-              placeholder="Postcode"
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-3">
+            <div>
+              <label className="text-xs font-semibold text-foreground-muted mb-1 block">Town/City</label>
+              <Input
+                value={tpFormData.tp_town}
+                onChange={(e) => handleInputChange('tp_town', e.target.value)}
+                placeholder="Town or city"
+                className="neomorph-inset"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-foreground-muted mb-1 block">County</label>
+              <Input
+                value={tpFormData.tp_county}
+                onChange={(e) => handleInputChange('tp_county', e.target.value)}
+                placeholder="County"
+                className="neomorph-inset"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-foreground-muted mb-1 block">Postcode</label>
+              <Input
+                value={tpFormData.tp_postcode}
+                onChange={(e) => handleInputChange('tp_postcode', e.target.value.toUpperCase())}
+                placeholder="Postcode"
+                className="neomorph-inset"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Third Party Vehicle Details */}
+        <div className="neomorph-inset p-4 mb-4">
+          <h4 className="font-semibold text-sm mb-3">Third Party Vehicle</h4>
+          
+          <div className="mb-3">
+            <label className="text-xs font-semibold text-foreground-muted mb-1 block">Vehicle Registration</label>
+            <div className="flex flex-col gap-2">
+              <div className="flex gap-2">
+                <Input
+                  value={tpFormData.tp_reg}
+                  onChange={(e) => {
+                    handleInputChange('tp_reg', e.target.value.toUpperCase());
+                    setVehicleLookupError(null);
+                  }}
+                  placeholder="e.g. AB12 CDE"
+                  className="neomorph-inset flex-1 text-lg"
+                />
+                <Button
+                  type="button"
+                  onClick={handleVehicleLookup}
+                  disabled={isLookingUpVehicle || !tpFormData.tp_reg || tpFormData.tp_reg.length < 3}
+                  className="neomorph-flat px-4 py-3 whitespace-nowrap"
+                  title="Lookup vehicle details from DVLA"
+                >
+                  {isLookingUpVehicle ? (
+                    <>
+                      <Loader className="w-4 h-4 animate-spin mr-2" />
+                      <span className="hidden sm:inline">Looking up...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Search className="w-4 h-4 sm:mr-2" />
+                      <span className="hidden sm:inline">Lookup</span>
+                    </>
+                  )}
+                </Button>
+              </div>
+              {vehicleLookupError && (
+                <div className="flex items-start gap-2 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                  <AlertCircle className="w-4 h-4 text-orange-600 flex-shrink-0 mt-0.5" />
+                  <p className="text-xs text-orange-800 whitespace-pre-line">{vehicleLookupError}</p>
+                </div>
+              )}
+              {tpFormData.tp_make_model && !vehicleLookupError && (
+                <div className="flex items-start gap-2 p-3 bg-green-50 border border-green-200 rounded-lg">
+                  <p className="text-sm text-green-700">
+                    ✓ <span className="font-bold">Vehicle found:</span>
+                    <br />
+                    <span className="font-bold text-base">{tpFormData.tp_make_model}</span>
+                    {tpFormData.tp_vehicle_colour && <span className="font-normal"> • {tpFormData.tp_vehicle_colour}</span>}
+                    {tpFormData.tp_vehicle_year && <span className="font-normal"> • {tpFormData.tp_vehicle_year}</span>}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs font-semibold text-foreground-muted mb-1 block">Make/Model</label>
+              <Input
+                value={tpFormData.tp_make_model}
+                onChange={(e) => handleInputChange('tp_make_model', e.target.value)}
+                placeholder="e.g. Ford Focus"
+                className="neomorph-inset"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-foreground-muted mb-1 block">Vehicle Location</label>
+              <AddressLookupInput
+                value={tpFormData.tp_vehicle_location}
+                onChange={handleVehicleLocationChange}
+                placeholder="Where is the vehicle now?"
+                className="neomorph-inset"
+              />
+            </div>
+          </div>
+
+          <div className="mt-3">
+            <label className="text-xs font-semibold text-foreground-muted mb-1 block">Vehicle Damage</label>
+            <Textarea
+              value={tpFormData.tp_vehicle_damage}
+              onChange={(e) => handleInputChange('tp_vehicle_damage', e.target.value)}
+              placeholder="Describe the damage to the third party's vehicle"
               className="neomorph-inset"
+              rows={3}
             />
           </div>
         </div>
 
-        <div className="mb-4">
-          <label className="text-xs font-semibold text-foreground-muted mb-1 block">Their Vehicle Damage</label>
-          <Textarea
-            value={tpFormData.tp_vehicle_damage}
-            onChange={(e) => handleInputChange('tp_vehicle_damage', e.target.value)}
-            placeholder="Describe the damage to the third party's vehicle"
-            className="neomorph-inset"
-            rows={3}
-          />
+        {/* Third Party Insurance */}
+        <div className="neomorph-inset p-4 mb-4">
+          <h4 className="font-semibold text-sm mb-3">Third Party Insurance</h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs font-semibold text-foreground-muted mb-1 block">Their Insurer</label>
+              <InsurerCombobox
+                value={tpFormData.tp_insurer}
+                onChange={(value) => handleInputChange('tp_insurer', value)}
+              />
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-foreground-muted mb-1 block">Their Policy Number</label>
+              <Input
+                value={tpFormData.tp_policy_number}
+                onChange={(e) => handleInputChange('tp_policy_number', e.target.value)}
+                placeholder="Policy number"
+                className="neomorph-inset"
+              />
+            </div>
+          </div>
         </div>
 
         <div className="flex gap-3 flex-wrap">
