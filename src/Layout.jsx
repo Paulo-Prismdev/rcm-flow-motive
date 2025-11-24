@@ -631,8 +631,8 @@ export default function Layout({ children, currentPageName }) {
                 <div className="app-title">
                   <span className="app-title-artura">
                     <span className="gold-letter">A</span>
-                    <span className="black-letter">RTUR</span>
-                    <span className="gold-letter">A</span>
+                    <span className="black-letter">RTEC</span>
+                    <span className="gold-letter">H</span>
                   </span>
                   <span className="app-title-one">One</span>
                 </div>
