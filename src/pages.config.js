@@ -17,6 +17,7 @@ import PdfTemplateManager from './pages/PdfTemplateManager';
 import ChaserEmailSettings from './pages/ChaserEmailSettings';
 import Reports from './pages/Reports';
 import Tasks from './pages/Tasks';
+import RepairerPortal from './pages/RepairerPortal';
 import __Layout from './Layout.jsx';
 
 
@@ -40,6 +41,7 @@ export const PAGES = {
     "ChaserEmailSettings": ChaserEmailSettings,
     "Reports": Reports,
     "Tasks": Tasks,
+    "RepairerPortal": RepairerPortal,
 }
 
 export const pagesConfig = {
