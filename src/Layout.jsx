@@ -353,33 +353,33 @@ export default function Layout({ children }) {
           box-shadow: var(--shadow-lg);
         }
 
-        .app-title-arttec {
-          font-family: 'Palatino Linotype', 'Palatino', 'Book Antiqua', serif;
-          font-weight: 400;
-          font-size: 1.75rem;
-          letter-spacing: 0.02em;
-        }
+        .app-title-artech {
+                        font-family: 'Palatino Linotype', 'Palatino', 'Book Antiqua', serif;
+                        font-weight: 400;
+                        font-size: 1.75rem;
+                        letter-spacing: 0.02em;
+                      }
 
-        .app-title-arttec .gold-letter {
-          color: var(--accent);
-        }
+                      .app-title-artech .gold-letter {
+                        color: var(--accent);
+                      }
 
-        .app-title-arttec .black-letter {
-          color: var(--foreground);
-        }
+                      .app-title-artech .black-letter {
+                        color: var(--foreground);
+                      }
 
-        .app-title-one {
-          font-family: 'Gill Sans MT', 'Gill Sans', 'Lato', sans-serif;
-          font-weight: 400;
-          font-size: 1.75rem;
-          color: var(--foreground);
-        }
+                      .app-title-one {
+                        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+                        font-weight: 300;
+                        font-size: 1.75rem;
+                        color: var(--foreground);
+                      }
 
-        .app-title {
-          display: flex;
-          align-items: baseline;
-          gap: 0.5rem;
-        }
+                      .app-title {
+                        display: flex;
+                        align-items: baseline;
+                        gap: 0.5rem;
+                      }
 
         /* ============================================
            NAVIGATION STYLES
@@ -543,7 +543,7 @@ export default function Layout({ children }) {
         }
 
         @media (max-width: 640px) {
-          .app-title-arttec {
+          .app-title-artech {
             font-size: 1.15rem;
           }
 
@@ -561,7 +561,7 @@ export default function Layout({ children }) {
         }
 
         @media (max-width: 400px) {
-          .app-title-arttec {
+          .app-title-artech {
             font-size: 1rem;
           }
 
@@ -594,7 +594,7 @@ export default function Layout({ children }) {
       `}</style>
 
         {/* NEW HEADER - COMPLETELY REWRITTEN */}
-        <header className="header-glass mb-3 mx-2 md:mx-3 mt-2 md:mt-3 p-3 md:p-5 flex-shrink-0">
+        <header className="header-glass mb-2 mx-2 md:mx-3 mt-2 md:mt-3 p-3 md:p-4 flex-shrink-0">
           <div className="max-w-full mx-auto">
             {/* Top Row - Logo and Actions */}
             <div className="flex items-center justify-between gap-2">
@@ -611,11 +611,12 @@ export default function Layout({ children }) {
 
                 {/* Logo - Always Visible */}
                 <div className="app-title">
-                  <span className="app-title-arttec">
+                  <span className="app-title-artech">
                     <span className="gold-letter">A</span>
                     <span className="black-letter">RTEC</span>
                     <span className="gold-letter">H</span>
                   </span>
+                  <span className="app-title-one">One</span>
                 </div>
               </div>
 
