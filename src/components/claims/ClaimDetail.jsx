@@ -39,6 +39,7 @@ import ClaimStatusForm from './ClaimStatusForm';
 import ClaimVehicleDamageForm from './ClaimVehicleDamageForm';
 import ClaimIndemnityForm from './ClaimIndemnityForm';
 import ClaimExcessContributionForm from './ClaimExcessContributionForm';
+import ThirdPartyPursuitSection from './ThirdPartyPursuitSection';
 import NotesSection from '../shared/NotesSection';
 import PartsRequestModal from './PartsRequestModal';
 import EstimateRequestModal from './EstimateRequestModal';
@@ -125,6 +126,7 @@ function DetailRow({ label, value, isCurrency = false, isDate = false, isStatus 
 
 const DETAIL_SECTIONS = [
   { id: 'status', label: 'Status & Overview', icon: Clock },
+  { id: 'thirdpartyPursuit', label: 'Third Party Pursuit', icon: Users },
   { id: 'client', label: 'Client Details', icon: User },
   { id: 'vehicle', label: 'Vehicle Details', icon: Car },
   { id: 'vehicleDamage', label: 'Vehicle Damage', icon: AlertTriangle },

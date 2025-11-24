@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -283,6 +282,11 @@ export default function ClaimForm({ claim, onSubmit, onCancel }) {
         console.error('Failed to generate job number:', error);
         alert('Failed to generate job number. Please try again.');
         return;
+      }
+      
+      // Set third_party_pursuit_status for fault claims
+      if (formData.claim_type === 'Fault Claim') {
+        formData.third_party_pursuit_status = 'Awaiting Details';
       }
     }
     
