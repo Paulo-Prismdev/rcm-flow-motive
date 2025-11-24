@@ -371,18 +371,18 @@ export default function Layout({ children, currentPageName }) {
           box-shadow: var(--shadow-lg);
         }
 
-        .app-title-artech {
+        .app-title-artura {
                         font-family: 'Palatino Linotype', 'Palatino', 'Book Antiqua', serif;
                         font-weight: 400;
                         font-size: 1.75rem;
                         letter-spacing: 0.02em;
                       }
 
-                      .app-title-artech .gold-letter {
+                      .app-title-artura .gold-letter {
                         color: var(--accent);
                       }
 
-                      .app-title-artech .black-letter {
+                      .app-title-artura .black-letter {
                         color: var(--foreground);
                       }
 
@@ -561,7 +561,7 @@ export default function Layout({ children, currentPageName }) {
         }
 
         @media (max-width: 640px) {
-          .app-title-artech {
+          .app-title-artura {
             font-size: 1.15rem;
           }
 
@@ -579,7 +579,7 @@ export default function Layout({ children, currentPageName }) {
         }
 
         @media (max-width: 400px) {
-          .app-title-artech {
+          .app-title-artura {
             font-size: 1rem;
           }
 
@@ -629,10 +629,10 @@ export default function Layout({ children, currentPageName }) {
 
                 {/* Logo - Always Visible */}
                 <div className="app-title">
-                  <span className="app-title-artech">
+                  <span className="app-title-artura">
                     <span className="gold-letter">A</span>
-                    <span className="black-letter">RTEC</span>
-                    <span className="gold-letter">H</span>
+                    <span className="black-letter">RTUR</span>
+                    <span className="gold-letter">A</span>
                   </span>
                   <span className="app-title-one">One</span>
                 </div>
