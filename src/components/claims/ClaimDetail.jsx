@@ -52,8 +52,10 @@ import UpdateTrackingModal from './UpdateTrackingModal';
 import UpdateOverrideModal from './UpdateOverrideModal';
 import ClaimUpdatesModal from '../shared/ClaimUpdatesModal';
 import InstructionTemplateModal from './InstructionTemplateModal';
+import ClaimTasksSection from '../tasks/ClaimTasksSection';
 import { Textarea } from "@/components/ui/textarea";
 import { formatUKRegistration } from '../shared/formatRegistration';
+import { ListTodo } from "lucide-react";
 
 import {
   DropdownMenu,
@@ -126,12 +128,13 @@ function DetailRow({ label, value, isCurrency = false, isDate = false, isStatus 
 
 const DETAIL_SECTIONS = [
   { id: 'status', label: 'Status & Overview', icon: Clock },
+  { id: 'tasks', label: 'Tasks', icon: ListTodo },
   { id: 'thirdpartyPursuit', label: 'Third Party Pursuit', icon: Users },
   { id: 'client', label: 'Client Details', icon: User },
   { id: 'vehicle', label: 'Vehicle Details', icon: Car },
   { id: 'vehicleDamage', label: 'Vehicle Damage', icon: AlertTriangle },
   { id: 'insurance', label: 'Insurance Details', icon: Shield },
-  { id: 'excessContribution', label: 'Excess Contribution', icon: BadgePercent }, // Changed from Percent to BadgePercent
+  { id: 'excessContribution', label: 'Excess Contribution', icon: BadgePercent },
   { id: 'referrer', label: 'Referrer Details', icon: Briefcase },
   { id: 'indemnity', label: 'Indemnity Details', icon: Shield },
   { id: 'thirdparty', label: 'Third Party Details', icon: Users },
@@ -370,6 +373,15 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
 
   const renderSelectedSection = () => {
     switch (selectedSection) {
+      case 'tasks':
+        return (
+          <ClaimTasksSection 
+            claimId={claim.id} 
+            claimJobNumber={claim.job_number} 
+            claimReg={claim.reg} 
+          />
+        );
+
       case 'thirdpartyPursuit':
         // Only show for fault claims
         if (claim.claim_type !== 'Fault Claim') {
