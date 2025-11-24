@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -614,10 +613,9 @@ export default function Layout({ children }) {
                 <div className="app-title">
                   <span className="app-title-arttec">
                     <span className="gold-letter">A</span>
-                    <span className="black-letter">RT-TE</span>
-                    <span className="gold-letter">C</span>
+                    <span className="black-letter">RTEC</span>
+                    <span className="gold-letter">H</span>
                   </span>
-                  <span className="app-title-one">One</span>
                 </div>
               </div>
 
