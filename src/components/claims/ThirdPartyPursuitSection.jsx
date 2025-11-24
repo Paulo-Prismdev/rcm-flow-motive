@@ -22,8 +22,12 @@ export default function ThirdPartyPursuitSection({ claim, onUpdate }) {
     tp_email: claim.tp_email || '',
     tp_reg: claim.tp_reg || '',
     tp_make_model: claim.tp_make_model || '',
+    tp_vehicle_make: claim.tp_vehicle_make || '',
+    tp_vehicle_model: claim.tp_vehicle_model || '',
     tp_vehicle_colour: claim.tp_vehicle_colour || '',
     tp_vehicle_year: claim.tp_vehicle_year || '',
+    tp_vehicle_fuel_type: claim.tp_vehicle_fuel_type || '',
+    tp_vehicle_engine_capacity: claim.tp_vehicle_engine_capacity || '',
     tp_insurer: claim.tp_insurer || '',
     tp_policy_number: claim.tp_policy_number || '',
     tp_address_line_1: claim.tp_address_line_1 || '',
@@ -58,8 +62,12 @@ export default function ThirdPartyPursuitSection({ claim, onUpdate }) {
         setTpFormData(prev => ({
           ...prev,
           tp_make_model: result.make_model || '',
+          tp_vehicle_make: result.make || '',
+          tp_vehicle_model: result.model || '',
           tp_vehicle_colour: result.colour || '',
           tp_vehicle_year: result.year_of_manufacture || '',
+          tp_vehicle_fuel_type: result.fuel_type || '',
+          tp_vehicle_engine_capacity: result.engine_capacity || '',
         }));
         setVehicleLookupError(null);
       } else {
@@ -149,7 +157,7 @@ export default function ThirdPartyPursuitSection({ claim, onUpdate }) {
         console.error('Failed to generate job number:', error);
       }
 
-      // Create the new third-party claim with full mapping
+      // Create the new third-party claim with full mapping matching Claim entity fields
       const newClaim = await base44.entities.Claim.create({
         job_number: jobNumber,
         claim_type: 'Third Party',
@@ -163,11 +171,15 @@ export default function ThirdPartyPursuitSection({ claim, onUpdate }) {
         client_town: tpData.tp_town,
         client_county: tpData.tp_county,
         client_postcode: tpData.tp_postcode,
-        // Their vehicle details - full mapping
+        // Their vehicle details - full mapping to Claim vehicle fields
         reg: tpData.tp_reg,
         make_model: tpData.tp_make_model,
+        vehicle_make: tpData.tp_vehicle_make,
+        vehicle_model: tpData.tp_vehicle_model,
         vehicle_colour: tpData.tp_vehicle_colour,
+        vehicle_fuel_type: tpData.tp_vehicle_fuel_type,
         vehicle_year_of_manufacture: tpData.tp_vehicle_year ? parseInt(tpData.tp_vehicle_year) : null,
+        vehicle_engine_capacity: tpData.tp_vehicle_engine_capacity ? parseInt(tpData.tp_vehicle_engine_capacity) : null,
         vehicle_damage: tpData.tp_vehicle_damage,
         vehicle_location: tpData.tp_vehicle_location,
         // Insurance
@@ -463,13 +475,24 @@ export default function ThirdPartyPursuitSection({ claim, onUpdate }) {
               )}
               {tpFormData.tp_make_model && !vehicleLookupError && (
                 <div className="flex items-start gap-2 p-3 bg-green-50 border border-green-200 rounded-lg">
-                  <p className="text-sm text-green-700">
-                    ✓ <span className="font-bold">Vehicle found:</span>
-                    <br />
-                    <span className="font-bold text-base">{tpFormData.tp_make_model}</span>
-                    {tpFormData.tp_vehicle_colour && <span className="font-normal"> • {tpFormData.tp_vehicle_colour}</span>}
-                    {tpFormData.tp_vehicle_year && <span className="font-normal"> • {tpFormData.tp_vehicle_year}</span>}
-                  </p>
+                  <div className="text-sm text-green-700">
+                    <p className="font-bold mb-1">✓ Vehicle found:</p>
+                    <p className="font-bold text-base">{tpFormData.tp_make_model}</p>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-2 text-xs">
+                      {tpFormData.tp_vehicle_colour && (
+                        <div><span className="text-green-600">Colour:</span> {tpFormData.tp_vehicle_colour}</div>
+                      )}
+                      {tpFormData.tp_vehicle_year && (
+                        <div><span className="text-green-600">Year:</span> {tpFormData.tp_vehicle_year}</div>
+                      )}
+                      {tpFormData.tp_vehicle_fuel_type && (
+                        <div><span className="text-green-600">Fuel:</span> {tpFormData.tp_vehicle_fuel_type}</div>
+                      )}
+                      {tpFormData.tp_vehicle_engine_capacity && (
+                        <div><span className="text-green-600">Engine:</span> {tpFormData.tp_vehicle_engine_capacity}cc</div>
+                      )}
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
