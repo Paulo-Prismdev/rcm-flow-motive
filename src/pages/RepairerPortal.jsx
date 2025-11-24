@@ -355,7 +355,8 @@ function RepairerEstimatesTab({ estimates, bodyshopId, bodyshopName }) {
           <RepairerEstimateForm 
             bodyshopId={bodyshopId} 
             bodyshopName={bodyshopName}
-            onClose={() => setShowForm(false)} 
+            onClose={() => setShowForm(false)}
+            onSuccess={() => setShowForm(false)}
           />
         ) : (
           <div className="space-y-3">
@@ -408,7 +409,8 @@ function RepairerPartsTab({ parts, bodyshopId, bodyshopName }) {
           <RepairerPartsForm 
             bodyshopId={bodyshopId} 
             bodyshopName={bodyshopName}
-            onClose={() => setShowForm(false)} 
+            onClose={() => setShowForm(false)}
+            onSuccess={() => setShowForm(false)}
           />
         ) : (
           <div className="space-y-3">
