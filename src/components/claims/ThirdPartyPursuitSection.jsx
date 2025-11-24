@@ -22,12 +22,21 @@ export default function ThirdPartyPursuitSection({ claim, onUpdate }) {
     tp_email: claim.tp_email || '',
     tp_reg: claim.tp_reg || '',
     tp_make_model: claim.tp_make_model || '',
-    tp_vehicle_make: claim.tp_vehicle_make || '',
-    tp_vehicle_model: claim.tp_vehicle_model || '',
-    tp_vehicle_colour: claim.tp_vehicle_colour || '',
-    tp_vehicle_year: claim.tp_vehicle_year || '',
-    tp_vehicle_fuel_type: claim.tp_vehicle_fuel_type || '',
-    tp_vehicle_engine_capacity: claim.tp_vehicle_engine_capacity || '',
+    tp_vehicle_make: '',
+    tp_vehicle_model: '',
+    tp_vehicle_colour: '',
+    tp_vehicle_fuel_type: '',
+    tp_vehicle_year_of_manufacture: null,
+    tp_vehicle_engine_capacity: null,
+    tp_vehicle_co2_emissions: null,
+    tp_vehicle_euro_status: '',
+    tp_vehicle_mot_status: '',
+    tp_vehicle_mot_expiry_date: null,
+    tp_vehicle_tax_status: '',
+    tp_vehicle_tax_due_date: null,
+    tp_vehicle_wheelplan: '',
+    tp_vehicle_revenue_weight: null,
+    tp_vehicle_date_of_last_v5c_issued: null,
     tp_insurer: claim.tp_insurer || '',
     tp_policy_number: claim.tp_policy_number || '',
     tp_address_line_1: claim.tp_address_line_1 || '',
@@ -38,6 +47,7 @@ export default function ThirdPartyPursuitSection({ claim, onUpdate }) {
     tp_vehicle_damage: claim.tp_vehicle_damage || '',
     tp_vehicle_location: claim.tp_vehicle_location || '',
   });
+  const [vehicleData, setVehicleData] = useState(null);
   
   const queryClient = useQueryClient();
 
@@ -59,18 +69,31 @@ export default function ThirdPartyPursuitSection({ claim, onUpdate }) {
       const result = response.data;
 
       if (result.success) {
+        // Store full vehicle data for display
+        setVehicleData(result);
+        // Map all fields to form data
         setTpFormData(prev => ({
           ...prev,
           tp_make_model: result.make_model || '',
           tp_vehicle_make: result.make || '',
           tp_vehicle_model: result.model || '',
           tp_vehicle_colour: result.colour || '',
-          tp_vehicle_year: result.year_of_manufacture || '',
           tp_vehicle_fuel_type: result.fuel_type || '',
-          tp_vehicle_engine_capacity: result.engine_capacity || '',
+          tp_vehicle_year_of_manufacture: result.year_of_manufacture || null,
+          tp_vehicle_engine_capacity: result.engine_capacity || null,
+          tp_vehicle_co2_emissions: result.co2_emissions || null,
+          tp_vehicle_euro_status: result.euro_status || '',
+          tp_vehicle_mot_status: result.mot_status || '',
+          tp_vehicle_mot_expiry_date: result.mot_expiry_date || null,
+          tp_vehicle_tax_status: result.tax_status || '',
+          tp_vehicle_tax_due_date: result.tax_due_date || null,
+          tp_vehicle_wheelplan: result.wheelplan || '',
+          tp_vehicle_revenue_weight: result.revenue_weight || null,
+          tp_vehicle_date_of_last_v5c_issued: result.date_of_last_v5c_issued || null,
         }));
         setVehicleLookupError(null);
       } else {
+        setVehicleData(null);
         setVehicleLookupError(result.message || 'Vehicle not found');
       }
     } catch (error) {
@@ -171,15 +194,24 @@ export default function ThirdPartyPursuitSection({ claim, onUpdate }) {
         client_town: tpData.tp_town,
         client_county: tpData.tp_county,
         client_postcode: tpData.tp_postcode,
-        // Their vehicle details - full mapping to Claim vehicle fields
+        // Their vehicle details - mapped to standard Claim vehicle fields
         reg: tpData.tp_reg,
         make_model: tpData.tp_make_model,
         vehicle_make: tpData.tp_vehicle_make,
         vehicle_model: tpData.tp_vehicle_model,
         vehicle_colour: tpData.tp_vehicle_colour,
         vehicle_fuel_type: tpData.tp_vehicle_fuel_type,
-        vehicle_year_of_manufacture: tpData.tp_vehicle_year ? parseInt(tpData.tp_vehicle_year) : null,
-        vehicle_engine_capacity: tpData.tp_vehicle_engine_capacity ? parseInt(tpData.tp_vehicle_engine_capacity) : null,
+        vehicle_year_of_manufacture: tpData.tp_vehicle_year_of_manufacture,
+        vehicle_engine_capacity: tpData.tp_vehicle_engine_capacity,
+        vehicle_co2_emissions: tpData.tp_vehicle_co2_emissions,
+        vehicle_euro_status: tpData.tp_vehicle_euro_status,
+        vehicle_mot_status: tpData.tp_vehicle_mot_status,
+        vehicle_mot_expiry_date: tpData.tp_vehicle_mot_expiry_date,
+        vehicle_tax_status: tpData.tp_vehicle_tax_status,
+        vehicle_tax_due_date: tpData.tp_vehicle_tax_due_date,
+        vehicle_wheelplan: tpData.tp_vehicle_wheelplan,
+        vehicle_revenue_weight: tpData.tp_vehicle_revenue_weight,
+        vehicle_date_of_last_v5c_issued: tpData.tp_vehicle_date_of_last_v5c_issued,
         vehicle_damage: tpData.tp_vehicle_damage,
         vehicle_location: tpData.tp_vehicle_location,
         // Insurance
@@ -473,25 +505,50 @@ export default function ThirdPartyPursuitSection({ claim, onUpdate }) {
                   <p className="text-xs text-orange-800 whitespace-pre-line">{vehicleLookupError}</p>
                 </div>
               )}
-              {tpFormData.tp_make_model && !vehicleLookupError && (
-                <div className="flex items-start gap-2 p-3 bg-green-50 border border-green-200 rounded-lg">
-                  <div className="text-sm text-green-700">
-                    <p className="font-bold mb-1">✓ Vehicle found:</p>
-                    <p className="font-bold text-base">{tpFormData.tp_make_model}</p>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-2 text-xs">
-                      {tpFormData.tp_vehicle_colour && (
-                        <div><span className="text-green-600">Colour:</span> {tpFormData.tp_vehicle_colour}</div>
-                      )}
-                      {tpFormData.tp_vehicle_year && (
-                        <div><span className="text-green-600">Year:</span> {tpFormData.tp_vehicle_year}</div>
-                      )}
-                      {tpFormData.tp_vehicle_fuel_type && (
-                        <div><span className="text-green-600">Fuel:</span> {tpFormData.tp_vehicle_fuel_type}</div>
-                      )}
-                      {tpFormData.tp_vehicle_engine_capacity && (
-                        <div><span className="text-green-600">Engine:</span> {tpFormData.tp_vehicle_engine_capacity}cc</div>
-                      )}
+              {vehicleData && !vehicleLookupError && (
+                <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                  <p className="text-sm text-green-700 font-semibold mb-2">✓ Vehicle found</p>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-xs">
+                    <div>
+                      <span className="text-green-600">Make/Model:</span>
+                      <p className="font-bold text-green-800">{vehicleData.make_model}</p>
                     </div>
+                    {vehicleData.colour && (
+                      <div>
+                        <span className="text-green-600">Colour:</span>
+                        <p className="font-medium text-green-800">{vehicleData.colour}</p>
+                      </div>
+                    )}
+                    {vehicleData.year_of_manufacture && (
+                      <div>
+                        <span className="text-green-600">Year:</span>
+                        <p className="font-medium text-green-800">{vehicleData.year_of_manufacture}</p>
+                      </div>
+                    )}
+                    {vehicleData.fuel_type && (
+                      <div>
+                        <span className="text-green-600">Fuel:</span>
+                        <p className="font-medium text-green-800">{vehicleData.fuel_type}</p>
+                      </div>
+                    )}
+                    {vehicleData.engine_capacity && (
+                      <div>
+                        <span className="text-green-600">Engine:</span>
+                        <p className="font-medium text-green-800">{vehicleData.engine_capacity}cc</p>
+                      </div>
+                    )}
+                    {vehicleData.mot_status && (
+                      <div>
+                        <span className="text-green-600">MOT:</span>
+                        <p className="font-medium text-green-800">{vehicleData.mot_status}</p>
+                      </div>
+                    )}
+                    {vehicleData.tax_status && (
+                      <div>
+                        <span className="text-green-600">Tax:</span>
+                        <p className="font-medium text-green-800">{vehicleData.tax_status}</p>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
