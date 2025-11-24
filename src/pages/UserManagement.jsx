@@ -445,19 +445,17 @@ export default function UserManagement() {
                         )}
                       </div>
                     </div>
-                    {user.role !== 'admin' && (
-                      <div>
-                        <Button
-                          onClick={() => {
-                            setEditingUserId(user.id);
-                            setError(null);
-                          }}
-                          className="neomorph-flat px-4 py-2 text-blue-600"
-                        >
-                          Edit User
-                        </Button>
-                      </div>
-                    )}
+                    <div>
+                    <Button
+                      onClick={() => {
+                        setEditingUserId(user.id);
+                        setError(null);
+                      }}
+                      className="neomorph-flat px-4 py-2 text-blue-600"
+                    >
+                      Edit User
+                    </Button>
+                  </div>
                   </div>
 
                   {user.role === 'admin' ? (
