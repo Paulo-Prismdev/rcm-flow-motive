@@ -58,7 +58,7 @@ export default function RepairerPortal() {
           <AlertCircle className="w-16 h-16 mx-auto text-amber-500 mb-4" />
           <h2 className="text-xl font-bold mb-2">Account Not Linked</h2>
           <p className="text-foreground-muted">
-            Your account is not linked to a bodyshop. Please contact ARTECH to set up your repairer portal access.
+            Your account is not linked to a bodyshop. Please contact ARTURA to set up your repairer portal access.
           </p>
         </div>
       </div>
@@ -74,7 +74,7 @@ export default function RepairerPortal() {
     { id: 'claims', label: 'My Claims', icon: FileText },
     { id: 'estimates', label: 'Estimate Requests', icon: Calculator },
     { id: 'parts', label: 'Parts Support', icon: Package },
-    { id: 'products', label: 'ARTECH Products', icon: Gift },
+    { id: 'products', label: 'ARTURA Products', icon: Gift },
   ];
 
   return (
@@ -187,7 +187,7 @@ function RepairerDashboard({ claims, estimates, parts, activeClaims, pendingEsti
             </div>
             <div>
               <p className="text-2xl font-bold">New</p>
-              <p className="text-xs text-foreground-muted">ARTECH Products</p>
+              <p className="text-xs text-foreground-muted">ARTURA Products</p>
             </div>
           </div>
         </div>
@@ -249,7 +249,7 @@ function RepairerDashboard({ claims, estimates, parts, activeClaims, pendingEsti
             >
               <div className="flex items-center gap-3">
                 <Gift className="w-5 h-5 text-accent" />
-                <span className="font-medium">Explore ARTECH Products</span>
+                <span className="font-medium">Explore ARTURA Products</span>
               </div>
               <ChevronRight className="w-4 h-4" />
             </button>
@@ -449,7 +449,7 @@ function RepairerProductsTab() {
   const products = [
     {
       id: 1,
-      name: 'ARTECH Estimating Services',
+      name: 'ARTURA Estimating Services',
       description: 'Professional vehicle damage assessment and estimation services using industry-leading technology.',
       icon: Calculator,
       color: 'blue',
@@ -491,7 +491,7 @@ function RepairerProductsTab() {
   return (
     <div className="space-y-4">
       <div className="neomorph p-6 text-center">
-        <h2 className="text-2xl font-bold mb-2">ARTECH Products & Services</h2>
+        <h2 className="text-2xl font-bold mb-2">ARTURA Products & Services</h2>
         <p className="text-foreground-muted">
           Explore our range of services designed to help your business grow
         </p>
@@ -525,7 +525,7 @@ function RepairerProductsTab() {
       </div>
 
       <div className="neomorph p-6 text-center bg-accent/5">
-        <h3 className="font-bold text-lg mb-2">Interested in partnering with ARTECH?</h3>
+        <h3 className="font-bold text-lg mb-2">Interested in partnering with ARTURA?</h3>
         <p className="text-foreground-muted mb-4">
           Contact us to discuss how we can support your business
         </p>
