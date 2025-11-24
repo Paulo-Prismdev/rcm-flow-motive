@@ -33,6 +33,9 @@ export default function ClaimTasksSection({ claimId, claimJobNumber, claimReg })
           user_email: taskData.assigned_to,
           title: 'New Task Assigned',
           message: `You have been assigned a new task: "${taskData.title}" for claim ${claimJobNumber || claimReg}`,
+          type: 'assignment',
+          related_item_type: 'Claim',
+          related_item_id: claimId,
           link: `/claims?id=${claimId}`,
           is_read: false
         });
