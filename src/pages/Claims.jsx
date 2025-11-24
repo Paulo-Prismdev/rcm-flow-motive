@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Plus, Search, Archive, FileDown, Filter, X, AlertTriangle } from 'lucide-react';
+import { Plus, Search, Archive, Filter, X, AlertTriangle } from 'lucide-react';
 import ClaimDetail from '../components/claims/ClaimDetail';
 import ClaimForm from '../components/claims/ClaimForm';
 import StatusBadge from '../components/shared/StatusBadge';
@@ -15,34 +15,31 @@ const calculateUpdateStatus = (claim) => {
   const now = new Date();
   const closedStatuses = ['Completed', 'Cancelled', 'Total Loss'];
   
-  // If claim is closed, return gray
   if (closedStatuses.includes(claim.job_status)) {
     return 'Gray';
   }
   
-  // If override is active and not expired
   if (claim.override_active && claim.override_expiry_at) {
     const overrideExpiry = new Date(claim.override_expiry_at);
     if (now < overrideExpiry) {
-      return 'Blue'; // Override active
+      return 'Blue';
     }
   }
   
-  // Check if update is overdue
   if (claim.next_update_due_at) {
     const dueDate = new Date(claim.next_update_due_at);
     const hoursUntilDue = (dueDate - now) / (1000 * 60 * 60);
     
     if (hoursUntilDue < 0) {
-      return 'Red'; // Overdue
+      return 'Red';
     } else if (hoursUntilDue < 24) {
-      return 'Amber'; // Due within 24 hours
+      return 'Amber';
     } else {
-      return 'Green'; // All good
+      return 'Green';
     }
   }
   
-  return 'Green'; // Default
+  return 'Green';
 };
 
 // Helper function to get background style based on update status
@@ -111,14 +108,13 @@ export default function ClaimsPage() {
     queryFn: () => base44.entities.ClaimStatusConfig.list('sort_order'),
   });
 
-  // Get active custom statuses sorted by sort_order, ensuring "New" is always included
+  // Get active custom statuses sorted by sort_order
   const availableStatuses = React.useMemo(() => {
     const active = customStatuses
       .filter(s => s.is_active)
       .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
       .map(s => s.status_name);
     
-    // Ensure "New" is always available, add it if not present
     if (!active.includes('New')) {
       return ['New', ...active];
     }
@@ -151,20 +147,6 @@ export default function ClaimsPage() {
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.Claim.update(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['claims'] });
-    },
-  });
-
-  const archiveMutation = useMutation({
-    mutationFn: ({ id, archived }) => base44.entities.Claim.update(id, { archived }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['claims'] });
-    },
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: (id) => base44.entities.Claim.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['claims'] });
     },
@@ -212,28 +194,23 @@ export default function ClaimsPage() {
       return matchesSearch && matchesStatus && matchesClaimType && matchesInsurer && matchesReferrer && matchesUpdateStatus;
     })
     .sort((a, b) => {
-      // Calculate update status for both claims
       const statusA = calculateUpdateStatus(a);
       const statusB = calculateUpdateStatus(b);
       
-      // Priority order: Red (overdue) > Amber > Green/Blue/Gray
       const priorityOrder = { 'Red': 1, 'Amber': 2, 'Green': 3, 'Blue': 3, 'Gray': 4 };
       const priorityA = priorityOrder[statusA] || 3;
       const priorityB = priorityOrder[statusB] || 3;
       
-      // If different priorities, sort by priority
       if (priorityA !== priorityB) {
         return priorityA - priorityB;
       }
       
-      // If both are Red (overdue), sort by oldest overdue first (earliest next_update_due_at)
       if (statusA === 'Red' && statusB === 'Red') {
         const dueDateA = a.next_update_due_at ? new Date(a.next_update_due_at) : new Date();
         const dueDateB = b.next_update_due_at ? new Date(b.next_update_due_at) : new Date();
-        return dueDateA - dueDateB; // Oldest overdue first
+        return dueDateA - dueDateB;
       }
       
-      // Otherwise, sort by created date (newest first)
       return new Date(b.created_date) - new Date(a.created_date);
     });
 
@@ -256,6 +233,61 @@ export default function ClaimsPage() {
       />
     );
   }
+
+  // Render claim card
+  const renderClaimCard = (claim) => {
+    const updateStatus = calculateUpdateStatus(claim);
+    const isClosedStatus = ['Completed', 'Cancelled', 'Total Loss'].includes(claim.job_status);
+    const statusStyle = getStatusStyle(updateStatus);
+    
+    return (
+      <div
+        key={claim.id}
+        onClick={() => setSelectedClaim(claim)}
+        className="p-4 hover:shadow-lg transition-all cursor-pointer border-2 rounded-xl"
+        style={statusStyle}
+      >
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-2 flex-wrap">
+              <h3 className="font-bold text-lg">{formatUKRegistration(claim.reg) || 'No Reg'}</h3>
+              {claim.job_number && (
+                <span className="text-xs font-mono px-2 py-1 rounded bg-accent/20 text-accent font-semibold">
+                  {claim.job_number}
+                </span>
+              )}
+              <StatusBadge status={claim.job_status || 'New'} />
+              {!isClosedStatus && updateStatus && (
+                <UpdateStatusBadge status={updateStatus} small />
+              )}
+              {claim.claim_type === 'Fault Claim' && 
+               claim.third_party_pursuit_status === 'Awaiting Details' && (
+                <span className="flex items-center gap-1 px-2 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-medium animate-pulse">
+                  <AlertTriangle className="w-3 h-3" />
+                  3rd Party Pending
+                </span>
+              )}
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
+              <div>
+                <span className="text-foreground-muted">Client:</span>{' '}
+                <span className="font-medium">{claim.client_name || 'N/A'}</span>
+              </div>
+              <div>
+                <span className="text-foreground-muted">Vehicle:</span>{' '}
+                <span className="font-medium">{claim.make_model || 'N/A'}</span>
+              </div>
+              <div>
+                <span className="text-foreground-muted">Insurer:</span>{' '}
+                <span className="font-medium">{claim.insurer || 'N/A'}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="h-full flex flex-col gap-4 md:gap-6">
@@ -294,7 +326,6 @@ export default function ClaimsPage() {
       {/* Search & Filters */}
       <div className="neomorph p-4 flex-shrink-0">
         <div className="flex flex-col gap-3">
-          {/* Search Bar with Filter Toggle */}
           <div className="flex gap-3">
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-foreground-muted" />
@@ -323,11 +354,9 @@ export default function ClaimsPage() {
             )}
           </div>
 
-          {/* Advanced Filters - Collapsible */}
           {showFilters && (
             <div className="neomorph-inset p-4 space-y-3">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                {/* Job Status Filter */}
                 <div>
                   <label className="block text-xs text-foreground-muted mb-1">Job Status</label>
                   <select
@@ -342,7 +371,6 @@ export default function ClaimsPage() {
                   </select>
                 </div>
 
-                {/* Claim Type Filter */}
                 <div>
                   <label className="block text-xs text-foreground-muted mb-1">Claim Type</label>
                   <select
@@ -360,7 +388,6 @@ export default function ClaimsPage() {
                   </select>
                 </div>
 
-                {/* Insurer Filter */}
                 <div>
                   <label className="block text-xs text-foreground-muted mb-1">Insurer</label>
                   <select
@@ -375,7 +402,6 @@ export default function ClaimsPage() {
                   </select>
                 </div>
 
-                {/* Referrer Filter */}
                 <div>
                   <label className="block text-xs text-foreground-muted mb-1">Referrer</label>
                   <select
@@ -390,7 +416,6 @@ export default function ClaimsPage() {
                   </select>
                 </div>
 
-                {/* Update Status Filter */}
                 <div>
                   <label className="block text-xs text-foreground-muted mb-1">Update Status</label>
                   <select
@@ -412,7 +437,7 @@ export default function ClaimsPage() {
         </div>
       </div>
 
-      {/* Claims List */}
+      {/* Claims List - Grouped by Status */}
       <div className="flex-1 overflow-y-auto min-h-0">
         {isLoading ? (
           <div className="text-center py-12">Loading claims...</div>
@@ -434,57 +459,31 @@ export default function ClaimsPage() {
             )}
           </div>
         ) : (
-          <div className="space-y-3">
-            {filteredClaims.map((claim) => {
-              const updateStatus = calculateUpdateStatus(claim);
-              const isClosedStatus = ['Completed', 'Cancelled', 'Total Loss'].includes(claim.job_status);
-              const statusStyle = getStatusStyle(updateStatus);
+          <div className="space-y-6">
+            {availableStatuses.map(statusGroup => {
+              const claimsInGroup = filteredClaims.filter(claim => claim.job_status === statusGroup);
               
+              // Only show groups that have claims (unless a specific status is filtered)
+              if (claimsInGroup.length === 0 && !statusFilter) return null;
+
               return (
-                <div
-                  key={claim.id}
-                  onClick={() => setSelectedClaim(claim)}
-                  className="p-4 hover:shadow-lg transition-all cursor-pointer border-2 rounded-xl"
-                  style={statusStyle}
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-2 flex-wrap">
-                        <h3 className="font-bold text-lg">{formatUKRegistration(claim.reg) || 'No Reg'}</h3>
-                        {claim.job_number && (
-                          <span className="text-xs font-mono px-2 py-1 rounded bg-accent/20 text-accent font-semibold">
-                            {claim.job_number}
-                          </span>
-                        )}
-                        <StatusBadge status={claim.job_status || 'New'} />
-                        {!isClosedStatus && updateStatus && (
-                          <UpdateStatusBadge status={updateStatus} small />
-                        )}
-                        {claim.claim_type === 'Fault Claim' && 
-                         claim.third_party_pursuit_status === 'Awaiting Details' && (
-                          <span className="flex items-center gap-1 px-2 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-medium animate-pulse">
-                            <AlertTriangle className="w-3 h-3" />
-                            3rd Party Pending
-                          </span>
-                        )}
-                      </div>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
-                        <div>
-                          <span className="text-foreground-muted">Client:</span>{' '}
-                          <span className="font-medium">{claim.client_name || 'N/A'}</span>
-                        </div>
-                        <div>
-                          <span className="text-foreground-muted">Vehicle:</span>{' '}
-                          <span className="font-medium">{claim.make_model || 'N/A'}</span>
-                        </div>
-                        <div>
-                          <span className="text-foreground-muted">Insurer:</span>{' '}
-                          <span className="font-medium">{claim.insurer || 'N/A'}</span>
-                        </div>
-                      </div>
-                    </div>
+                <div key={statusGroup} className="neomorph p-4">
+                  <div className="flex items-center gap-3 mb-4">
+                    <StatusBadge status={statusGroup} />
+                    <span className="text-sm text-foreground-muted">
+                      {claimsInGroup.length} claim{claimsInGroup.length !== 1 ? 's' : ''}
+                    </span>
                   </div>
+                  
+                  {claimsInGroup.length === 0 ? (
+                    <div className="neomorph-inset p-4 text-center text-foreground-muted text-sm">
+                      No claims in this status
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {claimsInGroup.map(renderClaimCard)}
+                    </div>
+                  )}
                 </div>
               );
             })}
