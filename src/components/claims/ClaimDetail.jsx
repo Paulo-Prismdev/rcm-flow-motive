@@ -830,70 +830,68 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
                     )}
                   </div>
 
-                  <div className="flex items-center gap-1.5 md:gap-2 flex-wrap">
-                      <Button 
-                        onClick={() => setIsClaimUpdatesOpen(true)}
-                        className="neomorph-flat px-2 md:px-4 py-1.5 md:py-3 bg-accent/10 hover:bg-accent/20 font-medium text-accent text-xs md:text-sm"
-                        title="Official Updates"
-                      >
-                        Updates
-                      </Button>
-                      <Button 
-                        onClick={() => setIsNotesOpen(true)}
-                        className="neomorph-flat p-1.5 md:p-3"
-                        title="Internal Notes"
-                      >
-                        <Edit className="w-3.5 h-3.5 md:w-4 md:h-4" />
-                      </Button>
-                      <Button 
-                        onClick={() => setIsAttachmentsOpen(true)}
-                        className="neomorph-flat p-1.5 md:p-3"
-                        title="View Attachments"
-                      >
-                        <FileText className="w-3.5 h-3.5 md:w-4 md:h-4" />
-                      </Button>
-                      <Button 
-                        onClick={() => setIsEmailModalOpen(true)}
-                        className="neomorph-flat p-1.5 md:p-3"
-                        title="Send Email"
-                      >
-                        <Mail className="w-3.5 h-3.5 md:w-4 md:h-4" />
-                      </Button>
-                      {canEdit && (
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button className="neomorph-flat p-1.5 md:p-3">
-                              <ChevronDown className="w-3.5 h-3.5 md:w-4 md:h-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-56">
-                                                            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsTasksModalOpen(true); }}>
-                                                              <ListTodo className="w-4 h-4 mr-2" />
-                                                              Manage Tasks
-                                                            </DropdownMenuItem>
-                                                            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsInstructionModalOpen(true); }}>
-                                                              <FileText className="w-4 h-4 mr-2" />
-                                                              Generate Instructions
-                                                            </DropdownMenuItem>
-                                                            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsEstimateModalOpen(true); }}>
-                                                              <Calculator className="w-4 h-4 mr-2" />
-                                                              Request Estimate
-                                                            </DropdownMenuItem>
-                                                            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsPartsModalOpen(true); }}>
-                                                              <Package className="w-4 h-4 mr-2" />
-                                                              Log Parts Issue
-                                                            </DropdownMenuItem>
-                            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleArchive(); }} disabled={archiveMutation.isLoading}>
-                              <Archive className="w-4 h-4 mr-2" />
-                              {claim.archived ? 'Unarchive' : 'Archive'}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleDelete(); }} disabled={deleteMutation.isLoading} className="text-red-600">
-                              <Trash2 className="w-4 h-4 mr-2" />
-                              Delete
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      )}
+                  <div className="flex items-center justify-between gap-1.5 md:gap-2">
+                      <div className="flex items-center gap-1.5 md:gap-2 flex-wrap">
+                        <Button 
+                          onClick={() => setIsClaimUpdatesOpen(true)}
+                          className="neomorph-flat px-2 md:px-4 py-1.5 md:py-3 bg-accent/10 hover:bg-accent/20 font-medium text-accent text-xs md:text-sm"
+                          title="Official Updates"
+                        >
+                          Updates
+                        </Button>
+                      </div>
+                      <div className="flex items-center gap-1.5 md:gap-2">
+                        <Button 
+                          onClick={() => setIsNotesOpen(true)}
+                          className="neomorph-flat p-1.5 md:p-3"
+                          title="Internal Notes"
+                        >
+                          <Edit className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                        </Button>
+                        {canEdit && (
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button className="neomorph-flat p-1.5 md:p-3">
+                                <ChevronDown className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-56">
+                              <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsAttachmentsOpen(true); }}>
+                                <FileText className="w-4 h-4 mr-2" />
+                                Documents
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsEmailModalOpen(true); }}>
+                                <Mail className="w-4 h-4 mr-2" />
+                                Send Email
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsTasksModalOpen(true); }}>
+                                <ListTodo className="w-4 h-4 mr-2" />
+                                Manage Tasks
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsInstructionModalOpen(true); }}>
+                                <FileText className="w-4 h-4 mr-2" />
+                                Generate Instructions
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsEstimateModalOpen(true); }}>
+                                <Calculator className="w-4 h-4 mr-2" />
+                                Request Estimate
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsPartsModalOpen(true); }}>
+                                <Package className="w-4 h-4 mr-2" />
+                                Log Parts Issue
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleArchive(); }} disabled={archiveMutation.isLoading}>
+                                <Archive className="w-4 h-4 mr-2" />
+                                {claim.archived ? 'Unarchive' : 'Archive'}
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleDelete(); }} disabled={deleteMutation.isLoading} className="text-red-600">
+                                <Trash2 className="w-4 h-4 mr-2" />
+                                Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        )}
+                      </div>
                   </div>
               </div>
           </div>
