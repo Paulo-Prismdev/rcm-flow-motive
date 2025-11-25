@@ -830,8 +830,8 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
                     )}
                   </div>
 
-                  <div className="flex items-center justify-between gap-1.5 md:gap-2">
-                      <div className="flex items-center gap-1.5 md:gap-2 flex-wrap">
+                  <div className="flex items-center justify-end gap-1.5 md:gap-2">
+                      <div className="flex items-center gap-1.5 md:gap-2">
                         <Button 
                           onClick={() => setIsClaimUpdatesOpen(true)}
                           className="neomorph-flat px-2 md:px-4 py-1.5 md:py-3 bg-accent/10 hover:bg-accent/20 font-medium text-accent text-xs md:text-sm"
@@ -839,8 +839,6 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
                         >
                           Updates
                         </Button>
-                      </div>
-                      <div className="flex items-center gap-1.5 md:gap-2">
                         <Button 
                           onClick={() => setIsNotesOpen(true)}
                           className="neomorph-flat p-1.5 md:p-3"
