@@ -98,20 +98,34 @@ export default function EmailTemplates() {
   });
 
   const createMutation = useMutation({
-    mutationFn: (data) => base44.entities.EmailTemplate.create(data),
+    mutationFn: async (data) => {
+      const result = await base44.entities.EmailTemplate.create(data);
+      return result;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['emailTemplates'] });
       setIsModalOpen(false);
       setEditingTemplate(null);
     },
+    onError: (error) => {
+      console.error('Failed to create template:', error);
+      alert('Failed to create template. Please try again.');
+    },
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }) => base44.entities.EmailTemplate.update(id, data),
+    mutationFn: async ({ id, data }) => {
+      const result = await base44.entities.EmailTemplate.update(id, data);
+      return result;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['emailTemplates'] });
       setIsModalOpen(false);
       setEditingTemplate(null);
+    },
+    onError: (error) => {
+      console.error('Failed to update template:', error);
+      alert('Failed to update template. Please try again.');
     },
   });
 
@@ -210,11 +224,15 @@ export default function EmailTemplates() {
           setEditingTemplate(null);
         }}
         template={editingTemplate}
-        onSubmit={(data) => {
-          if (editingTemplate) {
-            updateMutation.mutate({ id: editingTemplate.id, data });
-          } else {
-            createMutation.mutate(data);
+        onSubmit={async (data) => {
+          try {
+            if (editingTemplate) {
+              await updateMutation.mutateAsync({ id: editingTemplate.id, data });
+            } else {
+              await createMutation.mutateAsync(data);
+            }
+          } catch (error) {
+            console.error('Template save error:', error);
           }
         }}
         isLoading={createMutation.isPending || updateMutation.isPending}
