@@ -61,7 +61,8 @@ export default function ClaimCardFieldsModal({ isOpen, onClose, selectedFields, 
   };
 
   const selectedFieldObjects = fields.map(id => AVAILABLE_FIELDS.find(f => f.id === id)).filter(Boolean);
-  const unselectedFields = AVAILABLE_FIELDS.filter(f => !fields.includes(f.id));
+  // Only show non-mandatory fields as available to add
+  const unselectedFields = AVAILABLE_FIELDS.filter(f => !fields.includes(f.id) && !isMandatory(f.id));
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
