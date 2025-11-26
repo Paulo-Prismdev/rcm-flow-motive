@@ -148,6 +148,17 @@ export default function Layout({ children, currentPageName }) {
     return null;
   }
 
+  // If user is a referrer type and accessing the referrer portal, the page handles its own layout
+  if (currentUser?.user_type === 'referrer' && currentPageName === 'ReferrerPortal') {
+    return children;
+  }
+
+  // If user is a referrer type, redirect them to ReferrerPortal
+  if (currentUser?.user_type === 'referrer' && currentPageName !== 'ReferrerPortal') {
+    window.location.href = createPageUrl('ReferrerPortal');
+    return null;
+  }
+
   return (
     <StatusConfigProvider>
       <UserTypeFixer />
