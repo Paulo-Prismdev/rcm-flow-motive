@@ -90,6 +90,7 @@ export default function ClaimsPage() {
   const [showForm, setShowForm] = useState(false);
   const [selectedClaim, setSelectedClaim] = useState(null);
   const [showArchived, setShowArchived] = useState(false);
+  const [showFieldsModal, setShowFieldsModal] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: currentUser } = useQuery({
