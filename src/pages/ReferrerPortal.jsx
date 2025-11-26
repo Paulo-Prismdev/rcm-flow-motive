@@ -9,12 +9,15 @@ import {
   CheckCircle2,
   AlertCircle,
   TrendingUp,
-  Calculator
+  Calculator,
+  Plus
 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import StatusBadge from '../components/shared/StatusBadge';
 import { formatUKRegistration } from '../components/shared/formatRegistration';
 import ReferrerLayout from '../components/referrer/ReferrerLayout';
+import ReferrerPartsForm from '../components/referrer/ReferrerPartsForm';
 
 export default function ReferrerPortal() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -140,7 +143,7 @@ export default function ReferrerPortal() {
             <ReferrerClaimsList claims={claims} />
           )}
           {activeTab === 'parts' && (
-            <ReferrerPartsTab parts={parts} />
+            <ReferrerPartsTab parts={parts} claims={claims} />
           )}
         </div>
       </div>
@@ -342,42 +345,63 @@ function ReferrerClaimsList({ claims }) {
   );
 }
 
-function ReferrerPartsTab({ parts }) {
+function ReferrerPartsTab({ parts, claims }) {
+  const [showForm, setShowForm] = useState(false);
+
   return (
     <div className="space-y-4">
-      <div className="neomorph p-4">
-        <h3 className="font-bold mb-4">Parts Tracking</h3>
-        <p className="text-sm text-foreground-muted mb-4">
-          Track parts sourcing progress for your referred claims
-        </p>
-
-        <div className="space-y-3">
-          {parts.map(part => (
-            <div key={part.id} className="neomorph-flat p-4">
-              <div className="flex items-start justify-between">
-                <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <h4 className="font-bold">{part.part_description || part.job_number}</h4>
-                    <StatusBadge status={part.sourcing_status} />
-                  </div>
-                  <p className="text-sm text-foreground-muted">
-                    {part.manufacturer} - {part.vehicle_ref}
-                  </p>
-                  <p className="text-xs text-foreground-muted mt-1">
-                    Requested: {part.date_requested ? format(new Date(part.date_requested), 'dd/MM/yyyy') : 'N/A'}
-                  </p>
-                </div>
-                {part.net_price && (
-                  <p className="font-bold text-lg">£{part.net_price.toFixed(2)}</p>
-                )}
-              </div>
+      {showForm ? (
+        <ReferrerPartsForm 
+          claims={claims} 
+          onClose={() => setShowForm(false)} 
+          onSuccess={() => setShowForm(false)}
+        />
+      ) : (
+        <div className="neomorph p-4">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="font-bold">Parts Tracking</h3>
+              <p className="text-sm text-foreground-muted">
+                Track parts sourcing progress for your referred claims
+              </p>
             </div>
-          ))}
-          {parts.length === 0 && (
-            <p className="text-center text-foreground-muted py-8">No parts requests for your claims</p>
-          )}
+            <Button 
+              onClick={() => setShowForm(true)} 
+              className="neomorph-flat bg-accent/10 text-accent"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Request Parts
+            </Button>
+          </div>
+
+          <div className="space-y-3">
+            {parts.map(part => (
+              <div key={part.id} className="neomorph-flat p-4">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <h4 className="font-bold">{part.part_description || part.job_number}</h4>
+                      <StatusBadge status={part.sourcing_status} />
+                    </div>
+                    <p className="text-sm text-foreground-muted">
+                      {part.manufacturer} - {part.vehicle_ref}
+                    </p>
+                    <p className="text-xs text-foreground-muted mt-1">
+                      Requested: {part.date_requested ? format(new Date(part.date_requested), 'dd/MM/yyyy') : 'N/A'}
+                    </p>
+                  </div>
+                  {part.net_price && (
+                    <p className="font-bold text-lg">£{part.net_price.toFixed(2)}</p>
+                  )}
+                </div>
+              </div>
+            ))}
+            {parts.length === 0 && (
+              <p className="text-center text-foreground-muted py-8">No parts requests for your claims</p>
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
