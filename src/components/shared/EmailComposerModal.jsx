@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { X, Send, Loader, Mail } from "lucide-react";
+import { Mail } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -81,26 +81,6 @@ export default function EmailComposerModal({ isOpen, onClose, itemType, itemData
     enabled: isOpen,
   });
 
-  // Send email mutation
-  const sendEmailMutation = useMutation({
-    mutationFn: async (emailData) => {
-      return base44.integrations.Core.SendEmail({
-        to: emailData.to,
-        subject: emailData.subject,
-        body: emailData.body,
-      });
-    },
-    onSuccess: () => {
-      onClose();
-      // Reset form
-      setTo('');
-      setSubject('');
-      setBody('');
-      setSelectedTemplateId('');
-      setUseCustomEmail(false);
-    },
-  });
-
   // Get available emails from item
   const availableEmails = extractEmails(itemData);
 
@@ -133,16 +113,6 @@ export default function EmailComposerModal({ isOpen, onClose, itemType, itemData
     }
   };
 
-  const handleSend = (e) => {
-    e.preventDefault();
-    if (!to || !subject || !body) {
-      alert('Please fill in all fields');
-      return;
-    }
-    
-    sendEmailMutation.mutate({ to, subject, body });
-  };
-
   const handleOpenInOutlook = () => {
     if (!to) {
       alert('Please select a recipient');
@@ -161,7 +131,7 @@ export default function EmailComposerModal({ isOpen, onClose, itemType, itemData
           <DialogTitle>Send Email</DialogTitle>
         </DialogHeader>
         
-        <form onSubmit={handleSend} className="space-y-4">
+        <div className="space-y-4">
           {/* Template Selector */}
           <div>
             <label className="block text-sm font-medium mb-2">Email Template (Optional)</label>
@@ -271,38 +241,19 @@ export default function EmailComposerModal({ isOpen, onClose, itemType, itemData
               type="button"
               variant="outline"
               onClick={onClose}
-              disabled={sendEmailMutation.isPending}
             >
               Cancel
             </Button>
             <Button
               type="button"
-              variant="outline"
               onClick={handleOpenInOutlook}
               className="flex items-center gap-2"
             >
               <Mail className="w-4 h-4" />
               Open in Outlook
             </Button>
-            <Button
-              type="submit"
-              disabled={sendEmailMutation.isPending}
-              className="flex items-center gap-2"
-            >
-              {sendEmailMutation.isPending ? (
-                <>
-                  <Loader className="w-4 h-4 animate-spin" />
-                  Sending...
-                </>
-              ) : (
-                <>
-                  <Send className="w-4 h-4" />
-                  Send via System
-                </>
-              )}
-            </Button>
           </div>
-        </form>
+        </div>
       </DialogContent>
     </Dialog>
   );
