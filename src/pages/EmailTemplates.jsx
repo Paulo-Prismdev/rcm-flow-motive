@@ -416,20 +416,17 @@ function TemplateFormModal({ isOpen, onClose, template, onSubmit, isLoading }) {
             </Button>
             <Button
               type="button"
-              disabled={isLoading}
-              onClick={() => onSubmit(formData)}
+              disabled={isLoading || !formData.name || !formData.subject || !formData.body}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Submitting template:', formData);
+                onSubmit(formData);
+              }}
+              className="bg-primary text-primary-foreground hover:bg-primary/90"
             >
-              {isLoading ? (
-                <>
-                  <Save className="w-4 h-4 mr-2 animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <Save className="w-4 h-4 mr-2" />
-                  {template ? 'Update Template' : 'Create Template'}
-                </>
-              )}
+              <Save className="w-4 h-4 mr-2" />
+              {isLoading ? 'Saving...' : (template ? 'Update Template' : 'Create Template')}
             </Button>
           </div>
         </form>
