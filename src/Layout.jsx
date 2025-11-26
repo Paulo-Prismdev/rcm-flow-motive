@@ -149,12 +149,18 @@ export default function Layout({ children, currentPageName }) {
   }
 
   // If user is a referrer type and accessing the referrer portal, the page handles its own layout
-  if (currentUser?.user_type === 'referrer' && currentPageName === 'ReferrerPortal') {
+  if ((currentUser?.user_type === 'referrer' || currentUser?.linked_referrer_id) && 
+      !currentUser?.user_type?.includes('internal') && 
+      currentUser?.role !== 'admin' &&
+      currentPageName === 'ReferrerPortal') {
     return children;
   }
 
-  // If user is a referrer type, redirect them to ReferrerPortal
-  if (currentUser?.user_type === 'referrer' && currentPageName !== 'ReferrerPortal') {
+  // If user is a referrer type (or linked to referrer without being internal), redirect them to ReferrerPortal
+  if ((currentUser?.user_type === 'referrer' || (currentUser?.linked_referrer_id && !currentUser?.user_type)) && 
+      currentUser?.user_type !== 'internal' && 
+      currentUser?.role !== 'admin' &&
+      currentPageName !== 'ReferrerPortal') {
     window.location.href = createPageUrl('ReferrerPortal');
     return null;
   }
