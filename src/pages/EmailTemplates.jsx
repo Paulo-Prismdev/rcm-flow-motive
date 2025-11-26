@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -331,51 +330,64 @@ function TemplateFormModal({ isOpen, onClose, template, onSubmit, isLoading }) {
             />
           </div>
 
-          {/* Available Placeholders */}
-          <div className="neomorph-inset p-4">
-            <label className="block text-sm font-medium mb-3">Available Placeholders</label>
-            <p className="text-xs text-foreground-muted mb-3">Click a tag to insert it into Subject or Body (cursor position)</p>
-            <div className="flex flex-wrap gap-2">
-              {availablePlaceholders.map(({ tag, label }) => (
-                <button
-                  key={tag}
-                  type="button"
-                  onClick={() => {
-                    // Try to insert into the last focused field, default to body
-                    const activeElement = document.activeElement;
-                    if (activeElement === subjectRef.current) {
-                      insertPlaceholder(tag, 'subject');
-                    } else {
-                      insertPlaceholder(tag, 'body');
-                    }
-                  }}
-                  className="neomorph-flat px-3 py-1.5 text-xs hover:border-accent transition-all"
-                  title={`Insert ${label}`}
-                >
-                  {tag}
-                </button>
-              ))}
-            </div>
-          </div>
-
           <div>
-            <label className="block text-sm font-medium mb-2">Subject *</label>
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-sm font-medium">Subject *</label>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button type="button" variant="outline" size="sm" className="text-xs">
+                    + Insert Placeholder
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="max-h-64 overflow-y-auto">
+                  {availablePlaceholders.map(({ tag, label }) => (
+                    <DropdownMenuItem
+                      key={tag}
+                      onClick={() => insertPlaceholder(tag, 'subject')}
+                    >
+                      <span className="font-mono text-xs mr-2">{tag}</span>
+                      <span className="text-foreground-muted">{label}</span>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
             <Input
               ref={subjectRef}
               value={formData.subject}
               onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-              placeholder="Email subject (click tags above to insert)"
+              placeholder="Email subject"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">Body *</label>
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-sm font-medium">Body *</label>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button type="button" variant="outline" size="sm" className="text-xs">
+                    + Insert Placeholder
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="max-h-64 overflow-y-auto">
+                  {availablePlaceholders.map(({ tag, label }) => (
+                    <DropdownMenuItem
+                      key={tag}
+                      onClick={() => insertPlaceholder(tag, 'body')}
+                    >
+                      <span className="font-mono text-xs mr-2">{tag}</span>
+                      <span className="text-foreground-muted">{label}</span>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
             <Textarea
               ref={bodyRef}
               value={formData.body}
               onChange={(e) => setFormData({ ...formData, body: e.target.value })}
-              placeholder="Email body (click tags above to insert)"
+              placeholder="Email body"
               className="h-64 font-mono text-sm"
               required
             />
