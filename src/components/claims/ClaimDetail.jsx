@@ -202,6 +202,20 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
     enabled: !!claim.linked_parts_id,
   });
 
+  // Linked third-party claim (from fault claim)
+  const { data: linkedThirdPartyClaim } = useQuery({
+    queryKey: ['claim', claim.linked_third_party_claim_id],
+    queryFn: () => claim.linked_third_party_claim_id ? base44.entities.Claim.get(claim.linked_third_party_claim_id) : null,
+    enabled: !!claim.linked_third_party_claim_id,
+  });
+
+  // Linked original fault claim (from third-party claim)
+  const { data: linkedOriginalClaim } = useQuery({
+    queryKey: ['claim', claim.linked_original_claim_id],
+    queryFn: () => claim.linked_original_claim_id ? base44.entities.Claim.get(claim.linked_original_claim_id) : null,
+    enabled: !!claim.linked_original_claim_id,
+  });
+
   const { data: currentUser } = useQuery({
     queryKey: ['currentUser'],
     queryFn: () => base44.auth.me(),
@@ -931,13 +945,33 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
               </div>
           </div>
 
-        {(linkedEstimate || linkedEngineering || linkedParts) && (
+        {(linkedEstimate || linkedEngineering || linkedParts || linkedThirdPartyClaim || linkedOriginalClaim) && (
           <div className="neomorph p-4 flex-shrink-0">
             <div className="flex items-center gap-2 mb-3">
               <span className="w-4 h-4 text-gold">🔗</span>
               <h3 className="font-medium">Linked Cases</h3>
             </div>
             <div className="flex gap-3 flex-wrap">
+              {linkedOriginalClaim && (
+                <button
+                  onClick={() => openLinkedItem(createPageUrl('Claims'), linkedOriginalClaim.id)}
+                  className="neomorph-flat px-4 py-2 text-sm hover:neomorph transition-all cursor-pointer"
+                  title="Click to open in new window"
+                >
+                  <span className="text-gray-500">Original Fault Claim:</span>{' '}
+                  <span className="font-medium text-blue-600 underline">{linkedOriginalClaim.job_number || linkedOriginalClaim.reg}</span>
+                </button>
+              )}
+              {linkedThirdPartyClaim && (
+                <button
+                  onClick={() => openLinkedItem(createPageUrl('Claims'), linkedThirdPartyClaim.id)}
+                  className="neomorph-flat px-4 py-2 text-sm hover:neomorph transition-all cursor-pointer"
+                  title="Click to open in new window"
+                >
+                  <span className="text-gray-500">Third Party Claim:</span>{' '}
+                  <span className="font-medium text-indigo-600 underline">{linkedThirdPartyClaim.job_number || linkedThirdPartyClaim.reg}</span>
+                </button>
+              )}
               {linkedEstimate && (
                 <button
                   onClick={() => openLinkedItem(createPageUrl('Estimating'), linkedEstimate.id)}
