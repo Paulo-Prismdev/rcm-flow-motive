@@ -126,8 +126,10 @@ function DetailRow({ label, value, isCurrency = false, isDate = false, isStatus 
     );
 }
 
-import { ListTodo, History } from "lucide-react";
+import { ListTodo, History, Timer } from "lucide-react";
 import ActivityLogSection from '../shared/ActivityLogSection';
+import TimeLogsModal from '../shared/TimeLogsModal';
+import ActivityLogModal from '../shared/ActivityLogModal';
 import { logActivity, logChanges } from '../shared/useActivityLogger';
 
 const DETAIL_SECTIONS = [
@@ -164,6 +166,8 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
   const [isUpdateTrackingOpen, setIsUpdateTrackingOpen] = useState(false);
   const [isInstructionModalOpen, setIsInstructionModalOpen] = useState(false);
   const [isTasksModalOpen, setIsTasksModalOpen] = useState(false);
+  const [isTimeLogsOpen, setIsTimeLogsOpen] = useState(false);
+  const [isActivityLogOpen, setIsActivityLogOpen] = useState(false);
 
   const canEdit = isInternalUser;
 
@@ -806,6 +810,20 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
                 onClose={() => setIsTasksModalOpen(false)}
               />
 
+              <TimeLogsModal
+                parentId={claim.id}
+                parentType="Claim"
+                isOpen={isTimeLogsOpen}
+                onClose={() => setIsTimeLogsOpen(false)}
+              />
+
+              <ActivityLogModal
+                parentId={claim.id}
+                parentType="Claim"
+                isOpen={isActivityLogOpen}
+                onClose={() => setIsActivityLogOpen(false)}
+              />
+
       <div className="h-full flex flex-col gap-4 md:gap-6">
           <div className="neomorph p-3 md:p-6 flex-shrink-0 sticky top-0 z-10 bg-background">
               <div className="flex flex-col gap-3">
@@ -846,6 +864,14 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
                               <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsAttachmentsOpen(true); }}>
                                 <FileText className="w-4 h-4 mr-2" />
                                 Documents
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsTimeLogsOpen(true); }}>
+                                <Timer className="w-4 h-4 mr-2" />
+                                Time Logs
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsActivityLogOpen(true); }}>
+                                <History className="w-4 h-4 mr-2" />
+                                Activity Log
                               </DropdownMenuItem>
                               <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsEmailModalOpen(true); }}>
                                 <Mail className="w-4 h-4 mr-2" />
