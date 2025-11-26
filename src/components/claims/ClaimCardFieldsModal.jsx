@@ -25,11 +25,19 @@ const AVAILABLE_FIELDS = [
 ];
 
 export default function ClaimCardFieldsModal({ isOpen, onClose, selectedFields, onSave }) {
-  const [fields, setFields] = useState(selectedFields || ['client_name', 'make_model', 'insurer']);
+  // Ensure mandatory fields are always included
+  const initialFields = selectedFields || [];
+  const mergedFields = [...MANDATORY_FIELDS, ...initialFields.filter(f => !MANDATORY_FIELDS.includes(f))];
+  const [fields, setFields] = useState(mergedFields);
 
   if (!isOpen) return null;
 
+  const isMandatory = (fieldId) => MANDATORY_FIELDS.includes(fieldId);
+
   const toggleField = (fieldId) => {
+    // Don't allow removing mandatory fields
+    if (isMandatory(fieldId)) return;
+    
     if (fields.includes(fieldId)) {
       setFields(fields.filter(f => f !== fieldId));
     } else {
