@@ -346,6 +346,13 @@ export default function ClaimsPage() {
             </p>
           </div>
           <div className="flex gap-2">
+            <Button
+              onClick={() => setShowFieldsModal(true)}
+              className="neomorph-flat"
+              title="Customise card fields"
+            >
+              <Settings2 className="w-4 h-4" />
+            </Button>
             {isInternalUser && (
               <>
                 <Button
