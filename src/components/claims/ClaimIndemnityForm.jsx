@@ -2,6 +2,10 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { CalendarIcon } from 'lucide-react';
+import { format, parse, isValid } from 'date-fns';
 
 export default function ClaimIndemnityForm({ claim, onSave, onCancel }) {
   const [formData, setFormData] = useState({
@@ -40,12 +44,52 @@ export default function ClaimIndemnityForm({ claim, onSave, onCancel }) {
         <>
           <div>
             <label className="block text-sm font-medium mb-2">Driver's Date of Birth</label>
-            <Input
-              type="date"
-              value={formData.indemnity_driver_dob}
-              onChange={(e) => setFormData({ ...formData, indemnity_driver_dob: e.target.value })}
-              className="neomorph-inset"
-            />
+            <Popover>
+              <div className="relative">
+                <Input
+                  type="text"
+                  placeholder="DD/MM/YYYY"
+                  value={formData.indemnity_driver_dob ? (() => {
+                    try {
+                      const d = new Date(formData.indemnity_driver_dob);
+                      return isValid(d) ? format(d, 'dd/MM/yyyy') : formData.indemnity_driver_dob;
+                    } catch {
+                      return formData.indemnity_driver_dob;
+                    }
+                  })() : ''}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    const parsed = parse(val, 'dd/MM/yyyy', new Date());
+                    if (isValid(parsed)) {
+                      setFormData({ ...formData, indemnity_driver_dob: format(parsed, 'yyyy-MM-dd') });
+                    } else {
+                      setFormData({ ...formData, indemnity_driver_dob: val });
+                    }
+                  }}
+                  className="neomorph-inset pr-10"
+                />
+                <PopoverTrigger asChild>
+                  <button
+                    type="button"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-foreground-muted hover:text-foreground"
+                  >
+                    <CalendarIcon className="w-4 h-4" />
+                  </button>
+                </PopoverTrigger>
+              </div>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={formData.indemnity_driver_dob ? new Date(formData.indemnity_driver_dob) : undefined}
+                  onSelect={(date) => {
+                    if (date) {
+                      setFormData({ ...formData, indemnity_driver_dob: format(date, 'yyyy-MM-dd') });
+                    }
+                  }}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
           </div>
 
       <div>
