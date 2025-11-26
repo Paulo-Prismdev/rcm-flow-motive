@@ -200,8 +200,22 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
     enabled: !!claim.linked_parts_id,
   });
 
+  const { data: currentUser } = useQuery({
+    queryKey: ['currentUser'],
+    queryFn: () => base44.auth.me(),
+  });
+
   const handleUpdate = async (updatedData) => {
     const statusChanged = updatedData.job_status && updatedData.job_status !== claim.job_status;
+    
+    // Log all changes to activity log
+    await logChanges({
+      parentId: claim.id,
+      parentType: 'Claim',
+      oldData: claim,
+      newData: updatedData,
+      user: currentUser,
+    });
     
     if (statusChanged) {
       const oldStatus = claim.job_status || 'New';
@@ -222,6 +236,7 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
       }
     }
     
+    queryClient.invalidateQueries({ queryKey: ['activityLogs', claim.id] });
     onUpdate(updatedData);
   };
 
