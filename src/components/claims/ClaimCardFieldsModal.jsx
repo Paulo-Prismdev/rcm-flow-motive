@@ -1,18 +1,21 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { X, GripVertical, Check } from "lucide-react";
+import { X, GripVertical, Check, Lock } from "lucide-react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+
+// These fields are always shown and cannot be removed
+const MANDATORY_FIELDS = ['client_name', 'make_model', 'loss_date', 'referrer'];
 
 const AVAILABLE_FIELDS = [
   { id: 'client_name', label: 'Client Name' },
   { id: 'make_model', label: 'Vehicle Make/Model' },
-  { id: 'insurer', label: 'Insurer' },
+  { id: 'loss_date', label: 'Loss Date' },
   { id: 'referrer', label: 'Referrer' },
+  { id: 'insurer', label: 'Insurer' },
   { id: 'bodyshop', label: 'Bodyshop' },
   { id: 'claim_type', label: 'Claim Type' },
   { id: 'booking_in_date', label: 'Booking In Date' },
   { id: 'ecd', label: 'ECD' },
-  { id: 'loss_date', label: 'Loss Date' },
   { id: 'authority_cost_gross', label: 'Authority Cost' },
   { id: 'final_repair_cost', label: 'Final Repair Cost' },
   { id: 'claim_ref', label: 'Claim Reference' },
