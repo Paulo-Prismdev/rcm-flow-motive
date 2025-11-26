@@ -18,6 +18,7 @@ import ChaserEmailSettings from './pages/ChaserEmailSettings';
 import Reports from './pages/Reports';
 import Tasks from './pages/Tasks';
 import RepairerPortal from './pages/RepairerPortal';
+import ReferrerPortal from './pages/ReferrerPortal';
 import __Layout from './Layout.jsx';
 
 
@@ -42,6 +43,7 @@ export const PAGES = {
     "Reports": Reports,
     "Tasks": Tasks,
     "RepairerPortal": RepairerPortal,
+    "ReferrerPortal": ReferrerPortal,
 }
 
 export const pagesConfig = {
