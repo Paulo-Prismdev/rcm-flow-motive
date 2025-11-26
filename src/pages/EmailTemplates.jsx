@@ -405,28 +405,28 @@ function TemplateFormModal({ isOpen, onClose, template, onSubmit, isLoading }) {
             />
           </div>
 
-          <div className="flex justify-end gap-3">
+          <div className="flex justify-end gap-3 pt-4 border-t">
             <Button
               type="button"
+              variant="outline"
               onClick={onClose}
               disabled={isLoading}
-              className="neomorph-flat px-6 py-3 font-medium transition-all active:neomorph-pressed"
             >
               Cancel
             </Button>
             <Button
-              type="submit"
+              type="button"
               disabled={isLoading}
-              className="neomorph-flat px-6 py-3 font-medium text-accent transition-all active:neomorph-pressed flex items-center gap-2"
+              onClick={() => onSubmit(formData)}
             >
               {isLoading ? (
                 <>
-                  <Save className="w-4 h-4 animate-spin" />
+                  <Save className="w-4 h-4 mr-2 animate-spin" />
                   Saving...
                 </>
               ) : (
                 <>
-                  <Save className="w-4 h-4" />
+                  <Save className="w-4 h-4 mr-2" />
                   {template ? 'Update Template' : 'Create Template'}
                 </>
               )}
