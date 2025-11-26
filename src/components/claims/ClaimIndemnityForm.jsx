@@ -40,37 +40,12 @@ export default function ClaimIndemnityForm({ claim, onSave, onCancel }) {
         <>
           <div>
             <label className="block text-sm font-medium mb-2">Driver's Date of Birth</label>
-            <div className="flex gap-2">
-              <Input
-                type="text"
-                placeholder="DD/MM/YYYY"
-                value={formData.indemnity_driver_dob ? (() => {
-                  const d = new Date(formData.indemnity_driver_dob);
-                  if (isNaN(d.getTime())) return formData.indemnity_driver_dob;
-                  return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
-                })() : ''}
-                onChange={(e) => {
-                  const val = e.target.value;
-                  // Try to parse DD/MM/YYYY format
-                  const match = val.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-                  if (match) {
-                    const [, day, month, year] = match;
-                    const isoDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
-                    setFormData({ ...formData, indemnity_driver_dob: isoDate });
-                  } else {
-                    // Store raw value for editing
-                    setFormData({ ...formData, indemnity_driver_dob: val });
-                  }
-                }}
-                className="neomorph-inset flex-1"
-              />
-              <Input
-                type="date"
-                value={formData.indemnity_driver_dob && /^\d{4}-\d{2}-\d{2}$/.test(formData.indemnity_driver_dob) ? formData.indemnity_driver_dob : ''}
-                onChange={(e) => setFormData({ ...formData, indemnity_driver_dob: e.target.value })}
-                className="neomorph-inset w-auto"
-              />
-            </div>
+            <Input
+              type="date"
+              value={formData.indemnity_driver_dob}
+              onChange={(e) => setFormData({ ...formData, indemnity_driver_dob: e.target.value })}
+              className="neomorph-inset"
+            />
           </div>
 
       <div>
