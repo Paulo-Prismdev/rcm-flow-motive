@@ -3,9 +3,85 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Calendar } from '@/components/ui/calendar';
 import { CalendarIcon } from 'lucide-react';
 import { format, parse, isValid } from 'date-fns';
+
+// Custom DOB Calendar with year/month dropdowns
+function DOBCalendar({ selected, onSelect }) {
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: 100 }, (_, i) => currentYear - i);
+  const months = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+
+  const [viewDate, setViewDate] = useState(selected || new Date(currentYear - 30, 0, 1));
+
+  const daysInMonth = new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 0).getDate();
+  const firstDayOfMonth = new Date(viewDate.getFullYear(), viewDate.getMonth(), 1).getDay();
+  
+  const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+  const blanks = Array.from({ length: firstDayOfMonth }, (_, i) => i);
+
+  const handleDayClick = (day) => {
+    const newDate = new Date(viewDate.getFullYear(), viewDate.getMonth(), day);
+    onSelect(newDate);
+  };
+
+  const isSelected = (day) => {
+    if (!selected) return false;
+    return selected.getDate() === day && 
+           selected.getMonth() === viewDate.getMonth() && 
+           selected.getFullYear() === viewDate.getFullYear();
+  };
+
+  return (
+    <div className="p-3 w-72">
+      <div className="flex gap-2 mb-3">
+        <select
+          value={viewDate.getMonth()}
+          onChange={(e) => setViewDate(new Date(viewDate.getFullYear(), parseInt(e.target.value), 1))}
+          className="flex-1 px-2 py-1.5 text-sm border rounded-md bg-background"
+        >
+          {months.map((month, i) => (
+            <option key={month} value={i}>{month}</option>
+          ))}
+        </select>
+        <select
+          value={viewDate.getFullYear()}
+          onChange={(e) => setViewDate(new Date(parseInt(e.target.value), viewDate.getMonth(), 1))}
+          className="w-24 px-2 py-1.5 text-sm border rounded-md bg-background"
+        >
+          {years.map(year => (
+            <option key={year} value={year}>{year}</option>
+          ))}
+        </select>
+      </div>
+      <div className="grid grid-cols-7 gap-1 text-center text-xs font-medium text-foreground-muted mb-1">
+        {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(d => (
+          <div key={d} className="py-1">{d}</div>
+        ))}
+      </div>
+      <div className="grid grid-cols-7 gap-1">
+        {blanks.map(i => (
+          <div key={`blank-${i}`} />
+        ))}
+        {days.map(day => (
+          <button
+            key={day}
+            type="button"
+            onClick={() => handleDayClick(day)}
+            className={`p-2 text-sm rounded-md hover:bg-accent/20 transition-colors ${
+              isSelected(day) ? 'bg-accent text-accent-foreground font-bold' : ''
+            }`}
+          >
+            {day}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function ClaimIndemnityForm({ claim, onSave, onCancel }) {
   const [formData, setFormData] = useState({
@@ -78,15 +154,13 @@ export default function ClaimIndemnityForm({ claim, onSave, onCancel }) {
                 </PopoverTrigger>
               </div>
               <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
+                <DOBCalendar
                   selected={formData.indemnity_driver_dob ? new Date(formData.indemnity_driver_dob) : undefined}
                   onSelect={(date) => {
                     if (date) {
                       setFormData({ ...formData, indemnity_driver_dob: format(date, 'yyyy-MM-dd') });
                     }
                   }}
-                  initialFocus
                 />
               </PopoverContent>
             </Popover>
