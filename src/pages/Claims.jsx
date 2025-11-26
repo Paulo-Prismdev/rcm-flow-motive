@@ -443,9 +443,8 @@ export default function ClaimsPage() {
                     className="neomorph-inset w-full px-3 py-2 rounded-lg border-0 text-sm"
                   >
                     <option value="">All Types</option>
-                    <option value="Own Damage">Own Damage</option>
-                    <option value="Third Party">Third Party</option>
-                    <option value="Fault Claim">Fault Claim</option>
+                    <option value="Credit Repair">Credit Repair</option>
+                        <option value="Fault Claim">Fault Claim</option>
                     <option value="Non-Fault Claim">Non-Fault Claim</option>
                     <option value="Total Loss">Total Loss</option>
                     <option value="Glass Claim">Glass Claim</option>
