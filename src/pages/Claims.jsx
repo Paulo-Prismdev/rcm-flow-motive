@@ -99,7 +99,9 @@ export default function ClaimsPage() {
   });
 
   const isInternalUser = currentUser?.user_type === 'internal' || currentUser?.role === 'admin';
-  const userCardFields = currentUser?.claim_card_fields || ['client_name', 'make_model', 'insurer'];
+  const MANDATORY_FIELDS = ['client_name', 'make_model', 'loss_date', 'referrer'];
+  const savedFields = currentUser?.claim_card_fields || [];
+  const userCardFields = [...MANDATORY_FIELDS, ...savedFields.filter(f => !MANDATORY_FIELDS.includes(f))];
 
   const updateUserFieldsMutation = useMutation({
     mutationFn: (fields) => base44.auth.updateMe({ claim_card_fields: fields }),
