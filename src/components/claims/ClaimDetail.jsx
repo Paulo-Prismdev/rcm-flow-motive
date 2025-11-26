@@ -145,8 +145,6 @@ const DETAIL_SECTIONS = [
   { id: 'dates', label: 'Key Dates', icon: Calendar },
   { id: 'bodyshop', label: 'Bodyshop Details', icon: Wrench },
   { id: 'estimate', label: 'Estimate Details', icon: Calculator },
-  { id: 'timelogs', label: 'Time Logs', icon: Clock },
-  { id: 'activitylog', label: 'Activity Log', icon: History },
 ];
 
 export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser = true }) {
@@ -725,12 +723,6 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
             </div>
           </EditableSection>
         );
-
-      case 'timelogs':
-        return <TimeLogSection parentId={claim.id} parentType="Claim" />;
-
-      case 'activitylog':
-        return <ActivityLogSection parentId={claim.id} parentType="Claim" />;
 
       default:
         return null;
