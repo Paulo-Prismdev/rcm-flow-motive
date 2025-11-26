@@ -245,6 +245,46 @@ export default function ClaimsPage() {
     );
   }
 
+  // Field label mapping
+  const FIELD_LABELS = {
+    client_name: 'Client',
+    make_model: 'Vehicle',
+    insurer: 'Insurer',
+    referrer: 'Referrer',
+    bodyshop: 'Bodyshop',
+    claim_type: 'Type',
+    booking_in_date: 'Booking In',
+    ecd: 'ECD',
+    loss_date: 'Loss Date',
+    authority_cost_gross: 'Authority',
+    final_repair_cost: 'Final Cost',
+    claim_ref: 'Claim Ref',
+    policy_number: 'Policy No',
+    client_phone: 'Phone',
+    vehicle_location: 'Location',
+  };
+
+  const getFieldValue = (claim, fieldId) => {
+    const value = claim[fieldId];
+    if (!value) return 'N/A';
+    
+    // Format dates
+    if (['booking_in_date', 'ecd', 'loss_date'].includes(fieldId)) {
+      try {
+        return format(new Date(value), 'dd/MM/yyyy');
+      } catch {
+        return value;
+      }
+    }
+    
+    // Format currency
+    if (['authority_cost_gross', 'final_repair_cost'].includes(fieldId)) {
+      return `£${Number(value).toLocaleString()}`;
+    }
+    
+    return value;
+  };
+
   // Render claim card
   const renderClaimCard = (claim) => {
     const updateStatus = calculateUpdateStatus(claim);
@@ -280,19 +320,13 @@ export default function ClaimsPage() {
               )}
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
-              <div>
-                <span className="text-foreground-muted">Client:</span>{' '}
-                <span className="font-medium">{claim.client_name || 'N/A'}</span>
-              </div>
-              <div>
-                <span className="text-foreground-muted">Vehicle:</span>{' '}
-                <span className="font-medium">{claim.make_model || 'N/A'}</span>
-              </div>
-              <div>
-                <span className="text-foreground-muted">Insurer:</span>{' '}
-                <span className="font-medium">{claim.insurer || 'N/A'}</span>
-              </div>
+            <div className={`grid grid-cols-1 md:grid-cols-${Math.min(userCardFields.length, 4)} gap-2 text-sm`}>
+              {userCardFields.map(fieldId => (
+                <div key={fieldId}>
+                  <span className="text-foreground-muted">{FIELD_LABELS[fieldId] || fieldId}:</span>{' '}
+                  <span className="font-medium">{getFieldValue(claim, fieldId)}</span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
