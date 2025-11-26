@@ -217,7 +217,7 @@ export default function EmailTemplates() {
             createMutation.mutate(data);
           }
         }}
-        isLoading={createMutation.isLoading || updateMutation.isLoading}
+        isLoading={createMutation.isPending || updateMutation.isPending}
       />
     </div>
   );
