@@ -953,24 +953,22 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
             </div>
             <div className="flex gap-3 flex-wrap">
               {linkedOriginalClaim && (
-                <button
-                  onClick={() => openLinkedItem(createPageUrl('Claims'), linkedOriginalClaim.id)}
+                <Link
+                  to={`${createPageUrl('Claims')}?id=${linkedOriginalClaim.id}`}
                   className="neomorph-flat px-4 py-2 text-sm hover:neomorph transition-all cursor-pointer"
-                  title="Click to open in new window"
                 >
                   <span className="text-gray-500">Original Fault Claim:</span>{' '}
                   <span className="font-medium text-blue-600 underline">{linkedOriginalClaim.job_number || linkedOriginalClaim.reg}</span>
-                </button>
+                </Link>
               )}
               {linkedThirdPartyClaim && (
-                <button
-                  onClick={() => openLinkedItem(createPageUrl('Claims'), linkedThirdPartyClaim.id)}
+                <Link
+                  to={`${createPageUrl('Claims')}?id=${linkedThirdPartyClaim.id}`}
                   className="neomorph-flat px-4 py-2 text-sm hover:neomorph transition-all cursor-pointer"
-                  title="Click to open in new window"
                 >
                   <span className="text-gray-500">Third Party Claim:</span>{' '}
                   <span className="font-medium text-indigo-600 underline">{linkedThirdPartyClaim.job_number || linkedThirdPartyClaim.reg}</span>
-                </button>
+                </Link>
               )}
               {linkedEstimate && (
                 <button
