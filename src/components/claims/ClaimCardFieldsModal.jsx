@@ -101,14 +101,18 @@ export default function ClaimCardFieldsModal({ isOpen, onClose, selectedFields, 
                               <GripVertical className="w-4 h-4 text-foreground-muted cursor-grab" />
                             </div>
                             <span className="flex-1 text-sm font-medium">{field.label}</span>
-                            <Button
-                              onClick={() => toggleField(field.id)}
-                              variant="ghost"
-                              size="icon"
-                              className="h-6 w-6"
-                            >
-                              <X className="w-3 h-3" />
-                            </Button>
+                            {isMandatory(field.id) ? (
+                              <Lock className="w-3 h-3 text-foreground-muted" title="Required field" />
+                            ) : (
+                              <Button
+                                onClick={() => toggleField(field.id)}
+                                variant="ghost"
+                                size="icon"
+                                className="h-6 w-6"
+                              >
+                                <X className="w-3 h-3" />
+                              </Button>
+                            )}
                           </div>
                         )}
                       </Draggable>
