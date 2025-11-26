@@ -4,7 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { X, Clock, User, Calendar, Mail } from 'lucide-react';
+import { X, Clock, User, Calendar, Mail, Plus } from 'lucide-react';
 import { format } from 'date-fns';
 import {
   Dialog,
@@ -42,6 +42,7 @@ const UPDATE_TYPE_COLORS = {
 };
 
 export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onClose, onUpdateCreated }) {
+  const [showForm, setShowForm] = useState(false);
   const [newUpdate, setNewUpdate] = useState({
     update_type: 'Other',
     description: '',
@@ -116,6 +117,7 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
       });
       setSendEmail(false);
       setSelectedEmails([]);
+      setShowForm(false);
     },
   });
 
@@ -221,9 +223,40 @@ This update was sent from ART-TEC One Claims Management System
         </DialogHeader>
 
         <div className="flex-1 overflow-y-auto space-y-4 pr-2">
-          {/* New Update Form */}
+          {/* Add Update Button or Form */}
+          {!showForm ? (
+            <Button
+              onClick={() => setShowForm(true)}
+              className="w-full glass-button px-4 py-3 flex items-center justify-center gap-2 text-accent"
+            >
+              <Plus className="w-4 h-4" />
+              Add New Update
+            </Button>
+          ) : (
           <div className="glass-elevated p-4 border-l-4 border-accent">
-            <h3 className="font-semibold mb-3 text-sm">Add New Update</h3>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-semibold text-sm">Add New Update</h3>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setShowForm(false);
+                  setNewUpdate({
+                    update_type: 'Other',
+                    description: '',
+                    next_steps: '',
+                    due_date_for_next_action: '',
+                    new_status: currentStatus || ''
+                  });
+                  setSendEmail(false);
+                  setSelectedEmails([]);
+                }}
+                className="text-foreground-muted hover:text-foreground"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
             <form onSubmit={handleSubmit} className="space-y-3">
               <div>
                 <label className="block text-xs text-foreground-muted mb-1">Update Type *</label>
@@ -347,6 +380,7 @@ This update was sent from ART-TEC One Claims Management System
                 <Button
                   type="button"
                   onClick={() => {
+                    setShowForm(false);
                     setNewUpdate({
                       update_type: 'Other',
                       description: '',
@@ -359,18 +393,19 @@ This update was sent from ART-TEC One Claims Management System
                   }}
                   className="glass-button px-4 py-2 text-xs"
                 >
-                  Clear
+                  Cancel
                 </Button>
                 <Button
                   type="submit"
-                  disabled={createUpdateMutation.isLoading || !newUpdate.description.trim()}
+                  disabled={createUpdateMutation.isPending || !newUpdate.description.trim()}
                   className="glass-button px-4 py-2 text-xs text-accent"
                 >
-                  {createUpdateMutation.isLoading ? 'Adding...' : 'Add Update'}
+                  {createUpdateMutation.isPending ? 'Adding...' : 'Add Update'}
                 </Button>
               </div>
             </form>
           </div>
+          )}
 
           {/* Updates Timeline */}
           <div>
