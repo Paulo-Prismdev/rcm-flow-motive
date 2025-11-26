@@ -523,9 +523,10 @@ export default function ClaimsPage() {
           <div className="space-y-6">
             {availableStatuses.map(statusGroup => {
               const claimsInGroup = filteredClaims.filter(claim => claim.job_status === statusGroup);
-              
-              // Only show groups that have claims (unless a specific status is filtered)
-              if (claimsInGroup.length === 0 && !statusFilter) return null;
+
+              // Hide empty groups, and when filtering by status only show that status
+              if (claimsInGroup.length === 0) return null;
+              if (statusFilter && statusGroup !== statusFilter) return null;
 
               return (
                 <div key={statusGroup} className="neomorph p-4">
