@@ -138,20 +138,23 @@ export default function ClaimsPage() {
   const uniqueInsurers = [...new Set(claims.map(c => c.insurer).filter(Boolean))].sort();
   const uniqueReferrers = [...new Set(claims.map(c => c.referrer).filter(Boolean))].sort();
 
-  // URL parameter handling - only on initial load
-  const hasLoadedFromUrl = React.useRef(false);
+  // URL parameter handling - watch for changes
+  const lastProcessedId = React.useRef(null);
   useEffect(() => {
-    if (hasLoadedFromUrl.current) return;
     const urlParams = new URLSearchParams(window.location.search);
     const claimId = urlParams.get('id');
-    if (claimId && claims.length > 0) {
+    
+    // Only process if there's a new claim ID in the URL
+    if (claimId && claimId !== lastProcessedId.current && claims.length > 0) {
       const claim = claims.find(c => c.id === claimId);
       if (claim) {
         setSelectedClaim(claim);
-        hasLoadedFromUrl.current = true;
+        lastProcessedId.current = claimId;
+        // Clear the URL parameter after processing
+        window.history.replaceState({}, '', window.location.pathname);
       }
     }
-  }, [claims]);
+  }, [claims, window.location.search]);
 
   const createMutation = useMutation({
     mutationFn: (newClaim) => base44.entities.Claim.create(newClaim),
