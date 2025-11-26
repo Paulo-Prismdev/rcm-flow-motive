@@ -336,6 +336,13 @@ export default function ClaimsPage() {
 
   return (
     <div className="h-full flex flex-col gap-4 md:gap-6">
+      <ClaimCardFieldsModal
+        isOpen={showFieldsModal}
+        onClose={() => setShowFieldsModal(false)}
+        selectedFields={userCardFields}
+        onSave={(fields) => updateUserFieldsMutation.mutate(fields)}
+      />
+
       {/* Header */}
       <div className="neomorph p-4 md:p-6 flex-shrink-0">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
