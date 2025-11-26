@@ -983,7 +983,7 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
                 <ChevronDown className="w-4 h-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-full" align="start">
+            <DropdownMenuContent className="w-full max-h-80 overflow-y-auto" align="start" side="bottom">
               {DETAIL_SECTIONS.map(section => (
                 <DropdownMenuItem
                   key={section.id}
