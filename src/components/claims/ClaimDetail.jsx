@@ -589,15 +589,19 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
       case 'indemnity':
         if (!claim.requires_indemnity) {
           return (
-            <div className="neomorph-flat p-4 md:p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <Shield className="w-5 h-5 text-gold" />
-                <h3 className="font-bold">Indemnity Details</h3>
+            <EditableSection 
+              title="Indemnity Details" 
+              icon={Shield} 
+              claim={claim} 
+              onUpdate={handleUpdate} 
+              EditComponent={ClaimIndemnityForm} 
+              canEdit={canEdit}
+            >
+              <div className="text-center py-8 text-gray-500">
+                <p className="mb-4">This claim does not currently require indemnity checks.</p>
+                <p className="text-sm">Click the edit button to enable indemnity details if needed.</p>
               </div>
-              <div className="text-center py-12 text-gray-500">
-                <p>This claim does not require indemnity checks.</p>
-              </div>
-            </div>
+            </EditableSection>
           );
         }
         

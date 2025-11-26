@@ -5,6 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 
 export default function ClaimIndemnityForm({ claim, onSave, onCancel }) {
   const [formData, setFormData] = useState({
+    requires_indemnity: claim.requires_indemnity || false,
     indemnity_driver_dob: claim.indemnity_driver_dob || '',
     indemnity_registered_owner: claim.indemnity_registered_owner || '',
     indemnity_pending_prosecutions: claim.indemnity_pending_prosecutions || '',
@@ -22,8 +23,23 @@ export default function ClaimIndemnityForm({ claim, onSave, onCancel }) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
-        <label className="block text-sm font-medium mb-2">Driver's Date of Birth</label>
+      <div className="flex items-center gap-3 p-3 neomorph-inset rounded-lg">
+        <input
+          type="checkbox"
+          id="requires_indemnity"
+          checked={formData.requires_indemnity}
+          onChange={(e) => setFormData({ ...formData, requires_indemnity: e.target.checked })}
+          className="w-5 h-5"
+        />
+        <label htmlFor="requires_indemnity" className="text-sm font-medium">
+          This claim requires indemnity details
+        </label>
+      </div>
+
+      {formData.requires_indemnity && (
+        <>
+          <div>
+            <label className="block text-sm font-medium mb-2">Driver's Date of Birth</label>
         <Input
           type="date"
           value={formData.indemnity_driver_dob}
@@ -96,16 +112,18 @@ export default function ClaimIndemnityForm({ claim, onSave, onCancel }) {
         />
       </div>
 
-      <div>
-        <label className="block text-sm font-medium mb-2">Are there any modifications to the policyholder's vehicle?</label>
-        <Textarea
-          value={formData.indemnity_vehicle_modifications}
-          onChange={(e) => setFormData({ ...formData, indemnity_vehicle_modifications: e.target.value })}
-          placeholder="Enter details of modifications (or 'No' if none)..."
-          className="neomorph-inset"
-          rows={2}
-        />
-      </div>
+          <div>
+            <label className="block text-sm font-medium mb-2">Are there any modifications to the policyholder's vehicle?</label>
+            <Textarea
+              value={formData.indemnity_vehicle_modifications}
+              onChange={(e) => setFormData({ ...formData, indemnity_vehicle_modifications: e.target.value })}
+              placeholder="Enter details of modifications (or 'No' if none)..."
+              className="neomorph-inset"
+              rows={2}
+            />
+          </div>
+        </>
+      )}
 
       <div className="flex gap-3 pt-4">
         <Button type="button" onClick={onCancel} className="neomorph-flat flex-1">
