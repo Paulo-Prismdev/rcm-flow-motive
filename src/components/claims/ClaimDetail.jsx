@@ -817,7 +817,7 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
                     {!isClosedStatus && claim.update_status_flag && (
                       <button
                         onClick={() => setIsUpdateTrackingOpen(true)}
-                        className="neomorph-flat hover:neomorph transition-all cursor-pointer"
+                        className="hover:opacity-80 transition-all cursor-pointer rounded-md"
                         title="Update Tracking"
                       >
                         <UpdateStatusBadge status={claim.update_status_flag} small />
