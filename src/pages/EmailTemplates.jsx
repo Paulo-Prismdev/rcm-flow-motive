@@ -349,7 +349,10 @@ function TemplateFormModal({ isOpen, onClose, template, onSubmit, isLoading }) {
                   {availablePlaceholders.map(({ tag, label }) => (
                     <DropdownMenuItem
                       key={tag}
-                      onClick={() => insertPlaceholder(tag, 'subject')}
+                      onSelect={(e) => {
+                        e.preventDefault();
+                        insertPlaceholder(tag, 'subject');
+                      }}
                     >
                       <span className="font-mono text-xs mr-2">{tag}</span>
                       <span className="text-foreground-muted">{label}</span>
@@ -380,7 +383,10 @@ function TemplateFormModal({ isOpen, onClose, template, onSubmit, isLoading }) {
                   {availablePlaceholders.map(({ tag, label }) => (
                     <DropdownMenuItem
                       key={tag}
-                      onClick={() => insertPlaceholder(tag, 'body')}
+                      onSelect={(e) => {
+                        e.preventDefault();
+                        insertPlaceholder(tag, 'body');
+                      }}
                     >
                       <span className="font-mono text-xs mr-2">{tag}</span>
                       <span className="text-foreground-muted">{label}</span>
