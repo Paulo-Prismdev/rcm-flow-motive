@@ -126,7 +126,9 @@ function DetailRow({ label, value, isCurrency = false, isDate = false, isStatus 
     );
 }
 
-import { ListTodo } from "lucide-react";
+import { ListTodo, History } from "lucide-react";
+import ActivityLogSection from '../shared/ActivityLogSection';
+import { logActivity, logChanges } from '../shared/useActivityLogger';
 
 const DETAIL_SECTIONS = [
   { id: 'status', label: 'Status & Overview', icon: Clock },
@@ -144,6 +146,7 @@ const DETAIL_SECTIONS = [
   { id: 'bodyshop', label: 'Bodyshop Details', icon: Wrench },
   { id: 'estimate', label: 'Estimate Details', icon: Calculator },
   { id: 'timelogs', label: 'Time Logs', icon: Clock },
+  { id: 'activitylog', label: 'Activity Log', icon: History },
 ];
 
 export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser = true }) {
