@@ -810,50 +810,26 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
                             )}
                           </div>
                       </div>
-                  </div>
-
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <StatusBadge status={claim.job_status || 'New'} />
-                    {!isClosedStatus && claim.update_status_flag && (
-                      <button
-                        onClick={() => setIsUpdateTrackingOpen(true)}
-                        className="hover:opacity-80 transition-all cursor-pointer rounded-md"
-                        title="Update Tracking"
-                      >
-                        <UpdateStatusBadge status={claim.update_status_flag} small />
-                      </button>
-                    )}
-                    {claim.archived && (
-                      <span className="neomorph-flat px-2 md:px-3 py-0.5 md:py-1 text-xs font-medium text-gray-600">
-                        Archived
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="flex items-center justify-end gap-1.5 md:gap-2">
-                      <div className="flex items-center gap-1.5 md:gap-2">
+                      <div className="flex items-center gap-1.5 md:gap-2 flex-shrink-0">
                         <Button 
                           onClick={() => setIsClaimUpdatesOpen(true)}
-                          className="neomorph-flat px-2 md:px-4 py-1.5 md:py-3 bg-accent/10 hover:bg-accent/20 font-medium text-accent text-xs md:text-sm"
+                          className="neomorph-flat px-2 md:px-4 py-1.5 md:py-2 bg-accent/10 hover:bg-accent/20 font-medium text-accent text-xs md:text-sm"
                           title="Official Updates"
                         >
                           Updates
                         </Button>
-                        <Button 
-                          onClick={() => setIsNotesOpen(true)}
-                          className="neomorph-flat p-1.5 md:p-3"
-                          title="Internal Notes"
-                        >
-                          <Edit className="w-3.5 h-3.5 md:w-4 md:h-4" />
-                        </Button>
                         {canEdit && (
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button className="neomorph-flat p-1.5 md:p-3">
+                              <Button className="neomorph-flat p-1.5 md:p-2">
                                 <ChevronDown className="w-3.5 h-3.5 md:w-4 md:h-4" />
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-56">
+                              <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsNotesOpen(true); }}>
+                                <Edit className="w-4 h-4 mr-2" />
+                                Internal Notes
+                              </DropdownMenuItem>
                               <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsAttachmentsOpen(true); }}>
                                 <FileText className="w-4 h-4 mr-2" />
                                 Documents
@@ -890,6 +866,24 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
                           </DropdownMenu>
                         )}
                       </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <StatusBadge status={claim.job_status || 'New'} />
+                    {!isClosedStatus && claim.update_status_flag && (
+                      <button
+                        onClick={() => setIsUpdateTrackingOpen(true)}
+                        className="hover:opacity-80 transition-all cursor-pointer rounded-md"
+                        title="Update Tracking"
+                      >
+                        <UpdateStatusBadge status={claim.update_status_flag} small />
+                      </button>
+                    )}
+                    {claim.archived && (
+                      <span className="neomorph-flat px-2 md:px-3 py-0.5 md:py-1 text-xs font-medium text-gray-600">
+                        Archived
+                      </span>
+                    )}
                   </div>
               </div>
           </div>
