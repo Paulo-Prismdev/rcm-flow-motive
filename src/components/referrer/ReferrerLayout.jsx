@@ -115,14 +115,22 @@ export default function ReferrerLayout({ children }) {
       <header className="neomorph mb-2 mx-2 md:mx-3 mt-2 md:mt-3 p-3 md:p-4 flex-shrink-0">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="flex items-baseline gap-2">
-              <span style={{ fontFamily: "'Palatino Linotype', serif", fontSize: '1.5rem' }}>
-                <span style={{ color: 'var(--accent)' }}>A</span>
-                <span>RTEC</span>
-                <span style={{ color: 'var(--accent)' }}>H</span>
-              </span>
-              <span style={{ fontWeight: 300, fontSize: '1.5rem' }}>One</span>
-            </div>
+            {referrer?.logo_url ? (
+              <img 
+                src={referrer.logo_url} 
+                alt={referrer.name} 
+                className="h-10 md:h-12 max-w-[200px] object-contain"
+              />
+            ) : (
+              <div className="flex items-baseline gap-2">
+                <span style={{ fontFamily: "'Palatino Linotype', serif", fontSize: '1.5rem' }}>
+                  <span style={{ color: 'var(--accent)' }}>A</span>
+                  <span>RTEC</span>
+                  <span style={{ color: 'var(--accent)' }}>H</span>
+                </span>
+                <span style={{ fontWeight: 300, fontSize: '1.5rem' }}>One</span>
+              </div>
+            )}
             <span className="text-xs px-2 py-1 rounded-full bg-accent/20 text-accent font-medium">
               Referrer Portal
             </span>
