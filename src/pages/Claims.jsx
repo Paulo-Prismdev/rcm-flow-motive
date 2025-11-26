@@ -3,12 +3,14 @@ import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Plus, Search, Archive, Filter, X, AlertTriangle } from 'lucide-react';
+import { Plus, Search, Archive, Filter, X, AlertTriangle, Settings2 } from 'lucide-react';
 import ClaimDetail from '../components/claims/ClaimDetail';
 import ClaimForm from '../components/claims/ClaimForm';
 import StatusBadge from '../components/shared/StatusBadge';
 import UpdateStatusBadge from '../components/shared/UpdateStatusBadge';
 import { formatUKRegistration } from '../components/shared/formatRegistration';
+import ClaimCardFieldsModal from '../components/claims/ClaimCardFieldsModal';
+import { format } from 'date-fns';
 
 // Helper function to calculate update status
 const calculateUpdateStatus = (claim) => {
