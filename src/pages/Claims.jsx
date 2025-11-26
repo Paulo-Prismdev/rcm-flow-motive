@@ -138,14 +138,17 @@ export default function ClaimsPage() {
   const uniqueInsurers = [...new Set(claims.map(c => c.insurer).filter(Boolean))].sort();
   const uniqueReferrers = [...new Set(claims.map(c => c.referrer).filter(Boolean))].sort();
 
-  // URL parameter handling
+  // URL parameter handling - only on initial load
+  const hasLoadedFromUrl = React.useRef(false);
   useEffect(() => {
+    if (hasLoadedFromUrl.current) return;
     const urlParams = new URLSearchParams(window.location.search);
     const claimId = urlParams.get('id');
     if (claimId && claims.length > 0) {
       const claim = claims.find(c => c.id === claimId);
       if (claim) {
         setSelectedClaim(claim);
+        hasLoadedFromUrl.current = true;
       }
     }
   }, [claims]);
