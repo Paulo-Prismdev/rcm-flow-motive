@@ -714,6 +714,9 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
       case 'timelogs':
         return <TimeLogSection parentId={claim.id} parentType="Claim" />;
 
+      case 'activitylog':
+        return <ActivityLogSection parentId={claim.id} parentType="Claim" />;
+
       default:
         return null;
     }
