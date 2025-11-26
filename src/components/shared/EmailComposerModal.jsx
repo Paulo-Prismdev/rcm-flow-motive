@@ -4,7 +4,7 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { X, Send, Loader } from "lucide-react";
+import { X, Send, Loader, Mail } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -143,6 +143,17 @@ export default function EmailComposerModal({ isOpen, onClose, itemType, itemData
     sendEmailMutation.mutate({ to, subject, body });
   };
 
+  const handleOpenInOutlook = () => {
+    if (!to) {
+      alert('Please select a recipient');
+      return;
+    }
+    
+    const mailtoUrl = `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject || '')}&body=${encodeURIComponent(body || '')}`;
+    window.location.href = mailtoUrl;
+    onClose();
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl">
@@ -260,16 +271,25 @@ export default function EmailComposerModal({ isOpen, onClose, itemType, itemData
               type="button"
               variant="outline"
               onClick={onClose}
-              disabled={sendEmailMutation.isLoading}
+              disabled={sendEmailMutation.isPending}
             >
               Cancel
             </Button>
             <Button
-              type="submit"
-              disabled={sendEmailMutation.isLoading}
+              type="button"
+              variant="outline"
+              onClick={handleOpenInOutlook}
               className="flex items-center gap-2"
             >
-              {sendEmailMutation.isLoading ? (
+              <Mail className="w-4 h-4" />
+              Open in Outlook
+            </Button>
+            <Button
+              type="submit"
+              disabled={sendEmailMutation.isPending}
+              className="flex items-center gap-2"
+            >
+              {sendEmailMutation.isPending ? (
                 <>
                   <Loader className="w-4 h-4 animate-spin" />
                   Sending...
@@ -277,7 +297,7 @@ export default function EmailComposerModal({ isOpen, onClose, itemType, itemData
               ) : (
                 <>
                   <Send className="w-4 h-4" />
-                  Send Email
+                  Send via System
                 </>
               )}
             </Button>
