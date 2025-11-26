@@ -71,7 +71,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel }) {
     job_number: '',
     reg: '',
     job_status: 'New',
-    claim_type: 'Own Damage',
+    claim_type: 'Credit Repair',
     circumstances: '',
     loss_date: '',
     loss_time: '',
@@ -591,8 +591,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel }) {
                     onChange={(e) => handleChange('claim_type', e.target.value)}
                     className="neomorph-inset w-full px-4 py-3 text-gray-700 border-0 rounded-xl"
                   >
-                    <option value="Own Damage">Own Damage</option>
-                    <option value="Third Party">Third Party</option>
+                    <option value="Credit Repair">Credit Repair</option>
                     <option value="Fault Claim">Fault Claim</option>
                     <option value="Non-Fault Claim">Non-Fault Claim</option>
                     <option value="Total Loss">Total Loss</option>
@@ -1313,8 +1312,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel }) {
                     className="neomorph-inset w-full px-4 py-3 text-gray-700 border-0 rounded-xl"
                     required
                   >
-                    <option value="Own Damage">Own Damage</option>
-                    <option value="Third Party">Third Party</option>
+                    <option value="Credit Repair">Credit Repair</option>
                     <option value="Fault Claim">Fault Claim</option>
                     <option value="Non-Fault Claim">Non-Fault Claim</option>
                     <option value="Total Loss">Total Loss</option>

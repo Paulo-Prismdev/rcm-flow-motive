@@ -7,7 +7,7 @@ import AddressLookupInput from '../shared/AddressLookupInput';
 export default function ClaimStatusForm({ claim, onSave, onCancel }) {
     const [formData, setFormData] = useState({
         job_status: claim.job_status || 'New',
-        claim_type: claim.claim_type || 'Own Damage',
+        claim_type: claim.claim_type || 'Credit Repair',
         loss_date: claim.loss_date || '',
         loss_time: claim.loss_time || '',
         incident_location: claim.incident_location || '',
@@ -58,8 +58,7 @@ export default function ClaimStatusForm({ claim, onSave, onCancel }) {
                         onChange={e => handleChange('claim_type', e.target.value)} 
                         className="neomorph-inset w-full px-4 py-3 text-gray-700 border-0 rounded-xl"
                     >
-                        <option value="Own Damage">Own Damage</option>
-                        <option value="Third Party">Third Party</option>
+                        <option value="Credit Repair">Credit Repair</option>
                         <option value="Fault Claim">Fault Claim</option>
                         <option value="Non-Fault Claim">Non-Fault Claim</option>
                         <option value="Total Loss">Total Loss</option>
