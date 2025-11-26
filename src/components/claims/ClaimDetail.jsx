@@ -56,6 +56,7 @@ import ClaimUpdatesModal from '../shared/ClaimUpdatesModal';
 import InstructionTemplateModal from './InstructionTemplateModal';
 import { Textarea } from "@/components/ui/textarea";
 import { formatUKRegistration } from '../shared/formatRegistration';
+import { Link } from 'react-router-dom';
 
 import {
   DropdownMenu,
