@@ -151,6 +151,7 @@ const DETAIL_SECTIONS = [
 ];
 
 export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser = true }) {
+  const navigate = useNavigate();
   const [isPartsModalOpen, setIsPartsModalOpen] = useState(false);
   const [isEstimateModalOpen, setIsEstimateModalOpen] = useState(false);
   const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
