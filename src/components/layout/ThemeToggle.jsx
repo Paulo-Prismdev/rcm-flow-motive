@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Sun, Moon } from 'lucide-react';
 
 export default function ThemeToggle() {
-  const [isDark, setIsDark] = useState(true);
+  const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
     // Check localStorage for saved theme preference
@@ -11,7 +11,8 @@ export default function ThemeToggle() {
       setIsDark(savedTheme === 'dark');
       document.documentElement.setAttribute('data-theme', savedTheme);
     } else {
-      document.documentElement.setAttribute('data-theme', 'dark');
+      // Default to light theme
+      document.documentElement.setAttribute('data-theme', 'light');
     }
   }, []);
 
