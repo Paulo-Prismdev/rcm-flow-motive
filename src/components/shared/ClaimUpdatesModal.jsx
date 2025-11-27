@@ -18,6 +18,7 @@ const UPDATE_TYPES = [
   "Client Communication",
   "Bodyshop Communication",
   "Insurer Communication",
+  "Referrer Update",
   "Action Taken",
   "Awaiting Information",
   "Documentation Received",
