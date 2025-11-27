@@ -397,6 +397,7 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
   };
 
   const navigateToLinkedClaim = (claimId) => {
+    onClose(); // Close current claim detail first
     navigate(`/claims?id=${claimId}`);
   };
 
