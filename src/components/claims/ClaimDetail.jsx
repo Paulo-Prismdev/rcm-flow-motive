@@ -390,18 +390,7 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
     }
   };
 
-  const createPageUrl = (entityType) => {
-    switch (entityType) {
-      case 'Estimating':
-        return '/estimating';
-      case 'Engineering':
-        return '/engineering';
-      case 'Parts':
-        return '/parts';
-      default:
-        return '/dashboard';
-    }
-  };
+  const createClaimsPageUrl = () => '/claims';
 
   const openLinkedItem = (pageUrl, itemId) => {
     const url = `${pageUrl}?id=${itemId}`;
