@@ -1578,6 +1578,19 @@ export default function ClaimForm({ claim, onSubmit, onCancel }) {
                         />
                       </div>
                     </div>
+
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">VAT Status</label>
+                      <select
+                        value={formData.client_vat_status}
+                        onChange={(e) => handleChange('client_vat_status', e.target.value)}
+                        className="neomorph-inset w-full px-3 py-2 text-sm text-gray-700 border-0 rounded-xl"
+                      >
+                        <option value="VAT Registered">VAT Registered</option>
+                        <option value="Non-VAT">Non-VAT</option>
+                        <option value="Unknown">Unknown</option>
+                      </select>
+                    </div>
                   </div>
 
                   <div>
