@@ -165,6 +165,15 @@ export default function RepairerLayout({ children }) {
               </div>
             )}
 
+            <button
+              onClick={toggleTheme}
+              className="glass-button w-10 h-10 flex items-center justify-center"
+              style={{ color: 'var(--foreground)' }}
+              title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+            >
+              {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </button>
+
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button className="glass-button w-10 h-10 flex items-center justify-center">
