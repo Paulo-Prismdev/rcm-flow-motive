@@ -18,6 +18,7 @@ import StatusBadge from '../components/shared/StatusBadge';
 import { formatUKRegistration } from '../components/shared/formatRegistration';
 import ReferrerLayout from '../components/referrer/ReferrerLayout';
 import ReferrerPartsForm from '../components/referrer/ReferrerPartsForm';
+import ReferrerClaimDetail from '../components/referrer/ReferrerClaimDetail';
 
 export default function ReferrerPortal() {
   const [activeTab, setActiveTab] = useState('dashboard');
