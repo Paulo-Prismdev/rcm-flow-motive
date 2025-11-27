@@ -275,12 +275,22 @@ function ReferrerDashboard({ claims, parts, activeClaims, completedClaims, activ
 
 function ReferrerClaimsList({ claims }) {
   const [filter, setFilter] = useState('active');
+  const [selectedClaim, setSelectedClaim] = useState(null);
 
   const filteredClaims = claims.filter(c => {
     if (filter === 'active') return !['Completed', 'Cancelled', 'Total Loss'].includes(c.job_status);
     if (filter === 'completed') return c.job_status === 'Completed';
     return true;
   });
+
+  if (selectedClaim) {
+    return (
+      <ReferrerClaimDetail 
+        claim={selectedClaim} 
+        onClose={() => setSelectedClaim(null)} 
+      />
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -301,7 +311,11 @@ function ReferrerClaimsList({ claims }) {
 
         <div className="space-y-3">
           {filteredClaims.map(claim => (
-            <div key={claim.id} className="neomorph-flat p-4">
+            <div 
+              key={claim.id} 
+              className="neomorph-flat p-4 cursor-pointer hover:shadow-lg transition-all"
+              onClick={() => setSelectedClaim(claim)}
+            >
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2">
@@ -334,6 +348,7 @@ function ReferrerClaimsList({ claims }) {
                     </div>
                   </div>
                 </div>
+                <ChevronRight className="w-5 h-5 text-foreground-muted flex-shrink-0" />
               </div>
             </div>
           ))}
