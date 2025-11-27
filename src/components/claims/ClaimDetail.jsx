@@ -396,9 +396,8 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
     window.open(url, '_blank');
   };
 
-  const navigateToLinkedClaim = (claimId) => {
-    onClose(); // Close current claim detail first
-    navigate(`/claims?id=${claimId}`);
+  const openLinkedClaim = (claimId) => {
+    window.open(`/claims?id=${claimId}`, '_blank');
   };
 
   const renderSelectedSection = () => {
