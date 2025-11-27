@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
-import { LogOut, User, Building2, Sun, Moon } from 'lucide-react';
+import { LogOut, User, Building2, Sun, Moon, Menu, X } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,7 +13,8 @@ import {
 import { StatusConfigProvider } from '../shared/StatusConfigContext';
 
 export default function RepairerLayout({ children }) {
-  const [isDark, setIsDark] = React.useState(false);
+  const [isDark, setIsDark] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   React.useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
@@ -130,36 +131,138 @@ export default function RepairerLayout({ children }) {
           background: var(--surface-hover);
           box-shadow: var(--shadow-md);
         }
+
+        .mobile-menu-overlay {
+          position: fixed;
+          inset: 0;
+          background: rgba(0, 0, 0, 0.5);
+          z-index: 40;
+        }
+
+        .mobile-menu {
+          position: fixed;
+          top: 0;
+          left: 0;
+          bottom: 0;
+          width: 80%;
+          max-width: 320px;
+          background: var(--glass-bg);
+          backdrop-filter: blur(24px);
+          border-right: 1px solid var(--border-strong);
+          box-shadow: var(--shadow-lg);
+          z-index: 50;
+          transform: translateX(-100%);
+          transition: transform 0.3s ease;
+          overflow-y: auto;
+          display: flex;
+          flex-direction: column;
+        }
+
+        .mobile-menu.open {
+          transform: translateX(0);
+        }
       `}</style>
+
+      {/* Mobile Menu */}
+      {mobileMenuOpen && (
+        <>
+          <div 
+            className="mobile-menu-overlay md:hidden" 
+            onClick={() => setMobileMenuOpen(false)}
+          />
+          <div className={`mobile-menu md:hidden ${mobileMenuOpen ? 'open' : ''}`}>
+            <div className="p-4 border-b border-border flex items-center justify-between">
+              <h2 className="font-bold text-lg">Menu</h2>
+              <button onClick={() => setMobileMenuOpen(false)} className="glass-button w-10 h-10 flex items-center justify-center">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* User Profile Card */}
+            {currentUser && (
+              <div className="p-4 border-b border-border">
+                <div className="neomorph-flat p-4 rounded-xl">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-12 h-12 rounded-full bg-accent flex items-center justify-center">
+                      <span className="text-base font-bold text-accent-foreground">
+                        {currentUser.full_name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || '?'}
+                      </span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold truncate">{currentUser.full_name || 'User'}</p>
+                      <p className="text-xs text-foreground-muted truncate">{currentUser.email}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Theme Toggle */}
+            <div className="p-4 border-b border-border">
+              <button
+                onClick={toggleTheme}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl glass-button"
+              >
+                {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+                <span className="font-medium">{isDark ? 'Light Mode' : 'Dark Mode'}</span>
+              </button>
+            </div>
+
+            {/* Logout Button */}
+            <div className="p-4 mt-auto border-t border-border">
+              <button
+                onClick={() => base44.auth.logout()}
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl glass-button text-red-500 font-medium"
+              >
+                <LogOut className="w-5 h-5" />
+                Log Out
+              </button>
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Header */}
       <header className="neomorph mb-2 mx-2 md:mx-3 mt-2 md:mt-3 p-3 md:p-4 flex-shrink-0">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
+        <div className="flex items-center justify-between gap-2">
+          {/* Left: Burger (mobile) + Logo */}
+          <div className="flex items-center gap-2 md:gap-4 min-w-0 flex-1">
+            {/* Mobile Burger */}
+            <button
+              onClick={() => setMobileMenuOpen(true)}
+              className="glass-button w-10 h-10 flex items-center justify-center flex-shrink-0 md:hidden"
+              style={{ color: 'var(--foreground)' }}
+            >
+              <Menu className="w-4 h-4" />
+            </button>
+
+            {/* Logo */}
             <div className="flex items-baseline gap-2">
-              <span style={{ fontFamily: "'Palatino Linotype', serif", fontSize: '1.5rem' }}>
+              <span style={{ fontFamily: "'Palatino Linotype', serif", fontSize: '1.25rem' }} className="md:text-2xl">
                 <span style={{ color: 'var(--accent)' }}>A</span>
                 <span>RTEC</span>
                 <span style={{ color: 'var(--accent)' }}>H</span>
               </span>
-              <span style={{ fontWeight: 300, fontSize: '1.5rem' }}>One</span>
+              <span style={{ fontWeight: 300 }} className="text-xl md:text-2xl">One</span>
             </div>
-            <span className="text-xs px-2 py-1 rounded-full bg-accent/20 text-accent font-medium">
+            <span className="hidden sm:inline text-xs px-2 py-1 rounded-full bg-accent/20 text-accent font-medium">
               Repairer Portal
             </span>
           </div>
           
+          {/* Center: Bodyshop Logo */}
           {bodyshop?.logo_url && (
             <img 
               src={bodyshop.logo_url} 
               alt={bodyshop.name} 
-              className="h-10 md:h-12 max-w-[200px] object-contain"
+              className="h-8 md:h-12 max-w-[120px] md:max-w-[200px] object-contain"
             />
           )}
 
-          <div className="flex items-center gap-3">
+          {/* Right: Desktop controls */}
+          <div className="hidden md:flex items-center gap-3">
             {bodyshop && (
-              <div className="hidden md:flex items-center gap-2 text-sm text-foreground-muted">
+              <div className="flex items-center gap-2 text-sm text-foreground-muted">
                 <Building2 className="w-4 h-4" />
                 {bodyshop.name}
               </div>
