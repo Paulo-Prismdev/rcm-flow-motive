@@ -33,6 +33,7 @@ const UPDATE_TYPE_COLORS = {
   "Client Communication": "bg-blue-500",
   "Bodyshop Communication": "bg-green-500",
   "Insurer Communication": "bg-orange-500",
+  "Referrer Update": "bg-amber-500",
   "Action Taken": "bg-indigo-500",
   "Awaiting Information": "bg-yellow-500",
   "Documentation Received": "bg-teal-500",
