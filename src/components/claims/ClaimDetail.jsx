@@ -391,11 +391,13 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
     }
   };
 
-  const createClaimsPageUrl = () => '/claims';
-
   const openLinkedItem = (pageUrl, itemId) => {
     const url = `${pageUrl}?id=${itemId}`;
     window.open(url, '_blank');
+  };
+
+  const navigateToLinkedClaim = (claimId) => {
+    navigate(`/claims?id=${claimId}`);
   };
 
   const renderSelectedSection = () => {
