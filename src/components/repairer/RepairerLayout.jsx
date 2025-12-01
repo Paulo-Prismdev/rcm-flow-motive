@@ -222,8 +222,13 @@ export default function RepairerLayout({ children }) {
         </>
       )}
 
+      {/* Advert Banner */}
+      <div className="mx-2 md:mx-3 mt-2 md:mt-3 overflow-hidden rounded-lg bg-gradient-to-r from-accent/10 to-accent/5 border border-accent/20">
+        <AdvertBanner />
+      </div>
+
       {/* Header */}
-      <header className="neomorph mb-2 mx-2 md:mx-3 mt-2 md:mt-3 p-3 md:p-4 flex-shrink-0">
+      <header className="neomorph mb-2 mx-2 md:mx-3 mt-2 p-3 md:p-4 flex-shrink-0">
         <div className="flex items-center justify-between gap-2">
           {/* Left: Burger (mobile) + Logo */}
           <div className="flex items-center gap-2 md:gap-4 min-w-0 flex-1">
