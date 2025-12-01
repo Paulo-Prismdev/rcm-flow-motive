@@ -24,17 +24,20 @@ export default function AdvertBanner() {
   const [isPaused, setIsPaused] = useState(false);
 
   // Fetch custom adverts from the AdvertBanner entity
-  const { data: customAdverts = [] } = useQuery({
-    queryKey: ['advertBanners'],
+  const { data: customAdverts = [], refetch } = useQuery({
+    queryKey: ['advertBannersPortal'],
     queryFn: async () => {
       try {
-        const adverts = await base44.entities.AdvertBanner.filter({ is_active: true }, 'sort_order');
-        return adverts;
+        const adverts = await base44.entities.AdvertBanner.list('sort_order');
+        // Filter active ones client-side to avoid RLS issues
+        return adverts.filter(a => a.is_active !== false);
       } catch (e) {
+        console.error('Failed to fetch adverts:', e);
         return [];
       }
     },
-    staleTime: 60000,
+    staleTime: 10000,
+    refetchOnWindowFocus: true,
   });
 
   const adverts = customAdverts.length > 0 ? customAdverts : DEFAULT_ADVERTS;

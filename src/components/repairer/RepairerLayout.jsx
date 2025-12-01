@@ -303,17 +303,17 @@ export default function RepairerLayout({ children }) {
       </header>
 
       {/* Main Content */}
-      <main className="px-2 md:px-3 flex-1 overflow-y-auto min-h-0">
-        <div className="max-w-full mx-auto h-full">
+      <main className="px-2 md:px-3 pb-2 md:pb-3 flex-1 overflow-y-auto min-h-0">
+        <div className="max-w-full mx-auto">
           {children}
         </div>
-      </main>
 
-      {/* Advert Banner - Bottom */}
-      <div className="mx-2 md:mx-3 mb-2 md:mb-3 overflow-hidden rounded-lg border border-accent/20 flex-shrink-0">
-        <AdvertBanner />
+        {/* Advert Banner - Inside scrollable area */}
+        <div className="mt-4 overflow-hidden rounded-lg border border-accent/20">
+          <AdvertBanner />
+        </div>
+      </main>
       </div>
-    </div>
     </StatusConfigProvider>
   );
 }
