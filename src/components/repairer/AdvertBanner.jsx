@@ -68,11 +68,9 @@ export default function AdvertBanner() {
     }
   };
 
-  console.log('AdvertBanner - customAdverts:', customAdverts, 'using adverts:', adverts);
-
   return (
         <div 
-          className="relative h-32 md:h-40 bg-surface overflow-hidden"
+          className="relative h-24 sm:h-28 md:h-32 lg:h-36 bg-surface overflow-hidden"
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
         >
@@ -84,7 +82,7 @@ export default function AdvertBanner() {
         <img 
           src={currentAd.image_url} 
           alt={currentAd.alt_text || 'Advertisement'}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-contain"
         />
       </div>
 
