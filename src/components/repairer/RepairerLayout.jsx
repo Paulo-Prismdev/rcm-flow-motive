@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { StatusConfigProvider } from '../shared/StatusConfigContext';
+import AdvertBanner from './AdvertBanner';
 
 export default function RepairerLayout({ children }) {
   const [isDark, setIsDark] = useState(false);
