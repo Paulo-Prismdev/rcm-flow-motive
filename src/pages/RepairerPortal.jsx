@@ -166,11 +166,7 @@ function RepairerDashboard({ claims, estimates, parts, activeClaims, pendingEsti
   return (
     <div className="space-y-4">
       {/* Advert Banner */}
-      <div className="flex justify-center">
-        <div className="overflow-hidden rounded-lg border border-accent/20" style={{ maxWidth: '600px' }}>
-          <AdvertBanner />
-        </div>
-      </div>
+      <AdvertBanner />
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
