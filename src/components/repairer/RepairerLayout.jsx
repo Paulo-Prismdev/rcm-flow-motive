@@ -11,7 +11,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { StatusConfigProvider } from '../shared/StatusConfigContext';
-import AdvertBanner from './AdvertBanner';
 
 export default function RepairerLayout({ children }) {
   const [isDark, setIsDark] = useState(false);
@@ -306,11 +305,6 @@ export default function RepairerLayout({ children }) {
       <main className="px-2 md:px-3 pb-2 md:pb-3 flex-1 overflow-y-auto min-h-0">
         <div className="max-w-full mx-auto">
           {children}
-        </div>
-
-        {/* Advert Banner - Inside scrollable area */}
-        <div className="mt-4 overflow-hidden rounded-lg border border-accent/20">
-          <AdvertBanner />
         </div>
       </main>
       </div>

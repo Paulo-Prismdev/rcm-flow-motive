@@ -18,6 +18,7 @@ import StatusBadge from '../components/shared/StatusBadge';
 import { formatUKRegistration } from '../components/shared/formatRegistration';
 import RepairerEstimateForm from '../components/repairer/RepairerEstimateForm';
 import RepairerPartsForm from '../components/repairer/RepairerPartsForm';
+import AdvertBanner from '../components/repairer/AdvertBanner';
 
 export default function RepairerPortal() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -164,6 +165,11 @@ export default function RepairerPortal() {
 function RepairerDashboard({ claims, estimates, parts, activeClaims, pendingEstimates, activeParts, onNavigate }) {
   return (
     <div className="space-y-4">
+      {/* Advert Banner */}
+      <div className="overflow-hidden rounded-lg border border-accent/20">
+        <AdvertBanner />
+      </div>
+
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <div className="neomorph p-4 cursor-pointer hover:shadow-lg transition-all" onClick={() => onNavigate('claims')}>
