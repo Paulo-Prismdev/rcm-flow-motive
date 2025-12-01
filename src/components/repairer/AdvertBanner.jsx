@@ -70,7 +70,7 @@ export default function AdvertBanner() {
 
   return (
         <div 
-          className="relative h-24 sm:h-28 md:h-32 lg:h-36 bg-surface overflow-hidden"
+          className="relative h-28 sm:h-32 md:h-40 lg:h-44 bg-surface overflow-hidden"
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
         >
