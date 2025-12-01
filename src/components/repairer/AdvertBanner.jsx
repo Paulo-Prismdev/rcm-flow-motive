@@ -71,7 +71,7 @@ export default function AdvertBanner() {
   return (
     <div 
       className="relative w-full bg-surface overflow-hidden rounded-lg border border-accent/20"
-      style={{ aspectRatio: '4 / 1' }}
+      style={{ aspectRatio: '8 / 1' }}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >

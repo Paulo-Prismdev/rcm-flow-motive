@@ -154,7 +154,7 @@ export default function PortalManagementTab() {
           <div>
             <h2 className="text-lg font-bold">Advert Banners</h2>
             <p className="text-sm text-foreground-muted">
-              Manage adverts shown in the Repairer Portal. Recommended image size: 1200x300px
+              Manage adverts shown in the Repairer Portal. Recommended image size: 1200x150px
             </p>
           </div>
           <Button onClick={() => openModal()} className="neomorph-flat gap-2">
