@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import StatusManagementTab from "../components/settings/StatusManagementTab";
 import CompanyManagementTab from "../components/settings/CompanyManagementTab";
+import PortalManagementTab from "../components/settings/PortalManagementTab";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 
@@ -28,6 +29,7 @@ export default function Settings() {
   const mainTabs = [
     { id: "status", label: "Status Settings" },
     { id: "companies", label: "Companies" },
+    { id: "portals", label: "Portal Management" },
     { id: "email", label: "Email Templates" },
     { id: "chasers", label: "Chaser Emails" },
     { id: "manufacturers", label: "Manufacturer Links" },
@@ -45,6 +47,7 @@ export default function Settings() {
 
   const mainTabComponents = {
     companies: <CompanyManagementTab />,
+    portals: <PortalManagementTab />,
     email: <EmailTemplates />,
     chasers: <ChaserEmailSettings />,
     manufacturers: <PartManufacturerConfigManagement />,
