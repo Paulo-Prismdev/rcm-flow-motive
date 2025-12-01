@@ -66,11 +66,11 @@ export default function AdvertBanner() {
   };
 
   return (
-    <div 
-      className="relative h-48 md:h-64 bg-surface overflow-hidden"
-      onMouseEnter={() => setIsPaused(true)}
-      onMouseLeave={() => setIsPaused(false)}
-    >
+        <div 
+          className="relative h-20 md:h-24 bg-surface overflow-hidden"
+          onMouseEnter={() => setIsPaused(true)}
+          onMouseLeave={() => setIsPaused(false)}
+        >
       {/* Image Container */}
       <div 
         className={`absolute inset-0 transition-opacity duration-500 ${currentAd.link_url ? 'cursor-pointer' : ''}`}
