@@ -346,6 +346,7 @@ export default function PortalManagementTab() {
                 type="submit" 
                 className="gap-2"
                 disabled={createMutation.isPending || updateMutation.isPending}
+                onClick={handleSubmit}
               >
                 <Save className="w-4 h-4" />
                 {editingAdvert ? 'Update' : 'Create'}
