@@ -68,9 +68,11 @@ export default function AdvertBanner() {
     }
   };
 
+  console.log('AdvertBanner - customAdverts:', customAdverts, 'using adverts:', adverts);
+
   return (
         <div 
-          className="relative h-20 md:h-24 bg-surface overflow-hidden"
+          className="relative h-32 md:h-40 bg-surface overflow-hidden"
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
         >
