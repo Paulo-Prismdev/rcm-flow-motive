@@ -70,7 +70,8 @@ export default function AdvertBanner() {
 
   return (
         <div 
-          className="relative h-28 sm:h-32 md:h-40 lg:h-44 bg-surface overflow-hidden"
+          className="relative w-full bg-surface overflow-hidden"
+          style={{ aspectRatio: '2 / 1', maxHeight: '300px' }}
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
         >
