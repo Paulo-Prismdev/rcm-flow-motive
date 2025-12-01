@@ -166,9 +166,7 @@ function RepairerDashboard({ claims, estimates, parts, activeClaims, pendingEsti
   return (
     <div className="space-y-4">
       {/* Advert Banner */}
-      <div className="overflow-hidden rounded-lg border border-accent/20">
-        <AdvertBanner />
-      </div>
+      <AdvertBanner />
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
