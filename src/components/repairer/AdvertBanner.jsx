@@ -1,34 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { base44 } from '@/api/base44Client';
+import { useQuery } from '@tanstack/react-query';
 
-const ADVERTS = [
+// Fallback adverts if no custom ones are configured
+const DEFAULT_ADVERTS = [
   {
-    id: 1,
-    title: "New Parts Portal",
-    description: "Order parts directly through ARTECH One - faster delivery, better prices!",
-    bgColor: "from-blue-500/20 to-blue-600/10",
-    textColor: "text-blue-700 dark:text-blue-300"
+    id: 'default-1',
+    image_url: 'https://images.unsplash.com/photo-1487754180451-c456f719a1fc?w=1200&h=200&fit=crop',
+    link_url: '',
+    alt_text: 'ARTECH One - Your Repair Management Partner'
   },
   {
-    id: 2,
-    title: "Training Available",
-    description: "Free estimating training sessions available - contact us to book your place.",
-    bgColor: "from-green-500/20 to-green-600/10",
-    textColor: "text-green-700 dark:text-green-300"
-  },
-  {
-    id: 3,
-    title: "Preferred Repairer Scheme",
-    description: "Join our preferred repairer network for priority work allocation.",
-    bgColor: "from-purple-500/20 to-purple-600/10",
-    textColor: "text-purple-700 dark:text-purple-300"
-  },
-  {
-    id: 4,
-    title: "Quality Bonus Programme",
-    description: "Earn bonus payments for exceptional repair quality scores.",
-    bgColor: "from-amber-500/20 to-amber-600/10",
-    textColor: "text-amber-700 dark:text-amber-300"
+    id: 'default-2',
+    image_url: 'https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?w=1200&h=200&fit=crop',
+    link_url: '',
+    alt_text: 'Quality Repairs, Quality Service'
   }
 ];
 
@@ -36,71 +23,99 @@ export default function AdvertBanner() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
 
+  // Fetch custom adverts from the AdvertBanner entity
+  const { data: customAdverts = [] } = useQuery({
+    queryKey: ['advertBanners'],
+    queryFn: async () => {
+      try {
+        const adverts = await base44.entities.AdvertBanner.filter({ is_active: true }, 'sort_order');
+        return adverts;
+      } catch (e) {
+        return [];
+      }
+    },
+    staleTime: 60000,
+  });
+
+  const adverts = customAdverts.length > 0 ? customAdverts : DEFAULT_ADVERTS;
+
   useEffect(() => {
-    if (isPaused) return;
+    if (isPaused || adverts.length <= 1) return;
     
     const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % ADVERTS.length);
+      setCurrentIndex((prev) => (prev + 1) % adverts.length);
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [isPaused]);
+  }, [isPaused, adverts.length]);
 
   const goToPrevious = () => {
-    setCurrentIndex((prev) => (prev - 1 + ADVERTS.length) % ADVERTS.length);
+    setCurrentIndex((prev) => (prev - 1 + adverts.length) % adverts.length);
   };
 
   const goToNext = () => {
-    setCurrentIndex((prev) => (prev + 1) % ADVERTS.length);
+    setCurrentIndex((prev) => (prev + 1) % adverts.length);
   };
 
-  const currentAd = ADVERTS[currentIndex];
+  const currentAd = adverts[currentIndex];
+
+  const handleAdClick = () => {
+    if (currentAd.link_url) {
+      window.open(currentAd.link_url, '_blank');
+    }
+  };
 
   return (
     <div 
-      className={`relative px-4 py-2 md:py-3 bg-gradient-to-r ${currentAd.bgColor} transition-all duration-500`}
+      className="relative h-20 md:h-24 bg-surface overflow-hidden"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
-      <div className="flex items-center justify-between gap-2">
-        <button 
-          onClick={goToPrevious}
-          className="p-1 rounded-full hover:bg-white/20 transition-colors flex-shrink-0"
-        >
-          <ChevronLeft className="w-4 h-4" />
-        </button>
-        
-        <div className="flex-1 text-center min-w-0">
-          <p className={`font-semibold text-sm md:text-base ${currentAd.textColor}`}>
-            {currentAd.title}
-          </p>
-          <p className="text-xs md:text-sm text-foreground-muted truncate">
-            {currentAd.description}
-          </p>
-        </div>
-
-        <button 
-          onClick={goToNext}
-          className="p-1 rounded-full hover:bg-white/20 transition-colors flex-shrink-0"
-        >
-          <ChevronRight className="w-4 h-4" />
-        </button>
+      {/* Image Container */}
+      <div 
+        className={`absolute inset-0 transition-opacity duration-500 ${currentAd.link_url ? 'cursor-pointer' : ''}`}
+        onClick={handleAdClick}
+      >
+        <img 
+          src={currentAd.image_url} 
+          alt={currentAd.alt_text || 'Advertisement'}
+          className="w-full h-full object-cover"
+        />
       </div>
 
-      {/* Dots indicator */}
-      <div className="flex justify-center gap-1.5 mt-1.5">
-        {ADVERTS.map((_, index) => (
-          <button
-            key={index}
-            onClick={() => setCurrentIndex(index)}
-            className={`w-1.5 h-1.5 rounded-full transition-all ${
-              index === currentIndex 
-                ? 'bg-accent w-3' 
-                : 'bg-foreground-subtle/40 hover:bg-foreground-subtle/60'
-            }`}
-          />
-        ))}
-      </div>
+      {/* Navigation Arrows */}
+      {adverts.length > 1 && (
+        <>
+          <button 
+            onClick={(e) => { e.stopPropagation(); goToPrevious(); }}
+            className="absolute left-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/30 hover:bg-black/50 text-white transition-colors z-10"
+          >
+            <ChevronLeft className="w-4 h-4 md:w-5 md:h-5" />
+          </button>
+          
+          <button 
+            onClick={(e) => { e.stopPropagation(); goToNext(); }}
+            className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/30 hover:bg-black/50 text-white transition-colors z-10"
+          >
+            <ChevronRight className="w-4 h-4 md:w-5 md:h-5" />
+          </button>
+
+          {/* Dots indicator */}
+          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
+            {adverts.map((_, index) => (
+              <button
+                key={index}
+                onClick={(e) => { e.stopPropagation(); setCurrentIndex(index); }}
+                className={`w-2 h-2 rounded-full transition-all ${
+                  index === currentIndex 
+                    ? 'bg-white w-4' 
+                    : 'bg-white/50 hover:bg-white/70'
+                }`}
+              />
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 }
