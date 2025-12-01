@@ -106,6 +106,10 @@ export default function PortalManagementTab() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (!formData.name || !formData.image_url) {
+      alert('Please provide a name and image URL');
+      return;
+    }
     if (editingAdvert) {
       updateMutation.mutate({ id: editingAdvert.id, data: formData });
     } else {
@@ -284,11 +288,12 @@ export default function PortalManagementTab() {
                 
                 <div className="flex gap-2">
                   <Input
-                    value={formData.image_url}
-                    onChange={(e) => setFormData(prev => ({ ...prev, image_url: e.target.value }))}
-                    placeholder="Image URL or upload below"
-                    className="flex-1"
-                  />
+                                  value={formData.image_url}
+                                  onChange={(e) => setFormData(prev => ({ ...prev, image_url: e.target.value }))}
+                                  placeholder="Image URL or upload below"
+                                  className="flex-1"
+                                  required
+                                />
                   <label className="neomorph-flat px-4 py-2 cursor-pointer flex items-center gap-2 hover:bg-surface-hover">
                     <Upload className="w-4 h-4" />
                     {isUploading ? 'Uploading...' : 'Upload'}
