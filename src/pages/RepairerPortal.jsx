@@ -153,9 +153,6 @@ export default function RepairerPortal() {
 function RepairerDashboard({ claims, estimates, parts, activeClaims, pendingEstimates, activeParts, onNavigate }) {
   return (
     <div className="space-y-4">
-      {/* Advert Banner */}
-      <AdvertBanner />
-
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <div className="neomorph p-4 cursor-pointer hover:shadow-lg transition-all" onClick={() => onNavigate('claims')}>
@@ -270,6 +267,9 @@ function RepairerDashboard({ claims, estimates, parts, activeClaims, pendingEsti
           </div>
         </div>
       </div>
+
+      {/* Advert Banner */}
+      <AdvertBanner />
     </div>
   );
 }

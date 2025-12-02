@@ -255,16 +255,16 @@ export default function RepairerLayout({ children }) {
             <img 
               src={bodyshop.logo_url} 
               alt={bodyshop.name} 
-              className="h-6 md:h-8 max-w-[100px] md:max-w-[150px] object-contain"
+              className="h-8 md:h-10 max-w-[120px] md:max-w-[180px] object-contain"
             />
           )}
 
           {/* Right: Desktop controls */}
           <div className="hidden md:flex items-center gap-2">
             {bodyshop && (
-              <div className="flex items-center gap-1.5 text-xs text-foreground-muted">
-                <Building2 className="w-3.5 h-3.5" />
-                <span className="max-w-[120px] truncate">{bodyshop.name}</span>
+              <div className="flex items-center gap-1.5 text-sm text-foreground-muted">
+                <Building2 className="w-4 h-4" />
+                <span>{bodyshop.name}</span>
               </div>
             )}
 
