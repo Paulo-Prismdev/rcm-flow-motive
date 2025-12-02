@@ -222,58 +222,58 @@ function RepairerDashboard({ claims, estimates, parts, activeClaims, pendingEsti
               View All
             </button>
           </div>
-          <div className="space-y-2">
-            {claims.slice(0, 5).map(claim => (
-              <div key={claim.id} className="neomorph-flat p-3 flex items-center justify-between">
-                <div>
-                  <p className="font-medium">{formatUKRegistration(claim.reg)}</p>
-                  <p className="text-xs text-foreground-muted">{claim.client_name}</p>
-                </div>
-                <StatusBadge status={claim.job_status} />
-              </div>
-            ))}
-            {claims.length === 0 && (
-              <p className="text-center text-foreground-muted py-4">No claims yet</p>
-            )}
-          </div>
+          <div className="space-y-2 max-h-[180px] overflow-y-auto">
+                            {claims.slice(0, 5).map(claim => (
+                              <div key={claim.id} className="neomorph-flat p-3 flex items-center justify-between">
+                                <div>
+                                  <p className="font-medium">{formatUKRegistration(claim.reg)}</p>
+                                  <p className="text-xs text-foreground-muted">{claim.client_name}</p>
+                                </div>
+                                <StatusBadge status={claim.job_status} />
+                              </div>
+                            ))}
+                            {claims.length === 0 && (
+                              <p className="text-center text-foreground-muted py-4">No claims yet</p>
+                            )}
+                          </div>
         </div>
 
         {/* Quick Actions */}
         <div className="neomorph p-4">
           <h3 className="font-bold mb-4">Quick Actions</h3>
-          <div className="space-y-2">
-            <button 
-              onClick={() => onNavigate('estimates')}
-              className="w-full neomorph-flat p-4 flex items-center justify-between hover:shadow-md transition-all"
-            >
-              <div className="flex items-center gap-3">
-                <Calculator className="w-5 h-5 text-accent" />
-                <span className="font-medium">Request an Estimate</span>
-              </div>
-              <ChevronRight className="w-4 h-4" />
-            </button>
-            <button 
-              onClick={() => onNavigate('parts')}
-              className="w-full neomorph-flat p-4 flex items-center justify-between hover:shadow-md transition-all"
-            >
-              <div className="flex items-center gap-3">
-                <Package className="w-5 h-5 text-accent" />
-                <span className="font-medium">Request Parts Support</span>
-              </div>
-              <ChevronRight className="w-4 h-4" />
-            </button>
-            <button 
-              onClick={() => onNavigate('products')}
-              className="w-full neomorph-flat p-4 flex items-center justify-between hover:shadow-md transition-all"
-            >
-              <div className="flex items-center gap-3">
-                <Gift className="w-5 h-5 text-accent" />
-                <span className="font-medium">Explore ARTURA Products</span>
-              </div>
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
+                          <div className="space-y-2 max-h-[180px] overflow-y-auto">
+                            <button 
+                              onClick={() => onNavigate('estimates')}
+                              className="w-full neomorph-flat p-4 flex items-center justify-between hover:shadow-md transition-all"
+                            >
+                              <div className="flex items-center gap-3">
+                                <Calculator className="w-5 h-5 text-accent" />
+                                <span className="font-medium">Request an Estimate</span>
+                              </div>
+                              <ChevronRight className="w-4 h-4" />
+                            </button>
+                            <button 
+                              onClick={() => onNavigate('parts')}
+                              className="w-full neomorph-flat p-4 flex items-center justify-between hover:shadow-md transition-all"
+                            >
+                              <div className="flex items-center gap-3">
+                                <Package className="w-5 h-5 text-accent" />
+                                <span className="font-medium">Request Parts Support</span>
+                              </div>
+                              <ChevronRight className="w-4 h-4" />
+                            </button>
+                            <button 
+                              onClick={() => onNavigate('products')}
+                              className="w-full neomorph-flat p-4 flex items-center justify-between hover:shadow-md transition-all"
+                            >
+                              <div className="flex items-center gap-3">
+                                <Gift className="w-5 h-5 text-accent" />
+                                <span className="font-medium">Explore ARTURA Products</span>
+                              </div>
+                              <ChevronRight className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
       </div>
       </div>
       
