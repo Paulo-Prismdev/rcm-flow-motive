@@ -68,6 +68,13 @@ export default function Layout({ children, currentPageName }) {
     queryFn: () => base44.auth.me(),
   });
 
+  const { data: appConfigs = [] } = useQuery({
+    queryKey: ['appConfigs'],
+    queryFn: () => base44.entities.AppConfig.list(),
+  });
+
+  const companyLogo = appConfigs.find(c => c.config_key === 'company_logo')?.config_value || '';
+
   // Simplified messages query - only fetch when messenger is about to open
   // This prevents unnecessary WebSocket connections
   const { data: messages = [] } = useQuery({
@@ -644,14 +651,25 @@ export default function Layout({ children, currentPageName }) {
                   <Menu className="w-4 h-4" />
                 </button>
 
-                {/* Logo - Always Visible */}
-                <div className="app-title">
-                  <span className="app-title-artura">
-                    <span className="gold-letter">A</span>
-                    <span className="black-letter">RTEC</span>
-                    <span className="gold-letter">H</span>
-                  </span>
-                  <span className="app-title-one">One</span>
+                {/* Company Logo + App Title */}
+                <div className="flex items-center gap-3">
+                  {companyLogo && (
+                    <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 bg-surface-hover">
+                      <img 
+                        src={companyLogo} 
+                        alt="Company Logo" 
+                        className="w-full h-full object-contain"
+                      />
+                    </div>
+                  )}
+                  <div className="app-title">
+                    <span className="app-title-artura">
+                      <span className="gold-letter">A</span>
+                      <span className="black-letter">RTEC</span>
+                      <span className="gold-letter">H</span>
+                    </span>
+                    <span className="app-title-one">One</span>
+                  </div>
                 </div>
               </div>
 
