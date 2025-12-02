@@ -75,11 +75,31 @@ export default function PortalManagementTab() {
   });
   const [isUploading, setIsUploading] = useState(false);
 
+  // Product management state
+  const [isProductModalOpen, setIsProductModalOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState(null);
+  const [productFormData, setProductFormData] = useState({
+    name: '',
+    description: '',
+    icon: 'Package',
+    color: 'blue',
+    features: [],
+    link_url: '',
+    is_active: true,
+    sort_order: 0
+  });
+  const [newFeature, setNewFeature] = useState('');
+
   const queryClient = useQueryClient();
 
   const { data: adverts = [], isLoading } = useQuery({
     queryKey: ['advertBanners'],
     queryFn: () => base44.entities.AdvertBanner.list('sort_order'),
+  });
+
+  const { data: products = [], isLoading: productsLoading } = useQuery({
+    queryKey: ['portalProducts'],
+    queryFn: () => base44.entities.PortalProduct.list('sort_order'),
   });
 
   const createMutation = useMutation({
