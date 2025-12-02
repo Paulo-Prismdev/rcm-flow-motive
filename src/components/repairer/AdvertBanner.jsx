@@ -83,7 +83,7 @@ export default function AdvertBanner() {
         <img 
           src={currentAd.image_url} 
           alt={currentAd.alt_text || 'Advertisement'}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-contain"
         />
       </div>
 
