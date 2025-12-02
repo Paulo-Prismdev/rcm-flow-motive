@@ -23,6 +23,7 @@ import AdvertBanner from '../components/repairer/AdvertBanner';
 
 export default function RepairerPortal() {
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const { data: currentUser } = useQuery({
     queryKey: ['currentUser'],
@@ -101,40 +102,106 @@ export default function RepairerPortal() {
     { id: 'products', label: 'ARTURA Products', icon: Gift },
   ];
 
+  const handleTabChange = (tabId) => {
+    setActiveTab(tabId);
+    setMobileMenuOpen(false);
+  };
+
   return (
     <div className="h-full flex flex-col gap-2 overflow-hidden">
-      {/* Tabs */}
-                  <div className="neomorph p-2 flex gap-2 overflow-x-auto flex-shrink-0">
-                    {tabs.map(tab => {
-                      const isActive = activeTab === tab.id;
-                      return (
-                        <button
-                          key={tab.id}
-                          onClick={() => setActiveTab(tab.id)}
-                          className={`nav-button ${isActive ? 'nav-button-active' : ''}`}
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.5rem',
-                            padding: '0.75rem 1rem',
-                            whiteSpace: 'nowrap',
-                            fontSize: '0.875rem',
-                            fontWeight: 500,
-                            background: isActive ? 'var(--accent)' : 'var(--surface)',
-                            border: `1px solid ${isActive ? 'var(--accent)' : 'var(--border)'}`,
-                            borderRadius: '12px',
-                            boxShadow: isActive ? '0 4px 12px rgba(212, 175, 55, 0.3)' : 'var(--shadow-sm)',
-                            color: isActive ? 'var(--accent-foreground)' : 'var(--foreground)',
-                            transition: 'all 0.2s ease',
-                            cursor: 'pointer',
-                          }}
-                        >
-                          <tab.icon className="w-4 h-4" />
-                          <span className="hidden sm:inline">{tab.label}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
+      {/* Mobile Menu Overlay */}
+      {mobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 md:hidden" 
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
+
+      {/* Mobile Slide-out Menu */}
+      <div className={`fixed top-0 left-0 bottom-0 w-[80%] max-w-[320px] z-50 md:hidden transform transition-transform duration-300 ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}
+        style={{ background: 'var(--glass-bg)', backdropFilter: 'blur(24px)', borderRight: '1px solid var(--border-strong)' }}
+      >
+        <div className="p-4 border-b flex items-center justify-between" style={{ borderColor: 'var(--border)' }}>
+          <h2 className="font-bold text-lg">Menu</h2>
+          <button 
+            onClick={() => setMobileMenuOpen(false)} 
+            className="w-10 h-10 flex items-center justify-center rounded-xl"
+            style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
+          >
+            <span className="text-xl">×</span>
+          </button>
+        </div>
+        <nav className="p-4 space-y-2">
+          {tabs.map(tab => {
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => handleTabChange(tab.id)}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all"
+                style={{
+                  background: isActive ? 'var(--accent)' : 'var(--surface)',
+                  border: `1px solid ${isActive ? 'var(--accent)' : 'var(--border)'}`,
+                  color: isActive ? 'var(--accent-foreground)' : 'var(--foreground)',
+                }}
+              >
+                <tab.icon className="w-5 h-5" />
+                <span className="font-medium">{tab.label}</span>
+              </button>
+            );
+          })}
+        </nav>
+      </div>
+
+      {/* Mobile Header with Menu Button */}
+      <div className="neomorph p-2 flex items-center gap-2 md:hidden flex-shrink-0">
+        <button
+          onClick={() => setMobileMenuOpen(true)}
+          className="w-10 h-10 flex items-center justify-center rounded-xl flex-shrink-0"
+          style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+        <div className="flex-1 text-center">
+          <span className="font-medium">{tabs.find(t => t.id === activeTab)?.label}</span>
+        </div>
+        <div className="w-10" /> {/* Spacer for centering */}
+      </div>
+
+      {/* Desktop Tabs */}
+      <div className="neomorph p-2 hidden md:flex gap-2 overflow-x-auto flex-shrink-0">
+        {tabs.map(tab => {
+          const isActive = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`nav-button ${isActive ? 'nav-button-active' : ''}`}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                padding: '0.75rem 1rem',
+                whiteSpace: 'nowrap',
+                fontSize: '0.875rem',
+                fontWeight: 500,
+                background: isActive ? 'var(--accent)' : 'var(--surface)',
+                border: `1px solid ${isActive ? 'var(--accent)' : 'var(--border)'}`,
+                borderRadius: '12px',
+                boxShadow: isActive ? '0 4px 12px rgba(212, 175, 55, 0.3)' : 'var(--shadow-sm)',
+                color: isActive ? 'var(--accent-foreground)' : 'var(--foreground)',
+                transition: 'all 0.2s ease',
+                cursor: 'pointer',
+              }}
+            >
+              <tab.icon className="w-4 h-4" />
+              <span>{tab.label}</span>
+            </button>
+          );
+        })}
+      </div>
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto min-h-0">

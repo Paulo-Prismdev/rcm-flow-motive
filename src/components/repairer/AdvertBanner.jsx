@@ -82,7 +82,7 @@ export default function AdvertBanner() {
         <img 
           src={currentAd.image_url} 
           alt={currentAd.alt_text || 'Advertisement'}
-          className="w-full h-auto"
+          className="w-full h-auto min-h-[120px] md:min-h-0 object-cover"
           style={{ imageRendering: 'auto' }}
         />
       </div>
