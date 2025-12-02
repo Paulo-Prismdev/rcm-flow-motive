@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
 import { 
   Plus, 
   Trash2, 
@@ -14,7 +15,18 @@ import {
   GripVertical,
   X,
   Save,
-  Upload
+  Upload,
+  Gift,
+  Calculator,
+  Package,
+  FileText,
+  TrendingUp,
+  Wrench,
+  Shield,
+  Truck,
+  Clock,
+  DollarSign,
+  Users
 } from 'lucide-react';
 import {
   Dialog,
@@ -22,6 +34,33 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+const ICON_OPTIONS = [
+  { value: 'Calculator', icon: Calculator },
+  { value: 'Package', icon: Package },
+  { value: 'FileText', icon: FileText },
+  { value: 'TrendingUp', icon: TrendingUp },
+  { value: 'Wrench', icon: Wrench },
+  { value: 'Shield', icon: Shield },
+  { value: 'Truck', icon: Truck },
+  { value: 'Clock', icon: Clock },
+  { value: 'DollarSign', icon: DollarSign },
+  { value: 'Users', icon: Users },
+];
+
+const COLOR_OPTIONS = ['blue', 'green', 'purple', 'orange', 'red', 'yellow', 'indigo', 'pink'];
+
+const getIconComponent = (iconName) => {
+  const found = ICON_OPTIONS.find(i => i.value === iconName);
+  return found ? found.icon : Package;
+};
 
 export default function PortalManagementTab() {
   const [isModalOpen, setIsModalOpen] = useState(false);
