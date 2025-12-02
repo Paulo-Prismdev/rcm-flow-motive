@@ -70,7 +70,7 @@ export default function AdvertBanner() {
 
   return (
     <div 
-      className="relative w-full bg-surface overflow-hidden rounded-lg border border-accent/20"
+      className="relative w-full neomorph overflow-hidden"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
