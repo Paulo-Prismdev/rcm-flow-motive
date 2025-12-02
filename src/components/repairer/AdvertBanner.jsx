@@ -71,19 +71,19 @@ export default function AdvertBanner() {
   return (
     <div 
       className="relative w-full bg-surface overflow-hidden rounded-lg border border-accent/20"
-      style={{ aspectRatio: '8 / 1' }}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
       {/* Image Container */}
       <div 
-        className={`absolute inset-0 transition-opacity duration-500 ${currentAd.link_url ? 'cursor-pointer' : ''}`}
+        className={`transition-opacity duration-500 ${currentAd.link_url ? 'cursor-pointer' : ''}`}
         onClick={handleAdClick}
       >
         <img 
           src={currentAd.image_url} 
           alt={currentAd.alt_text || 'Advertisement'}
-          className="w-full h-full object-contain"
+          className="w-full h-auto"
+          style={{ imageRendering: 'auto' }}
         />
       </div>
 
