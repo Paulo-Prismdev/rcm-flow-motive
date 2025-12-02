@@ -122,38 +122,29 @@ export default function RepairerPortal() {
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto min-h-0">
-        <div className="flex flex-col min-h-full">
-          <div className="flex-1">
-            {activeTab === 'dashboard' && (
-              <RepairerDashboard 
-                claims={claims}
-                estimates={estimates}
-                parts={parts}
-                activeClaims={activeClaims}
-                pendingEstimates={pendingEstimates}
-                activeParts={activeParts}
-                onNavigate={setActiveTab}
-              />
-            )}
-            {activeTab === 'claims' && (
-              <RepairerClaimsList claims={claims} />
-            )}
-            {activeTab === 'estimates' && (
-              <RepairerEstimatesTab estimates={estimates} bodyshopId={currentUser.linked_bodyshop_id} bodyshopName={bodyshop?.name} />
-            )}
-            {activeTab === 'parts' && (
-              <RepairerPartsTab parts={parts} bodyshopId={currentUser.linked_bodyshop_id} bodyshopName={bodyshop?.name} />
-            )}
-            {activeTab === 'products' && (
-              <RepairerProductsTab />
-            )}
-          </div>
-          
-          {/* Advert Banner - Always at bottom */}
-          <div className="mt-4 pb-2">
-            <AdvertBanner />
-          </div>
-        </div>
+        {activeTab === 'dashboard' && (
+          <RepairerDashboard 
+            claims={claims}
+            estimates={estimates}
+            parts={parts}
+            activeClaims={activeClaims}
+            pendingEstimates={pendingEstimates}
+            activeParts={activeParts}
+            onNavigate={setActiveTab}
+          />
+        )}
+        {activeTab === 'claims' && (
+          <RepairerClaimsList claims={claims} />
+        )}
+        {activeTab === 'estimates' && (
+          <RepairerEstimatesTab estimates={estimates} bodyshopId={currentUser.linked_bodyshop_id} bodyshopName={bodyshop?.name} />
+        )}
+        {activeTab === 'parts' && (
+          <RepairerPartsTab parts={parts} bodyshopId={currentUser.linked_bodyshop_id} bodyshopName={bodyshop?.name} />
+        )}
+        {activeTab === 'products' && (
+          <RepairerProductsTab />
+        )}
       </div>
     </div>
   );
@@ -161,7 +152,8 @@ export default function RepairerPortal() {
 
 function RepairerDashboard({ claims, estimates, parts, activeClaims, pendingEstimates, activeParts, onNavigate }) {
   return (
-    <div className="space-y-4">
+    <div className="flex flex-col min-h-full">
+      <div className="flex-1 space-y-4">
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <div className="neomorph p-4 cursor-pointer hover:shadow-lg transition-all" onClick={() => onNavigate('claims')}>
@@ -275,6 +267,12 @@ function RepairerDashboard({ claims, estimates, parts, activeClaims, pendingEsti
             </button>
           </div>
         </div>
+      </div>
+      </div>
+      
+      {/* Advert Banner - Bottom of dashboard only */}
+      <div className="mt-4 pb-2">
+        <AdvertBanner />
       </div>
     </div>
   );
