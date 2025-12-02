@@ -103,22 +103,37 @@ export default function RepairerPortal() {
   return (
     <div className="h-full flex flex-col gap-2">
       {/* Tabs */}
-      <div className="neomorph p-1.5 flex gap-1 overflow-x-auto flex-shrink-0">
-        {tabs.map(tab => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${
-              activeTab === tab.id 
-                ? 'bg-accent text-accent-foreground' 
-                : 'hover:bg-surface-hover'
-            }`}
-          >
-            <tab.icon className="w-4 h-4" />
-            <span className="hidden sm:inline">{tab.label}</span>
-          </button>
-        ))}
-      </div>
+                  <div className="neomorph p-2 flex gap-2 overflow-x-auto flex-shrink-0">
+                    {tabs.map(tab => {
+                      const isActive = activeTab === tab.id;
+                      return (
+                        <button
+                          key={tab.id}
+                          onClick={() => setActiveTab(tab.id)}
+                          className={`nav-button ${isActive ? 'nav-button-active' : ''}`}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem',
+                            padding: '0.75rem 1rem',
+                            whiteSpace: 'nowrap',
+                            fontSize: '0.875rem',
+                            fontWeight: 500,
+                            background: isActive ? 'var(--accent)' : 'var(--surface)',
+                            border: `1px solid ${isActive ? 'var(--accent)' : 'var(--border)'}`,
+                            borderRadius: '12px',
+                            boxShadow: isActive ? '0 4px 12px rgba(212, 175, 55, 0.3)' : 'var(--shadow-sm)',
+                            color: isActive ? 'var(--accent-foreground)' : 'var(--foreground)',
+                            transition: 'all 0.2s ease',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <tab.icon className="w-4 h-4" />
+                          <span className="hidden sm:inline">{tab.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto min-h-0">
