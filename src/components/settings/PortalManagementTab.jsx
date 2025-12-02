@@ -14,8 +14,7 @@ import {
   GripVertical,
   X,
   Save,
-  Upload,
-  Building2
+  Upload
 } from 'lucide-react';
 import {
   Dialog,
@@ -37,50 +36,7 @@ export default function PortalManagementTab() {
   });
   const [isUploading, setIsUploading] = useState(false);
 
-  const [logoUploading, setLogoUploading] = useState(false);
   const queryClient = useQueryClient();
-
-  // Fetch company logo config
-  const { data: appConfigs = [] } = useQuery({
-    queryKey: ['appConfigs'],
-    queryFn: () => base44.entities.AppConfig.list(),
-  });
-
-  const companyLogo = appConfigs.find(c => c.config_key === 'company_logo')?.config_value || '';
-
-  const logoMutation = useMutation({
-    mutationFn: async (logoUrl) => {
-      const existing = appConfigs.find(c => c.config_key === 'company_logo');
-      if (existing) {
-        return base44.entities.AppConfig.update(existing.id, { config_value: logoUrl });
-      } else {
-        return base44.entities.AppConfig.create({ config_key: 'company_logo', config_value: logoUrl });
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['appConfigs'] });
-    },
-  });
-
-  const handleLogoUpload = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setLogoUploading(true);
-    try {
-      const result = await base44.integrations.Core.UploadFile({ file });
-      logoMutation.mutate(result.file_url);
-    } catch (error) {
-      console.error('Upload failed:', error);
-      alert('Failed to upload logo. Please try again.');
-    } finally {
-      setLogoUploading(false);
-    }
-  };
-
-  const handleRemoveLogo = () => {
-    logoMutation.mutate('');
-  };
 
   const { data: adverts = [], isLoading } = useQuery({
     queryKey: ['advertBanners'],
@@ -192,65 +148,6 @@ export default function PortalManagementTab() {
 
   return (
     <div className="space-y-6">
-      {/* Company Logo Section */}
-      <div className="neomorph p-4">
-        <div className="flex items-center gap-2 mb-4">
-          <Building2 className="w-5 h-5 text-accent" />
-          <div>
-            <h2 className="text-lg font-bold">Company Logo</h2>
-            <p className="text-sm text-foreground-muted">
-              This logo appears in the header across the entire app
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-6">
-          {/* Logo Preview */}
-          <div className="w-20 h-20 rounded-lg border-2 border-dashed border-border flex items-center justify-center overflow-hidden bg-surface-hover">
-            {companyLogo ? (
-              <img 
-                src={companyLogo} 
-                alt="Company Logo" 
-                className="w-full h-full object-contain"
-              />
-            ) : (
-              <Image className="w-8 h-8 text-foreground-muted" />
-            )}
-          </div>
-
-          {/* Upload Controls */}
-          <div className="flex-1 space-y-2">
-            <div className="flex gap-2">
-              <label className="neomorph-flat px-4 py-2 cursor-pointer flex items-center gap-2 hover:bg-surface-hover text-sm font-medium">
-                <Upload className="w-4 h-4" />
-                {logoUploading ? 'Uploading...' : 'Upload Logo'}
-                <input 
-                  type="file" 
-                  accept="image/*" 
-                  onChange={handleLogoUpload}
-                  className="hidden"
-                  disabled={logoUploading}
-                />
-              </label>
-              {companyLogo && (
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={handleRemoveLogo}
-                  className="text-red-500 hover:text-red-600"
-                >
-                  <Trash2 className="w-4 h-4 mr-1" />
-                  Remove
-                </Button>
-              )}
-            </div>
-            <p className="text-xs text-foreground-muted">
-              Recommended: Square image, at least 80x80px. PNG or JPG.
-            </p>
-          </div>
-        </div>
-      </div>
-
       {/* Advert Banners Header */}
       <div className="neomorph p-4">
         <div className="flex items-center justify-between mb-4">
