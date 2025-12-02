@@ -771,7 +771,7 @@ export default function Layout({ children, currentPageName }) {
             </div>
 
             {/* Desktop Navigation Row */}
-            <div className={`hidden md:block nav-container-wrapper ${hasScrollRight ? 'has-scroll-right' : ''}`}>
+            <div className={`hidden md:block nav-container-wrapper mt-5 ${hasScrollRight ? 'has-scroll-right' : ''}`}>
               <nav 
                 className="nav-container"
                 ref={navContainerRef}
