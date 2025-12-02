@@ -270,12 +270,14 @@ export default function RepairerLayout({ children }) {
           
           {/* Center: Bodyshop Logo */}
           {bodyshop?.logo_url && (
-            <img 
-              src={bodyshop.logo_url} 
-              alt={bodyshop.name} 
-              className="h-8 md:h-10 max-w-[120px] md:max-w-[180px] object-contain"
-            />
-          )}
+                        <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 m-5">
+                          <img 
+                            src={bodyshop.logo_url} 
+                            alt={bodyshop.name} 
+                            className="w-full h-full object-contain"
+                          />
+                        </div>
+                      )}
 
           {/* Right: Desktop controls */}
           <div className="hidden md:flex items-center gap-2">
