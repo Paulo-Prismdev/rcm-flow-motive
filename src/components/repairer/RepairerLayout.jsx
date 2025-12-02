@@ -246,7 +246,7 @@ export default function RepairerLayout({ children }) {
             {/* Company Logo + App Title */}
             <div className="flex items-center gap-3">
               {companyLogo && (
-                <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-surface-hover">
+                <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 bg-surface-hover mx-5">
                   <img 
                     src={companyLogo} 
                     alt="Company Logo" 
