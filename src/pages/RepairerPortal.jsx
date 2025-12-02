@@ -101,7 +101,7 @@ export default function RepairerPortal() {
   ];
 
   return (
-    <div className="h-full flex flex-col gap-2">
+    <div className="h-full flex flex-col gap-2 overflow-hidden">
       {/* Tabs */}
                   <div className="neomorph p-2 flex gap-2 overflow-x-auto flex-shrink-0">
                     {tabs.map(tab => {
@@ -168,8 +168,8 @@ export default function RepairerPortal() {
 
 function RepairerDashboard({ claims, estimates, parts, activeClaims, pendingEstimates, activeParts, onNavigate, bodyshopName }) {
   return (
-    <div className="flex flex-col min-h-full">
-      <div className="flex-1 space-y-4">
+            <div className="flex flex-col h-full overflow-hidden">
+              <div className="flex-1 space-y-3 overflow-y-auto">
       {/* Welcome Message */}
       <div className="neomorph p-4">
         <h2 className="text-xl font-bold">Welcome back, {bodyshopName || 'Repairer'}!</h2>
@@ -177,7 +177,7 @@ function RepairerDashboard({ claims, estimates, parts, activeClaims, pendingEsti
       </div>
       
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
         <div className="neomorph p-4 cursor-pointer hover:shadow-lg transition-all" onClick={() => onNavigate('claims')}>
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
@@ -228,7 +228,7 @@ function RepairerDashboard({ claims, estimates, parts, activeClaims, pendingEsti
       </div>
 
       {/* Recent Activity */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
         {/* Recent Claims */}
         <div className="neomorph p-4">
           <div className="flex items-center justify-between mb-4">
@@ -293,9 +293,9 @@ function RepairerDashboard({ claims, estimates, parts, activeClaims, pendingEsti
       </div>
       
       {/* Advert Banner - Bottom of dashboard only */}
-      <div className="mt-4 pb-2">
-        <AdvertBanner />
-      </div>
+                  <div className="mt-2 flex-shrink-0">
+                    <AdvertBanner />
+                  </div>
     </div>
   );
 }
