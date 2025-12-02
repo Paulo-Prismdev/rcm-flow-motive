@@ -74,15 +74,28 @@ export default function AdvertBanner() {
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
-      {/* Image Container */}
+      {/* Image Container - Desktop */}
       <div 
-        className={`transition-opacity duration-500 ${currentAd.link_url ? 'cursor-pointer' : ''}`}
+        className={`hidden md:block transition-opacity duration-500 ${currentAd.link_url ? 'cursor-pointer' : ''}`}
         onClick={handleAdClick}
       >
         <img 
           src={currentAd.image_url} 
           alt={currentAd.alt_text || 'Advertisement'}
-          className="w-full h-auto min-h-[120px] md:min-h-0 object-cover"
+          className="w-full h-auto object-cover"
+          style={{ imageRendering: 'auto' }}
+        />
+      </div>
+
+      {/* Image Container - Mobile */}
+      <div 
+        className={`md:hidden transition-opacity duration-500 ${currentAd.link_url ? 'cursor-pointer' : ''}`}
+        onClick={handleAdClick}
+      >
+        <img 
+          src={currentAd.mobile_image_url || currentAd.image_url} 
+          alt={currentAd.alt_text || 'Advertisement'}
+          className="w-full h-auto min-h-[120px] object-cover"
           style={{ imageRendering: 'auto' }}
         />
       </div>

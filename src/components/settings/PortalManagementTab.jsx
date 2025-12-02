@@ -68,12 +68,14 @@ export default function PortalManagementTab() {
   const [formData, setFormData] = useState({
     name: '',
     image_url: '',
+    mobile_image_url: '',
     link_url: '',
     alt_text: '',
     is_active: true,
     sort_order: 0
   });
   const [isUploading, setIsUploading] = useState(false);
+  const [isUploadingMobile, setIsUploadingMobile] = useState(false);
 
   // Product management state
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
@@ -155,6 +157,7 @@ export default function PortalManagementTab() {
       setFormData({
         name: advert.name || '',
         image_url: advert.image_url || '',
+        mobile_image_url: advert.mobile_image_url || '',
         link_url: advert.link_url || '',
         alt_text: advert.alt_text || '',
         is_active: advert.is_active !== false,
@@ -165,6 +168,7 @@ export default function PortalManagementTab() {
       setFormData({
         name: '',
         image_url: '',
+        mobile_image_url: '',
         link_url: '',
         alt_text: '',
         is_active: true,
@@ -180,6 +184,7 @@ export default function PortalManagementTab() {
     setFormData({
       name: '',
       image_url: '',
+      mobile_image_url: '',
       link_url: '',
       alt_text: '',
       is_active: true,
@@ -226,6 +231,22 @@ export default function PortalManagementTab() {
       alert('Failed to upload image. Please try again.');
     } finally {
       setIsUploading(false);
+    }
+  };
+
+  const handleMobileFileUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploadingMobile(true);
+    try {
+      const result = await base44.integrations.Core.UploadFile({ file });
+      setFormData(prev => ({ ...prev, mobile_image_url: result.file_url }));
+    } catch (error) {
+      console.error('Upload failed:', error);
+      alert('Failed to upload image. Please try again.');
+    } finally {
+      setIsUploadingMobile(false);
     }
   };
 
@@ -515,13 +536,13 @@ export default function PortalManagementTab() {
             </div>
 
             <div>
-              <Label>Image</Label>
+              <Label>Desktop Image (1200x150px recommended)</Label>
               <div className="space-y-2">
                 {formData.image_url && (
-                  <div className="relative w-full h-32 rounded overflow-hidden bg-surface-hover">
+                  <div className="relative w-full h-24 rounded overflow-hidden bg-surface-hover">
                     <img 
                       src={formData.image_url} 
-                      alt="Preview"
+                      alt="Desktop Preview"
                       className="w-full h-full object-cover"
                     />
                     <button
@@ -538,19 +559,62 @@ export default function PortalManagementTab() {
                   <Input
                     value={formData.image_url}
                     onChange={(e) => setFormData(prev => ({ ...prev, image_url: e.target.value }))}
-                    placeholder="Image URL or upload below"
+                    placeholder="Desktop image URL"
                     className="flex-1"
                     required
                   />
                   <label className="neomorph-flat px-4 py-2 cursor-pointer flex items-center gap-2 hover:bg-surface-hover">
                     <Upload className="w-4 h-4" />
-                    {isUploading ? 'Uploading...' : 'Upload'}
+                    {isUploading ? '...' : 'Upload'}
                     <input 
                       type="file" 
                       accept="image/*" 
                       onChange={handleFileUpload}
                       className="hidden"
                       disabled={isUploading}
+                    />
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <Label>Mobile Image (600x200px recommended) - Optional</Label>
+              <p className="text-xs text-foreground-muted mb-2">If not provided, desktop image will be used</p>
+              <div className="space-y-2">
+                {formData.mobile_image_url && (
+                  <div className="relative w-full h-24 rounded overflow-hidden bg-surface-hover">
+                    <img 
+                      src={formData.mobile_image_url} 
+                      alt="Mobile Preview"
+                      className="w-full h-full object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setFormData(prev => ({ ...prev, mobile_image_url: '' }))}
+                      className="absolute top-2 right-2 p-1 rounded-full bg-black/50 text-white hover:bg-black/70"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                )}
+                
+                <div className="flex gap-2">
+                  <Input
+                    value={formData.mobile_image_url}
+                    onChange={(e) => setFormData(prev => ({ ...prev, mobile_image_url: e.target.value }))}
+                    placeholder="Mobile image URL (optional)"
+                    className="flex-1"
+                  />
+                  <label className="neomorph-flat px-4 py-2 cursor-pointer flex items-center gap-2 hover:bg-surface-hover">
+                    <Upload className="w-4 h-4" />
+                    {isUploadingMobile ? '...' : 'Upload'}
+                    <input 
+                      type="file" 
+                      accept="image/*" 
+                      onChange={handleMobileFileUpload}
+                      className="hidden"
+                      disabled={isUploadingMobile}
                     />
                   </label>
                 </div>
