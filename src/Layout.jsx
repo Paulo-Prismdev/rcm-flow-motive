@@ -654,14 +654,14 @@ export default function Layout({ children, currentPageName }) {
                 {/* Company Logo + App Title */}
                 <div className="flex items-center gap-3">
                   {companyLogo && (
-                    <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 bg-surface-hover">
-                      <img 
-                        src={companyLogo} 
-                        alt="Company Logo" 
-                        className="w-full h-full object-contain"
-                      />
-                    </div>
-                  )}
+                                        <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-surface-hover">
+                                          <img 
+                                            src={companyLogo} 
+                                            alt="Company Logo" 
+                                            className="w-full h-full object-contain"
+                                          />
+                                        </div>
+                                      )}
                   <div className="app-title">
                     <span className="app-title-artura">
                       <span className="gold-letter">A</span>
