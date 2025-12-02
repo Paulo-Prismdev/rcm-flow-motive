@@ -122,29 +122,38 @@ export default function RepairerPortal() {
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto min-h-0">
-        {activeTab === 'dashboard' && (
-          <RepairerDashboard 
-            claims={claims}
-            estimates={estimates}
-            parts={parts}
-            activeClaims={activeClaims}
-            pendingEstimates={pendingEstimates}
-            activeParts={activeParts}
-            onNavigate={setActiveTab}
-          />
-        )}
-        {activeTab === 'claims' && (
-          <RepairerClaimsList claims={claims} />
-        )}
-        {activeTab === 'estimates' && (
-          <RepairerEstimatesTab estimates={estimates} bodyshopId={currentUser.linked_bodyshop_id} bodyshopName={bodyshop?.name} />
-        )}
-        {activeTab === 'parts' && (
-          <RepairerPartsTab parts={parts} bodyshopId={currentUser.linked_bodyshop_id} bodyshopName={bodyshop?.name} />
-        )}
-        {activeTab === 'products' && (
-          <RepairerProductsTab />
-        )}
+        <div className="flex flex-col min-h-full">
+          <div className="flex-1">
+            {activeTab === 'dashboard' && (
+              <RepairerDashboard 
+                claims={claims}
+                estimates={estimates}
+                parts={parts}
+                activeClaims={activeClaims}
+                pendingEstimates={pendingEstimates}
+                activeParts={activeParts}
+                onNavigate={setActiveTab}
+              />
+            )}
+            {activeTab === 'claims' && (
+              <RepairerClaimsList claims={claims} />
+            )}
+            {activeTab === 'estimates' && (
+              <RepairerEstimatesTab estimates={estimates} bodyshopId={currentUser.linked_bodyshop_id} bodyshopName={bodyshop?.name} />
+            )}
+            {activeTab === 'parts' && (
+              <RepairerPartsTab parts={parts} bodyshopId={currentUser.linked_bodyshop_id} bodyshopName={bodyshop?.name} />
+            )}
+            {activeTab === 'products' && (
+              <RepairerProductsTab />
+            )}
+          </div>
+          
+          {/* Advert Banner - Always at bottom */}
+          <div className="mt-4 pb-2">
+            <AdvertBanner />
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -267,9 +276,6 @@ function RepairerDashboard({ claims, estimates, parts, activeClaims, pendingEsti
           </div>
         </div>
       </div>
-
-      {/* Advert Banner */}
-      <AdvertBanner />
     </div>
   );
 }
