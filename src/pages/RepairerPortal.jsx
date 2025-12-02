@@ -101,33 +101,21 @@ export default function RepairerPortal() {
   ];
 
   return (
-    <div className="h-full flex flex-col gap-4">
-      {/* Header */}
-      <div className="neomorph p-4 md:p-6">
-        <div className="flex items-center justify-between flex-wrap gap-4">
-          <div>
-            <h1 className="text-2xl md:text-3xl font-bold">Repairer Portal</h1>
-            <p className="text-foreground-muted mt-1">
-              Welcome back, {bodyshop?.name || 'Repairer'}
-            </p>
-          </div>
-        </div>
-      </div>
-
+    <div className="h-full flex flex-col gap-2">
       {/* Tabs */}
-      <div className="neomorph p-2 flex gap-1 overflow-x-auto flex-shrink-0">
+      <div className="neomorph p-1.5 flex gap-1 overflow-x-auto flex-shrink-0">
         {tabs.map(tab => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${
               activeTab === tab.id 
                 ? 'bg-accent text-accent-foreground' 
                 : 'hover:bg-surface-hover'
             }`}
           >
             <tab.icon className="w-4 h-4" />
-            {tab.label}
+            <span className="hidden sm:inline">{tab.label}</span>
           </button>
         ))}
       </div>

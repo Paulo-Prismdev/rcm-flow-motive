@@ -223,30 +223,30 @@ export default function RepairerLayout({ children }) {
       )}
 
       {/* Header */}
-      <header className="neomorph mb-2 mx-2 md:mx-3 mt-2 md:mt-3 p-3 md:p-4 flex-shrink-0">
+      <header className="neomorph mx-2 md:mx-3 mt-2 md:mt-3 px-3 py-2 flex-shrink-0">
         <div className="flex items-center justify-between gap-2">
           {/* Left: Burger (mobile) + Logo */}
-          <div className="flex items-center gap-2 md:gap-4 min-w-0 flex-1">
+          <div className="flex items-center gap-2 md:gap-3 min-w-0">
             {/* Mobile Burger */}
             <button
               onClick={() => setMobileMenuOpen(true)}
-              className="glass-button w-10 h-10 flex items-center justify-center flex-shrink-0 md:hidden"
+              className="glass-button w-8 h-8 flex items-center justify-center flex-shrink-0 md:hidden"
               style={{ color: 'var(--foreground)' }}
             >
               <Menu className="w-4 h-4" />
             </button>
 
             {/* Logo */}
-            <div className="flex items-baseline gap-2">
-              <span style={{ fontFamily: "'Palatino Linotype', serif", fontSize: '1.25rem' }} className="md:text-2xl">
+            <div className="flex items-baseline gap-1">
+              <span style={{ fontFamily: "'Palatino Linotype', serif", fontSize: '1.1rem' }} className="md:text-xl">
                 <span style={{ color: 'var(--accent)' }}>A</span>
                 <span>RTEC</span>
                 <span style={{ color: 'var(--accent)' }}>H</span>
               </span>
-              <span style={{ fontWeight: 300 }} className="text-xl md:text-2xl">One</span>
+              <span style={{ fontWeight: 300 }} className="text-lg md:text-xl">One</span>
             </div>
-            <span className="hidden sm:inline text-xs px-2 py-1 rounded-full bg-accent/20 text-accent font-medium">
-              Repairer Portal
+            <span className="hidden sm:inline text-[10px] px-1.5 py-0.5 rounded-full bg-accent/20 text-accent font-medium">
+              Repairer
             </span>
           </div>
           
@@ -255,32 +255,32 @@ export default function RepairerLayout({ children }) {
             <img 
               src={bodyshop.logo_url} 
               alt={bodyshop.name} 
-              className="h-8 md:h-12 max-w-[120px] md:max-w-[200px] object-contain"
+              className="h-6 md:h-8 max-w-[100px] md:max-w-[150px] object-contain"
             />
           )}
 
           {/* Right: Desktop controls */}
-          <div className="hidden md:flex items-center gap-3">
+          <div className="hidden md:flex items-center gap-2">
             {bodyshop && (
-              <div className="flex items-center gap-2 text-sm text-foreground-muted">
-                <Building2 className="w-4 h-4" />
-                {bodyshop.name}
+              <div className="flex items-center gap-1.5 text-xs text-foreground-muted">
+                <Building2 className="w-3.5 h-3.5" />
+                <span className="max-w-[120px] truncate">{bodyshop.name}</span>
               </div>
             )}
 
             <button
               onClick={toggleTheme}
-              className="glass-button w-10 h-10 flex items-center justify-center"
+              className="glass-button w-8 h-8 flex items-center justify-center"
               style={{ color: 'var(--foreground)' }}
               title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
             >
-              {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+              {isDark ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
             </button>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="glass-button w-10 h-10 flex items-center justify-center">
-                  <User className="w-4 h-4" />
+                <button className="glass-button w-8 h-8 flex items-center justify-center">
+                  <User className="w-3.5 h-3.5" />
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="neomorph-flat w-56">
@@ -302,8 +302,8 @@ export default function RepairerLayout({ children }) {
       </header>
 
       {/* Main Content */}
-      <main className="px-2 md:px-3 pb-2 md:pb-3 flex-1 overflow-y-auto min-h-0">
-        <div className="max-w-full mx-auto">
+      <main className="px-2 md:px-3 pt-2 pb-2 md:pb-3 flex-1 overflow-y-auto min-h-0">
+        <div className="max-w-full mx-auto h-full">
           {children}
         </div>
       </main>
