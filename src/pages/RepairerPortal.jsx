@@ -131,6 +131,7 @@ export default function RepairerPortal() {
             pendingEstimates={pendingEstimates}
             activeParts={activeParts}
             onNavigate={setActiveTab}
+            userName={currentUser?.full_name}
           />
         )}
         {activeTab === 'claims' && (
@@ -150,10 +151,16 @@ export default function RepairerPortal() {
   );
 }
 
-function RepairerDashboard({ claims, estimates, parts, activeClaims, pendingEstimates, activeParts, onNavigate }) {
+function RepairerDashboard({ claims, estimates, parts, activeClaims, pendingEstimates, activeParts, onNavigate, userName }) {
   return (
     <div className="flex flex-col min-h-full">
       <div className="flex-1 space-y-4">
+      {/* Welcome Message */}
+      <div className="neomorph p-4">
+        <h2 className="text-xl font-bold">Welcome back, {userName || 'User'}!</h2>
+        <p className="text-sm text-foreground-muted">Here's an overview of your current activity</p>
+      </div>
+      
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <div className="neomorph p-4 cursor-pointer hover:shadow-lg transition-all" onClick={() => onNavigate('claims')}>
