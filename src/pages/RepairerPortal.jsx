@@ -491,17 +491,13 @@ function RepairerProductsTab() {
     queryKey: ['portalProducts'],
     queryFn: async () => {
       const allProducts = await base44.entities.PortalProduct.list('sort_order');
+      console.log('Fetched products:', allProducts);
       return allProducts.filter(p => p.is_active !== false);
     },
   });
 
-  const iconMap = {
-    Calculator, Package, FileText, TrendingUp, Wrench: Calculator,
-    Shield: FileText, Truck: Package, Clock: Calculator, DollarSign: TrendingUp, Users: FileText
-  };
-
   const getIcon = (iconName) => {
-    const icons = { Calculator, Package, FileText, TrendingUp };
+    const icons = { Calculator, Package, FileText, TrendingUp, Wrench };
     return icons[iconName] || Package;
   };
 
