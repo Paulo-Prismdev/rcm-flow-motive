@@ -131,7 +131,7 @@ export default function RepairerPortal() {
             pendingEstimates={pendingEstimates}
             activeParts={activeParts}
             onNavigate={setActiveTab}
-            userName={currentUser?.full_name}
+            bodyshopName={bodyshop?.name}
           />
         )}
         {activeTab === 'claims' && (
@@ -151,13 +151,13 @@ export default function RepairerPortal() {
   );
 }
 
-function RepairerDashboard({ claims, estimates, parts, activeClaims, pendingEstimates, activeParts, onNavigate, userName }) {
+function RepairerDashboard({ claims, estimates, parts, activeClaims, pendingEstimates, activeParts, onNavigate, bodyshopName }) {
   return (
     <div className="flex flex-col min-h-full">
       <div className="flex-1 space-y-4">
       {/* Welcome Message */}
       <div className="neomorph p-4">
-        <h2 className="text-xl font-bold">Welcome back, {userName || 'User'}!</h2>
+        <h2 className="text-xl font-bold">Welcome back, {bodyshopName || 'Repairer'}!</h2>
         <p className="text-sm text-foreground-muted">Here's an overview of your current activity</p>
       </div>
       
