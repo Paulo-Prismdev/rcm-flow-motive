@@ -229,6 +229,85 @@ export default function PortalManagementTab() {
     }
   };
 
+  // Product handlers
+  const openProductModal = (product = null) => {
+    if (product) {
+      setEditingProduct(product);
+      setProductFormData({
+        name: product.name || '',
+        description: product.description || '',
+        icon: product.icon || 'Package',
+        color: product.color || 'blue',
+        features: product.features || [],
+        link_url: product.link_url || '',
+        is_active: product.is_active !== false,
+        sort_order: product.sort_order || 0
+      });
+    } else {
+      setEditingProduct(null);
+      setProductFormData({
+        name: '',
+        description: '',
+        icon: 'Package',
+        color: 'blue',
+        features: [],
+        link_url: '',
+        is_active: true,
+        sort_order: products.length
+      });
+    }
+    setIsProductModalOpen(true);
+  };
+
+  const closeProductModal = () => {
+    setIsProductModalOpen(false);
+    setEditingProduct(null);
+    setNewFeature('');
+  };
+
+  const handleProductSubmit = (e) => {
+    e.preventDefault();
+    if (!productFormData.name || !productFormData.description) {
+      alert('Please provide a name and description');
+      return;
+    }
+    if (editingProduct) {
+      updateProductMutation.mutate({ id: editingProduct.id, data: productFormData });
+    } else {
+      createProductMutation.mutate(productFormData);
+    }
+  };
+
+  const handleDeleteProduct = (id) => {
+    if (window.confirm('Are you sure you want to delete this product?')) {
+      deleteProductMutation.mutate(id);
+    }
+  };
+
+  const handleToggleProductActive = (product) => {
+    updateProductMutation.mutate({ 
+      id: product.id, 
+      data: { ...product, is_active: !product.is_active } 
+    });
+  };
+
+  const addFeature = () => {
+    if (newFeature.trim()) {
+      setProductFormData(prev => ({
+        ...prev,
+        features: [...prev.features, newFeature.trim()]
+      }));
+      setNewFeature('');
+    }
+  };
+
+  const removeFeature = (index) => {
+    setProductFormData(prev => ({
+      ...prev,
+      features: prev.features.filter((_, i) => i !== index)
+    }));
+  };
+
   return (
     <div className="space-y-6">
       {/* Advert Banners Header */}
