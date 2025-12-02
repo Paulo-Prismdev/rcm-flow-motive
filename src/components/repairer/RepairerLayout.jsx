@@ -44,6 +44,13 @@ export default function RepairerLayout({ children }) {
     enabled: !!currentUser?.linked_bodyshop_id,
   });
 
+  const { data: appConfigs = [] } = useQuery({
+    queryKey: ['appConfigs'],
+    queryFn: () => base44.entities.AppConfig.list(),
+  });
+
+  const companyLogo = appConfigs.find(c => c.config_key === 'company_logo')?.config_value || '';
+
   return (
     <StatusConfigProvider>
     <div className="h-screen flex flex-col bg-background text-foreground overflow-hidden">
@@ -236,14 +243,25 @@ export default function RepairerLayout({ children }) {
               <Menu className="w-4 h-4" />
             </button>
 
-            {/* Logo */}
-            <div className="flex items-baseline gap-1">
-              <span style={{ fontFamily: "'Palatino Linotype', serif", fontSize: '1.1rem' }} className="md:text-xl">
-                <span style={{ color: 'var(--accent)' }}>A</span>
-                <span>RTEC</span>
-                <span style={{ color: 'var(--accent)' }}>H</span>
-              </span>
-              <span style={{ fontWeight: 300 }} className="text-lg md:text-xl">One</span>
+            {/* Company Logo + App Title */}
+            <div className="flex items-center gap-3">
+              {companyLogo && (
+                <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-surface-hover">
+                  <img 
+                    src={companyLogo} 
+                    alt="Company Logo" 
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+              )}
+              <div className="flex items-baseline gap-1">
+                <span style={{ fontFamily: "'Palatino Linotype', serif", fontSize: '1.1rem' }} className="md:text-xl">
+                  <span style={{ color: 'var(--accent)' }}>A</span>
+                  <span>RTEC</span>
+                  <span style={{ color: 'var(--accent)' }}>H</span>
+                </span>
+                <span style={{ fontWeight: 300 }} className="text-lg md:text-xl">One</span>
+              </div>
             </div>
             <span className="hidden sm:inline text-[10px] px-1.5 py-0.5 rounded-full bg-accent/20 text-accent font-medium">
               Repairer
