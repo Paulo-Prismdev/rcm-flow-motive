@@ -125,6 +125,30 @@ export default function PortalManagementTab() {
     },
   });
 
+  // Product mutations
+  const createProductMutation = useMutation({
+    mutationFn: (data) => base44.entities.PortalProduct.create(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['portalProducts'] });
+      closeProductModal();
+    },
+  });
+
+  const updateProductMutation = useMutation({
+    mutationFn: ({ id, data }) => base44.entities.PortalProduct.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['portalProducts'] });
+      closeProductModal();
+    },
+  });
+
+  const deleteProductMutation = useMutation({
+    mutationFn: (id) => base44.entities.PortalProduct.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['portalProducts'] });
+    },
+  });
+
   const openModal = (advert = null) => {
     if (advert) {
       setEditingAdvert(advert);
