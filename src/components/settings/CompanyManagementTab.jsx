@@ -426,7 +426,11 @@ function GeocodeBodyshopsButton({ items }) {
       }
 
       try {
-        const result = await base44.functions.invoke('geocodeAddress', { address: addressToGeocode });
+        const response = await base44.functions.invoke('geocodeAddress', { address: addressToGeocode });
+        // Response from functions.invoke is an axios response, data is in response.data
+        const result = response?.data || response;
+        
+        console.log(`Geocode result for ${bodyshop.name}:`, result);
         
         if (result && result.latitude && result.longitude) {
           await base44.entities.Bodyshop.update(bodyshop.id, {
@@ -436,6 +440,7 @@ function GeocodeBodyshopsButton({ items }) {
           successCount++;
           setProgress(prev => ({ ...prev, success: successCount }));
         } else {
+          console.log(`No coordinates found for ${bodyshop.name}:`, result);
           failedCount++;
           setProgress(prev => ({ ...prev, failed: failedCount }));
         }
