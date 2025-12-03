@@ -88,6 +88,7 @@ export default function ClaimsPage() {
   const [referrerFilter, setReferrerFilter] = useState('');
   const [updateStatusFilter, setUpdateStatusFilter] = useState('');
   const [repairerAcceptanceFilter, setRepairerAcceptanceFilter] = useState('');
+  const [repairerFilter, setRepairerFilter] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [selectedClaim, setSelectedClaim] = useState(null);
@@ -139,6 +140,7 @@ export default function ClaimsPage() {
   // Get unique values for filters
   const uniqueInsurers = [...new Set(claims.map(c => c.insurer).filter(Boolean))].sort();
   const uniqueReferrers = [...new Set(claims.map(c => c.referrer).filter(Boolean))].sort();
+  const uniqueRepairers = [...new Set(claims.map(c => c.bodyshop).filter(Boolean))].sort();
 
   // URL parameter handling - watch for changes
   const location = useLocation();
@@ -186,11 +188,12 @@ export default function ClaimsPage() {
     setClaimTypeFilter('');
     setInsurerFilter('');
     setReferrerFilter('');
+    setRepairerFilter('');
     setUpdateStatusFilter('');
     setRepairerAcceptanceFilter('');
   };
 
-  const activeFiltersCount = [statusFilter, claimTypeFilter, insurerFilter, referrerFilter, updateStatusFilter, repairerAcceptanceFilter].filter(Boolean).length;
+  const activeFiltersCount = [statusFilter, claimTypeFilter, insurerFilter, referrerFilter, repairerFilter, updateStatusFilter, repairerAcceptanceFilter].filter(Boolean).length;
 
   const allClaims = showArchived ? claims : claims.filter(c => !c.archived);
 
@@ -207,6 +210,7 @@ export default function ClaimsPage() {
       const matchesClaimType = !claimTypeFilter || c.claim_type === claimTypeFilter;
       const matchesInsurer = !insurerFilter || c.insurer === insurerFilter;
       const matchesReferrer = !referrerFilter || c.referrer === referrerFilter;
+      const matchesRepairer = !repairerFilter || c.bodyshop === repairerFilter;
       
       const updateStatus = calculateUpdateStatus(c);
       const matchesUpdateStatus = !updateStatusFilter || updateStatus === updateStatusFilter;
@@ -219,7 +223,7 @@ export default function ClaimsPage() {
         matchesRepairerAcceptance = c.repairer_accepted === true;
       }
 
-      return matchesSearch && matchesStatus && matchesClaimType && matchesInsurer && matchesReferrer && matchesUpdateStatus && matchesRepairerAcceptance;
+      return matchesSearch && matchesStatus && matchesClaimType && matchesInsurer && matchesReferrer && matchesRepairer && matchesUpdateStatus && matchesRepairerAcceptance;
     })
     .sort((a, b) => {
       const statusA = calculateUpdateStatus(a);
@@ -493,6 +497,20 @@ export default function ClaimsPage() {
                     <option value="">All Referrers</option>
                     {uniqueReferrers.map(referrer => (
                       <option key={referrer} value={referrer}>{referrer}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs text-foreground-muted mb-1">Repairer</label>
+                  <select
+                    value={repairerFilter}
+                    onChange={(e) => setRepairerFilter(e.target.value)}
+                    className="neomorph-inset w-full px-3 py-2 rounded-lg border-0 text-sm"
+                  >
+                    <option value="">All Repairers</option>
+                    {uniqueRepairers.map(repairer => (
+                      <option key={repairer} value={repairer}>{repairer}</option>
                     ))}
                   </select>
                 </div>
