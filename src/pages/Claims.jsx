@@ -4,7 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Plus, Search, Archive, Filter, X, AlertTriangle, Settings2 } from 'lucide-react';
+import { Plus, Search, Archive, Filter, X, AlertTriangle, Settings2, Clock } from 'lucide-react';
 import ClaimDetail from '../components/claims/ClaimDetail';
 import ClaimForm from '../components/claims/ClaimForm';
 import StatusBadge from '../components/shared/StatusBadge';
@@ -87,6 +87,7 @@ export default function ClaimsPage() {
   const [insurerFilter, setInsurerFilter] = useState('');
   const [referrerFilter, setReferrerFilter] = useState('');
   const [updateStatusFilter, setUpdateStatusFilter] = useState('');
+  const [repairerAcceptanceFilter, setRepairerAcceptanceFilter] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [selectedClaim, setSelectedClaim] = useState(null);
@@ -186,9 +187,10 @@ export default function ClaimsPage() {
     setInsurerFilter('');
     setReferrerFilter('');
     setUpdateStatusFilter('');
+    setRepairerAcceptanceFilter('');
   };
 
-  const activeFiltersCount = [statusFilter, claimTypeFilter, insurerFilter, referrerFilter, updateStatusFilter].filter(Boolean).length;
+  const activeFiltersCount = [statusFilter, claimTypeFilter, insurerFilter, referrerFilter, updateStatusFilter, repairerAcceptanceFilter].filter(Boolean).length;
 
   const allClaims = showArchived ? claims : claims.filter(c => !c.archived);
 
@@ -208,8 +210,16 @@ export default function ClaimsPage() {
       
       const updateStatus = calculateUpdateStatus(c);
       const matchesUpdateStatus = !updateStatusFilter || updateStatus === updateStatusFilter;
+      
+      // Repairer acceptance filter
+      let matchesRepairerAcceptance = true;
+      if (repairerAcceptanceFilter === 'awaiting') {
+        matchesRepairerAcceptance = c.bodyshop_id && !c.repairer_accepted && !['Completed', 'Cancelled', 'Total Loss'].includes(c.job_status);
+      } else if (repairerAcceptanceFilter === 'accepted') {
+        matchesRepairerAcceptance = c.repairer_accepted === true;
+      }
 
-      return matchesSearch && matchesStatus && matchesClaimType && matchesInsurer && matchesReferrer && matchesUpdateStatus;
+      return matchesSearch && matchesStatus && matchesClaimType && matchesInsurer && matchesReferrer && matchesUpdateStatus && matchesRepairerAcceptance;
     })
     .sort((a, b) => {
       const statusA = calculateUpdateStatus(a);
@@ -323,6 +333,12 @@ export default function ClaimsPage() {
                 <span className="flex items-center gap-1 px-2 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-medium animate-pulse">
                   <AlertTriangle className="w-3 h-3" />
                   3rd Party Pending
+                </span>
+              )}
+              {claim.bodyshop_id && !claim.repairer_accepted && !isClosedStatus && (
+                <span className="flex items-center gap-1 px-2 py-1 rounded-full bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300 text-xs font-medium">
+                  <Clock className="w-3 h-3" />
+                  Awaiting Repairer
                 </span>
               )}
             </div>
@@ -494,6 +510,19 @@ export default function ClaimsPage() {
                     <option value="Green">🟢 On Track</option>
                     <option value="Blue">🔵 Override Active</option>
                     <option value="Gray">⚫ Closed</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs text-foreground-muted mb-1">Repairer Acceptance</label>
+                  <select
+                    value={repairerAcceptanceFilter}
+                    onChange={(e) => setRepairerAcceptanceFilter(e.target.value)}
+                    className="neomorph-inset w-full px-3 py-2 rounded-lg border-0 text-sm"
+                  >
+                    <option value="">All Claims</option>
+                    <option value="awaiting">⏳ Awaiting Acceptance</option>
+                    <option value="accepted">✓ Accepted by Repairer</option>
                   </select>
                 </div>
               </div>
