@@ -239,18 +239,19 @@ export default function RepairerPortal() {
 function RepairerDashboard({ claims, estimates, parts, activeClaims, pendingEstimates, activeParts, onNavigate, bodyshopName, bodyshopId }) {
   return (
             <div className="flex flex-col h-full overflow-hidden">
-              <div className="flex-1 space-y-3 overflow-y-auto">
       {/* New Jobs Banner - Most prominent */}
-      <NewJobsBanner bodyshopId={bodyshopId} />
+      <div className="flex-shrink-0">
+        <NewJobsBanner bodyshopId={bodyshopId} />
+      </div>
 
       {/* Welcome Message */}
-      <div className="neomorph p-4">
+      <div className="neomorph p-4 flex-shrink-0 mt-2">
         <h2 className="text-xl font-bold">Welcome back, {bodyshopName || 'Repairer'}!</h2>
         <p className="text-sm text-foreground-muted">Here's an overview of your current activity</p>
       </div>
       
       {/* Stats */}
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2 flex-shrink-0 mt-2">
         <div className="neomorph p-4 cursor-pointer hover:shadow-lg transition-all" onClick={() => onNavigate('claims')}>
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
@@ -301,7 +302,7 @@ function RepairerDashboard({ claims, estimates, parts, activeClaims, pendingEsti
       </div>
 
       {/* Recent Activity */}
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 flex-1 min-h-0">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 flex-1 min-h-0 mt-2 overflow-hidden">
         {/* Recent Claims */}
         <div className="neomorph p-4 flex flex-col">
           <div className="flex items-center justify-between mb-4">
@@ -362,10 +363,9 @@ function RepairerDashboard({ claims, estimates, parts, activeClaims, pendingEsti
                             </button>
                           </div>
                         </div>
-      </div>
-      </div>
-      
-      {/* Advert Banner - Bottom of dashboard only */}
+                        </div>
+
+                        {/* Advert Banner - Bottom of dashboard only */}
                   <div className="mt-2 flex-shrink-0">
                     <AdvertBanner />
                   </div>
