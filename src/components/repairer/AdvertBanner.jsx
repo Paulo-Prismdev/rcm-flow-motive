@@ -28,10 +28,7 @@ export default function AdvertBanner() {
     return () => clearInterval(interval);
   }, [isPaused, adverts.length]);
 
-  // Don't render anything while loading or if no adverts
-  if (isLoading || adverts.length === 0) {
-    return null;
-  }
+  const currentAd = adverts[currentIndex];
 
   const goToPrevious = () => {
     setCurrentIndex((prev) => (prev - 1 + adverts.length) % adverts.length);
@@ -41,7 +38,10 @@ export default function AdvertBanner() {
     setCurrentIndex((prev) => (prev + 1) % adverts.length);
   };
 
-  const currentAd = adverts[currentIndex];
+  // Don't render anything while loading or if no adverts
+  if (isLoading || adverts.length === 0 || !currentAd) {
+    return null;
+  }
 
   const handleAdClick = () => {
     if (currentAd.link_url) {
