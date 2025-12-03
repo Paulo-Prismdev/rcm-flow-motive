@@ -3,7 +3,8 @@ import { Link, useLocation } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
-import { LogOut, User, Building2, Sun, Moon, Menu, X } from 'lucide-react';
+import { LogOut, User, Building2, Sun, Moon, Menu, X, Bell } from 'lucide-react';
+import RepairerNotifications from './RepairerNotifications';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -287,6 +288,8 @@ export default function RepairerLayout({ children }) {
                 <span>{bodyshop.name}</span>
               </div>
             )}
+
+            <RepairerNotifications />
 
             <button
               onClick={toggleTheme}

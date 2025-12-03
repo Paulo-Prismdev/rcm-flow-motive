@@ -20,6 +20,7 @@ import { formatUKRegistration } from '../components/shared/formatRegistration';
 import RepairerEstimateForm from '../components/repairer/RepairerEstimateForm';
 import RepairerPartsForm from '../components/repairer/RepairerPartsForm';
 import AdvertBanner from '../components/repairer/AdvertBanner';
+import NewJobsBanner from '../components/repairer/NewJobsBanner';
 
 export default function RepairerPortal() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -206,17 +207,18 @@ export default function RepairerPortal() {
       {/* Content */}
       <div className="flex-1 overflow-y-auto min-h-0">
         {activeTab === 'dashboard' && (
-          <RepairerDashboard 
-            claims={claims}
-            estimates={estimates}
-            parts={parts}
-            activeClaims={activeClaims}
-            pendingEstimates={pendingEstimates}
-            activeParts={activeParts}
-            onNavigate={setActiveTab}
-            bodyshopName={bodyshop?.name}
-          />
-        )}
+            <RepairerDashboard 
+              claims={claims}
+              estimates={estimates}
+              parts={parts}
+              activeClaims={activeClaims}
+              pendingEstimates={pendingEstimates}
+              activeParts={activeParts}
+              onNavigate={setActiveTab}
+              bodyshopName={bodyshop?.name}
+              bodyshopId={currentUser?.linked_bodyshop_id}
+            />
+          )}
         {activeTab === 'claims' && (
           <RepairerClaimsList claims={claims} />
         )}
@@ -234,10 +236,13 @@ export default function RepairerPortal() {
   );
 }
 
-function RepairerDashboard({ claims, estimates, parts, activeClaims, pendingEstimates, activeParts, onNavigate, bodyshopName }) {
+function RepairerDashboard({ claims, estimates, parts, activeClaims, pendingEstimates, activeParts, onNavigate, bodyshopName, bodyshopId }) {
   return (
             <div className="flex flex-col h-full overflow-hidden">
               <div className="flex-1 space-y-3 overflow-y-auto">
+      {/* New Jobs Banner - Most prominent */}
+      <NewJobsBanner bodyshopId={bodyshopId} />
+
       {/* Welcome Message */}
       <div className="neomorph p-4">
         <h2 className="text-xl font-bold">Welcome back, {bodyshopName || 'Repairer'}!</h2>
