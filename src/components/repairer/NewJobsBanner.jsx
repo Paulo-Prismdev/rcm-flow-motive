@@ -187,9 +187,33 @@ export default function NewJobsBanner({ bodyshopId }) {
                 </div>
               </div>
 
-              <p className="text-sm text-foreground-muted">
-                By accepting this job, you confirm that your bodyshop can handle this repair. 
-                The customer and ARTURA will be notified of your acceptance.
+              {/* Terms of Repair */}
+              <div className="p-4 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-300 dark:border-amber-700">
+                <h5 className="font-bold text-sm mb-2 text-amber-800 dark:text-amber-200">Terms of Repair</h5>
+                <p className="text-sm text-amber-700 dark:text-amber-300 mb-3">
+                  By accepting this repair, you agree to the following:
+                </p>
+                <ul className="text-sm space-y-2 text-amber-700 dark:text-amber-300">
+                  <li className="flex items-start gap-2">
+                    <span className="font-bold">•</span>
+                    <span>
+                      <strong>Repairer Referral Fee:</strong> A bottom line discount of{' '}
+                      <strong>{selectedClaim.referral_fee_repairer ? `${selectedClaim.referral_fee_repairer}%` : 'the agreed percentage'}</strong>{' '}
+                      of the repair total will be taken as ARTURA's fee.
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="font-bold">•</span>
+                    <span>
+                      <strong>Invoice Submission:</strong> The final invoice must be submitted directly to ARTURA. 
+                      Failure to do so will result in further charges as per SLA.
+                    </span>
+                  </li>
+                </ul>
+              </div>
+
+              <p className="text-xs text-foreground-muted">
+                By clicking "Confirm Acceptance", you acknowledge that you have read and agree to the terms above.
               </p>
 
               <div className="flex gap-3">
