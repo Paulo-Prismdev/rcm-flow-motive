@@ -717,6 +717,29 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
       case 'bodyshop':
         return (
           <EditableSection title="Bodyshop Details" icon={Wrench} claim={claim} onUpdate={handleUpdate} EditComponent={ClaimBodyshopForm} canEdit={canEdit}>
+            {/* Repairer Acceptance Status Banner */}
+            {claim.bodyshop_id && !claim.repairer_accepted && (
+              <div className="mb-4 p-3 rounded-lg border-2 border-amber-500 bg-amber-50 dark:bg-amber-900/20 flex items-center gap-3">
+                <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0" />
+                <div>
+                  <p className="font-medium text-amber-800 dark:text-amber-200">Awaiting Repairer Acceptance</p>
+                  <p className="text-xs text-amber-600 dark:text-amber-300">The bodyshop has not yet confirmed they can handle this repair</p>
+                </div>
+              </div>
+            )}
+            {claim.bodyshop_id && claim.repairer_accepted && (
+              <div className="mb-4 p-3 rounded-lg border-2 border-green-500 bg-green-50 dark:bg-green-900/20 flex items-center gap-3">
+                <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
+                  <span className="text-white text-xs">✓</span>
+                </div>
+                <div>
+                  <p className="font-medium text-green-800 dark:text-green-200">Repairer Accepted</p>
+                  <p className="text-xs text-green-600 dark:text-green-300">
+                    {claim.repairer_accepted_date ? `Accepted on ${format(new Date(claim.repairer_accepted_date), 'dd/MM/yyyy')}` : 'Job confirmed by bodyshop'}
+                  </p>
+                </div>
+              </div>
+            )}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
               <DetailRow label="Bodyshop" value={claim.bodyshop} />
               <DetailRow label="Bodyshop Email" value={claim.bodyshop_email} />
