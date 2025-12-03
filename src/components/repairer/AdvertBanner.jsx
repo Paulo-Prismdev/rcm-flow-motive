@@ -18,11 +18,6 @@ export default function AdvertBanner() {
     refetchOnWindowFocus: true,
   });
 
-  // Don't render anything while loading or if no adverts
-  if (isLoading || adverts.length === 0) {
-    return null;
-  }
-
   useEffect(() => {
     if (isPaused || adverts.length <= 1) return;
     
@@ -32,6 +27,11 @@ export default function AdvertBanner() {
 
     return () => clearInterval(interval);
   }, [isPaused, adverts.length]);
+
+  // Don't render anything while loading or if no adverts
+  if (isLoading || adverts.length === 0) {
+    return null;
+  }
 
   const goToPrevious = () => {
     setCurrentIndex((prev) => (prev - 1 + adverts.length) % adverts.length);
