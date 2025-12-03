@@ -4,7 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Plus, Edit, Trash2, Upload, X, Building2, Users, Package } from 'lucide-react';
+import { Plus, Edit, Trash2, Upload, X, Building2, Users, Package, MapPin, Loader, AlertCircle } from 'lucide-react';
 
 const COMPANY_TYPES = [
   { id: 'bodyshop', label: 'Bodyshops', icon: Building2, entity: 'Bodyshop' },
