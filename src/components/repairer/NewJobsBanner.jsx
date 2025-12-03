@@ -197,8 +197,8 @@ export default function NewJobsBanner({ bodyshopId }) {
                   <li className="flex items-start gap-2">
                     <span className="font-bold">•</span>
                     <span>
-                      <strong>Repairer Referral Fee:</strong> A bottom line discount of{' '}
-                      <strong>{selectedClaim.referral_fee_repairer ? `${selectedClaim.referral_fee_repairer}%` : 'the agreed percentage'}</strong>{' '}
+                      <strong>Bottom Line Discount:</strong>{' '}
+                      <strong>{selectedClaim.referral_fee_repairer ? `${selectedClaim.referral_fee_repairer}%` : 'The agreed percentage'}</strong>{' '}
                       of the repair total will be taken as ARTURA's fee.
                     </span>
                   </li>
