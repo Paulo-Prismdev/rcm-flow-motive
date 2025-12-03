@@ -3,44 +3,25 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 
-// Fallback adverts if no custom ones are configured
-const DEFAULT_ADVERTS = [
-  {
-    id: 'default-1',
-    image_url: 'https://images.unsplash.com/photo-1487754180451-c456f719a1fc?w=1200&h=200&fit=crop',
-    link_url: '',
-    alt_text: 'ARTECH One - Your Repair Management Partner'
-  },
-  {
-    id: 'default-2',
-    image_url: 'https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?w=1200&h=200&fit=crop',
-    link_url: '',
-    alt_text: 'Quality Repairs, Quality Service'
-  }
-];
-
 export default function AdvertBanner() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
 
   // Fetch custom adverts from the AdvertBanner entity
-  const { data: customAdverts = [], refetch } = useQuery({
+  const { data: adverts = [], isLoading } = useQuery({
     queryKey: ['advertBannersPortal'],
     queryFn: async () => {
-      try {
-        const adverts = await base44.entities.AdvertBanner.list('sort_order');
-        // Filter active ones client-side to avoid RLS issues
-        return adverts.filter(a => a.is_active !== false);
-      } catch (e) {
-        console.error('Failed to fetch adverts:', e);
-        return [];
-      }
+      const fetchedAdverts = await base44.entities.AdvertBanner.list('sort_order');
+      return fetchedAdverts.filter(a => a.is_active !== false);
     },
     staleTime: 10000,
     refetchOnWindowFocus: true,
   });
 
-  const adverts = customAdverts.length > 0 ? customAdverts : DEFAULT_ADVERTS;
+  // Don't render anything while loading or if no adverts
+  if (isLoading || adverts.length === 0) {
+    return null;
+  }
 
   useEffect(() => {
     if (isPaused || adverts.length <= 1) return;
