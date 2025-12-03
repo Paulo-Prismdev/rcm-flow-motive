@@ -318,15 +318,12 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
     
     setIsAllocating(true);
     try {
-      // Update claim with bodyshop
+      // Update claim with instruction date (bodyshop already saved in step 1)
       await base44.entities.Claim.update(claim.id, {
-        bodyshop_id: selectedBodyshop.id,
-        bodyshop: selectedBodyshop.name,
-        bodyshop_email: selectedBodyshop.email,
         bs_instructed: new Date().toISOString().split('T')[0],
       });
 
-      // Create notification for the bodyshop users
+      // Create notification for the bodyshop users - this is when they see it in their portal
       await base44.entities.Notification.create({
         title: 'New Job Instruction',
         message: `A new job has been allocated to your bodyshop: ${claim.job_number || claim.reg} - ${claim.client_name || 'Customer'}`,
