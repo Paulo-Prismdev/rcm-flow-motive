@@ -1,0 +1,227 @@
+import React, { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { base44 } from '@/api/base44Client';
+import { 
+  AlertTriangle, 
+  CheckCircle, 
+  X, 
+  ChevronDown, 
+  ChevronUp,
+  Car,
+  User,
+  Calendar,
+  MapPin
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { format } from 'date-fns';
+import { formatUKRegistration } from '../shared/formatRegistration';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+
+export default function NewJobsBanner({ bodyshopId }) {
+  const [expanded, setExpanded] = useState(true);
+  const [selectedClaim, setSelectedClaim] = useState(null);
+  const [isAccepting, setIsAccepting] = useState(false);
+  const queryClient = useQueryClient();
+
+  // Fetch claims that are allocated but not yet accepted
+  const { data: pendingJobs = [] } = useQuery({
+    queryKey: ['pendingJobs', bodyshopId],
+    queryFn: async () => {
+      const allClaims = await base44.entities.Claim.list('-created_date', 5000);
+      return allClaims.filter(c => 
+        c.bodyshop_id === bodyshopId && 
+        c.repairer_accepted !== true &&
+        !['Completed', 'Cancelled', 'Total Loss'].includes(c.job_status)
+      );
+    },
+    enabled: !!bodyshopId,
+    refetchInterval: 30000,
+  });
+
+  const acceptJobMutation = useMutation({
+    mutationFn: async (claimId) => {
+      await base44.entities.Claim.update(claimId, {
+        repairer_accepted: true,
+        repairer_accepted_date: new Date().toISOString().split('T')[0],
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['pendingJobs'] });
+      queryClient.invalidateQueries({ queryKey: ['repairerClaims'] });
+      setSelectedClaim(null);
+    },
+  });
+
+  const handleAccept = async (claim) => {
+    setIsAccepting(true);
+    try {
+      await acceptJobMutation.mutateAsync(claim.id);
+    } finally {
+      setIsAccepting(false);
+    }
+  };
+
+  if (pendingJobs.length === 0) return null;
+
+  return (
+    <>
+      {/* Prominent Banner */}
+      <div className="neomorph border-2 border-amber-500 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 overflow-hidden animate-pulse-subtle">
+        <div 
+          className="p-4 cursor-pointer"
+          onClick={() => setExpanded(!expanded)}
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-full bg-amber-500 flex items-center justify-center animate-bounce">
+                <AlertTriangle className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h3 className="font-bold text-lg text-amber-800 dark:text-amber-200">
+                  {pendingJobs.length} New Job{pendingJobs.length !== 1 ? 's' : ''} Awaiting Acceptance
+                </h3>
+                <p className="text-sm text-amber-600 dark:text-amber-300">
+                  Please review and accept to confirm you can handle these repairs
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-2xl font-bold text-amber-600 bg-white/50 px-3 py-1 rounded-full">
+                {pendingJobs.length}
+              </span>
+              {expanded ? (
+                <ChevronUp className="w-5 h-5 text-amber-600" />
+              ) : (
+                <ChevronDown className="w-5 h-5 text-amber-600" />
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Expanded Job List */}
+        {expanded && (
+          <div className="border-t border-amber-300 dark:border-amber-700 p-4 space-y-3 max-h-[300px] overflow-y-auto">
+            {pendingJobs.map(job => (
+              <div 
+                key={job.id} 
+                className="neomorph-flat p-4 flex flex-col md:flex-row md:items-center justify-between gap-3 hover:shadow-lg transition-all"
+              >
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="font-bold text-lg">{formatUKRegistration(job.reg)}</span>
+                    {job.job_number && (
+                      <span className="text-xs font-mono px-2 py-0.5 rounded bg-accent/20 text-accent">
+                        {job.job_number}
+                      </span>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
+                    <div className="flex items-center gap-1">
+                      <User className="w-3 h-3 text-foreground-muted" />
+                      <span>{job.client_name || 'N/A'}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Car className="w-3 h-3 text-foreground-muted" />
+                      <span>{job.make_model || 'N/A'}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Calendar className="w-3 h-3 text-foreground-muted" />
+                      <span>{job.bs_instructed ? format(new Date(job.bs_instructed), 'dd/MM/yy') : 'Today'}</span>
+                    </div>
+                    {job.client_postcode && (
+                      <div className="flex items-center gap-1">
+                        <MapPin className="w-3 h-3 text-foreground-muted" />
+                        <span>{job.client_postcode}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <Button
+                  onClick={() => setSelectedClaim(job)}
+                  className="bg-green-600 hover:bg-green-700 text-white font-bold px-6 py-2 gap-2"
+                >
+                  <CheckCircle className="w-4 h-4" />
+                  Accept Job
+                </Button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <style>{`
+          @keyframes pulse-subtle {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
+            50% { box-shadow: 0 0 0 8px rgba(245, 158, 11, 0); }
+          }
+          .animate-pulse-subtle {
+            animation: pulse-subtle 2s infinite;
+          }
+        `}</style>
+      </div>
+
+      {/* Accept Confirmation Modal */}
+      <Dialog open={!!selectedClaim} onOpenChange={() => setSelectedClaim(null)}>
+        <DialogContent className="neomorph max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CheckCircle className="w-5 h-5 text-green-600" />
+              Accept Job
+            </DialogTitle>
+          </DialogHeader>
+
+          {selectedClaim && (
+            <div className="space-y-4">
+              <div className="p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+                <h4 className="font-bold text-lg mb-2">{formatUKRegistration(selectedClaim.reg)}</h4>
+                <div className="space-y-1 text-sm">
+                  <p><span className="text-foreground-muted">Client:</span> {selectedClaim.client_name || 'N/A'}</p>
+                  <p><span className="text-foreground-muted">Vehicle:</span> {selectedClaim.make_model || 'N/A'}</p>
+                  {selectedClaim.job_number && (
+                    <p><span className="text-foreground-muted">Job #:</span> {selectedClaim.job_number}</p>
+                  )}
+                </div>
+              </div>
+
+              <p className="text-sm text-foreground-muted">
+                By accepting this job, you confirm that your bodyshop can handle this repair. 
+                The customer and ARTURA will be notified of your acceptance.
+              </p>
+
+              <div className="flex gap-3">
+                <Button
+                  variant="outline"
+                  onClick={() => setSelectedClaim(null)}
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={() => handleAccept(selectedClaim)}
+                  disabled={isAccepting}
+                  className="flex-1 bg-green-600 hover:bg-green-700 text-white gap-2"
+                >
+                  {isAccepting ? (
+                    <>
+                      <span className="animate-spin">⏳</span>
+                      Accepting...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle className="w-4 h-4" />
+                      Confirm Acceptance
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
