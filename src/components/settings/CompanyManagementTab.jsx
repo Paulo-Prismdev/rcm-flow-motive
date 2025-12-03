@@ -391,3 +391,111 @@ function CompanyForm({ type, initialData, onSubmit, onCancel, isLoading }) {
     </form>
   );
 }
+
+// Component to batch geocode bodyshops missing coordinates
+function GeocodeBodyshopsButton({ items }) {
+  const [isGeocoding, setIsGeocoding] = useState(false);
+  const [progress, setProgress] = useState({ current: 0, total: 0, success: 0, failed: 0 });
+  const queryClient = useQueryClient();
+
+  const bodyshopsMissingCoords = items.filter(b => !b.latitude || !b.longitude);
+
+  const handleGeocodeAll = async () => {
+    if (bodyshopsMissingCoords.length === 0) return;
+
+    setIsGeocoding(true);
+    setProgress({ current: 0, total: bodyshopsMissingCoords.length, success: 0, failed: 0 });
+
+    let successCount = 0;
+    let failedCount = 0;
+
+    for (let i = 0; i < bodyshopsMissingCoords.length; i++) {
+      const bodyshop = bodyshopsMissingCoords[i];
+      setProgress(prev => ({ ...prev, current: i + 1 }));
+
+      const addressToGeocode = [
+        bodyshop.address_line_1,
+        bodyshop.town,
+        bodyshop.postcode
+      ].filter(Boolean).join(', ');
+
+      if (!addressToGeocode) {
+        failedCount++;
+        setProgress(prev => ({ ...prev, failed: failedCount }));
+        continue;
+      }
+
+      try {
+        const result = await base44.functions.invoke('geocodeAddress', { address: addressToGeocode });
+        
+        if (result && result.latitude && result.longitude) {
+          await base44.entities.Bodyshop.update(bodyshop.id, {
+            latitude: result.latitude,
+            longitude: result.longitude
+          });
+          successCount++;
+          setProgress(prev => ({ ...prev, success: successCount }));
+        } else {
+          failedCount++;
+          setProgress(prev => ({ ...prev, failed: failedCount }));
+        }
+      } catch (error) {
+        console.error(`Failed to geocode ${bodyshop.name}:`, error);
+        failedCount++;
+        setProgress(prev => ({ ...prev, failed: failedCount }));
+      }
+
+      // Small delay to avoid rate limiting
+      if (i < bodyshopsMissingCoords.length - 1) {
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+    }
+
+    setIsGeocoding(false);
+    queryClient.invalidateQueries({ queryKey: ['Bodyshop'] });
+  };
+
+  if (bodyshopsMissingCoords.length === 0) return null;
+
+  return (
+    <div className="neomorph-flat p-4 border-l-4 border-orange-400">
+      <div className="flex items-start gap-3">
+        <AlertCircle className="w-5 h-5 text-orange-500 flex-shrink-0 mt-0.5" />
+        <div className="flex-1">
+          <h4 className="font-medium text-orange-700">
+            {bodyshopsMissingCoords.length} bodyshop{bodyshopsMissingCoords.length !== 1 ? 's' : ''} missing map coordinates
+          </h4>
+          <p className="text-sm text-foreground-muted mt-1">
+            These bodyshops won't appear on the map. Click below to automatically geocode their addresses.
+          </p>
+          
+          {isGeocoding ? (
+            <div className="mt-3">
+              <div className="flex items-center gap-2 text-sm">
+                <Loader className="w-4 h-4 animate-spin" />
+                <span>Processing {progress.current} of {progress.total}...</span>
+              </div>
+              <div className="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-accent transition-all" 
+                  style={{ width: `${(progress.current / progress.total) * 100}%` }}
+                />
+              </div>
+              <p className="text-xs text-foreground-muted mt-1">
+                ✓ {progress.success} geocoded • ✗ {progress.failed} failed
+              </p>
+            </div>
+          ) : (
+            <Button
+              onClick={handleGeocodeAll}
+              className="mt-3 neomorph-flat bg-orange-100 text-orange-700 hover:bg-orange-200"
+            >
+              <MapPin className="w-4 h-4 mr-2" />
+              Geocode All Missing ({bodyshopsMissingCoords.length})
+            </Button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
