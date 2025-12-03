@@ -231,7 +231,7 @@ export default function RepairerLayout({ children }) {
       )}
 
       {/* Header */}
-      <header className="neomorph mx-2 md:mx-3 mt-2 md:mt-3 px-3 py-2 flex-shrink-0">
+      <header className="neomorph mx-2 md:mx-3 mt-2 md:mt-3 px-3 py-1 flex-shrink-0">
         <div className="flex items-center justify-between gap-2">
           {/* Left: Burger (mobile) + Logo */}
           <div className="flex items-center gap-2 md:gap-3 min-w-0">
@@ -245,16 +245,16 @@ export default function RepairerLayout({ children }) {
             </button>
 
             {/* Company Logo + App Title */}
-            <div className="flex items-center gap-3">
-              {companyLogo && (
-                <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 bg-surface-hover m-5">
-                  <img 
-                    src={companyLogo} 
-                    alt="Company Logo" 
-                    className="w-full h-full object-contain"
-                  />
-                </div>
-              )}
+                  <div className="flex items-center gap-3">
+                    {companyLogo && (
+                      <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-surface-hover mx-2">
+                        <img 
+                          src={companyLogo} 
+                          alt="Company Logo" 
+                          className="w-full h-full object-contain"
+                        />
+                      </div>
+                    )}
               <div className="flex items-baseline gap-1">
                 <span style={{ fontFamily: "'Palatino Linotype', serif", fontSize: '1.1rem' }} className="md:text-xl">
                   <span style={{ color: 'var(--accent)' }}>A</span>
@@ -271,7 +271,7 @@ export default function RepairerLayout({ children }) {
           
           {/* Center: Bodyshop Logo */}
           {bodyshop?.logo_url && (
-                        <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 m-5">
+                        <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 mx-2">
                           <img 
                             src={bodyshop.logo_url} 
                             alt={bodyshop.name} 
