@@ -338,7 +338,7 @@ export default function ClaimsPage() {
               {claim.bodyshop_id && !claim.repairer_accepted && !isClosedStatus && (
                 <span className="flex items-center gap-1 px-2 py-1 rounded-full bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300 text-xs font-medium">
                   <Clock className="w-3 h-3" />
-                  Awaiting Repairer
+                  Awaiting Repairer Acceptance
                 </span>
               )}
             </div>
