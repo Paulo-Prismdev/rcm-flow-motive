@@ -119,6 +119,11 @@ export default function CompanyManagementTab() {
         />
       )}
 
+      {/* Geocode Missing Coordinates Button - Only for Bodyshops */}
+      {activeType === 'bodyshop' && !showForm && (
+        <GeocodeBodyshopsButton items={items} />
+      )}
+
       {/* List */}
       {isLoading ? (
         <div className="text-center py-8 text-foreground-muted">Loading...</div>
@@ -128,47 +133,57 @@ export default function CompanyManagementTab() {
         </div>
       ) : (
         <div className="space-y-2">
-          {items.map(item => (
-            <div
-              key={item.id}
-              className="neomorph-flat p-4 flex items-center gap-4"
-            >
-              {item.logo_url ? (
-                <img
-                  src={item.logo_url}
-                  alt={item.name}
-                  className="w-12 h-12 object-contain rounded"
-                />
-              ) : (
-                <div className="w-12 h-12 rounded bg-accent/10 flex items-center justify-center">
-                  <currentConfig.icon className="w-6 h-6 text-accent" />
+          {items.map(item => {
+            const hasCoordinates = item.latitude && item.longitude;
+            return (
+              <div
+                key={item.id}
+                className="neomorph-flat p-4 flex items-center gap-4"
+              >
+                {item.logo_url ? (
+                  <img
+                    src={item.logo_url}
+                    alt={item.name}
+                    className="w-12 h-12 object-contain rounded"
+                  />
+                ) : (
+                  <div className="w-12 h-12 rounded bg-accent/10 flex items-center justify-center">
+                    <currentConfig.icon className="w-6 h-6 text-accent" />
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-medium truncate">{item.name}</h3>
+                    {activeType === 'bodyshop' && !hasCoordinates && (
+                      <span className="text-xs px-2 py-0.5 rounded bg-orange-100 text-orange-600" title="Missing map coordinates">
+                        No GPS
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-sm text-foreground-muted truncate">
+                    {item.contact_name} • {item.email}
+                  </p>
                 </div>
-              )}
-              <div className="flex-1 min-w-0">
-                <h3 className="font-medium truncate">{item.name}</h3>
-                <p className="text-sm text-foreground-muted truncate">
-                  {item.contact_name} • {item.email}
-                </p>
+                <div className="flex gap-2">
+                  <Button
+                    onClick={() => handleEdit(item)}
+                    className="neomorph-flat p-2"
+                    title="Edit"
+                  >
+                    <Edit className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    onClick={() => handleDelete(item)}
+                    className="neomorph-flat p-2 text-red-500"
+                    title="Delete"
+                    disabled={deleteMutation.isPending}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
               </div>
-              <div className="flex gap-2">
-                <Button
-                  onClick={() => handleEdit(item)}
-                  className="neomorph-flat p-2"
-                  title="Edit"
-                >
-                  <Edit className="w-4 h-4" />
-                </Button>
-                <Button
-                  onClick={() => handleDelete(item)}
-                  className="neomorph-flat p-2 text-red-500"
-                  title="Delete"
-                  disabled={deleteMutation.isPending}
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
