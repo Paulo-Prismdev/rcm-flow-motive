@@ -323,17 +323,18 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
         bs_instructed: new Date().toISOString().split('T')[0],
       });
 
-      // Create notification for the bodyshop users - this is when they see it in their portal
-      await base44.entities.Notification.create({
-        title: 'New Job Instruction',
-        message: `A new job has been allocated to your bodyshop: ${claim.job_number || claim.reg} - ${claim.client_name || 'Customer'}`,
-        type: 'new_instruction',
-        recipient_type: 'bodyshop',
-        recipient_id: selectedBodyshop.id,
-        link_type: 'Claim',
-        link_id: claim.id,
-        is_read: false,
-      });
+      // Create notification for the bodyshop - use the bodyshop email as user_email
+      if (selectedBodyshop.email) {
+        await base44.entities.Notification.create({
+          user_email: selectedBodyshop.email,
+          title: 'New Job Instruction',
+          message: `A new job has been allocated to your bodyshop: ${claim.job_number || claim.reg} - ${claim.client_name || 'Customer'}`,
+          type: 'assignment',
+          related_item_type: 'Claim',
+          related_item_id: claim.id,
+          is_read: false,
+        });
+      }
 
       queryClient.invalidateQueries({ queryKey: ['claims'] });
       
