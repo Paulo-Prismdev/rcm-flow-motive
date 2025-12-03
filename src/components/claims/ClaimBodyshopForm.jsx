@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { MapPin } from "lucide-react";
+import { MapPin, Wand2 } from "lucide-react";
 import BodyshopCombobox from '../shared/BodyshopCombobox';
 import ClaimBodyshopMapModal from './ClaimBodyshopMapModal';
+import BodyshopAllocationWizard from './BodyshopAllocationWizard';
 
 export default function ClaimBodyshopForm({ claim, onSave, onCancel }) {
     const [formData, setFormData] = useState(claim || {});
     const [isMapOpen, setIsMapOpen] = useState(false);
+    const [isWizardOpen, setIsWizardOpen] = useState(false);
 
     const handleBodyshopChange = (bodyshop) => {
         setFormData(prev => ({ 
@@ -31,6 +33,19 @@ export default function ClaimBodyshopForm({ claim, onSave, onCancel }) {
         setIsMapOpen(false);
     };
 
+    const handleWizardComplete = (bodyshop) => {
+        handleBodyshopChange(bodyshop);
+        setIsWizardOpen(false);
+        // Auto-save after wizard completes
+        onSave({
+            ...formData,
+            bodyshop: bodyshop.name,
+            bodyshop_id: bodyshop.id,
+            bodyshop_email: bodyshop.email || '',
+            bs_instructed: new Date().toISOString().split('T')[0],
+        });
+    };
+
     return (
         <>
             <ClaimBodyshopMapModal
@@ -39,8 +54,34 @@ export default function ClaimBodyshopForm({ claim, onSave, onCancel }) {
                 onClose={() => setIsMapOpen(false)}
                 onSelectBodyshop={handleMapSelect}
             />
+
+            <BodyshopAllocationWizard
+                claim={claim}
+                isOpen={isWizardOpen}
+                onClose={() => setIsWizardOpen(false)}
+                onAllocationComplete={handleWizardComplete}
+            />
             
             <div className="space-y-4 pt-4">
+                {/* Allocation Wizard Button */}
+                <Button
+                    type="button"
+                    onClick={() => setIsWizardOpen(true)}
+                    className="w-full neomorph-flat py-3 text-accent hover:bg-accent/10 border-accent/30"
+                >
+                    <Wand2 className="w-4 h-4 mr-2" />
+                    Allocate Job (Full Wizard)
+                </Button>
+                
+                <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                        <span className="w-full border-t" />
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                        <span className="bg-background px-2 text-muted-foreground">Or select manually</span>
+                    </div>
+                </div>
+
                 <div className="space-y-4">
                     <div>
                         <label className="text-sm text-gray-500 mb-2 block">Bodyshop</label>
