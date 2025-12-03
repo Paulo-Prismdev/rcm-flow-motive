@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,10 +35,32 @@ export default function AddBodyshopModal({ isOpen, onClose, onSuccess, initialNa
     mutationFn: async (data) => {
       console.log("[AddBodyshopModal] createMutation starting with data:", data);
       
-      // Geocoding logic is removed from here as AddressLookupInput should provide latitude/longitude
-      // The data object should already contain latitude and longitude if an address was selected via lookup.
+      let finalData = { ...data };
       
-      const newBodyshop = await base44.entities.Bodyshop.create(data); // Pass data directly, including lat/lng
+      // If lat/lng are missing but we have address info, try to geocode
+      if ((!finalData.latitude || !finalData.longitude) && finalData.postcode) {
+        console.log("[AddBodyshopModal] Lat/lng missing, attempting geocode...");
+        try {
+          const addressToGeocode = [
+            finalData.address_line_1,
+            finalData.town,
+            finalData.postcode
+          ].filter(Boolean).join(', ');
+          
+          if (addressToGeocode) {
+            const result = await base44.functions.invoke('geocodeAddress', { address: addressToGeocode });
+            if (result && result.latitude && result.longitude) {
+              finalData.latitude = result.latitude;
+              finalData.longitude = result.longitude;
+              console.log("[AddBodyshopModal] Geocoded successfully:", result.latitude, result.longitude);
+            }
+          }
+        } catch (error) {
+          console.log("[AddBodyshopModal] Geocoding failed, continuing without coordinates:", error);
+        }
+      }
+      
+      const newBodyshop = await base44.entities.Bodyshop.create(finalData);
       console.log("[AddBodyshopModal] Bodyshop created successfully:", newBodyshop);
       return newBodyshop;
     },
