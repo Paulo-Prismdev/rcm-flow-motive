@@ -4,14 +4,14 @@ import { createPageUrl } from '@/utils';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { LogOut, User, Building2, Sun, Moon, Menu, X, Bell } from 'lucide-react';
-import RepairerNotifications from './RepairerNotifications';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { StatusConfigProvider } from '../shared/StatusConfigContext';
+import { StatusConfigProvider } from '@/components/shared/StatusConfigContext';
+import RepairerNotifications from '@/components/repairer/RepairerNotifications';
 
 export default function RepairerLayout({ children }) {
   const [isDark, setIsDark] = useState(false);

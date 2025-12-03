@@ -15,12 +15,12 @@ import {
   Wrench
 } from 'lucide-react';
 import { format } from 'date-fns';
-import StatusBadge from '../components/shared/StatusBadge';
-import { formatUKRegistration } from '../components/shared/formatRegistration';
-import RepairerEstimateForm from '../components/repairer/RepairerEstimateForm';
-import RepairerPartsForm from '../components/repairer/RepairerPartsForm';
-import AdvertBanner from '../components/repairer/AdvertBanner';
-import NewJobsBanner from '../components/repairer/NewJobsBanner';
+import StatusBadge from '@/components/shared/StatusBadge';
+import { formatUKRegistration } from '@/components/shared/formatRegistration';
+import RepairerEstimateForm from '@/components/repairer/RepairerEstimateForm';
+import RepairerPartsForm from '@/components/repairer/RepairerPartsForm';
+import AdvertBanner from '@/components/repairer/AdvertBanner';
+import NewJobsBanner from '@/components/repairer/NewJobsBanner';
 
 export default function RepairerPortal() {
   const [activeTab, setActiveTab] = useState('dashboard');

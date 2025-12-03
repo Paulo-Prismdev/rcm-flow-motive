@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
-import { formatUKRegistration } from '../shared/formatRegistration';
+import { formatUKRegistration } from '@/components/shared/formatRegistration';
 import {
   Dialog,
   DialogContent,
