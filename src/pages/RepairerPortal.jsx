@@ -301,17 +301,17 @@ function RepairerDashboard({ claims, estimates, parts, activeClaims, pendingEsti
       </div>
 
       {/* Recent Activity */}
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 flex-1 min-h-0">
         {/* Recent Claims */}
-        <div className="neomorph p-4">
+        <div className="neomorph p-4 flex flex-col">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-bold">Recent Claims</h3>
             <button onClick={() => onNavigate('claims')} className="text-sm text-accent hover:underline">
               View All
             </button>
           </div>
-          <div className="space-y-2 max-h-[180px] overflow-y-auto">
-                            {claims.slice(0, 5).map(claim => (
+          <div className="space-y-2 flex-1 overflow-y-auto">
+                            {claims.slice(0, 10).map(claim => (
                               <div key={claim.id} className="neomorph-flat p-3 flex items-center justify-between">
                                 <div>
                                   <p className="font-medium">{formatUKRegistration(claim.reg)}</p>
@@ -327,9 +327,9 @@ function RepairerDashboard({ claims, estimates, parts, activeClaims, pendingEsti
         </div>
 
         {/* Quick Actions */}
-        <div className="neomorph p-4">
+        <div className="neomorph p-4 flex flex-col">
           <h3 className="font-bold mb-4">Quick Actions</h3>
-                          <div className="space-y-2 max-h-[180px] overflow-y-auto">
+                          <div className="space-y-2 flex-1 overflow-y-auto">
                             <button 
                               onClick={() => onNavigate('estimates')}
                               className="w-full neomorph-flat p-4 flex items-center justify-between hover:shadow-md transition-all"
