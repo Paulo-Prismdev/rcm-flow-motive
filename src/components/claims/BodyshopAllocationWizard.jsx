@@ -244,10 +244,22 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
     }
   }, [selectedBodyshop, currentStep]);
 
-  const handleBodyshopClick = (bodyshop) => {
+  const handleBodyshopClick = async (bodyshop) => {
     setSelectedBodyshop(bodyshop);
     setMapCenter([parseFloat(bodyshop.latitude), parseFloat(bodyshop.longitude)]);
     setMapZoom(11);
+    
+    // Save the bodyshop to the claim immediately (but don't notify yet)
+    try {
+      await base44.entities.Claim.update(claim.id, {
+        bodyshop_id: bodyshop.id,
+        bodyshop: bodyshop.name,
+        bodyshop_email: bodyshop.email,
+      });
+      queryClient.invalidateQueries({ queryKey: ['claims'] });
+    } catch (error) {
+      console.error('Error saving bodyshop selection:', error);
+    }
   };
 
   const handleGeneratePdf = async () => {
