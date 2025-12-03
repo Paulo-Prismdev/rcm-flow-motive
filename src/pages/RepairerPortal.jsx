@@ -302,16 +302,16 @@ function RepairerDashboard({ claims, estimates, parts, activeClaims, pendingEsti
       </div>
 
       {/* Recent Activity */}
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 flex-1 min-h-0 mt-2 overflow-hidden">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 flex-1 min-h-0 mt-2">
         {/* Recent Claims */}
-        <div className="neomorph p-4 flex flex-col">
-          <div className="flex items-center justify-between mb-4">
+        <div className="neomorph p-4 flex flex-col min-h-0 overflow-hidden">
+          <div className="flex items-center justify-between mb-4 flex-shrink-0">
             <h3 className="font-bold">Recent Claims</h3>
             <button onClick={() => onNavigate('claims')} className="text-sm text-accent hover:underline">
               View All
             </button>
           </div>
-          <div className="space-y-2 flex-1 overflow-y-auto">
+          <div className="space-y-2 flex-1 overflow-y-auto min-h-0">
                             {claims.slice(0, 10).map(claim => (
                               <div key={claim.id} className="neomorph-flat p-3 flex items-center justify-between">
                                 <div>
@@ -328,9 +328,9 @@ function RepairerDashboard({ claims, estimates, parts, activeClaims, pendingEsti
         </div>
 
         {/* Quick Actions */}
-        <div className="neomorph p-4 flex flex-col">
-          <h3 className="font-bold mb-4">Quick Actions</h3>
-                          <div className="space-y-2 flex-1 overflow-y-auto">
+        <div className="neomorph p-4 flex flex-col min-h-0 overflow-hidden">
+          <h3 className="font-bold mb-4 flex-shrink-0">Quick Actions</h3>
+                          <div className="space-y-2 flex-1 overflow-y-auto min-h-0">
                             <button 
                               onClick={() => onNavigate('estimates')}
                               className="w-full neomorph-flat p-4 flex items-center justify-between hover:shadow-md transition-all"
