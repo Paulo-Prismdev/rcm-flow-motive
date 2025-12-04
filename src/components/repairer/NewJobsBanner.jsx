@@ -82,10 +82,15 @@ export default function NewJobsBanner({ bodyshopId }) {
         user_email: currentUser?.email,
         user_name: currentUser?.full_name,
       });
+      
+      return claim;
     },
-    onSuccess: () => {
+    onSuccess: (claim) => {
       queryClient.invalidateQueries({ queryKey: ['pendingJobs'] });
       queryClient.invalidateQueries({ queryKey: ['repairerClaims'] });
+      // Show success step with download option
+      setAcceptedClaim(claim);
+      setShowSuccessStep(true);
       setSelectedClaim(null);
     },
   });
