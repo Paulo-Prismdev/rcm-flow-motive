@@ -977,12 +977,31 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
             {currentStep === 0 ? 'Cancel' : 'Back'}
           </Button>
 
-          {currentStep < STEPS.length - 1 && (
+          {currentStep === 0 && (
+            <Button
+              onClick={handleSaveValidation}
+              disabled={missingFields.length > 0 || isSavingValidation}
+            >
+              {isSavingValidation ? (
+                <>
+                  <Loader className="w-4 h-4 mr-2 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  Save & Continue
+                  <ChevronRight className="w-4 h-4 ml-2" />
+                </>
+              )}
+            </Button>
+          )}
+
+          {currentStep > 0 && currentStep < STEPS.length - 1 && (
             <Button
               onClick={() => setCurrentStep(currentStep + 1)}
               disabled={!canProceed()}
             >
-              {currentStep === 1 || currentStep === 2 ? 'Skip / Next' : 'Next'}
+              {currentStep === 2 || currentStep === 3 ? 'Skip / Next' : 'Next'}
               <ChevronRight className="w-4 h-4 ml-2" />
             </Button>
           )}
