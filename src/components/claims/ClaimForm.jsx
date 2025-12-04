@@ -1806,107 +1806,219 @@ export default function ClaimForm({ claim, onSubmit, onCancel }) {
                 <h3 className="text-xl font-bold text-gray-700 mb-4">Third Party Details</h3>
                 <p className="text-sm text-gray-500 mb-4">Enter the details of the third party involved</p>
 
-                <div>
-                  <label className="block text-sm text-gray-600 mb-2">Third Party *</label>
-                  {isInternalUser ? (
-                    <div className="flex gap-2">
-                      <div className="flex-1">
-                        <ClientCombobox
-                          value={formData.tp_name}
-                          onChange={handleTPChange}
-                        />
+                {/* Third Party Contact Details */}
+                <div className="neomorph-inset p-4 space-y-4">
+                  <h4 className="font-semibold text-gray-700">Contact Details</h4>
+                  
+                  <div>
+                    <label className="block text-sm text-gray-600 mb-2">Third Party Name *</label>
+                    {isInternalUser ? (
+                      <div className="flex gap-2">
+                        <div className="flex-1">
+                          <ClientCombobox
+                            value={formData.tp_name}
+                            onChange={handleTPChange}
+                          />
+                        </div>
+                        <Button
+                          type="button"
+                          onClick={() => {
+                            console.log('TP plus button clicked, user:', currentUser);
+                            if (!isInternalUser) {
+                              alert('You do not have permission to add clients');
+                              return;
+                            }
+                            setShowTPModal(true);
+                          }}
+                          className="neomorph-flat p-3"
+                        >
+                          <Plus className="w-4 h-4" />
+                        </Button>
                       </div>
-                      <Button
-                        type="button"
-                        onClick={() => {
-                          console.log('TP plus button clicked, user:', currentUser);
-                          if (!isInternalUser) {
-                            alert('You do not have permission to add clients');
-                            return;
-                          }
-                          setShowTPModal(true);
-                        }}
-                        className="neomorph-flat p-3"
-                      >
-                        <Plus className="w-4 h-4" />
-                      </Button>
+                    ) : (
+                      <ClientCombobox
+                        value={formData.tp_name}
+                        onChange={handleTPChange}
+                      />
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm text-gray-600 mb-2">Phone</label>
+                      <Input
+                        value={formData.tp_phone}
+                        onChange={(e) => handleChange('tp_phone', e.target.value)}
+                        className="neomorph-inset px-4 py-3 text-gray-700 border-0"
+                      />
                     </div>
-                  ) : (
-                    <ClientCombobox
-                      value={formData.tp_name}
-                      onChange={handleTPChange}
+                    <div>
+                      <label className="block text-sm text-gray-600 mb-2">Email</label>
+                      <Input
+                        type="email"
+                        value={formData.tp_email}
+                        onChange={(e) => handleChange('tp_email', e.target.value)}
+                        className="neomorph-inset px-4 py-3 text-gray-700 border-0"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm text-gray-600 mb-2">Address Line 1</label>
+                    <Input
+                      value={formData.tp_address_line_1}
+                      onChange={(e) => handleChange('tp_address_line_1', e.target.value)}
+                      className="neomorph-inset px-4 py-3 text-gray-700 border-0"
                     />
-                  )}
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-600 mb-2">Address Line 2</label>
+                    <Input
+                      value={formData.tp_address_line_2}
+                      onChange={(e) => handleChange('tp_address_line_2', e.target.value)}
+                      className="neomorph-inset px-4 py-3 text-gray-700 border-0"
+                    />
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm text-gray-600 mb-2">Town</label>
+                      <Input
+                        value={formData.tp_town}
+                        onChange={(e) => handleChange('tp_town', e.target.value)}
+                        className="neomorph-inset px-4 py-3 text-gray-700 border-0"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-gray-600 mb-2">County</label>
+                      <Input
+                        value={formData.tp_county}
+                        onChange={(e) => handleChange('tp_county', e.target.value)}
+                        className="neomorph-inset px-4 py-3 text-gray-700 border-0"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-gray-600 mb-2">Postcode</label>
+                      <Input
+                        value={formData.tp_postcode}
+                        onChange={(e) => handleChange('tp_postcode', e.target.value)}
+                        className="neomorph-inset px-4 py-3 text-gray-700 border-0"
+                      />
+                    </div>
+                  </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Third Party Vehicle Details */}
+                <div className="neomorph-inset p-4 space-y-4">
+                  <h4 className="font-semibold text-gray-700">Vehicle Details</h4>
+                  
                   <div>
-                    <label className="block text-sm text-gray-600 mb-2">Phone</label>
-                    <Input
-                      value={formData.tp_phone}
-                      onChange={(e) => handleChange('tp_phone', e.target.value)}
-                      className="neomorph-inset px-4 py-3 text-gray-700 border-0"
-                    />
+                    <label className="block text-sm text-gray-600 mb-2">Vehicle Registration</label>
+                    <div className="flex flex-col gap-2">
+                      <div className="flex gap-2">
+                        <Input
+                          value={formData.tp_reg}
+                          onChange={(e) => {
+                            handleChange('tp_reg', e.target.value.toUpperCase());
+                            setTpVehicleLookupError(null);
+                          }}
+                          className="neomorph-inset px-4 py-3 text-gray-700 border-0 text-lg flex-1"
+                          placeholder="e.g. AB12 CDE"
+                        />
+                        <Button
+                          type="button"
+                          onClick={handleTPVehicleLookup}
+                          disabled={isLookingUpTPVehicle || !formData.tp_reg || formData.tp_reg.length < 3}
+                          className="neomorph-flat px-4 py-3 whitespace-nowrap"
+                          title="Lookup vehicle details from DVLA"
+                        >
+                          {isLookingUpTPVehicle ? (
+                            <>
+                              <Loader className="w-4 h-4 animate-spin mr-2" />
+                              <span className="hidden sm:inline">Looking up...</span>
+                            </>
+                          ) : (
+                            <>
+                              <Search className="w-4 h-4 sm:mr-2" />
+                              <span className="hidden sm:inline">Lookup</span>
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                      {tpVehicleLookupError && (
+                        <div className="flex items-start gap-2 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                          <AlertCircle className="w-4 h-4 text-orange-600 flex-shrink-0 mt-0.5" />
+                          <p className="text-xs text-orange-800 whitespace-pre-line">{tpVehicleLookupError}</p>
+                        </div>
+                      )}
+                      {formData.tp_make_model && !tpVehicleLookupError && (
+                        <div className="flex items-start gap-2 p-3 bg-green-50 border border-green-200 rounded-lg">
+                          <p className="text-sm text-green-700">
+                            ✓ <span className="font-bold">Vehicle found:</span>
+                            <br />
+                            <span className="font-bold text-base">{formData.tp_make_model}</span>
+                            {formData.tp_vehicle_colour && <span className="font-normal"> • {formData.tp_vehicle_colour}</span>}
+                            {formData.tp_vehicle_year_of_manufacture && <span className="font-normal"> • {formData.tp_vehicle_year_of_manufacture}</span>}
+                          </p>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <div>
-                    <label className="block text-sm text-gray-600 mb-2">Email</label>
-                    <Input
-                      type="email"
-                      value={formData.tp_email}
-                      onChange={(e) => handleChange('tp_email', e.target.value)}
-                      className="neomorph-inset px-4 py-3 text-gray-700 border-0"
-                    />
-                  </div>
-                  <div className="md:col-span-2">
-                    <label className="block text-sm text-gray-600 mb-2">Vehicle</label>
-                    <Input
-                      value={formData.tp_make_model}
-                      onChange={(e) => handleChange('tp_make_model', e.target.value)}
-                      className="neomorph-inset px-4 py-3 text-gray-700 border-0"
-                      placeholder="Make & Model"
-                    />
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm text-gray-600 mb-2">Make/Model</label>
+                      <Input
+                        value={formData.tp_make_model}
+                        onChange={(e) => handleChange('tp_make_model', e.target.value)}
+                        className="neomorph-inset px-4 py-3 text-gray-700 border-0"
+                        placeholder="e.g. Ford Focus"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-gray-600 mb-2">Vehicle Type</label>
+                      <select
+                        value={formData.tp_vehicle_type}
+                        onChange={(e) => handleChange('tp_vehicle_type', e.target.value)}
+                        className="neomorph-inset w-full px-4 py-3 text-gray-700 border-0 rounded-xl"
+                      >
+                        <option value="Car">Car</option>
+                        <option value="Van">Van</option>
+                        <option value="Motorcycle">Motorcycle</option>
+                        <option value="HGV">HGV</option>
+                        <option value="Other">Other</option>
+                      </select>
+                    </div>
                   </div>
                 </div>
-                <div>
-                  <label className="block text-sm text-gray-600 mb-2">Address Line 1</label>
-                  <Input
-                    value={formData.tp_address_line_1}
-                    onChange={(e) => handleChange('tp_address_line_1', e.target.value)}
-                    className="neomorph-inset px-4 py-3 text-gray-700 border-0"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm text-gray-600 mb-2">Address Line 2</label>
-                  <Input
-                    value={formData.tp_address_line_2}
-                    onChange={(e) => handleChange('tp_address_line_2', e.target.value)}
-                    className="neomorph-inset px-4 py-3 text-gray-700 border-0"
-                  />
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-sm text-gray-600 mb-2">Town</label>
-                    <Input
-                      value={formData.tp_town}
-                      onChange={(e) => handleChange('tp_town', e.target.value)}
-                      className="neomorph-inset px-4 py-3 text-gray-700 border-0"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm text-gray-600 mb-2">County</label>
-                    <Input
-                      value={formData.tp_county}
-                      onChange={(e) => handleChange('tp_county', e.target.value)}
-                      className="neomorph-inset px-4 py-3 text-gray-700 border-0"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm text-gray-600 mb-2">Postcode</label>
-                    <Input
-                      value={formData.tp_postcode}
-                      onChange={(e) => handleChange('tp_postcode', e.target.value)}
-                      className="neomorph-inset px-4 py-3 text-gray-700 border-0"
-                    />
+
+                {/* Third Party Insurance Details */}
+                <div className="neomorph-inset p-4 space-y-4">
+                  <h4 className="font-semibold text-gray-700">Insurance Details</h4>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm text-gray-600 mb-2">Their Insurer</label>
+                      <InsurerCombobox
+                        value={formData.tp_insurer}
+                        onChange={(value) => handleChange('tp_insurer', value)}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-gray-600 mb-2">Their Claim Reference</label>
+                      <Input
+                        value={formData.tp_claim_ref}
+                        onChange={(e) => handleChange('tp_claim_ref', e.target.value)}
+                        className="neomorph-inset px-4 py-3 text-gray-700 border-0"
+                      />
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-sm text-gray-600 mb-2">Their Policy Number</label>
+                      <Input
+                        value={formData.tp_policy_number}
+                        onChange={(e) => handleChange('tp_policy_number', e.target.value)}
+                        className="neomorph-inset px-4 py-3 text-gray-700 border-0"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
