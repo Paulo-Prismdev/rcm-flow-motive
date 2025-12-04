@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { 
   X, MapPin, CheckCircle, Phone, Mail, MapPinned, AlertCircle, Loader,
-  ChevronRight, ChevronLeft, FileText, Send, Building2, Settings
+  ChevronRight, ChevronLeft, FileText, Send, Building2, Settings, ClipboardCheck
 } from 'lucide-react';
 import {
   Dialog,
@@ -24,6 +24,7 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
+import InsurerCombobox from '../shared/InsurerCombobox';
 
 // Fix for default marker icons in React Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
