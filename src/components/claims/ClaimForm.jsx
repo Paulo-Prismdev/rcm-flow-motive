@@ -42,6 +42,8 @@ export default function ClaimForm({ claim, onSubmit, onCancel }) {
   const [showTPModal, setShowTPModal] = useState(false);
   const [isLookingUpVehicle, setIsLookingUpVehicle] = useState(false);
   const [vehicleLookupError, setVehicleLookupError] = useState(null);
+  const [isLookingUpTPVehicle, setIsLookingUpTPVehicle] = useState(false);
+  const [tpVehicleLookupError, setTpVehicleLookupError] = useState(null);
   const [aiExtractDialog, setAiExtractDialog] = useState({ isOpen: false, data: null });
   const queryClient = useQueryClient();
 
