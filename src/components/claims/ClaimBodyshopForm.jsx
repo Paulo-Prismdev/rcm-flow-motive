@@ -116,8 +116,65 @@ export default function ClaimBodyshopForm({ claim, onSave, onCancel }) {
                 onClose={() => setIsWizardOpen(false)}
                 onAllocationComplete={handleWizardComplete}
             />
+
+            {/* Unallocate Confirmation Dialog */}
+            <Dialog open={isUnallocateOpen} onOpenChange={setIsUnallocateOpen}>
+                <DialogContent className="neomorph max-w-md">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2 text-red-600">
+                            <UserX className="w-5 h-5" />
+                            Unallocate Repairer
+                        </DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                        <div className="p-3 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-300">
+                            <p className="text-sm text-amber-700 dark:text-amber-300">
+                                This will remove <strong>{claim.bodyshop}</strong> from this claim. 
+                                The job will no longer appear in their repairer portal.
+                            </p>
+                        </div>
+                        <div>
+                            <label className="text-sm font-medium mb-2 block">Reason for unallocation *</label>
+                            <Textarea
+                                value={unallocateReason}
+                                onChange={(e) => setUnallocateReason(e.target.value)}
+                                placeholder="Enter reason for removing this repairer..."
+                                className="min-h-[100px]"
+                            />
+                        </div>
+                        <div className="flex gap-3">
+                            <Button
+                                variant="outline"
+                                onClick={() => { setIsUnallocateOpen(false); setUnallocateReason(''); }}
+                                className="flex-1"
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                onClick={handleUnallocate}
+                                disabled={isUnallocating || !unallocateReason.trim()}
+                                className="flex-1 bg-red-600 hover:bg-red-700 text-white"
+                            >
+                                {isUnallocating ? 'Unallocating...' : 'Confirm Unallocate'}
+                            </Button>
+                        </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
             
             <div className="space-y-4 pt-4">
+                {/* Unallocate Button - only show if bodyshop is allocated */}
+                {claim.bodyshop_id && (
+                    <Button
+                        type="button"
+                        onClick={() => setIsUnallocateOpen(true)}
+                        className="w-full neomorph-flat py-3 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 border-red-300"
+                    >
+                        <UserX className="w-4 h-4 mr-2" />
+                        Unallocate Repairer
+                    </Button>
+                )}
+
                 {/* Allocation Wizard Button */}
                 <Button
                     type="button"
