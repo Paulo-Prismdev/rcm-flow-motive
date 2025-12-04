@@ -358,12 +358,13 @@ Deno.serve(async (req) => {
       
       console.log('PDF uploaded:', uploadResult.file_url);
       
-      // Add to claim's file_urls
+      // Add to claim's file_urls and save instruction_pdf_url
       const currentFileUrls = Array.isArray(claim.file_urls) ? claim.file_urls : [];
       const updatedFileUrls = [...currentFileUrls, uploadResult.file_url];
       
       await base44.asServiceRole.entities.Claim.update(claim.id, {
-        file_urls: updatedFileUrls
+        file_urls: updatedFileUrls,
+        instruction_pdf_url: uploadResult.file_url
       });
       
       console.log('✓ PDF saved to claim documents');

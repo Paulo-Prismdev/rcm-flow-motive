@@ -10,7 +10,9 @@ import {
   Car,
   User,
   Calendar,
-  MapPin
+  MapPin,
+  Download,
+  FileText
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
@@ -141,13 +143,29 @@ export default function NewJobsBanner({ bodyshopId }) {
                     )}
                   </div>
                 </div>
-                <Button
-                  onClick={() => setSelectedClaim(job)}
-                  className="bg-green-600 hover:bg-green-700 text-white font-bold px-6 py-2 gap-2"
-                >
-                  <CheckCircle className="w-4 h-4" />
-                  Accept Job
-                </Button>
+                <div className="flex gap-2">
+                  {job.instruction_pdf_url && (
+                    <Button
+                      variant="outline"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        window.open(job.instruction_pdf_url, '_blank');
+                      }}
+                      className="gap-2"
+                      title="Download Instruction PDF"
+                    >
+                      <Download className="w-4 h-4" />
+                      <span className="hidden sm:inline">Instructions</span>
+                    </Button>
+                  )}
+                  <Button
+                    onClick={() => setSelectedClaim(job)}
+                    className="bg-green-600 hover:bg-green-700 text-white font-bold px-6 py-2 gap-2"
+                  >
+                    <CheckCircle className="w-4 h-4" />
+                    Accept Job
+                  </Button>
+                </div>
               </div>
             ))}
           </div>
@@ -185,6 +203,18 @@ export default function NewJobsBanner({ bodyshopId }) {
                     <p><span className="text-foreground-muted">Job #:</span> {selectedClaim.job_number}</p>
                   )}
                 </div>
+
+                {/* Instruction PDF Download */}
+                {selectedClaim.instruction_pdf_url && (
+                  <Button
+                    variant="outline"
+                    onClick={() => window.open(selectedClaim.instruction_pdf_url, '_blank')}
+                    className="w-full mt-3 gap-2"
+                  >
+                    <FileText className="w-4 h-4" />
+                    Download Repair Instructions
+                  </Button>
+                )}
               </div>
 
               {/* Terms of Repair */}
