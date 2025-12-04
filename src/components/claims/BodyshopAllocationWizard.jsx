@@ -201,7 +201,7 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
 
   // Reset when modal opens
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && claim) {
       hasAttemptedGeocode.current = false;
       setCurrentStep(0);
       setSelectedBodyshop(null);
@@ -213,6 +213,13 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
       setEmailBody('');
       setSelectedEmailTemplateId('');
       
+      // Initialize validation data from claim
+      const initialValidation = {};
+      REQUIRED_FIELDS.forEach(field => {
+        initialValidation[field.key] = claim[field.key] ?? (field.type === 'boolean' ? false : '');
+      });
+      setValidationData(initialValidation);
+      
       if (validBodyshops.length > 0) {
         const avgLat = validBodyshops.reduce((sum, b) => sum + parseFloat(b.latitude), 0) / validBodyshops.length;
         const avgLng = validBodyshops.reduce((sum, b) => sum + parseFloat(b.longitude), 0) / validBodyshops.length;
@@ -220,7 +227,35 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
         setMapZoom(7);
       }
     }
-  }, [isOpen, validBodyshops]);
+  }, [isOpen, validBodyshops, claim]);
+
+  // Check which fields are missing
+  const missingFields = useMemo(() => {
+    return REQUIRED_FIELDS.filter(field => {
+      const value = validationData[field.key];
+      if (field.type === 'boolean') return false; // Booleans are always valid
+      if (value === null || value === undefined || value === '') return true;
+      return false;
+    });
+  }, [validationData]);
+
+  const handleValidationChange = (key, value) => {
+    setValidationData(prev => ({ ...prev, [key]: value }));
+  };
+
+  const handleSaveValidation = async () => {
+    setIsSavingValidation(true);
+    try {
+      await base44.entities.Claim.update(claim.id, validationData);
+      queryClient.invalidateQueries({ queryKey: ['claims'] });
+      setCurrentStep(1); // Move to map step
+    } catch (error) {
+      console.error('Error saving validation data:', error);
+      alert('Failed to save. Please try again.');
+    } finally {
+      setIsSavingValidation(false);
+    }
+  };
 
   // Geocode client address
   useEffect(() => {
