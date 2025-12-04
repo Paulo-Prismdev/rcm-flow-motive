@@ -1,10 +1,19 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { MapPin, Wand2 } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { MapPin, Wand2, UserX } from "lucide-react";
 import BodyshopCombobox from '../shared/BodyshopCombobox';
 import ClaimBodyshopMapModal from './ClaimBodyshopMapModal';
 import BodyshopAllocationWizard from './BodyshopAllocationWizard';
+import { base44 } from '@/api/base44Client';
+import { useQuery } from '@tanstack/react-query';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 export default function ClaimBodyshopForm({ claim, onSave, onCancel }) {
     const [formData, setFormData] = useState(claim || {});
