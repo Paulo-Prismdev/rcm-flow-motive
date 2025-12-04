@@ -41,7 +41,11 @@ export default function RepairerPortal() {
     queryKey: ['repairerClaims', currentUser?.linked_bodyshop_id],
     queryFn: async () => {
       const allClaims = await base44.entities.Claim.list('-created_date', 5000);
-      return allClaims.filter(c => c.bodyshop_id === currentUser.linked_bodyshop_id);
+      // Only show claims that have been accepted by the repairer
+      return allClaims.filter(c => 
+        c.bodyshop_id === currentUser.linked_bodyshop_id && 
+        c.repairer_accepted === true
+      );
     },
     enabled: !!currentUser?.linked_bodyshop_id,
   });
