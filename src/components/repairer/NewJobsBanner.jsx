@@ -258,212 +258,279 @@ export default function NewJobsBanner({ bodyshopId }) {
         `}</style>
       </div>
 
-      {/* Accept/Reject Job Modal */}
-      <Dialog open={!!selectedClaim} onOpenChange={() => { setSelectedClaim(null); setShowRejectForm(false); setRejectReason(''); }}>
-        <DialogContent className="neomorph max-w-md max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              {showRejectForm ? (
-                <>
-                  <XCircle className="w-5 h-5 text-red-600" />
-                  Reject Job
-                </>
-              ) : (
-                <>
-                  <FileText className="w-5 h-5 text-accent" />
-                  Review Job
-                </>
-              )}
-            </DialogTitle>
-          </DialogHeader>
-
-          {selectedClaim && (
-            <div className="space-y-4">
-              {/* Job Details */}
-              <div className="p-4 rounded-lg bg-surface border border-border">
-                <h4 className="font-bold text-lg mb-2">{formatUKRegistration(selectedClaim.reg)}</h4>
-                <div className="space-y-1 text-sm">
-                  <p><span className="text-foreground-muted">Client:</span> {selectedClaim.client_name || 'N/A'}</p>
-                  <p><span className="text-foreground-muted">Vehicle:</span> {selectedClaim.make_model || 'N/A'}</p>
-                  {selectedClaim.job_number && (
-                    <p><span className="text-foreground-muted">Job #:</span> {selectedClaim.job_number}</p>
-                  )}
-                </div>
-              </div>
-
-              {!showRejectForm ? (
-                <>
-                  {/* Terms of Repair */}
-                  <div className="p-4 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-300 dark:border-amber-700">
-                    <h5 className="font-bold text-sm mb-2 text-amber-800 dark:text-amber-200">Terms of Repair</h5>
-                    <p className="text-sm text-amber-700 dark:text-amber-300 mb-3">
-                      By accepting this repair, you agree to the following:
-                    </p>
-                    <ul className="text-sm space-y-2 text-amber-700 dark:text-amber-300">
-                      <li className="flex items-start gap-2">
-                        <span className="font-bold">•</span>
-                        <span>
-                          <strong>Bottom Line Discount:</strong>{' '}
-                          <strong>{selectedClaim.referral_fee_repairer ? `${selectedClaim.referral_fee_repairer}%` : 'The agreed percentage'}</strong>{' '}
-                          of the repair total will be taken as ARTURA's fee.
-                        </span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="font-bold">•</span>
-                        <span>
-                          <strong>Invoice Submission:</strong> The final invoice must be submitted directly to ARTURA. 
-                          Failure to do so will result in further charges as per SLA.
-                        </span>
-                      </li>
-                    </ul>
-                  </div>
-
-                  <p className="text-xs text-foreground-muted">
-                    By clicking "Accept Job", you acknowledge that you have read and agree to the terms above.
-                  </p>
-
-                  {/* Action Buttons */}
-                  <div className="flex flex-col gap-2">
-                    <Button
-                      onClick={() => handleAccept(selectedClaim)}
-                      disabled={isAccepting}
-                      className="w-full bg-green-600 hover:bg-green-700 text-white gap-2"
-                    >
-                      {isAccepting ? (
-                        <>
-                          <span className="animate-spin">⏳</span>
-                          Accepting...
-                        </>
-                      ) : (
-                        <>
-                          <CheckCircle className="w-4 h-4" />
-                          Accept Job
-                        </>
-                      )}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => setShowRejectForm(true)}
-                      className="w-full text-red-600 border-red-300 hover:bg-red-50 gap-2"
-                    >
-                      <XCircle className="w-4 h-4" />
-                      Reject Job
-                    </Button>
-                  </div>
-                </>
-              ) : (
-                <>
-                  {/* Reject Form */}
-                  <div className="p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-300 dark:border-red-700">
-                    <h5 className="font-bold text-sm mb-2 text-red-800 dark:text-red-200">Rejection Reason</h5>
-                    <p className="text-sm text-red-700 dark:text-red-300 mb-3">
-                      Please provide a reason for rejecting this job. This will be sent to ARTURA.
-                    </p>
-                    <Textarea
-                      placeholder="Enter reason for rejection..."
-                      value={rejectReason}
-                      onChange={(e) => setRejectReason(e.target.value)}
-                      className="min-h-[100px]"
-                    />
-                  </div>
-
-                  {/* Reject Action Buttons */}
-                  <div className="flex gap-3">
-                    <Button
-                      variant="outline"
-                      onClick={() => { setShowRejectForm(false); setRejectReason(''); }}
-                      className="flex-1"
-                    >
-                      Back
-                    </Button>
-                    <Button
-                      onClick={() => handleReject(selectedClaim)}
-                      disabled={isRejecting || !rejectReason.trim()}
-                      className="flex-1 bg-red-600 hover:bg-red-700 text-white gap-2"
-                    >
-                      {isRejecting ? (
-                        <>
-                          <span className="animate-spin">⏳</span>
-                          Rejecting...
-                        </>
-                      ) : (
-                        <>
-                          <XCircle className="w-4 h-4" />
-                          Confirm Rejection
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                </>
-              )}
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
-
-      {/* Success Modal with Download Instructions */}
+      {/* Job Acceptance Wizard Modal */}
       <Dialog 
-        open={showSuccessStep && !!acceptedClaim && successModalReady.current} 
+        open={!!selectedClaim} 
         onOpenChange={(open) => { 
-          if (!open) { 
-            setShowSuccessStep(false); 
-            setAcceptedClaim(null); 
-            successModalReady.current = false;
+          if (!open && wizardStep !== 2) { 
+            // Only allow closing on step 1 or 3
+            handleFinalClose();
           } 
         }}
       >
-        <DialogContent className="neomorph max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <CheckCircle className="w-6 h-6 text-green-600" />
-              Job Accepted!
-            </DialogTitle>
-          </DialogHeader>
-
-          {acceptedClaim && (
-            <div className="space-y-4">
-              <div className="p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-300 dark:border-green-700 text-center">
-                <CheckCircle className="w-12 h-12 text-green-600 mx-auto mb-3" />
-                <h4 className="font-bold text-lg mb-1">{formatUKRegistration(acceptedClaim.reg)}</h4>
-                <p className="text-sm text-foreground-muted">
-                  You have successfully accepted this job.
-                </p>
+        <DialogContent className="neomorph max-w-md max-h-[90vh] overflow-y-auto">
+          {selectedClaim && (
+            <>
+              {/* Step Indicator */}
+              <div className="flex items-center justify-center gap-2 mb-4">
+                {[1, 2, 3].map((step) => (
+                  <div key={step} className="flex items-center">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                      wizardStep === step 
+                        ? 'bg-accent text-accent-foreground' 
+                        : wizardStep > step 
+                          ? 'bg-green-500 text-white'
+                          : 'bg-gray-200 dark:bg-gray-700 text-gray-500'
+                    }`}>
+                      {wizardStep > step ? <CheckCircle className="w-4 h-4" /> : step}
+                    </div>
+                    {step < 3 && (
+                      <div className={`w-8 h-1 ${wizardStep > step ? 'bg-green-500' : 'bg-gray-200 dark:bg-gray-700'}`} />
+                    )}
+                  </div>
+                ))}
               </div>
 
-              {/* Instruction PDF Download */}
-              {acceptedClaim.instruction_pdf_url ? (
-                <div className="p-4 rounded-lg bg-accent/10 border border-accent">
-                  <h5 className="font-bold text-sm mb-2 flex items-center gap-2">
-                    <FileText className="w-4 h-4 text-accent" />
-                    Download Repair Instructions
-                  </h5>
-                  <p className="text-sm text-foreground-muted mb-3">
-                    Please download and review the repair instructions for this job.
-                  </p>
-                  <Button
-                    onClick={() => window.open(acceptedClaim.instruction_pdf_url, '_blank')}
-                    className="w-full bg-accent hover:bg-accent-hover text-accent-foreground gap-2"
-                  >
-                    <Download className="w-4 h-4" />
-                    Download Instructions (PDF)
-                  </Button>
-                </div>
-              ) : (
-                <div className="p-4 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-300">
-                  <p className="text-sm text-amber-700 dark:text-amber-300">
-                    No instruction document is available for this job yet. Please contact ARTURA if you need further details.
-                  </p>
-                </div>
+              {/* Step 1: Review & Accept */}
+              {wizardStep === 1 && !showRejectForm && (
+                <>
+                  <DialogHeader>
+                    <DialogTitle className="flex items-center gap-2">
+                      <FileText className="w-5 h-5 text-accent" />
+                      Step 1: Review Job
+                    </DialogTitle>
+                  </DialogHeader>
+
+                  <div className="space-y-4">
+                    {/* Job Details */}
+                    <div className="p-4 rounded-lg bg-surface border border-border">
+                      <h4 className="font-bold text-lg mb-2">{formatUKRegistration(selectedClaim.reg)}</h4>
+                      <div className="space-y-1 text-sm">
+                        <p><span className="text-foreground-muted">Client:</span> {selectedClaim.client_name || 'N/A'}</p>
+                        <p><span className="text-foreground-muted">Vehicle:</span> {selectedClaim.make_model || 'N/A'}</p>
+                        {selectedClaim.job_number && (
+                          <p><span className="text-foreground-muted">Job #:</span> {selectedClaim.job_number}</p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Terms of Repair */}
+                    <div className="p-4 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-300 dark:border-amber-700">
+                      <h5 className="font-bold text-sm mb-2 text-amber-800 dark:text-amber-200">Terms of Repair</h5>
+                      <p className="text-sm text-amber-700 dark:text-amber-300 mb-3">
+                        By accepting this repair, you agree to the following:
+                      </p>
+                      <ul className="text-sm space-y-2 text-amber-700 dark:text-amber-300">
+                        <li className="flex items-start gap-2">
+                          <span className="font-bold">•</span>
+                          <span>
+                            <strong>Bottom Line Discount:</strong>{' '}
+                            <strong>{selectedClaim.referral_fee_repairer ? `${selectedClaim.referral_fee_repairer}%` : 'The agreed percentage'}</strong>{' '}
+                            of the repair total will be taken as ARTURA's fee.
+                          </span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="font-bold">•</span>
+                          <span>
+                            <strong>Invoice Submission:</strong> The final invoice must be submitted directly to ARTURA. 
+                            Failure to do so will result in further charges as per SLA.
+                          </span>
+                        </li>
+                      </ul>
+                    </div>
+
+                    <p className="text-xs text-foreground-muted">
+                      By clicking "Accept Job", you acknowledge that you have read and agree to the terms above.
+                    </p>
+
+                    {/* Action Buttons */}
+                    <div className="flex flex-col gap-2">
+                      <Button
+                        onClick={() => handleAccept(selectedClaim)}
+                        disabled={isAccepting}
+                        className="w-full bg-green-600 hover:bg-green-700 text-white gap-2"
+                      >
+                        {isAccepting ? (
+                          <>
+                            <span className="animate-spin">⏳</span>
+                            Accepting...
+                          </>
+                        ) : (
+                          <>
+                            <CheckCircle className="w-4 h-4" />
+                            Accept Job
+                          </>
+                        )}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => setShowRejectForm(true)}
+                        className="w-full text-red-600 border-red-300 hover:bg-red-50 gap-2"
+                      >
+                        <XCircle className="w-4 h-4" />
+                        Reject Job
+                      </Button>
+                    </div>
+                  </div>
+                </>
               )}
 
-              <Button
-                variant="outline"
-                onClick={() => { setShowSuccessStep(false); setAcceptedClaim(null); }}
-                className="w-full"
-              >
-                Close
-              </Button>
-            </div>
+              {/* Step 1: Reject Form */}
+              {wizardStep === 1 && showRejectForm && (
+                <>
+                  <DialogHeader>
+                    <DialogTitle className="flex items-center gap-2">
+                      <XCircle className="w-5 h-5 text-red-600" />
+                      Reject Job
+                    </DialogTitle>
+                  </DialogHeader>
+
+                  <div className="space-y-4">
+                    <div className="p-4 rounded-lg bg-surface border border-border">
+                      <h4 className="font-bold text-lg mb-2">{formatUKRegistration(selectedClaim.reg)}</h4>
+                    </div>
+
+                    <div className="p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-300 dark:border-red-700">
+                      <h5 className="font-bold text-sm mb-2 text-red-800 dark:text-red-200">Rejection Reason</h5>
+                      <p className="text-sm text-red-700 dark:text-red-300 mb-3">
+                        Please provide a reason for rejecting this job. This will be sent to ARTURA.
+                      </p>
+                      <Textarea
+                        placeholder="Enter reason for rejection..."
+                        value={rejectReason}
+                        onChange={(e) => setRejectReason(e.target.value)}
+                        className="min-h-[100px]"
+                      />
+                    </div>
+
+                    <div className="flex gap-3">
+                      <Button
+                        variant="outline"
+                        onClick={() => { setShowRejectForm(false); setRejectReason(''); }}
+                        className="flex-1"
+                      >
+                        Back
+                      </Button>
+                      <Button
+                        onClick={() => handleReject(selectedClaim)}
+                        disabled={isRejecting || !rejectReason.trim()}
+                        className="flex-1 bg-red-600 hover:bg-red-700 text-white gap-2"
+                      >
+                        {isRejecting ? (
+                          <>
+                            <span className="animate-spin">⏳</span>
+                            Rejecting...
+                          </>
+                        ) : (
+                          <>
+                            <XCircle className="w-4 h-4" />
+                            Confirm Rejection
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {/* Step 2: Download Instructions */}
+              {wizardStep === 2 && (
+                <>
+                  <DialogHeader>
+                    <DialogTitle className="flex items-center gap-2">
+                      <Download className="w-5 h-5 text-accent" />
+                      Step 2: Download Instructions
+                    </DialogTitle>
+                  </DialogHeader>
+
+                  <div className="space-y-4">
+                    <div className="p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-300 dark:border-green-700 text-center">
+                      <CheckCircle className="w-10 h-10 text-green-600 mx-auto mb-2" />
+                      <p className="font-medium text-green-800 dark:text-green-200">Job Accepted!</p>
+                      <p className="text-sm text-green-600 dark:text-green-300">{formatUKRegistration(selectedClaim.reg)}</p>
+                    </div>
+
+                    {selectedClaim.instruction_pdf_url ? (
+                      <div className="p-4 rounded-lg bg-accent/10 border border-accent">
+                        <h5 className="font-bold text-sm mb-2 flex items-center gap-2">
+                          <FileText className="w-4 h-4 text-accent" />
+                          Repair Instructions
+                        </h5>
+                        <p className="text-sm text-foreground-muted mb-3">
+                          Please download and review the repair instructions before proceeding.
+                        </p>
+                        <Button
+                          onClick={handleDownloadAndConfirm}
+                          className="w-full bg-accent hover:bg-accent-hover text-accent-foreground gap-2"
+                        >
+                          <Download className="w-4 h-4" />
+                          Download & Continue
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="p-4 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-300">
+                        <p className="text-sm text-amber-700 dark:text-amber-300 mb-3">
+                          No instruction document is available for this job yet. You can proceed without downloading.
+                        </p>
+                        <Button
+                          onClick={() => setWizardStep(3)}
+                          className="w-full"
+                        >
+                          Continue
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
+
+              {/* Step 3: Confirmation */}
+              {wizardStep === 3 && (
+                <>
+                  <DialogHeader>
+                    <DialogTitle className="flex items-center gap-2">
+                      <CheckCircle className="w-5 h-5 text-green-600" />
+                      Step 3: Complete
+                    </DialogTitle>
+                  </DialogHeader>
+
+                  <div className="space-y-4">
+                    <div className="p-6 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-300 dark:border-green-700 text-center">
+                      <CheckCircle className="w-16 h-16 text-green-600 mx-auto mb-3" />
+                      <h4 className="font-bold text-xl mb-2 text-green-800 dark:text-green-200">All Done!</h4>
+                      <p className="text-sm text-green-600 dark:text-green-300">
+                        You have successfully accepted <strong>{formatUKRegistration(selectedClaim.reg)}</strong>
+                      </p>
+                    </div>
+
+                    <div className="p-4 rounded-lg bg-surface border border-border">
+                      <h5 className="font-bold text-sm mb-2">Next Steps:</h5>
+                      <ul className="text-sm space-y-2 text-foreground-muted">
+                        <li className="flex items-start gap-2">
+                          <span>1.</span>
+                          <span>Review the instruction document (if downloaded)</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span>2.</span>
+                          <span>Contact the client to arrange booking in</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span>3.</span>
+                          <span>Submit your invoice to ARTURA after completion</span>
+                        </li>
+                      </ul>
+                    </div>
+
+                    <Button
+                      onClick={handleFinalClose}
+                      className="w-full bg-accent hover:bg-accent-hover text-accent-foreground"
+                    >
+                      Close
+                    </Button>
+                  </div>
+                </>
+              )}
+            </>
           )}
         </DialogContent>
       </Dialog>
