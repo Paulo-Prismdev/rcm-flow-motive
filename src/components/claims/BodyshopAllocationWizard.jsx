@@ -735,7 +735,7 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
           )}
 
           {/* Step 2: Instruction PDF */}
-          {currentStep === 1 && (
+          {currentStep === 2 && (
             <div className="space-y-4">
               <div className="p-4 rounded-lg bg-accent/10 border border-accent/20">
                 <p className="font-medium">Selected Repairer: {selectedBodyshop?.name}</p>
