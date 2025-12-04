@@ -988,6 +988,8 @@ export default function ClaimForm({ claim, onSubmit, onCancel }) {
             {formData.has_third_party && (
               <div className="neomorph-flat p-6 space-y-4">
                 <h3 className="font-bold text-gray-700 mb-4">Third Party Details</h3>
+                
+                {/* Contact Details */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm text-gray-600 mb-2">Name</label>
@@ -1012,15 +1014,6 @@ export default function ClaimForm({ claim, onSubmit, onCancel }) {
                       value={formData.tp_email}
                       onChange={(e) => handleChange('tp_email', e.target.value)}
                       className="neomorph-inset px-4 py-3 text-gray-700 border-0"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm text-gray-600 mb-2">Vehicle</label>
-                    <Input
-                      value={formData.tp_make_model}
-                      onChange={(e) => handleChange('tp_make_model', e.target.value)}
-                      className="neomorph-inset px-4 py-3 text-gray-700 border-0"
-                      placeholder="Make & Model"
                     />
                   </div>
                 </div>
@@ -1062,6 +1055,95 @@ export default function ClaimForm({ claim, onSubmit, onCancel }) {
                     <Input
                       value={formData.tp_postcode}
                       onChange={(e) => handleChange('tp_postcode', e.target.value)}
+                      className="neomorph-inset px-4 py-3 text-gray-700 border-0"
+                    />
+                  </div>
+                </div>
+
+                {/* Vehicle Details */}
+                <h4 className="font-semibold text-gray-700 mt-6 mb-3">Third Party Vehicle</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="md:col-span-2">
+                    <label className="block text-sm text-gray-600 mb-2">Vehicle Registration</label>
+                    <div className="flex gap-2">
+                      <Input
+                        value={formData.tp_reg}
+                        onChange={(e) => {
+                          handleChange('tp_reg', e.target.value.toUpperCase());
+                          setTpVehicleLookupError(null);
+                        }}
+                        className="neomorph-inset px-4 py-3 text-gray-700 border-0 flex-1"
+                        placeholder="e.g. AB12 CDE"
+                      />
+                      <Button
+                        type="button"
+                        onClick={handleTPVehicleLookup}
+                        disabled={isLookingUpTPVehicle || !formData.tp_reg}
+                        className="neomorph-flat px-4 py-3 whitespace-nowrap"
+                        title="Lookup vehicle details from DVLA"
+                      >
+                        {isLookingUpTPVehicle ? (
+                          <Loader className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <Search className="w-4 h-4" />
+                        )}
+                      </Button>
+                    </div>
+                    {tpVehicleLookupError && (
+                      <div className="flex items-start gap-2 p-3 mt-2 bg-orange-50 border border-orange-200 rounded-lg">
+                        <AlertCircle className="w-4 h-4 text-orange-600 flex-shrink-0 mt-0.5" />
+                        <p className="text-xs text-orange-800">{tpVehicleLookupError}</p>
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-600 mb-2">Make/Model</label>
+                    <Input
+                      value={formData.tp_make_model}
+                      onChange={(e) => handleChange('tp_make_model', e.target.value)}
+                      className="neomorph-inset px-4 py-3 text-gray-700 border-0"
+                      placeholder="e.g. Ford Focus"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-600 mb-2">Vehicle Type</label>
+                    <select
+                      value={formData.tp_vehicle_type}
+                      onChange={(e) => handleChange('tp_vehicle_type', e.target.value)}
+                      className="neomorph-inset w-full px-4 py-3 text-gray-700 border-0 rounded-xl"
+                    >
+                      <option value="Car">Car</option>
+                      <option value="Van">Van</option>
+                      <option value="Motorcycle">Motorcycle</option>
+                      <option value="HGV">HGV</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Insurance Details */}
+                <h4 className="font-semibold text-gray-700 mt-6 mb-3">Third Party Insurance</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm text-gray-600 mb-2">Their Insurer</label>
+                    <InsurerCombobox
+                      value={formData.tp_insurer}
+                      onChange={(value) => handleChange('tp_insurer', value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-600 mb-2">Their Claim Reference</label>
+                    <Input
+                      value={formData.tp_claim_ref}
+                      onChange={(e) => handleChange('tp_claim_ref', e.target.value)}
+                      className="neomorph-inset px-4 py-3 text-gray-700 border-0"
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm text-gray-600 mb-2">Their Policy Number</label>
+                    <Input
+                      value={formData.tp_policy_number}
+                      onChange={(e) => handleChange('tp_policy_number', e.target.value)}
                       className="neomorph-inset px-4 py-3 text-gray-700 border-0"
                     />
                   </div>
