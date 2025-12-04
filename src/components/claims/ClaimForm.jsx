@@ -2103,6 +2103,20 @@ export default function ClaimForm({ claim, onSubmit, onCancel }) {
                     </div>
                   </div>
                 </div>
+
+                {/* Third Party Vehicle Damage */}
+                <div className="neomorph-inset p-4 space-y-4">
+                  <h4 className="font-semibold text-gray-700">Vehicle Damage</h4>
+                  <div>
+                    <label className="block text-sm text-gray-600 mb-2">Third Party Damage Description</label>
+                    <Textarea
+                      value={formData.tp_vehicle_damage}
+                      onChange={(e) => handleChange('tp_vehicle_damage', e.target.value)}
+                      className="neomorph-inset px-4 py-3 text-gray-700 border-0 min-h-[100px]"
+                      placeholder="Describe the damage to the third party's vehicle..."
+                    />
+                  </div>
+                </div>
               </div>
             )}
 

@@ -663,11 +663,10 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
               <DetailRow label="TP Phone" value={claim.tp_phone} />
               <DetailRow label="TP Email" value={claim.tp_email} />
               <DetailRow label="TP Driver/Contact" value={claim.tp_driver_contact} />
-              <DetailRow label="TP Vehicle" value={claim.tp_make_model} />
             </div>
             <div className="mt-2 py-3 px-4 rounded-lg glass-inset">
               <div className="text-xs font-semibold text-foreground-muted mb-2">TP Address</div>
-              <div className="text-sm leading-relaxed space-y-0.5 mb-3">
+              <div className="text-sm leading-relaxed space-y-0.5">
                 {claim.tp_address_line_1 && <div>{claim.tp_address_line_1}</div>}
                 {claim.tp_address_line_2 && <div>{claim.tp_address_line_2}</div>}
                 {claim.tp_town && <div>{claim.tp_town}</div>}
@@ -675,8 +674,24 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
                 {claim.tp_postcode && <div>{claim.tp_postcode}</div>}
                 {!claim.tp_address_line_1 && !claim.tp_town && !claim.tp_postcode && '-'}
               </div>
-              <div className="text-xs font-semibold text-foreground-muted mb-2">TP Damage Description</div>
+            </div>
+
+            <h4 className="font-semibold text-gray-700 mt-4 mb-2">Third Party Vehicle</h4>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+              <DetailRow label="TP Registration" value={claim.tp_reg} />
+              <DetailRow label="TP Vehicle" value={claim.tp_make_model} />
+              <DetailRow label="TP Vehicle Type" value={claim.tp_vehicle_type} />
+            </div>
+            <div className="mt-2 py-3 px-4 rounded-lg glass-inset">
+              <div className="text-xs font-semibold text-foreground-muted mb-2">TP Vehicle Damage</div>
               <div className="text-sm leading-relaxed whitespace-pre-wrap">{claim.tp_vehicle_damage || '-'}</div>
+            </div>
+
+            <h4 className="font-semibold text-gray-700 mt-4 mb-2">Third Party Insurance</h4>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+              <DetailRow label="TP Insurer" value={claim.tp_insurer} />
+              <DetailRow label="TP Claim Reference" value={claim.tp_claim_ref} />
+              <DetailRow label="TP Policy Number" value={claim.tp_policy_number} />
             </div>
           </EditableSection>
         );
