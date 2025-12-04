@@ -90,12 +90,13 @@ export default function NewJobsBanner({ bodyshopId }) {
 
   const rejectJobMutation = useMutation({
     mutationFn: async ({ claimId, claim, reason }) => {
-      // Remove bodyshop from claim
+      // Remove bodyshop from claim and store rejection reason
       await base44.entities.Claim.update(claimId, {
         bodyshop_id: null,
         bodyshop: null,
         bodyshop_email: null,
         bs_instructed: null,
+        latest_update: `Job rejected by ${bodyshop?.name || 'Repairer'}. Reason: ${reason}`,
       });
       
       // Log the rejection in ActivityLog
@@ -109,16 +110,6 @@ export default function NewJobsBanner({ bodyshopId }) {
         description: `Job rejected by ${bodyshop?.name || 'Repairer'}. Reason: ${reason}`,
         user_email: currentUser?.email,
         user_name: currentUser?.full_name,
-      });
-      
-      // Create notification for internal users
-      await base44.entities.Notification.create({
-        title: 'Job Rejected by Repairer',
-        message: `${bodyshop?.name || 'Repairer'} has rejected job ${claim.job_number || claim.reg}. Reason: ${reason}`,
-        type: 'warning',
-        related_item_type: 'Claim',
-        related_item_id: claimId,
-        is_read: false,
       });
     },
     onSuccess: () => {
