@@ -393,7 +393,7 @@ export default function NewJobsBanner({ bodyshopId }) {
       </Dialog>
 
       {/* Success Modal with Download Instructions */}
-      <Dialog open={showSuccessStep} onOpenChange={() => { setShowSuccessStep(false); setAcceptedClaim(null); }}>
+      <Dialog open={showSuccessStep && !!acceptedClaim} onOpenChange={(open) => { if (!open) { setShowSuccessStep(false); setAcceptedClaim(null); } }}>
         <DialogContent className="neomorph max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
