@@ -418,10 +418,11 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
 
   const canProceed = () => {
     switch (currentStep) {
-      case 0: return !!selectedBodyshop;
-      case 1: return true; // PDF generation is optional
-      case 2: return true; // Email is optional
-      case 3: return true;
+      case 0: return missingFields.length === 0; // Validation step
+      case 1: return !!selectedBodyshop; // Map step
+      case 2: return true; // PDF generation is optional
+      case 3: return true; // Email is optional
+      case 4: return true; // Confirm step
       default: return false;
     }
   };
