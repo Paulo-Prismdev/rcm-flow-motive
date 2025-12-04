@@ -941,6 +941,12 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
                                 <FileText className="w-4 h-4 mr-2" />
                                 Generate Instructions
                               </DropdownMenuItem>
+                              {claim.instruction_pdf_url && (
+                                <DropdownMenuItem onSelect={(e) => { e.preventDefault(); window.open(claim.instruction_pdf_url, '_blank'); }}>
+                                  <Download className="w-4 h-4 mr-2" />
+                                  Download Instruction PDF
+                                </DropdownMenuItem>
+                              )}
                               <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsEstimateModalOpen(true); }}>
                                 <Calculator className="w-4 h-4 mr-2" />
                                 Request Estimate
