@@ -85,15 +85,23 @@ export default function NewJobsBanner({ bodyshopId }) {
       
       return claim;
     },
-    onSuccess: (claim) => {
-      queryClient.invalidateQueries({ queryKey: ['pendingJobs'] });
-      queryClient.invalidateQueries({ queryKey: ['repairerClaims'] });
-      // Show success step with download option
+  });
+
+  const handleAccept = async (claim) => {
+    setIsAccepting(true);
+    try {
+      await acceptJobMutation.mutateAsync({ claimId: claim.id, claim });
+      // Set success state BEFORE invalidating queries
+      setSelectedClaim(null);
       setAcceptedClaim(claim);
       setShowSuccessStep(true);
-      setSelectedClaim(null);
-    },
-  });
+      // Invalidate queries after showing success modal
+      queryClient.invalidateQueries({ queryKey: ['pendingJobs'] });
+      queryClient.invalidateQueries({ queryKey: ['repairerClaims'] });
+    } finally {
+      setIsAccepting(false);
+    }
+  };
 
   const rejectJobMutation = useMutation({
     mutationFn: async ({ claimId, claim, reason }) => {
