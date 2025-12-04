@@ -19,6 +19,52 @@ export default function ClaimBodyshopForm({ claim, onSave, onCancel }) {
     const [formData, setFormData] = useState(claim || {});
     const [isMapOpen, setIsMapOpen] = useState(false);
     const [isWizardOpen, setIsWizardOpen] = useState(false);
+    const [isUnallocateOpen, setIsUnallocateOpen] = useState(false);
+    const [unallocateReason, setUnallocateReason] = useState('');
+    const [isUnallocating, setIsUnallocating] = useState(false);
+
+    const { data: currentUser } = useQuery({
+        queryKey: ['currentUser'],
+        queryFn: () => base44.auth.me(),
+    });
+
+    const handleUnallocate = async () => {
+        if (!unallocateReason.trim()) return;
+        
+        setIsUnallocating(true);
+        try {
+            // Log the unallocation in ActivityLog
+            await base44.entities.ActivityLog.create({
+                parent_id: claim.id,
+                parent_type: 'Claim',
+                action: 'Repairer Unallocated',
+                field_name: 'bodyshop_id',
+                old_value: claim.bodyshop || 'Allocated Repairer',
+                new_value: 'Unassigned',
+                description: `Repairer unallocated. Reason: ${unallocateReason}`,
+                user_email: currentUser?.email,
+                user_name: currentUser?.full_name,
+            });
+
+            // Save with cleared bodyshop fields
+            onSave({
+                ...formData,
+                bodyshop: null,
+                bodyshop_id: null,
+                bodyshop_email: null,
+                bs_instructed: null,
+                repairer_accepted: false,
+                repairer_accepted_date: null,
+                instruction_pdf_url: null,
+                latest_update: `Repairer unallocated by ${currentUser?.full_name || 'Internal User'}. Reason: ${unallocateReason}`,
+            });
+
+            setIsUnallocateOpen(false);
+            setUnallocateReason('');
+        } finally {
+            setIsUnallocating(false);
+        }
+    };
 
     const handleBodyshopChange = (bodyshop) => {
         setFormData(prev => ({ 
