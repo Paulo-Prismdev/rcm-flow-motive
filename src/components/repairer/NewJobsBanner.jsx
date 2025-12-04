@@ -62,10 +62,23 @@ export default function NewJobsBanner({ bodyshopId }) {
   });
 
   const acceptJobMutation = useMutation({
-    mutationFn: async (claimId) => {
+    mutationFn: async ({ claimId, claim }) => {
       await base44.entities.Claim.update(claimId, {
         repairer_accepted: true,
         repairer_accepted_date: new Date().toISOString().split('T')[0],
+      });
+      
+      // Log the acceptance in ActivityLog
+      await base44.entities.ActivityLog.create({
+        parent_id: claimId,
+        parent_type: 'Claim',
+        action: 'Job Accepted by Repairer',
+        field_name: 'repairer_accepted',
+        old_value: 'false',
+        new_value: 'true',
+        description: `Job accepted by ${bodyshop?.name || 'Repairer'}`,
+        user_email: currentUser?.email,
+        user_name: currentUser?.full_name,
       });
     },
     onSuccess: () => {
@@ -75,12 +88,64 @@ export default function NewJobsBanner({ bodyshopId }) {
     },
   });
 
+  const rejectJobMutation = useMutation({
+    mutationFn: async ({ claimId, claim, reason }) => {
+      // Remove bodyshop from claim
+      await base44.entities.Claim.update(claimId, {
+        bodyshop_id: null,
+        bodyshop: null,
+        bodyshop_email: null,
+        bs_instructed: null,
+      });
+      
+      // Log the rejection in ActivityLog
+      await base44.entities.ActivityLog.create({
+        parent_id: claimId,
+        parent_type: 'Claim',
+        action: 'Job Rejected by Repairer',
+        field_name: 'bodyshop_id',
+        old_value: bodyshop?.name || 'Repairer',
+        new_value: 'Unassigned',
+        description: `Job rejected by ${bodyshop?.name || 'Repairer'}. Reason: ${reason}`,
+        user_email: currentUser?.email,
+        user_name: currentUser?.full_name,
+      });
+      
+      // Create notification for internal users
+      await base44.entities.Notification.create({
+        title: 'Job Rejected by Repairer',
+        message: `${bodyshop?.name || 'Repairer'} has rejected job ${claim.job_number || claim.reg}. Reason: ${reason}`,
+        type: 'warning',
+        related_item_type: 'Claim',
+        related_item_id: claimId,
+        is_read: false,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['pendingJobs'] });
+      queryClient.invalidateQueries({ queryKey: ['repairerClaims'] });
+      setSelectedClaim(null);
+      setShowRejectForm(false);
+      setRejectReason('');
+    },
+  });
+
   const handleAccept = async (claim) => {
     setIsAccepting(true);
     try {
-      await acceptJobMutation.mutateAsync(claim.id);
+      await acceptJobMutation.mutateAsync({ claimId: claim.id, claim });
     } finally {
       setIsAccepting(false);
+    }
+  };
+
+  const handleReject = async (claim) => {
+    if (!rejectReason.trim()) return;
+    setIsRejecting(true);
+    try {
+      await rejectJobMutation.mutateAsync({ claimId: claim.id, claim, reason: rejectReason });
+    } finally {
+      setIsRejecting(false);
     }
   };
 
