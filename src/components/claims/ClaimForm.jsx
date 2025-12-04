@@ -450,6 +450,44 @@ export default function ClaimForm({ claim, onSubmit, onCancel }) {
     setShowTPModal(false); // Close the modal
   };
 
+  // Third party vehicle lookup
+  const handleTPVehicleLookup = async () => {
+    if (!formData.tp_reg || formData.tp_reg.trim().length < 3) {
+      setTpVehicleLookupError('Please enter a valid registration number');
+      return;
+    }
+
+    setIsLookingUpTPVehicle(true);
+    setTpVehicleLookupError(null);
+
+    try {
+      const response = await base44.functions.invoke('lookupVehicleData', {
+        registrationNumber: formData.tp_reg,
+      });
+
+      const result = response.data;
+
+      if (result.success) {
+        setFormData(prev => ({
+          ...prev,
+          tp_make_model: result.make_model || '',
+          tp_vehicle_colour: result.colour || '',
+          tp_vehicle_fuel_type: result.fuel_type || '',
+          tp_vehicle_year_of_manufacture: result.year_of_manufacture || null,
+        }));
+        setTpVehicleLookupError(null);
+      } else {
+        setTpVehicleLookupError(result.message || 'Vehicle not found');
+      }
+    } catch (error) {
+      console.error('TP Vehicle lookup error:', error);
+      const errorMessage = error.response?.data?.message || error.message || 'Unable to lookup vehicle. Please try again.';
+      setTpVehicleLookupError(errorMessage);
+    } finally {
+      setIsLookingUpTPVehicle(false);
+    }
+  };
+
   const handleReferrerChange = (referrer) => {
     setFormData(prev => ({
       ...prev,
