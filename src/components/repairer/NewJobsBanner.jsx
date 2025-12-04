@@ -223,20 +223,6 @@ export default function NewJobsBanner({ bodyshopId }) {
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  {job.instruction_pdf_url && (
-                    <Button
-                      variant="outline"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        window.open(job.instruction_pdf_url, '_blank');
-                      }}
-                      className="gap-2"
-                      title="Download Instruction PDF"
-                    >
-                      <Download className="w-4 h-4" />
-                      <span className="hidden sm:inline">Instructions</span>
-                    </Button>
-                  )}
                   <Button
                     onClick={() => setSelectedClaim(job)}
                     className="bg-green-600 hover:bg-green-700 text-white font-bold px-6 py-2 gap-2"
