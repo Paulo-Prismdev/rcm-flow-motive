@@ -35,6 +35,7 @@ export default function NewJobsBanner({ bodyshopId }) {
   const [rejectReason, setRejectReason] = useState('');
   const [showSuccessStep, setShowSuccessStep] = useState(false);
   const [acceptedClaim, setAcceptedClaim] = useState(null);
+  const successModalReady = useRef(false);
   const queryClient = useQueryClient();
   
   const { data: currentUser } = useQuery({
