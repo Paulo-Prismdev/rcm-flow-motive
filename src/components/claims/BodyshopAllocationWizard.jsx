@@ -894,7 +894,7 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
           )}
 
           {/* Step 4: Confirm Allocation */}
-          {currentStep === 3 && (
+          {currentStep === 4 && (
             <div className="space-y-4">
               <div className="text-center py-6">
                 <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-accent/20 flex items-center justify-center">
