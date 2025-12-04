@@ -259,7 +259,7 @@ export default function NewJobsBanner({ bodyshopId }) {
                 </>
               ) : (
                 <>
-                  <CheckCircle className="w-5 h-5 text-green-600" />
+                  <FileText className="w-5 h-5 text-accent" />
                   Review Job
                 </>
               )}
@@ -279,18 +279,6 @@ export default function NewJobsBanner({ bodyshopId }) {
                   )}
                 </div>
               </div>
-
-              {/* Instruction PDF Download - Always visible */}
-              {selectedClaim.instruction_pdf_url && (
-                <Button
-                  variant="outline"
-                  onClick={() => window.open(selectedClaim.instruction_pdf_url, '_blank')}
-                  className="w-full gap-2 border-accent text-accent hover:bg-accent/10"
-                >
-                  <Download className="w-4 h-4" />
-                  Download Repair Instructions (PDF)
-                </Button>
-              )}
 
               {!showRejectForm ? (
                 <>
@@ -397,6 +385,64 @@ export default function NewJobsBanner({ bodyshopId }) {
                   </div>
                 </>
               )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Success Modal with Download Instructions */}
+      <Dialog open={showSuccessStep} onOpenChange={() => { setShowSuccessStep(false); setAcceptedClaim(null); }}>
+        <DialogContent className="neomorph max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CheckCircle className="w-6 h-6 text-green-600" />
+              Job Accepted!
+            </DialogTitle>
+          </DialogHeader>
+
+          {acceptedClaim && (
+            <div className="space-y-4">
+              <div className="p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-300 dark:border-green-700 text-center">
+                <CheckCircle className="w-12 h-12 text-green-600 mx-auto mb-3" />
+                <h4 className="font-bold text-lg mb-1">{formatUKRegistration(acceptedClaim.reg)}</h4>
+                <p className="text-sm text-foreground-muted">
+                  You have successfully accepted this job.
+                </p>
+              </div>
+
+              {/* Instruction PDF Download */}
+              {acceptedClaim.instruction_pdf_url ? (
+                <div className="p-4 rounded-lg bg-accent/10 border border-accent">
+                  <h5 className="font-bold text-sm mb-2 flex items-center gap-2">
+                    <FileText className="w-4 h-4 text-accent" />
+                    Download Repair Instructions
+                  </h5>
+                  <p className="text-sm text-foreground-muted mb-3">
+                    Please download and review the repair instructions for this job.
+                  </p>
+                  <Button
+                    onClick={() => window.open(acceptedClaim.instruction_pdf_url, '_blank')}
+                    className="w-full bg-accent hover:bg-accent-hover text-accent-foreground gap-2"
+                  >
+                    <Download className="w-4 h-4" />
+                    Download Instructions (PDF)
+                  </Button>
+                </div>
+              ) : (
+                <div className="p-4 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-300">
+                  <p className="text-sm text-amber-700 dark:text-amber-300">
+                    No instruction document is available for this job yet. Please contact ARTURA if you need further details.
+                  </p>
+                </div>
+              )}
+
+              <Button
+                variant="outline"
+                onClick={() => { setShowSuccessStep(false); setAcceptedClaim(null); }}
+                className="w-full"
+              >
+                Close
+              </Button>
             </div>
           )}
         </DialogContent>
