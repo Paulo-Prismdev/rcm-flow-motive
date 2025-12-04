@@ -125,6 +125,10 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
   const [mapCenter, setMapCenter] = useState([54.5, -2.0]);
   const [mapZoom, setMapZoom] = useState(7);
   
+  // Validation step
+  const [validationData, setValidationData] = useState({});
+  const [isSavingValidation, setIsSavingValidation] = useState(false);
+  
   // Instruction step
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [generatedPdfUrl, setGeneratedPdfUrl] = useState(null);
