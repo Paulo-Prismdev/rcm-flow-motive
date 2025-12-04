@@ -95,13 +95,15 @@ export default function NewJobsBanner({ bodyshopId }) {
       // Store the claim data before closing and invalidating
       const claimCopy = { ...claim };
       setSelectedClaim(null);
+      // Set the accepted claim and mark as ready before showing modal
       setAcceptedClaim(claimCopy);
+      successModalReady.current = true;
       setShowSuccessStep(true);
-      // Delay query invalidation to ensure modal state is set
+      // Delay query invalidation significantly to ensure modal is stable
       setTimeout(() => {
         queryClient.invalidateQueries({ queryKey: ['pendingJobs'] });
         queryClient.invalidateQueries({ queryKey: ['repairerClaims'] });
-      }, 100);
+      }, 500);
     } finally {
       setIsAccepting(false);
     }
