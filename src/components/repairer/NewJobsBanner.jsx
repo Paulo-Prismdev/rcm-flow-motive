@@ -12,9 +12,11 @@ import {
   Calendar,
   MapPin,
   Download,
-  FileText
+  FileText,
+  XCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
 import { format } from 'date-fns';
 import { formatUKRegistration } from '@/components/shared/formatRegistration';
 import {
@@ -28,7 +30,21 @@ export default function NewJobsBanner({ bodyshopId }) {
   const [expanded, setExpanded] = useState(true);
   const [selectedClaim, setSelectedClaim] = useState(null);
   const [isAccepting, setIsAccepting] = useState(false);
+  const [isRejecting, setIsRejecting] = useState(false);
+  const [showRejectForm, setShowRejectForm] = useState(false);
+  const [rejectReason, setRejectReason] = useState('');
   const queryClient = useQueryClient();
+  
+  const { data: currentUser } = useQuery({
+    queryKey: ['currentUser'],
+    queryFn: () => base44.auth.me(),
+  });
+  
+  const { data: bodyshop } = useQuery({
+    queryKey: ['bodyshop', bodyshopId],
+    queryFn: () => base44.entities.Bodyshop.get(bodyshopId),
+    enabled: !!bodyshopId,
+  });
 
   // Fetch claims that are allocated but not yet accepted
   const { data: pendingJobs = [] } = useQuery({
