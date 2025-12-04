@@ -263,19 +263,29 @@ export default function NewJobsBanner({ bodyshopId }) {
         `}</style>
       </div>
 
-      {/* Accept Confirmation Modal */}
-      <Dialog open={!!selectedClaim} onOpenChange={() => setSelectedClaim(null)}>
-        <DialogContent className="neomorph max-w-md">
+      {/* Accept/Reject Job Modal */}
+      <Dialog open={!!selectedClaim} onOpenChange={() => { setSelectedClaim(null); setShowRejectForm(false); setRejectReason(''); }}>
+        <DialogContent className="neomorph max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <CheckCircle className="w-5 h-5 text-green-600" />
-              Accept Job
+              {showRejectForm ? (
+                <>
+                  <XCircle className="w-5 h-5 text-red-600" />
+                  Reject Job
+                </>
+              ) : (
+                <>
+                  <CheckCircle className="w-5 h-5 text-green-600" />
+                  Review Job
+                </>
+              )}
             </DialogTitle>
           </DialogHeader>
 
           {selectedClaim && (
             <div className="space-y-4">
-              <div className="p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+              {/* Job Details */}
+              <div className="p-4 rounded-lg bg-surface border border-border">
                 <h4 className="font-bold text-lg mb-2">{formatUKRegistration(selectedClaim.reg)}</h4>
                 <div className="space-y-1 text-sm">
                   <p><span className="text-foreground-muted">Client:</span> {selectedClaim.client_name || 'N/A'}</p>
@@ -284,75 +294,125 @@ export default function NewJobsBanner({ bodyshopId }) {
                     <p><span className="text-foreground-muted">Job #:</span> {selectedClaim.job_number}</p>
                   )}
                 </div>
-
-                {/* Instruction PDF Download */}
-                {selectedClaim.instruction_pdf_url && (
-                  <Button
-                    variant="outline"
-                    onClick={() => window.open(selectedClaim.instruction_pdf_url, '_blank')}
-                    className="w-full mt-3 gap-2"
-                  >
-                    <FileText className="w-4 h-4" />
-                    Download Repair Instructions
-                  </Button>
-                )}
               </div>
 
-              {/* Terms of Repair */}
-              <div className="p-4 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-300 dark:border-amber-700">
-                <h5 className="font-bold text-sm mb-2 text-amber-800 dark:text-amber-200">Terms of Repair</h5>
-                <p className="text-sm text-amber-700 dark:text-amber-300 mb-3">
-                  By accepting this repair, you agree to the following:
-                </p>
-                <ul className="text-sm space-y-2 text-amber-700 dark:text-amber-300">
-                  <li className="flex items-start gap-2">
-                    <span className="font-bold">•</span>
-                    <span>
-                      <strong>Bottom Line Discount:</strong>{' '}
-                      <strong>{selectedClaim.referral_fee_repairer ? `${selectedClaim.referral_fee_repairer}%` : 'The agreed percentage'}</strong>{' '}
-                      of the repair total will be taken as ARTURA's fee.
-                    </span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="font-bold">•</span>
-                    <span>
-                      <strong>Invoice Submission:</strong> The final invoice must be submitted directly to ARTURA. 
-                      Failure to do so will result in further charges as per SLA.
-                    </span>
-                  </li>
-                </ul>
-              </div>
-
-              <p className="text-xs text-foreground-muted">
-                By clicking "Confirm Acceptance", you acknowledge that you have read and agree to the terms above.
-              </p>
-
-              <div className="flex gap-3">
+              {/* Instruction PDF Download - Always visible */}
+              {selectedClaim.instruction_pdf_url && (
                 <Button
                   variant="outline"
-                  onClick={() => setSelectedClaim(null)}
-                  className="flex-1"
+                  onClick={() => window.open(selectedClaim.instruction_pdf_url, '_blank')}
+                  className="w-full gap-2 border-accent text-accent hover:bg-accent/10"
                 >
-                  Cancel
+                  <Download className="w-4 h-4" />
+                  Download Repair Instructions (PDF)
                 </Button>
-                <Button
-                  onClick={() => handleAccept(selectedClaim)}
-                  disabled={isAccepting}
-                  className="flex-1 bg-green-600 hover:bg-green-700 text-white gap-2"
-                >
-                  {isAccepting ? (
-                    <>
-                      <span className="animate-spin">⏳</span>
-                      Accepting...
-                    </>
-                  ) : (
-                    <>
-                      <CheckCircle className="w-4 h-4" />
-                      Confirm Acceptance
-                    </>
-                  )}
-                </Button>
-              </div>
+              )}
+
+              {!showRejectForm ? (
+                <>
+                  {/* Terms of Repair */}
+                  <div className="p-4 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-300 dark:border-amber-700">
+                    <h5 className="font-bold text-sm mb-2 text-amber-800 dark:text-amber-200">Terms of Repair</h5>
+                    <p className="text-sm text-amber-700 dark:text-amber-300 mb-3">
+                      By accepting this repair, you agree to the following:
+                    </p>
+                    <ul className="text-sm space-y-2 text-amber-700 dark:text-amber-300">
+                      <li className="flex items-start gap-2">
+                        <span className="font-bold">•</span>
+                        <span>
+                          <strong>Bottom Line Discount:</strong>{' '}
+                          <strong>{selectedClaim.referral_fee_repairer ? `${selectedClaim.referral_fee_repairer}%` : 'The agreed percentage'}</strong>{' '}
+                          of the repair total will be taken as ARTURA's fee.
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="font-bold">•</span>
+                        <span>
+                          <strong>Invoice Submission:</strong> The final invoice must be submitted directly to ARTURA. 
+                          Failure to do so will result in further charges as per SLA.
+                        </span>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <p className="text-xs text-foreground-muted">
+                    By clicking "Accept Job", you acknowledge that you have read and agree to the terms above.
+                  </p>
+
+                  {/* Action Buttons */}
+                  <div className="flex flex-col gap-2">
+                    <Button
+                      onClick={() => handleAccept(selectedClaim)}
+                      disabled={isAccepting}
+                      className="w-full bg-green-600 hover:bg-green-700 text-white gap-2"
+                    >
+                      {isAccepting ? (
+                        <>
+                          <span className="animate-spin">⏳</span>
+                          Accepting...
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle className="w-4 h-4" />
+                          Accept Job
+                        </>
+                      )}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => setShowRejectForm(true)}
+                      className="w-full text-red-600 border-red-300 hover:bg-red-50 gap-2"
+                    >
+                      <XCircle className="w-4 h-4" />
+                      Reject Job
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  {/* Reject Form */}
+                  <div className="p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-300 dark:border-red-700">
+                    <h5 className="font-bold text-sm mb-2 text-red-800 dark:text-red-200">Rejection Reason</h5>
+                    <p className="text-sm text-red-700 dark:text-red-300 mb-3">
+                      Please provide a reason for rejecting this job. This will be sent to ARTURA.
+                    </p>
+                    <Textarea
+                      placeholder="Enter reason for rejection..."
+                      value={rejectReason}
+                      onChange={(e) => setRejectReason(e.target.value)}
+                      className="min-h-[100px]"
+                    />
+                  </div>
+
+                  {/* Reject Action Buttons */}
+                  <div className="flex gap-3">
+                    <Button
+                      variant="outline"
+                      onClick={() => { setShowRejectForm(false); setRejectReason(''); }}
+                      className="flex-1"
+                    >
+                      Back
+                    </Button>
+                    <Button
+                      onClick={() => handleReject(selectedClaim)}
+                      disabled={isRejecting || !rejectReason.trim()}
+                      className="flex-1 bg-red-600 hover:bg-red-700 text-white gap-2"
+                    >
+                      {isRejecting ? (
+                        <>
+                          <span className="animate-spin">⏳</span>
+                          Rejecting...
+                        </>
+                      ) : (
+                        <>
+                          <XCircle className="w-4 h-4" />
+                          Confirm Rejection
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </>
+              )}
             </div>
           )}
         </DialogContent>
