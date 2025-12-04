@@ -268,9 +268,17 @@ export default function NewJobsBanner({ bodyshopId }) {
       <Dialog 
         open={!!selectedClaim} 
         onOpenChange={(open) => { 
-          if (!open && wizardStep !== 2) { 
-            // Only allow closing on step 1 or 3
-            handleFinalClose();
+          // Only allow closing via the Close button on step 3
+          // Prevent accidental closing on step 2 (download instructions) 
+          if (!open) {
+            if (wizardStep === 3) {
+              // User clicked close button on final step - allow close
+              handleFinalClose();
+            } else if (wizardStep === 1 && !showRejectForm) {
+              // Allow closing on step 1 (review) only if not in reject form
+              handleFinalClose();
+            }
+            // Otherwise prevent closing (step 2 or reject form)
           } 
         }}
       >
