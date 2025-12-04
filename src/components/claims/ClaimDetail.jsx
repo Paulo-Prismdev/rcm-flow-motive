@@ -762,8 +762,8 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
               <DetailRow label="Authorising Party" value={claim.authorising_party} />
             </div>
             
-            {/* Instruction PDF Download - Always show if there's a PDF */}
-            {claim.instruction_pdf_url ? (
+            {/* Instruction PDF Download - Only show if there's a PDF */}
+            {claim.instruction_pdf_url && (
               <div className="mt-4 p-3 rounded-lg bg-accent/10 border border-accent/30">
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-2">
@@ -778,24 +778,6 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
                   >
                     <Download className="w-4 h-4" />
                     Download
-                  </Button>
-                </div>
-              </div>
-            ) : claim.bodyshop_id && canEdit && (
-              <div className="mt-4 p-3 rounded-lg bg-surface border border-border">
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-2">
-                    <FileText className="w-4 h-4 text-foreground-muted" />
-                    <span className="text-sm text-foreground-muted">No instruction PDF generated yet</span>
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setIsInstructionModalOpen(true)}
-                    className="gap-2"
-                  >
-                    <FileText className="w-4 h-4" />
-                    Generate
                   </Button>
                 </div>
               </div>
