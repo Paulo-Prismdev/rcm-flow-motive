@@ -90,21 +90,29 @@ export default function NewJobsBanner({ bodyshopId }) {
     setIsAccepting(true);
     try {
       await acceptJobMutation.mutateAsync({ claimId: claim.id, claim });
-      // Store the claim data before closing and invalidating
-      const claimCopy = { ...claim };
-      setSelectedClaim(null);
-      // Set the accepted claim and mark as ready before showing modal
-      setAcceptedClaim(claimCopy);
-      successModalReady.current = true;
-      setShowSuccessStep(true);
-      // Delay query invalidation significantly to ensure modal is stable
-      setTimeout(() => {
-        queryClient.invalidateQueries({ queryKey: ['pendingJobs'] });
-        queryClient.invalidateQueries({ queryKey: ['repairerClaims'] });
-      }, 500);
+      // Move to step 2 (download instructions) - stay in same modal
+      setWizardStep(2);
     } finally {
       setIsAccepting(false);
     }
+  };
+
+  const handleDownloadAndConfirm = () => {
+    if (selectedClaim?.instruction_pdf_url) {
+      window.open(selectedClaim.instruction_pdf_url, '_blank');
+    }
+    // Move to confirmation step
+    setWizardStep(3);
+  };
+
+  const handleFinalClose = () => {
+    setSelectedClaim(null);
+    setShowRejectForm(false);
+    setRejectReason('');
+    setWizardStep(1);
+    // Invalidate queries after modal is fully closed
+    queryClient.invalidateQueries({ queryKey: ['pendingJobs'] });
+    queryClient.invalidateQueries({ queryKey: ['repairerClaims'] });
   };
 
   const rejectJobMutation = useMutation({
