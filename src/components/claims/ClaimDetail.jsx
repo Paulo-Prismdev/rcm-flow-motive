@@ -20,7 +20,8 @@ import {
     Trash2,
     Clock,
     AlertTriangle,
-    BadgePercent // Changed from Percent to BadgePercent
+    BadgePercent,
+    Download
 } from "lucide-react";
 import { format } from "date-fns";
 import StatusBadge from "../shared/StatusBadge";
