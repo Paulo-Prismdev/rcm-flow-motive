@@ -483,8 +483,119 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
 
         {/* Step Content */}
         <div className="p-4 overflow-y-auto" style={{ maxHeight: 'calc(95vh - 200px)' }}>
-          {/* Step 1: Map */}
+          {/* Step 0: Validate Details */}
           {currentStep === 0 && (
+            <div className="space-y-4">
+              <div className="p-4 rounded-lg bg-amber-50 border border-amber-200">
+                <div className="flex items-start gap-3">
+                  <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="font-medium text-amber-800">Pre-Allocation Checklist</h4>
+                    <p className="text-sm text-amber-700 mt-1">
+                      Please ensure all required fields are completed before allocating to a repairer.
+                      {missingFields.length > 0 && (
+                        <span className="font-medium"> {missingFields.length} field(s) need attention.</span>
+                      )}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {REQUIRED_FIELDS.map(field => {
+                  const isMissing = missingFields.some(f => f.key === field.key);
+                  const value = validationData[field.key];
+                  
+                  return (
+                    <div key={field.key} className={`p-3 rounded-lg border ${isMissing ? 'border-red-300 bg-red-50' : 'border-green-300 bg-green-50'}`}>
+                      <label className="block text-sm font-medium mb-2 flex items-center gap-2">
+                        {isMissing ? (
+                          <AlertCircle className="w-4 h-4 text-red-500" />
+                        ) : (
+                          <CheckCircle className="w-4 h-4 text-green-500" />
+                        )}
+                        {field.label}
+                        {isMissing && <span className="text-red-500">*</span>}
+                      </label>
+                      
+                      {field.type === 'select' && (
+                        <Select value={value || ''} onValueChange={(v) => handleValidationChange(field.key, v)}>
+                          <SelectTrigger className="bg-white">
+                            <SelectValue placeholder={`Select ${field.label}`} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {field.options.map(opt => (
+                              <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
+                      
+                      {field.type === 'text' && (
+                        <Input
+                          value={value || ''}
+                          onChange={(e) => handleValidationChange(field.key, e.target.value)}
+                          placeholder={`Enter ${field.label.toLowerCase()}`}
+                          className="bg-white"
+                        />
+                      )}
+                      
+                      {field.type === 'email' && (
+                        <Input
+                          type="email"
+                          value={value || ''}
+                          onChange={(e) => handleValidationChange(field.key, e.target.value)}
+                          placeholder={`Enter ${field.label.toLowerCase()}`}
+                          className="bg-white"
+                        />
+                      )}
+                      
+                      {field.type === 'number' && (
+                        <Input
+                          type="number"
+                          value={value || ''}
+                          onChange={(e) => handleValidationChange(field.key, e.target.value ? parseFloat(e.target.value) : '')}
+                          placeholder={`Enter ${field.label.toLowerCase()}`}
+                          className="bg-white"
+                        />
+                      )}
+                      
+                      {field.type === 'textarea' && (
+                        <Textarea
+                          value={value || ''}
+                          onChange={(e) => handleValidationChange(field.key, e.target.value)}
+                          placeholder={`Enter ${field.label.toLowerCase()}`}
+                          className="bg-white min-h-[80px]"
+                        />
+                      )}
+                      
+                      {field.type === 'boolean' && (
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            checked={value || false}
+                            onChange={(e) => handleValidationChange(field.key, e.target.checked)}
+                            className="w-4 h-4 rounded border-gray-300"
+                          />
+                          <span className="text-sm text-foreground-muted">Yes</span>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+
+              {missingFields.length === 0 && (
+                <div className="p-4 rounded-lg bg-green-50 border border-green-200 flex items-center gap-3">
+                  <CheckCircle className="w-5 h-5 text-green-600" />
+                  <p className="text-sm text-green-800 font-medium">All required fields are complete. You can proceed to select a repairer.</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Step 1: Map */}
+          {currentStep === 1 && (
             <div className="space-y-4">
               {isGeocoding && (
                 <div className="p-4 rounded-lg border border-blue-500/30 bg-blue-50/50 flex items-center gap-3">
