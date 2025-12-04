@@ -136,15 +136,6 @@ export default function NewJobsBanner({ bodyshopId }) {
     },
   });
 
-  const handleAccept = async (claim) => {
-    setIsAccepting(true);
-    try {
-      await acceptJobMutation.mutateAsync({ claimId: claim.id, claim });
-    } finally {
-      setIsAccepting(false);
-    }
-  };
-
   const handleReject = async (claim) => {
     if (!rejectReason.trim()) return;
     setIsRejecting(true);
