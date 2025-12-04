@@ -93,7 +93,9 @@ export default function NewJobsBanner({ bodyshopId }) {
   const handleAccept = async (claim) => {
     setIsAccepting(true);
     try {
-      await acceptJobMutation.mutateAsync({ claimId: claim.id, claim });
+      const latestClaim = await acceptJobMutation.mutateAsync({ claimId: claim.id, claim });
+      // Update selectedClaim with latest data (including instruction_pdf_url)
+      setSelectedClaim(latestClaim);
       // Move to step 2 (download instructions) - stay in same modal
       setWizardStep(2);
     } finally {
