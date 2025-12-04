@@ -64,9 +64,7 @@ export default function NewJobsBanner({ bodyshopId }) {
 
   const acceptJobMutation = useMutation({
     mutationFn: async ({ claimId, claim }) => {
-      // First, get the latest claim data to ensure we have the instruction_pdf_url
-      const latestClaim = await base44.entities.Claim.get(claimId);
-      
+      // Update the claim to accepted
       await base44.entities.Claim.update(claimId, {
         repairer_accepted: true,
         repairer_accepted_date: new Date().toISOString().split('T')[0],
@@ -84,6 +82,9 @@ export default function NewJobsBanner({ bodyshopId }) {
         user_email: currentUser?.email,
         user_name: currentUser?.full_name,
       });
+      
+      // Get the latest claim data AFTER update to ensure we have the instruction_pdf_url
+      const latestClaim = await base44.entities.Claim.get(claimId);
       
       // Return the latest claim data with the instruction_pdf_url
       return latestClaim;
