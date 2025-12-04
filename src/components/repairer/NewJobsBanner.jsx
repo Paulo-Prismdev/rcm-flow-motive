@@ -91,13 +91,16 @@ export default function NewJobsBanner({ bodyshopId }) {
     setIsAccepting(true);
     try {
       await acceptJobMutation.mutateAsync({ claimId: claim.id, claim });
-      // Set success state BEFORE invalidating queries
+      // Store the claim data before closing and invalidating
+      const claimCopy = { ...claim };
       setSelectedClaim(null);
-      setAcceptedClaim(claim);
+      setAcceptedClaim(claimCopy);
       setShowSuccessStep(true);
-      // Invalidate queries after showing success modal
-      queryClient.invalidateQueries({ queryKey: ['pendingJobs'] });
-      queryClient.invalidateQueries({ queryKey: ['repairerClaims'] });
+      // Delay query invalidation to ensure modal state is set
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ['pendingJobs'] });
+        queryClient.invalidateQueries({ queryKey: ['repairerClaims'] });
+      }, 100);
     } finally {
       setIsAccepting(false);
     }
