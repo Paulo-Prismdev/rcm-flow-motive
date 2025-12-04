@@ -746,6 +746,27 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
               <DetailRow label="Bodyshop Email" value={claim.bodyshop_email} />
               <DetailRow label="Authorising Party" value={claim.authorising_party} />
             </div>
+            
+            {/* Instruction PDF Download */}
+            {claim.instruction_pdf_url && (
+              <div className="mt-4 p-3 rounded-lg bg-accent/10 border border-accent/30">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2">
+                    <FileText className="w-4 h-4 text-accent" />
+                    <span className="text-sm font-medium">Instruction PDF</span>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => window.open(claim.instruction_pdf_url, '_blank')}
+                    className="gap-2"
+                  >
+                    <Download className="w-4 h-4" />
+                    Download
+                  </Button>
+                </div>
+              </div>
+            )}
           </EditableSection>
         );
 
