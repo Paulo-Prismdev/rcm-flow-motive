@@ -30,7 +30,7 @@ function VehicleLookupSection({ vehicleRef, vehicleMake, vehicleModel, manufactu
 
     try {
       const response = await base44.functions.invoke('lookupVehicleData', {
-        registration: vehicleRef.replace(/\s/g, '').toUpperCase()
+        registrationNumber: vehicleRef.replace(/\s/g, '').toUpperCase()
       });
 
       if (response.data.success && response.data.vehicleData) {
