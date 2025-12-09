@@ -117,9 +117,19 @@ export default function PartDetail({ part, onClose, onUpdate, isInternalUser = t
 
   // Find suppliers that have this manufacturer in their associations
   const partManufacturer = part.manufacturer || part.vehicle_make;
-  const linkedSuppliers = allSuppliers.filter(supplier =>
-    supplier.manufacturer_associations?.includes(partManufacturer)
-  );
+  const linkedSuppliers = allSuppliers.filter(supplier => {
+    if (!supplier.manufacturer_associations || !partManufacturer) return false;
+    // Case-insensitive matching
+    return supplier.manufacturer_associations.some(mfr => 
+      mfr.toLowerCase() === partManufacturer.toLowerCase()
+    );
+  });
+
+  // Debug logging
+  console.log('Part manufacturer:', partManufacturer);
+  console.log('All suppliers:', allSuppliers.length);
+  console.log('Linked suppliers found:', linkedSuppliers.length);
+  console.log('Linked suppliers:', linkedSuppliers.map(s => s.name));
 
   // Archive Mutation
   const archiveMutation = useMutation({
