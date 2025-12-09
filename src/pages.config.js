@@ -8,7 +8,6 @@ import Archive from './pages/Archive';
 import EmailTemplates from './pages/EmailTemplates';
 import Invoicing from './pages/Invoicing';
 import UserManagement from './pages/UserManagement';
-import PartManufacturerConfigManagement from './pages/PartManufacturerConfigManagement';
 import Settings from './pages/Settings';
 import UserProfile from './pages/UserProfile';
 import EmployeeManagement from './pages/EmployeeManagement';
@@ -34,7 +33,6 @@ export const PAGES = {
     "EmailTemplates": EmailTemplates,
     "Invoicing": Invoicing,
     "UserManagement": UserManagement,
-    "PartManufacturerConfigManagement": PartManufacturerConfigManagement,
     "Settings": Settings,
     "UserProfile": UserProfile,
     "EmployeeManagement": EmployeeManagement,

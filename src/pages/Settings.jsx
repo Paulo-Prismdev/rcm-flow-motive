@@ -12,7 +12,6 @@ import { base44 } from "@/api/base44Client";
 
 // Import components for other tabs
 import EmailTemplates from "./EmailTemplates";
-import PartManufacturerConfigManagement from "./PartManufacturerConfigManagement";
 import UserManagement from "./UserManagement";
 import ChaserEmailSettings from "./ChaserEmailSettings";
 import SupplierManagement from "./SupplierManagement";
@@ -36,7 +35,6 @@ export default function Settings() {
     { id: "portals", label: "Portal Management" },
     { id: "email", label: "Email Templates" },
     { id: "chasers", label: "Chaser Emails" },
-    { id: "manufacturers", label: "Manufacturer Links" },
     { id: "users", label: "User Management", permission: canManagePermissions },
   ];
 
@@ -56,7 +54,6 @@ export default function Settings() {
     portals: <PortalManagementTab />,
     email: <EmailTemplates />,
     chasers: <ChaserEmailSettings />,
-    manufacturers: <PartManufacturerConfigManagement />,
     users: <UserManagement />,
   };
 
