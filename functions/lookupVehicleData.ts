@@ -183,18 +183,33 @@ DVLA says: ${errorDetails}`,
 
     const vehicleData = await dvlaResponse.json();
     console.log('✓ Vehicle data received successfully');
+    console.log('=== FULL DVLA RESPONSE ===');
+    console.log(JSON.stringify(vehicleData, null, 2));
     console.log(`Vehicle: ${vehicleData.make} ${vehicleData.model || '(no model)'} (${vehicleData.yearOfManufacture})`);
 
     // Map DVLA response to our format
-    // FIXED: Handle cases where model is undefined but make exists
+    // Note: DVLA API often doesn't provide a separate model field
+    // Sometimes the make field contains both make and model
+    let make = vehicleData.make || '';
+    let model = vehicleData.model || '';
+    
+    // If no model but make exists, try to extract model from make field
+    // e.g., "FORD FOCUS" -> make: "FORD", model: "FOCUS"
+    if (!model && make && make.includes(' ')) {
+      const parts = make.split(' ');
+      if (parts.length >= 2) {
+        make = parts[0];
+        model = parts.slice(1).join(' ');
+        console.log(`Extracted model from make field: "${make}" / "${model}"`);
+      }
+    }
+
     const result = {
       success: true,
       registration: vehicleData.registrationNumber || cleanReg,
-      make: vehicleData.make || '',
-      model: vehicleData.model || '',
-      make_model: vehicleData.make 
-        ? (vehicleData.model ? `${vehicleData.make} ${vehicleData.model}` : vehicleData.make) 
-        : '',
+      make: make,
+      model: model,
+      make_model: make && model ? `${make} ${model}` : (make || ''),
       colour: vehicleData.colour || '',
       fuel_type: vehicleData.fuelType || '',
       year_of_manufacture: vehicleData.yearOfManufacture || null,
