@@ -38,8 +38,22 @@ function VehicleLookupSection({ vehicleRef, vehicleMake, vehicleModel, manufactu
       if (result.success) {
         onVehicleDataChange({
           manufacturer: result.make || '',
+          make_model: result.make_model || '',
           vehicle_make: result.make || '',
           vehicle_model: result.model || '',
+          vehicle_colour: result.colour || '',
+          vehicle_fuel_type: result.fuel_type || '',
+          vehicle_year_of_manufacture: result.year_of_manufacture || null,
+          vehicle_engine_capacity: result.engine_capacity || null,
+          vehicle_co2_emissions: result.co2_emissions || null,
+          vehicle_euro_status: result.euro_status || '',
+          vehicle_mot_status: result.mot_status || '',
+          vehicle_mot_expiry_date: result.mot_expiry_date || '',
+          vehicle_tax_status: result.tax_status || '',
+          vehicle_tax_due_date: result.tax_due_date || '',
+          vehicle_date_of_last_v5c_issued: result.date_of_last_v5c_issued || '',
+          vehicle_wheelplan: result.wheelplan || '',
+          vehicle_revenue_weight: result.revenue_weight || null,
         });
         setLookupError('');
       } else {
@@ -88,13 +102,11 @@ function VehicleLookupSection({ vehicleRef, vehicleMake, vehicleModel, manufactu
 
       {vehicleMake && (
         <div className="neomorph-inset p-4 bg-green-50 dark:bg-green-900/20">
-          <p className="text-sm font-medium text-green-800 dark:text-green-200 mb-2">Vehicle Found ✓</p>
-          <p className="text-sm text-gray-700">
-            <span className="font-medium">Make:</span> {vehicleMake}
-          </p>
-          <p className="text-sm text-gray-700">
-            <span className="font-medium">Model:</span> {vehicleModel || 'N/A'}
-          </p>
+          <p className="text-sm font-medium text-green-800 dark:text-green-200 mb-2">✓ Vehicle Found</p>
+          <div className="grid grid-cols-2 gap-2 text-sm text-gray-700">
+            <div><span className="font-medium">Make:</span> {vehicleMake}</div>
+            <div><span className="font-medium">Model:</span> {vehicleModel || 'N/A'}</div>
+          </div>
         </div>
       )}
 
@@ -126,8 +138,22 @@ export default function PartForm({ part, onSubmit, onCancel }) {
     date_requested: new Date().toISOString().split('T')[0],
     sourcing_status: 'New Request',
     manufacturer: '',
+    make_model: '',
     vehicle_make: '',
     vehicle_model: '',
+    vehicle_colour: '',
+    vehicle_fuel_type: '',
+    vehicle_year_of_manufacture: null,
+    vehicle_engine_capacity: null,
+    vehicle_co2_emissions: null,
+    vehicle_euro_status: '',
+    vehicle_mot_status: '',
+    vehicle_mot_expiry_date: '',
+    vehicle_tax_status: '',
+    vehicle_tax_due_date: '',
+    vehicle_date_of_last_v5c_issued: '',
+    vehicle_wheelplan: '',
+    vehicle_revenue_weight: null,
     part_description: '',
     part_number: '',
     bodyshop_company: '',
