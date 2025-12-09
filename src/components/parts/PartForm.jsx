@@ -33,20 +33,22 @@ function VehicleLookupSection({ vehicleRef, vehicleMake, vehicleModel, manufactu
         registrationNumber: vehicleRef.replace(/\s/g, '').toUpperCase()
       });
 
-      if (response.data.success && response.data.vehicleData) {
-        const vData = response.data.vehicleData;
+      const result = response.data;
+
+      if (result.success) {
         onVehicleDataChange({
-          vehicle_ref: vehicleRef,
-          manufacturer: vData.make || '',
-          vehicle_make: vData.make || '',
-          vehicle_model: vData.model || '',
+          manufacturer: result.make || '',
+          vehicle_make: result.make || '',
+          vehicle_model: result.model || '',
         });
+        setLookupError('');
       } else {
-        setLookupError(response.data.error || 'Vehicle not found');
+        setLookupError(result.message || 'Vehicle not found');
       }
     } catch (error) {
       console.error('Vehicle lookup error:', error);
-      setLookupError('Failed to lookup vehicle. Please enter manually.');
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to lookup vehicle. Please enter manually.';
+      setLookupError(errorMessage);
     } finally {
       setIsLookingUp(false);
     }
