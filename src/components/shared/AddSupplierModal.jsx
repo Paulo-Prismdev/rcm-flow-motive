@@ -7,7 +7,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from '@/api/base44Client';
 import { Loader, X, ChevronDown } from 'lucide-react';
 import AddressLookupInput from './AddressLookupInput';
-import { vehicleManufacturers } from './vehicleManufacturers';
+import { VEHICLE_MANUFACTURERS } from './vehicleManufacturers';
 
 export default function AddSupplierModal({ isOpen, onClose, onSuccess, editingSupplier = null }) {
   const queryClient = useQueryClient();
@@ -280,7 +280,7 @@ export default function AddSupplierModal({ isOpen, onClose, onSuccess, editingSu
 
               {showManufacturers && (
                 <div className="max-h-48 overflow-y-auto space-y-2 border border-border rounded-lg p-2">
-                  {vehicleManufacturers.map((manufacturer) => (
+                  {VEHICLE_MANUFACTURERS.map((manufacturer) => (
                     <label
                       key={manufacturer}
                       className="flex items-center gap-2 p-2 hover:bg-surface-hover rounded cursor-pointer"
