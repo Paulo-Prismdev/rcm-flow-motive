@@ -1,9 +1,8 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, ArrowRight, Check, Plus } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Plus, Search, Loader } from "lucide-react";
 import FileUpload from '../shared/FileUpload';
 import BodyshopCombobox from '../shared/BodyshopCombobox';
 import SupplierCombobox from '../shared/SupplierCombobox';
@@ -14,6 +13,103 @@ import AddSupplierModal from '../shared/AddSupplierModal';
 import AddWorkProviderModal from '../shared/AddWorkProviderModal';
 import { useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
+
+// Vehicle Lookup Component
+function VehicleLookupSection({ vehicleRef, vehicleMake, vehicleModel, manufacturer, onVehicleDataChange }) {
+  const [isLookingUp, setIsLookingUp] = useState(false);
+  const [lookupError, setLookupError] = useState('');
+
+  const handleVehicleLookup = async () => {
+    if (!vehicleRef || vehicleRef.length < 2) {
+      setLookupError('Please enter a valid registration');
+      return;
+    }
+
+    setIsLookingUp(true);
+    setLookupError('');
+
+    try {
+      const response = await base44.functions.invoke('lookupVehicleData', {
+        registration: vehicleRef.replace(/\s/g, '').toUpperCase()
+      });
+
+      if (response.data.success && response.data.vehicleData) {
+        const vData = response.data.vehicleData;
+        onVehicleDataChange({
+          vehicle_ref: vehicleRef,
+          manufacturer: vData.make || '',
+          vehicle_make: vData.make || '',
+          vehicle_model: vData.model || '',
+        });
+      } else {
+        setLookupError(response.data.error || 'Vehicle not found');
+      }
+    } catch (error) {
+      console.error('Vehicle lookup error:', error);
+      setLookupError('Failed to lookup vehicle. Please enter manually.');
+    } finally {
+      setIsLookingUp(false);
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <label className="block text-sm text-gray-600 mb-2">Vehicle Registration *</label>
+        <div className="flex gap-2">
+          <Input
+            value={vehicleRef}
+            onChange={(e) => onVehicleDataChange({ vehicle_ref: e.target.value })}
+            className="neomorph-inset px-4 py-3 text-gray-700 border-0 text-lg flex-1"
+            placeholder="e.g. AB12 CDE"
+            maxLength={10}
+            required
+            autoFocus
+          />
+          <Button
+            type="button"
+            onClick={handleVehicleLookup}
+            disabled={isLookingUp || !vehicleRef}
+            className="neomorph-flat px-4 py-3"
+          >
+            {isLookingUp ? (
+              <Loader className="w-4 h-4 animate-spin" />
+            ) : (
+              <Search className="w-4 h-4" />
+            )}
+          </Button>
+        </div>
+        {lookupError && (
+          <p className="text-xs text-red-600 mt-1">{lookupError}</p>
+        )}
+      </div>
+
+      {vehicleMake && (
+        <div className="neomorph-inset p-4 bg-green-50 dark:bg-green-900/20">
+          <p className="text-sm font-medium text-green-800 dark:text-green-200 mb-2">Vehicle Found ✓</p>
+          <p className="text-sm text-gray-700">
+            <span className="font-medium">Make:</span> {vehicleMake}
+          </p>
+          <p className="text-sm text-gray-700">
+            <span className="font-medium">Model:</span> {vehicleModel || 'N/A'}
+          </p>
+        </div>
+      )}
+
+      {!vehicleMake && vehicleRef && (
+        <div>
+          <label className="block text-sm text-gray-600 mb-2">Manufacturer (Manual Entry)</label>
+          <ManufacturerModelCombobox
+            value={manufacturer}
+            onChange={(value) => onVehicleDataChange({ manufacturer: value })}
+            placeholder="Select make & model..."
+          />
+          <p className="text-xs text-gray-500 mt-1">Enter manually if lookup didn't work</p>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function PartForm({ part, onSubmit, onCancel }) {
   const [currentStep, setCurrentStep] = useState(1);
@@ -28,6 +124,8 @@ export default function PartForm({ part, onSubmit, onCancel }) {
     date_requested: new Date().toISOString().split('T')[0],
     sourcing_status: 'New Request',
     manufacturer: '',
+    vehicle_make: '',
+    vehicle_model: '',
     part_description: '',
     part_number: '',
     bodyshop_company: '',
@@ -523,27 +621,18 @@ export default function PartForm({ part, onSubmit, onCancel }) {
             <div className="neomorph-flat p-6 space-y-6">
               <h3 className="text-xl font-bold text-gray-700 mb-4">Let's start with the basics</h3>
 
-              <div>
-                <label className="block text-sm text-gray-600 mb-2">Vehicle Registration *</label>
-                <Input
-                  value={formData.vehicle_ref}
-                  onChange={(e) => handleChange('vehicle_ref', e.target.value)}
-                  className="neomorph-inset px-4 py-3 text-gray-700 border-0 text-lg"
-                  placeholder="e.g. AB12 CDE"
-                  maxLength={10}
-                  required
-                  autoFocus
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm text-gray-600 mb-2">Manufacturer & Model</label>
-                <ManufacturerModelCombobox
-                  value={formData.manufacturer}
-                  onChange={(value) => handleChange('manufacturer', value)}
-                  placeholder="Select make & model..."
-                />
-              </div>
+              <VehicleLookupSection
+                vehicleRef={formData.vehicle_ref}
+                vehicleMake={formData.vehicle_make}
+                vehicleModel={formData.vehicle_model}
+                manufacturer={formData.manufacturer}
+                onVehicleDataChange={(data) => {
+                  setFormData(prev => ({
+                    ...prev,
+                    ...data
+                  }));
+                }}
+              />
 
               <div>
                 <label className="block text-sm text-gray-600 mb-2">Part Description</label>
@@ -751,9 +840,16 @@ export default function PartForm({ part, onSubmit, onCancel }) {
                 </div>
 
                 <div className="neomorph-inset p-4">
-                  <p className="text-sm text-gray-500 mb-2">Manufacturer & Model</p>
-                  <p className="font-medium text-gray-700">{formData.manufacturer || 'Not specified'}</p>
+                  <p className="text-sm text-gray-500 mb-2">Manufacturer</p>
+                  <p className="font-medium text-gray-700">{formData.manufacturer || formData.vehicle_make || 'Not specified'}</p>
                 </div>
+
+                {formData.vehicle_model && (
+                  <div className="neomorph-inset p-4">
+                    <p className="text-sm text-gray-500 mb-2">Model</p>
+                    <p className="font-medium text-gray-700">{formData.vehicle_model}</p>
+                  </div>
+                )}
 
                 <div className="neomorph-inset p-4">
                   <p className="text-sm text-gray-500 mb-2">Part Description</p>
