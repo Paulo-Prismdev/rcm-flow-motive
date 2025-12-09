@@ -15,6 +15,7 @@ import EmailTemplates from "./EmailTemplates";
 import PartManufacturerConfigManagement from "./PartManufacturerConfigManagement";
 import UserManagement from "./UserManagement";
 import ChaserEmailSettings from "./ChaserEmailSettings";
+import SupplierManagement from "./SupplierManagement";
 
 export default function Settings() {
   const [activeMainTab, setActiveMainTab] = useState("branding");
@@ -31,6 +32,7 @@ export default function Settings() {
     { id: "branding", label: "Branding" },
     { id: "status", label: "Status Settings" },
     { id: "companies", label: "Companies" },
+    { id: "suppliers", label: "Suppliers" },
     { id: "portals", label: "Portal Management" },
     { id: "email", label: "Email Templates" },
     { id: "chasers", label: "Chaser Emails" },
@@ -50,6 +52,7 @@ export default function Settings() {
   const mainTabComponents = {
     branding: <BrandingTab />,
     companies: <CompanyManagementTab />,
+    suppliers: <SupplierManagement />,
     portals: <PortalManagementTab />,
     email: <EmailTemplates />,
     chasers: <ChaserEmailSettings />,
