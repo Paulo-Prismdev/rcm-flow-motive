@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Edit, Package, FileText, DollarSign, Calendar, ChevronDown, ChevronUp, Link as LinkIcon, Mail, Send, Users, Archive, Trash2 } from "lucide-react";
@@ -104,12 +103,6 @@ export default function PartDetail({ part, onClose, onUpdate, isInternalUser = t
     enabled: !!part.linked_claim_id,
   });
 
-  // Get manufacturer config for this part's manufacturer
-  const { data: manufacturerConfigs = [] } = useQuery({
-    queryKey: ['partManufacturerConfigs'],
-    queryFn: () => base44.entities.PartManufacturerConfig.list(),
-  });
-
   // Get all suppliers
   const { data: allSuppliers = [] } = useQuery({
     queryKey: ['suppliers'],
@@ -122,17 +115,10 @@ export default function PartDetail({ part, onClose, onUpdate, isInternalUser = t
     queryFn: () => base44.entities.PartStatusConfig.list(),
   });
 
-  // Find the config for this part's manufacturer
-  const relevantConfig = manufacturerConfigs.find(
-    config => config.name?.toLowerCase() === part.manufacturer?.toLowerCase()
+  // Find suppliers that have this manufacturer in their associations
+  const linkedSuppliers = allSuppliers.filter(supplier =>
+    supplier.manufacturer_associations?.includes(part.manufacturer)
   );
-
-  // Get the actual supplier objects for the linked suppliers
-  const linkedSuppliers = relevantConfig?.associated_supplier_names
-    ? allSuppliers.filter(supplier =>
-        relevantConfig.associated_supplier_names.includes(supplier.name)
-      )
-    : [];
 
   // Archive Mutation
   const archiveMutation = useMutation({
@@ -251,7 +237,7 @@ export default function PartDetail({ part, onClose, onUpdate, isInternalUser = t
 
   const handleSendToLinkedSuppliers = async () => {
     if (linkedSuppliers.length === 0) {
-      alert('No linked suppliers found for this manufacturer. Please configure supplier links in the Parts Manufacturer Links page.');
+      alert('No suppliers found for this manufacturer. Please add suppliers and assign them to this manufacturer in Settings > Suppliers.');
       return;
     }
 
