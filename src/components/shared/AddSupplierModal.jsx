@@ -5,7 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from '@/api/base44Client';
-import { Loader, X, ChevronDown } from 'lucide-react';
+import { Loader, X, ChevronDown, Eye, EyeOff } from 'lucide-react';
 import AddressLookupInput from './AddressLookupInput';
 import { VEHICLE_MANUFACTURERS } from './vehicleManufacturers';
 
@@ -31,6 +31,7 @@ export default function AddSupplierModal({ isOpen, onClose, onSuccess, editingSu
   });
   const [newEmail, setNewEmail] = useState('');
   const [showManufacturers, setShowManufacturers] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     if (editingSupplier) {
@@ -324,14 +325,23 @@ export default function AddSupplierModal({ isOpen, onClose, onSuccess, editingSu
           </div>
           <div>
             <label className="block text-sm text-gray-600 mb-2">Portal Password</label>
-            <Input
-              type="password"
-              value={formData.portal_password}
-              onChange={(e) => setFormData({...formData, portal_password: e.target.value})}
-              className="neomorph-inset"
-              placeholder="Password for supplier portal"
-              autoComplete="new-password"
-            />
+            <div className="relative">
+              <Input
+                type={showPassword ? "text" : "password"}
+                value={formData.portal_password}
+                onChange={(e) => setFormData({...formData, portal_password: e.target.value})}
+                className="neomorph-inset pr-10"
+                placeholder="Password for supplier portal"
+                autoComplete="new-password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
           </div>
 
           <div>
