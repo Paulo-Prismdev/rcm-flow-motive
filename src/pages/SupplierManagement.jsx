@@ -23,6 +23,7 @@ import { ArrowLeft } from 'lucide-react';
 
 export default function SupplierManagement() {
   const [searchTerm, setSearchTerm] = useState('');
+  const [filterType, setFilterType] = useState('all');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingSupplier, setEditingSupplier] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -130,12 +131,16 @@ export default function SupplierManagement() {
     window.URL.revokeObjectURL(url);
   };
 
-  const filteredSuppliers = suppliers.filter(supplier =>
-    supplier.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    supplier.contact_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    supplier.emails?.some(email => email.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    supplier.email?.toLowerCase().includes(searchTerm.toLowerCase()) // Backward compatibility
-  );
+  const filteredSuppliers = suppliers.filter(supplier => {
+    const matchesSearch = supplier.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      supplier.contact_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      supplier.emails?.some(email => email.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      supplier.email?.toLowerCase().includes(searchTerm.toLowerCase()); // Backward compatibility
+    
+    const matchesType = filterType === 'all' || supplier.part_supply_type === filterType;
+    
+    return matchesSearch && matchesType;
+  });
 
   return (
     <div className="space-y-4">
@@ -195,14 +200,27 @@ export default function SupplierManagement() {
           </div>
         </div>
 
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-foreground-muted" />
-          <Input
-            placeholder="Search suppliers..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="neomorph-inset pl-10"
-          />
+        <div className="flex gap-3">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-foreground-muted" />
+            <Input
+              placeholder="Search suppliers..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="neomorph-inset pl-10"
+            />
+          </div>
+          <select
+            value={filterType}
+            onChange={(e) => setFilterType(e.target.value)}
+            className="neomorph-inset px-4 py-2 rounded-xl border-0 min-w-[200px]"
+          >
+            <option value="all">All Types</option>
+            <option value="OEM">OEM</option>
+            <option value="Green">Green (Used)</option>
+            <option value="Aftermarket">Aftermarket</option>
+            <option value="Reconditioned">Reconditioned</option>
+          </select>
         </div>
       </div>
 
