@@ -67,7 +67,7 @@ Deno.serve(async (req) => {
         title: `New Feedback: ${ratingLabels[rating]}`,
         message: `${userTypeLabel} ${currentUser.email} submitted ${ratingLabels[rating]} feedback${comment ? ' with a comment' : ''}.`,
         type: 'general',
-        link: '/feedback-hub',
+        link: '/FeedbackHub',
         is_read: false
       });
     }
