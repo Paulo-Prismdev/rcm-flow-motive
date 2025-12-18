@@ -130,6 +130,32 @@ export default function AddSupplierModal({ isOpen, onClose, onSuccess, editingSu
     });
   };
 
+  const handleSelectAllManufacturers = () => {
+    setFormData(prev => ({
+      ...prev,
+      manufacturer_associations: [...VEHICLE_MANUFACTURERS]
+    }));
+  };
+
+  const handleDeselectAllManufacturers = () => {
+    setFormData(prev => ({
+      ...prev,
+      manufacturer_associations: []
+    }));
+  };
+
+  // Auto-select all manufacturers for Green, Aftermarket, and Reconditioned
+  useEffect(() => {
+    if (formData.part_supply_type === 'Green' || 
+        formData.part_supply_type === 'Aftermarket' || 
+        formData.part_supply_type === 'Reconditioned') {
+      setFormData(prev => ({
+        ...prev,
+        manufacturer_associations: [...VEHICLE_MANUFACTURERS]
+      }));
+    }
+  }, [formData.part_supply_type]);
+
   const handleClose = () => {
     setFormData({
       name: '',
@@ -350,18 +376,37 @@ export default function AddSupplierModal({ isOpen, onClose, onSuccess, editingSu
           <div>
             <label className="block text-sm text-gray-600 mb-2">Manufacturer Associations</label>
             <div className="neomorph-inset p-3">
-              <Button
-                type="button"
-                onClick={() => setShowManufacturers(!showManufacturers)}
-                className="w-full flex items-center justify-between mb-2 neomorph-flat"
-              >
-                <span className="text-sm">
-                  {formData.manufacturer_associations?.length > 0
-                    ? `${formData.manufacturer_associations.length} manufacturer(s) selected`
-                    : 'Select manufacturers...'}
-                </span>
-                <ChevronDown className={`w-4 h-4 transition-transform ${showManufacturers ? 'rotate-180' : ''}`} />
-              </Button>
+              <div className="flex gap-2 mb-2">
+                <Button
+                  type="button"
+                  onClick={() => setShowManufacturers(!showManufacturers)}
+                  className="flex-1 flex items-center justify-between neomorph-flat"
+                >
+                  <span className="text-sm">
+                    {formData.manufacturer_associations?.length > 0
+                      ? `${formData.manufacturer_associations.length} manufacturer(s) selected`
+                      : 'Select manufacturers...'}
+                  </span>
+                  <ChevronDown className={`w-4 h-4 transition-transform ${showManufacturers ? 'rotate-180' : ''}`} />
+                </Button>
+                {formData.manufacturer_associations?.length === VEHICLE_MANUFACTURERS.length ? (
+                  <Button
+                    type="button"
+                    onClick={handleDeselectAllManufacturers}
+                    className="neomorph-flat px-3 text-xs"
+                  >
+                    Deselect All
+                  </Button>
+                ) : (
+                  <Button
+                    type="button"
+                    onClick={handleSelectAllManufacturers}
+                    className="neomorph-flat px-3 text-xs"
+                  >
+                    Select All
+                  </Button>
+                )}
+              </div>
 
               {showManufacturers && (
                 <div className="max-h-48 overflow-y-auto space-y-2 border border-border rounded-lg p-2">
@@ -400,7 +445,11 @@ export default function AddSupplierModal({ isOpen, onClose, onSuccess, editingSu
                 </div>
               )}
             </div>
-            <p className="text-xs text-gray-500 mt-1">Select which vehicle manufacturers this supplier can supply parts for</p>
+            <p className="text-xs text-gray-500 mt-1">
+              {(formData.part_supply_type === 'Green' || formData.part_supply_type === 'Aftermarket' || formData.part_supply_type === 'Reconditioned')
+                ? 'All manufacturers automatically selected for this supplier type'
+                : 'Select which vehicle manufacturers this supplier can supply parts for'}
+            </p>
           </div>
           <div className="flex justify-end gap-4 pt-4">
             <Button
