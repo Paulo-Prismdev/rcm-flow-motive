@@ -74,8 +74,8 @@ export default function SupplierManagement() {
         headers.forEach((header, index) => {
           const value = values[index] || '';
           
-          // Handle manufacturer_associations - expect pipe-separated list
-          if (header === 'manufacturer_associations') {
+          // Handle emails and manufacturer_associations - expect pipe-separated list
+          if (header === 'emails' || header === 'manufacturer_associations') {
             supplier[header] = value ? value.split('|').map(m => m.trim()).filter(Boolean) : [];
           } else {
             supplier[header] = value;
@@ -83,7 +83,7 @@ export default function SupplierManagement() {
         });
         
         // Only add if required fields are present
-        if (supplier.name && supplier.contact_name && supplier.phone && supplier.email) {
+        if (supplier.name && supplier.contact_name && supplier.phone && supplier.emails && supplier.emails.length > 0) {
           suppliers.push(supplier);
         }
       }
@@ -102,15 +102,19 @@ export default function SupplierManagement() {
   };
 
   const handleExportCSV = () => {
-    const headers = ['name', 'contact_name', 'phone', 'email', 'address_line_1', 'address_line_2', 'town', 'county', 'postcode', 'website', 'account_number', 'manufacturer_associations', 'notes'];
+    const headers = ['name', 'contact_name', 'phone', 'emails', 'address_line_1', 'address_line_2', 'town', 'county', 'postcode', 'website', 'account_number', 'manufacturer_associations', 'notes'];
     const csvContent = [
       headers.join(','),
       ...suppliers.map(s => 
         headers.map(h => {
           const value = s[h];
-          // Join manufacturer_associations with pipe separator
-          if (h === 'manufacturer_associations' && Array.isArray(value)) {
+          // Join emails and manufacturer_associations with pipe separator
+          if ((h === 'emails' || h === 'manufacturer_associations') && Array.isArray(value)) {
             return value.join('|');
+          }
+          // Backward compatibility: if old 'email' field exists, migrate it
+          if (h === 'emails' && !value && s.email) {
+            return s.email;
           }
           return value || '';
         }).join(',')
@@ -129,7 +133,8 @@ export default function SupplierManagement() {
   const filteredSuppliers = suppliers.filter(supplier =>
     supplier.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     supplier.contact_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    supplier.email?.toLowerCase().includes(searchTerm.toLowerCase())
+    supplier.emails?.some(email => email.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    supplier.email?.toLowerCase().includes(searchTerm.toLowerCase()) // Backward compatibility
   );
 
   return (
@@ -250,10 +255,21 @@ export default function SupplierManagement() {
                     <Phone className="w-3 h-3" />
                     <span>{supplier.phone}</span>
                   </div>
-                  <div className="flex items-center gap-2 text-foreground-muted">
-                    <Mail className="w-3 h-3" />
-                    <span className="truncate">{supplier.email}</span>
-                  </div>
+                  {(supplier.emails && supplier.emails.length > 0) ? (
+                    <div className="space-y-1">
+                      {supplier.emails.map((email, idx) => (
+                        <div key={idx} className="flex items-center gap-2 text-foreground-muted">
+                          <Mail className="w-3 h-3" />
+                          <span className="truncate">{email}</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : supplier.email ? (
+                    <div className="flex items-center gap-2 text-foreground-muted">
+                      <Mail className="w-3 h-3" />
+                      <span className="truncate">{supplier.email}</span>
+                    </div>
+                  ) : null}
                   {supplier.postcode && (
                     <div className="flex items-center gap-2 text-foreground-muted">
                       <MapPin className="w-3 h-3" />

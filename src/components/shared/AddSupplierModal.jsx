@@ -15,7 +15,7 @@ export default function AddSupplierModal({ isOpen, onClose, onSuccess, editingSu
     name: '',
     contact_name: '',
     phone: '',
-    email: '',
+    emails: [],
     address_line_1: '',
     address_line_2: '',
     town: '',
@@ -26,6 +26,7 @@ export default function AddSupplierModal({ isOpen, onClose, onSuccess, editingSu
     notes: '',
     manufacturer_associations: [],
   });
+  const [newEmail, setNewEmail] = useState('');
   const [showManufacturers, setShowManufacturers] = useState(false);
 
   useEffect(() => {
@@ -34,7 +35,7 @@ export default function AddSupplierModal({ isOpen, onClose, onSuccess, editingSu
         name: editingSupplier.name || '',
         contact_name: editingSupplier.contact_name || '',
         phone: editingSupplier.phone || '',
-        email: editingSupplier.email || '',
+        emails: editingSupplier.emails || (editingSupplier.email ? [editingSupplier.email] : []),
         address_line_1: editingSupplier.address_line_1 || '',
         address_line_2: editingSupplier.address_line_2 || '',
         town: editingSupplier.town || '',
@@ -77,12 +78,41 @@ export default function AddSupplierModal({ isOpen, onClose, onSuccess, editingSu
     e.preventDefault();
     e.stopPropagation();
 
-    if (!formData.name || !formData.contact_name || !formData.phone || !formData.email) {
-      alert('Please fill in all required fields: Name, Contact Name, Phone, Email.');
+    if (!formData.name || !formData.contact_name || !formData.phone || !formData.emails || formData.emails.length === 0) {
+      alert('Please fill in all required fields: Name, Contact Name, Phone, and at least one Email.');
       return;
     }
 
     createMutation.mutate(formData);
+  };
+
+  const handleAddEmail = () => {
+    if (!newEmail.trim()) return;
+    
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(newEmail)) {
+      alert('Please enter a valid email address');
+      return;
+    }
+
+    if (formData.emails.includes(newEmail)) {
+      alert('This email has already been added');
+      return;
+    }
+
+    setFormData({
+      ...formData,
+      emails: [...formData.emails, newEmail]
+    });
+    setNewEmail('');
+  };
+
+  const handleRemoveEmail = (emailToRemove) => {
+    setFormData({
+      ...formData,
+      emails: formData.emails.filter(e => e !== emailToRemove)
+    });
   };
 
   const handleManufacturerToggle = (manufacturer) => {
@@ -103,7 +133,7 @@ export default function AddSupplierModal({ isOpen, onClose, onSuccess, editingSu
       name: '',
       contact_name: '',
       phone: '',
-      email: '',
+      emails: [],
       address_line_1: '',
       address_line_2: '',
       town: '',
@@ -114,6 +144,7 @@ export default function AddSupplierModal({ isOpen, onClose, onSuccess, editingSu
       notes: '',
       manufacturer_associations: [],
     });
+    setNewEmail('');
     setShowManufacturers(false);
     onClose();
   };
@@ -165,15 +196,52 @@ export default function AddSupplierModal({ isOpen, onClose, onSuccess, editingSu
             />
           </div>
           <div>
-            <label className="block text-sm text-gray-600 mb-2">Email *</label>
-            <Input
-              type="email"
-              value={formData.email}
-              onChange={(e) => setFormData({...formData, email: e.target.value})}
-              className="neomorph-inset"
-              required
-              placeholder="Email Address"
-            />
+            <label className="block text-sm text-gray-600 mb-2">Email Addresses *</label>
+            <div className="neomorph-inset p-3 space-y-2">
+              <div className="flex gap-2">
+                <Input
+                  type="email"
+                  value={newEmail}
+                  onChange={(e) => setNewEmail(e.target.value)}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleAddEmail();
+                    }
+                  }}
+                  className="flex-1"
+                  placeholder="Enter email address"
+                />
+                <Button
+                  type="button"
+                  onClick={handleAddEmail}
+                  className="neomorph-flat px-4"
+                >
+                  Add
+                </Button>
+              </div>
+              
+              {formData.emails.length > 0 && (
+                <div className="space-y-1 pt-2 border-t border-border">
+                  {formData.emails.map((email, index) => (
+                    <div key={index} className="flex items-center justify-between p-2 rounded bg-surface hover:bg-surface-hover">
+                      <span className="text-sm">{email}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveEmail(email)}
+                        className="text-red-500 hover:text-red-700"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              
+              {formData.emails.length === 0 && (
+                <p className="text-xs text-gray-500">At least one email address is required</p>
+              )}
+            </div>
           </div>
           <div>
             <label className="block text-sm text-gray-600 mb-2">Website</label>
