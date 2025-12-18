@@ -46,6 +46,32 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Notify all internal users
+    const allUsers = await base44.asServiceRole.entities.User.list();
+    const internalUsers = allUsers.filter(u => 
+      u.user_type === 'internal' || u.role === 'admin'
+    );
+
+    const ratingLabels = {
+      love: 'Love Artura',
+      good: 'Good',
+      ok: 'Ok',
+      hate: 'Hate'
+    };
+
+    const userTypeLabel = currentUser.user_type === 'bodyshop' ? 'Repairer' : 'Referrer';
+
+    for (const internalUser of internalUsers) {
+      await base44.asServiceRole.entities.Notification.create({
+        user_id: internalUser.id,
+        title: `New Feedback: ${ratingLabels[rating]}`,
+        message: `${userTypeLabel} ${currentUser.email} submitted ${ratingLabels[rating]} feedback${comment ? ' with a comment' : ''}.`,
+        type: 'feedback',
+        link: '/feedback-hub',
+        is_read: false
+      });
+    }
+
     return Response.json({ 
       success: true,
       message: 'Feedback submitted successfully'
