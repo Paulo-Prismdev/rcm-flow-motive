@@ -19,6 +19,7 @@ import Tasks from './pages/Tasks';
 import RepairerPortal from './pages/RepairerPortal';
 import ReferrerPortal from './pages/ReferrerPortal';
 import SupplierManagement from './pages/SupplierManagement';
+import FeedbackHub from './pages/FeedbackHub';
 import __Layout from './Layout.jsx';
 
 
@@ -44,6 +45,7 @@ export const PAGES = {
     "RepairerPortal": RepairerPortal,
     "ReferrerPortal": ReferrerPortal,
     "SupplierManagement": SupplierManagement,
+    "FeedbackHub": FeedbackHub,
 }
 
 export const pagesConfig = {

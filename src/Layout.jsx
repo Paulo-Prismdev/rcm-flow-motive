@@ -52,6 +52,7 @@ const allDepartments = [
   { name: "Parts", url: createPageUrl("Parts"), icon: Package, permission: "Parts" },
   { name: "Invoicing", url: createPageUrl("Invoicing"), icon: DollarSign, permission: "Invoicing" },
   { name: "Reports", url: createPageUrl("Reports"), icon: BarChart3, permission: "Reports" },
+  { name: "Feedback Hub", url: createPageUrl("FeedbackHub"), icon: MessageSquare, permission: "Dashboard" },
   { name: "Map", url: createPageUrl("BodyshopMap"), icon: Search, permission: "Map" },
 ];
 
