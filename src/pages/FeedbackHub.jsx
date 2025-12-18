@@ -15,7 +15,9 @@ import {
   AlertTriangle,
   CheckCircle,
   Filter,
-  ArrowLeft
+  ArrowLeft,
+  Wrench,
+  Users
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { createPageUrl } from '@/utils';
@@ -115,6 +117,28 @@ export default function FeedbackHub() {
       return matchesSearch && matchesRating && matchesUserType;
     })
     .sort((a, b) => new Date(b.submission_date) - new Date(a.submission_date));
+
+  // Enrich feedback with company names
+  const enrichedFeedback = filteredFeedback.map(f => {
+    const user = users.find(u => u.email === f.user_email);
+    let companyName = 'Unknown Company';
+    
+    if (user) {
+      if (f.user_type === 'bodyshop' && user.linked_bodyshop_id) {
+        const bodyshop = bodyshops.find(b => b.id === user.linked_bodyshop_id);
+        companyName = bodyshop?.name || 'Unknown Company';
+      } else if (f.user_type === 'referrer' && user.linked_referrer_id) {
+        const referrer = referrers.find(r => r.id === user.linked_referrer_id);
+        companyName = referrer?.name || 'Unknown Company';
+      }
+    }
+    
+    return { ...f, companyName };
+  });
+
+  // Group by user type
+  const repairerFeedback = enrichedFeedback.filter(f => f.user_type === 'bodyshop');
+  const referrerFeedback = enrichedFeedback.filter(f => f.user_type === 'referrer');
 
   const isInternalUser = currentUser?.user_type === 'internal' || currentUser?.role === 'admin';
 
@@ -337,61 +361,125 @@ export default function FeedbackHub() {
       </div>
 
       {/* Feedback List */}
-      <div className="neomorph p-4">
-        <h3 className="font-bold mb-4">Feedback Responses ({filteredFeedback.length})</h3>
-        
+      <div className="space-y-4">
         {feedbackLoading ? (
-          <div className="text-center py-8">
-            <div className="animate-spin w-8 h-8 border-4 border-accent border-t-transparent rounded-full mx-auto mb-2"></div>
-            <p className="text-foreground-muted">Loading feedback...</p>
+          <div className="neomorph p-4">
+            <div className="text-center py-8">
+              <div className="animate-spin w-8 h-8 border-4 border-accent border-t-transparent rounded-full mx-auto mb-2"></div>
+              <p className="text-foreground-muted">Loading feedback...</p>
+            </div>
           </div>
-        ) : filteredFeedback.length === 0 ? (
-          <div className="text-center py-8">
-            <MessageCircle className="w-12 h-12 mx-auto text-foreground-muted mb-2" />
-            <p className="text-foreground-muted">No feedback responses yet</p>
+        ) : enrichedFeedback.length === 0 ? (
+          <div className="neomorph p-4">
+            <div className="text-center py-8">
+              <MessageCircle className="w-12 h-12 mx-auto text-foreground-muted mb-2" />
+              <p className="text-foreground-muted">No feedback responses yet</p>
+            </div>
           </div>
         ) : (
-          <div className="space-y-3">
-            {filteredFeedback.map(item => {
-              const config = RATING_CONFIG[item.rating];
-              const Icon = config.icon;
-              
-              return (
-                <div key={item.id} className={`neomorph-flat p-4 ${config.bgColor} border border-opacity-30`}>
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <div className={`w-10 h-10 rounded-full ${config.bgColor} flex items-center justify-center`}>
-                          <Icon className={`w-5 h-5 ${config.color}`} />
-                        </div>
-                        <div>
-                          <p className="font-bold">{item.user_email}</p>
-                          <p className="text-xs text-foreground-muted">
-                            {item.user_type === 'bodyshop' ? 'Repairer' : 'Referrer'} • 
-                            {item.submission_date ? format(new Date(item.submission_date), 'dd/MM/yyyy HH:mm') : 'N/A'}
-                          </p>
-                        </div>
-                      </div>
-                      
-                      <div className="ml-13">
-                        <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${config.bgColor} ${config.color}`}>
-                          <Icon className="w-4 h-4" />
-                          {config.label}
-                        </span>
-                        
-                        {item.comment && (
-                          <div className="mt-3 p-3 rounded-lg bg-surface border border-border">
-                            <p className="text-sm font-medium text-foreground-muted mb-1">Comment:</p>
-                            <p className="text-sm">{item.comment}</p>
+          <>
+            {/* Repairer Feedback */}
+            {repairerFeedback.length > 0 && (
+              <div className="neomorph p-4">
+                <h3 className="font-bold mb-4 flex items-center gap-2">
+                  <Wrench className="w-5 h-5 text-accent" />
+                  Repairer Feedback ({repairerFeedback.length})
+                </h3>
+                <div className="space-y-3">
+                  {repairerFeedback.map(item => {
+                    const config = RATING_CONFIG[item.rating];
+                    const Icon = config.icon;
+                    
+                    return (
+                      <div key={item.id} className={`neomorph-flat p-4 ${config.bgColor} border border-opacity-30`}>
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <div className={`w-10 h-10 rounded-full ${config.bgColor} flex items-center justify-center`}>
+                                <Icon className={`w-5 h-5 ${config.color}`} />
+                              </div>
+                              <div>
+                                <p className="font-bold">{item.user_email}</p>
+                                <p className="text-sm font-medium text-accent">{item.companyName}</p>
+                                <p className="text-xs text-foreground-muted">
+                                  {item.submission_date ? format(new Date(item.submission_date), 'dd/MM/yyyy HH:mm') : 'N/A'}
+                                </p>
+                              </div>
+                            </div>
+                            
+                            <div className="ml-13">
+                              <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${config.bgColor} ${config.color}`}>
+                                <Icon className="w-4 h-4" />
+                                {config.label}
+                              </span>
+                              
+                              {item.comment && (
+                                <div className="mt-3 p-3 rounded-lg bg-surface border border-border">
+                                  <p className="text-sm font-medium text-foreground-muted mb-1">Comment:</p>
+                                  <p className="text-sm">{item.comment}</p>
+                                </div>
+                              )}
+                            </div>
                           </div>
-                        )}
+                        </div>
                       </div>
-                    </div>
-                  </div>
+                    );
+                  })}
                 </div>
-              );
-            })}
-          </div>
+              </div>
+            )}
+
+            {/* Referrer Feedback */}
+            {referrerFeedback.length > 0 && (
+              <div className="neomorph p-4">
+                <h3 className="font-bold mb-4 flex items-center gap-2">
+                  <Users className="w-5 h-5 text-accent" />
+                  Referrer Feedback ({referrerFeedback.length})
+                </h3>
+                <div className="space-y-3">
+                  {referrerFeedback.map(item => {
+                    const config = RATING_CONFIG[item.rating];
+                    const Icon = config.icon;
+                    
+                    return (
+                      <div key={item.id} className={`neomorph-flat p-4 ${config.bgColor} border border-opacity-30`}>
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <div className={`w-10 h-10 rounded-full ${config.bgColor} flex items-center justify-center`}>
+                                <Icon className={`w-5 h-5 ${config.color}`} />
+                              </div>
+                              <div>
+                                <p className="font-bold">{item.user_email}</p>
+                                <p className="text-sm font-medium text-accent">{item.companyName}</p>
+                                <p className="text-xs text-foreground-muted">
+                                  {item.submission_date ? format(new Date(item.submission_date), 'dd/MM/yyyy HH:mm') : 'N/A'}
+                                </p>
+                              </div>
+                            </div>
+                            
+                            <div className="ml-13">
+                              <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${config.bgColor} ${config.color}`}>
+                                <Icon className="w-4 h-4" />
+                                {config.label}
+                              </span>
+                              
+                              {item.comment && (
+                                <div className="mt-3 p-3 rounded-lg bg-surface border border-border">
+                                  <p className="text-sm font-medium text-foreground-muted mb-1">Comment:</p>
+                                  <p className="text-sm">{item.comment}</p>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
