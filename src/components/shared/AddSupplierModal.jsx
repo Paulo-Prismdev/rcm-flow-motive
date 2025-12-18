@@ -24,6 +24,8 @@ export default function AddSupplierModal({ isOpen, onClose, onSuccess, editingSu
     postcode: '',
     website: '',
     account_number: '',
+    portal_username: '',
+    portal_password: '',
     notes: '',
     manufacturer_associations: [],
   });
@@ -45,6 +47,8 @@ export default function AddSupplierModal({ isOpen, onClose, onSuccess, editingSu
         postcode: editingSupplier.postcode || '',
         website: editingSupplier.website || '',
         account_number: editingSupplier.account_number || '',
+        portal_username: editingSupplier.portal_username || '',
+        portal_password: editingSupplier.portal_password || '',
         notes: editingSupplier.notes || '',
         manufacturer_associations: editingSupplier.manufacturer_associations || [],
       });
@@ -171,6 +175,8 @@ export default function AddSupplierModal({ isOpen, onClose, onSuccess, editingSu
       postcode: '',
       website: '',
       account_number: '',
+      portal_username: '',
+      portal_password: '',
       notes: '',
       manufacturer_associations: [],
     });
@@ -304,6 +310,27 @@ export default function AddSupplierModal({ isOpen, onClose, onSuccess, editingSu
               onChange={(e) => setFormData({...formData, account_number: e.target.value})}
               className="neomorph-inset"
               placeholder="Your account number with this supplier"
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-gray-600 mb-2">Portal Username</label>
+            <Input
+              value={formData.portal_username}
+              onChange={(e) => setFormData({...formData, portal_username: e.target.value})}
+              className="neomorph-inset"
+              placeholder="Username for supplier portal"
+              autoComplete="off"
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-gray-600 mb-2">Portal Password</label>
+            <Input
+              type="password"
+              value={formData.portal_password}
+              onChange={(e) => setFormData({...formData, portal_password: e.target.value})}
+              className="neomorph-inset"
+              placeholder="Password for supplier portal"
+              autoComplete="new-password"
             />
           </div>
 
