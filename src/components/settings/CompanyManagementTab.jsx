@@ -9,7 +9,6 @@ import { Plus, Edit, Trash2, Upload, X, Building2, Users, Package, MapPin, Loade
 const COMPANY_TYPES = [
   { id: 'bodyshop', label: 'Bodyshops', icon: Building2, entity: 'Bodyshop' },
   { id: 'referrer', label: 'Referrers', icon: Users, entity: 'Referrer' },
-  { id: 'supplier', label: 'Suppliers', icon: Package, entity: 'Supplier' },
 ];
 
 export default function CompanyManagementTab() {

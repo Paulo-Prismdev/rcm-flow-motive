@@ -31,10 +31,10 @@ export default function Settings() {
     { id: "branding", label: "Branding" },
     { id: "status", label: "Status Settings" },
     { id: "companies", label: "Companies" },
-    { id: "suppliers", label: "Suppliers" },
     { id: "portals", label: "Portal Management" },
     { id: "email", label: "Email Templates" },
     { id: "chasers", label: "Chaser Emails" },
+    { id: "suppliers", label: "Suppliers" },
     { id: "users", label: "User Management", permission: canManagePermissions },
   ];
 
