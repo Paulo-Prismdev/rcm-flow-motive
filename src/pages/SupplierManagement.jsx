@@ -31,7 +31,7 @@ export default function SupplierManagement() {
 
   const { data: suppliers = [], isLoading } = useQuery({
     queryKey: ['suppliers'],
-    queryFn: () => base44.entities.Supplier.list(),
+    queryFn: () => base44.entities.Supplier.list('name'),
   });
 
   const deleteMutation = useMutation({
@@ -149,7 +149,9 @@ export default function SupplierManagement() {
       <AddSupplierModal
         isOpen={isAddModalOpen}
         onClose={handleModalClose}
-        onSuccess={() => {}}
+        onSuccess={() => {
+          queryClient.invalidateQueries({ queryKey: ['suppliers'] });
+        }}
         editingSupplier={editingSupplier}
       />
 
