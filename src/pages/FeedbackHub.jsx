@@ -85,11 +85,13 @@ export default function FeedbackHub() {
     }
   });
 
-  // Get companies and users based on selected type
-  const companies = requestType === 'bodyshop' ? bodyshops : referrers;
+  // Get companies and users based on selected type (sorted alphabetically)
+  const companies = (requestType === 'bodyshop' ? bodyshops : referrers)
+    .sort((a, b) => a.name.localeCompare(b.name));
   const linkedField = requestType === 'bodyshop' ? 'linked_bodyshop_id' : 'linked_referrer_id';
   const companyUsers = selectedCompanyId 
     ? users.filter(u => u[linkedField] === selectedCompanyId)
+        .sort((a, b) => (a.full_name || '').localeCompare(b.full_name || ''))
     : [];
 
   // Calculate stats
