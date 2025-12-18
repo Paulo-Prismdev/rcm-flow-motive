@@ -90,7 +90,11 @@ export default function SupplierManagement() {
 
     setIsUploading(true);
     try {
-      const text = await file.text();
+      // Read file with proper encoding handling
+      const arrayBuffer = await file.arrayBuffer();
+      const decoder = new TextDecoder('utf-8', { fatal: false });
+      const text = decoder.decode(arrayBuffer);
+      
       const lines = text.split('\n').filter(line => line.trim());
       const headers = parseCSVLine(lines[0]);
       
@@ -102,8 +106,20 @@ export default function SupplierManagement() {
         headers.forEach((header, index) => {
           const value = values[index] || '';
           
-          // Handle emails and manufacturer_associations - expect pipe-separated list
-          if (header === 'emails' || header === 'manufacturer_associations') {
+          // Handle emails - support both pipe (|) and semicolon (;) separators
+          if (header === 'emails') {
+            if (value.includes('|')) {
+              supplier[header] = value.split('|').map(m => m.trim()).filter(Boolean);
+            } else if (value.includes(';')) {
+              supplier[header] = value.split(';').map(m => m.trim()).filter(Boolean);
+            } else if (value) {
+              supplier[header] = [value.trim()];
+            } else {
+              supplier[header] = [];
+            }
+          }
+          // Handle manufacturer_associations - expect pipe-separated list
+          else if (header === 'manufacturer_associations') {
             supplier[header] = value ? value.split('|').map(m => m.trim()).filter(Boolean) : [];
           } else {
             supplier[header] = value;
@@ -114,6 +130,11 @@ export default function SupplierManagement() {
         if (supplier.name && supplier.contact_name && supplier.phone && supplier.emails && supplier.emails.length > 0) {
           suppliers.push(supplier);
         }
+      }
+
+      if (suppliers.length === 0) {
+        alert('No valid suppliers found in CSV. Please check the format.');
+        return;
       }
 
       // Bulk create suppliers
