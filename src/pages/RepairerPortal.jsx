@@ -21,6 +21,7 @@ import RepairerEstimateForm from '@/components/repairer/RepairerEstimateForm';
 import RepairerPartsForm from '@/components/repairer/RepairerPartsForm';
 import AdvertBanner from '@/components/repairer/AdvertBanner';
 import NewJobsBanner from '@/components/repairer/NewJobsBanner';
+import FeedbackModal from '@/components/shared/FeedbackModal';
 
 export default function RepairerPortal() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -114,6 +115,9 @@ export default function RepairerPortal() {
 
   return (
     <div className="h-full flex flex-col gap-2 overflow-hidden">
+      {currentUser?.show_feedback_prompt && (
+        <FeedbackModal user={currentUser} onClose={() => {}} />
+      )}
       {/* Mobile Menu Overlay */}
       {mobileMenuOpen && (
         <div 

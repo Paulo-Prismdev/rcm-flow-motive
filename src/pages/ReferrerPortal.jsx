@@ -19,6 +19,7 @@ import { formatUKRegistration } from '../components/shared/formatRegistration';
 import ReferrerLayout from '../components/referrer/ReferrerLayout';
 import ReferrerPartsForm from '../components/referrer/ReferrerPartsForm';
 import ReferrerClaimDetail from '../components/referrer/ReferrerClaimDetail';
+import FeedbackModal from '../components/shared/FeedbackModal';
 
 export default function ReferrerPortal() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -97,6 +98,9 @@ export default function ReferrerPortal() {
 
   return (
     <ReferrerLayout>
+      {currentUser?.show_feedback_prompt && (
+        <FeedbackModal user={currentUser} onClose={() => {}} />
+      )}
       <div className="h-full flex flex-col gap-4">
         {/* Header */}
         <div className="neomorph p-4 md:p-6">
