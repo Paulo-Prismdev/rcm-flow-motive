@@ -57,69 +57,26 @@ export default function SupplierManagement() {
     setEditingSupplier(null);
   };
 
-  const parseCSVLine = (line) => {
-    const result = [];
-    let current = '';
-    let inQuotes = false;
-    
-    for (let i = 0; i < line.length; i++) {
-      const char = line[i];
-      const nextChar = line[i + 1];
-      
-      if (char === '"') {
-        if (inQuotes && nextChar === '"') {
-          current += '"';
-          i++;
-        } else {
-          inQuotes = !inQuotes;
-        }
-      } else if (char === ',' && !inQuotes) {
-        result.push(current.trim());
-        current = '';
-      } else {
-        current += char;
-      }
-    }
-    result.push(current.trim());
-    return result;
-  };
-
   const handleCSVUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     setIsUploading(true);
     try {
-      // Read file with proper encoding handling
-      const arrayBuffer = await file.arrayBuffer();
-      const decoder = new TextDecoder('utf-8', { fatal: false });
-      const text = decoder.decode(arrayBuffer);
-      
+      const text = await file.text();
       const lines = text.split('\n').filter(line => line.trim());
-      const headers = parseCSVLine(lines[0]);
+      const headers = lines[0].split(',').map(h => h.trim());
       
       const suppliers = [];
       for (let i = 1; i < lines.length; i++) {
-        const values = parseCSVLine(lines[i]);
+        const values = lines[i].split(',').map(v => v.trim());
         const supplier = {};
         
         headers.forEach((header, index) => {
           const value = values[index] || '';
           
-          // Handle emails - support both pipe (|) and semicolon (;) separators
-          if (header === 'emails') {
-            if (value.includes('|')) {
-              supplier[header] = value.split('|').map(m => m.trim()).filter(Boolean);
-            } else if (value.includes(';')) {
-              supplier[header] = value.split(';').map(m => m.trim()).filter(Boolean);
-            } else if (value) {
-              supplier[header] = [value.trim()];
-            } else {
-              supplier[header] = [];
-            }
-          }
-          // Handle manufacturer_associations - expect pipe-separated list
-          else if (header === 'manufacturer_associations') {
+          // Handle emails and manufacturer_associations - expect pipe-separated list
+          if (header === 'emails' || header === 'manufacturer_associations') {
             supplier[header] = value ? value.split('|').map(m => m.trim()).filter(Boolean) : [];
           } else {
             supplier[header] = value;
@@ -130,11 +87,6 @@ export default function SupplierManagement() {
         if (supplier.name && supplier.contact_name && supplier.phone && supplier.emails && supplier.emails.length > 0) {
           suppliers.push(supplier);
         }
-      }
-
-      if (suppliers.length === 0) {
-        alert('No valid suppliers found in CSV. Please check the format.');
-        return;
       }
 
       // Bulk create suppliers
@@ -150,18 +102,8 @@ export default function SupplierManagement() {
     }
   };
 
-  const escapeCSVField = (field) => {
-    if (field == null) return '';
-    const str = String(field);
-    // If field contains comma, newline, or quotes, wrap in quotes and escape internal quotes
-    if (str.includes(',') || str.includes('\n') || str.includes('"')) {
-      return `"${str.replace(/"/g, '""')}"`;
-    }
-    return str;
-  };
-
   const handleExportCSV = () => {
-    const headers = ['name', 'contact_name', 'phone', 'emails', 'part_supply_type', 'address_line_1', 'address_line_2', 'town', 'county', 'postcode', 'website', 'account_number', 'portal_username', 'portal_password', 'manufacturer_associations', 'notes'];
+    const headers = ['name', 'contact_name', 'phone', 'emails', 'part_supply_type', 'address_line_1', 'address_line_2', 'town', 'county', 'postcode', 'website', 'account_number', 'manufacturer_associations', 'notes'];
     const csvContent = [
       headers.join(','),
       ...suppliers.map(s => 
@@ -169,18 +111,18 @@ export default function SupplierManagement() {
           const value = s[h];
           // Join emails and manufacturer_associations with pipe separator
           if ((h === 'emails' || h === 'manufacturer_associations') && Array.isArray(value)) {
-            return escapeCSVField(value.join('|'));
+            return value.join('|');
           }
           // Backward compatibility: if old 'email' field exists, migrate it
           if (h === 'emails' && !value && s.email) {
-            return escapeCSVField(s.email);
+            return s.email;
           }
-          return escapeCSVField(value);
+          return value || '';
         }).join(',')
       )
     ].join('\n');
 
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
