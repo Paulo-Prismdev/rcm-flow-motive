@@ -102,7 +102,7 @@ export default function SupplierManagement() {
   };
 
   const handleExportCSV = () => {
-    const headers = ['name', 'contact_name', 'phone', 'emails', 'address_line_1', 'address_line_2', 'town', 'county', 'postcode', 'website', 'account_number', 'manufacturer_associations', 'notes'];
+    const headers = ['name', 'contact_name', 'phone', 'emails', 'part_supply_type', 'address_line_1', 'address_line_2', 'town', 'county', 'postcode', 'website', 'account_number', 'manufacturer_associations', 'notes'];
     const csvContent = [
       headers.join(','),
       ...suppliers.map(s => 
@@ -227,7 +227,20 @@ export default function SupplierManagement() {
               <div key={supplier.id} className="neomorph-flat p-4 hover:shadow-lg transition-all">
                 <div className="flex justify-between items-start mb-3">
                   <div className="flex-1">
-                    <h3 className="font-bold text-lg mb-1">{supplier.name}</h3>
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="font-bold text-lg">{supplier.name}</h3>
+                      {supplier.part_supply_type && (
+                        <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                          supplier.part_supply_type === 'OEM' ? 'bg-green-100 text-green-700' :
+                          supplier.part_supply_type === 'Green' ? 'bg-emerald-100 text-emerald-700' :
+                          supplier.part_supply_type === 'Aftermarket' ? 'bg-blue-100 text-blue-700' :
+                          supplier.part_supply_type === 'Reconditioned' ? 'bg-purple-100 text-purple-700' :
+                          'bg-gray-100 text-gray-700'
+                        }`}>
+                          {supplier.part_supply_type}
+                        </span>
+                      )}
+                    </div>
                     <p className="text-sm text-foreground-muted">{supplier.contact_name}</p>
                   </div>
                   <div className="flex gap-1">

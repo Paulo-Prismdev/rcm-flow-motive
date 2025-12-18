@@ -16,6 +16,7 @@ export default function AddSupplierModal({ isOpen, onClose, onSuccess, editingSu
     contact_name: '',
     phone: '',
     emails: [],
+    part_supply_type: '',
     address_line_1: '',
     address_line_2: '',
     town: '',
@@ -36,6 +37,7 @@ export default function AddSupplierModal({ isOpen, onClose, onSuccess, editingSu
         contact_name: editingSupplier.contact_name || '',
         phone: editingSupplier.phone || '',
         emails: editingSupplier.emails || (editingSupplier.email ? [editingSupplier.email] : []),
+        part_supply_type: editingSupplier.part_supply_type || '',
         address_line_1: editingSupplier.address_line_1 || '',
         address_line_2: editingSupplier.address_line_2 || '',
         town: editingSupplier.town || '',
@@ -134,6 +136,7 @@ export default function AddSupplierModal({ isOpen, onClose, onSuccess, editingSu
       contact_name: '',
       phone: '',
       emails: [],
+      part_supply_type: '',
       address_line_1: '',
       address_line_2: '',
       town: '',
@@ -242,6 +245,20 @@ export default function AddSupplierModal({ isOpen, onClose, onSuccess, editingSu
                 <p className="text-xs text-gray-500">At least one email address is required</p>
               )}
             </div>
+          </div>
+          <div>
+            <label className="block text-sm text-gray-600 mb-2">Part Supply Type</label>
+            <select
+              value={formData.part_supply_type}
+              onChange={(e) => setFormData({...formData, part_supply_type: e.target.value})}
+              className="neomorph-inset w-full px-4 py-2 rounded-xl border-0"
+            >
+              <option value="">Select type...</option>
+              <option value="OEM">OEM (Original Equipment Manufacturer)</option>
+              <option value="Green">Green (Second Hand Parts)</option>
+              <option value="Aftermarket">Aftermarket Parts</option>
+              <option value="Reconditioned">Reconditioned Parts</option>
+            </select>
           </div>
           <div>
             <label className="block text-sm text-gray-600 mb-2">Website</label>
