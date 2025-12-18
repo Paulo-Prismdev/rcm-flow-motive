@@ -103,7 +103,7 @@ export default function SupplierManagement() {
   };
 
   const handleExportCSV = () => {
-    const headers = ['name', 'contact_name', 'phone', 'emails', 'part_supply_type', 'address_line_1', 'address_line_2', 'town', 'county', 'postcode', 'website', 'account_number', 'manufacturer_associations', 'notes'];
+    const headers = ['name', 'contact_name', 'phone', 'emails', 'part_supply_type', 'address_line_1', 'address_line_2', 'town', 'county', 'postcode', 'website', 'account_number', 'portal_username', 'portal_password', 'manufacturer_associations', 'notes'];
     const csvContent = [
       headers.join(','),
       ...suppliers.map(s => 
