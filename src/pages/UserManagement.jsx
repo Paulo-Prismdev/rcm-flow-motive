@@ -3,7 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Users, Shield, X, Plus, AlertCircle } from "lucide-react";
+import { Users, Shield, X, Plus, AlertCircle, MessageCircle } from "lucide-react";
 
 function UserForm({ user, onSave, onCancel }) {
   const [formData, setFormData] = useState(user || {
@@ -355,6 +355,27 @@ export default function UserManagement() {
     return role?.role_name || null;
   };
 
+  const requestFeedbackMutation = useMutation({
+    mutationFn: async (userId) => {
+      const response = await base44.functions.invoke('requestFeedback', { userId });
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      alert('Feedback request sent successfully!');
+    },
+    onError: (error) => {
+      console.error('Error requesting feedback:', error);
+      alert('Failed to send feedback request: ' + (error.message || 'Unknown error'));
+    }
+  });
+
+  const handleRequestFeedback = (userId) => {
+    if (confirm('Send a feedback prompt to this user? They will see it the next time they log in to their portal.')) {
+      requestFeedbackMutation.mutate(userId);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="neomorph p-6">
@@ -445,17 +466,27 @@ export default function UserManagement() {
                         )}
                       </div>
                     </div>
-                    <div>
-                    <Button
-                      onClick={() => {
-                        setEditingUserId(user.id);
-                        setError(null);
-                      }}
-                      className="neomorph-flat px-4 py-2 text-blue-600"
-                    >
-                      Edit User
-                    </Button>
-                  </div>
+                    <div className="flex gap-2">
+                      {(user.user_type === 'referrer' || user.user_type === 'bodyshop') && (
+                        <Button
+                          onClick={() => handleRequestFeedback(user.id)}
+                          disabled={requestFeedbackMutation.isPending}
+                          className="neomorph-flat px-4 py-2 text-green-600"
+                          title="Request feedback from this user"
+                        >
+                          <MessageCircle className="w-4 h-4" />
+                        </Button>
+                      )}
+                      <Button
+                        onClick={() => {
+                          setEditingUserId(user.id);
+                          setError(null);
+                        }}
+                        className="neomorph-flat px-4 py-2 text-blue-600"
+                      >
+                        Edit User
+                      </Button>
+                    </div>
                   </div>
 
                   {user.role === 'admin' ? (
