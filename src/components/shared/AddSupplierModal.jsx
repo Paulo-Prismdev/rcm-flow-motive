@@ -255,7 +255,7 @@ export default function AddSupplierModal({ isOpen, onClose, onSuccess, editingSu
             >
               <option value="">Select type...</option>
               <option value="OEM">OEM (Original Equipment Manufacturer)</option>
-              <option value="Green">Green (Second Hand Parts)</option>
+              <option value="Green">Green (Used Parts)</option>
               <option value="Aftermarket">Aftermarket Parts</option>
               <option value="Reconditioned">Reconditioned Parts</option>
             </select>

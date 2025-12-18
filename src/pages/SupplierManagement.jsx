@@ -231,8 +231,8 @@ export default function SupplierManagement() {
                       <h3 className="font-bold text-lg">{supplier.name}</h3>
                       {supplier.part_supply_type && (
                         <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                          supplier.part_supply_type === 'OEM' ? 'bg-green-100 text-green-700' :
-                          supplier.part_supply_type === 'Green' ? 'bg-emerald-100 text-emerald-700' :
+                          supplier.part_supply_type === 'OEM' ? 'bg-amber-100 text-amber-700' :
+                          supplier.part_supply_type === 'Green' ? 'bg-green-100 text-green-700' :
                           supplier.part_supply_type === 'Aftermarket' ? 'bg-blue-100 text-blue-700' :
                           supplier.part_supply_type === 'Reconditioned' ? 'bg-purple-100 text-purple-700' :
                           'bg-gray-100 text-gray-700'
