@@ -144,11 +144,12 @@ export default function AddSupplierModal({ isOpen, onClose, onSuccess, editingSu
     }));
   };
 
-  // Auto-select all manufacturers for Green, Aftermarket, and Reconditioned
+  // Auto-select all manufacturers for Green, Aftermarket, Reconditioned, and Glass
   useEffect(() => {
     if (formData.part_supply_type === 'Green' || 
         formData.part_supply_type === 'Aftermarket' || 
-        formData.part_supply_type === 'Reconditioned') {
+        formData.part_supply_type === 'Reconditioned' ||
+        formData.part_supply_type === 'Glass') {
       setFormData(prev => ({
         ...prev,
         manufacturer_associations: [...VEHICLE_MANUFACTURERS]
@@ -284,6 +285,7 @@ export default function AddSupplierModal({ isOpen, onClose, onSuccess, editingSu
               <option value="Green">Green (Used Parts)</option>
               <option value="Aftermarket">Aftermarket Parts</option>
               <option value="Reconditioned">Reconditioned Parts</option>
+              <option value="Glass">Glass</option>
             </select>
           </div>
           <div>
@@ -446,7 +448,7 @@ export default function AddSupplierModal({ isOpen, onClose, onSuccess, editingSu
               )}
             </div>
             <p className="text-xs text-gray-500 mt-1">
-              {(formData.part_supply_type === 'Green' || formData.part_supply_type === 'Aftermarket' || formData.part_supply_type === 'Reconditioned')
+              {(formData.part_supply_type === 'Green' || formData.part_supply_type === 'Aftermarket' || formData.part_supply_type === 'Reconditioned' || formData.part_supply_type === 'Glass')
                 ? 'All manufacturers automatically selected for this supplier type'
                 : 'Select which vehicle manufacturers this supplier can supply parts for'}
             </p>

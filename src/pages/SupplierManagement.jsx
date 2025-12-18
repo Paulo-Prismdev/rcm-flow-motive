@@ -220,6 +220,7 @@ export default function SupplierManagement() {
             <option value="Green">Green (Used)</option>
             <option value="Aftermarket">Aftermarket</option>
             <option value="Reconditioned">Reconditioned</option>
+            <option value="Glass">Glass</option>
           </select>
         </div>
       </div>
