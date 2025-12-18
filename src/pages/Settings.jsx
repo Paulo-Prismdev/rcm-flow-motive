@@ -14,7 +14,6 @@ import { base44 } from "@/api/base44Client";
 import EmailTemplates from "./EmailTemplates";
 import UserManagement from "./UserManagement";
 import ChaserEmailSettings from "./ChaserEmailSettings";
-import SupplierManagement from "./SupplierManagement";
 
 export default function Settings() {
   const [activeMainTab, setActiveMainTab] = useState("branding");
@@ -34,7 +33,6 @@ export default function Settings() {
     { id: "portals", label: "Portal Management" },
     { id: "email", label: "Email Templates" },
     { id: "chasers", label: "Chaser Emails" },
-    { id: "suppliers", label: "Suppliers" },
     { id: "users", label: "User Management", permission: canManagePermissions },
   ];
 
@@ -50,7 +48,6 @@ export default function Settings() {
   const mainTabComponents = {
     branding: <BrandingTab />,
     companies: <CompanyManagementTab />,
-    suppliers: <SupplierManagement />,
     portals: <PortalManagementTab />,
     email: <EmailTemplates />,
     chasers: <ChaserEmailSettings />,
