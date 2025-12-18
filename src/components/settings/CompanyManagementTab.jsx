@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Plus, Edit, Trash2, Upload, X, Building2, Users, Package, MapPin, Loader, AlertCircle } from 'lucide-react';
+import AddSupplierModal from '../shared/AddSupplierModal';
 
 const COMPANY_TYPES = [
   { id: 'bodyshop', label: 'Bodyshops', icon: Building2, entity: 'Bodyshop' },
@@ -106,7 +107,21 @@ export default function CompanyManagementTab() {
       )}
 
       {/* Form */}
-      {showForm && (
+      {showForm && activeType === 'supplier' ? (
+        <AddSupplierModal
+          isOpen={showForm}
+          onClose={() => {
+            setShowForm(false);
+            setEditingItem(null);
+          }}
+          onSuccess={() => {
+            queryClient.invalidateQueries({ queryKey: ['Supplier'] });
+            setShowForm(false);
+            setEditingItem(null);
+          }}
+          supplier={editingItem}
+        />
+      ) : showForm && (
         <CompanyForm
           type={activeType}
           initialData={editingItem}
@@ -161,7 +176,7 @@ export default function CompanyManagementTab() {
                     )}
                   </div>
                   <p className="text-sm text-foreground-muted truncate">
-                    {item.contact_name} • {item.email}
+                    {item.contact_name} • {activeType === 'supplier' && item.emails?.length ? item.emails[0] : item.email}
                   </p>
                 </div>
                 <div className="flex gap-2">
