@@ -53,25 +53,8 @@ export default function FeedbackModal({ user, onClose }) {
 
   const submitFeedbackMutation = useMutation({
     mutationFn: async (feedbackData) => {
-      // Create feedback record
-      await base44.entities.UserFeedback.create(feedbackData);
-      
-      // Update user to clear the prompt flag
-      await base44.auth.updateMe({
-        show_feedback_prompt: false
-      });
-
-      // Update the company's last prompted date (resets 20-day timer)
-      const today = new Date().toISOString().split('T')[0];
-      if (user.user_type === 'bodyshop' && user.linked_bodyshop_id) {
-        await base44.entities.Bodyshop.update(user.linked_bodyshop_id, {
-          last_feedback_prompted_date: today
-        });
-      } else if (user.user_type === 'referrer' && user.linked_referrer_id) {
-        await base44.entities.Referrer.update(user.linked_referrer_id, {
-          last_feedback_prompted_date: today
-        });
-      }
+      const response = await base44.functions.invoke('submitFeedback', feedbackData);
+      return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['currentUser'] });
@@ -96,17 +79,10 @@ export default function FeedbackModal({ user, onClose }) {
       return;
     }
 
-    const feedbackData = {
-      user_id: user.id,
-      user_email: user.email,
-      user_type: user.user_type === 'bodyshop' ? 'bodyshop' : 'referrer',
+    submitFeedbackMutation.mutate({
       rating: selectedRating,
-      comment: comment.trim() || null,
-      prompt_date: new Date().toISOString(),
-      submission_date: new Date().toISOString()
-    };
-
-    submitFeedbackMutation.mutate(feedbackData);
+      comment: comment.trim() || null
+    });
   };
 
   return (
