@@ -752,9 +752,15 @@ export default function Layout({ children, currentPageName }) {
                             <span>Employee Management</span>
                           </DropdownMenuItem>
                         </Link>
-                      </>
-                    )}
-                    {canManagePermissions && (
+                        <Link to={createPageUrl("FeedbackHub")}>
+                          <DropdownMenuItem className="cursor-pointer">
+                            <MessageSquare className="mr-2 h-4 w-4" />
+                            <span>Feedback Hub</span>
+                          </DropdownMenuItem>
+                        </Link>
+                        </>
+                        )}
+                        {canManagePermissions && (
                       <>
                         <Link to={createPageUrl("UserManagement")}>
                           <DropdownMenuItem className="cursor-pointer">
