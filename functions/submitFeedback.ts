@@ -63,10 +63,10 @@ Deno.serve(async (req) => {
 
     for (const internalUser of internalUsers) {
       await base44.asServiceRole.entities.Notification.create({
-        user_id: internalUser.id,
+        user_email: internalUser.email,
         title: `New Feedback: ${ratingLabels[rating]}`,
         message: `${userTypeLabel} ${currentUser.email} submitted ${ratingLabels[rating]} feedback${comment ? ' with a comment' : ''}.`,
-        type: 'feedback',
+        type: 'general',
         link: '/feedback-hub',
         is_read: false
       });
