@@ -32,6 +32,8 @@ export default function FeedbackHub() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterRating, setFilterRating] = useState('all');
   const [filterUserType, setFilterUserType] = useState('all');
+  const [requestType, setRequestType] = useState('bodyshop'); // 'bodyshop' or 'referrer'
+  const [selectedCompanyId, setSelectedCompanyId] = useState('');
   const [selectedUserId, setSelectedUserId] = useState('');
   const queryClient = useQueryClient();
 
@@ -50,14 +52,31 @@ export default function FeedbackHub() {
     queryFn: () => base44.entities.User.list(),
   });
 
+  const { data: bodyshops = [] } = useQuery({
+    queryKey: ['bodyshops'],
+    queryFn: () => base44.entities.Bodyshop.list(),
+  });
+
+  const { data: referrers = [] } = useQuery({
+    queryKey: ['referrers'],
+    queryFn: () => base44.entities.Referrer.list(),
+  });
+
   const requestFeedbackMutation = useMutation({
-    mutationFn: async (userId) => {
-      const response = await base44.functions.invoke('requestFeedback', { userId });
+    mutationFn: async ({ userId, companyId, companyType }) => {
+      const response = await base44.functions.invoke('requestFeedback', { 
+        userId, 
+        companyId, 
+        companyType 
+      });
       return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
+      queryClient.invalidateQueries({ queryKey: ['bodyshops'] });
+      queryClient.invalidateQueries({ queryKey: ['referrers'] });
       setSelectedUserId('');
+      setSelectedCompanyId('');
       alert('Feedback request sent successfully!');
     },
     onError: (error) => {
@@ -66,10 +85,12 @@ export default function FeedbackHub() {
     }
   });
 
-  // Filter users to only show referrers and bodyshops
-  const externalUsers = users.filter(u => 
-    u.user_type === 'referrer' || u.user_type === 'bodyshop'
-  );
+  // Get companies and users based on selected type
+  const companies = requestType === 'bodyshop' ? bodyshops : referrers;
+  const linkedField = requestType === 'bodyshop' ? 'linked_bodyshop_id' : 'linked_referrer_id';
+  const companyUsers = selectedCompanyId 
+    ? users.filter(u => u[linkedField] === selectedCompanyId)
+    : [];
 
   // Calculate stats
   const stats = {
@@ -171,29 +192,108 @@ export default function FeedbackHub() {
           <Send className="w-5 h-5 text-accent" />
           Request Feedback
         </h3>
-        <div className="flex gap-2">
-          <select
-            value={selectedUserId}
-            onChange={(e) => setSelectedUserId(e.target.value)}
-            className="neomorph-inset flex-1 px-4 py-3 rounded-xl border-0"
-          >
-            <option value="">Select a user...</option>
-            {externalUsers.map(user => (
-              <option key={user.id} value={user.id}>
-                {user.full_name} ({user.email}) - {user.user_type}
-              </option>
-            ))}
-          </select>
+        
+        <div className="space-y-3">
+          {/* Step 1: Select Type */}
+          <div>
+            <label className="block text-sm font-medium mb-2">1. Select Type</label>
+            <div className="flex gap-2">
+              <button
+                onClick={() => {
+                  setRequestType('bodyshop');
+                  setSelectedCompanyId('');
+                  setSelectedUserId('');
+                }}
+                className={`flex-1 px-4 py-3 rounded-xl font-medium transition-all ${
+                  requestType === 'bodyshop'
+                    ? 'bg-accent text-accent-foreground'
+                    : 'neomorph-flat hover:bg-surface-hover'
+                }`}
+              >
+                Repairer/Bodyshop
+              </button>
+              <button
+                onClick={() => {
+                  setRequestType('referrer');
+                  setSelectedCompanyId('');
+                  setSelectedUserId('');
+                }}
+                className={`flex-1 px-4 py-3 rounded-xl font-medium transition-all ${
+                  requestType === 'referrer'
+                    ? 'bg-accent text-accent-foreground'
+                    : 'neomorph-flat hover:bg-surface-hover'
+                }`}
+              >
+                Referrer
+              </button>
+            </div>
+          </div>
+
+          {/* Step 2: Select Company */}
+          <div>
+            <label className="block text-sm font-medium mb-2">2. Select Company</label>
+            <select
+              value={selectedCompanyId}
+              onChange={(e) => {
+                setSelectedCompanyId(e.target.value);
+                setSelectedUserId('');
+              }}
+              className="neomorph-inset w-full px-4 py-3 rounded-xl border-0"
+            >
+              <option value="">Select a {requestType === 'bodyshop' ? 'bodyshop' : 'referrer'}...</option>
+              {companies.map(company => (
+                <option key={company.id} value={company.id}>
+                  {company.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Step 3: Select User or All */}
+          {selectedCompanyId && (
+            <div>
+              <label className="block text-sm font-medium mb-2">3. Select User (or send to all)</label>
+              <select
+                value={selectedUserId}
+                onChange={(e) => setSelectedUserId(e.target.value)}
+                className="neomorph-inset w-full px-4 py-3 rounded-xl border-0"
+              >
+                <option value="">All users in this company ({companyUsers.length})</option>
+                {companyUsers.map(user => (
+                  <option key={user.id} value={user.id}>
+                    {user.full_name} ({user.email})
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {/* Send Button */}
           <Button
-            onClick={() => selectedUserId && requestFeedbackMutation.mutate(selectedUserId)}
-            disabled={!selectedUserId || requestFeedbackMutation.isPending}
-            className="neomorph-flat px-6 py-3 bg-accent/10 text-accent font-medium"
+            onClick={() => {
+              if (selectedUserId) {
+                requestFeedbackMutation.mutate({ userId: selectedUserId });
+              } else if (selectedCompanyId) {
+                requestFeedbackMutation.mutate({ 
+                  companyId: selectedCompanyId, 
+                  companyType: requestType 
+                });
+              }
+            }}
+            disabled={!selectedCompanyId || requestFeedbackMutation.isPending}
+            className="w-full neomorph-flat px-6 py-3 bg-accent/10 text-accent font-medium"
           >
-            {requestFeedbackMutation.isPending ? 'Sending...' : 'Send Request'}
+            {requestFeedbackMutation.isPending 
+              ? 'Sending...' 
+              : selectedUserId 
+                ? 'Send to Selected User' 
+                : `Send to All Users (${companyUsers.length})`
+            }
           </Button>
         </div>
+
         <p className="text-xs text-foreground-muted mt-2">
-          User will see the feedback prompt the next time they log in
+          Users will see the feedback prompt the next time they log in to their portal
         </p>
       </div>
 

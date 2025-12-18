@@ -58,9 +58,20 @@ export default function FeedbackModal({ user, onClose }) {
       
       // Update user to clear the prompt flag
       await base44.auth.updateMe({
-        show_feedback_prompt: false,
-        last_feedback_prompted_date: new Date().toISOString().split('T')[0]
+        show_feedback_prompt: false
       });
+
+      // Update the company's last prompted date (resets 20-day timer)
+      const today = new Date().toISOString().split('T')[0];
+      if (user.user_type === 'bodyshop' && user.linked_bodyshop_id) {
+        await base44.entities.Bodyshop.update(user.linked_bodyshop_id, {
+          last_feedback_prompted_date: today
+        });
+      } else if (user.user_type === 'referrer' && user.linked_referrer_id) {
+        await base44.entities.Referrer.update(user.linked_referrer_id, {
+          last_feedback_prompted_date: today
+        });
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['currentUser'] });

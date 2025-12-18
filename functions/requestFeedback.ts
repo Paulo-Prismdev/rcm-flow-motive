@@ -14,22 +14,53 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Forbidden - Admin access required' }, { status: 403 });
     }
 
-    const { userId } = await req.json();
+    const { userId, companyId, companyType } = await req.json();
 
-    if (!userId) {
-      return Response.json({ error: 'userId is required' }, { status: 400 });
+    // Option 1: Send to specific user
+    if (userId) {
+      await base44.asServiceRole.entities.User.update(userId, {
+        show_feedback_prompt: true,
+        last_feedback_prompted_date: new Date().toISOString().split('T')[0]
+      });
+
+      return Response.json({ 
+        success: true,
+        message: 'Feedback prompt has been triggered for the user'
+      });
     }
 
-    // Update the user to show the feedback prompt
-    await base44.asServiceRole.entities.User.update(userId, {
-      show_feedback_prompt: true,
-      last_feedback_prompted_date: new Date().toISOString().split('T')[0]
-    });
+    // Option 2: Send to all users in a company
+    if (companyId && companyType) {
+      const today = new Date().toISOString().split('T')[0];
+      
+      // Get all users linked to this company
+      const allUsers = await base44.asServiceRole.entities.User.list();
+      const linkedField = companyType === 'bodyshop' ? 'linked_bodyshop_id' : 'linked_referrer_id';
+      const companyUsers = allUsers.filter(u => u[linkedField] === companyId);
 
-    return Response.json({ 
-      success: true,
-      message: 'Feedback prompt has been triggered for the user'
-    });
+      // Update all users to show feedback prompt
+      await Promise.all(
+        companyUsers.map(user =>
+          base44.asServiceRole.entities.User.update(user.id, {
+            show_feedback_prompt: true,
+            last_feedback_prompted_date: today
+          })
+        )
+      );
+
+      // Update the company's last prompted date
+      const entityName = companyType === 'bodyshop' ? 'Bodyshop' : 'Referrer';
+      await base44.asServiceRole.entities[entityName].update(companyId, {
+        last_feedback_prompted_date: today
+      });
+
+      return Response.json({ 
+        success: true,
+        message: `Feedback prompt has been triggered for ${companyUsers.length} user(s) in the company`
+      });
+    }
+
+    return Response.json({ error: 'Either userId or (companyId + companyType) is required' }, { status: 400 });
 
   } catch (error) {
     console.error('Error requesting feedback:', error);
