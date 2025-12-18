@@ -104,15 +104,17 @@ export default function FeedbackHub() {
     withComments: feedback.filter(f => f.comment).length
   };
 
-  // Filter feedback
-  const filteredFeedback = feedback.filter(f => {
-    const matchesSearch = !searchTerm || 
-      f.user_email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      f.comment?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesRating = filterRating === 'all' || f.rating === filterRating;
-    const matchesUserType = filterUserType === 'all' || f.user_type === filterUserType;
-    return matchesSearch && matchesRating && matchesUserType;
-  });
+  // Filter feedback and sort by submission date (newest first)
+  const filteredFeedback = feedback
+    .filter(f => {
+      const matchesSearch = !searchTerm || 
+        f.user_email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        f.comment?.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesRating = filterRating === 'all' || f.rating === filterRating;
+      const matchesUserType = filterUserType === 'all' || f.user_type === filterUserType;
+      return matchesSearch && matchesRating && matchesUserType;
+    })
+    .sort((a, b) => new Date(b.submission_date) - new Date(a.submission_date));
 
   const isInternalUser = currentUser?.user_type === 'internal' || currentUser?.role === 'admin';
 
