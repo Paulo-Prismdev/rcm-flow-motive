@@ -70,19 +70,6 @@ export default function NewJobsBanner({ bodyshopId }) {
         repairer_accepted_date: new Date().toISOString().split('T')[0],
       });
       
-      // Log the acceptance in ActivityLog
-      await base44.entities.ActivityLog.create({
-        parent_id: claimId,
-        parent_type: 'Claim',
-        action: 'Job Accepted by Repairer',
-        field_name: 'repairer_accepted',
-        old_value: 'false',
-        new_value: 'true',
-        description: `Job accepted by ${bodyshop?.name || 'Repairer'}`,
-        user_email: currentUser?.email,
-        user_name: currentUser?.full_name,
-      });
-      
       // Get the latest claim data AFTER update to ensure we have the instruction_pdf_url
       const latestClaim = await base44.entities.Claim.get(claimId);
       
@@ -138,19 +125,6 @@ export default function NewJobsBanner({ bodyshopId }) {
         bodyshop_email: null,
         bs_instructed: null,
         latest_update: `Job rejected by ${bodyshop?.name || 'Repairer'}. Reason: ${reason}`,
-      });
-      
-      // Log the rejection in ActivityLog
-      await base44.entities.ActivityLog.create({
-        parent_id: claimId,
-        parent_type: 'Claim',
-        action: 'Job Rejected by Repairer',
-        field_name: 'bodyshop_id',
-        old_value: bodyshop?.name || 'Repairer',
-        new_value: 'Unassigned',
-        description: `Job rejected by ${bodyshop?.name || 'Repairer'}. Reason: ${reason}`,
-        user_email: currentUser?.email,
-        user_name: currentUser?.full_name,
       });
     },
     onSuccess: () => {
