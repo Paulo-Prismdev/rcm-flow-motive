@@ -89,6 +89,10 @@ export default function NewJobsBanner({ bodyshopId }) {
       // Return the latest claim data with the instruction_pdf_url
       return latestClaim;
     },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['pendingJobs'] });
+      queryClient.invalidateQueries({ queryKey: ['repairerClaims'] });
+    },
   });
 
   const handleAccept = async (claim) => {
@@ -99,12 +103,9 @@ export default function NewJobsBanner({ bodyshopId }) {
       setSelectedClaim(latestClaim);
       // Move to step 2 (download instructions) - stay in same modal
       setWizardStep(2);
-      // Invalidate queries to refresh the claims list
-      queryClient.invalidateQueries({ queryKey: ['pendingJobs'] });
-      queryClient.invalidateQueries({ queryKey: ['repairerClaims'] });
     } catch (error) {
       console.error('Error accepting job:', error);
-      alert('Failed to accept job. Please try again.');
+      alert('Failed to accept job: ' + (error.message || 'Please try again.'));
     } finally {
       setIsAccepting(false);
     }
