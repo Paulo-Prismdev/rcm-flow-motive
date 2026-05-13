@@ -1,0 +1,95 @@
+{
+  "name": "Notification",
+  "type": "object",
+  "properties": {
+    "user_email": {
+      "type": "string",
+      "description": "Email of the user this notification is for"
+    },
+    "title": {
+      "type": "string",
+      "description": "Notification title"
+    },
+    "message": {
+      "type": "string",
+      "description": "Notification message"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "tagged",
+        "status_change",
+        "assignment",
+        "invoice",
+        "estimate_request",
+        "parts_update",
+        "engineering_update",
+        "general"
+      ],
+      "description": "Type of notification"
+    },
+    "related_item_type": {
+      "type": "string",
+      "enum": [
+        "Claim",
+        "Estimate",
+        "Engineering",
+        "Part"
+      ],
+      "description": "Type of related item"
+    },
+    "related_item_id": {
+      "type": "string",
+      "description": "ID of the related item"
+    },
+    "is_read": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the notification has been read"
+    },
+    "link": {
+      "type": "string",
+      "description": "Link to navigate to when notification is clicked"
+    }
+  },
+  "required": [
+    "user_email",
+    "title",
+    "message",
+    "type"
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "user_type": "internal"
+          }
+        }
+      ]
+    },
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "data.user_email": "{{user.email}}"
+        }
+      ]
+    },
+    "update": {
+      "data.user_email": "{{user.email}}"
+    },
+    "delete": {
+      "data.user_email": "{{user.email}}"
+    }
+  }
+}
