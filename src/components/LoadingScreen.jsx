@@ -5,15 +5,23 @@ import { Car, AlertCircle } from "lucide-react";
 export default function LoadingScreen() {
   const carVariants = {
     initial: { x: -100, opacity: 0 },
-    drive: {
-      x: 320,
+    animate: {
+      x: [
+        -100,
+        320, // Drive across
+        300, // Crash shake
+        310,
+        295,
+        305,
+        320, // Back to crash position
+      ],
       opacity: 1,
-      transition: { duration: 2.5, ease: "linear" },
-    },
-    crash: {
-      x: 320,
-      rotate: [0, -15, 15, -10, 10, 0],
-      transition: { duration: 0.6, ease: "easeInOut" },
+      rotate: [0, 0, -15, 15, -10, 10, 0],
+      transition: {
+        duration: 3.5,
+        ease: "linear",
+        times: [0, 0.7, 0.7, 0.78, 0.85, 0.92, 1],
+      },
     },
   };
 
@@ -54,7 +62,7 @@ export default function LoadingScreen() {
         <motion.div
           variants={carVariants}
           initial="initial"
-          animate={["drive", "crash"]}
+          animate="animate"
           className="absolute"
         >
           <Car className="w-12 h-12 text-red-600" />
@@ -63,11 +71,11 @@ export default function LoadingScreen() {
         {/* Wall/Obstacle */}
         <div className="absolute right-12 w-2 h-16 bg-gray-600 rounded-lg" />
 
-        {/* Smoke Burst */}
+        {/* Smoke Burst - triggers at crash time */}
         <motion.div
-          variants={smokeVariants}
-          initial="initial"
-          animate="explode"
+          initial={{ opacity: 0, scale: 0 }}
+          animate={{ opacity: [0, 1, 1, 0], scale: [0, 1.5, 1.8, 2] }}
+          transition={{ duration: 1, delay: 2.45, ease: "easeOut" }}
           className="absolute right-8 w-16 h-16 bg-gray-400 rounded-full opacity-60"
         />
 
@@ -75,44 +83,38 @@ export default function LoadingScreen() {
         {[...Array(6)].map((_, i) => (
           <motion.div
             key={i}
-            variants={debrisVariants}
-            initial="initial"
-            animate="scatter"
-            custom={{
-              y: Math.random() * -150 - 30,
-              x: (Math.random() - 0.5) * 200,
+            initial={{ opacity: 1, y: 0, x: 0 }}
+            animate={{
+              opacity: [1, 0],
+              y: [0, Math.random() * -150 - 30],
+              x: [0, (Math.random() - 0.5) * 200],
               rotate: Math.random() * 360,
             }}
+            transition={{ duration: 1, delay: 2.45, ease: "easeOut" }}
             className="absolute right-12"
           >
             <div className="w-2 h-2 bg-orange-500 rounded" />
           </motion.div>
         ))}
-
-        {/* Alert Icon */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 2.7, duration: 0.4 }}
-          className="absolute right-8"
-        >
-          <AlertCircle className="w-8 h-8 text-yellow-500" />
-        </motion.div>
       </div>
 
-      {/* Loading Text */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.5 }}
-        className="mt-12 text-center"
-      >
-        <p className="text-lg font-semibold text-gray-700 dark:text-gray-200">
-          Loading...
-        </p>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-          Buckle up! 🚗💥
-        </p>
+      {/* Loading Dots */}
+      <motion.div className="mt-12 flex gap-1">
+        <motion.div
+          animate={{ opacity: [0.3, 1, 0.3] }}
+          transition={{ duration: 1.5, repeat: Infinity }}
+          className="w-2 h-2 bg-gray-600 dark:bg-gray-300 rounded-full"
+        />
+        <motion.div
+          animate={{ opacity: [0.3, 1, 0.3] }}
+          transition={{ duration: 1.5, repeat: Infinity, delay: 0.2 }}
+          className="w-2 h-2 bg-gray-600 dark:bg-gray-300 rounded-full"
+        />
+        <motion.div
+          animate={{ opacity: [0.3, 1, 0.3] }}
+          transition={{ duration: 1.5, repeat: Infinity, delay: 0.4 }}
+          className="w-2 h-2 bg-gray-600 dark:bg-gray-300 rounded-full"
+        />
       </motion.div>
     </div>
   );
