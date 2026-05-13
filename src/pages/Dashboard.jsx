@@ -416,10 +416,7 @@ export default function Dashboard() {
                         {...provided.draggableProps}
                         data-widget-id={widget.id}
                         className={`relative ${snapshot.isDragging ? 'z-50 rotate-2 scale-105' : ''} ${isEditMode && !snapshot.isDragging && !isResizing ? 'widget-edit-mode' : ''} ${isResizing ? 'widget-resizing' : ''} transition-all`}
-                        style={{
-                          ...provided.draggableProps.style,
-                          gridColumn: `span ${Math.min(span, 4)}`,
-                        }}
+                        style={provided.draggableProps.style}
                       >
                         {isEditMode && (
                           <>
