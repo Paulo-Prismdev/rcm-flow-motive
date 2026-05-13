@@ -45,8 +45,8 @@ export const AuthProvider = ({ children }) => {
           setIsAuthenticated(false);
         }
         
-        // Ensure loading screen shows for at least 2 seconds for animation
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        // Ensure loading screen shows for at least 3 seconds for animation
+        await new Promise(resolve => setTimeout(resolve, 3000));
         setIsLoadingPublicSettings(false);
       } catch (appError) {
         console.error('App state check failed:', appError);
