@@ -37,34 +37,40 @@ export default function WidgetInvoiceTracking({ config, isEditMode }) {
     .filter(r => r.invoice_status === 'Ready to Invoice' || r.invoice_status === 'Invoice Required - Pending')
     .reduce((sum, r) => sum + (r.invoice_amount || 0), 0);
 
+  const thisMonth = claims.filter(c => {
+    const date = new Date(c.created_date);
+    const now = new Date();
+    return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
+  }).length;
+
+  const metrics = [
+    { label: 'Ready to Invoice', value: isEditMode ? '–' : readyToInvoice, sub: `£${totalInvoiceValue.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, accent: 'text-emerald-600', bar: 'bg-emerald-500', barPct: Math.min(100, readyToInvoice * 5) },
+    { label: 'Overdue', value: isEditMode ? '–' : overdueInvoices, sub: 'Requires attention', accent: 'text-rose-600', bar: 'bg-rose-500', barPct: Math.min(100, overdueInvoices * 10) },
+    { label: 'New This Month', value: isEditMode ? '–' : thisMonth, sub: 'Cases opened', accent: 'text-blue-600', bar: 'bg-blue-500', barPct: Math.min(100, thisMonth * 4) },
+  ];
+
   const content = (
-    <div className="glass p-4 md:p-6 col-span-1 md:col-span-2 card-hover">
-      <h2 className="text-lg md:text-xl font-bold mb-4 md:mb-6 flex items-center gap-2">
-        <DollarSign className="w-5 h-5 text-accent" />
-        Invoice Tracking
-      </h2>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
-        <div className="glass-flat p-3 md:p-4">
-          <p className="text-xs text-foreground-muted mb-1">Ready to Invoice</p>
-          <p className="text-xl md:text-2xl font-bold text-green-600">{isEditMode ? '...' : readyToInvoice}</p>
-          <p className="text-[10px] md:text-xs text-foreground-subtle mt-1">£{totalInvoiceValue.toFixed(2)}</p>
+    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-200 p-5 col-span-1 md:col-span-2">
+      <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-xl bg-amber-50 flex items-center justify-center">
+            <DollarSign className="w-4 h-4 text-amber-500" />
+          </div>
+          <h2 className="text-sm font-bold text-slate-700">Invoice Tracking</h2>
         </div>
-        <div className="glass-flat p-3 md:p-4">
-          <p className="text-xs text-foreground-muted mb-1">Overdue</p>
-          <p className="text-xl md:text-2xl font-bold text-red-600">{isEditMode ? '...' : overdueInvoices}</p>
-          <p className="text-[10px] md:text-xs text-foreground-subtle mt-1">Requires attention</p>
-        </div>
-        <div className="glass-flat p-3 md:p-4">
-          <p className="text-xs text-foreground-muted mb-1">This Month</p>
-          <p className="text-xl md:text-2xl font-bold text-blue-600">
-            {isEditMode ? '...' : claims.filter(c => {
-              const date = new Date(c.created_date);
-              const now = new Date();
-              return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
-            }).length}
-          </p>
-          <p className="text-[10px] md:text-xs text-foreground-subtle mt-1">New cases</p>
-        </div>
+        <TrendingUp className="w-4 h-4 text-slate-300" />
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {metrics.map(m => (
+          <div key={m.label} className="bg-slate-50 rounded-xl p-4">
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-2">{m.label}</p>
+            <p className={`text-2xl font-bold tabular-nums ${m.accent} mb-1`}>{m.value}</p>
+            <p className="text-[11px] text-slate-400 mb-3">{m.sub}</p>
+            <div className="w-full h-1 bg-slate-200 rounded-full overflow-hidden">
+              <div className={`h-full ${m.bar} rounded-full transition-all duration-700`} style={{ width: `${m.barPct}%` }} />
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

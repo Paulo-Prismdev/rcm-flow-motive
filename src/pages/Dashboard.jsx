@@ -311,41 +311,36 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="space-y-4 md:space-y-6">
+    <div className="space-y-4 md:space-y-5">
       {/* Header */}
-      <div className="glass p-4 md:p-6">
-        <div className="flex items-center justify-between flex-wrap gap-4">
-          <div className="flex items-center gap-3 flex-1">
-            <div>
-              <h1 className="text-2xl md:text-3xl font-bold">Dashboard</h1>
-              <p className="text-sm text-foreground-muted mt-1">
-                {isEditMode ? 'Customize your dashboard layout' : 'Monitor your operations'}
-              </p>
-            </div>
+      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm px-5 py-4">
+        <div className="flex items-center justify-between flex-wrap gap-3">
+          <div>
+            <h1 className="text-xl font-bold text-slate-800 tracking-tight">Dashboard</h1>
+            <p className="text-xs text-slate-400 mt-0.5">
+              {isEditMode ? 'Drag widgets to reorder • Resize from corner • Click × to remove' : 'Monitor your operations at a glance'}
+            </p>
           </div>
           
-          <div className="flex items-center gap-2 md:gap-3">
+          <div className="flex items-center gap-2">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button className="glass-button px-3 md:px-4 py-2 flex items-center gap-2" disabled={isEditMode}>
-                  <LayoutIcon className="w-4 h-4" />
-                  <span className="hidden sm:inline">{currentDashboardOption?.label || 'Select Dashboard'}</span>
-                  <ChevronDown className="w-4 h-4" />
+                <Button className="h-8 px-3 text-xs font-medium bg-slate-50 border border-slate-200 text-slate-600 hover:bg-slate-100 rounded-xl flex items-center gap-1.5 shadow-none" disabled={isEditMode}>
+                  <LayoutIcon className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">{currentDashboardOption?.label || 'Select'}</span>
+                  <ChevronDown className="w-3 h-3" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuContent align="end" className="w-56 rounded-xl border-slate-100 shadow-lg">
                 {DASHBOARD_OPTIONS.map((option) => (
                   <DropdownMenuItem
                     key={option.value}
                     onClick={() => setSelectedDashboard(option.value)}
-                    className={selectedDashboard === option.value ? 'bg-glass-hover' : ''}
+                    className={`text-xs rounded-lg ${selectedDashboard === option.value ? 'bg-slate-100 font-semibold' : ''}`}
                   >
                     {option.label}
-                    {option.type === 'company' && !isAdmin && (
-                      <span className="ml-auto text-xs text-foreground-subtle">(View Only)</span>
-                    )}
-                    {option.type === 'department' && !isAdmin && (
-                      <span className="ml-auto text-xs text-foreground-subtle">(View Only)</span>
+                    {(option.type === 'company' || option.type === 'department') && !isAdmin && (
+                      <span className="ml-auto text-[10px] text-slate-400">View only</span>
                     )}
                   </DropdownMenuItem>
                 ))}
@@ -354,43 +349,27 @@ export default function Dashboard() {
 
             {!isEditMode ? (
               canEdit && (
-                <Button
-                  onClick={() => setIsEditMode(true)}
-                  className="glass-button px-4 py-2 flex items-center gap-2"
-                >
-                  <Settings className="w-4 h-4" />
+                <Button onClick={() => setIsEditMode(true)} className="h-8 px-3 text-xs font-medium bg-slate-50 border border-slate-200 text-slate-600 hover:bg-slate-100 rounded-xl shadow-none flex items-center gap-1.5">
+                  <Settings className="w-3.5 h-3.5" />
                   <span className="hidden sm:inline">Customize</span>
                 </Button>
               )
             ) : (
               <>
-                <Button
-                  onClick={() => setShowWidgetGallery(true)}
-                  className="glass-button px-4 py-2 flex items-center gap-2 text-green-600"
-                >
-                  <Plus className="w-4 h-4" />
+                <Button onClick={() => setShowWidgetGallery(true)} className="h-8 px-3 text-xs font-medium bg-emerald-50 border border-emerald-200 text-emerald-700 hover:bg-emerald-100 rounded-xl shadow-none flex items-center gap-1.5">
+                  <Plus className="w-3.5 h-3.5" />
                   <span className="hidden sm:inline">Add</span>
                 </Button>
-                <Button
-                  onClick={handleResetToDefault}
-                  className="glass-button px-4 py-2 flex items-center gap-2 text-orange-600"
-                >
-                  <LayoutIcon className="w-4 h-4" />
+                <Button onClick={handleResetToDefault} className="h-8 px-3 text-xs font-medium bg-orange-50 border border-orange-200 text-orange-700 hover:bg-orange-100 rounded-xl shadow-none flex items-center gap-1.5">
+                  <LayoutIcon className="w-3.5 h-3.5" />
                   <span className="hidden sm:inline">Reset</span>
                 </Button>
-                <Button
-                  onClick={handleCancel}
-                  className="glass-button px-4 py-2 flex items-center gap-2"
-                >
-                  <X className="w-4 h-4" />
+                <Button onClick={handleCancel} className="h-8 px-3 text-xs font-medium bg-slate-50 border border-slate-200 text-slate-600 hover:bg-slate-100 rounded-xl shadow-none flex items-center gap-1.5">
+                  <X className="w-3.5 h-3.5" />
                   <span className="hidden sm:inline">Cancel</span>
                 </Button>
-                <Button
-                  onClick={handleSave}
-                  disabled={saveDashboardMutation.isPending}
-                  className="glass-button px-4 py-2 flex items-center gap-2 text-accent"
-                >
-                  <Save className="w-4 h-4" />
+                <Button onClick={handleSave} disabled={saveDashboardMutation.isPending} className="h-8 px-3 text-xs font-semibold bg-slate-800 text-white hover:bg-slate-700 rounded-xl shadow-none flex items-center gap-1.5">
+                  <Save className="w-3.5 h-3.5" />
                   <span className="hidden sm:inline">Save</span>
                 </Button>
               </>
@@ -400,13 +379,9 @@ export default function Dashboard() {
       </div>
 
       {isEditMode && (
-        <div className="glass p-4 border-2 border-accent">
-          <div className="flex items-center gap-3">
-            <div className="w-2 h-2 bg-accent rounded-full animate-pulse"></div>
-            <p className="text-sm">
-              <strong>Edit Mode:</strong> Drag widgets to reorder, drag bottom-right corner to resize, or click X to remove.
-            </p>
-          </div>
+        <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5 flex items-center gap-2">
+          <div className="w-1.5 h-1.5 bg-amber-400 rounded-full animate-pulse flex-shrink-0"></div>
+          <p className="text-xs text-amber-700 font-medium">Edit Mode active — drag to reorder, resize from the corner handle, or click × to remove widgets.</p>
         </div>
       )}
 
@@ -499,15 +474,14 @@ export default function Dashboard() {
       </DragDropContext>
 
       {localWidgets.length === 0 && (
-        <div className="glass p-12 text-center">
-          <LayoutIcon className="w-16 h-16 mx-auto mb-4 text-foreground-subtle opacity-50" />
-          <h3 className="text-lg font-bold mb-2">Your dashboard is empty</h3>
-          <p className="text-sm text-foreground-muted mb-4">Add widgets to personalize your dashboard</p>
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-16 text-center">
+          <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-4">
+            <LayoutIcon className="w-8 h-8 text-slate-300" />
+          </div>
+          <h3 className="text-base font-bold text-slate-700 mb-1">Your dashboard is empty</h3>
+          <p className="text-sm text-slate-400 mb-5">Add widgets to personalize your view</p>
           {canEdit && (
-            <Button
-              onClick={() => setShowWidgetGallery(true)}
-              className="glass-button px-6 py-3 text-accent"
-            >
+            <Button onClick={() => setShowWidgetGallery(true)} className="h-9 px-5 text-sm font-semibold bg-slate-800 text-white hover:bg-slate-700 rounded-xl shadow-none">
               <Plus className="w-4 h-4 mr-2" />
               Add Your First Widget
             </Button>

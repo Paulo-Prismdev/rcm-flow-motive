@@ -35,20 +35,23 @@ export default function WidgetDepartmentStats({ config, isEditMode }) {
   ];
 
   const content = (
-    <div className="glass p-4 md:p-6 col-span-1 md:col-span-2 lg:col-span-4 card-hover">
-      <h2 className="text-lg md:text-xl font-bold mb-4 md:mb-6">{department} Overview</h2>
+    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-200 p-5 col-span-1 md:col-span-2 lg:col-span-4">
+      <div className="flex items-center justify-between mb-5">
+        <h2 className="text-sm font-bold text-slate-700">{department} Overview</h2>
+        <span className="text-[11px] font-medium px-2.5 py-1 rounded-full bg-slate-100 text-slate-500">{activeRecords.length} active</span>
+      </div>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (
-            <div key={stat.label} className="glass-flat p-4">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="glass-flat p-2">
-                  <Icon className={`w-5 h-5 ${stat.color}`} />
-                </div>
-                <p className="text-xs text-foreground-muted">{stat.label}</p>
+            <div key={stat.label} className="bg-slate-50 rounded-xl p-4 flex items-center gap-4">
+              <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center flex-shrink-0">
+                <Icon className={`w-5 h-5 ${stat.color}`} />
               </div>
-              <p className="text-2xl font-bold">{isLoading ? '...' : stat.value}</p>
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-0.5">{stat.label}</p>
+                <p className="text-2xl font-bold text-slate-800 tabular-nums">{isLoading ? '–' : stat.value}</p>
+              </div>
             </div>
           );
         })}
