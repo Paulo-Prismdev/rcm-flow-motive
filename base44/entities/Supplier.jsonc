@@ -108,7 +108,7 @@
           }
         },
         {
-          "id": "{{user.linked_supplier_id}}"
+          "id": "{{user.data.linked_supplier_id}}"
         }
       ]
     },
@@ -125,21 +125,23 @@
           }
         },
         {
-          "id": "{{user.linked_supplier_id}}"
+          "id": "{{user.data.linked_supplier_id}}"
         }
       ]
     },
     "delete": {
-      "user_condition": {
-        "$or": [
-          {
+      "$or": [
+        {
+          "user_condition": {
             "role": "admin"
-          },
-          {
+          }
+        },
+        {
+          "user_condition": {
             "user_type": "internal"
           }
-        ]
-      }
+        }
+      ]
     }
   }
 }
