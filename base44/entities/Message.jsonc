@@ -120,6 +120,9 @@
           }
         },
         {
+          "sender_email": "{{user.email}}"
+        },
+        {
           "channel_members": {
             "$in": [
               "{{user.email}}"

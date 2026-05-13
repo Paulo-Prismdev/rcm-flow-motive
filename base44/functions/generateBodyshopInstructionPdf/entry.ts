@@ -31,7 +31,7 @@ Deno.serve(async (req) => {
     let templateConfig = null;
     if (templateConfigId) {
       try {
-        templateConfig = await base44.asServiceRole.entities.PdfTemplateConfig.get(templateConfigId);
+        templateConfig = await base44.entities.PdfTemplateConfig.get(templateConfigId);
       } catch (error) {
         console.log('Template config not found, using defaults');
       }

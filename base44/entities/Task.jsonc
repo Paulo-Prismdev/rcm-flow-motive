@@ -109,7 +109,7 @@
           }
         },
         {
-          "data.assigned_to": "{{user.email}}"
+          "assigned_to": "{{user.email}}"
         }
       ]
     },
@@ -126,7 +126,7 @@
           }
         },
         {
-          "data.assigned_to": "{{user.email}}"
+          "assigned_to": "{{user.email}}"
         }
       ]
     },
