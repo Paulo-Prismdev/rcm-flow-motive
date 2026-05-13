@@ -29,12 +29,11 @@ Deno.serve(async (req) => {
 
     await base44.entities.UserFeedback.create(feedbackData);
     
-    // Update user to clear the prompt flag (use service role)
-    await base44.asServiceRole.entities.User.update(currentUser.id, {
-      show_feedback_prompt: false
-    });
+    // Update user to clear the prompt flag (user-scoped, no elevation needed)
+    await base44.auth.updateMe({ show_feedback_prompt: false });
 
     // Update the company's last prompted date (resets 20-day timer)
+    // These still require service role as the user may not have write access to company records
     const today = new Date().toISOString().split('T')[0];
     if (currentUser.user_type === 'bodyshop' && currentUser.linked_bodyshop_id) {
       await base44.asServiceRole.entities.Bodyshop.update(currentUser.linked_bodyshop_id, {

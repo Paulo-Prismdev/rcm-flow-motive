@@ -4,10 +4,13 @@ Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     
-    // Verify user authentication
+    // Verify user authentication and restrict to internal/admin users
     const user = await base44.auth.me();
     if (!user) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    if (user.role !== 'admin' && user.user_type !== 'internal') {
+      return Response.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     // Get the entity type from request
