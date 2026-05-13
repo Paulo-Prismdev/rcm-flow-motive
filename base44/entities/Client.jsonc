@@ -1,0 +1,112 @@
+{
+  "name": "Client",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Client's full name"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "address_line_1": {
+      "type": "string",
+      "description": "Street address"
+    },
+    "address_line_2": {
+      "type": "string",
+      "description": "Additional address line (optional)"
+    },
+    "town": {
+      "type": "string",
+      "description": "Town or City"
+    },
+    "county": {
+      "type": "string",
+      "description": "County or State"
+    },
+    "postcode": {
+      "type": "string",
+      "description": "Postal code"
+    },
+    "latitude": {
+      "type": "number",
+      "description": "Geographic latitude coordinate"
+    },
+    "longitude": {
+      "type": "number",
+      "description": "Geographic longitude coordinate"
+    }
+  },
+  "required": [
+    "name",
+    "phone"
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "user_type": "internal"
+          }
+        }
+      ]
+    },
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "user_type": "internal"
+          }
+        },
+        {
+          "id": "{{user.data.linked_client_id}}"
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "user_type": "internal"
+          }
+        },
+        {
+          "id": "{{user.data.linked_client_id}}"
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "user_type": "internal"
+          }
+        }
+      ]
+    }
+  }
+}
