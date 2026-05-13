@@ -76,20 +76,16 @@
         "In Progress",
         "Completed"
       ],
-      "default": "N/A",
-      "description": "Status of third-party pursuit for fault claims"
+      "default": "N/A"
     },
     "linked_third_party_claim_id": {
-      "type": "string",
-      "description": "ID of the third-party claim created from this fault claim"
+      "type": "string"
     },
     "linked_original_claim_id": {
-      "type": "string",
-      "description": "ID of the original fault claim (for third-party claims)"
+      "type": "string"
     },
     "tp_capture_rejected_reason": {
-      "type": "string",
-      "description": "Reason why third-party capture was not possible"
+      "type": "string"
     },
     "insurer": {
       "type": "string"
@@ -104,8 +100,7 @@
       "type": "number"
     },
     "excess_contribution_amount": {
-      "type": "number",
-      "description": "Amount we contribute towards client's excess"
+      "type": "number"
     },
     "excess_contribution_method": {
       "type": "string",
@@ -114,27 +109,22 @@
         "Via Repairer",
         "Direct to Client"
       ],
-      "default": "None",
-      "description": "How the excess contribution is paid"
+      "default": "None"
     },
     "excess_contribution_paid": {
       "type": "boolean",
-      "default": false,
-      "description": "Whether our contribution has been paid"
+      "default": false
     },
     "excess_contribution_paid_date": {
       "type": "string",
-      "format": "date",
-      "description": "When the contribution was paid"
+      "format": "date"
     },
     "excess_contribution_invoice_received": {
       "type": "boolean",
-      "default": false,
-      "description": "If via repairer, whether invoice received"
+      "default": false
     },
     "excess_contribution_notes": {
-      "type": "string",
-      "description": "Additional notes about the excess contribution"
+      "type": "string"
     },
     "referrer": {
       "type": "string"
@@ -172,28 +162,22 @@
       "type": "string"
     },
     "client_driving_license": {
-      "type": "string",
-      "description": "Client's driving license number"
+      "type": "string"
     },
     "client_address_line_1": {
-      "type": "string",
-      "description": "Client street address"
+      "type": "string"
     },
     "client_address_line_2": {
-      "type": "string",
-      "description": "Client additional address line"
+      "type": "string"
     },
     "client_town": {
-      "type": "string",
-      "description": "Client town or city"
+      "type": "string"
     },
     "client_county": {
-      "type": "string",
-      "description": "Client county or state"
+      "type": "string"
     },
     "client_postcode": {
-      "type": "string",
-      "description": "Client postal code"
+      "type": "string"
     },
     "client_vat_status": {
       "type": "string",
@@ -216,67 +200,52 @@
       "type": "string"
     },
     "vehicle_make": {
-      "type": "string",
-      "description": "Vehicle manufacturer from DVLA"
+      "type": "string"
     },
     "vehicle_model": {
-      "type": "string",
-      "description": "Vehicle model from DVLA"
+      "type": "string"
     },
     "vehicle_colour": {
-      "type": "string",
-      "description": "Vehicle colour from DVLA"
+      "type": "string"
     },
     "vehicle_fuel_type": {
-      "type": "string",
-      "description": "Fuel type from DVLA"
+      "type": "string"
     },
     "vehicle_year_of_manufacture": {
-      "type": "number",
-      "description": "Year vehicle was manufactured"
+      "type": "number"
     },
     "vehicle_engine_capacity": {
-      "type": "number",
-      "description": "Engine capacity in CC"
+      "type": "number"
     },
     "vehicle_co2_emissions": {
-      "type": "number",
-      "description": "CO2 emissions in g/km"
+      "type": "number"
     },
     "vehicle_euro_status": {
-      "type": "string",
-      "description": "Euro emissions standard"
+      "type": "string"
     },
     "vehicle_mot_status": {
-      "type": "string",
-      "description": "Current MOT status"
+      "type": "string"
     },
     "vehicle_mot_expiry_date": {
       "type": "string",
-      "format": "date",
-      "description": "MOT expiry date"
+      "format": "date"
     },
     "vehicle_tax_status": {
-      "type": "string",
-      "description": "Current tax status"
+      "type": "string"
     },
     "vehicle_tax_due_date": {
       "type": "string",
-      "format": "date",
-      "description": "Tax due date"
+      "format": "date"
     },
     "vehicle_date_of_last_v5c_issued": {
       "type": "string",
-      "format": "date",
-      "description": "Date last V5C was issued"
+      "format": "date"
     },
     "vehicle_wheelplan": {
-      "type": "string",
-      "description": "Vehicle wheelplan description"
+      "type": "string"
     },
     "vehicle_revenue_weight": {
-      "type": "number",
-      "description": "Maximum legal weight"
+      "type": "number"
     },
     "vehicle_location": {
       "type": "string"
@@ -313,24 +282,19 @@
       "type": "string"
     },
     "tp_address_line_1": {
-      "type": "string",
-      "description": "Third party street address"
+      "type": "string"
     },
     "tp_address_line_2": {
-      "type": "string",
-      "description": "Third party additional address line"
+      "type": "string"
     },
     "tp_town": {
-      "type": "string",
-      "description": "Third party town or city"
+      "type": "string"
     },
     "tp_county": {
-      "type": "string",
-      "description": "Third party county or state"
+      "type": "string"
     },
     "tp_postcode": {
-      "type": "string",
-      "description": "Third party postal code"
+      "type": "string"
     },
     "tp_vat_status": {
       "type": "string",
@@ -344,20 +308,16 @@
       "type": "string"
     },
     "tp_reg": {
-      "type": "string",
-      "description": "Third party vehicle registration"
+      "type": "string"
     },
     "tp_insurer": {
-      "type": "string",
-      "description": "Third party insurer"
+      "type": "string"
     },
     "tp_policy_number": {
-      "type": "string",
-      "description": "Third party policy number"
+      "type": "string"
     },
     "tp_claim_ref": {
-      "type": "string",
-      "description": "Third party claim reference"
+      "type": "string"
     },
     "tp_vehicle_location": {
       "type": "string"
@@ -393,17 +353,14 @@
     },
     "repairer_accepted": {
       "type": "boolean",
-      "default": false,
-      "description": "Whether the repairer has accepted this job"
+      "default": false
     },
     "repairer_accepted_date": {
       "type": "string",
-      "format": "date",
-      "description": "Date when the repairer accepted the job"
+      "format": "date"
     },
     "instruction_pdf_url": {
-      "type": "string",
-      "description": "URL of the generated instruction PDF for the repairer"
+      "type": "string"
     },
     "authorising_party": {
       "type": "string"
@@ -597,13 +554,11 @@
     },
     "last_updated_at": {
       "type": "string",
-      "format": "date-time",
-      "description": "Timestamp of last significant update to the claim"
+      "format": "date-time"
     },
     "next_update_due_at": {
       "type": "string",
-      "format": "date-time",
-      "description": "When the next update is due (48 hours from last update)"
+      "format": "date-time"
     },
     "update_status_flag": {
       "type": "string",
@@ -614,68 +569,53 @@
         "Blue",
         "Gray"
       ],
-      "default": "Green",
-      "description": "Visual indicator for update status"
+      "default": "Green"
     },
     "override_active": {
       "type": "boolean",
-      "default": false,
-      "description": "Whether a manual update override/snooze is active"
+      "default": false
     },
     "override_reason": {
-      "type": "string",
-      "description": "Reason for the update override"
+      "type": "string"
     },
     "override_expiry_at": {
       "type": "string",
-      "format": "date-time",
-      "description": "When the override expires and normal tracking resumes"
+      "format": "date-time"
     },
     "override_by_user_email": {
-      "type": "string",
-      "description": "Email of user who set the override"
+      "type": "string"
     },
     "override_notes": {
-      "type": "string",
-      "description": "Additional notes about the override"
+      "type": "string"
     },
     "requires_indemnity": {
       "type": "boolean",
-      "default": false,
-      "description": "Whether this claim requires indemnity checks"
+      "default": false
     },
     "indemnity_driver_dob": {
       "type": "string",
-      "format": "date",
-      "description": "Driver's date of birth"
+      "format": "date"
     },
     "indemnity_registered_owner": {
-      "type": "string",
-      "description": "Registered owner and keeper of the vehicle"
+      "type": "string"
     },
     "indemnity_pending_prosecutions": {
-      "type": "string",
-      "description": "Details of any pending prosecutions"
+      "type": "string"
     },
     "indemnity_dvla_medical_restrictions": {
-      "type": "string",
-      "description": "Has driver been told not to drive by DVLA or medical source"
+      "type": "string"
     },
     "indemnity_full_license_12_months": {
-      "type": "string",
-      "description": "Has driver held full UK/EU license for 12+ months"
+      "type": "string"
     },
     "indemnity_convictions_last_5_years": {
-      "type": "string",
-      "description": "Motoring convictions or fixed penalty points in last 5 years"
+      "type": "string"
     },
     "indemnity_vehicle_use_at_incident": {
-      "type": "string",
-      "description": "What the vehicle was being used for at time of incident"
+      "type": "string"
     },
     "indemnity_vehicle_modifications": {
-      "type": "string",
-      "description": "Any modifications to the policyholder's vehicle"
+      "type": "string"
     }
   },
   "required": [],
@@ -715,13 +655,13 @@
           "created_by": "{{user.email}}"
         },
         {
-          "referrer_id": "{{user.linked_referrer_id}}"
+          "data.referrer_id": "{{user.data.linked_referrer_id}}"
         },
         {
-          "bodyshop_id": "{{user.linked_bodyshop_id}}"
+          "data.bodyshop_id": "{{user.data.linked_bodyshop_id}}"
         },
         {
-          "client_id": "{{user.linked_client_id}}"
+          "data.client_id": "{{user.data.linked_client_id}}"
         }
       ]
     },
@@ -738,7 +678,7 @@
           }
         },
         {
-          "bodyshop_id": "{{user.linked_bodyshop_id}}"
+          "data.bodyshop_id": "{{user.data.linked_bodyshop_id}}"
         }
       ]
     },
