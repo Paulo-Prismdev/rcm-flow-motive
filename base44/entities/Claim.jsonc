@@ -681,28 +681,68 @@
   "required": [],
   "rls": {
     "create": {
-      "user_condition": {
-        "$or": [
-          {
+      "$or": [
+        {
+          "user_condition": {
             "role": "admin"
-          },
-          {
+          }
+        },
+        {
+          "user_condition": {
             "user_type": "internal"
-          },
-          {
+          }
+        },
+        {
+          "user_condition": {
             "user_type": "referrer"
           }
-        ]
-      }
+        }
+      ]
     },
     "read": {
-      "created_by": "{{user.email}}"
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "user_type": "internal"
+          }
+        },
+        {
+          "data.referrer_id": "{{user.linked_referrer_id}}"
+        },
+        {
+          "data.bodyshop_id": "{{user.linked_bodyshop_id}}"
+        },
+        {
+          "data.client_id": "{{user.linked_client_id}}"
+        }
+      ]
     },
     "update": {
-      "created_by": "{{user.email}}"
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "user_type": "internal"
+          }
+        },
+        {
+          "data.bodyshop_id": "{{user.linked_bodyshop_id}}"
+        }
+      ]
     },
     "delete": {
-      "created_by": "{{user.email}}"
+      "user_condition": {
+        "role": "admin"
+      }
     }
   }
 }
