@@ -87,7 +87,7 @@
           }
         },
         {
-          "id": "{{user.linked_bodyshop_id}}"
+          "id": "{{user.data.linked_bodyshop_id}}"
         }
       ]
     },
@@ -104,7 +104,7 @@
           }
         },
         {
-          "id": "{{user.linked_bodyshop_id}}"
+          "id": "{{user.data.linked_bodyshop_id}}"
         }
       ]
     },
