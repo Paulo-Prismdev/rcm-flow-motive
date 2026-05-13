@@ -310,18 +310,18 @@ export default function Layout({ children, currentPageName }) {
         }
 
         .glass-button {
-          background: var(--surface);
-          border: 1px solid var(--border);
+          background: rgba(255,255,255,0.07);
+          border: 1px solid rgba(255,255,255,0.12);
           border-radius: 12px;
           box-shadow: var(--shadow-sm);
           transition: all 0.2s ease;
           cursor: pointer;
-          color: var(--foreground);
+          color: rgba(255,255,255,0.85);
         }
 
         .glass-button:hover {
-          background: var(--surface-hover);
-          border-color: var(--border-strong);
+          background: rgba(255,255,255,0.14);
+          border-color: rgba(255,255,255,0.2);
           box-shadow: var(--shadow-md);
           transform: translateY(-1px);
         }
@@ -382,10 +382,10 @@ export default function Layout({ children, currentPageName }) {
            ============================================ */
 
         .header-glass {
-          background: var(--glass-bg);
+          background: #151d44;
           backdrop-filter: blur(24px);
           -webkit-backdrop-filter: blur(24px);
-          border: 1px solid var(--glass-border);
+          border: 1px solid rgba(255,255,255,0.08);
           border-radius: 20px;
           box-shadow: var(--shadow-lg);
         }
@@ -443,18 +443,18 @@ export default function Layout({ children, currentPageName }) {
           white-space: nowrap;
           font-size: 0.875rem;
           font-weight: 500;
-          background: var(--surface);
-          border: 1px solid var(--border);
+          background: rgba(255,255,255,0.07);
+          border: 1px solid rgba(255,255,255,0.12);
           border-radius: 12px;
           box-shadow: var(--shadow-sm);
           transition: all 0.2s ease;
-          color: var(--foreground);
+          color: rgba(255,255,255,0.85);
           text-decoration: none;
         }
 
         .nav-button:hover {
-          background: var(--surface-hover);
-          border-color: var(--border-strong);
+          background: rgba(255,255,255,0.14);
+          border-color: rgba(255,255,255,0.2);
           box-shadow: var(--shadow-md);
         }
 
