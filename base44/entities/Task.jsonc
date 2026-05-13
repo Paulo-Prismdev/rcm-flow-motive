@@ -1,0 +1,139 @@
+{
+  "name": "Task",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Task title"
+    },
+    "description": {
+      "type": "string",
+      "description": "Detailed description of the task"
+    },
+    "claim_id": {
+      "type": "string",
+      "description": "ID of the related claim"
+    },
+    "claim_job_number": {
+      "type": "string",
+      "description": "Job number of the related claim for display"
+    },
+    "claim_reg": {
+      "type": "string",
+      "description": "Vehicle reg of the related claim for display"
+    },
+    "assigned_to": {
+      "type": "string",
+      "description": "Email of the user assigned to this task"
+    },
+    "assigned_to_name": {
+      "type": "string",
+      "description": "Name of the assigned user for display"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Pending",
+        "In Progress",
+        "Completed",
+        "Cancelled"
+      ],
+      "default": "Pending",
+      "description": "Current status of the task"
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "Low",
+        "Medium",
+        "High",
+        "Urgent"
+      ],
+      "default": "Medium",
+      "description": "Priority level of the task"
+    },
+    "due_date": {
+      "type": "string",
+      "format": "date",
+      "description": "When the task is due"
+    },
+    "completed_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the task was completed"
+    },
+    "completed_by": {
+      "type": "string",
+      "description": "Email of user who completed the task"
+    },
+    "reminder_sent": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether a reminder notification has been sent"
+    },
+    "overdue_notification_sent": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether an overdue notification has been sent"
+    }
+  },
+  "required": [
+    "title",
+    "claim_id"
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "user_type": "internal"
+          }
+        }
+      ]
+    },
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "user_type": "internal"
+          }
+        },
+        {
+          "data.assigned_to": "{{user.email}}"
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "user_type": "internal"
+          }
+        },
+        {
+          "data.assigned_to": "{{user.email}}"
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
