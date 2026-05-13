@@ -1,0 +1,708 @@
+{
+  "name": "Claim",
+  "type": "object",
+  "properties": {
+    "job_number": {
+      "type": "string",
+      "description": "Unique job number (e.g. CLM-0001)"
+    },
+    "archived": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this claim is archived"
+    },
+    "reg": {
+      "type": "string",
+      "description": "Vehicle registration number"
+    },
+    "job_status": {
+      "type": "string",
+      "default": "New"
+    },
+    "claim_type": {
+      "type": "string",
+      "enum": [
+        "Credit Repair",
+        "Fault Claim",
+        "Non-Fault Claim",
+        "Total Loss",
+        "Glass Claim"
+      ]
+    },
+    "circumstances": {
+      "type": "string"
+    },
+    "loss_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date when the incident/loss occurred"
+    },
+    "loss_time": {
+      "type": "string",
+      "description": "Time when the incident/loss occurred (HH:MM format)"
+    },
+    "incident_location": {
+      "type": "string",
+      "description": "Location where the incident occurred"
+    },
+    "vehicle_use": {
+      "type": "string",
+      "enum": [
+        "Business",
+        "Social",
+        "Commuting"
+      ],
+      "description": "Use of vehicle at time of incident"
+    },
+    "courtesy_car_required": {
+      "type": "boolean"
+    },
+    "linked_estimate_id": {
+      "type": "string"
+    },
+    "linked_engineering_id": {
+      "type": "string"
+    },
+    "linked_parts_id": {
+      "type": "string"
+    },
+    "third_party_pursuit_status": {
+      "type": "string",
+      "enum": [
+        "N/A",
+        "Awaiting Details",
+        "Details Obtained",
+        "Claim Created",
+        "In Progress",
+        "Completed"
+      ],
+      "default": "N/A",
+      "description": "Status of third-party pursuit for fault claims"
+    },
+    "linked_third_party_claim_id": {
+      "type": "string",
+      "description": "ID of the third-party claim created from this fault claim"
+    },
+    "linked_original_claim_id": {
+      "type": "string",
+      "description": "ID of the original fault claim (for third-party claims)"
+    },
+    "tp_capture_rejected_reason": {
+      "type": "string",
+      "description": "Reason why third-party capture was not possible"
+    },
+    "insurer": {
+      "type": "string"
+    },
+    "claim_ref": {
+      "type": "string"
+    },
+    "policy_number": {
+      "type": "string"
+    },
+    "policy_excess": {
+      "type": "number"
+    },
+    "excess_contribution_amount": {
+      "type": "number",
+      "description": "Amount we contribute towards client's excess"
+    },
+    "excess_contribution_method": {
+      "type": "string",
+      "enum": [
+        "None",
+        "Via Repairer",
+        "Direct to Client"
+      ],
+      "default": "None",
+      "description": "How the excess contribution is paid"
+    },
+    "excess_contribution_paid": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether our contribution has been paid"
+    },
+    "excess_contribution_paid_date": {
+      "type": "string",
+      "format": "date",
+      "description": "When the contribution was paid"
+    },
+    "excess_contribution_invoice_received": {
+      "type": "boolean",
+      "default": false,
+      "description": "If via repairer, whether invoice received"
+    },
+    "excess_contribution_notes": {
+      "type": "string",
+      "description": "Additional notes about the excess contribution"
+    },
+    "referrer": {
+      "type": "string"
+    },
+    "referrer_id": {
+      "type": "string",
+      "description": "ID of the Referrer entity"
+    },
+    "referrer_ref": {
+      "type": "string"
+    },
+    "file_handler": {
+      "type": "string"
+    },
+    "referrer_email": {
+      "type": "string"
+    },
+    "percent_to_referrer": {
+      "type": "number"
+    },
+    "client_name": {
+      "type": "string"
+    },
+    "client_id": {
+      "type": "string",
+      "description": "ID of the Client entity"
+    },
+    "client_phone": {
+      "type": "string"
+    },
+    "driver_contact_name": {
+      "type": "string"
+    },
+    "client_email": {
+      "type": "string"
+    },
+    "client_driving_license": {
+      "type": "string",
+      "description": "Client's driving license number"
+    },
+    "client_address_line_1": {
+      "type": "string",
+      "description": "Client street address"
+    },
+    "client_address_line_2": {
+      "type": "string",
+      "description": "Client additional address line"
+    },
+    "client_town": {
+      "type": "string",
+      "description": "Client town or city"
+    },
+    "client_county": {
+      "type": "string",
+      "description": "Client county or state"
+    },
+    "client_postcode": {
+      "type": "string",
+      "description": "Client postal code"
+    },
+    "client_vat_status": {
+      "type": "string",
+      "enum": [
+        "VAT Registered",
+        "Non-VAT",
+        "Unknown"
+      ]
+    },
+    "business_division": {
+      "type": "string"
+    },
+    "client_lat": {
+      "type": "number"
+    },
+    "client_lng": {
+      "type": "number"
+    },
+    "make_model": {
+      "type": "string"
+    },
+    "vehicle_make": {
+      "type": "string",
+      "description": "Vehicle manufacturer from DVLA"
+    },
+    "vehicle_model": {
+      "type": "string",
+      "description": "Vehicle model from DVLA"
+    },
+    "vehicle_colour": {
+      "type": "string",
+      "description": "Vehicle colour from DVLA"
+    },
+    "vehicle_fuel_type": {
+      "type": "string",
+      "description": "Fuel type from DVLA"
+    },
+    "vehicle_year_of_manufacture": {
+      "type": "number",
+      "description": "Year vehicle was manufactured"
+    },
+    "vehicle_engine_capacity": {
+      "type": "number",
+      "description": "Engine capacity in CC"
+    },
+    "vehicle_co2_emissions": {
+      "type": "number",
+      "description": "CO2 emissions in g/km"
+    },
+    "vehicle_euro_status": {
+      "type": "string",
+      "description": "Euro emissions standard"
+    },
+    "vehicle_mot_status": {
+      "type": "string",
+      "description": "Current MOT status"
+    },
+    "vehicle_mot_expiry_date": {
+      "type": "string",
+      "format": "date",
+      "description": "MOT expiry date"
+    },
+    "vehicle_tax_status": {
+      "type": "string",
+      "description": "Current tax status"
+    },
+    "vehicle_tax_due_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Tax due date"
+    },
+    "vehicle_date_of_last_v5c_issued": {
+      "type": "string",
+      "format": "date",
+      "description": "Date last V5C was issued"
+    },
+    "vehicle_wheelplan": {
+      "type": "string",
+      "description": "Vehicle wheelplan description"
+    },
+    "vehicle_revenue_weight": {
+      "type": "number",
+      "description": "Maximum legal weight"
+    },
+    "vehicle_location": {
+      "type": "string"
+    },
+    "vehicle_damage": {
+      "type": "string"
+    },
+    "vehicle_type": {
+      "type": "string",
+      "enum": [
+        "Car",
+        "Van",
+        "Motorcycle",
+        "HGV",
+        "Other"
+      ]
+    },
+    "unroadworthy": {
+      "type": "boolean"
+    },
+    "recovery_required": {
+      "type": "boolean"
+    },
+    "tp_name": {
+      "type": "string"
+    },
+    "tp_phone": {
+      "type": "string"
+    },
+    "tp_driver_contact": {
+      "type": "string"
+    },
+    "tp_email": {
+      "type": "string"
+    },
+    "tp_address_line_1": {
+      "type": "string",
+      "description": "Third party street address"
+    },
+    "tp_address_line_2": {
+      "type": "string",
+      "description": "Third party additional address line"
+    },
+    "tp_town": {
+      "type": "string",
+      "description": "Third party town or city"
+    },
+    "tp_county": {
+      "type": "string",
+      "description": "Third party county or state"
+    },
+    "tp_postcode": {
+      "type": "string",
+      "description": "Third party postal code"
+    },
+    "tp_vat_status": {
+      "type": "string",
+      "enum": [
+        "VAT Registered",
+        "Non-VAT",
+        "Unknown"
+      ]
+    },
+    "tp_make_model": {
+      "type": "string"
+    },
+    "tp_reg": {
+      "type": "string",
+      "description": "Third party vehicle registration"
+    },
+    "tp_insurer": {
+      "type": "string",
+      "description": "Third party insurer"
+    },
+    "tp_policy_number": {
+      "type": "string",
+      "description": "Third party policy number"
+    },
+    "tp_claim_ref": {
+      "type": "string",
+      "description": "Third party claim reference"
+    },
+    "tp_vehicle_location": {
+      "type": "string"
+    },
+    "tp_vehicle_damage": {
+      "type": "string"
+    },
+    "tp_vehicle_type": {
+      "type": "string",
+      "enum": [
+        "Car",
+        "Van",
+        "Motorcycle",
+        "HGV",
+        "Other"
+      ]
+    },
+    "tp_unroadworthy": {
+      "type": "boolean"
+    },
+    "tp_recovery_required": {
+      "type": "boolean"
+    },
+    "bodyshop": {
+      "type": "string"
+    },
+    "bodyshop_id": {
+      "type": "string",
+      "description": "ID of the Bodyshop entity"
+    },
+    "bodyshop_email": {
+      "type": "string"
+    },
+    "repairer_accepted": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the repairer has accepted this job"
+    },
+    "repairer_accepted_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date when the repairer accepted the job"
+    },
+    "instruction_pdf_url": {
+      "type": "string",
+      "description": "URL of the generated instruction PDF for the repairer"
+    },
+    "authorising_party": {
+      "type": "string"
+    },
+    "audatex_code": {
+      "type": "string"
+    },
+    "send_estimate_email": {
+      "type": "string"
+    },
+    "artura_est_url": {
+      "type": "string"
+    },
+    "est_fee": {
+      "type": "number"
+    },
+    "referral_fee_repairer": {
+      "type": "number"
+    },
+    "percent_bld_instruction": {
+      "type": "number"
+    },
+    "last_file_update": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "last_client_update": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "latest_update": {
+      "type": "string"
+    },
+    "date_received": {
+      "type": "string",
+      "format": "date"
+    },
+    "estimate_completed": {
+      "type": "string",
+      "format": "date"
+    },
+    "authority_received": {
+      "type": "string",
+      "format": "date"
+    },
+    "bs_instructed": {
+      "type": "string",
+      "format": "date"
+    },
+    "booking_in_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "on_site_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "all_parts_on_site": {
+      "type": "string",
+      "format": "date"
+    },
+    "ecd": {
+      "type": "string",
+      "format": "date"
+    },
+    "completion_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "invoice_received_repairer": {
+      "type": "string",
+      "format": "date"
+    },
+    "invoice_sent_referrer": {
+      "type": "string",
+      "format": "date"
+    },
+    "estimate_cost_net": {
+      "type": "number"
+    },
+    "authority_cost_net": {
+      "type": "number"
+    },
+    "estimate_cost_gross": {
+      "type": "number"
+    },
+    "authority_cost_gross": {
+      "type": "number"
+    },
+    "final_repair_cost": {
+      "type": "number"
+    },
+    "total_invoice_repairer": {
+      "type": "number"
+    },
+    "percent_fee_optima": {
+      "type": "number"
+    },
+    "percent_taken_factor": {
+      "type": "number"
+    },
+    "percent_bld_invoice": {
+      "type": "number"
+    },
+    "artura_percent": {
+      "type": "number"
+    },
+    "total_loss_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "storage_amount_net": {
+      "type": "number"
+    },
+    "storage_amount_vat": {
+      "type": "number"
+    },
+    "storage_invoice_repairer": {
+      "type": "number"
+    },
+    "cancellation_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "cancellation_reason": {
+      "type": "string"
+    },
+    "date_sent_factor": {
+      "type": "string",
+      "format": "date"
+    },
+    "factored": {
+      "type": "boolean"
+    },
+    "date_payment_in": {
+      "type": "string",
+      "format": "date"
+    },
+    "survey_status": {
+      "type": "string",
+      "enum": [
+        "Not Sent",
+        "Sent",
+        "Completed",
+        "No Response"
+      ]
+    },
+    "invoice_status": {
+      "type": "string",
+      "enum": [
+        "Not Ready for Invoicing",
+        "Ready to Invoice",
+        "Invoice Required - Pending",
+        "Invoiced",
+        "Invoice Paid",
+        "Invoice Overdue",
+        "Not Applicable"
+      ],
+      "default": "Not Ready for Invoicing"
+    },
+    "ready_invoice_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "invoice_notes": {
+      "type": "string"
+    },
+    "invoice_amount": {
+      "type": "number"
+    },
+    "external_invoice_ref": {
+      "type": "string"
+    },
+    "invoice_sent_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "invoice_due_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "invoice_payment_received": {
+      "type": "string",
+      "format": "date"
+    },
+    "file_urls": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "last_updated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp of last significant update to the claim"
+    },
+    "next_update_due_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the next update is due (48 hours from last update)"
+    },
+    "update_status_flag": {
+      "type": "string",
+      "enum": [
+        "Green",
+        "Amber",
+        "Red",
+        "Blue",
+        "Gray"
+      ],
+      "default": "Green",
+      "description": "Visual indicator for update status"
+    },
+    "override_active": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether a manual update override/snooze is active"
+    },
+    "override_reason": {
+      "type": "string",
+      "description": "Reason for the update override"
+    },
+    "override_expiry_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the override expires and normal tracking resumes"
+    },
+    "override_by_user_email": {
+      "type": "string",
+      "description": "Email of user who set the override"
+    },
+    "override_notes": {
+      "type": "string",
+      "description": "Additional notes about the override"
+    },
+    "requires_indemnity": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this claim requires indemnity checks"
+    },
+    "indemnity_driver_dob": {
+      "type": "string",
+      "format": "date",
+      "description": "Driver's date of birth"
+    },
+    "indemnity_registered_owner": {
+      "type": "string",
+      "description": "Registered owner and keeper of the vehicle"
+    },
+    "indemnity_pending_prosecutions": {
+      "type": "string",
+      "description": "Details of any pending prosecutions"
+    },
+    "indemnity_dvla_medical_restrictions": {
+      "type": "string",
+      "description": "Has driver been told not to drive by DVLA or medical source"
+    },
+    "indemnity_full_license_12_months": {
+      "type": "string",
+      "description": "Has driver held full UK/EU license for 12+ months"
+    },
+    "indemnity_convictions_last_5_years": {
+      "type": "string",
+      "description": "Motoring convictions or fixed penalty points in last 5 years"
+    },
+    "indemnity_vehicle_use_at_incident": {
+      "type": "string",
+      "description": "What the vehicle was being used for at time of incident"
+    },
+    "indemnity_vehicle_modifications": {
+      "type": "string",
+      "description": "Any modifications to the policyholder's vehicle"
+    }
+  },
+  "required": [],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "$or": [
+          {
+            "role": "admin"
+          },
+          {
+            "user_type": "internal"
+          },
+          {
+            "user_type": "referrer"
+          }
+        ]
+      }
+    },
+    "read": {
+      "created_by": "{{user.email}}"
+    },
+    "update": {
+      "created_by": "{{user.email}}"
+    },
+    "delete": {
+      "created_by": "{{user.email}}"
+    }
+  }
+}
