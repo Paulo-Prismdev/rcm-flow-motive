@@ -1,0 +1,165 @@
+{
+  "name": "Message",
+  "type": "object",
+  "properties": {
+    "content": {
+      "type": "string",
+      "description": "The message text content"
+    },
+    "sender_email": {
+      "type": "string",
+      "description": "Email of the user who sent the message"
+    },
+    "sender_name": {
+      "type": "string",
+      "description": "Name of the sender at time of sending"
+    },
+    "conversation_id": {
+      "type": "string",
+      "description": "Unique ID for the conversation thread or channel"
+    },
+    "conversation_type": {
+      "type": "string",
+      "enum": [
+        "direct",
+        "channel"
+      ],
+      "default": "direct",
+      "description": "Type of conversation - direct message or channel"
+    },
+    "channel_name": {
+      "type": "string",
+      "description": "Name of the channel if conversation_type is channel"
+    },
+    "channel_description": {
+      "type": "string",
+      "description": "Description of the channel"
+    },
+    "channel_members": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Array of user emails who are members of this channel",
+      "default": []
+    },
+    "is_department_channel": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this is an official department channel"
+    },
+    "department": {
+      "type": "string",
+      "description": "Department name if this is a department channel"
+    },
+    "is_read": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the message has been read (for direct messages)"
+    },
+    "read_by": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Array of user emails who have read this message (for channels)",
+      "default": []
+    },
+    "attachment_urls": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Array of file URLs attached to the message",
+      "default": []
+    },
+    "reply_to_message_id": {
+      "type": "string",
+      "description": "ID of the message this is replying to"
+    },
+    "reactions": {
+      "type": "object",
+      "description": "Object with emoji as key and array of user emails as value",
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "default": {}
+    },
+    "is_pinned": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this message is pinned in the channel"
+    },
+    "mentioned_users": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Array of user emails mentioned in this message",
+      "default": []
+    }
+  },
+  "required": [
+    "content",
+    "sender_email",
+    "conversation_id",
+    "conversation_type"
+  ],
+  "rls": {
+    "create": {
+      "sender_email": "{{user.email}}"
+    },
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "conversation_type": "direct",
+          "channel_members": {
+            "$in": [
+              "{{user.email}}"
+            ]
+          }
+        },
+        {
+          "conversation_type": "channel",
+          "channel_members": {
+            "$in": [
+              "{{user.email}}"
+            ]
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "sender_email": "{{user.email}}"
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "sender_email": "{{user.email}}"
+        }
+      ]
+    }
+  }
+}
