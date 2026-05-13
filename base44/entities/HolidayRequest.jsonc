@@ -1,0 +1,143 @@
+{
+  "name": "HolidayRequest",
+  "type": "object",
+  "properties": {
+    "employee_email": {
+      "type": "string",
+      "description": "Email of the employee requesting holiday"
+    },
+    "employee_name": {
+      "type": "string",
+      "description": "Name of the employee"
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Start date of holiday"
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date",
+      "description": "End date of holiday"
+    },
+    "total_days": {
+      "type": "number",
+      "description": "Total number of days requested"
+    },
+    "holiday_type": {
+      "type": "string",
+      "enum": [
+        "Annual Leave",
+        "Unpaid Leave",
+        "Study Leave",
+        "Compassionate Leave",
+        "Other"
+      ],
+      "default": "Annual Leave"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Pending",
+        "Approved",
+        "Rejected",
+        "Cancelled"
+      ],
+      "default": "Pending"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Additional notes or reason for holiday"
+    },
+    "approved_by": {
+      "type": "string",
+      "description": "Email of the person who approved/rejected"
+    },
+    "approved_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the request was approved/rejected"
+    }
+  },
+  "required": [
+    "employee_email",
+    "employee_name",
+    "start_date",
+    "end_date",
+    "total_days"
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "employee_email": "{{user.email}}"
+        }
+      ]
+    },
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "can_manage_permissions": true
+          }
+        },
+        {
+          "employee_email": "{{user.email}}"
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "can_manage_permissions": true
+          }
+        },
+        {
+          "$and": [
+            {
+              "employee_email": "{{user.email}}"
+            },
+            {
+              "status": "Pending"
+            }
+          ]
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "$and": [
+            {
+              "employee_email": "{{user.email}}"
+            },
+            {
+              "status": "Pending"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

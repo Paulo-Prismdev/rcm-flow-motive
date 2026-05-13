@@ -110,7 +110,7 @@
   ],
   "rls": {
     "create": {
-      "data.sender_email": "{{user.email}}"
+      "sender_email": "{{user.email}}"
     },
     "read": {
       "$or": [
@@ -120,7 +120,7 @@
           }
         },
         {
-          "data.channel_members": {
+          "channel_members": {
             "$in": [
               "{{user.email}}"
             ]
@@ -136,14 +136,21 @@
           }
         },
         {
-          "data.sender_email": "{{user.email}}"
+          "sender_email": "{{user.email}}"
         }
       ]
     },
     "delete": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "sender_email": "{{user.email}}"
+        }
+      ]
     }
   }
 }

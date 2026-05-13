@@ -159,6 +159,9 @@
           "user_condition": {
             "user_type": "internal"
           }
+        },
+        {
+          "created_by": "{{user.email}}"
         }
       ]
     },
@@ -178,7 +181,7 @@
           "created_by": "{{user.email}}"
         },
         {
-          "data.client_id": "{{user.linked_client_id}}"
+          "client_id": "{{user.linked_client_id}}"
         }
       ]
     },
@@ -193,13 +196,23 @@
           "user_condition": {
             "user_type": "internal"
           }
+        },
+        {
+          "created_by": "{{user.email}}"
         }
       ]
     },
     "delete": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "created_by": "{{user.email}}"
+        }
+      ]
     }
   }
 }
