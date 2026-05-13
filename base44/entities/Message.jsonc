@@ -110,7 +110,7 @@
   ],
   "rls": {
     "create": {
-      "sender_email": "{{user.email}}"
+      "data.sender_email": "{{user.email}}"
     },
     "read": {
       "$or": [
@@ -120,16 +120,7 @@
           }
         },
         {
-          "conversation_type": "direct",
-          "channel_members": {
-            "$in": [
-              "{{user.email}}"
-            ]
-          }
-        },
-        {
-          "conversation_type": "channel",
-          "channel_members": {
+          "data.channel_members": {
             "$in": [
               "{{user.email}}"
             ]
@@ -145,21 +136,14 @@
           }
         },
         {
-          "sender_email": "{{user.email}}"
+          "data.sender_email": "{{user.email}}"
         }
       ]
     },
     "delete": {
-      "$or": [
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        },
-        {
-          "sender_email": "{{user.email}}"
-        }
-      ]
+      "user_condition": {
+        "role": "admin"
+      }
     }
   }
 }
