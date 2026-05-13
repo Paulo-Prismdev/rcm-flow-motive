@@ -288,7 +288,23 @@
   "required": [],
   "rls": {
     "create": {
-      "created_by": "{{user.email}}"
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "user_type": "internal"
+          }
+        },
+        {
+          "user_condition": {
+            "user_type": "bodyshop"
+          }
+        }
+      ]
     },
     "read": {
       "$or": [
@@ -303,13 +319,10 @@
           }
         },
         {
-          "created_by": "{{user.email}}"
+          "data.bodyshop_company_id": "{{user.linked_bodyshop_id}}"
         },
         {
-          "bodyshop_company_id": "{{user.linked_bodyshop_id}}"
-        },
-        {
-          "supplier_id": "{{user.linked_supplier_id}}"
+          "data.supplier_id": "{{user.linked_supplier_id}}"
         }
       ]
     },
@@ -326,21 +339,14 @@
           }
         },
         {
-          "created_by": "{{user.email}}"
+          "data.bodyshop_company_id": "{{user.linked_bodyshop_id}}"
         }
       ]
     },
     "delete": {
-      "$or": [
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        },
-        {
-          "created_by": "{{user.email}}"
-        }
-      ]
+      "user_condition": {
+        "role": "admin"
+      }
     }
   }
 }
