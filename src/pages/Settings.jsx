@@ -6,7 +6,6 @@ import { createPageUrl } from "@/utils";
 import StatusManagementTab from "../components/settings/StatusManagementTab";
 import CompanyManagementTab from "../components/settings/CompanyManagementTab";
 import PortalManagementTab from "../components/settings/PortalManagementTab";
-import BrandingTab from "../components/settings/BrandingTab";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 
@@ -17,7 +16,7 @@ import ChaserEmailSettings from "./ChaserEmailSettings";
 import SupplierManagement from "./SupplierManagement";
 
 export default function Settings() {
-  const [activeMainTab, setActiveMainTab] = useState("branding");
+  const [activeMainTab, setActiveMainTab] = useState("status");
   const [activeStatusTab, setActiveStatusTab] = useState("Claim");
 
   const { data: currentUser } = useQuery({
@@ -28,7 +27,6 @@ export default function Settings() {
   const canManagePermissions = currentUser?.role === 'admin' || currentUser?.can_manage_permissions;
 
   const mainTabs = [
-    { id: "branding", label: "Branding" },
     { id: "status", label: "Status Settings" },
     { id: "companies", label: "Companies" },
     { id: "portals", label: "Portal Management" },
@@ -48,7 +46,6 @@ export default function Settings() {
   const visibleMainTabs = mainTabs.filter(tab => tab.permission !== false);
 
   const mainTabComponents = {
-    branding: <BrandingTab />,
     companies: <CompanyManagementTab />,
     suppliers: <SupplierManagement />,
     portals: <PortalManagementTab />,

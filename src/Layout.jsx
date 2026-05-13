@@ -68,12 +68,7 @@ export default function Layout({ children, currentPageName }) {
     queryFn: () => base44.auth.me(),
   });
 
-  const { data: appConfigs = [] } = useQuery({
-    queryKey: ['appConfigs'],
-    queryFn: () => base44.entities.AppConfig.list(),
-  });
-
-  const companyLogo = appConfigs.find(c => c.config_key === 'company_logo')?.config_value || '';
+  const companyLogo = 'https://media.base44.com/images/public/68ee39fb8915b1b539e13c59/b2cb057e2_RCMAutomotiveLogoGreenAutomotivewithHLights.jpg';
 
   // Simplified messages query - only fetch when messenger is about to open
   // This prevents unnecessary WebSocket connections
@@ -652,15 +647,13 @@ export default function Layout({ children, currentPageName }) {
 
                 {/* Company Logo + App Title */}
                 <div className="flex items-center gap-3">
-                  {companyLogo && (
-                                        <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 bg-surface-hover mx-5">
-                                          <img 
-                                            src={companyLogo} 
-                                            alt="Company Logo" 
-                                            className="w-full h-full object-contain"
-                                          />
-                                        </div>
-                                      )}
+                  <div className="h-14 w-auto flex-shrink-0">
+                  <img 
+                    src={companyLogo} 
+                    alt="RCM Automotive" 
+                    className="h-full w-auto object-contain"
+                  />
+                </div>
                   
                 </div>
               </div>
