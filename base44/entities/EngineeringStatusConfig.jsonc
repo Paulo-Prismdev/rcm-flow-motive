@@ -1,0 +1,59 @@
+{
+  "name": "EngineeringStatusConfig",
+  "type": "object",
+  "properties": {
+    "status_name": {
+      "type": "string",
+      "description": "Name of the engineering status"
+    },
+    "color": {
+      "type": "string",
+      "enum": [
+        "blue",
+        "green",
+        "orange",
+        "red",
+        "purple",
+        "yellow",
+        "gray"
+      ],
+      "default": "blue",
+      "description": "Color theme for this status"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this status is currently in use"
+    },
+    "is_default": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this is a built-in default status"
+    },
+    "sort_order": {
+      "type": "number",
+      "description": "Order in which status appears in dropdowns"
+    }
+  },
+  "required": [
+    "status_name"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": true,
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
