@@ -96,10 +96,12 @@ function getRecipientEmail(claim, recipientType, customEmail) {
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    
-    // This function should be called by a scheduler/cron
-    // For now, it can be called manually or via a scheduled task
-    
+
+    const user = await base44.auth.me();
+    if (!user || user.role !== 'admin') {
+      return Response.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
+    }
+
     console.log('Starting chaser email processing...');
     
     // Step 1: Fetch all active chaser email rules
