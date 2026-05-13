@@ -712,13 +712,16 @@
           }
         },
         {
-          "data.referrer_id": "{{user.linked_referrer_id}}"
+          "created_by": "{{user.email}}"
         },
         {
-          "data.bodyshop_id": "{{user.linked_bodyshop_id}}"
+          "referrer_id": "{{user.linked_referrer_id}}"
         },
         {
-          "data.client_id": "{{user.linked_client_id}}"
+          "bodyshop_id": "{{user.linked_bodyshop_id}}"
+        },
+        {
+          "client_id": "{{user.linked_client_id}}"
         }
       ]
     },
@@ -735,7 +738,7 @@
           }
         },
         {
-          "data.bodyshop_id": "{{user.linked_bodyshop_id}}"
+          "bodyshop_id": "{{user.linked_bodyshop_id}}"
         }
       ]
     },

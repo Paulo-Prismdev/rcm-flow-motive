@@ -70,11 +70,6 @@
           "user_condition": {
             "user_type": "internal"
           }
-        },
-        {
-          "user_condition": {
-            "user_type": "bodyshop"
-          }
         }
       ]
     },
