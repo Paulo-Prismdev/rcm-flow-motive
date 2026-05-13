@@ -313,11 +313,11 @@ export default function Dashboard() {
   return (
     <div className="space-y-4 md:space-y-5">
       {/* Header */}
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm px-5 py-4">
+      <div className="bg-card text-card-foreground rounded-2xl border border-border shadow-sm px-5 py-4">
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div>
-            <h1 className="text-xl font-bold text-slate-800 tracking-tight">Dashboard</h1>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <h1 className="text-xl font-bold tracking-tight">Dashboard</h1>
+            <p className="text-xs text-muted-foreground mt-0.5">
               {isEditMode ? 'Drag widgets to reorder • Resize from corner • Click × to remove' : 'Monitor your operations at a glance'}
             </p>
           </div>
@@ -474,12 +474,12 @@ export default function Dashboard() {
       </DragDropContext>
 
       {localWidgets.length === 0 && (
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-16 text-center">
-          <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-4">
-            <LayoutIcon className="w-8 h-8 text-slate-300" />
+        <div className="bg-card text-card-foreground rounded-2xl border border-border shadow-sm p-16 text-center">
+          <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-4">
+            <LayoutIcon className="w-8 h-8 text-muted-foreground" />
           </div>
-          <h3 className="text-base font-bold text-slate-700 mb-1">Your dashboard is empty</h3>
-          <p className="text-sm text-slate-400 mb-5">Add widgets to personalize your view</p>
+          <h3 className="text-base font-bold mb-1">Your dashboard is empty</h3>
+          <p className="text-sm text-muted-foreground mb-5">Add widgets to personalize your view</p>
           {canEdit && (
             <Button onClick={() => setShowWidgetGallery(true)} className="h-9 px-5 text-sm font-semibold bg-slate-800 text-white hover:bg-slate-700 rounded-xl shadow-none">
               <Plus className="w-4 h-4 mr-2" />
