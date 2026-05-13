@@ -1,0 +1,145 @@
+{
+  "name": "Supplier",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Supplier company name"
+    },
+    "contact_name": {
+      "type": "string",
+      "description": "Main contact person at supplier"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "emails": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Email addresses for this supplier"
+    },
+    "part_supply_type": {
+      "type": "string",
+      "enum": [
+        "OEM",
+        "Green",
+        "Aftermarket",
+        "Reconditioned",
+        "Glass"
+      ],
+      "description": "Type of parts supplied by this supplier"
+    },
+    "address_line_1": {
+      "type": "string",
+      "description": "Street address"
+    },
+    "address_line_2": {
+      "type": "string",
+      "description": "Additional address line (optional)"
+    },
+    "town": {
+      "type": "string",
+      "description": "Town or City"
+    },
+    "county": {
+      "type": "string",
+      "description": "County or State"
+    },
+    "postcode": {
+      "type": "string",
+      "description": "Postal code"
+    },
+    "website": {
+      "type": "string"
+    },
+    "account_number": {
+      "type": "string",
+      "description": "Your account number with this supplier"
+    },
+    "portal_username": {
+      "type": "string",
+      "description": "Username for supplier portal access"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Additional notes about this supplier"
+    },
+    "manufacturer_associations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of vehicle manufacturers this supplier can supply parts for"
+    }
+  },
+  "required": [
+    "name",
+    "contact_name",
+    "phone",
+    "emails"
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "user_type": "internal"
+          }
+        }
+      ]
+    },
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "user_type": "internal"
+          }
+        },
+        {
+          "id": "{{user.linked_supplier_id}}"
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "user_type": "internal"
+          }
+        },
+        {
+          "id": "{{user.linked_supplier_id}}"
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "$or": [
+          {
+            "role": "admin"
+          },
+          {
+            "user_type": "internal"
+          }
+        ]
+      }
+    }
+  }
+}
