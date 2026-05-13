@@ -1,0 +1,303 @@
+{
+  "name": "Estimate",
+  "type": "object",
+  "properties": {
+    "job_number": {
+      "type": "string",
+      "description": "Unique job number (e.g. EST-0001)"
+    },
+    "archived": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this estimate is archived"
+    },
+    "name": {
+      "type": "string",
+      "description": "Job reference"
+    },
+    "repairer_action": {
+      "type": "string",
+      "enum": [
+        "Awaiting Response",
+        "In Progress",
+        "Submitted",
+        "Revised",
+        "Approved"
+      ]
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "High",
+        "Medium",
+        "Low"
+      ],
+      "default": "Medium"
+    },
+    "vda": {
+      "type": "string"
+    },
+    "date_received": {
+      "type": "string",
+      "format": "date"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "New",
+        "In Progress",
+        "Awaiting Authority",
+        "Authorised",
+        "Supplement Requested",
+        "Completed",
+        "Cancelled"
+      ],
+      "default": "New"
+    },
+    "repairer": {
+      "type": "string"
+    },
+    "repairer_id": {
+      "type": "string",
+      "description": "ID of the Bodyshop entity (repairer)"
+    },
+    "email_address": {
+      "type": "string"
+    },
+    "bodyshop_list": {
+      "type": "string"
+    },
+    "date_last_updated": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "date_est_checked": {
+      "type": "string",
+      "format": "date"
+    },
+    "est_platform": {
+      "type": "string",
+      "enum": [
+        "Audatex",
+        "GT Estimate",
+        "Glassmatix",
+        "Other"
+      ]
+    },
+    "job_type": {
+      "type": "string"
+    },
+    "fee": {
+      "type": "number"
+    },
+    "credit_repair": {
+      "type": "boolean"
+    },
+    "bld_percent": {
+      "type": "number"
+    },
+    "make_model": {
+      "type": "string"
+    },
+    "contract": {
+      "type": "string"
+    },
+    "insurer_work_provider": {
+      "type": "string"
+    },
+    "linked_claim_id": {
+      "type": "string"
+    },
+    "linked_parts_id": {
+      "type": "string"
+    },
+    "authorising_party": {
+      "type": "string"
+    },
+    "claim_number": {
+      "type": "string"
+    },
+    "estimate_value": {
+      "type": "number"
+    },
+    "percent_vehicle_value": {
+      "type": "number"
+    },
+    "auda_value": {
+      "type": "number"
+    },
+    "date_estimate_completed": {
+      "type": "string",
+      "format": "date"
+    },
+    "methods": {
+      "type": "string"
+    },
+    "authority_notes": {
+      "type": "string"
+    },
+    "date_authorised": {
+      "type": "string",
+      "format": "date"
+    },
+    "labour_rate_agreed": {
+      "type": "number"
+    },
+    "authorised_value": {
+      "type": "number"
+    },
+    "followed_method": {
+      "type": "boolean"
+    },
+    "all_docs_attached": {
+      "type": "boolean"
+    },
+    "missing_docs_details": {
+      "type": "string"
+    },
+    "supp_received": {
+      "type": "string",
+      "format": "date"
+    },
+    "supp_sent": {
+      "type": "string",
+      "format": "date"
+    },
+    "supp_authority_notes": {
+      "type": "string"
+    },
+    "labour_hours": {
+      "type": "number"
+    },
+    "paint_hours": {
+      "type": "number"
+    },
+    "specialist_hours": {
+      "type": "number"
+    },
+    "parts_cost": {
+      "type": "number"
+    },
+    "final_authorised_inc_vat": {
+      "type": "number"
+    },
+    "final_authorised_exc_vat": {
+      "type": "number"
+    },
+    "supp_authorised": {
+      "type": "string",
+      "format": "date"
+    },
+    "date_assistance_dealt": {
+      "type": "string",
+      "format": "date"
+    },
+    "info_request": {
+      "type": "string"
+    },
+    "qualified_vda_check": {
+      "type": "boolean"
+    },
+    "overtime": {
+      "type": "boolean"
+    },
+    "review": {
+      "type": "string"
+    },
+    "invoice_status": {
+      "type": "string",
+      "enum": [
+        "Not Ready for Invoicing",
+        "Ready to Invoice",
+        "Invoice Required - Pending",
+        "Invoiced",
+        "Invoice Paid",
+        "Invoice Overdue",
+        "Not Applicable"
+      ],
+      "default": "Not Ready for Invoicing"
+    },
+    "invoice_amount": {
+      "type": "number"
+    },
+    "invoice_notes": {
+      "type": "string"
+    },
+    "external_invoice_ref": {
+      "type": "string"
+    },
+    "invoice_sent_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "invoice_payment_received": {
+      "type": "string",
+      "format": "date"
+    },
+    "file_urls": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "user_type": "internal"
+          }
+        }
+      ]
+    },
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "user_type": "internal"
+          }
+        },
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "data.repairer_id": "{{user.linked_bodyshop_id}}"
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "user_type": "internal"
+          }
+        },
+        {
+          "data.repairer_id": "{{user.linked_bodyshop_id}}"
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
