@@ -4,12 +4,12 @@ import { Car, AlertCircle } from "lucide-react";
 
 export default function LoadingScreen() {
   const carVariants = {
-    initial: { x: -100, opacity: 0 },
+    initial: { x: -500, opacity: 0 },
     animate: {
       x: 400,
       opacity: 1,
       transition: {
-        duration: 3.5,
+        duration: 2,
         ease: "easeInOut",
       },
     },
