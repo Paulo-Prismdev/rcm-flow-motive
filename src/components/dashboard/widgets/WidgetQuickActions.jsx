@@ -6,8 +6,7 @@ import { Plus, Search, FileText } from 'lucide-react';
 export default function WidgetQuickActions({ config, isEditMode }) {
   const actions = [
     { label: 'New Claim', icon: Plus, link: createPageUrl('Claims'), color: 'text-blue-600' },
-    { label: 'Search', icon: Search, link: createPageUrl('Dashboard'), color: 'text-purple-600' },
-    { label: 'Reports', icon: FileText, link: createPageUrl('Dashboard'), color: 'text-green-600' },
+    { label: 'Reports', icon: FileText, link: createPageUrl('Reports'), color: 'text-green-600' },
   ];
 
   return (

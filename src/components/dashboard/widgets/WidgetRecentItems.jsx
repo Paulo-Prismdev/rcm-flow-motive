@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
@@ -29,7 +28,7 @@ export default function WidgetRecentItems({ config, isEditMode }) {
   };
 
   const getPageUrl = (item) => {
-    return createPageUrl(`${department}?view=${item.id}`);
+    return `${createPageUrl(department)}?view=${item.id}`;
   };
 
   return (

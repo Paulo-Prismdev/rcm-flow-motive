@@ -23,8 +23,8 @@ export default function WidgetRecentActivity({ config, isEditMode }) {
   });
 
   const recentCases = [
-    ...claims.slice(0, 3).map(c => ({ ...c, type: 'Claim', dept: 'Claims', link: createPageUrl(`Claims?view=${c.id}`) })),
-    ...estimates.slice(0, 2).map(e => ({ ...e, type: 'Estimate', dept: 'Estimating', link: createPageUrl(`Estimating?view=${e.id}`) })),
+    ...claims.slice(0, 3).map(c => ({ ...c, type: 'Claim', dept: 'Claims', link: `${createPageUrl('Claims')}?view=${c.id}` })),
+    ...estimates.slice(0, 2).map(e => ({ ...e, type: 'Estimate', dept: 'Estimating', link: `${createPageUrl('Estimating')}?view=${e.id}` })),
   ].sort((a, b) => new Date(b.created_date) - new Date(a.created_date)).slice(0, limit);
 
   return (
