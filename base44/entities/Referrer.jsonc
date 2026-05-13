@@ -1,0 +1,123 @@
+{
+  "name": "Referrer",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Referrer company name"
+    },
+    "logo_url": {
+      "type": "string",
+      "description": "URL of the company logo (JPEG or PNG)"
+    },
+    "contact_name": {
+      "type": "string",
+      "description": "Main contact person at referrer"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "address_line_1": {
+      "type": "string",
+      "description": "Street address"
+    },
+    "address_line_2": {
+      "type": "string",
+      "description": "Additional address line (optional)"
+    },
+    "town": {
+      "type": "string",
+      "description": "Town or City"
+    },
+    "county": {
+      "type": "string",
+      "description": "County or State"
+    },
+    "postcode": {
+      "type": "string",
+      "description": "Postal code"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Additional notes about this referrer"
+    },
+    "last_feedback_prompted_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date when feedback was last requested from this company"
+    }
+  },
+  "required": [
+    "name",
+    "contact_name",
+    "phone",
+    "email"
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "user_type": "internal"
+          }
+        }
+      ]
+    },
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "user_type": "internal"
+          }
+        },
+        {
+          "id": "{{user.data.linked_referrer_id}}"
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "user_type": "internal"
+          }
+        },
+        {
+          "id": "{{user.data.linked_referrer_id}}"
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "user_type": "internal"
+          }
+        }
+      ]
+    }
+  }
+}
