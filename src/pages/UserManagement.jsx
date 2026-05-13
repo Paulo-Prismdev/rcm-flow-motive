@@ -338,23 +338,6 @@ export default function UserManagement() {
     setError(null);
   };
 
-  const canManage = currentUser?.role === 'admin' || currentUser?.can_manage_permissions;
-
-  if (!canManage) {
-    return (
-      <div className="neomorph p-8 text-center">
-        <Shield className="w-12 h-12 mx-auto mb-4 text-red-600" />
-        <h2 className="text-xl font-bold text-gray-700 mb-2">Access Denied</h2>
-        <p className="text-gray-500">You do not have permission to manage user access.</p>
-      </div>
-    );
-  }
-
-  const getRoleName = (roleId) => {
-    const role = roles.find(r => r.id === roleId);
-    return role?.role_name || null;
-  };
-
   const requestFeedbackMutation = useMutation({
     mutationFn: async (userId) => {
       const response = await base44.functions.invoke('requestFeedback', { userId });
@@ -374,6 +357,23 @@ export default function UserManagement() {
     if (confirm('Send a feedback prompt to this user? They will see it the next time they log in to their portal.')) {
       requestFeedbackMutation.mutate(userId);
     }
+  };
+
+  const canManage = currentUser?.role === 'admin' || currentUser?.can_manage_permissions;
+
+  if (!canManage) {
+    return (
+      <div className="neomorph p-8 text-center">
+        <Shield className="w-12 h-12 mx-auto mb-4 text-red-600" />
+        <h2 className="text-xl font-bold text-gray-700 mb-2">Access Denied</h2>
+        <p className="text-gray-500">You do not have permission to manage user access.</p>
+      </div>
+    );
+  }
+
+  const getRoleName = (roleId) => {
+    const role = roles.find(r => r.id === roleId);
+    return role?.role_name || null;
   };
 
   return (

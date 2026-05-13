@@ -47,16 +47,15 @@ export default function NewJobsBanner({ bodyshopId }) {
     enabled: !!bodyshopId,
   });
 
-  // Fetch claims that are allocated but not yet accepted
+  // Fetch only unaccepted, pending claims for this bodyshop
   const { data: pendingJobs = [] } = useQuery({
     queryKey: ['pendingJobs', bodyshopId],
     queryFn: async () => {
-      const allClaims = await base44.entities.Claim.list('-created_date', 5000);
-      return allClaims.filter(c => 
-        c.bodyshop_id === bodyshopId && 
-        c.repairer_accepted !== true &&
-        !['Completed', 'Cancelled', 'Total Loss'].includes(c.job_status)
+      const results = await base44.entities.Claim.filter(
+        { bodyshop_id: bodyshopId, repairer_accepted: false },
+        '-created_date'
       );
+      return results.filter(c => !['Completed', 'Cancelled', 'Total Loss'].includes(c.job_status));
     },
     enabled: !!bodyshopId,
     refetchInterval: 30000,
@@ -151,7 +150,7 @@ export default function NewJobsBanner({ bodyshopId }) {
   return (
     <>
       {/* Prominent Banner */}
-      <div className="neomorph border-2 border-amber-500 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 overflow-hidden animate-pulse-subtle">
+      <div className="neomorph border-2 border-amber-500 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 overflow-hidden" style={{ animation: 'pulse-border 2s infinite' }}>
         <div 
           className="p-4 cursor-pointer"
           onClick={() => setExpanded(!expanded)}
@@ -235,15 +234,6 @@ export default function NewJobsBanner({ bodyshopId }) {
           </div>
         )}
 
-        <style>{`
-          @keyframes pulse-subtle {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
-            50% { box-shadow: 0 0 0 8px rgba(245, 158, 11, 0); }
-          }
-          .animate-pulse-subtle {
-            animation: pulse-subtle 2s infinite;
-          }
-        `}</style>
       </div>
 
       {/* Job Acceptance Wizard Modal */}

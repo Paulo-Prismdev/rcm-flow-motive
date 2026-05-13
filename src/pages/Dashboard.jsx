@@ -312,36 +312,6 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-4 md:space-y-6">
-      <style>{`
-        @keyframes sway {
-          0%, 100% { transform: rotate(0deg) scale(1); }
-          25% { transform: rotate(-1deg) scale(1.02); }
-          75% { transform: rotate(1deg) scale(1.02); }
-        }
-
-        .widget-edit-mode:hover {
-          animation: sway 2s ease-in-out infinite;
-        }
-
-        .resize-handle {
-          cursor: nwse-resize;
-          touch-action: none;
-          z-index: 100;
-        }
-
-        .resize-handle:hover svg {
-          transform: scale(1.2);
-        }
-
-        .widget-resizing {
-          pointer-events: none;
-        }
-
-        .widget-resizing .resize-handle {
-          pointer-events: all;
-        }
-      `}</style>
-
       {/* Header */}
       <div className="glass p-4 md:p-6">
         <div className="flex items-center justify-between flex-wrap gap-4">

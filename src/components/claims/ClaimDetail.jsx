@@ -58,6 +58,7 @@ import InstructionTemplateModal from './InstructionTemplateModal';
 import { Textarea } from "@/components/ui/textarea";
 import { formatUKRegistration } from '../shared/formatRegistration';
 import { Link, useNavigate } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
 
 import {
   DropdownMenu,

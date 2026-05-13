@@ -156,3 +156,36 @@ button:focus-visible {
     @apply bg-background text-foreground;
   }
 }
+
+@keyframes pulse-border {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(245, 158, 11, 0); }
+}
+
+@keyframes sway {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  25% { transform: rotate(-1deg) scale(1.02); }
+  75% { transform: rotate(1deg) scale(1.02); }
+}
+
+.widget-edit-mode:hover {
+  animation: sway 2s ease-in-out infinite;
+}
+
+.resize-handle {
+  cursor: nwse-resize;
+  touch-action: none;
+  z-index: 100;
+}
+
+.resize-handle:hover svg {
+  transform: scale(1.2);
+}
+
+.widget-resizing {
+  pointer-events: none;
+}
+
+.widget-resizing .resize-handle {
+  pointer-events: all;
+}
