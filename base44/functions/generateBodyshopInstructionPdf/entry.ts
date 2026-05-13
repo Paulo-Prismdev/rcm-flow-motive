@@ -10,6 +10,10 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    if (user.role !== 'admin' && user.user_type !== 'internal') {
+      return Response.json({ error: 'Forbidden: Admin or internal users only' }, { status: 403 });
+    }
+
     const { claimId, templateType, templateConfigId } = await req.json();
 
     if (!claimId || !templateType) {

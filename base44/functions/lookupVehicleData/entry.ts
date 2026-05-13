@@ -10,6 +10,10 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    if (user.role !== 'admin' && user.user_type !== 'internal') {
+      return Response.json({ error: 'Forbidden: Internal staff only' }, { status: 403 });
+    }
+
     // Get registration number from request
     const { registrationNumber } = await req.json();
     

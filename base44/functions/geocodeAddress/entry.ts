@@ -220,6 +220,10 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    if (user.role !== 'admin' && user.user_type !== 'internal') {
+      return Response.json({ error: 'Forbidden: Internal staff only' }, { status: 403 });
+    }
+
     // Get the address from the request
     const { address } = await req.json();
     
