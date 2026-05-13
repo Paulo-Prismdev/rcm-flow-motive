@@ -461,7 +461,6 @@ export default function Layout({ children, currentPageName }) {
           background: var(--surface-hover);
           border-color: var(--border-strong);
           box-shadow: var(--shadow-md);
-          transform: translateY(-1px);
         }
 
         .nav-button-active {
