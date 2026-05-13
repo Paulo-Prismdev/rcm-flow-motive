@@ -225,10 +225,10 @@ export default function Layout({ children, currentPageName }) {
 
         [data-theme="dark"] {
           /* Dark Mode Colors */
-          --background: #0f172a;
-          --surface: #1e293b;
-          --surface-elevated: #334155;
-          --surface-hover: #475569;
+          --background: #070d1a;
+          --surface: #0f1829;
+          --surface-elevated: #182035;
+          --surface-hover: #1e2a45;
           
           --foreground: #f1f5f9;
           --foreground-muted: #cbd5e1;
