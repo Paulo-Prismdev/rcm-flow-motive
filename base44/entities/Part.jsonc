@@ -303,6 +303,9 @@
           "user_condition": {
             "user_type": "bodyshop"
           }
+        },
+        {
+          "created_by": "{{user.email}}"
         }
       ]
     },
@@ -319,10 +322,13 @@
           }
         },
         {
-          "data.bodyshop_company_id": "{{user.linked_bodyshop_id}}"
+          "created_by": "{{user.email}}"
         },
         {
-          "data.supplier_id": "{{user.linked_supplier_id}}"
+          "data.bodyshop_company_id": "{{user.data.linked_bodyshop_id}}"
+        },
+        {
+          "data.supplier_id": "{{user.data.linked_supplier_id}}"
         }
       ]
     },
@@ -339,14 +345,21 @@
           }
         },
         {
-          "data.bodyshop_company_id": "{{user.linked_bodyshop_id}}"
+          "created_by": "{{user.email}}"
         }
       ]
     },
     "delete": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "created_by": "{{user.email}}"
+        }
+      ]
     }
   }
 }
