@@ -39,12 +39,12 @@ export default function WidgetStatCard({ config, isEditMode }) {
   const pageName = pageMap[entity] || 'Dashboard';
 
   const content = (
-    <div className="h-full bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-200 p-5 flex flex-col gap-4 group">
+    <div className="h-full bg-card text-card-foreground rounded-2xl border border-border shadow-sm hover:shadow-md transition-all duration-200 p-5 flex flex-col gap-4 group">
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-1">{title}</p>
-          <h3 className="text-3xl font-bold text-slate-800 tabular-nums">
-            {isLoading ? <span className="inline-block w-12 h-8 bg-slate-100 rounded animate-pulse" /> : openCount}
+          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-1">{title}</p>
+          <h3 className="text-3xl font-bold tabular-nums">
+            {isLoading ? <span className="inline-block w-12 h-8 bg-muted rounded animate-pulse" /> : openCount}
           </h3>
         </div>
         <span className={`w-8 h-8 rounded-full ${c.dot} opacity-10 group-hover:opacity-20 transition-opacity`} />
@@ -53,17 +53,17 @@ export default function WidgetStatCard({ config, isEditMode }) {
       {/* Progress bar */}
       <div>
         <div className="flex items-center justify-between mb-1.5">
-          <span className="text-[11px] text-slate-400">Active vs Total</span>
-          <span className="text-[11px] font-semibold text-slate-500">{pct}%</span>
+          <span className="text-[11px] text-muted-foreground">Active vs Total</span>
+          <span className="text-[11px] font-semibold text-muted-foreground">{pct}%</span>
         </div>
-        <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+        <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
           <div className={`h-full ${c.bar} rounded-full transition-all duration-500`} style={{ width: `${pct}%` }} />
         </div>
       </div>
 
       <div className="flex items-center justify-between mt-auto">
         <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full ${c.pill}`}>{total} total</span>
-        <ArrowUpRight className="w-4 h-4 text-slate-300 group-hover:text-slate-500 transition-colors" />
+        <ArrowUpRight className="w-4 h-4 text-muted-foreground/40 group-hover:text-muted-foreground transition-colors" />
       </div>
     </div>
   );
