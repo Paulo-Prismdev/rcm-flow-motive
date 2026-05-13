@@ -393,7 +393,7 @@ export default function Dashboard() {
               {...provided.droppableProps}
               ref={provided.innerRef}
               id="widgets-grid"
-              className="grid grid-cols-1 gap-3 md:gap-4"
+              className="grid grid-cols-1 gap-3 md:gap-4 pb-6"
             >
               {localWidgets.map((widget, index) => {
                 const WidgetComponent = WIDGET_COMPONENTS[widget.type];
