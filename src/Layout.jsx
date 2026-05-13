@@ -309,25 +309,43 @@ export default function Layout({ children, currentPageName }) {
           color: var(--foreground);
         }
 
+        /* glass-button: always used on the dark #151d44 header — always white */
         .glass-button {
-          background: rgba(255,255,255,0.07);
-          border: 1px solid rgba(255,255,255,0.12);
+          background: rgba(255,255,255,0.08);
+          border: 1px solid rgba(255,255,255,0.15);
           border-radius: 12px;
           box-shadow: var(--shadow-sm);
           transition: all 0.2s ease;
           cursor: pointer;
-          color: rgba(255,255,255,0.85);
+          color: rgba(255,255,255,0.9) !important;
         }
 
         .glass-button:hover {
-          background: rgba(255,255,255,0.14);
-          border-color: rgba(255,255,255,0.2);
+          background: rgba(255,255,255,0.16);
+          border-color: rgba(255,255,255,0.25);
           box-shadow: var(--shadow-md);
           transform: translateY(-1px);
         }
 
         .glass-button:active {
           transform: translateY(0);
+        }
+
+        /* surface-button: used in mobile menu / light-mode areas */
+        .surface-button {
+          background: var(--surface);
+          border: 1px solid var(--border);
+          border-radius: 12px;
+          box-shadow: var(--shadow-sm);
+          transition: all 0.2s ease;
+          cursor: pointer;
+          color: var(--foreground);
+        }
+
+        .surface-button:hover {
+          background: var(--surface-hover);
+          border-color: var(--border-strong);
+          box-shadow: var(--shadow-md);
         }
 
         .card-hover {
@@ -640,7 +658,6 @@ export default function Layout({ children, currentPageName }) {
                 <button
                   onClick={() => setMobileMenuOpen(true)}
                   className="glass-button w-10 h-10 flex items-center justify-center flex-shrink-0 md:hidden"
-                  style={{ color: 'var(--foreground)' }}
                 >
                   <Menu className="w-4 h-4" />
                 </button>
@@ -665,7 +682,6 @@ export default function Layout({ children, currentPageName }) {
                   onClick={() => setMessagesOpen(true)}
                   className="glass-button w-10 h-10 flex items-center justify-center relative flex-shrink-0 md:hidden"
                   title="Messages"
-                  style={{ color: 'var(--foreground)' }}
                 >
                   <MessageSquare className="w-4 h-4" />
                   {unreadMessagesCount > 0 && (
@@ -681,7 +697,6 @@ export default function Layout({ children, currentPageName }) {
                 <button
                   onClick={() => setSearchOpen(true)}
                   className="glass-button w-10 h-10 flex items-center justify-center"
-                  style={{ color: 'var(--foreground)' }}
                 >
                   <Search className="w-4 h-4" />
                 </button>
@@ -691,7 +706,6 @@ export default function Layout({ children, currentPageName }) {
                     onClick={() => setMessagesOpen(true)}
                     className="glass-button w-10 h-10 flex items-center justify-center relative"
                     title="Messages"
-                    style={{ color: 'var(--foreground)' }}
                   >
                     <MessageSquare className="w-4 h-4" />
                     {unreadMessagesCount > 0 && (
@@ -707,7 +721,7 @@ export default function Layout({ children, currentPageName }) {
 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button className="glass-button w-10 h-10 flex items-center justify-center" style={{ color: 'var(--foreground)' }}>
+                    <button className="glass-button w-10 h-10 flex items-center justify-center">
                       <ChevronDown className="w-4 h-4" />
                     </button>
                   </DropdownMenuTrigger>
@@ -797,7 +811,7 @@ export default function Layout({ children, currentPageName }) {
                 <div className="flex items-center gap-2">
                   <ThemeToggle />
                   <Notifications />
-                  <button onClick={() => setMobileMenuOpen(false)} className="glass-button w-10 h-10 flex items-center justify-center">
+                  <button onClick={() => setMobileMenuOpen(false)} className="surface-button w-10 h-10 flex items-center justify-center">
                     <X className="w-5 h-5" />
                   </button>
                 </div>
@@ -827,7 +841,7 @@ export default function Layout({ children, currentPageName }) {
                       </div>
                     </div>
                     <Link to={createPageUrl("UserProfile")} onClick={() => setMobileMenuOpen(false)}>
-                      <button className="w-full glass-button px-4 py-2 rounded-lg text-sm">
+                      <button className="w-full surface-button px-4 py-2 rounded-lg text-sm">
                         View Profile
                       </button>
                     </Link>
@@ -844,7 +858,7 @@ export default function Layout({ children, currentPageName }) {
                       setSearchOpen(true);
                       setMobileMenuOpen(false);
                     }}
-                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl glass-button"
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl surface-button"
                   >
                     <Search className="w-5 h-5" />
                     <span className="font-medium">Search Everything</span>
@@ -864,7 +878,7 @@ export default function Layout({ children, currentPageName }) {
                         to={dept.url}
                         onClick={() => setMobileMenuOpen(false)}
                         className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
-                          isActive ? 'nav-active' : 'glass-button'
+                          isActive ? 'nav-active' : 'surface-button'
                         }`}
                       >
                         <dept.icon className="w-5 h-5" />
@@ -884,7 +898,7 @@ export default function Layout({ children, currentPageName }) {
                           <Link
                             to={createPageUrl("Settings")}
                             onClick={() => setMobileMenuOpen(false)}
-                            className="flex items-center gap-3 px-4 py-3 rounded-xl glass-button"
+                            className="flex items-center gap-3 px-4 py-3 rounded-xl surface-button"
                           >
                             <Settings className="w-5 h-5" />
                             <span className="font-medium">Settings</span>
@@ -892,7 +906,7 @@ export default function Layout({ children, currentPageName }) {
                           <Link
                             to={createPageUrl("Archive")}
                             onClick={() => setMobileMenuOpen(false)}
-                            className="flex items-center gap-3 px-4 py-3 rounded-xl glass-button"
+                            className="flex items-center gap-3 px-4 py-3 rounded-xl surface-button"
                           >
                             <Archive className="w-5 h-5" />
                             <span className="font-medium">View Archive</span>
@@ -900,7 +914,7 @@ export default function Layout({ children, currentPageName }) {
                           <Link
                             to={createPageUrl("EmployeeManagement")}
                             onClick={() => setMobileMenuOpen(false)}
-                            className="flex items-center gap-3 px-4 py-3 rounded-xl glass-button"
+                            className="flex items-center gap-3 px-4 py-3 rounded-xl surface-button"
                           >
                             <CalendarDays className="w-5 h-5" />
                             <span className="font-medium">Employee Management</span>
@@ -912,7 +926,7 @@ export default function Layout({ children, currentPageName }) {
                         <Link
                           to={createPageUrl("UserManagement")}
                           onClick={() => setMobileMenuOpen(false)}
-                          className="flex items-center gap-3 px-4 py-3 rounded-xl glass-button"
+                          className="flex items-center gap-3 px-4 py-3 rounded-xl surface-button"
                         >
                           <UserCog className="w-5 h-5" />
                           <span className="font-medium">User Management</span>
@@ -927,7 +941,7 @@ export default function Layout({ children, currentPageName }) {
               <div className="p-4 border-t border-border">
                 <button
                   onClick={() => base44.auth.logout()}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl glass-button text-red-500 font-medium"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl surface-button text-red-500 font-medium"
                 >
                   <LogOut className="w-5 h-5" />
                   Log Out

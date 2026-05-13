@@ -23,9 +23,8 @@ export default function ThemeToggle() {
     <button
       onClick={toggleTheme}
       className="glass-button w-10 h-10 flex items-center justify-center"
-      style={{ color: 'var(--foreground)' }}
     >
-      {isDark ? <Sun className="w-4 h-4" style={{ color: 'var(--foreground)' }} /> : <Moon className="w-4 h-4" style={{ color: 'var(--foreground)' }} />}
+      {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
     </button>
   );
 }

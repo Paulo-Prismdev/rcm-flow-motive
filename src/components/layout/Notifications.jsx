@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
@@ -62,8 +61,8 @@ export default function Notifications() {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <button className="glass-button w-10 h-10 flex items-center justify-center relative" style={{ color: 'var(--foreground)' }}>
-          <Bell className="w-4 h-4" style={{ color: 'var(--foreground)' }} />
+        <button className="glass-button w-10 h-10 flex items-center justify-center relative">
+          <Bell className="w-4 h-4" />
           {unreadCount > 0 && (
             <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
               {unreadCount > 9 ? '9+' : unreadCount}
@@ -122,17 +121,17 @@ export default function Notifications() {
                         <div className="flex gap-1 flex-shrink-0">
                           {!notification.is_read && (
                             <button
-                              className="glass-button w-6 h-6 flex items-center justify-center"
+                              className="surface-button w-6 h-6 flex items-center justify-center"
                               onClick={(e) => handleMarkAsRead(e, notification.id)}
                               title="Mark as read"
-                            >
+                              >
                               <Check className="w-3 h-3" />
-                            </button>
-                          )}
-                          <button
-                            className="glass-button w-6 h-6 flex items-center justify-center text-red-500"
-                            onClick={(e) => handleDelete(e, notification.id)}
-                            title="Delete"
+                              </button>
+                              )}
+                              <button
+                              className="surface-button w-6 h-6 flex items-center justify-center text-red-500"
+                              onClick={(e) => handleDelete(e, notification.id)}
+                              title="Delete"
                           >
                             <X className="w-3 h-3" />
                           </button>
@@ -153,7 +152,7 @@ export default function Notifications() {
                       <div className="flex gap-1 flex-shrink-0">
                         {!notification.is_read && (
                           <button
-                            className="glass-button w-6 h-6 flex items-center justify-center"
+                            className="surface-button w-6 h-6 flex items-center justify-center"
                             onClick={(e) => handleMarkAsRead(e, notification.id)}
                             title="Mark as read"
                           >
@@ -161,7 +160,7 @@ export default function Notifications() {
                           </button>
                         )}
                         <button
-                          className="glass-button w-6 h-6 flex items-center justify-center text-red-500"
+                          className="surface-button w-6 h-6 flex items-center justify-center text-red-500"
                           onClick={(e) => handleDelete(e, notification.id)}
                           title="Delete"
                         >
