@@ -1,0 +1,108 @@
+{
+  "name": "WorkProvider",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Work provider company name"
+    },
+    "contact_name": {
+      "type": "string",
+      "description": "Main contact person"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "address_line_1": {
+      "type": "string",
+      "description": "Street address"
+    },
+    "address_line_2": {
+      "type": "string",
+      "description": "Additional address line (optional)"
+    },
+    "town": {
+      "type": "string",
+      "description": "Town or City"
+    },
+    "county": {
+      "type": "string",
+      "description": "County or State"
+    },
+    "postcode": {
+      "type": "string",
+      "description": "Postal code"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Additional notes about this work provider"
+    }
+  },
+  "required": [
+    "name",
+    "contact_name",
+    "phone",
+    "email"
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "user_type": "internal"
+          }
+        }
+      ]
+    },
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "user_type": "internal"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "user_type": "internal"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "user_type": "internal"
+          }
+        }
+      ]
+    }
+  }
+}
