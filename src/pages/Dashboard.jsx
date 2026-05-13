@@ -38,8 +38,8 @@ const DEFAULT_USER_WIDGETS = [
   { id: 'stat-estimates', type: 'StatCard', config: { title: 'Open Estimates', entity: 'Estimate', color: 'green', span: 1 } },
   { id: 'stat-engineering', type: 'StatCard', config: { title: 'Engineering Jobs', entity: 'Engineering', color: 'purple', span: 1 } },
   { id: 'stat-parts', type: 'StatCard', config: { title: 'Parts Requests', entity: 'Part', color: 'orange', span: 1 } },
-  { id: 'invoice-tracking', type: 'InvoiceTracking', config: { span: 2 } },
-  { id: 'recent-activity', type: 'RecentActivity', config: { span: 4 } },
+  { id: 'invoice-tracking', type: 'InvoiceTracking', config: { span: 1 } },
+  { id: 'recent-activity', type: 'RecentActivity', config: { span: 1 } },
 ];
 
 const DEFAULT_COMPANY_WIDGETS = [
@@ -47,37 +47,37 @@ const DEFAULT_COMPANY_WIDGETS = [
   { id: 'company-estimates', type: 'StatCard', config: { title: 'Total Estimates', entity: 'Estimate', color: 'green', span: 1 } },
   { id: 'company-engineering', type: 'StatCard', config: { title: 'Total Engineering', entity: 'Engineering', color: 'purple', span: 1 } },
   { id: 'company-parts', type: 'StatCard', config: { title: 'Total Parts', entity: 'Part', color: 'orange', span: 1 } },
-  { id: 'company-invoices', type: 'InvoiceTracking', config: { span: 4 } },
-  { id: 'company-activity', type: 'RecentActivity', config: { span: 4 } },
+  { id: 'company-invoices', type: 'InvoiceTracking', config: { span: 1 } },
+  { id: 'company-activity', type: 'RecentActivity', config: { span: 1 } },
 ];
 
 const DEPARTMENT_TEMPLATES = {
   Claims: [
-    { id: 'claims-stats', type: 'DepartmentStats', config: { department: 'Claims', entity: 'Claim', span: 4 } },
-    { id: 'claims-status', type: 'StatusBreakdown', config: { department: 'Claims', entity: 'Claim', statusField: 'job_status', span: 2 } },
-    { id: 'claims-invoice', type: 'StatCard', config: { title: 'Ready to Invoice', entity: 'Claim', color: 'green', filter: { invoice_status: 'Ready to Invoice' }, span: 2 } },
-    { id: 'claims-recent', type: 'RecentItems', config: { department: 'Claims', entity: 'Claim', limit: 10, span: 4 } },
+    { id: 'claims-stats', type: 'DepartmentStats', config: { department: 'Claims', entity: 'Claim', span: 1 } },
+    { id: 'claims-status', type: 'StatusBreakdown', config: { department: 'Claims', entity: 'Claim', statusField: 'job_status', span: 1 } },
+    { id: 'claims-invoice', type: 'StatCard', config: { title: 'Ready to Invoice', entity: 'Claim', color: 'green', filter: { invoice_status: 'Ready to Invoice' }, span: 1 } },
+    { id: 'claims-recent', type: 'RecentItems', config: { department: 'Claims', entity: 'Claim', limit: 10, span: 1 } },
   ],
   Estimating: [
-    { id: 'est-stats', type: 'DepartmentStats', config: { department: 'Estimating', entity: 'Estimate', span: 4 } },
-    { id: 'est-status', type: 'StatusBreakdown', config: { department: 'Estimating', entity: 'Estimate', statusField: 'status', span: 2 } },
-    { id: 'est-priority', type: 'StatCard', config: { title: 'High Priority', entity: 'Estimate', color: 'red', filter: { priority: 'High' }, span: 2 } },
-    { id: 'est-recent', type: 'RecentItems', config: { department: 'Estimating', entity: 'Estimate', limit: 10, span: 4 } },
+    { id: 'est-stats', type: 'DepartmentStats', config: { department: 'Estimating', entity: 'Estimate', span: 1 } },
+    { id: 'est-status', type: 'StatusBreakdown', config: { department: 'Estimating', entity: 'Estimate', statusField: 'status', span: 1 } },
+    { id: 'est-priority', type: 'StatCard', config: { title: 'High Priority', entity: 'Estimate', color: 'red', filter: { priority: 'High' }, span: 1 } },
+    { id: 'est-recent', type: 'RecentItems', config: { department: 'Estimating', entity: 'Estimate', limit: 10, span: 1 } },
   ],
   Engineering: [
-    { id: 'eng-stats', type: 'DepartmentStats', config: { department: 'Engineering', entity: 'Engineering', span: 4 } },
-    { id: 'eng-status', type: 'StatusBreakdown', config: { department: 'Engineering', entity: 'Engineering', statusField: 'status', span: 2 } },
-    { id: 'eng-pending', type: 'StatCard', config: { title: 'Reports Pending', entity: 'Engineering', color: 'orange', filter: { report_status: 'In Progress' }, span: 2 } },
-    { id: 'eng-recent', type: 'RecentItems', config: { department: 'Engineering', entity: 'Engineering', limit: 10, span: 4 } },
+    { id: 'eng-stats', type: 'DepartmentStats', config: { department: 'Engineering', entity: 'Engineering', span: 1 } },
+    { id: 'eng-status', type: 'StatusBreakdown', config: { department: 'Engineering', entity: 'Engineering', statusField: 'status', span: 1 } },
+    { id: 'eng-pending', type: 'StatCard', config: { title: 'Reports Pending', entity: 'Engineering', color: 'orange', filter: { report_status: 'In Progress' }, span: 1 } },
+    { id: 'eng-recent', type: 'RecentItems', config: { department: 'Engineering', entity: 'Engineering', limit: 10, span: 1 } },
   ],
   Parts: [
-    { id: 'parts-stats', type: 'DepartmentStats', config: { department: 'Parts', entity: 'Part', span: 4 } },
-    { id: 'parts-status', type: 'StatusBreakdown', config: { department: 'Parts', entity: 'Part', statusField: 'sourcing_status', span: 2 } },
-    { id: 'parts-urgent', type: 'StatCard', config: { title: 'Urgent Requests', entity: 'Part', color: 'red', filter: { sourcing_status: 'Need to Order' }, span: 2 } },
-    { id: 'parts-recent', type: 'RecentItems', config: { department: 'Parts', entity: 'Part', limit: 10, span: 4 } },
+    { id: 'parts-stats', type: 'DepartmentStats', config: { department: 'Parts', entity: 'Part', span: 1 } },
+    { id: 'parts-status', type: 'StatusBreakdown', config: { department: 'Parts', entity: 'Part', statusField: 'sourcing_status', span: 1 } },
+    { id: 'parts-urgent', type: 'StatCard', config: { title: 'Urgent Requests', entity: 'Part', color: 'red', filter: { sourcing_status: 'Need to Order' }, span: 1 } },
+    { id: 'parts-recent', type: 'RecentItems', config: { department: 'Parts', entity: 'Part', limit: 10, span: 1 } },
   ],
   Invoicing: [
-    { id: 'inv-tracking', type: 'InvoiceTracking', config: { span: 4 } },
+    { id: 'inv-tracking', type: 'InvoiceTracking', config: { span: 1 } },
     { id: 'inv-ready', type: 'StatCard', config: { title: 'Ready to Invoice', entity: 'Claim', color: 'green', filter: { invoice_status: 'Ready to Invoice' }, span: 1 } },
     { id: 'inv-sent', type: 'StatCard', config: { title: 'Invoiced', entity: 'Claim', color: 'blue', filter: { invoice_status: 'Invoiced' }, span: 1 } },
     { id: 'inv-paid', type: 'StatCard', config: { title: 'Paid', entity: 'Claim', color: 'gray', filter: { invoice_status: 'Invoice Paid' }, span: 1 } },
@@ -393,7 +393,7 @@ export default function Dashboard() {
               {...provided.droppableProps}
               ref={provided.innerRef}
               id="widgets-grid"
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6"
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4"
             >
               {localWidgets.map((widget, index) => {
                 const WidgetComponent = WIDGET_COMPONENTS[widget.type];
