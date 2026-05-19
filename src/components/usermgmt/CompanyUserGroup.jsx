@@ -2,10 +2,11 @@ import React, { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronRight, User, Edit2, MessageCircle, Check } from "lucide-react";
+import { ChevronDown, ChevronRight, User, Edit2, MessageCircle } from "lucide-react";
 import UserEditForm from "./UserEditForm";
+import CompanyPortalSections from "./CompanyPortalSections";
 
-export default function CompanyUserGroup({ company, users, isSuperAdmin, onFeedbackRequest }) {
+export default function CompanyUserGroup({ company, companyType, users, isSuperAdmin, onFeedbackRequest }) {
   const [isOpen, setIsOpen] = useState(false);
   const [editingUserId, setEditingUserId] = useState(null);
   const queryClient = useQueryClient();
@@ -47,6 +48,17 @@ export default function CompanyUserGroup({ company, users, isSuperAdmin, onFeedb
           {users.length > 0 ? `${users.length} linked` : 'No users'}
         </span>
       </button>
+
+      {/* Portal sections — always visible below header */}
+      {(companyType === 'bodyshop' || companyType === 'referrer') && (
+        <div className="px-4 pb-3">
+          <CompanyPortalSections
+            company={company}
+            companyType={companyType}
+            isSuperAdmin={isSuperAdmin}
+          />
+        </div>
+      )}
 
       {/* Users list - expanded */}
       {isOpen && (

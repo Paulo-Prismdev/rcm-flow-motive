@@ -171,6 +171,7 @@ export default function UserManagement() {
               <CompanyUserGroup
                 key={company.id}
                 company={company}
+                companyType={activeTab}
                 users={companyMap[company.id] || []}
                 isSuperAdmin={isSuperAdmin}
                 onFeedbackRequest={handleFeedbackRequest}

@@ -48,6 +48,16 @@
       "type": "string",
       "format": "date",
       "description": "Date when feedback was last requested from this company"
+    },
+    "portal_sections": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Which portal sections/features this company has access to",
+      "default": [
+        "Claims"
+      ]
     }
   },
   "required": [
@@ -58,18 +68,16 @@
   ],
   "rls": {
     "create": {
-      "$or": [
-        {
-          "user_condition": {
+      "user_condition": {
+        "$or": [
+          {
             "role": "admin"
-          }
-        },
-        {
-          "user_condition": {
+          },
+          {
             "user_type": "internal"
           }
-        }
-      ]
+        ]
+      }
     },
     "read": {
       "$or": [
@@ -84,7 +92,7 @@
           }
         },
         {
-          "id": "{{user.data.linked_referrer_id}}"
+          "id": "{{user.linked_referrer_id}}"
         }
       ]
     },
@@ -101,23 +109,21 @@
           }
         },
         {
-          "id": "{{user.data.linked_referrer_id}}"
+          "id": "{{user.linked_referrer_id}}"
         }
       ]
     },
     "delete": {
-      "$or": [
-        {
-          "user_condition": {
+      "user_condition": {
+        "$or": [
+          {
             "role": "admin"
-          }
-        },
-        {
-          "user_condition": {
+          },
+          {
             "user_type": "internal"
           }
-        }
-      ]
+        ]
+      }
     }
   }
 }

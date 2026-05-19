@@ -51,6 +51,18 @@
       "type": "string",
       "format": "date",
       "description": "Date when feedback was last requested from this company"
+    },
+    "portal_sections": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Which portal sections/features this company has access to",
+      "default": [
+        "Claims",
+        "Estimates",
+        "Parts"
+      ]
     }
   },
   "required": [
@@ -87,7 +99,7 @@
           }
         },
         {
-          "id": "{{user.data.linked_bodyshop_id}}"
+          "id": "{{user.linked_bodyshop_id}}"
         }
       ]
     },
@@ -104,7 +116,7 @@
           }
         },
         {
-          "id": "{{user.data.linked_bodyshop_id}}"
+          "id": "{{user.linked_bodyshop_id}}"
         }
       ]
     },
