@@ -3,7 +3,9 @@ import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Users, Shield, X, Plus, AlertCircle, MessageCircle } from "lucide-react";
+import { Users, Shield, X, Plus, AlertCircle, MessageCircle, Check } from "lucide-react";
+
+const ALL_DEPARTMENTS = ["Dashboard", "Claims", "Estimating", "Engineering", "Parts", "Invoicing", "Reports", "Map"];
 
 function UserForm({ user, onSave, onCancel }) {
   const [formData, setFormData] = useState(user || {
@@ -20,15 +22,7 @@ function UserForm({ user, onSave, onCancel }) {
     linked_supplier_id: ''
   });
 
-  const AVAILABLE_DEPARTMENTS_FOR_FORM = [
-    "Dashboard",
-    "Claims",
-    "Estimating",
-    "Engineering",
-    "Parts",
-    "Invoicing",
-    "Map"
-  ];
+  const AVAILABLE_DEPARTMENTS_FOR_FORM = ALL_DEPARTMENTS;
 
   const { data: roles = [] } = useQuery({
     queryKey: ['roles'],
@@ -276,6 +270,7 @@ export default function UserManagement() {
   const [editingUserId, setEditingUserId] = useState(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [error, setError] = useState(null);
+  const [deptEdits, setDeptEdits] = useState({});
 
   const { data: currentUser } = useQuery({
     queryKey: ['currentUser'],
@@ -377,6 +372,24 @@ export default function UserManagement() {
   const getRoleName = (roleId) => {
     const role = roles.find(r => r.id === roleId);
     return role?.role_name || null;
+  };
+
+  const toggleDept = (userId, dept, currentAccess) => {
+    const current = deptEdits[userId] ?? currentAccess ?? [];
+    const updated = current.includes(dept)
+      ? current.filter(d => d !== dept)
+      : [...current, dept];
+    setDeptEdits(prev => ({ ...prev, [userId]: updated }));
+  };
+
+  const saveDeptAccess = (userId) => {
+    const newAccess = deptEdits[userId];
+    if (newAccess !== undefined) {
+      updateUserMutation.mutate(
+        { id: userId, data: { departments_access: newAccess } },
+        { onSuccess: () => setDeptEdits(prev => { const n = {...prev}; delete n[userId]; return n; }) }
+      );
+    }
   };
 
   return (
@@ -503,17 +516,40 @@ export default function UserManagement() {
                     </p>
                   ) : user.user_type === 'internal' ? (
                     <div className="mt-4">
-                      <p className="text-sm font-medium text-gray-600 mb-2">Department Access:</p>
+                      <div className="flex items-center justify-between mb-3">
+                        <p className="text-sm font-medium text-gray-600">Department Access</p>
+                        {isSuperAdmin && deptEdits[user.id] !== undefined && (
+                          <Button
+                            onClick={() => saveDeptAccess(user.id)}
+                            disabled={updateUserMutation.isPending}
+                            className="h-7 px-3 text-xs bg-green-600 text-white hover:bg-green-700 rounded-lg flex items-center gap-1"
+                          >
+                            <Check className="w-3 h-3" /> Save
+                          </Button>
+                        )}
+                      </div>
                       <div className="flex flex-wrap gap-2">
-                        {(user.departments_access || []).length > 0 ? (
-                          (user.departments_access || []).map((dept) => (
+                        {ALL_DEPARTMENTS.map((dept) => {
+                          const access = deptEdits[user.id] ?? user.departments_access ?? [];
+                          const enabled = access.includes(dept);
+                          return isSuperAdmin ? (
+                            <button
+                              key={dept}
+                              onClick={() => toggleDept(user.id, dept, user.departments_access ?? [])}
+                              className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-all ${
+                                enabled
+                                  ? 'bg-blue-600 text-white border-blue-600'
+                                  : 'bg-gray-100 text-gray-400 border-gray-200 hover:border-gray-400'
+                              }`}
+                            >
+                              {dept}
+                            </button>
+                          ) : enabled ? (
                             <span key={dept} className="neomorph-flat px-3 py-1 text-xs font-medium text-gray-700">
                               {dept}
                             </span>
-                          ))
-                        ) : (
-                          <span className="text-sm text-gray-500">No department access assigned</span>
-                        )}
+                          ) : null;
+                        })}
                       </div>
                     </div>
                   ) : (
