@@ -254,7 +254,7 @@ Only map columns that clearly correspond to a field. Be conservative - if unsure
       try {
         let jobNumber;
         try {
-          const res = await base44.functions.invoke('generateJobNumber', { type: 'CLM' });
+          const res = await base44.functions.invoke('generateJobNumber', { entityType: 'Claim' });
           jobNumber = res?.data?.job_number || res?.job_number;
         } catch {}
 

@@ -593,7 +593,6 @@ export default function ClaimsPage() {
             {availableStatuses.map(statusGroup => {
               const claimsInGroup = filteredClaims.filter(claim => claim.job_status === statusGroup);
 
-              // Hide empty groups, and when filtering by status only show that status
               if (claimsInGroup.length === 0) return null;
               if (statusFilter && statusGroup !== statusFilter) return null;
 
@@ -605,19 +604,31 @@ export default function ClaimsPage() {
                       {claimsInGroup.length} claim{claimsInGroup.length !== 1 ? 's' : ''}
                     </span>
                   </div>
-                  
-                  {claimsInGroup.length === 0 ? (
-                    <div className="neomorph-inset p-4 text-center text-foreground-muted text-sm">
-                      No claims in this status
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      {claimsInGroup.map(renderClaimCard)}
-                    </div>
-                  )}
+                  <div className="space-y-3">
+                    {claimsInGroup.map(renderClaimCard)}
+                  </div>
                 </div>
               );
             })}
+
+            {/* Catch-all: claims whose status doesn't match any configured status */}
+            {(() => {
+              const knownStatuses = new Set(availableStatuses);
+              const ungrouped = filteredClaims.filter(c => !knownStatuses.has(c.job_status));
+              if (ungrouped.length === 0) return null;
+              if (statusFilter) return null;
+              return (
+                <div className="neomorph p-4">
+                  <div className="flex items-center gap-3 mb-4">
+                    <span className="px-2 py-1 rounded text-xs font-semibold bg-gray-200 dark:bg-gray-700 text-foreground-muted">Other</span>
+                    <span className="text-sm text-foreground-muted">{ungrouped.length} claim{ungrouped.length !== 1 ? 's' : ''}</span>
+                  </div>
+                  <div className="space-y-3">
+                    {ungrouped.map(renderClaimCard)}
+                  </div>
+                </div>
+              );
+            })()}
           </div>
         )}
       </div>
