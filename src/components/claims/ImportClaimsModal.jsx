@@ -1,211 +1,134 @@
 import React, { useState, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
-import { Upload, X, CheckCircle, AlertCircle, Loader2, FileSpreadsheet, Download } from 'lucide-react';
+import { Upload, X, CheckCircle, AlertCircle, Loader2, FileSpreadsheet, Sparkles } from 'lucide-react';
 
-// Map AH Claims columns to Claim entity fields
-const mapRowToClaim = (row) => {
-  const parseDate = (val) => {
-    if (!val) return undefined;
-    // Handle "2026-03-05 00:00:00" format
-    const d = new Date(val);
-    if (!isNaN(d)) return d.toISOString().split('T')[0];
-    return undefined;
-  };
+// Claim fields the AI can map to
+const CLAIM_FIELDS = [
+  { key: 'reg', label: 'Vehicle Registration' },
+  { key: 'client_name', label: 'Client Name' },
+  { key: 'driver_contact_name', label: 'Driver/Contact Name' },
+  { key: 'client_phone', label: 'Client Phone' },
+  { key: 'client_email', label: 'Client Email' },
+  { key: 'client_address_line_1', label: 'Client Address' },
+  { key: 'client_postcode', label: 'Client Postcode' },
+  { key: 'make_model', label: 'Vehicle Make/Model' },
+  { key: 'vehicle_colour', label: 'Vehicle Colour' },
+  { key: 'job_status', label: 'Job Status' },
+  { key: 'claim_type', label: 'Claim Type' },
+  { key: 'date_received', label: 'Date Received' },
+  { key: 'loss_date', label: 'Date of Loss' },
+  { key: 'claim_ref', label: 'Claim Reference' },
+  { key: 'policy_number', label: 'Policy Number' },
+  { key: 'policy_excess', label: 'Policy Excess' },
+  { key: 'insurer', label: 'Insurer/Broker' },
+  { key: 'referrer', label: 'Referrer/Client Company' },
+  { key: 'referrer_ref', label: 'Referrer Reference' },
+  { key: 'authorising_party', label: 'Authorising Party' },
+  { key: 'vehicle_damage', label: 'Vehicle Damage Description' },
+  { key: 'vehicle_location', label: 'Vehicle Location' },
+  { key: 'courtesy_car_required', label: 'Courtesy Car Required (yes/no)' },
+  { key: 'unroadworthy', label: 'Unroadworthy (yes/no)' },
+  { key: 'recovery_required', label: 'Recovery Required (yes/no)' },
+  { key: 'bodyshop', label: 'Bodyshop/Repairer Name' },
+  { key: 'bodyshop_email', label: 'Bodyshop Email' },
+  { key: 'bs_instructed', label: 'Bodyshop Instructed Date' },
+  { key: 'estimate_completed', label: 'Estimate Completed Date' },
+  { key: 'estimate_cost_net', label: 'Estimate Cost (Net)' },
+  { key: 'estimate_cost_gross', label: 'Estimate Cost (Gross)' },
+  { key: 'authority_received', label: 'Authority Received Date' },
+  { key: 'authority_cost_net', label: 'Authorised Cost (Net)' },
+  { key: 'authority_cost_gross', label: 'Authorised Cost (Gross)' },
+  { key: 'on_site_date', label: 'On Site Date' },
+  { key: 'ecd', label: 'Expected Completion Date' },
+  { key: 'completion_date', label: 'Completion Date' },
+  { key: 'final_repair_cost', label: 'Final Repair Cost' },
+  { key: 'total_loss_date', label: 'Total Loss Date' },
+  { key: 'cancellation_date', label: 'Cancellation Date' },
+  { key: 'cancellation_reason', label: 'Cancellation Reason' },
+  { key: 'factored', label: 'Factored (yes/no)' },
+  { key: 'date_payment_in', label: 'Date Payment Received' },
+  { key: 'storage_amount_net', label: 'Storage Amount (Net)' },
+  { key: 'storage_amount_vat', label: 'Storage Amount (Inc VAT)' },
+  { key: 'percent_bld_instruction', label: '% BLD on Instruction' },
+  { key: 'circumstances', label: 'Circumstances/Description' },
+];
 
-  const parseNumber = (val) => {
-    if (!val && val !== 0) return undefined;
-    const n = parseFloat(String(val).replace(/[£,]/g, ''));
-    return isNaN(n) ? undefined : n;
-  };
+const parseDate = (val) => {
+  if (!val) return undefined;
+  const d = new Date(val);
+  if (!isNaN(d)) return d.toISOString().split('T')[0];
+  return undefined;
+};
 
-  const mapClaimType = (val) => {
-    if (!val) return undefined;
-    const v = val.toString().toUpperCase();
-    if (v.includes('CREDIT REPAIR') || v.includes('CREDIT')) return 'Credit Repair';
-    if (v.includes('FAULT') && !v.includes('NON')) return 'Fault Claim';
-    if (v.includes('NON FAULT') || v.includes('NON-FAULT') || v.includes('3RD PARTY') || v.includes('THIRD PARTY')) return 'Non-Fault Claim';
-    if (v.includes('TOTAL LOSS') || v.includes('TOTAL')) return 'Total Loss';
-    if (v.includes('GLASS')) return 'Glass Claim';
-    if (v.includes('INTERVENTION')) return 'Non-Fault Claim';
-    if (v.includes('50/50')) return 'Non-Fault Claim';
-    return 'Non-Fault Claim';
-  };
+const parseNumber = (val) => {
+  if (!val && val !== 0) return undefined;
+  const n = parseFloat(String(val).replace(/[£,$,]/g, ''));
+  return isNaN(n) ? undefined : n;
+};
 
-  const mapJobStatus = (val) => {
-    if (!val) return 'New';
-    const v = val.toString();
-    const knownStatuses = [
-      'New', 'In Progress', 'Completed', 'Cancelled', 'Total Loss',
-      'Awaiting Authority', 'Authorised', 'On Site', 'Awaiting Payment'
-    ];
-    // Return as-is if it looks like a status (non-null string)
-    return v || 'New';
-  };
+const parseBool = (val) => {
+  if (val === null || val === undefined || val === '') return undefined;
+  const v = String(val).toLowerCase().trim();
+  if (v === 'yes' || v === 'true' || v === '1' || v === 'y') return true;
+  if (v === 'no' || v === 'false' || v === '0' || v === 'n') return false;
+  return undefined;
+};
 
-  const parseBool = (val) => {
-    if (!val) return undefined;
-    const v = String(val).toUpperCase();
-    if (v === 'YES' || v === 'TRUE' || v === '1') return true;
-    if (v === 'NO' || v === 'FALSE' || v === '0') return false;
-    return undefined;
-  };
+const DATE_FIELDS = new Set(['date_received','loss_date','bs_instructed','estimate_completed',
+  'authority_received','on_site_date','ecd','completion_date','total_loss_date',
+  'cancellation_date','date_payment_in','booking_in_date']);
+const NUMBER_FIELDS = new Set(['policy_excess','estimate_cost_net','estimate_cost_gross',
+  'authority_cost_net','authority_cost_gross','final_repair_cost','storage_amount_net',
+  'storage_amount_vat','percent_bld_instruction','percent_to_referrer']);
+const BOOL_FIELDS = new Set(['courtesy_car_required','unroadworthy','recovery_required','factored']);
 
-  // The columns in order from the spreadsheet header:
-  // Name, Client, Make/Model, Job Status, Date Received, Claim Type, 
-  // Client Email Email, Client Phone No, Client Address, Claim Ref, Broker, Contact Name, 
-  // Client Email, Loss Date, Vehicle Location, Vehicle Damage, Vehicle Type, 
-  // C/Car Req, Unroadworthy?, Recovery Required, Bodyshop, Bodyshop Email,
-  // Last File Update, BS Instructed, Linked File, Estimate Completed,
-  // Estimate cost NET, Estimate cost GROSS, Authority Received, Authorised Costs NET,
-  // Authorised cost GROSS, BID, On-Site, ECD, Authorising Party, Insurer,
-  // Claim Ref for Authorising Party, Policy Number, Policy Excess, Completion Date,
-  // Factored, Total loss Date, Cancellation Date, Reason for Cancellation,
-  // % BLD on Instruction, Excess Contribution, Final Repair Cost (excl VAT),
-  // Date Sent to ACG, Date Payment in, Storage Amount Net, Storage Amount Inc VAT,
-  // Item ID (auto generated)
+const CLAIM_TYPE_MAP = {
+  'credit repair': 'Credit Repair', 'credit': 'Credit Repair',
+  'fault': 'Fault Claim',
+  'non fault': 'Non-Fault Claim', 'non-fault': 'Non-Fault Claim',
+  'third party': 'Non-Fault Claim', '3rd party': 'Non-Fault Claim',
+  'total loss': 'Total Loss',
+  'glass': 'Glass Claim',
+};
 
-  // Helper: get first non-empty value from a list of possible column names
-  const get = (...keys) => {
-    for (const k of keys) {
-      if (row[k] !== null && row[k] !== undefined && row[k] !== '') return row[k];
-    }
-    return undefined;
-  };
+const mapClaimType = (val) => {
+  if (!val) return undefined;
+  const v = val.toString().toLowerCase().trim();
+  for (const [k, mapped] of Object.entries(CLAIM_TYPE_MAP)) {
+    if (v.includes(k)) return mapped;
+  }
+  return 'Non-Fault Claim';
+};
 
+// Apply AI-generated column mapping to a raw row
+const applyMapping = (row, mapping) => {
   const claim = {};
+  for (const [spreadsheetCol, claimField] of Object.entries(mapping)) {
+    if (!claimField || claimField === 'SKIP') continue;
+    const rawVal = row[spreadsheetCol];
+    if (rawVal === null || rawVal === undefined || rawVal === '') continue;
 
-  const regVal = get('Name', 'Reg', 'Registration', 'REG', 'Vehicle Reg');
-  if (regVal) claim.reg = regVal.toString().trim().toUpperCase();
+    if (DATE_FIELDS.has(claimField)) {
+      const d = parseDate(rawVal);
+      if (d) claim[claimField] = d;
+    } else if (NUMBER_FIELDS.has(claimField)) {
+      const n = parseNumber(rawVal);
+      if (n !== undefined) claim[claimField] = n;
+    } else if (BOOL_FIELDS.has(claimField)) {
+      const b = parseBool(rawVal);
+      if (b !== undefined) claim[claimField] = b;
+    } else if (claimField === 'claim_type') {
+      claim[claimField] = mapClaimType(rawVal);
+    } else if (claimField === 'reg') {
+      claim[claimField] = rawVal.toString().trim().toUpperCase();
+    } else {
+      claim[claimField] = rawVal.toString().trim();
+    }
+  }
 
-  const clientVal = get('Client', 'Client Name', 'Customer');
-  if (clientVal) claim.referrer = clientVal.toString().trim();
-
-  const makeModelVal = get('Make/Model', 'Make Model', 'Vehicle', 'Make & Model');
-  if (makeModelVal) claim.make_model = makeModelVal.toString().trim();
-  const jobStatusVal = get('Job Status', 'Status', 'Job Status ');
-  if (jobStatusVal) claim.job_status = mapJobStatus(jobStatusVal);
-
-  const dateReceivedVal = get('Date Received', 'Date Rec', 'Received Date');
-  if (dateReceivedVal) claim.date_received = parseDate(dateReceivedVal);
-
-  const claimTypeVal = get('Claim Type', 'Type', 'Job Type');
-  if (claimTypeVal) claim.claim_type = mapClaimType(claimTypeVal);
-
-  const phoneVal = get('Client Phone No', 'Client Phone', 'Phone', 'Tel', 'Phone No');
-  if (phoneVal) claim.client_phone = phoneVal.toString().trim();
-
-  const addrVal = get('Client Address', 'Address', 'Client Addr');
-  if (addrVal) claim.vehicle_location = addrVal.toString().trim();
-
-  const claimRefVal = get('Claim Ref', 'Claim Reference', 'Ref');
-  if (claimRefVal) claim.claim_ref = claimRefVal.toString().trim();
-
-  const insurerVal = get('Broker', 'Insurer', 'Broker/Insurer', 'Insurance');
-  if (insurerVal) claim.insurer = insurerVal.toString().trim();
-
-  const contactVal = get('Contact Name', 'Driver', 'Driver Name', 'Driver Contact');
-  if (contactVal) claim.driver_contact_name = contactVal.toString().trim();
-
-  const emailVal = get('Client Email', 'Email', 'Client Email Email', 'Email Address');
-  if (emailVal) claim.client_email = emailVal.toString().trim();
-
-  const lossDateVal = get('Loss Date', 'Date of Loss', 'Incident Date');
-  if (lossDateVal) claim.loss_date = parseDate(lossDateVal);
-
-  const damageVal = get('Vehicle Damage', 'Damage', 'Damage Description');
-  if (damageVal) claim.vehicle_damage = damageVal.toString().trim();
-
-  const ccVal = get('C/Car Req', 'Courtesy Car', 'C/Car Required', 'Courtesy Car Required');
-  const courtesyCar = parseBool(ccVal);
-  if (courtesyCar !== undefined) claim.courtesy_car_required = courtesyCar;
-
-  const unroadVal = get('Unroadworthy?', 'Unroadworthy', 'Un-roadworthy');
-  const unroadworthy = parseBool(unroadVal);
-  if (unroadworthy !== undefined) claim.unroadworthy = unroadworthy;
-
-  const recoveryVal = get('Recovery Required', 'Recovery', 'Recovery Req');
-  const recovery = parseBool(recoveryVal);
-  if (recovery !== undefined) claim.recovery_required = recovery;
-
-  const bodyshopVal = get('Bodyshop', 'Repairer', 'Body Shop', 'Garage');
-  if (bodyshopVal) claim.bodyshop = bodyshopVal.toString().trim();
-
-  const bsEmailVal = get('Bodyshop Email', 'Repairer Email', 'Body Shop Email');
-  if (bsEmailVal) claim.bodyshop_email = bsEmailVal.toString().trim();
-
-  const bsInstructedVal = get('BS Instructed', 'BS Inst', 'Bodyshop Instructed');
-  if (bsInstructedVal) claim.bs_instructed = parseDate(bsInstructedVal);
-
-  const estCompVal = get('Estimate Completed', 'Est Completed', 'Estimate Complete');
-  if (estCompVal) claim.estimate_completed = parseDate(estCompVal);
-
-  const estNetVal = get('Estimate cost NET', 'Estimate NET', 'Est Net', 'Estimate Net');
-  if (estNetVal) claim.estimate_cost_net = parseNumber(estNetVal);
-
-  const estGrossVal = get('Estimate cost GROSS', 'Estimate GROSS', 'Est Gross', 'Estimate Gross');
-  if (estGrossVal) claim.estimate_cost_gross = parseNumber(estGrossVal);
-
-  const authRecVal = get('Authority Received', 'Auth Received', 'Authority Rec');
-  if (authRecVal) claim.authority_received = parseDate(authRecVal);
-
-  const authNetVal = get('Authorised Costs NET', 'Authorised NET', 'Auth Net', 'Auth Cost Net');
-  if (authNetVal) claim.authority_cost_net = parseNumber(authNetVal);
-
-  const authGrossVal = get('Authorised cost GROSS', 'Authorised GROSS', 'Auth Gross', 'Auth Cost Gross');
-  if (authGrossVal) claim.authority_cost_gross = parseNumber(authGrossVal);
-
-  const onSiteVal = get('On-Site', 'On Site', 'Onsite', 'On-site Date');
-  if (onSiteVal) claim.on_site_date = parseDate(onSiteVal);
-
-  const ecdVal = get('ECD', 'Expected Completion', 'Expected Completion Date');
-  if (ecdVal) claim.ecd = parseDate(ecdVal);
-
-  const authPartyVal = get('Authorising Party', 'Auth Party', 'Authorising party');
-  if (authPartyVal) claim.authorising_party = authPartyVal.toString().trim();
-
-  const refRefVal = get('Claim Ref for Authorising Party', 'Referrer Ref', 'Auth Party Ref');
-  if (refRefVal) claim.referrer_ref = refRefVal.toString().trim();
-
-  const policyNumVal = get('Policy Number', 'Policy No', 'Policy #');
-  if (policyNumVal) claim.policy_number = policyNumVal.toString().trim();
-
-  const policyExcessVal = get('Policy Excess', 'Excess', 'Policy Exc');
-  if (policyExcessVal) claim.policy_excess = parseNumber(policyExcessVal);
-
-  const compDateVal = get('Completion Date', 'Completed Date', 'Comp Date', 'Date Completed');
-  if (compDateVal) claim.completion_date = parseDate(compDateVal);
-
-  const factoredVal = get('Factored', 'Factored?');
-  const factored = parseBool(factoredVal);
-  if (factored !== undefined) claim.factored = factored;
-
-  const tlDateVal = get('Total loss Date', 'Total Loss Date', 'TL Date');
-  if (tlDateVal) claim.total_loss_date = parseDate(tlDateVal);
-
-  const cancelDateVal = get('Cancellation Date', 'Cancel Date', 'Cancelled Date');
-  if (cancelDateVal) claim.cancellation_date = parseDate(cancelDateVal);
-
-  const cancelReasonVal = get('Reason for Cancellation', 'Cancellation Reason', 'Cancel Reason');
-  if (cancelReasonVal) claim.cancellation_reason = cancelReasonVal.toString().trim();
-
-  const bldVal = get('% BLD on Instruction', '% BLD', 'BLD %', 'BLD Instruction');
-  if (bldVal) claim.percent_bld_instruction = parseNumber(bldVal);
-
-  const finalRepairVal = get('Final Repair Cost (excl VAT)', 'Final Repair Cost', 'Final Cost', 'Final Repair');
-  if (finalRepairVal) claim.final_repair_cost = parseNumber(finalRepairVal);
-
-  const paymentDateVal = get('Date Payment in', 'Date Payment In', 'Payment Date');
-  if (paymentDateVal) claim.date_payment_in = parseDate(paymentDateVal);
-
-  const storageNetVal = get('Storage Amount Net', 'Storage Net', 'Storage Amount (Net)');
-  if (storageNetVal) claim.storage_amount_net = parseNumber(storageNetVal);
-
-  const storageVatVal = get('Storage Amount Inc VAT', 'Storage Inc VAT', 'Storage Amount (Inc VAT)');
-  if (storageVatVal) claim.storage_amount_vat = parseNumber(storageVatVal);
-
-  // Split make_model into vehicle_make and vehicle_model if possible
-  if (claim.make_model) {
+  // Derive vehicle_make/model from make_model
+  if (claim.make_model && !claim.vehicle_make) {
     const parts = claim.make_model.split(' ');
     if (parts.length >= 2) {
       claim.vehicle_make = parts[0];
@@ -213,38 +136,28 @@ const mapRowToClaim = (row) => {
     }
   }
 
-  // Set client_name from referrer (the "Client" column in AH Claims is actually the referrer/client company)
-  // The "Name" column is the vehicle reg, so client_name needs to be derived or left empty
-  // Use contact_name if available
-  if (claim.driver_contact_name && !claim.client_name) {
-    claim.client_name = claim.driver_contact_name;
-  }
+  // Default job_status
+  if (!claim.job_status) claim.job_status = 'New';
 
   return claim;
 };
 
-const isValidClaimRow = (row) => {
-  // Skip completely empty rows
+const isEmptyRow = (row) => {
   const values = Object.values(row);
-  const nonEmpty = values.filter(v => v !== null && v !== undefined && v !== '');
-  if (nonEmpty.length === 0) return false;
-
-  // Skip obvious header/summary rows by checking if the first cell is a known header label
-  const firstVal = (values[0] || '').toString().trim().toLowerCase();
-  const headerKeywords = ['name', 'item id', 'new claims', 'section', 'ref', 'header'];
-  if (headerKeywords.some(k => firstVal === k)) return false;
-
-  return true;
+  return values.every(v => v === null || v === undefined || v === '');
 };
 
 export default function ImportClaimsModal({ isOpen, onClose, onImportComplete }) {
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState([]);
+  const [columnMapping, setColumnMapping] = useState({});
   const [importing, setImporting] = useState(false);
   const [parsing, setParsing] = useState(false);
+  const [aiProcessing, setAiProcessing] = useState(false);
   const [parseError, setParseError] = useState(null);
   const [results, setResults] = useState(null);
   const [step, setStep] = useState('upload'); // upload | preview | done
+  const [rawRows, setRawRows] = useState([]);
   const fileInputRef = useRef(null);
 
   const handleFileChange = async (e) => {
@@ -256,32 +169,78 @@ export default function ImportClaimsModal({ isOpen, onClose, onImportComplete })
     setParsing(true);
 
     try {
-      // Upload file then extract
       const uploaded = await base44.integrations.Core.UploadFile({ file: f });
-
-      // Use backend function to parse the xlsx directly
       const parsed = await base44.functions.invoke('parseClaimsSpreadsheet', { file_url: uploaded.file_url });
       if (parsed?.error) throw new Error(parsed.error);
 
       const rows = parsed?.data?.rows || parsed?.rows || [];
       if (!rows.length) throw new Error('No rows found in spreadsheet. The file may be empty or in an unsupported format.');
 
-      const validRows = rows.filter(isValidClaimRow);
-      const mappedRows = validRows.map(row => ({ raw: row, mapped: mapRowToClaim(row) }));
+      const nonEmptyRows = rows.filter(r => !isEmptyRow(r));
+      if (!nonEmptyRows.length) throw new Error('All rows in the spreadsheet appear to be empty.');
 
-      // If nothing passed validation, show all rows anyway so user sees something
-      if (validRows.length === 0 && rows.length > 0) {
-        const allMapped = rows.map(row => ({ raw: row, mapped: mapRowToClaim(row) }));
-        setPreview(allMapped);
-        setStep('preview');
-        return;
-      }
-      setPreview(mappedRows);
-      setStep('preview');
+      setRawRows(nonEmptyRows);
+      setParsing(false);
+
+      // Now use AI to map columns
+      setAiProcessing(true);
+      await runAiMapping(nonEmptyRows);
     } catch (err) {
       setParseError(err.message || 'Failed to parse file');
-    } finally {
       setParsing(false);
+      setAiProcessing(false);
+    }
+  };
+
+  const runAiMapping = async (rows) => {
+    try {
+      // Get column headers and a few sample rows for the AI
+      const headers = Object.keys(rows[0] || {});
+      const sampleRows = rows.slice(0, 3).map(r =>
+        Object.fromEntries(Object.entries(r).map(([k, v]) => [k, v !== null && v !== undefined ? String(v).substring(0, 50) : '']))
+      );
+
+      const fieldDescriptions = CLAIM_FIELDS.map(f => `"${f.key}": ${f.label}`).join('\n');
+
+      const prompt = `You are mapping spreadsheet columns to insurance claim fields.
+
+Spreadsheet column headers: ${JSON.stringify(headers)}
+
+Sample data (first 3 rows):
+${JSON.stringify(sampleRows, null, 2)}
+
+Available claim fields:
+${fieldDescriptions}
+
+For each spreadsheet column, determine which claim field it maps to. If a column doesn't match any field, use "SKIP".
+Return a JSON object where keys are the exact spreadsheet column names and values are the claim field keys (or "SKIP").
+Only map columns that clearly correspond to a field. Be conservative - if unsure, use "SKIP".`;
+
+      const mapping = await base44.integrations.Core.InvokeLLM({
+        prompt,
+        response_json_schema: {
+          type: 'object',
+          additionalProperties: { type: 'string' }
+        }
+      });
+
+      setColumnMapping(mapping);
+
+      // Apply mapping to all rows
+      const mapped = rows.map(row => ({
+        raw: row,
+        mapped: applyMapping(row, mapping)
+      }));
+
+      // Filter out rows that have no useful data after mapping
+      const withData = mapped.filter(({ mapped: m }) => Object.keys(m).length > 1);
+
+      setPreview(withData.length > 0 ? withData : mapped);
+      setStep('preview');
+    } catch (err) {
+      throw new Error('AI mapping failed: ' + (err.message || 'Unknown error'));
+    } finally {
+      setAiProcessing(false);
     }
   };
 
@@ -293,7 +252,6 @@ export default function ImportClaimsModal({ isOpen, onClose, onImportComplete })
 
     for (const { mapped } of preview) {
       try {
-        // Generate job number
         let jobNumber;
         try {
           const res = await base44.functions.invoke('generateJobNumber', { type: 'CLM' });
@@ -307,7 +265,7 @@ export default function ImportClaimsModal({ isOpen, onClose, onImportComplete })
         succeeded++;
       } catch (err) {
         failed++;
-        errors.push(`${mapped.reg}: ${err.message}`);
+        errors.push(`Row ${succeeded + failed}: ${err.message}`);
       }
     }
 
@@ -320,12 +278,17 @@ export default function ImportClaimsModal({ isOpen, onClose, onImportComplete })
   const handleClose = () => {
     setFile(null);
     setPreview([]);
+    setRawRows([]);
+    setColumnMapping({});
     setResults(null);
     setParseError(null);
     setParsing(false);
+    setAiProcessing(false);
     setStep('upload');
     onClose();
   };
+
+  const isLoading = parsing || aiProcessing;
 
   if (!isOpen) return null;
 
@@ -338,7 +301,7 @@ export default function ImportClaimsModal({ isOpen, onClose, onImportComplete })
             <FileSpreadsheet className="w-6 h-6 text-accent" />
             <div>
               <h2 className="text-xl font-bold">Import Claims</h2>
-              <p className="text-sm text-foreground-muted">Import from AH Claims spreadsheet (.xlsx)</p>
+              <p className="text-sm text-foreground-muted">AI-powered spreadsheet import</p>
             </div>
           </div>
           <button onClick={handleClose} className="glass-button w-9 h-9 flex items-center justify-center">
@@ -351,20 +314,26 @@ export default function ImportClaimsModal({ isOpen, onClose, onImportComplete })
           {step === 'upload' && (
             <div className="space-y-6">
               <div
-                onClick={() => !parsing && fileInputRef.current?.click()}
-                className={`border-2 border-dashed rounded-xl p-12 text-center transition-colors ${parsing ? 'border-accent cursor-wait' : 'border-border cursor-pointer hover:border-accent'}`}
+                onClick={() => !isLoading && fileInputRef.current?.click()}
+                className={`border-2 border-dashed rounded-xl p-12 text-center transition-colors ${isLoading ? 'border-accent cursor-wait' : 'border-border cursor-pointer hover:border-accent'}`}
               >
                 {parsing ? (
                   <>
                     <Loader2 className="w-12 h-12 mx-auto mb-4 text-accent animate-spin" />
-                    <p className="text-lg font-medium mb-1">Uploading & parsing file...</p>
+                    <p className="text-lg font-medium mb-1">Reading spreadsheet...</p>
                     <p className="text-sm text-foreground-muted">{file?.name}</p>
+                  </>
+                ) : aiProcessing ? (
+                  <>
+                    <Sparkles className="w-12 h-12 mx-auto mb-4 text-accent animate-pulse" />
+                    <p className="text-lg font-medium mb-1">AI is mapping your columns...</p>
+                    <p className="text-sm text-foreground-muted">Analysing column headers and data patterns</p>
                   </>
                 ) : (
                   <>
                     <Upload className="w-12 h-12 mx-auto mb-4 text-foreground-muted" />
                     <p className="text-lg font-medium mb-1">Click to upload spreadsheet</p>
-                    <p className="text-sm text-foreground-muted">Supports .xlsx files exported from AH Claims</p>
+                    <p className="text-sm text-foreground-muted">Supports .xlsx, .xls, .csv — any column layout</p>
                   </>
                 )}
                 <input
@@ -373,21 +342,25 @@ export default function ImportClaimsModal({ isOpen, onClose, onImportComplete })
                   accept=".xlsx,.xls,.csv"
                   onChange={handleFileChange}
                   className="hidden"
-                  disabled={parsing}
+                  disabled={isLoading}
                 />
               </div>
+
               {parseError && (
                 <div className="flex items-start gap-3 p-4 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
                   <AlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
                   <div>
-                    <p className="font-semibold text-red-700 dark:text-red-400 text-sm">Failed to parse file</p>
+                    <p className="font-semibold text-red-700 dark:text-red-400 text-sm">Failed to import</p>
                     <p className="text-red-600 dark:text-red-300 text-sm mt-1">{parseError}</p>
                   </div>
                 </div>
               )}
-              <div className="glass-flat p-4 rounded-xl text-sm space-y-1">
-                <p className="font-semibold mb-2">Expected columns (AH Claims format):</p>
-                <p className="text-foreground-muted">Name (Reg), Client, Make/Model, Job Status, Date Received, Claim Type, Client Phone, Client Address, Claim Ref, Broker/Insurer, Contact Name, Client Email, Loss Date, Vehicle Damage, C/Car Req, Bodyshop, Estimate costs, Authority dates, etc.</p>
+
+              <div className="glass-flat p-4 rounded-xl text-sm flex items-start gap-3">
+                <Sparkles className="w-4 h-4 text-accent shrink-0 mt-0.5" />
+                <p className="text-foreground-muted">
+                  The AI will automatically analyse your spreadsheet's column headers and map them to the correct claim fields — no matter what format your file uses.
+                </p>
               </div>
             </div>
           )}
@@ -396,27 +369,52 @@ export default function ImportClaimsModal({ isOpen, onClose, onImportComplete })
           {step === 'preview' && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <p className="font-medium">{preview.length} valid claim{preview.length !== 1 ? 's' : ''} found</p>
-                <button onClick={() => setStep('upload')} className="text-sm text-foreground-muted underline">
+                <p className="font-medium">{preview.length} claim{preview.length !== 1 ? 's' : ''} ready to import</p>
+                <button onClick={() => { setStep('upload'); setPreview([]); setRawRows([]); }} className="text-sm text-foreground-muted underline">
                   Re-upload
                 </button>
               </div>
-              <div className="space-y-2 max-h-96 overflow-y-auto">
+
+              {/* AI Mapping Summary */}
+              {Object.keys(columnMapping).length > 0 && (
+                <div className="glass-flat p-3 rounded-xl">
+                  <p className="text-xs font-semibold text-foreground-muted mb-2 flex items-center gap-1">
+                    <Sparkles className="w-3 h-3" /> AI Column Mapping
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {Object.entries(columnMapping)
+                      .filter(([, v]) => v && v !== 'SKIP')
+                      .map(([col, field]) => {
+                        const fieldDef = CLAIM_FIELDS.find(f => f.key === field);
+                        return (
+                          <span key={col} className="text-xs bg-accent/10 text-accent px-2 py-0.5 rounded-full">
+                            {col} → {fieldDef?.label || field}
+                          </span>
+                        );
+                      })}
+                  </div>
+                </div>
+              )}
+
+              <div className="space-y-2 max-h-80 overflow-y-auto">
                 {preview.map(({ mapped }, i) => (
                   <div key={i} className="glass-flat p-3 rounded-xl flex items-center gap-3">
-                    <div className="w-24 font-mono font-bold text-sm shrink-0">{mapped.reg || '—'}</div>
-                    <div className="flex-1 text-sm text-foreground-muted min-w-0">
-                      <span className="font-medium text-foreground">{mapped.make_model || '—'}</span>
-                      {mapped.referrer && <span className="ml-2">· {mapped.referrer}</span>}
-                      {mapped.job_status && <span className="ml-2">· {mapped.job_status}</span>}
-                      {mapped.claim_type && <span className="ml-2">· {mapped.claim_type}</span>}
+                    <div className="w-28 font-mono font-bold text-sm shrink-0">{mapped.reg || `Row ${i + 1}`}</div>
+                    <div className="flex-1 text-sm text-foreground-muted min-w-0 flex flex-wrap gap-x-2">
+                      {mapped.make_model && <span className="font-medium text-foreground">{mapped.make_model}</span>}
+                      {mapped.client_name && <span>· {mapped.client_name}</span>}
+                      {mapped.referrer && <span>· {mapped.referrer}</span>}
+                      {mapped.job_status && <span>· {mapped.job_status}</span>}
+                      {mapped.claim_type && <span>· {mapped.claim_type}</span>}
+                      {mapped.insurer && <span>· {mapped.insurer}</span>}
                     </div>
                   </div>
                 ))}
               </div>
+
               {preview.length === 0 && (
                 <div className="text-center py-8 text-foreground-muted">
-                  No valid claim rows detected. Please check the file format.
+                  No rows could be mapped. Try re-uploading with a different file.
                 </div>
               )}
             </div>
