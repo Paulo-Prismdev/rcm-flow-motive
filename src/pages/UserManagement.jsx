@@ -1,356 +1,63 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Users, Shield, X, Plus, AlertCircle, MessageCircle, Check } from "lucide-react";
+import { Users, Shield, Building2, UserCheck, Package, User, Wrench } from "lucide-react";
+import CompanyUserGroup from "../components/usermgmt/CompanyUserGroup";
 
-const ALL_DEPARTMENTS = ["Dashboard", "Claims", "Estimating", "Engineering", "Parts", "Invoicing", "Reports", "Map"];
-
-function UserForm({ user, onSave, onCancel }) {
-  const [formData, setFormData] = useState(user || {
-    full_name: '',
-    email: '',
-    role: 'user',
-    user_type: 'internal',
-    job_role_id: '',
-    departments_access: ['Dashboard', 'Claims', 'Estimating', 'Engineering', 'Parts', 'Map'],
-    can_manage_permissions: false,
-    linked_referrer_id: '',
-    linked_bodyshop_id: '',
-    linked_client_id: '',
-    linked_supplier_id: ''
-  });
-
-  const AVAILABLE_DEPARTMENTS_FOR_FORM = ALL_DEPARTMENTS;
-
-  const { data: roles = [] } = useQuery({
-    queryKey: ['roles'],
-    queryFn: () => base44.entities.Role.list(),
-  });
-
-  const { data: referrers = [] } = useQuery({
-    queryKey: ['referrers'],
-    queryFn: () => base44.entities.Referrer.list(),
-  });
-
-  const { data: bodyshops = [] } = useQuery({
-    queryKey: ['bodyshops'],
-    queryFn: () => base44.entities.Bodyshop.list(),
-  });
-
-  const { data: clients = [] } = useQuery({
-    queryKey: ['clients'],
-    queryFn: () => base44.entities.Client.list(),
-  });
-
-  const { data: suppliers = [] } = useQuery({
-    queryKey: ['suppliers'],
-    queryFn: () => base44.entities.Supplier.list(),
-  });
-
-  const handleRoleChange = (roleId) => {
-    const selectedRole = roles.find(r => r.id === roleId);
-    if (selectedRole) {
-      setFormData({
-        ...formData,
-        job_role_id: roleId,
-        departments_access: selectedRole.departments_access || ['Dashboard']
-      });
-    } else {
-      setFormData({
-        ...formData,
-        job_role_id: ''
-      });
-    }
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    
-    const cleanedData = { ...formData };
-    if (formData.user_type !== 'referrer') cleanedData.linked_referrer_id = '';
-    if (formData.user_type !== 'bodyshop') cleanedData.linked_bodyshop_id = '';
-    if (formData.user_type !== 'client') cleanedData.linked_client_id = '';
-    if (formData.user_type !== 'supplier') cleanedData.linked_supplier_id = '';
-    
-    onSave(cleanedData);
-  };
-
-  const activeRoles = roles.filter(r => r.is_active);
-
-  return (
-    <div className="glass p-6 max-w-2xl w-full mx-auto">
-      <h2 className="text-xl font-bold mb-4 text-gray-700">{user ? 'Edit User' : 'New User'}</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Full Name *</label>
-          <Input
-            value={formData.full_name}
-            onChange={(e) => setFormData({...formData, full_name: e.target.value})}
-            required
-            className="glass-inset"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Email *</label>
-          <Input
-            type="email"
-            value={formData.email}
-            onChange={(e) => setFormData({...formData, email: e.target.value})}
-            required
-            disabled={!!user}
-            className="glass-inset"
-          />
-          {user && <p className="text-xs text-gray-500 mt-1">Email cannot be changed after creation</p>}
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Role *</label>
-          <select
-            value={formData.role}
-            onChange={(e) => setFormData({...formData, role: e.target.value})}
-            className="glass-inset w-full px-4 py-3 rounded-xl border border-transparent focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent"
-          >
-            <option value="user">User — Standard access</option>
-            <option value="company_admin">Company Admin — Manages their company</option>
-            <option value="super_admin">Super Admin — Full system access</option>
-          </select>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">User Type *</label>
-          <select
-            value={formData.user_type}
-            onChange={(e) => setFormData({...formData, user_type: e.target.value})}
-            className="glass-inset w-full px-4 py-3 rounded-xl border border-transparent focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent"
-          >
-            <option value="internal">Internal Staff</option>
-            <option value="referrer">Referrer</option>
-            <option value="bodyshop">Bodyshop/Repairer</option>
-            <option value="client">Client</option>
-            <option value="supplier">Supplier</option>
-          </select>
-        </div>
-
-        {formData.user_type === 'referrer' && (
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Linked Referrer</label>
-            <select
-              value={formData.linked_referrer_id}
-              onChange={(e) => setFormData({...formData, linked_referrer_id: e.target.value})}
-              className="glass-inset w-full px-4 py-3 rounded-xl border border-transparent focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent"
-            >
-              <option value="">Select Referrer...</option>
-              {referrers.map(r => (
-                <option key={r.id} value={r.id}>{r.name}</option>
-              ))}
-            </select>
-          </div>
-        )}
-
-        {formData.user_type === 'bodyshop' && (
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Linked Bodyshop</label>
-            <select
-              value={formData.linked_bodyshop_id}
-              onChange={(e) => setFormData({...formData, linked_bodyshop_id: e.target.value})}
-              className="glass-inset w-full px-4 py-3 rounded-xl border border-transparent focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent"
-            >
-              <option value="">Select Bodyshop...</option>
-              {bodyshops.map(b => (
-                <option key={b.id} value={b.id}>{b.name}</option>
-              ))}
-            </select>
-          </div>
-        )}
-
-        {formData.user_type === 'client' && (
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Linked Client</label>
-            <select
-              value={formData.linked_client_id}
-              onChange={(e) => setFormData({...formData, linked_client_id: e.target.value})}
-              className="glass-inset w-full px-4 py-3 rounded-xl border border-transparent focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent"
-            >
-              <option value="">Select Client...</option>
-              {clients.map(c => (
-                <option key={c.id} value={c.id}>{c.name}</option>
-              ))}
-            </select>
-          </div>
-        )}
-
-        {formData.user_type === 'supplier' && (
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Linked Supplier</label>
-            <select
-              value={formData.linked_supplier_id}
-              onChange={(e) => setFormData({...formData, linked_supplier_id: e.target.value})}
-              className="glass-inset w-full px-4 py-3 rounded-xl border border-transparent focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent"
-            >
-              <option value="">Select Supplier...</option>
-              {suppliers.map(s => (
-                <option key={s.id} value={s.id}>{s.name}</option>
-              ))}
-            </select>
-          </div>
-        )}
-
-        {formData.user_type === 'internal' && (
-          <>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Job Role</label>
-              <select
-                value={formData.job_role_id}
-                onChange={(e) => handleRoleChange(e.target.value)}
-                className="glass-inset w-full px-4 py-3 rounded-xl border border-transparent focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent"
-              >
-                <option value="">No Role Assigned</option>
-                {activeRoles.map(role => (
-                  <option key={role.id} value={role.id}>{role.role_name}</option>
-                ))}
-              </select>
-              <p className="text-xs text-gray-500 mt-1">Selecting a role will auto-populate department access</p>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Department Access</label>
-              <div className="glass-inset p-4 space-y-2 rounded-xl">
-                {AVAILABLE_DEPARTMENTS_FOR_FORM.map(dept => (
-                  <label key={dept} className="flex items-center gap-2 text-gray-700">
-                    <input
-                      type="checkbox"
-                      checked={formData.departments_access?.includes(dept)}
-                      onChange={(e) => {
-                        const newDepts = e.target.checked
-                          ? [...(formData.departments_access || []), dept]
-                          : (formData.departments_access || []).filter(d => d !== dept);
-                        setFormData({...formData, departments_access: newDepts});
-                      }}
-                      className="form-checkbox h-4 w-4 text-gold rounded focus:ring-gold border-gray-300"
-                    />
-                    <span>{dept}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <label className="flex items-center gap-2 text-gray-700">
-                <input
-                  type="checkbox"
-                  checked={formData.can_manage_permissions}
-                  onChange={(e) => setFormData({...formData, can_manage_permissions: e.target.checked})}
-                  className="form-checkbox h-4 w-4 text-gold rounded focus:ring-gold border-gray-300"
-                />
-                <span>Can manage user permissions</span>
-              </label>
-            </div>
-          </>
-        )}
-
-        <div className="flex justify-end gap-3 pt-4">
-          <Button type="button" onClick={onCancel} className="neomorph-flat px-4 py-2 text-gray-600">
-            Cancel
-          </Button>
-          <Button type="submit" className="glass-button px-4 py-2 text-gold-700">
-            {user ? 'Update User' : 'Create User'}
-          </Button>
-        </div>
-      </form>
-    </div>
-  );
-}
-
+const TABS = [
+  { id: "internal",  label: "Internal Staff",  icon: UserCheck,  type: "internal"  },
+  { id: "bodyshop",  label: "Repairers",        icon: Wrench,     type: "bodyshop"  },
+  { id: "referrer",  label: "Referrers",        icon: Building2,  type: "referrer"  },
+  { id: "supplier",  label: "Suppliers",        icon: Package,    type: "supplier"  },
+  { id: "client",    label: "Clients",          icon: User,       type: "client"    },
+];
 
 export default function UserManagement() {
   const queryClient = useQueryClient();
-  const [editingUserId, setEditingUserId] = useState(null);
-  const [showCreateForm, setShowCreateForm] = useState(false);
-  const [error, setError] = useState(null);
-  const [deptEdits, setDeptEdits] = useState({});
+  const [activeTab, setActiveTab] = useState("internal");
 
   const { data: currentUser } = useQuery({
     queryKey: ['currentUser'],
     queryFn: () => base44.auth.me(),
   });
 
-  const { data: users = [], isLoading } = useQuery({
+  const { data: users = [], isLoading: usersLoading } = useQuery({
     queryKey: ['users'],
     queryFn: () => base44.entities.User.list(),
   });
 
-  const { data: roles = [] } = useQuery({
-    queryKey: ['roles'],
-    queryFn: () => base44.entities.Role.list(),
+  const { data: bodyshops = [] } = useQuery({
+    queryKey: ['Bodyshop'],
+    queryFn: () => base44.entities.Bodyshop.list('name'),
   });
 
-  const updateUserMutation = useMutation({
-    mutationFn: ({ id, data }) => base44.entities.User.update(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['users'] });
-      setEditingUserId(null);
-      setError(null);
-    },
-    onError: (error) => {
-      console.error("Update error:", error);
-      setError("Failed to update user: " + (error.message || "Unknown error"));
-    },
+  const { data: referrers = [] } = useQuery({
+    queryKey: ['Referrer'],
+    queryFn: () => base44.entities.Referrer.list('name'),
   });
 
-  const createUserMutation = useMutation({
-    mutationFn: async (data) => {
-      try {
-        return await base44.entities.User.create(data);
-      } catch (err) {
-        throw new Error("User creation failed. Users may need to be invited through the Dashboard > Data > User section instead.");
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['users'] });
-      setShowCreateForm(false);
-      setError(null);
-    },
-    onError: (error) => {
-      console.error("Create error:", error);
-      setError(error.message || "Failed to create user. Please try inviting them through Dashboard > Data > Users instead.");
-    },
+  const { data: suppliers = [] } = useQuery({
+    queryKey: ['Supplier'],
+    queryFn: () => base44.entities.Supplier.list('name'),
   });
 
-  const handleSaveUserForm = async (formData) => {
-    setError(null);
-    if (editingUserId) {
-      updateUserMutation.mutate({ id: editingUserId, data: formData });
-    } else {
-      createUserMutation.mutate(formData);
-    }
-  };
-
-  const handleCancelUserForm = () => {
-    setEditingUserId(null);
-    setShowCreateForm(false);
-    setError(null);
-  };
+  const { data: clients = [] } = useQuery({
+    queryKey: ['Client'],
+    queryFn: () => base44.entities.Client.list('name'),
+  });
 
   const requestFeedbackMutation = useMutation({
     mutationFn: async (userId) => {
       const response = await base44.functions.invoke('requestFeedback', { userId });
       return response.data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['users'] });
-      alert('Feedback request sent successfully!');
-    },
-    onError: (error) => {
-      console.error('Error requesting feedback:', error);
-      alert('Failed to send feedback request: ' + (error.message || 'Unknown error'));
-    }
+    onSuccess: () => alert('Feedback request sent successfully!'),
+    onError: (err) => alert('Failed to send feedback request: ' + (err.message || 'Unknown error')),
   });
 
-  const handleRequestFeedback = (userId) => {
-    if (confirm('Send a feedback prompt to this user? They will see it the next time they log in to their portal.')) {
+  const handleFeedbackRequest = (userId) => {
+    if (confirm('Send a feedback prompt to this user?')) {
       requestFeedbackMutation.mutate(userId);
     }
   };
@@ -359,238 +66,298 @@ export default function UserManagement() {
   const isAdmin = isSuperAdmin || currentUser?.role === 'company_admin';
   const canManage = isAdmin || currentUser?.can_manage_permissions;
 
+  // Build company → users mapping for the active tab
+  const { companies, companyMap } = useMemo(() => {
+    if (activeTab === 'internal') return { companies: [], companyMap: {} };
+    const entityMap = {
+      bodyshop: { list: bodyshops, idField: 'linked_bodyshop_id' },
+      referrer:  { list: referrers,  idField: 'linked_referrer_id'  },
+      supplier:  { list: suppliers,  idField: 'linked_supplier_id'  },
+      client:    { list: clients,    idField: 'linked_client_id'    },
+    };
+    const { list, idField } = entityMap[activeTab] || { list: [], idField: '' };
+    const map = {};
+    list.forEach(c => { map[c.id] = []; });
+    users.filter(u => u.user_type === activeTab).forEach(u => {
+      const cid = u[idField];
+      if (cid && map[cid]) map[cid].push(u);
+      else if (cid) map[cid] = [u]; // orphaned link
+    });
+    return { companies: list, companyMap: map };
+  }, [activeTab, users, bodyshops, referrers, suppliers, clients]);
+
+  // Internal users (no company grouping)
+  const internalUsers = useMemo(() => {
+    return users.filter(u => u.user_type === 'internal' || (!u.user_type && u.role !== 'super_admin' && u.role !== 'company_admin') || u.role === 'super_admin' || u.role === 'company_admin');
+  }, [users]);
+
   if (!canManage) {
     return (
       <div className="neomorph p-8 text-center">
-        <Shield className="w-12 h-12 mx-auto mb-4 text-red-600" />
-        <h2 className="text-xl font-bold text-gray-700 mb-2">Access Denied</h2>
-        <p className="text-gray-500">You do not have permission to manage user access.</p>
+        <Shield className="w-12 h-12 mx-auto mb-4 text-red-500" />
+        <h2 className="text-xl font-bold mb-2">Access Denied</h2>
+        <p className="text-foreground-muted">You do not have permission to manage user access.</p>
       </div>
     );
   }
 
-  const getRoleName = (roleId) => {
-    const role = roles.find(r => r.id === roleId);
-    return role?.role_name || null;
-  };
-
-  const toggleDept = (userId, dept, currentAccess) => {
-    const current = deptEdits[userId] ?? currentAccess ?? [];
-    const updated = current.includes(dept)
-      ? current.filter(d => d !== dept)
-      : [...current, dept];
-    setDeptEdits(prev => ({ ...prev, [userId]: updated }));
-  };
-
-  const saveDeptAccess = (userId) => {
-    const newAccess = deptEdits[userId];
-    if (newAccess !== undefined) {
-      updateUserMutation.mutate(
-        { id: userId, data: { departments_access: newAccess } },
-        { onSuccess: () => setDeptEdits(prev => { const n = {...prev}; delete n[userId]; return n; }) }
-      );
-    }
-  };
-
   return (
-    <div className="space-y-6">
-      <div className="neomorph p-6">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <Users className="w-6 h-6 text-gold" />
-            <div>
-              <h1 className="text-2xl font-bold text-gray-700">User Management</h1>
-              <p className="text-sm text-gray-500 mt-1">Manage user accounts and permissions</p>
-            </div>
-          </div>
-          <Button
-            onClick={() => {
-              setShowCreateForm(true);
-              setError(null);
-            }}
-            className="glass-button px-4 py-2 text-gold-700"
-          >
-            <Plus className="w-4 h-4 mr-2" /> Create New User
-          </Button>
+    <div className="space-y-4">
+      {/* Header */}
+      <div className="neomorph p-4 flex items-center gap-3">
+        <Users className="w-5 h-5 text-accent flex-shrink-0" />
+        <div>
+          <h1 className="text-xl font-bold">User Management</h1>
+          <p className="text-xs text-foreground-muted">Manage users by company type</p>
         </div>
-
-        {error && (
-          <div className="neomorph-flat p-4 bg-red-50 border border-red-200 rounded-xl mb-4 flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-            <div className="flex-1">
-              <p className="text-sm text-red-800 font-medium">Error</p>
-              <p className="text-sm text-red-700 mt-1">{error}</p>
-              <p className="text-xs text-red-600 mt-2">
-                <strong>Note:</strong> New users typically need to be invited through Dashboard - Data - Users. 
-                This form is primarily for updating existing user permissions.
-              </p>
-            </div>
-            <Button
-              onClick={() => setError(null)}
-              variant="ghost"
-              size="icon"
-              className="flex-shrink-0 w-6 h-6 p-0 hover:bg-red-100"
-            >
-              <X className="w-4 h-4 text-red-600" />
-            </Button>
-          </div>
-        )}
       </div>
 
-      {(editingUserId || showCreateForm) ? (
-        <UserForm
-          user={editingUserId ? users.find(u => u.id === editingUserId) : null}
-          onSave={handleSaveUserForm}
-          onCancel={handleCancelUserForm}
-        />
-      ) : (
-        <div className="space-y-4">
-          {isLoading ? (
-            <div className="neomorph p-8 text-center text-gray-500">Loading users...</div>
-          ) : users.length === 0 ? (
-            <div className="neomorph p-8 text-center text-gray-500">No users found.</div>
-          ) : (
-            users.map((user) => {
-              const roleName = user.job_role_id ? getRoleName(user.job_role_id) : null;
-              
-              return (
-                <div key={user.id} className="neomorph p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <div>
-                      <h3 className="text-lg font-bold text-foreground">{user.full_name || 'Unnamed User'}</h3>
-                      <p className="text-sm text-foreground-muted">{user.email}</p>
-                      <div className="flex flex-wrap gap-2 mt-2">
-                        {user.role === 'super_admin' && (
-                          <span className="neomorph-flat px-3 py-1 text-xs font-medium text-red-600">
-                            ⭐ Super Admin
-                          </span>
-                        )}
-                        {user.role === 'company_admin' && (
-                          <span className="neomorph-flat px-3 py-1 text-xs font-medium text-orange-500">
-                            Company Admin
-                          </span>
-                        )}
-                        {roleName && (
-                          <span className="neomorph-flat px-3 py-1 text-xs font-medium text-indigo-600">
-                            {roleName}
-                          </span>
-                        )}
-                        {user.can_manage_permissions && (
-                          <span className="neomorph-flat px-3 py-1 text-xs font-medium text-blue-600">
-                            Can Manage Permissions
-                          </span>
-                        )}
-                        {user.user_type && user.user_type !== 'internal' && (
-                          <span className="neomorph-flat px-3 py-1 text-xs font-medium text-purple-600 capitalize">
-                            {user.user_type} User
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex gap-2">
-                      {(user.user_type === 'referrer' || user.user_type === 'bodyshop') && (
-                        <Button
-                          onClick={() => handleRequestFeedback(user.id)}
-                          disabled={requestFeedbackMutation.isPending}
-                          className="neomorph-flat px-4 py-2 text-green-600"
-                          title="Request feedback from this user"
-                        >
-                          <MessageCircle className="w-4 h-4" />
-                        </Button>
-                      )}
-                      <Button
-                        onClick={() => {
-                          setEditingUserId(user.id);
-                          setError(null);
-                        }}
-                        className="neomorph-flat px-4 py-2 text-blue-600"
-                      >
-                        Edit User
-                      </Button>
-                    </div>
-                  </div>
+      {/* Tabs */}
+      <div className="neomorph p-2 flex gap-1 overflow-x-auto">
+        {TABS.map(tab => {
+          const Icon = tab.icon;
+          const count = tab.id === 'internal'
+            ? internalUsers.length
+            : users.filter(u => u.user_type === tab.type).length;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-all flex-shrink-0 ${
+                activeTab === tab.id
+                  ? 'bg-accent text-accent-foreground shadow'
+                  : 'text-foreground-muted hover:text-foreground hover:bg-surface-hover'
+              }`}
+            >
+              <Icon className="w-4 h-4" />
+              {tab.label}
+              <span className={`text-xs px-1.5 py-0.5 rounded-full ${
+                activeTab === tab.id ? 'bg-black/20 text-white' : 'bg-surface text-foreground-muted'
+              }`}>
+                {count}
+              </span>
+            </button>
+          );
+        })}
+      </div>
 
-                  {(user.role === 'super_admin' || user.role === 'company_admin') ? (
-                    <p className="text-sm text-gray-500 mt-4">
-                      {user.role === 'super_admin' ? 'Super Admins have full system access.' : 'Company Admins manage their company and its users.'}
-                    </p>
-                  ) : (user.user_type === 'internal' || !user.user_type) ? (
-                    <div className="mt-4">
-                      <div className="flex items-center justify-between mb-3">
-                        <p className="text-sm font-medium text-foreground-muted">Department Access</p>
-                        {isSuperAdmin && deptEdits[user.id] !== undefined && (
-                          <Button
-                            onClick={() => saveDeptAccess(user.id)}
-                            disabled={updateUserMutation.isPending}
-                            className="h-7 px-3 text-xs bg-green-600 text-white hover:bg-green-700 rounded-lg flex items-center gap-1"
-                          >
-                            <Check className="w-3 h-3" /> Save
-                          </Button>
-                        )}
-                      </div>
-                      <div className="flex flex-wrap gap-2">
-                        {ALL_DEPARTMENTS.map((dept) => {
-                          const access = deptEdits[user.id] ?? user.departments_access ?? [];
-                          const enabled = access.includes(dept);
-                          return isSuperAdmin ? (
-                            <button
-                              key={dept}
-                              onClick={() => toggleDept(user.id, dept, user.departments_access ?? [])}
-                              className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-all ${
-                                enabled
-                                  ? 'bg-blue-600 text-white border-blue-600'
-                                  : 'bg-gray-100 text-gray-400 border-gray-200 hover:border-gray-400'
-                              }`}
-                            >
-                              {dept}
-                            </button>
-                          ) : enabled ? (
-                            <span key={dept} className="neomorph-flat px-3 py-1 text-xs font-medium text-foreground">
-                              {dept}
-                            </span>
-                          ) : null;
-                        })}
-                        {!isSuperAdmin && (user.departments_access ?? []).length === 0 && (
-                          <span className="text-sm text-foreground-muted">No departments assigned</span>
-                        )}
-                      </div>
-                    </div>
-                  ) : (
-                      <div className="mt-4">
-                          <p className="text-sm font-medium text-gray-600 mb-2">Linked Entity:</p>
-                          <div className="flex flex-wrap gap-2">
-                              {user.user_type === 'referrer' && user.linked_referrer_id && (
-                                  <span className="neomorph-flat px-3 py-1 text-xs font-medium text-gray-700">
-                                      Referrer ID: {user.linked_referrer_id}
-                                  </span>
-                              )}
-                              {user.user_type === 'bodyshop' && user.linked_bodyshop_id && (
-                                  <span className="neomorph-flat px-3 py-1 text-xs font-medium text-gray-700">
-                                      Bodyshop ID: {user.linked_bodyshop_id}
-                                  </span>
-                              )}
-                              {user.user_type === 'client' && user.linked_client_id && (
-                                  <span className="neomorph-flat px-3 py-1 text-xs font-medium text-gray-700">
-                                      Client ID: {user.linked_client_id}
-                                  </span>
-                              )}
-                              {user.user_type === 'supplier' && user.linked_supplier_id && (
-                                  <span className="neomorph-flat px-3 py-1 text-xs font-medium text-gray-700">
-                                      Supplier ID: {user.linked_supplier_id}
-                                  </span>
-                              )}
-                              {!user.linked_referrer_id && !user.linked_bodyshop_id && !user.linked_client_id && !user.linked_supplier_id && (
-                                  <span className="text-sm text-gray-500">No linked entity assigned</span>
-                              )}
-                          </div>
-                      </div>
-                  )}
-                </div>
-              );
-            })
+      {/* Content */}
+      {usersLoading ? (
+        <div className="neomorph p-8 text-center text-foreground-muted">Loading users...</div>
+      ) : activeTab === 'internal' ? (
+        // Internal staff — flat list with accordion per user
+        <div className="space-y-2">
+          {internalUsers.length === 0 ? (
+            <div className="neomorph p-8 text-center text-foreground-muted">No internal users found.</div>
+          ) : (
+            internalUsers.map(user => (
+              <InternalUserRow
+                key={user.id}
+                user={user}
+                isSuperAdmin={isSuperAdmin}
+              />
+            ))
+          )}
+        </div>
+      ) : (
+        // Company-grouped view
+        <div className="space-y-2">
+          {companies.length === 0 ? (
+            <div className="neomorph p-8 text-center text-foreground-muted">
+              No {TABS.find(t => t.id === activeTab)?.label.toLowerCase()} found.
+            </div>
+          ) : (
+            companies.map(company => (
+              <CompanyUserGroup
+                key={company.id}
+                company={company}
+                users={companyMap[company.id] || []}
+                isSuperAdmin={isSuperAdmin}
+                onFeedbackRequest={handleFeedbackRequest}
+              />
+            ))
           )}
         </div>
       )}
     </div>
+  );
+}
+
+// Simple accordion row for internal staff
+function InternalUserRow({ user, isSuperAdmin }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const queryClient = useQueryClient();
+
+  const updateMutation = useMutation({
+    mutationFn: ({ id, data }) => base44.entities.User.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      setIsEditing(false);
+    },
+  });
+
+  const { data: roles = [] } = useQuery({
+    queryKey: ['roles'],
+    queryFn: () => base44.entities.Role.list(),
+    enabled: isOpen,
+  });
+
+  const roleName = roles.find(r => r.id === user.job_role_id)?.role_name;
+
+  return (
+    <div className="neomorph-flat overflow-hidden">
+      <button
+        onClick={() => setIsOpen(o => !o)}
+        className="w-full flex items-center gap-3 p-4 text-left hover:bg-surface-hover transition-colors"
+      >
+        <div className="w-9 h-9 rounded-full bg-accent/10 flex items-center justify-center flex-shrink-0">
+          <span className="text-sm font-bold text-accent">
+            {(user.full_name || user.email)?.[0]?.toUpperCase()}
+          </span>
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="font-semibold text-foreground text-sm truncate">{user.full_name || 'Unnamed User'}</p>
+          <p className="text-xs text-foreground-muted truncate">{user.email}</p>
+        </div>
+        <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+          {user.role === 'super_admin' && <span className="text-xs px-2 py-0.5 rounded bg-red-100 text-red-700">Super Admin</span>}
+          {user.role === 'company_admin' && <span className="text-xs px-2 py-0.5 rounded bg-orange-100 text-orange-700">Company Admin</span>}
+          {roleName && <span className="text-xs px-2 py-0.5 rounded bg-indigo-100 text-indigo-700">{roleName}</span>}
+          {user.can_manage_permissions && <span className="text-xs px-2 py-0.5 rounded bg-blue-100 text-blue-700 hidden sm:inline">Perm. Manager</span>}
+          <svg className={`w-4 h-4 text-foreground-muted transition-transform ${isOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        </div>
+      </button>
+
+      {isOpen && (
+        <div className="border-t border-border px-4 pb-4">
+          {/* Dept access display */}
+          {!isEditing && (
+            <div className="pt-3 space-y-3">
+              {(user.role !== 'super_admin' && user.role !== 'company_admin') && (
+                <div>
+                  <p className="text-xs font-medium text-foreground-muted mb-1.5">Department Access</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {(user.departments_access || []).length > 0
+                      ? user.departments_access.map(d => (
+                          <span key={d} className="text-xs px-2 py-0.5 rounded bg-surface border border-border text-foreground">{d}</span>
+                        ))
+                      : <span className="text-xs text-foreground-muted">No departments assigned</span>
+                    }
+                  </div>
+                </div>
+              )}
+              {isSuperAdmin && (
+                <Button
+                  onClick={() => setIsEditing(true)}
+                  className="neomorph-flat px-3 py-1.5 text-xs text-blue-600"
+                >
+                  Edit User
+                </Button>
+              )}
+            </div>
+          )}
+
+          {isEditing && (
+            <div className="pt-3">
+              <UserEditFormInline
+                user={user}
+                onSave={(data) => updateMutation.mutate({ id: user.id, data })}
+                onCancel={() => setIsEditing(false)}
+                isSaving={updateMutation.isPending}
+              />
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Inline form for internal users (dept toggles)
+function UserEditFormInline({ user, onSave, onCancel, isSaving }) {
+  const ALL_DEPARTMENTS = ["Dashboard", "Claims", "Estimating", "Engineering", "Parts", "Invoicing", "Reports", "Map"];
+  const [formData, setFormData] = useState({
+    full_name: user?.full_name || '',
+    role: user?.role || 'user',
+    departments_access: user?.departments_access || [],
+    can_manage_permissions: user?.can_manage_permissions || false,
+  });
+
+  const { data: roles = [] } = useQuery({
+    queryKey: ['roles'],
+    queryFn: () => base44.entities.Role.list(),
+  });
+
+  return (
+    <form onSubmit={(e) => { e.preventDefault(); onSave(formData); }} className="space-y-3">
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className="block text-xs text-foreground-muted mb-1">Full Name</label>
+          <input
+            value={formData.full_name}
+            onChange={e => setFormData(p => ({ ...p, full_name: e.target.value }))}
+            className="neomorph-inset w-full px-3 py-1.5 rounded-lg text-sm"
+          />
+        </div>
+        <div>
+          <label className="block text-xs text-foreground-muted mb-1">System Role</label>
+          <select
+            value={formData.role}
+            onChange={e => setFormData(p => ({ ...p, role: e.target.value }))}
+            className="neomorph-inset w-full px-3 py-1.5 rounded-lg text-sm"
+          >
+            <option value="user">User</option>
+            <option value="company_admin">Company Admin</option>
+            <option value="super_admin">Super Admin</option>
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-xs text-foreground-muted mb-1.5">Department Access</label>
+        <div className="flex flex-wrap gap-1.5">
+          {ALL_DEPARTMENTS.map(dept => {
+            const enabled = formData.departments_access?.includes(dept);
+            return (
+              <button
+                key={dept}
+                type="button"
+                onClick={() => setFormData(p => ({
+                  ...p,
+                  departments_access: enabled
+                    ? p.departments_access.filter(d => d !== dept)
+                    : [...(p.departments_access || []), dept]
+                }))}
+                className={`px-2.5 py-1 text-xs font-medium rounded-lg border transition-all ${
+                  enabled ? 'bg-blue-600 text-white border-blue-600' : 'bg-surface text-foreground-muted border-border hover:border-foreground-muted'
+                }`}
+              >
+                {dept}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <label className="flex items-center gap-2 text-sm text-foreground cursor-pointer">
+        <input
+          type="checkbox"
+          checked={formData.can_manage_permissions}
+          onChange={e => setFormData(p => ({ ...p, can_manage_permissions: e.target.checked }))}
+          className="rounded"
+        />
+        Can manage user permissions
+      </label>
+
+      <div className="flex gap-2 pt-1">
+        <Button type="button" onClick={onCancel} className="neomorph-flat px-3 py-1.5 text-xs">Cancel</Button>
+        <Button type="submit" disabled={isSaving} className="neomorph-flat px-3 py-1.5 text-xs bg-accent/10 text-accent">
+          {isSaving ? 'Saving...' : 'Save'}
+        </Button>
+      </div>
+    </form>
   );
 }
