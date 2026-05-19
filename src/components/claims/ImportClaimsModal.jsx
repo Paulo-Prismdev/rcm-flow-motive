@@ -65,67 +65,144 @@ const mapRowToClaim = (row) => {
   // Date Sent to ACG, Date Payment in, Storage Amount Net, Storage Amount Inc VAT,
   // Item ID (auto generated)
 
+  // Helper: get first non-empty value from a list of possible column names
+  const get = (...keys) => {
+    for (const k of keys) {
+      if (row[k] !== null && row[k] !== undefined && row[k] !== '') return row[k];
+    }
+    return undefined;
+  };
+
   const claim = {};
 
-  if (row['Name'] || row[0]) claim.reg = (row['Name'] || row[0])?.toString().trim().toUpperCase();
-  if (row['Client'] || row[1]) claim.referrer = (row['Client'] || row[1])?.toString().trim();
-  if (row['Make/Model'] || row[2]) claim.make_model = (row['Make/Model'] || row[2])?.toString().trim();
-  if (row['Job Status'] || row[3]) claim.job_status = mapJobStatus(row['Job Status'] || row[3]);
-  if (row['Date Received'] || row[4]) claim.date_received = parseDate(row['Date Received'] || row[4]);
-  if (row['Claim Type'] || row[5]) claim.claim_type = mapClaimType(row['Claim Type'] || row[5]);
-  if (row['Client Phone No'] || row[7]) claim.client_phone = (row['Client Phone No'] || row[7])?.toString().trim();
-  if (row['Client Address'] || row[8]) {
-    // Use as vehicle_location and client_address
-    const addr = (row['Client Address'] || row[8])?.toString().trim();
-    claim.vehicle_location = addr;
-  }
-  if (row['Claim Ref'] || row[9]) claim.claim_ref = (row['Claim Ref'] || row[9])?.toString().trim();
-  if (row['Broker'] || row[10]) claim.insurer = (row['Broker'] || row[10])?.toString().trim();
-  if (row['Contact Name'] || row[11]) claim.driver_contact_name = (row['Contact Name'] || row[11])?.toString().trim();
-  if (row['Client Email'] || row[12] || row['Client Email Email'] || row[6]) {
-    claim.client_email = (row['Client Email'] || row[12] || row['Client Email Email'] || row[6])?.toString().trim();
-  }
-  if (row['Loss Date'] || row[13]) claim.loss_date = parseDate(row['Loss Date'] || row[13]);
-  if (row['Vehicle Damage'] || row[15]) claim.vehicle_damage = (row['Vehicle Damage'] || row[15])?.toString().trim();
-  
-  const courtesyCar = parseBool(row['C/Car Req'] || row[17]);
+  const regVal = get('Name', 'Reg', 'Registration', 'REG', 'Vehicle Reg');
+  if (regVal) claim.reg = regVal.toString().trim().toUpperCase();
+
+  const clientVal = get('Client', 'Client Name', 'Customer');
+  if (clientVal) claim.referrer = clientVal.toString().trim();
+
+  const makeModelVal = get('Make/Model', 'Make Model', 'Vehicle', 'Make & Model');
+  if (makeModelVal) claim.make_model = makeModelVal.toString().trim();
+  const jobStatusVal = get('Job Status', 'Status', 'Job Status ');
+  if (jobStatusVal) claim.job_status = mapJobStatus(jobStatusVal);
+
+  const dateReceivedVal = get('Date Received', 'Date Rec', 'Received Date');
+  if (dateReceivedVal) claim.date_received = parseDate(dateReceivedVal);
+
+  const claimTypeVal = get('Claim Type', 'Type', 'Job Type');
+  if (claimTypeVal) claim.claim_type = mapClaimType(claimTypeVal);
+
+  const phoneVal = get('Client Phone No', 'Client Phone', 'Phone', 'Tel', 'Phone No');
+  if (phoneVal) claim.client_phone = phoneVal.toString().trim();
+
+  const addrVal = get('Client Address', 'Address', 'Client Addr');
+  if (addrVal) claim.vehicle_location = addrVal.toString().trim();
+
+  const claimRefVal = get('Claim Ref', 'Claim Reference', 'Ref');
+  if (claimRefVal) claim.claim_ref = claimRefVal.toString().trim();
+
+  const insurerVal = get('Broker', 'Insurer', 'Broker/Insurer', 'Insurance');
+  if (insurerVal) claim.insurer = insurerVal.toString().trim();
+
+  const contactVal = get('Contact Name', 'Driver', 'Driver Name', 'Driver Contact');
+  if (contactVal) claim.driver_contact_name = contactVal.toString().trim();
+
+  const emailVal = get('Client Email', 'Email', 'Client Email Email', 'Email Address');
+  if (emailVal) claim.client_email = emailVal.toString().trim();
+
+  const lossDateVal = get('Loss Date', 'Date of Loss', 'Incident Date');
+  if (lossDateVal) claim.loss_date = parseDate(lossDateVal);
+
+  const damageVal = get('Vehicle Damage', 'Damage', 'Damage Description');
+  if (damageVal) claim.vehicle_damage = damageVal.toString().trim();
+
+  const ccVal = get('C/Car Req', 'Courtesy Car', 'C/Car Required', 'Courtesy Car Required');
+  const courtesyCar = parseBool(ccVal);
   if (courtesyCar !== undefined) claim.courtesy_car_required = courtesyCar;
-  
-  const unroadworthy = parseBool(row['Unroadworthy?'] || row[18]);
+
+  const unroadVal = get('Unroadworthy?', 'Unroadworthy', 'Un-roadworthy');
+  const unroadworthy = parseBool(unroadVal);
   if (unroadworthy !== undefined) claim.unroadworthy = unroadworthy;
-  
-  const recovery = parseBool(row['Recovery Required'] || row[19]);
+
+  const recoveryVal = get('Recovery Required', 'Recovery', 'Recovery Req');
+  const recovery = parseBool(recoveryVal);
   if (recovery !== undefined) claim.recovery_required = recovery;
-  
-  if (row['Bodyshop'] || row[20]) claim.bodyshop = (row['Bodyshop'] || row[20])?.toString().trim();
-  if (row['Bodyshop Email'] || row[21]) claim.bodyshop_email = (row['Bodyshop Email'] || row[21])?.toString().trim();
-  
-  if (row['BS Instructed'] || row[23]) claim.bs_instructed = parseDate(row['BS Instructed'] || row[23]);
-  if (row['Estimate Completed'] || row[25]) claim.estimate_completed = parseDate(row['Estimate Completed'] || row[25]);
-  if (row['Estimate cost NET'] || row[26]) claim.estimate_cost_net = parseNumber(row['Estimate cost NET'] || row[26]);
-  if (row['Estimate cost GROSS'] || row[27]) claim.estimate_cost_gross = parseNumber(row['Estimate cost GROSS'] || row[27]);
-  if (row['Authority Received'] || row[28]) claim.authority_received = parseDate(row['Authority Received'] || row[28]);
-  if (row['Authorised Costs NET'] || row[29]) claim.authority_cost_net = parseNumber(row['Authorised Costs NET'] || row[29]);
-  if (row['Authorised cost GROSS'] || row[30]) claim.authority_cost_gross = parseNumber(row['Authorised cost GROSS'] || row[30]);
-  if (row['On-Site'] || row[32]) claim.on_site_date = parseDate(row['On-Site'] || row[32]);
-  if (row['ECD'] || row[33]) claim.ecd = parseDate(row['ECD'] || row[33]);
-  if (row['Authorising Party'] || row[34]) claim.authorising_party = (row['Authorising Party'] || row[34])?.toString().trim();
-  if (row['Claim Ref for Authorising Party'] || row[36]) claim.referrer_ref = (row['Claim Ref for Authorising Party'] || row[36])?.toString().trim();
-  if (row['Policy Number'] || row[37]) claim.policy_number = (row['Policy Number'] || row[37])?.toString().trim();
-  if (row['Policy Excess'] || row[38]) claim.policy_excess = parseNumber(row['Policy Excess'] || row[38]);
-  if (row['Completion Date'] || row[39]) claim.completion_date = parseDate(row['Completion Date'] || row[39]);
-  
-  const factored = parseBool(row['Factored'] || row[40]);
+
+  const bodyshopVal = get('Bodyshop', 'Repairer', 'Body Shop', 'Garage');
+  if (bodyshopVal) claim.bodyshop = bodyshopVal.toString().trim();
+
+  const bsEmailVal = get('Bodyshop Email', 'Repairer Email', 'Body Shop Email');
+  if (bsEmailVal) claim.bodyshop_email = bsEmailVal.toString().trim();
+
+  const bsInstructedVal = get('BS Instructed', 'BS Inst', 'Bodyshop Instructed');
+  if (bsInstructedVal) claim.bs_instructed = parseDate(bsInstructedVal);
+
+  const estCompVal = get('Estimate Completed', 'Est Completed', 'Estimate Complete');
+  if (estCompVal) claim.estimate_completed = parseDate(estCompVal);
+
+  const estNetVal = get('Estimate cost NET', 'Estimate NET', 'Est Net', 'Estimate Net');
+  if (estNetVal) claim.estimate_cost_net = parseNumber(estNetVal);
+
+  const estGrossVal = get('Estimate cost GROSS', 'Estimate GROSS', 'Est Gross', 'Estimate Gross');
+  if (estGrossVal) claim.estimate_cost_gross = parseNumber(estGrossVal);
+
+  const authRecVal = get('Authority Received', 'Auth Received', 'Authority Rec');
+  if (authRecVal) claim.authority_received = parseDate(authRecVal);
+
+  const authNetVal = get('Authorised Costs NET', 'Authorised NET', 'Auth Net', 'Auth Cost Net');
+  if (authNetVal) claim.authority_cost_net = parseNumber(authNetVal);
+
+  const authGrossVal = get('Authorised cost GROSS', 'Authorised GROSS', 'Auth Gross', 'Auth Cost Gross');
+  if (authGrossVal) claim.authority_cost_gross = parseNumber(authGrossVal);
+
+  const onSiteVal = get('On-Site', 'On Site', 'Onsite', 'On-site Date');
+  if (onSiteVal) claim.on_site_date = parseDate(onSiteVal);
+
+  const ecdVal = get('ECD', 'Expected Completion', 'Expected Completion Date');
+  if (ecdVal) claim.ecd = parseDate(ecdVal);
+
+  const authPartyVal = get('Authorising Party', 'Auth Party', 'Authorising party');
+  if (authPartyVal) claim.authorising_party = authPartyVal.toString().trim();
+
+  const refRefVal = get('Claim Ref for Authorising Party', 'Referrer Ref', 'Auth Party Ref');
+  if (refRefVal) claim.referrer_ref = refRefVal.toString().trim();
+
+  const policyNumVal = get('Policy Number', 'Policy No', 'Policy #');
+  if (policyNumVal) claim.policy_number = policyNumVal.toString().trim();
+
+  const policyExcessVal = get('Policy Excess', 'Excess', 'Policy Exc');
+  if (policyExcessVal) claim.policy_excess = parseNumber(policyExcessVal);
+
+  const compDateVal = get('Completion Date', 'Completed Date', 'Comp Date', 'Date Completed');
+  if (compDateVal) claim.completion_date = parseDate(compDateVal);
+
+  const factoredVal = get('Factored', 'Factored?');
+  const factored = parseBool(factoredVal);
   if (factored !== undefined) claim.factored = factored;
-  
-  if (row['Total loss Date'] || row[41]) claim.total_loss_date = parseDate(row['Total loss Date'] || row[41]);
-  if (row['Cancellation Date'] || row[42]) claim.cancellation_date = parseDate(row['Cancellation Date'] || row[42]);
-  if (row['Reason for Cancellation'] || row[43]) claim.cancellation_reason = (row['Reason for Cancellation'] || row[43])?.toString().trim();
-  if (row['% BLD on Instruction'] || row[44]) claim.percent_bld_instruction = parseNumber(row['% BLD on Instruction'] || row[44]);
-  if (row['Final Repair Cost (excl VAT)'] || row[46]) claim.final_repair_cost = parseNumber(row['Final Repair Cost (excl VAT)'] || row[46]);
-  if (row['Date Payment in'] || row[48]) claim.date_payment_in = parseDate(row['Date Payment in'] || row[48]);
-  if (row['Storage Amount Net'] || row[49]) claim.storage_amount_net = parseNumber(row['Storage Amount Net'] || row[49]);
-  if (row['Storage Amount Inc VAT'] || row[50]) claim.storage_amount_vat = parseNumber(row['Storage Amount Inc VAT'] || row[50]);
+
+  const tlDateVal = get('Total loss Date', 'Total Loss Date', 'TL Date');
+  if (tlDateVal) claim.total_loss_date = parseDate(tlDateVal);
+
+  const cancelDateVal = get('Cancellation Date', 'Cancel Date', 'Cancelled Date');
+  if (cancelDateVal) claim.cancellation_date = parseDate(cancelDateVal);
+
+  const cancelReasonVal = get('Reason for Cancellation', 'Cancellation Reason', 'Cancel Reason');
+  if (cancelReasonVal) claim.cancellation_reason = cancelReasonVal.toString().trim();
+
+  const bldVal = get('% BLD on Instruction', '% BLD', 'BLD %', 'BLD Instruction');
+  if (bldVal) claim.percent_bld_instruction = parseNumber(bldVal);
+
+  const finalRepairVal = get('Final Repair Cost (excl VAT)', 'Final Repair Cost', 'Final Cost', 'Final Repair');
+  if (finalRepairVal) claim.final_repair_cost = parseNumber(finalRepairVal);
+
+  const paymentDateVal = get('Date Payment in', 'Date Payment In', 'Payment Date');
+  if (paymentDateVal) claim.date_payment_in = parseDate(paymentDateVal);
+
+  const storageNetVal = get('Storage Amount Net', 'Storage Net', 'Storage Amount (Net)');
+  if (storageNetVal) claim.storage_amount_net = parseNumber(storageNetVal);
+
+  const storageVatVal = get('Storage Amount Inc VAT', 'Storage Inc VAT', 'Storage Amount (Inc VAT)');
+  if (storageVatVal) claim.storage_amount_vat = parseNumber(storageVatVal);
 
   // Split make_model into vehicle_make and vehicle_model if possible
   if (claim.make_model) {
@@ -147,20 +224,16 @@ const mapRowToClaim = (row) => {
 };
 
 const isValidClaimRow = (row) => {
-  // Must have a registration number (Name column) and it should look like a UK reg
-  const reg = row['Name'] || row[0];
-  if (!reg || typeof reg !== 'string') return false;
-  const trimmed = reg.toString().trim();
-  // Skip header rows, summary rows, section headers
-  if (trimmed.length < 3) return false;
-  if (trimmed.toLowerCase().includes('name') || trimmed.toLowerCase().includes('new claim') ||
-      trimmed.toLowerCase().includes('placed') || trimmed.toLowerCase().includes('completed') ||
-      trimmed.toLowerCase() === 'item id') return false;
-  // Must look like a vehicle reg (alphanumeric, 5-8 chars)
-  if (!/^[A-Z0-9]{2,4}\s?[A-Z0-9]{2,4}$/i.test(trimmed.replace(/\s/g, ''))) {
-    // Allow if it has at least some letters and numbers
-    if (!/[A-Z]/i.test(trimmed) || !/[0-9]/.test(trimmed)) return false;
-  }
+  // Skip completely empty rows
+  const values = Object.values(row);
+  const nonEmpty = values.filter(v => v !== null && v !== undefined && v !== '');
+  if (nonEmpty.length === 0) return false;
+
+  // Skip obvious header/summary rows by checking if the first cell is a known header label
+  const firstVal = (values[0] || '').toString().trim().toLowerCase();
+  const headerKeywords = ['name', 'item id', 'new claims', 'section', 'ref', 'header'];
+  if (headerKeywords.some(k => firstVal === k)) return false;
+
   return true;
 };
 
@@ -191,10 +264,18 @@ export default function ImportClaimsModal({ isOpen, onClose, onImportComplete })
       if (parsed?.error) throw new Error(parsed.error);
 
       const rows = parsed?.data?.rows || parsed?.rows || [];
-      if (!rows.length) throw new Error('No rows found in spreadsheet');
+      if (!rows.length) throw new Error('No rows found in spreadsheet. The file may be empty or in an unsupported format.');
 
       const validRows = rows.filter(isValidClaimRow);
       const mappedRows = validRows.map(row => ({ raw: row, mapped: mapRowToClaim(row) }));
+
+      // If nothing passed validation, show all rows anyway so user sees something
+      if (validRows.length === 0 && rows.length > 0) {
+        const allMapped = rows.map(row => ({ raw: row, mapped: mapRowToClaim(row) }));
+        setPreview(allMapped);
+        setStep('preview');
+        return;
+      }
       setPreview(mappedRows);
       setStep('preview');
     } catch (err) {
