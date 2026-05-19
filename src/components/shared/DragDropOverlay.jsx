@@ -95,7 +95,7 @@ export default function DragDropOverlay({ onFilesUploaded, children }) {
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
-      className="relative"
+      className="relative h-full"
     >
       {children}
       

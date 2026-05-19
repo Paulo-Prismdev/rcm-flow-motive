@@ -896,7 +896,7 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
                 onClose={() => setIsActivityLogOpen(false)}
               />
 
-      <div className="h-full flex flex-col gap-4 md:gap-6 overflow-hidden">
+      <div className="flex flex-col gap-4 md:gap-6" style={{height: '100%', overflow: 'hidden'}}>
           <div className="neomorph p-3 md:p-6 flex-shrink-0 sticky top-0 z-10 bg-background">
               <div className="flex flex-col gap-3">
                   <div className="flex items-center gap-2 md:gap-4">
