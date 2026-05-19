@@ -416,15 +416,15 @@ export default function ClaimsPage() {
                   <Upload className="w-4 h-4 mr-2" />
                   Import
                 </Button>
-                <Button
-                  onClick={() => setShowForm(true)}
-                  className="neomorph-flat bg-accent/10 text-accent font-medium"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  New Claim
-                </Button>
               </>
             )}
+            <Button
+              onClick={() => setShowForm(true)}
+              className="neomorph-flat bg-accent/10 text-accent font-medium"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              New Claim
+            </Button>
           </div>
         </div>
       </div>
@@ -583,7 +583,7 @@ export default function ClaimsPage() {
                 <X className="w-4 h-4 mr-2" />
                 Clear Filters
               </Button>
-            ) : isInternalUser && (
+            ) : (
               <Button onClick={() => setShowForm(true)} className="neomorph-flat">
                 <Plus className="w-4 h-4 mr-2" />
                 Create First Claim
