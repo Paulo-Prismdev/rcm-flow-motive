@@ -15,9 +15,13 @@
       "type": "string",
       "description": "Vehicle registration number"
     },
-    "job_status": {
-      "type": "string",
-      "default": "New"
+    "job_statuses": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Array of job statuses (multi-select)"
     },
     "claim_type": {
       "type": "string",
@@ -629,12 +633,12 @@
         },
         {
           "user_condition": {
-            "user_type": "internal"
+            "data.user_type": "internal"
           }
         },
         {
           "user_condition": {
-            "user_type": "referrer"
+            "data.user_type": "referrer"
           }
         }
       ]
@@ -648,7 +652,7 @@
         },
         {
           "user_condition": {
-            "user_type": "internal"
+            "data.user_type": "internal"
           }
         },
         {
@@ -674,7 +678,7 @@
         },
         {
           "user_condition": {
-            "user_type": "internal"
+            "data.user_type": "internal"
           }
         },
         {

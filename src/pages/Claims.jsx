@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -13,6 +13,7 @@ import UpdateStatusBadge from '../components/shared/UpdateStatusBadge';
 import { formatUKRegistration } from '../components/shared/formatRegistration';
 import ClaimCardFieldsModal from '../components/claims/ClaimCardFieldsModal';
 import { format } from 'date-fns';
+import StatusMultiSelect from '../components/shared/StatusMultiSelect';
 
 // Helper function to calculate update status
 const calculateUpdateStatus = (claim) => {
@@ -83,7 +84,7 @@ const getStatusStyle = (status) => {
 
 export default function ClaimsPage() {
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState([]); // Now array for multi-select
   const [claimTypeFilter, setClaimTypeFilter] = useState('');
   const [insurerFilter, setInsurerFilter] = useState('');
   const [referrerFilter, setReferrerFilter] = useState('');
@@ -186,7 +187,7 @@ export default function ClaimsPage() {
 
   const clearAllFilters = () => {
     setSearchTerm('');
-    setStatusFilter('');
+    setStatusFilter([]);
     setClaimTypeFilter('');
     setInsurerFilter('');
     setReferrerFilter('');
@@ -195,7 +196,7 @@ export default function ClaimsPage() {
     setRepairerAcceptanceFilter('');
   };
 
-  const activeFiltersCount = [statusFilter, claimTypeFilter, insurerFilter, referrerFilter, repairerFilter, updateStatusFilter, repairerAcceptanceFilter].filter(Boolean).length;
+  const activeFiltersCount = [(statusFilter?.length || 0) > 0, claimTypeFilter, insurerFilter, referrerFilter, repairerFilter, updateStatusFilter, repairerAcceptanceFilter].filter(Boolean).length;
 
   const allClaims = showArchived ? claims : claims.filter(c => !c.archived);
 
@@ -208,7 +209,8 @@ export default function ClaimsPage() {
         c.job_number?.toLowerCase().includes(searchLower) ||
         c.insurer?.toLowerCase().includes(searchLower);
 
-      const matchesStatus = !statusFilter || c.job_status === statusFilter;
+      // Multi-status: match if ANY of the claim's statuses is in the filter array
+      const matchesStatus = !statusFilter || statusFilter.length === 0 || (c.job_statuses || []).some(s => statusFilter.includes(s));
       const matchesClaimType = !claimTypeFilter || c.claim_type === claimTypeFilter;
       const matchesInsurer = !insurerFilter || c.insurer === insurerFilter;
       const matchesReferrer = !referrerFilter || c.referrer === referrerFilter;
@@ -313,7 +315,9 @@ export default function ClaimsPage() {
   // Render claim card
   const renderClaimCard = (claim) => {
     const updateStatus = calculateUpdateStatus(claim);
-    const isClosedStatus = ['Completed', 'Cancelled', 'Total Loss'].includes(claim.job_status);
+    // Check if ANY status is a closed status
+    const statuses = claim.job_statuses || [];
+    const isClosedStatus = statuses.some(s => ['Completed', 'Cancelled', 'Total Loss'].includes(s));
     const statusStyle = getStatusStyle(updateStatus);
     
     return (
@@ -332,7 +336,7 @@ export default function ClaimsPage() {
                   {claim.job_number}
                 </span>
               )}
-              <StatusBadge status={claim.job_status || 'New'} />
+              <StatusBadge status={claim.job_statuses || []} />
               {!isClosedStatus && updateStatus && (
                 <UpdateStatusBadge status={updateStatus} small />
               )}
@@ -465,16 +469,12 @@ export default function ClaimsPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                 <div>
                   <label className="block text-xs text-foreground-muted mb-1">Job Status</label>
-                  <select
-                    value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value)}
-                    className="neomorph-inset w-full px-3 py-2 rounded-lg border-0 text-sm"
-                  >
-                    <option value="">All Statuses</option>
-                    {availableStatuses.map(status => (
-                      <option key={status} value={status}>{status}</option>
-                    ))}
-                  </select>
+                  <StatusMultiSelect
+                    selectedStatuses={statusFilter}
+                    onStatusesChange={setStatusFilter}
+                    availableStatuses={availableStatuses}
+                    placeholder="All Statuses"
+                  />
                 </div>
 
                 <div>
@@ -593,10 +593,12 @@ export default function ClaimsPage() {
         ) : (
           <div className="space-y-6">
             {availableStatuses.map(statusGroup => {
-              const claimsInGroup = filteredClaims.filter(claim => claim.job_status === statusGroup);
+              // Show claims that have THIS status (claims can appear in multiple groups)
+              const claimsInGroup = filteredClaims.filter(claim => (claim.job_statuses || []).includes(statusGroup));
 
               if (claimsInGroup.length === 0) return null;
-              if (statusFilter && statusGroup !== statusFilter) return null;
+              // If filter is active, only show groups that match the filter
+              if (statusFilter.length > 0 && !statusFilter.includes(statusGroup)) return null;
 
               return (
                 <div key={statusGroup} className="neomorph p-4">
@@ -613,12 +615,15 @@ export default function ClaimsPage() {
               );
             })}
 
-            {/* Catch-all: claims whose status doesn't match any configured status */}
+            {/* Catch-all: claims with no statuses or only unconfigured statuses */}
             {(() => {
               const knownStatuses = new Set(availableStatuses);
-              const ungrouped = filteredClaims.filter(c => !knownStatuses.has(c.job_status));
+              const ungrouped = filteredClaims.filter(c => {
+                const statuses = c.job_statuses || [];
+                return statuses.length === 0 || !statuses.some(s => knownStatuses.has(s));
+              });
               if (ungrouped.length === 0) return null;
-              if (statusFilter) return null;
+              if (statusFilter.length > 0) return null;
               return (
                 <div className="neomorph p-4">
                   <div className="flex items-center gap-3 mb-4">
