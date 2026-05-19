@@ -101,16 +101,16 @@ export default function Layout({ children, currentPageName }) {
     }).length;
   }, [messages, currentUser]);
 
+  const isSuperAdmin = currentUser?.role === 'super_admin';
+  const isCompanyAdmin = currentUser?.role === 'company_admin';
+  const isAdmin = isSuperAdmin || isCompanyAdmin;
+
   const departments = allDepartments.filter(dept => {
     if (!currentUser) return false;
     if (isSuperAdmin || isCompanyAdmin) return true;
     const userAccess = currentUser.departments_access || [];
     return userAccess.includes(dept.permission);
   });
-
-  const isSuperAdmin = currentUser?.role === 'super_admin';
-  const isCompanyAdmin = currentUser?.role === 'company_admin';
-  const isAdmin = isSuperAdmin || isCompanyAdmin;
   const canManagePermissions = isSuperAdmin || isCompanyAdmin || currentUser?.can_manage_permissions;
   const isInternalUser = currentUser?.user_type === 'internal' || isAdmin;
 
