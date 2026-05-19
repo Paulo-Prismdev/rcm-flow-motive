@@ -103,7 +103,7 @@ export default function Layout({ children, currentPageName }) {
 
   const isSuperAdmin = currentUser?.role === 'super_admin';
   const isCompanyAdmin = currentUser?.role === 'company_admin';
-  const isAdmin = isSuperAdmin || isCompanyAdmin;
+  const isAdmin = isSuperAdmin || isCompanyAdmin || currentUser?.role === 'admin';
 
   const departments = allDepartments.filter(dept => {
     if (!currentUser) return false;
