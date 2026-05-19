@@ -275,33 +275,31 @@ export default function ClaimForm({ claim, onSubmit, onCancel }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    // Strip system/AI-extracted fields to avoid conflicts
+    const { id: _id, created_date: _cd, updated_date: _ud, created_by: _cb, ...submitData } = formData;
+
     // If creating a new claim (not editing), generate job number
     if (!claim) {
       try {
         const response = await base44.functions.invoke('generateJobNumber', {
           entityType: 'Claim'
         });
-        
         if (response.data.success) {
-          formData.job_number = response.data.job_number;
+          submitData.job_number = response.data.job_number;
         } else {
-          console.error('Failed to generate job number (API response):', response.data.message);
           alert('Failed to generate job number. Please try again.');
           return;
         }
       } catch (error) {
-        console.error('Failed to generate job number:', error);
         alert('Failed to generate job number. Please try again.');
         return;
       }
-      
-      // Set third_party_pursuit_status for fault claims
-      if (formData.claim_type === 'Fault Claim') {
-        formData.third_party_pursuit_status = 'Awaiting Details';
+      if (submitData.claim_type === 'Fault Claim') {
+        submitData.third_party_pursuit_status = 'Awaiting Details';
       }
     }
     
-    onSubmit(formData);
+    onSubmit(submitData);
   };
 
   const handleChange = (field, value) => {
