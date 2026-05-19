@@ -3,10 +3,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import AddressLookupInput from '../shared/AddressLookupInput';
+import StatusMultiSelect from '../shared/StatusMultiSelect';
+import { useQuery } from '@tanstack/react-query';
+import { base44 } from '@/api/base44Client';
 
 export default function ClaimStatusForm({ claim, onSave, onCancel }) {
     const [formData, setFormData] = useState({
-        job_status: claim.job_status || 'New',
+        job_statuses: claim.job_statuses || (claim.job_status ? [claim.job_status] : ['New']),
         claim_type: claim.claim_type || 'Credit Repair',
         loss_date: claim.loss_date || '',
         loss_time: claim.loss_time || '',
@@ -15,6 +18,20 @@ export default function ClaimStatusForm({ claim, onSave, onCancel }) {
         circumstances: claim.circumstances || '',
         courtesy_car_required: claim.courtesy_car_required || false,
     });
+
+    const { data: customStatuses = [] } = useQuery({
+        queryKey: ['ClaimStatusConfig'],
+        queryFn: () => base44.entities.ClaimStatusConfig.list('sort_order'),
+        staleTime: 0,
+    });
+
+    const availableStatuses = React.useMemo(() => {
+        const active = customStatuses
+            .filter(s => s.is_active !== false)
+            .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
+            .map(s => s.status_name);
+        return active.includes('New') ? active : ['New', ...active];
+    }, [customStatuses]);
 
     const handleChange = (field, value) => {
         setFormData(prev => ({ ...prev, [field]: value }));
@@ -36,20 +53,12 @@ export default function ClaimStatusForm({ claim, onSave, onCancel }) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <label className="text-sm text-gray-500">Job Status</label>
-                    <select 
-                        value={formData.job_status} 
-                        onChange={e => handleChange('job_status', e.target.value)} 
-                        className="neomorph-inset w-full px-4 py-3 text-gray-700 border-0 rounded-xl"
-                    >
-                        <option value="New">New</option>
-                        <option value="In Progress">In Progress</option>
-                        <option value="Awaiting Authority">Awaiting Authority</option>
-                        <option value="Placed">Placed</option>
-                        <option value="In Repair">In Repair</option>
-                        <option value="Completed">Completed</option>
-                        <option value="Cancelled">Cancelled</option>
-                        <option value="Total Loss">Total Loss</option>
-                    </select>
+                    <StatusMultiSelect
+                        selectedStatuses={formData.job_statuses}
+                        onStatusesChange={(statuses) => handleChange('job_statuses', statuses)}
+                        availableStatuses={availableStatuses}
+                        placeholder="Select statuses..."
+                    />
                 </div>
                 <div>
                     <label className="text-sm text-gray-500">Claim Type</label>
