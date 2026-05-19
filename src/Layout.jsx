@@ -967,7 +967,7 @@ export default function Layout({ children, currentPageName }) {
           </>
         )}
 
-        <main className="px-2 md:px-3 pb-3 md:pb-4 flex-1 overflow-y-auto min-h-0">
+        <main className="px-2 md:px-3 pb-3 md:pb-4 flex-1 overflow-hidden min-h-0">
           <div className="max-w-full mx-auto h-full">
             {children}
           </div>
