@@ -250,12 +250,14 @@ export default function ClaimsPage() {
 
   if (selectedClaim) {
     return (
-      <ClaimDetail
-        claim={selectedClaim}
-        onClose={() => setSelectedClaim(null)}
-        onUpdate={handleUpdate}
-        isInternalUser={isInternalUser}
-      />
+      <div className="h-full">
+        <ClaimDetail
+          claim={selectedClaim}
+          onClose={() => setSelectedClaim(null)}
+          onUpdate={handleUpdate}
+          isInternalUser={isInternalUser}
+        />
+      </div>
     );
   }
 
