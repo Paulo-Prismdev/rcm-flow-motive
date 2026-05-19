@@ -148,7 +148,7 @@ export default function UserManagement() {
       ) : activeTab === 'internal' ? (
         // Internal staff — flat list with accordion per user
         <div className="space-y-2">
-          <InternalNavSections canEdit={isSuperAdmin} />
+          <InternalNavSections canEdit={canManage} />
           {internalUsers.length === 0 ? (
             <div className="neomorph p-8 text-center text-foreground-muted">No internal users found.</div>
           ) : (
