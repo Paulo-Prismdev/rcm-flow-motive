@@ -4,30 +4,32 @@ import { Car, AlertCircle } from "lucide-react";
 
 export default function LoadingScreen() {
   const carVariants = {
-    initial: { x: "-60vw", opacity: 0 },
+    initial: { x: "-55vw", opacity: 1 },
     animate: {
-      x: "60vw",
+      x: "55vw",
       opacity: 1,
       transition: {
         duration: 3,
         ease: "easeInOut",
+        repeat: Infinity,
+        repeatDelay: 0.5,
       },
     },
   };
 
   return (
-    <div className="fixed inset-0 flex flex-col items-center justify-center bg-gradient-to-b from-blue-50 to-blue-100 dark:from-slate-900 dark:to-slate-800">
+    <div className="fixed inset-0 flex flex-col items-center justify-center bg-gradient-to-b from-blue-50 to-blue-100 dark:from-slate-900 dark:to-slate-800 overflow-hidden">
       {/* Road */}
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div className="absolute left-0 right-0 h-24 bg-gray-400 opacity-30 flex items-center gap-8 px-8" style={{width: '100vw'}}>
-          {[...Array(8)].map((_, i) => (
-            <div key={i} className="h-1 w-12 bg-yellow-300" />
+      <div className="absolute left-0 right-0" style={{ top: '50%', transform: 'translateY(-50%)' }}>
+        <div className="w-full h-24 bg-gray-500 opacity-40 flex items-center overflow-hidden" style={{ gap: '2rem', paddingLeft: '1rem' }}>
+          {[...Array(30)].map((_, i) => (
+            <div key={i} className="flex-shrink-0 h-1 w-12 bg-yellow-300" />
           ))}
         </div>
       </div>
 
       {/* Animation Container */}
-      <div className="relative w-full h-48 flex items-center justify-center">
+      <div className="relative w-full h-48 flex items-center justify-center" style={{ zIndex: 10 }}>
         {/* Car */}
         <motion.div
           variants={carVariants}
