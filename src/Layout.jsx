@@ -729,7 +729,7 @@ export default function Layout({ children, currentPageName }) {
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="glass-elevated w-56" align="end">
-                    {isSuperAdmin && (
+                    {isAdmin && (
                       <>
                         <Link to={createPageUrl("Settings")}>
                           <DropdownMenuItem className="cursor-pointer">
@@ -743,12 +743,14 @@ export default function Layout({ children, currentPageName }) {
                             <span>View Archive</span>
                           </DropdownMenuItem>
                         </Link>
-                        <Link to={createPageUrl("FeedbackHub")}>
-                          <DropdownMenuItem className="cursor-pointer">
-                            <MessageSquare className="mr-2 h-4 w-4" />
-                            <span>Feedback Hub</span>
-                          </DropdownMenuItem>
-                        </Link>
+                        {isSuperAdmin && (
+                          <Link to={createPageUrl("FeedbackHub")}>
+                            <DropdownMenuItem className="cursor-pointer">
+                              <MessageSquare className="mr-2 h-4 w-4" />
+                              <span>Feedback Hub</span>
+                            </DropdownMenuItem>
+                          </Link>
+                        )}
                         <DropdownMenuSeparator />
                       </>
                     )}
@@ -900,7 +902,7 @@ export default function Layout({ children, currentPageName }) {
                   <div className="mt-6">
                     <p className="text-xs font-semibold text-foreground-muted mb-3">MANAGEMENT</p>
                     <div className="space-y-2">
-                      {isSuperAdmin && (
+                      {isAdmin && (
                         <>
                           <Link
                             to={createPageUrl("Settings")}
@@ -918,14 +920,16 @@ export default function Layout({ children, currentPageName }) {
                             <Archive className="w-5 h-5" />
                             <span className="font-medium">View Archive</span>
                           </Link>
-                          <Link
-                            to={createPageUrl("FeedbackHub")}
-                            onClick={() => setMobileMenuOpen(false)}
-                            className="flex items-center gap-3 px-4 py-3 rounded-xl surface-button"
-                          >
-                            <MessageSquare className="w-5 h-5" />
-                            <span className="font-medium">Feedback Hub</span>
-                          </Link>
+                          {isSuperAdmin && (
+                            <Link
+                              to={createPageUrl("FeedbackHub")}
+                              onClick={() => setMobileMenuOpen(false)}
+                              className="flex items-center gap-3 px-4 py-3 rounded-xl surface-button"
+                            >
+                              <MessageSquare className="w-5 h-5" />
+                              <span className="font-medium">Feedback Hub</span>
+                            </Link>
+                          )}
                         </>
                       )}
                       {isAdmin && (
