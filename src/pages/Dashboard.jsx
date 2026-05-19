@@ -38,8 +38,8 @@ const DEFAULT_USER_WIDGETS = [
   { id: 'stat-estimates', type: 'StatCard', config: { title: 'Open Estimates', entity: 'Estimate', color: 'green', span: 1 } },
   { id: 'stat-engineering', type: 'StatCard', config: { title: 'Engineering Jobs', entity: 'Engineering', color: 'purple', span: 1 } },
   { id: 'stat-parts', type: 'StatCard', config: { title: 'Parts Requests', entity: 'Part', color: 'orange', span: 1 } },
-  { id: 'invoice-tracking', type: 'InvoiceTracking', config: { span: 1 } },
-  { id: 'recent-activity', type: 'RecentActivity', config: { span: 1 } },
+  { id: 'invoice-tracking', type: 'InvoiceTracking', config: { span: 2 } },
+  { id: 'recent-activity', type: 'RecentActivity', config: { span: 2 } },
 ];
 
 const DEFAULT_COMPANY_WIDGETS = [
@@ -47,8 +47,8 @@ const DEFAULT_COMPANY_WIDGETS = [
   { id: 'company-estimates', type: 'StatCard', config: { title: 'Total Estimates', entity: 'Estimate', color: 'green', span: 1 } },
   { id: 'company-engineering', type: 'StatCard', config: { title: 'Total Engineering', entity: 'Engineering', color: 'purple', span: 1 } },
   { id: 'company-parts', type: 'StatCard', config: { title: 'Total Parts', entity: 'Part', color: 'orange', span: 1 } },
-  { id: 'company-invoices', type: 'InvoiceTracking', config: { span: 1 } },
-  { id: 'company-activity', type: 'RecentActivity', config: { span: 1 } },
+  { id: 'company-invoices', type: 'InvoiceTracking', config: { span: 2 } },
+  { id: 'company-activity', type: 'RecentActivity', config: { span: 2 } },
 ];
 
 const DEPARTMENT_TEMPLATES = {
@@ -393,7 +393,7 @@ export default function Dashboard() {
               {...provided.droppableProps}
               ref={provided.innerRef}
               id="widgets-grid"
-              className="grid grid-cols-1 gap-3 md:gap-4 pb-6"
+              className="grid grid-cols-1 md:grid-cols-4 gap-3 md:gap-4 pb-6"
             >
               {localWidgets.map((widget, index) => {
                 const WidgetComponent = WIDGET_COMPONENTS[widget.type];
@@ -416,7 +416,10 @@ export default function Dashboard() {
                         {...provided.draggableProps}
                         data-widget-id={widget.id}
                         className={`relative ${snapshot.isDragging ? 'z-50 rotate-2 scale-105' : ''} ${isEditMode && !snapshot.isDragging && !isResizing ? 'widget-edit-mode' : ''} ${isResizing ? 'widget-resizing' : ''} transition-all`}
-                        style={provided.draggableProps.style}
+                        style={{
+                          ...provided.draggableProps.style,
+                          gridColumn: window.innerWidth >= 768 ? `span ${Math.min(span, 4)}` : undefined,
+                        }}
                       >
                         {isEditMode && (
                           <>
