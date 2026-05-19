@@ -101,17 +101,17 @@ export default function Layout({ children, currentPageName }) {
     }).length;
   }, [messages, currentUser]);
 
-  const isSuperAdmin = currentUser?.role === 'super_admin';
-  const isCompanyAdmin = currentUser?.role === 'company_admin';
-  const isAdmin = isSuperAdmin || isCompanyAdmin || currentUser?.role === 'admin';
+  const userRole = currentUser?.role;
+  const isSuperAdmin = userRole === 'super_admin';
+  const isAdmin = userRole === 'super_admin' || userRole === 'company_admin' || userRole === 'admin';
 
   const departments = allDepartments.filter(dept => {
     if (!currentUser) return false;
-    if (isSuperAdmin || isCompanyAdmin) return true;
+    if (isAdmin) return true;
     const userAccess = currentUser.departments_access || [];
     return userAccess.includes(dept.permission);
   });
-  const canManagePermissions = isSuperAdmin || isCompanyAdmin || currentUser?.can_manage_permissions;
+  const canManagePermissions = isAdmin || currentUser?.can_manage_permissions;
   const isInternalUser = currentUser?.user_type === 'internal' || isAdmin;
 
   useEffect(() => {
@@ -756,9 +756,6 @@ export default function Layout({ children, currentPageName }) {
                     )}
                     {isAdmin && (
                       <>
-                        <div className="px-2 py-1.5 text-xs font-semibold text-foreground-muted">
-                          Employees
-                        </div>
                         <Link to={createPageUrl("EmployeeManagement")}>
                           <DropdownMenuItem className="cursor-pointer">
                             <CalendarDays className="mr-2 h-4 w-4" />
