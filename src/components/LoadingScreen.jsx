@@ -21,10 +21,14 @@ export default function LoadingScreen() {
     <div className="fixed inset-0 flex flex-col items-center justify-center bg-gradient-to-b from-blue-50 to-blue-100 dark:from-slate-900 dark:to-slate-800 overflow-hidden">
       {/* Road */}
       <div className="absolute left-0 right-0" style={{ top: '50%', transform: 'translateY(-50%)' }}>
-        <div className="w-full h-24 bg-gray-500 opacity-40 flex items-center overflow-hidden" style={{ gap: '2rem', paddingLeft: '1rem' }}>
-          {[...Array(30)].map((_, i) => (
-            <div key={i} className="flex-shrink-0 h-1 w-12 bg-yellow-300" />
-          ))}
+        <div className="h-24 bg-gray-500 opacity-40 relative" style={{ width: '100vw' }}>
+          {/* Dashed centre line using CSS repeating-linear-gradient */}
+          <div className="absolute inset-0 flex items-center" style={{
+            backgroundImage: 'repeating-linear-gradient(to right, #fde047 0px, #fde047 48px, transparent 48px, transparent 96px)',
+            backgroundSize: '96px 4px',
+            backgroundPosition: '0 50%',
+            backgroundRepeat: 'repeat-x',
+          }} />
         </div>
       </div>
 
