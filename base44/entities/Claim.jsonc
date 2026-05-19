@@ -633,12 +633,12 @@
         },
         {
           "user_condition": {
-            "data.user_type": "internal"
+            "user_type": "internal"
           }
         },
         {
           "user_condition": {
-            "data.user_type": "referrer"
+            "user_type": "referrer"
           }
         }
       ]
@@ -652,20 +652,20 @@
         },
         {
           "user_condition": {
-            "data.user_type": "internal"
+            "user_type": "internal"
           }
         },
         {
           "created_by": "{{user.email}}"
         },
         {
-          "data.referrer_id": "{{user.data.linked_referrer_id}}"
+          "data.referrer_id": "{{user.linked_referrer_id}}"
         },
         {
-          "data.bodyshop_id": "{{user.data.linked_bodyshop_id}}"
+          "data.bodyshop_id": "{{user.linked_bodyshop_id}}"
         },
         {
-          "data.client_id": "{{user.data.linked_client_id}}"
+          "data.client_id": "{{user.linked_client_id}}"
         }
       ]
     },
@@ -678,11 +678,11 @@
         },
         {
           "user_condition": {
-            "data.user_type": "internal"
+            "user_type": "internal"
           }
         },
         {
-          "data.bodyshop_id": "{{user.data.linked_bodyshop_id}}"
+          "data.bodyshop_id": "{{user.linked_bodyshop_id}}"
         }
       ]
     },
