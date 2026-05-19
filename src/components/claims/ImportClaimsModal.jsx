@@ -168,6 +168,8 @@ export default function ImportClaimsModal({ isOpen, onClose, onImportComplete })
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState([]);
   const [importing, setImporting] = useState(false);
+  const [parsing, setParsing] = useState(false);
+  const [parseError, setParseError] = useState(null);
   const [results, setResults] = useState(null);
   const [step, setStep] = useState('upload'); // upload | preview | done
   const fileInputRef = useRef(null);
@@ -177,6 +179,8 @@ export default function ImportClaimsModal({ isOpen, onClose, onImportComplete })
     if (!f) return;
     setFile(f);
     setResults(null);
+    setParseError(null);
+    setParsing(true);
 
     try {
       // Upload file then extract
@@ -205,6 +209,8 @@ export default function ImportClaimsModal({ isOpen, onClose, onImportComplete })
         } else if (output?.rows) {
           rows = output.rows;
         }
+      } else {
+        throw new Error(extracted.details || 'Failed to extract data from file');
       }
 
       const validRows = rows.filter(isValidClaimRow);
@@ -212,7 +218,9 @@ export default function ImportClaimsModal({ isOpen, onClose, onImportComplete })
       setPreview(mappedRows);
       setStep('preview');
     } catch (err) {
-      alert('Failed to parse file: ' + err.message);
+      setParseError(err.message || 'Failed to parse file');
+    } finally {
+      setParsing(false);
     }
   };
 
@@ -252,6 +260,8 @@ export default function ImportClaimsModal({ isOpen, onClose, onImportComplete })
     setFile(null);
     setPreview([]);
     setResults(null);
+    setParseError(null);
+    setParsing(false);
     setStep('upload');
     onClose();
   };
@@ -280,20 +290,40 @@ export default function ImportClaimsModal({ isOpen, onClose, onImportComplete })
           {step === 'upload' && (
             <div className="space-y-6">
               <div
-                onClick={() => fileInputRef.current?.click()}
-                className="border-2 border-dashed border-border rounded-xl p-12 text-center cursor-pointer hover:border-accent transition-colors"
+                onClick={() => !parsing && fileInputRef.current?.click()}
+                className={`border-2 border-dashed rounded-xl p-12 text-center transition-colors ${parsing ? 'border-accent cursor-wait' : 'border-border cursor-pointer hover:border-accent'}`}
               >
-                <Upload className="w-12 h-12 mx-auto mb-4 text-foreground-muted" />
-                <p className="text-lg font-medium mb-1">Click to upload spreadsheet</p>
-                <p className="text-sm text-foreground-muted">Supports .xlsx files exported from AH Claims</p>
+                {parsing ? (
+                  <>
+                    <Loader2 className="w-12 h-12 mx-auto mb-4 text-accent animate-spin" />
+                    <p className="text-lg font-medium mb-1">Uploading & parsing file...</p>
+                    <p className="text-sm text-foreground-muted">{file?.name}</p>
+                  </>
+                ) : (
+                  <>
+                    <Upload className="w-12 h-12 mx-auto mb-4 text-foreground-muted" />
+                    <p className="text-lg font-medium mb-1">Click to upload spreadsheet</p>
+                    <p className="text-sm text-foreground-muted">Supports .xlsx files exported from AH Claims</p>
+                  </>
+                )}
                 <input
                   ref={fileInputRef}
                   type="file"
                   accept=".xlsx,.xls,.csv"
                   onChange={handleFileChange}
                   className="hidden"
+                  disabled={parsing}
                 />
               </div>
+              {parseError && (
+                <div className="flex items-start gap-3 p-4 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                  <AlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-semibold text-red-700 dark:text-red-400 text-sm">Failed to parse file</p>
+                    <p className="text-red-600 dark:text-red-300 text-sm mt-1">{parseError}</p>
+                  </div>
+                </div>
+              )}
               <div className="glass-flat p-4 rounded-xl text-sm space-y-1">
                 <p className="font-semibold mb-2">Expected columns (AH Claims format):</p>
                 <p className="text-foreground-muted">Name (Reg), Client, Make/Model, Job Status, Date Received, Claim Type, Client Phone, Client Address, Claim Ref, Broker/Insurer, Contact Name, Client Email, Loss Date, Vehicle Damage, C/Car Req, Bodyshop, Estimate costs, Authority dates, etc.</p>
