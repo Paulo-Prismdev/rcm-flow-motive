@@ -55,7 +55,8 @@ export default function Settings() {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="h-full flex flex-col overflow-hidden">
+    <div className="space-y-4 flex-1 overflow-y-auto">
       <div className="neomorph p-4">
         <div className="flex items-center gap-3 mb-4">
           <Link to={createPageUrl("Dashboard")}>
@@ -114,6 +115,7 @@ export default function Settings() {
       ) : (
         mainTabComponents[activeMainTab]
       )}
+    </div>
     </div>
   );
 }

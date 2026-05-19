@@ -93,8 +93,8 @@ export default function Invoicing() {
   const totalOverdueValue = overdue.reduce((sum, i) => sum + (i.invoice_amount || 0), 0);
 
   return (
-    <div className="space-y-6">
-      <div className="neomorph p-6">
+    <div className="h-full flex flex-col gap-6 overflow-hidden">
+      <div className="neomorph p-6 flex-shrink-0">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold text-gray-700">Invoicing</h1>
@@ -162,7 +162,7 @@ export default function Invoicing() {
       </div>
 
       {/* Invoice Items List */}
-      <div className="space-y-4">
+      <div className="flex-1 overflow-y-auto min-h-0 space-y-4">
         {filteredItems.length === 0 ? (
           <div className="neomorph p-8 text-center text-gray-500">
             No invoice items found matching your criteria.
