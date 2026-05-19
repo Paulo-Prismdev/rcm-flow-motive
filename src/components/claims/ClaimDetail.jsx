@@ -173,7 +173,7 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
   const [isTimeLogsOpen, setIsTimeLogsOpen] = useState(false);
   const [isActivityLogOpen, setIsActivityLogOpen] = useState(false);
 
-  const canEdit = isInternalUser;
+  const canEdit = true;
 
   const isClosedStatus = ['Completed', 'Cancelled', 'Total Loss'].includes(claim.job_status);
 
