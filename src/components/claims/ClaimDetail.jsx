@@ -76,7 +76,7 @@ const EditableSection = ({ title, icon: Icon, claim, onUpdate, children, EditCom
     };
 
     return (
-        <div className="neomorph-flat p-4 md:p-6">
+        <div className="neomorph-flat p-4 md:p-6 overflow-y-auto max-h-[calc(100vh-280px)]">
             <div className="flex justify-between items-center mb-4">
                 <div
                     className="flex items-center gap-3 text-left flex-grow"
