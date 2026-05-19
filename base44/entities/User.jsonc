@@ -1,0 +1,203 @@
+{
+  "name": "User",
+  "type": "object",
+  "properties": {
+    "role": {
+      "type": "string",
+      "enum": [
+        "super_admin",
+        "company_admin",
+        "user"
+      ],
+      "default": "user",
+      "description": "User role: super_admin = full system access, company_admin = manages their company, user = standard access"
+    },
+    "profile_picture_url": {
+      "type": "string",
+      "description": "URL to user's profile picture"
+    },
+    "job_role_id": {
+      "type": "string",
+      "description": "ID of the Role this user has"
+    },
+    "departments_access": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "Dashboard",
+          "Claims",
+          "Estimating",
+          "Engineering",
+          "Parts",
+          "Invoicing",
+          "Reports",
+          "Map"
+        ]
+      },
+      "description": "List of departments this user can access. Admins have access to all.",
+      "default": [
+        "Dashboard",
+        "Claims",
+        "Estimating",
+        "Engineering",
+        "Parts",
+        "Map"
+      ]
+    },
+    "can_manage_permissions": {
+      "type": "boolean",
+      "description": "Whether this user can manage other users' permissions",
+      "default": false
+    },
+    "user_type": {
+      "type": "string",
+      "enum": [
+        "internal",
+        "referrer",
+        "bodyshop",
+        "client",
+        "supplier"
+      ],
+      "default": "internal",
+      "description": "Type of user account"
+    },
+    "linked_referrer_id": {
+      "type": "string",
+      "description": "ID of the Referrer this user is linked to (if user_type is referrer)"
+    },
+    "linked_bodyshop_id": {
+      "type": "string",
+      "description": "ID of the Bodyshop this user is linked to (if user_type is bodyshop)"
+    },
+    "linked_client_id": {
+      "type": "string",
+      "description": "ID of the Client this user is linked to (if user_type is client)"
+    },
+    "linked_supplier_id": {
+      "type": "string",
+      "description": "ID of the Supplier this user is linked to (if user_type is supplier)"
+    },
+    "notification_preferences": {
+      "type": "object",
+      "description": "User's notification preferences",
+      "properties": {
+        "tagged_in_notes": {
+          "type": "boolean",
+          "default": true
+        },
+        "status_changes": {
+          "type": "boolean",
+          "default": true
+        },
+        "new_assignments": {
+          "type": "boolean",
+          "default": true
+        },
+        "invoice_updates": {
+          "type": "boolean",
+          "default": true
+        },
+        "estimate_requests": {
+          "type": "boolean",
+          "default": true
+        },
+        "parts_updates": {
+          "type": "boolean",
+          "default": false
+        },
+        "engineering_updates": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "default": {
+        "tagged_in_notes": true,
+        "status_changes": true,
+        "new_assignments": true,
+        "invoice_updates": true,
+        "estimate_requests": true,
+        "parts_updates": false,
+        "engineering_updates": false
+      }
+    },
+    "claim_card_fields": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of fields to display on claim cards",
+      "default": [
+        "client_name",
+        "make_model",
+        "insurer"
+      ]
+    },
+    "job_title": {
+      "type": "string",
+      "description": "Employee's job title"
+    },
+    "department": {
+      "type": "string",
+      "description": "Employee's department"
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Employee start date"
+    },
+    "phone": {
+      "type": "string",
+      "description": "Contact phone number"
+    },
+    "address_line_1": {
+      "type": "string",
+      "description": "Street address"
+    },
+    "address_line_2": {
+      "type": "string",
+      "description": "Additional address line"
+    },
+    "town": {
+      "type": "string",
+      "description": "Town or city"
+    },
+    "county": {
+      "type": "string",
+      "description": "County"
+    },
+    "postcode": {
+      "type": "string",
+      "description": "Postal code"
+    },
+    "emergency_contact_name": {
+      "type": "string",
+      "description": "Emergency contact name"
+    },
+    "emergency_contact_phone": {
+      "type": "string",
+      "description": "Emergency contact phone"
+    },
+    "annual_leave_allowance": {
+      "type": "number",
+      "description": "Annual leave days per year",
+      "default": 25
+    },
+    "annual_leave_taken": {
+      "type": "number",
+      "description": "Annual leave days taken this year",
+      "default": 0
+    },
+    "show_feedback_prompt": {
+      "type": "boolean",
+      "description": "Whether to show the feedback pop-up to this user",
+      "default": false
+    },
+    "last_feedback_prompted_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date when the user was last prompted for feedback"
+    }
+  },
+  "required": []
+}

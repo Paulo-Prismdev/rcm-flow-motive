@@ -108,7 +108,7 @@ export default function Dashboard() {
     queryFn: () => base44.auth.me(),
   });
 
-  const isAdmin = currentUser?.role === 'admin';
+  const isAdmin = currentUser?.role === 'super_admin' || currentUser?.role === 'company_admin';
   const currentDashboardOption = DASHBOARD_OPTIONS.find(opt => opt.value === selectedDashboard);
   
   // Determine if current user can edit this dashboard

@@ -103,13 +103,16 @@ export default function Layout({ children, currentPageName }) {
 
   const departments = allDepartments.filter(dept => {
     if (!currentUser) return false;
-    if (currentUser.role === 'admin') return true;
+    if (isSuperAdmin || isCompanyAdmin) return true;
     const userAccess = currentUser.departments_access || [];
     return userAccess.includes(dept.permission);
   });
 
-  const canManagePermissions = currentUser?.role === 'admin' || currentUser?.can_manage_permissions;
-  const isInternalUser = currentUser?.user_type === 'internal' || currentUser?.role === 'admin';
+  const isSuperAdmin = currentUser?.role === 'super_admin';
+  const isCompanyAdmin = currentUser?.role === 'company_admin';
+  const isAdmin = isSuperAdmin || isCompanyAdmin;
+  const canManagePermissions = isSuperAdmin || isCompanyAdmin || currentUser?.can_manage_permissions;
+  const isInternalUser = currentUser?.user_type === 'internal' || isAdmin;
 
   useEffect(() => {
     const checkScroll = () => {
@@ -136,7 +139,7 @@ export default function Layout({ children, currentPageName }) {
   }, [departments]);
 
   // If user is a bodyshop/repairer and accessing the repairer portal, use the repairer layout
-  if (currentUser?.user_type === 'bodyshop' && currentPageName === 'RepairerPortal') {
+  if (currentUser?.user_type === 'bodyshop' && !isAdmin && currentPageName === 'RepairerPortal') {
     return (
       <RepairerLayout>
         {children}
@@ -145,7 +148,7 @@ export default function Layout({ children, currentPageName }) {
   }
 
   // If user is a bodyshop type, redirect them to RepairerPortal
-  if (currentUser?.user_type === 'bodyshop' && currentPageName !== 'RepairerPortal') {
+  if (currentUser?.user_type === 'bodyshop' && !isAdmin && currentPageName !== 'RepairerPortal') {
     window.location.href = createPageUrl('RepairerPortal');
     return null;
   }
@@ -726,7 +729,7 @@ export default function Layout({ children, currentPageName }) {
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="glass-elevated w-56" align="end">
-                    {isInternalUser && (
+                    {isSuperAdmin && (
                       <>
                         <Link to={createPageUrl("Settings")}>
                           <DropdownMenuItem className="cursor-pointer">
@@ -740,7 +743,17 @@ export default function Layout({ children, currentPageName }) {
                             <span>View Archive</span>
                           </DropdownMenuItem>
                         </Link>
+                        <Link to={createPageUrl("FeedbackHub")}>
+                          <DropdownMenuItem className="cursor-pointer">
+                            <MessageSquare className="mr-2 h-4 w-4" />
+                            <span>Feedback Hub</span>
+                          </DropdownMenuItem>
+                        </Link>
                         <DropdownMenuSeparator />
+                      </>
+                    )}
+                    {isAdmin && (
+                      <>
                         <div className="px-2 py-1.5 text-xs font-semibold text-foreground-muted">
                           Employees
                         </div>
@@ -750,15 +763,9 @@ export default function Layout({ children, currentPageName }) {
                             <span>Employee Management</span>
                           </DropdownMenuItem>
                         </Link>
-                        <Link to={createPageUrl("FeedbackHub")}>
-                          <DropdownMenuItem className="cursor-pointer">
-                            <MessageSquare className="mr-2 h-4 w-4" />
-                            <span>Feedback Hub</span>
-                          </DropdownMenuItem>
-                        </Link>
-                        </>
-                        )}
-                        {canManagePermissions && (
+                      </>
+                    )}
+                    {canManagePermissions && (
                       <>
                         <Link to={createPageUrl("UserManagement")}>
                           <DropdownMenuItem className="cursor-pointer">
@@ -889,11 +896,11 @@ export default function Layout({ children, currentPageName }) {
                 </div>
 
                 {/* Settings & Management */}
-                {(isInternalUser || canManagePermissions) && (
+                {(isAdmin || canManagePermissions) && (
                   <div className="mt-6">
                     <p className="text-xs font-semibold text-foreground-muted mb-3">MANAGEMENT</p>
                     <div className="space-y-2">
-                      {isInternalUser && (
+                      {isSuperAdmin && (
                         <>
                           <Link
                             to={createPageUrl("Settings")}
@@ -912,16 +919,25 @@ export default function Layout({ children, currentPageName }) {
                             <span className="font-medium">View Archive</span>
                           </Link>
                           <Link
-                            to={createPageUrl("EmployeeManagement")}
+                            to={createPageUrl("FeedbackHub")}
                             onClick={() => setMobileMenuOpen(false)}
                             className="flex items-center gap-3 px-4 py-3 rounded-xl surface-button"
                           >
-                            <CalendarDays className="w-5 h-5" />
-                            <span className="font-medium">Employee Management</span>
+                            <MessageSquare className="w-5 h-5" />
+                            <span className="font-medium">Feedback Hub</span>
                           </Link>
                         </>
                       )}
-                      
+                      {isAdmin && (
+                        <Link
+                          to={createPageUrl("EmployeeManagement")}
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="flex items-center gap-3 px-4 py-3 rounded-xl surface-button"
+                        >
+                          <CalendarDays className="w-5 h-5" />
+                          <span className="font-medium">Employee Management</span>
+                        </Link>
+                      )}
                       {canManagePermissions && (
                         <Link
                           to={createPageUrl("UserManagement")}

@@ -119,8 +119,9 @@ function UserForm({ user, onSave, onCancel }) {
             onChange={(e) => setFormData({...formData, role: e.target.value})}
             className="glass-inset w-full px-4 py-3 rounded-xl border border-transparent focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent"
           >
-            <option value="user">User</option>
-            <option value="admin">Admin</option>
+            <option value="user">User — Standard access</option>
+            <option value="company_admin">Company Admin — Manages their company</option>
+            <option value="super_admin">Super Admin — Full system access</option>
           </select>
         </div>
 
@@ -359,7 +360,9 @@ export default function UserManagement() {
     }
   };
 
-  const canManage = currentUser?.role === 'admin' || currentUser?.can_manage_permissions;
+  const isSuperAdmin = currentUser?.role === 'super_admin';
+  const isAdmin = isSuperAdmin || currentUser?.role === 'company_admin';
+  const canManage = isAdmin || currentUser?.can_manage_permissions;
 
   if (!canManage) {
     return (
@@ -444,9 +447,14 @@ export default function UserManagement() {
                       <h3 className="text-lg font-bold text-gray-700">{user.full_name || 'Unnamed User'}</h3>
                       <p className="text-sm text-gray-500">{user.email}</p>
                       <div className="flex flex-wrap gap-2 mt-2">
-                        {user.role === 'admin' && (
-                          <span className="neomorph-flat px-3 py-1 text-xs font-medium text-gold">
-                            Admin - Full Access
+                        {user.role === 'super_admin' && (
+                          <span className="neomorph-flat px-3 py-1 text-xs font-medium text-red-600">
+                            ⭐ Super Admin
+                          </span>
+                        )}
+                        {user.role === 'company_admin' && (
+                          <span className="neomorph-flat px-3 py-1 text-xs font-medium text-orange-500">
+                            Company Admin
                           </span>
                         )}
                         {roleName && (
@@ -489,8 +497,10 @@ export default function UserManagement() {
                     </div>
                   </div>
 
-                  {user.role === 'admin' ? (
-                    <p className="text-sm text-gray-500 mt-4">Administrators have full access by default.</p>
+                  {(user.role === 'super_admin' || user.role === 'company_admin') ? (
+                    <p className="text-sm text-gray-500 mt-4">
+                      {user.role === 'super_admin' ? 'Super Admins have full system access.' : 'Company Admins manage their company and its users.'}
+                    </p>
                   ) : user.user_type === 'internal' ? (
                     <div className="mt-4">
                       <p className="text-sm font-medium text-gray-600 mb-2">Department Access:</p>
