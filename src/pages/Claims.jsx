@@ -122,22 +122,22 @@ export default function ClaimsPage() {
   });
 
   // Fetch custom claim statuses
-  const { data: customStatuses = [] } = useQuery({
+  const { data: customStatuses = [], refetch: refetchStatuses } = useQuery({
     queryKey: ['ClaimStatusConfig'],
     queryFn: () => base44.entities.ClaimStatusConfig.list('sort_order'),
+    staleTime: 0, // Always refetch to get latest
   });
 
   // Get active custom statuses sorted by sort_order
   const availableStatuses = React.useMemo(() => {
     const active = customStatuses
-      .filter(s => s.is_active)
+      .filter(s => s.is_active !== false) // Include statuses where is_active is not explicitly false
       .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
       .map(s => s.status_name);
     
-    if (!active.includes('New')) {
-      return ['New', ...active];
-    }
-    return active;
+    // Always ensure 'New' is first if not in list
+    const withNew = active.includes('New') ? active : ['New', ...active];
+    return withNew;
   }, [customStatuses]);
 
   // Get unique values for filters
