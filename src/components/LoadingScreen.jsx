@@ -19,7 +19,7 @@ export default function LoadingScreen() {
     <div className="fixed inset-0 flex flex-col items-center justify-center bg-gradient-to-b from-blue-50 to-blue-100 dark:from-slate-900 dark:to-slate-800">
       {/* Road */}
       <div className="absolute inset-0 flex items-center justify-center">
-        <div className="absolute w-full h-24 bg-gray-400 opacity-30 flex items-center gap-8 px-8">
+        <div className="absolute left-0 right-0 h-24 bg-gray-400 opacity-30 flex items-center gap-8 px-8" style={{width: '100vw'}}>
           {[...Array(8)].map((_, i) => (
             <div key={i} className="h-1 w-12 bg-yellow-300" />
           ))}
