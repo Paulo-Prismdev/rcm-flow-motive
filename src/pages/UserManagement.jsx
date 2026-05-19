@@ -457,8 +457,8 @@ export default function UserManagement() {
                 <div key={user.id} className="neomorph p-6">
                   <div className="flex items-start justify-between mb-4">
                     <div>
-                      <h3 className="text-lg font-bold text-gray-700">{user.full_name || 'Unnamed User'}</h3>
-                      <p className="text-sm text-gray-500">{user.email}</p>
+                      <h3 className="text-lg font-bold text-foreground">{user.full_name || 'Unnamed User'}</h3>
+                      <p className="text-sm text-foreground-muted">{user.email}</p>
                       <div className="flex flex-wrap gap-2 mt-2">
                         {user.role === 'super_admin' && (
                           <span className="neomorph-flat px-3 py-1 text-xs font-medium text-red-600">
@@ -514,10 +514,10 @@ export default function UserManagement() {
                     <p className="text-sm text-gray-500 mt-4">
                       {user.role === 'super_admin' ? 'Super Admins have full system access.' : 'Company Admins manage their company and its users.'}
                     </p>
-                  ) : user.user_type === 'internal' ? (
+                  ) : (user.user_type === 'internal' || !user.user_type) ? (
                     <div className="mt-4">
                       <div className="flex items-center justify-between mb-3">
-                        <p className="text-sm font-medium text-gray-600">Department Access</p>
+                        <p className="text-sm font-medium text-foreground-muted">Department Access</p>
                         {isSuperAdmin && deptEdits[user.id] !== undefined && (
                           <Button
                             onClick={() => saveDeptAccess(user.id)}
@@ -545,11 +545,14 @@ export default function UserManagement() {
                               {dept}
                             </button>
                           ) : enabled ? (
-                            <span key={dept} className="neomorph-flat px-3 py-1 text-xs font-medium text-gray-700">
+                            <span key={dept} className="neomorph-flat px-3 py-1 text-xs font-medium text-foreground">
                               {dept}
                             </span>
                           ) : null;
                         })}
+                        {!isSuperAdmin && (user.departments_access ?? []).length === 0 && (
+                          <span className="text-sm text-foreground-muted">No departments assigned</span>
+                        )}
                       </div>
                     </div>
                   ) : (
