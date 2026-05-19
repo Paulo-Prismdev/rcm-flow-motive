@@ -192,12 +192,49 @@ export default function ImportClaimsModal({ isOpen, onClose, onImportComplete })
           properties: {
             rows: {
               type: 'array',
+              description: 'All rows from the spreadsheet, one object per row with column headers as keys',
               items: {
                 type: 'object',
+                properties: {
+                  Name: { type: 'string' },
+                  Client: { type: 'string' },
+                  'Make/Model': { type: 'string' },
+                  'Job Status': { type: 'string' },
+                  'Date Received': { type: 'string' },
+                  'Claim Type': { type: 'string' },
+                  'Client Phone No': { type: 'string' },
+                  'Client Address': { type: 'string' },
+                  'Claim Ref': { type: 'string' },
+                  'Broker': { type: 'string' },
+                  'Contact Name': { type: 'string' },
+                  'Client Email': { type: 'string' },
+                  'Loss Date': { type: 'string' },
+                  'Vehicle Damage': { type: 'string' },
+                  'C/Car Req': { type: 'string' },
+                  'Bodyshop': { type: 'string' },
+                  'Bodyshop Email': { type: 'string' },
+                  'BS Instructed': { type: 'string' },
+                  'Estimate Completed': { type: 'string' },
+                  'Estimate cost NET': { type: 'string' },
+                  'Estimate cost GROSS': { type: 'string' },
+                  'Authority Received': { type: 'string' },
+                  'Authorised Costs NET': { type: 'string' },
+                  'Authorised cost GROSS': { type: 'string' },
+                  'On-Site': { type: 'string' },
+                  'ECD': { type: 'string' },
+                  'Authorising Party': { type: 'string' },
+                  'Policy Number': { type: 'string' },
+                  'Policy Excess': { type: 'string' },
+                  'Completion Date': { type: 'string' },
+                  'Final Repair Cost (excl VAT)': { type: 'string' },
+                  'Cancellation Date': { type: 'string' },
+                  'Reason for Cancellation': { type: 'string' }
+                },
                 additionalProperties: true
               }
             }
-          }
+          },
+          required: ['rows']
         }
       });
 
