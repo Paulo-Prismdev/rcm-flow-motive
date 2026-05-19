@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Users, Shield, Building2, UserCheck, Package, User, Wrench } from "lucide-react";
 import CompanyUserGroup from "../components/usermgmt/CompanyUserGroup";
+import InternalNavSections from "../components/usermgmt/InternalNavSections";
 
 const TABS = [
   { id: "internal",  label: "Internal Staff",  icon: UserCheck,  type: "internal"  },
@@ -147,6 +148,7 @@ export default function UserManagement() {
       ) : activeTab === 'internal' ? (
         // Internal staff — flat list with accordion per user
         <div className="space-y-2">
+          <InternalNavSections canEdit={isSuperAdmin} />
           {internalUsers.length === 0 ? (
             <div className="neomorph p-8 text-center text-foreground-muted">No internal users found.</div>
           ) : (

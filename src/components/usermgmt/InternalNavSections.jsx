@@ -1,31 +1,43 @@
-import React, { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import React, { useState, useEffect } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
-import { Settings2 } from "lucide-react";
+import { Settings2, Monitor } from "lucide-react";
 
-const BODYSHOP_SECTIONS = ["Claims", "Estimates", "Parts", "Engineering", "Invoices", "Messages"];
-const REFERRER_SECTIONS = ["Claims", "Estimates", "Engineering", "Invoices", "Messages"];
-const DEFAULT_SECTIONS = ["Claims", "Estimates", "Parts", "Engineering", "Invoices", "Messages"];
+const ALL_NAV_SECTIONS = ["Dashboard", "Claims", "Estimating", "Engineering", "Parts", "Invoicing", "Reports", "Map"];
+const CONFIG_KEY = "internal_nav_sections";
 
-export default function CompanyPortalSections({ company, companyType, canEdit }) {
+export default function InternalNavSections({ canEdit }) {
   const queryClient = useQueryClient();
 
-  const availableSections = companyType === 'bodyshop'
-    ? BODYSHOP_SECTIONS
-    : companyType === 'referrer'
-    ? REFERRER_SECTIONS
-    : DEFAULT_SECTIONS;
+  const { data: configs = [] } = useQuery({
+    queryKey: ['AppConfig'],
+    queryFn: () => base44.entities.AppConfig.list(),
+  });
 
-  const currentSections = company.portal_sections || availableSections;
+  const config = configs.find(c => c.config_key === CONFIG_KEY);
+  const currentSections = config?.config_value
+    ? JSON.parse(config.config_value)
+    : ALL_NAV_SECTIONS;
+
   const [isEditing, setIsEditing] = useState(false);
   const [selected, setSelected] = useState(currentSections);
 
-  const entityName = companyType === 'bodyshop' ? 'Bodyshop' : 'Referrer';
+  // Sync if config loads after mount
+  useEffect(() => {
+    if (!isEditing) setSelected(currentSections);
+  }, [configs]);
 
-  const updateMutation = useMutation({
-    mutationFn: (sections) => base44.entities[entityName].update(company.id, { portal_sections: sections }),
+  const saveMutation = useMutation({
+    mutationFn: async (sections) => {
+      const value = JSON.stringify(sections);
+      if (config) {
+        return base44.entities.AppConfig.update(config.id, { config_value: value });
+      } else {
+        return base44.entities.AppConfig.create({ config_key: CONFIG_KEY, config_value: value });
+      }
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [entityName] });
+      queryClient.invalidateQueries({ queryKey: ['AppConfig'] });
       setIsEditing(false);
     },
   });
@@ -37,10 +49,15 @@ export default function CompanyPortalSections({ company, companyType, canEdit })
   };
 
   return (
-    <div className="mt-2">
+    <div className="neomorph-flat p-4 rounded-xl">
+      <div className="flex items-center gap-2 mb-3">
+        <Monitor className="w-4 h-4 text-accent flex-shrink-0" />
+        <p className="text-sm font-semibold text-foreground">Internal Navigation Sections</p>
+        <span className="text-xs text-foreground-muted">— controls which modules internal staff can see</span>
+      </div>
+
       {!isEditing ? (
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-xs text-foreground-muted font-medium">Portal access:</span>
           {currentSections.map(s => (
             <span key={s} className="text-xs px-2 py-0.5 rounded bg-accent/10 text-accent border border-accent/20">{s}</span>
           ))}
@@ -54,10 +71,9 @@ export default function CompanyPortalSections({ company, companyType, canEdit })
           )}
         </div>
       ) : (
-        <div className="mt-2 p-3 neomorph-flat rounded-xl space-y-2">
-          <p className="text-xs font-medium text-foreground-muted">Toggle portal sections</p>
+        <div className="space-y-2">
           <div className="flex flex-wrap gap-1.5">
-            {availableSections.map(section => {
+            {ALL_NAV_SECTIONS.map(section => {
               const enabled = selected.includes(section);
               return (
                 <button
@@ -85,11 +101,11 @@ export default function CompanyPortalSections({ company, companyType, canEdit })
             </button>
             <button
               type="button"
-              onClick={() => updateMutation.mutate(selected)}
-              disabled={updateMutation.isPending}
+              onClick={() => saveMutation.mutate(selected)}
+              disabled={saveMutation.isPending}
               className="px-3 py-1 text-xs rounded-lg bg-accent/10 text-accent border border-accent/20 hover:bg-accent/20 transition-colors disabled:opacity-50"
             >
-              {updateMutation.isPending ? 'Saving...' : 'Save'}
+              {saveMutation.isPending ? 'Saving...' : 'Save'}
             </button>
           </div>
         </div>

@@ -55,7 +55,7 @@ export default function CompanyUserGroup({ company, companyType, users, isSuperA
           <CompanyPortalSections
             company={company}
             companyType={companyType}
-            isSuperAdmin={isSuperAdmin}
+            canEdit={isSuperAdmin}
           />
         </div>
       )}
