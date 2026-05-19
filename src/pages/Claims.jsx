@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Plus, Search, Archive, Filter, X, AlertTriangle, Settings2, Clock, Upload } from 'lucide-react';
 import ClaimDetail from '../components/claims/ClaimDetail';
-import ClaimForm from '../components/claims/ClaimForm';
+import ClaimFormWrapper from '../components/claims/ClaimFormWrapper';
 import ImportClaimsModal from '../components/claims/ImportClaimsModal';
 import StatusBadge from '../components/shared/StatusBadge';
 import UpdateStatusBadge from '../components/shared/UpdateStatusBadge';
@@ -265,7 +265,7 @@ export default function ClaimsPage() {
 
   if (showForm) {
     return (
-      <ClaimForm
+      <ClaimFormWrapper
         onSubmit={handleSubmit}
         onCancel={() => setShowForm(false)}
       />
