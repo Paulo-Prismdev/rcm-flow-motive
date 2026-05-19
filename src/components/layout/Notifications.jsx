@@ -8,6 +8,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Bell, Loader, Check, X } from 'lucide-react';
+import { useBrowserNotifications } from '@/hooks/useBrowserNotifications';
 
 export default function Notifications() {
   const queryClient = useQueryClient();
@@ -45,6 +46,9 @@ export default function Notifications() {
   });
 
   const unreadCount = notifications.filter(n => !n.is_read).length;
+
+  // Browser push notifications — requests permission & fires for new unread items
+  useBrowserNotifications(notifications, currentUser);
 
   const handleMarkAsRead = (e, notificationId) => {
     e.preventDefault();
