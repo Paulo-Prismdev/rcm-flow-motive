@@ -4,9 +4,10 @@ import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Plus, Search, Archive, Filter, X, AlertTriangle, Settings2, Clock } from 'lucide-react';
+import { Plus, Search, Archive, Filter, X, AlertTriangle, Settings2, Clock, Upload } from 'lucide-react';
 import ClaimDetail from '../components/claims/ClaimDetail';
 import ClaimForm from '../components/claims/ClaimForm';
+import ImportClaimsModal from '../components/claims/ImportClaimsModal';
 import StatusBadge from '../components/shared/StatusBadge';
 import UpdateStatusBadge from '../components/shared/UpdateStatusBadge';
 import { formatUKRegistration } from '../components/shared/formatRegistration';
@@ -94,6 +95,7 @@ export default function ClaimsPage() {
   const [selectedClaim, setSelectedClaim] = useState(null);
   const [showArchived, setShowArchived] = useState(false);
   const [showFieldsModal, setShowFieldsModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: currentUser } = useQuery({
@@ -363,6 +365,14 @@ export default function ClaimsPage() {
 
   return (
     <div className="h-full flex flex-col gap-4 md:gap-6">
+      <ImportClaimsModal
+        isOpen={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        onImportComplete={() => {
+          queryClient.invalidateQueries({ queryKey: ['claims'] });
+          setShowImportModal(false);
+        }}
+      />
       <ClaimCardFieldsModal
         isOpen={showFieldsModal}
         onClose={() => setShowFieldsModal(false)}
@@ -395,6 +405,14 @@ export default function ClaimsPage() {
                 >
                   <Archive className="w-4 h-4 mr-2" />
                   {showArchived ? 'Hide' : 'Show'} Archived
+                </Button>
+                <Button
+                  onClick={() => setShowImportModal(true)}
+                  className="neomorph-flat"
+                  title="Import claims from spreadsheet"
+                >
+                  <Upload className="w-4 h-4 mr-2" />
+                  Import
                 </Button>
                 <Button
                   onClick={() => setShowForm(true)}
