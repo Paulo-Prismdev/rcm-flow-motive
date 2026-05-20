@@ -88,8 +88,8 @@ Deno.serve(async (req) => {
     const lh = 7;
 
     // RCM Branding colours
-    const RCM_GOLD = [212, 175, 55]; // #D4AF37
-    const RCM_DARK = [21, 29, 68];   // #151d44
+    const RCM_GREEN = [1, 242, 5];   // #01f205
+    const RCM_BLUE = [19, 29, 71];   // #131d47
 
     // Header with logo
     const logoUrl = 'https://media.base44.com/images/public/68ee39fb8915b1b539e13c59/b2cb057e2_RCMAutomotiveLogoGreenAutomotivewithHLights.jpg';
@@ -108,7 +108,7 @@ Deno.serve(async (req) => {
     yPos += 10;
     doc.setFontSize(18);
     doc.setFont('helvetica', 'bold');
-    doc.setTextColor(RCM_DARK[0], RCM_DARK[1], RCM_DARK[2]);
+    doc.setTextColor(RCM_BLUE[0], RCM_BLUE[1], RCM_BLUE[2]);
     doc.text('STATEMENT OF TRUTH', 105, yPos, { align: 'center' });
 
     yPos += 8;
@@ -118,8 +118,8 @@ Deno.serve(async (req) => {
     doc.text(`Claim Reference: ${jobNumber}  |  Date: ${new Date().toLocaleDateString('en-GB')}`, 105, yPos, { align: 'center' });
 
     yPos += 3;
-    // Gold accent line
-    doc.setDrawColor(RCM_GOLD[0], RCM_GOLD[1], RCM_GOLD[2]);
+    // Green accent line
+    doc.setDrawColor(RCM_GREEN[0], RCM_GREEN[1], RCM_GREEN[2]);
     doc.setLineWidth(1.2);
     doc.line(leftMargin, yPos, rightMargin, yPos);
     yPos += 8;
@@ -129,8 +129,8 @@ Deno.serve(async (req) => {
       if (yPos > 255) { doc.addPage(); yPos = 20; }
       doc.setFontSize(11);
       doc.setFont('helvetica', 'bold');
-      doc.setTextColor(RCM_DARK[0], RCM_DARK[1], RCM_DARK[2]);
-      doc.setFillColor(RCM_GOLD[0], RCM_GOLD[1], RCM_GOLD[2]);
+      doc.setTextColor(RCM_BLUE[0], RCM_BLUE[1], RCM_BLUE[2]);
+      doc.setFillColor(RCM_GREEN[0], RCM_GREEN[1], RCM_GREEN[2]);
       doc.rect(leftMargin, yPos - 4, maxWidth, 8, 'F');
       doc.setTextColor(255, 255, 255);
       doc.text(title, leftMargin + 2, yPos + 1);
@@ -233,12 +233,12 @@ Deno.serve(async (req) => {
     doc.text(`Date: ${new Date().toLocaleDateString('en-GB')}`, leftMargin, yPos);
 
     // Footer with RCM branding
-    doc.setFillColor(RCM_DARK[0], RCM_DARK[1], RCM_DARK[2]);
+    doc.setFillColor(RCM_BLUE[0], RCM_BLUE[1], RCM_BLUE[2]);
     doc.rect(0, 280, 210, 17, 'F');
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(8);
     doc.text('RCM Automotive', 105, 287, { align: 'center' });
-    doc.setTextColor(RCM_GOLD[0], RCM_GOLD[1], RCM_GOLD[2]);
+    doc.setTextColor(RCM_GREEN[0], RCM_GREEN[1], RCM_GREEN[2]);
     doc.text('www.rcmautomotive.co.uk | info@rcmautomotive.co.uk', 105, 292, { align: 'center' });
 
     // Upload PDF
