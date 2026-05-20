@@ -1,0 +1,113 @@
+{
+  "name": "BackorderedPart",
+  "type": "object",
+  "properties": {
+    "claim_id": {
+      "type": "string",
+      "description": "ID of the linked claim"
+    },
+    "claim_job_number": {
+      "type": "string",
+      "description": "Job number of the claim for display"
+    },
+    "claim_reg": {
+      "type": "string",
+      "description": "Vehicle reg of the claim for display"
+    },
+    "part_description": {
+      "type": "string",
+      "description": "Description of the backordered part"
+    },
+    "part_number": {
+      "type": "string",
+      "description": "OEM part number if known"
+    },
+    "supplier_name": {
+      "type": "string",
+      "description": "Supplier the part is on backorder with"
+    },
+    "expected_arrival_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Expected date the part will arrive"
+    },
+    "additional_notes": {
+      "type": "string",
+      "description": "Any additional notes from the repairer"
+    },
+    "submitted_by_name": {
+      "type": "string",
+      "description": "Name of the person who submitted the form"
+    },
+    "submitted_by_phone": {
+      "type": "string",
+      "description": "Phone of the person who submitted"
+    },
+    "received_by_repairer": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the part has been received by the repairer"
+    },
+    "received_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date the part was received"
+    },
+    "received_by_user": {
+      "type": "string",
+      "description": "Email of the user who marked it as received"
+    }
+  },
+  "required": [
+    "claim_id",
+    "part_description"
+  ],
+  "rls": {
+    "create": true,
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "user_type": "internal"
+          }
+        },
+        {
+          "data.claim_id": "{{user.linked_claim_id}}"
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "user_type": "internal"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "user_type": "internal"
+          }
+        }
+      ]
+    }
+  }
+}

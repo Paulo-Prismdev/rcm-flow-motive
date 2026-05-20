@@ -41,6 +41,7 @@ import ClaimVehicleDamageForm from './ClaimVehicleDamageForm';
 import ClaimIndemnityForm from './ClaimIndemnityForm';
 import ClaimExcessContributionForm from './ClaimExcessContributionForm';
 import ThirdPartyPursuitSection from './ThirdPartyPursuitSection';
+import BackorderedPartsSection from './BackorderedPartsSection';
 import NotesSection from '../shared/NotesSection';
 import PartsRequestModal from './PartsRequestModal';
 import EstimateRequestModal from './EstimateRequestModal';
@@ -150,6 +151,7 @@ const DETAIL_SECTIONS = [
   { id: 'dates', label: 'Key Dates', icon: Calendar },
   { id: 'bodyshop', label: 'Bodyshop Details', icon: Wrench },
   { id: 'estimate', label: 'Estimate Details', icon: Calculator },
+  { id: 'backorderedParts', label: 'Backordered Parts', icon: Package },
 ];
 
 export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser = true }) {
@@ -800,6 +802,15 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
           </EditableSection>
         );
 
+      case 'backorderedParts':
+        return (
+          <BackorderedPartsSection
+            claim={claim}
+            currentUser={currentUser}
+            onSendEmail={() => setIsEmailModalOpen(true)}
+          />
+        );
+
       default:
         return null;
     }
@@ -970,6 +981,10 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
                               <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsPartsModalOpen(true); }}>
                                 <Package className="w-4 h-4 mr-2" />
                                 Log Parts Issue
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setSelectedSection('backorderedParts'); }}>
+                                <Package className="w-4 h-4 mr-2" />
+                                Backordered Parts
                               </DropdownMenuItem>
                               <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleArchive(); }} disabled={archiveMutation.isLoading}>
                                 <Archive className="w-4 h-4 mr-2" />

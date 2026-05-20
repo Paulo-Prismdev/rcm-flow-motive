@@ -11,6 +11,7 @@ import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import LoadingScreen from '@/components/LoadingScreen';
 import PublicPartsRequest from '@/pages/PublicPartsRequest';
+import BackorderForm from '@/pages/BackorderForm';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -59,6 +60,7 @@ const AuthenticatedApp = () => {
         />
       ))}
       <Route path="/parts-request" element={<PublicPartsRequest />} />
+      <Route path="/backorder-form" element={<BackorderForm />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
