@@ -145,7 +145,7 @@ export default function RepairerPortal() {
         >
           <Menu className="w-5 h-5" />
         </button>
-        <div className="flex-1 text-center font-medium text-white">
+        <div className="flex-1 text-center font-bold" style={{ color: 'var(--accent)' }}>
           {TABS.find(t => t.id === activeTab)?.label}
         </div>
         <div className="w-10" />
@@ -159,17 +159,17 @@ export default function RepairerPortal() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium whitespace-nowrap transition-all nav-button"
+              className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium whitespace-nowrap transition-all"
               style={{
                 background: isActive ? 'var(--accent)' : 'rgba(255,255,255,0.07)',
                 border: `1px solid ${isActive ? 'var(--accent)' : 'rgba(255,255,255,0.12)'}`,
                 boxShadow: isActive ? '0 4px 12px rgba(0, 255, 0, 0.3)' : 'var(--shadow-sm)',
-                color: isActive ? 'var(--accent-foreground)' : 'rgba(255,255,255,0.85)',
+                color: isActive ? '#000000' : 'rgba(255,255,255,0.95)',
                 cursor: 'pointer',
               }}
             >
-              <tab.icon className="w-4 h-4" />
-              <span>{tab.label}</span>
+              <tab.icon className={`w-4 h-4 ${isActive ? 'text-black' : ''}`} />
+              <span className={isActive ? 'text-black' : ''}>{tab.label}</span>
             </button>
           );
         })}
