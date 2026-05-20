@@ -73,7 +73,7 @@
           }
         },
         {
-          "id": "{{user.data.linked_client_id}}"
+          "id": "{{user.linked_client_id}}"
         }
       ]
     },
@@ -90,7 +90,7 @@
           }
         },
         {
-          "id": "{{user.data.linked_client_id}}"
+          "id": "{{user.linked_client_id}}"
         }
       ]
     },
