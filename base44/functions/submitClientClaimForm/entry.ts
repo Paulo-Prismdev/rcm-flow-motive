@@ -11,7 +11,7 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { formData, signatureDataUrl } = body;
+    const { formData, signatureDataUrl, photoUrls } = body;
 
     if (!formData) {
       return Response.json({ error: 'Missing form data' }, { status: 400 });
@@ -74,6 +74,7 @@ Deno.serve(async (req) => {
       job_statuses: ['New'],
       date_received: new Date().toISOString().split('T')[0],
       file_urls: [],
+      image_urls: photoUrls || [],
     };
 
     // Create the claim
