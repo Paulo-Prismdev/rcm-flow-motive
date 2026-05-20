@@ -63,7 +63,25 @@
     "part_description"
   ],
   "rls": {
-    "create": true,
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "user_type": "internal"
+          }
+        },
+        {
+          "user_condition": {
+            "user_type": "bodyshop"
+          }
+        }
+      ]
+    },
     "read": {
       "$or": [
         {
@@ -77,7 +95,13 @@
           }
         },
         {
+          "created_by": "{{user.email}}"
+        },
+        {
           "data.claim_id": "{{user.linked_claim_id}}"
+        },
+        {
+          "data.bodyshop_company_id": "{{user.linked_bodyshop_id}}"
         }
       ]
     },
