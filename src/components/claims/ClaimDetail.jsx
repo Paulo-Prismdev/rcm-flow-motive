@@ -398,44 +398,51 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
     setVehicleFetchError('');
     
     try {
-      const result = await lookupVehicleData({ registrationNumber: claim.reg });
+      console.log('Fetching DVLA data for:', claim.reg);
+      const response = await lookupVehicleData({ registrationNumber: claim.reg });
+      console.log('DVLA response:', response);
       
-      if (result.success) {
-        const updates = {
-          vehicle_make: result.make || '',
-          vehicle_model: result.model || '',
-          make_model: result.make_model || '',
-          vehicle_colour: result.colour || '',
-          vehicle_fuel_type: result.fuel_type || '',
-          vehicle_year_of_manufacture: result.year_of_manufacture || null,
-          vehicle_engine_capacity: result.engine_capacity || null,
-          vehicle_co2_emissions: result.co2_emissions || null,
-          vehicle_euro_status: result.euro_status || '',
-          vehicle_mot_status: result.mot_status || '',
-          vehicle_mot_expiry_date: result.mot_expiry_date || null,
-          vehicle_tax_status: result.tax_status || '',
-          vehicle_tax_due_date: result.tax_due_date || null,
-          vehicle_date_of_last_v5c_issued: result.date_of_last_v5c_issued || null,
-          vehicle_wheelplan: result.wheelplan || '',
-          vehicle_revenue_weight: result.revenue_weight || null,
-        };
-        
-        await logChanges({
-          parentId: claim.id,
-          parentType: 'Claim',
-          oldData: claim,
-          newData: { ...claim, ...updates },
-          user: currentUser,
-        });
-        
-        handleUpdate({ ...claim, ...updates });
-        
-        if (window.confirm('Vehicle data fetched successfully! Would you like to update the claim with this data?')) {
-          // Already updated above
-        }
-      } else {
-        setVehicleFetchError(result.message || 'Failed to fetch vehicle data');
+      // The function returns the data directly, not wrapped in success/error
+      const result = response.data || response;
+      console.log('Processed result:', result);
+      
+      if (result.error) {
+        setVehicleFetchError(result.message || result.error || 'Failed to fetch vehicle data');
+        return;
       }
+      
+      const updates = {
+        vehicle_make: result.make || '',
+        vehicle_model: result.model || '',
+        make_model: result.make_model || '',
+        vehicle_colour: result.colour || '',
+        vehicle_fuel_type: result.fuel_type || '',
+        vehicle_year_of_manufacture: result.year_of_manufacture || null,
+        vehicle_engine_capacity: result.engine_capacity || null,
+        vehicle_co2_emissions: result.co2_emissions || null,
+        vehicle_euro_status: result.euro_status || '',
+        vehicle_mot_status: result.mot_status || '',
+        vehicle_mot_expiry_date: result.mot_expiry_date || null,
+        vehicle_tax_status: result.tax_status || '',
+        vehicle_tax_due_date: result.tax_due_date || null,
+        vehicle_date_of_last_v5c_issued: result.date_of_last_v5c_issued || null,
+        vehicle_wheelplan: result.wheelplan || '',
+        vehicle_revenue_weight: result.revenue_weight || null,
+      };
+      
+      await logChanges({
+        parentId: claim.id,
+        parentType: 'Claim',
+        oldData: claim,
+        newData: { ...claim, ...updates },
+        user: currentUser,
+      });
+      
+      handleUpdate({ ...claim, ...updates });
+      
+      // Show success message with summary
+      const summary = `${result.make} ${result.model || ''} (${result.year_of_manufacture}) - ${result.colour} ${result.fuel_type}`;
+      alert(`✓ Vehicle data fetched successfully!\n\n${summary}\n\nThe claim has been updated with the DVLA data.`);
     } catch (error) {
       console.error('Failed to fetch vehicle data:', error);
       setVehicleFetchError(error.message || 'An error occurred while fetching vehicle data');
