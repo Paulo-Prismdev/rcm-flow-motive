@@ -203,20 +203,9 @@ export default function RepairerPortal() {
             <div className="max-w-2xl mx-auto space-y-4">
               <h2 className="text-2xl font-bold mb-4">Tyre Pricing & Ordering</h2>
               <p className="text-foreground-muted mb-6">
-                Request a price quote or place an order for tyres. Select a claim below to populate vehicle details.
+                Request a price quote or place an order for tyres.
               </p>
-              {allClaims.length > 0 ? (
-                allClaims.map(claim => (
-                  <TyreRequestForm key={claim.id} claim={claim} />
-                ))
-              ) : (
-                <div className="neomorph p-8 text-center">
-                  <AlertCircle className="w-12 h-12 mx-auto text-amber-500 mb-3" />
-                  <p className="text-foreground-muted">
-                    No accepted claims available. You need an accepted claim to request tyre pricing or ordering.
-                  </p>
-                </div>
-              )}
+              <TyreRequestForm />
             </div>
           </div>
         )}
