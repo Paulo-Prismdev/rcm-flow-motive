@@ -8,12 +8,14 @@ import RepairerClaimsList from '@/components/repairer/RepairerClaimsList';
 import RepairerEstimatesTab from '@/components/repairer/RepairerEstimatesTab';
 import RepairerPartsTab from '@/components/repairer/RepairerPartsTab';
 import RepairerProductsTab from '@/components/repairer/RepairerProductsTab';
+import TyreRequestForm from '@/components/repairer/TyreRequestForm';
 
 const TABS = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { id: 'claims', label: 'My Claims', icon: FileText },
   { id: 'estimates', label: 'Estimate Requests', icon: Calculator },
   { id: 'parts', label: 'Parts Support', icon: Package },
+  { id: 'tyres', label: 'Tyres', icon: Package },
   { id: 'products', label: 'ARTURA Products', icon: Gift },
 ];
 
@@ -50,6 +52,13 @@ export default function RepairerPortal() {
   const { data: parts = [], isLoading: partsLoading } = useQuery({
     queryKey: ['repairerParts', bodyshopId],
     queryFn: () => base44.entities.Part.filter({ bodyshop_company_id: bodyshopId }, '-created_date'),
+    enabled: !!bodyshopId,
+  });
+
+  // Fetch claims for tyre form dropdown (only accepted claims)
+  const { data: allClaims = [] } = useQuery({
+    queryKey: ['repairerAllClaims', bodyshopId],
+    queryFn: () => base44.entities.Claim.filter({ bodyshop_id: bodyshopId, repairer_accepted: true }, '-created_date'),
     enabled: !!bodyshopId,
   });
 
@@ -190,6 +199,28 @@ export default function RepairerPortal() {
           <RepairerPartsTab parts={parts} bodyshopId={bodyshopId} bodyshopName={bodyshop?.name} />
         )}
         {activeTab === 'products' && <RepairerProductsTab />}
+        {activeTab === 'tyres' && (
+          <div className="p-4">
+            <div className="max-w-2xl mx-auto space-y-4">
+              <h2 className="text-2xl font-bold mb-4">Tyre Pricing & Ordering</h2>
+              <p className="text-foreground-muted mb-6">
+                Request a price quote or place an order for tyres. Select a claim below to populate vehicle details.
+              </p>
+              {allClaims.length > 0 ? (
+                allClaims.map(claim => (
+                  <TyreRequestForm key={claim.id} claim={claim} />
+                ))
+              ) : (
+                <div className="neomorph p-8 text-center">
+                  <AlertCircle className="w-12 h-12 mx-auto text-amber-500 mb-3" />
+                  <p className="text-foreground-muted">
+                    No accepted claims available. You need an accepted claim to request tyre pricing or ordering.
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
