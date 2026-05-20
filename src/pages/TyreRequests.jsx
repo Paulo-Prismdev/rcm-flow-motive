@@ -52,22 +52,27 @@ export default function TyreRequests() {
   };
 
   const handleEmailClick = (req) => {
-    const subject = `${req.request_type === 'price' ? 'Price Request' : 'Order'} - Tyre for ${req.claim_reg}`;
+    const subject = `${req.request_type === 'price' ? 'Price Request' : 'Order'} - ${req.tyre_make} (${req.tyre_size})`;
     const body = `TYRE ${req.request_type === 'price' ? 'PRICE REQUEST' : 'ORDER'}
 
 Vehicle Details:
-- Registration: ${req.claim_reg}
-- Job Number: ${req.claim_job_number}
+- Registration: ${req.vehicle_reg || 'N/A'}
+- Make: ${req.vehicle_make || 'N/A'}
+- Model: ${req.vehicle_model || 'N/A'}
 
 Tyre Details:
 - Tyre Make/Model: ${req.tyre_make}
 - Tyre Size: ${req.tyre_size}
+- Quantity: ${req.tyre_quantity || 1}
 
-Repairer Details:
-- Company: ${req.repairer_name}
-- Contact Name: ${req.repairer_contact_name}
-- Phone: ${req.repairer_phone}
-- Email: ${req.repairer_email}
+Customer Details:
+- Company: ${req.company_name || 'N/A'}
+- Contact Name: ${req.customer_name}
+- Phone: ${req.customer_phone}
+- Email: ${req.customer_email}
+
+Additional Notes:
+${req.notes || 'None'}
 
 Request Type: ${req.request_type === 'price' ? 'Price Request' : 'Order'}
 `;
@@ -187,19 +192,19 @@ Request Type: ${req.request_type === 'price' ? 'Price Request' : 'Order'}
                   <div className="grid md:grid-cols-3 gap-4">
                     <div>
                       <p className="text-xs text-muted-foreground mb-1">Vehicle</p>
-                      <p className="font-semibold">{req.claim_reg}</p>
-                      <p className="text-sm text-muted-foreground">{req.claim_job_number}</p>
+                      <p className="font-semibold">{req.vehicle_reg || 'N/A'}</p>
+                      <p className="text-sm text-muted-foreground">{req.vehicle_make} {req.vehicle_model}</p>
                     </div>
                     <div>
                       <p className="text-xs text-muted-foreground mb-1">Tyre Details</p>
                       <p className="font-semibold">{req.tyre_make}</p>
-                      <p className="text-sm text-muted-foreground">{req.tyre_size}</p>
+                      <p className="text-sm text-muted-foreground">{req.tyre_size} (Qty: {req.tyre_quantity || 1})</p>
                     </div>
                     <div>
-                      <p className="text-xs text-muted-foreground mb-1">Repairer</p>
-                      <p className="font-semibold">{req.repairer_name}</p>
-                      <p className="text-sm text-muted-foreground">{req.repairer_contact_name}</p>
-                      <p className="text-xs text-muted-foreground">{req.repairer_phone}</p>
+                      <p className="text-xs text-muted-foreground mb-1">Customer</p>
+                      <p className="font-semibold">{req.customer_name}</p>
+                      <p className="text-sm text-muted-foreground">{req.company_name}</p>
+                      <p className="text-xs text-muted-foreground">{req.customer_phone}</p>
                     </div>
                   </div>
                 </CardContent>

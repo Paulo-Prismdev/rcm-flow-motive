@@ -2,18 +2,6 @@
   "name": "TyreRequest",
   "type": "object",
   "properties": {
-    "claim_id": {
-      "type": "string",
-      "description": "ID of the linked claim"
-    },
-    "claim_job_number": {
-      "type": "string",
-      "description": "Job number for display"
-    },
-    "claim_reg": {
-      "type": "string",
-      "description": "Vehicle registration for display"
-    },
     "request_type": {
       "type": "string",
       "enum": [
@@ -30,21 +18,38 @@
       "type": "string",
       "description": "Tyre size requested"
     },
-    "repairer_name": {
-      "type": "string",
-      "description": "Name of the repairer/company"
+    "tyre_quantity": {
+      "type": "number",
+      "default": 1,
+      "description": "Number of tyres requested"
     },
-    "repairer_contact_name": {
+    "vehicle_reg": {
       "type": "string",
-      "description": "Contact person name"
+      "description": "Vehicle registration"
     },
-    "repairer_phone": {
+    "vehicle_make": {
+      "type": "string",
+      "description": "Vehicle make"
+    },
+    "vehicle_model": {
+      "type": "string",
+      "description": "Vehicle model"
+    },
+    "customer_name": {
+      "type": "string",
+      "description": "Customer/repairer contact name"
+    },
+    "customer_phone": {
       "type": "string",
       "description": "Contact phone number"
     },
-    "repairer_email": {
+    "customer_email": {
       "type": "string",
       "description": "Contact email"
+    },
+    "company_name": {
+      "type": "string",
+      "description": "Company/bodyshop name"
     },
     "status": {
       "type": "string",
@@ -58,11 +63,14 @@
     },
     "notes": {
       "type": "string",
+      "description": "Additional notes or requirements"
+    },
+    "internal_notes": {
+      "type": "string",
       "description": "Internal notes for processing"
     }
   },
   "required": [
-    "claim_id",
     "request_type",
     "tyre_make",
     "tyre_size"

@@ -1,137 +1,207 @@
 import React, { useState } from "react";
+import { base44 } from "@/api/base44Client";
+import { useMutation } from "@tanstack/react-query";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { sendTyreRequestEmail } from "@/functions/sendTyreRequestEmail";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Package, CheckCircle } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
-import { Loader2 } from "lucide-react";
 
-export default function TyreRequestForm({ claim }) {
-    const [requestType, setRequestType] = useState("price");
-    const [tyreMake, setTyreMake] = useState("");
-    const [tyreSize, setTyreSize] = useState("");
-    const [isSubmitting, setIsSubmitting] = useState(false);
+export default function TyreRequestForm({ onClose }) {
+  const [formData, setFormData] = useState({
+    request_type: "price",
+    tyre_make: "",
+    tyre_size: "",
+    tyre_quantity: 1,
+    vehicle_reg: "",
+    vehicle_make: "",
+    vehicle_model: "",
+    customer_name: "",
+    customer_phone: "",
+    customer_email: "",
+    company_name: "",
+    notes: ""
+  });
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        
-        if (!tyreMake || !tyreSize) {
-            toast({
-                title: "Missing Information",
-                description: "Please enter both tyre make and size.",
-                variant: "destructive"
-            });
-            return;
-        }
+  const submitMutation = useMutation({
+    mutationFn: (data) => base44.entities.TyreRequest.create(data),
+    onSuccess: () => {
+      toast({
+        title: "Request Submitted",
+        description: "Your tyre request has been submitted successfully.",
+      });
+      if (onClose) onClose();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
 
-        setIsSubmitting(true);
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    submitMutation.mutate(formData);
+  };
 
-        try {
-            await sendTyreRequestEmail({
-                claimId: claim.id,
-                tyreMake,
-                tyreSize,
-                requestType
-            });
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center gap-2">
+          <Package className="w-6 h-6 text-accent" />
+          <CardTitle>Tyre Request</CardTitle>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <Label>Request Type *</Label>
+              <Select
+                value={formData.request_type}
+                onValueChange={(value) => setFormData({ ...formData, request_type: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="price">Price Request</SelectItem>
+                  <SelectItem value="order">Place Order</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-            toast({
-                title: "Request Sent",
-                description: `Your tyre ${requestType === 'price' ? 'price request' : 'order'} has been submitted successfully.`,
-            });
+            <div>
+              <Label>Tyre Quantity</Label>
+              <Input
+                type="number"
+                min="1"
+                value={formData.tyre_quantity}
+                onChange={(e) => setFormData({ ...formData, tyre_quantity: parseInt(e.target.value) || 1 })}
+              />
+            </div>
+          </div>
 
-            // Reset form
-            setTyreMake("");
-            setTyreSize("");
-        } catch (error) {
-            toast({
-                title: "Error",
-                description: error.message || "Failed to submit request.",
-                variant: "destructive"
-            });
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <Label>Tyre Make/Model *</Label>
+              <Input
+                placeholder="e.g. Michelin Primacy 4"
+                value={formData.tyre_make}
+                onChange={(e) => setFormData({ ...formData, tyre_make: e.target.value })}
+                required
+              />
+            </div>
 
-    return (
-        <Card>
-            <CardHeader>
-                <CardTitle className="text-lg">Tyre Pricing & Ordering</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    {/* Request Type */}
-                    <div className="space-y-2">
-                        <Label>Request Type</Label>
-                        <RadioGroup
-                            value={requestType}
-                            onValueChange={setRequestType}
-                            className="flex gap-4"
-                        >
-                            <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="price" id="price" />
-                                <Label htmlFor="price" className="cursor-pointer">Request Price</Label>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="order" id="order" />
-                                <Label htmlFor="order" className="cursor-pointer">Order Tyre</Label>
-                            </div>
-                        </RadioGroup>
-                    </div>
+            <div>
+              <Label>Tyre Size *</Label>
+              <Input
+                placeholder="e.g. 205/55 R16"
+                value={formData.tyre_size}
+                onChange={(e) => setFormData({ ...formData, tyre_size: e.target.value })}
+                required
+              />
+            </div>
+          </div>
 
-                    {/* Vehicle Info (Read-only) */}
-                    <div className="grid grid-cols-3 gap-4 p-3 bg-muted rounded-lg">
-                        <div>
-                            <Label className="text-xs text-muted-foreground">Vehicle Reg</Label>
-                            <p className="font-medium">{claim.reg || 'N/A'}</p>
-                        </div>
-                        <div>
-                            <Label className="text-xs text-muted-foreground">Make</Label>
-                            <p className="font-medium">{claim.vehicle_make || 'N/A'}</p>
-                        </div>
-                        <div>
-                            <Label className="text-xs text-muted-foreground">Model</Label>
-                            <p className="font-medium">{claim.vehicle_model || 'N/A'}</p>
-                        </div>
-                    </div>
+          <div className="grid md:grid-cols-3 gap-4">
+            <div>
+              <Label>Vehicle Registration</Label>
+              <Input
+                placeholder="e.g. AB12 CDE"
+                value={formData.vehicle_reg}
+                onChange={(e) => setFormData({ ...formData, vehicle_reg: e.target.value })}
+              />
+            </div>
 
-                    {/* Tyre Make */}
-                    <div className="space-y-2">
-                        <Label htmlFor="tyreMake">Tyre Make/Model *</Label>
-                        <Input
-                            id="tyreMake"
-                            value={tyreMake}
-                            onChange={(e) => setTyreMake(e.target.value)}
-                            placeholder="e.g. Michelin Primacy 4"
-                            disabled={isSubmitting}
-                        />
-                    </div>
+            <div>
+              <Label>Vehicle Make</Label>
+              <Input
+                placeholder="e.g. Ford"
+                value={formData.vehicle_make}
+                onChange={(e) => setFormData({ ...formData, vehicle_make: e.target.value })}
+              />
+            </div>
 
-                    {/* Tyre Size */}
-                    <div className="space-y-2">
-                        <Label htmlFor="tyreSize">Tyre Size *</Label>
-                        <Input
-                            id="tyreSize"
-                            value={tyreSize}
-                            onChange={(e) => setTyreSize(e.target.value)}
-                            placeholder="e.g. 205/55 R16"
-                            disabled={isSubmitting}
-                        />
-                    </div>
+            <div>
+              <Label>Vehicle Model</Label>
+              <Input
+                placeholder="e.g. Focus"
+                value={formData.vehicle_model}
+                onChange={(e) => setFormData({ ...formData, vehicle_model: e.target.value })}
+              />
+            </div>
+          </div>
 
-                    {/* Submit Button */}
-                    <Button
-                        type="submit"
-                        className="w-full"
-                        disabled={isSubmitting}
-                    >
-                        {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        {requestType === 'price' ? 'Request Price' : 'Order Tyre'}
-                    </Button>
-                </form>
-            </CardContent>
-        </Card>
-    );
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <Label>Contact Name *</Label>
+              <Input
+                value={formData.customer_name}
+                onChange={(e) => setFormData({ ...formData, customer_name: e.target.value })}
+                required
+              />
+            </div>
+
+            <div>
+              <Label>Company Name</Label>
+              <Input
+                value={formData.company_name}
+                onChange={(e) => setFormData({ ...formData, company_name: e.target.value })}
+              />
+            </div>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <Label>Phone *</Label>
+              <Input
+                type="tel"
+                value={formData.customer_phone}
+                onChange={(e) => setFormData({ ...formData, customer_phone: e.target.value })}
+                required
+              />
+            </div>
+
+            <div>
+              <Label>Email *</Label>
+              <Input
+                type="email"
+                value={formData.customer_email}
+                onChange={(e) => setFormData({ ...formData, customer_email: e.target.value })}
+                required
+              />
+            </div>
+          </div>
+
+          <div>
+            <Label>Additional Notes</Label>
+            <Textarea
+              placeholder="Any additional requirements or information..."
+              value={formData.notes}
+              onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+              className="h-24"
+            />
+          </div>
+
+          <div className="flex justify-end gap-2">
+            {onClose && (
+              <Button type="button" variant="outline" onClick={onClose}>
+                Cancel
+              </Button>
+            )}
+            <Button type="submit" disabled={submitMutation.isPending}>
+              {submitMutation.isPending ? "Submitting..." : "Submit Request"}
+            </Button>
+          </div>
+        </form>
+      </CardContent>
+    </Card>
+  );
 }
