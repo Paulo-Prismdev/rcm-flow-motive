@@ -79,13 +79,23 @@ export default function ClientClaimForm() {
 
   const handlePhotoFiles = async (files) => {
     setUploadingPhotos(true);
+    setError('');
     const uploaded = [];
+    
     for (const file of Array.from(files)) {
-      const preview = URL.createObjectURL(file);
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
-      uploaded.push({ preview, url: file_url, name: file.name });
+      try {
+        const preview = URL.createObjectURL(file);
+        const { file_url } = await base44.integrations.Core.UploadFile({ file });
+        uploaded.push({ preview, url: file_url, name: file.name });
+      } catch (err) {
+        console.error('Photo upload failed:', err);
+        setError(`Failed to upload ${file.name}. Please try again.`);
+      }
     }
-    setPhotos(p => [...p, ...uploaded]);
+    
+    if (uploaded.length > 0) {
+      setPhotos(p => [...p, ...uploaded]);
+    }
     setUploadingPhotos(false);
   };
 
@@ -402,14 +412,14 @@ export default function ClientClaimForm() {
                 </button>
               </div>
 
-              {/* Hidden inputs */}
+              {/* Hidden inputs - use sr-only for better mobile compatibility */}
               <input
                 ref={cameraInputRef}
                 type="file"
                 accept="image/*"
                 capture="environment"
                 multiple
-                className="hidden"
+                className="sr-only"
                 onChange={e => handlePhotoFiles(e.target.files)}
               />
               <input
@@ -417,7 +427,7 @@ export default function ClientClaimForm() {
                 type="file"
                 accept="image/*"
                 multiple
-                className="hidden"
+                className="sr-only"
                 onChange={e => handlePhotoFiles(e.target.files)}
               />
 
