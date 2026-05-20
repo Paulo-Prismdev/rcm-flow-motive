@@ -257,11 +257,11 @@ export default function RepairerLayout({ children }) {
                     )}
               <div className="flex items-baseline gap-1">
                 <span style={{ fontFamily: "'Palatino Linotype', serif", fontSize: '1.1rem' }} className="md:text-xl">
+                  <span style={{ color: 'var(--accent)' }}>R</span>
+                  <span>CM</span>
                   <span style={{ color: 'var(--accent)' }}>A</span>
-                  <span>RTEC</span>
-                  <span style={{ color: 'var(--accent)' }}>H</span>
                 </span>
-                <span style={{ fontWeight: 300 }} className="text-lg md:text-xl">One</span>
+                <span style={{ fontWeight: 300 }} className="text-lg md:text-xl">utomotive</span>
               </div>
             </div>
             <span className="hidden sm:inline text-[10px] px-1.5 py-0.5 rounded-full bg-accent/20 text-accent font-medium">

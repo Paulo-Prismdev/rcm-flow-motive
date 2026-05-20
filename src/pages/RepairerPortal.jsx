@@ -16,7 +16,7 @@ const TABS = [
   { id: 'estimates', label: 'Estimate Requests', icon: Calculator },
   { id: 'parts', label: 'Parts Support', icon: Package },
   { id: 'tyres', label: 'Tyres', icon: Package },
-  { id: 'products', label: 'ARTURA Products', icon: Gift },
+  { id: 'products', label: 'RCM Products', icon: Gift },
 ];
 
 export default function RepairerPortal() {
@@ -80,7 +80,7 @@ export default function RepairerPortal() {
           <AlertCircle className="w-16 h-16 mx-auto text-amber-500 mb-4" />
           <h2 className="text-xl font-bold mb-2">Account Not Linked</h2>
           <p className="text-foreground-muted">
-            Your account is not linked to a bodyshop. Please contact ARTURA to set up your repairer portal access.
+            Your account is not linked to a bodyshop. Please contact RCM Automotive to set up your repairer portal access.
           </p>
         </div>
       </div>
