@@ -1,0 +1,127 @@
+{
+  "name": "TyreRequest",
+  "type": "object",
+  "properties": {
+    "claim_id": {
+      "type": "string",
+      "description": "ID of the linked claim"
+    },
+    "claim_job_number": {
+      "type": "string",
+      "description": "Job number for display"
+    },
+    "claim_reg": {
+      "type": "string",
+      "description": "Vehicle registration for display"
+    },
+    "request_type": {
+      "type": "string",
+      "enum": [
+        "price",
+        "order"
+      ],
+      "description": "Whether this is a price request or an order"
+    },
+    "tyre_make": {
+      "type": "string",
+      "description": "Tyre make/model requested"
+    },
+    "tyre_size": {
+      "type": "string",
+      "description": "Tyre size requested"
+    },
+    "repairer_name": {
+      "type": "string",
+      "description": "Name of the repairer/company"
+    },
+    "repairer_contact_name": {
+      "type": "string",
+      "description": "Contact person name"
+    },
+    "repairer_phone": {
+      "type": "string",
+      "description": "Contact phone number"
+    },
+    "repairer_email": {
+      "type": "string",
+      "description": "Contact email"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Pending",
+        "Processed",
+        "Completed"
+      ],
+      "default": "Pending",
+      "description": "Request status"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Internal notes for processing"
+    }
+  },
+  "required": [
+    "claim_id",
+    "request_type",
+    "tyre_make",
+    "tyre_size"
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "user_type": "bodyshop"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "user_type": "internal"
+          }
+        }
+      ]
+    },
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "user_type": "internal"
+          }
+        },
+        {
+          "created_by": "{{user.email}}"
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "user_type": "internal"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

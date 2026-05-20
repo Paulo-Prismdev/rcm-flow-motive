@@ -36,37 +36,22 @@ Deno.serve(async (req) => {
         const repairerPhone = bodyshop?.phone || 'N/A';
         const repairerEmail = bodyshop?.email || user.email || 'N/A';
 
-        const emailSubject = `${requestType === 'price' ? 'Price Request' : 'Order'} - Tyre for ${vehicleReg}`;
-        
-        const emailBody = `
-TYRE ${requestType === 'price' ? 'PRICE REQUEST' : 'ORDER'}
-
-Vehicle Details:
-- Registration: ${vehicleReg}
-- Make: ${vehicleMake}
-- Model: ${vehicleModel}
-
-Tyre Details:
-- Tyre Make/Model: ${tyreMake}
-- Tyre Size: ${tyreSize}
-
-Repairer Details:
-- Company: ${repairerName}
-- Contact Name: ${repairerContactName}
-- Phone: ${repairerPhone}
-- Email: ${repairerEmail}
-
-Request Type: ${requestType === 'price' ? 'Price Request' : 'Order'}
-`;
-
-        // Send email to dedicated tyre email address
-        await base44.integrations.Core.SendEmail({
-            to: 'tyres@rcmautomotive.com',
-            subject: emailSubject,
-            body: emailBody
+        // Create TyreRequest record in database
+        await base44.entities.TyreRequest.create({
+            claim_id: claimId,
+            claim_job_number: claim.job_number,
+            claim_reg: vehicleReg,
+            request_type: requestType,
+            tyre_make: tyreMake,
+            tyre_size: tyreSize,
+            repairer_name: repairerName,
+            repairer_contact_name: repairerContactName,
+            repairer_phone: repairerPhone,
+            repairer_email: repairerEmail,
+            status: 'Pending'
         });
 
-        return Response.json({ success: true, message: 'Tyre request sent successfully' });
+        return Response.json({ success: true, message: 'Tyre request submitted successfully' });
     } catch (error) {
         return Response.json({ error: error.message }, { status: 500 });
     }
