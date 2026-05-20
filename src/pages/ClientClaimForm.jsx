@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import { getPublicFormToken } from '@/functions/getPublicFormToken';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -59,6 +60,7 @@ export default function ClientClaimForm() {
   const [submitted, setSubmitted] = useState(false);
   const [submittedData, setSubmittedData] = useState(null);
   const [error, setError] = useState('');
+  const [formToken, setFormToken] = useState('');
   const [photos, setPhotos] = useState([]);
   const [uploadingPhotos, setUploadingPhotos] = useState(false);
   const fileInputRef = useRef(null);
@@ -88,6 +90,11 @@ export default function ClientClaimForm() {
   };
 
   const removePhoto = (index) => setPhotos(p => p.filter((_, i) => i !== index));
+
+  // Fetch form token on mount
+  useEffect(() => {
+    getPublicFormToken({}).then(res => setFormToken(res.data?.token || '')).catch(() => {});
+  }, []);
 
   // Canvas signature
   useEffect(() => {
@@ -183,6 +190,7 @@ export default function ClientClaimForm() {
     const signatureDataUrl = canvas ? canvas.toDataURL('image/png') : '';
 
     const result = await base44.functions.invoke('submitClientClaimForm', {
+      _form_secret: formToken,
       formData,
       signatureDataUrl,
       photoUrls: photos.map(p => p.url),

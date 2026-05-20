@@ -6,7 +6,7 @@ Deno.serve(async (req) => {
       headers: {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type',
+        'Access-Control-Allow-Headers': 'Content-Type, x-form-secret',
       },
     });
   }
@@ -14,6 +14,12 @@ Deno.serve(async (req) => {
   const base44 = createClientFromRequest(req);
 
   const data = await req.json();
+
+  const secret = data._form_secret;
+  if (!secret || secret !== Deno.env.get('PUBLIC_FORM_SECRET')) {
+    return Response.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+  delete data._form_secret;
 
   if (!data.vehicle_ref || !data.manufacturer || !data.part_description || !data.contact_name || !data.contact_number) {
     return Response.json({ error: 'Missing required fields' }, { status: 400 });

@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { submitPublicPartsRequest } from '@/functions/submitPublicPartsRequest';
+import { getPublicFormToken } from '@/functions/getPublicFormToken';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
@@ -8,6 +9,12 @@ import { Package, CheckCircle2 } from 'lucide-react';
 const companyLogo = 'https://media.base44.com/images/public/68ee39fb8915b1b539e13c59/b2cb057e2_RCMAutomotiveLogoGreenAutomotivewithHLights.jpg';
 
 export default function PublicPartsRequest() {
+  const [formToken, setFormToken] = useState('');
+
+  useEffect(() => {
+    getPublicFormToken({}).then(res => setFormToken(res.data?.token || '')).catch(() => {});
+  }, []);
+
   const [formData, setFormData] = useState({
     contact_name: '',
     contact_number: '',
@@ -35,7 +42,7 @@ export default function PublicPartsRequest() {
     setError('');
 
     try {
-      await submitPublicPartsRequest(formData);
+      await submitPublicPartsRequest({ ...formData, _form_secret: formToken });
       setSubmitted(true);
     } catch (err) {
       setError('Something went wrong. Please try again or contact us directly.');

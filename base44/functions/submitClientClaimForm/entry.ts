@@ -6,6 +6,11 @@ Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
     const body = await req.json();
 
+    const secret = body._form_secret;
+    if (!secret || secret !== Deno.env.get('PUBLIC_FORM_SECRET')) {
+      return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { formData, signatureDataUrl } = body;
 
     if (!formData) {

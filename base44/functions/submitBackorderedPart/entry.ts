@@ -5,6 +5,12 @@ Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
     const data = await req.json();
 
+    const secret = data._form_secret;
+    if (!secret || secret !== Deno.env.get('PUBLIC_FORM_SECRET')) {
+      return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    delete data._form_secret;
+
     if (!data.claim_id || !data.parts || !Array.isArray(data.parts) || data.parts.length === 0) {
       return Response.json({ error: 'Missing required fields: claim_id and parts array' }, { status: 400 });
     }

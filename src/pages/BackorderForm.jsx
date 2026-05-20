@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { submitBackorderedPart } from '@/functions/submitBackorderedPart';
+import { getPublicFormToken } from '@/functions/getPublicFormToken';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
@@ -20,6 +21,7 @@ export default function BackorderForm() {
   const [claimInfo, setClaimInfo] = useState(null);
   const [loadingClaim, setLoadingClaim] = useState(true);
   const [claimError, setClaimError] = useState('');
+  const [formToken, setFormToken] = useState('');
 
   const [submitterName, setSubmitterName] = useState('');
   const [submitterPhone, setSubmitterPhone] = useState('');
@@ -37,8 +39,8 @@ export default function BackorderForm() {
       return;
     }
     setClaimId(id);
-    // We'll verify via the backend on submit; just show the ID for now
     setClaimInfo({ id });
+    getPublicFormToken({}).then(res => setFormToken(res.data?.token || '')).catch(() => {});
     setLoadingClaim(false);
   }, []);
 
@@ -63,6 +65,7 @@ export default function BackorderForm() {
 
     try {
       await submitBackorderedPart({
+        _form_secret: formToken,
         claim_id: claimId,
         submitted_by_name: submitterName,
         submitted_by_phone: submitterPhone,
