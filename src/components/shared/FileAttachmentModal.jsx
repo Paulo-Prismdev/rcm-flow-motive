@@ -1,15 +1,37 @@
-
-import React, { useState } from 'react';
-import { X, Eye, Download, Sparkles, Loader, FileText } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { X, Eye, Download, Sparkles, Loader, FileText, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import FileViewer from './FileViewer';
 import AIExtractConfirmDialog from './AIExtractConfirmDialog';
 import { base44 } from '@/api/base44Client';
 
-export default function FileAttachmentModal({ fileUrls = [], onRemove, isOpen, onClose, enableAI = false, analysisType = 'general', onAIExtract = null, existingData = {} }) {
+export default function FileAttachmentModal({ fileUrls = [], onAdd, onRemove, isOpen, onClose, enableAI = false, analysisType = 'general', onAIExtract = null, existingData = {} }) {
   const [viewingFile, setViewingFile] = useState(null);
   const [analyzingFile, setAnalyzingFile] = useState(null);
   const [aiExtractDialog, setAiExtractDialog] = useState({ isOpen: false, data: null });
+  const [isUploading, setIsUploading] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef(null);
+
+  const handleUpload = async (files) => {
+    if (!files || files.length === 0) return;
+    setIsUploading(true);
+    const newUrls = [];
+    for (const file of Array.from(files)) {
+      const result = await base44.integrations.Core.UploadFile({ file });
+      newUrls.push(result.file_url);
+    }
+    if (onAdd) onAdd(newUrls);
+    setIsUploading(false);
+  };
+
+  const handleDragOver = (e) => { e.preventDefault(); setIsDragging(true); };
+  const handleDragLeave = (e) => { e.preventDefault(); setIsDragging(false); };
+  const handleDrop = async (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+    await handleUpload(e.dataTransfer.files);
+  };
 
   if (!isOpen) return null;
 
@@ -295,6 +317,37 @@ export default function FileAttachmentModal({ fileUrls = [], onRemove, isOpen, o
             >
               <X className="w-4 h-4" />
             </button>
+          </div>
+
+          {/* Upload Area */}
+          <div className="px-6 pt-4 flex-shrink-0">
+            <div
+              className={`neomorph-inset p-3 rounded-xl text-center transition-all cursor-pointer ${isDragging ? 'ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-900/20' : ''}`}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              onClick={() => !isUploading && fileInputRef.current?.click()}
+            >
+              {isUploading ? (
+                <div className="flex items-center justify-center gap-2 text-foreground-muted py-1">
+                  <Loader className="w-4 h-4 animate-spin" />
+                  <span className="text-sm">Uploading...</span>
+                </div>
+              ) : (
+                <div className="flex items-center justify-center gap-2 text-foreground-muted py-1">
+                  <Upload className="w-4 h-4" />
+                  <span className="text-sm">Click or drag & drop to upload documents</span>
+                </div>
+              )}
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                className="sr-only"
+                onChange={(e) => { handleUpload(e.target.files); e.target.value = ''; }}
+                disabled={isUploading}
+              />
+            </div>
           </div>
 
           {/* Files List - Scrollable */}

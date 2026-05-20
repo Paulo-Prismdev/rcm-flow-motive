@@ -21,7 +21,8 @@ import {
     Clock,
     AlertTriangle,
     BadgePercent,
-    Download
+    Download,
+    Image
 } from "lucide-react";
 import { format } from "date-fns";
 import StatusBadge from "../shared/StatusBadge";
@@ -46,6 +47,7 @@ import NotesSection from '../shared/NotesSection';
 import PartsRequestModal from './PartsRequestModal';
 import EstimateRequestModal from './EstimateRequestModal';
 import FileAttachmentModal from '../shared/FileAttachmentModal';
+import ImageAttachmentModal from '../shared/ImageAttachmentModal';
 import DragDropOverlay from '../shared/DragDropOverlay';
 import TimeLogSection from '../shared/TimeLogSection';
 import ClaimTasksSection from '../tasks/ClaimTasksSection';
@@ -160,6 +162,7 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
   const [isEstimateModalOpen, setIsEstimateModalOpen] = useState(false);
   const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
   const [isAttachmentsOpen, setIsAttachmentsOpen] = useState(false);
+  const [isImagesOpen, setIsImagesOpen] = useState(false);
   const [isNotesOpen, setIsNotesOpen] = useState(false);
   const [isClaimUpdatesOpen, setIsClaimUpdatesOpen] = useState(false);
   const [startTime] = useState(new Date());
@@ -370,6 +373,16 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
     const currentUrls = Array.isArray(claim.file_urls) ? claim.file_urls : [];
     const updatedUrls = currentUrls.filter(url => url !== urlToRemove);
     handleUpdate({ ...claim, file_urls: updatedUrls });
+  };
+
+  const handleImagesAdd = (newImageUrls) => {
+    const currentUrls = Array.isArray(claim.image_urls) ? claim.image_urls : [];
+    handleUpdate({ ...claim, image_urls: [...currentUrls, ...newImageUrls] });
+  };
+
+  const handleImageRemove = (urlToRemove) => {
+    const currentUrls = Array.isArray(claim.image_urls) ? claim.image_urls : [];
+    handleUpdate({ ...claim, image_urls: currentUrls.filter(url => url !== urlToRemove) });
   };
 
   const handlePartCreated = (createdPart) => {
@@ -838,6 +851,10 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
       />
       <FileAttachmentModal
         fileUrls={claim.file_urls || []}
+        onAdd={(newUrls) => {
+          const current = Array.isArray(claim.file_urls) ? claim.file_urls : [];
+          handleUpdate({ ...claim, file_urls: [...current, ...newUrls] });
+        }}
         onRemove={handleFileRemove}
         isOpen={isAttachmentsOpen}
         onClose={() => setIsAttachmentsOpen(false)}
@@ -845,6 +862,13 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
         analysisType="claim"
         onAIExtract={handleAIExtract}
         existingData={claim}
+      />
+      <ImageAttachmentModal
+        imageUrls={claim.image_urls || []}
+        onAdd={handleImagesAdd}
+        onRemove={handleImageRemove}
+        isOpen={isImagesOpen}
+        onClose={() => setIsImagesOpen(false)}
       />
       <NotesModal
         parentId={claim.id}
@@ -947,6 +971,10 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
                               <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsAttachmentsOpen(true); }}>
                                 <FileText className="w-4 h-4 mr-2" />
                                 Documents
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsImagesOpen(true); }}>
+                                <Image className="w-4 h-4 mr-2" />
+                                Images
                               </DropdownMenuItem>
                               <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsTimeLogsOpen(true); }}>
                                 <Timer className="w-4 h-4 mr-2" />

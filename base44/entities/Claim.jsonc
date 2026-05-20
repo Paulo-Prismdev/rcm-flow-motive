@@ -556,6 +556,14 @@
         "type": "string"
       }
     },
+    "image_urls": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Image attachments for this claim",
+      "default": []
+    },
     "last_updated_at": {
       "type": "string",
       "format": "date-time"
@@ -640,11 +648,6 @@
           "user_condition": {
             "user_type": "referrer"
           }
-        },
-        {
-          "user_condition": {
-            "user_type": "client"
-          }
         }
       ]
     },
@@ -687,13 +690,10 @@
           }
         },
         {
-          "created_by": "{{user.email}}"
-        },
-        {
           "data.bodyshop_id": "{{user.linked_bodyshop_id}}"
         },
         {
-          "data.referrer_id": "{{user.linked_referrer_id}}"
+          "created_by": "{{user.email}}"
         }
       ]
     },
