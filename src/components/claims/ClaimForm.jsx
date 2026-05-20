@@ -2,7 +2,21 @@ import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, ArrowRight, Check, Plus, Search, Loader, AlertCircle, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Plus, Search, Loader, AlertCircle, Sparkles, Send, Copy } from "lucide-react";
+
+function CopyLinkButton({ url }) {
+  const [copied, setCopied] = React.useState(false);
+  return (
+    <button
+      type="button"
+      onClick={() => { navigator.clipboard.writeText(url); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
+      className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-lg border border-blue-300 bg-white text-blue-600 hover:bg-blue-50 whitespace-nowrap transition-colors"
+    >
+      {copied ? <Check className="w-3.5 h-3.5 text-green-500" /> : <Copy className="w-3.5 h-3.5" />}
+      {copied ? 'Copied!' : 'Copy Link'}
+    </button>
+  );
+}
 import ClientFormLink from './ClientFormLink';
 import ClaimEditForm from './ClaimEditForm';
 import InsurerCombobox from "../shared/InsurerCombobox";
@@ -84,6 +98,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel }) {
   });
 
   const isEditing = !!claim;
+  const [choiceStep, setChoiceStep] = useState(!isEditing); // show choice screen for new claims
 
   const handleAIExtract = async (extractedData) => {
     setAiExtractDialog({ isOpen: true, data: extractedData });
@@ -266,6 +281,78 @@ export default function ClaimForm({ claim, onSubmit, onCancel }) {
 
   const steps = generateSteps();
   const getStepNumber = (key) => steps.find(s => s.key === key)?.number;
+
+  // Choice screen for new claims
+  if (choiceStep) {
+    const appOrigin = window.location.hostname.includes('base44.app')
+      ? `https://${window.location.hostname.replace(/^preview-sandbox--/, '')}`
+      : window.location.origin;
+    const formUrl = `${appOrigin}/client-claim-form`;
+
+    return (
+      <div className="h-full flex flex-col gap-4 md:gap-6">
+        <div className="neomorph p-6 flex-shrink-0">
+          <div className="flex items-center gap-4">
+            <Button onClick={onCancel} className="neomorph-flat p-3 transition-all active:neomorph-pressed">
+              <ArrowLeft className="w-4 h-4 text-gray-600" />
+            </Button>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-700">New Claim</h1>
+              <p className="text-sm text-gray-500 mt-1">How would you like to create this claim?</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex-1 flex flex-col md:flex-row gap-4 p-1">
+          {/* Option 1: Send to client */}
+          <div className="flex-1 neomorph-flat p-8 flex flex-col items-center text-center gap-4 cursor-pointer border-2 border-transparent hover:border-blue-300 transition-all rounded-2xl"
+            onClick={() => {/* just show the link below */}}>
+            <div className="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center">
+              <Send className="w-8 h-8 text-white" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-gray-700 mb-2">Send to Client</h3>
+              <p className="text-sm text-gray-500">Share a link with your client so they fill in their own details and sign a Statement of Truth. The claim is created automatically when they submit.</p>
+            </div>
+            <div className="w-full mt-2 space-y-3" onClick={e => e.stopPropagation()}>
+              <div className="flex gap-2">
+                <input
+                  readOnly
+                  value={formUrl}
+                  className="flex-1 text-xs px-3 py-2 rounded-lg bg-gray-50 border border-gray-200 text-gray-500 truncate"
+                />
+                <CopyLinkButton url={formUrl} />
+              </div>
+              <p className="text-xs text-blue-600 font-medium">Once sent, you can close this — no need to fill anything in.</p>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-center text-gray-400 font-bold text-sm">OR</div>
+
+          {/* Option 2: Fill in manually */}
+          <div
+            className="flex-1 neomorph-flat p-8 flex flex-col items-center text-center gap-4 cursor-pointer border-2 border-transparent hover:border-green-300 transition-all rounded-2xl"
+            onClick={() => setChoiceStep(false)}
+          >
+            <div className="w-16 h-16 rounded-full bg-green-600 flex items-center justify-center">
+              <Check className="w-8 h-8 text-white" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-gray-700 mb-2">Fill In Manually</h3>
+              <p className="text-sm text-gray-500">You have all the information and want to create the claim yourself using the step-by-step wizard.</p>
+            </div>
+            <Button
+              type="button"
+              onClick={() => setChoiceStep(false)}
+              className="mt-2 neomorph-flat px-6 py-3 font-medium text-green-600 border border-green-300 hover:bg-green-50"
+            >
+              Start Wizard →
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Edit mode — use extracted component
   if (isEditing) {
