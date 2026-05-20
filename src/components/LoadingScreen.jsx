@@ -18,7 +18,7 @@ export default function LoadingScreen() {
   };
 
   return (
-    <div className="fixed inset-0 flex flex-col items-center justify-center bg-gradient-to-b from-blue-50 to-blue-100 dark:from-slate-900 dark:to-slate-800 overflow-hidden">
+    <div className="fixed inset-0 flex flex-col items-center justify-center overflow-hidden" style={{ background: '#151d44' }}>
       {/* Logo */}
       <div className="absolute top-12 flex flex-col items-center" style={{ zIndex: 20 }}>
         <img
@@ -59,17 +59,17 @@ export default function LoadingScreen() {
         <motion.div
           animate={{ opacity: [0.3, 1, 0.3] }}
           transition={{ duration: 1.5, repeat: Infinity }}
-          className="w-2 h-2 bg-gray-600 dark:bg-gray-300 rounded-full"
+          className="w-2 h-2 bg-white/60 rounded-full"
         />
         <motion.div
           animate={{ opacity: [0.3, 1, 0.3] }}
           transition={{ duration: 1.5, repeat: Infinity, delay: 0.2 }}
-          className="w-2 h-2 bg-gray-600 dark:bg-gray-300 rounded-full"
+          className="w-2 h-2 bg-white/60 rounded-full"
         />
         <motion.div
           animate={{ opacity: [0.3, 1, 0.3] }}
           transition={{ duration: 1.5, repeat: Infinity, delay: 0.4 }}
-          className="w-2 h-2 bg-gray-600 dark:bg-gray-300 rounded-full"
+          className="w-2 h-2 bg-white/60 rounded-full"
         />
       </motion.div>
 
