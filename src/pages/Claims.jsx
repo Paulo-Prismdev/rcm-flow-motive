@@ -4,7 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Plus, Search, Archive, Filter, X, AlertTriangle, Settings2, Clock, Upload } from 'lucide-react';
+import { Plus, Search, Archive, Filter, X, AlertTriangle, Settings2, Clock, Upload, Package } from 'lucide-react';
 import ClaimDetail from '../components/claims/ClaimDetail';
 import ClaimFormWrapper from '../components/claims/ClaimFormWrapper';
 import ImportClaimsModal from '../components/claims/ImportClaimsModal';
@@ -97,6 +97,8 @@ export default function ClaimsPage() {
   const [showArchived, setShowArchived] = useState(false);
   const [showFieldsModal, setShowFieldsModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
+  const [hasBackorderedPartsFilter, setHasBackorderedPartsFilter] = useState(false);
+  const [claimIdsWithBackorders, setClaimIdsWithBackorders] = useState(new Set());
   const queryClient = useQueryClient();
 
   const { data: currentUser } = useQuery({
@@ -120,6 +122,25 @@ export default function ClaimsPage() {
     queryKey: ['claims'],
     queryFn: () => base44.entities.Claim.list('-created_date', 5000),
   });
+
+  // Fetch backordered parts to identify claims with outstanding backorders
+  const { data: backorderedParts = [] } = useQuery({
+    queryKey: ['backorderedParts'],
+    queryFn: () => base44.entities.BackorderedPart.list(),
+    staleTime: 2 * 60 * 1000, // 2 minutes
+  });
+
+  // Calculate which claims have outstanding backordered parts
+  React.useEffect(() => {
+    if (backorderedParts.length > 0) {
+      const claimIdsWithOutstandingBackorders = new Set(
+        backorderedParts
+          .filter(part => !part.received_by_repairer)
+          .map(part => part.claim_id)
+      );
+      setClaimIdsWithBackorders(claimIdsWithOutstandingBackorders);
+    }
+  }, [backorderedParts]);
 
   // Fetch custom claim statuses
   const { data: customStatuses = [], refetch: refetchStatuses } = useQuery({
@@ -194,9 +215,10 @@ export default function ClaimsPage() {
     setRepairerFilter('');
     setUpdateStatusFilter('');
     setRepairerAcceptanceFilter('');
+    setHasBackorderedPartsFilter(false);
   };
 
-  const activeFiltersCount = [(statusFilter?.length || 0) > 0, claimTypeFilter, insurerFilter, referrerFilter, repairerFilter, updateStatusFilter, repairerAcceptanceFilter].filter(Boolean).length;
+  const activeFiltersCount = [(statusFilter?.length || 0) > 0, claimTypeFilter, insurerFilter, referrerFilter, repairerFilter, updateStatusFilter, repairerAcceptanceFilter, hasBackorderedPartsFilter].filter(Boolean).length;
 
   const allClaims = showArchived ? claims : claims.filter(c => !c.archived);
 
@@ -226,8 +248,14 @@ export default function ClaimsPage() {
       } else if (repairerAcceptanceFilter === 'accepted') {
         matchesRepairerAcceptance = c.repairer_accepted === true;
       }
+      
+      // Backordered parts filter
+      let matchesBackorderedParts = true;
+      if (hasBackorderedPartsFilter) {
+        matchesBackorderedParts = claimIdsWithBackorders.has(c.id);
+      }
 
-      return matchesSearch && matchesStatus && matchesClaimType && matchesInsurer && matchesReferrer && matchesRepairer && matchesUpdateStatus && matchesRepairerAcceptance;
+      return matchesSearch && matchesStatus && matchesClaimType && matchesInsurer && matchesReferrer && matchesRepairer && matchesUpdateStatus && matchesRepairerAcceptance && matchesBackorderedParts;
     })
     .sort((a, b) => {
       const statusA = calculateUpdateStatus(a);
@@ -351,6 +379,12 @@ export default function ClaimsPage() {
                 <span className="flex items-center gap-1 px-2 py-1 rounded-full bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300 text-xs font-medium">
                   <Clock className="w-3 h-3" />
                   Awaiting Repairer Acceptance
+                </span>
+              )}
+              {claimIdsWithBackorders.has(claim.id) && (
+                <span className="flex items-center gap-1 px-2 py-1 rounded-full bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300 text-xs font-medium animate-pulse">
+                  <Package className="w-3 h-3" />
+                  Outstanding Backordered Parts
                 </span>
               )}
             </div>
@@ -561,6 +595,18 @@ export default function ClaimsPage() {
                     <option value="">All Claims</option>
                     <option value="awaiting">⏳ Awaiting Acceptance</option>
                     <option value="accepted">✓ Accepted by Repairer</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs text-foreground-muted mb-1">Backordered Parts</label>
+                  <select
+                    value={hasBackorderedPartsFilter ? 'true' : ''}
+                    onChange={(e) => setHasBackorderedPartsFilter(e.target.value === 'true')}
+                    className="neomorph-inset w-full px-3 py-2 rounded-lg border-0 text-sm"
+                  >
+                    <option value="">All Claims</option>
+                    <option value="true">📦 Has Outstanding Backorders</option>
                   </select>
                 </div>
               </div>
