@@ -72,7 +72,7 @@ Repairer Details:
 Request Type: ${req.request_type === 'price' ? 'Price Request' : 'Order'}
 `;
     
-    window.open(`mailto:tyres@rcmautomotive.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);
+    window.open(`mailto:paul@rcmautomotive.co.uk?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);
   };
 
   return (
