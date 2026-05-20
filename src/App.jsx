@@ -12,6 +12,7 @@ import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import LoadingScreen from '@/components/LoadingScreen';
 import PublicPartsRequest from '@/pages/PublicPartsRequest';
 import BackorderForm from '@/pages/BackorderForm';
+import ClientClaimForm from '@/pages/ClientClaimForm';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -21,7 +22,7 @@ const LayoutWrapper = ({ children, currentPageName }) => Layout ?
   <Layout currentPageName={currentPageName}>{children}</Layout>
   : <>{children}</>;
 
-const PUBLIC_PATHS = ['/backorder-form', '/parts-request'];
+const PUBLIC_PATHS = ['/backorder-form', '/parts-request', '/client-claim-form'];
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, isAuthenticated, navigateToLogin } = useAuth();
@@ -34,6 +35,7 @@ const AuthenticatedApp = () => {
       <Routes>
         <Route path="/parts-request" element={<PublicPartsRequest />} />
         <Route path="/backorder-form" element={<BackorderForm />} />
+        <Route path="/client-claim-form" element={<ClientClaimForm />} />
       </Routes>
     );
   }
@@ -75,6 +77,7 @@ const AuthenticatedApp = () => {
       ))}
       <Route path="/parts-request" element={<PublicPartsRequest />} />
       <Route path="/backorder-form" element={<BackorderForm />} />
+      <Route path="/client-claim-form" element={<ClientClaimForm />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
