@@ -212,11 +212,11 @@ export default function ClientClaimForm() {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-[#151d44] px-4 py-4 flex items-center justify-center">
-        <div className="flex items-center gap-1">
-          <span style={{ fontFamily: 'Palatino, serif', fontSize: '1.6rem', color: '#D4AF37' }}>A</span>
-          <span style={{ fontFamily: 'Palatino, serif', fontSize: '1.6rem', color: '#fff' }}>RTUR</span>
-          <span style={{ fontFamily: 'Palatino, serif', fontSize: '1.6rem', color: '#D4AF37' }}>A</span>
-        </div>
+        <img
+          src="https://media.base44.com/images/public/68ee39fb8915b1b539e13c59/b2cb057e2_RCMAutomotiveLogoGreenAutomotivewithHLights.jpg"
+          alt="RCM Automotive"
+          className="h-14 w-auto object-contain"
+        />
       </div>
 
       <div className="max-w-xl mx-auto px-4 py-6">
