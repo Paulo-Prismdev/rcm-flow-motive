@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Package, CheckCircle } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 
-export default function TyreRequestForm({ onClose }) {
+export default function TyreRequestForm({ onClose, bodyshopId }) {
   const [formData, setFormData] = useState({
     request_type: "price",
     tyre_make: "",
@@ -25,6 +25,11 @@ export default function TyreRequestForm({ onClose }) {
     customer_email: "",
     company_name: "",
     notes: ""
+  });
+
+  const { data: currentUser } = useQuery({
+    queryKey: ['currentUser'],
+    queryFn: () => base44.auth.me(),
   });
 
   const submitMutation = useMutation({

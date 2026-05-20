@@ -205,7 +205,7 @@ export default function RepairerPortal() {
               <p className="text-foreground-muted mb-6">
                 Request a price quote or place an order for tyres.
               </p>
-              <TyreRequestForm />
+              <TyreRequestForm bodyshopId={bodyshopId} />
             </div>
           </div>
         )}
