@@ -708,6 +708,13 @@ export default function Layout({ children, currentPageName }) {
               {/* DESKTOP ONLY: All Buttons - Now using inline flex instead of class */}
               <div className="hidden md:flex items-center gap-[0.375rem] flex-shrink-0">
                 <button
+                  onClick={() => window.location.reload()}
+                  className="glass-button w-10 h-10 flex items-center justify-center"
+                  title="Refresh"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                </button>
+                <button
                   onClick={() => setSearchOpen(true)}
                   className="glass-button w-10 h-10 flex items-center justify-center"
                 >
