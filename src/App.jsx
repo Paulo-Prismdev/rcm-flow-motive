@@ -21,8 +21,22 @@ const LayoutWrapper = ({ children, currentPageName }) => Layout ?
   <Layout currentPageName={currentPageName}>{children}</Layout>
   : <>{children}</>;
 
+const PUBLIC_PATHS = ['/backorder-form', '/parts-request'];
+
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, isAuthenticated, navigateToLogin } = useAuth();
+
+  const isPublicPath = PUBLIC_PATHS.some(p => window.location.pathname.startsWith(p));
+
+  // For public pages, render immediately without auth checks
+  if (isPublicPath) {
+    return (
+      <Routes>
+        <Route path="/parts-request" element={<PublicPartsRequest />} />
+        <Route path="/backorder-form" element={<BackorderForm />} />
+      </Routes>
+    );
+  }
 
   // Show loading spinner while checking app public settings or auth
   if (isLoadingPublicSettings || isLoadingAuth) {
