@@ -1,0 +1,102 @@
+{
+  "name": "ActivityLog",
+  "type": "object",
+  "properties": {
+    "parent_id": {
+      "type": "string",
+      "description": "ID of the parent record (Claim, Estimate, etc.)"
+    },
+    "parent_type": {
+      "type": "string",
+      "enum": [
+        "Claim",
+        "Estimate",
+        "Engineering",
+        "Part"
+      ],
+      "description": "Type of the parent record"
+    },
+    "action": {
+      "type": "string",
+      "description": "Type of action performed (e.g., 'Created', 'Updated', 'Status Changed', 'Note Added')"
+    },
+    "field_name": {
+      "type": "string",
+      "description": "Name of the field that was changed (if applicable)"
+    },
+    "old_value": {
+      "type": "string",
+      "description": "Previous value before change"
+    },
+    "new_value": {
+      "type": "string",
+      "description": "New value after change"
+    },
+    "description": {
+      "type": "string",
+      "description": "Human-readable description of what happened"
+    },
+    "user_email": {
+      "type": "string",
+      "description": "Email of user who performed the action"
+    },
+    "user_name": {
+      "type": "string",
+      "description": "Name of user who performed the action"
+    }
+  },
+  "required": [
+    "parent_id",
+    "parent_type",
+    "action",
+    "description"
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "user_type": "internal"
+          }
+        },
+        {
+          "user_condition": {
+            "user_type": "bodyshop"
+          }
+        }
+      ]
+    },
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "user_type": "internal"
+          }
+        },
+        {
+          "created_by": "{{user.email}}"
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
