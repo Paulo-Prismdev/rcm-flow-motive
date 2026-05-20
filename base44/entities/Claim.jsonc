@@ -640,6 +640,11 @@
           "user_condition": {
             "user_type": "referrer"
           }
+        },
+        {
+          "user_condition": {
+            "user_type": "client"
+          }
         }
       ]
     },
@@ -682,10 +687,13 @@
           }
         },
         {
+          "created_by": "{{user.email}}"
+        },
+        {
           "data.bodyshop_id": "{{user.linked_bodyshop_id}}"
         },
         {
-          "created_by": "{{user.email}}"
+          "data.referrer_id": "{{user.linked_referrer_id}}"
         }
       ]
     },
