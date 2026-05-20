@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Check, ArrowLeft, ArrowRight, Loader, PenLine, Trash2 } from 'lucide-react';
+import { Check, ArrowLeft, ArrowRight, Loader, PenLine, Trash2, Camera, Upload, X, Image } from 'lucide-react';
 
 const STEPS = [
   { key: 'personal', title: 'Your Details' },
@@ -11,6 +11,7 @@ const STEPS = [
   { key: 'vehicle', title: 'Your Vehicle' },
   { key: 'insurance', title: 'Insurance' },
   { key: 'third_party', title: 'Third Party' },
+  { key: 'photos', title: 'Photos' },
   { key: 'signature', title: 'Sign & Submit' },
 ];
 
@@ -58,6 +59,10 @@ export default function ClientClaimForm() {
   const [submitted, setSubmitted] = useState(false);
   const [submittedData, setSubmittedData] = useState(null);
   const [error, setError] = useState('');
+  const [photos, setPhotos] = useState([]);
+  const [uploadingPhotos, setUploadingPhotos] = useState(false);
+  const fileInputRef = useRef(null);
+  const cameraInputRef = useRef(null);
 
   const canvasRef = useRef(null);
   const [isDrawing, setIsDrawing] = useState(false);
@@ -69,6 +74,20 @@ export default function ClientClaimForm() {
 
   const field = (key, value) => setFormData(p => ({ ...p, [key]: value }));
   const check = (key, val) => setFormData(p => ({ ...p, [key]: val }));
+
+  const handlePhotoFiles = async (files) => {
+    setUploadingPhotos(true);
+    const uploaded = [];
+    for (const file of Array.from(files)) {
+      const preview = URL.createObjectURL(file);
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      uploaded.push({ preview, url: file_url, name: file.name });
+    }
+    setPhotos(p => [...p, ...uploaded]);
+    setUploadingPhotos(false);
+  };
+
+  const removePhoto = (index) => setPhotos(p => p.filter((_, i) => i !== index));
 
   // Canvas signature
   useEffect(() => {
@@ -166,6 +185,7 @@ export default function ClientClaimForm() {
     const result = await base44.functions.invoke('submitClientClaimForm', {
       formData,
       signatureDataUrl,
+      photoUrls: photos.map(p => p.url),
     });
 
     setIsSubmitting(false);
@@ -346,6 +366,90 @@ export default function ClientClaimForm() {
               <div><label className={labelCls}>Third Party Vehicle Reg</label><Input value={formData.tp_reg} onChange={e => field('tp_reg', e.target.value.toUpperCase())} className={inputCls} placeholder="e.g. XY21 ZAB" /></div>
               <div><label className={labelCls}>Third Party Insurer</label><Input value={formData.tp_insurer} onChange={e => field('tp_insurer', e.target.value)} className={inputCls} placeholder="If known" /></div>
               <div><label className={labelCls}>Damage to Third Party Vehicle</label><Textarea value={formData.tp_vehicle_damage} onChange={e => field('tp_vehicle_damage', e.target.value)} className={`${inputCls} h-20`} /></div>
+            </div>
+          )}
+
+          {/* Step: photos */}
+          {currentStepKey === 'photos' && (
+            <div className="space-y-4">
+              <p className="text-sm text-gray-500">Please add any photos of the damage or incident scene. You can take a photo now or upload from your device.</p>
+
+              {/* Upload buttons */}
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => cameraInputRef.current?.click()}
+                  className="flex flex-col items-center justify-center gap-2 p-4 border-2 border-dashed border-amber-300 rounded-xl bg-amber-50 text-amber-700 hover:bg-amber-100 transition-colors"
+                >
+                  <Camera className="w-7 h-7" />
+                  <span className="text-sm font-medium">Take Photo</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex flex-col items-center justify-center gap-2 p-4 border-2 border-dashed border-gray-300 rounded-xl bg-gray-50 text-gray-600 hover:bg-gray-100 transition-colors"
+                >
+                  <Upload className="w-7 h-7" />
+                  <span className="text-sm font-medium">Upload from Library</span>
+                </button>
+              </div>
+
+              {/* Hidden inputs */}
+              <input
+                ref={cameraInputRef}
+                type="file"
+                accept="image/*"
+                capture="environment"
+                multiple
+                className="hidden"
+                onChange={e => handlePhotoFiles(e.target.files)}
+              />
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                onChange={e => handlePhotoFiles(e.target.files)}
+              />
+
+              {/* Uploading indicator */}
+              {uploadingPhotos && (
+                <div className="flex items-center gap-2 text-sm text-amber-600">
+                  <Loader className="w-4 h-4 animate-spin" /> Uploading photos...
+                </div>
+              )}
+
+              {/* Photo grid */}
+              {photos.length > 0 && (
+                <div className="grid grid-cols-3 gap-2">
+                  {photos.map((photo, i) => (
+                    <div key={i} className="relative aspect-square rounded-xl overflow-hidden border border-gray-200 group">
+                      <img src={photo.preview} alt={`Photo ${i + 1}`} className="w-full h-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => removePhoto(i)}
+                        className="absolute top-1 right-1 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {photos.length === 0 && !uploadingPhotos && (
+                <div className="text-center py-6 text-gray-400">
+                  <Image className="w-10 h-10 mx-auto mb-2 opacity-40" />
+                  <p className="text-sm">No photos added yet. This step is optional.</p>
+                </div>
+              )}
+
+              {photos.length > 0 && (
+                <p className="text-xs text-green-600 flex items-center gap-1">
+                  <Check className="w-3.5 h-3.5" /> {photos.length} photo{photos.length > 1 ? 's' : ''} added
+                </p>
+              )}
             </div>
           )}
 
