@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { base44 } from '@/api/base44Client';
+import { submitPublicPartsRequest } from '@/functions/submitPublicPartsRequest';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
@@ -35,21 +35,7 @@ export default function PublicPartsRequest() {
     setError('');
 
     try {
-      await base44.entities.Part.create({
-        vehicle_ref: formData.vehicle_ref,
-        manufacturer: formData.manufacturer,
-        part_description: formData.part_description,
-        part_number: formData.part_number,
-        part_type: formData.part_type,
-        bodyshop_company: formData.bodyshop_company,
-        contact_name: formData.contact_name,
-        contact_number: formData.contact_number,
-        contact_email: formData.contact_email,
-        delivery_address: formData.delivery_address,
-        additional_comments: formData.additional_comments,
-        sourcing_status: 'New Request',
-        date_requested: new Date().toISOString().split('T')[0],
-      });
+      await submitPublicPartsRequest(formData);
       setSubmitted(true);
     } catch (err) {
       setError('Something went wrong. Please try again or contact us directly.');
