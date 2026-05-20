@@ -226,15 +226,15 @@ This update was sent from ART-TEC One Claims Management System
 
         <div className="flex-1 overflow-y-auto space-y-4 pr-2">
           {/* Add Update Button or Form */}
-          {!showForm ? (
-            <Button
-              onClick={() => setShowForm(true)}
-              className="w-full glass-button px-4 py-3 flex items-center justify-center gap-2 text-accent"
-            >
-              <Plus className="w-4 h-4" />
-              Add New Update
-            </Button>
-          ) : (
+           {!showForm ? (
+             <Button
+               onClick={() => setShowForm(true)}
+               className="w-full px-4 py-3 bg-accent hover:bg-accent/90 text-accent-foreground font-medium rounded-lg flex items-center justify-center gap-2"
+             >
+               <Plus className="w-4 h-4" />
+               Add New Update
+             </Button>
+           ) : (
           <div className="glass-elevated p-4 border-l-4 border-accent">
             <div className="flex items-center justify-between mb-3">
               <h3 className="font-semibold text-sm">Add New Update</h3>
