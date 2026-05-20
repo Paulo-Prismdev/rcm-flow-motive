@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.7.1';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
 Deno.serve(async (req) => {
   try {
@@ -41,6 +41,8 @@ Deno.serve(async (req) => {
 
     console.log(`=== DVLA API Request ===`);
     console.log(`Registration: ${cleanReg}`);
+    console.log(`User email: ${user.email}`);
+    console.log(`User type: ${user.user_type}`);
     console.log(`API key configured: ${!!apiKey}`);
     console.log(`API key length: ${apiKey.length} characters`);
     console.log(`API key preview: ${apiKey.substring(0, 4)}...${apiKey.substring(apiKey.length - 4)}`);
@@ -51,18 +53,36 @@ Deno.serve(async (req) => {
 
     console.log('Request body:', JSON.stringify(requestBody));
 
-    // Call DVLA API
-    const dvlaResponse = await fetch(
-      'https://driver-vehicle-licensing.api.gov.uk/vehicle-enquiry/v1/vehicles',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': apiKey
-        },
-        body: JSON.stringify(requestBody)
+    // Call DVLA API with timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+    
+    let dvlaResponse;
+    try {
+      dvlaResponse = await fetch(
+        'https://driver-vehicle-licensing.api.gov.uk/vehicle-enquiry/v1/vehicles',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': apiKey
+          },
+          body: JSON.stringify(requestBody),
+          signal: controller.signal
+        }
+      );
+      clearTimeout(timeoutId);
+    } catch (fetchError) {
+      clearTimeout(timeoutId);
+      if (fetchError.name === 'AbortError') {
+        return Response.json({ 
+          error: 'Request timeout',
+          message: 'The DVLA API request timed out. This can happen on slower network connections. Please try again.',
+          success: false
+        }, { status: 504 });
       }
-    );
+      throw fetchError;
+    }
 
     console.log(`DVLA Response Status: ${dvlaResponse.status}`);
     console.log(`DVLA Response Headers:`, Object.fromEntries(dvlaResponse.headers.entries()));
