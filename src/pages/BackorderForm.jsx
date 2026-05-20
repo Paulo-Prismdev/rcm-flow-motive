@@ -124,11 +124,11 @@ export default function BackorderForm() {
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-white/80 mb-1">Your Name *</label>
+                  <label className="block text-sm font-medium text-white/80 mb-1">Bodyshop Name *</label>
                   <Input
-                    value={submitterName}
-                    onChange={(e) => setSubmitterName(e.target.value)}
-                    placeholder="Full name"
+                   value={submitterName}
+                   onChange={(e) => setSubmitterName(e.target.value)}
+                   placeholder="Bodyshop name"
                     required
                     className="bg-white/10 border-white/20 text-white placeholder:text-white/40"
                   />
