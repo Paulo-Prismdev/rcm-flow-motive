@@ -1,0 +1,114 @@
+{
+  "name": "ClaimUpdate",
+  "type": "object",
+  "properties": {
+    "claim_id": {
+      "type": "string",
+      "description": "ID of the claim this update belongs to"
+    },
+    "update_type": {
+      "type": "string",
+      "enum": [
+        "Status Change",
+        "Client Communication",
+        "Bodyshop Communication",
+        "Insurer Communication",
+        "Action Taken",
+        "Awaiting Information",
+        "Documentation Received",
+        "Parts Update",
+        "Repair Progress",
+        "Quality Check",
+        "Other"
+      ],
+      "default": "Other",
+      "description": "Type of update - categorizes the activity"
+    },
+    "description": {
+      "type": "string",
+      "description": "Detailed description of what was done/updated"
+    },
+    "next_steps": {
+      "type": "string",
+      "description": "What needs to happen next (optional)"
+    },
+    "due_date_for_next_action": {
+      "type": "string",
+      "format": "date",
+      "description": "When the next action is due (optional)"
+    },
+    "file_urls": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Files attached to this update",
+      "default": []
+    }
+  },
+  "required": [
+    "claim_id",
+    "update_type",
+    "description"
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "user_type": "internal"
+          }
+        },
+        {
+          "created_by": "{{user.email}}"
+        }
+      ]
+    },
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "user_type": "internal"
+          }
+        },
+        {
+          "created_by": "{{user.email}}"
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "created_by": "{{user.email}}"
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "created_by": "{{user.email}}"
+        }
+      ]
+    }
+  }
+}
