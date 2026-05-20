@@ -51,14 +51,14 @@ export default function TyreRequestForm({ onClose }) {
   };
 
   return (
-    <Card>
+    <Card className="bg-card border-border">
       <CardHeader>
         <div className="flex items-center gap-2">
           <Package className="w-6 h-6 text-accent" />
           <CardTitle>Tyre Request</CardTitle>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="text-foreground">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid md:grid-cols-2 gap-4">
             <div>
