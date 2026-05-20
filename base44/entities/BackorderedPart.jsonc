@@ -75,6 +75,9 @@
           "user_condition": {
             "user_type": "internal"
           }
+        },
+        {
+          "claim_id": "{{user.linked_claim_id}}"
         }
       ]
     },

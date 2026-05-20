@@ -53,6 +53,7 @@ import TimeLogSection from '../shared/TimeLogSection';
 import ClaimTasksSection from '../tasks/ClaimTasksSection';
 import TasksModal from '../tasks/TasksModal';
 import EmailComposerModal from '../shared/EmailComposerModal';
+import { lookupVehicleData } from '@/functions/lookupVehicleData';
 import NotesModal from '../shared/NotesModal';
 import UpdateTrackingModal from './UpdateTrackingModal';
 import UpdateOverrideModal from './UpdateOverrideModal';
@@ -177,6 +178,8 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
   const [isTasksModalOpen, setIsTasksModalOpen] = useState(false);
   const [isTimeLogsOpen, setIsTimeLogsOpen] = useState(false);
   const [isActivityLogOpen, setIsActivityLogOpen] = useState(false);
+  const [isFetchingVehicle, setIsFetchingVehicle] = useState(false);
+  const [vehicleFetchError, setVehicleFetchError] = useState('');
 
   const canEdit = true;
 
@@ -385,6 +388,62 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
     handleUpdate({ ...claim, image_urls: currentUrls.filter(url => url !== urlToRemove) });
   };
 
+  const handleFetchVehicleData = async () => {
+    if (!claim.reg) {
+      setVehicleFetchError('Please enter a registration number first');
+      return;
+    }
+    
+    setIsFetchingVehicle(true);
+    setVehicleFetchError('');
+    
+    try {
+      const result = await lookupVehicleData({ registrationNumber: claim.reg });
+      
+      if (result.success) {
+        const updates = {
+          vehicle_make: result.make || '',
+          vehicle_model: result.model || '',
+          make_model: result.make_model || '',
+          vehicle_colour: result.colour || '',
+          vehicle_fuel_type: result.fuel_type || '',
+          vehicle_year_of_manufacture: result.year_of_manufacture || null,
+          vehicle_engine_capacity: result.engine_capacity || null,
+          vehicle_co2_emissions: result.co2_emissions || null,
+          vehicle_euro_status: result.euro_status || '',
+          vehicle_mot_status: result.mot_status || '',
+          vehicle_mot_expiry_date: result.mot_expiry_date || null,
+          vehicle_tax_status: result.tax_status || '',
+          vehicle_tax_due_date: result.tax_due_date || null,
+          vehicle_date_of_last_v5c_issued: result.date_of_last_v5c_issued || null,
+          vehicle_wheelplan: result.wheelplan || '',
+          vehicle_revenue_weight: result.revenue_weight || null,
+        };
+        
+        await logChanges({
+          parentId: claim.id,
+          parentType: 'Claim',
+          oldData: claim,
+          newData: { ...claim, ...updates },
+          user: currentUser,
+        });
+        
+        handleUpdate({ ...claim, ...updates });
+        
+        if (window.confirm('Vehicle data fetched successfully! Would you like to update the claim with this data?')) {
+          // Already updated above
+        }
+      } else {
+        setVehicleFetchError(result.message || 'Failed to fetch vehicle data');
+      }
+    } catch (error) {
+      console.error('Failed to fetch vehicle data:', error);
+      setVehicleFetchError(error.message || 'An error occurred while fetching vehicle data');
+    } finally {
+      setIsFetchingVehicle(false);
+    }
+  };
+
   const handlePartCreated = (createdPart) => {
     handleUpdate({ ...claim, linked_parts_id: createdPart.id });
     queryClient.invalidateQueries({ queryKey: ['parts'] });
@@ -494,6 +553,28 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
       case 'vehicle':
         return (
           <EditableSection title="Vehicle Details" icon={Car} claim={claim} onUpdate={handleUpdate} EditComponent={ClaimVehicleForm} canEdit={canEdit}>
+            {/* DVLA Lookup Button */}
+            {claim.reg && (
+              <div className="mb-4 p-3 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="font-medium text-blue-800 dark:text-blue-200 text-sm">DVLA Vehicle Lookup</p>
+                    <p className="text-xs text-blue-600 dark:text-blue-300">Fetch vehicle data from DVLA for {claim.reg}</p>
+                  </div>
+                  <Button
+                    onClick={handleFetchVehicleData}
+                    disabled={isFetchingVehicle}
+                    className="bg-blue-600 hover:bg-blue-700 text-white text-sm"
+                  >
+                    {isFetchingVehicle ? 'Fetching...' : 'Fetch from DVLA'}
+                  </Button>
+                </div>
+                {vehicleFetchError && (
+                  <p className="mt-2 text-xs text-red-600 dark:text-red-400">{vehicleFetchError}</p>
+                )}
+              </div>
+            )}
+            
             <div className="mb-6">
               <h4 className="text-sm font-semibold text-gray-600 mb-3">Basic Information</h4>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
