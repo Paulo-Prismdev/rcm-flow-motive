@@ -75,7 +75,7 @@
           }
         },
         {
-          "employee_email": "{{user.email}}"
+          "data.employee_email": "{{user.email}}"
         }
       ]
     },
@@ -92,7 +92,7 @@
           }
         },
         {
-          "employee_email": "{{user.email}}"
+          "data.employee_email": "{{user.email}}"
         }
       ]
     },
@@ -111,10 +111,10 @@
         {
           "$and": [
             {
-              "employee_email": "{{user.email}}"
+              "data.employee_email": "{{user.email}}"
             },
             {
-              "status": "Pending"
+              "data.status": "Pending"
             }
           ]
         }
@@ -130,10 +130,10 @@
         {
           "$and": [
             {
-              "employee_email": "{{user.email}}"
+              "data.employee_email": "{{user.email}}"
             },
             {
-              "status": "Pending"
+              "data.status": "Pending"
             }
           ]
         }
