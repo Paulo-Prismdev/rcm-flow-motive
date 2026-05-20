@@ -204,8 +204,8 @@ export default function Layout({ children, currentPageName }) {
           --foreground-muted: #6c757d;
           --foreground-subtle: #adb5bd;
           
-          --accent: #D4AF37;
-          --accent-hover: #C19B2B;
+          --accent: #00ff00;
+          --accent-hover: #00cc00;
           --accent-foreground: #000000;
           
           --border: #dee2e6;
@@ -238,8 +238,8 @@ export default function Layout({ children, currentPageName }) {
           --foreground-muted: #cbd5e1;
           --foreground-subtle: #64748b;
           
-          --accent: #fbbf24;
-          --accent-hover: #f59e0b;
+          --accent: #00ff00;
+          --accent-hover: #00cc00;
           --accent-foreground: #000000;
           
           --border: #334155;
@@ -484,7 +484,7 @@ export default function Layout({ children, currentPageName }) {
           background: var(--accent);
           color: var(--accent-foreground);
           border-color: var(--accent);
-          box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+          box-shadow: 0 4px 12px rgba(0, 255, 0, 0.3);
         }
 
         .nav-active {
