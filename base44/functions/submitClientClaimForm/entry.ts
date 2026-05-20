@@ -83,16 +83,10 @@ Deno.serve(async (req) => {
     const lh = 7;
 
     // Header
-    doc.setFontSize(24);
-    doc.setFont('times', 'normal');
-    doc.setTextColor(212, 175, 55);
-    doc.text('A', leftMargin, yPos);
-    const aWidth = doc.getTextWidth('A');
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
     doc.setTextColor(0, 0, 0);
-    doc.text('RTUR', leftMargin + aWidth, yPos);
-    const rturWidth = doc.getTextWidth('RTUR');
-    doc.setTextColor(212, 175, 55);
-    doc.text('A', leftMargin + aWidth + rturWidth, yPos);
+    doc.text('RCM Automotive', leftMargin, yPos);
 
     yPos += 10;
     doc.setFontSize(16);
@@ -223,8 +217,8 @@ Deno.serve(async (req) => {
     doc.rect(0, 280, 210, 17, 'F');
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(8);
-    doc.text('Artura, The Nexus, Systematic Business Park, Old Ipswich Rd, Ardleigh, Colchester CO7 7QL', 105, 287, { align: 'center' });
-    doc.text('www.artura.uk | info@artura.uk', 105, 292, { align: 'center' });
+    doc.text('RCM Automotive', 105, 287, { align: 'center' });
+    doc.text('www.rcmautomotive.co.uk | info@rcmautomotive.co.uk', 105, 292, { align: 'center' });
 
     // Upload PDF
     const pdfBytes = doc.output('arraybuffer');

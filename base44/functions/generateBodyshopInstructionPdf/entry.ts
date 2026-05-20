@@ -127,29 +127,13 @@ Deno.serve(async (req) => {
     // Header configuration
     const headerConfig = templateConfig?.header_config || { show_logo: true, show_claim_type: true };
     
-    // Clean ARTURA logo matching app header style
+    // RCM Automotive header
     if (headerConfig.show_logo) {
-      doc.setFontSize(28);
-      doc.setFont('times', 'normal');
-      
-      // Position for centered alignment of the word
-      let xPos = leftMargin;
-      
-      // A - gold
-      doc.setTextColor(212, 175, 55);
-      doc.text('A', xPos, 20);
-      xPos += doc.getTextWidth('A');
-      
-      // RTUR - black
+      doc.setFontSize(18);
+      doc.setFont('helvetica', 'bold');
       doc.setTextColor(0, 0, 0);
-      doc.text('RTUR', xPos, 20);
-      xPos += doc.getTextWidth('RTUR');
-      
-      // A - gold
-      doc.setTextColor(212, 175, 55);
-      doc.text('A', xPos, 20);
-      
-      console.log('✓ ARTURA logo added (matching app header style)');
+      doc.text('RCM Automotive', leftMargin, 20);
+      console.log('✓ RCM Automotive header added');
     }
 
     // Add claim type header if enabled
@@ -165,7 +149,7 @@ Deno.serve(async (req) => {
     doc.setFontSize(12);
     doc.setTextColor(0, 0, 0);
     doc.setFont('helvetica', 'normal');
-    doc.text(`Artura Claim Reference - ${claim.job_number || 'N/A'}`, leftMargin, 55);
+    doc.text(`RCM Claim Reference - ${claim.job_number || 'N/A'}`, leftMargin, 55);
 
     // Render sections based on configuration
     let yPos = 65;
@@ -214,7 +198,7 @@ Deno.serve(async (req) => {
             doc.text(noteLines, leftMargin + 50, yPos);
             yPos += lineHeight * noteLines.length;
           } else if (templateType === 'orkin') {
-            const note = 'DO NOT APPROACH THE DRIVER - MUST BE INVOICED TO ARTURA SOLUTIONS LTD';
+            const note = 'DO NOT APPROACH THE DRIVER - MUST BE INVOICED TO RCM AUTOMOTIVE LTD';
             const noteLines = doc.splitTextToSize(note, maxWidth - 50);
             doc.text(noteLines, leftMargin + 50, yPos);
             yPos += lineHeight * noteLines.length;
@@ -293,7 +277,7 @@ Deno.serve(async (req) => {
     doc.text(line2, leftMargin, yPos);
     yPos += 6 * line2.length;
 
-    const line3 = doc.splitTextToSize('Artura will process the invoice pack via ACG who will deduct both the BLD & Estimate Fee from the payment to you.', maxWidth);
+    const line3 = doc.splitTextToSize('RCM Automotive will process the invoice pack via ACG who will deduct both the BLD & Estimate Fee from the payment to you.', maxWidth);
     doc.text(line3, leftMargin, yPos);
     yPos += 6 * line3.length;
 
@@ -304,7 +288,7 @@ Deno.serve(async (req) => {
     yPos += 7;
 
     doc.setTextColor(0, 0, 255);
-    doc.textWithLink('invoices@artura.uk', leftMargin, yPos, { url: 'mailto:invoices@artura.uk' });
+    doc.textWithLink('invoices@rcmautomotive.co.uk', leftMargin, yPos, { url: 'mailto:invoices@rcmautomotive.co.uk' });
     doc.setTextColor(0, 0, 0);
     yPos += 10;
 
@@ -331,8 +315,8 @@ Deno.serve(async (req) => {
       doc.setFontSize(8);
       doc.setFont('helvetica', 'normal');
       
-      const address = footerConfig.address || 'Artura, The Nexus, Systematic Business Park, Old Ipswich Rd, Ardleigh, Colchester CO7 7QL';
-      const contact = footerConfig.contact_info || 'www.artura.uk | info@artura.uk';
+      const address = footerConfig.address || 'RCM Automotive';
+      const contact = footerConfig.contact_info || 'www.rcmautomotive.co.uk | info@rcmautomotive.co.uk';
       
       doc.text(address, 105, 287, { align: 'center' });
       doc.text(contact, 105, 292, { align: 'center' });
