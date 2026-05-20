@@ -1,10 +1,10 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { X, Send, Reply, Smile, Eye, EyeOff, MessageSquare } from "lucide-react";
+import VoiceInput from '@/components/shared/VoiceInput';
 import { format } from 'date-fns';
 import {
   Dialog,
@@ -383,9 +383,16 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
               )}
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-xs text-foreground-muted">
-                Tip: Type @ to mention a user
-              </span>
+              <div className="flex items-center gap-2">
+                <VoiceInput
+                  value={newNote}
+                  onChange={setNewNote}
+                  disabled={createNoteMutation.isPending}
+                />
+                <span className="text-xs text-foreground-muted">
+                  Dictate or type @ to mention
+                </span>
+              </div>
               <Button
                 type="submit"
                 disabled={!newNote.trim() || createNoteMutation.isPending}

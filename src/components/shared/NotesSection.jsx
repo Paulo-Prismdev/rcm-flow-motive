@@ -1,10 +1,10 @@
-
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Send, Reply, ThumbsUp, Eye, Trash2, ChevronDown } from 'lucide-react';
+import VoiceInput from '@/components/shared/VoiceInput';
 import { format } from 'date-fns';
 import {
   DropdownMenu,
@@ -192,7 +192,12 @@ export default function NotesSection({ parentId, parentType }) {
             }
           }}
         />
-        <div className="flex justify-end">
+        <div className="flex justify-between items-center">
+          <VoiceInput
+            value={newNote}
+            onChange={setNewNote}
+            disabled={createNoteMutation.isPending}
+          />
           <Button
             onClick={handleAddNote}
             disabled={!newNote.trim() || createNoteMutation.isPending}
