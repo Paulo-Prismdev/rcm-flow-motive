@@ -138,34 +138,33 @@ export default function RepairerPortal() {
       </div>
 
       {/* Mobile Header */}
-      <div className="neomorph p-2 flex items-center gap-2 md:hidden flex-shrink-0">
+      <div className="header-glass p-2 flex items-center gap-2 md:hidden flex-shrink-0">
         <button
           onClick={() => setMobileMenuOpen(true)}
-          className="w-10 h-10 flex items-center justify-center rounded-xl flex-shrink-0"
-          style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
+          className="glass-button w-10 h-10 flex items-center justify-center rounded-xl flex-shrink-0"
         >
           <Menu className="w-5 h-5" />
         </button>
-        <div className="flex-1 text-center font-medium">
+        <div className="flex-1 text-center font-medium text-white">
           {TABS.find(t => t.id === activeTab)?.label}
         </div>
         <div className="w-10" />
       </div>
 
       {/* Desktop Tabs */}
-      <div className="neomorph p-2 hidden md:flex gap-2 overflow-x-auto flex-shrink-0">
+      <div className="hidden md:flex gap-2 overflow-x-auto flex-shrink-0">
         {TABS.map(tab => {
           const isActive = activeTab === tab.id;
           return (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium whitespace-nowrap transition-all"
+              className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium whitespace-nowrap transition-all nav-button"
               style={{
-                background: isActive ? 'var(--accent)' : 'var(--surface)',
-                border: `1px solid ${isActive ? 'var(--accent)' : 'var(--border)'}`,
-                boxShadow: isActive ? '0 4px 12px rgba(212, 175, 55, 0.3)' : 'var(--shadow-sm)',
-                color: isActive ? 'var(--accent-foreground)' : 'var(--foreground)',
+                background: isActive ? 'var(--accent)' : 'rgba(255,255,255,0.07)',
+                border: `1px solid ${isActive ? 'var(--accent)' : 'rgba(255,255,255,0.12)'}`,
+                boxShadow: isActive ? '0 4px 12px rgba(0, 255, 0, 0.3)' : 'var(--shadow-sm)',
+                color: isActive ? 'var(--accent-foreground)' : 'rgba(255,255,255,0.85)',
                 cursor: 'pointer',
               }}
             >

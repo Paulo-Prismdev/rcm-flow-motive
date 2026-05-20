@@ -50,7 +50,7 @@ export default function RepairerLayout({ children }) {
     queryFn: () => base44.entities.AppConfig.list(),
   });
 
-  const companyLogo = appConfigs.find(c => c.config_key === 'company_logo')?.config_value || '';
+  const companyLogo = 'https://media.base44.com/images/public/68ee39fb8915b1b539e13c59/b2cb057e2_RCMAutomotiveLogoGreenAutomotivewithHLights.jpg';
 
   return (
     <StatusConfigProvider>
@@ -66,8 +66,8 @@ export default function RepairerLayout({ children }) {
           --foreground: #1a1a1a;
           --foreground-muted: #6c757d;
           --foreground-subtle: #adb5bd;
-          --accent: #D4AF37;
-          --accent-hover: #C19B2B;
+          --accent: #00ff00;
+          --accent-hover: #00cc00;
           --accent-foreground: #000000;
           --border: #dee2e6;
           --border-strong: #ced4da;
@@ -79,15 +79,15 @@ export default function RepairerLayout({ children }) {
         }
 
         [data-theme="dark"] {
-          --background: #0f172a;
-          --surface: #1e293b;
-          --surface-elevated: #334155;
-          --surface-hover: #475569;
+          --background: #070d1a;
+          --surface: #0f1829;
+          --surface-elevated: #182035;
+          --surface-hover: #1e2a45;
           --foreground: #f1f5f9;
           --foreground-muted: #cbd5e1;
           --foreground-subtle: #64748b;
-          --accent: #fbbf24;
-          --accent-hover: #f59e0b;
+          --accent: #00ff00;
+          --accent-hover: #00cc00;
           --accent-foreground: #000000;
           --border: #334155;
           --border-strong: #475569;
@@ -102,6 +102,15 @@ export default function RepairerLayout({ children }) {
           font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
           background: var(--background);
           color: var(--foreground);
+        }
+
+        .header-glass {
+          background: #151d44;
+          backdrop-filter: blur(24px);
+          -webkit-backdrop-filter: blur(24px);
+          border: 1px solid rgba(255,255,255,0.08);
+          border-radius: 20px;
+          box-shadow: var(--shadow-lg);
         }
 
         .neomorph {
@@ -127,16 +136,18 @@ export default function RepairerLayout({ children }) {
         }
 
         .glass-button {
-          background: var(--surface);
-          border: 1px solid var(--border);
+          background: rgba(255,255,255,0.08);
+          border: 1px solid rgba(255,255,255,0.15);
           border-radius: 12px;
           box-shadow: var(--shadow-sm);
           transition: all 0.2s ease;
           cursor: pointer;
+          color: rgba(255,255,255,0.9) !important;
         }
 
         .glass-button:hover {
-          background: var(--surface-hover);
+          background: rgba(255,255,255,0.16);
+          border-color: rgba(255,255,255,0.25);
           box-shadow: var(--shadow-md);
         }
 
@@ -231,30 +242,27 @@ export default function RepairerLayout({ children }) {
       )}
 
       {/* Header */}
-      <header className="neomorph mx-2 md:mx-3 mt-2 md:mt-3 px-3 py-1 flex-shrink-0">
+      <header className="header-glass mx-2 md:mx-3 mt-2 md:mt-3 px-3 py-3 flex-shrink-0">
         <div className="flex items-center justify-between gap-2">
           {/* Left: Burger (mobile) + Logo */}
           <div className="flex items-center gap-2 md:gap-3 min-w-0">
             {/* Mobile Burger */}
             <button
               onClick={() => setMobileMenuOpen(true)}
-              className="glass-button w-8 h-8 flex items-center justify-center flex-shrink-0 md:hidden"
-              style={{ color: 'var(--foreground)' }}
+              className="glass-button w-10 h-10 flex items-center justify-center flex-shrink-0 md:hidden"
             >
               <Menu className="w-4 h-4" />
             </button>
 
             {/* Company Logo + App Title */}
                   <div className="flex items-center gap-3">
-                    {companyLogo && (
-                      <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-surface-hover mx-2">
-                        <img 
-                          src={companyLogo} 
-                          alt="Company Logo" 
-                          className="w-full h-full object-contain"
-                        />
-                      </div>
-                    )}
+                    <div className="h-12 w-auto flex-shrink-0">
+                      <img 
+                        src={companyLogo} 
+                        alt="RCM Automotive" 
+                        className="h-full w-auto object-contain"
+                      />
+                    </div>
               <div className="flex items-baseline gap-1">
                 <span style={{ fontFamily: "'Palatino Linotype', serif", fontSize: '1.1rem' }} className="md:text-xl">
                   <span style={{ color: 'var(--accent)' }}>R</span>
@@ -264,46 +272,33 @@ export default function RepairerLayout({ children }) {
                 <span style={{ fontWeight: 300 }} className="text-lg md:text-xl">utomotive</span>
               </div>
             </div>
-            <span className="hidden sm:inline text-[10px] px-1.5 py-0.5 rounded-full bg-accent/20 text-accent font-medium">
-              Repairer
-            </span>
+
           </div>
           
-          {/* Center: Bodyshop Logo */}
-          {bodyshop?.logo_url && (
-                        <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 mx-2">
-                          <img 
-                            src={bodyshop.logo_url} 
-                            alt={bodyshop.name} 
-                            className="w-full h-full object-contain"
-                          />
-                        </div>
-                      )}
+          {/* Right: Bodyshop Name */}
+          {bodyshop && (
+            <div className="hidden lg:flex items-center gap-1.5 text-sm text-foreground-subtle">
+              <Building2 className="w-4 h-4" />
+              <span>{bodyshop.name}</span>
+            </div>
+          )}
 
           {/* Right: Desktop controls */}
           <div className="hidden md:flex items-center gap-2">
-            {bodyshop && (
-              <div className="flex items-center gap-1.5 text-sm text-foreground-muted">
-                <Building2 className="w-4 h-4" />
-                <span>{bodyshop.name}</span>
-              </div>
-            )}
-
             <RepairerNotifications />
 
             <button
               onClick={toggleTheme}
-              className="glass-button w-8 h-8 flex items-center justify-center"
-              style={{ color: 'var(--foreground)' }}
+              className="glass-button w-10 h-10 flex items-center justify-center"
               title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
             >
-              {isDark ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
+              {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </button>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="glass-button w-8 h-8 flex items-center justify-center">
-                  <User className="w-3.5 h-3.5" />
+                <button className="glass-button w-10 h-10 flex items-center justify-center">
+                  <User className="w-4 h-4" />
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="neomorph-flat w-56">
