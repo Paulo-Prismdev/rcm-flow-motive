@@ -8,6 +8,9 @@ Deno.serve(async (req) => {
     if (!user) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
+    if (user.role !== 'admin' && user.user_type !== 'internal') {
+      return Response.json({ error: 'Forbidden: Admin or internal access required' }, { status: 403 });
+    }
 
     const { file_url } = await req.json();
     if (!file_url) {
