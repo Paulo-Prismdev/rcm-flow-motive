@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import {
@@ -509,8 +509,8 @@ export default function Layout({ children, currentPageName }) {
           top: 0;
           left: 0;
           bottom: 0;
-          width: 80%;
-          max-width: 320px;
+          width: 85%;
+          max-width: 400px;
           background: var(--glass-bg);
           backdrop-filter: blur(24px);
           -webkit-backdrop-filter: blur(24px);
@@ -526,6 +526,13 @@ export default function Layout({ children, currentPageName }) {
 
         .mobile-menu.open {
           transform: translateX(0);
+        }
+
+        /* Tablet-specific: wider mobile menu */
+        @media (min-width: 769px) and (max-width: 1024px) {
+          .mobile-menu {
+            max-width: 450px;
+          }
         }
 
         /* ============================================
@@ -589,6 +596,19 @@ export default function Layout({ children, currentPageName }) {
            RESPONSIVE
            ============================================ */
 
+        /* Tablet (768px - 1024px) */
+        @media (max-width: 1024px) and (min-width: 769px) {
+          .nav-button {
+            padding: 0.6rem 0.85rem;
+            font-size: 0.825rem;
+          }
+          
+          .header-glass {
+            padding: 0.6rem 0.85rem;
+          }
+        }
+
+        /* Mobile and small tablets */
         @media (max-width: 768px) {
           .header-glass {
             border-radius: 16px;
@@ -600,6 +620,7 @@ export default function Layout({ children, currentPageName }) {
           h3 { font-size: 1.1rem; }
         }
 
+        /* Small mobile */
         @media (max-width: 640px) {
           .app-title-artura {
             font-size: 1.15rem;
@@ -618,6 +639,7 @@ export default function Layout({ children, currentPageName }) {
           }
         }
 
+        /* Extra small mobile */
         @media (max-width: 400px) {
           .app-title-artura {
             font-size: 1rem;
@@ -625,6 +647,37 @@ export default function Layout({ children, currentPageName }) {
 
           .app-title-one {
             font-size: 1rem;
+          }
+        }
+
+        /* Touch-friendly adjustments for tablets and touch devices */
+        @media (hover: none) and (min-width: 640px) {
+          .nav-button, .glass-button, button, a {
+            min-height: 44px;
+            min-width: 44px;
+          }
+          
+          .nav-button {
+            padding: 0.875rem 1.125rem;
+          }
+        }
+
+        /* Fix for tablet navigation scrolling */
+        @media (min-width: 769px) and (max-width: 1024px) {
+          .nav-container {
+            gap: 0.375rem;
+          }
+          
+          .nav-button {
+            padding: 0.625rem 0.875rem;
+            font-size: 0.8125rem;
+          }
+        }
+
+        /* Prevent zoom on double-tap for tablets */
+        @media (min-width: 768px) {
+          * {
+            touch-action: manipulation;
           }
         }
 
@@ -652,23 +705,23 @@ export default function Layout({ children, currentPageName }) {
       `}</style>
 
         {/* NEW HEADER - COMPLETELY REWRITTEN */}
-        <header className="header-glass mb-2 mx-2 md:mx-3 mt-2 md:mt-3 p-3 md:p-4 flex-shrink-0">
+        <header className="header-glass mb-2 mx-2 sm:mx-3 mt-2 sm:mt-3 p-3 sm:p-4 flex-shrink-0">
           <div className="max-w-full mx-auto">
             {/* Top Row - Logo and Actions */}
             <div className="flex items-center justify-between gap-2">
               {/* Left: Burger + Logo (Mobile) OR Just Logo (Desktop) */}
-              <div className="flex items-center gap-2 md:gap-4 min-w-0 flex-1">
-                {/* MOBILE ONLY: Burger Button */}
+              <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
+                {/* MOBILE AND SMALL TABLET: Burger Button */}
                 <button
                   onClick={() => setMobileMenuOpen(true)}
-                  className="glass-button w-10 h-10 flex items-center justify-center flex-shrink-0 md:hidden"
+                  className="glass-button w-10 h-10 flex items-center justify-center flex-shrink-0 sm:hidden"
                 >
                   <Menu className="w-4 h-4" />
                 </button>
 
                 {/* Company Logo + App Title */}
-                <div className="flex items-center gap-3">
-                  <div className="h-14 w-auto flex-shrink-0">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="h-12 w-auto sm:h-14 flex-shrink-0">
                   <img 
                     src={companyLogo} 
                     alt="RCM Automotive" 
@@ -681,7 +734,7 @@ export default function Layout({ children, currentPageName }) {
 
               {/* Right Side Actions */}
               {/* MOBILE ONLY: Messages + Refresh */}
-              <div className="flex items-center gap-2 md:hidden">
+              <div className="flex items-center gap-2 sm:hidden">
                 {isInternalUser && (
                   <button
                     onClick={() => setMessagesOpen(true)}
@@ -705,8 +758,8 @@ export default function Layout({ children, currentPageName }) {
                 </button>
               </div>
 
-              {/* DESKTOP ONLY: All Buttons - Now using inline flex instead of class */}
-              <div className="hidden md:flex items-center gap-[0.375rem] flex-shrink-0">
+              {/* DESKTOP AND TABLET: All Buttons */}
+              <div className="hidden sm:flex items-center gap-[0.375rem] flex-shrink-0">
                 <button
                   onClick={() => window.location.reload()}
                   className="glass-button w-10 h-10 flex items-center justify-center"
@@ -798,8 +851,8 @@ export default function Layout({ children, currentPageName }) {
               </div>
             </div>
 
-            {/* Desktop Navigation Row */}
-            <div className={`hidden md:block nav-container-wrapper mt-5 ${hasScrollRight ? 'has-scroll-right' : ''}`}>
+            {/* Navigation Row - Show on tablets and desktop */}
+            <div className={`hidden sm:block nav-container-wrapper mt-5 ${hasScrollRight ? 'has-scroll-right' : ''}`}>
               <nav 
                 className="nav-container"
                 ref={navContainerRef}
@@ -825,10 +878,10 @@ export default function Layout({ children, currentPageName }) {
         {mobileMenuOpen && (
           <>
             <div 
-              className="mobile-menu-overlay md:hidden" 
+              className="mobile-menu-overlay sm:hidden" 
               onClick={() => setMobileMenuOpen(false)}
             />
-            <div className={`mobile-menu md:hidden ${mobileMenuOpen ? 'open' : ''}`}>
+            <div className={`mobile-menu sm:hidden ${mobileMenuOpen ? 'open' : ''}`}>
               <div className="p-4 border-b border-border flex items-center justify-between">
                 <h2 className="font-bold text-lg">Menu</h2>
                 <div className="flex items-center gap-2">
@@ -985,7 +1038,7 @@ export default function Layout({ children, currentPageName }) {
           </>
         )}
 
-        <main className="px-2 md:px-3 pb-3 md:pb-4 flex-1 overflow-hidden min-h-0">
+        <main className="px-2 sm:px-3 pb-3 sm:pb-4 flex-1 overflow-hidden min-h-0">
           <div className="max-w-full mx-auto h-full">
             {children}
           </div>
