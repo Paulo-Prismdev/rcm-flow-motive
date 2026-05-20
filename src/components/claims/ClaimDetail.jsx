@@ -38,6 +38,7 @@ import ClaimDatesForm from './ClaimDatesForm';
 import ClaimBodyshopForm from './ClaimBodyshopForm';
 import ClaimEstimateForm from './ClaimEstimateForm';
 import ClaimStatusForm from './ClaimStatusForm';
+import ChangeStatusModal from './ChangeStatusModal';
 import ClaimVehicleDamageForm from './ClaimVehicleDamageForm';
 import ClaimIndemnityForm from './ClaimIndemnityForm';
 import ClaimExcessContributionForm from './ClaimExcessContributionForm';
@@ -180,6 +181,7 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
   const [isActivityLogOpen, setIsActivityLogOpen] = useState(false);
   const [isFetchingVehicle, setIsFetchingVehicle] = useState(false);
   const [vehicleFetchError, setVehicleFetchError] = useState('');
+  const [isChangeStatusModalOpen, setIsChangeStatusModalOpen] = useState(false);
 
   const canEdit = true;
 
@@ -509,8 +511,8 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
             icon={Clock} 
             claim={claim} 
             onUpdate={handleUpdate}
-            EditComponent={ClaimStatusForm} 
-            canEdit={canEdit}
+            EditComponent={null} 
+            canEdit={false}
           >
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
               <DetailRow label="Job Status" value={claim.job_status} isStatus />
@@ -965,6 +967,20 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
         onClose={() => setIsNotesOpen(false)}
       />
       
+      <ChangeStatusModal
+        isOpen={isChangeStatusModalOpen}
+        onClose={() => setIsChangeStatusModalOpen(false)}
+        claim={claim}
+        onSave={(statusData) => {
+          const { job_status, status_change_notes } = statusData;
+          const updates = { job_status };
+          if (status_change_notes) {
+            updates.latest_update = status_change_notes;
+          }
+          handleUpdate({ ...claim, ...updates });
+        }}
+      />
+
       <UpdateOverrideModal
         isOpen={isOverrideModalOpen}
         onClose={() => setIsOverrideModalOpen(false)}
@@ -1044,6 +1060,15 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
                         >
                           Updates
                         </Button>
+                        {canEdit && (
+                          <Button 
+                            onClick={() => setIsChangeStatusModalOpen(true)}
+                            className="neomorph-flat px-2 md:px-4 py-1.5 md:py-2 bg-green-600/10 hover:bg-green-600/20 font-medium text-green-600 text-xs md:text-sm"
+                            title="Change Status"
+                          >
+                            Change Status
+                          </Button>
+                        )}
                         {canEdit && (
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
