@@ -29,7 +29,7 @@ const AuthenticatedApp = () => {
 
   const isPublicPath = PUBLIC_PATHS.some(p => window.location.pathname.startsWith(p));
 
-  // For public pages, render immediately without auth checks
+  // For public pages, render IMMEDIATELY — no auth, no loading screen
   if (isPublicPath) {
     return (
       <Routes>
@@ -84,7 +84,26 @@ const AuthenticatedApp = () => {
 };
 
 
+function PublicApp() {
+  return (
+    <Routes>
+      <Route path="/parts-request" element={<PublicPartsRequest />} />
+      <Route path="/backorder-form" element={<BackorderForm />} />
+      <Route path="/client-claim-form" element={<ClientClaimForm />} />
+    </Routes>
+  );
+}
+
 function App() {
+  const isPublicPath = PUBLIC_PATHS.some(p => window.location.pathname.startsWith(p));
+
+  if (isPublicPath) {
+    return (
+      <Router>
+        <PublicApp />
+      </Router>
+    );
+  }
 
   return (
     <AuthProvider>
