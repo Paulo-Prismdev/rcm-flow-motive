@@ -87,16 +87,28 @@ Deno.serve(async (req) => {
     let yPos = 20;
     const lh = 7;
 
-    // Header
-    doc.setFontSize(14);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(0, 0, 0);
-    doc.text('RCM Automotive', leftMargin, yPos);
+    // RCM Branding colours
+    const RCM_GOLD = [212, 175, 55]; // #D4AF37
+    const RCM_DARK = [21, 29, 68];   // #151d44
 
+    // Header with logo
+    const logoUrl = 'https://media.base44.com/images/public/68ee39fb8915b1b539e13c59/b2cb057e2_RCMAutomotiveLogoGreenAutomotivewithHLights.jpg';
+    try {
+      // Add logo (top left)
+      doc.addImage(logoUrl, 'JPEG', leftMargin, yPos - 5, 50, 25);
+    } catch (e) {
+      // Fallback if image fails to load
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(RCM_DARK[0], RCM_DARK[1], RCM_DARK[2]);
+      doc.text('RCM Automotive', leftMargin, yPos);
+    }
+
+    // Title (centered)
     yPos += 10;
-    doc.setFontSize(16);
+    doc.setFontSize(18);
     doc.setFont('helvetica', 'bold');
-    doc.setTextColor(0, 0, 0);
+    doc.setTextColor(RCM_DARK[0], RCM_DARK[1], RCM_DARK[2]);
     doc.text('STATEMENT OF TRUTH', 105, yPos, { align: 'center' });
 
     yPos += 8;
@@ -106,23 +118,26 @@ Deno.serve(async (req) => {
     doc.text(`Claim Reference: ${jobNumber}  |  Date: ${new Date().toLocaleDateString('en-GB')}`, 105, yPos, { align: 'center' });
 
     yPos += 3;
-    doc.setDrawColor(212, 175, 55);
-    doc.setLineWidth(0.8);
+    // Gold accent line
+    doc.setDrawColor(RCM_GOLD[0], RCM_GOLD[1], RCM_GOLD[2]);
+    doc.setLineWidth(1.2);
     doc.line(leftMargin, yPos, rightMargin, yPos);
     yPos += 8;
 
-    // Section helper
+    // Section helper with RCM branding
     const addSection = (title) => {
       if (yPos > 255) { doc.addPage(); yPos = 20; }
       doc.setFontSize(11);
       doc.setFont('helvetica', 'bold');
-      doc.setTextColor(0, 0, 0);
-      doc.setFillColor(240, 240, 240);
+      doc.setTextColor(RCM_DARK[0], RCM_DARK[1], RCM_DARK[2]);
+      doc.setFillColor(RCM_GOLD[0], RCM_GOLD[1], RCM_GOLD[2]);
       doc.rect(leftMargin, yPos - 4, maxWidth, 8, 'F');
+      doc.setTextColor(255, 255, 255);
       doc.text(title, leftMargin + 2, yPos + 1);
       yPos += 9;
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(10);
+      doc.setTextColor(0, 0, 0);
     };
 
     const addRow = (label, value) => {
@@ -217,12 +232,13 @@ Deno.serve(async (req) => {
     yPos += 7;
     doc.text(`Date: ${new Date().toLocaleDateString('en-GB')}`, leftMargin, yPos);
 
-    // Footer
-    doc.setFillColor(0, 0, 0);
+    // Footer with RCM branding
+    doc.setFillColor(RCM_DARK[0], RCM_DARK[1], RCM_DARK[2]);
     doc.rect(0, 280, 210, 17, 'F');
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(8);
     doc.text('RCM Automotive', 105, 287, { align: 'center' });
+    doc.setTextColor(RCM_GOLD[0], RCM_GOLD[1], RCM_GOLD[2]);
     doc.text('www.rcmautomotive.co.uk | info@rcmautomotive.co.uk', 105, 292, { align: 'center' });
 
     // Upload PDF
