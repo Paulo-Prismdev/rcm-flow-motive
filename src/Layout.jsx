@@ -23,6 +23,7 @@ import {
   Moon,
   BarChart3,
   CheckSquare,
+  RefreshCw,
 } from "lucide-react";
 import GlobalSearch from "./components/layout/GlobalSearch";
 import Notifications from "./components/layout/Notifications";
@@ -679,21 +680,30 @@ export default function Layout({ children, currentPageName }) {
               </div>
 
               {/* Right Side Actions */}
-              {/* MOBILE ONLY: Just Messages */}
-              {isInternalUser && (
+              {/* MOBILE ONLY: Messages + Refresh */}
+              <div className="flex items-center gap-2 md:hidden">
+                {isInternalUser && (
+                  <button
+                    onClick={() => setMessagesOpen(true)}
+                    className="glass-button w-10 h-10 flex items-center justify-center relative flex-shrink-0"
+                    title="Messages"
+                  >
+                    <MessageSquare className="w-4 h-4" />
+                    {unreadMessagesCount > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold animate-pulse">
+                        {unreadMessagesCount > 9 ? '9+' : unreadMessagesCount}
+                      </span>
+                    )}
+                  </button>
+                )}
                 <button
-                  onClick={() => setMessagesOpen(true)}
-                  className="glass-button w-10 h-10 flex items-center justify-center relative flex-shrink-0 md:hidden"
-                  title="Messages"
+                  onClick={() => window.location.reload()}
+                  className="glass-button w-10 h-10 flex items-center justify-center flex-shrink-0"
+                  title="Refresh"
                 >
-                  <MessageSquare className="w-4 h-4" />
-                  {unreadMessagesCount > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold animate-pulse">
-                      {unreadMessagesCount > 9 ? '9+' : unreadMessagesCount}
-                    </span>
-                  )}
+                  <RefreshCw className="w-4 h-4" />
                 </button>
-              )}
+              </div>
 
               {/* DESKTOP ONLY: All Buttons - Now using inline flex instead of class */}
               <div className="hidden md:flex items-center gap-[0.375rem] flex-shrink-0">

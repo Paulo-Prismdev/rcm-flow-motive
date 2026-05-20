@@ -1,6 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { Car, RefreshCw } from "lucide-react";
+import { Car } from "lucide-react";
 
 export default function LoadingScreen() {
   const carVariants = {
@@ -73,14 +73,6 @@ export default function LoadingScreen() {
         />
       </motion.div>
 
-      {/* Refresh Button */}
-      <button
-        onClick={() => window.location.reload()}
-        className="mt-6 flex items-center gap-2 px-4 py-2 rounded-lg bg-white/60 dark:bg-slate-700/60 border border-gray-300 dark:border-slate-600 text-gray-600 dark:text-gray-300 text-sm font-medium hover:bg-white/90 dark:hover:bg-slate-700/90 transition-all"
-      >
-        <RefreshCw className="w-4 h-4" />
-        Refresh
-      </button>
     </div>
   );
 }
