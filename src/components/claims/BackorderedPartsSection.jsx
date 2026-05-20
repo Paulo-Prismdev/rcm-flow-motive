@@ -29,7 +29,10 @@ export default function BackorderedPartsSection({ claim, currentUser, onSendEmai
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['backorderedParts', claim.id] }),
   });
 
-  const formUrl = `${window.location.origin}/backorder-form?claim=${claim.id}`;
+  const appOrigin = window.location.hostname.includes('base44.app')
+    ? `https://${window.location.hostname.replace(/^preview-sandbox--/, '')}`
+    : window.location.origin;
+  const formUrl = `${appOrigin}/backorder-form?claim=${claim.id}`;
 
   const copyLink = () => {
     navigator.clipboard.writeText(formUrl);
