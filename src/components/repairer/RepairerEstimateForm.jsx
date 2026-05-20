@@ -33,17 +33,21 @@ export default function RepairerEstimateForm({ bodyshopId, bodyshopName, onClose
         priority: 'Medium',
       });
 
-      // Create notification for internal users
-      await base44.entities.Notification.create({
-        user_email: 'admin@artech.com', // This should be configurable
-        title: 'New Estimate Request',
-        message: `${bodyshopName} has requested an estimate for ${data.vehicle_reg} - ${data.make_model}`,
-        type: 'estimate_request',
-        related_item_type: 'Estimate',
-        related_item_id: estimate.id,
-        link: `/estimating?id=${estimate.id}`,
-        is_read: false,
-      });
+      // Notify all admin and internal users
+      const allUsers = await base44.entities.User.list();
+      const recipients = allUsers.filter(u => u.role === 'admin' || u.user_type === 'internal');
+      await Promise.all(recipients.map(u =>
+        base44.entities.Notification.create({
+          user_email: u.email,
+          title: 'New Estimate Request',
+          message: `${bodyshopName} has requested an estimate for ${data.vehicle_reg} - ${data.make_model}`,
+          type: 'estimate_request',
+          related_item_type: 'Estimate',
+          related_item_id: estimate.id,
+          link: `/estimating?id=${estimate.id}`,
+          is_read: false,
+        })
+      ));
 
       return estimate;
     },

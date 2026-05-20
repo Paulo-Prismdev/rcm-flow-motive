@@ -312,13 +312,13 @@ export default function NewJobsBanner({ bodyshopId }) {
                           <span>
                             <strong>Bottom Line Discount:</strong>{' '}
                             <strong>{selectedClaim.referral_fee_repairer ? `${selectedClaim.referral_fee_repairer}%` : 'The agreed percentage'}</strong>{' '}
-                            of the repair total will be taken as ARTURA's fee.
+                            of the repair total will be taken as RCM's fee.
                           </span>
                         </li>
                         <li className="flex items-start gap-2">
                           <span className="font-bold">•</span>
                           <span>
-                            <strong>Invoice Submission:</strong> The final invoice must be submitted directly to ARTURA. 
+                            <strong>Invoice Submission:</strong> The final invoice must be submitted directly to RCM Automotive. 
                             Failure to do so will result in further charges as per SLA.
                           </span>
                         </li>
@@ -379,7 +379,7 @@ export default function NewJobsBanner({ bodyshopId }) {
                     <div className="p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-300 dark:border-red-700">
                       <h5 className="font-bold text-sm mb-2 text-red-800 dark:text-red-200">Rejection Reason</h5>
                       <p className="text-sm text-red-700 dark:text-red-300 mb-3">
-                        Please provide a reason for rejecting this job. This will be sent to ARTURA.
+                        Please provide a reason for rejecting this job. This will be sent to RCM Automotive.
                       </p>
                       <Textarea
                         placeholder="Enter reason for rejection..."
@@ -502,7 +502,7 @@ export default function NewJobsBanner({ bodyshopId }) {
                         </li>
                         <li className="flex items-start gap-2">
                           <span>3.</span>
-                          <span>Submit your invoice to ARTURA after completion</span>
+                          <span>Submit your invoice to RCM Automotive after completion</span>
                         </li>
                       </ul>
                     </div>

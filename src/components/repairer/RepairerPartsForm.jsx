@@ -34,17 +34,21 @@ export default function RepairerPartsForm({ bodyshopId, bodyshopName, onClose, o
         date_requested: new Date().toISOString().split('T')[0],
       });
 
-      // Create notification for internal users
-      await base44.entities.Notification.create({
-        user_email: 'admin@artech.com', // This should be configurable
-        title: 'New Parts Request',
-        message: `${bodyshopName} has requested parts support for ${data.vehicle_ref} - ${data.part_description}`,
-        type: 'parts_update',
-        related_item_type: 'Part',
-        related_item_id: part.id,
-        link: `/parts?id=${part.id}`,
-        is_read: false,
-      });
+      // Notify all admin and internal users
+      const allUsers = await base44.entities.User.list();
+      const recipients = allUsers.filter(u => u.role === 'admin' || u.user_type === 'internal');
+      await Promise.all(recipients.map(u =>
+        base44.entities.Notification.create({
+          user_email: u.email,
+          title: 'New Parts Request',
+          message: `${bodyshopName} has requested parts support for ${data.vehicle_ref} - ${data.part_description}`,
+          type: 'parts_update',
+          related_item_type: 'Part',
+          related_item_id: part.id,
+          link: `/parts?id=${part.id}`,
+          is_read: false,
+        })
+      ));
 
       return part;
     },
