@@ -1143,6 +1143,9 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
 
                   <div className="flex items-center gap-2 flex-wrap">
                     <StatusBadge status={claim.job_status || 'New'} />
+                    {claim.secondary_status && (
+                      <StatusBadge status={claim.secondary_status} variant="secondary" />
+                    )}
                     {!isClosedStatus && claim.update_status_flag && (
                       <button
                         onClick={() => setIsUpdateTrackingOpen(true)}

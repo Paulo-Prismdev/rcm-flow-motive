@@ -15,6 +15,14 @@
       "type": "string",
       "description": "Vehicle registration number"
     },
+    "job_status": {
+      "type": "string",
+      "description": "Primary status of the claim"
+    },
+    "secondary_status": {
+      "type": "string",
+      "description": "Secondary status for additional tracking"
+    },
     "job_statuses": {
       "type": "array",
       "items": {

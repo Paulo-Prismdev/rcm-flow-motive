@@ -1,7 +1,7 @@
 import React from 'react';
 import { useStatusConfigs } from './StatusConfigContext';
 
-export default function StatusBadge({ status }) {
+export default function StatusBadge({ status, variant = "primary" }) {
   const { allStatuses, isLoading } = useStatusConfigs();
 
   const getStatusColor = (statusName) => {
@@ -60,11 +60,21 @@ export default function StatusBadge({ status }) {
     );
   }
 
-  // Handle single status (backward compatibility)
+  // Handle single status
   if (!status) {
     return <span className="px-2.5 py-1 text-xs font-medium rounded-md bg-gray-200 text-gray-500">No status</span>;
   }
 
+  // Secondary variant - outlined style
+  if (variant === "secondary") {
+    return (
+      <span className={`px-2.5 py-1 text-xs font-medium rounded-md border-2 ${colorClasses[getStatusColor(status)]?.replace('bg-', 'border-') || 'border-gray-500'} ${colorClasses[getStatusColor(status)]?.replace('bg-', 'text-') || 'text-gray-500'} bg-transparent`}>
+        {status}
+      </span>
+    );
+  }
+
+  // Primary variant - filled style (default)
   return (
     <span className={`px-2.5 py-1 text-xs font-medium rounded-md text-white ${colorClasses[getStatusColor(status)] || 'bg-gray-500'}`}>
       {status}

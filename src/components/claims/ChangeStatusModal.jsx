@@ -21,6 +21,7 @@ import { base44 } from "@/api/base44Client";
 
 export default function ChangeStatusModal({ isOpen, onClose, claim, onSave }) {
   const [newStatus, setNewStatus] = useState(claim?.job_status || "");
+  const [newSecondaryStatus, setNewSecondaryStatus] = useState(claim?.secondary_status || "");
   const [statusNotes, setStatusNotes] = useState("");
 
   const { data: statusConfigs = [] } = useQuery({
@@ -38,9 +39,11 @@ export default function ChangeStatusModal({ isOpen, onClose, claim, onSave }) {
     
     onSave({
       job_status: newStatus,
+      secondary_status: newSecondaryStatus || null,
       status_change_notes: statusNotes
     });
     setNewStatus("");
+    setNewSecondaryStatus("");
     setStatusNotes("");
     onClose();
   };
@@ -65,12 +68,29 @@ export default function ChangeStatusModal({ isOpen, onClose, claim, onSave }) {
 
         <div className="space-y-4 py-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium">New Status</label>
+            <label className="text-sm font-medium">Primary Status</label>
             <Select value={newStatus} onValueChange={setNewStatus}>
               <SelectTrigger>
                 <SelectValue placeholder="Select a status" />
               </SelectTrigger>
               <SelectContent>
+                {activeStatuses.map((status) => (
+                  <SelectItem key={status.status_name} value={status.status_name}>
+                    {status.status_name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Secondary Status (Optional)</label>
+            <Select value={newSecondaryStatus} onValueChange={setNewSecondaryStatus}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select secondary status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={null}>No secondary status</SelectItem>
                 {activeStatuses.map((status) => (
                   <SelectItem key={status.status_name} value={status.status_name}>
                     {status.status_name}
