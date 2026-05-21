@@ -12,9 +12,12 @@ import {
   Calculator,
   Plus,
   Search,
-  X
+  X,
+  Upload,
+  ImageIcon
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import StatusBadge from '../components/shared/StatusBadge';
@@ -26,6 +29,8 @@ import FeedbackModal from '../components/shared/FeedbackModal';
 
 export default function ReferrerPortal() {
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const queryClient = useQueryClient();
 
   const { data: currentUser } = useQuery({
     queryKey: ['currentUser'],
@@ -37,6 +42,16 @@ export default function ReferrerPortal() {
     queryFn: () => base44.entities.Referrer.get(currentUser.linked_referrer_id),
     enabled: !!currentUser?.linked_referrer_id,
   });
+
+  const handleLogoUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file || !currentUser?.linked_referrer_id) return;
+    setUploadingLogo(true);
+    const result = await base44.integrations.Core.UploadFile({ file });
+    await base44.entities.Referrer.update(currentUser.linked_referrer_id, { logo_url: result.file_url });
+    queryClient.invalidateQueries({ queryKey: ['referrer', currentUser.linked_referrer_id] });
+    setUploadingLogo(false);
+  };
 
   const { data: claims = [], isLoading: claimsLoading } = useQuery({
     queryKey: ['referrerClaims', currentUser?.linked_referrer_id],
@@ -110,9 +125,32 @@ export default function ReferrerPortal() {
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div>
               <h1 className="text-2xl md:text-3xl font-bold">Referrer Portal</h1>
-              <p className="text-foreground-muted mt-1">
+              <p className="text-muted-foreground mt-1">
                 Welcome back, {referrer?.name || 'Referrer'}
               </p>
+            </div>
+            {/* Logo upload */}
+            <div className="flex items-center gap-3">
+              {referrer?.logo_url ? (
+                <img src={referrer.logo_url} alt={referrer.name} className="h-12 max-w-[160px] object-contain rounded" />
+              ) : (
+                <div className="w-16 h-12 rounded border-2 border-dashed border-border flex items-center justify-center">
+                  <ImageIcon className="w-5 h-5 text-muted-foreground" />
+                </div>
+              )}
+              <label className="cursor-pointer">
+                <div className="flex items-center gap-2 px-3 py-2 rounded-lg border border-border hover:bg-muted text-sm font-medium text-foreground transition-colors">
+                  <Upload className="w-4 h-4" />
+                  {uploadingLogo ? 'Uploading...' : referrer?.logo_url ? 'Change Logo' : 'Upload Logo'}
+                </div>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleLogoUpload}
+                  className="hidden"
+                  disabled={uploadingLogo}
+                />
+              </label>
             </div>
           </div>
         </div>
