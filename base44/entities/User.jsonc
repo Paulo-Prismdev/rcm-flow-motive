@@ -18,7 +18,8 @@
     },
     "job_role_id": {
       "type": "string",
-      "description": "ID of the Role this user has"
+      "description": "ID of the Role this user has",
+      "x-foreign-key": "Role"
     },
     "departments_access": {
       "type": "array",
@@ -64,19 +65,23 @@
     },
     "linked_referrer_id": {
       "type": "string",
-      "description": "ID of the Referrer this user is linked to (if user_type is referrer)"
+      "description": "Referrer this user is linked to (if user_type is referrer)",
+      "x-foreign-key": "Referrer"
     },
     "linked_bodyshop_id": {
       "type": "string",
-      "description": "ID of the Bodyshop this user is linked to (if user_type is bodyshop)"
+      "description": "Bodyshop this user is linked to (if user_type is bodyshop)",
+      "x-foreign-key": "Bodyshop"
     },
     "linked_client_id": {
       "type": "string",
-      "description": "ID of the Client this user is linked to (if user_type is client)"
+      "description": "Client this user is linked to (if user_type is client)",
+      "x-foreign-key": "Client"
     },
     "linked_supplier_id": {
       "type": "string",
-      "description": "ID of the Supplier this user is linked to (if user_type is supplier)"
+      "description": "Supplier this user is linked to (if user_type is supplier)",
+      "x-foreign-key": "Supplier"
     },
     "notification_preferences": {
       "type": "object",
