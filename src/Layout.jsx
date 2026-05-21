@@ -16,7 +16,6 @@ import {
   Menu,
   X,
   CalendarDays,
-  UserCog,
   MessageSquare,
   LogOut,
   Sun,
@@ -835,16 +834,7 @@ export default function Layout({ children, currentPageName }) {
                         </Link>
                       </>
                     )}
-                    {canManagePermissions && (
-                      <>
-                        <Link to={createPageUrl("UserManagement")}>
-                          <DropdownMenuItem className="cursor-pointer">
-                            <UserCog className="mr-2 h-4 w-4" />
-                            <span>User Management</span>
-                          </DropdownMenuItem>
-                        </Link>
-                      </>
-                    )}
+
                   </DropdownMenuContent>
                 </DropdownMenu>
 
@@ -1010,16 +1000,7 @@ export default function Layout({ children, currentPageName }) {
                           <span className="font-medium">Employee Management</span>
                         </Link>
                       )}
-                      {canManagePermissions && (
-                        <Link
-                          to={createPageUrl("UserManagement")}
-                          onClick={() => setMobileMenuOpen(false)}
-                          className="flex items-center gap-3 px-4 py-3 rounded-xl surface-button"
-                        >
-                          <UserCog className="w-5 h-5" />
-                          <span className="font-medium">User Management</span>
-                        </Link>
-                      )}
+
                     </div>
                   </div>
                 )}
