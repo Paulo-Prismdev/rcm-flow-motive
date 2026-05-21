@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { base44 } from '@/api/base44Client';
 import { Button } from "@/components/ui/button";
 import {
   ArrowLeft,
@@ -6,11 +8,15 @@ import {
   Car,
   Shield,
   Calendar,
-  DollarSign,
   Wrench,
   Clock,
   AlertTriangle,
-  ChevronDown
+  ChevronDown,
+  FileText,
+  Image,
+  MessageSquare,
+  Download,
+  ExternalLink
 } from "lucide-react";
 import { format } from "date-fns";
 import StatusBadge from "../shared/StatusBadge";
@@ -27,16 +33,9 @@ function DetailRow({ label, value, isCurrency = false, isDate = false, isStatus 
   if (isCurrency && typeof value === 'number') {
     displayValue = `£${value.toFixed(2)}`;
   } else if (isDate && value) {
-    try {
-      displayValue = format(new Date(value), 'dd/MM/yyyy');
-    } catch (e) {
-      displayValue = 'Invalid Date';
-    }
+    try { displayValue = format(new Date(value), 'dd/MM/yyyy'); } catch (e) { displayValue = 'Invalid Date'; }
   }
-
-  if (value === null || typeof value === 'undefined' || value === '') {
-    displayValue = '-';
-  }
+  if (value === null || typeof value === 'undefined' || value === '') displayValue = '-';
 
   return (
     <div className="py-3 px-4 rounded-lg hover:bg-surface-hover transition-colors">
@@ -49,27 +48,57 @@ function DetailRow({ label, value, isCurrency = false, isDate = false, isStatus 
 }
 
 const DETAIL_SECTIONS = [
-  { id: 'status', label: 'Status & Overview', icon: Clock },
-  { id: 'client', label: 'Client Details', icon: User },
-  { id: 'vehicle', label: 'Vehicle Details', icon: Car },
-  { id: 'vehicleDamage', label: 'Vehicle Damage', icon: AlertTriangle },
-  { id: 'insurance', label: 'Insurance Details', icon: Shield },
-  { id: 'dates', label: 'Key Dates', icon: Calendar },
-  { id: 'bodyshop', label: 'Bodyshop Details', icon: Wrench },
+  { id: 'status',        label: 'Status & Overview',  icon: Clock },
+  { id: 'client',        label: 'Client Details',      icon: User },
+  { id: 'vehicle',       label: 'Vehicle Details',     icon: Car },
+  { id: 'vehicleDamage', label: 'Vehicle Damage',      icon: AlertTriangle },
+  { id: 'insurance',     label: 'Insurance Details',   icon: Shield },
+  { id: 'dates',         label: 'Key Dates',           icon: Calendar },
+  { id: 'bodyshop',      label: 'Bodyshop Details',    icon: Wrench },
+  { id: 'updates',       label: 'Updates',             icon: MessageSquare },
+  { id: 'documents',     label: 'Documents',           icon: FileText },
+  { id: 'images',        label: 'Images',              icon: Image },
 ];
+
+function getFileName(url) {
+  try {
+    const parts = decodeURIComponent(url).split('/');
+    return parts[parts.length - 1].split('?')[0];
+  } catch {
+    return 'File';
+  }
+}
+
+function isImageUrl(url) {
+  return /\.(jpg|jpeg|png|gif|webp|svg|bmp)(\?|$)/i.test(url);
+}
 
 export default function ReferrerClaimDetail({ claim, onClose }) {
   const [selectedSection, setSelectedSection] = useState('status');
+  const [lightboxUrl, setLightboxUrl] = useState(null);
+
+  const { data: claimUpdates = [] } = useQuery({
+    queryKey: ['claimUpdates', claim.id],
+    queryFn: () => base44.entities.ClaimUpdate.filter({ claim_id: claim.id }, '-created_date'),
+    enabled: selectedSection === 'updates',
+  });
+
+  const allFileUrls = claim.file_urls || [];
+  const allImageUrls = claim.image_urls || [];
+
+  // Also gather files from claim_updates when that section loads
+  const updateFiles = claimUpdates.flatMap(u => u.file_urls || []).filter(u => !isImageUrl(u));
+  const updateImages = claimUpdates.flatMap(u => u.file_urls || []).filter(u => isImageUrl(u));
+
+  const documents = [...allFileUrls.filter(u => !isImageUrl(u)), ...updateFiles];
+  const images = [...allImageUrls, ...allFileUrls.filter(u => isImageUrl(u)), ...updateImages];
 
   const renderSelectedSection = () => {
     switch (selectedSection) {
       case 'status':
         return (
           <div className="neomorph-flat p-4 md:p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <Clock className="w-5 h-5 text-gold" />
-              <h3 className="font-bold">Status & Overview</h3>
-            </div>
+            <div className="flex items-center gap-3 mb-4"><Clock className="w-5 h-5 text-gold" /><h3 className="font-bold">Status & Overview</h3></div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
               <DetailRow label="Job Status" value={claim.job_status} isStatus />
               <DetailRow label="Claim Type" value={claim.claim_type} />
@@ -82,9 +111,7 @@ export default function ReferrerClaimDetail({ claim, onClose }) {
               <div className="text-xs font-semibold text-foreground-muted mb-2">Incident Location</div>
               <div className="text-sm font-medium mb-3">{claim.incident_location || '-'}</div>
               <div className="text-xs font-semibold text-foreground-muted mb-2">Circumstances</div>
-              <div className="text-sm leading-relaxed whitespace-pre-wrap">
-                {claim.circumstances || '-'}
-              </div>
+              <div className="text-sm leading-relaxed whitespace-pre-wrap">{claim.circumstances || '-'}</div>
             </div>
           </div>
         );
@@ -92,10 +119,7 @@ export default function ReferrerClaimDetail({ claim, onClose }) {
       case 'client':
         return (
           <div className="neomorph-flat p-4 md:p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <User className="w-5 h-5 text-gold" />
-              <h3 className="font-bold">Client Details</h3>
-            </div>
+            <div className="flex items-center gap-3 mb-4"><User className="w-5 h-5 text-gold" /><h3 className="font-bold">Client Details</h3></div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
               <DetailRow label="Client Name" value={claim.client_name} />
               <DetailRow label="Client Phone" value={claim.client_phone} />
@@ -121,10 +145,7 @@ export default function ReferrerClaimDetail({ claim, onClose }) {
       case 'vehicle':
         return (
           <div className="neomorph-flat p-4 md:p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <Car className="w-5 h-5 text-gold" />
-              <h3 className="font-bold">Vehicle Details</h3>
-            </div>
+            <div className="flex items-center gap-3 mb-4"><Car className="w-5 h-5 text-gold" /><h3 className="font-bold">Vehicle Details</h3></div>
             <div className="mb-6">
               <h4 className="text-sm font-semibold text-gray-600 mb-3">Basic Information</h4>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
@@ -135,7 +156,7 @@ export default function ReferrerClaimDetail({ claim, onClose }) {
                 <DetailRow label="Vehicle Type" value={claim.vehicle_type} />
               </div>
             </div>
-            <div className="mb-6">
+            <div>
               <h4 className="text-sm font-semibold text-gray-600 mb-3">MOT & Tax Status</h4>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
                 <DetailRow label="MOT Status" value={claim.vehicle_mot_status} />
@@ -150,10 +171,7 @@ export default function ReferrerClaimDetail({ claim, onClose }) {
       case 'vehicleDamage':
         return (
           <div className="neomorph-flat p-4 md:p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <AlertTriangle className="w-5 h-5 text-gold" />
-              <h3 className="font-bold">Vehicle Damage</h3>
-            </div>
+            <div className="flex items-center gap-3 mb-4"><AlertTriangle className="w-5 h-5 text-gold" /><h3 className="font-bold">Vehicle Damage</h3></div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
               <DetailRow label="Courtesy Car Needed" value={claim.courtesy_car_required ? 'Yes' : 'No'} />
               <DetailRow label="Undriveable / Drivable" value={claim.unroadworthy ? 'Undriveable' : 'Drivable'} />
@@ -170,10 +188,7 @@ export default function ReferrerClaimDetail({ claim, onClose }) {
       case 'insurance':
         return (
           <div className="neomorph-flat p-4 md:p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <Shield className="w-5 h-5 text-gold" />
-              <h3 className="font-bold">Insurance Details</h3>
-            </div>
+            <div className="flex items-center gap-3 mb-4"><Shield className="w-5 h-5 text-gold" /><h3 className="font-bold">Insurance Details</h3></div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
               <DetailRow label="Insurer" value={claim.insurer} />
               <DetailRow label="Claim Ref" value={claim.claim_ref} />
@@ -186,10 +201,7 @@ export default function ReferrerClaimDetail({ claim, onClose }) {
       case 'dates':
         return (
           <div className="neomorph-flat p-4 md:p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <Calendar className="w-5 h-5 text-gold" />
-              <h3 className="font-bold">Key Dates</h3>
-            </div>
+            <div className="flex items-center gap-3 mb-4"><Calendar className="w-5 h-5 text-gold" /><h3 className="font-bold">Key Dates</h3></div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
               <DetailRow label="Date Received" value={claim.date_received} isDate />
               <DetailRow label="Loss Date" value={claim.loss_date} isDate />
@@ -207,15 +219,99 @@ export default function ReferrerClaimDetail({ claim, onClose }) {
       case 'bodyshop':
         return (
           <div className="neomorph-flat p-4 md:p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <Wrench className="w-5 h-5 text-gold" />
-              <h3 className="font-bold">Bodyshop Details</h3>
-            </div>
+            <div className="flex items-center gap-3 mb-4"><Wrench className="w-5 h-5 text-gold" /><h3 className="font-bold">Bodyshop Details</h3></div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
               <DetailRow label="Bodyshop" value={claim.bodyshop} />
               <DetailRow label="Bodyshop Email" value={claim.bodyshop_email} />
               <DetailRow label="Authorising Party" value={claim.authorising_party} />
             </div>
+          </div>
+        );
+
+      case 'updates':
+        return (
+          <div className="neomorph-flat p-4 md:p-6">
+            <div className="flex items-center gap-3 mb-4"><MessageSquare className="w-5 h-5 text-gold" /><h3 className="font-bold">Updates</h3></div>
+            {claimUpdates.length === 0 ? (
+              <p className="text-center text-foreground-muted py-8">No updates yet.</p>
+            ) : (
+              <div className="space-y-3">
+                {claimUpdates.map(update => (
+                  <div key={update.id} className="neomorph p-4 rounded-xl space-y-2">
+                    <div className="flex items-center justify-between flex-wrap gap-2">
+                      <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-accent/20 text-accent">
+                        {update.update_type}
+                      </span>
+                      <span className="text-xs text-foreground-muted">
+                        {update.created_date ? format(new Date(update.created_date), 'dd/MM/yyyy HH:mm') : ''}
+                      </span>
+                    </div>
+                    <p className="text-sm leading-relaxed whitespace-pre-wrap">{update.description}</p>
+                    {update.next_steps && (
+                      <div className="py-2 px-3 rounded-lg bg-surface-hover text-xs">
+                        <span className="font-semibold text-foreground-muted">Next Steps: </span>
+                        {update.next_steps}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+
+      case 'documents':
+        return (
+          <div className="neomorph-flat p-4 md:p-6">
+            <div className="flex items-center gap-3 mb-4"><FileText className="w-5 h-5 text-gold" /><h3 className="font-bold">Documents</h3></div>
+            {documents.length === 0 ? (
+              <p className="text-center text-foreground-muted py-8">No documents attached.</p>
+            ) : (
+              <div className="space-y-2">
+                {documents.map((url, i) => (
+                  <div key={i} className="neomorph-flat p-3 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <FileText className="w-4 h-4 text-foreground-muted flex-shrink-0" />
+                      <span className="text-sm truncate">{getFileName(url)}</span>
+                    </div>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <a href={url} target="_blank" rel="noopener noreferrer">
+                        <Button variant="ghost" size="sm" className="h-8 px-2">
+                          <ExternalLink className="w-3.5 h-3.5" />
+                        </Button>
+                      </a>
+                      <a href={url} download>
+                        <Button variant="ghost" size="sm" className="h-8 px-2">
+                          <Download className="w-3.5 h-3.5" />
+                        </Button>
+                      </a>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+
+      case 'images':
+        return (
+          <div className="neomorph-flat p-4 md:p-6">
+            <div className="flex items-center gap-3 mb-4"><Image className="w-5 h-5 text-gold" /><h3 className="font-bold">Images</h3></div>
+            {images.length === 0 ? (
+              <p className="text-center text-foreground-muted py-8">No images attached.</p>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {images.map((url, i) => (
+                  <div
+                    key={i}
+                    className="aspect-square rounded-xl overflow-hidden cursor-pointer hover:opacity-90 transition-opacity neomorph-flat"
+                    onClick={() => setLightboxUrl(url)}
+                  >
+                    <img src={url} alt={`Image ${i + 1}`} className="w-full h-full object-cover" />
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         );
 
@@ -226,6 +322,25 @@ export default function ReferrerClaimDetail({ claim, onClose }) {
 
   return (
     <div className="h-full flex flex-col gap-4 md:gap-6">
+      {/* Lightbox */}
+      {lightboxUrl && (
+        <div
+          className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4"
+          onClick={() => setLightboxUrl(null)}
+        >
+          <img
+            src={lightboxUrl}
+            alt="Full size"
+            className="max-w-full max-h-full rounded-xl object-contain"
+            onClick={e => e.stopPropagation()}
+          />
+          <button
+            className="absolute top-4 right-4 text-white text-2xl font-bold bg-black/40 rounded-full w-10 h-10 flex items-center justify-center"
+            onClick={() => setLightboxUrl(null)}
+          >×</button>
+        </div>
+      )}
+
       {/* Header */}
       <div className="neomorph p-3 md:p-6 flex-shrink-0 sticky top-0 z-10 bg-background">
         <div className="flex flex-col gap-3">
@@ -244,7 +359,6 @@ export default function ReferrerClaimDetail({ claim, onClose }) {
               </div>
             </div>
           </div>
-
           <div className="flex items-center gap-2 flex-wrap">
             <StatusBadge status={claim.job_status || 'New'} />
             <span className="neomorph-flat px-2 md:px-3 py-0.5 md:py-1 text-xs font-medium text-foreground-muted">
@@ -260,7 +374,7 @@ export default function ReferrerClaimDetail({ claim, onClose }) {
           <DropdownMenuTrigger asChild>
             <Button className="w-full neomorph-flat p-3 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                {React.createElement(DETAIL_SECTIONS.find(s => s.id === selectedSection)?.icon || User, { className: "w-5 h-5" })}
+                {React.createElement(DETAIL_SECTIONS.find(s => s.id === selectedSection)?.icon || Clock, { className: "w-5 h-5" })}
                 <span className="font-medium">{DETAIL_SECTIONS.find(s => s.id === selectedSection)?.label || 'Select Section'}</span>
               </div>
               <ChevronDown className="w-4 h-4" />

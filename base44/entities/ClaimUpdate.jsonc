@@ -63,9 +63,6 @@
           "user_condition": {
             "user_type": "internal"
           }
-        },
-        {
-          "created_by": "{{user.email}}"
         }
       ]
     },
@@ -83,6 +80,11 @@
         },
         {
           "created_by": "{{user.email}}"
+        },
+        {
+          "data.claim_id": {
+            "$in": "{{user.referrer_claim_ids}}"
+          }
         }
       ]
     },
