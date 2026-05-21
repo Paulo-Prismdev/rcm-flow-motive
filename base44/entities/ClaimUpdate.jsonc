@@ -19,6 +19,7 @@
         "Parts Update",
         "Repair Progress",
         "Quality Check",
+        "Referrer Response",
         "Other"
       ],
       "default": "Other",
@@ -62,6 +63,11 @@
         {
           "user_condition": {
             "user_type": "internal"
+          }
+        },
+        {
+          "user_condition": {
+            "user_type": "referrer"
           }
         }
       ]

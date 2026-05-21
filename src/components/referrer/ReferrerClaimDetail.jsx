@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import {
   ArrowLeft,
   User,
@@ -16,7 +17,9 @@ import {
   Image,
   MessageSquare,
   Download,
-  ExternalLink
+  ExternalLink,
+  Send,
+  Loader2
 } from "lucide-react";
 import { format } from "date-fns";
 import StatusBadge from "../shared/StatusBadge";
@@ -76,17 +79,36 @@ function isImageUrl(url) {
 export default function ReferrerClaimDetail({ claim, onClose }) {
   const [selectedSection, setSelectedSection] = useState('status');
   const [lightboxUrl, setLightboxUrl] = useState(null);
+  const [replyText, setReplyText] = useState('');
+  const queryClient = useQueryClient();
 
+  // Always fetch updates so documents/images from updates are always included
   const { data: claimUpdates = [] } = useQuery({
     queryKey: ['claimUpdates', claim.id],
     queryFn: () => base44.entities.ClaimUpdate.filter({ claim_id: claim.id }, '-created_date'),
-    enabled: selectedSection === 'updates',
   });
+
+  const replyMutation = useMutation({
+    mutationFn: (description) => base44.entities.ClaimUpdate.create({
+      claim_id: claim.id,
+      update_type: 'Referrer Response',
+      description,
+    }),
+    onSuccess: () => {
+      setReplyText('');
+      queryClient.invalidateQueries({ queryKey: ['claimUpdates', claim.id] });
+    },
+  });
+
+  const handleReply = () => {
+    const text = replyText.trim();
+    if (!text) return;
+    replyMutation.mutate(text);
+  };
 
   const allFileUrls = claim.file_urls || [];
   const allImageUrls = claim.image_urls || [];
 
-  // Also gather files from claim_updates when that section loads
   const updateFiles = claimUpdates.flatMap(u => u.file_urls || []).filter(u => !isImageUrl(u));
   const updateImages = claimUpdates.flatMap(u => u.file_urls || []).filter(u => isImageUrl(u));
 
@@ -230,31 +252,89 @@ export default function ReferrerClaimDetail({ claim, onClose }) {
 
       case 'updates':
         return (
-          <div className="neomorph-flat p-4 md:p-6">
-            <div className="flex items-center gap-3 mb-4"><MessageSquare className="w-5 h-5 text-gold" /><h3 className="font-bold">Updates</h3></div>
+          <div className="neomorph-flat p-4 md:p-6 space-y-4">
+            <div className="flex items-center gap-3"><MessageSquare className="w-5 h-5 text-gold" /><h3 className="font-bold">Updates</h3></div>
+
+            {/* Reply form */}
+            <div className="neomorph p-4 space-y-3">
+              <p className="text-sm font-medium text-foreground-muted">Send a response to RCM</p>
+              <Textarea
+                placeholder="Type your message here..."
+                value={replyText}
+                onChange={e => setReplyText(e.target.value)}
+                rows={3}
+                className="neomorph-inset resize-none"
+              />
+              <div className="flex justify-end">
+                <Button
+                  onClick={handleReply}
+                  disabled={!replyText.trim() || replyMutation.isPending}
+                  className="bg-accent/10 text-accent border border-accent/30 hover:bg-accent/20"
+                >
+                  {replyMutation.isPending ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Send className="w-4 h-4 mr-2" />
+                  )}
+                  Send Response
+                </Button>
+              </div>
+            </div>
+
+            {/* Updates list */}
             {claimUpdates.length === 0 ? (
               <p className="text-center text-muted-foreground py-8">No updates yet.</p>
             ) : (
               <div className="space-y-3">
-                {claimUpdates.map(update => (
-                  <div key={update.id} className="neomorph p-4 rounded-xl space-y-2">
-                    <div className="flex items-center justify-between flex-wrap gap-2">
-                      <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-accent/20 text-accent">
-                        {update.update_type}
-                      </span>
-                      <span className="text-xs text-foreground-muted">
-                        {update.created_date ? format(new Date(update.created_date), 'dd/MM/yyyy HH:mm') : ''}
-                      </span>
-                    </div>
-                    <p className="text-sm leading-relaxed whitespace-pre-wrap">{update.description}</p>
-                    {update.next_steps && (
-                      <div className="py-2 px-3 rounded-lg bg-surface-hover text-xs">
-                        <span className="font-semibold text-foreground-muted">Next Steps: </span>
-                        {update.next_steps}
+                {claimUpdates.map(update => {
+                  const isReferrerResponse = update.update_type === 'Referrer Response';
+                  return (
+                    <div
+                      key={update.id}
+                      className={`neomorph p-4 rounded-xl space-y-2 ${isReferrerResponse ? 'border-l-4 border-accent/50' : ''}`}
+                    >
+                      <div className="flex items-center justify-between flex-wrap gap-2">
+                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+                          isReferrerResponse
+                            ? 'bg-accent/20 text-accent'
+                            : 'bg-muted text-foreground-muted'
+                        }`}>
+                          {update.update_type}
+                        </span>
+                        <div className="flex items-center gap-2 text-xs text-foreground-muted">
+                          {update.created_by && <span>{update.created_by}</span>}
+                          <span>{update.created_date ? format(new Date(update.created_date), 'dd/MM/yyyy HH:mm') : ''}</span>
+                        </div>
                       </div>
-                    )}
-                  </div>
-                ))}
+                      <p className="text-sm leading-relaxed whitespace-pre-wrap">{update.description}</p>
+                      {update.next_steps && (
+                        <div className="py-2 px-3 rounded-lg bg-surface-hover text-xs">
+                          <span className="font-semibold text-foreground-muted">Next Steps: </span>
+                          {update.next_steps}
+                        </div>
+                      )}
+                      {update.file_urls?.length > 0 && (
+                        <div className="space-y-1 pt-1">
+                          {update.file_urls.map((url, i) => (
+                            <a
+                              key={i}
+                              href={url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-2 text-xs text-accent hover:underline"
+                            >
+                              {isImageUrl(url)
+                                ? <Image className="w-3.5 h-3.5 flex-shrink-0" />
+                                : <FileText className="w-3.5 h-3.5 flex-shrink-0" />
+                              }
+                              {getFileName(url)}
+                            </a>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>
