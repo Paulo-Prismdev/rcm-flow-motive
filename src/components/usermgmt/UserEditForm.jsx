@@ -5,6 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { X } from "lucide-react";
 
+const USER_TYPES = [
+  { value: 'internal', label: 'Internal' },
+  { value: 'bodyshop', label: 'Bodyshop / Repairer' },
+  { value: 'referrer', label: 'Referrer' },
+  { value: 'supplier', label: 'Supplier' },
+];
+
 const ALL_DEPARTMENTS = ["Dashboard", "Claims", "Estimating", "Engineering", "Parts", "Invoicing", "Reports", "Map"];
 
 export default function UserEditForm({ user, onSave, onCancel, isSaving }) {
@@ -26,6 +33,24 @@ export default function UserEditForm({ user, onSave, onCancel, isSaving }) {
     queryFn: () => base44.entities.Role.list(),
   });
 
+  const { data: referrers = [] } = useQuery({
+    queryKey: ['referrers'],
+    queryFn: () => base44.entities.Referrer.list('name'),
+    enabled: formData.user_type === 'referrer',
+  });
+
+  const { data: bodyshops = [] } = useQuery({
+    queryKey: ['bodyshops'],
+    queryFn: () => base44.entities.Bodyshop.list('name'),
+    enabled: formData.user_type === 'bodyshop',
+  });
+
+  const { data: suppliers = [] } = useQuery({
+    queryKey: ['suppliers'],
+    queryFn: () => base44.entities.Supplier.list('name'),
+    enabled: formData.user_type === 'supplier',
+  });
+
   const handleRoleChange = (roleId) => {
     const selectedRole = roles.find(r => r.id === roleId);
     setFormData(prev => ({
@@ -42,6 +67,9 @@ export default function UserEditForm({ user, onSave, onCancel, isSaving }) {
 
   const activeRoles = roles.filter(r => r.is_active);
   const isInternal = formData.user_type === 'internal' || !formData.user_type;
+  const isReferrer = formData.user_type === 'referrer';
+  const isBodyshop = formData.user_type === 'bodyshop';
+  const isSupplier = formData.user_type === 'supplier';
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 pt-3 border-t border-border mt-3">
@@ -67,6 +95,73 @@ export default function UserEditForm({ user, onSave, onCancel, isSaving }) {
           </select>
         </div>
       </div>
+
+      <div>
+        <label className="block text-xs font-medium text-foreground-muted mb-1">User Type</label>
+        <select
+          value={formData.user_type || 'internal'}
+          onChange={(e) => setFormData(p => ({
+            ...p,
+            user_type: e.target.value,
+            linked_referrer_id: '',
+            linked_bodyshop_id: '',
+            linked_supplier_id: '',
+          }))}
+          className="neomorph-inset w-full px-3 py-2 rounded-lg text-sm"
+        >
+          {USER_TYPES.map(t => (
+            <option key={t.value} value={t.value}>{t.label}</option>
+          ))}
+        </select>
+      </div>
+
+      {isReferrer && (
+        <div>
+          <label className="block text-xs font-medium text-foreground-muted mb-1">Linked Referrer</label>
+          <select
+            value={formData.linked_referrer_id}
+            onChange={(e) => setFormData(p => ({ ...p, linked_referrer_id: e.target.value }))}
+            className="neomorph-inset w-full px-3 py-2 rounded-lg text-sm"
+          >
+            <option value="">— Select Referrer —</option>
+            {referrers.map(r => (
+              <option key={r.id} value={r.id}>{r.name}</option>
+            ))}
+          </select>
+        </div>
+      )}
+
+      {isBodyshop && (
+        <div>
+          <label className="block text-xs font-medium text-foreground-muted mb-1">Linked Bodyshop</label>
+          <select
+            value={formData.linked_bodyshop_id}
+            onChange={(e) => setFormData(p => ({ ...p, linked_bodyshop_id: e.target.value }))}
+            className="neomorph-inset w-full px-3 py-2 rounded-lg text-sm"
+          >
+            <option value="">— Select Bodyshop —</option>
+            {bodyshops.map(b => (
+              <option key={b.id} value={b.id}>{b.name}</option>
+            ))}
+          </select>
+        </div>
+      )}
+
+      {isSupplier && (
+        <div>
+          <label className="block text-xs font-medium text-foreground-muted mb-1">Linked Supplier</label>
+          <select
+            value={formData.linked_supplier_id}
+            onChange={(e) => setFormData(p => ({ ...p, linked_supplier_id: e.target.value }))}
+            className="neomorph-inset w-full px-3 py-2 rounded-lg text-sm"
+          >
+            <option value="">— Select Supplier —</option>
+            {suppliers.map(s => (
+              <option key={s.id} value={s.id}>{s.name}</option>
+            ))}
+          </select>
+        </div>
+      )}
 
       {isInternal && (
         <>
