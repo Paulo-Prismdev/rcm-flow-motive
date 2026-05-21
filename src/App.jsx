@@ -79,7 +79,7 @@ const AuthenticatedApp = () => {
       <Route path="/parts-request" element={<PublicPartsRequest />} />
       <Route path="/backorder-form" element={<BackorderForm />} />
       <Route path="/client-claim-form" element={<ClientClaimForm />} />
-      <Route path="/tyre-requests" element={
+      <Route path="/TyreRequests" element={
         <LayoutWrapper currentPageName="TyreRequests">
           <TyreRequests />
         </LayoutWrapper>
