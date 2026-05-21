@@ -460,10 +460,10 @@ export default function Layout({ children, currentPageName }) {
         .nav-button {
           display: flex;
           align-items: center;
-          gap: 0.5rem;
-          padding: 0.5rem 0.875rem;
+          gap: 0.375rem;
+          padding: 0.375rem 0.625rem;
           white-space: nowrap;
-          font-size: 0.875rem;
+          font-size: 0.8rem;
           font-weight: 500;
           background: rgba(255,255,255,0.07);
           border: 1px solid rgba(255,255,255,0.12);
