@@ -381,16 +381,16 @@ export default function ClaimsPage() {
             : 'bg-white dark:bg-surface border-black dark:border-gray-600'
         }`}
       >
-        <div className="flex gap-3">
+        <div className="flex gap-4">
           {/* Left cell: Registration number - large and bold for quick reference */}
-          <div className="flex-shrink-0 flex items-center">
-            <h3 className="text-xl font-extrabold tracking-tight">
+          <div className="flex-shrink-0 flex items-center px-4 py-2 bg-accent/10 rounded-lg">
+            <h3 className="text-xl font-extrabold tracking-tight text-center min-w-[120px]">
               {formatUKRegistration(claim.reg) || 'No Reg'}
             </h3>
           </div>
 
           {/* Right section: All other content */}
-          <div className="flex-1 min-w-0 space-y-2">
+          <div className="flex-1 min-w-0 space-y-2 px-4 py-2">
             {/* Top row: job number, status badges, alerts */}
             <div className="flex items-center gap-2 min-w-0 flex-wrap">
               {claim.job_number && (
