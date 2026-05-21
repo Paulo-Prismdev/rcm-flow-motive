@@ -1071,14 +1071,10 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
         onSave={(statusData) => {
           const { job_status, secondary_status, status_change_notes } = statusData;
           const updates = { job_status, secondary_status: secondary_status || null };
-          // Keep job_statuses array in sync with job_status
+          // Replace the old primary status (claim.job_status) with the new one in job_statuses array
           const currentStatuses = claim.job_statuses || [];
-          if (job_status && !currentStatuses.includes(job_status)) {
-            updates.job_statuses = [job_status, ...currentStatuses.filter(s => s !== claim.job_status)];
-          } else if (job_status) {
-            // Replace old primary status with new one
-            updates.job_statuses = [job_status, ...currentStatuses.filter(s => s !== claim.job_status && s !== job_status)];
-          }
+          // Remove the OLD primary status and add the NEW one at the front
+          updates.job_statuses = [job_status, ...currentStatuses.filter(s => s !== claim.job_status)];
           if (status_change_notes) {
             updates.latest_update = status_change_notes;
           }
