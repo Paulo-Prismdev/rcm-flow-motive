@@ -55,27 +55,37 @@ const getStatusStyle = (status) => {
     case 'Red':
       return {
         backgroundColor: isDark ? 'rgba(127, 29, 29, 0.3)' : 'rgba(254, 226, 226, 0.8)',
-        borderColor: isDark ? 'rgba(185, 28, 28, 0.5)' : 'rgba(252, 165, 165, 0.8)',
+        borderTopColor: isDark ? 'rgba(185, 28, 28, 0.5)' : 'rgba(252, 165, 165, 0.8)',
+        borderRightColor: isDark ? 'rgba(185, 28, 28, 0.5)' : 'rgba(252, 165, 165, 0.8)',
+        borderBottomColor: isDark ? 'rgba(185, 28, 28, 0.5)' : 'rgba(252, 165, 165, 0.8)',
       };
     case 'Amber':
       return {
         backgroundColor: isDark ? 'rgba(120, 53, 15, 0.3)' : 'rgba(254, 243, 199, 0.8)',
-        borderColor: isDark ? 'rgba(217, 119, 6, 0.5)' : 'rgba(253, 230, 138, 0.8)',
+        borderTopColor: isDark ? 'rgba(217, 119, 6, 0.5)' : 'rgba(253, 230, 138, 0.8)',
+        borderRightColor: isDark ? 'rgba(217, 119, 6, 0.5)' : 'rgba(253, 230, 138, 0.8)',
+        borderBottomColor: isDark ? 'rgba(217, 119, 6, 0.5)' : 'rgba(253, 230, 138, 0.8)',
       };
     case 'Green':
       return {
         backgroundColor: isDark ? 'rgba(20, 83, 45, 0.3)' : 'rgba(220, 252, 231, 0.8)',
-        borderColor: isDark ? 'rgba(22, 163, 74, 0.5)' : 'rgba(134, 239, 172, 0.8)',
+        borderTopColor: isDark ? 'rgba(22, 163, 74, 0.5)' : 'rgba(134, 239, 172, 0.8)',
+        borderRightColor: isDark ? 'rgba(22, 163, 74, 0.5)' : 'rgba(134, 239, 172, 0.8)',
+        borderBottomColor: isDark ? 'rgba(22, 163, 74, 0.5)' : 'rgba(134, 239, 172, 0.8)',
       };
     case 'Blue':
       return {
         backgroundColor: isDark ? 'rgba(30, 58, 138, 0.3)' : 'rgba(219, 234, 254, 0.8)',
-        borderColor: isDark ? 'rgba(37, 99, 235, 0.5)' : 'rgba(147, 197, 253, 0.8)',
+        borderTopColor: isDark ? 'rgba(37, 99, 235, 0.5)' : 'rgba(147, 197, 253, 0.8)',
+        borderRightColor: isDark ? 'rgba(37, 99, 235, 0.5)' : 'rgba(147, 197, 253, 0.8)',
+        borderBottomColor: isDark ? 'rgba(37, 99, 235, 0.5)' : 'rgba(147, 197, 253, 0.8)',
       };
     case 'Gray':
       return {
         backgroundColor: isDark ? 'rgba(55, 65, 81, 0.3)' : 'rgba(249, 250, 251, 0.8)',
-        borderColor: isDark ? 'rgba(107, 114, 128, 0.5)' : 'rgba(229, 231, 235, 0.8)',
+        borderTopColor: isDark ? 'rgba(107, 114, 128, 0.5)' : 'rgba(229, 231, 235, 0.8)',
+        borderRightColor: isDark ? 'rgba(107, 114, 128, 0.5)' : 'rgba(229, 231, 235, 0.8)',
+        borderBottomColor: isDark ? 'rgba(107, 114, 128, 0.5)' : 'rgba(229, 231, 235, 0.8)',
       };
     default:
       return {};
@@ -377,6 +387,9 @@ export default function ClaimsPage() {
             </span>
           )}
           <div className="flex-shrink-0"><StatusBadge status={claim.job_statuses || []} /></div>
+          {claim.secondary_status && (
+            <div className="flex-shrink-0"><StatusBadge status={claim.secondary_status} variant="secondary" /></div>
+          )}
           {!isClosedStatus && updateStatus && (
             <div className="flex-shrink-0"><UpdateStatusBadge status={updateStatus} small /></div>
           )}
