@@ -89,7 +89,13 @@ export default function UserManagement() {
 
   // Internal users (no company grouping)
   const internalUsers = useMemo(() => {
-    return users.filter(u => u.user_type === 'internal' || (!u.user_type && u.role !== 'super_admin' && u.role !== 'company_admin') || u.role === 'super_admin' || u.role === 'company_admin');
+    return users.filter(u =>
+      u.user_type === 'internal' ||
+      u.role === 'super_admin' ||
+      u.role === 'company_admin' ||
+      u.role === 'admin' ||
+      (!u.user_type && !u.linked_referrer_id && !u.linked_bodyshop_id && !u.linked_supplier_id && !u.linked_client_id)
+    );
   }, [users]);
 
   if (!canManage) {
