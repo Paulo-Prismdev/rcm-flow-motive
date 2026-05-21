@@ -2,9 +2,10 @@ import React, { useState, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Users, Shield, Building2, UserCheck, Package, User, Wrench } from "lucide-react";
+import { Users, Shield, Building2, UserCheck, Package, User, Wrench, UserPlus } from "lucide-react";
 import CompanyUserGroup from "../components/usermgmt/CompanyUserGroup";
 import InternalNavSections from "../components/usermgmt/InternalNavSections";
+import InviteUserModal from "../components/usermgmt/InviteUserModal";
 
 const TABS = [
   { id: "internal",  label: "Internal Staff",  icon: UserCheck,  type: "internal"  },
@@ -63,6 +64,8 @@ export default function UserManagement() {
     }
   };
 
+  const [showInviteModal, setShowInviteModal] = useState(false);
+
   const isSuperAdmin = currentUser?.role === 'super_admin';
   const isAdmin = isSuperAdmin || currentUser?.role === 'company_admin';
   const canManage = isAdmin || currentUser?.can_manage_permissions;
@@ -112,13 +115,34 @@ export default function UserManagement() {
 
   return (
     <div className="space-y-4">
+      {/* Invite Modal */}
+      {showInviteModal && (
+        <InviteUserModal
+          onClose={() => setShowInviteModal(false)}
+          onSuccess={() => {
+            setShowInviteModal(false);
+            queryClient.invalidateQueries({ queryKey: ['users'] });
+          }}
+          isSuperAdmin={isSuperAdmin}
+        />
+      )}
+
       {/* Header */}
       <div className="neomorph p-4 flex items-center gap-3">
         <Users className="w-5 h-5 text-accent flex-shrink-0" />
-        <div>
+        <div className="flex-1">
           <h1 className="text-xl font-bold">User Management</h1>
           <p className="text-xs text-foreground-muted">Manage users by company type</p>
         </div>
+        {isSuperAdmin && (
+          <Button
+            onClick={() => setShowInviteModal(true)}
+            className="flex items-center gap-2 bg-accent text-accent-foreground px-3 py-2 text-sm rounded-lg"
+          >
+            <UserPlus className="w-4 h-4" />
+            Invite User
+          </Button>
+        )}
       </div>
 
       {/* Tabs */}
