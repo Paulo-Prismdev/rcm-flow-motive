@@ -192,8 +192,12 @@ export default function ClaimsPage() {
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.Claim.update(id, data),
-    onSuccess: () => {
+    onSuccess: (savedClaim, { id }) => {
       queryClient.invalidateQueries({ queryKey: ['claims'] });
+      // Sync selectedClaim with the latest saved data
+      if (savedClaim) {
+        setSelectedClaim(savedClaim);
+      }
     },
   });
 

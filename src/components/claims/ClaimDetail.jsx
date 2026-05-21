@@ -158,7 +158,14 @@ const DETAIL_SECTIONS = [
   { id: 'backorderedParts', label: 'Backordered Parts', icon: Package },
 ];
 
-export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser = true }) {
+export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInternalUser = true }) {
+  const [claim, setClaim] = useState(claimProp);
+  
+  // Sync local state when parent passes a newer version (e.g. after refetch)
+  React.useEffect(() => {
+    setClaim(claimProp);
+  }, [claimProp]);
+
   const navigate = useNavigate();
   const [isPartsModalOpen, setIsPartsModalOpen] = useState(false);
   const [isEstimateModalOpen, setIsEstimateModalOpen] = useState(false);
@@ -236,6 +243,8 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
   });
 
   const handleUpdate = async (updatedData) => {
+    // Update local state immediately for instant UI feedback
+    setClaim(updatedData);
     const statusChanged = updatedData.job_status && updatedData.job_status !== claim.job_status;
     
     // Log all changes to activity log
