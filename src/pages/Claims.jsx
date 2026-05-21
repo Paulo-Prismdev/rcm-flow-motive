@@ -375,8 +375,11 @@ export default function ClaimsPage() {
       <div
         key={claim.id}
         onClick={() => setSelectedClaim(claim)}
-        className="px-3 py-3 hover:shadow-lg transition-all cursor-pointer border rounded-xl"
-        style={leftBorderStyle}
+        className={`px-3 py-3 hover:shadow-lg transition-all cursor-pointer rounded-xl ${
+          updateStatus === 'Red'
+            ? 'bg-red-50 dark:bg-red-900/20 border-red-300 dark:border-red-700'
+            : 'bg-white dark:bg-surface border-black dark:border-gray-600'
+        }`}
       >
         {/* Top row: reg, job number, status badges — all on one line */}
         <div className="flex items-center gap-2 min-w-0 flex-wrap">
