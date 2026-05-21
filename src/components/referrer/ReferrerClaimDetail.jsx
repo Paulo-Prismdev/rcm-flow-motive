@@ -233,7 +233,7 @@ export default function ReferrerClaimDetail({ claim, onClose }) {
           <div className="neomorph-flat p-4 md:p-6">
             <div className="flex items-center gap-3 mb-4"><MessageSquare className="w-5 h-5 text-gold" /><h3 className="font-bold">Updates</h3></div>
             {claimUpdates.length === 0 ? (
-              <p className="text-center text-foreground-muted py-8">No updates yet.</p>
+              <p className="text-center text-muted-foreground py-8">No updates yet.</p>
             ) : (
               <div className="space-y-3">
                 {claimUpdates.map(update => (
@@ -265,7 +265,7 @@ export default function ReferrerClaimDetail({ claim, onClose }) {
           <div className="neomorph-flat p-4 md:p-6">
             <div className="flex items-center gap-3 mb-4"><FileText className="w-5 h-5 text-gold" /><h3 className="font-bold">Documents</h3></div>
             {documents.length === 0 ? (
-              <p className="text-center text-foreground-muted py-8">No documents attached.</p>
+              <p className="text-center text-muted-foreground py-8">No documents attached.</p>
             ) : (
               <div className="space-y-2">
                 {documents.map((url, i) => (
@@ -298,7 +298,7 @@ export default function ReferrerClaimDetail({ claim, onClose }) {
           <div className="neomorph-flat p-4 md:p-6">
             <div className="flex items-center gap-3 mb-4"><Image className="w-5 h-5 text-gold" /><h3 className="font-bold">Images</h3></div>
             {images.length === 0 ? (
-              <p className="text-center text-foreground-muted py-8">No images attached.</p>
+              <p className="text-center text-muted-foreground py-8">No images attached.</p>
             ) : (
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {images.map((url, i) => (
@@ -345,7 +345,7 @@ export default function ReferrerClaimDetail({ claim, onClose }) {
       <div className="neomorph p-3 md:p-6 flex-shrink-0 sticky top-0 z-10 bg-background">
         <div className="flex flex-col gap-3">
           <div className="flex items-center gap-2 md:gap-4">
-            <Button onClick={onClose} className="neomorph-flat p-2 flex-shrink-0">
+            <Button onClick={onClose} variant="outline" className="p-2 flex-shrink-0">
               <ArrowLeft className="w-4 h-4" />
             </Button>
             <div className="flex-1 min-w-0">
@@ -361,7 +361,7 @@ export default function ReferrerClaimDetail({ claim, onClose }) {
           </div>
           <div className="flex items-center gap-2 flex-wrap">
             <StatusBadge status={claim.job_status || 'New'} />
-            <span className="neomorph-flat px-2 md:px-3 py-0.5 md:py-1 text-xs font-medium text-foreground-muted">
+            <span className="px-2 md:px-3 py-0.5 md:py-1 text-xs font-medium text-muted-foreground border border-border rounded-md">
               View Only
             </span>
           </div>
@@ -372,7 +372,7 @@ export default function ReferrerClaimDetail({ claim, onClose }) {
       <div className="neomorph p-4 flex-shrink-0">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button className="w-full neomorph-flat p-3 flex items-center justify-between">
+            <Button variant="outline" className="w-full p-3 flex items-center justify-between text-foreground border-border bg-background hover:bg-muted">
               <div className="flex items-center gap-2">
                 {React.createElement(DETAIL_SECTIONS.find(s => s.id === selectedSection)?.icon || Clock, { className: "w-5 h-5" })}
                 <span className="font-medium">{DETAIL_SECTIONS.find(s => s.id === selectedSection)?.label || 'Select Section'}</span>
@@ -380,12 +380,12 @@ export default function ReferrerClaimDetail({ claim, onClose }) {
               <ChevronDown className="w-4 h-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-full max-h-80 overflow-y-auto" align="start" side="bottom">
+          <DropdownMenuContent className="w-72 max-h-80 overflow-y-auto" align="start" side="bottom">
             {DETAIL_SECTIONS.map(section => (
               <DropdownMenuItem
                 key={section.id}
                 onSelect={() => setSelectedSection(section.id)}
-                className={selectedSection === section.id ? 'bg-glass-hover' : ''}
+                className={selectedSection === section.id ? 'bg-muted font-semibold' : ''}
               >
                 <section.icon className="w-4 h-4 mr-2" />
                 {section.label}
