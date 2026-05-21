@@ -714,9 +714,9 @@ export default function Layout({ children, currentPageName }) {
                 {/* MOBILE AND SMALL TABLET: Burger Button */}
                 <button
                   onClick={() => setMobileMenuOpen(true)}
-                  className="glass-button w-10 h-10 flex items-center justify-center flex-shrink-0 sm:hidden"
+                  className="glass-button w-8 h-8 flex items-center justify-center flex-shrink-0 sm:hidden"
                 >
-                  <Menu className="w-4 h-4" />
+                  <Menu className="w-3.5 h-3.5" />
                 </button>
 
                 {/* Company Logo + App Title */}
@@ -738,12 +738,12 @@ export default function Layout({ children, currentPageName }) {
                 {isInternalUser && (
                   <button
                     onClick={() => setMessagesOpen(true)}
-                    className="glass-button w-10 h-10 flex items-center justify-center relative flex-shrink-0"
+                    className="glass-button w-8 h-8 flex items-center justify-center relative flex-shrink-0"
                     title="Messages"
                   >
-                    <MessageSquare className="w-4 h-4" />
+                    <MessageSquare className="w-3.5 h-3.5" />
                     {unreadMessagesCount > 0 && (
-                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold animate-pulse">
+                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-bold animate-pulse" style={{fontSize:'9px'}}>
                         {unreadMessagesCount > 9 ? '9+' : unreadMessagesCount}
                       </span>
                     )}
@@ -751,10 +751,10 @@ export default function Layout({ children, currentPageName }) {
                 )}
                 <button
                   onClick={() => window.location.reload()}
-                  className="glass-button w-10 h-10 flex items-center justify-center flex-shrink-0"
+                  className="glass-button w-8 h-8 flex items-center justify-center flex-shrink-0"
                   title="Refresh"
                 >
-                  <RefreshCw className="w-4 h-4" />
+                  <RefreshCw className="w-3.5 h-3.5" />
                 </button>
               </div>
 
@@ -762,27 +762,27 @@ export default function Layout({ children, currentPageName }) {
               <div className="hidden sm:flex items-center gap-[0.375rem] flex-shrink-0">
                 <button
                   onClick={() => window.location.reload()}
-                  className="glass-button w-10 h-10 flex items-center justify-center"
+                  className="glass-button w-8 h-8 flex items-center justify-center"
                   title="Refresh"
                 >
-                  <RefreshCw className="w-4 h-4" />
+                  <RefreshCw className="w-3.5 h-3.5" />
                 </button>
                 <button
                   onClick={() => setSearchOpen(true)}
-                  className="glass-button w-10 h-10 flex items-center justify-center"
+                  className="glass-button w-8 h-8 flex items-center justify-center"
                 >
-                  <Search className="w-4 h-4" />
+                  <Search className="w-3.5 h-3.5" />
                 </button>
 
                 {isInternalUser && (
                   <button
                     onClick={() => setMessagesOpen(true)}
-                    className="glass-button w-10 h-10 flex items-center justify-center relative"
+                    className="glass-button w-8 h-8 flex items-center justify-center relative"
                     title="Messages"
                   >
-                    <MessageSquare className="w-4 h-4" />
+                    <MessageSquare className="w-3.5 h-3.5" />
                     {unreadMessagesCount > 0 && (
-                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold animate-pulse">
+                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-bold animate-pulse" style={{fontSize:'9px'}}>
                         {unreadMessagesCount > 9 ? '9+' : unreadMessagesCount}
                       </span>
                     )}
@@ -794,8 +794,8 @@ export default function Layout({ children, currentPageName }) {
 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button className="glass-button w-10 h-10 flex items-center justify-center">
-                      <ChevronDown className="w-4 h-4" />
+                    <button className="glass-button w-8 h-8 flex items-center justify-center">
+                      <ChevronDown className="w-3.5 h-3.5" />
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="glass-elevated w-56" align="end">
