@@ -343,68 +343,78 @@ export default function ClaimsPage() {
   // Render claim card
   const renderClaimCard = (claim) => {
     const updateStatus = calculateUpdateStatus(claim);
-    // Check if ANY status is a closed status
     const statuses = claim.job_statuses || [];
     const isClosedStatus = statuses.some(s => ['Completed', 'Cancelled', 'Total Loss'].includes(s));
     const statusStyle = getStatusStyle(updateStatus);
-    
+    const hasBackorder = claimIdsWithBackorders.has(claim.id);
+
+    // Left border accent for alert flags
+    const leftBorderStyle = hasBackorder
+      ? { borderLeft: '4px solid #ef4444', ...statusStyle }
+      : claim.bodyshop_id && !claim.repairer_accepted && !isClosedStatus
+      ? { borderLeft: '4px solid #f59e0b', ...statusStyle }
+      : claim.claim_type === 'Fault Claim' && claim.third_party_pursuit_status === 'Awaiting Details'
+      ? { borderLeft: '4px solid #f59e0b', ...statusStyle }
+      : statusStyle;
+
     return (
       <div
         key={claim.id}
         onClick={() => setSelectedClaim(claim)}
-        className="p-4 hover:shadow-lg transition-all cursor-pointer border-2 rounded-xl"
-        style={statusStyle}
+        className="px-3 py-2 hover:shadow-lg transition-all cursor-pointer border rounded-xl"
+        style={leftBorderStyle}
       >
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-2 flex-wrap">
-              <h3 className="font-bold text-lg">{formatUKRegistration(claim.reg) || 'No Reg'}</h3>
-              {claim.job_number && (
-                <span className="text-xs font-mono px-2 py-1 rounded bg-accent/20 text-accent font-semibold">
-                  {claim.job_number}
-                </span>
-              )}
-              <StatusBadge status={claim.job_statuses || []} />
-              {!isClosedStatus && updateStatus && (
-                <UpdateStatusBadge status={updateStatus} small />
-              )}
-              {claim.claim_type === 'Fault Claim' && 
-               claim.third_party_pursuit_status === 'Awaiting Details' && (
-                <span className="flex items-center gap-1 px-2 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-medium animate-pulse">
-                  <AlertTriangle className="w-3 h-3" />
-                  3rd Party Pending
-                </span>
-              )}
-              {claim.bodyshop_id && !claim.repairer_accepted && !isClosedStatus && (
-                <span className="flex items-center gap-1 px-2 py-1 rounded-full bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300 text-xs font-medium">
-                  <Clock className="w-3 h-3" />
-                  Awaiting Repairer Acceptance
-                </span>
-              )}
-              {claimIdsWithBackorders.has(claim.id) && (
-                <span className="flex items-center gap-1 px-2 py-1 rounded-full bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300 text-xs font-medium animate-pulse">
-                  <Package className="w-3 h-3" />
-                  Outstanding Backordered Parts
-                </span>
-              )}
-            </div>
-            
-            <div className={`grid grid-cols-1 md:grid-cols-${Math.min(userCardFields.length, 4)} gap-2 text-sm`}>
-              {userCardFields.map(fieldId => (
-                <div key={fieldId}>
-                  <span className="text-foreground-muted">{FIELD_LABELS[fieldId] || fieldId}:</span>{' '}
-                  <span className="font-medium">{getFieldValue(claim, fieldId)}</span>
-                </div>
-              ))}
-            </div>
-          </div>
+        {/* Top row: reg, job number, status badges — all on one line */}
+        <div className="flex items-center gap-2 min-w-0 flex-nowrap overflow-hidden">
+          <h3 className="font-bold text-base flex-shrink-0">{formatUKRegistration(claim.reg) || 'No Reg'}</h3>
+          {claim.job_number && (
+            <span className="text-xs font-mono px-1.5 py-0.5 rounded bg-accent/20 text-accent font-semibold flex-shrink-0">
+              {claim.job_number}
+            </span>
+          )}
+          <div className="flex-shrink-0"><StatusBadge status={claim.job_statuses || []} /></div>
+          {!isClosedStatus && updateStatus && (
+            <div className="flex-shrink-0"><UpdateStatusBadge status={updateStatus} small /></div>
+          )}
+          {claim.claim_type === 'Fault Claim' && claim.third_party_pursuit_status === 'Awaiting Details' && (
+            <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700 text-xs font-medium animate-pulse flex-shrink-0">
+              <AlertTriangle className="w-3 h-3" />
+              3rd Party Pending
+            </span>
+          )}
+          {claim.bodyshop_id && !claim.repairer_accepted && !isClosedStatus && (
+            <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300 text-xs font-medium flex-shrink-0">
+              <Clock className="w-3 h-3" />
+              Awaiting Acceptance
+            </span>
+          )}
+          {hasBackorder && (
+            <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300 text-xs font-medium animate-pulse flex-shrink-0">
+              <Package className="w-3 h-3" />
+              Backordered Parts
+            </span>
+          )}
+        </div>
+
+        {/* Bottom row: data fields on a single line */}
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-0.5 mt-1 text-xs">
+          {userCardFields.map(fieldId => {
+            const val = getFieldValue(claim, fieldId);
+            if (!val || val === 'N/A') return null;
+            return (
+              <span key={fieldId} className="whitespace-nowrap">
+                <span className="text-foreground-muted">{FIELD_LABELS[fieldId] || fieldId}:</span>{' '}
+                <span className="font-medium">{val}</span>
+              </span>
+            );
+          })}
         </div>
       </div>
     );
   };
 
   return (
-    <div className="h-full flex flex-col gap-2 md:gap-3">
+    <div className="h-full flex flex-col gap-1.5">
       <ImportClaimsModal
         isOpen={showImportModal}
         onClose={() => setShowImportModal(false)}
@@ -421,11 +431,11 @@ export default function ClaimsPage() {
       />
 
       {/* Header */}
-      <div className="neomorph p-3 md:p-4 flex-shrink-0">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="neomorph px-3 py-2 flex-shrink-0">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold">Claims</h1>
-            <p className="text-sm text-foreground-muted mt-1">
+            <h1 className="text-xl md:text-2xl font-bold">Claims</h1>
+            <p className="text-xs text-foreground-muted mt-0.5">
               Manage and track insurance claims • {filteredClaims.length} of {allClaims.length} shown
             </p>
           </div>
@@ -468,7 +478,7 @@ export default function ClaimsPage() {
       </div>
 
       {/* Search & Filters */}
-      <div className="neomorph p-4 flex-shrink-0">
+      <div className="neomorph px-3 py-2 flex-shrink-0">
         <div className="flex flex-col gap-3">
           <div className="flex gap-3">
             <div className="flex-1 relative">
@@ -637,7 +647,7 @@ export default function ClaimsPage() {
             )}
           </div>
         ) : (
-          <div className="space-y-6">
+          <div className="space-y-2">
             {availableStatuses.map(statusGroup => {
               // Show claims that have THIS status (claims can appear in multiple groups)
               const claimsInGroup = filteredClaims.filter(claim => (claim.job_statuses || []).includes(statusGroup));
@@ -647,14 +657,14 @@ export default function ClaimsPage() {
               if (statusFilter.length > 0 && !statusFilter.includes(statusGroup)) return null;
 
               return (
-                <div key={statusGroup} className="neomorph p-4">
-                  <div className="flex items-center gap-3 mb-4">
+                <div key={statusGroup} className="neomorph px-3 py-2">
+                  <div className="flex items-center gap-2 mb-2">
                     <StatusBadge status={statusGroup} />
-                    <span className="text-sm text-foreground-muted">
+                    <span className="text-xs text-foreground-muted">
                       {claimsInGroup.length} claim{claimsInGroup.length !== 1 ? 's' : ''}
                     </span>
                   </div>
-                  <div className="space-y-3">
+                  <div className="space-y-1.5">
                     {claimsInGroup.map(renderClaimCard)}
                   </div>
                 </div>
@@ -671,12 +681,12 @@ export default function ClaimsPage() {
               if (ungrouped.length === 0) return null;
               if (statusFilter.length > 0) return null;
               return (
-                <div className="neomorph p-4">
-                  <div className="flex items-center gap-3 mb-4">
-                    <span className="px-2 py-1 rounded text-xs font-semibold bg-gray-200 dark:bg-gray-700 text-foreground-muted">Other</span>
-                    <span className="text-sm text-foreground-muted">{ungrouped.length} claim{ungrouped.length !== 1 ? 's' : ''}</span>
+                <div className="neomorph px-3 py-2">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="px-2 py-0.5 rounded text-xs font-semibold bg-gray-200 dark:bg-gray-700 text-foreground-muted">Other</span>
+                    <span className="text-xs text-foreground-muted">{ungrouped.length} claim{ungrouped.length !== 1 ? 's' : ''}</span>
                   </div>
-                  <div className="space-y-3">
+                  <div className="space-y-1.5">
                     {ungrouped.map(renderClaimCard)}
                   </div>
                 </div>
