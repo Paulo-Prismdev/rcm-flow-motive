@@ -25,7 +25,7 @@ export default function UserManagement() {
 
   const { data: users = [], isLoading: usersLoading } = useQuery({
     queryKey: ['users'],
-    queryFn: () => base44.entities.User.list(),
+    queryFn: () => base44.entities.User.list('full_name', 500),
   });
 
   const { data: bodyshops = [] } = useQuery({
@@ -79,10 +79,12 @@ export default function UserManagement() {
     const { list, idField } = entityMap[activeTab] || { list: [], idField: '' };
     const map = {};
     list.forEach(c => { map[c.id] = []; });
+    // "Unlinked" bucket for users of this type with no matching company
+    map['__unlinked__'] = [];
     users.filter(u => u.user_type === activeTab).forEach(u => {
       const cid = u[idField];
-      if (cid && map[cid]) map[cid].push(u);
-      else if (cid) map[cid] = [u]; // orphaned link
+      if (cid && map[cid] !== undefined) map[cid].push(u);
+      else map['__unlinked__'].push(u);
     });
     return { companies: list, companyMap: map };
   }, [activeTab, users, bodyshops, referrers, suppliers, clients]);
@@ -185,6 +187,16 @@ export default function UserManagement() {
                 onFeedbackRequest={handleFeedbackRequest}
               />
             ))
+          )}
+          {(companyMap['__unlinked__']?.length > 0) && (
+            <CompanyUserGroup
+              key="__unlinked__"
+              company={{ id: '__unlinked__', name: 'Unlinked Users' }}
+              companyType={activeTab}
+              users={companyMap['__unlinked__']}
+              isSuperAdmin={isSuperAdmin}
+              onFeedbackRequest={handleFeedbackRequest}
+            />
           )}
         </div>
       )}
