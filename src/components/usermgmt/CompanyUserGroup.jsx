@@ -110,6 +110,7 @@ export default function CompanyUserGroup({ company, companyType, users, isSuperA
                   {editingUserId === user.id && (
                     <UserEditForm
                       user={user}
+                      defaultCompanyLink={company.id !== '__unlinked__' ? { type: companyType, id: company.id } : null}
                       onSave={(data) => updateMutation.mutate({ id: user.id, data })}
                       onCancel={() => setEditingUserId(null)}
                       isSaving={updateMutation.isPending}

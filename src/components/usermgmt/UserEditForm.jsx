@@ -14,18 +14,30 @@ const USER_TYPES = [
 
 const ALL_DEPARTMENTS = ["Dashboard", "Claims", "Estimating", "Engineering", "Parts", "Invoicing", "Reports", "Map"];
 
-export default function UserEditForm({ user, onSave, onCancel, isSaving }) {
+export default function UserEditForm({ user, onSave, onCancel, isSaving, defaultCompanyLink }) {
+  const getLinkedId = (type, id) => ({
+    linked_referrer_id: type === 'referrer' ? id : (user?.linked_referrer_id || ''),
+    linked_bodyshop_id: type === 'bodyshop' ? id : (user?.linked_bodyshop_id || ''),
+    linked_supplier_id: type === 'supplier' ? id : (user?.linked_supplier_id || ''),
+    linked_client_id:   type === 'client'   ? id : (user?.linked_client_id   || ''),
+  });
+
   const [formData, setFormData] = useState({
     full_name: user?.full_name || '',
     role: user?.role || 'user',
-    user_type: user?.user_type || 'internal',
+    user_type: defaultCompanyLink?.type || user?.user_type || 'internal',
     job_role_id: user?.job_role_id || '',
     departments_access: user?.departments_access || ['Dashboard', 'Claims', 'Estimating', 'Engineering', 'Parts', 'Map'],
     can_manage_permissions: user?.can_manage_permissions || false,
-    linked_referrer_id: user?.linked_referrer_id || '',
-    linked_bodyshop_id: user?.linked_bodyshop_id || '',
-    linked_client_id: user?.linked_client_id || '',
-    linked_supplier_id: user?.linked_supplier_id || '',
+    ...(defaultCompanyLink
+      ? getLinkedId(defaultCompanyLink.type, defaultCompanyLink.id)
+      : {
+          linked_referrer_id: user?.linked_referrer_id || '',
+          linked_bodyshop_id: user?.linked_bodyshop_id || '',
+          linked_client_id:   user?.linked_client_id   || '',
+          linked_supplier_id: user?.linked_supplier_id || '',
+        }
+    ),
   });
 
   const { data: roles = [] } = useQuery({
