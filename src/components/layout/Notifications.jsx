@@ -65,10 +65,10 @@ export default function Notifications() {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <button className="glass-button w-10 h-10 flex items-center justify-center relative">
-          <Bell className="w-4 h-4" />
+        <button className="glass-button w-8 h-8 flex items-center justify-center relative">
+          <Bell className="w-3.5 h-3.5" />
           {unreadCount > 0 && (
-            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+            <span className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center font-bold" style={{fontSize:'9px'}}>
               {unreadCount > 9 ? '9+' : unreadCount}
             </span>
           )}
