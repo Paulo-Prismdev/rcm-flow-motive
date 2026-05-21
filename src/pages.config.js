@@ -7,7 +7,6 @@ import BodyshopMap from './pages/BodyshopMap';
 import Archive from './pages/Archive';
 import EmailTemplates from './pages/EmailTemplates';
 import Invoicing from './pages/Invoicing';
-import UserManagement from './pages/UserManagement';
 import Settings from './pages/Settings';
 import UserProfile from './pages/UserProfile';
 import EmployeeManagement from './pages/EmployeeManagement';
@@ -33,7 +32,6 @@ export const PAGES = {
     "Archive": Archive,
     "EmailTemplates": EmailTemplates,
     "Invoicing": Invoicing,
-    "UserManagement": UserManagement,
     "Settings": Settings,
     "UserProfile": UserProfile,
     "EmployeeManagement": EmployeeManagement,
