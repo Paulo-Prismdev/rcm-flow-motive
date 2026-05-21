@@ -10,8 +10,11 @@ import {
   AlertCircle,
   TrendingUp,
   Calculator,
-  Plus
+  Plus,
+  Search,
+  X
 } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import StatusBadge from '../components/shared/StatusBadge';
@@ -279,12 +282,24 @@ function ReferrerDashboard({ claims, parts, activeClaims, completedClaims, activ
 
 function ReferrerClaimsList({ claims }) {
   const [filter, setFilter] = useState('active');
+  const [search, setSearch] = useState('');
+  const [claimTypeFilter, setClaimTypeFilter] = useState('all');
   const [selectedClaim, setSelectedClaim] = useState(null);
 
+  const claimTypes = ['all', ...Array.from(new Set(claims.map(c => c.claim_type).filter(Boolean)))];
+
   const filteredClaims = claims.filter(c => {
-    if (filter === 'active') return !['Completed', 'Cancelled', 'Total Loss'].includes(c.job_status);
-    if (filter === 'completed') return c.job_status === 'Completed';
-    return true;
+    const matchesStatus =
+      filter === 'active' ? !['Completed', 'Cancelled', 'Total Loss'].includes(c.job_status) :
+      filter === 'completed' ? c.job_status === 'Completed' : true;
+    const matchesType = claimTypeFilter === 'all' || c.claim_type === claimTypeFilter;
+    const q = search.toLowerCase();
+    const matchesSearch = !q ||
+      c.reg?.toLowerCase().includes(q) ||
+      c.client_name?.toLowerCase().includes(q) ||
+      c.job_number?.toLowerCase().includes(q) ||
+      c.make_model?.toLowerCase().includes(q);
+    return matchesStatus && matchesType && matchesSearch;
   });
 
   if (selectedClaim) {
@@ -299,7 +314,8 @@ function ReferrerClaimsList({ claims }) {
   return (
     <div className="space-y-4">
       <div className="neomorph p-4">
-        <div className="flex gap-2 mb-4">
+        {/* Status filter tabs */}
+        <div className="flex gap-2 mb-4 flex-wrap">
           {['active', 'completed', 'all'].map(f => (
             <button
               key={f}
@@ -311,6 +327,33 @@ function ReferrerClaimsList({ claims }) {
               {f}
             </button>
           ))}
+        </div>
+
+        {/* Search + Claim Type filter */}
+        <div className="flex flex-col sm:flex-row gap-2 mb-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+            <Input
+              placeholder="Search by reg, client, job number..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="pl-9 pr-9"
+            />
+            {search && (
+              <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                <X className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+          <select
+            value={claimTypeFilter}
+            onChange={e => setClaimTypeFilter(e.target.value)}
+            className="border border-input bg-background rounded-md px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+          >
+            {claimTypes.map(t => (
+              <option key={t} value={t}>{t === 'all' ? 'All Types' : t}</option>
+            ))}
+          </select>
         </div>
 
         <div className="space-y-3">
@@ -357,7 +400,9 @@ function ReferrerClaimsList({ claims }) {
             </div>
           ))}
           {filteredClaims.length === 0 && (
-            <p className="text-center text-foreground-muted py-8">No claims found</p>
+            <p className="text-center text-muted-foreground py-8">
+              {search || claimTypeFilter !== 'all' ? 'No claims match your search.' : 'No claims found.'}
+            </p>
           )}
         </div>
       </div>
