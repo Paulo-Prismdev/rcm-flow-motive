@@ -381,56 +381,67 @@ export default function ClaimsPage() {
             : 'bg-white dark:bg-surface border-black dark:border-gray-600'
         }`}
       >
-        {/* Top row: reg, job number, status badges — all on one line */}
-        <div className="flex items-center gap-2 min-w-0 flex-wrap">
-          <h3 className="font-bold text-sm flex-shrink-0">{formatUKRegistration(claim.reg) || 'No Reg'}</h3>
-          {claim.job_number && (
-            <span className="text-xs font-mono px-1.5 py-0.5 rounded bg-accent/20 text-accent font-semibold flex-shrink-0">
-              {claim.job_number}
-            </span>
-          )}
-          <div className="flex-shrink-0"><StatusBadge status={claim.job_statuses || []} /></div>
-          {claim.secondary_status && (
-            <div className="flex-shrink-0"><StatusBadge status={claim.secondary_status} variant="secondary" /></div>
-          )}
-          {!isClosedStatus && updateStatus && (
-            <div className="flex-shrink-0"><UpdateStatusBadge status={updateStatus} small /></div>
-          )}
-          {claim.claim_type === 'Fault Claim' && claim.third_party_pursuit_status === 'Awaiting Details' && (
-            <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700 text-xs font-medium animate-pulse flex-shrink-0">
-              <AlertTriangle className="w-3 h-3" />
-              3rd Party Pending
-            </span>
-          )}
-          {claim.bodyshop_id && !claim.repairer_accepted && !isClosedStatus && (
-            <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300 text-xs font-medium flex-shrink-0">
-              <Clock className="w-3 h-3" />
-              Awaiting Acceptance
-            </span>
-          )}
-          {hasBackorder && (
-            <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300 text-xs font-medium animate-pulse flex-shrink-0">
-              <Package className="w-3 h-3" />
-              Backordered Parts
-            </span>
-          )}
-        </div>
+        <div className="flex gap-3">
+          {/* Left cell: Registration number - large and bold for quick reference */}
+          <div className="flex-shrink-0 flex items-center">
+            <h3 className="text-xl font-extrabold tracking-tight">
+              {formatUKRegistration(claim.reg) || 'No Reg'}
+            </h3>
+          </div>
 
-        {/* Bottom row: data fields with consistent spacing and separators */}
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5 text-[13px]">
-          {userCardFields.map((fieldId, index) => {
-            const val = getFieldValue(claim, fieldId);
-            if (!val || val === 'N/A') return null;
-            return (
-              <span key={fieldId} className="whitespace-nowrap flex items-center gap-1.5">
-                {index > 0 && <span className="text-foreground-muted opacity-50">•</span>}
-                <span>
-                  <span className="text-foreground-muted">{FIELD_LABELS[fieldId] || fieldId}:</span>{' '}
-                  <span className="font-medium">{val}</span>
+          {/* Right section: All other content */}
+          <div className="flex-1 min-w-0 space-y-2">
+            {/* Top row: job number, status badges, alerts */}
+            <div className="flex items-center gap-2 min-w-0 flex-wrap">
+              {claim.job_number && (
+                <span className="text-xs font-mono px-1.5 py-0.5 rounded bg-accent/20 text-accent font-semibold flex-shrink-0">
+                  {claim.job_number}
                 </span>
-              </span>
-            );
-          })}
+              )}
+              <div className="flex-shrink-0"><StatusBadge status={claim.job_statuses || []} /></div>
+              {claim.secondary_status && (
+                <div className="flex-shrink-0"><StatusBadge status={claim.secondary_status} variant="secondary" /></div>
+              )}
+              {!isClosedStatus && updateStatus && (
+                <div className="flex-shrink-0"><UpdateStatusBadge status={updateStatus} small /></div>
+              )}
+              {claim.claim_type === 'Fault Claim' && claim.third_party_pursuit_status === 'Awaiting Details' && (
+                <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700 text-xs font-medium animate-pulse flex-shrink-0">
+                  <AlertTriangle className="w-3 h-3" />
+                  3rd Party Pending
+                </span>
+              )}
+              {claim.bodyshop_id && !claim.repairer_accepted && !isClosedStatus && (
+                <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300 text-xs font-medium flex-shrink-0">
+                  <Clock className="w-3 h-3" />
+                  Awaiting Acceptance
+                </span>
+              )}
+              {hasBackorder && (
+                <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300 text-xs font-medium animate-pulse flex-shrink-0">
+                  <Package className="w-3 h-3" />
+                  Backordered Parts
+                </span>
+              )}
+            </div>
+
+            {/* Bottom row: data fields with consistent spacing and separators */}
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px]">
+              {userCardFields.map((fieldId, index) => {
+                const val = getFieldValue(claim, fieldId);
+                if (!val || val === 'N/A') return null;
+                return (
+                  <span key={fieldId} className="whitespace-nowrap flex items-center gap-1.5">
+                    {index > 0 && <span className="text-foreground-muted opacity-50">•</span>}
+                    <span>
+                      <span className="text-foreground-muted">{FIELD_LABELS[fieldId] || fieldId}:</span>{' '}
+                      <span className="font-medium">{val}</span>
+                    </span>
+                  </span>
+                );
+              })}
+            </div>
+          </div>
         </div>
       </div>
     );
