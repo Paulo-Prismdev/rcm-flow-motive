@@ -275,15 +275,6 @@ export default function ReferrerLayout({ children }) {
             </span>
           </div>
           
-          {/* Center: Referrer Logo */}
-          {referrer?.logo_url && (
-            <img 
-              src={referrer.logo_url} 
-              alt={referrer.name} 
-              className="h-8 md:h-12 max-w-[120px] md:max-w-[200px] object-contain"
-            />
-          )}
-
           {/* Right: Desktop controls */}
           <div className="hidden md:flex items-center gap-2">
             {referrer && (
