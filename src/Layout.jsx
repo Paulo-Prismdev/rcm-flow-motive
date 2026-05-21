@@ -813,6 +813,12 @@ export default function Layout({ children, currentPageName }) {
                             <span>View Archive</span>
                           </DropdownMenuItem>
                         </Link>
+                        <Link to={createPageUrl("CompanyIdLookup")}>
+                          <DropdownMenuItem className="cursor-pointer">
+                            <Users className="mr-2 h-4 w-4" />
+                            <span>Company ID Lookup</span>
+                          </DropdownMenuItem>
+                        </Link>
                         {isSuperAdmin && (
                           <Link to={createPageUrl("FeedbackHub")}>
                             <DropdownMenuItem className="cursor-pointer">
@@ -977,6 +983,14 @@ export default function Layout({ children, currentPageName }) {
                           >
                             <Archive className="w-5 h-5" />
                             <span className="font-medium">View Archive</span>
+                          </Link>
+                          <Link
+                            to={createPageUrl("CompanyIdLookup")}
+                            onClick={() => setMobileMenuOpen(false)}
+                            className="flex items-center gap-3 px-4 py-3 rounded-xl surface-button"
+                          >
+                            <Users className="w-5 h-5" />
+                            <span className="font-medium">Company ID Lookup</span>
                           </Link>
                           {isSuperAdmin && (
                             <Link

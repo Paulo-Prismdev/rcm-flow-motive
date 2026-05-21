@@ -19,6 +19,7 @@ import RepairerPortal from './pages/RepairerPortal';
 import ReferrerPortal from './pages/ReferrerPortal';
 import SupplierManagement from './pages/SupplierManagement';
 import FeedbackHub from './pages/FeedbackHub';
+import CompanyIdLookup from './pages/CompanyIdLookup';
 import __Layout from './Layout.jsx';
 
 
@@ -44,6 +45,7 @@ export const PAGES = {
     "ReferrerPortal": ReferrerPortal,
     "SupplierManagement": SupplierManagement,
     "FeedbackHub": FeedbackHub,
+    "CompanyIdLookup": CompanyIdLookup,
 }
 
 export const pagesConfig = {
