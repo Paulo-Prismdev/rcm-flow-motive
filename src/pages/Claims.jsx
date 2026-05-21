@@ -375,12 +375,12 @@ export default function ClaimsPage() {
       <div
         key={claim.id}
         onClick={() => setSelectedClaim(claim)}
-        className="px-3 py-2 hover:shadow-lg transition-all cursor-pointer border rounded-xl"
+        className="px-3 py-3 hover:shadow-lg transition-all cursor-pointer border rounded-xl"
         style={leftBorderStyle}
       >
         {/* Top row: reg, job number, status badges — all on one line */}
-        <div className="flex items-center gap-2 min-w-0 flex-nowrap overflow-hidden">
-          <h3 className="font-bold text-base flex-shrink-0">{formatUKRegistration(claim.reg) || 'No Reg'}</h3>
+        <div className="flex items-center gap-2 min-w-0 flex-wrap">
+          <h3 className="font-bold text-sm flex-shrink-0">{formatUKRegistration(claim.reg) || 'No Reg'}</h3>
           {claim.job_number && (
             <span className="text-xs font-mono px-1.5 py-0.5 rounded bg-accent/20 text-accent font-semibold flex-shrink-0">
               {claim.job_number}
@@ -413,15 +413,18 @@ export default function ClaimsPage() {
           )}
         </div>
 
-        {/* Bottom row: data fields on a single line */}
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-0.5 mt-1 text-xs">
-          {userCardFields.map(fieldId => {
+        {/* Bottom row: data fields with consistent spacing and separators */}
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5 text-[13px]">
+          {userCardFields.map((fieldId, index) => {
             const val = getFieldValue(claim, fieldId);
             if (!val || val === 'N/A') return null;
             return (
-              <span key={fieldId} className="whitespace-nowrap">
-                <span className="text-foreground-muted">{FIELD_LABELS[fieldId] || fieldId}:</span>{' '}
-                <span className="font-medium">{val}</span>
+              <span key={fieldId} className="whitespace-nowrap flex items-center gap-1.5">
+                {index > 0 && <span className="text-foreground-muted opacity-50">•</span>}
+                <span>
+                  <span className="text-foreground-muted">{FIELD_LABELS[fieldId] || fieldId}:</span>{' '}
+                  <span className="font-medium">{val}</span>
+                </span>
               </span>
             );
           })}
