@@ -56,8 +56,8 @@ export default function ReferrerLayout({ children }) {
           --foreground: #1a1a1a;
           --foreground-muted: #6c757d;
           --foreground-subtle: #adb5bd;
-          --accent: #D4AF37;
-          --accent-hover: #C19B2B;
+          --accent: #00ff00;
+          --accent-hover: #00cc00;
           --accent-foreground: #000000;
           --border: #dee2e6;
           --border-strong: #ced4da;
@@ -69,15 +69,15 @@ export default function ReferrerLayout({ children }) {
         }
 
         [data-theme="dark"] {
-          --background: #0f172a;
-          --surface: #1e293b;
-          --surface-elevated: #334155;
-          --surface-hover: #475569;
+          --background: #070d1a;
+          --surface: #0f1829;
+          --surface-elevated: #182035;
+          --surface-hover: #1e2a45;
           --foreground: #f1f5f9;
           --foreground-muted: #cbd5e1;
           --foreground-subtle: #64748b;
-          --accent: #fbbf24;
-          --accent-hover: #f59e0b;
+          --accent: #00ff00;
+          --accent-hover: #00cc00;
           --accent-foreground: #000000;
           --border: #334155;
           --border-strong: #475569;
@@ -116,17 +116,45 @@ export default function ReferrerLayout({ children }) {
           box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
         }
 
+        .header-glass {
+          background: #151d44;
+          backdrop-filter: blur(24px);
+          -webkit-backdrop-filter: blur(24px);
+          border: 1px solid rgba(255,255,255,0.08);
+          border-radius: 20px;
+          box-shadow: var(--shadow-lg);
+        }
+
         .glass-button {
+          background: rgba(255,255,255,0.08);
+          border: 1px solid rgba(255,255,255,0.15);
+          border-radius: 12px;
+          box-shadow: var(--shadow-sm);
+          transition: all 0.2s ease;
+          cursor: pointer;
+          color: rgba(255,255,255,0.9) !important;
+        }
+
+        .glass-button:hover {
+          background: rgba(255,255,255,0.16);
+          border-color: rgba(255,255,255,0.25);
+          box-shadow: var(--shadow-md);
+          transform: translateY(-1px);
+        }
+
+        .surface-button {
           background: var(--surface);
           border: 1px solid var(--border);
           border-radius: 12px;
           box-shadow: var(--shadow-sm);
           transition: all 0.2s ease;
           cursor: pointer;
+          color: var(--foreground);
         }
 
-        .glass-button:hover {
+        .surface-button:hover {
           background: var(--surface-hover);
+          border-color: var(--border-strong);
           box-shadow: var(--shadow-md);
         }
 
@@ -171,7 +199,7 @@ export default function ReferrerLayout({ children }) {
           <div className={`mobile-menu md:hidden ${mobileMenuOpen ? 'open' : ''}`}>
             <div className="p-4 border-b border-border flex items-center justify-between">
               <h2 className="font-bold text-lg">Menu</h2>
-              <button onClick={() => setMobileMenuOpen(false)} className="glass-button w-10 h-10 flex items-center justify-center">
+              <button onClick={() => setMobileMenuOpen(false)} className="surface-button w-10 h-10 flex items-center justify-center">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -199,7 +227,7 @@ export default function ReferrerLayout({ children }) {
             <div className="p-4 border-b border-border">
               <button
                 onClick={toggleTheme}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl glass-button"
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl surface-button"
               >
                 {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
                 <span className="font-medium">{isDark ? 'Light Mode' : 'Dark Mode'}</span>
@@ -210,7 +238,7 @@ export default function ReferrerLayout({ children }) {
             <div className="p-4 mt-auto border-t border-border">
               <button
                 onClick={() => base44.auth.logout()}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl glass-button text-red-500 font-medium"
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl surface-button text-red-500 font-medium"
               >
                 <LogOut className="w-5 h-5" />
                 Log Out
@@ -221,7 +249,7 @@ export default function ReferrerLayout({ children }) {
       )}
 
       {/* Header */}
-      <header className="neomorph mb-2 mx-2 md:mx-3 mt-2 md:mt-3 p-3 md:p-4 flex-shrink-0">
+      <header className="header-glass mb-2 mx-2 md:mx-3 mt-2 md:mt-3 p-3 md:p-4 flex-shrink-0">
         <div className="flex items-center justify-between gap-2">
           {/* Left: Burger (mobile) + Logo */}
           <div className="flex items-center gap-2 md:gap-4 min-w-0 flex-1">
@@ -229,21 +257,20 @@ export default function ReferrerLayout({ children }) {
             <button
               onClick={() => setMobileMenuOpen(true)}
               className="glass-button w-10 h-10 flex items-center justify-center flex-shrink-0 md:hidden"
-              style={{ color: 'var(--foreground)' }}
             >
               <Menu className="w-4 h-4" />
             </button>
 
-            {/* Logo */}
-            <div className="flex items-baseline gap-2">
-              <span style={{ fontFamily: "'Palatino Linotype', serif", fontSize: '1.25rem' }} className="md:text-2xl">
-                <span style={{ color: 'var(--accent)' }}>A</span>
-                <span>RTEC</span>
-                <span style={{ color: 'var(--accent)' }}>H</span>
-              </span>
-              <span style={{ fontWeight: 300 }} className="text-xl md:text-2xl">One</span>
+            {/* RCM Logo */}
+            <div className="h-12 md:h-14 flex-shrink-0">
+              <img
+                src="https://media.base44.com/images/public/68ee39fb8915b1b539e13c59/b2cb057e2_RCMAutomotiveLogoGreenAutomotivewithHLights.jpg"
+                alt="RCM Automotive"
+                className="h-full w-auto object-contain"
+              />
             </div>
-            <span className="hidden sm:inline text-xs px-2 py-1 rounded-full bg-accent/20 text-accent font-medium">
+
+            <span className="hidden sm:inline text-xs px-2 py-1 rounded-full font-medium" style={{ background: 'rgba(0,255,0,0.15)', color: '#00ff00' }}>
               Referrer Portal
             </span>
           </div>
@@ -258,9 +285,9 @@ export default function ReferrerLayout({ children }) {
           )}
 
           {/* Right: Desktop controls */}
-          <div className="hidden md:flex items-center gap-3">
+          <div className="hidden md:flex items-center gap-2">
             {referrer && (
-              <div className="flex items-center gap-2 text-sm text-foreground-muted">
+              <div className="flex items-center gap-2 text-sm" style={{ color: 'rgba(255,255,255,0.7)' }}>
                 <Briefcase className="w-4 h-4" />
                 {referrer.name}
               </div>
@@ -269,7 +296,6 @@ export default function ReferrerLayout({ children }) {
             <button
               onClick={toggleTheme}
               className="glass-button w-10 h-10 flex items-center justify-center"
-              style={{ color: 'var(--foreground)' }}
               title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
             >
               {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
@@ -281,7 +307,7 @@ export default function ReferrerLayout({ children }) {
                   <User className="w-4 h-4" />
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="neomorph-flat w-56">
+              <DropdownMenuContent align="end" className="w-56">
                 <div className="p-3 border-b border-border">
                   <p className="font-medium">{currentUser?.full_name}</p>
                   <p className="text-xs text-foreground-muted">{currentUser?.email}</p>
