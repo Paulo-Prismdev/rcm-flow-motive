@@ -461,7 +461,7 @@ export default function Layout({ children, currentPageName }) {
           display: flex;
           align-items: center;
           gap: 0.5rem;
-          padding: 0.75rem 1rem;
+          padding: 0.5rem 0.875rem;
           white-space: nowrap;
           font-size: 0.875rem;
           font-weight: 500;
@@ -705,7 +705,7 @@ export default function Layout({ children, currentPageName }) {
       `}</style>
 
         {/* NEW HEADER - COMPLETELY REWRITTEN */}
-        <header className="header-glass mb-2 mx-2 sm:mx-3 mt-2 sm:mt-3 p-3 sm:p-4 flex-shrink-0">
+        <header className="header-glass mb-1 mx-2 sm:mx-3 mt-2 sm:mt-3 p-2 sm:p-3 flex-shrink-0">
           <div className="max-w-full mx-auto">
             {/* Top Row - Logo and Actions */}
             <div className="flex items-center justify-between gap-2">
@@ -721,7 +721,7 @@ export default function Layout({ children, currentPageName }) {
 
                 {/* Company Logo + App Title */}
                 <div className="flex items-center gap-2 sm:gap-3">
-                  <div className="h-12 w-auto sm:h-14 flex-shrink-0">
+                  <div className="h-9 w-auto sm:h-10 flex-shrink-0">
                   <img 
                     src={companyLogo} 
                     alt="RCM Automotive" 
@@ -849,7 +849,7 @@ export default function Layout({ children, currentPageName }) {
             </div>
 
             {/* Navigation Row - Show on tablets and desktop */}
-            <div className={`hidden sm:block nav-container-wrapper mt-5 ${hasScrollRight ? 'has-scroll-right' : ''}`}>
+            <div className={`hidden sm:block nav-container-wrapper mt-2 ${hasScrollRight ? 'has-scroll-right' : ''}`}>
               <nav 
                 className="nav-container"
                 ref={navContainerRef}

@@ -1123,9 +1123,9 @@ export default function ClaimDetail({ claim, onClose, onUpdate, isInternalUser =
                 onClose={() => setIsActivityLogOpen(false)}
               />
 
-      <div className="flex flex-col gap-4 md:gap-6" style={{height: '100%', overflow: 'hidden'}}>
-          <div className="neomorph p-3 md:p-6 flex-shrink-0 sticky top-0 z-10 bg-background">
-              <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-2 md:gap-3" style={{height: '100%', overflow: 'hidden'}}>
+          <div className="neomorph p-2 md:p-3 flex-shrink-0 sticky top-0 z-10 bg-background">
+              <div className="flex flex-col gap-2">
                   <div className="flex items-center gap-2 md:gap-4">
                       <Button onClick={handleClose} className="neomorph-flat p-2 flex-shrink-0">
                           <ArrowLeft className="w-4 h-4" />

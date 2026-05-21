@@ -404,7 +404,7 @@ export default function ClaimsPage() {
   };
 
   return (
-    <div className="h-full flex flex-col gap-4 md:gap-6">
+    <div className="h-full flex flex-col gap-2 md:gap-3">
       <ImportClaimsModal
         isOpen={showImportModal}
         onClose={() => setShowImportModal(false)}
@@ -421,7 +421,7 @@ export default function ClaimsPage() {
       />
 
       {/* Header */}
-      <div className="neomorph p-4 md:p-6 flex-shrink-0">
+      <div className="neomorph p-3 md:p-4 flex-shrink-0">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl md:text-3xl font-bold">Claims</h1>
