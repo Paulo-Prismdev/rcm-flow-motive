@@ -640,36 +640,34 @@ export default function ClaimsPage() {
   // ── Split-panel layout ───────────────────────────────────────────────
   return (
     <div className="h-full flex gap-2 min-h-0">
-      {/* Left panel: claim list — collapses to full-width on mobile when detail is open */}
-      <div className={`flex flex-col min-h-0 transition-all duration-200 ${
-        selectedClaim
-          ? 'hidden lg:flex lg:w-[420px] xl:w-[480px] flex-shrink-0'
-          : 'flex w-full'
-      }`}>
+      {/* Left panel: fixed-width list, hidden on mobile when detail open */}
+      <div className={`flex-shrink-0 flex flex-col min-h-0 w-full lg:w-[360px] xl:w-[400px] ${selectedClaim ? 'hidden lg:flex' : 'flex'}`}>
         {claimListPanel}
       </div>
 
-      {/* Right panel: claim detail */}
-      {selectedClaim ? (
-        <div className="flex-1 min-w-0 min-h-0 overflow-hidden">
-          <ClaimDetail
-            claim={selectedClaim}
-            onClose={() => setSelectedClaim(null)}
-            onUpdate={handleUpdate}
-            isInternalUser={isInternalUser}
-          />
-        </div>
-      ) : (
-        <div className="hidden lg:flex flex-1 items-center justify-center neomorph text-center">
-          <div>
-            <div className="w-16 h-16 rounded-2xl bg-accent/10 flex items-center justify-center mx-auto mb-3">
-              <Search className="w-8 h-8 text-accent/60" />
-            </div>
-            <p className="text-foreground-muted text-sm font-medium">Select a claim to view details</p>
-            <p className="text-foreground-subtle text-xs mt-1">Click any claim from the list</p>
+      {/* Right panel: detail or placeholder — always visible on desktop */}
+      <div className={`flex-1 min-w-0 min-h-0 ${selectedClaim ? 'flex' : 'hidden lg:flex'} flex-col`}>
+        {selectedClaim ? (
+          <div className="h-full overflow-hidden">
+            <ClaimDetail
+              claim={selectedClaim}
+              onClose={() => setSelectedClaim(null)}
+              onUpdate={handleUpdate}
+              isInternalUser={isInternalUser}
+            />
           </div>
-        </div>
-      )}
+        ) : (
+          <div className="flex-1 flex items-center justify-center neomorph text-center h-full">
+            <div>
+              <div className="w-16 h-16 rounded-2xl bg-accent/10 flex items-center justify-center mx-auto mb-3">
+                <Search className="w-8 h-8 text-accent/60" />
+              </div>
+              <p className="text-foreground-muted text-sm font-medium">Select a claim to view details</p>
+              <p className="text-foreground-subtle text-xs mt-1">Click any claim from the list</p>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
