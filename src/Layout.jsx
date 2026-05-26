@@ -217,24 +217,13 @@ export default function Layout({ children, currentPageName }) {
           {/* User footer */}
           <div className="border-t border-white/10 px-3 py-3">
             <div className="flex items-center gap-3">
-              {currentUser?.profile_picture_url ? (
-                <img src={currentUser.profile_picture_url} alt="Profile" className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
-              ) : (
-                <div className="w-8 h-8 rounded-full bg-[#00ff00]/20 border border-[#00ff00]/30 flex items-center justify-center flex-shrink-0">
-                  <span className="text-xs font-bold text-[#00ff00]">{userInitials}</span>
-                </div>
-              )}
+              <div className="flex-shrink-0">
+                <UserProfile />
+              </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-white truncate">{currentUser?.full_name || 'User'}</p>
                 <p className="text-xs text-white/40 truncate">{currentUser?.role || ''}</p>
               </div>
-              <button
-                onClick={() => base44.auth.logout()}
-                className="text-white/40 hover:text-white transition-colors flex-shrink-0"
-                title="Log out"
-              >
-                <LogOut className="w-4 h-4" />
-              </button>
             </div>
           </div>
         </aside>
