@@ -199,9 +199,6 @@ export default function ClaimsPage() {
             : 'hover:bg-gray-50 dark:hover:bg-gray-800/50'
         }`}
       >
-        <td className="px-4 py-2.5 font-mono text-xs font-semibold text-blue-600 dark:text-blue-400 whitespace-nowrap">
-          {claim.job_number || '—'}
-        </td>
         <td className="px-4 py-2.5 whitespace-nowrap">
           <span
             className="inline-flex items-center justify-center w-[118px] h-[28px] rounded-sm px-2 text-black bg-yellow-400 border-2 border-yellow-600 shadow-sm uppercase"
@@ -209,6 +206,9 @@ export default function ClaimsPage() {
           >
             {claim.reg ? formatUKRegistration(claim.reg) : ''}
           </span>
+        </td>
+        <td className="px-4 py-2.5 font-mono text-xs font-semibold text-blue-600 dark:text-blue-400 whitespace-nowrap">
+          {claim.job_number || '—'}
         </td>
         <td className="px-4 py-2.5 text-gray-700 dark:text-gray-300 whitespace-nowrap max-w-[160px] truncate">
           {claim.client_name || '—'}
@@ -374,7 +374,7 @@ export default function ClaimsPage() {
             {/* Column headers */}
             <thead className="sticky top-0 bg-white dark:bg-gray-900 z-10">
               <tr className="border-b border-gray-200 dark:border-gray-700">
-                {['Job No', 'Reg', 'Client', 'Vehicle', 'Loss Date', 'Insurer', 'Referrer', 'Status'].map(h => (
+                {['Reg', 'Job No', 'Client', 'Vehicle', 'Loss Date', 'Insurer', 'Referrer', 'Status'].map(h => (
                   <th key={h} className="px-4 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap">{h}</th>
                 ))}
               </tr>
@@ -449,7 +449,7 @@ export default function ClaimsPage() {
   return (
     <div className="h-full flex gap-3 min-h-0">
       {/* Left: claims table */}
-      <div className={`flex-shrink-0 flex flex-col min-h-0 w-full lg:w-[520px] xl:w-[620px] ${selectedClaim ? 'hidden lg:flex' : 'flex'}`}>
+      <div className={`flex-shrink-0 flex flex-col min-h-0 w-full lg:w-[640px] xl:w-[800px] 2xl:w-[900px] ${selectedClaim ? 'hidden lg:flex' : 'flex'}`}>
         {claimsListView}
       </div>
 
