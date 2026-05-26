@@ -276,7 +276,7 @@ export default function ClaimsPage() {
             </>
           )}
           <button onClick={() => setShowForm(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#1a2035] text-white hover:bg-[#243050] transition-colors">
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#131d47] text-white hover:bg-[#1a2660] transition-colors">
             <Plus className="w-3.5 h-3.5" />New Claim
           </button>
         </div>

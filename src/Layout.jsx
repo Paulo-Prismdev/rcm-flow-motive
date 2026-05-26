@@ -140,7 +140,7 @@ export default function Layout({ children, currentPageName }) {
         {/* ── SIDEBAR ── */}
         <aside className={`
           fixed inset-y-0 left-0 z-50 flex flex-col
-          w-56 bg-[#1a2035] text-white
+          w-56 bg-[#131d47] text-white
           transition-transform duration-300
           ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
           lg:relative lg:translate-x-0 lg:flex-shrink-0
