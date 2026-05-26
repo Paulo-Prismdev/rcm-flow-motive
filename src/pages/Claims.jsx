@@ -442,35 +442,8 @@ export default function ClaimsPage() {
   );
 
   return (
-    <div className="h-full flex gap-3 min-h-0">
-      {/* Left: claims table */}
-      <div className={`flex-shrink-0 flex flex-col min-h-0 w-full lg:w-[520px] xl:w-[620px] ${selectedClaim ? 'hidden lg:flex' : 'flex'}`}>
-        {claimsListView}
-      </div>
-
-      {/* Right: detail panel */}
-      <div className={`flex-1 min-w-0 min-h-0 ${selectedClaim ? 'flex' : 'hidden lg:flex'} flex-col`}>
-        {selectedClaim ? (
-          <div className="h-full overflow-hidden rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
-            <ClaimDetail
-              claim={selectedClaim}
-              onClose={() => setSelectedClaim(null)}
-              onUpdate={handleUpdate}
-              isInternalUser={isInternalUser}
-            />
-          </div>
-        ) : (
-          <div className="flex-1 flex items-center justify-center rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-center h-full">
-            <div>
-              <div className="w-14 h-14 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center mx-auto mb-3">
-                <Search className="w-7 h-7 text-gray-300 dark:text-gray-600" />
-              </div>
-              <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">Select a claim to view details</p>
-              <p className="text-gray-400 dark:text-gray-500 text-xs mt-1">Click any row from the list</p>
-            </div>
-          </div>
-        )}
-      </div>
+    <div className="h-full flex flex-col min-h-0">
+      {claimsListView}
     </div>
   );
 }
