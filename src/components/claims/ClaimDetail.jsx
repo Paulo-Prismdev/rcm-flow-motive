@@ -22,7 +22,8 @@ import {
     AlertTriangle,
     BadgePercent,
     Download,
-    Image
+    Image,
+    RefreshCw
 } from "lucide-react";
 import { format } from "date-fns";
 import StatusBadge from "../shared/StatusBadge";
@@ -1139,28 +1140,29 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
 
       <div className="flex flex-col gap-2 md:gap-3 isolate" style={{height: '100%', overflow: 'hidden'}}>
           <div className="neomorph p-2 md:p-3 flex-shrink-0 bg-card dark:bg-card" style={{position: 'relative', zIndex: 1}}>
-              <div className="flex flex-col gap-2">
-                  <div className="flex items-center gap-2 md:gap-4">
+              <div className="flex flex-col gap-1.5">
+                  <div className="flex items-center gap-2">
                       <Button onClick={handleClose} className="neomorph-flat p-2 flex-shrink-0">
                           <ArrowLeft className="w-4 h-4" />
                       </Button>
                       <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <h1 className="text-base md:text-2xl font-bold truncate">{formatUKRegistration(claim.reg) || 'Claim Details'}</h1>
+                          <div className="flex items-center gap-1.5 min-w-0">
+                            <h1 className="text-sm md:text-xl font-bold truncate">{formatUKRegistration(claim.reg) || 'Claim Details'}</h1>
                             {claim.job_number && (
-                              <span className="text-xs md:text-sm font-mono px-2 py-0.5 md:py-1 rounded bg-gold/20 text-gold font-semibold">
+                              <span className="text-xs font-mono px-1.5 py-0.5 rounded bg-gold/20 text-gold font-semibold whitespace-nowrap flex-shrink-0">
                                 {claim.job_number}
                               </span>
                             )}
                           </div>
                       </div>
-                      <div className="flex items-center gap-1.5 md:gap-2 flex-shrink-0">
+                      <div className="flex items-center gap-1 flex-shrink-0">
                         <Button 
                           onClick={() => setIsClaimUpdatesOpen(true)}
                           className="neomorph-flat px-2 md:px-4 py-1.5 md:py-2 bg-accent/10 hover:bg-accent/20 font-medium text-accent text-xs md:text-sm"
                           title="Official Updates"
                         >
-                          Updates
+                          <span className="hidden sm:inline">Updates</span>
+                          <span className="sm:hidden"><Edit className="w-3.5 h-3.5" /></span>
                         </Button>
                         {canEdit && (
                           <Button 
@@ -1168,7 +1170,8 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                             className="neomorph-flat px-2 md:px-4 py-1.5 md:py-2 bg-green-600/10 hover:bg-green-600/20 font-medium text-green-600 text-xs md:text-sm"
                             title="Change Status"
                           >
-                            Change Status
+                            <span className="hidden sm:inline">Change Status</span>
+                            <span className="sm:hidden text-green-600"><RefreshCw className="w-3.5 h-3.5" /></span>
                           </Button>
                         )}
                         {canEdit && (
