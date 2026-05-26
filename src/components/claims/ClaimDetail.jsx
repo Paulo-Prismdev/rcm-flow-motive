@@ -1137,7 +1137,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                 onClose={() => setIsActivityLogOpen(false)}
               />
 
-      <div className="flex flex-col gap-2 md:gap-3" style={{height: '100%', overflow: 'hidden'}}>
+      <div className="flex flex-col gap-2 md:gap-3 isolate" style={{height: '100%', overflow: 'hidden'}}>
           <div className="neomorph p-2 md:p-3 flex-shrink-0 sticky top-0 z-10 bg-background">
               <div className="flex flex-col gap-2">
                   <div className="flex items-center gap-2 md:gap-4">
