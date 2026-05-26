@@ -1139,19 +1139,111 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
               />
 
       <div className="flex flex-col gap-2 md:gap-3" style={{height: '100%', overflow: 'hidden', touchAction: 'auto'}}>
-          <div className="neomorph p-3 md:p-4 flex-shrink-0 bg-card dark:bg-card" style={{position: 'relative', zIndex: 50}}>
+
+          {/* ── MOBILE/TABLET top bar (< lg) — pure native elements, no Radix ── */}
+          <div className="lg:hidden bg-card dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 flex-shrink-0">
+            {/* Row 1: back + title + action buttons */}
+            <div className="flex items-center gap-2 px-3 py-2">
+              <button
+                onClick={handleClose}
+                style={{minWidth: 48, minHeight: 48, WebkitTapHighlightColor: 'transparent'}}
+                className="flex items-center justify-center rounded-xl bg-gray-100 dark:bg-gray-800 active:bg-gray-200 dark:active:bg-gray-700 flex-shrink-0"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </button>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <h1 className="text-base font-bold truncate">{formatUKRegistration(claim.reg) || 'Claim Details'}</h1>
+                  {claim.job_number && (
+                    <span className="text-xs font-mono px-1.5 py-0.5 rounded bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 font-semibold whitespace-nowrap flex-shrink-0">
+                      {claim.job_number}
+                    </span>
+                  )}
+                </div>
+              </div>
+              <button
+                onClick={() => setIsClaimUpdatesOpen(true)}
+                style={{minHeight: 48, WebkitTapHighlightColor: 'transparent'}}
+                className="px-3 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 font-semibold text-sm active:bg-blue-100 dark:active:bg-blue-900/40 flex-shrink-0"
+              >
+                Updates
+              </button>
+              <button
+                onClick={() => setIsChangeStatusModalOpen(true)}
+                style={{minHeight: 48, WebkitTapHighlightColor: 'transparent'}}
+                className="px-3 rounded-xl bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 font-semibold text-sm active:bg-green-100 dark:active:bg-green-900/40 flex-shrink-0"
+              >
+                Status
+              </button>
+            </div>
+            {/* Row 2: status badges */}
+            <div className="flex items-center gap-2 px-3 pb-2 flex-wrap">
+              <StatusBadge status={claim.job_status || 'New'} />
+              {claim.secondary_status && <StatusBadge status={claim.secondary_status} variant="secondary" />}
+              {!isClosedStatus && claim.update_status_flag && (
+                <button onClick={() => setIsUpdateTrackingOpen(true)} style={{WebkitTapHighlightColor: 'transparent'}}>
+                  <UpdateStatusBadge status={claim.update_status_flag} small />
+                </button>
+              )}
+              {claim.archived && <span className="px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-800 text-xs text-gray-600">Archived</span>}
+            </div>
+            {/* Row 3: native select for actions menu */}
+            <div className="px-3 pb-3">
+              <select
+                defaultValue=""
+                onChange={(e) => {
+                  const val = e.target.value;
+                  e.target.value = '';
+                  if (val === 'notes') setIsNotesOpen(true);
+                  else if (val === 'docs') setIsAttachmentsOpen(true);
+                  else if (val === 'images') setIsImagesOpen(true);
+                  else if (val === 'timelogs') setIsTimeLogsOpen(true);
+                  else if (val === 'activity') setIsActivityLogOpen(true);
+                  else if (val === 'email') setIsEmailModalOpen(true);
+                  else if (val === 'tasks') setIsTasksModalOpen(true);
+                  else if (val === 'instructions') setIsInstructionModalOpen(true);
+                  else if (val === 'download_pdf') window.open(claim.instruction_pdf_url, '_blank');
+                  else if (val === 'estimate') setIsEstimateModalOpen(true);
+                  else if (val === 'parts') setIsPartsModalOpen(true);
+                  else if (val === 'backorders') setSelectedSection('backorderedParts');
+                  else if (val === 'archive') handleArchive();
+                  else if (val === 'delete') handleDelete();
+                }}
+                style={{minHeight: 48, WebkitTapHighlightColor: 'transparent', fontSize: 15}}
+                className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-200 px-3 py-2"
+              >
+                <option value="" disabled>⋯ More Actions</option>
+                <option value="notes">📝 Internal Notes</option>
+                <option value="docs">📄 Documents</option>
+                <option value="images">🖼 Images</option>
+                <option value="timelogs">⏱ Time Logs</option>
+                <option value="activity">📋 Activity Log</option>
+                <option value="email">✉️ Send Email</option>
+                <option value="tasks">✅ Manage Tasks</option>
+                <option value="instructions">📑 Generate Instructions</option>
+                {claim.instruction_pdf_url && <option value="download_pdf">⬇️ Download Instruction PDF</option>}
+                <option value="estimate">🔢 Request Estimate</option>
+                <option value="parts">📦 Log Parts Issue</option>
+                <option value="backorders">📦 Backordered Parts</option>
+                <option value="archive">{claim.archived ? '📤 Unarchive' : '🗄 Archive'}</option>
+                <option value="delete">🗑 Delete</option>
+              </select>
+            </div>
+          </div>
+
+          {/* ── DESKTOP top bar (≥ lg) — unchanged Radix dropdown ── */}
+          <div className="hidden lg:block neomorph p-3 md:p-4 flex-shrink-0 bg-card dark:bg-card">
               <div className="flex flex-col gap-2">
                   <div className="flex items-center gap-2">
                       <button
                         onClick={handleClose}
-                        className="neomorph-flat p-3 flex-shrink-0 rounded-lg touch-manipulation active:opacity-70"
-                        style={{minWidth: 44, minHeight: 44}}
+                        className="neomorph-flat p-2.5 flex-shrink-0 rounded-lg hover:opacity-80"
                       >
-                          <ArrowLeft className="w-5 h-5" />
+                          <ArrowLeft className="w-4 h-4" />
                       </button>
                       <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-1.5 min-w-0">
-                            <h1 className="text-base md:text-xl font-bold truncate">{formatUKRegistration(claim.reg) || 'Claim Details'}</h1>
+                            <h1 className="text-xl font-bold truncate">{formatUKRegistration(claim.reg) || 'Claim Details'}</h1>
                             {claim.job_number && (
                               <span className="text-xs font-mono px-1.5 py-0.5 rounded bg-gold/20 text-gold font-semibold whitespace-nowrap flex-shrink-0">
                                 {claim.job_number}
@@ -1160,117 +1252,42 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                           </div>
                       </div>
                       <div className="flex items-center gap-1.5 flex-shrink-0">
-                        <button
-                          onClick={() => setIsClaimUpdatesOpen(true)}
-                          className="neomorph-flat px-3 py-2.5 bg-accent/10 hover:bg-accent/20 active:opacity-70 font-medium text-accent text-sm rounded-lg touch-manipulation"
-                          style={{minHeight: 44}}
-                          title="Official Updates"
-                        >
-                          <span className="hidden sm:inline">Updates</span>
-                          <span className="sm:hidden"><Edit className="w-4 h-4" /></span>
-                        </button>
-                        {canEdit && (
-                          <button
-                            onClick={() => setIsChangeStatusModalOpen(true)}
-                            className="neomorph-flat px-3 py-2.5 bg-green-600/10 hover:bg-green-600/20 active:opacity-70 font-medium text-green-600 text-sm rounded-lg touch-manipulation"
-                            style={{minHeight: 44}}
-                            title="Change Status"
-                          >
-                            <span className="hidden sm:inline">Change Status</span>
-                            <span className="sm:hidden"><RefreshCw className="w-4 h-4" /></span>
-                          </button>
-                        )}
+                        <Button onClick={() => setIsClaimUpdatesOpen(true)} className="neomorph-flat px-4 py-2 bg-accent/10 hover:bg-accent/20 font-medium text-accent text-sm">Updates</Button>
+                        {canEdit && <Button onClick={() => setIsChangeStatusModalOpen(true)} className="neomorph-flat px-4 py-2 bg-green-600/10 hover:bg-green-600/20 font-medium text-green-600 text-sm">Change Status</Button>}
                         {canEdit && (
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <button className="neomorph-flat p-2.5 rounded-lg touch-manipulation active:opacity-70" style={{minWidth: 44, minHeight: 44}}>
-                                <ChevronDown className="w-5 h-5" />
-                              </button>
+                              <Button className="neomorph-flat p-2"><ChevronDown className="w-4 h-4" /></Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-56">
-                              <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsNotesOpen(true); }}>
-                                <Edit className="w-4 h-4 mr-2" />
-                                Internal Notes
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsAttachmentsOpen(true); }}>
-                                <FileText className="w-4 h-4 mr-2" />
-                                Documents
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsImagesOpen(true); }}>
-                                <Image className="w-4 h-4 mr-2" />
-                                Images
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsTimeLogsOpen(true); }}>
-                                <Timer className="w-4 h-4 mr-2" />
-                                Time Logs
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsActivityLogOpen(true); }}>
-                                <History className="w-4 h-4 mr-2" />
-                                Activity Log
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsEmailModalOpen(true); }}>
-                                <Mail className="w-4 h-4 mr-2" />
-                                Send Email
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsTasksModalOpen(true); }}>
-                                <ListTodo className="w-4 h-4 mr-2" />
-                                Manage Tasks
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsInstructionModalOpen(true); }}>
-                                <FileText className="w-4 h-4 mr-2" />
-                                Generate Instructions
-                              </DropdownMenuItem>
-                              {claim.instruction_pdf_url && (
-                                <DropdownMenuItem onSelect={(e) => { e.preventDefault(); window.open(claim.instruction_pdf_url, '_blank'); }}>
-                                  <Download className="w-4 h-4 mr-2" />
-                                  Download Instruction PDF
-                                </DropdownMenuItem>
-                              )}
-                              <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsEstimateModalOpen(true); }}>
-                                <Calculator className="w-4 h-4 mr-2" />
-                                Request Estimate
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsPartsModalOpen(true); }}>
-                                <Package className="w-4 h-4 mr-2" />
-                                Log Parts Issue
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setSelectedSection('backorderedParts'); }}>
-                                <Package className="w-4 h-4 mr-2" />
-                                Backordered Parts
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleArchive(); }} disabled={archiveMutation.isLoading}>
-                                <Archive className="w-4 h-4 mr-2" />
-                                {claim.archived ? 'Unarchive' : 'Archive'}
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleDelete(); }} disabled={deleteMutation.isLoading} className="text-red-600">
-                                <Trash2 className="w-4 h-4 mr-2" />
-                                Delete
-                              </DropdownMenuItem>
+                              <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsNotesOpen(true); }}><Edit className="w-4 h-4 mr-2" />Internal Notes</DropdownMenuItem>
+                              <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsAttachmentsOpen(true); }}><FileText className="w-4 h-4 mr-2" />Documents</DropdownMenuItem>
+                              <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsImagesOpen(true); }}><Image className="w-4 h-4 mr-2" />Images</DropdownMenuItem>
+                              <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsTimeLogsOpen(true); }}><Timer className="w-4 h-4 mr-2" />Time Logs</DropdownMenuItem>
+                              <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsActivityLogOpen(true); }}><History className="w-4 h-4 mr-2" />Activity Log</DropdownMenuItem>
+                              <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsEmailModalOpen(true); }}><Mail className="w-4 h-4 mr-2" />Send Email</DropdownMenuItem>
+                              <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsTasksModalOpen(true); }}><ListTodo className="w-4 h-4 mr-2" />Manage Tasks</DropdownMenuItem>
+                              <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsInstructionModalOpen(true); }}><FileText className="w-4 h-4 mr-2" />Generate Instructions</DropdownMenuItem>
+                              {claim.instruction_pdf_url && <DropdownMenuItem onSelect={(e) => { e.preventDefault(); window.open(claim.instruction_pdf_url, '_blank'); }}><Download className="w-4 h-4 mr-2" />Download Instruction PDF</DropdownMenuItem>}
+                              <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsEstimateModalOpen(true); }}><Calculator className="w-4 h-4 mr-2" />Request Estimate</DropdownMenuItem>
+                              <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsPartsModalOpen(true); }}><Package className="w-4 h-4 mr-2" />Log Parts Issue</DropdownMenuItem>
+                              <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setSelectedSection('backorderedParts'); }}><Package className="w-4 h-4 mr-2" />Backordered Parts</DropdownMenuItem>
+                              <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleArchive(); }} disabled={archiveMutation.isLoading}><Archive className="w-4 h-4 mr-2" />{claim.archived ? 'Unarchive' : 'Archive'}</DropdownMenuItem>
+                              <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleDelete(); }} disabled={deleteMutation.isLoading} className="text-red-600"><Trash2 className="w-4 h-4 mr-2" />Delete</DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
                         )}
                       </div>
                   </div>
-
                   <div className="flex items-center gap-2 flex-wrap">
                     <StatusBadge status={claim.job_status || 'New'} />
-                    {claim.secondary_status && (
-                      <StatusBadge status={claim.secondary_status} variant="secondary" />
-                    )}
+                    {claim.secondary_status && <StatusBadge status={claim.secondary_status} variant="secondary" />}
                     {!isClosedStatus && claim.update_status_flag && (
-                      <button
-                        onClick={() => setIsUpdateTrackingOpen(true)}
-                        className="hover:opacity-80 transition-all cursor-pointer rounded-md"
-                        title="Update Tracking"
-                      >
+                      <button onClick={() => setIsUpdateTrackingOpen(true)} className="hover:opacity-80 transition-all cursor-pointer rounded-md">
                         <UpdateStatusBadge status={claim.update_status_flag} small />
                       </button>
                     )}
-                    {claim.archived && (
-                      <span className="neomorph-flat px-2 md:px-3 py-0.5 md:py-1 text-xs font-medium text-gray-600">
-                        Archived
-                      </span>
-                    )}
+                    {claim.archived && <span className="neomorph-flat px-3 py-1 text-xs font-medium text-gray-600">Archived</span>}
                   </div>
               </div>
           </div>
