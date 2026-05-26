@@ -72,6 +72,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import ClaimDetailMobileHeader from './ClaimDetailMobileHeader';
 
 const EditableSection = ({ title, icon: Icon, claim, onUpdate, children, EditComponent, canEdit = true }) => {
     const [isEditing, setIsEditing] = useState(false);
@@ -1140,96 +1141,32 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
 
       <div className="flex flex-col gap-2 md:gap-3" style={{height: '100%', overflow: 'hidden', touchAction: 'auto'}}>
 
-          {/* ── MOBILE/TABLET top bar (< lg) — pure native elements, no Radix ── */}
-          <div className="lg:hidden bg-card dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 flex-shrink-0">
-            {/* Row 1: back + title + action buttons */}
-            <div className="flex items-center gap-2 px-3 py-2">
-              <button
-                onClick={handleClose}
-                style={{minWidth: 48, minHeight: 48, WebkitTapHighlightColor: 'transparent'}}
-                className="flex items-center justify-center rounded-xl bg-gray-100 dark:bg-gray-800 active:bg-gray-200 dark:active:bg-gray-700 flex-shrink-0"
-              >
-                <ArrowLeft className="w-5 h-5" />
-              </button>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-1.5 min-w-0">
-                  <h1 className="text-base font-bold truncate">{formatUKRegistration(claim.reg) || 'Claim Details'}</h1>
-                  {claim.job_number && (
-                    <span className="text-xs font-mono px-1.5 py-0.5 rounded bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 font-semibold whitespace-nowrap flex-shrink-0">
-                      {claim.job_number}
-                    </span>
-                  )}
-                </div>
-              </div>
-              <button
-                onClick={() => setIsClaimUpdatesOpen(true)}
-                style={{minHeight: 48, WebkitTapHighlightColor: 'transparent'}}
-                className="px-3 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 font-semibold text-sm active:bg-blue-100 dark:active:bg-blue-900/40 flex-shrink-0"
-              >
-                Updates
-              </button>
-              <button
-                onClick={() => setIsChangeStatusModalOpen(true)}
-                style={{minHeight: 48, WebkitTapHighlightColor: 'transparent'}}
-                className="px-3 rounded-xl bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 font-semibold text-sm active:bg-green-100 dark:active:bg-green-900/40 flex-shrink-0"
-              >
-                Status
-              </button>
-            </div>
-            {/* Row 2: status badges */}
-            <div className="flex items-center gap-2 px-3 pb-2 flex-wrap">
-              <StatusBadge status={claim.job_status || 'New'} />
-              {claim.secondary_status && <StatusBadge status={claim.secondary_status} variant="secondary" />}
-              {!isClosedStatus && claim.update_status_flag && (
-                <button onClick={() => setIsUpdateTrackingOpen(true)} style={{WebkitTapHighlightColor: 'transparent'}}>
-                  <UpdateStatusBadge status={claim.update_status_flag} small />
-                </button>
-              )}
-              {claim.archived && <span className="px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-800 text-xs text-gray-600">Archived</span>}
-            </div>
-            {/* Row 3: native select for actions menu */}
-            <div className="px-3 pb-3">
-              <select
-                defaultValue=""
-                onChange={(e) => {
-                  const val = e.target.value;
-                  e.target.value = '';
-                  if (val === 'notes') setIsNotesOpen(true);
-                  else if (val === 'docs') setIsAttachmentsOpen(true);
-                  else if (val === 'images') setIsImagesOpen(true);
-                  else if (val === 'timelogs') setIsTimeLogsOpen(true);
-                  else if (val === 'activity') setIsActivityLogOpen(true);
-                  else if (val === 'email') setIsEmailModalOpen(true);
-                  else if (val === 'tasks') setIsTasksModalOpen(true);
-                  else if (val === 'instructions') setIsInstructionModalOpen(true);
-                  else if (val === 'download_pdf') window.open(claim.instruction_pdf_url, '_blank');
-                  else if (val === 'estimate') setIsEstimateModalOpen(true);
-                  else if (val === 'parts') setIsPartsModalOpen(true);
-                  else if (val === 'backorders') setSelectedSection('backorderedParts');
-                  else if (val === 'archive') handleArchive();
-                  else if (val === 'delete') handleDelete();
-                }}
-                style={{minHeight: 48, WebkitTapHighlightColor: 'transparent', fontSize: 15}}
-                className="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-200 px-3 py-2"
-              >
-                <option value="" disabled>⋯ More Actions</option>
-                <option value="notes">📝 Internal Notes</option>
-                <option value="docs">📄 Documents</option>
-                <option value="images">🖼 Images</option>
-                <option value="timelogs">⏱ Time Logs</option>
-                <option value="activity">📋 Activity Log</option>
-                <option value="email">✉️ Send Email</option>
-                <option value="tasks">✅ Manage Tasks</option>
-                <option value="instructions">📑 Generate Instructions</option>
-                {claim.instruction_pdf_url && <option value="download_pdf">⬇️ Download Instruction PDF</option>}
-                <option value="estimate">🔢 Request Estimate</option>
-                <option value="parts">📦 Log Parts Issue</option>
-                <option value="backorders">📦 Backordered Parts</option>
-                <option value="archive">{claim.archived ? '📤 Unarchive' : '🗄 Archive'}</option>
-                <option value="delete">🗑 Delete</option>
-              </select>
-            </div>
-          </div>
+          {/* ── MOBILE/TABLET top bar — separate component, zero Radix ── */}
+          <ClaimDetailMobileHeader
+            claim={{ ...claim, _selectedSection: selectedSection }}
+            isClosedStatus={isClosedStatus}
+            onClose={handleClose}
+            onUpdates={() => setIsClaimUpdatesOpen(true)}
+            onChangeStatus={() => setIsChangeStatusModalOpen(true)}
+            onUpdateTracking={() => setIsUpdateTrackingOpen(true)}
+            onAction={(val) => {
+              if (val.startsWith('section:')) { setSelectedSection(val.replace('section:', '')); return; }
+              if (val === 'notes') setIsNotesOpen(true);
+              else if (val === 'docs') setIsAttachmentsOpen(true);
+              else if (val === 'images') setIsImagesOpen(true);
+              else if (val === 'timelogs') setIsTimeLogsOpen(true);
+              else if (val === 'activity') setIsActivityLogOpen(true);
+              else if (val === 'email') setIsEmailModalOpen(true);
+              else if (val === 'tasks') setIsTasksModalOpen(true);
+              else if (val === 'instructions') setIsInstructionModalOpen(true);
+              else if (val === 'download_pdf') window.open(claim.instruction_pdf_url, '_blank');
+              else if (val === 'estimate') setIsEstimateModalOpen(true);
+              else if (val === 'parts') setIsPartsModalOpen(true);
+              else if (val === 'backorders') setSelectedSection('backorderedParts');
+              else if (val === 'archive') handleArchive();
+              else if (val === 'delete') handleDelete();
+            }}
+          />
 
           {/* ── DESKTOP top bar (≥ lg) — unchanged Radix dropdown ── */}
           <div className="hidden lg:block neomorph p-3 md:p-4 flex-shrink-0 bg-card dark:bg-card">
@@ -1353,10 +1290,11 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
           </div>
         )}
 
-        <div className="neomorph px-3 py-2 flex-shrink-0" style={{position: 'relative', zIndex: 40}}>
+        {/* Section selector — desktop only (mobile uses ClaimDetailMobileHeader) */}
+        <div className="hidden lg:block neomorph px-3 py-2 flex-shrink-0">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button className="w-full neomorph-flat px-3 py-3 flex items-center justify-between touch-manipulation">
+              <Button className="w-full neomorph-flat px-3 py-3 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   {React.createElement(DETAIL_SECTIONS.find(s => s.id === selectedSection)?.icon || User, { className: "w-5 h-5" })}
                   <span className="font-medium">{DETAIL_SECTIONS.find(s => s.id === selectedSection)?.label || 'Select Section'}</span>
