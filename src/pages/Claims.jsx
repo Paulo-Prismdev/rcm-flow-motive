@@ -193,13 +193,14 @@ export default function ClaimsPage() {
       <tr
         key={claim.id}
         onClick={() => setSelectedClaim(claim)}
-        className={`border-b border-gray-100 dark:border-gray-800 cursor-pointer transition-colors text-sm ${
+        className={`group border-b border-gray-100 dark:border-gray-800 cursor-pointer transition-colors text-sm ${
           isSelected
             ? 'bg-blue-50 dark:bg-blue-900/20'
             : 'hover:bg-gray-50 dark:hover:bg-gray-800/50'
         }`}
       >
-        <td className="px-4 py-2.5 whitespace-nowrap">
+        {/* Sticky left: Reg */}
+        <td className={`sticky left-0 z-10 px-4 py-2.5 whitespace-nowrap ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-white dark:bg-gray-900 group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50'}`}>
           <span
             className="inline-flex items-center justify-center w-[118px] h-[28px] rounded-sm px-2 text-black bg-yellow-400 border-2 border-yellow-600 shadow-sm uppercase"
             style={{ fontFamily: "'UK Number Plate', 'Arial Black', 'Franklin Gothic Heavy', Impact, sans-serif", fontWeight: 900, fontSize: '14px', letterSpacing: '0.12em' }}
@@ -207,9 +208,7 @@ export default function ClaimsPage() {
             {claim.reg ? formatUKRegistration(claim.reg) : ''}
           </span>
         </td>
-        <td className="px-4 py-2.5 font-mono text-xs font-semibold text-blue-600 dark:text-blue-400 whitespace-nowrap">
-          {claim.job_number || '—'}
-        </td>
+        {/* Scrollable columns */}
         <td className="px-4 py-2.5 text-gray-700 dark:text-gray-300 whitespace-nowrap max-w-[160px] truncate">
           {claim.client_name || '—'}
         </td>
@@ -225,7 +224,8 @@ export default function ClaimsPage() {
         <td className="px-4 py-2.5 text-gray-600 dark:text-gray-400 whitespace-nowrap max-w-[120px] truncate">
           {claim.referrer || '—'}
         </td>
-        <td className="px-4 py-2.5 whitespace-nowrap">
+        {/* Sticky right: Status + alerts */}
+        <td className={`sticky right-0 z-10 px-4 py-2.5 whitespace-nowrap ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-white dark:bg-gray-900 group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50'}`}>
           <div className="flex items-center gap-1">
             {!isClosedStatus && <UpdateStatusBadge status={updateStatus} small />}
             {hasBackorder && (
@@ -374,9 +374,11 @@ export default function ClaimsPage() {
             {/* Column headers */}
             <thead className="sticky top-0 bg-white dark:bg-gray-900 z-10">
               <tr className="border-b border-gray-200 dark:border-gray-700">
-                {['Reg', 'Job No', 'Client', 'Vehicle', 'Loss Date', 'Insurer', 'Referrer', 'Status'].map(h => (
+                <th className="sticky left-0 z-20 bg-white dark:bg-gray-900 px-4 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap">Reg</th>
+                {['Client', 'Vehicle', 'Loss Date', 'Insurer', 'Referrer'].map(h => (
                   <th key={h} className="px-4 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap">{h}</th>
                 ))}
+                <th className="sticky right-0 z-20 bg-white dark:bg-gray-900 px-4 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap">Status</th>
               </tr>
             </thead>
             <tbody>
@@ -393,7 +395,7 @@ export default function ClaimsPage() {
                       className="bg-gray-50 dark:bg-gray-800/60 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-800"
                       onClick={() => toggleGroup(statusGroup)}
                     >
-                      <td colSpan={8} className="px-4 py-2">
+                      <td colSpan={7} className="px-4 py-2">
                         <div className="flex items-center gap-2">
                           {isCollapsed
                             ? <ChevronRight className="w-3.5 h-3.5 text-gray-400" />
@@ -421,7 +423,7 @@ export default function ClaimsPage() {
                 return (
                   <React.Fragment>
                     <tr className="bg-gray-50 dark:bg-gray-800/60 cursor-pointer select-none" onClick={() => toggleGroup('__other__')}>
-                      <td colSpan={8} className="px-4 py-2">
+                      <td colSpan={7} className="px-4 py-2">
                         <div className="flex items-center gap-2">
                           {isCollapsed ? <ChevronRight className="w-3.5 h-3.5 text-gray-400" /> : <ChevronDown className="w-3.5 h-3.5 text-gray-400" />}
                           <span className="w-2 h-2 rounded-full bg-gray-400 flex-shrink-0" />
