@@ -1141,32 +1141,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
 
       <div className="flex flex-col gap-2 md:gap-3" style={{height: '100%', overflow: 'hidden', touchAction: 'auto'}}>
 
-          {/* ── MOBILE/TABLET top bar — separate component, zero Radix ── */}
-          <ClaimDetailMobileHeader
-            claim={{ ...claim, _selectedSection: selectedSection }}
-            isClosedStatus={isClosedStatus}
-            onClose={handleClose}
-            onUpdates={() => setIsClaimUpdatesOpen(true)}
-            onChangeStatus={() => setIsChangeStatusModalOpen(true)}
-            onUpdateTracking={() => setIsUpdateTrackingOpen(true)}
-            onAction={(val) => {
-              if (val.startsWith('section:')) { setSelectedSection(val.replace('section:', '')); return; }
-              if (val === 'notes') setIsNotesOpen(true);
-              else if (val === 'docs') setIsAttachmentsOpen(true);
-              else if (val === 'images') setIsImagesOpen(true);
-              else if (val === 'timelogs') setIsTimeLogsOpen(true);
-              else if (val === 'activity') setIsActivityLogOpen(true);
-              else if (val === 'email') setIsEmailModalOpen(true);
-              else if (val === 'tasks') setIsTasksModalOpen(true);
-              else if (val === 'instructions') setIsInstructionModalOpen(true);
-              else if (val === 'download_pdf') window.open(claim.instruction_pdf_url, '_blank');
-              else if (val === 'estimate') setIsEstimateModalOpen(true);
-              else if (val === 'parts') setIsPartsModalOpen(true);
-              else if (val === 'backorders') setSelectedSection('backorderedParts');
-              else if (val === 'archive') handleArchive();
-              else if (val === 'delete') handleDelete();
-            }}
-          />
+
 
           {/* ── DESKTOP top bar (≥ lg) — unchanged Radix dropdown ── */}
           <div className="hidden lg:block neomorph p-3 md:p-4 flex-shrink-0 bg-card dark:bg-card">
