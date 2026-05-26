@@ -460,6 +460,7 @@ export default function ClaimsPage() {
         <div className="flex-1 min-w-0 min-h-0 flex flex-col">
           <div className="h-full overflow-hidden rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
             <ClaimDetail
+              key={selectedClaim.id}
               claim={selectedClaim}
               onClose={() => setSelectedClaim(null)}
               onUpdate={handleUpdate}
