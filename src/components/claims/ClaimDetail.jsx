@@ -1138,7 +1138,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                 onClose={() => setIsActivityLogOpen(false)}
               />
 
-      <div className="flex flex-col gap-2 md:gap-3 isolate" style={{height: '100%', overflow: 'hidden'}}>
+      <div className="flex flex-col gap-2 md:gap-3 isolate" style={{height: '100%', overflow: 'hidden', touchAction: 'auto'}}>
           <div className="neomorph p-2 md:p-3 flex-shrink-0 bg-card dark:bg-card" style={{position: 'relative', zIndex: 1}}>
               <div className="flex flex-col gap-1.5">
                   <div className="flex items-center gap-2">
@@ -1356,7 +1356,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
           </DropdownMenu>
         </div>
 
-        <div className="flex-1 overflow-y-auto min-h-0 pr-1 pb-4">
+        <div className="flex-1 overflow-y-auto min-h-0 pr-1 pb-4" style={{WebkitOverflowScrolling: 'touch'}}>
           <div>
             {renderSelectedSection()}
           </div>

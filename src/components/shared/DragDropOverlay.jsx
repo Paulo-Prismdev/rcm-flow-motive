@@ -96,6 +96,7 @@ export default function DragDropOverlay({ onFilesUploaded, children }) {
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
       className="relative h-full"
+      style={{ touchAction: 'auto' }}
     >
       {children}
       

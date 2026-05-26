@@ -157,7 +157,7 @@ export default function Layout({ children, currentPageName }) {
           </div>
 
           {/* Nav links */}
-          <nav className="flex-1 overflow-y-auto py-4 px-2 space-y-0.5">
+          <nav className="flex-1 overflow-y-auto py-4 px-2 space-y-0.5" style={{WebkitOverflowScrolling: 'touch'}}>
             {departments.map((dept) => {
               const isActive = location.pathname === dept.url;
               return (
@@ -287,7 +287,7 @@ export default function Layout({ children, currentPageName }) {
           </header>
 
           {/* Page content */}
-          <main className="flex-1 overflow-hidden p-3 min-h-0">
+          <main className="flex-1 overflow-hidden p-3 min-h-0" style={{WebkitOverflowScrolling: 'touch', touchAction: 'auto'}}>
             {children}
           </main>
         </div>
