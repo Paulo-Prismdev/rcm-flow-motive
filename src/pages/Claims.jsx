@@ -292,19 +292,6 @@ export default function ClaimsPage() {
       return new Date(b.created_date) - new Date(a.created_date);
     });
 
-  if (selectedClaim) {
-    return (
-      <div className="h-full">
-        <ClaimDetail
-          claim={selectedClaim}
-          onClose={() => setSelectedClaim(null)}
-          onUpdate={handleUpdate}
-          isInternalUser={isInternalUser}
-        />
-      </div>
-    );
-  }
-
   if (showForm) {
     return (
       <ClaimFormWrapper
@@ -371,84 +358,78 @@ export default function ClaimsPage() {
       ? { borderLeft: '4px solid #f59e0b', ...statusStyle }
       : statusStyle;
 
+    const isSelected = selectedClaim?.id === claim.id;
+
     return (
       <div
         key={claim.id}
         onClick={() => setSelectedClaim(claim)}
-        className={`px-3 py-3 hover:shadow-lg transition-all cursor-pointer border rounded-xl ${
-          updateStatus === 'Red'
+        className={`px-3 py-2.5 hover:shadow-md transition-all cursor-pointer border rounded-xl ${
+          isSelected
+            ? 'bg-accent/10 border-accent/40 dark:border-accent/30'
+            : updateStatus === 'Red'
             ? 'bg-red-50 dark:bg-red-900/20 border-red-300 dark:border-red-700'
             : 'bg-white dark:bg-surface border-black dark:border-gray-600'
         }`}
       >
-        <div className="flex gap-4">
-          {/* Left cell: Registration number - large and bold for quick reference */}
-          <div className="flex-shrink-0 flex items-center px-4 py-2 bg-accent/10 rounded-lg">
-            <h3 className="text-xl font-extrabold tracking-tight text-center min-w-[120px]">
-              {formatUKRegistration(claim.reg) || 'No Reg'}
-            </h3>
-          </div>
+        {/* Row 1: reg + badges */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <h3 className="text-base font-extrabold tracking-tight flex-shrink-0">
+            {formatUKRegistration(claim.reg) || 'No Reg'}
+          </h3>
+          {claim.job_number && (
+            <span className="text-[10px] font-mono px-1 py-0.5 rounded bg-accent/20 text-accent font-semibold flex-shrink-0">
+              {claim.job_number}
+            </span>
+          )}
+          <div className="flex-shrink-0"><StatusBadge status={claim.job_statuses || []} /></div>
+          {!isClosedStatus && updateStatus && (
+            <div className="flex-shrink-0"><UpdateStatusBadge status={updateStatus} small /></div>
+          )}
+        </div>
 
-          {/* Right section: All other content */}
-          <div className="flex-1 min-w-0 space-y-2 px-4 py-2">
-            {/* Top row: job number, status badges, alerts */}
-            <div className="flex items-center gap-2 min-w-0 flex-wrap">
-              {claim.job_number && (
-                <span className="text-xs font-mono px-1.5 py-0.5 rounded bg-accent/20 text-accent font-semibold flex-shrink-0">
-                  {claim.job_number}
-                </span>
-              )}
-              <div className="flex-shrink-0"><StatusBadge status={claim.job_statuses || []} /></div>
-              {claim.secondary_status && (
-                <div className="flex-shrink-0"><StatusBadge status={claim.secondary_status} variant="secondary" /></div>
-              )}
-              {!isClosedStatus && updateStatus && (
-                <div className="flex-shrink-0"><UpdateStatusBadge status={updateStatus} small /></div>
-              )}
-              {claim.claim_type === 'Fault Claim' && claim.third_party_pursuit_status === 'Awaiting Details' && (
-                <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700 text-xs font-medium animate-pulse flex-shrink-0">
-                  <AlertTriangle className="w-3 h-3" />
-                  3rd Party Pending
-                </span>
-              )}
-              {claim.bodyshop_id && !claim.repairer_accepted && !isClosedStatus && (
-                <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300 text-xs font-medium flex-shrink-0">
-                  <Clock className="w-3 h-3" />
-                  Awaiting Acceptance
-                </span>
-              )}
-              {hasBackorder && (
-                <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300 text-xs font-medium animate-pulse flex-shrink-0">
-                  <Package className="w-3 h-3" />
-                  Backordered Parts
-                </span>
-              )}
-            </div>
-
-            {/* Bottom row: data fields with consistent spacing and separators */}
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px]">
-              {userCardFields.map((fieldId, index) => {
-                const val = getFieldValue(claim, fieldId);
-                if (!val || val === 'N/A') return null;
-                return (
-                  <span key={fieldId} className="whitespace-nowrap flex items-center gap-1.5">
-                    {index > 0 && <span className="text-foreground-muted opacity-50">•</span>}
-                    <span>
-                      <span className="text-foreground-muted">{FIELD_LABELS[fieldId] || fieldId}:</span>{' '}
-                      <span className="font-medium">{val}</span>
-                    </span>
-                  </span>
-                );
-              })}
-            </div>
+        {/* Row 2: alert tags */}
+        {(hasBackorder || (claim.bodyshop_id && !claim.repairer_accepted && !isClosedStatus) || (claim.claim_type === 'Fault Claim' && claim.third_party_pursuit_status === 'Awaiting Details')) && (
+          <div className="flex flex-wrap gap-1 mt-1">
+            {claim.claim_type === 'Fault Claim' && claim.third_party_pursuit_status === 'Awaiting Details' && (
+              <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[10px] font-medium animate-pulse">
+                <AlertTriangle className="w-2.5 h-2.5" />3rd Party
+              </span>
+            )}
+            {claim.bodyshop_id && !claim.repairer_accepted && !isClosedStatus && (
+              <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300 text-[10px] font-medium">
+                <Clock className="w-2.5 h-2.5" />Awaiting
+              </span>
+            )}
+            {hasBackorder && (
+              <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300 text-[10px] font-medium animate-pulse">
+                <Package className="w-2.5 h-2.5" />Backorder
+              </span>
+            )}
           </div>
+        )}
+
+        {/* Row 3: data fields */}
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-1 text-[11px]">
+          {userCardFields.map((fieldId, index) => {
+            const val = getFieldValue(claim, fieldId);
+            if (!val || val === 'N/A') return null;
+            return (
+              <span key={fieldId} className="whitespace-nowrap flex items-center gap-1">
+                {index > 0 && <span className="text-foreground-muted opacity-40">·</span>}
+                <span className="text-foreground-muted">{FIELD_LABELS[fieldId] || fieldId}:</span>
+                <span className="font-medium">{val}</span>
+              </span>
+            );
+          })}
         </div>
       </div>
     );
   };
 
-  return (
-    <div className="h-full flex flex-col gap-1.5">
+  // ── Claim list panel (always visible) ──────────────────────────────
+  const claimListPanel = (
+    <div className="flex flex-col h-full min-h-0">
       <ImportClaimsModal
         isOpen={showImportModal}
         onClose={() => setShowImportModal(false)}
@@ -466,46 +447,32 @@ export default function ClaimsPage() {
 
       {/* Header */}
       <div className="neomorph px-3 py-2 flex-shrink-0">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
+        <div className="flex items-center justify-between gap-2 flex-wrap">
           <div>
-            <h1 className="text-xl md:text-2xl font-bold">Claims</h1>
-            <p className="text-xs text-foreground-muted mt-0.5">
-              Manage and track insurance claims • {filteredClaims.length} of {allClaims.length} shown
+            <h1 className="text-lg font-bold">Claims</h1>
+            <p className="text-xs text-foreground-muted">
+              {filteredClaims.length} of {allClaims.length} shown
             </p>
           </div>
-          <div className="flex gap-2">
-            <Button
-              onClick={() => setShowFieldsModal(true)}
-              className="neomorph-flat"
-              title="Customise card fields"
-            >
-              <Settings2 className="w-4 h-4" />
+          <div className="flex gap-1.5 flex-wrap">
+            <Button onClick={() => setShowFieldsModal(true)} className="neomorph-flat h-8 w-8 p-0" title="Customise card fields">
+              <Settings2 className="w-3.5 h-3.5" />
             </Button>
             {isInternalUser && (
               <>
-                <Button
-                  onClick={() => setShowArchived(!showArchived)}
-                  className="neomorph-flat"
-                >
-                  <Archive className="w-4 h-4 mr-2" />
-                  {showArchived ? 'Hide' : 'Show'} Archived
+                <Button onClick={() => setShowArchived(!showArchived)} className="neomorph-flat h-8 px-2 text-xs">
+                  <Archive className="w-3.5 h-3.5 mr-1" />
+                  {showArchived ? 'Hide' : 'Archived'}
                 </Button>
-                <Button
-                  onClick={() => setShowImportModal(true)}
-                  className="neomorph-flat"
-                  title="Import claims from spreadsheet"
-                >
-                  <Upload className="w-4 h-4 mr-2" />
+                <Button onClick={() => setShowImportModal(true)} className="neomorph-flat h-8 px-2 text-xs" title="Import">
+                  <Upload className="w-3.5 h-3.5 mr-1" />
                   Import
                 </Button>
               </>
             )}
-            <Button
-              onClick={() => setShowForm(true)}
-              className="neomorph-flat bg-accent/10 text-accent font-medium"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              New Claim
+            <Button onClick={() => setShowForm(true)} className="neomorph-flat bg-accent/10 text-accent font-medium h-8 px-2 text-xs">
+              <Plus className="w-3.5 h-3.5 mr-1" />
+              New
             </Button>
           </div>
         </div>
@@ -513,38 +480,34 @@ export default function ClaimsPage() {
 
       {/* Search & Filters */}
       <div className="neomorph px-3 py-2 flex-shrink-0">
-        <div className="flex flex-col gap-3">
-          <div className="flex gap-3">
+        <div className="flex flex-col gap-2">
+          <div className="flex gap-2">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-foreground-muted" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-foreground-muted" />
               <Input
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search by reg, client, job number, or insurer..."
-                className="pl-10 neomorph-inset"
+                placeholder="Reg, client, job no..."
+                className="pl-9 neomorph-inset h-8 text-sm"
               />
             </div>
             <Button
               onClick={() => setShowFilters(!showFilters)}
-              className={`neomorph-flat px-4 ${activeFiltersCount > 0 ? 'bg-accent/20' : ''}`}
+              className={`neomorph-flat h-8 px-3 text-xs ${activeFiltersCount > 0 ? 'bg-accent/20' : ''}`}
             >
-              <Filter className="w-4 h-4 mr-2" />
-              Filters {activeFiltersCount > 0 && `(${activeFiltersCount})`}
+              <Filter className="w-3.5 h-3.5 mr-1" />
+              {activeFiltersCount > 0 ? `(${activeFiltersCount})` : 'Filter'}
             </Button>
             {activeFiltersCount > 0 && (
-              <Button
-                onClick={clearAllFilters}
-                className="neomorph-flat px-3"
-                title="Clear all filters"
-              >
-                <X className="w-4 h-4" />
+              <Button onClick={clearAllFilters} className="neomorph-flat h-8 w-8 p-0">
+                <X className="w-3.5 h-3.5" />
               </Button>
             )}
           </div>
 
           {showFilters && (
-            <div className="neomorph-inset p-4 space-y-3">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            <div className="neomorph-inset p-3 space-y-2">
+              <div className="grid grid-cols-1 gap-2">
                 <div>
                   <label className="block text-xs text-foreground-muted mb-1">Job Status</label>
                   <StatusMultiSelect
@@ -554,72 +517,41 @@ export default function ClaimsPage() {
                     placeholder="All Statuses"
                   />
                 </div>
-
                 <div>
                   <label className="block text-xs text-foreground-muted mb-1">Claim Type</label>
-                  <select
-                    value={claimTypeFilter}
-                    onChange={(e) => setClaimTypeFilter(e.target.value)}
-                    className="neomorph-inset w-full px-3 py-2 rounded-lg border-0 text-sm"
-                  >
+                  <select value={claimTypeFilter} onChange={(e) => setClaimTypeFilter(e.target.value)} className="neomorph-inset w-full px-2 py-1.5 rounded-lg border-0 text-xs">
                     <option value="">All Types</option>
                     <option value="Credit Repair">Credit Repair</option>
-                        <option value="Fault Claim">Fault Claim</option>
+                    <option value="Fault Claim">Fault Claim</option>
                     <option value="Non-Fault Claim">Non-Fault Claim</option>
                     <option value="Total Loss">Total Loss</option>
                     <option value="Glass Claim">Glass Claim</option>
                   </select>
                 </div>
-
                 <div>
                   <label className="block text-xs text-foreground-muted mb-1">Insurer</label>
-                  <select
-                    value={insurerFilter}
-                    onChange={(e) => setInsurerFilter(e.target.value)}
-                    className="neomorph-inset w-full px-3 py-2 rounded-lg border-0 text-sm"
-                  >
+                  <select value={insurerFilter} onChange={(e) => setInsurerFilter(e.target.value)} className="neomorph-inset w-full px-2 py-1.5 rounded-lg border-0 text-xs">
                     <option value="">All Insurers</option>
-                    {uniqueInsurers.map(insurer => (
-                      <option key={insurer} value={insurer}>{insurer}</option>
-                    ))}
+                    {uniqueInsurers.map(i => <option key={i} value={i}>{i}</option>)}
                   </select>
                 </div>
-
                 <div>
                   <label className="block text-xs text-foreground-muted mb-1">Referrer</label>
-                  <select
-                    value={referrerFilter}
-                    onChange={(e) => setReferrerFilter(e.target.value)}
-                    className="neomorph-inset w-full px-3 py-2 rounded-lg border-0 text-sm"
-                  >
+                  <select value={referrerFilter} onChange={(e) => setReferrerFilter(e.target.value)} className="neomorph-inset w-full px-2 py-1.5 rounded-lg border-0 text-xs">
                     <option value="">All Referrers</option>
-                    {uniqueReferrers.map(referrer => (
-                      <option key={referrer} value={referrer}>{referrer}</option>
-                    ))}
+                    {uniqueReferrers.map(r => <option key={r} value={r}>{r}</option>)}
                   </select>
                 </div>
-
                 <div>
                   <label className="block text-xs text-foreground-muted mb-1">Repairer</label>
-                  <select
-                    value={repairerFilter}
-                    onChange={(e) => setRepairerFilter(e.target.value)}
-                    className="neomorph-inset w-full px-3 py-2 rounded-lg border-0 text-sm"
-                  >
+                  <select value={repairerFilter} onChange={(e) => setRepairerFilter(e.target.value)} className="neomorph-inset w-full px-2 py-1.5 rounded-lg border-0 text-xs">
                     <option value="">All Repairers</option>
-                    {uniqueRepairers.map(repairer => (
-                      <option key={repairer} value={repairer}>{repairer}</option>
-                    ))}
+                    {uniqueRepairers.map(r => <option key={r} value={r}>{r}</option>)}
                   </select>
                 </div>
-
                 <div>
                   <label className="block text-xs text-foreground-muted mb-1">Update Status</label>
-                  <select
-                    value={updateStatusFilter}
-                    onChange={(e) => setUpdateStatusFilter(e.target.value)}
-                    className="neomorph-inset w-full px-3 py-2 rounded-lg border-0 text-sm"
-                  >
+                  <select value={updateStatusFilter} onChange={(e) => setUpdateStatusFilter(e.target.value)} className="neomorph-inset w-full px-2 py-1.5 rounded-lg border-0 text-xs">
                     <option value="">All Updates</option>
                     <option value="Red">🔴 Overdue</option>
                     <option value="Amber">🟠 Due Soon</option>
@@ -628,29 +560,19 @@ export default function ClaimsPage() {
                     <option value="Gray">⚫ Closed</option>
                   </select>
                 </div>
-
                 <div>
                   <label className="block text-xs text-foreground-muted mb-1">Repairer Acceptance</label>
-                  <select
-                    value={repairerAcceptanceFilter}
-                    onChange={(e) => setRepairerAcceptanceFilter(e.target.value)}
-                    className="neomorph-inset w-full px-3 py-2 rounded-lg border-0 text-sm"
-                  >
+                  <select value={repairerAcceptanceFilter} onChange={(e) => setRepairerAcceptanceFilter(e.target.value)} className="neomorph-inset w-full px-2 py-1.5 rounded-lg border-0 text-xs">
                     <option value="">All Claims</option>
                     <option value="awaiting">⏳ Awaiting Acceptance</option>
-                    <option value="accepted">✓ Accepted by Repairer</option>
+                    <option value="accepted">✓ Accepted</option>
                   </select>
                 </div>
-
                 <div>
                   <label className="block text-xs text-foreground-muted mb-1">Backordered Parts</label>
-                  <select
-                    value={hasBackorderedPartsFilter ? 'true' : ''}
-                    onChange={(e) => setHasBackorderedPartsFilter(e.target.value === 'true')}
-                    className="neomorph-inset w-full px-3 py-2 rounded-lg border-0 text-sm"
-                  >
+                  <select value={hasBackorderedPartsFilter ? 'true' : ''} onChange={(e) => setHasBackorderedPartsFilter(e.target.value === 'true')} className="neomorph-inset w-full px-2 py-1.5 rounded-lg border-0 text-xs">
                     <option value="">All Claims</option>
-                    <option value="true">📦 Has Outstanding Backorders</option>
+                    <option value="true">📦 Has Backorders</option>
                   </select>
                 </div>
               </div>
@@ -659,76 +581,95 @@ export default function ClaimsPage() {
         </div>
       </div>
 
-      {/* Claims List - Grouped by Status */}
+      {/* Claims List */}
       <div className="flex-1 overflow-y-auto min-h-0">
         {isLoading ? (
-          <div className="text-center py-12">Loading claims...</div>
+          <div className="text-center py-12 text-sm text-foreground-muted">Loading claims...</div>
         ) : filteredClaims.length === 0 ? (
-          <div className="neomorph p-12 text-center">
-            <p className="text-foreground-muted mb-4">
+          <div className="neomorph p-8 text-center m-2">
+            <p className="text-foreground-muted text-sm mb-3">
               {activeFiltersCount > 0 ? 'No claims match your filters' : 'No claims found'}
             </p>
             {activeFiltersCount > 0 ? (
-              <Button onClick={clearAllFilters} className="neomorph-flat">
-                <X className="w-4 h-4 mr-2" />
-                Clear Filters
-              </Button>
+              <Button onClick={clearAllFilters} className="neomorph-flat text-xs h-8"><X className="w-3.5 h-3.5 mr-1" />Clear</Button>
             ) : (
-              <Button onClick={() => setShowForm(true)} className="neomorph-flat">
-                <Plus className="w-4 h-4 mr-2" />
-                Create First Claim
-              </Button>
+              <Button onClick={() => setShowForm(true)} className="neomorph-flat text-xs h-8"><Plus className="w-3.5 h-3.5 mr-1" />New Claim</Button>
             )}
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-2 p-1">
             {availableStatuses.map(statusGroup => {
-              // Show claims that have THIS status (claims can appear in multiple groups)
               const claimsInGroup = filteredClaims.filter(claim => (claim.job_statuses || []).includes(statusGroup));
-
               if (claimsInGroup.length === 0) return null;
-              // If filter is active, only show groups that match the filter
               if (statusFilter.length > 0 && !statusFilter.includes(statusGroup)) return null;
-
               return (
-                <div key={statusGroup} className="neomorph px-3 py-2">
-                  <div className="flex items-center gap-2 mb-2">
+                <div key={statusGroup} className="neomorph px-2 py-2">
+                  <div className="flex items-center gap-2 mb-1.5">
                     <StatusBadge status={statusGroup} />
-                    <span className="text-xs text-foreground-muted">
-                      {claimsInGroup.length} claim{claimsInGroup.length !== 1 ? 's' : ''}
-                    </span>
+                    <span className="text-xs text-foreground-muted">{claimsInGroup.length}</span>
                   </div>
-                  <div className="space-y-1.5">
+                  <div className="space-y-1">
                     {claimsInGroup.map(renderClaimCard)}
                   </div>
                 </div>
               );
             })}
-
-            {/* Catch-all: claims with no statuses or only unconfigured statuses */}
             {(() => {
               const knownStatuses = new Set(availableStatuses);
               const ungrouped = filteredClaims.filter(c => {
                 const statuses = c.job_statuses || [];
                 return statuses.length === 0 || !statuses.some(s => knownStatuses.has(s));
               });
-              if (ungrouped.length === 0) return null;
-              if (statusFilter.length > 0) return null;
+              if (ungrouped.length === 0 || statusFilter.length > 0) return null;
               return (
-                <div className="neomorph px-3 py-2">
-                  <div className="flex items-center gap-2 mb-2">
+                <div className="neomorph px-2 py-2">
+                  <div className="flex items-center gap-2 mb-1.5">
                     <span className="px-2 py-0.5 rounded text-xs font-semibold bg-gray-200 dark:bg-gray-700 text-foreground-muted">Other</span>
-                    <span className="text-xs text-foreground-muted">{ungrouped.length} claim{ungrouped.length !== 1 ? 's' : ''}</span>
+                    <span className="text-xs text-foreground-muted">{ungrouped.length}</span>
                   </div>
-                  <div className="space-y-1.5">
-                    {ungrouped.map(renderClaimCard)}
-                  </div>
+                  <div className="space-y-1">{ungrouped.map(renderClaimCard)}</div>
                 </div>
               );
             })()}
           </div>
         )}
       </div>
+    </div>
+  );
+
+  // ── Split-panel layout ───────────────────────────────────────────────
+  return (
+    <div className="h-full flex gap-2 min-h-0">
+      {/* Left panel: claim list — collapses to full-width on mobile when detail is open */}
+      <div className={`flex flex-col min-h-0 transition-all duration-200 ${
+        selectedClaim
+          ? 'hidden lg:flex lg:w-[420px] xl:w-[480px] flex-shrink-0'
+          : 'flex w-full'
+      }`}>
+        {claimListPanel}
+      </div>
+
+      {/* Right panel: claim detail */}
+      {selectedClaim ? (
+        <div className="flex-1 min-w-0 min-h-0 overflow-hidden">
+          <ClaimDetail
+            claim={selectedClaim}
+            onClose={() => setSelectedClaim(null)}
+            onUpdate={handleUpdate}
+            isInternalUser={isInternalUser}
+          />
+        </div>
+      ) : (
+        <div className="hidden lg:flex flex-1 items-center justify-center neomorph text-center">
+          <div>
+            <div className="w-16 h-16 rounded-2xl bg-accent/10 flex items-center justify-center mx-auto mb-3">
+              <Search className="w-8 h-8 text-accent/60" />
+            </div>
+            <p className="text-foreground-muted text-sm font-medium">Select a claim to view details</p>
+            <p className="text-foreground-subtle text-xs mt-1">Click any claim from the list</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
