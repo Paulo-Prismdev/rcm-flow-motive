@@ -203,11 +203,9 @@ export default function ClaimsPage() {
           {claim.job_number || '—'}
         </td>
         <td className="px-4 py-2.5 whitespace-nowrap">
-          {claim.reg ? (
-            <span className="inline-block px-2 py-0.5 rounded font-bold text-xs tracking-widest text-black bg-yellow-300 border border-yellow-500 font-mono shadow-sm">
-              {formatUKRegistration(claim.reg)}
-            </span>
-          ) : '—'}
+          <span className="inline-flex items-center justify-center w-[110px] h-[26px] rounded px-2 font-black text-sm tracking-widest text-black bg-yellow-300 border-2 border-yellow-500 font-mono shadow-sm uppercase">
+            {claim.reg ? formatUKRegistration(claim.reg) : ''}
+          </span>
         </td>
         <td className="px-4 py-2.5 text-gray-700 dark:text-gray-300 whitespace-nowrap max-w-[160px] truncate">
           {claim.client_name || '—'}
