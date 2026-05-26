@@ -166,6 +166,16 @@ export default function ClaimsPage() {
     return new Date(b.created_date) - new Date(a.created_date);
   });
 
+  // Hide the global layout header on mobile when a claim detail is open
+  useEffect(() => {
+    if (selectedClaim) {
+      document.body.classList.add('claim-detail-open');
+    } else {
+      document.body.classList.remove('claim-detail-open');
+    }
+    return () => document.body.classList.remove('claim-detail-open');
+  }, [selectedClaim]);
+
   const toggleGroup = (status) => setCollapsedGroups(p => ({ ...p, [status]: !p[status] }));
 
   const getStatusDot = (statusName) => {
