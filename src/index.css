@@ -160,6 +160,14 @@ button:focus-visible {
   }
   body {
     @apply bg-background text-foreground;
+    /* Prevent iOS double-tap zoom which delays touch events */
+    touch-action: manipulation;
+  }
+
+  /* Ensure all clickable/interactive elements respond instantly on touch */
+  button, a, [role="button"], [onClick] {
+    touch-action: manipulation;
+    cursor: pointer;
   }
 }
 

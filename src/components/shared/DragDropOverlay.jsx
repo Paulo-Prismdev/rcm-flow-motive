@@ -1,42 +1,38 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Upload, Loader } from 'lucide-react';
+
+// Detect touch-primary devices — on these we disable drag-drop entirely
+// so we never block touch events.
+const isTouchDevice = () =>
+  typeof window !== 'undefined' &&
+  ('ontouchstart' in window || navigator.maxTouchPoints > 0);
 
 export default function DragDropOverlay({ onFilesUploaded, children }) {
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const dragCounterRef = useRef(0);
+  const isTouch = isTouchDevice();
 
-  const handleDragOver = useCallback((e) => {
+  const handleDragEnter = useCallback((e) => {
     e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(true);
+    dragCounterRef.current += 1;
+    if (dragCounterRef.current === 1) setIsDragging(true);
   }, []);
 
   const handleDragLeave = useCallback((e) => {
     e.preventDefault();
-    e.stopPropagation();
-    
-    // Check if we're leaving the window bounds
-    const rect = e.currentTarget.getBoundingClientRect();
-    if (
-      e.clientX <= rect.left ||
-      e.clientX >= rect.right ||
-      e.clientY <= rect.top ||
-      e.clientY >= rect.bottom
-    ) {
-      setIsDragging(false);
-    }
+    dragCounterRef.current -= 1;
+    if (dragCounterRef.current === 0) setIsDragging(false);
   }, []);
 
-  const handleDragEnd = useCallback((e) => {
+  const handleDragOver = useCallback((e) => {
     e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
   }, []);
 
   const handleDrop = useCallback(async (e) => {
     e.preventDefault();
-    e.stopPropagation();
+    dragCounterRef.current = 0;
     setIsDragging(false);
 
     const files = Array.from(e.dataTransfer.files);
@@ -44,7 +40,6 @@ export default function DragDropOverlay({ onFilesUploaded, children }) {
 
     setIsUploading(true);
     const uploadedUrls = [];
-
     try {
       for (const file of files) {
         const result = await base44.integrations.Core.UploadFile({ file });
@@ -52,57 +47,44 @@ export default function DragDropOverlay({ onFilesUploaded, children }) {
       }
       onFilesUploaded(uploadedUrls);
     } catch (error) {
-      console.error("File upload failed:", error);
-      alert("Failed to upload files. Please try again.");
+      console.error('File upload failed:', error);
+      alert('Failed to upload files. Please try again.');
     } finally {
       setIsUploading(false);
     }
   }, [onFilesUploaded]);
 
-  // Global event listeners to handle dragging outside the window
+  // Prevent browser default file-open behaviour when dropping outside the zone
+  // Only wire up on non-touch devices
   useEffect(() => {
-    const handleWindowDragOver = (e) => {
-      e.preventDefault();
-    };
-
-    const handleWindowDragLeave = (e) => {
-      // If drag leaves the entire document
-      if (e.clientX === 0 && e.clientY === 0) {
-        setIsDragging(false);
-      }
-    };
-
-    const handleWindowDrop = (e) => {
-      e.preventDefault();
-      setIsDragging(false);
-    };
-
-    window.addEventListener('dragover', handleWindowDragOver);
-    window.addEventListener('dragleave', handleWindowDragLeave);
-    window.addEventListener('drop', handleWindowDrop);
-    window.addEventListener('dragend', handleDragEnd);
-
+    if (isTouch) return;
+    const prevent = (e) => e.preventDefault();
+    window.addEventListener('dragover', prevent);
+    window.addEventListener('drop', prevent);
     return () => {
-      window.removeEventListener('dragover', handleWindowDragOver);
-      window.removeEventListener('dragleave', handleWindowDragLeave);
-      window.removeEventListener('drop', handleWindowDrop);
-      window.removeEventListener('dragend', handleDragEnd);
+      window.removeEventListener('dragover', prevent);
+      window.removeEventListener('drop', prevent);
     };
-  }, [handleDragEnd]);
+  }, [isTouch]);
+
+  // On touch-primary devices just render children — no drag wiring at all
+  if (isTouch) {
+    return <div className="relative h-full" style={{ touchAction: 'auto' }}>{children}</div>;
+  }
 
   return (
     <div
-      onDragOver={handleDragOver}
+      onDragEnter={handleDragEnter}
       onDragLeave={handleDragLeave}
+      onDragOver={handleDragOver}
       onDrop={handleDrop}
       className="relative h-full"
-      style={{ touchAction: 'auto' }}
     >
       {children}
-      
+
       {(isDragging || isUploading) && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80 backdrop-blur-sm">
-          <div className="neomorph-flat bg-[#1A1A1A] p-12 border-gold border-2 border-dashed rounded-2xl pointer-events-none">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80 backdrop-blur-sm pointer-events-none">
+          <div className="neomorph-flat bg-[#1A1A1A] p-12 border-gold border-2 border-dashed rounded-2xl">
             <div className="flex flex-col items-center gap-4">
               {isUploading ? (
                 <>
