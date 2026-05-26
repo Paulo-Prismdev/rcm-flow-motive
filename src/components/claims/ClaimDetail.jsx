@@ -1138,7 +1138,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
               />
 
       <div className="flex flex-col gap-2 md:gap-3 isolate" style={{height: '100%', overflow: 'hidden'}}>
-          <div className="neomorph p-2 md:p-3 flex-shrink-0 sticky top-0 z-10 bg-background">
+          <div className="neomorph p-2 md:p-3 flex-shrink-0 bg-card dark:bg-card" style={{position: 'relative', zIndex: 1}}>
               <div className="flex flex-col gap-2">
                   <div className="flex items-center gap-2 md:gap-4">
                       <Button onClick={handleClose} className="neomorph-flat p-2 flex-shrink-0">
@@ -1327,7 +1327,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
           </div>
         )}
 
-        <div className="neomorph p-4 flex-shrink-0">
+        <div className="neomorph p-4 flex-shrink-0" style={{position: 'relative', zIndex: 1}}>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button className="w-full neomorph-flat p-3 flex items-center justify-between">
