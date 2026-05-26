@@ -1139,15 +1139,19 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
               />
 
       <div className="flex flex-col gap-2 md:gap-3 isolate" style={{height: '100%', overflow: 'hidden', touchAction: 'auto'}}>
-          <div className="neomorph p-2 md:p-3 flex-shrink-0 bg-card dark:bg-card" style={{position: 'relative', zIndex: 1}}>
-              <div className="flex flex-col gap-1.5">
+          <div className="neomorph p-3 md:p-4 flex-shrink-0 bg-card dark:bg-card" style={{position: 'relative', zIndex: 1}}>
+              <div className="flex flex-col gap-2">
                   <div className="flex items-center gap-2">
-                      <Button onClick={handleClose} className="neomorph-flat p-2 flex-shrink-0">
-                          <ArrowLeft className="w-4 h-4" />
-                      </Button>
+                      <button
+                        onClick={handleClose}
+                        className="neomorph-flat p-3 flex-shrink-0 rounded-lg touch-manipulation active:opacity-70"
+                        style={{minWidth: 44, minHeight: 44}}
+                      >
+                          <ArrowLeft className="w-5 h-5" />
+                      </button>
                       <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-1.5 min-w-0">
-                            <h1 className="text-sm md:text-xl font-bold truncate">{formatUKRegistration(claim.reg) || 'Claim Details'}</h1>
+                            <h1 className="text-base md:text-xl font-bold truncate">{formatUKRegistration(claim.reg) || 'Claim Details'}</h1>
                             {claim.job_number && (
                               <span className="text-xs font-mono px-1.5 py-0.5 rounded bg-gold/20 text-gold font-semibold whitespace-nowrap flex-shrink-0">
                                 {claim.job_number}
@@ -1155,31 +1159,33 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                             )}
                           </div>
                       </div>
-                      <div className="flex items-center gap-1 flex-shrink-0">
-                        <Button 
+                      <div className="flex items-center gap-1.5 flex-shrink-0">
+                        <button
                           onClick={() => setIsClaimUpdatesOpen(true)}
-                          className="neomorph-flat px-2.5 md:px-4 py-2 md:py-2 bg-accent/10 hover:bg-accent/20 font-medium text-accent text-xs md:text-sm touch-manipulation"
+                          className="neomorph-flat px-3 py-2.5 bg-accent/10 hover:bg-accent/20 active:opacity-70 font-medium text-accent text-sm rounded-lg touch-manipulation"
+                          style={{minHeight: 44}}
                           title="Official Updates"
                         >
                           <span className="hidden sm:inline">Updates</span>
                           <span className="sm:hidden"><Edit className="w-4 h-4" /></span>
-                        </Button>
+                        </button>
                         {canEdit && (
-                          <Button 
+                          <button
                             onClick={() => setIsChangeStatusModalOpen(true)}
-                            className="neomorph-flat px-2.5 md:px-4 py-2 md:py-2 bg-green-600/10 hover:bg-green-600/20 font-medium text-green-600 text-xs md:text-sm touch-manipulation"
+                            className="neomorph-flat px-3 py-2.5 bg-green-600/10 hover:bg-green-600/20 active:opacity-70 font-medium text-green-600 text-sm rounded-lg touch-manipulation"
+                            style={{minHeight: 44}}
                             title="Change Status"
                           >
                             <span className="hidden sm:inline">Change Status</span>
-                            <span className="sm:hidden text-green-600"><RefreshCw className="w-4 h-4" /></span>
-                          </Button>
+                            <span className="sm:hidden"><RefreshCw className="w-4 h-4" /></span>
+                          </button>
                         )}
                         {canEdit && (
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button className="neomorph-flat p-1.5 md:p-2">
-                                <ChevronDown className="w-3.5 h-3.5 md:w-4 md:h-4" />
-                              </Button>
+                              <button className="neomorph-flat p-2.5 rounded-lg touch-manipulation active:opacity-70" style={{minWidth: 44, minHeight: 44}}>
+                                <ChevronDown className="w-5 h-5" />
+                              </button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-56">
                               <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsNotesOpen(true); }}>
