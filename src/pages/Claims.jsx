@@ -2,99 +2,39 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Plus, Search, Archive, Filter, X, AlertTriangle, Settings2, Clock, Upload, Package } from 'lucide-react';
+import { Plus, Search, Archive, Filter, X, AlertTriangle, Clock, Upload, Package, ChevronDown, ChevronRight, Settings2 } from 'lucide-react';
 import ClaimDetail from '../components/claims/ClaimDetail';
 import ClaimFormWrapper from '../components/claims/ClaimFormWrapper';
 import ImportClaimsModal from '../components/claims/ImportClaimsModal';
-import StatusBadge from '../components/shared/StatusBadge';
+import ClaimCardFieldsModal from '../components/claims/ClaimCardFieldsModal';
 import UpdateStatusBadge from '../components/shared/UpdateStatusBadge';
 import { formatUKRegistration } from '../components/shared/formatRegistration';
-import ClaimCardFieldsModal from '../components/claims/ClaimCardFieldsModal';
 import { format } from 'date-fns';
-import StatusMultiSelect from '../components/shared/StatusMultiSelect';
+import { useStatusConfigs } from '../components/shared/StatusConfigContext';
 
-// Helper function to calculate update status
+// Status dot colour map
+const STATUS_COLORS = {
+  blue: '#3b82f6', green: '#22c55e', orange: '#f97316',
+  red: '#ef4444', purple: '#a855f7', yellow: '#eab308', gray: '#6b7280',
+};
+
 const calculateUpdateStatus = (claim) => {
   const now = new Date();
   const closedStatuses = ['Completed', 'Cancelled', 'Total Loss'];
-  
-  if (closedStatuses.includes(claim.job_status)) {
-    return 'Gray';
-  }
-  
-  if (claim.override_active && claim.override_expiry_at) {
-    const overrideExpiry = new Date(claim.override_expiry_at);
-    if (now < overrideExpiry) {
-      return 'Blue';
-    }
-  }
-  
+  if (closedStatuses.includes(claim.job_status)) return 'Gray';
+  if (claim.override_active && claim.override_expiry_at && now < new Date(claim.override_expiry_at)) return 'Blue';
   if (claim.next_update_due_at) {
-    const dueDate = new Date(claim.next_update_due_at);
-    const hoursUntilDue = (dueDate - now) / (1000 * 60 * 60);
-    
-    if (hoursUntilDue < 0) {
-      return 'Red';
-    } else if (hoursUntilDue < 24) {
-      return 'Amber';
-    } else {
-      return 'Green';
-    }
+    const hours = (new Date(claim.next_update_due_at) - now) / 3600000;
+    if (hours < 0) return 'Red';
+    if (hours < 24) return 'Amber';
+    return 'Green';
   }
-  
   return 'Green';
-};
-
-// Helper function to get background style based on update status
-const getStatusStyle = (status) => {
-  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-  
-  switch (status) {
-    case 'Red':
-      return {
-        backgroundColor: isDark ? 'rgba(127, 29, 29, 0.3)' : 'rgba(254, 226, 226, 0.8)',
-        borderTopColor: isDark ? 'rgba(185, 28, 28, 0.5)' : 'rgba(252, 165, 165, 0.8)',
-        borderRightColor: isDark ? 'rgba(185, 28, 28, 0.5)' : 'rgba(252, 165, 165, 0.8)',
-        borderBottomColor: isDark ? 'rgba(185, 28, 28, 0.5)' : 'rgba(252, 165, 165, 0.8)',
-      };
-    case 'Amber':
-      return {
-        backgroundColor: isDark ? 'rgba(120, 53, 15, 0.3)' : 'rgba(254, 243, 199, 0.8)',
-        borderTopColor: isDark ? 'rgba(217, 119, 6, 0.5)' : 'rgba(253, 230, 138, 0.8)',
-        borderRightColor: isDark ? 'rgba(217, 119, 6, 0.5)' : 'rgba(253, 230, 138, 0.8)',
-        borderBottomColor: isDark ? 'rgba(217, 119, 6, 0.5)' : 'rgba(253, 230, 138, 0.8)',
-      };
-    case 'Green':
-      return {
-        backgroundColor: isDark ? 'rgba(20, 83, 45, 0.3)' : 'rgba(220, 252, 231, 0.8)',
-        borderTopColor: isDark ? 'rgba(22, 163, 74, 0.5)' : 'rgba(134, 239, 172, 0.8)',
-        borderRightColor: isDark ? 'rgba(22, 163, 74, 0.5)' : 'rgba(134, 239, 172, 0.8)',
-        borderBottomColor: isDark ? 'rgba(22, 163, 74, 0.5)' : 'rgba(134, 239, 172, 0.8)',
-      };
-    case 'Blue':
-      return {
-        backgroundColor: isDark ? 'rgba(30, 58, 138, 0.3)' : 'rgba(219, 234, 254, 0.8)',
-        borderTopColor: isDark ? 'rgba(37, 99, 235, 0.5)' : 'rgba(147, 197, 253, 0.8)',
-        borderRightColor: isDark ? 'rgba(37, 99, 235, 0.5)' : 'rgba(147, 197, 253, 0.8)',
-        borderBottomColor: isDark ? 'rgba(37, 99, 235, 0.5)' : 'rgba(147, 197, 253, 0.8)',
-      };
-    case 'Gray':
-      return {
-        backgroundColor: isDark ? 'rgba(55, 65, 81, 0.3)' : 'rgba(249, 250, 251, 0.8)',
-        borderTopColor: isDark ? 'rgba(107, 114, 128, 0.5)' : 'rgba(229, 231, 235, 0.8)',
-        borderRightColor: isDark ? 'rgba(107, 114, 128, 0.5)' : 'rgba(229, 231, 235, 0.8)',
-        borderBottomColor: isDark ? 'rgba(107, 114, 128, 0.5)' : 'rgba(229, 231, 235, 0.8)',
-      };
-    default:
-      return {};
-  }
 };
 
 export default function ClaimsPage() {
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState([]); // Now array for multi-select
+  const [statusFilter, setStatusFilter] = useState([]);
   const [claimTypeFilter, setClaimTypeFilter] = useState('');
   const [insurerFilter, setInsurerFilter] = useState('');
   const [referrerFilter, setReferrerFilter] = useState('');
@@ -109,13 +49,11 @@ export default function ClaimsPage() {
   const [showImportModal, setShowImportModal] = useState(false);
   const [hasBackorderedPartsFilter, setHasBackorderedPartsFilter] = useState(false);
   const [claimIdsWithBackorders, setClaimIdsWithBackorders] = useState(new Set());
+  const [collapsedGroups, setCollapsedGroups] = useState({});
   const queryClient = useQueryClient();
+  const { allStatuses: statusConfigs } = useStatusConfigs();
 
-  const { data: currentUser } = useQuery({
-    queryKey: ['currentUser'],
-    queryFn: () => base44.auth.me(),
-  });
-
+  const { data: currentUser } = useQuery({ queryKey: ['currentUser'], queryFn: () => base44.auth.me() });
   const isInternalUser = currentUser?.user_type === 'internal' || currentUser?.role === 'admin';
   const MANDATORY_FIELDS = ['client_name', 'make_model', 'loss_date', 'referrer'];
   const savedFields = currentUser?.claim_card_fields || [];
@@ -123,9 +61,7 @@ export default function ClaimsPage() {
 
   const updateUserFieldsMutation = useMutation({
     mutationFn: (fields) => base44.auth.updateMe({ claim_card_fields: fields }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['currentUser'] });
-    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['currentUser'] }),
   });
 
   const { data: claims = [], isLoading } = useQuery({
@@ -133,60 +69,46 @@ export default function ClaimsPage() {
     queryFn: () => base44.entities.Claim.list('-created_date', 5000),
   });
 
-  // Fetch backordered parts to identify claims with outstanding backorders
   const { data: backorderedParts = [] } = useQuery({
     queryKey: ['backorderedParts'],
     queryFn: () => base44.entities.BackorderedPart.list(),
-    staleTime: 2 * 60 * 1000, // 2 minutes
+    staleTime: 2 * 60 * 1000,
   });
 
-  // Calculate which claims have outstanding backordered parts
-  React.useEffect(() => {
+  useEffect(() => {
     if (backorderedParts.length > 0) {
-      const claimIdsWithOutstandingBackorders = new Set(
-        backorderedParts
-          .filter(part => !part.received_by_repairer)
-          .map(part => part.claim_id)
-      );
-      setClaimIdsWithBackorders(claimIdsWithOutstandingBackorders);
+      setClaimIdsWithBackorders(new Set(
+        backorderedParts.filter(p => !p.received_by_repairer).map(p => p.claim_id)
+      ));
     }
   }, [backorderedParts]);
 
-  // Fetch custom claim statuses
-  const { data: customStatuses = [], refetch: refetchStatuses } = useQuery({
+  const { data: customStatuses = [] } = useQuery({
     queryKey: ['ClaimStatusConfig'],
     queryFn: () => base44.entities.ClaimStatusConfig.list('sort_order'),
-    staleTime: 0, // Always refetch to get latest
+    staleTime: 0,
   });
 
-  // Get active custom statuses sorted by sort_order
-  const availableStatuses = React.useMemo(() => {
+  const availableStatuses = useMemo(() => {
     const active = customStatuses
-      .filter(s => s.is_active !== false) // Include statuses where is_active is not explicitly false
+      .filter(s => s.is_active !== false)
       .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
       .map(s => s.status_name);
-    
-    // Always ensure 'New' is first if not in list
-    const withNew = active.includes('New') ? active : ['New', ...active];
-    return withNew;
+    return active.includes('New') ? active : ['New', ...active];
   }, [customStatuses]);
 
-  // Get unique values for filters
   const uniqueInsurers = [...new Set(claims.map(c => c.insurer).filter(Boolean))].sort();
   const uniqueReferrers = [...new Set(claims.map(c => c.referrer).filter(Boolean))].sort();
   const uniqueRepairers = [...new Set(claims.map(c => c.bodyshop).filter(Boolean))].sort();
 
-  // URL parameter handling - watch for changes
   const location = useLocation();
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search);
     const claimId = urlParams.get('id');
-    
     if (claimId && claims.length > 0) {
       const claim = claims.find(c => c.id === claimId);
       if (claim) {
         setSelectedClaim(claim);
-        // Clear the URL parameter after processing
         window.history.replaceState({}, '', window.location.pathname);
       }
     }
@@ -194,26 +116,16 @@ export default function ClaimsPage() {
 
   const createMutation = useMutation({
     mutationFn: (newClaim) => base44.entities.Claim.create(newClaim),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['claims'] });
-      setShowForm(false);
-    },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['claims'] }); setShowForm(false); },
   });
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.Claim.update(id, data),
-    onSuccess: (savedClaim, { id }) => {
+    onSuccess: (savedClaim) => {
       queryClient.invalidateQueries({ queryKey: ['claims'] });
-      // Sync selectedClaim with the latest saved data
-      if (savedClaim) {
-        setSelectedClaim(savedClaim);
-      }
+      if (savedClaim) setSelectedClaim(savedClaim);
     },
   });
-
-  const handleSubmit = (claimData) => {
-    createMutation.mutate(claimData);
-  };
 
   const handleUpdate = (updatedClaim) => {
     updateMutation.mutate({ id: updatedClaim.id, data: updatedClaim });
@@ -221,434 +133,325 @@ export default function ClaimsPage() {
   };
 
   const clearAllFilters = () => {
-    setSearchTerm('');
-    setStatusFilter([]);
-    setClaimTypeFilter('');
-    setInsurerFilter('');
-    setReferrerFilter('');
-    setRepairerFilter('');
-    setUpdateStatusFilter('');
-    setRepairerAcceptanceFilter('');
-    setHasBackorderedPartsFilter(false);
+    setSearchTerm(''); setStatusFilter([]); setClaimTypeFilter('');
+    setInsurerFilter(''); setReferrerFilter(''); setRepairerFilter('');
+    setUpdateStatusFilter(''); setRepairerAcceptanceFilter(''); setHasBackorderedPartsFilter(false);
   };
 
   const activeFiltersCount = [(statusFilter?.length || 0) > 0, claimTypeFilter, insurerFilter, referrerFilter, repairerFilter, updateStatusFilter, repairerAcceptanceFilter, hasBackorderedPartsFilter].filter(Boolean).length;
 
   const allClaims = showArchived ? claims : claims.filter(c => !c.archived);
 
-  const filteredClaims = allClaims
-    .filter(c => {
-      const searchLower = searchTerm.toLowerCase();
-      const matchesSearch = !searchTerm || 
-        c.reg?.toLowerCase().includes(searchLower) ||
-        c.client_name?.toLowerCase().includes(searchLower) ||
-        c.job_number?.toLowerCase().includes(searchLower) ||
-        c.insurer?.toLowerCase().includes(searchLower);
+  const filteredClaims = allClaims.filter(c => {
+    const s = searchTerm.toLowerCase();
+    const matchesSearch = !searchTerm ||
+      c.reg?.toLowerCase().includes(s) || c.client_name?.toLowerCase().includes(s) ||
+      c.job_number?.toLowerCase().includes(s) || c.insurer?.toLowerCase().includes(s) ||
+      c.referrer?.toLowerCase().includes(s);
+    const matchesStatus = !statusFilter.length || (c.job_statuses || []).some(st => statusFilter.includes(st));
+    const matchesClaimType = !claimTypeFilter || c.claim_type === claimTypeFilter;
+    const matchesInsurer = !insurerFilter || c.insurer === insurerFilter;
+    const matchesReferrer = !referrerFilter || c.referrer === referrerFilter;
+    const matchesRepairer = !repairerFilter || c.bodyshop === repairerFilter;
+    const matchesUpdateStatus = !updateStatusFilter || calculateUpdateStatus(c) === updateStatusFilter;
+    let matchesRepairerAcceptance = true;
+    if (repairerAcceptanceFilter === 'awaiting') matchesRepairerAcceptance = c.bodyshop_id && !c.repairer_accepted && !['Completed','Cancelled','Total Loss'].includes(c.job_status);
+    else if (repairerAcceptanceFilter === 'accepted') matchesRepairerAcceptance = c.repairer_accepted === true;
+    const matchesBackorders = !hasBackorderedPartsFilter || claimIdsWithBackorders.has(c.id);
+    return matchesSearch && matchesStatus && matchesClaimType && matchesInsurer && matchesReferrer && matchesRepairer && matchesUpdateStatus && matchesRepairerAcceptance && matchesBackorders;
+  }).sort((a, b) => {
+    const prio = { Red: 1, Amber: 2, Green: 3, Blue: 3, Gray: 4 };
+    const pa = prio[calculateUpdateStatus(a)] || 3, pb = prio[calculateUpdateStatus(b)] || 3;
+    if (pa !== pb) return pa - pb;
+    return new Date(b.created_date) - new Date(a.created_date);
+  });
 
-      // Multi-status: match if ANY of the claim's statuses is in the filter array
-      const matchesStatus = !statusFilter || statusFilter.length === 0 || (c.job_statuses || []).some(s => statusFilter.includes(s));
-      const matchesClaimType = !claimTypeFilter || c.claim_type === claimTypeFilter;
-      const matchesInsurer = !insurerFilter || c.insurer === insurerFilter;
-      const matchesReferrer = !referrerFilter || c.referrer === referrerFilter;
-      const matchesRepairer = !repairerFilter || c.bodyshop === repairerFilter;
-      
-      const updateStatus = calculateUpdateStatus(c);
-      const matchesUpdateStatus = !updateStatusFilter || updateStatus === updateStatusFilter;
-      
-      // Repairer acceptance filter
-      let matchesRepairerAcceptance = true;
-      if (repairerAcceptanceFilter === 'awaiting') {
-        matchesRepairerAcceptance = c.bodyshop_id && !c.repairer_accepted && !['Completed', 'Cancelled', 'Total Loss'].includes(c.job_status);
-      } else if (repairerAcceptanceFilter === 'accepted') {
-        matchesRepairerAcceptance = c.repairer_accepted === true;
-      }
-      
-      // Backordered parts filter
-      let matchesBackorderedParts = true;
-      if (hasBackorderedPartsFilter) {
-        matchesBackorderedParts = claimIdsWithBackorders.has(c.id);
-      }
+  const toggleGroup = (status) => setCollapsedGroups(p => ({ ...p, [status]: !p[status] }));
 
-      return matchesSearch && matchesStatus && matchesClaimType && matchesInsurer && matchesReferrer && matchesRepairer && matchesUpdateStatus && matchesRepairerAcceptance && matchesBackorderedParts;
-    })
-    .sort((a, b) => {
-      const statusA = calculateUpdateStatus(a);
-      const statusB = calculateUpdateStatus(b);
-      
-      const priorityOrder = { 'Red': 1, 'Amber': 2, 'Green': 3, 'Blue': 3, 'Gray': 4 };
-      const priorityA = priorityOrder[statusA] || 3;
-      const priorityB = priorityOrder[statusB] || 3;
-      
-      if (priorityA !== priorityB) {
-        return priorityA - priorityB;
-      }
-      
-      if (statusA === 'Red' && statusB === 'Red') {
-        const dueDateA = a.next_update_due_at ? new Date(a.next_update_due_at) : new Date();
-        const dueDateB = b.next_update_due_at ? new Date(b.next_update_due_at) : new Date();
-        return dueDateA - dueDateB;
-      }
-      
-      return new Date(b.created_date) - new Date(a.created_date);
-    });
+  const getStatusDot = (statusName) => {
+    const cfg = statusConfigs?.find(s => s.status_name === statusName);
+    return STATUS_COLORS[cfg?.color] || '#6b7280';
+  };
+
+  const formatDate = (val) => {
+    if (!val) return '—';
+    try { return format(new Date(val), 'dd/MM/yyyy'); } catch { return val; }
+  };
 
   if (showForm) {
-    return (
-      <ClaimFormWrapper
-        onSubmit={handleSubmit}
-        onCancel={() => setShowForm(false)}
-      />
-    );
+    return <ClaimFormWrapper onSubmit={(d) => createMutation.mutate(d)} onCancel={() => setShowForm(false)} />;
   }
 
-  // Field label mapping
-  const FIELD_LABELS = {
-    client_name: 'Client',
-    make_model: 'Vehicle',
-    insurer: 'Insurer',
-    referrer: 'Referrer',
-    bodyshop: 'Bodyshop',
-    claim_type: 'Type',
-    booking_in_date: 'Booking In',
-    ecd: 'ECD',
-    loss_date: 'Loss Date',
-    authority_cost_gross: 'Authority',
-    final_repair_cost: 'Final Cost',
-    claim_ref: 'Claim Ref',
-    policy_number: 'Policy No',
-    client_phone: 'Phone',
-    vehicle_location: 'Location',
-  };
-
-  const getFieldValue = (claim, fieldId) => {
-    const value = claim[fieldId];
-    if (!value) return 'N/A';
-    
-    // Format dates
-    if (['booking_in_date', 'ecd', 'loss_date'].includes(fieldId)) {
-      try {
-        return format(new Date(value), 'dd/MM/yyyy');
-      } catch {
-        return value;
-      }
-    }
-    
-    // Format currency
-    if (['authority_cost_gross', 'final_repair_cost'].includes(fieldId)) {
-      return `£${Number(value).toLocaleString()}`;
-    }
-    
-    return value;
-  };
-
-  // Render claim card
-  const renderClaimCard = (claim) => {
+  // The claims table row
+  const renderRow = (claim) => {
     const updateStatus = calculateUpdateStatus(claim);
-    const statuses = claim.job_statuses || [];
-    const isClosedStatus = statuses.some(s => ['Completed', 'Cancelled', 'Total Loss'].includes(s));
-    const statusStyle = getStatusStyle(updateStatus);
-    const hasBackorder = claimIdsWithBackorders.has(claim.id);
-
-    // Left border accent for alert flags
-    const leftBorderStyle = hasBackorder
-      ? { borderLeft: '4px solid #ef4444', ...statusStyle }
-      : claim.bodyshop_id && !claim.repairer_accepted && !isClosedStatus
-      ? { borderLeft: '4px solid #f59e0b', ...statusStyle }
-      : claim.claim_type === 'Fault Claim' && claim.third_party_pursuit_status === 'Awaiting Details'
-      ? { borderLeft: '4px solid #f59e0b', ...statusStyle }
-      : statusStyle;
-
     const isSelected = selectedClaim?.id === claim.id;
+    const hasBackorder = claimIdsWithBackorders.has(claim.id);
+    const isClosedStatus = (claim.job_statuses || []).some(s => ['Completed','Cancelled','Total Loss'].includes(s));
 
     return (
-      <div
+      <tr
         key={claim.id}
         onClick={() => setSelectedClaim(claim)}
-        className={`px-3 py-2.5 hover:shadow-md transition-all cursor-pointer border rounded-xl ${
+        className={`border-b border-gray-100 dark:border-gray-800 cursor-pointer transition-colors text-sm ${
           isSelected
-            ? 'bg-accent/10 border-accent/40 dark:border-accent/30'
-            : updateStatus === 'Red'
-            ? 'bg-red-50 dark:bg-red-900/20 border-red-300 dark:border-red-700'
-            : 'bg-white dark:bg-surface border-black dark:border-gray-600'
+            ? 'bg-blue-50 dark:bg-blue-900/20'
+            : 'hover:bg-gray-50 dark:hover:bg-gray-800/50'
         }`}
       >
-        {/* Row 1: reg + badges */}
-        <div className="flex items-center gap-2 flex-wrap">
-          <h3 className="text-base font-extrabold tracking-tight flex-shrink-0">
-            {formatUKRegistration(claim.reg) || 'No Reg'}
-          </h3>
-          {claim.job_number && (
-            <span className="text-[10px] font-mono px-1 py-0.5 rounded bg-accent/20 text-accent font-semibold flex-shrink-0">
-              {claim.job_number}
-            </span>
-          )}
-          <div className="flex-shrink-0"><StatusBadge status={claim.job_statuses || []} /></div>
-          {!isClosedStatus && updateStatus && (
-            <div className="flex-shrink-0"><UpdateStatusBadge status={updateStatus} small /></div>
-          )}
-        </div>
-
-        {/* Row 2: alert tags */}
-        {(hasBackorder || (claim.bodyshop_id && !claim.repairer_accepted && !isClosedStatus) || (claim.claim_type === 'Fault Claim' && claim.third_party_pursuit_status === 'Awaiting Details')) && (
-          <div className="flex flex-wrap gap-1 mt-1">
-            {claim.claim_type === 'Fault Claim' && claim.third_party_pursuit_status === 'Awaiting Details' && (
-              <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[10px] font-medium animate-pulse">
-                <AlertTriangle className="w-2.5 h-2.5" />3rd Party
+        <td className="px-4 py-2.5 font-mono text-xs font-semibold text-blue-600 dark:text-blue-400 whitespace-nowrap">
+          {claim.job_number || '—'}
+        </td>
+        <td className="px-4 py-2.5 font-semibold whitespace-nowrap">
+          {formatUKRegistration(claim.reg) || '—'}
+        </td>
+        <td className="px-4 py-2.5 text-gray-700 dark:text-gray-300 whitespace-nowrap max-w-[160px] truncate">
+          {claim.client_name || '—'}
+        </td>
+        <td className="px-4 py-2.5 text-gray-600 dark:text-gray-400 whitespace-nowrap">
+          {claim.make_model || '—'}
+        </td>
+        <td className="px-4 py-2.5 text-gray-600 dark:text-gray-400 whitespace-nowrap">
+          {formatDate(claim.loss_date)}
+        </td>
+        <td className="px-4 py-2.5 text-gray-600 dark:text-gray-400 whitespace-nowrap max-w-[120px] truncate">
+          {claim.insurer || '—'}
+        </td>
+        <td className="px-4 py-2.5 text-gray-600 dark:text-gray-400 whitespace-nowrap max-w-[120px] truncate">
+          {claim.referrer || '—'}
+        </td>
+        <td className="px-4 py-2.5 whitespace-nowrap">
+          <div className="flex items-center gap-1">
+            {!isClosedStatus && <UpdateStatusBadge status={updateStatus} small />}
+            {hasBackorder && (
+              <span className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300 text-[10px] font-medium">
+                <Package className="w-2.5 h-2.5" />BO
               </span>
             )}
             {claim.bodyshop_id && !claim.repairer_accepted && !isClosedStatus && (
-              <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300 text-[10px] font-medium">
-                <Clock className="w-2.5 h-2.5" />Awaiting
+              <span className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-orange-100 text-orange-700 text-[10px] font-medium">
+                <Clock className="w-2.5 h-2.5" />
               </span>
             )}
-            {hasBackorder && (
-              <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300 text-[10px] font-medium animate-pulse">
-                <Package className="w-2.5 h-2.5" />Backorder
+            {claim.claim_type === 'Fault Claim' && claim.third_party_pursuit_status === 'Awaiting Details' && (
+              <span className="px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[10px] font-medium">
+                <AlertTriangle className="w-2.5 h-2.5 inline" />
               </span>
             )}
           </div>
-        )}
-
-        {/* Row 3: data fields */}
-        <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-1 text-[11px]">
-          {userCardFields.map((fieldId, index) => {
-            const val = getFieldValue(claim, fieldId);
-            if (!val || val === 'N/A') return null;
-            return (
-              <span key={fieldId} className="whitespace-nowrap flex items-center gap-1">
-                {index > 0 && <span className="text-foreground-muted opacity-40">·</span>}
-                <span className="text-foreground-muted">{FIELD_LABELS[fieldId] || fieldId}:</span>
-                <span className="font-medium">{val}</span>
-              </span>
-            );
-          })}
-        </div>
-      </div>
+        </td>
+      </tr>
     );
   };
 
-  // ── Claim list panel (always visible) ──────────────────────────────
-  const claimListPanel = (
-    <div className="flex flex-col h-full min-h-0">
-      <ImportClaimsModal
-        isOpen={showImportModal}
-        onClose={() => setShowImportModal(false)}
-        onImportComplete={() => {
-          queryClient.invalidateQueries({ queryKey: ['claims'] });
-          setShowImportModal(false);
-        }}
-      />
-      <ClaimCardFieldsModal
-        isOpen={showFieldsModal}
-        onClose={() => setShowFieldsModal(false)}
-        selectedFields={userCardFields}
-        onSave={(fields) => updateUserFieldsMutation.mutate(fields)}
-      />
+  const claimsListView = (
+    <div className="flex flex-col h-full min-h-0 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+      <ImportClaimsModal isOpen={showImportModal} onClose={() => setShowImportModal(false)}
+        onImportComplete={() => { queryClient.invalidateQueries({ queryKey: ['claims'] }); setShowImportModal(false); }} />
+      <ClaimCardFieldsModal isOpen={showFieldsModal} onClose={() => setShowFieldsModal(false)}
+        selectedFields={userCardFields} onSave={(fields) => updateUserFieldsMutation.mutate(fields)} />
 
-      {/* Header */}
-      <div className="neomorph px-3 py-2 flex-shrink-0">
-        <div className="flex items-center justify-between gap-2 flex-wrap">
-          <div>
-            <h1 className="text-lg font-bold">Claims</h1>
-            <p className="text-xs text-foreground-muted">
-              {filteredClaims.length} of {allClaims.length} shown
-            </p>
-          </div>
-          <div className="flex gap-1.5 flex-wrap">
-            <Button onClick={() => setShowFieldsModal(true)} className="neomorph-flat h-8 w-8 p-0" title="Customise card fields">
-              <Settings2 className="w-3.5 h-3.5" />
-            </Button>
-            {isInternalUser && (
-              <>
-                <Button onClick={() => setShowArchived(!showArchived)} className="neomorph-flat h-8 px-2 text-xs">
-                  <Archive className="w-3.5 h-3.5 mr-1" />
-                  {showArchived ? 'Hide' : 'Archived'}
-                </Button>
-                <Button onClick={() => setShowImportModal(true)} className="neomorph-flat h-8 px-2 text-xs" title="Import">
-                  <Upload className="w-3.5 h-3.5 mr-1" />
-                  Import
-                </Button>
-              </>
-            )}
-            <Button onClick={() => setShowForm(true)} className="neomorph-flat bg-accent/10 text-accent font-medium h-8 px-2 text-xs">
-              <Plus className="w-3.5 h-3.5 mr-1" />
-              New
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      {/* Search & Filters */}
-      <div className="neomorph px-3 py-2 flex-shrink-0">
-        <div className="flex flex-col gap-2">
-          <div className="flex gap-2">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-foreground-muted" />
-              <Input
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Reg, client, job no..."
-                className="pl-9 neomorph-inset h-8 text-sm"
-              />
-            </div>
-            <Button
-              onClick={() => setShowFilters(!showFilters)}
-              className={`neomorph-flat h-8 px-3 text-xs ${activeFiltersCount > 0 ? 'bg-accent/20' : ''}`}
-            >
-              <Filter className="w-3.5 h-3.5 mr-1" />
-              {activeFiltersCount > 0 ? `(${activeFiltersCount})` : 'Filter'}
-            </Button>
-            {activeFiltersCount > 0 && (
-              <Button onClick={clearAllFilters} className="neomorph-flat h-8 w-8 p-0">
-                <X className="w-3.5 h-3.5" />
-              </Button>
-            )}
-          </div>
-
-          {showFilters && (
-            <div className="neomorph-inset p-3 space-y-2">
-              <div className="grid grid-cols-1 gap-2">
-                <div>
-                  <label className="block text-xs text-foreground-muted mb-1">Job Status</label>
-                  <StatusMultiSelect
-                    selectedStatuses={statusFilter}
-                    onStatusesChange={setStatusFilter}
-                    availableStatuses={availableStatuses}
-                    placeholder="All Statuses"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs text-foreground-muted mb-1">Claim Type</label>
-                  <select value={claimTypeFilter} onChange={(e) => setClaimTypeFilter(e.target.value)} className="neomorph-inset w-full px-2 py-1.5 rounded-lg border-0 text-xs">
-                    <option value="">All Types</option>
-                    <option value="Credit Repair">Credit Repair</option>
-                    <option value="Fault Claim">Fault Claim</option>
-                    <option value="Non-Fault Claim">Non-Fault Claim</option>
-                    <option value="Total Loss">Total Loss</option>
-                    <option value="Glass Claim">Glass Claim</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs text-foreground-muted mb-1">Insurer</label>
-                  <select value={insurerFilter} onChange={(e) => setInsurerFilter(e.target.value)} className="neomorph-inset w-full px-2 py-1.5 rounded-lg border-0 text-xs">
-                    <option value="">All Insurers</option>
-                    {uniqueInsurers.map(i => <option key={i} value={i}>{i}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs text-foreground-muted mb-1">Referrer</label>
-                  <select value={referrerFilter} onChange={(e) => setReferrerFilter(e.target.value)} className="neomorph-inset w-full px-2 py-1.5 rounded-lg border-0 text-xs">
-                    <option value="">All Referrers</option>
-                    {uniqueReferrers.map(r => <option key={r} value={r}>{r}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs text-foreground-muted mb-1">Repairer</label>
-                  <select value={repairerFilter} onChange={(e) => setRepairerFilter(e.target.value)} className="neomorph-inset w-full px-2 py-1.5 rounded-lg border-0 text-xs">
-                    <option value="">All Repairers</option>
-                    {uniqueRepairers.map(r => <option key={r} value={r}>{r}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs text-foreground-muted mb-1">Update Status</label>
-                  <select value={updateStatusFilter} onChange={(e) => setUpdateStatusFilter(e.target.value)} className="neomorph-inset w-full px-2 py-1.5 rounded-lg border-0 text-xs">
-                    <option value="">All Updates</option>
-                    <option value="Red">🔴 Overdue</option>
-                    <option value="Amber">🟠 Due Soon</option>
-                    <option value="Green">🟢 On Track</option>
-                    <option value="Blue">🔵 Override Active</option>
-                    <option value="Gray">⚫ Closed</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs text-foreground-muted mb-1">Repairer Acceptance</label>
-                  <select value={repairerAcceptanceFilter} onChange={(e) => setRepairerAcceptanceFilter(e.target.value)} className="neomorph-inset w-full px-2 py-1.5 rounded-lg border-0 text-xs">
-                    <option value="">All Claims</option>
-                    <option value="awaiting">⏳ Awaiting Acceptance</option>
-                    <option value="accepted">✓ Accepted</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs text-foreground-muted mb-1">Backordered Parts</label>
-                  <select value={hasBackorderedPartsFilter ? 'true' : ''} onChange={(e) => setHasBackorderedPartsFilter(e.target.value === 'true')} className="neomorph-inset w-full px-2 py-1.5 rounded-lg border-0 text-xs">
-                    <option value="">All Claims</option>
-                    <option value="true">📦 Has Backorders</option>
-                  </select>
-                </div>
-              </div>
-            </div>
+      {/* Top bar */}
+      <div className="flex items-center justify-between px-5 py-3.5 border-b border-gray-200 dark:border-gray-800 flex-shrink-0">
+        <h1 className="text-lg font-semibold text-gray-900 dark:text-white">Claims</h1>
+        <div className="flex items-center gap-2">
+          <button onClick={() => setShowFieldsModal(true)} className="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors" title="Customise columns">
+            <Settings2 className="w-4 h-4" />
+          </button>
+          {isInternalUser && (
+            <>
+              <button onClick={() => setShowArchived(!showArchived)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${showArchived ? 'bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-600' : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'}`}>
+                <Archive className="w-3.5 h-3.5" />{showArchived ? 'Hide Archived' : 'Archived'}
+              </button>
+              <button onClick={() => setShowImportModal(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                <Upload className="w-3.5 h-3.5" />Import
+              </button>
+            </>
           )}
+          <button onClick={() => setShowForm(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#1a2035] text-white hover:bg-[#243050] transition-colors">
+            <Plus className="w-3.5 h-3.5" />New Claim
+          </button>
         </div>
       </div>
 
-      {/* Claims List */}
-      <div className="flex-1 overflow-y-auto min-h-0">
+      {/* Search + filters bar */}
+      <div className="flex items-center gap-3 px-5 py-2.5 border-b border-gray-100 dark:border-gray-800 flex-shrink-0 bg-gray-50 dark:bg-gray-900/50">
+        <div className="flex-1 relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
+          <input
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+            placeholder="Search by reg, client, job number, insurer..."
+            className="w-full pl-9 pr-3 py-1.5 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/30 text-gray-900 dark:text-white placeholder-gray-400"
+          />
+        </div>
+
+        {/* Quick filter dropdowns */}
+        <button onClick={() => setShowFilters(!showFilters)}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${activeFiltersCount > 0 ? 'bg-blue-50 border-blue-200 text-blue-700 dark:bg-blue-900/20 dark:border-blue-700 dark:text-blue-300' : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-800'}`}>
+          <Filter className="w-3.5 h-3.5" />
+          Filters{activeFiltersCount > 0 ? ` (${activeFiltersCount})` : ''}
+        </button>
+        {activeFiltersCount > 0 && (
+          <button onClick={clearAllFilters} className="p-1.5 text-gray-400 hover:text-gray-600 transition-colors"><X className="w-3.5 h-3.5" /></button>
+        )}
+      </div>
+
+      {/* Filter panel */}
+      {showFilters && (
+        <div className="px-5 py-3 border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/30 flex-shrink-0">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {[
+              { label: 'Claim Type', value: claimTypeFilter, onChange: setClaimTypeFilter, options: ['Credit Repair','Fault Claim','Non-Fault Claim','Total Loss','Glass Claim'] },
+              { label: 'Insurer', value: insurerFilter, onChange: setInsurerFilter, options: uniqueInsurers },
+              { label: 'Referrer', value: referrerFilter, onChange: setReferrerFilter, options: uniqueReferrers },
+              { label: 'Repairer', value: repairerFilter, onChange: setRepairerFilter, options: uniqueRepairers },
+            ].map(f => (
+              <div key={f.label}>
+                <label className="block text-[11px] font-medium text-gray-500 dark:text-gray-400 mb-1">{f.label}</label>
+                <select value={f.value} onChange={e => f.onChange(e.target.value)}
+                  className="w-full px-2 py-1.5 text-xs bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-700 dark:text-gray-300 focus:outline-none">
+                  <option value="">All {f.label}s</option>
+                  {f.options.map(o => <option key={o} value={o}>{o}</option>)}
+                </select>
+              </div>
+            ))}
+            <div>
+              <label className="block text-[11px] font-medium text-gray-500 dark:text-gray-400 mb-1">Update Status</label>
+              <select value={updateStatusFilter} onChange={e => setUpdateStatusFilter(e.target.value)}
+                className="w-full px-2 py-1.5 text-xs bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-700 dark:text-gray-300 focus:outline-none">
+                <option value="">All</option>
+                <option value="Red">🔴 Overdue</option>
+                <option value="Amber">🟠 Due Soon</option>
+                <option value="Green">🟢 On Track</option>
+                <option value="Blue">🔵 Override</option>
+                <option value="Gray">⚫ Closed</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-[11px] font-medium text-gray-500 dark:text-gray-400 mb-1">Repairer Acceptance</label>
+              <select value={repairerAcceptanceFilter} onChange={e => setRepairerAcceptanceFilter(e.target.value)}
+                className="w-full px-2 py-1.5 text-xs bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-700 dark:text-gray-300 focus:outline-none">
+                <option value="">All</option>
+                <option value="awaiting">⏳ Awaiting</option>
+                <option value="accepted">✓ Accepted</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-[11px] font-medium text-gray-500 dark:text-gray-400 mb-1">Backordered Parts</label>
+              <select value={hasBackorderedPartsFilter ? 'true' : ''} onChange={e => setHasBackorderedPartsFilter(e.target.value === 'true')}
+                className="w-full px-2 py-1.5 text-xs bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-700 dark:text-gray-300 focus:outline-none">
+                <option value="">All</option>
+                <option value="true">📦 Has Backorders</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Table */}
+      <div className="flex-1 overflow-auto min-h-0">
         {isLoading ? (
-          <div className="text-center py-12 text-sm text-foreground-muted">Loading claims...</div>
+          <div className="flex items-center justify-center h-32 text-sm text-gray-400">Loading claims...</div>
         ) : filteredClaims.length === 0 ? (
-          <div className="neomorph p-8 text-center m-2">
-            <p className="text-foreground-muted text-sm mb-3">
-              {activeFiltersCount > 0 ? 'No claims match your filters' : 'No claims found'}
-            </p>
-            {activeFiltersCount > 0 ? (
-              <Button onClick={clearAllFilters} className="neomorph-flat text-xs h-8"><X className="w-3.5 h-3.5 mr-1" />Clear</Button>
-            ) : (
-              <Button onClick={() => setShowForm(true)} className="neomorph-flat text-xs h-8"><Plus className="w-3.5 h-3.5 mr-1" />New Claim</Button>
-            )}
+          <div className="flex flex-col items-center justify-center h-32 gap-2">
+            <p className="text-sm text-gray-400">{activeFiltersCount > 0 ? 'No claims match your filters' : 'No claims found'}</p>
+            {activeFiltersCount > 0
+              ? <button onClick={clearAllFilters} className="text-xs text-blue-600 hover:underline">Clear filters</button>
+              : <button onClick={() => setShowForm(true)} className="text-xs text-blue-600 hover:underline">Create first claim</button>
+            }
           </div>
         ) : (
-          <div className="space-y-2 p-1">
-            {availableStatuses.map(statusGroup => {
-              const claimsInGroup = filteredClaims.filter(claim => (claim.job_statuses || []).includes(statusGroup));
-              if (claimsInGroup.length === 0) return null;
-              if (statusFilter.length > 0 && !statusFilter.includes(statusGroup)) return null;
-              return (
-                <div key={statusGroup} className="neomorph px-2 py-2">
-                  <div className="flex items-center gap-2 mb-1.5">
-                    <StatusBadge status={statusGroup} />
-                    <span className="text-xs text-foreground-muted">{claimsInGroup.length}</span>
-                  </div>
-                  <div className="space-y-1">
-                    {claimsInGroup.map(renderClaimCard)}
-                  </div>
-                </div>
-              );
-            })}
-            {(() => {
-              const knownStatuses = new Set(availableStatuses);
-              const ungrouped = filteredClaims.filter(c => {
-                const statuses = c.job_statuses || [];
-                return statuses.length === 0 || !statuses.some(s => knownStatuses.has(s));
-              });
-              if (ungrouped.length === 0 || statusFilter.length > 0) return null;
-              return (
-                <div className="neomorph px-2 py-2">
-                  <div className="flex items-center gap-2 mb-1.5">
-                    <span className="px-2 py-0.5 rounded text-xs font-semibold bg-gray-200 dark:bg-gray-700 text-foreground-muted">Other</span>
-                    <span className="text-xs text-foreground-muted">{ungrouped.length}</span>
-                  </div>
-                  <div className="space-y-1">{ungrouped.map(renderClaimCard)}</div>
-                </div>
-              );
-            })()}
-          </div>
+          <table className="w-full min-w-[700px]">
+            {/* Column headers */}
+            <thead className="sticky top-0 bg-white dark:bg-gray-900 z-10">
+              <tr className="border-b border-gray-200 dark:border-gray-700">
+                {['Job No', 'Reg', 'Client', 'Vehicle', 'Loss Date', 'Insurer', 'Referrer', 'Status'].map(h => (
+                  <th key={h} className="px-4 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {availableStatuses.map(statusGroup => {
+                const claimsInGroup = filteredClaims.filter(c => (c.job_statuses || []).includes(statusGroup));
+                if (claimsInGroup.length === 0) return null;
+                if (statusFilter.length > 0 && !statusFilter.includes(statusGroup)) return null;
+                const isCollapsed = collapsedGroups[statusGroup];
+                const dotColor = getStatusDot(statusGroup);
+                return (
+                  <React.Fragment key={statusGroup}>
+                    {/* Group header row */}
+                    <tr
+                      className="bg-gray-50 dark:bg-gray-800/60 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-800"
+                      onClick={() => toggleGroup(statusGroup)}
+                    >
+                      <td colSpan={8} className="px-4 py-2">
+                        <div className="flex items-center gap-2">
+                          {isCollapsed
+                            ? <ChevronRight className="w-3.5 h-3.5 text-gray-400" />
+                            : <ChevronDown className="w-3.5 h-3.5 text-gray-400" />
+                          }
+                          <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: dotColor }} />
+                          <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">{statusGroup}</span>
+                          <span className="text-xs text-gray-400 font-normal ml-1">{claimsInGroup.length}</span>
+                        </div>
+                      </td>
+                    </tr>
+                    {!isCollapsed && claimsInGroup.map(renderRow)}
+                  </React.Fragment>
+                );
+              })}
+              {/* Ungrouped */}
+              {(() => {
+                const known = new Set(availableStatuses);
+                const ungrouped = filteredClaims.filter(c => {
+                  const st = c.job_statuses || [];
+                  return st.length === 0 || !st.some(s => known.has(s));
+                });
+                if (ungrouped.length === 0 || statusFilter.length > 0) return null;
+                const isCollapsed = collapsedGroups['__other__'];
+                return (
+                  <React.Fragment>
+                    <tr className="bg-gray-50 dark:bg-gray-800/60 cursor-pointer select-none" onClick={() => toggleGroup('__other__')}>
+                      <td colSpan={8} className="px-4 py-2">
+                        <div className="flex items-center gap-2">
+                          {isCollapsed ? <ChevronRight className="w-3.5 h-3.5 text-gray-400" /> : <ChevronDown className="w-3.5 h-3.5 text-gray-400" />}
+                          <span className="w-2 h-2 rounded-full bg-gray-400 flex-shrink-0" />
+                          <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Other</span>
+                          <span className="text-xs text-gray-400 ml-1">{ungrouped.length}</span>
+                        </div>
+                      </td>
+                    </tr>
+                    {!isCollapsed && ungrouped.map(renderRow)}
+                  </React.Fragment>
+                );
+              })()}
+            </tbody>
+          </table>
         )}
+      </div>
+
+      {/* Footer count */}
+      <div className="px-5 py-2 border-t border-gray-100 dark:border-gray-800 text-xs text-gray-400 flex-shrink-0">
+        {filteredClaims.length} of {allClaims.length} claims
       </div>
     </div>
   );
 
-  // ── Split-panel layout ───────────────────────────────────────────────
   return (
-    <div className="h-full flex gap-2 min-h-0">
-      {/* Left panel: fixed-width list, hidden on mobile when detail open */}
-      <div className={`flex-shrink-0 flex flex-col min-h-0 w-full lg:w-[360px] xl:w-[400px] ${selectedClaim ? 'hidden lg:flex' : 'flex'}`}>
-        {claimListPanel}
+    <div className="h-full flex gap-3 min-h-0">
+      {/* Left: claims table */}
+      <div className={`flex-shrink-0 flex flex-col min-h-0 w-full lg:w-[520px] xl:w-[620px] ${selectedClaim ? 'hidden lg:flex' : 'flex'}`}>
+        {claimsListView}
       </div>
 
-      {/* Right panel: detail or placeholder — always visible on desktop */}
+      {/* Right: detail panel */}
       <div className={`flex-1 min-w-0 min-h-0 ${selectedClaim ? 'flex' : 'hidden lg:flex'} flex-col`}>
         {selectedClaim ? (
-          <div className="h-full overflow-hidden">
+          <div className="h-full overflow-hidden rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
             <ClaimDetail
               claim={selectedClaim}
               onClose={() => setSelectedClaim(null)}
@@ -657,13 +460,13 @@ export default function ClaimsPage() {
             />
           </div>
         ) : (
-          <div className="flex-1 flex items-center justify-center neomorph text-center h-full">
+          <div className="flex-1 flex items-center justify-center rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-center h-full">
             <div>
-              <div className="w-16 h-16 rounded-2xl bg-accent/10 flex items-center justify-center mx-auto mb-3">
-                <Search className="w-8 h-8 text-accent/60" />
+              <div className="w-14 h-14 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center mx-auto mb-3">
+                <Search className="w-7 h-7 text-gray-300 dark:text-gray-600" />
               </div>
-              <p className="text-foreground-muted text-sm font-medium">Select a claim to view details</p>
-              <p className="text-foreground-subtle text-xs mt-1">Click any claim from the list</p>
+              <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">Select a claim to view details</p>
+              <p className="text-gray-400 dark:text-gray-500 text-xs mt-1">Click any row from the list</p>
             </div>
           </div>
         )}
