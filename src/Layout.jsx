@@ -294,7 +294,6 @@ export default function Layout({ children, currentPageName }) {
               )}
               <ThemeToggle />
               <Notifications />
-              <UserProfile />
             </div>
           </header>
 
