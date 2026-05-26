@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
@@ -73,7 +72,7 @@ export default function ReferrerCombobox({ value, onChange }) {
             aria-expanded={open}
             className="w-full justify-between neomorph-inset text-gray-700 border-0 focus:ring-0"
           >
-            {selectedReferrerName || "Select or add referrer..."}
+            {selectedReferrerName || "Select a referrer..."}
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
