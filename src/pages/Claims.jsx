@@ -182,7 +182,7 @@ export default function ClaimsPage() {
     return <ClaimFormWrapper onSubmit={(d) => createMutation.mutate(d)} onCancel={() => setShowForm(false)} />;
   }
 
-  // The claims table row
+  // The claims table row (desktop)
   const renderRow = (claim) => {
     const updateStatus = calculateUpdateStatus(claim);
     const isSelected = selectedClaim?.id === claim.id;
@@ -249,6 +249,48 @@ export default function ClaimsPage() {
     );
   };
 
+  // Mobile card view for a single claim
+  const renderMobileCard = (claim) => {
+    const updateStatus = calculateUpdateStatus(claim);
+    const hasBackorder = claimIdsWithBackorders.has(claim.id);
+    const isClosedStatus = (claim.job_statuses || []).some(s => ['Completed','Cancelled','Total Loss'].includes(s));
+    return (
+      <div
+        key={claim.id}
+        onClick={() => setSelectedClaim(claim)}
+        className="px-4 py-3 border-b border-gray-100 dark:border-gray-800 cursor-pointer active:bg-gray-50 dark:active:bg-gray-800/60 transition-colors"
+      >
+        <div className="flex items-center justify-between gap-2">
+          <span
+            className="inline-flex items-center justify-center h-[26px] px-2 rounded-sm text-black bg-yellow-400 border-2 border-yellow-600 shadow-sm uppercase flex-shrink-0"
+            style={{ fontFamily: "'UK Number Plate', 'Arial Black', Impact, sans-serif", fontWeight: 900, fontSize: '13px', letterSpacing: '0.12em', minWidth: '100px' }}
+          >
+            {claim.reg ? formatUKRegistration(claim.reg) : '—'}
+          </span>
+          <div className="flex items-center gap-1 flex-shrink-0">
+            {!isClosedStatus && <UpdateStatusBadge status={updateStatus} small />}
+            {hasBackorder && (
+              <span className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-red-100 text-red-700 text-[10px] font-medium">
+                <Package className="w-2.5 h-2.5" />BO
+              </span>
+            )}
+            {claim.bodyshop_id && !claim.repairer_accepted && !isClosedStatus && (
+              <span className="px-1.5 py-0.5 rounded-full bg-orange-100 text-orange-700 text-[10px] font-medium">
+                <Clock className="w-2.5 h-2.5 inline" />
+              </span>
+            )}
+            <ChevronRight className="w-4 h-4 text-gray-400 ml-1" />
+          </div>
+        </div>
+        <div className="mt-1.5 flex flex-col gap-0.5">
+          <span className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate">{claim.client_name || '—'}</span>
+          <span className="text-xs text-gray-500 dark:text-gray-400 truncate">{claim.make_model || '—'} · {formatDate(claim.loss_date)}</span>
+          {claim.referrer && <span className="text-xs text-gray-400 dark:text-gray-500 truncate">{claim.referrer}</span>}
+        </div>
+      </div>
+    );
+  };
+
   const claimsListView = (
     <div className="flex flex-col h-full min-h-0 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
       <ImportClaimsModal isOpen={showImportModal} onClose={() => setShowImportModal(false)}
@@ -257,27 +299,28 @@ export default function ClaimsPage() {
         selectedFields={userCardFields} onSave={(fields) => updateUserFieldsMutation.mutate(fields)} />
 
       {/* Top bar */}
-      <div className="flex items-center justify-between px-5 py-3.5 border-b border-gray-200 dark:border-gray-800 flex-shrink-0">
-        <h1 className="text-lg font-semibold text-gray-900 dark:text-white">Claims</h1>
-        <div className="flex items-center gap-2">
-          <button onClick={() => setShowFieldsModal(true)} className="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors" title="Customise columns">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-800 flex-shrink-0">
+        <h1 className="text-base lg:text-lg font-semibold text-gray-900 dark:text-white">Claims</h1>
+        <div className="flex items-center gap-1.5">
+          {/* Desktop-only buttons */}
+          <button onClick={() => setShowFieldsModal(true)} className="hidden lg:flex p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors" title="Customise columns">
             <Settings2 className="w-4 h-4" />
           </button>
           {isInternalUser && (
             <>
               <button onClick={() => setShowArchived(!showArchived)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${showArchived ? 'bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-600' : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'}`}>
+                className={`hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${showArchived ? 'bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-600' : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'}`}>
                 <Archive className="w-3.5 h-3.5" />{showArchived ? 'Hide Archived' : 'Archived'}
               </button>
               <button onClick={() => setShowImportModal(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                 <Upload className="w-3.5 h-3.5" />Import
               </button>
             </>
           )}
           <button onClick={() => setShowForm(true)}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#131d47] text-white hover:bg-[#1a2660] transition-colors">
-            <Plus className="w-3.5 h-3.5" />New Claim
+            <Plus className="w-3.5 h-3.5" /><span>New Claim</span>
           </button>
         </div>
       </div>
@@ -289,8 +332,8 @@ export default function ClaimsPage() {
           <input
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
-            placeholder="Search by reg, client, job number, insurer..."
-            className="w-full pl-9 pr-3 py-1.5 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/30 text-gray-900 dark:text-white placeholder-gray-400"
+            placeholder="Search by reg, client, job number..."
+            className="w-full pl-9 pr-3 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/30 text-gray-900 dark:text-white placeholder-gray-400"
           />
         </div>
 
@@ -357,8 +400,8 @@ export default function ClaimsPage() {
         </div>
       )}
 
-      {/* Table */}
-      <div className="flex-1 overflow-auto min-h-0">
+      {/* List / Table */}
+      <div className="flex-1 overflow-auto min-h-0" style={{WebkitOverflowScrolling: 'touch'}}>
         {isLoading ? (
           <div className="flex items-center justify-center h-32 text-sm text-gray-400">Loading claims...</div>
         ) : filteredClaims.length === 0 ? (
@@ -370,18 +413,9 @@ export default function ClaimsPage() {
             }
           </div>
         ) : (
-          <table className="w-full min-w-[700px]">
-            {/* Column headers */}
-            <thead className="sticky top-0 bg-white dark:bg-gray-900 z-10">
-              <tr className="border-b border-gray-200 dark:border-gray-700">
-                <th className="sticky left-0 z-20 bg-white dark:bg-gray-900 px-4 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap">Reg</th>
-                {['Client', 'Vehicle', 'Loss Date', 'Insurer', 'Referrer'].map(h => (
-                  <th key={h} className="px-4 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap">{h}</th>
-                ))}
-                <th className="sticky right-0 z-20 bg-white dark:bg-gray-900 px-4 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap">Status</th>
-              </tr>
-            </thead>
-            <tbody>
+          <>
+            {/* ── MOBILE / TABLET card list (< lg) ── */}
+            <div className="lg:hidden">
               {availableStatuses.map(statusGroup => {
                 const claimsInGroup = filteredClaims.filter(c => (c.job_statuses || []).includes(statusGroup));
                 if (claimsInGroup.length === 0) return null;
@@ -390,28 +424,19 @@ export default function ClaimsPage() {
                 const dotColor = getStatusDot(statusGroup);
                 return (
                   <React.Fragment key={statusGroup}>
-                    {/* Group header row */}
-                    <tr
-                      className="bg-gray-50 dark:bg-gray-800/60 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-800"
+                    <div
+                      className="flex items-center gap-2 px-4 py-2 bg-gray-50 dark:bg-gray-800/60 cursor-pointer select-none border-b border-gray-100 dark:border-gray-800"
                       onClick={() => toggleGroup(statusGroup)}
                     >
-                      <td colSpan={7} className="px-4 py-2">
-                        <div className="flex items-center gap-2">
-                          {isCollapsed
-                            ? <ChevronRight className="w-3.5 h-3.5 text-gray-400" />
-                            : <ChevronDown className="w-3.5 h-3.5 text-gray-400" />
-                          }
-                          <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: dotColor }} />
-                          <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">{statusGroup}</span>
-                          <span className="text-xs text-gray-400 font-normal ml-1">{claimsInGroup.length}</span>
-                        </div>
-                      </td>
-                    </tr>
-                    {!isCollapsed && claimsInGroup.map(renderRow)}
+                      {isCollapsed ? <ChevronRight className="w-3.5 h-3.5 text-gray-400" /> : <ChevronDown className="w-3.5 h-3.5 text-gray-400" />}
+                      <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: dotColor }} />
+                      <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">{statusGroup}</span>
+                      <span className="text-xs text-gray-400 ml-1">{claimsInGroup.length}</span>
+                    </div>
+                    {!isCollapsed && claimsInGroup.map(renderMobileCard)}
                   </React.Fragment>
                 );
               })}
-              {/* Ungrouped */}
               {(() => {
                 const known = new Set(availableStatuses);
                 const ungrouped = filteredClaims.filter(c => {
@@ -422,22 +447,82 @@ export default function ClaimsPage() {
                 const isCollapsed = collapsedGroups['__other__'];
                 return (
                   <React.Fragment>
-                    <tr className="bg-gray-50 dark:bg-gray-800/60 cursor-pointer select-none" onClick={() => toggleGroup('__other__')}>
-                      <td colSpan={7} className="px-4 py-2">
-                        <div className="flex items-center gap-2">
-                          {isCollapsed ? <ChevronRight className="w-3.5 h-3.5 text-gray-400" /> : <ChevronDown className="w-3.5 h-3.5 text-gray-400" />}
-                          <span className="w-2 h-2 rounded-full bg-gray-400 flex-shrink-0" />
-                          <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Other</span>
-                          <span className="text-xs text-gray-400 ml-1">{ungrouped.length}</span>
-                        </div>
-                      </td>
-                    </tr>
-                    {!isCollapsed && ungrouped.map(renderRow)}
+                    <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 dark:bg-gray-800/60 cursor-pointer select-none border-b border-gray-100 dark:border-gray-800" onClick={() => toggleGroup('__other__')}>
+                      {isCollapsed ? <ChevronRight className="w-3.5 h-3.5 text-gray-400" /> : <ChevronDown className="w-3.5 h-3.5 text-gray-400" />}
+                      <span className="w-2 h-2 rounded-full bg-gray-400 flex-shrink-0" />
+                      <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Other</span>
+                      <span className="text-xs text-gray-400 ml-1">{ungrouped.length}</span>
+                    </div>
+                    {!isCollapsed && ungrouped.map(renderMobileCard)}
                   </React.Fragment>
                 );
               })()}
-            </tbody>
-          </table>
+            </div>
+
+            {/* ── DESKTOP table (≥ lg) ── */}
+            <table className="hidden lg:table w-full min-w-[700px]">
+              <thead className="sticky top-0 bg-white dark:bg-gray-900 z-10">
+                <tr className="border-b border-gray-200 dark:border-gray-700">
+                  <th className="sticky left-0 z-20 bg-white dark:bg-gray-900 px-4 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap">Reg</th>
+                  {['Client', 'Vehicle', 'Loss Date', 'Insurer', 'Referrer'].map(h => (
+                    <th key={h} className="px-4 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap">{h}</th>
+                  ))}
+                  <th className="sticky right-0 z-20 bg-white dark:bg-gray-900 px-4 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {availableStatuses.map(statusGroup => {
+                  const claimsInGroup = filteredClaims.filter(c => (c.job_statuses || []).includes(statusGroup));
+                  if (claimsInGroup.length === 0) return null;
+                  if (statusFilter.length > 0 && !statusFilter.includes(statusGroup)) return null;
+                  const isCollapsed = collapsedGroups[statusGroup];
+                  const dotColor = getStatusDot(statusGroup);
+                  return (
+                    <React.Fragment key={statusGroup}>
+                      <tr
+                        className="bg-gray-50 dark:bg-gray-800/60 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-800"
+                        onClick={() => toggleGroup(statusGroup)}
+                      >
+                        <td colSpan={7} className="px-4 py-2">
+                          <div className="flex items-center gap-2">
+                            {isCollapsed ? <ChevronRight className="w-3.5 h-3.5 text-gray-400" /> : <ChevronDown className="w-3.5 h-3.5 text-gray-400" />}
+                            <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: dotColor }} />
+                            <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">{statusGroup}</span>
+                            <span className="text-xs text-gray-400 font-normal ml-1">{claimsInGroup.length}</span>
+                          </div>
+                        </td>
+                      </tr>
+                      {!isCollapsed && claimsInGroup.map(renderRow)}
+                    </React.Fragment>
+                  );
+                })}
+                {(() => {
+                  const known = new Set(availableStatuses);
+                  const ungrouped = filteredClaims.filter(c => {
+                    const st = c.job_statuses || [];
+                    return st.length === 0 || !st.some(s => known.has(s));
+                  });
+                  if (ungrouped.length === 0 || statusFilter.length > 0) return null;
+                  const isCollapsed = collapsedGroups['__other__'];
+                  return (
+                    <React.Fragment>
+                      <tr className="bg-gray-50 dark:bg-gray-800/60 cursor-pointer select-none" onClick={() => toggleGroup('__other__')}>
+                        <td colSpan={7} className="px-4 py-2">
+                          <div className="flex items-center gap-2">
+                            {isCollapsed ? <ChevronRight className="w-3.5 h-3.5 text-gray-400" /> : <ChevronDown className="w-3.5 h-3.5 text-gray-400" />}
+                            <span className="w-2 h-2 rounded-full bg-gray-400 flex-shrink-0" />
+                            <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Other</span>
+                            <span className="text-xs text-gray-400 ml-1">{ungrouped.length}</span>
+                          </div>
+                        </td>
+                      </tr>
+                      {!isCollapsed && ungrouped.map(renderRow)}
+                    </React.Fragment>
+                  );
+                })()}
+              </tbody>
+            </table>
+          </>
         )}
       </div>
 
@@ -450,14 +535,14 @@ export default function ClaimsPage() {
 
   return (
     <div className="h-full flex gap-3 min-h-0 overflow-hidden">
-      {/* Left: claims table — full width when no claim selected */}
-      <div className={`flex flex-col min-h-0 transition-all duration-300 ease-in-out flex-shrink-0 ${selectedClaim ? 'w-full lg:w-[640px] xl:w-[800px] 2xl:w-[900px] hidden lg:flex' : 'w-full flex'}`}>
+      {/* Left: claims list — hidden on mobile when a claim is selected */}
+      <div className={`flex flex-col min-h-0 flex-shrink-0 ${selectedClaim ? 'hidden lg:flex lg:w-[640px] xl:w-[800px] 2xl:w-[900px]' : 'flex w-full'}`}>
         {claimsListView}
       </div>
 
-      {/* Right: detail panel — slides in when claim selected, gone when not */}
+      {/* Right: detail panel — full screen on mobile, side panel on desktop */}
       {selectedClaim && (
-        <div className="flex-1 min-w-0 min-h-0 flex flex-col overflow-hidden">
+        <div className="flex-1 min-w-0 min-h-0 flex flex-col overflow-hidden w-full lg:w-auto">
           <div className="h-full overflow-hidden rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
             <ClaimDetail
               key={selectedClaim.id}

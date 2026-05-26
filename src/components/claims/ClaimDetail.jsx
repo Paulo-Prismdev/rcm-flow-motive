@@ -1158,20 +1158,20 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                       <div className="flex items-center gap-1 flex-shrink-0">
                         <Button 
                           onClick={() => setIsClaimUpdatesOpen(true)}
-                          className="neomorph-flat px-2 md:px-4 py-1.5 md:py-2 bg-accent/10 hover:bg-accent/20 font-medium text-accent text-xs md:text-sm"
+                          className="neomorph-flat px-2.5 md:px-4 py-2 md:py-2 bg-accent/10 hover:bg-accent/20 font-medium text-accent text-xs md:text-sm touch-manipulation"
                           title="Official Updates"
                         >
                           <span className="hidden sm:inline">Updates</span>
-                          <span className="sm:hidden"><Edit className="w-3.5 h-3.5" /></span>
+                          <span className="sm:hidden"><Edit className="w-4 h-4" /></span>
                         </Button>
                         {canEdit && (
                           <Button 
                             onClick={() => setIsChangeStatusModalOpen(true)}
-                            className="neomorph-flat px-2 md:px-4 py-1.5 md:py-2 bg-green-600/10 hover:bg-green-600/20 font-medium text-green-600 text-xs md:text-sm"
+                            className="neomorph-flat px-2.5 md:px-4 py-2 md:py-2 bg-green-600/10 hover:bg-green-600/20 font-medium text-green-600 text-xs md:text-sm touch-manipulation"
                             title="Change Status"
                           >
                             <span className="hidden sm:inline">Change Status</span>
-                            <span className="sm:hidden text-green-600"><RefreshCw className="w-3.5 h-3.5" /></span>
+                            <span className="sm:hidden text-green-600"><RefreshCw className="w-4 h-4" /></span>
                           </Button>
                         )}
                         {canEdit && (
@@ -1330,10 +1330,10 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
           </div>
         )}
 
-        <div className="neomorph p-4 flex-shrink-0" style={{position: 'relative', zIndex: 1}}>
+        <div className="neomorph px-3 py-2 flex-shrink-0" style={{position: 'relative', zIndex: 1}}>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button className="w-full neomorph-flat p-3 flex items-center justify-between">
+              <Button className="w-full neomorph-flat px-3 py-3 flex items-center justify-between touch-manipulation">
                 <div className="flex items-center gap-2">
                   {React.createElement(DETAIL_SECTIONS.find(s => s.id === selectedSection)?.icon || User, { className: "w-5 h-5" })}
                   <span className="font-medium">{DETAIL_SECTIONS.find(s => s.id === selectedSection)?.label || 'Select Section'}</span>

@@ -243,7 +243,7 @@ export default function Layout({ children, currentPageName }) {
             {/* Mobile burger */}
             <button
               onClick={() => setMobileMenuOpen(true)}
-              className="lg:hidden text-gray-500 hover:text-gray-900 dark:hover:text-white"
+              className="lg:hidden p-1.5 -ml-1 text-gray-500 hover:text-gray-900 dark:hover:text-white touch-manipulation"
             >
               <Menu className="w-5 h-5" />
             </button>
