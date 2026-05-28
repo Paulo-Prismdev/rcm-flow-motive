@@ -49,20 +49,7 @@ export default function ClaimsPage() {
   const [showImportModal, setShowImportModal] = useState(false);
   const [hasBackorderedPartsFilter, setHasBackorderedPartsFilter] = useState(false);
   const [claimIdsWithBackorders, setClaimIdsWithBackorders] = useState(new Set());
-  const [collapsedGroups, setCollapsedGroups] = useState(() => {
-    const initial = {};
-    return initial;
-  });
-
-  // Collapse all groups whenever availableStatuses loads/changes
-  useEffect(() => {
-    if (availableStatuses.length > 0) {
-      const collapsed = {};
-      availableStatuses.forEach(s => { collapsed[s] = true; });
-      collapsed['__other__'] = true;
-      setCollapsedGroups(collapsed);
-    }
-  }, [availableStatuses.length]);
+  const [collapsedGroups, setCollapsedGroups] = useState({});
   const queryClient = useQueryClient();
   const { allStatuses: statusConfigs } = useStatusConfigs();
 
@@ -109,6 +96,16 @@ export default function ClaimsPage() {
       .map(s => s.status_name);
     return active.includes('New') ? active : ['New', ...active];
   }, [customStatuses]);
+
+  // Collapse all groups by default on load
+  useEffect(() => {
+    if (availableStatuses.length > 0) {
+      const collapsed = {};
+      availableStatuses.forEach(s => { collapsed[s] = true; });
+      collapsed['__other__'] = true;
+      setCollapsedGroups(collapsed);
+    }
+  }, [availableStatuses.length]);
 
   const uniqueInsurers = [...new Set(claims.map(c => c.insurer).filter(Boolean))].sort();
   const uniqueReferrers = [...new Set(claims.map(c => c.referrer).filter(Boolean))].sort();
