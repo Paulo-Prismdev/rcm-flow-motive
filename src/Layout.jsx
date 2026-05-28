@@ -248,7 +248,7 @@ export default function Layout({ children, currentPageName }) {
         {/* ── MAIN CONTENT ── */}
         <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
           {/* Top bar — hidden on mobile when claim detail is open */}
-          {!claimDetailOpen && <header className="flex-shrink-0 h-12 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 flex items-center gap-3 px-4">
+          {!claimDetailOpen && <header className="flex-shrink-0 h-12 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 flex items-center gap-3 px-4 relative z-30">
             {/* Mobile burger */}
             <button
               onClick={() => setMobileMenuOpen(true)}
