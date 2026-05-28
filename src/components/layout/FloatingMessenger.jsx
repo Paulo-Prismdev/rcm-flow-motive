@@ -62,7 +62,7 @@ export default function FloatingMessenger({ currentUser, isOpen, onClose }) {
   const [showChannelSettings, setShowChannelSettings] = useState(false);
   const [showNewDM, setShowNewDM] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [viewMode, setViewMode] = useState("all"); // all, direct, channels
+  const [viewMode, setViewMode] = useState("direct"); // direct, channels
   
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -180,8 +180,11 @@ export default function FloatingMessenger({ currentUser, isOpen, onClose }) {
   const filteredConversations = conversations.filter(conv => {
     if (viewMode === 'direct') return conv.type === 'direct';
     if (viewMode === 'channels') return conv.type === 'channel';
-    return true;
+    return false;
   });
+
+  const directUnread = conversations.filter(c => c.type === 'direct').reduce((sum, c) => sum + (c.unreadCount || 0), 0);
+  const channelUnread = conversations.filter(c => c.type === 'channel').reduce((sum, c) => sum + (c.unreadCount || 0), 0);
 
   const conversationMessages = React.useMemo(() => {
     if (!selectedConversation) return [];
@@ -457,17 +460,25 @@ export default function FloatingMessenger({ currentUser, isOpen, onClose }) {
             <>
               {/* Tab bar */}
               <div className="flex items-center gap-1 px-3 py-2 border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50 flex-shrink-0">
-                {['all', 'direct', 'channels'].map(mode => (
+                {[
+                  { mode: 'direct', label: 'Direct', unread: directUnread },
+                  { mode: 'channels', label: 'Channels', unread: channelUnread },
+                ].map(({ mode, label, unread }) => (
                   <button
                     key={mode}
                     onClick={() => setViewMode(mode)}
-                    className={`flex-1 px-2 py-1.5 text-xs font-medium rounded-lg capitalize transition-colors ${
+                    className={`flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 text-xs font-medium rounded-lg transition-colors ${
                       viewMode === mode
                         ? 'bg-[#131d47] text-white'
                         : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 dark:text-gray-400'
                     }`}
                   >
-                    {mode}
+                    {label}
+                    {unread > 0 && (
+                      <span className="bg-red-500 text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center flex-shrink-0">
+                        {unread > 9 ? '9+' : unread}
+                      </span>
+                    )}
                   </button>
                 ))}
                 <button
