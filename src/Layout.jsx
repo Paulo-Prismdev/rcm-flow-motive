@@ -248,7 +248,7 @@ export default function Layout({ children, currentPageName }) {
         {/* ── MAIN CONTENT ── */}
         <div className="flex-1 flex flex-col min-w-0 overflow-hidden" style={{isolation: 'isolate'}}>
           {/* Top bar — hidden on mobile when claim detail is open */}
-          {!claimDetailOpen && <header className="flex-shrink-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 flex items-center gap-3 px-4 relative z-30 pointer-events-auto" style={{height: '48px', minHeight: '48px', transform: 'translateZ(0)'}}>
+          {!claimDetailOpen && <header className="hidden lg:flex flex-shrink-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 items-center gap-3 px-4 relative z-30" style={{height: '48px', minHeight: '48px'}}>
             {/* Mobile burger */}
             <button
               onClick={() => setMobileMenuOpen(true)}
