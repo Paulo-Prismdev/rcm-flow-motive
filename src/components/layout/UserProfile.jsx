@@ -14,7 +14,7 @@ import {
 import { LogOut, User } from 'lucide-react';
 
 // Helper functions for avatar
-const getUserInitials = (user) => {
+export const getUserInitials = (user) => {
   if (!user) return '?';
   if (user.full_name) {
     const parts = user.full_name.split(' ');
@@ -29,7 +29,7 @@ const getUserInitials = (user) => {
   return '?';
 };
 
-const getAvatarColor = (email) => {
+export const getAvatarColor = (email) => {
   if (!email) return 'bg-gray-500';
   const colors = [
     'bg-blue-500',
@@ -58,7 +58,7 @@ export default function UserProfile() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button id="user-profile-trigger" className="glass-button w-8 h-8 rounded-full overflow-hidden flex items-center justify-center p-0">
+        <button className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center p-0 focus:outline-none">
           {user?.profile_picture_url ? (
             <img 
               src={user.profile_picture_url} 

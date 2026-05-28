@@ -25,7 +25,6 @@ import {
 } from "lucide-react";
 import GlobalSearch from "./components/layout/GlobalSearch";
 import Notifications from "./components/layout/Notifications";
-import UserProfile from "./components/layout/UserProfile";
 import ThemeToggle from "./components/layout/ThemeToggle";
 import FloatingMessenger from "./components/layout/FloatingMessenger";
 import RepairerLayout from "./components/repairer/RepairerLayout";
@@ -33,6 +32,16 @@ import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { StatusConfigProvider } from './components/shared/StatusConfigContext';
 import UserTypeFixer from './components/shared/UserTypeFixer';
+import { getUserInitials, getAvatarColor } from "./components/layout/UserProfile";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { User } from "lucide-react";
 
 const allDepartments = [
   { name: "Dashboard", url: createPageUrl("Dashboard"), icon: LayoutDashboard, permission: "Dashboard" },
@@ -218,20 +227,76 @@ export default function Layout({ children, currentPageName }) {
 
           {/* User footer */}
           <div className="border-t border-white/10 px-3 py-3">
-            <div 
-              className="flex items-center gap-3 group cursor-pointer w-full hover:bg-white/5 p-2 -mx-2 rounded-lg transition-colors"
-              onClick={() => {
-                const triggerBtn = document.getElementById('user-profile-trigger');
-                if (triggerBtn) triggerBtn.click();
-              }}
-            >
-              <UserProfile />
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-white truncate">{currentUser?.full_name || 'User'}</p>
-                <p className="text-xs text-white/40 truncate">{currentUser?.email || ''}</p>
-                <p className="text-[10px] text-white/30 truncate mt-0.5">Click for profile & logout</p>
-              </div>
-            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <div 
+                  className="flex items-center gap-3 group cursor-pointer w-full hover:bg-white/5 p-2 -mx-2 rounded-lg transition-colors"
+                >
+                  <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
+                    {currentUser?.profile_picture_url ? (
+                      <img 
+                        src={currentUser.profile_picture_url} 
+                        alt="Profile" 
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className={`w-full h-full flex items-center justify-center ${getAvatarColor(currentUser?.email)}`}>
+                        <span className="text-sm font-bold text-white">
+                          {getUserInitials(currentUser)}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-white truncate">{currentUser?.full_name || 'User'}</p>
+                    <p className="text-xs text-white/40 truncate">{currentUser?.email || ''}</p>
+                    <p className="text-[10px] text-white/30 truncate mt-0.5">Click for profile & logout</p>
+                  </div>
+                </div>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="glass-elevated w-56 md:w-64 border-accent z-[10000]" align="end" side="top">
+                <DropdownMenuLabel className="font-normal">
+                  <div className="flex items-center gap-3">
+                    {currentUser?.profile_picture_url ? (
+                      <img 
+                        src={currentUser.profile_picture_url} 
+                        alt="Profile" 
+                        className="w-10 h-10 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className={`w-10 h-10 rounded-full ${getAvatarColor(currentUser?.email)} flex items-center justify-center`}>
+                        <span className="text-sm font-bold text-white">
+                          {getUserInitials(currentUser)}
+                        </span>
+                      </div>
+                    )}
+                    <div className="flex flex-col space-y-1 flex-1 min-w-0">
+                      <p className="text-sm font-medium leading-none truncate">
+                        {currentUser?.full_name || 'User'}
+                      </p>
+                      <p className="text-xs leading-none text-foreground-muted truncate">
+                        {currentUser?.email || 'Loading...'}
+                      </p>
+                    </div>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator className="bg-border" />
+                <Link to={createPageUrl("UserProfile")}>
+                  <DropdownMenuItem className="cursor-pointer">
+                    <User className="mr-2 h-4 w-4" />
+                    <span>My Profile</span>
+                  </DropdownMenuItem>
+                </Link>
+                <DropdownMenuSeparator className="bg-border" />
+                <DropdownMenuItem 
+                  onClick={() => base44.auth.logout()} 
+                  className="cursor-pointer text-red-500 focus:text-red-400"
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Log out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </aside>
 
