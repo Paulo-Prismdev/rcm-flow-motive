@@ -81,7 +81,7 @@ export default function GlobalSearch({ open, onOpenChange }) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-[#131d47] border border-white/10 p-6 text-white">
+      <DialogContent className="bg-[#131d47] border border-white/10 p-6 text-white sm:top-[50%] top-[5%] sm:translate-y-[-50%] translate-y-0 sm:max-h-[85vh] max-h-[55vh]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-white">
             <Search className="w-5 h-5" /> Global Search
@@ -91,9 +91,11 @@ export default function GlobalSearch({ open, onOpenChange }) {
           placeholder="Search by Claim Reg, Estimate Name, etc..."
           value={searchTerm}
           onChange={e => setSearchTerm(e.target.value)}
+          autoFocus
           className="mt-4 bg-white/10 border-white/20 text-white placeholder-white/40 focus:border-white/40"
         />
-        <div className="mt-4 space-y-2 max-h-[60vh] overflow-y-auto">
+        <div className="mt-4 space-y-2 overflow-y-auto flex-1" style={{maxHeight: 'calc(55vh - 120px)'}}>
+
           {isLoading && <div className="flex justify-center p-4"><Loader className="animate-spin text-white/60" /></div>}
           {!isLoading && data && data.length === 0 && debouncedSearchTerm.length > 1 && (
             <p className="text-center text-white/50 py-4">No results found.</p>
