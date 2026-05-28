@@ -48,7 +48,7 @@ export default function CompanyUserGroup({ company, companyType, users, isSuperA
       </button>
 
       {/* Portal sections — always visible below header */}
-      {(companyType === 'bodyshop' || companyType === 'referrer') && (
+      {(company?.company_type === 'repairer' || company?.company_type === 'referrer') && (
         <div className="px-3 py-2 border-t border-gray-200 dark:border-gray-800">
           <CompanyPortalSections
             company={company}

@@ -7,16 +7,21 @@ import { AlertCircle } from "lucide-react";
 
 const USER_TYPES = [
   { value: 'internal', label: 'Internal' },
-  { value: 'external', label: 'External' },
+  { value: 'bodyshop', label: 'Repairer' },
+  { value: 'referrer', label: 'Referrer' },
+  { value: 'supplier', label: 'Supplier' },
+  { value: 'client', label: 'Client' },
 ];
 
 export default function UserEditForm({ user, onSave, onCancel, isSaving }) {
   const [formData, setFormData] = useState({
     full_name: user?.full_name || '',
-    is_super_admin: user?.is_super_admin || false,
-    is_company_admin: user?.is_company_admin || false,
+    role: user?.role || 'user',
     user_type: user?.user_type || 'internal',
     company_id: user?.company_id || '',
+    is_active: user?.is_active ?? true,
+    can_manage_permissions: user?.can_manage_permissions || false,
+    departments_access: user?.departments_access || [],
   });
 
   const { data: companies = [] } = useQuery({
@@ -40,25 +45,18 @@ export default function UserEditForm({ user, onSave, onCancel, isSaving }) {
         />
       </div>
 
-      <div className="space-y-2 border border-border rounded-lg p-3">
-        <label className="flex items-center gap-2 text-sm text-foreground cursor-pointer">
-          <input
-            type="checkbox"
-            checked={formData.is_super_admin}
-            onChange={(e) => setFormData(p => ({ ...p, is_super_admin: e.target.checked }))}
-            className="rounded"
-          />
-          <span>Super Admin (full platform access)</span>
-        </label>
-        <label className="flex items-center gap-2 text-sm text-foreground cursor-pointer">
-          <input
-            type="checkbox"
-            checked={formData.is_company_admin}
-            onChange={(e) => setFormData(p => ({ ...p, is_company_admin: e.target.checked }))}
-            className="rounded"
-          />
-          <span>Company Admin (full company access)</span>
-        </label>
+      <div>
+        <label className="block text-xs font-medium text-foreground-muted mb-1">Role</label>
+        <select
+          value={formData.role || 'user'}
+          onChange={(e) => setFormData(p => ({ ...p, role: e.target.value }))}
+          className="neomorph-inset w-full px-3 py-2 rounded-lg text-sm"
+        >
+          <option value="user">User</option>
+          <option value="admin">Admin</option>
+          <option value="company_admin">Company Admin</option>
+          <option value="super_admin">Super Admin</option>
+        </select>
       </div>
 
       <div>
@@ -72,6 +70,27 @@ export default function UserEditForm({ user, onSave, onCancel, isSaving }) {
             <option key={t.value} value={t.value}>{t.label}</option>
           ))}
         </select>
+      </div>
+
+      <div className="space-y-2 border border-border rounded-lg p-3">
+        <label className="flex items-center gap-2 text-sm text-foreground cursor-pointer">
+          <input
+            type="checkbox"
+            checked={formData.is_active}
+            onChange={(e) => setFormData(p => ({ ...p, is_active: e.target.checked }))}
+            className="rounded"
+          />
+          <span>Active</span>
+        </label>
+        <label className="flex items-center gap-2 text-sm text-foreground cursor-pointer">
+          <input
+            type="checkbox"
+            checked={formData.can_manage_permissions}
+            onChange={(e) => setFormData(p => ({ ...p, can_manage_permissions: e.target.checked }))}
+            className="rounded"
+          />
+          <span>Can Manage Permissions</span>
+        </label>
       </div>
 
       <div>

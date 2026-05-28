@@ -13,16 +13,6 @@
       "default": "user",
       "description": "The role of the user in the app"
     },
-    "is_super_admin": {
-      "type": "boolean",
-      "default": false,
-      "description": "Platform super admin (full access)"
-    },
-    "is_company_admin": {
-      "type": "boolean",
-      "default": false,
-      "description": "Company administrator (full company access)"
-    },
     "company_id": {
       "type": "string",
       "description": "ID of the Company entity this user belongs to"
@@ -150,12 +140,12 @@
       "$or": [
         {
           "user_condition": {
-            "is_super_admin": true
+            "role": "super_admin"
           }
         },
         {
           "user_condition": {
-            "is_company_admin": true
+            "role": "company_admin"
           }
         }
       ]
@@ -164,12 +154,12 @@
       "$or": [
         {
           "user_condition": {
-            "is_super_admin": true
+            "role": "super_admin"
           }
         },
         {
           "user_condition": {
-            "is_company_admin": true
+            "role": "company_admin"
           }
         },
         {
@@ -183,12 +173,12 @@
       "$or": [
         {
           "user_condition": {
-            "is_super_admin": true
+            "role": "super_admin"
           }
         },
         {
           "user_condition": {
-            "is_company_admin": true
+            "role": "company_admin"
           }
         },
         {
@@ -200,7 +190,7 @@
     },
     "delete": {
       "user_condition": {
-        "is_super_admin": true
+        "role": "super_admin"
       }
     }
   }

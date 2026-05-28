@@ -16,6 +16,13 @@ const TABS = [
   { id: "client",    label: "Clients",          icon: User,       type: "client"    },
 ];
 
+const COMPANY_TYPE_MAP = {
+  bodyshop: "repairer",
+  referrer: "referrer",
+  supplier: "supplier",
+  client: "client",
+};
+
 export default function UserManagement() {
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState("internal");
@@ -30,24 +37,9 @@ export default function UserManagement() {
     queryFn: () => base44.entities.User.list('full_name', 500),
   });
 
-  const { data: bodyshops = [] } = useQuery({
-    queryKey: ['Bodyshop'],
-    queryFn: () => base44.entities.Bodyshop.list('name'),
-  });
-
-  const { data: referrers = [] } = useQuery({
-    queryKey: ['Referrer'],
-    queryFn: () => base44.entities.Referrer.list('name'),
-  });
-
-  const { data: suppliers = [] } = useQuery({
-    queryKey: ['Supplier'],
-    queryFn: () => base44.entities.Supplier.list('name'),
-  });
-
-  const { data: clients = [] } = useQuery({
-    queryKey: ['Client'],
-    queryFn: () => base44.entities.Client.list('name'),
+  const { data: companies = [] } = useQuery({
+    queryKey: ['Company'],
+    queryFn: () => base44.entities.Company.list('name'),
   });
 
   const requestFeedbackMutation = useMutation({
@@ -72,26 +64,21 @@ export default function UserManagement() {
   const canManage = isAdmin || currentUser?.can_manage_permissions;
 
   // Build company → users mapping for the active tab
-  const { companies, companyMap } = useMemo(() => {
-    if (activeTab === 'internal') return { companies: [], companyMap: {} };
-    const entityMap = {
-      bodyshop: { list: bodyshops, idField: 'linked_bodyshop_id' },
-      referrer:  { list: referrers,  idField: 'linked_referrer_id'  },
-      supplier:  { list: suppliers,  idField: 'linked_supplier_id'  },
-      client:    { list: clients,    idField: 'linked_client_id'    },
-    };
-    const { list, idField } = entityMap[activeTab] || { list: [], idField: '' };
+  const { companyMap } = useMemo(() => {
+    if (activeTab === 'internal') return { companyMap: {} };
+    const companyType = COMPANY_TYPE_MAP[activeTab];
+    const filteredCompanies = companies.filter(c => c.company_type === companyType);
     const map = {};
-    list.forEach(c => { map[c.id] = []; });
+    filteredCompanies.forEach(c => { map[c.id] = []; });
     // "Unlinked" bucket for users of this type with no matching company
     map['__unlinked__'] = [];
     users.filter(u => u.user_type === activeTab).forEach(u => {
-      const cid = u[idField];
+      const cid = u.company_id;
       if (cid && map[cid] !== undefined) map[cid].push(u);
       else map['__unlinked__'].push(u);
     });
-    return { companies: list, companyMap: map };
-  }, [activeTab, users, bodyshops, referrers, suppliers, clients]);
+    return { companyMap: map };
+  }, [activeTab, users, companies]);
 
   // Internal users (no company grouping)
   const internalUsers = useMemo(() => {
@@ -197,21 +184,24 @@ export default function UserManagement() {
         ) : (
           // Company-grouped view
           <div className="space-y-2">
-            {companies.length === 0 ? (
+            {Object.keys(companyMap).filter(k => k !== '__unlinked__').length === 0 ? (
               <div className="text-center py-6 text-sm text-gray-400">
                 No {TABS.find(t => t.id === activeTab)?.label.toLowerCase()} found.
               </div>
             ) : (
-              companies.map(company => (
-                <CompanyUserGroup
-                  key={company.id}
-                  company={company}
-                  companyType={activeTab}
-                  users={companyMap[company.id] || []}
-                  isSuperAdmin={isSuperAdmin}
-                  onFeedbackRequest={handleFeedbackRequest}
-                />
-              ))
+              Object.keys(companyMap).filter(k => k !== '__unlinked__').map(companyId => {
+                const company = companies.find(c => c.id === companyId);
+                return (
+                  <CompanyUserGroup
+                    key={companyId}
+                    company={company}
+                    companyType={activeTab}
+                    users={companyMap[companyId] || []}
+                    isSuperAdmin={isSuperAdmin}
+                    onFeedbackRequest={handleFeedbackRequest}
+                  />
+                );
+              })
             )}
             {(companyMap['__unlinked__']?.length > 0) && (
               <CompanyUserGroup
