@@ -24,7 +24,8 @@ export default function UserEditForm({ user, onSave, onCancel, isSaving, default
 
   const [formData, setFormData] = useState({
     full_name: user?.full_name || '',
-    role: user?.role || 'user',
+    is_super_admin: user?.is_super_admin || false,
+    is_company_admin: user?.is_company_admin || false,
     user_type: defaultCompanyLink?.type || user?.user_type || 'internal',
     job_role_id: user?.job_role_id || '',
     company_id: user?.company_id || '',
@@ -91,27 +92,34 @@ export default function UserEditForm({ user, onSave, onCancel, isSaving, default
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 pt-3 border-t border-border mt-3">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-xs font-medium text-foreground-muted mb-1">Full Name</label>
-          <Input
-            value={formData.full_name}
-            onChange={(e) => setFormData(p => ({ ...p, full_name: e.target.value }))}
-            className="neomorph-inset text-sm"
+      <div>
+        <label className="block text-xs font-medium text-foreground-muted mb-1">Full Name</label>
+        <Input
+          value={formData.full_name}
+          onChange={(e) => setFormData(p => ({ ...p, full_name: e.target.value }))}
+          className="neomorph-inset text-sm"
+        />
+      </div>
+
+      <div className="space-y-2 border border-border rounded-lg p-3">
+        <label className="flex items-center gap-2 text-sm text-foreground cursor-pointer">
+          <input
+            type="checkbox"
+            checked={formData.is_super_admin}
+            onChange={(e) => setFormData(p => ({ ...p, is_super_admin: e.target.checked }))}
+            className="rounded"
           />
-        </div>
-        <div>
-          <label className="block text-xs font-medium text-foreground-muted mb-1">System Role</label>
-          <select
-            value={formData.role}
-            onChange={(e) => setFormData(p => ({ ...p, role: e.target.value }))}
-            className="neomorph-inset w-full px-3 py-2 rounded-lg text-sm"
-          >
-            <option value="user">User</option>
-            <option value="company_admin">Company Admin</option>
-            <option value="super_admin">Super Admin</option>
-          </select>
-        </div>
+          <span>Super Admin (full platform access)</span>
+        </label>
+        <label className="flex items-center gap-2 text-sm text-foreground cursor-pointer">
+          <input
+            type="checkbox"
+            checked={formData.is_company_admin}
+            onChange={(e) => setFormData(p => ({ ...p, is_company_admin: e.target.checked }))}
+            className="rounded"
+          />
+          <span>Company Admin (full company access)</span>
+        </label>
       </div>
 
       <div>
