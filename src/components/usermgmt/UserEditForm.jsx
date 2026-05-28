@@ -27,6 +27,7 @@ export default function UserEditForm({ user, onSave, onCancel, isSaving, default
     role: user?.role || 'user',
     user_type: defaultCompanyLink?.type || user?.user_type || 'internal',
     job_role_id: user?.job_role_id || '',
+    company_id: user?.company_id || '',
     departments_access: user?.departments_access || ['Dashboard', 'Claims', 'Estimating', 'Engineering', 'Parts', 'Map'],
     can_manage_permissions: user?.can_manage_permissions || false,
     ...(defaultCompanyLink
@@ -61,6 +62,11 @@ export default function UserEditForm({ user, onSave, onCancel, isSaving, default
     queryKey: ['suppliers'],
     queryFn: () => base44.entities.Supplier.list('name'),
     enabled: formData.user_type === 'supplier',
+  });
+
+  const { data: companies = [] } = useQuery({
+    queryKey: ['companies'],
+    queryFn: () => base44.entities.Company.list('name'),
   });
 
   const handleRoleChange = (roleId) => {
@@ -174,6 +180,20 @@ export default function UserEditForm({ user, onSave, onCancel, isSaving, default
           </select>
         </div>
       )}
+
+      <div>
+        <label className="block text-xs font-medium text-foreground-muted mb-1">Company</label>
+        <select
+          value={formData.company_id}
+          onChange={(e) => setFormData(p => ({ ...p, company_id: e.target.value }))}
+          className="neomorph-inset w-full px-3 py-2 rounded-lg text-sm"
+        >
+          <option value="">— Select Company —</option>
+          {companies.map(c => (
+            <option key={c.id} value={c.id}>{c.name}</option>
+          ))}
+        </select>
+      </div>
 
       {isInternal && (
         <>
