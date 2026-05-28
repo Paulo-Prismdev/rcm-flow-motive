@@ -58,7 +58,7 @@ export default function UserProfile() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button className="glass-button w-8 h-8 rounded-full overflow-hidden flex items-center justify-center p-0">
+        <button id="user-profile-trigger" className="glass-button w-8 h-8 rounded-full overflow-hidden flex items-center justify-center p-0">
           {user?.profile_picture_url ? (
             <img 
               src={user.profile_picture_url} 

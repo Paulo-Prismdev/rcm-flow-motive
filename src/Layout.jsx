@@ -218,7 +218,13 @@ export default function Layout({ children, currentPageName }) {
 
           {/* User footer */}
           <div className="border-t border-white/10 px-3 py-3">
-            <div className="flex items-center gap-3 group cursor-pointer w-full hover:bg-white/5 p-2 -mx-2 rounded-lg transition-colors">
+            <div 
+              className="flex items-center gap-3 group cursor-pointer w-full hover:bg-white/5 p-2 -mx-2 rounded-lg transition-colors"
+              onClick={() => {
+                const triggerBtn = document.getElementById('user-profile-trigger');
+                if (triggerBtn) triggerBtn.click();
+              }}
+            >
               <UserProfile />
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-white truncate">{currentUser?.full_name || 'User'}</p>
