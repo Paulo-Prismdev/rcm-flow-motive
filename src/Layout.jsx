@@ -246,10 +246,10 @@ export default function Layout({ children, currentPageName }) {
         )}
 
         {/* ── MAIN CONTENT ── */}
-        <div className="flex-1 flex flex-col min-w-0 overflow-hidden" style={{isolation: 'isolate'}}>
+        <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
           {/* ── MOBILE top bar (< lg) ── */}
           {!claimDetailOpen && (
-            <div className="lg:hidden flex-shrink-0 flex items-center gap-2 px-3 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800" style={{height: '52px', minHeight: '52px'}}>
+            <div className="lg:hidden flex-shrink-0 flex items-center gap-2 px-3 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800" style={{height: '52px', minHeight: '52px', position: 'relative', zIndex: 30}}>
               <button
                 onClick={() => setMobileMenuOpen(true)}
                 className="p-2 rounded-lg text-gray-500 active:bg-gray-100 dark:active:bg-gray-800 touch-manipulation"
