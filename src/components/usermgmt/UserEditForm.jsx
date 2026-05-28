@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { X } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 
 const USER_TYPES = [
   { value: 'internal', label: 'Internal' },
@@ -142,18 +142,25 @@ export default function UserEditForm({ user, onSave, onCancel, isSaving, default
       </div>
 
       <div>
-        <label className="block text-xs font-medium text-foreground-muted mb-1">Company *</label>
-        <select
-          value={formData.company_id}
-          onChange={(e) => setFormData(p => ({ ...p, company_id: e.target.value }))}
-          className="neomorph-inset w-full px-3 py-2 rounded-lg text-sm"
-        >
-          <option value="">— Select Company —</option>
-          {companies.map(c => (
-            <option key={c.id} value={c.id}>{c.name}</option>
-          ))}
-        </select>
-      </div>
+         <label className="block text-xs font-medium text-foreground-muted mb-1">Company *</label>
+         {companies.length === 0 ? (
+           <div className="w-full px-3 py-2 rounded-lg text-sm border border-yellow-500/30 bg-yellow-500/5 flex items-start gap-2">
+             <AlertCircle className="w-4 h-4 text-yellow-600 flex-shrink-0 mt-0.5" />
+             <span className="text-yellow-700 dark:text-yellow-500 text-xs">No companies available. Check user permissions.</span>
+           </div>
+         ) : (
+           <select
+             value={formData.company_id}
+             onChange={(e) => setFormData(p => ({ ...p, company_id: e.target.value }))}
+             className="neomorph-inset w-full px-3 py-2 rounded-lg text-sm"
+           >
+             <option value="">— Select Company —</option>
+             {companies.map(c => (
+               <option key={c.id} value={c.id}>{c.name}</option>
+             ))}
+           </select>
+         )}
+       </div>
 
       {isInternal && (
         <>
