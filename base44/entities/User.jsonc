@@ -2,6 +2,17 @@
   "name": "User",
   "type": "object",
   "properties": {
+    "role": {
+      "type": "string",
+      "enum": [
+        "user",
+        "admin",
+        "super_admin",
+        "company_admin"
+      ],
+      "default": "user",
+      "description": "The role of the user in the app"
+    },
     "is_super_admin": {
       "type": "boolean",
       "default": false,
@@ -20,7 +31,11 @@
       "type": "string",
       "enum": [
         "internal",
-        "external"
+        "external",
+        "bodyshop",
+        "referrer",
+        "supplier",
+        "client"
       ],
       "default": "internal",
       "description": "Internal (platform owner) or external (referrer/repairer)"
@@ -29,11 +44,107 @@
       "type": "boolean",
       "default": true,
       "description": "Whether this user is active"
+    },
+    "phone": {
+      "type": "string",
+      "description": "User phone number"
+    },
+    "address_line_1": {
+      "type": "string",
+      "description": "Street address"
+    },
+    "address_line_2": {
+      "type": "string",
+      "description": "Additional address line"
+    },
+    "town": {
+      "type": "string",
+      "description": "Town or City"
+    },
+    "county": {
+      "type": "string",
+      "description": "County or State"
+    },
+    "postcode": {
+      "type": "string",
+      "description": "Postal code"
+    },
+    "job_title": {
+      "type": "string",
+      "description": "Job title for internal users"
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Employment start date"
+    },
+    "can_manage_permissions": {
+      "type": "boolean",
+      "default": false,
+      "description": "Can this user manage permissions for others"
+    },
+    "departments_access": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "Dashboard",
+          "Claims",
+          "Estimating",
+          "Engineering",
+          "Parts",
+          "Invoicing",
+          "Reports"
+        ]
+      },
+      "default": [],
+      "description": "Departments this user has access to"
+    },
+    "profile_picture_url": {
+      "type": "string",
+      "description": "URL of user profile picture"
+    },
+    "emergency_contact_name": {
+      "type": "string",
+      "description": "Emergency contact person name"
+    },
+    "emergency_contact_phone": {
+      "type": "string",
+      "description": "Emergency contact phone number"
+    },
+    "annual_leave_allowance": {
+      "type": "number",
+      "default": 25,
+      "description": "Annual leave days allowance"
+    },
+    "annual_leave_taken": {
+      "type": "number",
+      "default": 0,
+      "description": "Annual leave days taken"
+    },
+    "linked_referrer_id": {
+      "type": "string",
+      "description": "ID of linked Referrer entity"
+    },
+    "linked_bodyshop_id": {
+      "type": "string",
+      "description": "ID of linked Bodyshop entity"
+    },
+    "linked_supplier_id": {
+      "type": "string",
+      "description": "ID of linked Supplier entity"
+    },
+    "linked_client_id": {
+      "type": "string",
+      "description": "ID of linked Client entity"
+    },
+    "notification_preferences": {
+      "type": "object",
+      "description": "User notification preferences",
+      "additionalProperties": true
     }
   },
-  "required": [
-    "company_id"
-  ],
+  "required": [],
   "rls": {
     "create": {
       "$or": [
