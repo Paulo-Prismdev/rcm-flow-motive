@@ -218,13 +218,15 @@ export default function Layout({ children, currentPageName }) {
 
           {/* User footer */}
           <div className="border-t border-white/10 px-3 py-3">
-            <div className="flex items-center gap-3">
-              <div className="flex-shrink-0">
+            <div className="flex items-center gap-3 group cursor-pointer">
+              <div className="flex-shrink-0 relative">
                 <UserProfile />
+                <div className="absolute inset-0 rounded-full bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-white truncate">{currentUser?.full_name || 'User'}</p>
-                <p className="text-xs text-white/40 truncate">{currentUser?.role || ''}</p>
+                <p className="text-xs text-white/40 truncate">{currentUser?.email || ''}</p>
+                <p className="text-[10px] text-white/30 truncate mt-0.5">Click for profile & logout</p>
               </div>
             </div>
           </div>
