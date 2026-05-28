@@ -247,43 +247,40 @@ export default function Layout({ children, currentPageName }) {
 
         {/* ── MAIN CONTENT ── */}
         <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-          {/* ── MOBILE top bar (< lg) ── */}
+          {/* ── MOBILE bottom tab bar (< lg) ── */}
           {!claimDetailOpen && (
-            <div className="lg:hidden flex-shrink-0 flex items-center gap-2 px-3 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800" style={{height: '52px', minHeight: '52px', position: 'relative', zIndex: 30}}>
-              <button
-                onClick={() => setMobileMenuOpen(true)}
-                className="p-2 rounded-lg text-gray-500 active:bg-gray-100 dark:active:bg-gray-800 touch-manipulation"
-              >
+            <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 flex items-center justify-around px-2 safe-area-inset-bottom" style={{height: '60px', zIndex: 9999}}>
+              <button onClick={() => setMobileMenuOpen(true)} className="flex flex-col items-center justify-center gap-0.5 p-3 text-gray-500 dark:text-gray-400 touch-manipulation min-w-[44px] min-h-[44px]">
                 <Menu className="w-5 h-5" />
+                <span className="text-[9px]">Menu</span>
               </button>
-              <div className="flex-1" />
-              <button
-                onClick={() => window.location.reload()}
-                className="p-2 rounded-lg text-gray-500 active:bg-gray-100 dark:active:bg-gray-800 touch-manipulation"
-              >
-                <RefreshCw className="w-5 h-5" />
-              </button>
-              <button
-                onClick={() => setSearchOpen(true)}
-                className="p-2 rounded-lg text-gray-500 active:bg-gray-100 dark:active:bg-gray-800 touch-manipulation"
-              >
+              <button onClick={() => setSearchOpen(true)} className="flex flex-col items-center justify-center gap-0.5 p-3 text-gray-500 dark:text-gray-400 touch-manipulation min-w-[44px] min-h-[44px]">
                 <Search className="w-5 h-5" />
+                <span className="text-[9px]">Search</span>
               </button>
               {isInternalUser && (
-                <button
-                  onClick={() => setMessagesOpen(true)}
-                  className="relative p-2 rounded-lg text-gray-500 active:bg-gray-100 dark:active:bg-gray-800 touch-manipulation"
-                >
+                <button onClick={() => setMessagesOpen(true)} className="relative flex flex-col items-center justify-center gap-0.5 p-3 text-gray-500 dark:text-gray-400 touch-manipulation min-w-[44px] min-h-[44px]">
                   <MessageSquare className="w-5 h-5" />
+                  <span className="text-[9px]">Messages</span>
                   {unreadMessagesCount > 0 && (
-                    <span className="absolute top-1 right-1 bg-red-500 text-white text-[9px] rounded-full w-3.5 h-3.5 flex items-center justify-center font-bold">
+                    <span className="absolute top-1 right-2 bg-red-500 text-white text-[9px] rounded-full w-4 h-4 flex items-center justify-center font-bold">
                       {unreadMessagesCount > 9 ? '9+' : unreadMessagesCount}
                     </span>
                   )}
                 </button>
               )}
-              <ThemeToggle />
-              <Notifications />
+              <button onClick={() => window.location.reload()} className="flex flex-col items-center justify-center gap-0.5 p-3 text-gray-500 dark:text-gray-400 touch-manipulation min-w-[44px] min-h-[44px]">
+                <RefreshCw className="w-5 h-5" />
+                <span className="text-[9px]">Refresh</span>
+              </button>
+              <div className="flex flex-col items-center justify-center gap-0.5 touch-manipulation min-w-[44px] min-h-[44px]">
+                <ThemeToggle />
+                <span className="text-[9px] text-gray-500">Theme</span>
+              </div>
+              <div className="flex flex-col items-center justify-center gap-0.5 touch-manipulation min-w-[44px] min-h-[44px]">
+                <Notifications />
+                <span className="text-[9px] text-gray-500">Alerts</span>
+              </div>
             </div>
           )}
 
@@ -327,7 +324,7 @@ export default function Layout({ children, currentPageName }) {
           )}
 
           {/* Page content */}
-          <main className="flex-1 overflow-hidden p-3 min-h-0 relative" style={{WebkitOverflowScrolling: 'touch', touchAction: 'auto'}}>
+          <main className="flex-1 overflow-hidden p-3 min-h-0 relative lg:pb-3 pb-16" style={{WebkitOverflowScrolling: 'touch', touchAction: 'auto'}}>
             {children}
           </main>
         </div>
