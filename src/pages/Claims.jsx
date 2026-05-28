@@ -49,7 +49,20 @@ export default function ClaimsPage() {
   const [showImportModal, setShowImportModal] = useState(false);
   const [hasBackorderedPartsFilter, setHasBackorderedPartsFilter] = useState(false);
   const [claimIdsWithBackorders, setClaimIdsWithBackorders] = useState(new Set());
-  const [collapsedGroups, setCollapsedGroups] = useState({});
+  const [collapsedGroups, setCollapsedGroups] = useState(() => {
+    const initial = {};
+    return initial;
+  });
+
+  // Collapse all groups whenever availableStatuses loads/changes
+  useEffect(() => {
+    if (availableStatuses.length > 0) {
+      const collapsed = {};
+      availableStatuses.forEach(s => { collapsed[s] = true; });
+      collapsed['__other__'] = true;
+      setCollapsedGroups(collapsed);
+    }
+  }, [availableStatuses.length]);
   const queryClient = useQueryClient();
   const { allStatuses: statusConfigs } = useStatusConfigs();
 
