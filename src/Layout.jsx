@@ -15,7 +15,6 @@ import {
   Settings,
   Menu,
   X,
-  CalendarDays,
   MessageSquare,
   LogOut,
   BarChart3,
@@ -47,6 +46,7 @@ const allDepartments = [
   { name: "Reports", url: createPageUrl("Reports"), icon: BarChart3, permission: "Reports" },
   { name: "Map", url: createPageUrl("BodyshopMap"), icon: Search, permission: "Map" },
 ];
+
 
 export default function Layout({ children, currentPageName }) {
   const location = useLocation();
@@ -203,14 +203,7 @@ export default function Layout({ children, currentPageName }) {
                       className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-white/70 hover:bg-white/10 hover:text-white transition-all">
                       <Archive className="w-4 h-4" /><span>Archive</span>
                     </Link>
-                    <Link to={createPageUrl("CompanyIdLookup")} onClick={() => setMobileMenuOpen(false)}
-                      className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-white/70 hover:bg-white/10 hover:text-white transition-all">
-                      <Users className="w-4 h-4" /><span>Company ID Lookup</span>
-                    </Link>
-                    <Link to={createPageUrl("EmployeeManagement")} onClick={() => setMobileMenuOpen(false)}
-                      className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-white/70 hover:bg-white/10 hover:text-white transition-all">
-                      <CalendarDays className="w-4 h-4" /><span>Employee Mgmt</span>
-                    </Link>
+
                     {isSuperAdmin && (
                       <Link to={createPageUrl("FeedbackHub")} onClick={() => setMobileMenuOpen(false)}
                         className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-white/70 hover:bg-white/10 hover:text-white transition-all">
