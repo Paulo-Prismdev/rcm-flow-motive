@@ -29,9 +29,9 @@ export default function ThemeToggle() {
   return (
     <button
       onClick={toggleTheme}
-      className="glass-button w-8 h-8 flex items-center justify-center"
+      className="flex items-center justify-center touch-manipulation"
     >
-      {isDark ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
+      {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
     </button>
   );
 }
