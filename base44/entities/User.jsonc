@@ -29,58 +29,6 @@
       "type": "boolean",
       "default": true,
       "description": "Whether this user is active"
-    },
-    "enabled_features": {
-      "type": "array",
-      "items": {
-        "type": "string",
-        "enum": [
-          "dashboard",
-          "claims_view",
-          "claims_manage",
-          "jobs_view",
-          "jobs_assign",
-          "invoicing_view",
-          "invoicing_manage",
-          "reports",
-          "repairer_network",
-          "referrer_network",
-          "user_management",
-          "company_settings",
-          "platform_settings",
-          "billing"
-        ]
-      },
-      "description": "Features enabled for this user (subset of company features)",
-      "default": []
-    },
-    "linked_referrer_id": {
-      "type": "string",
-      "description": "ID of linked Referrer entity (for external referrer users)"
-    },
-    "linked_bodyshop_id": {
-      "type": "string",
-      "description": "ID of linked Bodyshop entity (for external repairer users)"
-    },
-    "linked_supplier_id": {
-      "type": "string",
-      "description": "ID of linked Supplier entity"
-    },
-    "linked_client_id": {
-      "type": "string",
-      "description": "ID of linked Client entity"
-    },
-    "linked_claim_id": {
-      "type": "string",
-      "description": "ID of linked Claim entity"
-    },
-    "departments_access": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      },
-      "description": "Department access (legacy field for backward compatibility)",
-      "default": []
     }
   },
   "required": [
