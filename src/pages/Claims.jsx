@@ -361,7 +361,7 @@ export default function ClaimsPage() {
       {/* Filter panel */}
       {showFilters && (
         <div className="px-5 py-3 border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/30 flex-shrink-0">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
             {[
               { label: 'Claim Type', value: claimTypeFilter, onChange: setClaimTypeFilter, options: ['Credit Repair','Fault Claim','Non-Fault Claim','Total Loss','Glass Claim'] },
               { label: 'Insurer', value: insurerFilter, onChange: setInsurerFilter, options: uniqueInsurers },
@@ -369,41 +369,41 @@ export default function ClaimsPage() {
               { label: 'Repairer', value: repairerFilter, onChange: setRepairerFilter, options: uniqueRepairers },
             ].map(f => (
               <div key={f.label}>
-                <label className="block text-[11px] font-medium text-gray-500 dark:text-gray-400 mb-1">{f.label}</label>
+                <label className="block text-[10px] font-medium text-gray-400 dark:text-gray-500 mb-0.5">{f.label}</label>
                 <select value={f.value} onChange={e => f.onChange(e.target.value)}
-                  className="w-full px-2 py-1.5 text-xs bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-700 dark:text-gray-300 focus:outline-none">
+                  className="w-full px-2 py-1 text-[11px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-700 dark:text-gray-300 focus:outline-none">
                   <option value="">All {f.label}s</option>
                   {f.options.map(o => <option key={o} value={o}>{o}</option>)}
                 </select>
               </div>
             ))}
             <div>
-              <label className="block text-[11px] font-medium text-gray-500 dark:text-gray-400 mb-1">Update Status</label>
+              <label className="block text-[10px] font-medium text-gray-400 dark:text-gray-500 mb-0.5">Update Status</label>
               <select value={updateStatusFilter} onChange={e => setUpdateStatusFilter(e.target.value)}
-                className="w-full px-2 py-1.5 text-xs bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-700 dark:text-gray-300 focus:outline-none">
+                className="w-full px-2 py-1 text-[11px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-700 dark:text-gray-300 focus:outline-none">
                 <option value="">All</option>
-                <option value="Red">🔴 Overdue</option>
-                <option value="Amber">🟠 Due Soon</option>
-                <option value="Green">🟢 On Track</option>
-                <option value="Blue">🔵 Override</option>
-                <option value="Gray">⚫ Closed</option>
+                <option value="Red">Overdue</option>
+                <option value="Amber">Due Soon</option>
+                <option value="Green">On Track</option>
+                <option value="Blue">Override</option>
+                <option value="Gray">Closed</option>
               </select>
             </div>
             <div>
-              <label className="block text-[11px] font-medium text-gray-500 dark:text-gray-400 mb-1">Repairer Acceptance</label>
+              <label className="block text-[10px] font-medium text-gray-400 dark:text-gray-500 mb-0.5">Repairer Acceptance</label>
               <select value={repairerAcceptanceFilter} onChange={e => setRepairerAcceptanceFilter(e.target.value)}
-                className="w-full px-2 py-1.5 text-xs bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-700 dark:text-gray-300 focus:outline-none">
+                className="w-full px-2 py-1 text-[11px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-700 dark:text-gray-300 focus:outline-none">
                 <option value="">All</option>
-                <option value="awaiting">⏳ Awaiting</option>
-                <option value="accepted">✓ Accepted</option>
+                <option value="awaiting">Awaiting</option>
+                <option value="accepted">Accepted</option>
               </select>
             </div>
             <div>
-              <label className="block text-[11px] font-medium text-gray-500 dark:text-gray-400 mb-1">Backordered Parts</label>
+              <label className="block text-[10px] font-medium text-gray-400 dark:text-gray-500 mb-0.5">Backordered Parts</label>
               <select value={hasBackorderedPartsFilter ? 'true' : ''} onChange={e => setHasBackorderedPartsFilter(e.target.value === 'true')}
-                className="w-full px-2 py-1.5 text-xs bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-700 dark:text-gray-300 focus:outline-none">
+                className="w-full px-2 py-1 text-[11px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-700 dark:text-gray-300 focus:outline-none">
                 <option value="">All</option>
-                <option value="true">📦 Has Backorders</option>
+                <option value="true">Has Backorders</option>
               </select>
             </div>
           </div>
