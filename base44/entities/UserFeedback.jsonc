@@ -1,0 +1,95 @@
+{
+  "name": "UserFeedback",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "ID of the user providing feedback"
+    },
+    "user_email": {
+      "type": "string",
+      "description": "Email of the user"
+    },
+    "user_type": {
+      "type": "string",
+      "enum": [
+        "referrer",
+        "bodyshop"
+      ],
+      "description": "Type of user providing feedback"
+    },
+    "rating": {
+      "type": "string",
+      "enum": [
+        "love",
+        "good",
+        "ok",
+        "hate"
+      ],
+      "description": "Sentiment rating"
+    },
+    "comment": {
+      "type": "string",
+      "description": "Optional comment, mandatory if rating is 'hate'"
+    },
+    "prompt_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the pop-up was shown"
+    },
+    "submission_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the feedback was submitted"
+    }
+  },
+  "required": [
+    "user_id",
+    "user_email",
+    "user_type",
+    "rating"
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "user_type": "internal"
+          }
+        },
+        {
+          "created_by": "{{user.email}}"
+        }
+      ]
+    },
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "user_type": "internal"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

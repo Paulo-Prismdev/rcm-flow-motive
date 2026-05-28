@@ -1,0 +1,180 @@
+{
+  "name": "DashboardConfig",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "ID of the user who owns this dashboard configuration. Empty for company-wide dashboards."
+    },
+    "dashboard_type": {
+      "type": "string",
+      "enum": [
+        "user",
+        "company",
+        "department"
+      ],
+      "default": "user",
+      "description": "Type of dashboard: user (personal), company (admin-only), or department (default templates)"
+    },
+    "department": {
+      "type": "string",
+      "enum": [
+        "Home",
+        "Claims",
+        "Estimating",
+        "Engineering",
+        "Parts",
+        "Invoicing"
+      ],
+      "description": "Which department this dashboard is for (if dashboard_type is department)"
+    },
+    "widgets": {
+      "type": "array",
+      "description": "Array of widget configurations",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "StatCard",
+              "RecentActivity",
+              "InvoiceTracking",
+              "CustomMetric",
+              "QuickActions",
+              "ActivityFeed",
+              "DepartmentStats",
+              "StatusBreakdown",
+              "RecentItems"
+            ]
+          },
+          "position": {
+            "type": "object",
+            "properties": {
+              "x": {
+                "type": "number"
+              },
+              "y": {
+                "type": "number"
+              },
+              "w": {
+                "type": "number"
+              },
+              "h": {
+                "type": "number"
+              }
+            }
+          },
+          "config": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      },
+      "default": []
+    },
+    "layout_version": {
+      "type": "number",
+      "default": 1
+    }
+  },
+  "required": [
+    "dashboard_type"
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "$and": [
+            {
+              "data.dashboard_type": "user"
+            },
+            {
+              "data.user_id": "{{user.id}}"
+            }
+          ]
+        }
+      ]
+    },
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "data.dashboard_type": "company"
+        },
+        {
+          "$and": [
+            {
+              "data.dashboard_type": "department"
+            },
+            {
+              "user_condition": {
+                "user_type": "internal"
+              }
+            }
+          ]
+        },
+        {
+          "$and": [
+            {
+              "data.dashboard_type": "user"
+            },
+            {
+              "data.user_id": "{{user.id}}"
+            }
+          ]
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "$and": [
+            {
+              "data.dashboard_type": "user"
+            },
+            {
+              "data.user_id": "{{user.id}}"
+            }
+          ]
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "$and": [
+            {
+              "data.dashboard_type": "user"
+            },
+            {
+              "data.user_id": "{{user.id}}"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,112 @@
+{
+  "name": "SicknessRecord",
+  "type": "object",
+  "properties": {
+    "employee_email": {
+      "type": "string",
+      "description": "Email of the employee"
+    },
+    "employee_name": {
+      "type": "string",
+      "description": "Name of the employee"
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Start date of sickness"
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date",
+      "description": "End date of sickness (null if ongoing)"
+    },
+    "total_days": {
+      "type": "number",
+      "description": "Total number of days sick"
+    },
+    "reason": {
+      "type": "string",
+      "description": "Reason for sickness (optional)"
+    },
+    "certified": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether a doctor's note was provided"
+    },
+    "return_to_work_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Actual return to work date"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Additional notes"
+    }
+  },
+  "required": [
+    "employee_email",
+    "employee_name",
+    "start_date"
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "can_manage_permissions": true
+          }
+        }
+      ]
+    },
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "can_manage_permissions": true
+          }
+        },
+        {
+          "employee_email": "{{user.email}}"
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "can_manage_permissions": true
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "can_manage_permissions": true
+          }
+        }
+      ]
+    }
+  }
+}

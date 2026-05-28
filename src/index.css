@@ -203,10 +203,3 @@ button:focus-visible {
 .widget-resizing .resize-handle {
   pointer-events: all;
 }
-
-/* Hide the global top bar on mobile/tablet when a claim detail is open */
-@media (max-width: 1023px) {
-  body.claim-detail-open header {
-    display: none !important;
-  }
-}

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import {
@@ -53,6 +53,15 @@ export default function Layout({ children, currentPageName }) {
   const [searchOpen, setSearchOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [messagesOpen, setMessagesOpen] = useState(false);
+  const [claimDetailOpen, setClaimDetailOpen] = useState(false);
+
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      setClaimDetailOpen(document.body.classList.contains('claim-detail-open'));
+    });
+    observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    return () => observer.disconnect();
+  }, []);
 
   const { data: currentUser } = useQuery({
     queryKey: ['currentUser'],
@@ -238,8 +247,8 @@ export default function Layout({ children, currentPageName }) {
 
         {/* ── MAIN CONTENT ── */}
         <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-          {/* Top bar */}
-          <header className="flex-shrink-0 h-12 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 flex items-center gap-3 px-4">
+          {/* Top bar — hidden on mobile when claim detail is open */}
+          {!claimDetailOpen && <header className="flex-shrink-0 h-12 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 flex items-center gap-3 px-4">
             {/* Mobile burger */}
             <button
               onClick={() => setMobileMenuOpen(true)}
@@ -284,7 +293,7 @@ export default function Layout({ children, currentPageName }) {
               <ThemeToggle />
               <Notifications />
             </div>
-          </header>
+          </header>}
 
           {/* Page content */}
           <main className="flex-1 overflow-hidden p-3 min-h-0" style={{WebkitOverflowScrolling: 'touch', touchAction: 'auto'}}>

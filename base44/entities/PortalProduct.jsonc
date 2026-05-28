@@ -1,0 +1,116 @@
+{
+  "name": "PortalProduct",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Product or service name"
+    },
+    "description": {
+      "type": "string",
+      "description": "Description of the product/service"
+    },
+    "icon": {
+      "type": "string",
+      "enum": [
+        "Calculator",
+        "Package",
+        "FileText",
+        "TrendingUp",
+        "Wrench",
+        "Shield",
+        "Truck",
+        "Clock",
+        "DollarSign",
+        "Users"
+      ],
+      "default": "Package",
+      "description": "Icon to display"
+    },
+    "color": {
+      "type": "string",
+      "enum": [
+        "blue",
+        "green",
+        "purple",
+        "orange",
+        "red",
+        "yellow",
+        "indigo",
+        "pink"
+      ],
+      "default": "blue",
+      "description": "Color theme for the product card"
+    },
+    "features": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of features/benefits"
+    },
+    "link_url": {
+      "type": "string",
+      "description": "Optional URL for Learn More button"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this product is visible"
+    },
+    "sort_order": {
+      "type": "number",
+      "default": 0,
+      "description": "Order in which products appear"
+    }
+  },
+  "required": [
+    "name",
+    "description"
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "user_type": "internal"
+          }
+        }
+      ]
+    },
+    "read": true,
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "user_type": "internal"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "user_type": "internal"
+          }
+        }
+      ]
+    }
+  }
+}

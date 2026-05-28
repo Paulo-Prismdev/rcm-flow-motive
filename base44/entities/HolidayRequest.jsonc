@@ -88,7 +88,7 @@
         },
         {
           "user_condition": {
-            "can_manage_permissions": true
+            "data.can_manage_permissions": true
           }
         },
         {
@@ -105,7 +105,7 @@
         },
         {
           "user_condition": {
-            "can_manage_permissions": true
+            "data.can_manage_permissions": true
           }
         },
         {

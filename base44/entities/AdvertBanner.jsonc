@@ -1,0 +1,85 @@
+{
+  "name": "AdvertBanner",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Name/label for this advert"
+    },
+    "image_url": {
+      "type": "string",
+      "description": "URL of the desktop advert image (recommended size: 1200x150px)"
+    },
+    "mobile_image_url": {
+      "type": "string",
+      "description": "URL of the mobile advert image (recommended size: 600x200px)"
+    },
+    "link_url": {
+      "type": "string",
+      "description": "Optional URL to open when the advert is clicked"
+    },
+    "alt_text": {
+      "type": "string",
+      "description": "Alt text for accessibility"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this advert is currently active"
+    },
+    "sort_order": {
+      "type": "number",
+      "default": 0,
+      "description": "Order in which adverts appear (lower numbers first)"
+    }
+  },
+  "required": [
+    "name",
+    "image_url"
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "user_type": "internal"
+          }
+        }
+      ]
+    },
+    "read": true,
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "user_type": "internal"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "user_type": "internal"
+          }
+        }
+      ]
+    }
+  }
+}

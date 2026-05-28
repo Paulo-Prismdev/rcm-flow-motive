@@ -110,7 +110,7 @@
   ],
   "rls": {
     "create": {
-      "sender_email": "{{user.email}}"
+      "data.sender_email": "{{user.email}}"
     },
     "read": {
       "$or": [
@@ -120,10 +120,10 @@
           }
         },
         {
-          "sender_email": "{{user.email}}"
+          "data.sender_email": "{{user.email}}"
         },
         {
-          "channel_members": {
+          "data.channel_members": {
             "$in": [
               "{{user.email}}"
             ]
@@ -139,7 +139,7 @@
           }
         },
         {
-          "sender_email": "{{user.email}}"
+          "data.sender_email": "{{user.email}}"
         }
       ]
     },
@@ -151,7 +151,7 @@
           }
         },
         {
-          "sender_email": "{{user.email}}"
+          "data.sender_email": "{{user.email}}"
         }
       ]
     }

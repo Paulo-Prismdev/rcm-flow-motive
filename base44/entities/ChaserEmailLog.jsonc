@@ -1,0 +1,107 @@
+{
+  "name": "ChaserEmailLog",
+  "type": "object",
+  "properties": {
+    "claim_id": {
+      "type": "string",
+      "description": "ID of the claim this email was sent for"
+    },
+    "rule_id": {
+      "type": "string",
+      "description": "ID of the ChaserEmailRule that triggered this"
+    },
+    "rule_name": {
+      "type": "string",
+      "description": "Name of the rule (for reference)"
+    },
+    "recipient_email": {
+      "type": "string",
+      "description": "Email address the chaser was sent to"
+    },
+    "recipient_type": {
+      "type": "string",
+      "description": "Type of recipient (Client, Referrer, etc.)"
+    },
+    "email_subject": {
+      "type": "string",
+      "description": "The actual subject that was sent"
+    },
+    "email_body": {
+      "type": "string",
+      "description": "The actual body that was sent"
+    },
+    "sent_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the email was sent"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Sent",
+        "Failed",
+        "Skipped"
+      ],
+      "default": "Sent",
+      "description": "Status of the email send"
+    },
+    "error_message": {
+      "type": "string",
+      "description": "Error message if failed"
+    },
+    "claim_status_at_send": {
+      "type": "string",
+      "description": "The claim status when email was sent"
+    },
+    "days_in_status_at_send": {
+      "type": "number",
+      "description": "How many days claim was in status when sent"
+    }
+  },
+  "required": [
+    "claim_id",
+    "rule_id",
+    "recipient_email",
+    "sent_at"
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "user_type": "internal"
+          }
+        }
+      ]
+    },
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "user_type": "internal"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

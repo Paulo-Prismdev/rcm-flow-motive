@@ -1,0 +1,301 @@
+{
+  "name": "PdfTemplateConfig",
+  "type": "object",
+  "properties": {
+    "template_name": {
+      "type": "string",
+      "description": "Name of the PDF template configuration"
+    },
+    "template_type": {
+      "type": "string",
+      "enum": [
+        "standard",
+        "driversure",
+        "orkin",
+        "custom"
+      ],
+      "default": "custom",
+      "description": "Type of template"
+    },
+    "logo_url": {
+      "type": "string",
+      "description": "URL of the company logo to display"
+    },
+    "logo_size": {
+      "type": "object",
+      "properties": {
+        "width": {
+          "type": "number",
+          "default": 50
+        },
+        "height": {
+          "type": "number",
+          "default": 30
+        }
+      },
+      "description": "Logo dimensions in mm"
+    },
+    "header_config": {
+      "type": "object",
+      "properties": {
+        "show_logo": {
+          "type": "boolean",
+          "default": true
+        },
+        "show_claim_type": {
+          "type": "boolean",
+          "default": true
+        },
+        "custom_text": {
+          "type": "string"
+        }
+      }
+    },
+    "sections_config": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "section_id": {
+            "type": "string"
+          },
+          "section_name": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean",
+            "default": true
+          },
+          "order": {
+            "type": "number"
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "field_id": {
+                  "type": "string"
+                },
+                "field_label": {
+                  "type": "string"
+                },
+                "enabled": {
+                  "type": "boolean",
+                  "default": true
+                },
+                "custom_label": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "description": "Configuration for sections and fields to include",
+      "default": []
+    },
+    "footer_config": {
+      "type": "object",
+      "properties": {
+        "show_footer": {
+          "type": "boolean",
+          "default": true
+        },
+        "company_name": {
+          "type": "string",
+          "default": "Artura"
+        },
+        "address": {
+          "type": "string"
+        },
+        "contact_info": {
+          "type": "string"
+        },
+        "website": {
+          "type": "string"
+        }
+      }
+    },
+    "payment_terms": {
+      "type": "object",
+      "properties": {
+        "show_section": {
+          "type": "boolean",
+          "default": true
+        },
+        "payment_method": {
+          "type": "string"
+        },
+        "terms_text": {
+          "type": "string"
+        }
+      }
+    },
+    "invoice_deductions": {
+      "type": "object",
+      "properties": {
+        "show_section": {
+          "type": "boolean",
+          "default": true
+        },
+        "custom_deductions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "label": {
+                "type": "string"
+              },
+              "value": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "is_default": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this is a default template"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this template is active"
+    },
+    "visibility": {
+      "type": "string",
+      "enum": [
+        "private",
+        "team",
+        "organization"
+      ],
+      "default": "private",
+      "description": "Visibility level: private (only creator), team (shared with specific users), organization (all internal users)"
+    },
+    "shared_with_users": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Array of user emails this template is shared with",
+      "default": []
+    },
+    "shared_with_roles": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Array of role IDs this template is shared with",
+      "default": []
+    },
+    "shared_with_departments": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "Dashboard",
+          "Claims",
+          "Estimating",
+          "Engineering",
+          "Parts",
+          "Invoicing",
+          "Map"
+        ]
+      },
+      "description": "Array of departments this template is shared with",
+      "default": []
+    },
+    "can_edit_users": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Array of user emails who can edit this template (beyond the creator)",
+      "default": []
+    },
+    "allow_others_to_duplicate": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether other users can duplicate this template"
+    }
+  },
+  "required": [
+    "template_name",
+    "template_type"
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "user_type": "internal"
+          }
+        }
+      ]
+    },
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "visibility": "organization",
+          "user_condition": {
+            "user_type": "internal"
+          }
+        },
+        {
+          "shared_with_users": {
+            "$in": [
+              "{{user.email}}"
+            ]
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "created_by": "{{user.email}}"
+        },
+        {
+          "can_edit_users": {
+            "$in": [
+              "{{user.email}}"
+            ]
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "created_by": "{{user.email}}"
+        }
+      ]
+    }
+  }
+}

@@ -254,6 +254,11 @@
           "user_condition": {
             "user_type": "internal"
           }
+        },
+        {
+          "user_condition": {
+            "user_type": "bodyshop"
+          }
         }
       ]
     },
@@ -273,7 +278,7 @@
           "created_by": "{{user.email}}"
         },
         {
-          "data.repairer_id": "{{user.linked_bodyshop_id}}"
+          "repairer_id": "{{user.linked_bodyshop_id}}"
         }
       ]
     },
@@ -290,7 +295,7 @@
           }
         },
         {
-          "data.repairer_id": "{{user.linked_bodyshop_id}}"
+          "repairer_id": "{{user.linked_bodyshop_id}}"
         }
       ]
     },

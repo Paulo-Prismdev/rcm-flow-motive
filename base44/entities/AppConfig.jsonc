@@ -1,14 +1,18 @@
 {
-  "name": "Insurer",
+  "name": "AppConfig",
   "type": "object",
   "properties": {
-    "name": {
+    "config_key": {
       "type": "string",
-      "description": "Name of the insurance company"
+      "description": "Unique key for the config (e.g., 'company_logo')"
+    },
+    "config_value": {
+      "type": "string",
+      "description": "Value of the config (e.g., URL for logo)"
     }
   },
   "required": [
-    "name"
+    "config_key"
   ],
   "rls": {
     "create": {
@@ -20,25 +24,12 @@
         },
         {
           "user_condition": {
-            "data.user_type": "internal"
+            "user_type": "internal"
           }
         }
       ]
     },
-    "read": {
-      "$or": [
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        },
-        {
-          "user_condition": {
-            "data.user_type": "internal"
-          }
-        }
-      ]
-    },
+    "read": true,
     "update": {
       "$or": [
         {
@@ -48,7 +39,7 @@
         },
         {
           "user_condition": {
-            "data.user_type": "internal"
+            "user_type": "internal"
           }
         }
       ]
@@ -62,7 +53,7 @@
         },
         {
           "user_condition": {
-            "data.user_type": "internal"
+            "user_type": "internal"
           }
         }
       ]

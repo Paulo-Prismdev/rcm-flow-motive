@@ -108,7 +108,7 @@
           }
         },
         {
-          "id": "{{user.data.linked_supplier_id}}"
+          "id": "{{user.linked_supplier_id}}"
         }
       ]
     },
@@ -125,7 +125,7 @@
           }
         },
         {
-          "id": "{{user.data.linked_supplier_id}}"
+          "id": "{{user.linked_supplier_id}}"
         }
       ]
     },

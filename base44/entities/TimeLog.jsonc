@@ -1,14 +1,10 @@
 {
-  "name": "Note",
+  "name": "TimeLog",
   "type": "object",
   "properties": {
-    "content": {
-      "type": "string",
-      "description": "The text content of the note."
-    },
     "parent_id": {
       "type": "string",
-      "description": "The ID of the parent record (Claim, Estimate, etc.) this note is attached to."
+      "description": "The ID of the parent record (Claim, Estimate, etc.)"
     },
     "parent_type": {
       "type": "string",
@@ -18,44 +14,29 @@
         "Engineering",
         "Part"
       ],
-      "description": "The type of the parent record."
+      "description": "The type of the parent record"
     },
-    "parent_note_id": {
+    "duration_seconds": {
+      "type": "number",
+      "description": "Duration in seconds"
+    },
+    "started_at": {
       "type": "string",
-      "description": "If this is a reply, the ID of the parent note"
+      "format": "date-time",
+      "description": "When the timer started"
     },
-    "reactions": {
-      "type": "object",
-      "description": "Object storing reactions with emoji as key and array of user emails as value",
-      "additionalProperties": {
-        "type": "array",
-        "items": {
-          "type": "string"
-        }
-      },
-      "default": {}
-    },
-    "viewed_by": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      },
-      "description": "Array of user emails who have viewed this note",
-      "default": []
-    },
-    "tagged_users": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      },
-      "description": "Array of user emails who are tagged/mentioned in this note",
-      "default": []
+    "ended_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the timer ended"
     }
   },
   "required": [
-    "content",
     "parent_id",
-    "parent_type"
+    "parent_type",
+    "duration_seconds",
+    "started_at",
+    "ended_at"
   ],
   "rls": {
     "create": {
@@ -63,11 +44,6 @@
         {
           "user_condition": {
             "role": "admin"
-          }
-        },
-        {
-          "user_condition": {
-            "user_type": "internal"
           }
         },
         {

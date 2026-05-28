@@ -92,6 +92,9 @@
           "user_condition": {
             "user_type": "internal"
           }
+        },
+        {
+          "created_by": "{{user.email}}"
         }
       ]
     },

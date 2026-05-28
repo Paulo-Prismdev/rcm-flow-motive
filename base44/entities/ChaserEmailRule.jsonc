@@ -1,0 +1,114 @@
+{
+  "name": "ChaserEmailRule",
+  "type": "object",
+  "properties": {
+    "rule_name": {
+      "type": "string",
+      "description": "Descriptive name for this rule"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this rule is currently active"
+    },
+    "trigger_status": {
+      "type": "string",
+      "description": "The job_status that triggers this rule"
+    },
+    "days_in_status": {
+      "type": "number",
+      "description": "Number of days claim must be in status before email is sent"
+    },
+    "recipient_type": {
+      "type": "string",
+      "enum": [
+        "Client",
+        "Referrer",
+        "Bodyshop",
+        "Insurer",
+        "File Handler",
+        "Custom Email"
+      ],
+      "description": "Who should receive the chaser email"
+    },
+    "custom_email": {
+      "type": "string",
+      "description": "If recipient_type is Custom Email, specify the email here"
+    },
+    "email_subject_template": {
+      "type": "string",
+      "description": "Email subject with placeholders like {{claim.job_number}}"
+    },
+    "email_body_template": {
+      "type": "string",
+      "description": "Email body with placeholders for claim data"
+    },
+    "send_frequency": {
+      "type": "string",
+      "enum": [
+        "Once",
+        "Daily",
+        "Every 3 Days",
+        "Weekly"
+      ],
+      "default": "Once",
+      "description": "How often to send after initial trigger"
+    },
+    "max_sends": {
+      "type": "number",
+      "default": 3,
+      "description": "Maximum number of times to send this chaser per claim"
+    },
+    "additional_conditions": {
+      "type": "object",
+      "description": "Additional JSON conditions to match (e.g., claim_type, insurer)"
+    },
+    "cc_emails": {
+      "type": "string",
+      "description": "Comma-separated list of CC email addresses"
+    },
+    "sort_order": {
+      "type": "number",
+      "description": "Order in which rules are displayed"
+    }
+  },
+  "required": [
+    "rule_name",
+    "trigger_status",
+    "days_in_status",
+    "recipient_type",
+    "email_subject_template",
+    "email_body_template"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "user_type": "internal"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

@@ -1,49 +1,40 @@
 {
-  "name": "Client",
+  "name": "EmailTemplate",
   "type": "object",
   "properties": {
     "name": {
       "type": "string",
-      "description": "Client's full name"
+      "description": "Template name"
     },
-    "phone": {
-      "type": "string"
-    },
-    "email": {
-      "type": "string"
-    },
-    "address_line_1": {
+    "subject": {
       "type": "string",
-      "description": "Street address"
+      "description": "Email subject line"
     },
-    "address_line_2": {
+    "body": {
       "type": "string",
-      "description": "Additional address line (optional)"
+      "description": "Email body template with placeholders"
     },
-    "town": {
+    "item_type": {
       "type": "string",
-      "description": "Town or City"
+      "enum": [
+        "Claim",
+        "Estimate",
+        "Engineering",
+        "Part",
+        "General"
+      ],
+      "description": "Which item type this template is for"
     },
-    "county": {
+    "description": {
       "type": "string",
-      "description": "County or State"
-    },
-    "postcode": {
-      "type": "string",
-      "description": "Postal code"
-    },
-    "latitude": {
-      "type": "number",
-      "description": "Geographic latitude coordinate"
-    },
-    "longitude": {
-      "type": "number",
-      "description": "Geographic longitude coordinate"
+      "description": "Optional description of when to use this template"
     }
   },
   "required": [
     "name",
-    "phone"
+    "subject",
+    "body",
+    "item_type"
   ],
   "rls": {
     "create": {
@@ -55,7 +46,7 @@
         },
         {
           "user_condition": {
-            "data.user_type": "internal"
+            "user_type": "internal"
           }
         }
       ]
@@ -69,11 +60,8 @@
         },
         {
           "user_condition": {
-            "data.user_type": "internal"
+            "user_type": "internal"
           }
-        },
-        {
-          "id": "{{user.linked_client_id}}"
         }
       ]
     },
@@ -86,11 +74,8 @@
         },
         {
           "user_condition": {
-            "data.user_type": "internal"
+            "user_type": "internal"
           }
-        },
-        {
-          "id": "{{user.linked_client_id}}"
         }
       ]
     },
@@ -103,7 +88,7 @@
         },
         {
           "user_condition": {
-            "data.user_type": "internal"
+            "user_type": "internal"
           }
         }
       ]

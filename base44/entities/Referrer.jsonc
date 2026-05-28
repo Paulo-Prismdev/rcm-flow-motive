@@ -68,18 +68,16 @@
   ],
   "rls": {
     "create": {
-      "$or": [
-        {
-          "user_condition": {
+      "user_condition": {
+        "$or": [
+          {
             "role": "admin"
-          }
-        },
-        {
-          "user_condition": {
+          },
+          {
             "user_type": "internal"
           }
-        }
-      ]
+        ]
+      }
     },
     "read": {
       "$or": [
@@ -116,18 +114,16 @@
       ]
     },
     "delete": {
-      "$or": [
-        {
-          "user_condition": {
+      "user_condition": {
+        "$or": [
+          {
             "role": "admin"
-          }
-        },
-        {
-          "user_condition": {
+          },
+          {
             "user_type": "internal"
           }
-        }
-      ]
+        ]
+      }
     }
   }
 }
