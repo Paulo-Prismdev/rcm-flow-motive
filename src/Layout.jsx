@@ -259,7 +259,7 @@ export default function Layout({ children, currentPageName }) {
                 <span className="text-[9px]">Search</span>
               </button>
               {isInternalUser && (
-                <button onClick={() => setMessagesOpen(true)} className="relative flex flex-col items-center justify-center gap-0.5 p-3 text-gray-500 dark:text-gray-400 touch-manipulation min-w-[44px] min-h-[44px]">
+                <button onClick={() => setMessagesOpen(prev => !prev)} className="relative flex flex-col items-center justify-center gap-0.5 p-3 text-gray-500 dark:text-gray-400 touch-manipulation min-w-[44px] min-h-[44px]">
                   <MessageSquare className="w-5 h-5" />
                   <span className="text-[9px]">Messages</span>
                   {unreadMessagesCount > 0 && (
