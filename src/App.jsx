@@ -14,6 +14,8 @@ import PublicPartsRequest from '@/pages/PublicPartsRequest';
 import BackorderForm from '@/pages/BackorderForm';
 import ClientClaimForm from '@/pages/ClientClaimForm';
 import TyreRequests from '@/pages/TyreRequests';
+import CompanyManagement from '@/pages/CompanyManagement';
+import MigrateUsers from '@/pages/MigrateUsers';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -82,6 +84,16 @@ const AuthenticatedApp = () => {
       <Route path="/TyreRequests" element={
         <LayoutWrapper currentPageName="TyreRequests">
           <TyreRequests />
+        </LayoutWrapper>
+      } />
+      <Route path="/admin/companies" element={
+        <LayoutWrapper currentPageName="CompanyManagement">
+          <CompanyManagement />
+        </LayoutWrapper>
+      } />
+      <Route path="/admin/migrate-users" element={
+        <LayoutWrapper currentPageName="MigrateUsers">
+          <MigrateUsers />
         </LayoutWrapper>
       } />
       <Route path="*" element={<PageNotFound />} />
