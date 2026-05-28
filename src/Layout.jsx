@@ -218,7 +218,13 @@ export default function Layout({ children, currentPageName }) {
 
           {/* User footer */}
           <div className="border-t border-white/10 px-3 py-3">
-            <div className="flex items-center gap-3 group cursor-pointer">
+            <div 
+              className="flex items-center gap-3 group cursor-pointer w-full"
+              onClick={() => {
+                const profileBtn = document.querySelector('[role="menu"]')?.previousElementSibling;
+                if (profileBtn) profileBtn.click();
+              }}
+            >
               <div className="flex-shrink-0 relative">
                 <UserProfile />
                 <div className="absolute inset-0 rounded-full bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
