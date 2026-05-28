@@ -138,6 +138,7 @@ export default function CompanyManagement() {
             </DialogContent>
           </Dialog>
         </div>
+      </div>
 
       {isLoading ? (
         <div className="text-center py-12">Loading...</div>
