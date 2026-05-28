@@ -106,16 +106,16 @@ export default function UserManagement() {
 
   if (!canManage) {
     return (
-      <div className="neomorph p-8 text-center">
-        <Shield className="w-12 h-12 mx-auto mb-4 text-red-500" />
-        <h2 className="text-xl font-bold mb-2">Access Denied</h2>
-        <p className="text-foreground-muted">You do not have permission to manage user access.</p>
+      <div className="text-center py-6">
+        <Shield className="w-10 h-10 mx-auto mb-3 text-red-500" />
+        <h2 className="font-semibold text-gray-900 dark:text-white mb-1">Access Denied</h2>
+        <p className="text-sm text-gray-500 dark:text-gray-400">No permission to manage users.</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 h-full flex flex-col">
       {/* Invite Modal */}
       {showInviteModal && (
         <InviteUserModal
@@ -129,25 +129,24 @@ export default function UserManagement() {
       )}
 
       {/* Header */}
-      <div className="neomorph p-4 flex items-center gap-3">
-        <Users className="w-5 h-5 text-accent flex-shrink-0" />
+      <div className="flex items-center justify-between gap-3 flex-wrap">
         <div className="flex-1">
-          <h1 className="text-xl font-bold">User Management</h1>
-          <p className="text-xs text-foreground-muted">Manage users by company type</p>
+          <h1 className="text-lg font-semibold text-gray-900 dark:text-white">User Management</h1>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Manage users by company type</p>
         </div>
         {isSuperAdmin && (
-          <Button
+          <button
             onClick={() => setShowInviteModal(true)}
-            className="flex items-center gap-2 bg-accent text-accent-foreground px-3 py-2 text-sm rounded-lg"
+            className="px-3 py-1.5 text-sm font-medium text-white bg-[#131d47] hover:bg-[#1a2660] rounded-lg flex items-center gap-2 transition-colors flex-shrink-0"
           >
-            <UserPlus className="w-4 h-4" />
-            Invite User
-          </Button>
+            <UserPlus className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Invite</span>
+          </button>
         )}
       </div>
 
       {/* Tabs */}
-      <div className="neomorph p-2 flex gap-1 overflow-x-auto">
+      <div className="flex gap-1 overflow-x-auto pb-1 scrollbar-hide">
         {TABS.map(tab => {
           const Icon = tab.icon;
           const count = tab.id === 'internal'
@@ -157,16 +156,16 @@ export default function UserManagement() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-all flex-shrink-0 ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all flex-shrink-0 ${
                 activeTab === tab.id
-                  ? 'bg-accent text-accent-foreground shadow'
-                  : 'text-foreground-muted hover:text-foreground hover:bg-surface-hover'
+                  ? 'bg-[#131d47] text-white'
+                  : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
               }`}
             >
-              <Icon className="w-4 h-4" />
-              {tab.label}
-              <span className={`text-xs px-1.5 py-0.5 rounded-full ${
-                activeTab === tab.id ? 'bg-black/20 text-white' : 'bg-surface text-foreground-muted'
+              <Icon className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">{tab.label}</span>
+              <span className={`text-[10px] px-1 py-0.5 rounded-full font-semibold ${
+                activeTab === tab.id ? 'bg-white/20' : 'bg-gray-200 dark:bg-gray-700'
               }`}>
                 {count}
               </span>
@@ -176,55 +175,57 @@ export default function UserManagement() {
       </div>
 
       {/* Content */}
-      {usersLoading ? (
-        <div className="neomorph p-8 text-center text-foreground-muted">Loading users...</div>
-      ) : activeTab === 'internal' ? (
-        // Internal staff — flat list with accordion per user
-        <div className="space-y-2">
-          <InternalNavSections canEdit={canManage} />
-          {internalUsers.length === 0 ? (
-            <div className="neomorph p-8 text-center text-foreground-muted">No internal users found.</div>
-          ) : (
-            internalUsers.map(user => (
-              <InternalUserRow
-                key={user.id}
-                user={user}
-                isSuperAdmin={isSuperAdmin}
-              />
-            ))
-          )}
-        </div>
-      ) : (
-        // Company-grouped view
-        <div className="space-y-2">
-          {companies.length === 0 ? (
-            <div className="neomorph p-8 text-center text-foreground-muted">
-              No {TABS.find(t => t.id === activeTab)?.label.toLowerCase()} found.
-            </div>
-          ) : (
-            companies.map(company => (
+      <div className="flex-1 overflow-y-auto min-h-0">
+        {usersLoading ? (
+          <div className="text-center py-6 text-sm text-gray-400">Loading...</div>
+        ) : activeTab === 'internal' ? (
+          // Internal staff — flat list with accordion per user
+          <div className="space-y-2">
+            <InternalNavSections canEdit={canManage} />
+            {internalUsers.length === 0 ? (
+              <div className="text-center py-6 text-sm text-gray-400">No internal users found.</div>
+            ) : (
+              internalUsers.map(user => (
+                <InternalUserRow
+                  key={user.id}
+                  user={user}
+                  isSuperAdmin={isSuperAdmin}
+                />
+              ))
+            )}
+          </div>
+        ) : (
+          // Company-grouped view
+          <div className="space-y-2">
+            {companies.length === 0 ? (
+              <div className="text-center py-6 text-sm text-gray-400">
+                No {TABS.find(t => t.id === activeTab)?.label.toLowerCase()} found.
+              </div>
+            ) : (
+              companies.map(company => (
+                <CompanyUserGroup
+                  key={company.id}
+                  company={company}
+                  companyType={activeTab}
+                  users={companyMap[company.id] || []}
+                  isSuperAdmin={isSuperAdmin}
+                  onFeedbackRequest={handleFeedbackRequest}
+                />
+              ))
+            )}
+            {(companyMap['__unlinked__']?.length > 0) && (
               <CompanyUserGroup
-                key={company.id}
-                company={company}
+                key="__unlinked__"
+                company={{ id: '__unlinked__', name: 'Unlinked Users' }}
                 companyType={activeTab}
-                users={companyMap[company.id] || []}
+                users={companyMap['__unlinked__']}
                 isSuperAdmin={isSuperAdmin}
                 onFeedbackRequest={handleFeedbackRequest}
               />
-            ))
-          )}
-          {(companyMap['__unlinked__']?.length > 0) && (
-            <CompanyUserGroup
-              key="__unlinked__"
-              company={{ id: '__unlinked__', name: 'Unlinked Users' }}
-              companyType={activeTab}
-              users={companyMap['__unlinked__']}
-              isSuperAdmin={isSuperAdmin}
-              onFeedbackRequest={handleFeedbackRequest}
-            />
-          )}
-        </div>
-      )}
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -252,69 +253,66 @@ function InternalUserRow({ user, isSuperAdmin }) {
   const roleName = roles.find(r => r.id === user.job_role_id)?.role_name;
 
   return (
-    <div className="neomorph-flat overflow-hidden">
+    <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden">
       <button
         onClick={() => setIsOpen(o => !o)}
-        className="w-full flex items-center gap-3 p-4 text-left hover:bg-surface-hover transition-colors"
+        className="w-full flex items-center gap-2 p-3 text-left hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
       >
-        <div className="w-9 h-9 rounded-full bg-accent/10 flex items-center justify-center flex-shrink-0">
-          <span className="text-sm font-bold text-accent">
+        <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0">
+          <span className="text-xs font-bold text-blue-600 dark:text-blue-400">
             {(user.full_name || user.email)?.[0]?.toUpperCase()}
           </span>
         </div>
         <div className="flex-1 min-w-0">
-          <p className="font-semibold text-foreground text-sm truncate">{user.full_name || 'Unnamed User'}</p>
-          <p className="text-xs text-foreground-muted truncate">{user.email}</p>
+          <p className="font-medium text-gray-900 dark:text-white text-sm truncate">{user.full_name || 'Unnamed'}</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{user.email}</p>
         </div>
-        <div className="flex items-center gap-2 flex-shrink-0 ml-2">
-          {user.role === 'super_admin' && <span className="text-xs px-2 py-0.5 rounded bg-red-100 text-red-700">Super Admin</span>}
-          {user.role === 'company_admin' && <span className="text-xs px-2 py-0.5 rounded bg-orange-100 text-orange-700">Company Admin</span>}
-          {roleName && <span className="text-xs px-2 py-0.5 rounded bg-indigo-100 text-indigo-700">{roleName}</span>}
-          {user.can_manage_permissions && <span className="text-xs px-2 py-0.5 rounded bg-blue-100 text-blue-700 hidden sm:inline">Perm. Manager</span>}
-          <svg className={`w-4 h-4 text-foreground-muted transition-transform ${isOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div className="flex items-center gap-1.5 flex-shrink-0">
+          {user.role === 'super_admin' && <span className="text-[10px] px-1.5 py-0.5 rounded bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300">Admin</span>}
+          {user.role === 'company_admin' && <span className="text-[10px] px-1.5 py-0.5 rounded bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300">Co Admin</span>}
+          {user.can_manage_permissions && <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 hidden sm:inline">Mgr</span>}
+          <svg className={`w-4 h-4 text-gray-400 transition-transform flex-shrink-0 ${isOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
           </svg>
         </div>
       </button>
 
       {isOpen && (
-        <div className="border-t border-border px-4 pb-4">
+        <div className="border-t border-gray-200 dark:border-gray-800 px-3 py-3 space-y-2">
           {/* Dept access display */}
           {!isEditing && (
-            <div className="pt-3 space-y-3">
+            <>
               {(user.role !== 'super_admin' && user.role !== 'company_admin') && (
                 <div>
-                  <p className="text-xs font-medium text-foreground-muted mb-1.5">Department Access</p>
-                  <div className="flex flex-wrap gap-1.5">
+                  <p className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Departments</p>
+                  <div className="flex flex-wrap gap-1">
                     {(user.departments_access || []).length > 0
                       ? user.departments_access.map(d => (
-                          <span key={d} className="text-xs px-2 py-0.5 rounded bg-surface border border-border text-foreground">{d}</span>
+                          <span key={d} className="text-xs px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 whitespace-nowrap">{d}</span>
                         ))
-                      : <span className="text-xs text-foreground-muted">No departments assigned</span>
+                      : <span className="text-xs text-gray-500">None assigned</span>
                     }
                   </div>
                 </div>
               )}
               {isSuperAdmin && (
-                <Button
+                <button
                   onClick={() => setIsEditing(true)}
-                  className="neomorph-flat px-3 py-1.5 text-xs text-blue-600"
+                  className="text-xs px-2 py-1 rounded text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors w-full text-left"
                 >
                   Edit User
-                </Button>
+                </button>
               )}
-            </div>
+            </>
           )}
 
           {isEditing && (
-            <div className="pt-3">
-              <UserEditForm
-                user={user}
-                onSave={(data) => updateMutation.mutate({ id: user.id, data })}
-                onCancel={() => setIsEditing(false)}
-                isSaving={updateMutation.isPending}
-              />
-            </div>
+            <UserEditForm
+              user={user}
+              onSave={(data) => updateMutation.mutate({ id: user.id, data })}
+              onCancel={() => setIsEditing(false)}
+              isSaving={updateMutation.isPending}
+            />
           )}
         </div>
       )}

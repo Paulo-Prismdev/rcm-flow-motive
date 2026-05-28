@@ -49,30 +49,32 @@ export default function InternalNavSections({ canEdit }) {
   };
 
   return (
-    <div className="neomorph-flat p-4 rounded-xl">
-      <div className="flex items-center gap-2 mb-3">
-        <Monitor className="w-4 h-4 text-accent flex-shrink-0" />
-        <p className="text-sm font-semibold text-foreground">Internal Navigation Sections</p>
-        <span className="text-xs text-foreground-muted">— controls which modules internal staff can see</span>
+    <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 p-3">
+      <div className="flex items-start gap-2 mb-2">
+        <Monitor className="w-4 h-4 text-gray-600 dark:text-gray-400 flex-shrink-0 mt-0.5" />
+        <div className="flex-1 min-w-0">
+          <p className="text-xs font-semibold text-gray-900 dark:text-white">Internal Navigation Sections</p>
+          <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">Modules visible to internal staff</p>
+        </div>
       </div>
 
       {!isEditing ? (
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-1.5 flex-wrap">
           {currentSections.map(s => (
-            <span key={s} className="text-xs px-2 py-0.5 rounded bg-accent/10 text-accent border border-accent/20">{s}</span>
+            <span key={s} className="text-[10px] px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400">{s}</span>
           ))}
           {canEdit && (
             <button
               onClick={() => { setSelected([...currentSections]); setIsEditing(true); }}
-              className="text-xs px-2 py-0.5 rounded border border-border text-foreground-muted hover:text-foreground hover:border-foreground-muted transition-colors flex items-center gap-1"
+              className="text-[10px] px-1.5 py-0.5 rounded border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors flex items-center gap-1"
             >
               <Settings2 className="w-3 h-3" /> Edit
             </button>
           )}
         </div>
       ) : (
-        <div className="space-y-2">
-          <div className="flex flex-wrap gap-1.5">
+        <div className="space-y-1.5">
+          <div className="flex flex-wrap gap-1">
             {ALL_NAV_SECTIONS.map(section => {
               const enabled = selected.includes(section);
               return (
@@ -80,10 +82,10 @@ export default function InternalNavSections({ canEdit }) {
                   key={section}
                   type="button"
                   onClick={() => toggle(section)}
-                  className={`px-2.5 py-1 text-xs font-medium rounded-lg border transition-all ${
+                  className={`px-2 py-1 text-[10px] font-medium rounded border transition-all ${
                     enabled
-                      ? 'bg-accent text-accent-foreground border-accent'
-                      : 'bg-surface text-foreground-muted border-border hover:border-foreground-muted'
+                      ? 'bg-blue-600 text-white border-blue-600'
+                      : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700'
                   }`}
                 >
                   {section}
@@ -91,11 +93,11 @@ export default function InternalNavSections({ canEdit }) {
               );
             })}
           </div>
-          <div className="flex gap-2 pt-1">
+          <div className="flex gap-1.5 pt-1">
             <button
               type="button"
               onClick={() => setIsEditing(false)}
-              className="px-3 py-1 text-xs rounded-lg neomorph-flat text-foreground-muted hover:text-foreground"
+              className="px-2 py-1 text-xs rounded text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
             >
               Cancel
             </button>
@@ -103,7 +105,7 @@ export default function InternalNavSections({ canEdit }) {
               type="button"
               onClick={() => saveMutation.mutate(selected)}
               disabled={saveMutation.isPending}
-              className="px-3 py-1 text-xs rounded-lg bg-accent/10 text-accent border border-accent/20 hover:bg-accent/20 transition-colors disabled:opacity-50"
+              className="px-2 py-1 text-xs rounded bg-blue-600 text-white hover:bg-blue-700 transition-colors disabled:opacity-50"
             >
               {saveMutation.isPending ? 'Saving...' : 'Save'}
             </button>
