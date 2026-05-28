@@ -141,56 +141,8 @@ export default function UserEditForm({ user, onSave, onCancel, isSaving, default
         </select>
       </div>
 
-      {isReferrer && (
-        <div>
-          <label className="block text-xs font-medium text-foreground-muted mb-1">Linked Referrer</label>
-          <select
-            value={formData.linked_referrer_id}
-            onChange={(e) => setFormData(p => ({ ...p, linked_referrer_id: e.target.value }))}
-            className="neomorph-inset w-full px-3 py-2 rounded-lg text-sm"
-          >
-            <option value="">— Select Referrer —</option>
-            {referrers.map(r => (
-              <option key={r.id} value={r.id}>{r.name}</option>
-            ))}
-          </select>
-        </div>
-      )}
-
-      {isBodyshop && (
-        <div>
-          <label className="block text-xs font-medium text-foreground-muted mb-1">Linked Bodyshop</label>
-          <select
-            value={formData.linked_bodyshop_id}
-            onChange={(e) => setFormData(p => ({ ...p, linked_bodyshop_id: e.target.value }))}
-            className="neomorph-inset w-full px-3 py-2 rounded-lg text-sm"
-          >
-            <option value="">— Select Bodyshop —</option>
-            {bodyshops.map(b => (
-              <option key={b.id} value={b.id}>{b.name}</option>
-            ))}
-          </select>
-        </div>
-      )}
-
-      {isSupplier && (
-        <div>
-          <label className="block text-xs font-medium text-foreground-muted mb-1">Linked Supplier</label>
-          <select
-            value={formData.linked_supplier_id}
-            onChange={(e) => setFormData(p => ({ ...p, linked_supplier_id: e.target.value }))}
-            className="neomorph-inset w-full px-3 py-2 rounded-lg text-sm"
-          >
-            <option value="">— Select Supplier —</option>
-            {suppliers.map(s => (
-              <option key={s.id} value={s.id}>{s.name}</option>
-            ))}
-          </select>
-        </div>
-      )}
-
       <div>
-        <label className="block text-xs font-medium text-foreground-muted mb-1">Company</label>
+        <label className="block text-xs font-medium text-foreground-muted mb-1">Company *</label>
         <select
           value={formData.company_id}
           onChange={(e) => setFormData(p => ({ ...p, company_id: e.target.value }))}
