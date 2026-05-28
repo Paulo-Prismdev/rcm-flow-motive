@@ -42,17 +42,28 @@ export default function GlobalSearch({ open, onOpenChange }) {
     queryFn: async () => {
       if (!debouncedSearchTerm) return [];
       
-      const claimsPromise = base44.entities.Claim.filter({ reg: { "$ilike": `%${debouncedSearchTerm}%` } }, '-created_date', 5);
-      const estimatesPromise = base44.entities.Estimate.filter({ name: { "$ilike": `%${debouncedSearchTerm}%` } }, '-created_date', 5);
-      const engineeringPromise = base44.entities.Engineering.filter({ reference: { "$ilike": `%${debouncedSearchTerm}%` } }, '-created_date', 5);
-      const partsPromise = base44.entities.Part.filter({ vehicle_ref: { "$ilike": `%${debouncedSearchTerm}%` } }, '-created_date', 5);
+      const term = debouncedSearchTerm.toLowerCase();
+      const claimsPromise = base44.entities.Claim.filter({ reg: { "$contains": term } }, '-created_date', 20);
+      const estimatesPromise = base44.entities.Estimate.filter({ name: { "$contains": term } }, '-created_date', 20);
+      const engineeringPromise = base44.entities.Engineering.filter({ reference: { "$contains": term } }, '-created_date', 20);
+      const partsPromise = base44.entities.Part.filter({ vehicle_ref: { "$contains": term } }, '-created_date', 20);
 
-      const [claims, estimates, engineering, parts] = await Promise.all([claimsPromise, estimatesPromise, engineeringPromise, partsPromise]);
+      const claimsClientPromise = base44.entities.Claim.filter({ client_name: { "$contains": term } }, '-created_date', 20);
+      const claimsJobPromise = base44.entities.Claim.filter({ job_number: { "$contains": term } }, '-created_date', 20);
+
+      const [claims, estimatesRaw, engineering, parts, claimsByClient, claimsByJob] = await Promise.all([
+        claimsPromise, estimatesPromise, engineeringPromise, partsPromise, claimsClientPromise, claimsJobPromise
+      ]);
+
+      // Deduplicate claims by id
+      const allClaimsMap = new Map();
+      [...claims, ...claimsByClient, ...claimsByJob].forEach(c => allClaimsMap.set(c.id, c));
+      const allClaims = Array.from(allClaimsMap.values()).slice(0, 10);
 
       return [
-        ...claims.map(item => ({ ...item, type: 'Claims', display: formatUKRegistration(item.reg), link: createPageUrl(`Claims?view=${item.id}`) })),
-        ...estimates.map(item => ({ ...item, type: 'Estimating', display: item.name, link: createPageUrl(`Estimating?view=${item.id}`) })),
-        ...engineering.map(item => ({ ...item, type: 'Engineering', display: item.reference, link: createPageUrl(`Engineering?view=${item.id}`) })),
+        ...allClaims.map(item => ({ ...item, type: 'Claims', display: `${formatUKRegistration(item.reg)} — ${item.client_name || ''}`, link: createPageUrl(`Claims?id=${item.id}`) })),
+        ...estimatesRaw.map(item => ({ ...item, type: 'Estimating', display: item.name || item.job_number, link: createPageUrl(`Estimating?view=${item.id}`) })),
+        ...engineering.map(item => ({ ...item, type: 'Engineering', display: item.reference || item.job_number, link: createPageUrl(`Engineering?view=${item.id}`) })),
         ...parts.map(item => ({ ...item, type: 'Parts', display: formatUKRegistration(item.vehicle_ref), link: createPageUrl(`Parts?view=${item.id}`) })),
       ];
     },
