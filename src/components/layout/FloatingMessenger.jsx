@@ -432,14 +432,15 @@ export default function FloatingMessenger({ currentUser, isOpen, onClose }) {
 
       {/* Backdrop */}
       <div 
-        className="messenger-backdrop fixed inset-0 bg-black/40 z-40"
+        className="messenger-backdrop fixed inset-0 bg-black/40"
+        style={{ zIndex: 10000 }}
         onClick={() => { onClose(); setSelectedConversation(null); }}
       />
       
       {/* Panel */}
       <div 
-        className="messenger-panel fixed top-0 right-0 bottom-0 z-50 flex flex-col bg-white dark:bg-gray-900 shadow-2xl border-l border-gray-200 dark:border-gray-800"
-        style={{ width: '100%', maxWidth: '380px' }}
+        className="messenger-panel fixed top-0 right-0 bottom-0 flex flex-col bg-white dark:bg-gray-900 shadow-2xl border-l border-gray-200 dark:border-gray-800"
+        style={{ width: '100%', maxWidth: '380px', zIndex: 10001 }}
       >
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 bg-[#131d47] text-white flex-shrink-0">
