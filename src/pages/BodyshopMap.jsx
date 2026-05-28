@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { MapPin, Loader, Search, X } from 'lucide-react';
+import { MapPin, Loader, Search, X, ArrowLeft } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
@@ -213,11 +213,19 @@ export default function BodyshopMap() {
   };
 
   return (
-    <div className="h-full flex flex-col gap-3">
-      <div className="glass p-4 flex-shrink-0">
-        <div className="mb-3">
-          <h1 className="text-xl font-bold">Bodyshop Locator</h1>
-          <p className="text-xs text-foreground-muted mt-1">Find the nearest bodyshop using postcode or address</p>
+    <div className="h-full flex flex-col gap-3" style={{ position: 'relative', zIndex: 1 }}>
+      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4 flex-shrink-0">
+        <div className="mb-3 flex items-center gap-3">
+          <button
+            onClick={() => window.history.back()}
+            className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors flex-shrink-0"
+          >
+            <ArrowLeft className="w-4 h-4" />
+          </button>
+          <div>
+            <h1 className="text-xl font-bold text-gray-900 dark:text-white">Bodyshop Locator</h1>
+            <p className="text-xs text-gray-400 mt-0.5">Find the nearest bodyshop using postcode or address</p>
+          </div>
         </div>
 
         <div className="flex gap-2 relative" ref={inputRef}>
@@ -226,7 +234,7 @@ export default function BodyshopMap() {
               placeholder="Start typing postcode or address (e.g., SW1A 1AA or 10 Downing Street)"
               value={customerAddress}
               onChange={(e) => handleAddressChange(e.target.value)}
-              className="glass-inset text-sm"
+              className="text-sm bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700"
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !showSuggestions) {
                   handleGeocodeCustomer();
@@ -259,7 +267,7 @@ export default function BodyshopMap() {
 
             {showSuggestions && suggestions.length > 0 && (
               <div 
-                className="absolute w-full mt-2 glass-elevated rounded-lg shadow-lg max-h-60 overflow-y-auto"
+                className="absolute w-full mt-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl max-h-60 overflow-y-auto"
                 style={{ zIndex: 9999 }}
               >
                 {isLoadingSuggestions && (
@@ -335,7 +343,7 @@ export default function BodyshopMap() {
         </div>
       </div>
 
-      <div className="glass p-3 flex-1 min-h-0">
+      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-3 flex-1 min-h-0" style={{ isolation: 'isolate' }}>
         {isLoading ? (
           <div className="flex justify-center items-center h-full">
             <Loader className="w-8 h-8 animate-spin text-accent" />
