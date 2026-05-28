@@ -22,7 +22,7 @@ export default function ClaimDetailMobileHeader({
   return (
     <div
       className="lg:hidden flex-shrink-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800"
-      style={{ position: 'relative', zIndex: 10 }}
+      style={{ position: 'relative', zIndex: 20, isolation: 'isolate' }}
     >
       {/* Row 1: back + title + primary actions */}
       <div className="flex items-center gap-2 px-3 pt-2 pb-1">

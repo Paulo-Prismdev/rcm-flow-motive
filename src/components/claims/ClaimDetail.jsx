@@ -1139,7 +1139,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                 onClose={() => setIsActivityLogOpen(false)}
               />
 
-      <div className="flex flex-col gap-2 md:gap-3" style={{height: '100%', touchAction: 'auto'}}>
+      <div className="flex flex-col gap-2 md:gap-3" style={{height: '100%', touchAction: 'auto', isolation: 'isolate'}}>
 
           {/* ── MOBILE header (< lg) ── */}
           <ClaimDetailMobileHeader

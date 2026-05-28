@@ -552,8 +552,8 @@ export default function ClaimsPage() {
 
       {/* Right: detail panel — full screen on mobile, side panel on desktop */}
       {selectedClaim && (
-        <div className="flex-1 min-w-0 min-h-0 flex flex-col overflow-hidden w-full lg:w-auto">
-          <div className="h-full overflow-hidden rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
+        <div className="flex-1 min-w-0 min-h-0 flex flex-col w-full lg:w-auto">
+          <div className="h-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 overflow-hidden">
             <ClaimDetail
               key={selectedClaim.id}
               claim={selectedClaim}
