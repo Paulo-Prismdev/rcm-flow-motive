@@ -148,7 +148,7 @@ export default function Layout({ children, currentPageName }) {
 
         {/* ── SIDEBAR ── */}
         <aside className={`
-          fixed inset-y-0 left-0 z-50 flex flex-col
+          fixed inset-y-0 left-0 z-[9999] flex flex-col
           w-56 bg-[#131d47] text-white
           transition-transform duration-300
           ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
@@ -235,7 +235,7 @@ export default function Layout({ children, currentPageName }) {
         {/* Mobile overlay */}
         {mobileMenuOpen && (
           <div
-            className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+            className="fixed inset-0 z-[9998] bg-black/50 lg:hidden"
             onClick={() => setMobileMenuOpen(false)}
           />
         )}
@@ -244,7 +244,7 @@ export default function Layout({ children, currentPageName }) {
         <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
           {/* ── MOBILE bottom tab bar (< lg) ── */}
           {!claimDetailOpen && (
-            <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 flex items-center justify-around px-2 safe-area-inset-bottom" style={{height: '60px', zIndex: 9999}}>
+            <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 flex items-center justify-around px-2 safe-area-inset-bottom" style={{height: '60px', zIndex: 1000}}>
               <button onClick={() => setMobileMenuOpen(prev => !prev)} className="flex flex-col items-center justify-center gap-0.5 p-3 text-gray-500 dark:text-gray-400 touch-manipulation min-w-[44px] min-h-[44px]">
                 <Menu className="w-5 h-5" />
                 <span className="text-[9px]">Menu</span>
