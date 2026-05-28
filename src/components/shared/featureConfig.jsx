@@ -1,0 +1,16 @@
+export const MASTER_FEATURES = [
+  { key: 'dashboard', label: 'Dashboard', description: 'View dashboard and statistics' },
+  { key: 'claims_view', label: 'Claims View', description: 'View claims' },
+  { key: 'claims_manage', label: 'Claims Manage', description: 'Create and edit claims' },
+  { key: 'jobs_view', label: 'Jobs View', description: 'View job assignments' },
+  { key: 'jobs_assign', label: 'Jobs Assign', description: 'Assign jobs to repairers' },
+  { key: 'invoicing_view', label: 'Invoicing View', description: 'View invoices' },
+  { key: 'invoicing_manage', label: 'Invoicing Manage', description: 'Create and manage invoices' },
+  { key: 'reports', label: 'Reports', description: 'Access reports and analytics' },
+  { key: 'repairer_network', label: 'Repairer Network', description: 'Manage repairer network' },
+  { key: 'referrer_network', label: 'Referrer Network', description: 'Manage referrer network' },
+  { key: 'user_management', label: 'User Management', description: 'Manage users' },
+  { key: 'company_settings', label: 'Company Settings', description: 'Configure company settings' },
+  { key: 'platform_settings', label: 'Platform Settings', description: 'Configure platform settings' },
+  { key: 'billing', label: 'Billing', description: 'Access billing information' },
+];
