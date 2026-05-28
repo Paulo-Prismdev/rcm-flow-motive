@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Link } from 'react-router-dom';
@@ -37,38 +37,47 @@ export default function GlobalSearch({ open, onOpenChange }) {
   const [searchTerm, setSearchTerm] = useState('');
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
-  const { data, isLoading } = useQuery({
-    queryKey: ['globalSearch', debouncedSearchTerm],
-    queryFn: async () => {
-      if (!debouncedSearchTerm) return [];
-      
-      const term = debouncedSearchTerm.toLowerCase();
-      const claimsPromise = base44.entities.Claim.filter({ reg: { "$contains": term } }, '-created_date', 20);
-      const estimatesPromise = base44.entities.Estimate.filter({ name: { "$contains": term } }, '-created_date', 20);
-      const engineeringPromise = base44.entities.Engineering.filter({ reference: { "$contains": term } }, '-created_date', 20);
-      const partsPromise = base44.entities.Part.filter({ vehicle_ref: { "$contains": term } }, '-created_date', 20);
+  // Fetch all records once, filter client-side
+  const { data: allClaims = [] } = useQuery({ queryKey: ['claims-search'], queryFn: () => base44.entities.Claim.list('-created_date', 5000), staleTime: 60000 });
+  const { data: allEstimates = [] } = useQuery({ queryKey: ['estimates-search'], queryFn: () => base44.entities.Estimate.list('-created_date', 2000), staleTime: 60000 });
+  const { data: allEngineering = [] } = useQuery({ queryKey: ['engineering-search'], queryFn: () => base44.entities.Engineering.list('-created_date', 2000), staleTime: 60000 });
+  const { data: allParts = [] } = useQuery({ queryKey: ['parts-search'], queryFn: () => base44.entities.Part.list('-created_date', 2000), staleTime: 60000 });
 
-      const claimsClientPromise = base44.entities.Claim.filter({ client_name: { "$contains": term } }, '-created_date', 20);
-      const claimsJobPromise = base44.entities.Claim.filter({ job_number: { "$contains": term } }, '-created_date', 20);
+  const isLoading = false;
 
-      const [claims, estimatesRaw, engineering, parts, claimsByClient, claimsByJob] = await Promise.all([
-        claimsPromise, estimatesPromise, engineeringPromise, partsPromise, claimsClientPromise, claimsJobPromise
-      ]);
+  const data = useMemo(() => {
+    if (debouncedSearchTerm.length < 2) return [];
+    const term = debouncedSearchTerm.toLowerCase();
 
-      // Deduplicate claims by id
-      const allClaimsMap = new Map();
-      [...claims, ...claimsByClient, ...claimsByJob].forEach(c => allClaimsMap.set(c.id, c));
-      const allClaims = Array.from(allClaimsMap.values()).slice(0, 10);
+    const matchedClaims = allClaims.filter(c =>
+      c.reg?.toLowerCase().includes(term) ||
+      c.client_name?.toLowerCase().includes(term) ||
+      c.job_number?.toLowerCase().includes(term) ||
+      c.insurer?.toLowerCase().includes(term) ||
+      c.referrer?.toLowerCase().includes(term)
+    ).slice(0, 8).map(item => ({ ...item, type: 'Claims', display: `${formatUKRegistration(item.reg)} — ${item.client_name || ''}`, link: createPageUrl(`Claims?id=${item.id}`) }));
 
-      return [
-        ...allClaims.map(item => ({ ...item, type: 'Claims', display: `${formatUKRegistration(item.reg)} — ${item.client_name || ''}`, link: createPageUrl(`Claims?id=${item.id}`) })),
-        ...estimatesRaw.map(item => ({ ...item, type: 'Estimating', display: item.name || item.job_number, link: createPageUrl(`Estimating?view=${item.id}`) })),
-        ...engineering.map(item => ({ ...item, type: 'Engineering', display: item.reference || item.job_number, link: createPageUrl(`Engineering?view=${item.id}`) })),
-        ...parts.map(item => ({ ...item, type: 'Parts', display: formatUKRegistration(item.vehicle_ref), link: createPageUrl(`Parts?view=${item.id}`) })),
-      ];
-    },
-    enabled: debouncedSearchTerm.length > 1,
-  });
+    const matchedEstimates = allEstimates.filter(e =>
+      e.name?.toLowerCase().includes(term) ||
+      e.job_number?.toLowerCase().includes(term) ||
+      e.make_model?.toLowerCase().includes(term)
+    ).slice(0, 5).map(item => ({ ...item, type: 'Estimating', display: item.name || item.job_number, link: createPageUrl(`Estimating?view=${item.id}`) }));
+
+    const matchedEngineering = allEngineering.filter(e =>
+      e.reference?.toLowerCase().includes(term) ||
+      e.job_number?.toLowerCase().includes(term) ||
+      e.vehicle_reg?.toLowerCase().includes(term) ||
+      e.client_name?.toLowerCase().includes(term)
+    ).slice(0, 5).map(item => ({ ...item, type: 'Engineering', display: item.reference || item.job_number, link: createPageUrl(`Engineering?view=${item.id}`) }));
+
+    const matchedParts = allParts.filter(p =>
+      p.vehicle_ref?.toLowerCase().includes(term) ||
+      p.job_number?.toLowerCase().includes(term) ||
+      p.part_description?.toLowerCase().includes(term)
+    ).slice(0, 5).map(item => ({ ...item, type: 'Parts', display: `${formatUKRegistration(item.vehicle_ref)} — ${item.part_description || ''}`, link: createPageUrl(`Parts?view=${item.id}`) }));
+
+    return [...matchedClaims, ...matchedEstimates, ...matchedEngineering, ...matchedParts];
+  }, [debouncedSearchTerm, allClaims, allEstimates, allEngineering, allParts]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
