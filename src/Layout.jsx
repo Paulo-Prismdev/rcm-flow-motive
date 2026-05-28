@@ -250,7 +250,7 @@ export default function Layout({ children, currentPageName }) {
           {/* ── MOBILE bottom tab bar (< lg) ── */}
           {!claimDetailOpen && (
             <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 flex items-center justify-around px-2 safe-area-inset-bottom" style={{height: '60px', zIndex: 9999}}>
-              <button onClick={() => setMobileMenuOpen(true)} className="flex flex-col items-center justify-center gap-0.5 p-3 text-gray-500 dark:text-gray-400 touch-manipulation min-w-[44px] min-h-[44px]">
+              <button onClick={() => setMobileMenuOpen(prev => !prev)} className="flex flex-col items-center justify-center gap-0.5 p-3 text-gray-500 dark:text-gray-400 touch-manipulation min-w-[44px] min-h-[44px]">
                 <Menu className="w-5 h-5" />
                 <span className="text-[9px]">Menu</span>
               </button>
