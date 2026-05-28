@@ -144,7 +144,7 @@ export default function Layout({ children, currentPageName }) {
         />
       )}
 
-      <div className="flex h-screen overflow-hidden bg-gray-100 dark:bg-gray-950">
+      <div className="flex overflow-hidden bg-gray-100 dark:bg-gray-950" style={{height: '100dvh'}}>
 
         {/* ── SIDEBAR ── */}
         <aside className={`
