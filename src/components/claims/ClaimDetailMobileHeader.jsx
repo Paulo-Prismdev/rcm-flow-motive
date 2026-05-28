@@ -86,21 +86,21 @@ export default function ClaimDetailMobileHeader({
           className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-200 px-3"
           style={{ height: 44, fontSize: 15 }}
         >
-          <option value="" disabled>⋯ More Actions</option>
-          <option value="notes">📝 Internal Notes</option>
-          <option value="docs">📄 Documents</option>
-          <option value="images">🖼 Images</option>
-          <option value="timelogs">⏱ Time Logs</option>
-          <option value="activity">📋 Activity Log</option>
-          <option value="email">✉️ Send Email</option>
-          <option value="tasks">✅ Manage Tasks</option>
-          <option value="instructions">📑 Generate Instructions</option>
-          {claim.instruction_pdf_url && <option value="download_pdf">⬇️ Download Instruction PDF</option>}
-          <option value="estimate">🔢 Request Estimate</option>
-          <option value="parts">📦 Log Parts Issue</option>
-          <option value="backorders">📦 Backordered Parts</option>
-          <option value="archive">{claim.archived ? '📤 Unarchive' : '🗄 Archive'}</option>
-          <option value="delete">🗑 Delete</option>
+          <option value="" disabled>More Actions</option>
+          <option value="notes">Internal Notes</option>
+          <option value="docs">Documents</option>
+          <option value="images">Images</option>
+          <option value="timelogs">Time Logs</option>
+          <option value="activity">Activity Log</option>
+          <option value="email">Send Email</option>
+          <option value="tasks">Manage Tasks</option>
+          <option value="instructions">Generate Instructions</option>
+          {claim.instruction_pdf_url && <option value="download_pdf">Download Instruction PDF</option>}
+          <option value="estimate">Request Estimate</option>
+          <option value="parts">Log Parts Issue</option>
+          <option value="backorders">Backordered Parts</option>
+          <option value="archive">{claim.archived ? 'Unarchive' : 'Archive'}</option>
+          <option value="delete">Delete</option>
         </select>
       </div>
 
@@ -112,21 +112,21 @@ export default function ClaimDetailMobileHeader({
           className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-200 px-3"
           style={{ height: 44, fontSize: 15 }}
         >
-          <option value="status">📋 Status &amp; Overview</option>
-          <option value="thirdpartyPursuit">👥 Third Party Pursuit</option>
-          <option value="client">👤 Client Details</option>
-          <option value="vehicle">🚗 Vehicle Details</option>
-          <option value="vehicleDamage">⚠️ Vehicle Damage</option>
-          <option value="insurance">🛡 Insurance Details</option>
-          <option value="excessContribution">% Excess Contribution</option>
-          <option value="referrer">💼 Referrer Details</option>
-          <option value="indemnity">🛡 Indemnity Details</option>
-          <option value="thirdparty">👥 Third Party Details</option>
-          <option value="financials">💰 Financials</option>
-          <option value="dates">📅 Key Dates</option>
-          <option value="bodyshop">🔧 Bodyshop Details</option>
-          <option value="estimate">🔢 Estimate Details</option>
-          <option value="backorderedParts">📦 Backordered Parts</option>
+          <option value="status">Status &amp; Overview</option>
+          <option value="thirdpartyPursuit">Third Party Pursuit</option>
+          <option value="client">Client Details</option>
+          <option value="vehicle">Vehicle Details</option>
+          <option value="vehicleDamage">Vehicle Damage</option>
+          <option value="insurance">Insurance Details</option>
+          <option value="excessContribution">Excess Contribution</option>
+          <option value="referrer">Referrer Details</option>
+          <option value="indemnity">Indemnity Details</option>
+          <option value="thirdparty">Third Party Details</option>
+          <option value="financials">Financials</option>
+          <option value="dates">Key Dates</option>
+          <option value="bodyshop">Bodyshop Details</option>
+          <option value="estimate">Estimate Details</option>
+          <option value="backorderedParts">Backordered Parts</option>
         </select>
       </div>
     </div>
