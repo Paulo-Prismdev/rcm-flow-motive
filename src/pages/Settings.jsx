@@ -63,7 +63,7 @@ const SETTINGS_SECTIONS = [
 ];
 
 export default function Settings() {
-  const [activeTab, setActiveTab] = React.useState("status");
+  const [activeTab, setActiveTab] = React.useState(null);
   const [activeStatusTab, setActiveStatusTab] = React.useState("Claim");
 
   const { data: currentUser } = useQuery({
