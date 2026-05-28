@@ -276,6 +276,12 @@ export default function Layout({ children, currentPageName }) {
                 <Notifications />
                 <span className="text-[9px] text-gray-500">Alerts</span>
               </div>
+              <div className="flex flex-col items-center justify-center gap-0.5 touch-manipulation min-w-[44px] min-h-[44px]">
+                <div className="scale-75">
+                  <UserProfile />
+                </div>
+                <span className="text-[9px] text-gray-500">Profile</span>
+              </div>
             </div>
           )}
 
