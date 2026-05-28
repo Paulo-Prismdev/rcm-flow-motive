@@ -429,116 +429,101 @@ export default function FloatingMessenger({ currentUser, isOpen, onClose }) {
 
       {/* Backdrop */}
       <div 
-        className="messenger-backdrop fixed inset-0 bg-black/20 backdrop-blur-sm z-40"
-        onClick={() => {
-          onClose();
-          setSelectedConversation(null);
-        }}
+        className="messenger-backdrop fixed inset-0 bg-black/40 z-40"
+        onClick={() => { onClose(); setSelectedConversation(null); }}
       />
       
       {/* Panel */}
       <div 
-        className="messenger-panel fixed top-0 right-0 bottom-0 glass-elevated shadow-2xl z-50"
-        style={{
-          width: '100%',
-          maxWidth: '400px',
-          borderLeft: '1px solid var(--border-strong)'
-        }}
+        className="messenger-panel fixed top-0 right-0 bottom-0 z-50 flex flex-col bg-white dark:bg-gray-900 shadow-2xl border-l border-gray-200 dark:border-gray-800"
+        style={{ width: '100%', maxWidth: '380px' }}
       >
         {/* Header */}
-        <div className="p-4 border-b border-border flex items-center justify-between bg-accent text-accent-foreground">
+        <div className="flex items-center justify-between px-4 py-3 bg-[#131d47] text-white flex-shrink-0">
           <div className="flex items-center gap-2">
-            <MessageSquare className="w-5 h-5" />
-            <h3 className="font-bold">Messages</h3>
+            <MessageSquare className="w-4 h-4" />
+            <h3 className="font-semibold text-sm">Messages</h3>
           </div>
           <button
-            onClick={() => {
-              onClose();
-              setSelectedConversation(null);
-            }}
-            className="hover:bg-accent-foreground hover:bg-opacity-20 p-1.5 rounded transition-colors"
+            onClick={() => { onClose(); setSelectedConversation(null); }}
+            className="p-1.5 rounded-lg hover:bg-white/10 transition-colors"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
-        <div className="h-[calc(100%-64px)] flex flex-col">
+        <div className="flex-1 flex flex-col min-h-0">
           {!selectedConversation ? (
             <>
-              {/* Conversations List Header */}
-              <div className="p-2 border-b border-border flex gap-1">
-                <button
-                  onClick={() => setViewMode('all')}
-                  className={`flex-1 px-2 py-1.5 text-xs rounded ${viewMode === 'all' ? 'bg-accent text-accent-foreground' : 'hover:bg-surface-hover'}`}
-                >
-                  All
-                </button>
-                <button
-                  onClick={() => setViewMode('direct')}
-                  className={`flex-1 px-2 py-1.5 text-xs rounded ${viewMode === 'direct' ? 'bg-accent text-accent-foreground' : 'hover:bg-surface-hover'}`}
-                >
-                  Direct
-                </button>
-                <button
-                  onClick={() => setViewMode('channels')}
-                  className={`flex-1 px-2 py-1.5 text-xs rounded ${viewMode === 'channels' ? 'bg-accent text-accent-foreground' : 'hover:bg-surface-hover'}`}
-                >
-                  Channels
-                </button>
+              {/* Tab bar */}
+              <div className="flex items-center gap-1 px-3 py-2 border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50 flex-shrink-0">
+                {['all', 'direct', 'channels'].map(mode => (
+                  <button
+                    key={mode}
+                    onClick={() => setViewMode(mode)}
+                    className={`flex-1 px-2 py-1.5 text-xs font-medium rounded-lg capitalize transition-colors ${
+                      viewMode === mode
+                        ? 'bg-[#131d47] text-white'
+                        : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 dark:text-gray-400'
+                    }`}
+                  >
+                    {mode}
+                  </button>
+                ))}
                 <button
                   onClick={() => setShowNewDM(true)}
-                  className="px-2 py-1.5 text-xs rounded hover:bg-surface-hover"
+                  className="p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 dark:text-gray-400 transition-colors"
                   title="New Direct Message"
                 >
                   <Plus className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => setShowCreateChannel(true)}
-                  className="px-2 py-1.5 text-xs rounded hover:bg-surface-hover"
+                  className="p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 dark:text-gray-400 transition-colors"
                   title="New Channel"
                 >
                   <Hash className="w-4 h-4" />
                 </button>
               </div>
 
-              <div className="flex-1 overflow-y-auto p-3">
+              <div className="flex-1 overflow-y-auto">
                 {filteredConversations.length === 0 ? (
                   <div className="flex flex-col items-center justify-center h-full text-center p-6">
-                    <MessageSquare className="w-16 h-16 text-foreground-subtle opacity-30 mb-4" />
-                    <p className="text-sm text-foreground-muted">No conversations yet</p>
+                    <MessageSquare className="w-12 h-12 text-gray-300 dark:text-gray-600 mb-3" />
+                    <p className="text-sm text-gray-400">No conversations yet</p>
                   </div>
                 ) : (
-                  <div className="space-y-2">
+                  <div className="divide-y divide-gray-100 dark:divide-gray-800">
                     {filteredConversations.map(conv => (
                       <button
                         key={conv.id}
                         onClick={() => setSelectedConversation(conv)}
-                        className="w-full p-3 rounded-xl hover:bg-surface-hover transition-all flex items-center gap-3 group"
+                        className="w-full px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors flex items-center gap-3 text-left"
                       >
                         {conv.type === 'channel' ? (
-                          <div className="w-11 h-11 rounded-xl bg-accent flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
-                            <Hash className="w-6 h-6 text-accent-foreground" />
+                          <div className="w-10 h-10 rounded-xl bg-[#131d47]/10 dark:bg-[#131d47]/40 flex items-center justify-center flex-shrink-0">
+                            <Hash className="w-5 h-5 text-[#131d47] dark:text-blue-300" />
                           </div>
                         ) : (
-                          <div className={`w-11 h-11 rounded-full ${getAvatarColor(conv.otherUser?.email)} flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform`}>
+                          <div className={`w-10 h-10 rounded-full ${getAvatarColor(conv.otherUser?.email)} flex items-center justify-center flex-shrink-0`}>
                             <span className="text-sm font-bold text-white">
                               {getUserInitials(conv.otherUser)}
                             </span>
                           </div>
                         )}
-                        <div className="flex-1 text-left min-w-0">
-                          <div className="flex items-center justify-between mb-1">
-                            <p className="font-semibold text-sm truncate">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between mb-0.5">
+                            <p className="font-semibold text-sm text-gray-900 dark:text-white truncate">
                               {conv.type === 'channel' ? conv.name : conv.otherUser?.full_name}
                             </p>
                             {conv.unreadCount > 0 && (
-                              <span className="bg-red-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ml-2">
+                              <span className="bg-[#00cc00] text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0 ml-2">
                                 {conv.unreadCount}
                               </span>
                             )}
                           </div>
-                          <p className="text-xs text-foreground-muted truncate">
-                            {conv.lastMessage.content.substring(0, 40)}...
+                          <p className="text-xs text-gray-400 truncate">
+                            {conv.lastMessage.content.substring(0, 45)}
                           </p>
                         </div>
                       </button>
@@ -550,55 +535,57 @@ export default function FloatingMessenger({ currentUser, isOpen, onClose }) {
           ) : (
             <>
               {/* Chat View Header */}
-              <div className="p-3 border-b border-border flex items-center justify-between">
+              <div className="px-3 py-2.5 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between flex-shrink-0 bg-white dark:bg-gray-900">
                 <div className="flex items-center gap-2 min-w-0 flex-1">
-                  <button onClick={() => setSelectedConversation(null)} className="hover:bg-surface-hover p-1 rounded flex-shrink-0">
-                    <X className="w-4 h-4" />
+                  <button onClick={() => setSelectedConversation(null)} className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors flex-shrink-0">
+                    <X className="w-4 h-4 text-gray-500" />
                   </button>
                   {selectedConversation.type === 'channel' ? (
                     <>
-                      <Hash className="w-4 h-4 text-accent flex-shrink-0" />
-                      <span className="font-bold text-sm truncate">{selectedConversation.name}</span>
+                      <div className="w-7 h-7 rounded-lg bg-[#131d47]/10 flex items-center justify-center flex-shrink-0">
+                        <Hash className="w-4 h-4 text-[#131d47] dark:text-blue-300" />
+                      </div>
+                      <span className="font-semibold text-sm text-gray-900 dark:text-white truncate">{selectedConversation.name}</span>
                     </>
                   ) : (
                     <>
-                      <div className={`w-6 h-6 rounded-full ${getAvatarColor(selectedConversation.otherUser?.email)} flex items-center justify-center flex-shrink-0`}>
+                      <div className={`w-7 h-7 rounded-full ${getAvatarColor(selectedConversation.otherUser?.email)} flex items-center justify-center flex-shrink-0`}>
                         <span className="text-xs font-bold text-white">
                           {getUserInitials(selectedConversation.otherUser)}
                         </span>
                       </div>
-                      <span className="font-bold text-sm truncate">{selectedConversation.otherUser?.full_name}</span>
+                      <span className="font-semibold text-sm text-gray-900 dark:text-white truncate">{selectedConversation.otherUser?.full_name}</span>
                     </>
                   )}
                 </div>
                 {selectedConversation.type === 'channel' && (
-                  <button onClick={() => setShowChannelSettings(true)} className="hover:bg-surface-hover p-1 rounded flex-shrink-0">
-                    <Settings className="w-4 h-4" />
+                  <button onClick={() => setShowChannelSettings(true)} className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors flex-shrink-0">
+                    <Settings className="w-4 h-4 text-gray-400" />
                   </button>
                 )}
               </div>
 
               {/* Messages */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-3">
+              <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50 dark:bg-gray-950">
                 {conversationMessages.map(msg => {
                   const isMine = msg.sender_email === currentUser?.email;
                   const replyToMsg = msg.reply_to_message_id ? messages.find(m => m.id === msg.reply_to_message_id) : null;
                   
                   return (
                     <div key={msg.id} className={`flex ${isMine ? 'justify-end' : 'justify-start'}`}>
-                      <div className={`max-w-[80%] rounded-2xl p-3 group relative ${
+                      <div className={`max-w-[80%] rounded-2xl px-3 py-2 group relative ${
                         isMine 
-                          ? 'bg-accent text-accent-foreground' 
-                          : 'glass-flat'
+                          ? 'bg-[#131d47] text-white'
+                          : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm border border-gray-100 dark:border-gray-700'
                       }`}>
                         {selectedConversation.type === 'channel' && !isMine && (
-                          <p className="text-xs font-semibold mb-1 opacity-70">{msg.sender_name}</p>
+                          <p className="text-[10px] font-semibold mb-1 text-[#00cc00]">{msg.sender_name}</p>
                         )}
                         
                         {replyToMsg && (
-                          <div className="glass-inset p-2 mb-2 text-xs opacity-70 rounded">
-                            <p className="font-semibold">{replyToMsg.sender_name}</p>
-                            <p className="truncate">{replyToMsg.content}</p>
+                          <div className={`p-2 mb-2 text-xs rounded-lg border-l-2 ${isMine ? 'border-white/40 bg-white/10' : 'border-gray-300 bg-gray-50 dark:bg-gray-700'}`}>
+                            <p className="font-semibold opacity-80">{replyToMsg.sender_name}</p>
+                            <p className="truncate opacity-60">{replyToMsg.content}</p>
                           </div>
                         )}
 
@@ -607,13 +594,8 @@ export default function FloatingMessenger({ currentUser, isOpen, onClose }) {
                         {msg.attachment_urls && msg.attachment_urls.length > 0 && (
                           <div className="mt-2">
                             {msg.attachment_urls.map((url, idx) => (
-                              <a
-                                key={idx}
-                                href={url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-xs underline block hover:opacity-80"
-                              >
+                              <a key={idx} href={url} target="_blank" rel="noopener noreferrer"
+                                className="text-xs underline block hover:opacity-80">
                                 📎 View attachment
                               </a>
                             ))}
@@ -623,47 +605,37 @@ export default function FloatingMessenger({ currentUser, isOpen, onClose }) {
                         {msg.reactions && Object.keys(msg.reactions).length > 0 && (
                           <div className="flex flex-wrap gap-1 mt-2">
                             {Object.entries(msg.reactions).map(([emoji, users]) => (
-                              <button
-                                key={emoji}
+                              <button key={emoji}
                                 onClick={() => addReactionMutation.mutate({ messageId: msg.id, emoji })}
-                                className={`glass-inset px-2 py-0.5 rounded-full text-xs flex items-center gap-1 ${
-                                  users.includes(currentUser.email) ? 'ring-1 ring-accent' : ''
-                                }`}
-                              >
+                                className={`px-2 py-0.5 rounded-full text-xs flex items-center gap-1 bg-white/20 dark:bg-black/20 ${
+                                  users.includes(currentUser.email) ? 'ring-1 ring-white/50' : ''
+                                }`}>
                                 {emoji} {users.length}
                               </button>
                             ))}
                           </div>
                         )}
 
-                        <div className="flex items-center justify-between mt-1">
-                          <p className={`text-[10px] ${isMine ? 'text-accent-foreground opacity-60' : 'text-foreground-subtle'}`}>
+                        <div className="flex items-center justify-between mt-1 gap-2">
+                          <p className={`text-[10px] ${isMine ? 'text-white/50' : 'text-gray-400'}`}>
                             {format(new Date(msg.created_date), 'HH:mm')}
                           </p>
-                          
                           <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                             <DropdownMenu open={showEmojiPicker === msg.id} onOpenChange={(open) => setShowEmojiPicker(open ? msg.id : null)}>
                               <DropdownMenuTrigger asChild>
-                                <button className="glass-button p-1 rounded">
+                                <button className={`p-1 rounded ${isMine ? 'hover:bg-white/20' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
                                   <Smile className="w-3 h-3" />
                                 </button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent>
                                 {EMOJI_LIST.map(emoji => (
-                                  <DropdownMenuItem
-                                    key={emoji}
-                                    onClick={() => addReactionMutation.mutate({ messageId: msg.id, emoji })}
-                                  >
+                                  <DropdownMenuItem key={emoji} onClick={() => addReactionMutation.mutate({ messageId: msg.id, emoji })}>
                                     {emoji}
                                   </DropdownMenuItem>
                                 ))}
                               </DropdownMenuContent>
                             </DropdownMenu>
-                            
-                            <button
-                              onClick={() => setReplyingTo(msg)}
-                              className="glass-button p-1 rounded"
-                            >
+                            <button onClick={() => setReplyingTo(msg)} className={`p-1 rounded ${isMine ? 'hover:bg-white/20' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
                               <Reply className="w-3 h-3" />
                             </button>
                           </div>
@@ -676,28 +648,23 @@ export default function FloatingMessenger({ currentUser, isOpen, onClose }) {
               </div>
 
               {/* Message Input */}
-              <div className="p-3 border-t border-border">
+              <div className="p-3 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 flex-shrink-0">
                 {replyingTo && (
-                  <div className="glass-inset p-2 mb-2 flex items-center justify-between text-xs">
+                  <div className="px-3 py-2 mb-2 flex items-center justify-between text-xs bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
                     <div className="flex-1 min-w-0 mr-2">
-                      <p className="font-semibold truncate">Replying to {replyingTo.sender_name}</p>
-                      <p className="text-foreground-muted truncate">{replyingTo.content}</p>
+                      <p className="font-semibold text-gray-700 dark:text-gray-300 truncate">Replying to {replyingTo.sender_name}</p>
+                      <p className="text-gray-400 truncate">{replyingTo.content}</p>
                     </div>
-                    <button onClick={() => setReplyingTo(null)} className="flex-shrink-0">
+                    <button onClick={() => setReplyingTo(null)} className="flex-shrink-0 text-gray-400 hover:text-gray-600">
                       <X className="w-3 h-3" />
                     </button>
                   </div>
                 )}
                 <div className="flex gap-2">
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    onChange={handleFileUpload}
-                    className="hidden"
-                  />
+                  <input type="file" ref={fileInputRef} onChange={handleFileUpload} className="hidden" />
                   <button
                     onClick={() => fileInputRef.current?.click()}
-                    className="glass-button p-2 flex-shrink-0"
+                    className="p-2 rounded-lg text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-600 transition-colors flex-shrink-0"
                     disabled={isUploading}
                   >
                     <Paperclip className="w-4 h-4" />
@@ -707,19 +674,17 @@ export default function FloatingMessenger({ currentUser, isOpen, onClose }) {
                     onChange={(e) => setMessageText(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && handleSendMessage()}
                     placeholder="Type a message..."
-                    className="glass-inset flex-1 text-sm h-10 rounded-xl"
+                    className="flex-1 text-sm h-9 rounded-xl bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700"
                     disabled={isUploading}
                   />
                   <button
                     onClick={handleSendMessage}
                     disabled={!messageText.trim() || sendMessageMutation.isPending || isUploading}
-                    className="w-10 h-10 rounded-xl flex items-center justify-center transition-all disabled:opacity-50"
-                    style={{
-                      background: messageText.trim() ? 'var(--accent)' : 'var(--surface)',
-                      color: messageText.trim() ? 'var(--accent-foreground)' : 'var(--foreground-muted)'
-                    }}
+                    className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all flex-shrink-0 ${
+                      messageText.trim() ? 'bg-[#131d47] text-white hover:bg-[#1a2660]' : 'bg-gray-100 dark:bg-gray-800 text-gray-400'
+                    } disabled:opacity-50`}
                   >
-                    <Send className="w-5 h-5" />
+                    <Send className="w-4 h-4" />
                   </button>
                 </div>
               </div>
