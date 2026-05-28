@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
@@ -62,9 +61,9 @@ export default function GlobalSearch({ open, onOpenChange }) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="neomorph-flat bg-[#1A1A1A] p-6 border-gold">
+      <DialogContent className="bg-[#131d47] border border-white/10 p-6 text-white">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-gold">
+          <DialogTitle className="flex items-center gap-2 text-white">
             <Search className="w-5 h-5" /> Global Search
           </DialogTitle>
         </DialogHeader>
@@ -72,22 +71,22 @@ export default function GlobalSearch({ open, onOpenChange }) {
           placeholder="Search by Claim Reg, Estimate Name, etc..."
           value={searchTerm}
           onChange={e => setSearchTerm(e.target.value)}
-          className="neomorph-inset mt-4"
+          className="mt-4 bg-white/10 border-white/20 text-white placeholder-white/40 focus:border-white/40"
         />
         <div className="mt-4 space-y-2 max-h-[60vh] overflow-y-auto">
-          {isLoading && <div className="flex justify-center p-4"><Loader className="animate-spin text-gold" /></div>}
+          {isLoading && <div className="flex justify-center p-4"><Loader className="animate-spin text-white/60" /></div>}
           {!isLoading && data && data.length === 0 && debouncedSearchTerm.length > 1 && (
-            <p className="text-center text-gray-500 py-4">No results found.</p>
+            <p className="text-center text-white/50 py-4">No results found.</p>
           )}
           {!isLoading && data && data.map(item => {
             const Icon = iconMap[item.type];
             return (
               <Link to={item.link} key={item.id} onClick={() => onOpenChange(false)} className="block">
-                <div className="neomorph-flat p-4 card-hover flex items-center gap-4">
-                  {Icon && <Icon className="w-5 h-5 text-gold" />}
+                <div className="bg-white/10 hover:bg-white/20 transition-colors p-4 rounded-lg flex items-center gap-4">
+                  {Icon && <Icon className="w-5 h-5 text-white/70" />}
                   <div>
-                    <p className="font-bold">{item.display}</p>
-                    <p className="text-sm text-gray-500">{item.type}</p>
+                    <p className="font-bold text-white">{item.display}</p>
+                    <p className="text-sm text-white/50">{item.type}</p>
                   </div>
                 </div>
               </Link>
