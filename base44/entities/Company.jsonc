@@ -1,0 +1,120 @@
+{
+  "name": "Company",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Company name"
+    },
+    "company_type": {
+      "type": "string",
+      "enum": [
+        "platform_owner",
+        "referrer",
+        "repairer"
+      ],
+      "description": "Type of company"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this company is active"
+    },
+    "enabled_features": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "dashboard",
+          "claims_view",
+          "claims_manage",
+          "jobs_view",
+          "jobs_assign",
+          "invoicing_view",
+          "invoicing_manage",
+          "reports",
+          "repairer_network",
+          "referrer_network",
+          "user_management",
+          "company_settings",
+          "platform_settings",
+          "billing"
+        ]
+      },
+      "description": "Features enabled for this company",
+      "default": []
+    },
+    "contact_name": {
+      "type": "string",
+      "description": "Main contact person"
+    },
+    "contact_email": {
+      "type": "string",
+      "description": "Contact email"
+    },
+    "contact_phone": {
+      "type": "string",
+      "description": "Contact phone"
+    },
+    "address_line_1": {
+      "type": "string",
+      "description": "Street address"
+    },
+    "address_line_2": {
+      "type": "string",
+      "description": "Additional address line"
+    },
+    "town": {
+      "type": "string",
+      "description": "Town or City"
+    },
+    "county": {
+      "type": "string",
+      "description": "County"
+    },
+    "postcode": {
+      "type": "string",
+      "description": "Postal code"
+    }
+  },
+  "required": [
+    "name",
+    "company_type"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "is_super_admin": true
+      }
+    },
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "is_super_admin": true
+          }
+        },
+        {
+          "user_condition": {
+            "is_company_admin": true
+          }
+        },
+        {
+          "user_condition": {
+            "user_type": "internal"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "is_super_admin": true
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "is_super_admin": true
+      }
+    }
+  }
+}
