@@ -218,17 +218,8 @@ export default function Layout({ children, currentPageName }) {
 
           {/* User footer */}
           <div className="border-t border-white/10 px-3 py-3">
-            <div 
-              className="flex items-center gap-3 group cursor-pointer w-full"
-              onClick={() => {
-                const profileBtn = document.querySelector('[role="menu"]')?.previousElementSibling;
-                if (profileBtn) profileBtn.click();
-              }}
-            >
-              <div className="flex-shrink-0 relative">
-                <UserProfile />
-                <div className="absolute inset-0 rounded-full bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
-              </div>
+            <div className="flex items-center gap-3 group cursor-pointer w-full hover:bg-white/5 p-2 -mx-2 rounded-lg transition-colors">
+              <UserProfile />
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-white truncate">{currentUser?.full_name || 'User'}</p>
                 <p className="text-xs text-white/40 truncate">{currentUser?.email || ''}</p>
@@ -282,16 +273,10 @@ export default function Layout({ children, currentPageName }) {
                 <Notifications />
                 <span className="text-[9px] text-gray-500">Alerts</span>
               </div>
-              <div className="flex flex-col items-center justify-center gap-0.5 touch-manipulation min-w-[44px] min-h-[44px]">
-                <div className="scale-75">
-                  <UserProfile />
-                </div>
-                <span className="text-[9px] text-gray-500">Profile</span>
               </div>
-            </div>
-          )}
+              )}
 
-          {/* ── DESKTOP top bar (≥ lg) ── */}
+              {/* ── DESKTOP top bar (≥ lg) ── */}
           {!claimDetailOpen && (
             <header className="hidden lg:flex flex-shrink-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 items-center gap-3 px-4 relative z-30" style={{height: '48px', minHeight: '48px'}}>
               <div className="flex-1" />
