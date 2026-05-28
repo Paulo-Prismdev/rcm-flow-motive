@@ -69,9 +69,9 @@ export default function CompanyManagementTab() {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {/* Type Tabs */}
-      <div className="flex gap-2 overflow-x-auto">
+      <div className="flex gap-2 overflow-x-auto pb-1">
         {COMPANY_TYPES.map(type => (
           <button
             key={type.id}
@@ -80,11 +80,11 @@ export default function CompanyManagementTab() {
               setShowForm(false);
               setEditingItem(null);
             }}
-            className={`neomorph-flat px-4 py-2 text-sm whitespace-nowrap flex items-center gap-2 transition-all ${
-              activeType === type.id ? 'border-accent text-accent' : 'hover:border-accent'
+            className={`px-3 py-1.5 text-xs font-medium whitespace-nowrap rounded-lg border transition-all ${
+              activeType === type.id ? 'bg-[#131d47] text-white border-[#131d47]' : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
             }`}
           >
-            <type.icon className="w-4 h-4" />
+            <type.icon className="w-3.5 h-3.5 inline mr-1.5" />
             {type.label}
           </button>
         ))}
@@ -92,16 +92,16 @@ export default function CompanyManagementTab() {
 
       {/* Add Button */}
       {!showForm && (
-        <Button
+        <button
           onClick={() => {
             setEditingItem(null);
             setShowForm(true);
           }}
-          className="neomorph-flat bg-accent/10 text-accent"
+          className="w-full px-3 py-2 text-sm font-medium text-white bg-[#131d47] hover:bg-[#1a2660] rounded-lg transition-colors flex items-center justify-center gap-2"
         >
-          <Plus className="w-4 h-4 mr-2" />
+          <Plus className="w-4 h-4" />
           Add {currentConfig.label.slice(0, -1)}
-        </Button>
+        </button>
       )}
 
       {/* Form */}
@@ -125,60 +125,58 @@ export default function CompanyManagementTab() {
 
       {/* List */}
       {isLoading ? (
-        <div className="text-center py-8 text-foreground-muted">Loading...</div>
+        <div className="text-center py-6 text-sm text-gray-400">Loading...</div>
       ) : items.length === 0 ? (
-        <div className="text-center py-8 text-foreground-muted">
+        <div className="text-center py-6 text-sm text-gray-400">
           No {currentConfig.label.toLowerCase()} found
         </div>
       ) : (
-        <div className="space-y-2">
+        <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden divide-y divide-gray-200 dark:divide-gray-800">
           {items.map(item => {
             const hasCoordinates = item.latitude && item.longitude;
             return (
               <div
                 key={item.id}
-                className="neomorph-flat p-4 flex items-center gap-4"
+                className="p-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors flex items-center gap-3"
               >
                 {item.logo_url ? (
                   <img
                     src={item.logo_url}
                     alt={item.name}
-                    className="w-12 h-12 object-contain rounded"
+                    className="w-10 h-10 object-contain rounded flex-shrink-0"
                   />
                 ) : (
-                  <div className="w-12 h-12 rounded bg-accent/10 flex items-center justify-center">
-                    <currentConfig.icon className="w-6 h-6 text-accent" />
+                  <div className="w-10 h-10 rounded bg-gray-100 dark:bg-gray-800 flex items-center justify-center flex-shrink-0">
+                    <currentConfig.icon className="w-5 h-5 text-gray-400" />
                   </div>
                 )}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <h3 className="font-medium truncate">{item.name}</h3>
+                    <h3 className="text-sm font-medium text-gray-900 dark:text-white truncate">{item.name}</h3>
                     {activeType === 'bodyshop' && !hasCoordinates && (
-                      <span className="text-xs px-2 py-0.5 rounded bg-orange-100 text-orange-600" title="Missing map coordinates">
-                        No GPS
-                      </span>
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300 flex-shrink-0">No GPS</span>
                     )}
                   </div>
-                  <p className="text-sm text-foreground-muted truncate">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
                     {item.contact_name} • {item.email}
                   </p>
                 </div>
-                <div className="flex gap-2">
-                  <Button
+                <div className="flex gap-1 flex-shrink-0">
+                  <button
                     onClick={() => handleEdit(item)}
-                    className="neomorph-flat p-2"
+                    className="p-1.5 text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white rounded transition-colors"
                     title="Edit"
                   >
-                    <Edit className="w-4 h-4" />
-                  </Button>
-                  <Button
+                    <Edit className="w-3.5 h-3.5" />
+                  </button>
+                  <button
                     onClick={() => handleDelete(item)}
-                    className="neomorph-flat p-2 text-red-500"
+                    className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
                     title="Delete"
                     disabled={deleteMutation.isPending}
                   >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
                 </div>
               </div>
             );

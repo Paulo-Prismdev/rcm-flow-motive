@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
@@ -100,191 +100,160 @@ export default function ChaserEmailSettings() {
 
   if (showLogs) {
     return (
-      <div className="h-full flex flex-col gap-4">
-        <div className="neomorph p-6 flex-shrink-0">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold">Chaser Email Logs</h1>
-              <p className="text-sm text-gray-500 mt-1">Recent chaser email activity</p>
-            </div>
-            <Button onClick={() => setShowLogs(false)} className="neomorph-flat">
-              Back to Rules
-            </Button>
-          </div>
+      <div className="h-full flex flex-col gap-3">
+        <div className="flex items-center justify-between">
+          <h1 className="text-lg font-semibold text-gray-900 dark:text-white">Chaser Email Logs</h1>
+          <button onClick={() => setShowLogs(false)} className="px-3 py-1.5 text-sm font-medium text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors">
+            Back
+          </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto min-h-0 pr-1">
-          <div className="space-y-2">
-            {recentLogs.length === 0 ? (
-              <div className="neomorph p-12 text-center text-gray-500">
-                No logs found yet
-              </div>
-            ) : (
-              recentLogs.map((log) => (
-                <div key={log.id} className="neomorph p-4">
-                  <div className="flex items-start justify-between mb-2">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <h3 className="font-bold">{log.rule_name}</h3>
-                        <span className={`px-2 py-1 text-xs rounded ${
-                          log.status === 'Sent' ? 'bg-green-100 text-green-700' :
-                          log.status === 'Failed' ? 'bg-red-100 text-red-700' :
-                          'bg-gray-100 text-gray-700'
-                        }`}>
-                          {log.status}
-                        </span>
-                      </div>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
-                        <div>
-                          <span className="text-gray-500">To:</span> {log.recipient_email}
-                        </div>
-                        <div>
-                          <span className="text-gray-500">Type:</span> {log.recipient_type}
-                        </div>
-                        <div>
-                          <span className="text-gray-500">Sent:</span> {new Date(log.sent_at).toLocaleString()}
-                        </div>
-                        <div>
-                          <span className="text-gray-500">Status:</span> {log.claim_status_at_send} ({log.days_in_status_at_send} days)
-                        </div>
-                      </div>
-                      {log.error_message && (
-                        <div className="mt-2 text-sm text-red-600">
-                          Error: {log.error_message}
-                        </div>
-                      )}
-                    </div>
+        <div className="flex-1 overflow-y-auto min-h-0">
+          {recentLogs.length === 0 ? (
+            <div className="text-center py-6 text-sm text-gray-400">
+              No logs found
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {recentLogs.map((log) => (
+                <div key={log.id} className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 p-3">
+                  <div className="flex items-start justify-between gap-2 mb-2">
+                    <h3 className="text-sm font-medium text-gray-900 dark:text-white truncate">{log.rule_name}</h3>
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded flex-shrink-0 ${
+                      log.status === 'Sent' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' :
+                      log.status === 'Failed' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' :
+                      'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400'
+                    }`}>
+                      {log.status}
+                    </span>
                   </div>
+                  <div className="grid grid-cols-2 gap-2 text-xs text-gray-600 dark:text-gray-400">
+                    <div><span className="text-gray-500 dark:text-gray-500">To:</span> {log.recipient_email}</div>
+                    <div><span className="text-gray-500 dark:text-gray-500">Type:</span> {log.recipient_type}</div>
+                    <div><span className="text-gray-500 dark:text-gray-500">Sent:</span> {new Date(log.sent_at).toLocaleString().split(', ')[1]}</div>
+                    <div><span className="text-gray-500 dark:text-gray-500">Status:</span> {log.claim_status_at_send}</div>
+                  </div>
+                  {log.error_message && (
+                    <div className="mt-2 text-xs text-red-600 dark:text-red-400">
+                      Error: {log.error_message}
+                    </div>
+                  )}
                 </div>
-              ))
-            )}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     );
   }
 
   return (
-    <div className="h-full flex flex-col gap-4">
-      <div className="neomorph p-6 flex-shrink-0">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h1 className="text-2xl font-bold">Automated Chaser Emails</h1>
-            <p className="text-sm text-gray-500 mt-1">Configure automatic email reminders for claims in specific statuses</p>
-          </div>
-          <div className="flex gap-2">
-            <Button
-              onClick={() => setShowLogs(true)}
-              className="neomorph-flat flex items-center gap-2"
-            >
-              <History className="w-4 h-4" />
-              View Logs
-            </Button>
-            <Button
-              onClick={handleRunNow}
-              disabled={isRunning}
-              className="neomorph-flat flex items-center gap-2 bg-blue-50"
-            >
-              <Play className="w-4 h-4" />
-              {isRunning ? 'Running...' : 'Run Now'}
-            </Button>
-            <Button
-              onClick={() => setShowForm(true)}
-              className="neomorph-flat bg-accent/10 text-accent flex items-center gap-2"
-            >
-              <Plus className="w-4 h-4" />
-              New Rule
-            </Button>
-          </div>
+    <div className="h-full flex flex-col gap-3">
+      <div className="flex items-start justify-between gap-3 flex-wrap">
+        <div className="flex-1">
+          <h1 className="text-lg font-semibold text-gray-900 dark:text-white">Automated Chaser Emails</h1>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Rules run daily automatically</p>
         </div>
-
-        <div className="neomorph-inset p-4 bg-blue-50">
-          <p className="text-sm text-blue-800">
-            <strong>How it works:</strong> These rules run automatically once per day. When a claim stays in a specific status for the configured number of days, an email is automatically sent to the specified recipient. You can also run the checker manually using the "Run Now" button above.
-          </p>
+        <div className="flex gap-2 flex-wrap">
+          <button
+            onClick={() => setShowLogs(true)}
+            className="px-3 py-1.5 text-sm font-medium text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg flex items-center gap-2 transition-colors"
+          >
+            <History className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Logs</span>
+          </button>
+          <button
+            onClick={handleRunNow}
+            disabled={isRunning}
+            className="px-3 py-1.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg flex items-center gap-2 transition-colors disabled:opacity-50"
+          >
+            <Play className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">{isRunning ? 'Running...' : 'Run Now'}</span>
+          </button>
+          <button
+            onClick={() => setShowForm(true)}
+            className="px-3 py-1.5 text-sm font-medium text-white bg-[#131d47] hover:bg-[#1a2660] rounded-lg flex items-center gap-2 transition-colors"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">New</span>
+          </button>
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto min-h-0 pr-1">
-        <div className="space-y-2">
-          {isLoading ? (
-            <div className="neomorph p-12 text-center text-gray-500">Loading rules...</div>
-          ) : rules.length === 0 ? (
-            <div className="neomorph p-12 text-center">
-              <p className="text-gray-500 mb-4">No chaser email rules configured yet</p>
-              <Button onClick={() => setShowForm(true)} className="neomorph-flat">
-                <Plus className="w-4 h-4 mr-2" />
-                Create Your First Rule
-              </Button>
-            </div>
-          ) : (
-            rules.map((rule) => (
-              <div key={rule.id} className={`neomorph p-4 ${!rule.is_active ? 'opacity-50' : ''}`}>
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h3 className="font-bold text-lg">{rule.rule_name}</h3>
+      <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
+        <p className="text-xs text-blue-900 dark:text-blue-300">
+          <strong>How it works:</strong> Claims stay in a status for N days → email sent automatically. Runs once daily. Use "Run Now" to trigger manually.
+        </p>
+      </div>
+
+      <div className="flex-1 overflow-y-auto min-h-0">
+        {isLoading ? (
+          <div className="text-center py-6 text-sm text-gray-400">Loading...</div>
+        ) : rules.length === 0 ? (
+          <div className="text-center py-6 text-sm text-gray-400">
+            No rules configured
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {rules.map((rule) => (
+              <div key={rule.id} className={`bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 p-3 ${!rule.is_active ? 'opacity-50' : ''}`}>
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-2">
+                      <h3 className="text-sm font-semibold text-gray-900 dark:text-white truncate">{rule.rule_name}</h3>
                       {rule.is_active ? (
-                        <span className="px-2 py-1 text-xs rounded bg-green-100 text-green-700">Active</span>
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 flex-shrink-0">Active</span>
                       ) : (
-                        <span className="px-2 py-1 text-xs rounded bg-gray-100 text-gray-700">Inactive</span>
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400 flex-shrink-0">Off</span>
                       )}
                     </div>
                     
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 text-sm mb-3">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs mb-2">
                       <div>
-                        <span className="text-gray-500">Trigger:</span> <strong>{rule.trigger_status}</strong>
+                        <span className="text-gray-500 dark:text-gray-400">Trigger:</span> <span className="font-medium text-gray-900 dark:text-white">{rule.trigger_status}</span>
                       </div>
                       <div>
-                        <span className="text-gray-500">After:</span> <strong>{rule.days_in_status} days</strong>
+                        <span className="text-gray-500 dark:text-gray-400">After:</span> <span className="font-medium text-gray-900 dark:text-white">{rule.days_in_status}d</span>
                       </div>
                       <div>
-                        <span className="text-gray-500">Send to:</span> <strong>{rule.recipient_type}</strong>
+                        <span className="text-gray-500 dark:text-gray-400">To:</span> <span className="font-medium text-gray-900 dark:text-white">{rule.recipient_type}</span>
                       </div>
                       <div>
-                        <span className="text-gray-500">Frequency:</span> <strong>{rule.send_frequency}</strong>
+                        <span className="text-gray-500 dark:text-gray-400">Freq:</span> <span className="font-medium text-gray-900 dark:text-white">{rule.send_frequency}</span>
                       </div>
                     </div>
 
-                    <div className="neomorph-inset p-3 text-sm">
-                      <div className="mb-2">
-                        <span className="text-gray-500">Subject:</span> <span className="ml-2">{rule.email_subject_template}</span>
-                      </div>
-                      <div>
-                        <span className="text-gray-500">Body:</span>
-                        <div className="ml-2 mt-1 text-gray-600 whitespace-pre-wrap line-clamp-2">
-                          {rule.email_body_template}
-                        </div>
-                      </div>
+                    <div className="text-xs text-gray-600 dark:text-gray-400 line-clamp-1">
+                      Subject: {rule.email_subject_template}
                     </div>
                   </div>
 
-                  <div className="flex gap-2 ml-4">
-                    <Button
+                  <div className="flex gap-1 flex-shrink-0">
+                    <button
                       onClick={() => handleToggleActive(rule)}
-                      className="neomorph-flat p-2"
+                      className="p-1.5 text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white rounded transition-colors"
                       title={rule.is_active ? 'Deactivate' : 'Activate'}
                     >
-                      {rule.is_active ? <PowerOff className="w-4 h-4" /> : <Power className="w-4 h-4" />}
-                    </Button>
-                    <Button
+                      {rule.is_active ? <PowerOff className="w-3.5 h-3.5" /> : <Power className="w-3.5 h-3.5" />}
+                    </button>
+                    <button
                       onClick={() => setEditingRule(rule)}
-                      className="neomorph-flat p-2"
+                      className="p-1.5 text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white rounded transition-colors"
                     >
-                      <Edit className="w-4 h-4" />
-                    </Button>
-                    <Button
+                      <Edit className="w-3.5 h-3.5" />
+                    </button>
+                    <button
                       onClick={() => handleDelete(rule)}
-                      className="neomorph-flat p-2 text-red-600"
+                      className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
                     >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
                   </div>
                 </div>
               </div>
-            ))
-          )}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
