@@ -247,44 +247,36 @@ export default function Layout({ children, currentPageName }) {
 
         {/* ── MAIN CONTENT ── */}
         <div className="flex-1 flex flex-col min-w-0 overflow-hidden" style={{isolation: 'isolate'}}>
-          {/* Top bar — hidden on mobile when claim detail is open */}
-          {!claimDetailOpen && <header className="hidden lg:flex flex-shrink-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 items-center gap-3 px-4 relative z-30" style={{height: '48px', minHeight: '48px'}}>
-            {/* Mobile burger */}
-            <button
-              onClick={() => setMobileMenuOpen(true)}
-              className="lg:hidden p-1.5 -ml-1 text-gray-500 hover:text-gray-900 dark:hover:text-white touch-manipulation"
-            >
-              <Menu className="w-5 h-5" />
-            </button>
-
-            {/* Page title / breadcrumb area — left spacer */}
-            <div className="flex-1" />
-
-            {/* Right actions */}
-            <div className="flex items-center gap-2">
+          {/* ── MOBILE top bar (< lg) ── */}
+          {!claimDetailOpen && (
+            <div className="lg:hidden flex-shrink-0 flex items-center gap-2 px-3 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800" style={{height: '52px', minHeight: '52px'}}>
+              <button
+                onClick={() => setMobileMenuOpen(true)}
+                className="p-2 rounded-lg text-gray-500 active:bg-gray-100 dark:active:bg-gray-800 touch-manipulation"
+              >
+                <Menu className="w-5 h-5" />
+              </button>
+              <div className="flex-1" />
               <button
                 onClick={() => window.location.reload()}
-                className="p-1.5 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-white transition-colors"
-                title="Refresh"
+                className="p-2 rounded-lg text-gray-500 active:bg-gray-100 dark:active:bg-gray-800 touch-manipulation"
               >
-                <RefreshCw className="w-4 h-4" />
+                <RefreshCw className="w-5 h-5" />
               </button>
               <button
                 onClick={() => setSearchOpen(true)}
-                className="p-1.5 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-white transition-colors"
-                title="Search"
+                className="p-2 rounded-lg text-gray-500 active:bg-gray-100 dark:active:bg-gray-800 touch-manipulation"
               >
-                <Search className="w-4 h-4" />
+                <Search className="w-5 h-5" />
               </button>
               {isInternalUser && (
                 <button
                   onClick={() => setMessagesOpen(true)}
-                  className="relative p-1.5 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-white transition-colors"
-                  title="Messages"
+                  className="relative p-2 rounded-lg text-gray-500 active:bg-gray-100 dark:active:bg-gray-800 touch-manipulation"
                 >
-                  <MessageSquare className="w-4 h-4" />
+                  <MessageSquare className="w-5 h-5" />
                   {unreadMessagesCount > 0 && (
-                    <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[9px] rounded-full w-3.5 h-3.5 flex items-center justify-center font-bold">
+                    <span className="absolute top-1 right-1 bg-red-500 text-white text-[9px] rounded-full w-3.5 h-3.5 flex items-center justify-center font-bold">
                       {unreadMessagesCount > 9 ? '9+' : unreadMessagesCount}
                     </span>
                   )}
@@ -293,7 +285,46 @@ export default function Layout({ children, currentPageName }) {
               <ThemeToggle />
               <Notifications />
             </div>
-          </header>}
+          )}
+
+          {/* ── DESKTOP top bar (≥ lg) ── */}
+          {!claimDetailOpen && (
+            <header className="hidden lg:flex flex-shrink-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 items-center gap-3 px-4 relative z-30" style={{height: '48px', minHeight: '48px'}}>
+              <div className="flex-1" />
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => window.location.reload()}
+                  className="p-1.5 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-white transition-colors"
+                  title="Refresh"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setSearchOpen(true)}
+                  className="p-1.5 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-white transition-colors"
+                  title="Search"
+                >
+                  <Search className="w-4 h-4" />
+                </button>
+                {isInternalUser && (
+                  <button
+                    onClick={() => setMessagesOpen(true)}
+                    className="relative p-1.5 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-white transition-colors"
+                    title="Messages"
+                  >
+                    <MessageSquare className="w-4 h-4" />
+                    {unreadMessagesCount > 0 && (
+                      <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[9px] rounded-full w-3.5 h-3.5 flex items-center justify-center font-bold">
+                        {unreadMessagesCount > 9 ? '9+' : unreadMessagesCount}
+                      </span>
+                    )}
+                  </button>
+                )}
+                <ThemeToggle />
+                <Notifications />
+              </div>
+            </header>
+          )}
 
           {/* Page content */}
           <main className="flex-1 overflow-hidden p-3 min-h-0 relative" style={{WebkitOverflowScrolling: 'touch', touchAction: 'auto'}}>
