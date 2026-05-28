@@ -45,7 +45,7 @@ export const getAvatarColor = (email) => {
   return colors[hash % colors.length];
 };
 
-export default function UserProfile() {
+export default function UserProfile({ customTrigger }) {
   const { data: user } = useQuery({
     queryKey: ['currentUser'],
     queryFn: () => base44.auth.me(),
@@ -58,21 +58,23 @@ export default function UserProfile() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center p-0 focus:outline-none">
-          {user?.profile_picture_url ? (
-            <img 
-              src={user.profile_picture_url} 
-              alt="Profile" 
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div className={`w-full h-full ${getAvatarColor(user?.email)} flex items-center justify-center`}>
-              <span className="text-sm font-bold text-white">
-                {getUserInitials(user)}
-              </span>
-            </div>
-          )}
-        </button>
+        {customTrigger || (
+          <button className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center p-0 focus:outline-none">
+            {user?.profile_picture_url ? (
+              <img 
+                src={user.profile_picture_url} 
+                alt="Profile" 
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className={`w-full h-full ${getAvatarColor(user?.email)} flex items-center justify-center`}>
+                <span className="text-sm font-bold text-white">
+                  {getUserInitials(user)}
+                </span>
+              </div>
+            )}
+          </button>
+        )}
       </DropdownMenuTrigger>
       <DropdownMenuContent className="glass-elevated w-56 md:w-64 border-accent z-[10000]" align="end">
         <DropdownMenuLabel className="font-normal">

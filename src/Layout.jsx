@@ -32,7 +32,7 @@ import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { StatusConfigProvider } from './components/shared/StatusConfigContext';
 import UserTypeFixer from './components/shared/UserTypeFixer';
-import { getUserInitials, getAvatarColor } from "./components/layout/UserProfile";
+import UserProfile, { getUserInitials, getAvatarColor } from "./components/layout/UserProfile";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -227,11 +227,9 @@ export default function Layout({ children, currentPageName }) {
 
           {/* User footer */}
           <div className="border-t border-white/10 px-3 py-3">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <div 
-                  className="flex items-center gap-3 group cursor-pointer w-full hover:bg-white/5 p-2 -mx-2 rounded-lg transition-colors"
-                >
+            <UserProfile
+              customTrigger={
+                <div className="flex items-center gap-3 group cursor-pointer w-full hover:bg-white/5 p-2 -mx-2 rounded-lg transition-colors">
                   <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
                     {currentUser?.profile_picture_url ? (
                       <img 
@@ -253,50 +251,8 @@ export default function Layout({ children, currentPageName }) {
                     <p className="text-[10px] text-white/30 truncate mt-0.5">Click for profile & logout</p>
                   </div>
                 </div>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="glass-elevated w-56 md:w-64 border-accent z-[10000]" align="end" side="top">
-                <DropdownMenuLabel className="font-normal">
-                  <div className="flex items-center gap-3">
-                    {currentUser?.profile_picture_url ? (
-                      <img 
-                        src={currentUser.profile_picture_url} 
-                        alt="Profile" 
-                        className="w-10 h-10 rounded-full object-cover"
-                      />
-                    ) : (
-                      <div className={`w-10 h-10 rounded-full ${getAvatarColor(currentUser?.email)} flex items-center justify-center`}>
-                        <span className="text-sm font-bold text-white">
-                          {getUserInitials(currentUser)}
-                        </span>
-                      </div>
-                    )}
-                    <div className="flex flex-col space-y-1 flex-1 min-w-0">
-                      <p className="text-sm font-medium leading-none truncate">
-                        {currentUser?.full_name || 'User'}
-                      </p>
-                      <p className="text-xs leading-none text-foreground-muted truncate">
-                        {currentUser?.email || 'Loading...'}
-                      </p>
-                    </div>
-                  </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator className="bg-border" />
-                <Link to={createPageUrl("UserProfile")}>
-                  <DropdownMenuItem className="cursor-pointer">
-                    <User className="mr-2 h-4 w-4" />
-                    <span>My Profile</span>
-                  </DropdownMenuItem>
-                </Link>
-                <DropdownMenuSeparator className="bg-border" />
-                <DropdownMenuItem 
-                  onClick={() => base44.auth.logout()} 
-                  className="cursor-pointer text-red-500 focus:text-red-400"
-                >
-                  <LogOut className="mr-2 h-4 w-4" />
-                  <span>Log out</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+              }
+            />
           </div>
         </aside>
 
