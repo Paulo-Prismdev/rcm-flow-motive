@@ -39,25 +39,8 @@
     "status_name"
   ],
   "rls": {
-    "create": {
-      "user_condition": {
-        "role": "admin"
-      }
-    },
-    "read": {
-      "$or": [
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        },
-        {
-          "user_condition": {
-            "user_type": "internal"
-          }
-        }
-      ]
-    },
+    "create": true,
+    "read": true,
     "update": {
       "user_condition": {
         "role": "admin"
