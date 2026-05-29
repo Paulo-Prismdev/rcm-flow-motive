@@ -386,6 +386,7 @@ function ReferrerClaimsList({ claims, onClaimOpen }) {
                       </span>
                     )}
                     <StatusBadge status={claim.job_status} />
+                    {claim.secondary_status && <StatusBadge status={claim.secondary_status} variant="secondary" />}
                   </div>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
                     <div>
