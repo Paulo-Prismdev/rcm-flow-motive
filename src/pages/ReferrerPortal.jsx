@@ -380,9 +380,9 @@ function ReferrerClaimsList({ claims, onClaimOpen }) {
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2">
                     <h4 className="font-bold">{formatUKRegistration(claim.reg)}</h4>
-                    {(claim.referrer_ref || claim.job_number) && (
+                    {claim.referrer_ref && (
                       <span className="text-xs font-mono px-2 py-0.5 rounded bg-accent/20 text-accent">
-                        {claim.referrer_ref || claim.job_number}
+                        {claim.referrer_ref}
                       </span>
                     )}
                     <StatusBadge status={claim.job_status} />

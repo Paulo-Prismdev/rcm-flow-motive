@@ -430,9 +430,9 @@ export default function ReferrerClaimDetail({ claim, onClose }) {
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
               <h1 className="text-sm md:text-base font-bold truncate">{formatUKRegistration(claim.reg) || 'Claim Details'}</h1>
-              {(claim.referrer_ref || claim.job_number) && (
+              {claim.referrer_ref && (
                 <span className="text-xs font-mono px-2 py-0.5 rounded bg-gold/20 text-gold font-semibold">
-                  {claim.referrer_ref || claim.job_number}
+                  {claim.referrer_ref}
                 </span>
               )}
               <StatusBadge status={claim.job_status || 'New'} />
