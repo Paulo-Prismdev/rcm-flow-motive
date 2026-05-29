@@ -143,7 +143,7 @@
     },
     "referrer_id": {
       "type": "string",
-      "description": "ID of the Referrer entity"
+      "description": "ID of the Referrer or Company entity"
     },
     "referrer_ref": {
       "type": "string"
@@ -676,6 +676,9 @@
         },
         {
           "data.referrer_id": "{{user.linked_referrer_id}}"
+        },
+        {
+          "data.referrer_id": "{{user.company_id}}"
         },
         {
           "data.bodyshop_id": "{{user.linked_bodyshop_id}}"

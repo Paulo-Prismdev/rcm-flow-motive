@@ -51,22 +51,26 @@ export default function ReferrerPortal() {
   const displayName = referrer?.name || company?.name || 'Referrer';
 
   const { data: claims = [], isLoading: claimsLoading } = useQuery({
-    queryKey: ['referrerClaims', referrerId],
+    queryKey: ['referrerClaims', referrerId, companyId],
     queryFn: async () => {
       const allClaims = await base44.entities.Claim.list('-created_date', 5000);
-      return allClaims.filter(c => c.referrer_id === referrerId);
+      // Match by legacy referrer_id OR by company_id (new system stores Company ID in referrer_id)
+      return allClaims.filter(c =>
+        (referrerId && c.referrer_id === referrerId) ||
+        (companyId && c.referrer_id === companyId)
+      );
     },
-    enabled: !!referrerId,
+    enabled: isLinked,
   });
 
   const { data: parts = [], isLoading: partsLoading } = useQuery({
-    queryKey: ['referrerParts', referrerId],
+    queryKey: ['referrerParts', referrerId, companyId],
     queryFn: async () => {
       const allParts = await base44.entities.Part.list('-created_date', 5000);
       const claimIds = claims.map(c => c.id);
       return allParts.filter(p => claimIds.includes(p.linked_claim_id));
     },
-    enabled: !!referrerId && claims.length > 0,
+    enabled: isLinked && claims.length > 0,
   });
 
   const isLoading = !currentUser || claimsLoading;
