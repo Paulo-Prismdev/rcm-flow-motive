@@ -179,8 +179,8 @@ This update was sent from ART-TEC One Claims Management System
       finalDescription = `${newUpdate.description}\n\n[Emailed to: ${emailLabels.join(', ')}]`;
     }
     
-    // Remove new_status from the update data as it's not part of ClaimUpdate entity
-    const { new_status, ...updateDataToSave } = newUpdate;
+    // Remove new_status and new_secondary_status from the update data as they're not part of ClaimUpdate entity
+    const { new_status, new_secondary_status, ...updateDataToSave } = newUpdate;
     
     // Use the final description with email info
     updateDataToSave.description = finalDescription;
