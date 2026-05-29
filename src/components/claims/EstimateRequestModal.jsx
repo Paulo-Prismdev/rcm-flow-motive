@@ -8,7 +8,7 @@ import {
     Dialog,
     DialogContent,
 } from "@/components/ui/dialog";
-import { X, Loader } from 'lucide-react';
+import { Loader } from 'lucide-react';
 
 export default function EstimateRequestModal({ claim, isOpen, onClose, onEstimateCreated }) {
     const [estimateData, setEstimateData] = useState({
@@ -59,19 +59,11 @@ export default function EstimateRequestModal({ claim, isOpen, onClose, onEstimat
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="max-w-[580px] bg-white dark:bg-gray-900 rounded-xl shadow-2xl p-8 border border-gray-200 dark:border-gray-800">
-                <div className="flex items-start justify-between mb-6">
-                    <div>
-                        <h2 className="text-[18px] font-semibold text-gray-900 dark:text-white">Request Estimate</h2>
-                        <p className="text-[13px] text-gray-500 dark:text-gray-400 mt-1">
-                            This will create a new job in the Estimating department linked to claim for vehicle: {claim.reg}.
-                        </p>
-                    </div>
-                    <button
-                        onClick={onClose}
-                        className="w-6 h-6 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
-                    >
-                        <X className="w-5 h-5" />
-                    </button>
+                <div className="mb-6">
+                    <h2 className="text-[18px] font-semibold text-gray-900 dark:text-white">Request Estimate</h2>
+                    <p className="text-[13px] text-gray-500 dark:text-gray-400 mt-1">
+                        This will create a new job in the Estimating department linked to claim for vehicle: {claim.reg}.
+                    </p>
                 </div>
                 <div className="space-y-5">
                     <div>
