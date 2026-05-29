@@ -399,7 +399,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel }) {
 
   // Wizard mode for new claims
   return (
-    <>
+    <div className="h-full flex flex-col gap-4 md:gap-6">
       <AIExtractConfirmDialog
         isOpen={aiExtractDialog.isOpen}
         onClose={() => setAiExtractDialog({ isOpen: false, data: null })}
@@ -408,8 +408,6 @@ export default function ClaimForm({ claim, onSubmit, onCancel }) {
         existingData={formData}
         title="AI Data Extraction"
       />
-
-      <div className="h-full flex flex-col gap-4 md:gap-6">
         {!isLoadingUser && isInternalUser && (
           <>
             <AddClientModal isOpen={showClientModal} onClose={() => setShowClientModal(false)} onSuccess={handleClientModalSuccess} />
@@ -448,7 +446,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel }) {
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto min-h-0 pr-1">
+        <div className="flex-1 overflow-y-auto min-h-0 pr-1 pb-4">
           <form onSubmit={handleSubmit}>
             {/* Step 1: Basic Info */}
             {currentStep === getStepNumber("basic") && (
@@ -731,7 +729,6 @@ export default function ClaimForm({ claim, onSubmit, onCancel }) {
             </div>
           </form>
         </div>
-      </div>
-    </>
+    </div>
   );
 }
