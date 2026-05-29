@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Button } from "@/components/ui/button";
@@ -50,7 +50,8 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
      description: '',
      next_steps: '',
      due_date_for_next_action: '',
-     new_status: currentStatus || ''
+     new_status: currentStatus || '',
+     new_secondary_status: ''
    });
    const [sendEmail, setSendEmail] = useState(false);
    const [selectedEmails, setSelectedEmails] = useState([]);
@@ -65,7 +66,7 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
    });
 
    // Get active statuses sorted by sort_order
-   const activeStatuses = React.useMemo(() => {
+   const activeStatuses = useMemo(() => {
      return customStatuses
        .filter(s => s.is_active)
        .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
@@ -112,7 +113,8 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
         description: '',
         next_steps: '',
         due_date_for_next_action: '',
-        new_status: currentStatus || ''
+        new_status: currentStatus || '',
+        new_secondary_status: ''
       });
       setSendEmail(false);
       setSelectedEmails([]);
@@ -142,7 +144,8 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
 This is an update for claim: ${claim?.reg || 'Unknown Vehicle'}
 
 Update Type: ${newUpdate.update_type}
-${newUpdate.update_type === 'Status Change' ? `New Status: ${newUpdate.new_status}\n` : ''}
+${newUpdate.update_type === 'Status Change' ? `New Primary Status: ${newUpdate.new_status}
+${newUpdate.new_secondary_status ? `New Secondary Status: ${newUpdate.new_secondary_status}\n` : ''}` : ''}
 
 Update Details:
 ${newUpdate.description}
@@ -181,9 +184,13 @@ This update was sent from ART-TEC One Claims Management System
   };
 
   // Update new_status when currentStatus changes
-  React.useEffect(() => {
-    setNewUpdate(prev => ({ ...prev, new_status: currentStatus || '' }));
-  }, [currentStatus]);
+  useEffect(() => {
+    setNewUpdate(prev => ({ 
+      ...prev, 
+      new_status: currentStatus || '',
+      new_secondary_status: claim?.secondary_status || ''
+    }));
+  }, [currentStatus, claim?.secondary_status]);
 
   // Get available email addresses from the claim
   const getAvailableEmails = () => {
@@ -287,34 +294,53 @@ This update was sent from ART-TEC One Claims Management System
                 </select>
               </div>
 
-              {/* Show status dropdown when Status Change is selected */}
+              {/* Show status dropdowns when Status Change is selected */}
               {newUpdate.update_type === 'Status Change' && (
-                <div>
-                  <label className="block text-xs text-muted-foreground mb-1">New Status *</label>
-                  {isLoadingStatuses ? (
-                    <div className="bg-muted/30 px-3 py-2 text-sm text-muted-foreground rounded-lg border border-border">
-                      Loading statuses...
-                    </div>
-                  ) : activeStatuses.length === 0 ? (
-                    <div className="bg-muted/30 px-3 py-2 text-sm text-muted-foreground rounded-lg border border-border">
-                      No statuses configured. Please add statuses in Settings.
-                    </div>
-                  ) : (
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-xs text-muted-foreground mb-1">New Primary Status *</label>
+                    {isLoadingStatuses ? (
+                      <div className="bg-muted/30 px-3 py-2 text-sm text-muted-foreground rounded-lg border border-border">
+                        Loading statuses...
+                      </div>
+                    ) : activeStatuses.length === 0 ? (
+                      <div className="bg-muted/30 px-3 py-2 text-sm text-muted-foreground rounded-lg border border-border">
+                        No statuses configured. Please add statuses in Settings.
+                      </div>
+                    ) : (
+                      <select
+                        value={newUpdate.new_status}
+                        onChange={(e) => setNewUpdate({ ...newUpdate, new_status: e.target.value })}
+                        className="w-full px-3 py-2 text-sm bg-background border border-border rounded-lg"
+                        required
+                      >
+                        <option value="">Select status...</option>
+                        {activeStatuses.map(status => (
+                          <option key={status} value={status}>{status}</option>
+                        ))}
+                      </select>
+                    )}
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Current primary status: <span className="font-medium">{currentStatus || 'Not set'}</span>
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs text-muted-foreground mb-1">New Secondary Status (Optional)</label>
                     <select
-                      value={newUpdate.new_status}
-                      onChange={(e) => setNewUpdate({ ...newUpdate, new_status: e.target.value })}
+                      value={newUpdate.new_secondary_status}
+                      onChange={(e) => setNewUpdate({ ...newUpdate, new_secondary_status: e.target.value })}
                       className="w-full px-3 py-2 text-sm bg-background border border-border rounded-lg"
-                      required
                     >
-                      <option value="">Select status...</option>
+                      <option value="">No secondary status</option>
                       {activeStatuses.map(status => (
                         <option key={status} value={status}>{status}</option>
                       ))}
                     </select>
-                  )}
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Current status: <span className="font-medium">{currentStatus || 'Not set'}</span>
-                  </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Use secondary status for additional tracking (e.g., "Awaiting Parts", "At Repairer")
+                    </p>
+                  </div>
                 </div>
               )}
 

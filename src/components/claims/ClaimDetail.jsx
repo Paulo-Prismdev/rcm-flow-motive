@@ -39,7 +39,7 @@ import ClaimDatesForm from './ClaimDatesForm';
 import ClaimBodyshopForm from './ClaimBodyshopForm';
 import ClaimEstimateForm from './ClaimEstimateForm';
 import ClaimStatusForm from './ClaimStatusForm';
-import ChangeStatusModal from './ChangeStatusModal';
+
 import ClaimVehicleDamageForm from './ClaimVehicleDamageForm';
 import ClaimIndemnityForm from './ClaimIndemnityForm';
 import ClaimExcessContributionForm from './ClaimExcessContributionForm';
@@ -191,7 +191,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
   const [isActivityLogOpen, setIsActivityLogOpen] = useState(false);
   const [isFetchingVehicle, setIsFetchingVehicle] = useState(false);
   const [vehicleFetchError, setVehicleFetchError] = useState('');
-  const [isChangeStatusModalOpen, setIsChangeStatusModalOpen] = useState(false);
+
   const [isBackorderedPartsModalOpen, setIsBackorderedPartsModalOpen] = useState(false);
 
   const canEdit = true;
@@ -333,7 +333,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
     handleUpdate({ ...claim, ...overrideData, last_updated_at: new Date().toISOString() });
   };
 
-  const handleClaimUpdateCreated = (newStatus) => {
+  const handleClaimUpdateCreated = (newStatus, newSecondaryStatus) => {
     const now = new Date();
     const fortyEightHoursFromNow = new Date(now.getTime() + 48 * 60 * 60 * 1000);
     
@@ -346,6 +346,10 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
     
     if (newStatus) {
       updateData.job_status = newStatus;
+    }
+    
+    if (newSecondaryStatus !== undefined) {
+      updateData.secondary_status = newSecondaryStatus;
     }
     
     handleUpdate(updateData);
@@ -1080,24 +1084,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
         onClose={() => setIsNotesOpen(false)}
       />
       
-      <ChangeStatusModal
-        isOpen={isChangeStatusModalOpen}
-        onClose={() => setIsChangeStatusModalOpen(false)}
-        claim={claim}
-        onSave={(statusData) => {
-          const { job_status, secondary_status, status_change_notes } = statusData;
-          const updates = { 
-            job_status, 
-            secondary_status: secondary_status || null,
-            // Replace entire job_statuses array with just the new primary status
-            job_statuses: [job_status]
-          };
-          if (status_change_notes) {
-            updates.latest_update = status_change_notes;
-          }
-          handleUpdate({ ...claim, ...updates });
-        }}
-      />
+
 
       <UpdateOverrideModal
         isOpen={isOverrideModalOpen}
@@ -1169,7 +1156,6 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
             isClosedStatus={isClosedStatus}
             onClose={handleClose}
             onUpdates={() => setIsClaimUpdatesOpen(true)}
-            onChangeStatus={() => setIsChangeStatusModalOpen(true)}
             onUpdateTracking={() => setIsUpdateTrackingOpen(true)}
             onAction={(val) => {
               if (val.startsWith('section:')) { setSelectedSection(val.replace('section:', '')); return; }
@@ -1211,8 +1197,16 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                           </div>
                       </div>
                       <div className="flex items-center gap-1.5 flex-shrink-0">
-                        <Button onClick={() => setIsClaimUpdatesOpen(true)} variant="outline" className="h-9 px-4 text-sm font-medium rounded-lg">Updates</Button>
-                        {canEdit && <Button onClick={() => setIsChangeStatusModalOpen(true)} className="h-9 px-4 text-sm font-medium rounded-lg bg-green-600 hover:bg-green-700 text-white">Change Status</Button>}
+                        {canEdit && (
+                          <Button onClick={() => setIsClaimUpdatesOpen(true)} className="h-9 px-4 text-sm font-medium rounded-lg bg-green-600 hover:bg-green-700 text-white">
+                            Updates & Status
+                          </Button>
+                        )}
+                        {!canEdit && (
+                          <Button onClick={() => setIsClaimUpdatesOpen(true)} variant="outline" className="h-9 px-4 text-sm font-medium rounded-lg">
+                            Updates
+                          </Button>
+                        )}
                         {canEdit && (
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
