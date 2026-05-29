@@ -24,6 +24,8 @@ import { ArrowLeft } from 'lucide-react';
 export default function SupplierManagement() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
+  const [filterManufacturer, setFilterManufacturer] = useState('all');
+  const [filterLocation, setFilterLocation] = useState('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingSupplier, setEditingSupplier] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -133,15 +135,27 @@ export default function SupplierManagement() {
     window.URL.revokeObjectURL(url);
   };
 
+  // Extract unique manufacturers from all suppliers for filter dropdown
+  const allManufacturers = suppliers.flatMap(s => s.manufacturer_associations || []).filter(Boolean);
+  const uniqueManufacturers = [...new Set(allManufacturers)].sort();
+
   const filteredSuppliers = suppliers.filter(supplier => {
     const matchesSearch = supplier.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       supplier.contact_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       supplier.emails?.some(email => email.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      supplier.email?.toLowerCase().includes(searchTerm.toLowerCase()); // Backward compatibility
+      supplier.email?.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesType = filterType === 'all' || supplier.part_supply_type === filterType;
     
-    return matchesSearch && matchesType;
+    const matchesManufacturer = filterManufacturer === 'all' || 
+      (supplier.manufacturer_associations && supplier.manufacturer_associations.includes(filterManufacturer));
+    
+    const matchesLocation = !filterLocation || 
+      supplier.town?.toLowerCase().includes(filterLocation.toLowerCase()) ||
+      supplier.county?.toLowerCase().includes(filterLocation.toLowerCase()) ||
+      supplier.postcode?.toLowerCase().includes(filterLocation.toLowerCase());
+    
+    return matchesSearch && matchesType && matchesManufacturer && matchesLocation;
   });
 
   return (
@@ -204,28 +218,66 @@ export default function SupplierManagement() {
           </div>
         </div>
 
-        <div className="flex gap-3">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-foreground-muted" />
-            <Input
-              placeholder="Search suppliers..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="neomorph-inset pl-10"
-            />
+        <div className="flex flex-col gap-3">
+          <div className="flex gap-3 flex-wrap">
+            <div className="relative flex-1 min-w-[200px]">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-foreground-muted" />
+              <Input
+                placeholder="Search by name, contact, email..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="neomorph-inset pl-10"
+              />
+            </div>
+            <select
+              value={filterType}
+              onChange={(e) => setFilterType(e.target.value)}
+              className="neomorph-inset px-4 py-2 rounded-xl border-0 min-w-[150px]"
+            >
+              <option value="all">All Types</option>
+              <option value="OEM">OEM</option>
+              <option value="Green">Green (Used)</option>
+              <option value="Aftermarket">Aftermarket</option>
+              <option value="Reconditioned">Reconditioned</option>
+              <option value="Glass">Glass</option>
+            </select>
           </div>
-          <select
-            value={filterType}
-            onChange={(e) => setFilterType(e.target.value)}
-            className="neomorph-inset px-4 py-2 rounded-xl border-0 min-w-[200px]"
-          >
-            <option value="all">All Types</option>
-            <option value="OEM">OEM</option>
-            <option value="Green">Green (Used)</option>
-            <option value="Aftermarket">Aftermarket</option>
-            <option value="Reconditioned">Reconditioned</option>
-            <option value="Glass">Glass</option>
-          </select>
+          <div className="flex gap-3 flex-wrap">
+            <div className="relative flex-1 min-w-[200px]">
+              <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-foreground-muted" />
+              <Input
+                placeholder="Filter by location (town, county, postcode)..."
+                value={filterLocation}
+                onChange={(e) => setFilterLocation(e.target.value)}
+                className="neomorph-inset pl-10"
+              />
+            </div>
+            <select
+              value={filterManufacturer}
+              onChange={(e) => setFilterManufacturer(e.target.value)}
+              className="neomorph-inset px-4 py-2 rounded-xl border-0 min-w-[200px]"
+            >
+              <option value="all">All Manufacturers</option>
+              {uniqueManufacturers.map(mfr => (
+                <option key={mfr} value={mfr}>{mfr}</option>
+              ))}
+            </select>
+          </div>
+          {(filterLocation || filterManufacturer !== 'all' || filterType !== 'all' || searchTerm) && (
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={() => {
+                setSearchTerm('');
+                setFilterType('all');
+                setFilterLocation('');
+                setFilterManufacturer('all');
+              }}
+              className="w-fit"
+            >
+              Clear Filters
+            </Button>
+          )}
         </div>
       </div>
 
