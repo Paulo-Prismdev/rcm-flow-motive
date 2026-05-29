@@ -216,32 +216,32 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="glass-elevated max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col bg-background border-border">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <MessageSquare className="w-5 h-5 text-accent" />
+          <DialogTitle className="flex items-center gap-2 text-foreground">
+            <MessageSquare className="w-5 h-5 text-primary" />
             Internal Notes & Team Communication
           </DialogTitle>
-          <p className="text-xs text-foreground-muted mt-1">
+          <p className="text-xs text-muted-foreground mt-1">
             These notes are for internal team communication only and do NOT affect 48-hour tracking
           </p>
         </DialogHeader>
 
         <div className="flex-1 overflow-y-auto space-y-4 pr-2">
           {isLoading ? (
-            <div className="text-center py-8 text-foreground-muted">Loading notes...</div>
+            <div className="text-center py-8 text-muted-foreground">Loading notes...</div>
           ) : mainNotes.length === 0 ? (
-            <div className="text-center py-8 text-foreground-muted">
+            <div className="text-center py-8 text-muted-foreground">
               No notes yet. Add the first update!
             </div>
           ) : (
             mainNotes.map((note) => (
               <div key={note.id} className="space-y-2">
-                <div className="neomorph-flat p-4">
+                <div className="bg-muted/30 border border-border rounded-lg p-4">
                   <div className="flex justify-between items-start mb-2">
                     <div>
-                      <span className="font-medium">{note.created_by}</span>
-                      <span className="text-xs text-foreground-muted ml-2">
+                      <span className="font-medium text-foreground">{note.created_by}</span>
+                      <span className="text-xs text-muted-foreground ml-2">
                         {format(new Date(note.created_date), 'MMM d, yyyy HH:mm')}
                       </span>
                     </div>
@@ -269,13 +269,13 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
                       </Button>
                     </div>
                   </div>
-                  <div className="text-sm whitespace-pre-wrap">
+                  <div className="text-sm whitespace-pre-wrap text-foreground">
                     {parseContentWithMentions(note.content)}
                   </div>
                   
                   {/* Show tagged users */}
                   {note.tagged_users && note.tagged_users.length > 0 && (
-                    <div className="mt-2 text-xs text-foreground-muted">
+                    <div className="mt-2 text-xs text-muted-foreground">
                       Tagged: {note.tagged_users.join(', ')}
                     </div>
                   )}
@@ -315,25 +315,25 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
 
                 {/* Replies */}
                 {getReplies(note.id).map(reply => (
-                  <div key={reply.id} className="ml-8 neomorph-flat p-3 bg-opacity-50">
-                    <div className="flex justify-between items-start mb-2">
-                      <div>
-                        <span className="font-medium text-sm">{reply.created_by}</span>
-                        <span className="text-xs text-foreground-muted ml-2">
-                          {format(new Date(reply.created_date), 'MMM d, yyyy HH:mm')}
-                        </span>
-                      </div>
+                <div key={reply.id} className="ml-8 bg-muted/20 border border-border rounded-lg p-3">
+                  <div className="flex justify-between items-start mb-2">
+                    <div>
+                      <span className="font-medium text-sm text-foreground">{reply.created_by}</span>
+                      <span className="text-xs text-muted-foreground ml-2">
+                        {format(new Date(reply.created_date), 'MMM d, yyyy HH:mm')}
+                      </span>
                     </div>
-                    <div className="text-sm whitespace-pre-wrap">
-                      {parseContentWithMentions(reply.content)}
-                    </div>
-                    
-                    {reply.tagged_users && reply.tagged_users.length > 0 && (
-                      <div className="mt-2 text-xs text-foreground-muted">
-                        Tagged: {reply.tagged_users.join(', ')}
-                      </div>
-                    )}
                   </div>
+                  <div className="text-sm whitespace-pre-wrap text-foreground">
+                    {parseContentWithMentions(reply.content)}
+                  </div>
+
+                  {reply.tagged_users && reply.tagged_users.length > 0 && (
+                    <div className="mt-2 text-xs text-muted-foreground">
+                      Tagged: {reply.tagged_users.join(', ')}
+                    </div>
+                  )}
+                </div>
                 ))}
               </div>
             ))
@@ -341,10 +341,10 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
         </div>
 
         {/* New Note Form */}
-        <div className="border-t border-glass-border pt-4 mt-4">
+        <div className="border-t border-border pt-4 mt-4">
           {replyingTo && (
-            <div className="mb-2 flex items-center justify-between neomorph-flat p-2 text-sm">
-              <span>Replying to {replyingTo.created_by}</span>
+            <div className="mb-2 flex items-center justify-between bg-muted/30 border border-border rounded-lg p-2 text-sm">
+              <span className="text-foreground">Replying to {replyingTo.created_by}</span>
               <Button
                 variant="ghost"
                 size="icon"
@@ -362,7 +362,7 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
                 value={newNote}
                 onChange={handleTextareaChange}
                 placeholder="Add a note or update... (type @ to mention someone)"
-                className="neomorph-inset min-h-[100px]"
+                className="min-h-[100px] bg-background border-border"
               />
               
               {/* Mention Dropdown */}

@@ -213,13 +213,13 @@ This update was sent from ART-TEC One Claims Management System
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="glass-elevated max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col bg-background border-border">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Clock className="w-5 h-5 text-accent" />
+          <DialogTitle className="flex items-center gap-2 text-foreground">
+            <Clock className="w-5 h-5 text-primary" />
             Official Updates - Activity Log
           </DialogTitle>
-          <p className="text-xs text-foreground-muted mt-1">
+          <p className="text-xs text-muted-foreground mt-1">
             These updates reset the 48-hour tracking timer and create an audit trail
           </p>
         </DialogHeader>
@@ -229,15 +229,15 @@ This update was sent from ART-TEC One Claims Management System
            {!showForm ? (
              <Button
                onClick={() => setShowForm(true)}
-               className="w-full px-4 py-3 bg-accent hover:bg-accent/90 text-accent-foreground font-medium rounded-lg flex items-center justify-center gap-2"
+               className="w-full px-4 py-3 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-lg flex items-center justify-center gap-2"
              >
                <Plus className="w-4 h-4" />
                Add New Update
              </Button>
            ) : (
-          <div className="glass-elevated p-4 border-l-4 border-accent">
+           <div className="bg-muted/30 border border-border rounded-lg p-4 border-l-4 border-l-primary">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="font-semibold text-sm">Add New Update</h3>
+              <h3 className="font-semibold text-sm text-foreground">Add New Update</h3>
               <Button
                 type="button"
                 variant="ghost"
@@ -254,18 +254,18 @@ This update was sent from ART-TEC One Claims Management System
                   setSendEmail(false);
                   setSelectedEmails([]);
                 }}
-                className="text-foreground-muted hover:text-foreground"
+                className="text-muted-foreground hover:text-foreground"
               >
                 <X className="w-4 h-4" />
               </Button>
             </div>
             <form onSubmit={handleSubmit} className="space-y-3">
               <div>
-                <label className="block text-xs text-foreground-muted mb-1">Update Type *</label>
+                <label className="block text-xs text-muted-foreground mb-1">Update Type *</label>
                 <select
                   value={newUpdate.update_type}
                   onChange={(e) => setNewUpdate({ ...newUpdate, update_type: e.target.value })}
-                  className="glass-inset w-full px-3 py-2 text-sm border-0 rounded-lg"
+                  className="w-full px-3 py-2 text-sm bg-background border border-border rounded-lg"
                   required
                 >
                   {UPDATE_TYPES.map(type => (
@@ -277,20 +277,20 @@ This update was sent from ART-TEC One Claims Management System
               {/* Show status dropdown when Status Change is selected */}
               {newUpdate.update_type === 'Status Change' && (
                 <div>
-                  <label className="block text-xs text-foreground-muted mb-1">New Status *</label>
+                  <label className="block text-xs text-muted-foreground mb-1">New Status *</label>
                   {isLoadingStatuses ? (
-                    <div className="glass-inset px-3 py-2 text-sm text-foreground-muted">
+                    <div className="bg-muted/30 px-3 py-2 text-sm text-muted-foreground rounded-lg border border-border">
                       Loading statuses...
                     </div>
                   ) : activeStatuses.length === 0 ? (
-                    <div className="glass-inset px-3 py-2 text-sm text-foreground-muted">
+                    <div className="bg-muted/30 px-3 py-2 text-sm text-muted-foreground rounded-lg border border-border">
                       No statuses configured. Please add statuses in Settings.
                     </div>
                   ) : (
                     <select
                       value={newUpdate.new_status}
                       onChange={(e) => setNewUpdate({ ...newUpdate, new_status: e.target.value })}
-                      className="glass-inset w-full px-3 py-2 text-sm border-0 rounded-lg"
+                      className="w-full px-3 py-2 text-sm bg-background border border-border rounded-lg"
                       required
                     >
                       <option value="">Select status...</option>
@@ -299,46 +299,46 @@ This update was sent from ART-TEC One Claims Management System
                       ))}
                     </select>
                   )}
-                  <p className="text-xs text-foreground-subtle mt-1">
+                  <p className="text-xs text-muted-foreground mt-1">
                     Current status: <span className="font-medium">{currentStatus || 'Not set'}</span>
                   </p>
                 </div>
               )}
 
               <div>
-                <label className="block text-xs text-foreground-muted mb-1">What was done? *</label>
+                <label className="block text-xs text-muted-foreground mb-1">What was done? *</label>
                 <Textarea
                   value={newUpdate.description}
                   onChange={(e) => setNewUpdate({ ...newUpdate, description: e.target.value })}
                   placeholder="Describe the action taken, communication made, or status change..."
-                  className="glass-inset px-3 py-2 text-sm border-0 h-24"
+                  className="px-3 py-2 text-sm bg-background border border-border h-24"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-xs text-foreground-muted mb-1">Next Steps (Optional)</label>
+                <label className="block text-xs text-muted-foreground mb-1">Next Steps (Optional)</label>
                 <Textarea
                   value={newUpdate.next_steps}
                   onChange={(e) => setNewUpdate({ ...newUpdate, next_steps: e.target.value })}
                   placeholder="What needs to happen next..."
-                  className="glass-inset px-3 py-2 text-sm border-0 h-20"
+                  className="px-3 py-2 text-sm bg-background border border-border h-20"
                 />
               </div>
 
               <div>
-                <label className="block text-xs text-foreground-muted mb-1">Due Date for Next Action (Optional)</label>
+                <label className="block text-xs text-muted-foreground mb-1">Due Date for Next Action (Optional)</label>
                 <Input
                   type="date"
                   value={newUpdate.due_date_for_next_action}
                   onChange={(e) => setNewUpdate({ ...newUpdate, due_date_for_next_action: e.target.value })}
-                  className="glass-inset px-3 py-2 text-sm border-0"
+                  className="px-3 py-2 text-sm bg-background border border-border"
                 />
               </div>
 
               {/* Email Section */}
               {availableEmails.length > 0 && (
-                <div className="glass-inset p-3 space-y-3">
+                <div className="bg-muted/30 p-3 space-y-3 border border-border rounded-lg">
                   <div className="flex items-center gap-2">
                     <input
                       type="checkbox"
@@ -393,14 +393,15 @@ This update was sent from ART-TEC One Claims Management System
                     setSendEmail(false);
                     setSelectedEmails([]);
                   }}
-                  className="glass-button px-4 py-2 text-xs"
+                  variant="outline"
+                  className="px-4 py-2 text-xs"
                 >
                   Cancel
                 </Button>
                 <Button
                   type="submit"
                   disabled={createUpdateMutation.isPending || !newUpdate.description.trim()}
-                  className="glass-button px-4 py-2 text-xs text-accent"
+                  className="px-4 py-2 text-xs bg-primary hover:bg-primary/90 text-primary-foreground"
                 >
                   {createUpdateMutation.isPending ? 'Adding...' : 'Add Update'}
                 </Button>
@@ -411,13 +412,13 @@ This update was sent from ART-TEC One Claims Management System
 
           {/* Updates Timeline */}
           <div>
-            <h3 className="font-semibold mb-3 text-sm">Update History</h3>
+            <h3 className="font-semibold mb-3 text-sm text-foreground">Update History</h3>
             {isLoading ? (
-              <div className="glass-inset p-4 text-center text-sm text-foreground-muted">
+              <div className="bg-muted/30 border border-border rounded-lg p-4 text-center text-sm text-muted-foreground">
                 Loading updates...
               </div>
             ) : updates.length === 0 ? (
-              <div className="glass-inset p-4 text-center text-sm text-foreground-muted">
+              <div className="bg-muted/30 border border-border rounded-lg p-4 text-center text-sm text-muted-foreground">
                 No updates yet. Add the first official update above.
               </div>
             ) : (
@@ -425,7 +426,7 @@ This update was sent from ART-TEC One Claims Management System
                 {updates.map((update) => (
                   <div
                     key={update.id}
-                    className="glass-elevated p-4 border-l-4"
+                    className="bg-muted/30 border border-border rounded-lg p-4 border-l-4"
                     style={{ borderLeftColor: UPDATE_TYPE_COLORS[update.update_type] || '#6B7280' }}
                   >
                     <div className="flex items-start justify-between mb-2">
@@ -435,7 +436,7 @@ This update was sent from ART-TEC One Claims Management System
                         >
                           {update.update_type}
                         </span>
-                        <span className="text-[10px] text-foreground-subtle flex items-center gap-1">
+                        <span className="text-[10px] text-muted-foreground flex items-center gap-1">
                           <Calendar className="w-3 h-3" />
                           {format(new Date(update.created_date), 'dd/MM/yyyy HH:mm')}
                         </span>
@@ -443,25 +444,25 @@ This update was sent from ART-TEC One Claims Management System
                     </div>
 
                     <div className="text-sm mb-2">
-                      <p className="font-medium mb-1">Update:</p>
-                      <p className="text-foreground-muted whitespace-pre-wrap">{update.description}</p>
+                      <p className="font-medium mb-1 text-foreground">Update:</p>
+                      <p className="text-muted-foreground whitespace-pre-wrap">{update.description}</p>
                     </div>
 
                     {update.next_steps && (
                       <div className="text-sm mb-2">
-                        <p className="font-medium mb-1">Next Steps:</p>
-                        <p className="text-foreground-muted whitespace-pre-wrap">{update.next_steps}</p>
+                        <p className="font-medium mb-1 text-foreground">Next Steps:</p>
+                        <p className="text-muted-foreground whitespace-pre-wrap">{update.next_steps}</p>
                       </div>
                     )}
 
                     {update.due_date_for_next_action && (
-                      <div className="text-xs text-foreground-subtle flex items-center gap-1 mt-2">
+                      <div className="text-xs text-muted-foreground flex items-center gap-1 mt-2">
                         <Clock className="w-3 h-3" />
                         Due: {format(new Date(update.due_date_for_next_action), 'dd/MM/yyyy')}
                       </div>
                     )}
 
-                    <div className="flex items-center gap-1 mt-2 text-[10px] text-foreground-subtle">
+                    <div className="flex items-center gap-1 mt-2 text-[10px] text-muted-foreground">
                       <User className="w-3 h-3" />
                       {update.created_by}
                     </div>
@@ -473,7 +474,7 @@ This update was sent from ART-TEC One Claims Management System
         </div>
 
         <div className="flex justify-end pt-4 border-t border-border">
-          <Button onClick={onClose} className="glass-button px-4 py-2">
+          <Button onClick={onClose} variant="outline" className="px-4 py-2">
             Close
           </Button>
         </div>

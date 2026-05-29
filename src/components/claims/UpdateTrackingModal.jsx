@@ -19,14 +19,14 @@ export default function UpdateTrackingModal({ claim, isOpen, onClose, onSetOverr
   if (isClosedStatus) {
     return (
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="glass-elevated max-w-2xl">
+        <DialogContent className="max-w-2xl bg-background border-border">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Clock className="w-5 h-5 text-accent" />
+            <DialogTitle className="flex items-center gap-2 text-foreground">
+              <Clock className="w-5 h-5 text-primary" />
               Update Tracking
             </DialogTitle>
           </DialogHeader>
-          <div className="p-6 text-center text-foreground-muted">
+          <div className="p-6 text-center text-muted-foreground">
             <p>Update tracking is not available for closed claims.</p>
           </div>
         </DialogContent>
@@ -59,13 +59,13 @@ export default function UpdateTrackingModal({ claim, isOpen, onClose, onSetOverr
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="glass-elevated max-w-2xl">
+      <DialogContent className="max-w-2xl bg-background border-border">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Clock className="w-5 h-5 text-accent" />
+          <DialogTitle className="flex items-center gap-2 text-foreground">
+            <Clock className="w-5 h-5 text-primary" />
             Update Tracking
           </DialogTitle>
-          <p className="text-xs text-foreground-muted mt-1">
+          <p className="text-xs text-muted-foreground mt-1">
             48-hour update tracking for this claim
           </p>
         </DialogHeader>
@@ -79,21 +79,21 @@ export default function UpdateTrackingModal({ claim, isOpen, onClose, onSetOverr
 
           {/* Override Notice */}
           {hasOverride && (
-            <div className="glass-inset p-4 border-l-4 border-blue-500">
+            <div className="bg-muted/30 border border-border rounded-lg p-4 border-l-4 border-l-blue-500">
               <div className="flex items-start gap-3">
                 <Pause className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
                 <div className="flex-1">
-                  <p className="font-medium text-sm mb-1">Update Tracking Paused</p>
-                  <p className="text-xs text-foreground-muted mb-2">
+                  <p className="font-medium text-sm mb-1 text-foreground">Update Tracking Paused</p>
+                  <p className="text-xs text-muted-foreground mb-2">
                     {claim.override_reason || 'No reason provided'}
                   </p>
                   {overrideExpiry && (
-                    <p className="text-xs text-foreground-subtle">
+                    <p className="text-xs text-muted-foreground">
                       Resumes: {format(overrideExpiry, 'dd/MM/yyyy HH:mm')}
                     </p>
                   )}
                   {claim.override_by_user_email && (
-                    <p className="text-xs text-foreground-subtle flex items-center gap-1 mt-1">
+                    <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
                       <User className="w-3 h-3" />
                       Set by: {claim.override_by_user_email}
                     </p>
@@ -105,14 +105,14 @@ export default function UpdateTrackingModal({ claim, isOpen, onClose, onSetOverr
 
           {/* Last Updated */}
           {lastUpdated && (
-            <div className="glass-inset p-4">
+            <div className="bg-muted/30 border border-border rounded-lg p-4">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs text-foreground-muted">Last Updated</span>
-                <span className="text-sm font-medium">
+                <span className="text-xs text-muted-foreground">Last Updated</span>
+                <span className="text-sm font-medium text-foreground">
                   {format(lastUpdated, 'dd/MM/yyyy HH:mm')}
                 </span>
               </div>
-              <p className="text-xs text-foreground-subtle">
+              <p className="text-xs text-muted-foreground">
                 {formatDistanceToNow(lastUpdated, { addSuffix: true })}
               </p>
             </div>
@@ -120,14 +120,14 @@ export default function UpdateTrackingModal({ claim, isOpen, onClose, onSetOverr
 
           {/* Progress Bar */}
           {!hasOverride && nextDue && (
-            <div className="glass-inset p-4">
+            <div className="bg-muted/30 border border-border rounded-lg p-4">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs text-foreground-muted">Time Until Next Update</span>
+                <span className="text-xs text-muted-foreground">Time Until Next Update</span>
                 <span className={`text-sm font-medium ${isOverdue ? 'text-red-600' : ''}`}>
                   {getTimeRemaining()}
                 </span>
               </div>
-              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
+              <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
                 <div 
                   className={`h-full transition-all duration-500 ${
                     isOverdue ? 'bg-red-500' : 
@@ -142,9 +142,9 @@ export default function UpdateTrackingModal({ claim, isOpen, onClose, onSetOverr
 
           {/* Next Due */}
           {nextDue && !hasOverride && (
-            <div className="glass-inset p-4">
+            <div className="bg-muted/30 border border-border rounded-lg p-4">
               <div className="flex items-center justify-between">
-                <span className="text-xs text-foreground-muted">Next Update Due</span>
+                <span className="text-xs text-muted-foreground">Next Update Due</span>
                 <span className={`text-sm font-medium ${isOverdue ? 'text-red-600' : ''}`}>
                   {format(nextDue, 'dd/MM/yyyy HH:mm')}
                 </span>
@@ -153,10 +153,10 @@ export default function UpdateTrackingModal({ claim, isOpen, onClose, onSetOverr
           )}
 
           {/* Info Box */}
-          <div className="glass-inset p-4 border-l-4 border-accent">
+          <div className="bg-muted/30 border border-border rounded-lg p-4 border-l-4 border-l-primary">
             <div className="flex items-start gap-3">
-              <AlertCircle className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
-              <div className="text-xs text-foreground-muted">
+              <AlertCircle className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+              <div className="text-xs text-muted-foreground">
                 <p className="mb-2">
                   Claims should be updated every 48 hours to keep stakeholders informed.
                 </p>
@@ -173,7 +173,8 @@ export default function UpdateTrackingModal({ claim, isOpen, onClose, onSetOverr
             <div className="flex justify-end gap-2 pt-4 border-t border-border">
               <Button
                 onClick={onSetOverride}
-                className="glass-button px-4 py-2 text-sm"
+                variant="outline"
+                className="px-4 py-2 text-sm"
               >
                 {hasOverride ? 'Modify Snooze' : 'Snooze Tracking'}
               </Button>
