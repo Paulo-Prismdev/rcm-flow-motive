@@ -25,6 +25,7 @@ import FeedbackModal from '../components/shared/FeedbackModal';
 
 export default function ReferrerPortal() {
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [viewingClaim, setViewingClaim] = useState(null);
 
   const { data: currentUser } = useQuery({
     queryKey: ['currentUser'],
@@ -119,6 +120,14 @@ export default function ReferrerPortal() {
 
   const tabs = allTabs.filter(t => !t.section || allowedSections.includes(t.section));
 
+  if (viewingClaim) {
+    return (
+      <ReferrerLayout>
+        <ReferrerClaimDetail claim={viewingClaim} onClose={() => setViewingClaim(null)} />
+      </ReferrerLayout>
+    );
+  }
+
   return (
     <ReferrerLayout>
       {currentUser?.show_feedback_prompt && (
@@ -169,7 +178,7 @@ export default function ReferrerPortal() {
             />
           )}
           {activeTab === 'claims' && (
-            <ReferrerClaimsList claims={claims} />
+            <ReferrerClaimsList claims={claims} onClaimOpen={setViewingClaim} />
           )}
           {activeTab === 'parts' && (
             <ReferrerPartsTab parts={parts} claims={claims} />
@@ -308,10 +317,9 @@ function ReferrerDashboard({ claims, parts, activeClaims, completedClaims, activ
   );
 }
 
-function ReferrerClaimsList({ claims }) {
+function ReferrerClaimsList({ claims, onClaimOpen }) {
   const [filter, setFilter] = useState('active');
   const [search, setSearch] = useState('');
-  const [selectedClaim, setSelectedClaim] = useState(null);
 
   const filteredClaims = claims.filter(c => {
     const matchesStatus =
@@ -325,15 +333,6 @@ function ReferrerClaimsList({ claims }) {
       c.make_model?.toLowerCase().includes(q);
     return matchesStatus && matchesSearch;
   });
-
-  if (selectedClaim) {
-    return (
-      <ReferrerClaimDetail 
-        claim={selectedClaim} 
-        onClose={() => setSelectedClaim(null)} 
-      />
-    );
-  }
 
   return (
     <div className="space-y-3">
@@ -374,7 +373,7 @@ function ReferrerClaimsList({ claims }) {
             <div 
               key={claim.id} 
               className="neomorph-flat p-4 cursor-pointer hover:shadow-lg transition-all"
-              onClick={() => setSelectedClaim(claim)}
+              onClick={() => onClaimOpen(claim)}
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1">
