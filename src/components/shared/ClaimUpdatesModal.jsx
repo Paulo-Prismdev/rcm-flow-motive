@@ -44,42 +44,39 @@ const UPDATE_TYPE_COLORS = {
 };
 
 export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onClose, onUpdateCreated }) {
-  const [showForm, setShowForm] = useState(false);
-  const [newUpdate, setNewUpdate] = useState({
-    update_type: 'Other',
-    description: '',
-    next_steps: '',
-    due_date_for_next_action: '',
-    new_status: currentStatus || ''
-  });
-  const [sendEmail, setSendEmail] = useState(false);
-  const [selectedEmails, setSelectedEmails] = useState([]);
+   const [showForm, setShowForm] = useState(false);
+   const [newUpdate, setNewUpdate] = useState({
+     update_type: 'Other',
+     description: '',
+     next_steps: '',
+     due_date_for_next_action: '',
+     new_status: currentStatus || ''
+   });
+   const [sendEmail, setSendEmail] = useState(false);
+   const [selectedEmails, setSelectedEmails] = useState([]);
 
-  const queryClient = useQueryClient();
+   const queryClient = useQueryClient();
 
-  // Fetch custom claim statuses
-  const { data: customStatuses = [], isLoading: isLoadingStatuses } = useQuery({
-    queryKey: ['ClaimStatusConfig'],
-    queryFn: () => base44.entities.ClaimStatusConfig.list('sort_order'),
-    staleTime: 5 * 60 * 1000,
-  });
+   // Fetch custom claim statuses
+   const { data: customStatuses = [], isLoading: isLoadingStatuses } = useQuery({
+     queryKey: ['ClaimStatusConfig'],
+     queryFn: () => base44.entities.ClaimStatusConfig.list('sort_order'),
+     staleTime: 5 * 60 * 1000,
+   });
 
-  // Get active statuses sorted by sort_order
-  const activeStatuses = React.useMemo(() => {
-    return customStatuses
-      .filter(s => s.is_active)
-      .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
-      .map(s => s.status_name);
-  }, [customStatuses]);
+   // Get active statuses sorted by sort_order
+   const activeStatuses = React.useMemo(() => {
+     return customStatuses
+       .filter(s => s.is_active)
+       .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
+       .map(s => s.status_name);
+   }, [customStatuses]);
 
-  const { data: claim } = useQuery({
-    queryKey: ['claim', claimId],
-    queryFn: async () => {
-      const allClaims = await base44.entities.Claim.list();
-      return allClaims.find(c => c.id === claimId);
-    },
-    enabled: isOpen && !!claimId,
-  });
+   const { data: claim } = useQuery({
+     queryKey: ['claim', claimId],
+     queryFn: async () => base44.entities.Claim.get(claimId),
+     enabled: isOpen && !!claimId,
+   });
 
   const { data: updates = [], isLoading } = useQuery({
     queryKey: ['claimUpdates', claimId],
@@ -218,6 +215,12 @@ This update was sent from ART-TEC One Claims Management System
         : [...prev, email]
     );
   };
+
+  // Validate claimId exists
+  if (!claimId) {
+    console.error('ClaimUpdatesModal: claimId is missing');
+    return null;
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
