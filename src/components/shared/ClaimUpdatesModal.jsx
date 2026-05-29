@@ -121,11 +121,19 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
       setSelectedEmails([]);
       setShowForm(false);
     },
+    onError: (error) => {
+      console.error('Failed to create update:', error);
+      alert('Failed to create update. Please try again.');
+    },
   });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!newUpdate.description.trim()) return;
+    
+    if (!newUpdate.description.trim()) {
+      alert('Please enter a description for the update.');
+      return;
+    }
 
     let finalDescription = newUpdate.description;
 
@@ -227,13 +235,15 @@ This update was sent from ART-TEC One Claims Management System
         <div className="flex-1 overflow-y-auto space-y-4 pr-2">
           {/* Add Update Button or Form */}
            {!showForm ? (
-             <Button
-               onClick={() => setShowForm(true)}
-               className="w-full px-4 py-3 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-lg flex items-center justify-center gap-2"
-             >
-               <Plus className="w-4 h-4" />
-               Add New Update
-             </Button>
+             <div className="pb-4">
+               <Button
+                 onClick={() => setShowForm(true)}
+                 className="w-full px-4 py-3 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-lg flex items-center justify-center gap-2"
+               >
+                 <Plus className="w-4 h-4" />
+                 Add New Update
+               </Button>
+             </div>
            ) : (
            <div className="bg-muted/30 border border-border rounded-lg p-4 border-l-4 border-l-primary">
             <div className="flex items-center justify-between mb-3">
