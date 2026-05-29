@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -50,6 +50,9 @@ export default function ClaimsPage() {
   const [hasBackorderedPartsFilter, setHasBackorderedPartsFilter] = useState(false);
   const [claimIdsWithBackorders, setClaimIdsWithBackorders] = useState(new Set());
   const [collapsedGroups, setCollapsedGroups] = useState({});
+  const [leftPanelWidth, setLeftPanelWidth] = useState(600);
+  const [isDragging, setIsDragging] = useState(false);
+  const containerRef = React.useRef(null);
   const queryClient = useQueryClient();
   const { allStatuses: statusConfigs } = useStatusConfigs();
 
@@ -197,6 +200,33 @@ export default function ClaimsPage() {
     if (!val) return '—';
     try { return format(new Date(val), 'dd/MM/yyyy'); } catch { return val; }
   };
+
+  // Handle divider drag
+  React.useEffect(() => {
+    const handleMouseMove = (e) => {
+      if (!isDragging || !containerRef.current) return;
+      const container = containerRef.current;
+      const newWidth = e.clientX - container.getBoundingClientRect().left;
+      const minWidth = 300;
+      const maxWidth = container.offsetWidth - 300;
+      if (newWidth >= minWidth && newWidth <= maxWidth) {
+        setLeftPanelWidth(newWidth);
+      }
+    };
+    
+    const handleMouseUp = () => {
+      setIsDragging(false);
+    };
+
+    if (isDragging) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      return () => {
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+      };
+    }
+  }, [isDragging]);
 
   if (showForm) {
     return <ClaimFormWrapper onSubmit={(d) => createMutation.mutate(d)} onCancel={() => setShowForm(false)} />;
@@ -554,11 +584,20 @@ export default function ClaimsPage() {
   );
 
   return (
-    <div className="h-full flex gap-3 min-h-0 overflow-hidden">
+    <div ref={containerRef} className="h-full flex gap-3 min-h-0 overflow-hidden">
       {/* Left: claims list — hidden on mobile when a claim is selected */}
-      <div className={`flex flex-col min-h-0 flex-shrink-0 ${selectedClaim ? 'hidden lg:flex lg:w-[640px] xl:w-[800px] 2xl:w-[900px]' : 'flex w-full'}`}>
+      <div className={`flex flex-col min-h-0 flex-shrink-0 ${selectedClaim ? 'hidden lg:flex' : 'flex w-full'}`} style={selectedClaim ? { width: `${leftPanelWidth}px` } : {}}>
         {claimsListView}
       </div>
+
+      {/* Resizable divider — desktop only when claim is selected */}
+      {selectedClaim && (
+        <div
+          onMouseDown={() => setIsDragging(true)}
+          className="hidden lg:block w-1 bg-gray-200 dark:bg-gray-700 hover:bg-blue-400 dark:hover:bg-blue-600 cursor-col-resize transition-colors flex-shrink-0"
+          title="Drag to resize panels"
+        />
+      )}
 
       {/* Right: detail panel — full screen on mobile, side panel on desktop */}
       {selectedClaim && (
