@@ -50,7 +50,7 @@ export default function ClaimsPage() {
   const [hasBackorderedPartsFilter, setHasBackorderedPartsFilter] = useState(false);
   const [claimIdsWithBackorders, setClaimIdsWithBackorders] = useState(new Set());
   const [collapsedGroups, setCollapsedGroups] = useState({});
-  const [leftPanelWidth, setLeftPanelWidth] = useState(600);
+  const [leftPanelWidth, setLeftPanelWidth] = useState(650);
   const [isDragging, setIsDragging] = useState(false);
   const containerRef = React.useRef(null);
   const queryClient = useQueryClient();
@@ -207,8 +207,8 @@ export default function ClaimsPage() {
       if (!isDragging || !containerRef.current) return;
       const container = containerRef.current;
       const newWidth = e.clientX - container.getBoundingClientRect().left;
-      const minWidth = 300;
-      const maxWidth = container.offsetWidth - 300;
+      const minWidth = 400;
+      const maxWidth = container.offsetWidth - 400;
       if (newWidth >= minWidth && newWidth <= maxWidth) {
         setLeftPanelWidth(newWidth);
       }
@@ -275,22 +275,22 @@ export default function ClaimsPage() {
           {claim.referrer || '—'}
         </td>
         {/* Sticky right: Status + alerts */}
-        <td className={`sticky right-0 z-10 px-4 py-2.5 whitespace-nowrap ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-white dark:bg-gray-900 group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50'}`}>
-          <div className="flex items-center gap-1">
+        <td className={`sticky right-0 z-10 px-3 py-2.5 whitespace-nowrap ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-white dark:bg-gray-900 group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50'}`}>
+          <div className="flex items-center gap-1.5 justify-end">
             {!isClosedStatus && <UpdateStatusBadge status={updateStatus} small />}
             {hasBackorder && (
-              <span className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300 text-[10px] font-medium">
-                <Package className="w-2.5 h-2.5" />BO
+              <span className="flex items-center gap-0.5 px-2 py-1 rounded-md bg-red-500 text-white text-[10px] font-semibold shadow-sm">
+                <Package className="w-3 h-3" />BO
               </span>
             )}
             {claim.bodyshop_id && !claim.repairer_accepted && !isClosedStatus && (
-              <span className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-orange-100 text-orange-700 text-[10px] font-medium">
-                <Clock className="w-2.5 h-2.5" />
+              <span className="flex items-center gap-0.5 px-2 py-1 rounded-md bg-orange-500 text-white text-[10px] font-semibold shadow-sm">
+                <Clock className="w-3 h-3" />
               </span>
             )}
             {claim.claim_type === 'Fault Claim' && claim.third_party_pursuit_status === 'Awaiting Details' && (
-              <span className="px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[10px] font-medium">
-                <AlertTriangle className="w-2.5 h-2.5 inline" />
+              <span className="flex items-center gap-0.5 px-2 py-1 rounded-md bg-amber-500 text-white text-[10px] font-semibold shadow-sm">
+                <AlertTriangle className="w-3 h-3" />
               </span>
             )}
           </div>
@@ -594,7 +594,7 @@ export default function ClaimsPage() {
       {selectedClaim && (
         <div
           onMouseDown={() => setIsDragging(true)}
-          className="hidden lg:block w-1 bg-gray-200 dark:bg-gray-700 hover:bg-blue-400 dark:hover:bg-blue-600 cursor-col-resize transition-colors flex-shrink-0"
+          className="hidden lg:block w-2 bg-gray-300 dark:bg-gray-700 hover:bg-blue-500 dark:hover:bg-blue-600 cursor-col-resize transition-colors flex-shrink-0 rounded-sm"
           title="Drag to resize panels"
         />
       )}
