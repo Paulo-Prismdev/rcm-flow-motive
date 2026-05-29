@@ -20,30 +20,6 @@
       "default": true,
       "description": "Whether this company is active"
     },
-    "enabled_features": {
-      "type": "array",
-      "items": {
-        "type": "string",
-        "enum": [
-          "dashboard",
-          "claims_view",
-          "claims_manage",
-          "jobs_view",
-          "jobs_assign",
-          "invoicing_view",
-          "invoicing_manage",
-          "reports",
-          "repairer_network",
-          "referrer_network",
-          "user_management",
-          "company_settings",
-          "platform_settings",
-          "billing"
-        ]
-      },
-      "description": "Features enabled for this company",
-      "default": []
-    },
     "contact_name": {
       "type": "string",
       "description": "Main contact person"
@@ -57,24 +33,19 @@
       "description": "Contact phone"
     },
     "address_line_1": {
-      "type": "string",
-      "description": "Street address"
+      "type": "string"
     },
     "address_line_2": {
-      "type": "string",
-      "description": "Additional address line"
+      "type": "string"
     },
     "town": {
-      "type": "string",
-      "description": "Town or City"
+      "type": "string"
     },
     "county": {
-      "type": "string",
-      "description": "County"
+      "type": "string"
     },
     "postcode": {
-      "type": "string",
-      "description": "Postal code"
+      "type": "string"
     }
   },
   "required": [
@@ -84,19 +55,14 @@
   "rls": {
     "create": {
       "user_condition": {
-        "is_super_admin": true
+        "role": "admin"
       }
     },
     "read": {
       "$or": [
         {
           "user_condition": {
-            "is_super_admin": true
-          }
-        },
-        {
-          "user_condition": {
-            "is_company_admin": true
+            "role": "admin"
           }
         },
         {
@@ -108,12 +74,12 @@
     },
     "update": {
       "user_condition": {
-        "is_super_admin": true
+        "role": "admin"
       }
     },
     "delete": {
       "user_condition": {
-        "is_super_admin": true
+        "role": "admin"
       }
     }
   }
