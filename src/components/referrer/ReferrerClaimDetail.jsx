@@ -421,58 +421,48 @@ export default function ReferrerClaimDetail({ claim, onClose }) {
         </div>
       )}
 
-      {/* Header */}
-      <div className="neomorph p-3 md:p-6 flex-shrink-0 sticky top-0 z-10 bg-background">
-        <div className="flex flex-col gap-3">
-          <div className="flex items-center gap-2 md:gap-4">
-            <Button onClick={onClose} variant="outline" className="p-2 flex-shrink-0">
-              <ArrowLeft className="w-4 h-4" />
-            </Button>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="text-base md:text-2xl font-bold truncate">{formatUKRegistration(claim.reg) || 'Claim Details'}</h1>
-                {claim.job_number && (
-                  <span className="text-xs md:text-sm font-mono px-2 py-0.5 md:py-1 rounded bg-gold/20 text-gold font-semibold">
-                    {claim.job_number}
-                  </span>
-                )}
-              </div>
+      {/* Combined Header + Section Selector */}
+      <div className="neomorph p-3 flex-shrink-0 sticky top-0 z-10 bg-background">
+        <div className="flex items-center gap-2">
+          <Button onClick={onClose} variant="outline" className="p-2 flex-shrink-0">
+            <ArrowLeft className="w-4 h-4" />
+          </Button>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h1 className="text-sm md:text-base font-bold truncate">{formatUKRegistration(claim.reg) || 'Claim Details'}</h1>
+              {claim.job_number && (
+                <span className="text-xs font-mono px-2 py-0.5 rounded bg-gold/20 text-gold font-semibold">
+                  {claim.job_number}
+                </span>
+              )}
+              <StatusBadge status={claim.job_status || 'New'} />
+              <span className="px-2 py-0.5 text-xs font-medium text-muted-foreground border border-border rounded-md">
+                View Only
+              </span>
             </div>
           </div>
-          <div className="flex items-center gap-2 flex-wrap">
-            <StatusBadge status={claim.job_status || 'New'} />
-            <span className="px-2 md:px-3 py-0.5 md:py-1 text-xs font-medium text-muted-foreground border border-border rounded-md">
-              View Only
-            </span>
-          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="flex items-center gap-2 flex-shrink-0 text-sm">
+                {React.createElement(DETAIL_SECTIONS.find(s => s.id === selectedSection)?.icon || Clock, { className: "w-4 h-4" })}
+                <span className="hidden sm:inline">{DETAIL_SECTIONS.find(s => s.id === selectedSection)?.label}</span>
+                <ChevronDown className="w-4 h-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-60 max-h-80 overflow-y-auto" align="end" side="bottom">
+              {DETAIL_SECTIONS.map(section => (
+                <DropdownMenuItem
+                  key={section.id}
+                  onSelect={() => setSelectedSection(section.id)}
+                  className={selectedSection === section.id ? 'bg-muted font-semibold' : ''}
+                >
+                  <section.icon className="w-4 h-4 mr-2" />
+                  {section.label}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
-      </div>
-
-      {/* Section Selector */}
-      <div className="neomorph p-4 flex-shrink-0">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="w-full p-3 flex items-center justify-between text-foreground border-border bg-background hover:bg-muted">
-              <div className="flex items-center gap-2">
-                {React.createElement(DETAIL_SECTIONS.find(s => s.id === selectedSection)?.icon || Clock, { className: "w-5 h-5" })}
-                <span className="font-medium">{DETAIL_SECTIONS.find(s => s.id === selectedSection)?.label || 'Select Section'}</span>
-              </div>
-              <ChevronDown className="w-4 h-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-72 max-h-80 overflow-y-auto" align="start" side="bottom">
-            {DETAIL_SECTIONS.map(section => (
-              <DropdownMenuItem
-                key={section.id}
-                onSelect={() => setSelectedSection(section.id)}
-                className={selectedSection === section.id ? 'bg-muted font-semibold' : ''}
-              >
-                <section.icon className="w-4 h-4 mr-2" />
-                {section.label}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
       </div>
 
       {/* Content */}

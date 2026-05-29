@@ -103,6 +103,9 @@
           "user_condition": {
             "user_type": "internal"
           }
+        },
+        {
+          "id": "{{user.company_id}}"
         }
       ]
     },
