@@ -1189,8 +1189,8 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                           </div>
                       </div>
                       <div className="flex items-center gap-1.5 flex-shrink-0">
-                        <Button onClick={() => setIsClaimUpdatesOpen(true)} className="neomorph-flat px-4 py-2 bg-accent/10 hover:bg-accent/20 font-medium text-accent text-sm">Updates</Button>
-                        {canEdit && <Button onClick={() => setIsChangeStatusModalOpen(true)} className="neomorph-flat px-4 py-2 bg-green-600/10 hover:bg-green-600/20 font-medium text-green-600 text-sm">Change Status</Button>}
+                        <Button onClick={() => setIsClaimUpdatesOpen(true)} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm rounded-lg">Updates</Button>
+                        {canEdit && <Button onClick={() => setIsChangeStatusModalOpen(true)} className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium text-sm rounded-lg">Change Status</Button>}
                         {canEdit && (
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>

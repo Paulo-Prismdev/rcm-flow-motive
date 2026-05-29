@@ -584,7 +584,7 @@ export default function ClaimsPage() {
   );
 
   return (
-    <div ref={containerRef} className="h-full flex gap-3 min-h-0 overflow-hidden">
+    <div ref={containerRef} className="h-full flex gap-0 min-h-0 overflow-hidden">
       {/* Left: claims list — hidden on mobile when a claim is selected */}
       <div className={`flex flex-col min-h-0 flex-shrink-0 ${selectedClaim ? 'hidden lg:flex' : 'flex w-full'}`} style={selectedClaim ? { width: `${leftPanelWidth}px` } : {}}>
         {claimsListView}
