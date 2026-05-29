@@ -11,12 +11,25 @@ export default function ClaimReferrerForm({ claim, onSave, onCancel }) {
     };
 
     const handleReferrerChange = (referrer) => {
-        setFormData(prev => ({
-            ...prev,
-            referrer: referrer.name,
-            referrer_id: referrer.id,
-            referrer_email: referrer.email || referrer.contact_email || ''
-        }));
+        if (!referrer) {
+            // Clear referrer details
+            setFormData(prev => ({
+                ...prev,
+                referrer: '',
+                referrer_id: '',
+                referrer_email: '',
+                referrer_ref: '',
+                file_handler: '',
+                percent_to_referrer: 0
+            }));
+        } else {
+            setFormData(prev => ({
+                ...prev,
+                referrer: referrer.name,
+                referrer_id: referrer.id,
+                referrer_email: referrer.email || referrer.contact_email || ''
+            }));
+        }
     };
 
     const handleSave = () => {

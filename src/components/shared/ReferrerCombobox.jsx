@@ -15,7 +15,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { Check, ChevronsUpDown, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export default function ReferrerCombobox({ value, onChange }) {
@@ -41,19 +41,26 @@ export default function ReferrerCombobox({ value, onChange }) {
 
   const selectedName = typeof value === 'string' ? value : (value?.name || "");
 
+  const handleClear = (e) => {
+    e.stopPropagation();
+    onChange(null);
+    setOpen(false);
+  };
+
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          className="w-full justify-between neomorph-inset text-gray-700 border-0 focus:ring-0"
-        >
-          {selectedName || "Select a referrer..."}
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-        </Button>
-      </PopoverTrigger>
+    <div className="relative">
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <Button
+            variant="outline"
+            role="combobox"
+            aria-expanded={open}
+            className="w-full justify-between neomorph-inset text-gray-700 border-0 focus:ring-0 pr-10"
+          >
+            {selectedName || "Select a referrer..."}
+            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          </Button>
+        </PopoverTrigger>
       <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
         <Command>
           <CommandInput placeholder="Search referrers..." />
@@ -86,5 +93,17 @@ export default function ReferrerCombobox({ value, onChange }) {
         </Command>
       </PopoverContent>
     </Popover>
+    {selectedName && (
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={handleClear}
+        className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 p-0 hover:bg-red-100 hover:text-red-600"
+        title="Clear referrer"
+      >
+        <X className="h-4 w-4" />
+      </Button>
+    )}
+    </div>
   );
 }
