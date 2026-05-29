@@ -330,6 +330,7 @@ function ReferrerClaimsList({ claims, onClaimOpen }) {
       c.reg?.toLowerCase().includes(q) ||
       c.client_name?.toLowerCase().includes(q) ||
       c.job_number?.toLowerCase().includes(q) ||
+      c.referrer_ref?.toLowerCase().includes(q) ||
       c.make_model?.toLowerCase().includes(q);
     return matchesStatus && matchesSearch;
   });
@@ -379,9 +380,9 @@ function ReferrerClaimsList({ claims, onClaimOpen }) {
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2">
                     <h4 className="font-bold">{formatUKRegistration(claim.reg)}</h4>
-                    {claim.job_number && (
+                    {(claim.referrer_ref || claim.job_number) && (
                       <span className="text-xs font-mono px-2 py-0.5 rounded bg-accent/20 text-accent">
-                        {claim.job_number}
+                        {claim.referrer_ref || claim.job_number}
                       </span>
                     )}
                     <StatusBadge status={claim.job_status} />
