@@ -259,9 +259,20 @@ export default function ClaimForm({ claim, onSubmit, onCancel }) {
     }
   };
 
-  const handleReferrerChange = (referrer) => setFormData(prev => ({
-    ...prev, referrer: referrer.name, referrer_id: referrer.id, referrer_email: referrer.email || ''
-  }));
+  const [referrerCompanyId, setReferrerCompanyId] = useState(claim?.referrer_id || null);
+
+  const { data: referrerUsers = [] } = useQuery({
+    queryKey: ['users', 'company', referrerCompanyId],
+    queryFn: () => base44.entities.User.filter({ company_id: referrerCompanyId }),
+    enabled: !!referrerCompanyId,
+  });
+
+  const handleReferrerChange = (referrer) => {
+    setReferrerCompanyId(referrer.id);
+    setFormData(prev => ({
+      ...prev, referrer: referrer.name, referrer_id: referrer.id, referrer_email: referrer.email || '', file_handler: ''
+    }));
+  };
 
   const nextStep = () => setCurrentStep(prev => prev + 1);
   const prevStep = () => setCurrentStep(prev => prev - 1);
@@ -527,7 +538,23 @@ export default function ClaimForm({ claim, onSubmit, onCancel }) {
                   <div><label className="block text-sm text-gray-600 mb-2">Referrer</label><ReferrerCombobox value={formData.referrer} onChange={handleReferrerChange} /></div>
                   <div><label className="block text-sm text-gray-600 mb-2">Referrer Email</label><Input type="email" value={formData.referrer_email} onChange={(e) => handleChange('referrer_email', e.target.value)} className="neomorph-inset px-4 py-3 text-gray-700 border-0" /></div>
                   <div><label className="block text-sm text-gray-600 mb-2">Referrer Reference</label><Input value={formData.referrer_ref} onChange={(e) => handleChange('referrer_ref', e.target.value)} className="neomorph-inset px-4 py-3 text-gray-700 border-0" /></div>
-                  <div><label className="block text-sm text-gray-600 mb-2">File Handler</label><Input value={formData.file_handler} onChange={(e) => handleChange('file_handler', e.target.value)} className="neomorph-inset px-4 py-3 text-gray-700 border-0" /></div>
+                  <div>
+                    <label className="block text-sm text-gray-600 mb-2">File Handler</label>
+                    {referrerUsers.length > 0 ? (
+                      <select
+                        value={formData.file_handler}
+                        onChange={(e) => handleChange('file_handler', e.target.value)}
+                        className="neomorph-inset w-full px-4 py-3 text-gray-700 border-0 rounded-xl"
+                      >
+                        <option value="">Select a file handler...</option>
+                        {referrerUsers.map(u => (
+                          <option key={u.id} value={u.full_name}>{u.full_name}</option>
+                        ))}
+                      </select>
+                    ) : (
+                      <Input value={formData.file_handler} onChange={(e) => handleChange('file_handler', e.target.value)} className="neomorph-inset px-4 py-3 text-gray-700 border-0" placeholder="Enter file handler name" />
+                    )}
+                  </div>
                 </div>
               </div>
             )}
