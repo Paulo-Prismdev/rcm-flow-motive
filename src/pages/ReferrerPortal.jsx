@@ -105,11 +105,16 @@ export default function ReferrerPortal() {
   const completedClaims = claims.filter(c => c.job_status === 'Completed');
   const activeParts = parts.filter(p => !['Complete', 'Cancelled'].includes(p.sourcing_status));
 
-  const tabs = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'claims', label: 'My Claims', icon: FileText },
-    { id: 'parts', label: 'Parts Tracking', icon: Package },
+  // Determine allowed portal sections from company (new) or referrer (legacy)
+  const allowedSections = (referrer?.portal_sections || company?.portal_sections || ['Claims']);
+
+  const allTabs = [
+    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, section: null }, // always shown
+    { id: 'claims', label: 'My Claims', icon: FileText, section: 'Claims' },
+    { id: 'parts', label: 'Parts Tracking', icon: Package, section: 'Parts' },
   ];
+
+  const tabs = allTabs.filter(t => !t.section || allowedSections.includes(t.section));
 
   return (
     <ReferrerLayout>

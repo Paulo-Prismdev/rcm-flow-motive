@@ -169,6 +169,8 @@ export default function CompanyManagement() {
 }
 
 function CompanyForm({ company, onSubmit, onCancel }) {
+  const ALL_PORTAL_SECTIONS = ['Claims', 'Parts'];
+
   const [formData, setFormData] = useState({
     name: company?.name || '',
     company_type: company?.company_type || 'repairer',
@@ -181,7 +183,17 @@ function CompanyForm({ company, onSubmit, onCancel }) {
     town: company?.town || '',
     county: company?.county || '',
     postcode: company?.postcode || '',
+    portal_sections: company?.portal_sections || ['Claims'],
   });
+
+  const toggleSection = (section) => {
+    setFormData(prev => ({
+      ...prev,
+      portal_sections: prev.portal_sections.includes(section)
+        ? prev.portal_sections.filter(s => s !== section)
+        : [...prev.portal_sections, section],
+    }));
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -245,6 +257,23 @@ function CompanyForm({ company, onSubmit, onCancel }) {
           <Input placeholder="Town" value={formData.town} onChange={(e) => setFormData({ ...formData, town: e.target.value })} />
           <Input placeholder="County" value={formData.county} onChange={(e) => setFormData({ ...formData, county: e.target.value })} />
           <Input placeholder="Postcode" value={formData.postcode} onChange={(e) => setFormData({ ...formData, postcode: e.target.value })} />
+        </div>
+      </div>
+
+      <div className="border-t pt-4 space-y-3">
+        <h3 className="text-sm font-semibold">Portal Access</h3>
+        <p className="text-xs text-gray-500">Select which sections this company can access in their portal.</p>
+        <div className="flex gap-3 flex-wrap">
+          {ALL_PORTAL_SECTIONS.map(section => (
+            <div key={section} className="flex items-center gap-2">
+              <Checkbox
+                id={`section-${section}`}
+                checked={formData.portal_sections.includes(section)}
+                onCheckedChange={() => toggleSection(section)}
+              />
+              <Label htmlFor={`section-${section}`}>{section}</Label>
+            </div>
+          ))}
         </div>
       </div>
 

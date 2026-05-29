@@ -46,6 +46,16 @@
     },
     "postcode": {
       "type": "string"
+    },
+    "portal_sections": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Which portal sections/features this company has access to",
+      "default": [
+        "Claims"
+      ]
     }
   },
   "required": [
