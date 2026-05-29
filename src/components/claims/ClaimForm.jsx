@@ -447,7 +447,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel }) {
         </div>
 
         <div className="flex-1 overflow-y-auto min-h-0 pr-1 pb-4">
-          <form onSubmit={handleSubmit}>
+          <form id="claim-wizard-form" onSubmit={handleSubmit}>
             {/* Step 1: Basic Info */}
             {currentStep === getStepNumber("basic") && (
               <div className="neomorph-flat p-6 space-y-6">
@@ -708,26 +708,27 @@ export default function ClaimForm({ claim, onSubmit, onCancel }) {
               </div>
             )}
 
-            {/* Navigation */}
-            <div className="flex justify-between mt-8">
-              {currentStep > 1 && (
-                <Button type="button" onClick={prevStep} className="neomorph-flat px-6 py-3 font-medium text-gray-700 transition-all active:neomorph-pressed flex items-center gap-2">
-                  <ArrowLeft className="w-4 h-4" /> Previous
-                </Button>
-              )}
-              <div className="flex-1" />
-              {currentStep < steps.length && (
-                <Button type="button" onClick={nextStep} className="neomorph-flat px-6 py-3 font-medium text-blue-600 transition-all active:neomorph-pressed flex items-center gap-2" disabled={currentStep === getStepNumber("basic") && !formData.reg}>
-                  Next <ArrowRight className="w-4 h-4" />
-                </Button>
-              )}
-              {currentStep === steps.length && (
-                <Button type="submit" className="neomorph-flat px-8 py-3 font-medium text-gold transition-all active:neomorph-pressed flex items-center gap-2">
-                  <Check className="w-5 h-5" /> Create Claim
-                </Button>
-              )}
-            </div>
           </form>
+        </div>
+
+        {/* Navigation — outside scroll area so always visible */}
+        <div className="flex justify-between pt-3 pb-2 flex-shrink-0">
+          {currentStep > 1 && (
+            <Button type="button" onClick={prevStep} className="neomorph-flat px-6 py-3 font-medium text-gray-700 transition-all active:neomorph-pressed flex items-center gap-2">
+              <ArrowLeft className="w-4 h-4" /> Previous
+            </Button>
+          )}
+          <div className="flex-1" />
+          {currentStep < steps.length && (
+            <Button type="button" onClick={nextStep} className="neomorph-flat px-6 py-3 font-medium text-blue-600 transition-all active:neomorph-pressed flex items-center gap-2" disabled={currentStep === getStepNumber("basic") && !formData.reg}>
+              Next <ArrowRight className="w-4 h-4" />
+            </Button>
+          )}
+          {currentStep === steps.length && (
+            <Button type="button" onClick={handleSubmit} className="neomorph-flat px-8 py-3 font-medium text-gold transition-all active:neomorph-pressed flex items-center gap-2">
+              <Check className="w-5 h-5" /> Create Claim
+            </Button>
+          )}
         </div>
     </div>
   );
