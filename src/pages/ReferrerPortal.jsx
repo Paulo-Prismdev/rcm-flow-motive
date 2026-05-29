@@ -9,7 +9,6 @@ import {
   CheckCircle2,
   AlertCircle,
   TrendingUp,
-  Calculator,
   Plus,
   Search,
   X
@@ -162,6 +161,7 @@ export default function ReferrerPortal() {
               completedClaims={completedClaims}
               activeParts={activeParts}
               onNavigate={setActiveTab}
+              allowedSections={allowedSections}
             />
           )}
           {activeTab === 'claims' && (
@@ -176,120 +176,127 @@ export default function ReferrerPortal() {
   );
 }
 
-function ReferrerDashboard({ claims, parts, activeClaims, completedClaims, activeParts, onNavigate }) {
+function ReferrerDashboard({ claims, parts, activeClaims, completedClaims, activeParts, onNavigate, allowedSections }) {
+  const showClaims = allowedSections.includes('Claims');
+  const showParts = allowedSections.includes('Parts');
+
   return (
     <div className="space-y-4">
-      {/* Stats */}
+      {/* Stats - only show relevant ones */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <div className="neomorph p-4 cursor-pointer hover:shadow-lg transition-all" onClick={() => onNavigate('claims')}>
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
-              <FileText className="w-5 h-5 text-blue-600" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold">{activeClaims.length}</p>
-              <p className="text-xs text-foreground-muted">Active Claims</p>
+        {showClaims && (
+          <div className="neomorph p-4 cursor-pointer hover:shadow-lg transition-all" onClick={() => onNavigate('claims')}>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
+                <FileText className="w-5 h-5 text-blue-600" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{activeClaims.length}</p>
+                <p className="text-xs text-foreground-muted">Active Claims</p>
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
-        <div className="neomorph p-4 cursor-pointer hover:shadow-lg transition-all" onClick={() => onNavigate('claims')}>
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
-              <CheckCircle2 className="w-5 h-5 text-green-600" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold">{completedClaims.length}</p>
-              <p className="text-xs text-foreground-muted">Completed</p>
+        {showClaims && (
+          <div className="neomorph p-4 cursor-pointer hover:shadow-lg transition-all" onClick={() => onNavigate('claims')}>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
+                <CheckCircle2 className="w-5 h-5 text-green-600" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{completedClaims.length}</p>
+                <p className="text-xs text-foreground-muted">Completed</p>
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
-        <div className="neomorph p-4 cursor-pointer hover:shadow-lg transition-all" onClick={() => onNavigate('parts')}>
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-orange-100 flex items-center justify-center">
-              <Package className="w-5 h-5 text-orange-600" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold">{activeParts.length}</p>
-              <p className="text-xs text-foreground-muted">Parts in Progress</p>
+        {showParts && (
+          <div className="neomorph p-4 cursor-pointer hover:shadow-lg transition-all" onClick={() => onNavigate('parts')}>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-orange-100 flex items-center justify-center">
+                <Package className="w-5 h-5 text-orange-600" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{activeParts.length}</p>
+                <p className="text-xs text-foreground-muted">Parts in Progress</p>
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
-        <div className="neomorph p-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center">
-              <TrendingUp className="w-5 h-5 text-purple-600" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold">{claims.length}</p>
-              <p className="text-xs text-foreground-muted">Total Claims</p>
+        {showClaims && (
+          <div className="neomorph p-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center">
+                <TrendingUp className="w-5 h-5 text-purple-600" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{claims.length}</p>
+                <p className="text-xs text-foreground-muted">Total Claims</p>
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Recent Activity */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Recent Claims */}
-        <div className="neomorph p-4">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-bold">Recent Claims</h3>
-            <button onClick={() => onNavigate('claims')} className="text-sm text-accent hover:underline">
-              View All
-            </button>
-          </div>
-          <div className="space-y-2">
-            {claims.slice(0, 5).map(claim => (
-              <div key={claim.id} className="neomorph-flat p-3 flex items-center justify-between">
-                <div>
-                  <p className="font-medium">{formatUKRegistration(claim.reg)}</p>
-                  <p className="text-xs text-foreground-muted">{claim.client_name}</p>
+        {showClaims && (
+          <div className="neomorph p-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-bold">Recent Claims</h3>
+              <button onClick={() => onNavigate('claims')} className="text-sm text-accent hover:underline">
+                View All
+              </button>
+            </div>
+            <div className="space-y-2">
+              {claims.slice(0, 5).map(claim => (
+                <div key={claim.id} className="neomorph-flat p-3 flex items-center justify-between">
+                  <div>
+                    <p className="font-medium">{formatUKRegistration(claim.reg)}</p>
+                    <p className="text-xs text-foreground-muted">{claim.client_name}</p>
+                  </div>
+                  <StatusBadge status={claim.job_status} />
                 </div>
-                <StatusBadge status={claim.job_status} />
-              </div>
-            ))}
-            {claims.length === 0 && (
-              <p className="text-center text-foreground-muted py-4">No claims yet</p>
-            )}
+              ))}
+              {claims.length === 0 && (
+                <p className="text-center text-foreground-muted py-4">No claims yet</p>
+              )}
+            </div>
           </div>
-        </div>
+        )}
 
-        {/* Quick Info */}
+        {/* Services Overview - only show allowed services */}
         <div className="neomorph p-4">
           <h3 className="font-bold mb-4">Services Overview</h3>
           <div className="space-y-2">
-            <div className="neomorph-flat p-4 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
-                <FileText className="w-5 h-5 text-blue-600" />
+            {showClaims && (
+              <div className="neomorph-flat p-4 flex items-center gap-3 cursor-pointer" onClick={() => onNavigate('claims')}>
+                <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
+                  <FileText className="w-5 h-5 text-blue-600" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-medium">Claims Management</p>
+                  <p className="text-xs text-foreground-muted">Track all your referred claims</p>
+                </div>
+                <ChevronRight className="w-4 h-4 text-foreground-muted" />
               </div>
-              <div className="flex-1">
-                <p className="font-medium">Claims Management</p>
-                <p className="text-xs text-foreground-muted">Track all your referred claims</p>
+            )}
+            {showParts && (
+              <div className="neomorph-flat p-4 flex items-center gap-3 cursor-pointer" onClick={() => onNavigate('parts')}>
+                <div className="w-10 h-10 rounded-lg bg-orange-100 flex items-center justify-center">
+                  <Package className="w-5 h-5 text-orange-600" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-medium">Parts Sourcing</p>
+                  <p className="text-xs text-foreground-muted">OEM, aftermarket & recycled</p>
+                </div>
+                <ChevronRight className="w-4 h-4 text-foreground-muted" />
               </div>
-              <ChevronRight className="w-4 h-4 text-foreground-muted" />
-            </div>
-            <div className="neomorph-flat p-4 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
-                <Calculator className="w-5 h-5 text-green-600" />
-              </div>
-              <div className="flex-1">
-                <p className="font-medium">Estimating Services</p>
-                <p className="text-xs text-foreground-muted">Professional damage assessments</p>
-              </div>
-              <ChevronRight className="w-4 h-4 text-foreground-muted" />
-            </div>
-            <div className="neomorph-flat p-4 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-orange-100 flex items-center justify-center">
-                <Package className="w-5 h-5 text-orange-600" />
-              </div>
-              <div className="flex-1">
-                <p className="font-medium">Parts Sourcing</p>
-                <p className="text-xs text-foreground-muted">OEM, aftermarket & recycled</p>
-              </div>
-              <ChevronRight className="w-4 h-4 text-foreground-muted" />
-            </div>
+            )}
           </div>
         </div>
       </div>
