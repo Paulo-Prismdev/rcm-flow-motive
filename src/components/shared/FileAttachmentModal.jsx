@@ -294,18 +294,18 @@ export default function FileAttachmentModal({ fileUrls = [], onAdd, onRemove, is
       
       <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={onClose}>
         <div 
-          className="glass-elevated w-full max-w-4xl mx-4 max-h-[85vh] flex flex-col"
+          className="bg-background border border-border rounded-lg w-full max-w-4xl mx-4 max-h-[85vh] flex flex-col shadow-2xl"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-glass-border flex-shrink-0">
+          <div className="flex items-center justify-between p-6 border-b border-border flex-shrink-0 bg-card">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center">
-                <FileText className="w-5 h-5 text-blue-500" />
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <FileText className="w-5 h-5 text-primary" />
               </div>
               <div>
                 <h3 className="text-lg font-bold text-foreground">Attachments</h3>
-                <p className="text-xs text-foreground-muted mt-0.5">
+                <p className="text-xs text-muted-foreground mt-0.5">
                   {fileUrls.length} {fileUrls.length === 1 ? 'file' : 'files'}
                   {enableAI && ' • AI analysis available'}
                 </p>
@@ -313,7 +313,7 @@ export default function FileAttachmentModal({ fileUrls = [], onAdd, onRemove, is
             </div>
             <button
               onClick={onClose}
-              className="neomorph-flat p-2 hover:bg-surface-hover transition-colors rounded-lg"
+              className="p-2 hover:bg-muted transition-colors rounded-lg text-muted-foreground hover:text-foreground"
             >
               <X className="w-4 h-4" />
             </button>
@@ -322,19 +322,19 @@ export default function FileAttachmentModal({ fileUrls = [], onAdd, onRemove, is
           {/* Upload Area */}
           <div className="px-6 pt-4 flex-shrink-0">
             <div
-              className={`neomorph-inset p-3 rounded-xl text-center transition-all cursor-pointer ${isDragging ? 'ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-900/20' : ''}`}
+              className={`border-2 border-dashed p-3 rounded-xl text-center transition-all cursor-pointer ${isDragging ? 'ring-2 ring-primary border-primary bg-primary/5' : 'border-border bg-muted/30'}`}
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
               onClick={() => !isUploading && fileInputRef.current?.click()}
             >
               {isUploading ? (
-                <div className="flex items-center justify-center gap-2 text-foreground-muted py-1">
+                <div className="flex items-center justify-center gap-2 text-muted-foreground py-1">
                   <Loader className="w-4 h-4 animate-spin" />
                   <span className="text-sm">Uploading...</span>
                 </div>
               ) : (
-                <div className="flex items-center justify-center gap-2 text-foreground-muted py-1">
+                <div className="flex items-center justify-center gap-2 text-muted-foreground py-1">
                   <Upload className="w-4 h-4" />
                   <span className="text-sm">Click or drag & drop to upload documents</span>
                 </div>
@@ -353,7 +353,7 @@ export default function FileAttachmentModal({ fileUrls = [], onAdd, onRemove, is
           {/* Files List - Scrollable */}
           <div className="flex-1 overflow-y-auto px-6 py-4">
             {fileUrls.length === 0 ? (
-              <div className="text-center py-12 text-foreground-muted">
+              <div className="text-center py-12 text-muted-foreground">
                 <FileText className="w-12 h-12 mx-auto mb-3 opacity-50" />
                 <p>No files attached</p>
               </div>
@@ -367,59 +367,59 @@ export default function FileAttachmentModal({ fileUrls = [], onAdd, onRemove, is
                   return (
                     <div
                       key={index}
-                      className="neomorph-flat p-4 rounded-lg flex items-center gap-4 hover:bg-surface-hover transition-all"
+                      className="bg-muted/30 p-4 rounded-lg flex items-center gap-4 hover:bg-muted/50 transition-all border border-border"
                     >
-                      <div className="w-10 h-10 rounded-lg bg-accent/20 flex items-center justify-center flex-shrink-0">
-                        <FileText className="w-5 h-5 text-accent" />
+                      <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                        <FileText className="w-5 h-5 text-primary" />
                       </div>
                       
                       <div className="flex-1 min-w-0">
                         <p className="font-medium text-foreground truncate">{fileName}</p>
-                        <p className="text-xs text-foreground-muted uppercase">{extension} file</p>
+                        <p className="text-xs text-muted-foreground uppercase">{extension} file</p>
                       </div>
 
                       <div className="flex items-center gap-2 flex-shrink-0">
-                        {enableAI && onAIExtract && (
-                          <button
-                            onClick={() => handleAIAnalysis(url)}
-                            disabled={isCurrentlyAnalyzing}
-                            className="neomorph-flat p-2 hover:bg-purple-500/10 transition-colors rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                            title="Analyze with AI"
-                          >
-                            {isCurrentlyAnalyzing ? (
-                              <Loader className="w-4 h-4 text-purple-500 animate-spin" />
-                            ) : (
-                              <Sparkles className="w-4 h-4 text-purple-500" />
-                            )}
-                          </button>
-                        )}
-                        
-                        <button
-                          onClick={() => setViewingFile(url)}
-                          className="neomorph-flat p-2 hover:bg-blue-500/10 transition-colors rounded-lg"
-                          title="View file"
-                        >
-                          <Eye className="w-4 h-4 text-blue-500" />
-                        </button>
-                        
-                        <button
-                          onClick={() => handleDownload(url)}
-                          className="neomorph-flat p-2 hover:bg-green-500/10 transition-colors rounded-lg"
-                          title="Download file"
-                        >
-                          <Download className="w-4 h-4 text-green-500" />
-                        </button>
-                        
-                        {onRemove && (
-                          <button
-                            onClick={() => onRemove(url)}
-                            className="neomorph-flat p-2 hover:bg-red-500/10 transition-colors rounded-lg"
-                            title="Remove file"
-                          >
-                            <X className="w-4 h-4 text-red-500" />
-                          </button>
-                        )}
-                      </div>
+                         {enableAI && onAIExtract && (
+                           <button
+                             onClick={() => handleAIAnalysis(url)}
+                             disabled={isCurrentlyAnalyzing}
+                             className="p-2 hover:bg-purple-500/10 transition-colors rounded-lg disabled:opacity-50 disabled:cursor-not-allowed text-muted-foreground hover:text-foreground"
+                             title="Analyze with AI"
+                           >
+                             {isCurrentlyAnalyzing ? (
+                               <Loader className="w-4 h-4 text-primary animate-spin" />
+                             ) : (
+                               <Sparkles className="w-4 h-4 text-primary" />
+                             )}
+                           </button>
+                         )}
+
+                         <button
+                           onClick={() => setViewingFile(url)}
+                           className="p-2 hover:bg-primary/10 transition-colors rounded-lg text-muted-foreground hover:text-foreground"
+                           title="View file"
+                         >
+                           <Eye className="w-4 h-4" />
+                         </button>
+
+                         <button
+                           onClick={() => handleDownload(url)}
+                           className="p-2 hover:bg-primary/10 transition-colors rounded-lg text-muted-foreground hover:text-foreground"
+                           title="Download file"
+                         >
+                           <Download className="w-4 h-4" />
+                         </button>
+
+                         {onRemove && (
+                           <button
+                             onClick={() => onRemove(url)}
+                             className="p-2 hover:bg-destructive/10 transition-colors rounded-lg text-muted-foreground hover:text-destructive"
+                             title="Remove file"
+                           >
+                             <X className="w-4 h-4" />
+                           </button>
+                         )}
+                       </div>
                     </div>
                   );
                 })}
@@ -429,11 +429,11 @@ export default function FileAttachmentModal({ fileUrls = [], onAdd, onRemove, is
 
           {/* Footer with AI Info */}
           {enableAI && (
-            <div className="p-4 border-t border-glass-border bg-purple-600 dark:bg-purple-700 flex-shrink-0">
+            <div className="p-4 border-t border-border bg-primary/5 flex-shrink-0">
               <div className="flex items-start gap-2 text-sm">
-                <Sparkles className="w-4 h-4 text-white flex-shrink-0 mt-0.5" />
-                <p className="text-white">
-                  <strong className="text-white font-bold">AI Analysis:</strong> Click the sparkle icon to automatically extract data from documents. 
+                <Sparkles className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+                <p className="text-foreground">
+                  <strong className="font-semibold">AI Analysis:</strong> Click the sparkle icon to automatically extract data from documents. 
                   The AI will analyze the file and populate matching fields for you to review.
                 </p>
               </div>
