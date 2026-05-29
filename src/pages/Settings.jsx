@@ -9,7 +9,7 @@ import {
   Send,
   Package,
   Users,
-  Hash,
+
   CalendarDays,
   ChevronRight,
 } from "lucide-react";
@@ -45,7 +45,7 @@ const SETTINGS_SECTIONS = [
       { id: "portals", label: "Portal Management", icon: Globe, adminOnly: true },
       { id: "chasers", label: "Chaser Emails", icon: Send, adminOnly: true },
       { id: "users", label: "User Management", icon: Users, permission: "canManage" },
-      { id: "companyids", label: "Company ID Lookup", icon: Hash, adminOnly: true },
+
     ],
   },
   {
