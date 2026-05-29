@@ -290,7 +290,15 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
   });
 
   const deleteMutation = useMutation({
-    mutationFn: () => base44.entities.Claim.delete(claim.id),
+    mutationFn: async () => {
+      // Verify claim exists before deletion
+      try {
+        await base44.entities.Claim.get(claim.id);
+      } catch (e) {
+        throw new Error('Claim not found - it may have already been deleted');
+      }
+      return base44.entities.Claim.delete(claim.id);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['claims'] });
       onClose();
