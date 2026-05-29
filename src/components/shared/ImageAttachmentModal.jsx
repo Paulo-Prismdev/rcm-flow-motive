@@ -66,35 +66,30 @@ export default function ImageAttachmentModal({ imageUrls = [], onAdd, onRemove, 
 
       <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={onClose}>
         <div
-          className="glass-elevated w-full max-w-3xl mx-4 max-h-[85vh] flex flex-col"
+          className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl w-full max-w-3xl mx-4 max-h-[90vh] flex flex-col overflow-hidden"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-glass-border flex-shrink-0">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center">
-                <Image className="w-5 h-5 text-blue-500" />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-foreground">Images</h3>
-                <p className="text-xs text-foreground-muted mt-0.5">
-                  {imageUrls.length} {imageUrls.length === 1 ? 'image' : 'images'}
-                </p>
-              </div>
+          <div className="flex items-center justify-between px-8 py-6 border-b border-gray-200 dark:border-gray-800 flex-shrink-0">
+            <div>
+              <h3 className="text-[18px] font-semibold text-gray-900 dark:text-white">Images</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                {imageUrls.length} {imageUrls.length === 1 ? 'image' : 'images'}
+              </p>
             </div>
             <button
               onClick={onClose}
-              className="neomorph-flat p-2 hover:bg-surface-hover transition-colors rounded-lg"
+              className="w-6 h-6 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
             >
-              <X className="w-4 h-4" />
+              <X className="w-5 h-5" />
             </button>
           </div>
 
           {/* Upload Area */}
-          <div className="px-6 pt-4 flex-shrink-0">
+          <div className="px-8 pt-6 flex-shrink-0">
             <div
-              className={`neomorph-inset p-4 rounded-xl text-center transition-all cursor-pointer ${
-                isDragging ? 'ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-900/20' : ''
+              className={`border-2 border-dashed rounded-lg p-6 text-center transition-all cursor-pointer ${
+                isDragging ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-300 dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-600'
               }`}
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
@@ -102,15 +97,15 @@ export default function ImageAttachmentModal({ imageUrls = [], onAdd, onRemove, 
               onClick={() => !isUploading && fileInputRef.current?.click()}
             >
               {isUploading ? (
-                <div className="flex flex-col items-center gap-2 text-foreground-muted">
+                <div className="flex flex-col items-center gap-2 text-gray-500 dark:text-gray-400">
                   <Loader className="w-6 h-6 animate-spin" />
                   <span className="text-sm">Uploading...</span>
                 </div>
               ) : (
-                <div className="flex flex-col items-center gap-2 text-foreground-muted">
+                <div className="flex flex-col items-center gap-2 text-gray-500 dark:text-gray-400">
                   <Upload className={`w-6 h-6 ${isDragging ? 'text-blue-500' : ''}`} />
                   <span className="text-sm">{isDragging ? 'Drop images here!' : 'Click or drag & drop images to upload'}</span>
-                  <span className="text-xs text-foreground-subtle">JPG, PNG, GIF, WebP supported</span>
+                  <span className="text-xs text-gray-400 dark:text-gray-500">JPG, PNG, GIF, WebP supported</span>
                 </div>
               )}
               <input
@@ -126,16 +121,16 @@ export default function ImageAttachmentModal({ imageUrls = [], onAdd, onRemove, 
           </div>
 
           {/* Image Grid - Scrollable */}
-          <div className="flex-1 overflow-y-auto px-6 py-4">
+          <div className="flex-1 overflow-y-auto px-8 py-6">
             {imageUrls.length === 0 ? (
-              <div className="text-center py-10 text-foreground-muted">
+              <div className="text-center py-10 text-gray-500 dark:text-gray-400">
                 <Image className="w-12 h-12 mx-auto mb-3 opacity-40" />
                 <p>No images uploaded yet</p>
               </div>
             ) : (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                 {imageUrls.map((url, index) => (
-                  <div key={index} className="relative group rounded-lg overflow-hidden aspect-square bg-surface border border-border">
+                  <div key={index} className="relative group rounded-lg overflow-hidden aspect-square bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
                     <img
                       src={url}
                       alt={`Image ${index + 1}`}
@@ -164,6 +159,16 @@ export default function ImageAttachmentModal({ imageUrls = [], onAdd, onRemove, 
                 ))}
               </div>
             )}
+          </div>
+
+          {/* Footer */}
+          <div className="px-8 py-4 border-t border-gray-200 dark:border-gray-800 flex-shrink-0 flex justify-end gap-3">
+            <button
+              onClick={onClose}
+              className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+            >
+              Close
+            </button>
           </div>
         </div>
       </div>

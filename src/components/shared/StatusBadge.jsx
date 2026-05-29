@@ -38,20 +38,20 @@ export default function StatusBadge({ status, variant = "primary" }) {
   };
 
   if (isLoading) {
-    return <span className="px-2.5 py-1 text-xs font-medium rounded-md bg-gray-200 animate-pulse w-16">&nbsp;</span>
+    return <span className="inline-flex items-center px-[10px] h-6 rounded-[6px] text-[12px] font-semibold bg-gray-200 animate-pulse w-16">&nbsp;</span>
   }
 
   // Handle array of statuses - render multiple badges
   if (Array.isArray(status)) {
     if (status.length === 0) {
-      return <span className="px-2.5 py-1 text-xs font-medium rounded-md bg-gray-200 text-gray-500">No status</span>;
+      return <span className="inline-flex items-center px-[10px] h-6 rounded-[6px] text-[12px] font-semibold bg-gray-200 text-gray-500">No status</span>;
     }
     return (
       <div className="flex flex-wrap gap-1">
         {status.map((s, index) => (
           <span 
             key={index}
-            className={`px-2.5 py-1 text-xs font-medium rounded-md text-white ${colorClasses[getStatusColor(s)] || 'bg-gray-500'}`}
+            className={`inline-flex items-center px-[10px] h-6 rounded-[6px] text-[12px] font-semibold text-white ${colorClasses[getStatusColor(s)] || 'bg-gray-500'}`}
           >
             {s}
           </span>
@@ -62,13 +62,13 @@ export default function StatusBadge({ status, variant = "primary" }) {
 
   // Handle single status
   if (!status) {
-    return <span className="px-2.5 py-1 text-xs font-medium rounded-md bg-gray-200 text-gray-500">No status</span>;
+    return <span className="inline-flex items-center px-[10px] h-6 rounded-[6px] text-[12px] font-semibold bg-gray-200 text-gray-500">No status</span>;
   }
 
   // Secondary variant - outlined style
   if (variant === "secondary") {
     return (
-      <span className={`px-2.5 py-1 text-xs font-medium rounded-md border-2 ${colorClasses[getStatusColor(status)]?.replace('bg-', 'border-') || 'border-gray-500'} ${colorClasses[getStatusColor(status)]?.replace('bg-', 'text-') || 'text-gray-500'} bg-transparent`}>
+      <span className={`inline-flex items-center px-[10px] h-6 rounded-[6px] text-[12px] font-semibold border-2 ${colorClasses[getStatusColor(status)]?.replace('bg-', 'border-') || 'border-gray-500'} ${colorClasses[getStatusColor(status)]?.replace('bg-', 'text-') || 'text-gray-500'} bg-transparent`}>
         {status}
       </span>
     );
@@ -76,7 +76,7 @@ export default function StatusBadge({ status, variant = "primary" }) {
 
   // Primary variant - filled style (default)
   return (
-    <span className={`px-2.5 py-1 text-xs font-medium rounded-md text-white ${colorClasses[getStatusColor(status)] || 'bg-gray-500'}`}>
+    <span className={`inline-flex items-center px-[10px] h-6 rounded-[6px] text-[12px] font-semibold text-white ${colorClasses[getStatusColor(status)] || 'bg-gray-500'}`}>
       {status}
     </span>
   );

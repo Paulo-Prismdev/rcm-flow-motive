@@ -252,8 +252,8 @@ export default function ClaimsPage() {
         {/* Sticky left: Reg */}
         <td className={`sticky left-0 z-10 px-4 py-2.5 whitespace-nowrap ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-white dark:bg-gray-900 group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50'}`}>
           <span
-            className="inline-flex items-center justify-center w-[118px] h-[28px] rounded-sm px-2 text-black bg-yellow-400 border-2 border-yellow-600 shadow-sm uppercase"
-            style={{ fontFamily: "'UK Number Plate', 'Arial Black', 'Franklin Gothic Heavy', Impact, sans-serif", fontWeight: 900, fontSize: '14px', letterSpacing: '0.12em' }}
+            className="inline-flex items-center justify-center px-3 py-1 rounded-md bg-[#1e2d4a] text-white font-semibold uppercase"
+            style={{ fontSize: '13px' }}
           >
             {claim.reg ? formatUKRegistration(claim.reg) : ''}
           </span>
@@ -312,8 +312,8 @@ export default function ClaimsPage() {
       >
         <div className="flex items-center justify-between gap-2">
           <span
-            className="inline-flex items-center justify-center h-[26px] px-2 rounded-sm text-black bg-yellow-400 border-2 border-yellow-600 shadow-sm uppercase flex-shrink-0"
-            style={{ fontFamily: "'UK Number Plate', 'Arial Black', Impact, sans-serif", fontWeight: 900, fontSize: '13px', letterSpacing: '0.12em', minWidth: '100px' }}
+            className="inline-flex items-center justify-center px-3 py-1 rounded-md bg-[#1e2d4a] text-white font-semibold uppercase flex-shrink-0"
+            style={{ fontSize: '13px' }}
           >
             {claim.reg ? formatUKRegistration(claim.reg) : '—'}
           </span>
