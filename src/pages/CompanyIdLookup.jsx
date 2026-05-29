@@ -3,15 +3,14 @@ import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Copy, Check, Building2, Wrench, Package, User } from "lucide-react";
 
-const TYPES = [
-  { id: "referrer",  label: "Referrers",  icon: Building2, entity: "Referrer" },
-  { id: "bodyshop",  label: "Bodyshops",  icon: Wrench,    entity: "Bodyshop" },
-  { id: "supplier",  label: "Suppliers",  icon: Package,   entity: "Supplier" },
-  { id: "client",    label: "Clients",    icon: User,      entity: "Client"   },
-];
+const TYPE_LABELS = {
+  platform_owner: { label: "Platform Owner", icon: Building2 },
+  referrer:       { label: "Referrer",        icon: Building2 },
+  repairer:       { label: "Repairer",        icon: Wrench    },
+};
 
 export default function CompanyIdLookup() {
-  const [activeTab, setActiveTab] = useState("referrer");
+  const [activeTab, setActiveTab] = useState("repairer");
   const [copied, setCopied] = useState(null);
 
   const { data: currentUser } = useQuery({
@@ -19,15 +18,10 @@ export default function CompanyIdLookup() {
     queryFn: () => base44.auth.me(),
   });
 
-  const activeType = TYPES.find(t => t.id === activeTab);
-
-  const { data: referrers = [] } = useQuery({ queryKey: ['Referrer'], queryFn: () => base44.entities.Referrer.list('name') });
-  const { data: bodyshops = [] } = useQuery({ queryKey: ['Bodyshop'],  queryFn: () => base44.entities.Bodyshop.list('name')  });
-  const { data: suppliers = [] } = useQuery({ queryKey: ['Supplier'],  queryFn: () => base44.entities.Supplier.list('name')  });
-  const { data: clients   = [] } = useQuery({ queryKey: ['Client'],    queryFn: () => base44.entities.Client.list('name')    });
-
-  const dataMap = { referrer: referrers, bodyshop: bodyshops, supplier: suppliers, client: clients };
-  const records = dataMap[activeTab] || [];
+  const { data: companies = [] } = useQuery({
+    queryKey: ['Company'],
+    queryFn: () => base44.entities.Company.list('name'),
+  });
 
   const isAdmin = ['super_admin', 'company_admin', 'admin'].includes(currentUser?.role);
   if (!isAdmin) return (
@@ -40,6 +34,9 @@ export default function CompanyIdLookup() {
     setTimeout(() => setCopied(null), 2000);
   };
 
+  const allTypes = [...new Set(companies.map(c => c.company_type).filter(Boolean))];
+  const records = companies.filter(c => c.company_type === activeTab);
+
   return (
     <div className="space-y-4 p-4">
       <div className="neomorph p-4">
@@ -49,20 +46,21 @@ export default function CompanyIdLookup() {
 
       {/* Tabs */}
       <div className="neomorph p-2 flex gap-1 overflow-x-auto">
-        {TYPES.map(t => {
-          const Icon = t.icon;
+        {allTypes.map(type => {
+          const meta = TYPE_LABELS[type] || { label: type, icon: Building2 };
+          const Icon = meta.icon;
           return (
             <button
-              key={t.id}
-              onClick={() => setActiveTab(t.id)}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-all flex-shrink-0 ${
-                activeTab === t.id
+              key={type}
+              onClick={() => setActiveTab(type)}
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-all flex-shrink-0 capitalize ${
+                activeTab === type
                   ? 'bg-accent text-accent-foreground shadow'
                   : 'text-foreground-muted hover:text-foreground hover:bg-surface-hover'
               }`}
             >
               <Icon className="w-4 h-4" />
-              {t.label}
+              {meta.label}
             </button>
           );
         })}
@@ -71,7 +69,7 @@ export default function CompanyIdLookup() {
       {/* Records */}
       <div className="space-y-2">
         {records.length === 0 ? (
-          <div className="neomorph p-8 text-center text-foreground-muted">No {activeType?.label.toLowerCase()} found.</div>
+          <div className="neomorph p-8 text-center text-foreground-muted">No companies of this type found.</div>
         ) : (
           records.map(record => (
             <div key={record.id} className="neomorph-flat p-4 flex items-center justify-between gap-4">
