@@ -295,6 +295,10 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
       queryClient.invalidateQueries({ queryKey: ['claims'] });
       onClose();
     },
+    onError: (error) => {
+      console.error('Failed to delete claim:', error);
+      alert('Failed to delete claim: ' + (error.message || 'Unknown error'));
+    },
   });
 
   React.useEffect(() => {
