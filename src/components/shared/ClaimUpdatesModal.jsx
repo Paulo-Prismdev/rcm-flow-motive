@@ -93,6 +93,10 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
     staleTime: 30000,
   });
 
+  const updateClaimMutation = useMutation({
+    mutationFn: (claimData) => base44.entities.Claim.update(claimId, claimData),
+  });
+
   const createUpdateMutation = useMutation({
     mutationFn: (updateData) => base44.entities.ClaimUpdate.create({
       ...updateData,
@@ -185,7 +189,23 @@ This update was sent from ART-TEC One Claims Management System
     // Use the final description with email info
     updateDataToSave.description = finalDescription;
     
-    createUpdateMutation.mutate(updateDataToSave);
+    // If this is a status change, update the claim's status fields
+    if (newUpdate.update_type === 'Status Change' && new_status) {
+      updateClaimMutation.mutate(
+        { 
+          job_status: new_status,
+          secondary_status: new_secondary_status || null
+        },
+        {
+          onSuccess: () => {
+            // After claim is updated, create the update record
+            createUpdateMutation.mutate(updateDataToSave);
+          }
+        }
+      );
+    } else {
+      createUpdateMutation.mutate(updateDataToSave);
+    }
   };
 
   // Update new_status when currentStatus changes
