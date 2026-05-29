@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,7 +15,7 @@ export default function ClaimReferrerForm({ claim, onSave, onCancel }) {
             ...prev,
             referrer: referrer.name,
             referrer_id: referrer.id,
-            referrer_email: referrer.email || ''
+            referrer_email: referrer.email || referrer.contact_email || ''
         }));
     };
 
