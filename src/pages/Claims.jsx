@@ -70,12 +70,13 @@ export default function ClaimsPage() {
   const { data: claims = [], isLoading } = useQuery({
     queryKey: ['claims'],
     queryFn: () => base44.entities.Claim.list('-created_date', 5000),
+    staleTime: 30000,
   });
 
   const { data: backorderedParts = [] } = useQuery({
     queryKey: ['backorderedParts'],
     queryFn: () => base44.entities.BackorderedPart.list(),
-    staleTime: 2 * 60 * 1000,
+    staleTime: 5 * 60 * 1000,
   });
 
   useEffect(() => {
@@ -89,7 +90,7 @@ export default function ClaimsPage() {
   const { data: customStatuses = [] } = useQuery({
     queryKey: ['ClaimStatusConfig'],
     queryFn: () => base44.entities.ClaimStatusConfig.list('sort_order'),
-    staleTime: 0,
+    staleTime: 5 * 60 * 1000,
   });
 
   const availableStatuses = useMemo(() => {

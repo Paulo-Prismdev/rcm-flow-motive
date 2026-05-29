@@ -65,6 +65,14 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
      staleTime: 5 * 60 * 1000,
    });
 
+   // Fetch claim data - use get instead of list+filter
+   const { data: claim } = useQuery({
+     queryKey: ['claim', claimId],
+     queryFn: () => base44.entities.Claim.get(claimId),
+     enabled: isOpen && !!claimId,
+     staleTime: 30000,
+   });
+
    // Get active statuses sorted by sort_order
    const activeStatuses = useMemo(() => {
      return customStatuses
@@ -73,19 +81,16 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
        .map(s => s.status_name);
    }, [customStatuses]);
 
-   const { data: claim } = useQuery({
-     queryKey: ['claim', claimId],
-     queryFn: async () => base44.entities.Claim.get(claimId),
-     enabled: isOpen && !!claimId,
-   });
+
 
   const { data: updates = [], isLoading } = useQuery({
     queryKey: ['claimUpdates', claimId],
     queryFn: async () => {
-      const allUpdates = await base44.entities.ClaimUpdate.list('-created_date', 1000);
+      const allUpdates = await base44.entities.ClaimUpdate.list('-created_date', 500);
       return allUpdates.filter(u => u.claim_id === claimId);
     },
     enabled: isOpen && !!claimId,
+    staleTime: 30000,
   });
 
   const createUpdateMutation = useMutation({
