@@ -7,12 +7,8 @@ import { Textarea } from '@/components/ui/textarea';
 import {
     Dialog,
     DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogDescription,
-    DialogFooter
 } from "@/components/ui/dialog";
-import { Loader } from 'lucide-react';
+import { X, Loader } from 'lucide-react';
 
 export default function PartsRequestModal({ claim, isOpen, onClose, onPartCreated }) {
     const [partData, setPartData] = useState({
@@ -57,46 +53,76 @@ export default function PartsRequestModal({ claim, isOpen, onClose, onPartCreate
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="neomorph-flat bg-[#1A1A1A] p-6 border-gold">
-                <DialogHeader>
-                    <DialogTitle className="text-gold">Create New Parts Request</DialogTitle>
-                    <DialogDescription className="text-gray-500">
-                        This will create a new job in the Parts department linked to claim for vehicle: {claim.reg}.
-                    </DialogDescription>
-                </DialogHeader>
-                <div className="space-y-4 py-4">
-                    <Textarea
-                        placeholder="Part Description(s)"
-                        value={partData.part_description}
-                        onChange={(e) => handleChange('part_description', e.target.value)}
-                        className="neomorph-inset"
-                        required
-                    />
-                    <Input
-                        placeholder="Part Number(s) (if known)"
-                        value={partData.part_number}
-                        onChange={(e) => handleChange('part_number', e.target.value)}
-                        className="neomorph-inset"
-                    />
-                    <Input
-                        placeholder="Delay / Backorder Duration"
-                        value={partData.backorder_duration}
-                        onChange={(e) => handleChange('backorder_duration', e.target.value)}
-                        className="neomorph-inset"
-                    />
-                    <Textarea
-                        placeholder="Additional Notes for Parts Team"
-                        value={partData.additional_comments}
-                        onChange={(e) => handleChange('additional_comments', e.target.value)}
-                        className="neomorph-inset"
-                    />
+            <DialogContent className="max-w-[580px] bg-white dark:bg-gray-900 rounded-xl shadow-2xl p-8 border border-gray-200 dark:border-gray-800">
+                <div className="flex items-start justify-between mb-6">
+                    <div>
+                        <h2 className="text-[18px] font-semibold text-gray-900 dark:text-white">Log Parts Issue</h2>
+                        <p className="text-[13px] text-gray-500 dark:text-gray-400 mt-1">
+                            This will create a new job in the Parts department linked to claim for vehicle: {claim.reg}.
+                        </p>
+                    </div>
+                    <button
+                        onClick={onClose}
+                        className="w-6 h-6 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                    >
+                        <X className="w-5 h-5" />
+                    </button>
                 </div>
-                <DialogFooter>
-                    <Button onClick={onClose} variant="ghost" className="neomorph-flat">Cancel</Button>
-                    <Button onClick={handleSubmit} className="neomorph-flat text-blue-600" disabled={createPartMutation.isPending}>
-                        {createPartMutation.isPending ? <Loader className="animate-spin" /> : 'Create Request'}
+                <div className="space-y-5">
+                    <div>
+                        <label className="block text-[14px] font-medium text-gray-700 dark:text-gray-300 mb-[6px]">Part Description(s)</label>
+                        <Textarea
+                            placeholder="Part Description(s)"
+                            value={partData.part_description}
+                            onChange={(e) => handleChange('part_description', e.target.value)}
+                            className="min-h-[120px] w-full border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-[14px] text-gray-900 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                            required
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-[14px] font-medium text-gray-700 dark:text-gray-300 mb-[6px]">Part Number(s) (if known)</label>
+                        <Input
+                            placeholder="Part Number(s) (if known)"
+                            value={partData.part_number}
+                            onChange={(e) => handleChange('part_number', e.target.value)}
+                            className="w-full h-10 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-[14px] text-gray-900 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-[14px] font-medium text-gray-700 dark:text-gray-300 mb-[6px]">Delay / Backorder Duration</label>
+                        <Input
+                            placeholder="Delay / Backorder Duration"
+                            value={partData.backorder_duration}
+                            onChange={(e) => handleChange('backorder_duration', e.target.value)}
+                            className="w-full h-10 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-[14px] text-gray-900 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-[14px] font-medium text-gray-700 dark:text-gray-300 mb-[6px]">Additional Notes for Parts Team</label>
+                        <Textarea
+                            placeholder="Additional Notes for Parts Team"
+                            value={partData.additional_comments}
+                            onChange={(e) => handleChange('additional_comments', e.target.value)}
+                            className="min-h-[120px] w-full border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-[14px] text-gray-900 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                        />
+                    </div>
+                </div>
+                <div className="flex justify-end gap-3 mt-6 pt-6 border-t border-gray-200 dark:border-gray-800">
+                    <Button
+                        onClick={onClose}
+                        variant="outline"
+                        className="h-9 px-4 text-sm font-medium rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
+                    >
+                        Cancel
                     </Button>
-                </DialogFooter>
+                    <Button 
+                        onClick={handleSubmit} 
+                        className="h-9 px-4 text-sm font-medium rounded-lg bg-blue-600 hover:bg-blue-700 text-white"
+                        disabled={createPartMutation.isPending}
+                    >
+                        {createPartMutation.isPending ? <Loader className="animate-spin mr-2" /> : 'Create Request'}
+                    </Button>
+                </div>
             </DialogContent>
         </Dialog>
     );

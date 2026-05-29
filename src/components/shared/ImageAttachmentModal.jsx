@@ -88,8 +88,8 @@ export default function ImageAttachmentModal({ imageUrls = [], onAdd, onRemove, 
           {/* Upload Area */}
           <div className="px-8 pt-6 flex-shrink-0">
             <div
-              className={`border-2 border-dashed rounded-lg p-6 text-center transition-all cursor-pointer ${
-                isDragging ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-300 dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-600'
+              className={`border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg p-8 text-center transition-all cursor-pointer ${
+                isDragging ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'hover:border-gray-400 dark:hover:border-gray-600'
               }`}
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
@@ -102,10 +102,12 @@ export default function ImageAttachmentModal({ imageUrls = [], onAdd, onRemove, 
                   <span className="text-sm">Uploading...</span>
                 </div>
               ) : (
-                <div className="flex flex-col items-center gap-2 text-gray-500 dark:text-gray-400">
-                  <Upload className={`w-6 h-6 ${isDragging ? 'text-blue-500' : ''}`} />
-                  <span className="text-sm">{isDragging ? 'Drop images here!' : 'Click or drag & drop images to upload'}</span>
-                  <span className="text-xs text-gray-400 dark:text-gray-500">JPG, PNG, GIF, WebP supported</span>
+                <div className="flex flex-col items-center gap-3 text-gray-500 dark:text-gray-400">
+                  <Upload className={`w-8 h-8 ${isDragging ? 'text-blue-500' : ''}`} />
+                  <div>
+                    <span className="text-sm font-medium">{isDragging ? 'Drop images here!' : 'Click or drag & drop images to upload'}</span>
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">JPG, PNG, GIF, WebP supported</p>
+                  </div>
                 </div>
               )}
               <input

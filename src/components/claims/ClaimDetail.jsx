@@ -61,6 +61,7 @@ import UpdateTrackingModal from './UpdateTrackingModal';
 import UpdateOverrideModal from './UpdateOverrideModal';
 import ClaimUpdatesModal from '../shared/ClaimUpdatesModal';
 import InstructionTemplateModal from './InstructionTemplateModal';
+import BackorderedPartsModal from './BackorderedPartsModal';
 import { Textarea } from "@/components/ui/textarea";
 import { formatUKRegistration } from '../shared/formatRegistration';
 import { Link, useNavigate } from 'react-router-dom';
@@ -191,6 +192,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
   const [isFetchingVehicle, setIsFetchingVehicle] = useState(false);
   const [vehicleFetchError, setVehicleFetchError] = useState('');
   const [isChangeStatusModalOpen, setIsChangeStatusModalOpen] = useState(false);
+  const [isBackorderedPartsModalOpen, setIsBackorderedPartsModalOpen] = useState(false);
 
   const canEdit = true;
 
@@ -1151,6 +1153,14 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                 onClose={() => setIsActivityLogOpen(false)}
               />
 
+              <BackorderedPartsModal
+                claim={claim}
+                currentUser={currentUser}
+                isOpen={isBackorderedPartsModalOpen}
+                onClose={() => setIsBackorderedPartsModalOpen(false)}
+                onSendEmail={() => setIsEmailModalOpen(true)}
+              />
+
       <div className="flex flex-col gap-2 md:gap-3" style={{height: '100%', touchAction: 'auto', isolation: 'isolate'}}>
 
           {/* ── MOBILE header (< lg) ── */}
@@ -1174,7 +1184,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
               else if (val === 'download_pdf') window.open(claim.instruction_pdf_url, '_blank');
               else if (val === 'estimate') setIsEstimateModalOpen(true);
               else if (val === 'parts') setIsPartsModalOpen(true);
-              else if (val === 'backorders') setSelectedSection('backorderedParts');
+              else if (val === 'backorders') setIsBackorderedPartsModalOpen(true);
               else if (val === 'archive') handleArchive();
               else if (val === 'delete') handleDelete();
             }}
@@ -1220,7 +1230,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                               {claim.instruction_pdf_url && <DropdownMenuItem onSelect={(e) => { e.preventDefault(); window.open(claim.instruction_pdf_url, '_blank'); }}><Download className="w-4 h-4 mr-2" />Download Instruction PDF</DropdownMenuItem>}
                               <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsEstimateModalOpen(true); }}><Calculator className="w-4 h-4 mr-2" />Request Estimate</DropdownMenuItem>
                               <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsPartsModalOpen(true); }}><Package className="w-4 h-4 mr-2" />Log Parts Issue</DropdownMenuItem>
-                              <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setSelectedSection('backorderedParts'); }}><Package className="w-4 h-4 mr-2" />Backordered Parts</DropdownMenuItem>
+                              <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsBackorderedPartsModalOpen(true); }}><Package className="w-4 h-4 mr-2" />Backordered Parts</DropdownMenuItem>
                               <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleArchive(); }} disabled={archiveMutation.isLoading}><Archive className="w-4 h-4 mr-2" />{claim.archived ? 'Unarchive' : 'Archive'}</DropdownMenuItem>
                               <DropdownMenuItem onSelect={() => handleDelete()} disabled={deleteMutation.isLoading} className="text-red-600"><Trash2 className="w-4 h-4 mr-2" />Delete</DropdownMenuItem>
                             </DropdownMenuContent>

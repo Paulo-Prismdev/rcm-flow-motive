@@ -76,47 +76,48 @@ export default function InstructionTemplateModal({ claim, isOpen, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="glass max-w-4xl w-full max-h-[90vh] overflow-y-auto rounded-2xl">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={onClose}>
+      <div 
+        className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl w-full max-w-[580px] mx-4 max-h-[90vh] flex flex-col shadow-2xl overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-glass-border">
+        <div className="flex items-start justify-between px-8 py-6 border-b border-gray-200 dark:border-gray-800 flex-shrink-0">
           <div>
-            <h2 className="text-xl font-bold">Generate Bodyshop Instructions</h2>
-            <p className="text-sm text-foreground-muted mt-1">
+            <h2 className="text-[18px] font-semibold text-gray-900 dark:text-white">Generate Bodyshop Instructions</h2>
+            <p className="text-[13px] text-gray-500 dark:text-gray-400 mt-1">
               Select the instruction template for {claim.job_number}
             </p>
           </div>
-          <Button
+          <button
             onClick={onClose}
-            className="neomorph-flat p-2"
+            className="w-6 h-6 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
             disabled={isGenerating}
           >
             <X className="w-5 h-5" />
-          </Button>
+          </button>
         </div>
 
         {/* Built-in Templates */}
-        <div className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-bold text-lg">Built-in Templates</h3>
-          </div>
+        <div className="px-8 py-6">
+          <h3 className="text-[14px] font-semibold text-gray-700 dark:text-gray-300 mb-4">Built-in Templates</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             {builtInTemplates.map((template) => (
               <div
                 key={template.id}
-                className="neomorph-flat p-5 hover:neomorph transition-all cursor-pointer"
+                className="border border-gray-200 dark:border-gray-700 rounded-xl p-6 hover:border-blue-500 dark:hover:border-blue-400 transition-all cursor-pointer"
                 onClick={() => !isGenerating && handleGenerate(template.type)}
               >
                 <div className="flex flex-col items-center gap-3 text-center">
-                  <div className="text-5xl">{template.icon}</div>
+                  <div className="text-4xl">{template.icon}</div>
                   <div className="flex-1">
-                    <h3 className="font-bold text-base mb-2">{template.name}</h3>
-                    <p className="text-xs text-foreground-muted">{template.description}</p>
+                    <h3 className="font-semibold text-sm mb-2 text-gray-900 dark:text-white">{template.name}</h3>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{template.description}</p>
                   </div>
                   {isGenerating && selectedType === template.type ? (
-                    <Loader className="w-6 h-6 animate-spin text-gold" />
+                    <Loader className="w-5 h-5 animate-spin text-blue-600" />
                   ) : (
-                    <FileText className="w-6 h-6 text-gray-400" />
+                    <FileText className="w-5 h-5 text-gray-400" />
                   )}
                 </div>
               </div>
@@ -127,10 +128,10 @@ export default function InstructionTemplateModal({ claim, isOpen, onClose }) {
           {customTemplates.length > 0 && (
             <>
               <div className="flex items-center justify-between mb-4 mt-8">
-                <h3 className="font-bold text-lg">Custom Templates</h3>
+                <h3 className="text-[14px] font-semibold text-gray-700 dark:text-gray-300">Custom Templates</h3>
                 <Link to={createPageUrl('PdfTemplateManager')}>
-                  <Button className="neomorph-flat text-sm flex items-center gap-2">
-                    <Settings className="w-4 h-4" />
+                  <Button variant="outline" className="h-9 px-4 text-sm font-medium rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800">
+                    <Settings className="w-4 h-4 mr-2" />
                     Manage Templates
                   </Button>
                 </Link>
@@ -139,32 +140,32 @@ export default function InstructionTemplateModal({ claim, isOpen, onClose }) {
                 {customTemplates.filter(t => t.is_active).map((template) => (
                   <div
                     key={template.id}
-                    className="neomorph-flat p-5 hover:neomorph transition-all cursor-pointer"
+                    className="border border-gray-200 dark:border-gray-700 rounded-xl p-6 hover:border-blue-500 dark:hover:border-blue-400 transition-all cursor-pointer"
                     onClick={() => !isGenerating && handleGenerate(template.template_type, template.id)}
                   >
                     <div className="flex items-start gap-4">
-                      <div className="w-12 h-12 rounded-lg bg-accent/20 flex items-center justify-center flex-shrink-0">
-                        <FileText className="w-6 h-6 text-accent" />
+                      <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0">
+                        <FileText className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-bold text-base mb-1">{template.template_name}</h3>
+                        <h3 className="font-semibold text-sm mb-1 text-gray-900 dark:text-white">{template.template_name}</h3>
                         <div className="flex items-center gap-2 mb-2">
-                          <span className="text-xs px-2 py-1 rounded neomorph-inset">
+                          <span className="text-xs px-2 py-1 rounded bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400">
                             {template.template_type}
                           </span>
                           {template.is_default && (
-                            <span className="text-xs px-2 py-1 rounded bg-gold/20 text-gold font-semibold">
+                            <span className="text-xs px-2 py-1 rounded bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-medium">
                               Default
                             </span>
                           )}
                         </div>
-                        <p className="text-xs text-foreground-muted">
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
                           {template.sections_config?.length || 0} sections • 
                           {template.header_config?.show_logo ? ' Logo' : ' No logo'}
                         </p>
                       </div>
                       {isGenerating && selectedTemplate === template.id ? (
-                        <Loader className="w-5 h-5 animate-spin text-gold flex-shrink-0" />
+                        <Loader className="w-4 h-4 animate-spin text-blue-600 flex-shrink-0" />
                       ) : null}
                     </div>
                   </div>
@@ -172,24 +173,24 @@ export default function InstructionTemplateModal({ claim, isOpen, onClose }) {
               </div>
             </>
           )}
-
-          {/* Manage Templates Link */}
-          <div className="mt-6 pt-6 border-t border-glass-border">
-            <Link to={createPageUrl('PdfTemplateManager')}>
-              <Button className="w-full neomorph-flat flex items-center justify-center gap-2">
-                <Settings className="w-4 h-4" />
-                Manage PDF Templates
-              </Button>
-            </Link>
-          </div>
         </div>
 
         {/* Info Footer */}
-        <div className="p-6 bg-blue-50 dark:bg-blue-900/20 border-t border-blue-200 dark:border-blue-800">
-          <p className="text-sm text-blue-800 dark:text-blue-200">
+        <div className="px-8 py-4 bg-blue-50 dark:bg-blue-900/20 border-t border-blue-200 dark:border-blue-800 flex-shrink-0">
+          <p className="text-[13px] text-blue-800 dark:text-blue-200">
             <strong>Note:</strong> The PDF will be generated with all current claim data and opened in a new tab. 
             A copy will be automatically saved to the claim's attachments.
           </p>
+        </div>
+
+        {/* Footer */}
+        <div className="px-8 py-4 border-t border-gray-200 dark:border-gray-800 flex-shrink-0 flex justify-end gap-3">
+          <Link to={createPageUrl('PdfTemplateManager')}>
+            <Button className="h-9 px-4 text-sm font-medium rounded-lg bg-blue-600 hover:bg-blue-700 text-white">
+              <Settings className="w-4 h-4 mr-2" />
+              Manage PDF Templates
+            </Button>
+          </Link>
         </div>
       </div>
     </div>

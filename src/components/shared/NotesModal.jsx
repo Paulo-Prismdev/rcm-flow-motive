@@ -216,16 +216,21 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col bg-background border-border">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-foreground">
-            <MessageSquare className="w-5 h-5 text-primary" />
-            Internal Notes & Team Communication
-          </DialogTitle>
-          <p className="text-xs text-muted-foreground mt-1">
-            These notes are for internal team communication only and do NOT affect 48-hour tracking
-          </p>
-        </DialogHeader>
+      <DialogContent className="max-w-[580px] bg-white dark:bg-gray-900 rounded-xl shadow-2xl p-8 border border-gray-200 dark:border-gray-800">
+        <div className="flex items-start justify-between mb-6">
+          <div>
+            <h2 className="text-[18px] font-semibold text-gray-900 dark:text-white">Internal Notes & Team Communication</h2>
+            <p className="text-[13px] text-gray-500 dark:text-gray-400 mt-1">
+              These notes are for internal team communication only and do NOT affect 48-hour tracking
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            className="w-6 h-6 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
 
         <div className="flex-1 overflow-y-auto space-y-4 pr-2">
           {isLoading ? (
@@ -341,28 +346,29 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
         </div>
 
         {/* New Note Form */}
-        <div className="border-t border-border pt-4 mt-4">
+        <div className="border-t border-gray-200 dark:border-gray-800 pt-6 mt-6">
           {replyingTo && (
-            <div className="mb-2 flex items-center justify-between bg-muted/30 border border-border rounded-lg p-2 text-sm">
-              <span className="text-foreground">Replying to {replyingTo.created_by}</span>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-6 w-6"
+            <div className="mb-3 flex items-center justify-between bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-2 text-sm">
+              <span className="text-gray-700 dark:text-gray-300">Replying to {replyingTo.created_by}</span>
+              <button
                 onClick={() => setReplyingTo(null)}
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
               >
                 <X className="w-4 h-4" />
-              </Button>
+              </button>
             </div>
           )}
-          <form onSubmit={handleSubmit} className="space-y-3">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div className="relative">
+              <label className="block text-[14px] font-medium text-gray-700 dark:text-gray-300 mb-[6px]">
+                Add Note
+              </label>
               <Textarea
                 ref={textareaRef}
                 value={newNote}
                 onChange={handleTextareaChange}
-                placeholder="Add a note or update... (type @ to mention someone)"
-                className="min-h-[100px] bg-background border-border"
+                placeholder="Type your note here... (type @ to mention someone)"
+                className="min-h-[160px] bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-[14px] text-gray-900 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
               />
               
               {/* Mention Dropdown */}
@@ -389,20 +395,33 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
                   onChange={setNewNote}
                   disabled={createNoteMutation.isPending}
                 />
-                <span className="text-xs text-foreground-muted">
+                <span className="text-xs text-gray-500 dark:text-gray-400">
                   Dictate or type @ to mention
                 </span>
               </div>
-              <Button
-                type="submit"
-                disabled={!newNote.trim() || createNoteMutation.isPending}
-                className="neomorph-flat px-6 py-2 text-accent flex items-center gap-2"
-              >
-                <Send className="w-4 h-4" />
-                {replyingTo ? 'Reply' : 'Post Note'}
-              </Button>
             </div>
           </form>
+        </div>
+
+        {/* Footer */}
+        <div className="flex justify-end gap-3 mt-6 pt-6 border-t border-gray-200 dark:border-gray-800">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onClose}
+            className="h-9 px-4 text-sm font-medium rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
+          >
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            onClick={handleSubmit}
+            disabled={!newNote.trim() || createNoteMutation.isPending}
+            className="h-9 px-4 text-sm font-medium rounded-lg bg-blue-600 hover:bg-blue-700 text-white"
+          >
+            <Send className="w-4 h-4 mr-2" />
+            {replyingTo ? 'Reply' : 'Add Note'}
+          </Button>
         </div>
       </DialogContent>
     </Dialog>

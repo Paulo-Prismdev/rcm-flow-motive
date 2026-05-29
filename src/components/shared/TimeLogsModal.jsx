@@ -1,24 +1,39 @@
 import React from 'react';
-import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
 import TimeLogSection from './TimeLogSection';
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
 } from "@/components/ui/dialog";
 
 export default function TimeLogsModal({ parentId, parentType, isOpen, onClose }) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl bg-background border-border">
-        <DialogHeader>
-          <DialogTitle className="text-foreground">Time Logs</DialogTitle>
-        </DialogHeader>
+      <DialogContent className="max-w-[580px] bg-white dark:bg-gray-900 rounded-xl shadow-2xl p-8 border border-gray-200 dark:border-gray-800">
+        <div className="flex items-start justify-between mb-6">
+          <div>
+            <h2 className="text-[18px] font-semibold text-gray-900 dark:text-white">Time Logs</h2>
+          </div>
+          <button
+            onClick={onClose}
+            className="w-6 h-6 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
 
-        <div className="flex-1 overflow-y-auto max-h-[60vh] py-4">
+        <div className="overflow-y-auto max-h-[60vh] pb-4">
           <TimeLogSection parentId={parentId} parentType={parentType} />
+        </div>
+
+        {/* Footer */}
+        <div className="flex justify-end gap-3 mt-6 pt-6 border-t border-gray-200 dark:border-gray-800">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors h-9"
+          >
+            Close
+          </button>
         </div>
       </DialogContent>
     </Dialog>

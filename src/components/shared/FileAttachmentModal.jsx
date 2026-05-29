@@ -294,49 +294,45 @@ export default function FileAttachmentModal({ fileUrls = [], onAdd, onRemove, is
       
       <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={onClose}>
         <div 
-          className="bg-background border border-border rounded-lg w-full max-w-4xl mx-4 max-h-[85vh] flex flex-col shadow-2xl"
+          className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl w-full max-w-[580px] mx-4 max-h-[90vh] flex flex-col shadow-2xl overflow-hidden"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-border flex-shrink-0 bg-card">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                <FileText className="w-5 h-5 text-primary" />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-foreground">Attachments</h3>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  {fileUrls.length} {fileUrls.length === 1 ? 'file' : 'files'}
-                  {enableAI && ' • AI analysis available'}
-                </p>
-              </div>
+          <div className="flex items-start justify-between px-8 py-6 border-b border-gray-200 dark:border-gray-800 flex-shrink-0">
+            <div>
+              <h3 className="text-[18px] font-semibold text-gray-900 dark:text-white">Attachments</h3>
+              <p className="text-[13px] text-gray-500 dark:text-gray-400 mt-1">
+                {fileUrls.length} {fileUrls.length === 1 ? 'file' : 'files'}
+                {enableAI && ' • AI analysis available'}
+              </p>
             </div>
             <button
               onClick={onClose}
-              className="p-2 hover:bg-muted transition-colors rounded-lg text-muted-foreground hover:text-foreground"
+              className="w-6 h-6 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
             >
-              <X className="w-4 h-4" />
+              <X className="w-5 h-5" />
             </button>
           </div>
 
           {/* Upload Area */}
-          <div className="px-6 pt-4 flex-shrink-0">
+          <div className="px-8 pt-6 flex-shrink-0">
             <div
-              className={`border-2 border-dashed p-3 rounded-xl text-center transition-all cursor-pointer ${isDragging ? 'ring-2 ring-primary border-primary bg-primary/5' : 'border-border bg-muted/30'}`}
+              className={`border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg p-6 text-center transition-all cursor-pointer ${isDragging ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'hover:border-gray-400 dark:hover:border-gray-600'}`}
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
               onClick={() => !isUploading && fileInputRef.current?.click()}
             >
               {isUploading ? (
-                <div className="flex items-center justify-center gap-2 text-muted-foreground py-1">
-                  <Loader className="w-4 h-4 animate-spin" />
+                <div className="flex flex-col items-center gap-2 text-gray-500 dark:text-gray-400">
+                  <Loader className="w-6 h-6 animate-spin" />
                   <span className="text-sm">Uploading...</span>
                 </div>
               ) : (
-                <div className="flex items-center justify-center gap-2 text-muted-foreground py-1">
-                  <Upload className="w-4 h-4" />
-                  <span className="text-sm">Click or drag & drop to upload documents</span>
+                <div className="flex flex-col items-center gap-2 text-gray-500 dark:text-gray-400">
+                  <Upload className={`w-6 h-6 ${isDragging ? 'text-blue-500' : ''}`} />
+                  <span className="text-sm">{isDragging ? 'Drop files here!' : 'Click or drag & drop files to upload'}</span>
+                  <span className="text-xs text-gray-400 dark:text-gray-500">PDF, DOC, DOCX, XLS, XLSX supported</span>
                 </div>
               )}
               <input
@@ -351,14 +347,14 @@ export default function FileAttachmentModal({ fileUrls = [], onAdd, onRemove, is
           </div>
 
           {/* Files List - Scrollable */}
-          <div className="flex-1 overflow-y-auto px-6 py-4">
+          <div className="flex-1 overflow-y-auto px-8 py-6">
             {fileUrls.length === 0 ? (
-              <div className="text-center py-12 text-muted-foreground">
-                <FileText className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                <p>No files attached</p>
+              <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+                <FileText className="w-12 h-12 mx-auto mb-3 opacity-40" />
+                <p>No files uploaded yet</p>
               </div>
             ) : (
-              <div className="grid gap-3">
+              <div className="space-y-3">
                 {fileUrls.map((url, index) => {
                   const fileName = getFileName(url);
                   const extension = getFileExtension(url);
@@ -367,7 +363,7 @@ export default function FileAttachmentModal({ fileUrls = [], onAdd, onRemove, is
                   return (
                     <div
                       key={index}
-                      className="bg-muted/30 p-4 rounded-lg flex items-center gap-4 hover:bg-muted/50 transition-all border border-border"
+                      className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 flex items-center gap-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all"
                     >
                       <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
                         <FileText className="w-5 h-5 text-primary" />
@@ -428,17 +424,27 @@ export default function FileAttachmentModal({ fileUrls = [], onAdd, onRemove, is
           </div>
 
           {/* Footer with AI Info */}
-          {enableAI && (
-            <div className="p-4 border-t border-border bg-primary/5 flex-shrink-0">
-              <div className="flex items-start gap-2 text-sm">
-                <Sparkles className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
-                <p className="text-foreground">
+          {enableAI && fileUrls.length > 0 && (
+            <div className="px-8 py-4 border-t border-gray-200 dark:border-gray-800 bg-blue-50 dark:bg-blue-900/20 flex-shrink-0">
+              <div className="flex items-start gap-2 text-[13px]">
+                <Sparkles className="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+                <p className="text-blue-800 dark:text-blue-200">
                   <strong className="font-semibold">AI Analysis:</strong> Click the sparkle icon to automatically extract data from documents. 
                   The AI will analyze the file and populate matching fields for you to review.
                 </p>
               </div>
             </div>
           )}
+
+          {/* Footer */}
+          <div className="px-8 py-4 border-t border-gray-200 dark:border-gray-800 flex-shrink-0 flex justify-end gap-3">
+            <button
+              onClick={onClose}
+              className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors h-9"
+            >
+              Close
+            </button>
+          </div>
         </div>
       </div>
     </>
