@@ -436,9 +436,7 @@ export default function ReferrerClaimDetail({ claim, onClose }) {
                 </span>
               )}
               <StatusBadge status={claim.job_status || 'New'} />
-              <span className="px-2 py-0.5 text-xs font-medium text-muted-foreground border border-border rounded-md">
-                View Only
-              </span>
+
             </div>
           </div>
           <DropdownMenu>
