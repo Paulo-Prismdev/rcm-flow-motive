@@ -32,30 +32,42 @@ export default function ReferrerPortal() {
     queryFn: () => base44.auth.me(),
   });
 
+  const referrerId = currentUser?.linked_referrer_id;
+  const companyId = currentUser?.company_id;
+  const isLinked = !!referrerId || !!companyId;
+
   const { data: referrer } = useQuery({
-    queryKey: ['referrer', currentUser?.linked_referrer_id],
-    queryFn: () => base44.entities.Referrer.get(currentUser.linked_referrer_id),
-    enabled: !!currentUser?.linked_referrer_id,
+    queryKey: ['referrer', referrerId],
+    queryFn: () => base44.entities.Referrer.get(referrerId),
+    enabled: !!referrerId,
   });
 
+  const { data: company } = useQuery({
+    queryKey: ['company', companyId],
+    queryFn: () => base44.entities.Company.get(companyId),
+    enabled: !!companyId && !referrerId,
+  });
+
+  // Display name: old referrer entity name, or new company name
+  const displayName = referrer?.name || company?.name || 'Referrer';
+
   const { data: claims = [], isLoading: claimsLoading } = useQuery({
-    queryKey: ['referrerClaims', currentUser?.linked_referrer_id],
+    queryKey: ['referrerClaims', referrerId],
     queryFn: async () => {
       const allClaims = await base44.entities.Claim.list('-created_date', 5000);
-      return allClaims.filter(c => c.referrer_id === currentUser.linked_referrer_id);
+      return allClaims.filter(c => c.referrer_id === referrerId);
     },
-    enabled: !!currentUser?.linked_referrer_id,
+    enabled: !!referrerId,
   });
 
   const { data: parts = [], isLoading: partsLoading } = useQuery({
-    queryKey: ['referrerParts', currentUser?.linked_referrer_id],
+    queryKey: ['referrerParts', referrerId],
     queryFn: async () => {
       const allParts = await base44.entities.Part.list('-created_date', 5000);
-      // Parts associated with claims from this referrer
       const claimIds = claims.map(c => c.id);
       return allParts.filter(p => claimIds.includes(p.linked_claim_id));
     },
-    enabled: !!currentUser?.linked_referrer_id && claims.length > 0,
+    enabled: !!referrerId && claims.length > 0,
   });
 
   const isLoading = !currentUser || claimsLoading;
@@ -73,7 +85,7 @@ export default function ReferrerPortal() {
     );
   }
 
-  if (!currentUser.linked_referrer_id) {
+  if (!isLinked) {
     return (
       <ReferrerLayout>
         <div className="h-full flex items-center justify-center">
@@ -81,7 +93,7 @@ export default function ReferrerPortal() {
             <AlertCircle className="w-16 h-16 mx-auto text-amber-500 mb-4" />
             <h2 className="text-xl font-bold mb-2">Account Not Linked</h2>
             <p className="text-foreground-muted">
-              Your account is not linked to a referrer. Please contact ARTURA to set up your referrer portal access.
+              Your account is not linked to a referrer. Please contact RCM Automotive to set up your referrer portal access.
             </p>
           </div>
         </div>
@@ -111,7 +123,7 @@ export default function ReferrerPortal() {
             <div>
               <h1 className="text-2xl md:text-3xl font-bold">Referrer Portal</h1>
               <p className="text-muted-foreground mt-1">
-                Welcome back, {referrer?.name || 'Referrer'}
+                Welcome back, {displayName}
               </p>
             </div>
           </div>

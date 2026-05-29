@@ -125,16 +125,12 @@ export default function Layout({ children, currentPageName }) {
     window.location.href = createPageUrl('RepairerPortal');
     return null;
   }
-  if ((currentUser?.user_type === 'referrer' || currentUser?.linked_referrer_id) &&
-    !currentUser?.user_type?.includes('internal') &&
-    currentUser?.role !== 'admin' &&
-    currentPageName === 'ReferrerPortal') {
+  const isReferrerUser = (currentUser?.user_type === 'referrer' || currentUser?.linked_referrer_id) &&
+    !isAdmin && currentUser?.user_type !== 'internal';
+  if (isReferrerUser && currentPageName === 'ReferrerPortal') {
     return children;
   }
-  if ((currentUser?.user_type === 'referrer' || (currentUser?.linked_referrer_id && !currentUser?.user_type)) &&
-    currentUser?.user_type !== 'internal' &&
-    currentUser?.role !== 'admin' &&
-    currentPageName !== 'ReferrerPortal') {
+  if (isReferrerUser && currentPageName !== 'ReferrerPortal') {
     window.location.href = createPageUrl('ReferrerPortal');
     return null;
   }
