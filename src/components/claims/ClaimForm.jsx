@@ -154,11 +154,12 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
         if (response.data.success) {
           submitData.job_number = response.data.job_number;
         } else {
-          alert('Failed to generate job number. Please try again.');
+          alert(`Failed to generate job number: ${response.data.error || 'Unknown error'}. Please try again.`);
           return;
         }
       } catch (error) {
-        alert('Failed to generate job number. Please try again.');
+        const msg = error.response?.data?.error || error.response?.data?.message || error.message || 'Unknown error';
+        alert(`Failed to generate job number: ${msg}. Please contact support if this continues.`);
         return;
       }
       if (submitData.claim_type === 'Fault Claim') {

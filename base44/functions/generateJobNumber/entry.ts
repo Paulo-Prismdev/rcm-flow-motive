@@ -9,8 +9,10 @@ Deno.serve(async (req) => {
     if (!user) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    if (user.role !== 'admin' && user.user_type !== 'internal') {
-      return Response.json({ error: 'Forbidden' }, { status: 403 });
+    const allowedRoles = ['admin', 'super_admin', 'company_admin'];
+    const isAllowed = allowedRoles.includes(user.role) || user.user_type === 'internal';
+    if (!isAllowed) {
+      return Response.json({ error: 'Forbidden', user_role: user.role, user_type: user.user_type }, { status: 403 });
     }
 
     // Get the entity type from request
