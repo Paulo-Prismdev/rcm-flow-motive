@@ -275,7 +275,7 @@ export default function FileUpload({
                 )}
               </div>
               {(value || []).map((url, index) => (
-                  <div key={index} className="neomorph-flat p-3 flex items-center justify-between text-sm gap-3">
+                  <div key={index} className="neomorph-flat p-3 flex items-center justify-between text-sm gap-3 min-w-0 overflow-hidden">
                       <div className="flex items-center gap-2 truncate flex-grow min-w-0">
                           <FileText className="w-4 h-4 flex-shrink-0" />
                           <span className="truncate">{getFileName(url)}</span>
