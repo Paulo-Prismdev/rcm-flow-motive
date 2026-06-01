@@ -1210,7 +1210,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                         {canEdit && (
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button className="neomorph-flat p-2"><ChevronDown className="w-4 h-4" /></Button>
+                              <Button variant="outline" className="p-2 h-9 w-9"><ChevronDown className="w-4 h-4" /></Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-56">
                               <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsNotesOpen(true); }}><Edit className="w-4 h-4 mr-2" />Internal Notes</DropdownMenuItem>
@@ -1307,10 +1307,10 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
         )}
 
         {/* Section selector — desktop only (mobile uses ClaimDetailMobileHeader) */}
-        <div className="hidden lg:block neomorph px-3 py-2 flex-shrink-0">
+        <div className="hidden lg:block bg-card border border-border rounded-xl px-3 py-2 flex-shrink-0">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button className="w-full neomorph-flat px-3 py-3 flex items-center justify-between">
+              <Button variant="outline" className="w-full px-3 py-3 flex items-center justify-between bg-transparent">
                 <div className="flex items-center gap-2">
                   {React.createElement(DETAIL_SECTIONS.find(s => s.id === selectedSection)?.icon || User, { className: "w-5 h-5" })}
                   <span className="font-medium">{DETAIL_SECTIONS.find(s => s.id === selectedSection)?.label || 'Select Section'}</span>
