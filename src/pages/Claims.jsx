@@ -230,7 +230,11 @@ export default function ClaimsPage() {
   }, [isDragging]);
 
   if (showForm) {
-    return <ClaimFormWrapper onSubmit={(d) => createMutation.mutate(d)} onCancel={() => setShowForm(false)} />;
+    return (
+      <div className="h-full overflow-y-auto bg-background p-4">
+        <ClaimFormWrapper onSubmit={(d) => createMutation.mutate(d)} onCancel={() => setShowForm(false)} />
+      </div>
+    );
   }
 
   // The claims table row (desktop)
