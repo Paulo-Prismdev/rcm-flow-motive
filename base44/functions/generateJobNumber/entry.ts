@@ -9,11 +9,9 @@ Deno.serve(async (req) => {
     if (!user) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    const allowedRoles = ['admin', 'super_admin', 'company_admin'];
-    const isAllowed = allowedRoles.includes(user.role) || user.user_type === 'internal';
-    if (!isAllowed) {
-      return Response.json({ error: 'Forbidden', user_role: user.role, user_type: user.user_type }, { status: 403 });
-    }
+    // Any authenticated user who can create claims is allowed to generate a job number.
+    // The Claim entity RLS enforces who can actually create claims.
+    // We just block completely unauthenticated requests above.
 
     // Get the entity type from request
     const { entityType } = await req.json();

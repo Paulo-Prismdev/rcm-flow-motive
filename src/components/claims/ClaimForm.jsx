@@ -56,7 +56,8 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
     staleTime: 5 * 60 * 1000,
   });
 
-  const isInternalUser = currentUser?.user_type === 'internal' || currentUser?.role === 'admin';
+  const isInternalUser = currentUser?.user_type === 'internal' || 
+    ['admin', 'super_admin', 'company_admin'].includes(currentUser?.role);
 
   const [formData, setFormData] = useState(claim || {
     job_number: '', reg: '', job_statuses: ['New'], claim_type: 'Credit Repair',
