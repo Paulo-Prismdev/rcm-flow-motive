@@ -316,16 +316,15 @@ export default function ClaimForm({ claim, onSubmit, onCancel }) {
 
         <div className="flex-1 flex flex-col md:flex-row gap-4 p-1">
           {/* Option 1: Send to client */}
-          <div className="flex-1 neomorph-flat p-8 flex flex-col items-center text-center gap-4 cursor-pointer border-2 border-transparent hover:border-blue-300 transition-all rounded-2xl"
-            onClick={() => {/* just show the link below */}}>
-            <div className="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center">
+          <div className="flex-1 neomorph-flat p-6 flex flex-col items-center text-center gap-4 border-2 border-transparent hover:border-blue-300 transition-all rounded-2xl">
+            <div className="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center flex-shrink-0">
               <Send className="w-8 h-8 text-white" />
             </div>
             <div>
               <h3 className="text-lg font-bold text-gray-700 mb-2">Send to Client</h3>
               <p className="text-sm text-gray-500">Share a link with your client so they fill in their own details and sign a Statement of Truth. The claim is created automatically when they submit.</p>
             </div>
-            <div className="w-full mt-2 space-y-3" onClick={e => e.stopPropagation()}>
+            <div className="w-full mt-auto space-y-3">
               <div className="flex gap-2">
                 <input
                   readOnly
@@ -340,12 +339,37 @@ export default function ClaimForm({ claim, onSubmit, onCancel }) {
 
           <div className="flex items-center justify-center text-gray-400 font-bold text-sm">OR</div>
 
-          {/* Option 2: Fill in manually */}
+          {/* Option 2: Upload & AI Extract */}
           <div
-            className="flex-1 neomorph-flat p-8 flex flex-col items-center text-center gap-4 cursor-pointer border-2 border-transparent hover:border-green-300 transition-all rounded-2xl"
+            className="flex-1 neomorph-flat p-6 flex flex-col items-center text-center gap-4 cursor-pointer border-2 border-transparent hover:border-purple-300 transition-all rounded-2xl"
+            onClick={() => { setChoiceStep(false); }}
+          >
+            <div className="w-16 h-16 rounded-full bg-purple-600 flex items-center justify-center flex-shrink-0">
+              <Sparkles className="w-8 h-8 text-white" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-gray-700 mb-2">Upload & Use AI</h3>
+              <p className="text-sm text-gray-500">Upload your instruction document and let AI automatically extract all claim details for you. Fast and accurate.</p>
+            </div>
+            <div className="w-full mt-auto">
+              <FileUpload
+                value={Array.isArray(formData.file_urls) ? formData.file_urls : []}
+                onChange={(urls) => handleChange('file_urls', urls)}
+                enableAI={true}
+                analysisType="claim"
+                onAIExtract={(data) => { handleAIExtract(data); setChoiceStep(false); }}
+              />
+            </div>
+          </div>
+
+          <div className="flex items-center justify-center text-gray-400 font-bold text-sm">OR</div>
+
+          {/* Option 3: Fill in manually */}
+          <div
+            className="flex-1 neomorph-flat p-6 flex flex-col items-center text-center gap-4 cursor-pointer border-2 border-transparent hover:border-green-300 transition-all rounded-2xl"
             onClick={() => setChoiceStep(false)}
           >
-            <div className="w-16 h-16 rounded-full bg-green-600 flex items-center justify-center">
+            <div className="w-16 h-16 rounded-full bg-green-600 flex items-center justify-center flex-shrink-0">
               <Check className="w-8 h-8 text-white" />
             </div>
             <div>
@@ -355,7 +379,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel }) {
             <Button
               type="button"
               onClick={() => setChoiceStep(false)}
-              className="mt-2 neomorph-flat px-6 py-3 font-medium text-green-600 border border-green-300 hover:bg-green-50"
+              className="mt-auto neomorph-flat px-6 py-3 font-medium text-green-600 border border-green-300 hover:bg-green-50"
             >
               Start Wizard →
             </Button>
