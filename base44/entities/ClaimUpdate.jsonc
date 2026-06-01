@@ -53,25 +53,7 @@
     "description"
   ],
   "rls": {
-    "create": {
-      "$or": [
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        },
-        {
-          "user_condition": {
-            "user_type": "internal"
-          }
-        },
-        {
-          "user_condition": {
-            "user_type": "referrer"
-          }
-        }
-      ]
-    },
+    "create": true,
     "read": {
       "$or": [
         {

@@ -276,3 +276,45 @@
 .widget-resizing .resize-handle {
   pointer-events: all;
 }
+
+/* Neomorphism styles used in claim forms */
+.neomorph {
+  background: hsl(var(--background));
+  border-radius: 16px;
+  box-shadow: 6px 6px 12px rgba(0,0,0,0.08), -4px -4px 10px rgba(255,255,255,0.7);
+  border: 1px solid hsl(var(--border));
+}
+
+.dark .neomorph {
+  box-shadow: 6px 6px 12px rgba(0,0,0,0.4), -4px -4px 10px rgba(255,255,255,0.03);
+}
+
+.neomorph-flat {
+  background: hsl(var(--background));
+  border-radius: 12px;
+  border: 1px solid hsl(var(--border));
+  box-shadow: 2px 2px 6px rgba(0,0,0,0.06), -2px -2px 6px rgba(255,255,255,0.6);
+}
+
+.dark .neomorph-flat {
+  box-shadow: 2px 2px 6px rgba(0,0,0,0.3), -2px -2px 6px rgba(255,255,255,0.02);
+}
+
+.neomorph-inset {
+  background: hsl(var(--muted));
+  border-radius: 10px;
+  border: 1px solid hsl(var(--border));
+  box-shadow: inset 2px 2px 5px rgba(0,0,0,0.07), inset -2px -2px 5px rgba(255,255,255,0.5);
+}
+
+.dark .neomorph-inset {
+  box-shadow: inset 2px 2px 5px rgba(0,0,0,0.4), inset -2px -2px 5px rgba(255,255,255,0.02);
+}
+
+.neomorph-pressed {
+  box-shadow: inset 3px 3px 7px rgba(0,0,0,0.12), inset -3px -3px 7px rgba(255,255,255,0.6);
+}
+
+.bg-gold { background-color: #f59e0b; }
+.text-gold { color: #f59e0b; }
+.border-gold { border-color: #f59e0b; }
