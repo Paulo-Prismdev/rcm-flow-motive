@@ -146,8 +146,12 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
     }
   };
 
+  const [isCreating, setIsCreating] = React.useState(false);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isCreating) return;
+    setIsCreating(true);
     const { id: _id, created_date: _cd, updated_date: _ud, created_by: _cb, ...submitData } = formData;
     if (!claim) {
       try {
@@ -161,6 +165,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
       } catch (error) {
         const msg = error.response?.data?.error || error.response?.data?.message || error.message || 'Unknown error';
         alert(`Failed to generate job number: ${msg}. Please contact support if this continues.`);
+        setIsCreating(false);
         return;
       }
       if (submitData.claim_type === 'Fault Claim') {
@@ -753,8 +758,8 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
             </Button>
           )}
           {currentStep === steps.length && (
-            <Button type="button" onClick={handleSubmit} disabled={isSubmitting} className="neomorph-flat px-8 py-3 font-medium text-gold transition-all active:neomorph-pressed flex items-center gap-2 disabled:opacity-60">
-              {isSubmitting ? <><Loader className="w-4 h-4 animate-spin" /> Creating...</> : <><Check className="w-5 h-5" /> Create Claim</>}
+            <Button type="button" onClick={handleSubmit} disabled={isSubmitting || isCreating} className="neomorph-flat px-8 py-3 font-medium text-gold transition-all active:neomorph-pressed flex items-center gap-2 disabled:opacity-60">
+              {(isSubmitting || isCreating) ? <><Loader className="w-4 h-4 animate-spin" /> Creating...</> : <><Check className="w-5 h-5" /> Create Claim</>}
             </Button>
           )}
         </div>
