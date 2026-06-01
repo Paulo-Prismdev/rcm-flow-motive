@@ -346,6 +346,16 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
     
     if (newStatus) {
       updateData.job_status = newStatus;
+      // Keep job_statuses in sync — replace the old primary status with the new one
+      const currentStatuses = claim.job_statuses?.length ? [...claim.job_statuses] : (claim.job_status ? [claim.job_status] : ['New']);
+      const oldPrimary = claim.job_status || 'New';
+      const idx = currentStatuses.indexOf(oldPrimary);
+      if (idx !== -1) {
+        currentStatuses[idx] = newStatus;
+      } else {
+        currentStatuses.unshift(newStatus);
+      }
+      updateData.job_statuses = currentStatuses;
     }
     
     if (newSecondaryStatus !== undefined) {
