@@ -128,9 +128,18 @@ export default function ClaimsPage() {
     }
   }, [claims, location.search]);
 
+  const [createError, setCreateError] = useState(null);
+
   const createMutation = useMutation({
     mutationFn: (newClaim) => base44.entities.Claim.create(newClaim),
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['claims'] }); setShowForm(false); },
+    onSuccess: () => { 
+      queryClient.invalidateQueries({ queryKey: ['claims'] }); 
+      setShowForm(false); 
+      setCreateError(null);
+    },
+    onError: (error) => {
+      setCreateError(error?.response?.data?.message || error?.message || 'Failed to create claim. Please try again.');
+    },
   });
 
   const updateMutation = useMutation({
@@ -232,7 +241,16 @@ export default function ClaimsPage() {
   if (showForm) {
     return (
       <div className="h-full overflow-y-auto bg-background p-4">
-        <ClaimFormWrapper onSubmit={(d) => createMutation.mutate(d)} onCancel={() => setShowForm(false)} />
+        {createError && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700 flex items-start gap-2">
+            <span className="font-semibold">Error:</span> {createError}
+          </div>
+        )}
+        <ClaimFormWrapper 
+          onSubmit={(d) => { setCreateError(null); createMutation.mutate(d); }} 
+          onCancel={() => { setShowForm(false); setCreateError(null); }}
+          isSubmitting={createMutation.isPending}
+        />
       </div>
     );
   }

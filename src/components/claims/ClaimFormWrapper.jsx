@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import ClaimForm from './ClaimForm';
 
-export default function ClaimFormWrapper({ claim, onSubmit, onCancel }) {
+export default function ClaimFormWrapper({ claim, onSubmit, onCancel, isSubmitting }) {
   // Fetch custom claim statuses
   const { data: customStatuses = [] } = useQuery({
     queryKey: ['ClaimStatusConfig'],
@@ -27,6 +27,7 @@ export default function ClaimFormWrapper({ claim, onSubmit, onCancel }) {
       onSubmit={onSubmit} 
       onCancel={onCancel}
       availableStatuses={availableStatuses}
+      isSubmitting={isSubmitting}
     />
   );
 }

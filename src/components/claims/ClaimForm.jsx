@@ -39,7 +39,7 @@ const geocodeAddress = async (address) => {
   return null;
 };
 
-export default function ClaimForm({ claim, onSubmit, onCancel }) {
+export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
   const [currentStep, setCurrentStep] = useState(1);
   const [showClientModal, setShowClientModal] = useState(false);
   const [showTPModal, setShowTPModal] = useState(false);
@@ -750,8 +750,8 @@ export default function ClaimForm({ claim, onSubmit, onCancel }) {
             </Button>
           )}
           {currentStep === steps.length && (
-            <Button type="button" onClick={handleSubmit} className="neomorph-flat px-8 py-3 font-medium text-gold transition-all active:neomorph-pressed flex items-center gap-2">
-              <Check className="w-5 h-5" /> Create Claim
+            <Button type="button" onClick={handleSubmit} disabled={isSubmitting} className="neomorph-flat px-8 py-3 font-medium text-gold transition-all active:neomorph-pressed flex items-center gap-2 disabled:opacity-60">
+              {isSubmitting ? <><Loader className="w-4 h-4 animate-spin" /> Creating...</> : <><Check className="w-5 h-5" /> Create Claim</>}
             </Button>
           )}
         </div>
