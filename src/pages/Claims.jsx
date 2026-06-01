@@ -275,8 +275,8 @@ export default function ClaimsPage() {
         {/* Sticky left: Reg */}
         <td className={`sticky left-0 z-10 px-4 py-2.5 whitespace-nowrap ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-white dark:bg-gray-900 group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50'}`}>
           <span
-            className="inline-flex items-center justify-center px-3 py-1 rounded-md bg-[#1e2d4a] text-white font-semibold uppercase"
-            style={{ fontSize: '13px' }}
+            className="inline-flex items-center justify-center rounded-md bg-[#1e2d4a] text-white font-semibold uppercase"
+            style={{ fontSize: '13px', width: '96px', height: '28px', letterSpacing: '0.05em' }}
           >
             {claim.reg ? formatUKRegistration(claim.reg) : ''}
           </span>
@@ -335,8 +335,8 @@ export default function ClaimsPage() {
       >
         <div className="flex items-center justify-between gap-2">
           <span
-            className="inline-flex items-center justify-center px-3 py-1 rounded-md bg-[#1e2d4a] text-white font-semibold uppercase flex-shrink-0"
-            style={{ fontSize: '13px' }}
+            className="inline-flex items-center justify-center rounded-md bg-[#1e2d4a] text-white font-semibold uppercase flex-shrink-0"
+            style={{ fontSize: '13px', width: '96px', height: '28px', letterSpacing: '0.05em' }}
           >
             {claim.reg ? formatUKRegistration(claim.reg) : '—'}
           </span>
