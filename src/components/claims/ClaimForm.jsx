@@ -569,7 +569,8 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
                       <select
                         value={formData.file_handler}
                         onChange={(e) => handleChange('file_handler', e.target.value)}
-                        className="neomorph-inset w-full px-4 py-3 text-gray-700 border-0 rounded-xl"
+                        style={{ WebkitAppearance: 'menulist', appearance: 'menulist' }}
+                        className="w-full px-4 py-3 text-gray-700 bg-white dark:bg-gray-800 dark:text-gray-100 border border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-blue-400"
                       >
                         <option value="">Select a file handler...</option>
                         {referrerUsers.map(u => (
