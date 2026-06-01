@@ -85,12 +85,9 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
 
   const { data: updates = [], isLoading } = useQuery({
     queryKey: ['claimUpdates', claimId],
-    queryFn: async () => {
-      const allUpdates = await base44.entities.ClaimUpdate.list('-created_date', 500);
-      return allUpdates.filter(u => u.claim_id === claimId);
-    },
+    queryFn: () => base44.entities.ClaimUpdate.filter({ claim_id: claimId }, '-created_date', 500),
     enabled: isOpen && !!claimId,
-    staleTime: 30000,
+    staleTime: 0,
   });
 
   const updateClaimMutation = useMutation({
