@@ -24,6 +24,7 @@ import {
 import { format } from "date-fns";
 import StatusBadge from "../shared/StatusBadge";
 import { formatUKRegistration } from '../shared/formatRegistration';
+import ClaimJourneyTimeline from '../claims/ClaimJourneyTimeline';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -438,6 +439,9 @@ export default function ReferrerClaimDetail({ claim, onClose }) {
               )}
               <StatusBadge status={claim.job_status || 'New'} />
               {claim.secondary_status && <StatusBadge status={claim.secondary_status} variant="secondary" />}
+            </div>
+            <div className="mt-2">
+              <ClaimJourneyTimeline claim={claim} updates={claimUpdates} />
             </div>
           </div>
           <DropdownMenu>
