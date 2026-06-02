@@ -490,10 +490,7 @@ export default function ClaimsPage() {
             {/* ── MOBILE / TABLET card list (< lg) ── */}
             <div className="lg:hidden">
               {availableStatuses.map(statusGroup => {
-                const claimsInGroup = filteredClaims.filter(c => {
-                   const statuses = c.job_statuses?.length ? c.job_statuses : (c.job_status ? [c.job_status] : []);
-                   return statuses.includes(statusGroup);
-                 });
+                const claimsInGroup = filteredClaims.filter(c => (c.job_status || 'New') === statusGroup);
                  if (claimsInGroup.length === 0) return null;
                  if (statusFilter.length > 0 && !statusFilter.includes(statusGroup)) return null;
                  const isCollapsed = collapsedGroups[statusGroup];
@@ -514,16 +511,16 @@ export default function ClaimsPage() {
                 );
               })}
               {(() => {
-                const known = new Set(availableStatuses);
-                const ungrouped = filteredClaims.filter(c => {
-                  const st = c.job_statuses?.length ? c.job_statuses : (c.job_status ? [c.job_status] : []);
-                  return st.length === 0 || !st.some(s => known.has(s));
-                });
-                if (ungrouped.length === 0 || statusFilter.length > 0) return null;
-                const isCollapsed = collapsedGroups['__other__'];
-                return (
-                  <React.Fragment>
-                    <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 dark:bg-gray-800/60 cursor-pointer select-none border-b border-gray-100 dark:border-gray-800" onClick={() => toggleGroup('__other__')}>
+               const known = new Set(availableStatuses);
+               const ungrouped = filteredClaims.filter(c => {
+                 const st = c.job_status || 'New';
+                 return !known.has(st);
+               });
+               if (ungrouped.length === 0 || statusFilter.length > 0) return null;
+               const isCollapsed = collapsedGroups['__other__'];
+               return (
+                 <React.Fragment>
+                   <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 dark:bg-gray-800/60 cursor-pointer select-none border-b border-gray-100 dark:border-gray-800" onClick={() => toggleGroup('__other__')}>
                       {isCollapsed ? <ChevronRight className="w-3.5 h-3.5 text-gray-400" /> : <ChevronDown className="w-3.5 h-3.5 text-gray-400" />}
                       <span className="w-2 h-2 rounded-full bg-gray-400 flex-shrink-0" />
                       <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Other</span>
@@ -548,10 +545,7 @@ export default function ClaimsPage() {
               </thead>
               <tbody>
                 {availableStatuses.map(statusGroup => {
-                  const claimsInGroup = filteredClaims.filter(c => {
-                    const statuses = c.job_statuses?.length ? c.job_statuses : (c.job_status ? [c.job_status] : []);
-                    return statuses.includes(statusGroup);
-                  });
+                  const claimsInGroup = filteredClaims.filter(c => (c.job_status || 'New') === statusGroup);
                   if (claimsInGroup.length === 0) return null;
                   if (statusFilter.length > 0 && !statusFilter.includes(statusGroup)) return null;
                   const isCollapsed = collapsedGroups[statusGroup];
@@ -577,10 +571,7 @@ export default function ClaimsPage() {
                 })}
                 {(() => {
                   const known = new Set(availableStatuses);
-                  const ungrouped = filteredClaims.filter(c => {
-                    const st = c.job_statuses?.length ? c.job_statuses : (c.job_status ? [c.job_status] : []);
-                    return st.length === 0 || !st.some(s => known.has(s));
-                  });
+                  const ungrouped = filteredClaims.filter(c => !known.has(c.job_status || 'New'));
                   if (ungrouped.length === 0 || statusFilter.length > 0) return null;
                   const isCollapsed = collapsedGroups['__other__'];
                   return (
