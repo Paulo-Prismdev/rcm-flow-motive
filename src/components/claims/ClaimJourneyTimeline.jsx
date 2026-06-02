@@ -35,7 +35,13 @@ function getStatusRank(status) {
 }
 
 export default function ClaimJourneyTimeline({ claim, updates = [] }) {
-  const currentRank = getStatusRank(claim.job_status);
+  // Use the higher rank between primary and secondary status
+  const primaryRank = getStatusRank(claim.job_status);
+  const secondaryRank = getStatusRank(claim.secondary_status);
+  const currentRank = Math.max(primaryRank, secondaryRank);
+
+  // The effective "current" status for active-stage detection
+  const effectiveStatus = secondaryRank > primaryRank ? claim.secondary_status : claim.job_status;
 
   // Find the date a status was first set via ClaimUpdate records
   const getUpdateForStatuses = (statusNames) => {
@@ -55,6 +61,7 @@ export default function ClaimJourneyTimeline({ claim, updates = [] }) {
       case 'awaiting_booking': {
         const isActive = currentRank < getStatusRank('Booked In') && currentRank >= 0;
         const isCompleted = currentRank >= getStatusRank('Booked In');
+
         return {
           isCompleted,
           isActive,
@@ -63,7 +70,7 @@ export default function ClaimJourneyTimeline({ claim, updates = [] }) {
         };
       }
       case 'booked_in': {
-        const isActive = claim.job_status === 'Booked In';
+        const isActive = effectiveStatus === 'Booked In';
         const isCompleted = currentRank > getStatusRank('Booked In');
         return {
           isCompleted,
@@ -73,7 +80,7 @@ export default function ClaimJourneyTimeline({ claim, updates = [] }) {
         };
       }
       case 'on_site': {
-        const isActive = claim.job_status === 'On Site';
+        const isActive = effectiveStatus === 'On Site';
         const isCompleted = currentRank > getStatusRank('On Site');
         return {
           isCompleted,
@@ -83,7 +90,7 @@ export default function ClaimJourneyTimeline({ claim, updates = [] }) {
         };
       }
       case 'in_repair': {
-        const isActive = ['In Repair', 'Awaiting Parts', 'Quality Check'].includes(claim.job_status);
+        const isActive = ['In Repair', 'Awaiting Parts', 'Quality Check'].includes(effectiveStatus);
         const isCompleted = currentRank >= getStatusRank('Completed');
         return {
           isCompleted,
@@ -93,7 +100,7 @@ export default function ClaimJourneyTimeline({ claim, updates = [] }) {
         };
       }
       case 'repairs_complete': {
-        const isActive = ['Completed', 'Invoice Pending', 'Invoiced'].includes(claim.job_status);
+        const isActive = ['Completed', 'Invoice Pending', 'Invoiced'].includes(effectiveStatus);
         const isCompleted = currentRank >= getStatusRank('Returned to Client');
         return {
           isCompleted,
@@ -103,7 +110,7 @@ export default function ClaimJourneyTimeline({ claim, updates = [] }) {
         };
       }
       case 'returned': {
-        const isActive = claim.job_status === 'Returned to Client';
+        const isActive = effectiveStatus === 'Returned to Client';
         const isCompleted = false;
         return {
           isCompleted,
