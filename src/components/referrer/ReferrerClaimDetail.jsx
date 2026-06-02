@@ -424,7 +424,7 @@ export default function ReferrerClaimDetail({ claim, onClose }) {
       )}
 
       {/* Combined Header + Section Selector */}
-      <div className="neomorph p-3 flex-shrink-0 sticky top-0 z-10 bg-background space-y-2">
+      <div className="neomorph p-3 flex-shrink-0 sticky top-0 z-10 bg-background">
         <div className="flex items-center gap-2">
           <Button onClick={onClose} variant="outline" className="p-2 flex-shrink-0">
             <ArrowLeft className="w-4 h-4" />
@@ -461,6 +461,10 @@ export default function ReferrerClaimDetail({ claim, onClose }) {
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
+      </div>
+
+      {/* Journey Timeline */}
+      <div className="flex-shrink-0">
         <ClaimJourneyTimeline claim={claim} updates={claimUpdates} />
       </div>
 
