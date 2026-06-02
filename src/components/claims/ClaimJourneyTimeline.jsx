@@ -1,0 +1,177 @@
+import React from 'react';
+import { Check, Clock } from 'lucide-react';
+import { format } from 'date-fns';
+
+const MILESTONES = [
+  { id: 'awaiting_booking', label: 'Awaiting Booking In' },
+  { id: 'booked_in', label: 'Booked In' },
+  { id: 'on_site', label: 'On Site' },
+  { id: 'in_repair', label: 'In Repair' },
+  { id: 'repairs_complete', label: 'Repairs Complete' },
+  { id: 'returned', label: 'Returned to Client' },
+];
+
+// Status names that indicate a milestone has been passed
+const MILESTONE_STATUS_MAP = {
+  awaiting_booking: [],
+  booked_in: ['Booked In'],
+  on_site: ['On Site'],
+  in_repair: ['In Repair', 'Awaiting Parts', 'Quality Check'],
+  repairs_complete: ['Completed', 'Invoice Pending', 'Invoiced'],
+  returned: ['Returned to Client'],
+};
+
+// All statuses that come after a given milestone (to determine "completed")
+const STATUS_ORDER = [
+  'New', 'In Progress', 'Awaiting Authority', 'Authorised',
+  'Booked In', 'On Site', 'In Repair', 'Awaiting Parts',
+  'Quality Check', 'Completed', 'Invoice Pending', 'Invoiced',
+  'Returned to Client'
+];
+
+function getStatusRank(status) {
+  const idx = STATUS_ORDER.indexOf(status);
+  return idx === -1 ? -1 : idx;
+}
+
+export default function ClaimJourneyTimeline({ claim, updates = [] }) {
+  const currentRank = getStatusRank(claim.job_status);
+
+  // Find the date a status was first set via ClaimUpdate records
+  const getUpdateForStatuses = (statusNames) => {
+    // Look for a status change update mentioning any of these statuses
+    return updates
+      .filter(u => u.update_type === 'Status Change' &&
+        statusNames.some(s => u.description?.toLowerCase().includes(s.toLowerCase()))
+      )
+      .sort((a, b) => new Date(a.created_date) - new Date(b.created_date))[0];
+  };
+
+  const getMilestoneInfo = (id) => {
+    const statusNames = MILESTONE_STATUS_MAP[id];
+    const update = statusNames.length ? getUpdateForStatuses(statusNames) : null;
+
+    switch (id) {
+      case 'awaiting_booking': {
+        const isActive = currentRank < getStatusRank('Booked In') && currentRank >= 0;
+        const isCompleted = currentRank >= getStatusRank('Booked In');
+        return {
+          isCompleted,
+          isActive,
+          date: claim.date_received,
+          user: null,
+        };
+      }
+      case 'booked_in': {
+        const isActive = claim.job_status === 'Booked In';
+        const isCompleted = currentRank > getStatusRank('Booked In');
+        return {
+          isCompleted,
+          isActive,
+          date: claim.booking_in_date || update?.created_date,
+          user: update?.created_by,
+        };
+      }
+      case 'on_site': {
+        const isActive = claim.job_status === 'On Site';
+        const isCompleted = currentRank > getStatusRank('On Site');
+        return {
+          isCompleted,
+          isActive,
+          date: claim.on_site_date || update?.created_date,
+          user: update?.created_by,
+        };
+      }
+      case 'in_repair': {
+        const isActive = ['In Repair', 'Awaiting Parts', 'Quality Check'].includes(claim.job_status);
+        const isCompleted = currentRank >= getStatusRank('Completed');
+        return {
+          isCompleted,
+          isActive,
+          date: update?.created_date,
+          user: update?.created_by,
+        };
+      }
+      case 'repairs_complete': {
+        const isActive = ['Completed', 'Invoice Pending', 'Invoiced'].includes(claim.job_status);
+        const isCompleted = currentRank >= getStatusRank('Returned to Client');
+        return {
+          isCompleted,
+          isActive,
+          date: claim.completion_date || update?.created_date,
+          user: update?.created_by,
+        };
+      }
+      case 'returned': {
+        const isActive = claim.job_status === 'Returned to Client';
+        const isCompleted = false;
+        return {
+          isCompleted,
+          isActive,
+          date: update?.created_date,
+          user: update?.created_by,
+        };
+      }
+      default:
+        return { isCompleted: false, isActive: false, date: null, user: null };
+    }
+  };
+
+  const formatDate = (d) => {
+    if (!d) return null;
+    try { return format(new Date(d), 'dd/MM/yy'); } catch { return null; }
+  };
+
+  return (
+    <div className="bg-card border border-border rounded-xl px-4 py-3 overflow-x-auto">
+      <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-3">Claim Journey</p>
+      <div className="relative flex items-start" style={{ minWidth: 560 }}>
+        {/* Background connector line */}
+        <div className="absolute top-4 left-4 right-4 h-px bg-border z-0" />
+
+        {MILESTONES.map((milestone, index) => {
+          const info = getMilestoneInfo(milestone.id);
+          const isLast = index === MILESTONES.length - 1;
+
+          return (
+            <div key={milestone.id} className="flex-1 flex flex-col items-center relative z-10">
+              {/* Node */}
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-300 ${
+                info.isCompleted
+                  ? 'bg-green-500 text-white shadow-lg shadow-green-500/30'
+                  : info.isActive
+                    ? 'bg-primary text-primary-foreground ring-4 ring-primary/25'
+                    : 'bg-muted border border-border text-muted-foreground'
+              }`}>
+                {info.isCompleted ? (
+                  <Check className="w-3.5 h-3.5 stroke-[3]" />
+                ) : info.isActive ? (
+                  <Clock className="w-3.5 h-3.5" />
+                ) : (
+                  <span className="w-2 h-2 rounded-full bg-current opacity-40" />
+                )}
+              </div>
+
+              {/* Label + date + user */}
+              <div className="text-center mt-2 px-1 max-w-[100px]">
+                <p className={`text-[11px] font-semibold leading-tight ${
+                  info.isActive ? 'text-primary' : info.isCompleted ? 'text-foreground' : 'text-muted-foreground'
+                }`}>
+                  {milestone.label}
+                </p>
+                {formatDate(info.date) && (
+                  <p className="text-[10px] text-muted-foreground mt-0.5">{formatDate(info.date)}</p>
+                )}
+                {info.user && (
+                  <p className="text-[9px] text-muted-foreground/50 truncate" title={info.user}>
+                    {info.user.split('@')[0]}
+                  </p>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}

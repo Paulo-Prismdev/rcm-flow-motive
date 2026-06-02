@@ -74,6 +74,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import ClaimDetailMobileHeader from './ClaimDetailMobileHeader';
+import ClaimJourneyTimeline from './ClaimJourneyTimeline';
 
 const EditableSection = ({ title, icon: Icon, claim, onUpdate, children, EditComponent, canEdit = true }) => {
     const [isEditing, setIsEditing] = useState(false);
@@ -244,6 +245,12 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
   const { data: currentUser } = useQuery({
     queryKey: ['currentUser'],
     queryFn: () => base44.auth.me(),
+  });
+
+  const { data: claimUpdates = [] } = useQuery({
+    queryKey: ['claimUpdates', claim.id],
+    queryFn: () => base44.entities.ClaimUpdate.filter({ claim_id: claim.id }, 'created_date', 500),
+    staleTime: 60000,
   });
 
   const handleUpdate = async (updatedData) => {
@@ -1252,6 +1259,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                     )}
                     {claim.archived && <span className="neomorph-flat px-3 py-1 text-xs font-medium text-gray-600">Archived</span>}
                   </div>
+                  <ClaimJourneyTimeline claim={claim} updates={claimUpdates} />
               </div>
           </div>
 
