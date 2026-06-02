@@ -130,37 +130,36 @@ export default function ClaimJourneyTimeline({ claim, updates = [] }) {
   };
 
   return (
-    <div className="bg-card border border-border rounded-xl px-4 py-3 overflow-x-auto">
-      <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-3">Claim Journey</p>
-      <div className="relative flex items-start" style={{ minWidth: 560 }}>
-        {/* Background connector line */}
-        <div className="absolute top-4 left-4 right-4 h-px bg-border z-0" />
+    <div className="bg-card border border-border rounded-xl px-4 py-4 overflow-x-auto">
+      <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-4">Claim Journey</p>
+      <div className="relative flex items-start" style={{ minWidth: 580 }}>
+        {/* Background connector line — sits at the vertical center of the circles (circle is 36px = top-[18px]) */}
+        <div className="absolute left-0 right-0 h-[2px] bg-border z-0" style={{ top: 18 }} />
 
         {MILESTONES.map((milestone, index) => {
           const info = getMilestoneInfo(milestone.id);
-          const isLast = index === MILESTONES.length - 1;
 
           return (
             <div key={milestone.id} className="flex-1 flex flex-col items-center relative z-10">
               {/* Node */}
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-300 ${
+              <div className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-300 border-2 ${
                 info.isCompleted
-                  ? 'bg-green-500 text-white shadow-lg shadow-green-500/30'
+                  ? 'bg-green-500 border-green-500 text-white'
                   : info.isActive
-                    ? 'bg-primary text-primary-foreground ring-4 ring-primary/25'
-                    : 'bg-muted border border-border text-muted-foreground'
+                    ? 'bg-white dark:bg-card border-primary text-primary ring-4 ring-primary/20'
+                    : 'bg-white dark:bg-card border-border text-muted-foreground'
               }`}>
                 {info.isCompleted ? (
-                  <Check className="w-3.5 h-3.5 stroke-[3]" />
+                  <Check className="w-4 h-4 stroke-[3]" />
                 ) : info.isActive ? (
-                  <Clock className="w-3.5 h-3.5" />
+                  <div className="w-3 h-3 rounded-full bg-primary" />
                 ) : (
-                  <span className="w-2 h-2 rounded-full bg-current opacity-40" />
+                  <div className="w-2.5 h-2.5 rounded-full border border-muted-foreground/40" />
                 )}
               </div>
 
               {/* Label + date + user */}
-              <div className="text-center mt-2 px-1 max-w-[100px]">
+              <div className="text-center mt-2 px-1 max-w-[90px]">
                 <p className={`text-[11px] font-semibold leading-tight ${
                   info.isActive ? 'text-primary' : info.isCompleted ? 'text-foreground' : 'text-muted-foreground'
                 }`}>
