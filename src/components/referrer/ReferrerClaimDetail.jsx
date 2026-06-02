@@ -424,25 +424,20 @@ export default function ReferrerClaimDetail({ claim, onClose }) {
       )}
 
       {/* Combined Header + Section Selector */}
-      <div className="neomorph p-3 flex-shrink-0 sticky top-0 z-10 bg-background">
+      <div className="neomorph p-3 flex-shrink-0 sticky top-0 z-10 bg-background space-y-2">
         <div className="flex items-center gap-2">
           <Button onClick={onClose} variant="outline" className="p-2 flex-shrink-0">
             <ArrowLeft className="w-4 h-4" />
           </Button>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-sm md:text-base font-bold truncate">{formatUKRegistration(claim.reg) || 'Claim Details'}</h1>
-              {claim.referrer_ref && (
-                <span className="text-xs font-mono px-2 py-0.5 rounded bg-gold/20 text-gold font-semibold">
-                  {claim.referrer_ref}
-                </span>
-              )}
-              <StatusBadge status={claim.job_status || 'New'} />
-              {claim.secondary_status && <StatusBadge status={claim.secondary_status} variant="secondary" />}
-            </div>
-            <div className="mt-2">
-              <ClaimJourneyTimeline claim={claim} updates={claimUpdates} />
-            </div>
+          <div className="flex-1 min-w-0 flex items-center gap-2 flex-wrap">
+            <h1 className="text-sm md:text-base font-bold truncate">{formatUKRegistration(claim.reg) || 'Claim Details'}</h1>
+            {claim.referrer_ref && (
+              <span className="text-xs font-mono px-2 py-0.5 rounded bg-gold/20 text-gold font-semibold">
+                {claim.referrer_ref}
+              </span>
+            )}
+            <StatusBadge status={claim.job_status || 'New'} />
+            {claim.secondary_status && <StatusBadge status={claim.secondary_status} variant="secondary" />}
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -466,6 +461,7 @@ export default function ReferrerClaimDetail({ claim, onClose }) {
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
+        <ClaimJourneyTimeline claim={claim} updates={claimUpdates} />
       </div>
 
       {/* Content */}
