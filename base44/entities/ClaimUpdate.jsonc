@@ -54,28 +54,7 @@
   ],
   "rls": {
     "create": true,
-    "read": {
-      "$or": [
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        },
-        {
-          "user_condition": {
-            "user_type": "internal"
-          }
-        },
-        {
-          "user_condition": {
-            "user_type": "referrer"
-          }
-        },
-        {
-          "created_by": "{{user.email}}"
-        }
-      ]
-    },
+    "read": true,
     "update": {
       "$or": [
         {

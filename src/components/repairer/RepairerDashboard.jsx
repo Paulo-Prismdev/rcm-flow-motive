@@ -61,7 +61,10 @@ export default function RepairerDashboard({ claims, estimates, parts, activeClai
                   <p className="font-medium">{formatUKRegistration(claim.reg)}</p>
                   <p className="text-xs text-foreground-muted">{claim.client_name}</p>
                 </div>
-                <StatusBadge status={claim.job_status} />
+                <div className="flex flex-col gap-1 items-end">
+                  <StatusBadge status={claim.job_status} />
+                  {claim.secondary_status && <StatusBadge status={claim.secondary_status} variant="secondary" />}
+                </div>
               </div>
             ))}
             {claims.length === 0 && (

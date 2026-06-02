@@ -8,6 +8,7 @@ import ClaimFormWrapper from '../components/claims/ClaimFormWrapper';
 import ImportClaimsModal from '../components/claims/ImportClaimsModal';
 import ClaimCardFieldsModal from '../components/claims/ClaimCardFieldsModal';
 import UpdateStatusBadge from '../components/shared/UpdateStatusBadge';
+import StatusBadge from '../components/shared/StatusBadge';
 import { formatUKRegistration } from '../components/shared/formatRegistration';
 import { format } from 'date-fns';
 import { useStatusConfigs } from '../components/shared/StatusConfigContext';
@@ -299,7 +300,8 @@ export default function ClaimsPage() {
         </td>
         {/* Sticky right: Status + alerts */}
         <td className={`sticky right-0 z-10 px-3 py-2.5 whitespace-nowrap ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-white dark:bg-gray-900 group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50'}`}>
-          <div className="flex items-center gap-1.5 justify-end">
+          <div className="flex items-center gap-1.5 justify-end flex-wrap">
+            {claim.secondary_status && <StatusBadge status={claim.secondary_status} variant="secondary" />}
             {!isClosedStatus && <UpdateStatusBadge status={updateStatus} small />}
             {hasBackorder && (
               <span className="flex items-center gap-0.5 px-2 py-1 rounded-md bg-red-500 text-white text-[10px] font-semibold shadow-sm">
@@ -359,6 +361,7 @@ export default function ClaimsPage() {
           <span className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate">{claim.client_name || '—'}</span>
           <span className="text-xs text-gray-500 dark:text-gray-400 truncate">{claim.make_model || '—'} · {formatDate(claim.loss_date)}</span>
           {claim.referrer && <span className="text-xs text-gray-400 dark:text-gray-500 truncate">{claim.referrer}</span>}
+          {claim.secondary_status && <div className="mt-1"><StatusBadge status={claim.secondary_status} variant="secondary" /></div>}
         </div>
       </div>
     );
