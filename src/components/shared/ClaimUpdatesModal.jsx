@@ -102,10 +102,10 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
     onSuccess: (newUpdateRecord) => {
       queryClient.invalidateQueries({ queryKey: ['claimUpdates', claimId] });
       
-      // If status was changed, notify parent with the new status
+      // If status was changed, notify parent with the new status and secondary status
       if (newUpdate.update_type === 'Status Change' && newUpdate.new_status) {
         if (onUpdateCreated) {
-          onUpdateCreated(newUpdate.new_status);
+          onUpdateCreated(newUpdate.new_status, newUpdate.new_secondary_status || null);
         }
       } else {
         // Otherwise just notify of update
@@ -150,8 +150,7 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
 This is an update for claim: ${claim?.reg || 'Unknown Vehicle'}
 
 Update Type: ${newUpdate.update_type}
-${newUpdate.update_type === 'Status Change' ? `New Primary Status: ${newUpdate.new_status}
-${newUpdate.new_secondary_status ? `New Secondary Status: ${newUpdate.new_secondary_status}\n` : ''}` : ''}
+${newUpdate.update_type === 'Status Change' ? `New Primary Status: ${newUpdate.new_status}${newUpdate.new_secondary_status ? `\nNew Secondary Status: ${newUpdate.new_secondary_status}` : ''}` : ''}
 
 Update Details:
 ${newUpdate.description}
@@ -185,6 +184,13 @@ This update was sent from ART-TEC One Claims Management System
     
     // Use the final description with email info
     updateDataToSave.description = finalDescription;
+
+    // Prepend status change info to description if not already present
+    if (newUpdate.update_type === 'Status Change' && new_status) {
+      const secondaryNote = new_secondary_status ? ` | Secondary: "${new_secondary_status}"` : (claim?.secondary_status ? ` | Secondary status cleared` : '');
+      const statusLine = `Status changed to "${new_status}"${secondaryNote}`;
+      updateDataToSave.description = `${statusLine}\n\n${updateDataToSave.description}`.trim();
+    }
     
     // If this is a status change, update the claim's status fields
     if (newUpdate.update_type === 'Status Change' && new_status) {
