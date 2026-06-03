@@ -79,12 +79,12 @@ export default function ClaimDetailMobileHeader({
       </div>
 
       {/* Row 3: native actions picker */}
-      <div className="px-3 pb-3 pt-1">
+      <div className="px-3 pb-1.5 pt-1">
         <select
           value=""
           onChange={handleActionChange}
           className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-200 px-3"
-          style={{ height: 44, fontSize: 15 }}
+          style={{ height: 36, fontSize: 14 }}
         >
           <option value="" disabled>More Actions</option>
           <option value="notes">Internal Notes</option>
@@ -105,12 +105,12 @@ export default function ClaimDetailMobileHeader({
       </div>
 
       {/* Row 4: native section picker */}
-      <div className="px-3 pb-3">
+      <div className="px-3 pb-2">
         <select
           value={claim._selectedSection}
           onChange={(e) => onAction('section:' + e.target.value)}
           className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-200 px-3"
-          style={{ height: 44, fontSize: 15 }}
+          style={{ height: 36, fontSize: 14 }}
         >
           <option value="status">Status &amp; Overview</option>
           <option value="thirdpartyPursuit">Third Party Pursuit</option>
