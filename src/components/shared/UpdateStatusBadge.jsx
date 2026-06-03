@@ -1,54 +1,50 @@
 import React from 'react';
 import { Clock, AlertCircle, CheckCircle, Pause, XCircle } from 'lucide-react';
 
+// Low-contrast pill style consistent with StatusBadge
+const configs = {
+  Red: {
+    classes: 'bg-red-50 text-red-700 dark:bg-red-900/25 dark:text-red-300',
+    icon: AlertCircle,
+    label: 'Overdue',
+    description: 'Update overdue',
+  },
+  Amber: {
+    classes: 'bg-amber-50 text-amber-700 dark:bg-amber-900/25 dark:text-amber-300',
+    icon: Clock,
+    label: 'Due Soon',
+    description: 'Update due soon',
+  },
+  Green: {
+    classes: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/25 dark:text-emerald-300',
+    icon: CheckCircle,
+    label: 'On Track',
+    description: 'On track',
+  },
+  Blue: {
+    classes: 'bg-blue-50 text-blue-700 dark:bg-blue-900/25 dark:text-blue-300',
+    icon: Pause,
+    label: 'Snoozed',
+    description: 'Update tracking paused',
+  },
+  Gray: {
+    classes: 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400',
+    icon: XCircle,
+    label: 'Closed',
+    description: 'Claim closed',
+  },
+};
+
 export default function UpdateStatusBadge({ status, small = false }) {
   if (!status) return null;
-
-  const configs = {
-    Red: {
-      bg: 'bg-red-500',
-      text: 'text-white',
-      icon: AlertCircle,
-      label: 'Overdue',
-      description: 'Update overdue'
-    },
-    Amber: {
-      bg: 'bg-orange-500',
-      text: 'text-white',
-      icon: Clock,
-      label: 'Due Soon',
-      description: 'Update due soon'
-    },
-    Green: {
-      bg: 'bg-green-500',
-      text: 'text-white',
-      icon: CheckCircle,
-      label: 'On Track',
-      description: 'On track'
-    },
-    Blue: {
-      bg: 'bg-blue-500',
-      text: 'text-white',
-      icon: Pause,
-      label: 'Snoozed',
-      description: 'Update tracking paused'
-    },
-    Gray: {
-      bg: 'bg-gray-500',
-      text: 'text-white',
-      icon: XCircle,
-      label: 'Closed',
-      description: 'Claim closed'
-    }
-  };
 
   const config = configs[status] || configs.Gray;
   const Icon = config.icon;
 
   if (small) {
     return (
-      <span 
-        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium ${config.bg} ${config.text}`}
+      <span
+        className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold whitespace-nowrap ${config.classes}`}
         title={config.description}
       >
         <Icon className="w-3 h-3" />
@@ -58,11 +54,11 @@ export default function UpdateStatusBadge({ status, small = false }) {
   }
 
   return (
-    <span 
-      className={`inline-flex items-center gap-2 px-3 py-1 rounded-lg text-sm font-medium ${config.bg} ${config.text}`}
+    <span
+      className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${config.classes}`}
       title={config.description}
     >
-      <Icon className="w-4 h-4" />
+      <Icon className="w-3.5 h-3.5" />
       {config.label}
     </span>
   );

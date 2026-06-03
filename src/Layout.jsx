@@ -154,13 +154,13 @@ export default function Layout({ children, currentPageName }) {
         {/* ── SIDEBAR ── */}
         <aside className={`
           fixed inset-y-0 left-0 z-[9999] flex flex-col
-          w-56 bg-[#131d47] text-white
+          w-56 bg-[#0f172a] text-white
           transition-transform duration-300
           ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
           lg:relative lg:translate-x-0 lg:flex-shrink-0
         `}>
           {/* Logo */}
-          <div className="flex items-center gap-3 px-4 py-4 border-b border-white/10">
+          <div className="flex items-center gap-3 px-4 py-3.5 border-b border-white/10">
             <img src={companyLogo} alt="RCM" className="h-8 w-auto object-contain" />
             <button
               onClick={() => setMobileMenuOpen(false)}
@@ -179,10 +179,10 @@ export default function Layout({ children, currentPageName }) {
                   key={dept.name}
                   to={dept.url}
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                  className={`flex items-center gap-3 px-3 py-2 rounded-[10px] text-sm font-medium transition-all ${
                     isActive
-                      ? 'bg-[#00cc00]/20 text-[#00ff00] border border-[#00ff00]/20'
-                      : 'text-white/70 hover:bg-white/10 hover:text-white'
+                      ? 'bg-white/10 text-white border border-white/15'
+                      : 'text-white/60 hover:bg-white/8 hover:text-white/90'
                   }`}
                 >
                   <dept.icon className="w-4 h-4 flex-shrink-0" />
@@ -201,17 +201,17 @@ export default function Layout({ children, currentPageName }) {
                 {isAdmin && (
                   <>
                     <Link to={createPageUrl("Settings")} onClick={() => setMobileMenuOpen(false)}
-                      className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-white/70 hover:bg-white/10 hover:text-white transition-all">
+                      className="flex items-center gap-3 px-3 py-2 rounded-[10px] text-sm font-medium text-white/60 hover:bg-white/8 hover:text-white/90 transition-all">
                       <Settings className="w-4 h-4" /><span>Settings</span>
                     </Link>
                     <Link to={createPageUrl("Archive")} onClick={() => setMobileMenuOpen(false)}
-                      className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-white/70 hover:bg-white/10 hover:text-white transition-all">
+                      className="flex items-center gap-3 px-3 py-2 rounded-[10px] text-sm font-medium text-white/60 hover:bg-white/8 hover:text-white/90 transition-all">
                       <Archive className="w-4 h-4" /><span>Archive</span>
                     </Link>
 
                     {isSuperAdmin && (
                       <Link to={createPageUrl("FeedbackHub")} onClick={() => setMobileMenuOpen(false)}
-                        className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-white/70 hover:bg-white/10 hover:text-white transition-all">
+                        className="flex items-center gap-3 px-3 py-2 rounded-[10px] text-sm font-medium text-white/60 hover:bg-white/8 hover:text-white/90 transition-all">
                         <MessageSquare className="w-4 h-4" /><span>Feedback Hub</span>
                       </Link>
                     )}
@@ -301,19 +301,19 @@ export default function Layout({ children, currentPageName }) {
 
               {/* ── DESKTOP top bar (≥ lg) ── */}
           {!claimDetailOpen && (
-            <header className="hidden lg:flex flex-shrink-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 items-center gap-3 px-4 relative z-30" style={{height: '48px', minHeight: '48px'}}>
+            <header className="hidden lg:flex flex-shrink-0 bg-white dark:bg-gray-900/95 border-b border-gray-100 dark:border-gray-800/80 items-center gap-3 px-5 relative z-30 backdrop-blur-sm" style={{height: '48px', minHeight: '48px'}}>
               <div className="flex-1" />
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => window.location.reload()}
-                  className="p-1.5 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-white transition-colors"
+                  className="p-1.5 rounded-[10px] text-gray-400 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-gray-200 transition-colors"
                   title="Refresh"
                 >
                   <RefreshCw className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => setSearchOpen(true)}
-                  className="p-1.5 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-white transition-colors"
+                  className="p-1.5 rounded-[10px] text-gray-400 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-gray-200 transition-colors"
                   title="Search"
                 >
                   <Search className="w-4 h-4" />
@@ -321,7 +321,7 @@ export default function Layout({ children, currentPageName }) {
                 {isInternalUser && (
                   <button
                     onClick={() => setMessagesOpen(true)}
-                    className="relative p-1.5 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-white transition-colors"
+                    className="relative p-1.5 rounded-[10px] text-gray-400 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-gray-200 transition-colors"
                     title="Messages"
                   >
                     <MessageSquare className="w-4 h-4" />
@@ -339,7 +339,7 @@ export default function Layout({ children, currentPageName }) {
           )}
 
           {/* Page content */}
-          <main className="flex-1 overflow-hidden p-3 min-h-0 relative lg:pb-3 pb-16" style={{WebkitOverflowScrolling: 'touch', touchAction: 'auto'}}>
+          <main className="flex-1 overflow-hidden p-3 lg:p-4 min-h-0 relative lg:pb-4 pb-16" style={{WebkitOverflowScrolling: 'touch', touchAction: 'auto'}}>
             {children}
           </main>
         </div>

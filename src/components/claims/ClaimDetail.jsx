@@ -85,13 +85,13 @@ const EditableSection = ({ title, icon: Icon, claim, onUpdate, children, EditCom
     };
 
     return (
-        <div className="neomorph-flat p-3 md:p-5">
-            <div className="flex justify-between items-center mb-4">
+        <div className="bg-card border border-border rounded-[10px] p-4 md:p-5 shadow-sm">
+            <div className="flex justify-between items-center pb-3 mb-4 border-b border-border">
                 <div
-                    className="flex items-center gap-3 text-left flex-grow"
+                    className="flex items-center gap-2.5 text-left flex-grow"
                 >
-                    <Icon className="w-5 h-5 text-gold" />
-                    <h3 className="font-bold">{title}</h3>
+                    <Icon className="w-4 h-4 text-muted-foreground" />
+                    <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{title}</h3>
                 </div>
                 <div className='flex items-center gap-2'>
                     {!isEditing && EditComponent && canEdit && (
@@ -129,9 +129,9 @@ function DetailRow({ label, value, isCurrency = false, isDate = false, isStatus 
     }
 
     return (
-        <div className="py-3 px-4 rounded-lg hover:bg-surface-hover transition-colors">
-            <div className="text-xs font-semibold text-foreground-muted mb-1">{label}</div>
-            <div className="text-sm font-medium">
+        <div className="py-2 px-3 rounded-[8px] hover:bg-muted/50 transition-colors">
+            <div className="text-[11px] font-medium text-muted-foreground mb-0.5">{label}</div>
+            <div className={`text-sm font-medium text-foreground ${(isCurrency || (typeof value === 'number')) ? 'tabular-nums' : ''}`}>
                 {isStatus ? <StatusBadge status={displayValue} /> : displayValue}
             </div>
         </div>
@@ -1194,12 +1194,12 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
           />
 
           {/* ── DESKTOP top bar (≥ lg) — unchanged Radix dropdown ── */}
-          <div className="hidden lg:block neomorph p-2 md:p-3 flex-shrink-0 bg-card dark:bg-card">
+          <div className="hidden lg:block bg-card border border-border rounded-[10px] p-3 flex-shrink-0 shadow-sm">
               <div className="flex flex-col gap-2">
                   <div className="flex items-center gap-2">
                       <button
                         onClick={handleClose}
-                        className="neomorph-flat p-2.5 flex-shrink-0 rounded-lg hover:opacity-80"
+                        className="p-2 flex-shrink-0 rounded-[10px] border border-border bg-card hover:bg-muted transition-colors"
                       >
                           <ArrowLeft className="w-4 h-4" />
                       </button>
@@ -1257,14 +1257,14 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                         <UpdateStatusBadge status={claim.update_status_flag} small />
                       </button>
                     )}
-                    {claim.archived && <span className="neomorph-flat px-3 py-1 text-xs font-medium text-gray-600">Archived</span>}
+                    {claim.archived && <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400">Archived</span>}
                   </div>
                   <ClaimJourneyTimeline claim={claim} updates={claimUpdates} />
               </div>
           </div>
 
         {(linkedEstimate || linkedEngineering || linkedParts || linkedThirdPartyClaim || linkedOriginalClaim) && (
-          <div className="neomorph p-4 flex-shrink-0">
+          <div className="bg-card border border-border rounded-[10px] p-3 flex-shrink-0 shadow-sm">
             <div className="flex items-center gap-2 mb-3">
               <span className="w-4 h-4 text-gold">🔗</span>
               <h3 className="font-medium">Linked Cases</h3>
@@ -1273,7 +1273,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
               {linkedOriginalClaim && (
                 <button
                   onClick={() => openLinkedClaim(linkedOriginalClaim.id)}
-                  className="neomorph-flat px-4 py-2 text-sm hover:neomorph transition-all cursor-pointer"
+                  className="bg-muted hover:bg-muted/80 border border-border rounded-[8px] px-3 py-1.5 text-sm transition-all cursor-pointer"
                   title="Click to open in new window"
                 >
                   <span className="text-gray-500">Original Fault Claim:</span>{' '}
@@ -1283,7 +1283,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
               {linkedThirdPartyClaim && (
                 <button
                   onClick={() => openLinkedClaim(linkedThirdPartyClaim.id)}
-                  className="neomorph-flat px-4 py-2 text-sm hover:neomorph transition-all cursor-pointer"
+                  className="bg-muted hover:bg-muted/80 border border-border rounded-[8px] px-3 py-1.5 text-sm transition-all cursor-pointer"
                   title="Click to open in new window"
                 >
                   <span className="text-gray-500">Third Party Claim:</span>{' '}
@@ -1293,7 +1293,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
               {linkedEstimate && (
                 <button
                   onClick={() => openLinkedItem(createPageUrl('Estimating'), linkedEstimate.id)}
-                  className="neomorph-flat px-4 py-2 text-sm hover:neomorph transition-all cursor-pointer"
+                  className="bg-muted hover:bg-muted/80 border border-border rounded-[8px] px-3 py-1.5 text-sm transition-all cursor-pointer"
                   title="Click to open in new window"
                 >
                   <span className="text-gray-500">Estimate:</span>{' '}
@@ -1303,7 +1303,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
               {linkedEngineering && (
                 <button
                   onClick={() => openLinkedItem(createPageUrl('Engineering'), linkedEngineering.id)}
-                  className="neomorph-flat px-4 py-2 text-sm hover:neomorph transition-all cursor-pointer"
+                  className="bg-muted hover:bg-muted/80 border border-border rounded-[8px] px-3 py-1.5 text-sm transition-all cursor-pointer"
                   title="Click to open in new window"
                 >
                   <span className="text-gray-500">Engineering:</span>{' '}
@@ -1313,7 +1313,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
               {linkedParts && (
                 <button
                   onClick={() => openLinkedItem(createPageUrl('Parts'), linkedParts.id)}
-                  className="neomorph-flat px-4 py-2 text-sm hover:neomorph transition-all cursor-pointer"
+                  className="bg-muted hover:bg-muted/80 border border-border rounded-[8px] px-3 py-1.5 text-sm transition-all cursor-pointer"
                   title="Click to open in new window"
                 >
                   <span className="text-gray-500">Parts:</span>{' '}
@@ -1325,7 +1325,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
         )}
 
         {/* Section selector — desktop only (mobile uses ClaimDetailMobileHeader) */}
-        <div className="hidden lg:block bg-card border border-border rounded-xl px-3 py-2 flex-shrink-0">
+        <div className="hidden lg:block bg-card border border-border rounded-[10px] px-3 py-2 flex-shrink-0 shadow-sm">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="w-full px-3 py-3 flex items-center justify-between bg-transparent">
