@@ -36,14 +36,14 @@
     --ring: 228 57% 18%;
 
     /* Sidebar — always dark navy */
-    --sidebar-background: 222 47% 12%;
+    --sidebar-background: 228 57% 18%;
     --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 221 83% 53%;
+    --sidebar-primary: 228 57% 18%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 222 47% 17%;
+    --sidebar-accent: 228 57% 23%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 222 47% 17%;
-    --sidebar-ring: 221 83% 53%;
+    --sidebar-border: 228 57% 23%;
+    --sidebar-ring: 228 57% 18%;
 
     /* Chart colors */
     --chart-1: 221 83% 53%;
