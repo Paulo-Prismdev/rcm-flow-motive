@@ -51,8 +51,6 @@ export default function ClaimsPage() {
   const [hasBackorderedPartsFilter, setHasBackorderedPartsFilter] = useState(false);
   const [claimIdsWithBackorders, setClaimIdsWithBackorders] = useState(new Set());
   const [collapsedGroups, setCollapsedGroups] = useState({});
-  const [leftPanelWidth, setLeftPanelWidth] = useState(650);
-  const [isDragging, setIsDragging] = useState(false);
   const containerRef = React.useRef(null);
   const queryClient = useQueryClient();
   const { allStatuses: statusConfigs } = useStatusConfigs();
@@ -212,32 +210,7 @@ export default function ClaimsPage() {
     try { return format(new Date(val), 'dd/MM/yyyy'); } catch { return val; }
   };
 
-  // Handle divider drag
-  React.useEffect(() => {
-    const handleMouseMove = (e) => {
-      if (!isDragging || !containerRef.current) return;
-      const container = containerRef.current;
-      const newWidth = e.clientX - container.getBoundingClientRect().left;
-      const minWidth = 400;
-      const maxWidth = container.offsetWidth - 400;
-      if (newWidth >= minWidth && newWidth <= maxWidth) {
-        setLeftPanelWidth(newWidth);
-      }
-    };
-    
-    const handleMouseUp = () => {
-      setIsDragging(false);
-    };
 
-    if (isDragging) {
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
-      return () => {
-        document.removeEventListener('mousemove', handleMouseMove);
-        document.removeEventListener('mouseup', handleMouseUp);
-      };
-    }
-  }, [isDragging]);
 
   if (showForm) {
     return (
@@ -608,23 +581,16 @@ export default function ClaimsPage() {
 
   return (
     <div ref={containerRef} className="h-full flex gap-0 min-h-0 overflow-hidden">
-      {/* Left: claims list — hidden on mobile when a claim is selected */}
-      <div className={`flex flex-col min-h-0 flex-shrink-0 ${selectedClaim ? 'hidden lg:flex' : 'flex w-full'}`} style={selectedClaim ? { width: `${leftPanelWidth}px` } : {}}>
-        {claimsListView}
-      </div>
-
-      {/* Resizable divider — desktop only when claim is selected */}
-      {selectedClaim && (
-        <div
-          onMouseDown={() => setIsDragging(true)}
-          className="hidden lg:block w-2 bg-gray-300 dark:bg-gray-700 hover:bg-blue-500 dark:hover:bg-blue-600 cursor-col-resize transition-colors flex-shrink-0 rounded-sm"
-          title="Drag to resize panels"
-        />
+      {/* Claims list — hidden when a claim is selected */}
+      {!selectedClaim && (
+        <div className="flex flex-col min-h-0 w-full">
+          {claimsListView}
+        </div>
       )}
 
-      {/* Right: detail panel — full screen on mobile, side panel on desktop */}
+      {/* Detail panel — full width, replacing the list */}
       {selectedClaim && (
-        <div className="flex-1 min-w-0 min-h-0 flex flex-col w-full lg:w-auto">
+        <div className="flex-1 min-w-0 min-h-0 flex flex-col w-full">
           <div className="h-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 overflow-hidden">
             <ClaimDetail
               key={selectedClaim.id}
