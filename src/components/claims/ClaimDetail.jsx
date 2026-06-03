@@ -85,7 +85,7 @@ const EditableSection = ({ title, icon: Icon, claim, onUpdate, children, EditCom
     };
 
     return (
-        <div className="neomorph-flat p-4 md:p-6">
+        <div className="neomorph-flat p-3 md:p-5">
             <div className="flex justify-between items-center mb-4">
                 <div
                     className="flex items-center gap-3 text-left flex-grow"
@@ -537,7 +537,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
         // Only show for fault claims
         if (claim.claim_type !== 'Fault Claim') {
           return (
-            <div className="neomorph-flat p-4 md:p-6">
+            <div className="neomorph-flat p-3 md:p-5">
               <div className="flex items-center gap-3 mb-4">
                 <Users className="w-5 h-5 text-gold" />
                 <h3 className="font-bold">Third Party Pursuit</h3>
@@ -1194,7 +1194,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
           />
 
           {/* ── DESKTOP top bar (≥ lg) — unchanged Radix dropdown ── */}
-          <div className="hidden lg:block neomorph p-3 md:p-4 flex-shrink-0 bg-card dark:bg-card">
+          <div className="hidden lg:block neomorph p-2 md:p-3 flex-shrink-0 bg-card dark:bg-card">
               <div className="flex flex-col gap-2">
                   <div className="flex items-center gap-2">
                       <button

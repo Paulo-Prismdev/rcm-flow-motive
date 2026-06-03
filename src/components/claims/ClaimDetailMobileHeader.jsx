@@ -25,7 +25,7 @@ export default function ClaimDetailMobileHeader({
       style={{ position: 'relative', zIndex: 20, isolation: 'isolate' }}
     >
       {/* Row 1: back + title + primary actions */}
-      <div className="flex items-center gap-2 px-3 pt-2 pb-1">
+      <div className="flex items-center gap-2 px-3 pt-1.5 pb-1">
         <button
           type="button"
           onClick={onClose}
@@ -65,7 +65,7 @@ export default function ClaimDetailMobileHeader({
       </div>
 
       {/* Row 2: status badges */}
-      <div className="flex items-center gap-2 px-3 py-1 flex-wrap">
+      <div className="flex items-center gap-2 px-3 py-0.5 flex-wrap">
         <StatusBadge status={claim.job_status || 'New'} />
         {claim.secondary_status && <StatusBadge status={claim.secondary_status} variant="secondary" />}
         {!isClosedStatus && claim.update_status_flag && (

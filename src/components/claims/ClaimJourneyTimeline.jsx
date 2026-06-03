@@ -130,9 +130,9 @@ export default function ClaimJourneyTimeline({ claim, updates = [] }) {
   };
 
   return (
-    <div className="bg-card border border-border rounded-xl px-4 py-4 overflow-x-auto">
-      <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-4">Claim Journey</p>
-      <div className="relative flex items-start" style={{ minWidth: 580 }}>
+    <div className="bg-card border border-border rounded-xl px-3 py-2 overflow-x-auto">
+      <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">Claim Journey</p>
+      <div className="relative flex items-start" style={{ minWidth: 520 }}>
         {/* Background connector line — sits at the vertical center of the circles (circle is 36px = top-[18px]) */}
         <div className="absolute left-0 right-0 h-[2px] bg-border z-0" style={{ top: 18 }} />
 
@@ -159,7 +159,7 @@ export default function ClaimJourneyTimeline({ claim, updates = [] }) {
               </div>
 
               {/* Label + date + user */}
-              <div className="text-center mt-2 px-1 max-w-[90px]">
+              <div className="text-center mt-1 px-1 max-w-[90px]">
                 <p className={`text-[11px] font-semibold leading-tight ${
                   info.isActive ? 'text-primary' : info.isCompleted ? 'text-foreground' : 'text-muted-foreground'
                 }`}>
