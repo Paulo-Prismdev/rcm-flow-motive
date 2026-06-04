@@ -2,9 +2,15 @@ import React, { createContext, useContext, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 
-const StatusConfigContext = createContext();
+export const StatusConfigContext = createContext();
 
-export const useStatusConfigs = () => useContext(StatusConfigContext);
+export const useStatusConfigs = () => {
+  const context = useContext(StatusConfigContext);
+  if (!context) {
+    throw new Error('useStatusConfigs must be used within a StatusConfigProvider');
+  }
+  return context;
+};
 
 export const StatusConfigProvider = ({ children }) => {
   const { data: claimStatuses = [] } = useQuery({ 
