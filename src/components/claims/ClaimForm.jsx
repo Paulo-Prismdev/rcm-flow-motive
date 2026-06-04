@@ -780,11 +780,11 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
             {/* Final Step: Review */}
             {currentStep === steps.length &&
           <div className="neomorph-flat p-6 space-y-6">
-                <h3 className="text-xl font-bold text-gray-700 mb-4">Review & Create</h3>
+                <h3 className="text-xl font-bold mb-4 text-[hsl(var(--foreground))]">Review & Create</h3>
                 <p className="text-sm text-gray-500 mb-6">Check the details below. You can add bodyshop and other details after creating the claim.</p>
                 <div className="space-y-4">
                   {[['Vehicle Registration', formData.reg, true], ['Claim Type', formData.claim_type], ['Client', formData.client_name || 'Not specified'], ['Vehicle', formData.make_model || 'Not specified']].map(([label, value, isGold]) =>
-              <div key={label} className="neomorph-inset p-4">
+              <div key={label} className="neomorph-inset p-4 bg-[hsl(var(--background))]">
                       <p className="text-sm text-gray-500 mb-2">{label}</p>
                       <p className={`text-[hsl(var(--primary))] ${isGold ? "font-bold text-lg" : 'text-gray-700'}`}>{value}</p>
                     </div>
