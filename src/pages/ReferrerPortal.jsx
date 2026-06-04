@@ -174,9 +174,9 @@ export default function ReferrerPortal() {
       )}
       {/* Claims list */}
       <div className="h-full flex flex-col min-h-0 bg-white dark:bg-gray-900 rounded-[10px] border border-gray-100 dark:border-gray-800 overflow-hidden shadow-sm m-4 mt-0">
-            {/* Search bar */}
-            <div className="flex items-center gap-3 px-5 py-2.5 border-b border-gray-100 dark:border-gray-800 flex-shrink-0 bg-gray-50 dark:bg-gray-900/50">
-              <div className="flex-1 relative">
+            {/* Search bar with filters */}
+            <div className="flex items-center gap-3 px-5 py-2.5 border-b border-gray-100 dark:border-gray-800 flex-shrink-0 bg-gray-50 dark:bg-gray-900/50 flex-wrap gap-y-2">
+              <div className="flex-1 min-w-[200px] relative">
                 <input
                   value={search}
                   onChange={e => setSearch(e.target.value)}
@@ -186,6 +186,36 @@ export default function ReferrerPortal() {
                 {search && (
                   <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
                     <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                <select
+                  value={statusFilter}
+                  onChange={e => setStatusFilter(e.target.value)}
+                  className="px-3 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-[10px] focus:outline-none focus:border-blue-400 text-gray-900 dark:text-white"
+                >
+                  <option value="all">All Statuses</option>
+                  {availableStatuses.map(status => (
+                    <option key={status} value={status}>{status}</option>
+                  ))}
+                </select>
+                <select
+                  value={insurerFilter}
+                  onChange={e => setInsurerFilter(e.target.value)}
+                  className="px-3 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-[10px] focus:outline-none focus:border-blue-400 text-gray-900 dark:text-white"
+                >
+                  <option value="all">All Insurers</option>
+                  {uniqueInsurers.map(insurer => (
+                    <option key={insurer} value={insurer}>{insurer}</option>
+                  ))}
+                </select>
+                {(statusFilter !== 'all' || insurerFilter !== 'all') && (
+                  <button
+                    onClick={() => { setStatusFilter('all'); setInsurerFilter('all'); }}
+                    className="px-3 py-2 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                  >
+                    Clear
                   </button>
                 )}
               </div>
