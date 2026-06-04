@@ -3,27 +3,13 @@ import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { LogOut, User, Sun, Moon, Menu, X, Search, RefreshCw, Bell, FileText, LayoutDashboard } from 'lucide-react';
 import { StatusConfigProvider } from '../shared/StatusConfigContext';
+import GlobalSearch from '../layout/GlobalSearch';
+import Notifications from '../layout/Notifications';
+import ThemeToggle from '../layout/ThemeToggle';
 
 export default function ReferrerLayout({ children }) {
-  const [isDark, setIsDark] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  React.useEffect(() => {
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme) {
-      setIsDark(savedTheme === 'dark');
-      document.documentElement.setAttribute('data-theme', savedTheme);
-    } else {
-      document.documentElement.setAttribute('data-theme', 'light');
-    }
-  }, []);
-
-  const toggleTheme = () => {
-    const newTheme = isDark ? 'light' : 'dark';
-    setIsDark(!isDark);
-    document.documentElement.setAttribute('data-theme', newTheme);
-    localStorage.setItem('theme', newTheme);
-  };
+  const [searchOpen, setSearchOpen] = useState(false);
 
   const { data: currentUser } = useQuery({
     queryKey: ['currentUser'],
@@ -36,10 +22,9 @@ export default function ReferrerLayout({ children }) {
     enabled: !!currentUser?.linked_referrer_id,
   });
 
-  const companyLogo = 'https://media.base44.com/images/public/68ee39fb8915b1b539e13c59/b2cb057e2_RCMAutomotiveLogoGreenAutomotivewithHLights.jpg';
-
   return (
     <StatusConfigProvider>
+    <GlobalSearch open={searchOpen} onOpenChange={setSearchOpen} />
     <div className="flex overflow-hidden bg-gray-100 dark:bg-gray-950" style={{ height: '100dvh' }}>
       {/* SIDEBAR */}
       <aside className={`
@@ -134,20 +119,13 @@ export default function ReferrerLayout({ children }) {
               <RefreshCw className="w-4 h-4" />
             </button>
             <button
+              onClick={() => setSearchOpen(true)}
               className="p-1.5 rounded-[10px] text-gray-400 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-gray-200 transition-colors"
               title="Search">
               <Search className="w-4 h-4" />
             </button>
-            <button
-              onClick={toggleTheme}
-              className="p-1.5 rounded-[10px] text-gray-400 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-gray-200 transition-colors">
-              {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-            </button>
-            <button
-              className="p-1.5 rounded-[10px] text-gray-400 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-gray-200 transition-colors"
-              title="Notifications">
-              <Bell className="w-4 h-4" />
-            </button>
+            <ThemeToggle />
+            <Notifications />
           </div>
         </header>
 
@@ -157,7 +135,7 @@ export default function ReferrerLayout({ children }) {
             <Menu className="w-5 h-5" />
             <span className="text-[9px]">Menu</span>
           </button>
-          <button className="flex flex-col items-center justify-center gap-0.5 p-3 text-gray-500 dark:text-gray-400 touch-manipulation min-w-[44px] min-h-[44px]">
+          <button onClick={() => setSearchOpen(true)} className="flex flex-col items-center justify-center gap-0.5 p-3 text-gray-500 dark:text-gray-400 touch-manipulation min-w-[44px] min-h-[44px]">
             <Search className="w-5 h-5" />
             <span className="text-[9px]">Search</span>
           </button>
@@ -166,13 +144,11 @@ export default function ReferrerLayout({ children }) {
             <span className="text-[9px]">Refresh</span>
           </button>
           <div className="flex flex-col items-center justify-center gap-0.5 touch-manipulation min-w-[44px] min-h-[44px]">
-            <button onClick={toggleTheme} className="text-gray-500 dark:text-gray-400">
-              {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-            </button>
+            <ThemeToggle />
             <span className="text-[9px] text-gray-500">Theme</span>
           </div>
           <div className="flex flex-col items-center justify-center gap-0.5 touch-manipulation min-w-[44px] min-h-[44px]">
-            <Bell className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+            <Notifications />
             <span className="text-[9px] text-gray-500">Alerts</span>
           </div>
         </div>
