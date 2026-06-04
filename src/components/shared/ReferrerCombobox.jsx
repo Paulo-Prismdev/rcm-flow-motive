@@ -52,6 +52,7 @@ export default function ReferrerCombobox({ value, onChange }) {
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
+            type="button"
             variant="outline"
             role="combobox"
             aria-expanded={open}
@@ -95,6 +96,7 @@ export default function ReferrerCombobox({ value, onChange }) {
     </Popover>
     {selectedName && (
       <Button
+        type="button"
         variant="ghost"
         size="sm"
         onClick={handleClear}

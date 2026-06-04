@@ -96,6 +96,7 @@ export default function ClientCombobox({ value, onChange, placeholder = "Select 
         </Popover>
         {allowClear && selectedClientName && (
           <Button
+            type="button"
             variant="ghost"
             size="sm"
             onClick={handleClear}
