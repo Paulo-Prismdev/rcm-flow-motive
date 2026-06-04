@@ -1,14 +1,14 @@
 {
-  "name": "Insurer",
+  "name": "Broker",
   "type": "object",
   "properties": {
     "name": {
       "type": "string",
-      "description": "Name of the insurance company"
+      "description": "Broker company name"
     },
     "contact_name": {
       "type": "string",
-      "description": "Main contact person"
+      "description": "Main contact person at broker"
     },
     "phone": {
       "type": "string"
@@ -16,13 +16,13 @@
     "email": {
       "type": "string"
     },
-    "claims_line": {
+    "address": {
       "type": "string",
-      "description": "Claims department phone number"
+      "description": "Broker address"
     },
     "notes": {
       "type": "string",
-      "description": "Additional notes about this insurer"
+      "description": "Additional notes about this broker"
     }
   },
   "required": [
@@ -38,7 +38,7 @@
         },
         {
           "user_condition": {
-            "data.user_type": "internal"
+            "user_type": "internal"
           }
         }
       ]
@@ -52,7 +52,7 @@
         },
         {
           "user_condition": {
-            "data.user_type": "internal"
+            "user_type": "internal"
           }
         }
       ]
@@ -66,7 +66,7 @@
         },
         {
           "user_condition": {
-            "data.user_type": "internal"
+            "user_type": "internal"
           }
         }
       ]
@@ -80,7 +80,7 @@
         },
         {
           "user_condition": {
-            "data.user_type": "internal"
+            "user_type": "internal"
           }
         }
       ]
