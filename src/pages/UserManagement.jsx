@@ -29,6 +29,11 @@ export default function UserManagement() {
     queryFn: () => base44.entities.Company.list("name"),
   });
 
+  const { data: referrers = [] } = useQuery({
+    queryKey: ["referrers"],
+    queryFn: () => base44.entities.Referrer.list("name"),
+  });
+
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.User.update(id, data),
     onSuccess: () => {
@@ -192,15 +197,21 @@ export default function UserManagement() {
                     <td className="px-4 py-2.5 hidden lg:table-cell">
                       {isEditing ? (
                         <select
-                          value={editData.company_id}
-                          onChange={(e) => setEditData((p) => ({ ...p, company_id: e.target.value }))}
-                          className="text-xs border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-800 dark:text-white"
-                        >
-                          <option value="">— None —</option>
-                          {companies.map((c) => (
-                            <option key={c.id} value={c.id}>{c.name} ({c.company_type})</option>
-                          ))}
-                        </select>
+                           value={editData.company_id}
+                           onChange={(e) => setEditData((p) => ({ ...p, company_id: e.target.value }))}
+                           className="text-xs border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-800 dark:text-white"
+                         >
+                           <option value="">— None —</option>
+                           {user.user_type === "referrer" ? (
+                             referrers.map((r) => (
+                               <option key={r.id} value={r.id}>{r.name}</option>
+                             ))
+                           ) : (
+                             companies.map((c) => (
+                               <option key={c.id} value={c.id}>{c.name} ({c.company_type})</option>
+                             ))
+                           )}
+                         </select>
                       ) : (
                         <span className="text-xs text-gray-500 dark:text-gray-400">{user.company_id ? getCompanyName(user.company_id) : "—"}</span>
                       )}
