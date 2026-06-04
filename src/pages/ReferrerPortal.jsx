@@ -123,6 +123,7 @@ export default function ReferrerPortal() {
     );
   }
 
+  // Claim detail view takes highest priority
   if (viewingClaim) {
     return (
       <ReferrerLayout>
@@ -131,6 +132,7 @@ export default function ReferrerPortal() {
     );
   }
 
+  // Dashboard view
   if (activeTab === 'dashboard') {
     return (
       <ReferrerLayout>
@@ -138,6 +140,8 @@ export default function ReferrerPortal() {
       </ReferrerLayout>
     );
   }
+
+  // Claims list view (default)
 
   const getStatusDot = (statusName) => {
     const cfg = customStatuses?.find(s => s.status_name === statusName);
