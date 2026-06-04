@@ -388,8 +388,7 @@ export default function ClaimsPage() {
 
       {/* Search + filters bar */}
       <div className="flex items-center gap-3 px-5 py-2.5 border-b border-gray-100 dark:border-gray-800 flex-shrink-0 bg-gray-50 dark:bg-gray-900/50">
-        <div className="flex-1 relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
+        <div className="flex-1">
           <input
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
