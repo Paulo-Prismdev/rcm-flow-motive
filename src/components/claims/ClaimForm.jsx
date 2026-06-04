@@ -220,11 +220,12 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
       queryClient.invalidateQueries({ queryKey: ['clients'] });
       alert('Client saved to database successfully!');
     } catch (error) {
-      const msg = error?.response?.data?.message || error?.response?.data?.error || error?.message || '';
+      console.error('Client creation error:', error);
+      const msg = error?.response?.data?.message || error?.response?.data?.error || error?.message || 'Unknown error';
       if (msg.toLowerCase().includes('permission') || msg.toLowerCase().includes('forbidden') || error?.response?.status === 403) {
         alert('You do not have permission to save clients to the database. The claim can still be created without saving the client separately.');
       } else {
-        alert('Failed to save client. Please try again.');
+        alert(`Failed to save client: ${msg}`);
       }
     }
   };

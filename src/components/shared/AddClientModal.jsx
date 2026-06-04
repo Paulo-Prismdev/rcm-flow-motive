@@ -34,6 +34,11 @@ export default function AddClientModal({ isOpen, onClose, onSuccess }) {
       if (onSuccess) onSuccess(newClient);
       handleClose();
     },
+    onError: (error) => {
+      const msg = error?.response?.data?.message || error?.response?.data?.error || error?.message || 'Failed to create client';
+      alert(`Failed to create client: ${msg}`);
+      console.error('Client creation error:', error);
+    },
   });
 
   const handleClose = () => {

@@ -38,7 +38,7 @@
         },
         {
           "user_condition": {
-            "data.user_type": "internal"
+            "user_type": "internal"
           }
         }
       ]
@@ -52,7 +52,7 @@
         },
         {
           "user_condition": {
-            "data.user_type": "internal"
+            "user_type": "internal"
           }
         }
       ]
@@ -66,7 +66,7 @@
         },
         {
           "user_condition": {
-            "data.user_type": "internal"
+            "user_type": "internal"
           }
         }
       ]
@@ -80,7 +80,7 @@
         },
         {
           "user_condition": {
-            "data.user_type": "internal"
+            "user_type": "internal"
           }
         }
       ]
