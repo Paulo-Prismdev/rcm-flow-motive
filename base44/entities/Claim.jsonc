@@ -11,6 +11,11 @@
       "default": false,
       "description": "Whether this claim is archived"
     },
+    "draft": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this claim is a draft (incomplete)"
+    },
     "reg": {
       "type": "string",
       "description": "Vehicle registration number"

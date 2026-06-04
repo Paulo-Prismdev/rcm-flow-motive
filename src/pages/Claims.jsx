@@ -235,6 +235,7 @@ export default function ClaimsPage() {
     const isSelected = selectedClaim?.id === claim.id;
     const hasBackorder = claimIdsWithBackorders.has(claim.id);
     const isClosedStatus = (claim.job_statuses || []).some(s => ['Completed','Cancelled','Total Loss'].includes(s));
+    const isDraft = claim.draft === true;
 
     return (
       <tr
@@ -274,6 +275,11 @@ export default function ClaimsPage() {
         {/* Sticky right: Status + alerts */}
         <td className={`sticky right-0 z-10 px-3 py-2.5 whitespace-nowrap ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-white dark:bg-gray-900 group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50'}`}>
           <div className="flex items-center gap-1.5 justify-end flex-wrap">
+            {isDraft && (
+              <span className="px-2 py-1 rounded-md bg-yellow-100 text-yellow-700 text-[10px] font-medium">
+                Draft
+              </span>
+            )}
             {claim.secondary_status && <StatusBadge status={claim.secondary_status} variant="secondary" />}
             {!isClosedStatus && <UpdateStatusBadge status={updateStatus} small />}
             {hasBackorder && (
@@ -302,6 +308,7 @@ export default function ClaimsPage() {
     const updateStatus = calculateUpdateStatus(claim);
     const hasBackorder = claimIdsWithBackorders.has(claim.id);
     const isClosedStatus = (claim.job_statuses || []).some(s => ['Completed','Cancelled','Total Loss'].includes(s));
+    const isDraft = claim.draft === true;
     return (
       <div
         key={claim.id}
@@ -316,6 +323,11 @@ export default function ClaimsPage() {
             {claim.reg ? formatUKRegistration(claim.reg) : '—'}
           </span>
           <div className="flex items-center gap-1 flex-shrink-0">
+            {isDraft && (
+              <span className="px-1.5 py-0.5 rounded-full bg-yellow-100 text-yellow-700 text-[10px] font-medium">
+                Draft
+              </span>
+            )}
             {!isClosedStatus && <UpdateStatusBadge status={updateStatus} small />}
             {hasBackorder && (
               <span className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-red-100 text-red-700 text-[10px] font-medium">

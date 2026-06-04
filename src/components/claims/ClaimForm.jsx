@@ -42,9 +42,8 @@ const geocodeAddress = async (address) => {
 
 export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
   const [currentStep, setCurrentStep] = useState(1);
-  const [showClientModal, setShowClientModal] = useState(false);
-  const [showTPModal, setShowTPModal] = useState(false);
   const [showInsurerModal, setShowInsurerModal] = useState(false);
+  const [isSavingDraft, setIsSavingDraft] = useState(false);
   const [isLookingUpVehicle, setIsLookingUpVehicle] = useState(false);
   const [vehicleLookupError, setVehicleLookupError] = useState(null);
   const [isLookingUpTPVehicle, setIsLookingUpTPVehicle] = useState(false);
@@ -208,43 +207,46 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
     }));
   };
 
-  const handleSaveClientToDatabase = async () => {
-    if (!formData.client_name) { alert('Please enter a client name'); return; }
+  const handleSaveDraft = async () => {
+    setIsSavingDraft(true);
     try {
-      const newClient = await base44.entities.Client.create({
-        name: formData.client_name, phone: formData.client_phone || '', email: formData.client_email || '',
-        address_line_1: formData.client_address_line_1 || '', address_line_2: formData.client_address_line_2 || '',
-        town: formData.client_town || '', county: formData.client_county || '', postcode: formData.client_postcode || ''
-      });
-      setFormData(prev => ({ ...prev, client_id: newClient.id }));
-      queryClient.invalidateQueries({ queryKey: ['clients'] });
-      alert('Client saved to database successfully!');
-    } catch (error) {
-      console.error('Client creation error:', error);
-      const msg = error?.response?.data?.message || error?.response?.data?.error || error?.message || 'Unknown error';
-      if (msg.toLowerCase().includes('permission') || msg.toLowerCase().includes('forbidden') || error?.response?.status === 403) {
-        alert('You do not have permission to save clients to the database. The claim can still be created without saving the client separately.');
-      } else {
-        alert(`Failed to save client: ${msg}`);
+      // Validate minimum required fields for a draft
+      if (!formData.reg) {
+        alert('Please enter at least the vehicle registration to save as draft.');
+        setIsSavingDraft(false);
+        return;
       }
+      
+      const { id: _id, created_date: _cd, updated_date: _ud, created_by: _cb, ...submitData } = formData;
+      
+      // Generate job number if this is a new claim
+      let draftData = submitData;
+      if (!claim) {
+        try {
+          const response = await base44.functions.invoke('generateJobNumber', { entityType: 'Claim' });
+          if (response.data.success) {
+            draftData = { ...submitData, job_number: response.data.job_number };
+          }
+        } catch (error) {
+          console.error('Failed to generate job number:', error);
+        }
+      }
+      
+      // Create or update the claim as a draft
+      if (claim) {
+        await base44.entities.Claim.update(claim.id, draftData);
+      } else {
+        await base44.entities.Claim.create(draftData);
+      }
+      
+      alert('Claim saved as draft. You can now add the client in the Clients section and return to continue.');
+      onCancel();
+    } catch (error) {
+      console.error('Failed to save draft:', error);
+      alert('Failed to save draft. Please try again.');
+    } finally {
+      setIsSavingDraft(false);
     }
-  };
-
-  const handleClientModalSuccess = (newClient) => {
-    queryClient.invalidateQueries({ queryKey: ['clients'] });
-    // newClient is the full object from AddClientModal
-    setFormData(prev => ({
-      ...prev,
-      client_name: newClient.name,
-      client_id: newClient.id,
-      client_phone: newClient.phone || '',
-      client_email: newClient.email || '',
-      client_address_line_1: newClient.address_line_1 || '',
-      client_town: newClient.town || '',
-      client_county: newClient.county || '',
-      client_postcode: newClient.postcode || '',
-    }));
-    setShowClientModal(false);
   };
 
   const handleInsurerModalSuccess = (newInsurer) => {
@@ -259,12 +261,6 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
       tp_address_line_1: client.address_line_1 || '', tp_address_line_2: client.address_line_2 || '',
       tp_town: client.town || '', tp_county: client.county || '', tp_postcode: client.postcode || '',
     }));
-  };
-
-  const handleTPModalSuccess = (newClient) => {
-    queryClient.invalidateQueries({ queryKey: ['clients'] });
-    handleTPChange(newClient);
-    setShowTPModal(false);
   };
 
   const handleTPVehicleLookup = async () => {
@@ -446,7 +442,6 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
         handleVehicleLocationChange={handleVehicleLocationChange}
         handleTPChange={handleTPChange}
         isInternalUser={isInternalUser}
-        setShowClientModal={setShowClientModal}
         aiExtractDialog={aiExtractDialog}
         setAiExtractDialog={setAiExtractDialog}
         handleAIExtractConfirm={handleAIExtractConfirm}
@@ -468,8 +463,6 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
       />
         {!isLoadingUser && isInternalUser && (
           <>
-            <AddClientModal isOpen={showClientModal} onClose={() => setShowClientModal(false)} onSuccess={handleClientModalSuccess} />
-            <AddClientModal isOpen={showTPModal} onClose={() => setShowTPModal(false)} onSuccess={handleTPModalSuccess} />
             <AddInsurerModal isOpen={showInsurerModal} onClose={() => setShowInsurerModal(false)} onSuccess={handleInsurerModalSuccess} />
           </>
         )}
@@ -632,18 +625,16 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
                     <ClientCombobox 
                       value={formData.client_name} 
                       onChange={handleClientChange} 
-                      onAddNew={() => setShowClientModal(true)}
                     />
-                    <p className="text-xs text-gray-500 mt-1">Search for existing client or enter a new name below</p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {formData.client_name && !formData.client_id 
+                        ? 'Client not found — you can save this claim as a draft, add them in the Clients section, and return to continue.'
+                        : 'Search for an existing client'}
+                    </p>
                   </div>
                   <div className="neomorph-inset p-4 space-y-4">
                     <div className="flex items-center justify-between mb-3">
                       <p className="text-sm font-medium text-gray-700">Client Details</p>
-                      {canSaveClients && formData.client_name && !formData.client_id && (
-                        <Button type="button" onClick={handleSaveClientToDatabase} className="neomorph-flat px-4 py-2 text-sm flex items-center gap-2 bg-green-50 hover:bg-green-100">
-                          <Plus className="w-4 h-4 text-green-600" /><span className="text-green-600 font-medium">Save Client to Database</span>
-                        </Button>
-                      )}
                       {formData.client_id && <span className="text-xs px-3 py-1 rounded-full bg-green-100 text-green-700 font-medium">✓ Linked to Database</span>}
                     </div>
                     <div><label className="block text-xs text-gray-500 mb-1">Name *</label><Input value={formData.client_name} onChange={(e) => handleChange('client_name', e.target.value)} className="neomorph-inset px-3 py-2 text-sm text-gray-700 border-0" placeholder="Enter client name" /></div>
@@ -716,9 +707,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
                   <h4 className="font-semibold text-gray-700">Contact Details</h4>
                   <div>
                     <label className="block text-sm text-gray-600 mb-2">Third Party Name</label>
-                    {isInternalUser ? (
-                      <div className="flex gap-2"><div className="flex-1"><ClientCombobox value={formData.tp_name} onChange={handleTPChange} /></div><Button type="button" onClick={() => setShowTPModal(true)} className="neomorph-flat p-3"><Plus className="w-4 h-4" /></Button></div>
-                    ) : <ClientCombobox value={formData.tp_name} onChange={handleTPChange} />}
+                    <ClientCombobox value={formData.tp_name} onChange={handleTPChange} />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div><label className="block text-sm text-gray-600 mb-2">Phone</label><Input value={formData.tp_phone} onChange={(e) => handleChange('tp_phone', e.target.value)} className="neomorph-inset px-4 py-3 text-gray-700 border-0" /></div>
@@ -787,12 +776,20 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
         </div>
 
         {/* Navigation — outside scroll area so always visible */}
-        <div className="flex justify-between pt-3 pb-2 flex-shrink-0">
+        <div className="flex justify-between pt-3 pb-2 flex-shrink-0 gap-3">
           {currentStep > 1 && (
             <Button type="button" onClick={prevStep} className="neomorph-flat px-6 py-3 font-medium text-gray-700 transition-all active:neomorph-pressed flex items-center gap-2">
               <ArrowLeft className="w-4 h-4" /> Previous
             </Button>
           )}
+          <Button 
+            type="button" 
+            onClick={handleSaveDraft} 
+            disabled={isSavingDraft || !formData.reg}
+            className="neomorph-flat px-6 py-3 font-medium text-blue-600 transition-all active:neomorph-pressed flex items-center gap-2 disabled:opacity-60"
+          >
+            {isSavingDraft ? <><Loader className="w-4 h-4 animate-spin" /> Saving...</> : <>💾 Save Draft</>}
+          </Button>
           <div className="flex-1" />
           {currentStep < steps.length && (
             <Button type="button" onClick={nextStep} className="neomorph-flat px-6 py-3 font-medium text-blue-600 transition-all active:neomorph-pressed flex items-center gap-2" disabled={currentStep === getStepNumber("basic") && !formData.reg}>
