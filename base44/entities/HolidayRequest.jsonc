@@ -67,77 +67,9 @@
     "total_days"
   ],
   "rls": {
-    "create": {
-      "$or": [
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        },
-        {
-          "data.employee_email": "{{user.email}}"
-        }
-      ]
-    },
-    "read": {
-      "$or": [
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        },
-        {
-          "user_condition": {
-            "data.can_manage_permissions": true
-          }
-        },
-        {
-          "data.employee_email": "{{user.email}}"
-        }
-      ]
-    },
-    "update": {
-      "$or": [
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        },
-        {
-          "user_condition": {
-            "data.can_manage_permissions": true
-          }
-        },
-        {
-          "$and": [
-            {
-              "data.employee_email": "{{user.email}}"
-            },
-            {
-              "data.status": "Pending"
-            }
-          ]
-        }
-      ]
-    },
-    "delete": {
-      "$or": [
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        },
-        {
-          "$and": [
-            {
-              "data.employee_email": "{{user.email}}"
-            },
-            {
-              "data.status": "Pending"
-            }
-          ]
-        }
-      ]
-    }
+    "create": true,
+    "read": true,
+    "update": true,
+    "delete": true
   }
 }

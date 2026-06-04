@@ -109,51 +109,9 @@
     "conversation_type"
   ],
   "rls": {
-    "create": {
-      "data.sender_email": "{{user.email}}"
-    },
-    "read": {
-      "$or": [
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        },
-        {
-          "data.sender_email": "{{user.email}}"
-        },
-        {
-          "data.channel_members": {
-            "$in": [
-              "{{user.email}}"
-            ]
-          }
-        }
-      ]
-    },
-    "update": {
-      "$or": [
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        },
-        {
-          "data.sender_email": "{{user.email}}"
-        }
-      ]
-    },
-    "delete": {
-      "$or": [
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        },
-        {
-          "data.sender_email": "{{user.email}}"
-        }
-      ]
-    }
+    "create": true,
+    "read": true,
+    "update": true,
+    "delete": true
   }
 }

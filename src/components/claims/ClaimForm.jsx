@@ -512,7 +512,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
         </div>
 
         <div className="flex-1 overflow-y-auto min-h-0 pr-1 pb-4">
-          <form id="claim-wizard-form" onSubmit={(e) => { e.preventDefault(); e.stopPropagation(); handleSubmit(e); }}>
+          <div id="claim-wizard-form">
             {/* Step 1: Basic Info */}
             {currentStep === getStepNumber("basic") && (
               <div className="neomorph-flat p-6 space-y-6">
@@ -785,7 +785,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
               </div>
             )}
 
-          </form>
+          </div>
         </div>
 
         {/* Navigation — outside scroll area so always visible */}
