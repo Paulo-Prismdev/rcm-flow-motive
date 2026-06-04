@@ -49,24 +49,16 @@
   ],
   "rls": {
     "create": {
-      "user_condition": {
-        "$or": [
-          {
-            "role": "admin"
-          },
-          {
-            "user_type": "internal"
-          }
-        ]
-      }
-    },
-    "read": {
       "$or": [
         {
           "user_condition": {
-            "role": "admin"
+            "user_type": "internal"
           }
-        },
+        }
+      ]
+    },
+    "read": {
+      "$or": [
         {
           "user_condition": {
             "user_type": "internal"
@@ -75,28 +67,22 @@
       ]
     },
     "update": {
-      "user_condition": {
-        "$or": [
-          {
-            "role": "admin"
-          },
-          {
+      "$or": [
+        {
+          "user_condition": {
             "user_type": "internal"
           }
-        ]
-      }
+        }
+      ]
     },
     "delete": {
-      "user_condition": {
-        "$or": [
-          {
-            "role": "admin"
-          },
-          {
+      "$or": [
+        {
+          "user_condition": {
             "user_type": "internal"
           }
-        ]
-      }
+        }
+      ]
     }
   }
 }

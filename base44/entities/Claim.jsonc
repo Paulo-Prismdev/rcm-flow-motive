@@ -666,40 +666,26 @@
   },
   "required": [],
   "rls": {
-    "create": true,
-    "read": {
+    "create": {
       "$or": [
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        },
         {
           "user_condition": {
             "user_type": "internal"
           }
-        },
+        }
+      ]
+    },
+    "read": {
+      "$or": [
         {
-          "created_by_id": "{{user.id}}"
-        },
-        {
-          "data.client_id": "{{user.linked_client_id}}"
-        },
-        {
-          "data.referrer_id": "{{user.linked_referrer_id}}"
-        },
-        {
-          "data.bodyshop_id": "{{user.linked_bodyshop_id}}"
+          "user_condition": {
+            "user_type": "internal"
+          }
         }
       ]
     },
     "update": {
       "$or": [
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        },
         {
           "user_condition": {
             "user_type": "internal"
@@ -708,9 +694,13 @@
       ]
     },
     "delete": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "user_condition": {
+            "user_type": "internal"
+          }
+        }
+      ]
     }
   }
 }

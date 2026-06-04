@@ -53,12 +53,7 @@
       "$or": [
         {
           "user_condition": {
-            "role": "admin"
-          }
-        },
-        {
-          "user_condition": {
-            "can_manage_permissions": true
+            "user_type": "internal"
           }
         }
       ]
@@ -67,16 +62,8 @@
       "$or": [
         {
           "user_condition": {
-            "role": "admin"
+            "user_type": "internal"
           }
-        },
-        {
-          "user_condition": {
-            "can_manage_permissions": true
-          }
-        },
-        {
-          "employee_email": "{{user.email}}"
         }
       ]
     },
@@ -84,12 +71,7 @@
       "$or": [
         {
           "user_condition": {
-            "role": "admin"
-          }
-        },
-        {
-          "user_condition": {
-            "can_manage_permissions": true
+            "user_type": "internal"
           }
         }
       ]
@@ -98,12 +80,7 @@
       "$or": [
         {
           "user_condition": {
-            "role": "admin"
-          }
-        },
-        {
-          "user_condition": {
-            "can_manage_permissions": true
+            "user_type": "internal"
           }
         }
       ]

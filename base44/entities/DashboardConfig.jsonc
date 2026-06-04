@@ -89,18 +89,8 @@
       "$or": [
         {
           "user_condition": {
-            "role": "admin"
+            "user_type": "internal"
           }
-        },
-        {
-          "$and": [
-            {
-              "data.dashboard_type": "user"
-            },
-            {
-              "data.user_id": "{{user.id}}"
-            }
-          ]
         }
       ]
     },
@@ -108,33 +98,8 @@
       "$or": [
         {
           "user_condition": {
-            "role": "admin"
+            "user_type": "internal"
           }
-        },
-        {
-          "data.dashboard_type": "company"
-        },
-        {
-          "$and": [
-            {
-              "data.dashboard_type": "department"
-            },
-            {
-              "user_condition": {
-                "user_type": "internal"
-              }
-            }
-          ]
-        },
-        {
-          "$and": [
-            {
-              "data.dashboard_type": "user"
-            },
-            {
-              "data.user_id": "{{user.id}}"
-            }
-          ]
         }
       ]
     },
@@ -142,18 +107,8 @@
       "$or": [
         {
           "user_condition": {
-            "role": "admin"
+            "user_type": "internal"
           }
-        },
-        {
-          "$and": [
-            {
-              "data.dashboard_type": "user"
-            },
-            {
-              "data.user_id": "{{user.id}}"
-            }
-          ]
         }
       ]
     },
@@ -161,18 +116,8 @@
       "$or": [
         {
           "user_condition": {
-            "role": "admin"
+            "user_type": "internal"
           }
-        },
-        {
-          "$and": [
-            {
-              "data.dashboard_type": "user"
-            },
-            {
-              "data.user_id": "{{user.id}}"
-            }
-          ]
         }
       ]
     }

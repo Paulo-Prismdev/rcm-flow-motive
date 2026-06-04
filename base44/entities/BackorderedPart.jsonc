@@ -63,21 +63,21 @@
     "part_description"
   ],
   "rls": {
-    "create": true,
-    "read": {
+    "create": {
       "$or": [
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        },
         {
           "user_condition": {
             "user_type": "internal"
           }
-        },
+        }
+      ]
+    },
+    "read": {
+      "$or": [
         {
-          "data.bodyshop_id": "{{user.linked_bodyshop_id}}"
+          "user_condition": {
+            "user_type": "internal"
+          }
         }
       ]
     },
@@ -85,23 +85,19 @@
       "$or": [
         {
           "user_condition": {
-            "role": "admin"
-          }
-        },
-        {
-          "user_condition": {
             "user_type": "internal"
           }
-        },
-        {
-          "data.bodyshop_id": "{{user.linked_bodyshop_id}}"
         }
       ]
     },
     "delete": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "user_condition": {
+            "user_type": "internal"
+          }
+        }
+      ]
     }
   }
 }

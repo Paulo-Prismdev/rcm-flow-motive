@@ -287,37 +287,26 @@
   },
   "required": [],
   "rls": {
-    "create": true,
-    "read": {
+    "create": {
       "$or": [
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        },
         {
           "user_condition": {
             "user_type": "internal"
           }
-        },
+        }
+      ]
+    },
+    "read": {
+      "$or": [
         {
-          "created_by_id": "{{user.id}}"
-        },
-        {
-          "data.bodyshop_company_id": "{{user.linked_bodyshop_id}}"
-        },
-        {
-          "data.supplier_id": "{{user.linked_supplier_id}}"
+          "user_condition": {
+            "user_type": "internal"
+          }
         }
       ]
     },
     "update": {
       "$or": [
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        },
         {
           "user_condition": {
             "user_type": "internal"
@@ -326,9 +315,13 @@
       ]
     },
     "delete": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "user_condition": {
+            "user_type": "internal"
+          }
+        }
+      ]
     }
   }
 }

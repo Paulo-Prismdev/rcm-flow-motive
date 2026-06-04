@@ -57,29 +57,37 @@
       "$or": [
         {
           "user_condition": {
-            "role": "admin"
+            "user_type": "internal"
           }
-        },
+        }
+      ]
+    },
+    "read": {
+      "$or": [
         {
           "user_condition": {
             "user_type": "internal"
           }
-        },
-        {
-          "created_by_id": "{{user.id}}"
         }
       ]
     },
-    "read": null,
     "update": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "user_condition": {
+            "user_type": "internal"
+          }
+        }
+      ]
     },
     "delete": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "user_condition": {
+            "user_type": "internal"
+          }
+        }
+      ]
     }
   }
 }

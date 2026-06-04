@@ -86,11 +86,6 @@
       "$or": [
         {
           "user_condition": {
-            "role": "admin"
-          }
-        },
-        {
-          "user_condition": {
             "user_type": "internal"
           }
         }
@@ -100,16 +95,8 @@
       "$or": [
         {
           "user_condition": {
-            "role": "admin"
-          }
-        },
-        {
-          "user_condition": {
             "user_type": "internal"
           }
-        },
-        {
-          "assigned_to": "{{user.email}}"
         }
       ]
     },
@@ -117,23 +104,19 @@
       "$or": [
         {
           "user_condition": {
-            "role": "admin"
-          }
-        },
-        {
-          "user_condition": {
             "user_type": "internal"
           }
-        },
-        {
-          "assigned_to": "{{user.email}}"
         }
       ]
     },
     "delete": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "user_condition": {
+            "user_type": "internal"
+          }
+        }
+      ]
     }
   }
 }

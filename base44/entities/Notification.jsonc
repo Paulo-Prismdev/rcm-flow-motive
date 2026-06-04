@@ -59,16 +59,21 @@
     "type"
   ],
   "rls": {
-    "create": true,
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "user_type": "internal"
+          }
+        }
+      ]
+    },
     "read": {
       "$or": [
         {
           "user_condition": {
-            "role": "admin"
+            "user_type": "internal"
           }
-        },
-        {
-          "data.user_email": "{{user.email}}"
         }
       ]
     },
@@ -76,11 +81,8 @@
       "$or": [
         {
           "user_condition": {
-            "role": "admin"
+            "user_type": "internal"
           }
-        },
-        {
-          "data.user_email": "{{user.email}}"
         }
       ]
     },
@@ -88,11 +90,8 @@
       "$or": [
         {
           "user_condition": {
-            "role": "admin"
+            "user_type": "internal"
           }
-        },
-        {
-          "data.user_email": "{{user.email}}"
         }
       ]
     }

@@ -56,11 +56,6 @@
       "$or": [
         {
           "user_condition": {
-            "role": "admin"
-          }
-        },
-        {
-          "user_condition": {
             "user_type": "internal"
           }
         }
@@ -70,9 +65,13 @@
       "$or": [
         {
           "user_condition": {
-            "role": "admin"
+            "user_type": "internal"
           }
-        },
+        }
+      ]
+    },
+    "update": {
+      "$or": [
         {
           "user_condition": {
             "user_type": "internal"
@@ -80,15 +79,14 @@
         }
       ]
     },
-    "update": {
-      "user_condition": {
-        "role": "admin"
-      }
-    },
     "delete": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "user_condition": {
+            "user_type": "internal"
+          }
+        }
+      ]
     }
   }
 }

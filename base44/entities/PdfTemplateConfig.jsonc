@@ -231,11 +231,6 @@
       "$or": [
         {
           "user_condition": {
-            "role": "admin"
-          }
-        },
-        {
-          "user_condition": {
             "user_type": "internal"
           }
         }
@@ -245,23 +240,7 @@
       "$or": [
         {
           "user_condition": {
-            "role": "admin"
-          }
-        },
-        {
-          "created_by": "{{user.email}}"
-        },
-        {
-          "visibility": "organization",
-          "user_condition": {
             "user_type": "internal"
-          }
-        },
-        {
-          "shared_with_users": {
-            "$in": [
-              "{{user.email}}"
-            ]
           }
         }
       ]
@@ -270,17 +249,7 @@
       "$or": [
         {
           "user_condition": {
-            "role": "admin"
-          }
-        },
-        {
-          "created_by": "{{user.email}}"
-        },
-        {
-          "can_edit_users": {
-            "$in": [
-              "{{user.email}}"
-            ]
+            "user_type": "internal"
           }
         }
       ]
@@ -289,11 +258,8 @@
       "$or": [
         {
           "user_condition": {
-            "role": "admin"
+            "user_type": "internal"
           }
-        },
-        {
-          "created_by": "{{user.email}}"
         }
       ]
     }

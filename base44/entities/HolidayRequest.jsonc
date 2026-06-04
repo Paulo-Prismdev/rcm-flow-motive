@@ -67,20 +67,20 @@
     "total_days"
   ],
   "rls": {
-    "create": true,
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "user_type": "internal"
+          }
+        }
+      ]
+    },
     "read": {
       "$or": [
         {
-          "created_by_id": "{{user.id}}"
-        },
-        {
           "user_condition": {
-            "role": "admin"
-          }
-        },
-        {
-          "user_condition": {
-            "can_manage_permissions": true
+            "user_type": "internal"
           }
         }
       ]
@@ -88,16 +88,8 @@
     "update": {
       "$or": [
         {
-          "created_by_id": "{{user.id}}"
-        },
-        {
           "user_condition": {
-            "role": "admin"
-          }
-        },
-        {
-          "user_condition": {
-            "can_manage_permissions": true
+            "user_type": "internal"
           }
         }
       ]
@@ -105,16 +97,8 @@
     "delete": {
       "$or": [
         {
-          "created_by_id": "{{user.id}}"
-        },
-        {
           "user_condition": {
-            "role": "admin"
-          }
-        },
-        {
-          "user_condition": {
-            "can_manage_permissions": true
+            "user_type": "internal"
           }
         }
       ]
