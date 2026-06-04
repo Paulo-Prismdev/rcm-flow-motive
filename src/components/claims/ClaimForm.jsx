@@ -9,13 +9,13 @@ function CopyLinkButton({ url }) {
   return (
     <button
       type="button"
-      onClick={() => { navigator.clipboard.writeText(url); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
-      className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-lg border border-blue-300 bg-white text-blue-600 hover:bg-blue-50 whitespace-nowrap transition-colors"
-    >
+      onClick={() => {navigator.clipboard.writeText(url);setCopied(true);setTimeout(() => setCopied(false), 2000);}}
+      className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-lg border border-blue-300 bg-white text-blue-600 hover:bg-blue-50 whitespace-nowrap transition-colors">
+      
       {copied ? <Check className="w-3.5 h-3.5 text-green-500" /> : <Copy className="w-3.5 h-3.5" />}
       {copied ? 'Copied!' : 'Copy Link'}
-    </button>
-  );
+    </button>);
+
 }
 import ClientFormLink from './ClientFormLink';
 import ClaimEditForm from './ClaimEditForm';
@@ -34,7 +34,7 @@ import AIExtractConfirmDialog from '../shared/AIExtractConfirmDialog';
 
 const geocodeAddress = async (address) => {
   if (!address || address.trim() === '') return null;
-  await new Promise(resolve => setTimeout(resolve, 300));
+  await new Promise((resolve) => setTimeout(resolve, 300));
   const l = address.toLowerCase();
   if (l.includes("london")) return { lat: 51.5074, lng: 0.1278 };
   return null;
@@ -54,11 +54,11 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
   const { data: currentUser, isLoading: isLoadingUser } = useQuery({
     queryKey: ['currentUser'],
     queryFn: () => base44.auth.me(),
-    staleTime: 5 * 60 * 1000,
+    staleTime: 5 * 60 * 1000
   });
 
-  const isInternalUser = currentUser?.user_type === 'internal' || 
-    ['admin', 'super_admin', 'company_admin'].includes(currentUser?.role);
+  const isInternalUser = currentUser?.user_type === 'internal' ||
+  ['admin', 'super_admin', 'company_admin'].includes(currentUser?.role);
   const canSaveClients = currentUser?.role === 'admin' || currentUser?.role === 'super_admin' || currentUser?.user_type === 'internal';
 
   const [formData, setFormData] = useState(claim || {
@@ -100,7 +100,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
     indemnity_driver_dob: '', indemnity_registered_owner: '',
     indemnity_pending_prosecutions: '', indemnity_dvla_medical_restrictions: '',
     indemnity_full_license_12_months: '', indemnity_convictions_last_5_years: '',
-    indemnity_vehicle_use_at_incident: '', indemnity_vehicle_modifications: '',
+    indemnity_vehicle_use_at_incident: '', indemnity_vehicle_modifications: ''
   });
 
   const isEditing = !!claim;
@@ -112,7 +112,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
   };
 
   const handleAIExtractConfirm = (selectedData) => {
-    if (selectedData) setFormData(prev => ({ ...prev, ...selectedData }));
+    if (selectedData) setFormData((prev) => ({ ...prev, ...selectedData }));
     setAiExtractDialog({ isOpen: false, data: null });
   };
 
@@ -128,7 +128,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
       const response = await base44.functions.invoke('lookupVehicleData', { registrationNumber: formData.reg });
       const result = response.data;
       if (result.success) {
-        setFormData(prev => ({
+        setFormData((prev) => ({
           ...prev,
           make_model: result.make_model || '', vehicle_make: result.make || '',
           vehicle_model: result.model || '', vehicle_colour: result.colour || '',
@@ -140,7 +140,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
           vehicle_mot_expiry_date: result.mot_expiry_date || '', vehicle_tax_status: result.tax_status || '',
           vehicle_tax_due_date: result.tax_due_date || '',
           vehicle_date_of_last_v5c_issued: result.date_of_last_v5c_issued || '',
-          vehicle_wheelplan: result.wheelplan || '', vehicle_revenue_weight: result.revenue_weight || null,
+          vehicle_wheelplan: result.wheelplan || '', vehicle_revenue_weight: result.revenue_weight || null
         }));
         setVehicleLookupError(null);
       } else {
@@ -184,32 +184,32 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
     onSubmit(submitData);
   };
 
-  const handleChange = (field, value) => setFormData(prev => ({ ...prev, [field]: value }));
-  const handleCheckboxChange = (field, checked) => setFormData(prev => ({ ...prev, [field]: checked }));
+  const handleChange = (field, value) => setFormData((prev) => ({ ...prev, [field]: value }));
+  const handleCheckboxChange = (field, checked) => setFormData((prev) => ({ ...prev, [field]: checked }));
 
   const handleIncidentLocationChange = (addressData) => handleChange('incident_location', addressData.display_name || addressData.address || '');
   const handleVehicleLocationChange = (addressData) => handleChange('vehicle_location', addressData.display_name || addressData.address || '');
 
-  const handleBodyshopChange = (bodyshop) => setFormData(prev => ({
+  const handleBodyshopChange = (bodyshop) => setFormData((prev) => ({
     ...prev, bodyshop: bodyshop.name, bodyshop_id: bodyshop.id, bodyshop_email: bodyshop.email || ''
   }));
 
   const handleClientChange = async (client) => {
     const fullAddress = [client.address_line_1, client.address_line_2, client.town, client.county, client.postcode].filter(Boolean).join(', ');
-    let geocodedLat = null, geocodedLng = null;
+    let geocodedLat = null,geocodedLng = null;
     if (fullAddress) {
       try {
         const coords = await geocodeAddress(fullAddress);
-        if (coords) { geocodedLat = coords.lat; geocodedLng = coords.lng; }
-      } catch (error) { console.error("Geocoding failed:", error); }
+        if (coords) {geocodedLat = coords.lat;geocodedLng = coords.lng;}
+      } catch (error) {console.error("Geocoding failed:", error);}
     }
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       client_name: client.name, client_id: client.id, client_phone: client.phone || '',
       client_email: client.email || '', client_address_line_1: client.address_line_1 || '',
       client_address_line_2: client.address_line_2 || '', client_town: client.town || '',
       client_county: client.county || '', client_postcode: client.postcode || '',
-      vehicle_location: fullAddress || '', client_lat: geocodedLat, client_lng: geocodedLng,
+      vehicle_location: fullAddress || '', client_lat: geocodedLat, client_lng: geocodedLng
     }));
   };
 
@@ -223,9 +223,9 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
         setIsSavingDraft(false);
         return;
       }
-      
+
       const { id: _id, created_date: _cd, updated_date: _ud, created_by: _cb, ...submitData } = formData;
-      
+
       // Generate job number if this is a new claim
       let draftData = submitData;
       if (!claim) {
@@ -238,14 +238,14 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
           console.error('Failed to generate job number:', error);
         }
       }
-      
+
       // Create or update the claim as a draft
       if (claim) {
         await base44.entities.Claim.update(claim.id, draftData);
       } else {
         await base44.entities.Claim.create(draftData);
       }
-      
+
       alert('Claim saved as draft. You can now add the client in the Clients section and return to continue.');
       onCancel();
     } catch (error) {
@@ -265,17 +265,17 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
 
   const handleTPChange = async (client) => {
     console.log('[ClaimForm] handleTPChange called');
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev, tp_name: client.name, tp_phone: client.phone || '', tp_email: client.email || '',
       tp_address_line_1: client.address_line_1 || '', tp_address_line_2: client.address_line_2 || '',
-      tp_town: client.town || '', tp_county: client.county || '', tp_postcode: client.postcode || '',
+      tp_town: client.town || '', tp_county: client.county || '', tp_postcode: client.postcode || ''
     }));
   };
 
   const handleTPVehicleLookup = async () => {
     console.log('[ClaimForm] handleTPVehicleLookup called');
     if (!formData.tp_reg || formData.tp_reg.trim().length < 3) {
-      setTpVehicleLookupError('Please enter a valid registration number'); return;
+      setTpVehicleLookupError('Please enter a valid registration number');return;
     }
     setIsLookingUpTPVehicle(true);
     setTpVehicleLookupError(null);
@@ -283,9 +283,9 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
       const response = await base44.functions.invoke('lookupVehicleData', { registrationNumber: formData.tp_reg });
       const result = response.data;
       if (result.success) {
-        setFormData(prev => ({
+        setFormData((prev) => ({
           ...prev, tp_make_model: result.make_model || '', tp_vehicle_colour: result.colour || '',
-          tp_vehicle_fuel_type: result.fuel_type || '', tp_vehicle_year_of_manufacture: result.year_of_manufacture || null,
+          tp_vehicle_fuel_type: result.fuel_type || '', tp_vehicle_year_of_manufacture: result.year_of_manufacture || null
         }));
         setTpVehicleLookupError(null);
       } else {
@@ -303,33 +303,33 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
   const { data: referrerUsers = [] } = useQuery({
     queryKey: ['users', 'company', referrerCompanyId],
     queryFn: () => base44.entities.User.filter({ company_id: referrerCompanyId }),
-    enabled: !!referrerCompanyId,
+    enabled: !!referrerCompanyId
   });
 
   const handleReferrerChange = (referrer) => {
     console.log('[ClaimForm] handleReferrerChange called');
     setReferrerCompanyId(referrer.id);
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev, referrer: referrer.name, referrer_id: referrer.id, referrer_email: referrer.email || '', file_handler: ''
     }));
   };
 
   const nextStep = () => {
     console.log('[ClaimForm] nextStep called');
-    setCurrentStep(prev => prev + 1);
+    setCurrentStep((prev) => prev + 1);
   };
   const prevStep = () => {
     console.log('[ClaimForm] prevStep called');
-    setCurrentStep(prev => prev - 1);
+    setCurrentStep((prev) => prev - 1);
   };
 
   const generateSteps = () => {
     const dynamicSteps = [
-      { title: "Basic Info", key: "basic" },
-      { title: "Referrer", key: "referrer" },
-      { title: "Client & Vehicle", key: "client_vehicle" },
-      { title: "Insurance", key: "insurance" },
-    ];
+    { title: "Basic Info", key: "basic" },
+    { title: "Referrer", key: "referrer" },
+    { title: "Client & Vehicle", key: "client_vehicle" },
+    { title: "Insurance", key: "insurance" }];
+
     if (formData.has_third_party) dynamicSteps.push({ title: "Third Party", key: "third_party" });
     if (formData.requires_indemnity) dynamicSteps.push({ title: "Indemnity", key: "indemnity" });
     dynamicSteps.push({ title: "Review", key: "review" });
@@ -337,13 +337,13 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
   };
 
   const steps = generateSteps();
-  const getStepNumber = (key) => steps.find(s => s.key === key)?.number;
+  const getStepNumber = (key) => steps.find((s) => s.key === key)?.number;
 
   // Choice screen for new claims
   if (choiceStep) {
-    const appOrigin = window.location.hostname.includes('base44.app')
-      ? `https://${window.location.hostname.replace(/^preview-sandbox--/, '')}`
-      : window.location.origin;
+    const appOrigin = window.location.hostname.includes('base44.app') ?
+    `https://${window.location.hostname.replace(/^preview-sandbox--/, '')}` :
+    window.location.origin;
     const formUrl = `${appOrigin}/client-claim-form`;
 
     return (
@@ -375,8 +375,8 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
                 <input
                   readOnly
                   value={formUrl}
-                  className="flex-1 text-xs px-3 py-2 rounded-lg bg-gray-50 border border-gray-200 text-gray-500 truncate"
-                />
+                  className="flex-1 text-xs px-3 py-2 rounded-lg bg-gray-50 border border-gray-200 text-gray-500 truncate" />
+                
                 <CopyLinkButton url={formUrl} />
               </div>
               <p className="text-xs text-blue-600 font-medium">Once sent, you can close this — no need to fill anything in.</p>
@@ -387,8 +387,8 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
 
           {/* Option 2: Upload & AI Extract */}
           <div
-            className="flex-1 neomorph-flat p-6 flex flex-col items-center text-center gap-4 border-2 border-transparent hover:border-purple-300 transition-all rounded-2xl"
-          >
+            className="flex-1 neomorph-flat p-6 flex flex-col items-center text-center gap-4 border-2 border-transparent hover:border-purple-300 transition-all rounded-2xl">
+            
             <div className="w-16 h-16 rounded-full bg-purple-600 flex items-center justify-center flex-shrink-0">
               <Sparkles className="w-8 h-8 text-white" />
             </div>
@@ -402,8 +402,8 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
                 onChange={(urls) => handleChange('file_urls', urls)}
                 enableAI={true}
                 analysisType="claim"
-                onAIExtract={(data) => { handleAIExtract(data); setEntryMode('ai'); setChoiceStep(false); }}
-              />
+                onAIExtract={(data) => {handleAIExtract(data);setEntryMode('ai');setChoiceStep(false);}} />
+              
               <p className="text-xs text-purple-600 font-medium mt-2">Upload a document above — AI will extract the details and open the form pre-filled.</p>
             </div>
           </div>
@@ -413,8 +413,8 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
           {/* Option 3: Fill in manually */}
           <div
             className="flex-1 neomorph-flat p-6 flex flex-col items-center text-center gap-4 cursor-pointer border-2 border-transparent hover:border-green-300 transition-all rounded-2xl"
-            onClick={() => { setEntryMode('manual'); setChoiceStep(false); }}
-          >
+            onClick={() => {setEntryMode('manual');setChoiceStep(false);}}>
+            
             <div className="w-16 h-16 rounded-full bg-green-600 flex items-center justify-center flex-shrink-0">
               <Check className="w-8 h-8 text-white" />
             </div>
@@ -424,15 +424,15 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
             </div>
             <Button
               type="button"
-              onClick={(e) => { e.preventDefault(); e.stopPropagation(); console.log('[ClaimForm choice] Start Wizard clicked'); setEntryMode('manual'); setChoiceStep(false); }}
-              className="mt-auto neomorph-flat px-6 py-3 font-medium text-green-600 border border-green-300 hover:bg-green-50"
-            >
+              onClick={(e) => {e.preventDefault();e.stopPropagation();console.log('[ClaimForm choice] Start Wizard clicked');setEntryMode('manual');setChoiceStep(false);}}
+              className="mt-auto neomorph-flat px-6 py-3 font-medium text-green-600 border border-green-300 hover:bg-green-50">
+              
               Start Wizard →
             </Button>
           </div>
         </div>
-      </div>
-    );
+      </div>);
+
   }
 
   // Edit mode — use extracted component
@@ -461,9 +461,9 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
         aiExtractDialog={aiExtractDialog}
         setAiExtractDialog={setAiExtractDialog}
         handleAIExtractConfirm={handleAIExtractConfirm}
-        handleAIExtract={handleAIExtract}
-      />
-    );
+        handleAIExtract={handleAIExtract} />);
+
+
   }
 
   // Wizard mode for new claims
@@ -475,18 +475,18 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
         onConfirm={handleAIExtractConfirm}
         extractedData={aiExtractDialog.data}
         existingData={formData}
-        title="AI Data Extraction"
-      />
-        {!isLoadingUser && isInternalUser && (
-          <>
+        title="AI Data Extraction" />
+      
+        {!isLoadingUser && isInternalUser &&
+      <>
             <AddInsurerModal isOpen={showInsurerModal} onClose={() => setShowInsurerModal(false)} onSuccess={handleInsurerModalSuccess} />
           </>
-        )}
+      }
 
         {/* Header & Progress */}
         <div className="neomorph p-6 flex-shrink-0">
           <div className="flex items-center gap-4 mb-6">
-            <Button onClick={(e) => { e.preventDefault(); e.stopPropagation(); console.log('[ClaimForm wizard] Back button clicked'); onCancel(); }} className="neomorph-flat p-3 transition-all active:neomorph-pressed">
+            <Button onClick={(e) => {e.preventDefault();e.stopPropagation();console.log('[ClaimForm wizard] Back button clicked');onCancel();}} className="neomorph-flat p-3 transition-all active:neomorph-pressed">
               <ArrowLeft className="w-4 h-4 text-gray-600" />
             </Button>
             <div className="flex-1">
@@ -496,34 +496,34 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
           </div>
 
           <div className="flex items-center justify-between mb-8">
-            {steps.map((step, index) => (
-              <React.Fragment key={step.number}>
+            {steps.map((step, index) =>
+          <React.Fragment key={step.number}>
                 <div className={`flex flex-col items-center ${currentStep === step.number ? 'scale-105' : ''}`}>
                   <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
-                    currentStep > step.number ? 'bg-green-600 text-white' : currentStep === step.number ? 'bg-gold text-black' : 'bg-gray-300 text-gray-600'
-                  }`}>
+              currentStep > step.number ? 'bg-green-600 text-white' : currentStep === step.number ? 'bg-gold text-black' : 'bg-gray-300 text-gray-600'}`
+              }>
                     {currentStep > step.number ? <Check className="w-5 h-5" /> : step.number}
                   </div>
                   <span className="text-xs text-gray-500 mt-2 hidden md:block">{step.title}</span>
                 </div>
-                {index < steps.length - 1 && (
-                  <div className={`flex-1 h-1 mx-2 transition-all ${currentStep > step.number ? 'bg-green-600' : 'bg-gray-300'}`} />
-                )}
+                {index < steps.length - 1 &&
+            <div className={`flex-1 h-1 mx-2 transition-all ${currentStep > step.number ? 'bg-green-600' : 'bg-gray-300'}`} />
+            }
               </React.Fragment>
-            ))}
+          )}
           </div>
         </div>
 
         <div className="flex-1 overflow-y-auto min-h-0 pr-1 pb-4">
           <div id="claim-wizard-form">
             {/* Step 1: Basic Info */}
-            {currentStep === getStepNumber("basic") && (
-              <div className="neomorph-flat p-6 space-y-6">
+            {currentStep === getStepNumber("basic") &&
+          <div className="neomorph-flat p-6 space-y-6">
                 <h3 className="text-xl font-bold text-gray-700 mb-4">Let's start with the basics</h3>
 
                 {/* Send to client + AI — only show if not in manual mode */}
-                {entryMode !== 'manual' && (
-                  <>
+                {entryMode !== 'manual' &&
+            <>
                     <ClientFormLink />
 
                     <div className="relative">
@@ -550,14 +550,14 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
                       <div className="relative flex justify-center text-sm"><span className="px-3 bg-background text-gray-500">Or enter details manually</span></div>
                     </div>
                   </>
-                )}
+            }
 
                 <div>
                   <label className="block text-sm text-gray-600 mb-2">Vehicle Registration *</label>
                   <div className="flex flex-col gap-2">
                     <div className="flex gap-2">
-                      <Input value={formData.reg} onChange={(e) => { handleChange('reg', e.target.value); setVehicleLookupError(null); }} className="neomorph-inset px-4 py-3 text-gray-700 border-0 text-lg" placeholder="e.g. AB12 CDE" required autoFocus />
-                      <Button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); console.log('[ClaimForm wizard] Vehicle Lookup clicked'); handleVehicleLookup(); }} disabled={isLookingUpVehicle || !formData.reg || formData.reg.length < 3} className="neomorph-flat px-4 py-3 whitespace-nowrap">
+                      <Input value={formData.reg} onChange={(e) => {handleChange('reg', e.target.value);setVehicleLookupError(null);}} className="neomorph-inset px-4 py-3 text-gray-700 border-0 text-lg" placeholder="e.g. AB12 CDE" required autoFocus />
+                      <Button type="button" onClick={(e) => {e.preventDefault();e.stopPropagation();console.log('[ClaimForm wizard] Vehicle Lookup clicked');handleVehicleLookup();}} disabled={isLookingUpVehicle || !formData.reg || formData.reg.length < 3} className="neomorph-flat px-4 py-3 whitespace-nowrap bg-[hsl(var(--popover))] text-[hsl(var(--primary))]">
                         {isLookingUpVehicle ? <><Loader className="w-4 h-4 animate-spin mr-2" /><span className="hidden sm:inline">Looking up...</span></> : <><Search className="w-4 h-4 sm:mr-2" /><span className="hidden sm:inline">Lookup</span></>}
                       </Button>
                     </div>
@@ -590,19 +590,19 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
                 <div><label className="block text-sm text-gray-600 mb-2">What happened?</label><Textarea value={formData.circumstances} onChange={(e) => handleChange('circumstances', e.target.value)} className="neomorph-inset px-4 py-3 text-gray-700 border-0 h-32" placeholder="Brief description of the incident..." /></div>
 
                 <div className="flex flex-col gap-3">
-                  {[['courtesy_car','courtesy_car_required','Customer needs a courtesy car'],['has_third_party','has_third_party','Third party involved'],['requires_indemnity','requires_indemnity','Indemnity details required']].map(([id, key, label]) => (
-                    <div key={id} className="flex items-center gap-3">
+                  {[['courtesy_car', 'courtesy_car_required', 'Customer needs a courtesy car'], ['has_third_party', 'has_third_party', 'Third party involved'], ['requires_indemnity', 'requires_indemnity', 'Indemnity details required']].map(([id, key, label]) =>
+              <div key={id} className="flex items-center gap-3">
                       <input type="checkbox" id={id} checked={formData[key]} onChange={(e) => handleCheckboxChange(key, e.target.checked)} className="neomorph-inset" />
                       <label htmlFor={id} className="text-sm text-gray-600">{label}</label>
                     </div>
-                  ))}
+              )}
                 </div>
               </div>
-            )}
+          }
 
             {/* Step 2: Referrer */}
-            {currentStep === getStepNumber("referrer") && (
-              <div className="neomorph-flat p-6 space-y-6">
+            {currentStep === getStepNumber("referrer") &&
+          <div className="neomorph-flat p-6 space-y-6">
                 <h3 className="text-xl font-bold text-gray-700 mb-4">Referrer Details</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div><label className="block text-sm text-gray-600 mb-2">Referrer</label><ReferrerCombobox value={formData.referrer} onChange={handleReferrerChange} /></div>
@@ -610,42 +610,42 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
                   <div><label className="block text-sm text-gray-600 mb-2">Referrer Reference</label><Input value={formData.referrer_ref} onChange={(e) => handleChange('referrer_ref', e.target.value)} className="neomorph-inset px-4 py-3 text-gray-700 border-0" /></div>
                   <div>
                     <label className="block text-sm text-gray-600 mb-2">File Handler</label>
-                    {referrerUsers.length > 0 ? (
-                      <select
-                        value={formData.file_handler}
-                        onChange={(e) => handleChange('file_handler', e.target.value)}
-                        style={{ WebkitAppearance: 'menulist', appearance: 'menulist' }}
-                        className="w-full px-4 py-3 text-gray-700 bg-white dark:bg-gray-800 dark:text-gray-100 border border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-blue-400"
-                      >
+                    {referrerUsers.length > 0 ?
+                <select
+                  value={formData.file_handler}
+                  onChange={(e) => handleChange('file_handler', e.target.value)}
+                  style={{ WebkitAppearance: 'menulist', appearance: 'menulist' }}
+                  className="w-full px-4 py-3 text-gray-700 bg-white dark:bg-gray-800 dark:text-gray-100 border border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:border-blue-400">
+                  
                         <option value="">Select a file handler...</option>
-                        {referrerUsers.map(u => (
-                          <option key={u.id} value={u.full_name}>{u.full_name}</option>
-                        ))}
-                      </select>
-                    ) : (
-                      <Input value={formData.file_handler} onChange={(e) => handleChange('file_handler', e.target.value)} className="neomorph-inset px-4 py-3 text-gray-700 border-0" placeholder="Enter file handler name" />
-                    )}
+                        {referrerUsers.map((u) =>
+                  <option key={u.id} value={u.full_name}>{u.full_name}</option>
+                  )}
+                      </select> :
+
+                <Input value={formData.file_handler} onChange={(e) => handleChange('file_handler', e.target.value)} className="neomorph-inset px-4 py-3 text-gray-700 border-0" placeholder="Enter file handler name" />
+                }
                   </div>
                 </div>
               </div>
-            )}
+          }
 
             {/* Step 3: Client & Vehicle */}
-            {currentStep === getStepNumber("client_vehicle") && (
-              <div className="neomorph-flat p-6 space-y-6">
+            {currentStep === getStepNumber("client_vehicle") &&
+          <div className="neomorph-flat p-6 space-y-6">
                 <h3 className="text-xl font-bold text-gray-700 mb-4">Client & Vehicle Details</h3>
                 <div className="space-y-4">
                   <h4 className="font-semibold text-gray-700">Client Information</h4>
                   <div>
                     <label className="block text-sm text-gray-600 mb-2">Client Name *</label>
-                    <ClientCombobox 
-                      value={formData.client_name} 
-                      onChange={handleClientChange} 
-                    />
+                    <ClientCombobox
+                  value={formData.client_name}
+                  onChange={handleClientChange} />
+                
                     <p className="text-xs text-gray-500 mt-1">
-                      {formData.client_name && !formData.client_id 
-                        ? 'Client not found — you can save this claim as a draft, add them in the Clients section, and return to continue.'
-                        : 'Search for an existing client'}
+                      {formData.client_name && !formData.client_id ?
+                  'Client not found — you can save this claim as a draft, add them in the Clients section, and return to continue.' :
+                  'Search for an existing client'}
                     </p>
                   </div>
                   <div className="neomorph-inset p-4 space-y-4">
@@ -668,8 +668,8 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
                     <div><label className="block text-xs text-gray-500 mb-1">VAT Status</label><select value={formData.client_vat_status} onChange={(e) => handleChange('client_vat_status', e.target.value)} className="neomorph-inset w-full px-3 py-2 text-sm text-gray-700 border-0 rounded-xl"><option>VAT Registered</option><option>Non-VAT</option><option>Unknown</option></select></div>
                   </div>
                   <div><label className="block text-sm text-gray-600 mb-2">Driver/Contact Name</label><Input value={formData.driver_contact_name} onChange={(e) => handleChange('driver_contact_name', e.target.value)} className="neomorph-inset px-4 py-3 text-gray-700 border-0" placeholder="If different from client" /></div>
-                  {formData.driver_contact_name && (
-                    <div className="space-y-4 pt-2 border-t border-gray-200">
+                  {formData.driver_contact_name &&
+              <div className="space-y-4 pt-2 border-t border-gray-200">
                       <h5 className="font-semibold text-gray-600">Driver Contact Details</h5>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div><label className="block text-xs text-gray-500 mb-1">Phone</label><Input value={formData.driver_contact_phone} onChange={(e) => handleChange('driver_contact_phone', e.target.value)} className="neomorph-inset px-3 py-2 text-sm text-gray-700 border-0" /></div>
@@ -683,23 +683,23 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
                         <div><label className="block text-xs text-gray-500 mb-1">Postcode</label><Input value={formData.driver_contact_postcode} onChange={(e) => handleChange('driver_contact_postcode', e.target.value)} className="neomorph-inset px-3 py-2 text-sm text-gray-700 border-0" /></div>
                       </div>
                     </div>
-                  )}
+              }
                   </div>
 
                 <div className="space-y-4">
                   <h4 className="font-semibold text-gray-700">Vehicle Information</h4>
-                  {formData.make_model ? (
-                    <div className="neomorph-inset p-4">
+                  {formData.make_model ?
+              <div className="neomorph-inset p-4">
                       <div className="flex items-center gap-2 mb-2"><div className="w-2 h-2 rounded-full bg-green-500"></div><p className="text-xs text-green-600 font-medium">Vehicle details from DVLA</p></div>
                       <div className="grid grid-cols-3 gap-4">
                         <div><p className="text-xs text-gray-500 mb-1">Make & Model</p><p className="font-medium text-gray-700">{formData.make_model}</p></div>
                         {formData.vehicle_colour && <div><p className="text-xs text-gray-500 mb-1">Colour</p><p className="font-medium text-gray-700">{formData.vehicle_colour}</p></div>}
                         {formData.vehicle_year_of_manufacture && <div><p className="text-xs text-gray-500 mb-1">Year</p><p className="font-medium text-gray-700">{formData.vehicle_year_of_manufacture}</p></div>}
                       </div>
-                    </div>
-                  ) : (
-                    <div className="neomorph-inset p-4 text-center text-sm text-gray-500">No vehicle details captured yet. Use the DVLA lookup in Step 1.</div>
-                  )}
+                    </div> :
+
+              <div className="neomorph-inset p-4 text-center text-sm text-gray-500">No vehicle details captured yet. Use the DVLA lookup in Step 1.</div>
+              }
                   <div><label className="block text-sm text-gray-600 mb-2">Vehicle Type</label><select value={formData.vehicle_type} onChange={(e) => handleChange('vehicle_type', e.target.value)} className="neomorph-inset w-full px-4 py-3 text-gray-700 border-0 rounded-xl"><option>Car</option><option>Van</option><option>Motorcycle</option><option>HGV</option><option>Other</option></select></div>
                   <div><label className="block text-sm text-gray-600 mb-2">Vehicle Location</label><AddressLookupInput value={formData.vehicle_location} onChange={handleVehicleLocationChange} placeholder="Where is the vehicle now..." className="neomorph-inset" /></div>
                   <div><label className="block text-sm text-gray-600 mb-2">Damage Description</label><Textarea value={formData.vehicle_damage} onChange={(e) => handleChange('vehicle_damage', e.target.value)} className="neomorph-inset px-4 py-3 text-gray-700 border-0 h-24" placeholder="Describe the damage..." /></div>
@@ -709,31 +709,31 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
                   </div>
                 </div>
               </div>
-            )}
+          }
 
             {/* Step 4: Insurance */}
-            {currentStep === getStepNumber("insurance") && (
-              <div className="neomorph-flat p-6 space-y-6">
+            {currentStep === getStepNumber("insurance") &&
+          <div className="neomorph-flat p-6 space-y-6">
                 <h3 className="text-xl font-bold text-gray-700 mb-4">Insurance Details</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm text-gray-600 mb-2">Insurer</label>
-                    <InsurerCombobox 
-                      value={formData.insurer} 
-                      onChange={(v) => handleChange('insurer', v)} 
-                      onAddNew={() => setShowInsurerModal(true)}
-                    />
+                    <InsurerCombobox
+                  value={formData.insurer}
+                  onChange={(v) => handleChange('insurer', v)}
+                  onAddNew={() => setShowInsurerModal(true)} />
+                
                   </div>
                   <div><label className="block text-sm text-gray-600 mb-2">Claim Reference</label><Input value={formData.claim_ref} onChange={(e) => handleChange('claim_ref', e.target.value)} className="neomorph-inset px-4 py-3 text-gray-700 border-0" /></div>
                   <div><label className="block text-sm text-gray-600 mb-2">Policy Number</label><Input value={formData.policy_number} onChange={(e) => handleChange('policy_number', e.target.value)} className="neomorph-inset px-4 py-3 text-gray-700 border-0" /></div>
-                  <div><label className="block text-sm text-gray-600 mb-2">Policy Excess (£)</label><Input type="text" inputMode="decimal" value={formData.policy_excess || ''} onChange={(e) => { const v = e.target.value; if (v === '' || /^\d*\.?\d*$/.test(v)) handleChange('policy_excess', v === '' ? 0 : parseFloat(v) || 0); }} className="neomorph-inset px-4 py-3 text-gray-700 border-0" placeholder="0.00" /></div>
+                  <div><label className="block text-sm text-gray-600 mb-2">Policy Excess (£)</label><Input type="text" inputMode="decimal" value={formData.policy_excess || ''} onChange={(e) => {const v = e.target.value;if (v === '' || /^\d*\.?\d*$/.test(v)) handleChange('policy_excess', v === '' ? 0 : parseFloat(v) || 0);}} className="neomorph-inset px-4 py-3 text-gray-700 border-0" placeholder="0.00" /></div>
                 </div>
               </div>
-            )}
+          }
 
             {/* Step: Third Party */}
-            {formData.has_third_party && currentStep === getStepNumber("third_party") && (
-              <div className="neomorph-flat p-6 space-y-6">
+            {formData.has_third_party && currentStep === getStepNumber("third_party") &&
+          <div className="neomorph-flat p-6 space-y-6">
                 <h3 className="text-xl font-bold text-gray-700 mb-4">Third Party Details</h3>
                 <div className="neomorph-inset p-4 space-y-4">
                   <h4 className="font-semibold text-gray-700">Contact Details</h4>
@@ -754,8 +754,8 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
                 <div className="neomorph-inset p-4 space-y-4">
                   <h4 className="font-semibold text-gray-700">Vehicle Details</h4>
                   <div className="flex gap-2">
-                    <Input value={formData.tp_reg} onChange={(e) => { handleChange('tp_reg', e.target.value.toUpperCase()); setTpVehicleLookupError(null); }} className="neomorph-inset px-4 py-3 text-gray-700 border-0 flex-1" placeholder="e.g. AB12 CDE" />
-                    <Button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); console.log('[ClaimForm wizard] TP Vehicle Lookup clicked'); handleTPVehicleLookup(); }} disabled={isLookingUpTPVehicle || !formData.tp_reg || formData.tp_reg.length < 3} className="neomorph-flat px-4 py-3">
+                    <Input value={formData.tp_reg} onChange={(e) => {handleChange('tp_reg', e.target.value.toUpperCase());setTpVehicleLookupError(null);}} className="neomorph-inset px-4 py-3 text-gray-700 border-0 flex-1" placeholder="e.g. AB12 CDE" />
+                    <Button type="button" onClick={(e) => {e.preventDefault();e.stopPropagation();console.log('[ClaimForm wizard] TP Vehicle Lookup clicked');handleTPVehicleLookup();}} disabled={isLookingUpTPVehicle || !formData.tp_reg || formData.tp_reg.length < 3} className="neomorph-flat px-4 py-3">
                       {isLookingUpTPVehicle ? <><Loader className="w-4 h-4 animate-spin mr-2" /><span className="hidden sm:inline">Looking up...</span></> : <><Search className="w-4 h-4 sm:mr-2" /><span className="hidden sm:inline">Lookup</span></>}
                     </Button>
                   </div>
@@ -770,25 +770,25 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
                   <div><label className="block text-sm text-gray-600 mb-2">Third Party Damage</label><Textarea value={formData.tp_vehicle_damage} onChange={(e) => handleChange('tp_vehicle_damage', e.target.value)} className="neomorph-inset px-4 py-3 text-gray-700 border-0 h-20" /></div>
                 </div>
               </div>
-            )}
+          }
 
             {/* Step: Indemnity */}
-            {formData.requires_indemnity && currentStep === getStepNumber("indemnity") && (
-              <ClaimIndemnityFields formData={formData} handleChange={handleChange} />
-            )}
+            {formData.requires_indemnity && currentStep === getStepNumber("indemnity") &&
+          <ClaimIndemnityFields formData={formData} handleChange={handleChange} />
+          }
 
             {/* Final Step: Review */}
-            {currentStep === steps.length && (
-              <div className="neomorph-flat p-6 space-y-6">
+            {currentStep === steps.length &&
+          <div className="neomorph-flat p-6 space-y-6">
                 <h3 className="text-xl font-bold text-gray-700 mb-4">Review & Create</h3>
                 <p className="text-sm text-gray-500 mb-6">Check the details below. You can add bodyshop and other details after creating the claim.</p>
                 <div className="space-y-4">
-                  {[['Vehicle Registration', formData.reg, true],['Claim Type', formData.claim_type],['Client', formData.client_name || 'Not specified'],['Vehicle', formData.make_model || 'Not specified']].map(([label, value, isGold]) => (
-                    <div key={label} className="neomorph-inset p-4">
+                  {[['Vehicle Registration', formData.reg, true], ['Claim Type', formData.claim_type], ['Client', formData.client_name || 'Not specified'], ['Vehicle', formData.make_model || 'Not specified']].map(([label, value, isGold]) =>
+              <div key={label} className="neomorph-inset p-4">
                       <p className="text-sm text-gray-500 mb-2">{label}</p>
                       <p className={`font-medium ${isGold ? 'font-bold text-lg text-gold' : 'text-gray-700'}`}>{value}</p>
                     </div>
-                  ))}
+              )}
                   {formData.insurer && <div className="neomorph-inset p-4"><p className="text-sm text-gray-500 mb-2">Insurer</p><p className="font-medium text-gray-700">{formData.insurer}</p></div>}
                   {formData.referrer && <div className="neomorph-inset p-4"><p className="text-sm text-gray-500 mb-2">Referrer</p><p className="font-medium text-gray-700">{formData.referrer}</p></div>}
                   {formData.has_third_party && formData.tp_name && <div className="neomorph-inset p-4"><p className="text-sm text-gray-500 mb-2">Third Party</p><p className="font-medium text-gray-700">{formData.tp_name}</p></div>}
@@ -802,38 +802,38 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
                   <FileUpload value={Array.isArray(formData.file_urls) ? formData.file_urls : []} onChange={(urls) => handleChange('file_urls', urls)} enableAI={true} analysisType="claim" onAIExtract={handleAIExtract} />
                 </div>
               </div>
-            )}
+          }
 
           </div>
         </div>
 
         {/* Navigation — outside scroll area so always visible */}
         <div className="flex justify-between pt-3 pb-2 flex-shrink-0 gap-3">
-          {currentStep > 1 && (
-            <Button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); console.log('[ClaimForm nav] Previous clicked'); prevStep(); }} className="neomorph-flat px-6 py-3 font-medium text-gray-700 transition-all active:neomorph-pressed flex items-center gap-2">
+          {currentStep > 1 &&
+        <Button type="button" onClick={(e) => {e.preventDefault();e.stopPropagation();console.log('[ClaimForm nav] Previous clicked');prevStep();}} className="neomorph-flat px-6 py-3 font-medium text-gray-700 transition-all active:neomorph-pressed flex items-center gap-2">
               <ArrowLeft className="w-4 h-4" /> Previous
             </Button>
-          )}
-          <Button 
-            type="button" 
-            onClick={(e) => { e.preventDefault(); e.stopPropagation(); console.log('[ClaimForm nav] Save Draft clicked'); handleSaveDraft(); }} 
-            disabled={isSavingDraft || !formData.reg}
-            className="neomorph-flat px-6 py-3 font-medium text-blue-600 transition-all active:neomorph-pressed flex items-center gap-2 disabled:opacity-60"
-          >
+        }
+          <Button
+          type="button"
+          onClick={(e) => {e.preventDefault();e.stopPropagation();console.log('[ClaimForm nav] Save Draft clicked');handleSaveDraft();}}
+          disabled={isSavingDraft || !formData.reg}
+          className="neomorph-flat px-6 py-3 font-medium text-blue-600 transition-all active:neomorph-pressed flex items-center gap-2 disabled:opacity-60">
+          
             {isSavingDraft ? <><Loader className="w-4 h-4 animate-spin" /> Saving...</> : <>💾 Save Draft</>}
           </Button>
           <div className="flex-1" />
-          {currentStep < steps.length && (
-            <Button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); console.log('[ClaimForm nav] Next clicked'); nextStep(); }} className="neomorph-flat px-6 py-3 font-medium text-blue-600 transition-all active:neomorph-pressed flex items-center gap-2" disabled={currentStep === getStepNumber("basic") && !formData.reg}>
+          {currentStep < steps.length &&
+        <Button type="button" onClick={(e) => {e.preventDefault();e.stopPropagation();console.log('[ClaimForm nav] Next clicked');nextStep();}} className="neomorph-flat px-6 py-3 font-medium text-blue-600 transition-all active:neomorph-pressed flex items-center gap-2" disabled={currentStep === getStepNumber("basic") && !formData.reg}>
               Next <ArrowRight className="w-4 h-4" />
             </Button>
-          )}
-          {currentStep === steps.length && (
-            <Button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); console.log('[ClaimForm nav] Create Claim clicked'); handleSubmit(e); }} disabled={isSubmitting || isCreating} className="neomorph-flat px-8 py-3 font-medium text-gold transition-all active:neomorph-pressed flex items-center gap-2 disabled:opacity-60">
-              {(isSubmitting || isCreating) ? <><Loader className="w-4 h-4 animate-spin" /> Creating...</> : <><Check className="w-5 h-5" /> Create Claim</>}
+        }
+          {currentStep === steps.length &&
+        <Button type="button" onClick={(e) => {e.preventDefault();e.stopPropagation();console.log('[ClaimForm nav] Create Claim clicked');handleSubmit(e);}} disabled={isSubmitting || isCreating} className="neomorph-flat px-8 py-3 font-medium text-gold transition-all active:neomorph-pressed flex items-center gap-2 disabled:opacity-60">
+              {isSubmitting || isCreating ? <><Loader className="w-4 h-4 animate-spin" /> Creating...</> : <><Check className="w-5 h-5" /> Create Claim</>}
             </Button>
-          )}
+        }
         </div>
-    </div>
-  );
+    </div>);
+
 }
