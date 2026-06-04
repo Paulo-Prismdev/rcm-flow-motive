@@ -231,7 +231,18 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
 
   const handleClientModalSuccess = (newClient) => {
     queryClient.invalidateQueries({ queryKey: ['clients'] });
-    handleClientChange(newClient);
+    // newClient is the full object from AddClientModal
+    setFormData(prev => ({
+      ...prev,
+      client_name: newClient.name,
+      client_id: newClient.id,
+      client_phone: newClient.phone || '',
+      client_email: newClient.email || '',
+      client_address_line_1: newClient.address_line_1 || '',
+      client_town: newClient.town || '',
+      client_county: newClient.county || '',
+      client_postcode: newClient.postcode || '',
+    }));
     setShowClientModal(false);
   };
 

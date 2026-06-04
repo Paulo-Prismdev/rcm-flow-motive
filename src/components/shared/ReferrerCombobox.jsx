@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -17,9 +17,12 @@ import {
 } from "@/components/ui/popover";
 import { Check, ChevronsUpDown, Plus, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import AddReferrerModal from "./AddReferrerModal";
 
 export default function ReferrerCombobox({ value, onChange, onAddNew }) {
   const [open, setOpen] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const queryClient = useQueryClient();
 
   const { data: companies = [], isLoading } = useQuery({
     queryKey: ["companies", "referrer"],
@@ -47,8 +50,20 @@ export default function ReferrerCombobox({ value, onChange, onAddNew }) {
     setOpen(false);
   };
 
+  const handleAddSuccess = (newReferrer) => {
+    queryClient.invalidateQueries({ queryKey: ["companies", "referrer"] });
+    onChange({
+      id: newReferrer.id,
+      name: newReferrer.name,
+      email: newReferrer.contact_email || '',
+    });
+    setShowAddModal(false);
+  };
+
   return (
-    <div className="flex gap-2 items-center">
+    <>
+      <AddReferrerModal isOpen={showAddModal} onClose={() => setShowAddModal(false)} onSuccess={handleAddSuccess} />
+      <div className="flex gap-2 items-center">
       <div className="relative flex-1">
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
@@ -113,6 +128,7 @@ export default function ReferrerCombobox({ value, onChange, onAddNew }) {
           <Plus className="w-4 h-4" /> Add New
         </Button>
       )}
-    </div>
+      </div>
+    </>
   );
 }
