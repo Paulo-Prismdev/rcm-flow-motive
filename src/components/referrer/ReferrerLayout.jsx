@@ -1,13 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
-import { LogOut, User, Briefcase, Sun, Moon, Menu, X } from 'lucide-react';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { LogOut, User, Sun, Moon, Menu, X, Search, RefreshCw, Bell, FileText } from 'lucide-react';
 import { StatusConfigProvider } from '../shared/StatusConfigContext';
 
 export default function ReferrerLayout({ children }) {
@@ -44,274 +38,119 @@ export default function ReferrerLayout({ children }) {
 
   return (
     <StatusConfigProvider>
-    <div className="h-screen flex flex-col bg-background text-foreground overflow-hidden">
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
-        :root {
-          --background: #f8f9fa;
-          --surface: #ffffff;
-          --surface-elevated: #ffffff;
-          --surface-hover: #f1f3f5;
-          --foreground: #1a1a1a;
-          --foreground-muted: #6c757d;
-          --foreground-subtle: #adb5bd;
-          --accent: #00ff00;
-          --accent-hover: #00cc00;
-          --accent-foreground: #000000;
-          --border: #dee2e6;
-          --border-strong: #ced4da;
-          --glass-bg: rgba(255, 255, 255, 0.85);
-          --glass-border: rgba(0, 0, 0, 0.08);
-          --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
-          --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.08);
-          --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.1);
-        }
-
-        [data-theme="dark"] {
-          --background: #070d1a;
-          --surface: #0f1829;
-          --surface-elevated: #182035;
-          --surface-hover: #1e2a45;
-          --foreground: #f1f5f9;
-          --foreground-muted: #cbd5e1;
-          --foreground-subtle: #64748b;
-          --accent: #00ff00;
-          --accent-hover: #00cc00;
-          --accent-foreground: #000000;
-          --border: #334155;
-          --border-strong: #475569;
-          --glass-bg: rgba(30, 41, 59, 0.85);
-          --glass-border: rgba(255, 255, 255, 0.08);
-          --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
-          --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
-          --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.5);
-        }
-
-        body {
-          font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-          background: var(--background);
-          color: var(--foreground);
-        }
-
-        .neomorph {
-          background: var(--glass-bg);
-          backdrop-filter: blur(20px);
-          border: 1px solid var(--glass-border);
-          border-radius: 16px;
-          box-shadow: var(--shadow-md);
-        }
-
-        .neomorph-flat {
-          background: var(--surface);
-          border: 1px solid var(--border);
-          border-radius: 12px;
-          box-shadow: var(--shadow-sm);
-        }
-
-        .neomorph-inset {
-          background: var(--surface);
-          border: 1px solid var(--border);
-          border-radius: 12px;
-          box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
-        }
-
-        .header-glass {
-          background: #151d44;
-          backdrop-filter: blur(24px);
-          -webkit-backdrop-filter: blur(24px);
-          border: 1px solid rgba(255,255,255,0.08);
-          border-radius: 20px;
-          box-shadow: var(--shadow-lg);
-        }
-
-        .glass-button {
-          background: rgba(255,255,255,0.08);
-          border: 1px solid rgba(255,255,255,0.15);
-          border-radius: 12px;
-          box-shadow: var(--shadow-sm);
-          transition: all 0.2s ease;
-          cursor: pointer;
-          color: rgba(255,255,255,0.9) !important;
-        }
-
-        .glass-button:hover {
-          background: rgba(255,255,255,0.16);
-          border-color: rgba(255,255,255,0.25);
-          box-shadow: var(--shadow-md);
-          transform: translateY(-1px);
-        }
-
-        .surface-button {
-          background: var(--surface);
-          border: 1px solid var(--border);
-          border-radius: 12px;
-          box-shadow: var(--shadow-sm);
-          transition: all 0.2s ease;
-          cursor: pointer;
-          color: var(--foreground);
-        }
-
-        .surface-button:hover {
-          background: var(--surface-hover);
-          border-color: var(--border-strong);
-          box-shadow: var(--shadow-md);
-        }
-
-        .mobile-menu-overlay {
-          position: fixed;
-          inset: 0;
-          background: rgba(0, 0, 0, 0.5);
-          z-index: 40;
-        }
-
-        .mobile-menu {
-          position: fixed;
-          top: 0;
-          left: 0;
-          bottom: 0;
-          width: 80%;
-          max-width: 320px;
-          background: var(--glass-bg);
-          backdrop-filter: blur(24px);
-          border-right: 1px solid var(--border-strong);
-          box-shadow: var(--shadow-lg);
-          z-index: 50;
-          transform: translateX(-100%);
-          transition: transform 0.3s ease;
-          overflow-y: auto;
-          display: flex;
-          flex-direction: column;
-        }
-
-        .mobile-menu.open {
-          transform: translateX(0);
-        }
-      `}</style>
-
-      {/* Mobile Menu */}
-      {mobileMenuOpen && (
-        <>
-          <div 
-            className="mobile-menu-overlay md:hidden" 
+    <div className="flex overflow-hidden bg-gray-100 dark:bg-gray-950" style={{ height: '100dvh' }}>
+      {/* SIDEBAR */}
+      <aside className={`
+        fixed inset-y-0 left-0 z-[9999] flex flex-col
+        w-56 bg-[#131d47] text-white
+        transition-transform duration-300
+        ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
+        lg:relative lg:translate-x-0 lg:flex-shrink-0
+      `}>
+        {/* Logo */}
+        <div className="flex items-center gap-3 px-4 py-3.5 border-b border-white/10">
+          <img src="https://media.base44.com/images/public/68ee39fb8915b1b539e13c59/b2cb057e2_RCMAutomotiveLogoGreenAutomotivewithHLights.jpg" alt="RCM" className="h-8 w-auto object-contain" />
+          <button
             onClick={() => setMobileMenuOpen(false)}
-          />
-          <div className={`mobile-menu md:hidden ${mobileMenuOpen ? 'open' : ''}`}>
-            <div className="p-4 border-b border-border flex items-center justify-between">
-              <h2 className="font-bold text-lg">Menu</h2>
-              <button onClick={() => setMobileMenuOpen(false)} className="surface-button w-10 h-10 flex items-center justify-center">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
+            className="ml-auto lg:hidden text-white/60 hover:text-white">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
 
-            {/* User Profile Card */}
-            {currentUser && (
-              <div className="p-4 border-b border-border">
-                <div className="neomorph-flat p-4 rounded-xl">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-12 h-12 rounded-full bg-accent flex items-center justify-center">
-                      <span className="text-base font-bold text-accent-foreground">
-                        {currentUser.full_name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || '?'}
-                      </span>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-bold truncate">{currentUser.full_name || 'User'}</p>
-                      <p className="text-xs text-foreground-muted truncate">{currentUser.email}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Theme Toggle */}
-            <div className="p-4 border-b border-border">
-              <button
-                onClick={toggleTheme}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl surface-button"
-              >
-                {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-                <span className="font-medium">{isDark ? 'Light Mode' : 'Dark Mode'}</span>
-              </button>
-            </div>
-
-            {/* Logout Button */}
-            <div className="p-4 mt-auto border-t border-border">
-              <button
-                onClick={() => base44.auth.logout()}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl surface-button text-red-500 font-medium"
-              >
-                <LogOut className="w-5 h-5" />
-                Log Out
-              </button>
-            </div>
+        {/* Nav links */}
+        <nav className="flex-1 overflow-y-auto py-4 px-2 space-y-0.5" style={{ WebkitOverflowScrolling: 'touch' }}>
+          <div className="flex items-center gap-3 px-3 py-2 rounded-[10px] text-sm font-medium bg-white/10 text-white border border-white/15">
+            <FileText className="w-4 h-4 flex-shrink-0" />
+            <span>Claims</span>
+            <div className="w-3 h-3 ml-auto opacity-60" />
           </div>
-        </>
-      )}
+        </nav>
 
-      {/* Header */}
-      <header className="header-glass mx-2 md:mx-3 mt-2 md:mt-3 p-3 md:p-4 flex-shrink-0">
-        <div className="flex items-center justify-between gap-2">
-          {/* Left: Burger (mobile) + Referrer Portal badge */}
-          <div className="flex items-center gap-2 md:gap-4 min-w-0 flex-1">
-            {/* Mobile Burger */}
-            <button
-              onClick={() => setMobileMenuOpen(true)}
-              className="glass-button w-10 h-10 flex items-center justify-center flex-shrink-0 md:hidden"
-            >
-              <Menu className="w-4 h-4" />
-            </button>
-
-            <span className="text-xs px-2 py-1 rounded-full font-medium" style={{ background: 'rgba(0,255,0,0.15)', color: '#00ff00' }}>
-              Referrer Portal
-            </span>
-          </div>
-          
-          {/* Right: Referrer name + Desktop controls */}
+        {/* User footer */}
+        <div className="border-t border-white/10 px-3 py-3">
           <div className="flex items-center gap-3">
-            {referrer && (
-              <span className="hidden sm:inline text-sm font-medium" style={{ color: 'rgba(255,255,255,0.9)' }}>
-                {referrer.name}
+            <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 bg-white/20 flex items-center justify-center">
+              <span className="text-sm font-bold text-white">
+                {currentUser?.full_name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || '?'}
               </span>
-            )}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-white truncate">{currentUser?.full_name || 'User'}</p>
+              <p className="text-xs text-white/40 truncate">{currentUser?.email || ''}</p>
+            </div>
+          </div>
+        </div>
+      </aside>
 
+      {/* Mobile overlay */}
+      {mobileMenuOpen &&
+        <div
+          className="fixed inset-0 z-[9998] bg-black/50 lg:hidden"
+          onClick={() => setMobileMenuOpen(false)} />
+      }
+
+      {/* MAIN CONTENT */}
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+        {/* TOP BAR */}
+        <header className="hidden lg:flex flex-shrink-0 dark:bg-gray-900/95 border-b border-gray-100 dark:border-gray-800/80 items-center gap-3 px-5 relative z-30 backdrop-blur-sm bg-[hsl(var(--background))]" style={{ height: '48px', minHeight: '48px' }}>
+          <div className="flex-1" />
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => window.location.reload()}
+              className="p-1.5 rounded-[10px] text-gray-400 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-gray-200 transition-colors"
+              title="Refresh">
+              <RefreshCw className="w-4 h-4" />
+            </button>
+            <button
+              className="p-1.5 rounded-[10px] text-gray-400 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-gray-200 transition-colors"
+              title="Search">
+              <Search className="w-4 h-4" />
+            </button>
             <button
               onClick={toggleTheme}
-              className="glass-button w-10 h-10 flex items-center justify-center"
-              title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-            >
+              className="p-1.5 rounded-[10px] text-gray-400 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-gray-200 transition-colors">
               {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </button>
+            <button
+              className="p-1.5 rounded-[10px] text-gray-400 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-gray-200 transition-colors"
+              title="Notifications">
+              <Bell className="w-4 h-4" />
+            </button>
+          </div>
+        </header>
 
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="glass-button w-10 h-10 flex items-center justify-center">
-                  <User className="w-4 h-4" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <div className="p-3 border-b border-border">
-                  <p className="font-medium">{currentUser?.full_name}</p>
-                  <p className="text-xs text-foreground-muted">{currentUser?.email}</p>
-                </div>
-                <DropdownMenuItem 
-                  onClick={() => base44.auth.logout()}
-                  className="cursor-pointer text-red-500"
-                >
-                  <LogOut className="w-4 h-4 mr-2" />
-                  Log Out
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+        {/* Mobile bottom tab bar */}
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 flex items-center justify-around px-2 safe-area-inset-bottom" style={{ height: '60px', zIndex: 1000 }}>
+          <button onClick={() => setMobileMenuOpen((prev) => !prev)} className="flex flex-col items-center justify-center gap-0.5 p-3 text-gray-500 dark:text-gray-400 touch-manipulation min-w-[44px] min-h-[44px]">
+            <Menu className="w-5 h-5" />
+            <span className="text-[9px]">Menu</span>
+          </button>
+          <button className="flex flex-col items-center justify-center gap-0.5 p-3 text-gray-500 dark:text-gray-400 touch-manipulation min-w-[44px] min-h-[44px]">
+            <Search className="w-5 h-5" />
+            <span className="text-[9px]">Search</span>
+          </button>
+          <button onClick={() => window.location.reload()} className="flex flex-col items-center justify-center gap-0.5 p-3 text-gray-500 dark:text-gray-400 touch-manipulation min-w-[44px] min-h-[44px]">
+            <RefreshCw className="w-5 h-5" />
+            <span className="text-[9px]">Refresh</span>
+          </button>
+          <div className="flex flex-col items-center justify-center gap-0.5 touch-manipulation min-w-[44px] min-h-[44px]">
+            <button onClick={toggleTheme} className="text-gray-500 dark:text-gray-400">
+              {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            </button>
+            <span className="text-[9px] text-gray-500">Theme</span>
+          </div>
+          <div className="flex flex-col items-center justify-center gap-0.5 touch-manipulation min-w-[44px] min-h-[44px]">
+            <Bell className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+            <span className="text-[9px] text-gray-500">Alerts</span>
           </div>
         </div>
-      </header>
 
-      {/* Main Content */}
-      <main className="px-2 md:px-3 pb-3 md:pb-4 flex-1 overflow-y-auto min-h-0">
-        <div className="max-w-full mx-auto h-full">
+        {/* Page content */}
+        <main className="flex-1 overflow-hidden p-3 lg:p-4 min-h-0 relative lg:pb-4 pb-16" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'auto' }}>
+
           {children}
-        </div>
-      </main>
+        </main>
+      </div>
     </div>
     </StatusConfigProvider>
   );
