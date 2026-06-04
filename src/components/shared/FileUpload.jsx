@@ -246,95 +246,43 @@ export default function FileUpload({
 
         {(value || []).length > 0 && (
           <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <h4 className="text-sm font-medium text-gray-600">Uploaded Files:</h4>
-                {enableAI && onAIExtract && (value || []).length > 0 && (
-                  <div className="px-3 py-2 rounded-lg relative overflow-hidden">
-                    {/* Solid gradient background */}
-                    <div 
-                      className="absolute inset-0 opacity-100"
-                      style={{
-                        background: 'linear-gradient(135deg, rgba(147, 51, 234, 0.15) 0%, rgba(236, 72, 153, 0.15) 100%)',
-                      }}
-                    />
-                    {/* Border with gradient */}
-                    <div 
-                      className="absolute inset-0 rounded-lg"
-                      style={{
-                        border: '2px solid',
-                        borderImage: 'linear-gradient(135deg, #9333ea, #ec4899) 1',
-                        borderRadius: '8px'
-                      }}
-                    />
-                    {/* Content */}
-                    <div className="relative z-10 flex items-center gap-2">
-                      <Sparkles className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400 animate-pulse" />
-                      <span className="text-xs font-bold text-gray-900 dark:text-white">AI Ready</span>
-                    </div>
-                  </div>
-                )}
+            <div className="flex items-center justify-between mb-1">
+              <h4 className="text-xs font-semibold uppercase tracking-wider text-gray-400">Uploaded Files</h4>
+              {enableAI && onAIExtract && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-purple-50 dark:bg-purple-900/30 border border-purple-200 dark:border-purple-700 text-purple-700 dark:text-purple-300 text-xs font-medium">
+                  <Sparkles className="w-3 h-3 animate-pulse" />
+                  AI Ready
+                </span>
+              )}
+            </div>
+            {(value || []).map((url, index) => (
+              <div key={index} className="flex items-center gap-2 px-3 py-2.5 bg-gray-50 dark:bg-gray-800/40 border border-gray-200 dark:border-gray-700 rounded-xl">
+                <FileText className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                <span className="text-sm text-gray-700 dark:text-gray-300 truncate flex-1 min-w-0">{getFileName(url)}</span>
+                <div className="flex items-center gap-1 flex-shrink-0">
+                  {enableAI && onAIExtract && (
+                    <Button
+                      size="sm"
+                      onClick={() => handleAIAnalysis(url)}
+                      disabled={analyzingFile === url}
+                      className="h-7 gap-1.5 px-2.5 bg-purple-600 hover:bg-purple-700 text-white text-xs font-semibold rounded-lg shadow-sm disabled:opacity-60"
+                    >
+                      {analyzingFile === url ? (
+                        <><Loader className="w-3 h-3 animate-spin" />Analyzing...</>
+                      ) : (
+                        <><Sparkles className="w-3 h-3" />Analyze</>
+                      )}
+                    </Button>
+                  )}
+                  <Button variant="ghost" size="icon" onClick={() => setViewingFile(url)} className="h-7 w-7 text-gray-400 hover:text-gray-600">
+                    <Eye className="w-3.5 h-3.5" />
+                  </Button>
+                  <Button variant="ghost" size="icon" onClick={() => handleRemoveFile(url)} className="h-7 w-7 text-gray-400 hover:text-red-500">
+                    <X className="w-3.5 h-3.5" />
+                  </Button>
+                </div>
               </div>
-              {(value || []).map((url, index) => (
-                  <div key={index} className="neomorph-flat p-3 flex items-center justify-between text-sm gap-3 min-w-0 overflow-hidden">
-                      <div className="flex items-center gap-2 truncate flex-grow min-w-0">
-                          <FileText className="w-4 h-4 flex-shrink-0" />
-                          <span className="truncate">{getFileName(url)}</span>
-                      </div>
-                      <div className="flex items-center gap-1 flex-shrink-0">
-                        {enableAI && onAIExtract && (
-                          <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleAIAnalysis(url)}
-                              disabled={analyzingFile === url}
-                              className="h-9 px-4 font-bold rounded-lg transition-all duration-300 relative overflow-hidden group"
-                              style={{
-                                background: analyzingFile === url 
-                                  ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
-                                  : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                                border: 'none',
-                                boxShadow: '0 4px 15px 0 rgba(116, 75, 162, 0.4), 0 0 20px rgba(102, 126, 234, 0.3)',
-                                color: 'white'
-                              }}
-                              title="Analyze with AI"
-                          >
-                              {/* Animated shine effect */}
-                              <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></span>
-                              
-                              <span className="relative flex items-center gap-2">
-                                {analyzingFile === url ? (
-                                  <>
-                                    <Loader className="w-4 h-4 animate-spin" />
-                                    <span className="text-xs">Analyzing...</span>
-                                  </>
-                                ) : (
-                                  <>
-                                    <Sparkles className="w-4 h-4 animate-pulse" />
-                                    <span className="text-xs">AI Analyze</span>
-                                  </>
-                                )}
-                              </span>
-                          </Button>
-                        )}
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => setViewingFile(url)}
-                            className="h-8 w-8"
-                        >
-                            <Eye className="w-4 h-4" />
-                        </Button>
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleRemoveFile(url)}
-                            className="h-8 w-8 hover:text-red-600"
-                        >
-                            <X className="w-4 h-4" />
-                        </Button>
-                      </div>
-                  </div>
-              ))}
+            ))}
           </div>
         )}
       </div>
