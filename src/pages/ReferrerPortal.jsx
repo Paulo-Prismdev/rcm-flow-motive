@@ -138,22 +138,8 @@ export default function ReferrerPortal() {
       {currentUser?.show_feedback_prompt && (
         <FeedbackModal user={currentUser} onClose={() => {}} />
       )}
-      <div className="h-full flex gap-0 min-h-0 overflow-hidden">
-        {/* Sidebar - matching internal app */}
-        <aside className="hidden lg:flex flex-col w-56 bg-[#131d47] text-white flex-shrink-0">
-          {/* Nav links */}
-          <nav className="flex-1 overflow-y-auto py-4 px-2 space-y-0.5">
-            <div className="flex items-center gap-3 px-3 py-2 rounded-[10px] text-sm font-medium bg-white/10 text-white border border-white/15">
-              <FileText className="w-4 h-4 flex-shrink-0" />
-              <span>Claims</span>
-            </div>
-          </nav>
-        </aside>
-
-        {/* Main content */}
-        <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
-          {/* Claims list */}
-          <div className="flex-1 flex flex-col min-h-0 bg-white dark:bg-gray-900 rounded-[10px] border border-gray-100 dark:border-gray-800 overflow-hidden shadow-sm m-4 mt-0">
+      {/* Claims list */}
+      <div className="flex-1 flex flex-col min-h-0 bg-white dark:bg-gray-900 rounded-[10px] border border-gray-100 dark:border-gray-800 overflow-hidden shadow-sm m-4 mt-0">
             {/* Search bar */}
             <div className="flex items-center gap-3 px-5 py-2.5 border-b border-gray-100 dark:border-gray-800 flex-shrink-0 bg-gray-50 dark:bg-gray-900/50">
               <div className="flex-1 relative">
@@ -403,8 +389,6 @@ export default function ReferrerPortal() {
               {filteredClaims.length} of {claims.length} claims
             </div>
           </div>
-        </div>
-      </div>
     </ReferrerLayout>
   );
 }
