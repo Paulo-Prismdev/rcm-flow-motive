@@ -4,7 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, Search, Archive, Filter, X, AlertTriangle, Clock, Upload, Package, ChevronDown, ChevronRight, Settings2 } from 'lucide-react';
 import ClaimDetail from '../components/claims/ClaimDetail';
-import ClaimFormWrapper from '../components/claims/ClaimFormWrapper';
+import SimpleClaimForm from '../components/claims/SimpleClaimForm';
 import ImportClaimsModal from '../components/claims/ImportClaimsModal';
 import ClaimCardFieldsModal from '../components/claims/ClaimCardFieldsModal';
 import UpdateStatusBadge from '../components/shared/UpdateStatusBadge';
@@ -131,10 +131,12 @@ export default function ClaimsPage() {
 
   const createMutation = useMutation({
     mutationFn: (newClaim) => base44.entities.Claim.create(newClaim),
-    onSuccess: () => { 
+    onSuccess: (savedClaim) => { 
       queryClient.invalidateQueries({ queryKey: ['claims'] }); 
       setShowForm(false); 
       setCreateError(null);
+      // Navigate to the newly created claim detail
+      window.location.href = `/claim/${savedClaim.id}`;
     },
     onError: (error) => {
       setCreateError(error?.response?.data?.message || error?.message || 'Failed to create claim. Please try again.');
@@ -220,10 +222,10 @@ export default function ClaimsPage() {
             <span className="font-semibold">Error:</span> {createError}
           </div>
         )}
-        <ClaimFormWrapper 
-          onSubmit={(d) => { setCreateError(null); createMutation.mutate(d); }} 
+        <SimpleClaimForm 
+          onSave={(d) => { setCreateError(null); createMutation.mutate(d); }} 
           onCancel={() => { setShowForm(false); setCreateError(null); }}
-          isSubmitting={createMutation.isPending}
+          isSaving={createMutation.isPending}
         />
       </div>
     );
