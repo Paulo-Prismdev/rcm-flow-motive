@@ -58,6 +58,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
 
   const isInternalUser = currentUser?.user_type === 'internal' || 
     ['admin', 'super_admin', 'company_admin'].includes(currentUser?.role);
+  const canSaveClients = currentUser?.role === 'admin' || currentUser?.role === 'super_admin' || currentUser?.user_type === 'internal';
 
   const [formData, setFormData] = useState(claim || {
     job_number: '', reg: '', job_statuses: ['New'], claim_type: 'Credit Repair',
@@ -207,7 +208,6 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
 
   const handleSaveClientToDatabase = async () => {
     if (!formData.client_name) { alert('Please enter a client name'); return; }
-    if (!formData.client_phone && !formData.client_email) { alert('Please enter at least a phone number or email'); return; }
     try {
       const newClient = await base44.entities.Client.create({
         name: formData.client_name, phone: formData.client_phone || '', email: formData.client_email || '',
@@ -218,7 +218,12 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
       queryClient.invalidateQueries({ queryKey: ['clients'] });
       alert('Client saved to database successfully!');
     } catch (error) {
-      alert('Failed to save client. Please try again.');
+      const msg = error?.response?.data?.message || error?.response?.data?.error || error?.message || '';
+      if (msg.toLowerCase().includes('permission') || msg.toLowerCase().includes('forbidden') || error?.response?.status === 403) {
+        alert('You do not have permission to save clients to the database. The claim can still be created without saving the client separately.');
+      } else {
+        alert('Failed to save client. Please try again.');
+      }
     }
   };
 
@@ -609,7 +614,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
                   <div className="neomorph-inset p-4 space-y-4">
                     <div className="flex items-center justify-between mb-3">
                       <p className="text-sm font-medium text-gray-700">Client Details</p>
-                      {isInternalUser && formData.client_name && !formData.client_id && (
+                      {canSaveClients && formData.client_name && !formData.client_id && (
                         <Button type="button" onClick={handleSaveClientToDatabase} className="neomorph-flat px-4 py-2 text-sm flex items-center gap-2 bg-green-50 hover:bg-green-100">
                           <Plus className="w-4 h-4 text-green-600" /><span className="text-green-600 font-medium">Save Client to Database</span>
                         </Button>
