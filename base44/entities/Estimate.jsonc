@@ -243,9 +243,61 @@
   },
   "required": [],
   "rls": {
-    "create": true,
-    "read": true,
-    "update": true,
-    "delete": true
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "user_type": "internal"
+          }
+        },
+        {
+          "data.repairer_id": "{{user.linked_bodyshop_id}}"
+        }
+      ]
+    },
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "user_type": "internal"
+          }
+        },
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.repairer_id": "{{user.linked_bodyshop_id}}"
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "user_type": "internal"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
   }
 }

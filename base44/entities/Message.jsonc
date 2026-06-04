@@ -110,8 +110,52 @@
   ],
   "rls": {
     "create": true,
-    "read": true,
-    "update": true,
-    "delete": true
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "data.conversation_type": "direct",
+          "data.channel_members": {
+            "$in": [
+              "{{user.email}}"
+            ]
+          }
+        },
+        {
+          "data.conversation_type": "channel",
+          "data.channel_members": {
+            "$in": [
+              "{{user.email}}"
+            ]
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
   }
 }

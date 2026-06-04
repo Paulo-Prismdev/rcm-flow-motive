@@ -64,8 +64,44 @@
   ],
   "rls": {
     "create": true,
-    "read": true,
-    "update": true,
-    "delete": true
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "user_type": "internal"
+          }
+        },
+        {
+          "data.bodyshop_id": "{{user.linked_bodyshop_id}}"
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "user_type": "internal"
+          }
+        },
+        {
+          "data.bodyshop_id": "{{user.linked_bodyshop_id}}"
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
   }
 }
