@@ -26,6 +26,7 @@ export default function ReferrerPortal() {
   useEffect(() => {
     const handleNav = (e) => {
       if (e.detail === 'claims') setActiveTab('claims');
+      if (e.detail === 'dashboard') setActiveTab('dashboard');
     };
     window.addEventListener('referrer-nav', handleNav);
     return () => window.removeEventListener('referrer-nav', handleNav);
