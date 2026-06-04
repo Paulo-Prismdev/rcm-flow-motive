@@ -11,7 +11,9 @@ import {
   TrendingUp,
   Plus,
   Search,
-  X
+  X,
+  Archive,
+  Filter
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -133,39 +135,41 @@ export default function ReferrerPortal() {
       {currentUser?.show_feedback_prompt && (
         <FeedbackModal user={currentUser} onClose={() => {}} />
       )}
-      <div className="h-full flex flex-col gap-4">
-        {/* Header */}
-        <div className="neomorph p-4 md:p-6">
-          <div className="flex items-center justify-between flex-wrap gap-4">
-            <div>
-              <h1 className="text-2xl md:text-3xl font-bold">Referrer Portal</h1>
-              <p className="text-muted-foreground mt-1">
-                Welcome back, {displayName}
-              </p>
+      <div className="h-full flex flex-col gap-0 min-h-0">
+        {/* Header - matching main app dark navy header */}
+        <div className="flex-shrink-0 bg-[#131d47] text-white px-4 py-2.5 border-b border-white/10">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <h1 className="text-lg font-semibold">Referrer Portal</h1>
+              <span className="px-2 py-0.5 rounded bg-green-500/20 text-green-400 text-xs font-medium border border-green-500/30">
+                {displayName}
+              </span>
             </div>
           </div>
         </div>
 
-        {/* Tabs */}
-        <div className="neomorph p-2 flex gap-1 overflow-x-auto flex-shrink-0">
-          {tabs.map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${
-                activeTab === tab.id 
-                  ? 'bg-accent text-accent-foreground' 
-                  : 'hover:bg-surface-hover'
-              }`}
-            >
-              <tab.icon className="w-4 h-4" />
-              {tab.label}
-            </button>
-          ))}
+        {/* Tabs - matching main app style */}
+        <div className="flex-shrink-0 px-4 py-2 bg-gray-50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-800">
+          <div className="flex gap-1 overflow-x-auto">
+            {tabs.map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-[10px] text-xs font-medium whitespace-nowrap transition-all ${
+                  activeTab === tab.id 
+                    ? 'bg-[#1e2d4a] text-white' 
+                    : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
+                }`}
+              >
+                <tab.icon className="w-3.5 h-3.5" />
+                {tab.label}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto min-h-0">
+        <div className="flex-1 overflow-y-auto min-h-0 p-4 bg-gray-50 dark:bg-gray-900/50">
           {activeTab === 'dashboard' && (
             <ReferrerDashboard 
               claims={claims}
@@ -195,59 +199,59 @@ function ReferrerDashboard({ claims, parts, activeClaims, completedClaims, activ
 
   return (
     <div className="space-y-4">
-      {/* Stats - only show relevant ones */}
+      {/* Stats - matching internal app dashboard style */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {showClaims && (
-          <div className="neomorph p-4 cursor-pointer hover:shadow-lg transition-all" onClick={() => onNavigate('claims')}>
+          <div className="bg-white dark:bg-gray-900 rounded-[10px] border border-gray-100 dark:border-gray-800 p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors" onClick={() => onNavigate('claims')}>
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center">
                 <FileText className="w-5 h-5 text-blue-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{activeClaims.length}</p>
-                <p className="text-xs text-foreground-muted">Active Claims</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">{activeClaims.length}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Active Claims</p>
               </div>
             </div>
           </div>
         )}
 
         {showClaims && (
-          <div className="neomorph p-4 cursor-pointer hover:shadow-lg transition-all" onClick={() => onNavigate('claims')}>
+          <div className="bg-white dark:bg-gray-900 rounded-[10px] border border-gray-100 dark:border-gray-800 p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors" onClick={() => onNavigate('claims')}>
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-lg bg-green-50 dark:bg-green-900/20 flex items-center justify-center">
                 <CheckCircle2 className="w-5 h-5 text-green-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{completedClaims.length}</p>
-                <p className="text-xs text-foreground-muted">Completed</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">{completedClaims.length}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Completed</p>
               </div>
             </div>
           </div>
         )}
 
         {showParts && (
-          <div className="neomorph p-4 cursor-pointer hover:shadow-lg transition-all" onClick={() => onNavigate('parts')}>
+          <div className="bg-white dark:bg-gray-900 rounded-[10px] border border-gray-100 dark:border-gray-800 p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors" onClick={() => onNavigate('parts')}>
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-orange-100 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-lg bg-orange-50 dark:bg-orange-900/20 flex items-center justify-center">
                 <Package className="w-5 h-5 text-orange-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{activeParts.length}</p>
-                <p className="text-xs text-foreground-muted">Parts in Progress</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">{activeParts.length}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Parts in Progress</p>
               </div>
             </div>
           </div>
         )}
 
         {showClaims && (
-          <div className="neomorph p-4">
+          <div className="bg-white dark:bg-gray-900 rounded-[10px] border border-gray-100 dark:border-gray-800 p-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-lg bg-purple-50 dark:bg-purple-900/20 flex items-center justify-center">
                 <TrendingUp className="w-5 h-5 text-purple-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{claims.length}</p>
-                <p className="text-xs text-foreground-muted">Total Claims</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">{claims.length}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Total Claims</p>
               </div>
             </div>
           </div>
@@ -258,19 +262,19 @@ function ReferrerDashboard({ claims, parts, activeClaims, completedClaims, activ
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Recent Claims */}
         {showClaims && (
-          <div className="neomorph p-4">
+          <div className="bg-white dark:bg-gray-900 rounded-[10px] border border-gray-100 dark:border-gray-800 p-4">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-bold">Recent Claims</h3>
-              <button onClick={() => onNavigate('claims')} className="text-sm text-accent hover:underline">
+              <h3 className="font-semibold text-gray-900 dark:text-white">Recent Claims</h3>
+              <button onClick={() => onNavigate('claims')} className="text-xs text-blue-600 hover:underline">
                 View All
               </button>
             </div>
             <div className="space-y-2">
               {claims.slice(0, 5).map(claim => (
-                <div key={claim.id} className="neomorph-flat p-3 flex items-center justify-between">
+                <div key={claim.id} className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer" onClick={() => onNavigate('claims')}>
                   <div>
-                    <p className="font-medium">{formatUKRegistration(claim.reg)}</p>
-                    <p className="text-xs text-foreground-muted">{claim.client_name}</p>
+                    <p className="font-medium text-gray-900 dark:text-white">{formatUKRegistration(claim.reg)}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{claim.client_name}</p>
                   </div>
                   <div className="flex flex-col gap-1 items-end">
                     <StatusBadge status={claim.job_status} />
@@ -279,38 +283,38 @@ function ReferrerDashboard({ claims, parts, activeClaims, completedClaims, activ
                 </div>
               ))}
               {claims.length === 0 && (
-                <p className="text-center text-foreground-muted py-4">No claims yet</p>
+                <p className="text-center text-gray-400 py-4 text-sm">No claims yet</p>
               )}
             </div>
           </div>
         )}
 
         {/* Services Overview - only show allowed services */}
-        <div className="neomorph p-4">
-          <h3 className="font-bold mb-4">Services Overview</h3>
+        <div className="bg-white dark:bg-gray-900 rounded-[10px] border border-gray-100 dark:border-gray-800 p-4">
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Services Overview</h3>
           <div className="space-y-2">
             {showClaims && (
-              <div className="neomorph-flat p-4 flex items-center gap-3 cursor-pointer" onClick={() => onNavigate('claims')}>
-                <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
+              <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer" onClick={() => onNavigate('claims')}>
+                <div className="w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center">
                   <FileText className="w-5 h-5 text-blue-600" />
                 </div>
                 <div className="flex-1">
-                  <p className="font-medium">Claims Management</p>
-                  <p className="text-xs text-foreground-muted">Track all your referred claims</p>
+                  <p className="font-medium text-gray-900 dark:text-white">Claims Management</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Track all your referred claims</p>
                 </div>
-                <ChevronRight className="w-4 h-4 text-foreground-muted" />
+                <ChevronRight className="w-4 h-4 text-gray-400" />
               </div>
             )}
             {showParts && (
-              <div className="neomorph-flat p-4 flex items-center gap-3 cursor-pointer" onClick={() => onNavigate('parts')}>
-                <div className="w-10 h-10 rounded-lg bg-orange-100 flex items-center justify-center">
+              <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer" onClick={() => onNavigate('parts')}>
+                <div className="w-10 h-10 rounded-lg bg-orange-50 dark:bg-orange-900/20 flex items-center justify-center">
                   <Package className="w-5 h-5 text-orange-600" />
                 </div>
                 <div className="flex-1">
-                  <p className="font-medium">Parts Sourcing</p>
-                  <p className="text-xs text-foreground-muted">OEM, aftermarket & recycled</p>
+                  <p className="font-medium text-gray-900 dark:text-white">Parts Sourcing</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">OEM, aftermarket & recycled</p>
                 </div>
-                <ChevronRight className="w-4 h-4 text-foreground-muted" />
+                <ChevronRight className="w-4 h-4 text-gray-400" />
               </div>
             )}
           </div>
@@ -338,89 +342,137 @@ function ReferrerClaimsList({ claims, onClaimOpen }) {
     return matchesStatus && matchesSearch;
   });
 
+  const formatDate = (val) => {
+    if (!val) return '—';
+    try { return format(new Date(val), 'dd/MM/yyyy'); } catch { return val; }
+  };
+
   return (
-    <div className="space-y-3">
-      {/* Search bar */}
-      <div className="relative">
-        <Input
-          placeholder="Search by reg, client, job number..."
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          className="pr-9"
-        />
-        {search && (
-          <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-            <X className="w-4 h-4" />
-          </button>
+    <div className="flex flex-col h-full bg-white dark:bg-gray-900 rounded-[10px] border border-gray-100 dark:border-gray-800 overflow-hidden shadow-sm">
+      {/* Search bar - matching Claims page */}
+      <div className="flex items-center gap-3 px-5 py-2.5 border-b border-gray-100 dark:border-gray-800 flex-shrink-0 bg-gray-50 dark:bg-gray-900/50">
+        <div className="flex-1 relative">
+          <input
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Search by reg, client, job number..."
+            className="w-full px-4 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-[10px] focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/15 text-gray-900 dark:text-white placeholder-gray-400 transition-all"
+          />
+          {search && (
+            <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
+
+        {/* Status filter */}
+        <select 
+          value={filter} 
+          onChange={e => setFilter(e.target.value)}
+          className="px-3 py-2 text-xs bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-[10px] text-gray-700 dark:text-gray-300 focus:outline-none"
+        >
+          <option value="active">Active</option>
+          <option value="completed">Completed</option>
+          <option value="all">All</option>
+        </select>
+      </div>
+
+      {/* Table */}
+      <div className="flex-1 overflow-auto min-h-0" style={{WebkitOverflowScrolling: 'touch'}}>
+        {filteredClaims.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-32 gap-2">
+            <p className="text-sm text-gray-400">{search ? 'No claims match your search.' : 'No claims found.'}</p>
+          </div>
+        ) : (
+          <>
+            {/* Mobile card view */}
+            <div className="lg:hidden">
+              {filteredClaims.map(claim => {
+                const isClosedStatus = ['Completed', 'Cancelled', 'Total Loss'].includes(claim.job_status);
+                return (
+                  <div
+                    key={claim.id}
+                    onClick={() => onClaimOpen(claim)}
+                    className="px-4 py-3 border-b border-gray-100 dark:border-gray-800 cursor-pointer active:bg-gray-50 dark:active:bg-gray-800/60 transition-colors"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <span
+                        className="inline-flex items-center justify-center rounded-md bg-[#1e2d4a] text-white font-semibold uppercase flex-shrink-0"
+                        style={{ fontSize: '13px', width: '96px', height: '28px', letterSpacing: '0.05em' }}
+                      >
+                        {claim.reg ? formatUKRegistration(claim.reg) : '—'}
+                      </span>
+                      <div className="flex items-center gap-1 flex-shrink-0">
+                        {!isClosedStatus && <StatusBadge status={claim.job_status} />}
+                        {claim.secondary_status && <StatusBadge status={claim.secondary_status} variant="secondary" />}
+                        <ChevronRight className="w-4 h-4 text-gray-400 ml-1" />
+                      </div>
+                    </div>
+                    <div className="mt-1.5 flex flex-col gap-0.5">
+                      <span className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate">{claim.client_name || '—'}</span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400 truncate">{claim.make_model || '—'} · {formatDate(claim.loss_date)}</span>
+                      {claim.referrer_ref && <span className="text-xs text-gray-400 dark:text-gray-500 truncate">{claim.referrer_ref}</span>}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Desktop table view - matching Claims page */}
+            <table className="hidden lg:table w-full min-w-[700px]">
+              <thead className="sticky top-0 bg-white dark:bg-gray-900 z-10">
+                <tr className="border-b border-gray-200 dark:border-gray-700">
+                  <th className="sticky left-0 z-20 bg-white dark:bg-gray-900 px-4 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap">REG</th>
+                  <th className="px-4 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap">CLIENT</th>
+                  <th className="px-4 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap">VEHICLE</th>
+                  <th className="px-4 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap">LOSS DATE</th>
+                  <th className="sticky right-0 z-20 bg-white dark:bg-gray-900 px-4 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap">STATUS</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredClaims.map(claim => {
+                  const isClosedStatus = ['Completed', 'Cancelled', 'Total Loss'].includes(claim.job_status);
+                  return (
+                    <tr
+                      key={claim.id}
+                      onClick={() => onClaimOpen(claim)}
+                      className="group border-b border-gray-100 dark:border-gray-800 cursor-pointer transition-colors text-sm hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                    >
+                      <td className="sticky left-0 z-10 px-4 py-2.5 whitespace-nowrap bg-white dark:bg-gray-900 group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50">
+                        <span
+                          className="inline-flex items-center justify-center rounded-md bg-[#1e2d4a] text-white font-semibold uppercase"
+                          style={{ fontSize: '13px', width: '96px', height: '28px', letterSpacing: '0.05em' }}
+                        >
+                          {claim.reg ? formatUKRegistration(claim.reg) : ''}
+                        </span>
+                      </td>
+                      <td className="px-4 py-2.5 text-gray-700 dark:text-gray-300 whitespace-nowrap max-w-[160px] truncate">
+                        {claim.client_name || '—'}
+                      </td>
+                      <td className="px-4 py-2.5 text-gray-600 dark:text-gray-400 whitespace-nowrap">
+                        {claim.make_model || '—'}
+                      </td>
+                      <td className="px-4 py-2.5 text-gray-600 dark:text-gray-400 whitespace-nowrap">
+                        {formatDate(claim.loss_date)}
+                      </td>
+                      <td className="sticky right-0 z-10 px-3 py-2.5 whitespace-nowrap bg-white dark:bg-gray-900 group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50">
+                        <div className="flex items-center gap-1.5 justify-end flex-wrap">
+                          {claim.secondary_status && <StatusBadge status={claim.secondary_status} variant="secondary" />}
+                          {!isClosedStatus && <StatusBadge status={claim.job_status} />}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </>
         )}
       </div>
 
-      <div className="neomorph p-4">
-        {/* Status filter tabs */}
-        <div className="flex gap-2 mb-4 flex-wrap">
-          {[{id:'active',label:'Active'},{id:'completed',label:'Completed'},{id:'all',label:'All'}].map(f => (
-            <button
-              key={f.id}
-              onClick={() => setFilter(f.id)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium ${
-                filter === f.id ? 'bg-accent text-accent-foreground' : 'border border-border hover:bg-muted'
-              }`}
-            >
-              {f.label}
-            </button>
-          ))}
-        </div>
-
-        <div className="space-y-3">
-          {filteredClaims.map(claim => (
-            <div 
-              key={claim.id} 
-              className="neomorph-flat p-4 cursor-pointer hover:shadow-lg transition-all"
-              onClick={() => onClaimOpen(claim)}
-            >
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <h4 className="font-bold">{formatUKRegistration(claim.reg)}</h4>
-                    {claim.referrer_ref && (
-                      <span className="text-xs font-mono px-2 py-0.5 rounded bg-accent/20 text-accent">
-                        {claim.referrer_ref}
-                      </span>
-                    )}
-                  <StatusBadge status={claim.job_status} />
-                    {claim.secondary_status && <StatusBadge status={claim.secondary_status} variant="secondary" />}
-                  </div>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
-                    <div>
-                      <span className="text-foreground-muted">Client:</span>{' '}
-                      <span className="font-medium">{claim.client_name || 'N/A'}</span>
-                    </div>
-                    <div>
-                      <span className="text-foreground-muted">Vehicle:</span>{' '}
-                      <span className="font-medium">{claim.make_model || 'N/A'}</span>
-                    </div>
-                    <div>
-                      <span className="text-foreground-muted">Type:</span>{' '}
-                      <span className="font-medium">{claim.claim_type || 'N/A'}</span>
-                    </div>
-                    <div>
-                      <span className="text-foreground-muted">Received:</span>{' '}
-                      <span className="font-medium">
-                        {claim.date_received ? format(new Date(claim.date_received), 'dd/MM/yyyy') : 'N/A'}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-                <ChevronRight className="w-5 h-5 text-foreground-muted flex-shrink-0" />
-              </div>
-            </div>
-          ))}
-          {filteredClaims.length === 0 && (
-            <p className="text-center text-muted-foreground py-8">
-              {search ? 'No claims match your search.' : 'No claims found.'}
-            </p>
-          )}
-        </div>
+      {/* Footer count */}
+      <div className="px-5 py-2 border-t border-gray-100 dark:border-gray-800 text-xs text-gray-400 flex-shrink-0">
+        {filteredClaims.length} of {claims.length} claims
       </div>
     </div>
   );
@@ -430,7 +482,7 @@ function ReferrerPartsTab({ parts, claims }) {
   const [showForm, setShowForm] = useState(false);
 
   return (
-    <div className="space-y-4">
+    <div className="bg-white dark:bg-gray-900 rounded-[10px] border border-gray-100 dark:border-gray-800 overflow-hidden shadow-sm">
       {showForm ? (
         <ReferrerPartsForm 
           claims={claims} 
@@ -438,50 +490,59 @@ function ReferrerPartsTab({ parts, claims }) {
           onSuccess={() => setShowForm(false)}
         />
       ) : (
-        <div className="neomorph p-4">
-          <div className="flex items-center justify-between mb-4">
+        <>
+          {/* Header */}
+          <div className="px-5 py-3 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between bg-gray-50 dark:bg-gray-900/50">
             <div>
-              <h3 className="font-bold">Parts Tracking</h3>
-              <p className="text-sm text-foreground-muted">
+              <h3 className="font-semibold text-gray-900 dark:text-white">Parts Tracking</h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                 Track parts sourcing progress for your referred claims
               </p>
             </div>
             <Button 
               onClick={() => setShowForm(true)} 
-              className="neomorph-flat bg-accent/10 text-accent"
+              className="bg-[#1e2d4a] text-white hover:opacity-90 text-xs px-3 py-1.5 rounded-[10px]"
             >
-              <Plus className="w-4 h-4 mr-2" />
+              <Plus className="w-3.5 h-3.5 mr-1.5" />
               Request Parts
             </Button>
           </div>
 
-          <div className="space-y-3">
+          {/* List */}
+          <div className="divide-y divide-gray-100 dark:divide-gray-800">
             {parts.map(part => (
-              <div key={part.id} className="neomorph-flat p-4">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <div className="flex items-center gap-2 mb-2">
-                      <h4 className="font-bold">{part.part_description || part.job_number}</h4>
+              <div key={part.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2 flex-wrap">
+                      <h4 className="font-semibold text-gray-900 dark:text-white">{part.part_description || part.job_number}</h4>
                       <StatusBadge status={part.sourcing_status} />
                     </div>
-                    <p className="text-sm text-foreground-muted">
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
                       {part.manufacturer} - {part.vehicle_ref}
                     </p>
-                    <p className="text-xs text-foreground-muted mt-1">
+                    <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
                       Requested: {part.date_requested ? format(new Date(part.date_requested), 'dd/MM/yyyy') : 'N/A'}
                     </p>
                   </div>
                   {part.net_price && (
-                    <p className="font-bold text-lg">£{part.net_price.toFixed(2)}</p>
+                    <p className="font-bold text-lg text-gray-900 dark:text-white">£{part.net_price.toFixed(2)}</p>
                   )}
                 </div>
               </div>
             ))}
             {parts.length === 0 && (
-              <p className="text-center text-foreground-muted py-8">No parts requests for your claims</p>
+              <div className="flex flex-col items-center justify-center py-12">
+                <p className="text-gray-400 text-sm">No parts requests for your claims</p>
+              </div>
             )}
           </div>
-        </div>
+
+          {/* Footer count */}
+          <div className="px-5 py-2 border-t border-gray-100 dark:border-gray-800 text-xs text-gray-400">
+            {parts.length} parts
+          </div>
+        </>
       )}
     </div>
   );
