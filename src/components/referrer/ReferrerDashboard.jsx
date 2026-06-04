@@ -1,13 +1,25 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { FileText, TrendingUp, Clock, CheckCircle } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 
 export default function ReferrerDashboard() {
+  const [activeTab, setActiveTab] = React.useState('dashboard');
+  
   const { data: currentUser } = useQuery({
     queryKey: ['currentUser'],
     queryFn: () => base44.auth.me(),
   });
+
+  // Listen for navigation events from layout
+  React.useEffect(() => {
+    const handleNav = (e) => {
+      if (e.detail === 'claims') setActiveTab('claims');
+      if (e.detail === 'dashboard') setActiveTab('dashboard');
+    };
+    window.addEventListener('referrer-nav', handleNav);
+    return () => window.removeEventListener('referrer-nav', handleNav);
+  }, []);
 
   const { data: claims = [] } = useQuery({
     queryKey: ['referrerClaims', currentUser?.linked_referrer_id, currentUser?.company_id],
@@ -86,7 +98,10 @@ export default function ReferrerDashboard() {
         {statCards.map((stat) => (
           <div
             key={stat.title}
-            className="bg-white dark:bg-gray-900 rounded-[10px] border border-gray-100 dark:border-gray-800 p-4 shadow-sm"
+            onClick={() => {
+              window.dispatchEvent(new CustomEvent('referrer-nav', { detail: 'claims' }));
+            }}
+            className="bg-white dark:bg-gray-900 rounded-[10px] border border-gray-100 dark:border-gray-800 p-4 shadow-sm cursor-pointer hover:shadow-md transition-all active:scale-[0.98]"
           >
             <div className="flex items-center justify-between mb-3">
               <div className={`w-10 h-10 ${stat.color} rounded-lg flex items-center justify-center`}>
@@ -142,7 +157,10 @@ export default function ReferrerDashboard() {
                 recentClaims.map((claim) => (
                   <tr
                     key={claim.id}
-                    className="border-b border-gray-100 dark:border-gray-800 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                    onClick={() => {
+                      window.dispatchEvent(new CustomEvent('referrer-nav', { detail: 'claims' }));
+                    }}
+                    className="border-b border-gray-100 dark:border-gray-800 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer"
                   >
                     <td className="px-4 py-3 whitespace-nowrap">
                       <span className="inline-flex items-center justify-center rounded-md bg-[#1e2d4a] text-white font-semibold uppercase text-xs"
