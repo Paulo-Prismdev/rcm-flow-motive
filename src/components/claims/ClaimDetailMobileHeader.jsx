@@ -114,14 +114,12 @@ export default function ClaimDetailMobileHeader({
         >
           <option value="status">Status &amp; Overview</option>
           <option value="thirdpartyPursuit">Third Party Pursuit</option>
-          <option value="client">Client Details</option>
+          <option value="parties">Parties Details</option>
           <option value="vehicle">Vehicle Details</option>
           <option value="vehicleDamage">Vehicle Damage</option>
-          <option value="insurance">Insurance Details</option>
           <option value="excessContribution">Excess Contribution</option>
           <option value="referrer">Referrer Details</option>
           <option value="indemnity">Indemnity Details</option>
-          <option value="thirdparty">Third Party Details</option>
           <option value="financials">Financials</option>
           <option value="dates">Key Dates</option>
           <option value="bodyshop">Bodyshop Details</option>

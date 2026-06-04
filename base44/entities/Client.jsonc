@@ -4,7 +4,28 @@
   "properties": {
     "name": {
       "type": "string",
-      "description": "Client's full name"
+      "description": "Client full name or company name"
+    },
+    "client_type": {
+      "type": "string",
+      "enum": [
+        "Individual",
+        "Company"
+      ],
+      "default": "Individual",
+      "description": "Whether this client is an individual or a company"
+    },
+    "company_contact_name": {
+      "type": "string",
+      "description": "Primary contact name (Company clients only)"
+    },
+    "company_contact_phone": {
+      "type": "string",
+      "description": "Primary contact phone (Company clients only)"
+    },
+    "company_contact_email": {
+      "type": "string",
+      "description": "Primary contact email (Company clients only)"
     },
     "phone": {
       "type": "string"
@@ -26,11 +47,15 @@
     },
     "county": {
       "type": "string",
-      "description": "County or State"
+      "description": "County"
     },
     "postcode": {
       "type": "string",
       "description": "Postal code"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Additional notes about this client"
     },
     "latitude": {
       "type": "number",
@@ -42,8 +67,7 @@
     }
   },
   "required": [
-    "name",
-    "phone"
+    "name"
   ],
   "rls": {
     "create": {
@@ -55,7 +79,7 @@
         },
         {
           "user_condition": {
-            "data.user_type": "internal"
+            "user_type": "internal"
           }
         }
       ]
@@ -69,7 +93,7 @@
         },
         {
           "user_condition": {
-            "data.user_type": "internal"
+            "user_type": "internal"
           }
         },
         {
@@ -86,7 +110,7 @@
         },
         {
           "user_condition": {
-            "data.user_type": "internal"
+            "user_type": "internal"
           }
         },
         {
@@ -103,7 +127,7 @@
         },
         {
           "user_condition": {
-            "data.user_type": "internal"
+            "user_type": "internal"
           }
         }
       ]

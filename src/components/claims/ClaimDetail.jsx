@@ -31,6 +31,7 @@ import UpdateStatusBadge from '../shared/UpdateStatusBadge';
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import ClaimClientForm from './ClaimClientForm';
+import ClaimPartiesForm from './ClaimPartiesForm';
 import ClaimVehicleForm from './ClaimVehicleForm';
 import ClaimInsuranceForm from './ClaimInsuranceForm';
 import ClaimReferrerForm from './ClaimReferrerForm';
@@ -147,14 +148,12 @@ import { logActivity, logChanges } from '../shared/useActivityLogger';
 const DETAIL_SECTIONS = [
   { id: 'status', label: 'Status & Overview', icon: Clock },
   { id: 'thirdpartyPursuit', label: 'Third Party Pursuit', icon: Users },
-  { id: 'client', label: 'Client Details', icon: User },
+  { id: 'parties', label: 'Parties Details', icon: Users },
   { id: 'vehicle', label: 'Vehicle Details', icon: Car },
   { id: 'vehicleDamage', label: 'Vehicle Damage', icon: AlertTriangle },
-  { id: 'insurance', label: 'Insurance Details', icon: Shield },
   { id: 'excessContribution', label: 'Excess Contribution', icon: BadgePercent },
   { id: 'referrer', label: 'Referrer Details', icon: Briefcase },
   { id: 'indemnity', label: 'Indemnity Details', icon: Shield },
-  { id: 'thirdparty', label: 'Third Party Details', icon: Users },
   { id: 'financials', label: 'Financials', icon: DollarSign },
   { id: 'dates', label: 'Key Dates', icon: Calendar },
   { id: 'bodyshop', label: 'Bodyshop Details', icon: Wrench },
@@ -667,28 +666,79 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
           </EditableSection>
         );
 
-      case 'client':
+      case 'parties':
         return (
-          <EditableSection title="Client Details" icon={User} claim={claim} onUpdate={handleUpdate} EditComponent={ClaimClientForm} canEdit={canEdit}>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
-              <DetailRow label="Client Name" value={claim.client_name} />
-              <DetailRow label="Client Phone" value={claim.client_phone} />
-              <DetailRow label="Client Email" value={claim.client_email} />
-              <DetailRow label="Driving License" value={claim.client_driving_license} />
-              <DetailRow label="Driver/Contact" value={claim.driver_contact_name} />
-              <DetailRow label="VAT Status" value={claim.client_vat_status} />
-              <DetailRow label="Business Division" value={claim.business_division} />
-            </div>
-            <div className="mt-2 py-3 px-4 rounded-lg glass-inset">
-              <div className="text-xs font-semibold text-foreground-muted mb-2">Address</div>
-              <div className="text-sm leading-relaxed space-y-0.5">
-                {claim.client_address_line_1 && <div>{claim.client_address_line_1}</div>}
-                {claim.client_address_line_2 && <div>{claim.client_address_line_2}</div>}
-                {claim.client_town && <div>{claim.client_town}</div>}
-                {claim.client_county && <div>{claim.client_county}</div>}
-                {claim.client_postcode && <div>{claim.client_postcode}</div>}
-                {!claim.client_address_line_1 && !claim.client_town && !claim.client_postcode && '-'}
+          <EditableSection title="Parties Details" icon={Users} claim={claim} onUpdate={handleUpdate} EditComponent={ClaimPartiesForm} canEdit={canEdit}>
+            <div className="space-y-5">
+              {/* First Party */}
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-2 h-2 rounded-full bg-primary" />
+                  <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">First Party — Client</span>
+                </div>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+                  <DetailRow label="Client Name" value={claim.client_name} />
+                  <DetailRow label="Phone" value={claim.client_phone} />
+                  <DetailRow label="Email" value={claim.client_email} />
+                  <DetailRow label="VAT Status" value={claim.client_vat_status} />
+                </div>
+                <div className="mt-2 py-3 px-4 rounded-lg glass-inset">
+                  <div className="text-xs font-semibold text-foreground-muted mb-2">Address</div>
+                  <div className="text-sm leading-relaxed space-y-0.5">
+                    {claim.client_address_line_1 && <div>{claim.client_address_line_1}</div>}
+                    {claim.client_address_line_2 && <div>{claim.client_address_line_2}</div>}
+                    {(claim.client_town || claim.client_county || claim.client_postcode) && (
+                      <div>{[claim.client_town, claim.client_county, claim.client_postcode].filter(Boolean).join(', ')}</div>
+                    )}
+                    {!claim.client_address_line_1 && !claim.client_town && '-'}
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 mt-2">
+                  <DetailRow label="Driver" value={claim.driver_same_as_client === false ? claim.driver_contact_name : 'Same as client'} />
+                  {claim.driver_same_as_client === false && <DetailRow label="Driving License" value={claim.client_driving_license} />}
+                  {claim.broker_name && <DetailRow label="Broker" value={claim.broker_name} />}
+                  <DetailRow label="Insurer" value={claim.insurer} />
+                  <DetailRow label="Claim Ref" value={claim.claim_ref} />
+                  <DetailRow label="Policy Number" value={claim.policy_number} />
+                  <DetailRow label="Policy Excess" value={claim.policy_excess} isCurrency />
+                </div>
               </div>
+
+              {/* Third Party */}
+              {(claim.tp_name || claim.tp_reg) ? (
+                <div className="border-t border-border pt-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-2 h-2 rounded-full bg-orange-500" />
+                    <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Third Party</span>
+                  </div>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+                    <DetailRow label="TP Name" value={claim.tp_name} />
+                    <DetailRow label="TP Phone" value={claim.tp_phone} />
+                    <DetailRow label="TP Email" value={claim.tp_email} />
+                    <DetailRow label="TP Driver" value={claim.tp_driver_same_as_client === false ? claim.tp_driver_contact : 'Same as client'} />
+                    {claim.tp_broker_name && <DetailRow label="TP Broker" value={claim.tp_broker_name} />}
+                    <DetailRow label="TP Insurer" value={claim.tp_insurer} />
+                    <DetailRow label="TP Claim Ref" value={claim.tp_claim_ref} />
+                    <DetailRow label="TP Policy No." value={claim.tp_policy_number} />
+                    <DetailRow label="TP Registration" value={claim.tp_reg} />
+                    <DetailRow label="TP Vehicle" value={claim.tp_make_model} />
+                  </div>
+                  {(claim.tp_town || claim.tp_postcode) && (
+                    <div className="mt-2 py-3 px-4 rounded-lg glass-inset">
+                      <div className="text-xs font-semibold text-foreground-muted mb-2">TP Address</div>
+                      <div className="text-sm leading-relaxed space-y-0.5">
+                        {claim.tp_address_line_1 && <div>{claim.tp_address_line_1}</div>}
+                        {claim.tp_address_line_2 && <div>{claim.tp_address_line_2}</div>}
+                        {[claim.tp_town, claim.tp_county, claim.tp_postcode].filter(Boolean).join(', ')}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="border-t border-border pt-4">
+                  <p className="text-sm text-muted-foreground text-center py-4">No third party involvement recorded. Click edit to add details.</p>
+                </div>
+              )}
             </div>
           </EditableSection>
         );
@@ -778,17 +828,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
           </EditableSection>
         );
 
-      case 'insurance':
-        return (
-          <EditableSection title="Insurance Details" icon={Shield} claim={claim} onUpdate={handleUpdate} EditComponent={ClaimInsuranceForm} canEdit={canEdit}>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
-              <DetailRow label="Insurer" value={claim.insurer} />
-              <DetailRow label="Claim Ref" value={claim.claim_ref} />
-              <DetailRow label="Policy Number" value={claim.policy_number} />
-              <DetailRow label="Policy Excess" value={claim.policy_excess} isCurrency />
-            </div>
-          </EditableSection>
-        );
+
 
       case 'excessContribution':
         return (
@@ -895,46 +935,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
           </EditableSection>
         );
 
-      case 'thirdparty':
-        return (
-          <EditableSection title="Third Party Details" icon={Users} claim={claim} onUpdate={handleUpdate} EditComponent={({claim: currentClaim, onSave, onCancel}) => <div>Not implemented yet <Button onClick={onCancel}>Back</Button></div>} canEdit={canEdit}>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
-              <DetailRow label="TP Name" value={claim.tp_name} />
-              <DetailRow label="TP Phone" value={claim.tp_phone} />
-              <DetailRow label="TP Email" value={claim.tp_email} />
-              <DetailRow label="TP Driver/Contact" value={claim.tp_driver_contact} />
-            </div>
-            <div className="mt-2 py-3 px-4 rounded-lg glass-inset">
-              <div className="text-xs font-semibold text-foreground-muted mb-2">TP Address</div>
-              <div className="text-sm leading-relaxed space-y-0.5">
-                {claim.tp_address_line_1 && <div>{claim.tp_address_line_1}</div>}
-                {claim.tp_address_line_2 && <div>{claim.tp_address_line_2}</div>}
-                {claim.tp_town && <div>{claim.tp_town}</div>}
-                {claim.tp_county && <div>{claim.tp_county}</div>}
-                {claim.tp_postcode && <div>{claim.tp_postcode}</div>}
-                {!claim.tp_address_line_1 && !claim.tp_town && !claim.tp_postcode && '-'}
-              </div>
-            </div>
 
-            <h4 className="font-semibold text-gray-700 mt-4 mb-2">Third Party Vehicle</h4>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
-              <DetailRow label="TP Registration" value={claim.tp_reg} />
-              <DetailRow label="TP Vehicle" value={claim.tp_make_model} />
-              <DetailRow label="TP Vehicle Type" value={claim.tp_vehicle_type} />
-            </div>
-            <div className="mt-2 py-3 px-4 rounded-lg glass-inset">
-              <div className="text-xs font-semibold text-foreground-muted mb-2">TP Vehicle Damage</div>
-              <div className="text-sm leading-relaxed whitespace-pre-wrap">{claim.tp_vehicle_damage || '-'}</div>
-            </div>
-
-            <h4 className="font-semibold text-gray-700 mt-4 mb-2">Third Party Insurance</h4>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
-              <DetailRow label="TP Insurer" value={claim.tp_insurer} />
-              <DetailRow label="TP Claim Reference" value={claim.tp_claim_ref} />
-              <DetailRow label="TP Policy Number" value={claim.tp_policy_number} />
-            </div>
-          </EditableSection>
-        );
 
       case 'financials':
         return (
