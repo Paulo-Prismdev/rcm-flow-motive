@@ -139,7 +139,7 @@ export default function ReferrerPortal() {
         <FeedbackModal user={currentUser} onClose={() => {}} />
       )}
       {/* Claims list */}
-      <div className="flex-1 flex flex-col min-h-0 bg-white dark:bg-gray-900 rounded-[10px] border border-gray-100 dark:border-gray-800 overflow-hidden shadow-sm m-4 mt-0">
+      <div className="h-full flex flex-col min-h-0 bg-white dark:bg-gray-900 rounded-[10px] border border-gray-100 dark:border-gray-800 overflow-hidden shadow-sm m-4 mt-0">
             {/* Search bar */}
             <div className="flex items-center gap-3 px-5 py-2.5 border-b border-gray-100 dark:border-gray-800 flex-shrink-0 bg-gray-50 dark:bg-gray-900/50">
               <div className="flex-1 relative">
