@@ -70,23 +70,7 @@
         }
       ]
     },
-    "read": {
-      "$or": [
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        },
-        {
-          "user_condition": {
-            "user_type": "internal"
-          }
-        },
-        {
-          "created_by_id": "{{user.id}}"
-        }
-      ]
-    },
+    "read": null,
     "update": {
       "user_condition": {
         "role": "admin"

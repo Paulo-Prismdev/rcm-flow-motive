@@ -52,15 +52,30 @@
     "description"
   ],
   "rls": {
-    "create": true,
-    "read": {
+    "create": {
       "$or": [
-        {
-          "created_by_id": "{{user.id}}"
-        },
         {
           "user_condition": {
             "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "user_type": "internal"
+          }
+        }
+      ]
+    },
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "user_type": "internal"
           }
         }
       ]
