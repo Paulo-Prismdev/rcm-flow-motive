@@ -95,13 +95,17 @@ export default function ReferrerLayout({ children }) {
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* TOP BAR */}
         <header className="hidden lg:flex flex-shrink-0 dark:bg-gray-900/95 border-b border-gray-100 dark:border-gray-800/80 items-center gap-3 px-5 relative z-30 backdrop-blur-sm bg-[hsl(var(--background))]" style={{ height: '48px', minHeight: '48px' }}>
-          {/* Left: Logo + Referrer Name */}
-          <div className="flex items-center gap-3">
-            <img src={companyLogo} alt="RCM" className="h-8 w-auto object-contain" />
+          {/* Left: Referrer Name + Portal Label */}
+          <div className="flex items-center gap-2">
             {referrer && (
-              <span className="text-sm font-medium text-gray-600 dark:text-gray-300">
-                {referrer.name}
-              </span>
+              <>
+                <span className="text-sm font-medium text-gray-600 dark:text-gray-300">
+                  {referrer.name}
+                </span>
+                <span className="text-sm font-medium text-green-600 dark:text-green-400">
+                  Referrer Portal
+                </span>
+              </>
             )}
           </div>
           <div className="flex-1" />
