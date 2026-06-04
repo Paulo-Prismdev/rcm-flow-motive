@@ -141,11 +141,6 @@ export default function ReferrerPortal() {
       <div className="h-full flex gap-0 min-h-0 overflow-hidden">
         {/* Sidebar - matching internal app */}
         <aside className="hidden lg:flex flex-col w-56 bg-[#131d47] text-white flex-shrink-0">
-          {/* Logo */}
-          <div className="flex items-center gap-3 px-4 py-3.5 border-b border-white/10">
-            <img src="https://media.base44.com/images/public/68ee39fb8915b1b539e13c59/b2cb057e2_RCMAutomotiveLogoGreenAutomotivewithHLights.jpg" alt="RCM" className="h-8 w-auto object-contain" />
-          </div>
-
           {/* Nav links */}
           <nav className="flex-1 overflow-y-auto py-4 px-2 space-y-0.5">
             <div className="flex items-center gap-3 px-3 py-2 rounded-[10px] text-sm font-medium bg-white/10 text-white border border-white/15">
@@ -153,27 +148,12 @@ export default function ReferrerPortal() {
               <span>Claims</span>
             </div>
           </nav>
-
-          {/* User footer */}
-          <div className="border-t border-white/10 px-3 py-3">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 bg-white/10 flex items-center justify-center">
-                <span className="text-sm font-bold text-white">
-                  {displayName.charAt(0).toUpperCase()}
-                </span>
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-white truncate">{displayName}</p>
-                <p className="text-[10px] text-white/30 truncate">Referrer</p>
-              </div>
-            </div>
-          </div>
         </aside>
 
         {/* Main content */}
         <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
           {/* Claims list */}
-          <div className="flex-1 flex flex-col min-h-0 bg-white dark:bg-gray-900 rounded-[10px] border border-gray-100 dark:border-gray-800 overflow-hidden shadow-sm m-4">
+          <div className="flex-1 flex flex-col min-h-0 bg-white dark:bg-gray-900 rounded-[10px] border border-gray-100 dark:border-gray-800 overflow-hidden shadow-sm m-4 mt-0">
             {/* Search bar */}
             <div className="flex items-center gap-3 px-5 py-2.5 border-b border-gray-100 dark:border-gray-800 flex-shrink-0 bg-gray-50 dark:bg-gray-900/50">
               <div className="flex-1 relative">

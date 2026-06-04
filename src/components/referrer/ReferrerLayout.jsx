@@ -249,9 +249,9 @@ export default function ReferrerLayout({ children }) {
       )}
 
       {/* Header */}
-      <header className="header-glass mb-2 mx-2 md:mx-3 mt-2 md:mt-3 p-3 md:p-4 flex-shrink-0">
+      <header className="header-glass mx-2 md:mx-3 mt-2 md:mt-3 p-3 md:p-4 flex-shrink-0">
         <div className="flex items-center justify-between gap-2">
-          {/* Left: Burger (mobile) + Logo */}
+          {/* Left: Burger (mobile) + Referrer Portal badge */}
           <div className="flex items-center gap-2 md:gap-4 min-w-0 flex-1">
             {/* Mobile Burger */}
             <button
@@ -261,27 +261,17 @@ export default function ReferrerLayout({ children }) {
               <Menu className="w-4 h-4" />
             </button>
 
-            {/* RCM Logo */}
-            <div className="h-12 md:h-14 flex-shrink-0">
-              <img
-                src="https://media.base44.com/images/public/68ee39fb8915b1b539e13c59/b2cb057e2_RCMAutomotiveLogoGreenAutomotivewithHLights.jpg"
-                alt="RCM Automotive"
-                className="h-full w-auto object-contain"
-              />
-            </div>
-
-            <span className="hidden sm:inline text-xs px-2 py-1 rounded-full font-medium" style={{ background: 'rgba(0,255,0,0.15)', color: '#00ff00' }}>
+            <span className="text-xs px-2 py-1 rounded-full font-medium" style={{ background: 'rgba(0,255,0,0.15)', color: '#00ff00' }}>
               Referrer Portal
             </span>
           </div>
           
-          {/* Right: Desktop controls */}
-          <div className="hidden md:flex items-center gap-2">
+          {/* Right: Referrer name + Desktop controls */}
+          <div className="flex items-center gap-3">
             {referrer && (
-              <div className="flex items-center gap-2 text-sm" style={{ color: 'rgba(255,255,255,0.7)' }}>
-                <Briefcase className="w-4 h-4" />
+              <span className="hidden sm:inline text-sm font-medium" style={{ color: 'rgba(255,255,255,0.9)' }}>
                 {referrer.name}
-              </div>
+              </span>
             )}
 
             <button
