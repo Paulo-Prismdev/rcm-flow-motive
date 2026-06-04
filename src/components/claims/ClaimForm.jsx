@@ -24,6 +24,7 @@ import FileUpload from '../shared/FileUpload';
 import ClientCombobox from '../shared/ClientCombobox';
 import ReferrerCombobox from '../shared/ReferrerCombobox';
 import AddClientModal from '../shared/AddClientModal';
+import AddInsurerModal from '../shared/AddInsurerModal';
 import StatusMultiSelect from '../shared/StatusMultiSelect';
 import ClaimIndemnityFields from './ClaimIndemnityFields';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -43,6 +44,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
   const [currentStep, setCurrentStep] = useState(1);
   const [showClientModal, setShowClientModal] = useState(false);
   const [showTPModal, setShowTPModal] = useState(false);
+  const [showInsurerModal, setShowInsurerModal] = useState(false);
   const [isLookingUpVehicle, setIsLookingUpVehicle] = useState(false);
   const [vehicleLookupError, setVehicleLookupError] = useState(null);
   const [isLookingUpTPVehicle, setIsLookingUpTPVehicle] = useState(false);
@@ -231,6 +233,12 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
     queryClient.invalidateQueries({ queryKey: ['clients'] });
     handleClientChange(newClient);
     setShowClientModal(false);
+  };
+
+  const handleInsurerModalSuccess = (newInsurer) => {
+    queryClient.invalidateQueries({ queryKey: ['insurers'] });
+    handleChange('insurer', newInsurer.name);
+    setShowInsurerModal(false);
   };
 
   const handleTPChange = async (client) => {
@@ -450,6 +458,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
           <>
             <AddClientModal isOpen={showClientModal} onClose={() => setShowClientModal(false)} onSuccess={handleClientModalSuccess} />
             <AddClientModal isOpen={showTPModal} onClose={() => setShowTPModal(false)} onSuccess={handleTPModalSuccess} />
+            <AddInsurerModal isOpen={showInsurerModal} onClose={() => setShowInsurerModal(false)} onSuccess={handleInsurerModalSuccess} />
           </>
         )}
 
@@ -608,7 +617,11 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
                   <h4 className="font-semibold text-gray-700">Client Information</h4>
                   <div>
                     <label className="block text-sm text-gray-600 mb-2">Client Name *</label>
-                    <ClientCombobox value={formData.client_name} onChange={handleClientChange} />
+                    <ClientCombobox 
+                      value={formData.client_name} 
+                      onChange={handleClientChange} 
+                      onAddNew={() => setShowClientModal(true)}
+                    />
                     <p className="text-xs text-gray-500 mt-1">Search for existing client or enter a new name below</p>
                   </div>
                   <div className="neomorph-inset p-4 space-y-4">
@@ -668,7 +681,14 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
               <div className="neomorph-flat p-6 space-y-6">
                 <h3 className="text-xl font-bold text-gray-700 mb-4">Insurance Details</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div><label className="block text-sm text-gray-600 mb-2">Insurer</label><InsurerCombobox value={formData.insurer} onChange={(v) => handleChange('insurer', v)} /></div>
+                  <div>
+                    <label className="block text-sm text-gray-600 mb-2">Insurer</label>
+                    <InsurerCombobox 
+                      value={formData.insurer} 
+                      onChange={(v) => handleChange('insurer', v)} 
+                      onAddNew={() => setShowInsurerModal(true)}
+                    />
+                  </div>
                   <div><label className="block text-sm text-gray-600 mb-2">Claim Reference</label><Input value={formData.claim_ref} onChange={(e) => handleChange('claim_ref', e.target.value)} className="neomorph-inset px-4 py-3 text-gray-700 border-0" /></div>
                   <div><label className="block text-sm text-gray-600 mb-2">Policy Number</label><Input value={formData.policy_number} onChange={(e) => handleChange('policy_number', e.target.value)} className="neomorph-inset px-4 py-3 text-gray-700 border-0" /></div>
                   <div><label className="block text-sm text-gray-600 mb-2">Policy Excess (£)</label><Input type="text" inputMode="decimal" value={formData.policy_excess || ''} onChange={(e) => { const v = e.target.value; if (v === '' || /^\d*\.?\d*$/.test(v)) handleChange('policy_excess', v === '' ? 0 : parseFloat(v) || 0); }} className="neomorph-inset px-4 py-3 text-gray-700 border-0" placeholder="0.00" /></div>
