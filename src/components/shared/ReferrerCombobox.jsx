@@ -26,7 +26,7 @@ export default function ReferrerCombobox({ value, onChange, onAddNew }) {
 
   const { data: companies = [], isLoading } = useQuery({
     queryKey: ["companies", "referrer"],
-    queryFn: () => base44.entities.Referrer.list(),
+    queryFn: () => base44.entities.Company.filter({ company_type: "referrer", is_active: true }),
   });
 
   const handleSelect = (companyName) => {

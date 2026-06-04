@@ -29,9 +29,9 @@ export default function UserManagement() {
     queryFn: () => base44.entities.Company.list("name"),
   });
 
-  const { data: referrers = [] } = useQuery({
-    queryKey: ["referrers"],
-    queryFn: () => base44.entities.Referrer.list("name"),
+  const { data: referrerCompanies = [] } = useQuery({
+    queryKey: ["companies", "referrer"],
+    queryFn: () => base44.entities.Company.filter({ company_type: "referrer", is_active: true }),
   });
 
   const updateMutation = useMutation({
@@ -203,8 +203,8 @@ export default function UserManagement() {
                          >
                            <option value="">— None —</option>
                            {user.user_type === "referrer" ? (
-                             referrers.map((r) => (
-                               <option key={r.id} value={r.id}>{r.name}</option>
+                             referrerCompanies.map((c) => (
+                               <option key={c.id} value={c.id}>{c.name}</option>
                              ))
                            ) : (
                              companies.map((c) => (
