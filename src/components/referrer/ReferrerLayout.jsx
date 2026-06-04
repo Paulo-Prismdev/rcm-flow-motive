@@ -10,6 +10,16 @@ import ThemeToggle from '../layout/ThemeToggle';
 export default function ReferrerLayout({ children }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('dashboard');
+
+  React.useEffect(() => {
+    const handleNav = (e) => {
+      if (e.detail === 'claims') setActiveTab('claims');
+      if (e.detail === 'dashboard') setActiveTab('dashboard');
+    };
+    window.addEventListener('referrer-nav', handleNav);
+    return () => window.removeEventListener('referrer-nav', handleNav);
+  }, []);
 
   const { data: currentUser } = useQuery({
     queryKey: ['currentUser'],
@@ -52,7 +62,11 @@ export default function ReferrerLayout({ children }) {
               e.preventDefault();
               window.dispatchEvent(new CustomEvent('referrer-nav', { detail: 'dashboard' }));
             }}
-            className="flex items-center gap-3 px-3 py-2 rounded-[10px] text-sm font-medium text-white/60 hover:bg-white/8 hover:text-white/90 transition-all"
+            className={`flex items-center gap-3 px-3 py-2 rounded-[10px] text-sm font-medium transition-all ${
+              activeTab === 'dashboard'
+                ? 'bg-white/10 text-white border border-white/15'
+                : 'text-white/60 hover:bg-white/8 hover:text-white/90'
+            }`}
           >
             <LayoutDashboard className="w-4 h-4 flex-shrink-0" />
             <span>Dashboard</span>
@@ -63,7 +77,11 @@ export default function ReferrerLayout({ children }) {
               e.preventDefault();
               window.dispatchEvent(new CustomEvent('referrer-nav', { detail: 'claims' }));
             }}
-            className="flex items-center gap-3 px-3 py-2 rounded-[10px] text-sm font-medium text-white/60 hover:bg-white/8 hover:text-white/90 transition-all"
+            className={`flex items-center gap-3 px-3 py-2 rounded-[10px] text-sm font-medium transition-all ${
+              activeTab === 'claims'
+                ? 'bg-white/10 text-white border border-white/15'
+                : 'text-white/60 hover:bg-white/8 hover:text-white/90'
+            }`}
           >
             <FileText className="w-4 h-4 flex-shrink-0" />
             <span>Claims</span>
@@ -135,7 +153,9 @@ export default function ReferrerLayout({ children }) {
 
         {/* Mobile bottom tab bar */}
         <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 flex items-center justify-around px-2 safe-area-inset-bottom" style={{ height: '60px', zIndex: 1000 }}>
-          <button onClick={() => setMobileMenuOpen((prev) => !prev)} className="flex flex-col items-center justify-center gap-0.5 p-3 text-gray-500 dark:text-gray-400 touch-manipulation min-w-[44px] min-h-[44px]">
+          <button onClick={() => setMobileMenuOpen((prev) => !prev)} className={`flex flex-col items-center justify-center gap-0.5 p-3 touch-manipulation min-w-[44px] min-h-[44px] ${
+            mobileMenuOpen ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'
+          }`}>
             <Menu className="w-5 h-5" />
             <span className="text-[9px]">Menu</span>
           </button>

@@ -20,6 +20,8 @@ export default function ReferrerPortal() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [viewingClaim, setViewingClaim] = useState(null);
   const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [insurerFilter, setInsurerFilter] = useState('all');
   const [collapsedGroups, setCollapsedGroups] = useState({});
 
   // Listen for navigation events from layout
@@ -90,6 +92,12 @@ export default function ReferrerPortal() {
 
   const isLoading = !currentUser || claimsLoading;
 
+  // Get unique insurers for filter dropdown
+  const uniqueInsurers = useMemo(() => {
+    const insurers = [...new Set(claims.map(c => c.insurer).filter(Boolean))];
+    return insurers.sort();
+  }, [claims]);
+
   const filteredClaims = claims.filter(c => {
     const q = search.toLowerCase();
     const matchesSearch = !q ||
@@ -99,7 +107,9 @@ export default function ReferrerPortal() {
       c.referrer_ref?.toLowerCase().includes(q) ||
       c.make_model?.toLowerCase().includes(q) ||
       c.insurer?.toLowerCase().includes(q);
-    return matchesSearch;
+    const matchesStatus = statusFilter === 'all' || (c.job_status || 'New') === statusFilter;
+    const matchesInsurer = insurerFilter === 'all' || c.insurer === insurerFilter;
+    return matchesSearch && matchesStatus && matchesInsurer;
   }).sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
 
   const displayName = referrer?.name || company?.name || 'Referrer';
