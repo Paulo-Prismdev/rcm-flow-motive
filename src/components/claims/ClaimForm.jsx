@@ -100,6 +100,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
 
   const isEditing = !!claim;
   const [choiceStep, setChoiceStep] = useState(!isEditing); // show choice screen for new claims
+  const [entryMode, setEntryMode] = useState(null); // 'manual' | 'ai' | null
 
   const handleAIExtract = async (extractedData) => {
     setAiExtractDialog({ isOpen: true, data: extractedData });
@@ -364,7 +365,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
                 onChange={(urls) => handleChange('file_urls', urls)}
                 enableAI={true}
                 analysisType="claim"
-                onAIExtract={(data) => { handleAIExtract(data); setChoiceStep(false); }}
+                onAIExtract={(data) => { handleAIExtract(data); setEntryMode('ai'); setChoiceStep(false); }}
               />
               <p className="text-xs text-purple-600 font-medium mt-2">Upload a document above — AI will extract the details and open the form pre-filled.</p>
             </div>
@@ -375,7 +376,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
           {/* Option 3: Fill in manually */}
           <div
             className="flex-1 neomorph-flat p-6 flex flex-col items-center text-center gap-4 cursor-pointer border-2 border-transparent hover:border-green-300 transition-all rounded-2xl"
-            onClick={() => setChoiceStep(false)}
+            onClick={() => { setEntryMode('manual'); setChoiceStep(false); }}
           >
             <div className="w-16 h-16 rounded-full bg-green-600 flex items-center justify-center flex-shrink-0">
               <Check className="w-8 h-8 text-white" />
@@ -386,7 +387,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
             </div>
             <Button
               type="button"
-              onClick={() => setChoiceStep(false)}
+              onClick={() => { setEntryMode('manual'); setChoiceStep(false); }}
               className="mt-auto neomorph-flat px-6 py-3 font-medium text-green-600 border border-green-300 hover:bg-green-50"
             >
               Start Wizard →
@@ -485,32 +486,36 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
               <div className="neomorph-flat p-6 space-y-6">
                 <h3 className="text-xl font-bold text-gray-700 mb-4">Let's start with the basics</h3>
 
-                {/* Send to client */}
-                <ClientFormLink />
+                {/* Send to client + AI — only show if not in manual mode */}
+                {entryMode !== 'manual' && (
+                  <>
+                    <ClientFormLink />
 
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-300"></div></div>
-                  <div className="relative flex justify-center text-sm"><span className="px-3 bg-background text-gray-500">Or fill in manually / use AI</span></div>
-                </div>
-
-                {/* AI Upload */}
-                <div className="neomorph-flat p-5 bg-purple-50/50 dark:bg-purple-900/10 border-2 border-purple-200 dark:border-purple-800">
-                  <div className="flex items-start gap-3 mb-4">
-                    <div className="w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center flex-shrink-0">
-                      <Sparkles className="w-5 h-5 text-white" />
+                    <div className="relative">
+                      <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-300"></div></div>
+                      <div className="relative flex justify-center text-sm"><span className="px-3 bg-background text-gray-500">Or fill in manually / use AI</span></div>
                     </div>
-                    <div className="flex-1">
-                      <h4 className="font-bold text-gray-800 dark:text-gray-200 mb-1">Quick Start with AI</h4>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">Upload your instruction document and let AI automatically extract claim details.</p>
-                    </div>
-                  </div>
-                  <FileUpload value={Array.isArray(formData.file_urls) ? formData.file_urls : []} onChange={(urls) => handleChange('file_urls', urls)} enableAI={true} analysisType="claim" onAIExtract={handleAIExtract} />
-                </div>
 
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-300"></div></div>
-                  <div className="relative flex justify-center text-sm"><span className="px-3 bg-background text-gray-500">Or enter details manually</span></div>
-                </div>
+                    {/* AI Upload */}
+                    <div className="neomorph-flat p-5 bg-purple-50/50 dark:bg-purple-900/10 border-2 border-purple-200 dark:border-purple-800">
+                      <div className="flex items-start gap-3 mb-4">
+                        <div className="w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center flex-shrink-0">
+                          <Sparkles className="w-5 h-5 text-white" />
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-bold text-gray-800 dark:text-gray-200 mb-1">Quick Start with AI</h4>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">Upload your instruction document and let AI automatically extract claim details.</p>
+                        </div>
+                      </div>
+                      <FileUpload value={Array.isArray(formData.file_urls) ? formData.file_urls : []} onChange={(urls) => handleChange('file_urls', urls)} enableAI={true} analysisType="claim" onAIExtract={handleAIExtract} />
+                    </div>
+
+                    <div className="relative">
+                      <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-300"></div></div>
+                      <div className="relative flex justify-center text-sm"><span className="px-3 bg-background text-gray-500">Or enter details manually</span></div>
+                    </div>
+                  </>
+                )}
 
                 <div>
                   <label className="block text-sm text-gray-600 mb-2">Vehicle Registration *</label>
