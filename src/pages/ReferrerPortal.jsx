@@ -28,7 +28,8 @@ export default function ReferrerPortal() {
   const [claimTypeFilter, setClaimTypeFilter] = useState('');
   const [insurerFilter, setInsurerFilter] = useState('');
   const [collapsedGroups, setCollapsedGroups] = useState({});
-  const { allStatuses: statusConfigs } = useStatusConfigs();
+  const statusConfigContext = useStatusConfigs();
+  const statusConfigs = statusConfigContext?.allStatuses || [];
 
   const { data: currentUser } = useQuery({
     queryKey: ['currentUser'],
