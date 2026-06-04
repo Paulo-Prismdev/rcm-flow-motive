@@ -43,9 +43,7 @@ const SECONDARY_STYLES = {
 const PILL_BASE = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold whitespace-nowrap leading-none';
 
 export default function StatusBadge({ status, variant = "primary" }) {
-  const context = useStatusConfigs();
-  const allStatuses = context?.allStatuses || [];
-  const isLoading = context?.isLoading ?? false;
+  const { allStatuses, isLoading } = useStatusConfigs();
 
   const getColor = (statusName) => {
     if (!statusName) return 'gray';

@@ -32,10 +32,10 @@ export const StatusConfigProvider = ({ children }) => {
     return [...claimStatuses, ...partStatuses, ...estimateStatuses, ...engineeringStatuses];
   }, [claimStatuses, partStatuses, estimateStatuses, engineeringStatuses]);
 
-  const value = useMemo(() => ({
+  const value = {
     allStatuses,
-    isLoading: false
-  }), [allStatuses]);
+    isLoading: !claimStatuses || !partStatuses || !estimateStatuses || !engineeringStatuses
+  };
 
   return (
     <StatusConfigContext.Provider value={value}>
