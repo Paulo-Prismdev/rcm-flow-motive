@@ -117,6 +117,14 @@ export default function ReferrerPortal() {
 
   const uniqueInsurers = [...new Set(claims.map(c => c.insurer).filter(Boolean))].sort();
 
+  // Get unique statuses from actual claims, in order of availableStatuses
+  const claimStatuses = useMemo(() => {
+    const statuses = new Set(claims.map(c => c.job_status || 'New'));
+    const ordered = availableStatuses.filter(s => statuses.has(s));
+    const remaining = Array.from(statuses).filter(s => !ordered.includes(s));
+    return [...ordered, ...remaining];
+  }, [claims, availableStatuses]);
+
   const filteredClaims = claims.filter(c => {
     const s = search.toLowerCase();
     const matchesSearch = !search ||
@@ -374,7 +382,7 @@ export default function ReferrerPortal() {
             <>
               {/* Mobile card view */}
               <div className="lg:hidden">
-                {availableStatuses.map(statusGroup => {
+                {claimStatuses.map(statusGroup => {
                   const claimsInGroup = filteredClaims.filter(c => (c.job_status || 'New') === statusGroup);
                   if (claimsInGroup.length === 0) return null;
                   const isCollapsed = collapsedGroups[statusGroup];
@@ -410,7 +418,7 @@ export default function ReferrerPortal() {
                   </tr>
                 </thead>
                 <tbody>
-                  {availableStatuses.map(statusGroup => {
+                  {claimStatuses.map(statusGroup => {
                     const claimsInGroup = filteredClaims.filter(c => (c.job_status || 'New') === statusGroup);
                     if (claimsInGroup.length === 0) return null;
                     const isCollapsed = collapsedGroups[statusGroup];
