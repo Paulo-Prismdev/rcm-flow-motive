@@ -13,12 +13,23 @@ import StatusBadge from '../components/shared/StatusBadge';
 import { formatUKRegistration } from '../components/shared/formatRegistration';
 import ReferrerLayout from '../components/referrer/ReferrerLayout';
 import ReferrerClaimDetail from '../components/referrer/ReferrerClaimDetail';
+import ReferrerDashboard from '../components/referrer/ReferrerDashboard';
 import FeedbackModal from '../components/shared/FeedbackModal';
 
 export default function ReferrerPortal() {
+  const [activeTab, setActiveTab] = useState('claims');
   const [viewingClaim, setViewingClaim] = useState(null);
   const [search, setSearch] = useState('');
   const [collapsedGroups, setCollapsedGroups] = useState({});
+
+  // Listen for navigation events from layout
+  useEffect(() => {
+    const handleNav = (e) => {
+      if (e.detail === 'claims') setActiveTab('claims');
+    };
+    window.addEventListener('referrer-nav', handleNav);
+    return () => window.removeEventListener('referrer-nav', handleNav);
+  }, []);
 
   const { data: currentUser } = useQuery({
     queryKey: ['currentUser'],
@@ -116,6 +127,14 @@ export default function ReferrerPortal() {
     return (
       <ReferrerLayout>
         <ReferrerClaimDetail claim={viewingClaim} onClose={() => setViewingClaim(null)} />
+      </ReferrerLayout>
+    );
+  }
+
+  if (activeTab === 'dashboard') {
+    return (
+      <ReferrerLayout>
+        <ReferrerDashboard />
       </ReferrerLayout>
     );
   }

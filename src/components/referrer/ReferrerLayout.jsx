@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
-import { LogOut, User, Sun, Moon, Menu, X, Search, RefreshCw, Bell, FileText } from 'lucide-react';
+import { LogOut, User, Sun, Moon, Menu, X, Search, RefreshCw, Bell, FileText, LayoutDashboard } from 'lucide-react';
 import { StatusConfigProvider } from '../shared/StatusConfigContext';
 
 export default function ReferrerLayout({ children }) {
@@ -61,11 +61,28 @@ export default function ReferrerLayout({ children }) {
 
         {/* Nav links */}
         <nav className="flex-1 overflow-y-auto py-4 px-2 space-y-0.5" style={{ WebkitOverflowScrolling: 'touch' }}>
-          <div className="flex items-center gap-3 px-3 py-2 rounded-[10px] text-sm font-medium bg-white/10 text-white border border-white/15">
+          <a
+            href="#dashboard"
+            onClick={(e) => {
+              e.preventDefault();
+              window.dispatchEvent(new CustomEvent('referrer-nav', { detail: 'dashboard' }));
+            }}
+            className="flex items-center gap-3 px-3 py-2 rounded-[10px] text-sm font-medium text-white/60 hover:bg-white/8 hover:text-white/90 transition-all"
+          >
+            <LayoutDashboard className="w-4 h-4 flex-shrink-0" />
+            <span>Dashboard</span>
+          </a>
+          <a
+            href="#claims"
+            onClick={(e) => {
+              e.preventDefault();
+              window.dispatchEvent(new CustomEvent('referrer-nav', { detail: 'claims' }));
+            }}
+            className="flex items-center gap-3 px-3 py-2 rounded-[10px] text-sm font-medium text-white/60 hover:bg-white/8 hover:text-white/90 transition-all"
+          >
             <FileText className="w-4 h-4 flex-shrink-0" />
             <span>Claims</span>
-            <div className="w-3 h-3 ml-auto opacity-60" />
-          </div>
+          </a>
         </nav>
 
         {/* User footer */}
