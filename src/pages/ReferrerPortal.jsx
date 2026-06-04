@@ -2,11 +2,9 @@ import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { 
-  FileText,
   ChevronRight,
   AlertCircle,
-  X,
-  Menu
+  X
 } from 'lucide-react';
 import { format } from 'date-fns';
 import StatusBadge from '../components/shared/StatusBadge';
@@ -19,7 +17,6 @@ export default function ReferrerPortal() {
   const [viewingClaim, setViewingClaim] = useState(null);
   const [filter, setFilter] = useState('active');
   const [search, setSearch] = useState('');
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const { data: currentUser } = useQuery({
     queryKey: ['currentUser'],
@@ -114,67 +111,8 @@ export default function ReferrerPortal() {
       {currentUser?.show_feedback_prompt && (
         <FeedbackModal user={currentUser} onClose={() => {}} />
       )}
-      <div className="h-full flex flex-col gap-0 min-h-0">
-        {/* Header - matching main app dark navy header */}
-        <div className="flex-shrink-0 bg-[#131d47] text-white px-4 py-2.5 border-b border-white/10 flex items-center gap-3">
-          <button
-            onClick={() => setMobileMenuOpen(true)}
-            className="lg:hidden p-1.5 hover:bg-white/10 rounded-lg transition-colors"
-          >
-            <Menu className="w-5 h-5" />
-          </button>
-          <div className="flex items-center gap-3">
-            <span className="px-2 py-0.5 rounded bg-green-500/20 text-green-400 text-xs font-medium border border-green-500/30">
-              {displayName}
-            </span>
-          </div>
-        </div>
-
-        <div className="flex-1 flex min-h-0">
-          {/* Sidebar - desktop */}
-          <aside className="hidden lg:flex flex-col w-56 bg-[#131d47] text-white border-r border-white/10 flex-shrink-0">
-            <nav className="flex-1 overflow-y-auto py-4 px-2 space-y-0.5">
-              <div className="px-3 py-2">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-white/30 mb-1">Claims</p>
-                <div className="flex items-center gap-3 px-3 py-2 rounded-[10px] bg-white/10 text-white border border-white/15">
-                  <FileText className="w-4 h-4" />
-                  <span className="text-sm font-medium">My Claims</span>
-                </div>
-              </div>
-            </nav>
-          </aside>
-
-          {/* Mobile sidebar overlay */}
-          {mobileMenuOpen && (
-            <>
-              <div
-                className="fixed inset-0 z-[9998] bg-black/50 lg:hidden"
-                onClick={() => setMobileMenuOpen(false)}
-              />
-              <aside className="fixed inset-y-0 left-0 z-[9999] w-56 bg-[#131d47] text-white lg:hidden transform transition-transform duration-300">
-                <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
-                  <span className="text-sm font-semibold">Menu</span>
-                  <button onClick={() => setMobileMenuOpen(false)} className="p-1.5 hover:bg-white/10 rounded-lg">
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
-                <nav className="py-4 px-2">
-                  <div className="px-3 py-2">
-                    <p className="text-[10px] font-semibold uppercase tracking-wider text-white/30 mb-1">Claims</p>
-                    <div className="flex items-center gap-3 px-3 py-2 rounded-[10px] bg-white/10 text-white border border-white/15">
-                      <FileText className="w-4 h-4" />
-                      <span className="text-sm font-medium">My Claims</span>
-                    </div>
-                  </div>
-                </nav>
-              </aside>
-            </>
-          )}
-
-          {/* Main content */}
-          <main className="flex-1 overflow-hidden p-4 min-w-0">
-            {/* Claims list - matching internal Claims page */}
-            <div className="h-full flex flex-col min-h-0 bg-white dark:bg-gray-900 rounded-[10px] border border-gray-100 dark:border-gray-800 overflow-hidden shadow-sm">
+      {/* Claims list - matching internal Claims page */}
+      <div className="h-full flex flex-col min-h-0 bg-white dark:bg-gray-900 rounded-[10px] border border-gray-100 dark:border-gray-800 overflow-hidden shadow-sm">
           {/* Search bar */}
           <div className="flex items-center gap-3 px-5 py-2.5 border-b border-gray-100 dark:border-gray-800 flex-shrink-0 bg-gray-50 dark:bg-gray-900/50">
             <div className="flex-1 relative">
@@ -296,14 +234,11 @@ export default function ReferrerPortal() {
             )}
           </div>
 
-              {/* Footer count */}
-              <div className="px-5 py-2 border-t border-gray-100 dark:border-gray-800 text-xs text-gray-400 flex-shrink-0">
-                {filteredClaims.length} of {claims.length} claims
-              </div>
-            </div>
-          </main>
+          {/* Footer count */}
+          <div className="px-5 py-2 border-t border-gray-100 dark:border-gray-800 text-xs text-gray-400 flex-shrink-0">
+            {filteredClaims.length} of {claims.length} claims
+          </div>
         </div>
-      </div>
     </ReferrerLayout>
   );
 }

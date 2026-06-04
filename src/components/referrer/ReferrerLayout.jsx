@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
-import { LogOut, User, Briefcase, Sun, Moon, Menu, X } from 'lucide-react';
+import { LogOut, User, Menu, X } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,298 +11,55 @@ import {
 import { StatusConfigProvider } from '../shared/StatusConfigContext';
 
 export default function ReferrerLayout({ children }) {
-  const [isDark, setIsDark] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  React.useEffect(() => {
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme) {
-      setIsDark(savedTheme === 'dark');
-      document.documentElement.setAttribute('data-theme', savedTheme);
-    } else {
-      document.documentElement.setAttribute('data-theme', 'light');
-    }
-  }, []);
-
-  const toggleTheme = () => {
-    const newTheme = isDark ? 'light' : 'dark';
-    setIsDark(!isDark);
-    document.documentElement.setAttribute('data-theme', newTheme);
-    localStorage.setItem('theme', newTheme);
-  };
 
   const { data: currentUser } = useQuery({
     queryKey: ['currentUser'],
     queryFn: () => base44.auth.me(),
   });
 
-  const { data: referrer } = useQuery({
-    queryKey: ['referrer', currentUser?.linked_referrer_id],
-    queryFn: () => base44.entities.Referrer.get(currentUser.linked_referrer_id),
-    enabled: !!currentUser?.linked_referrer_id,
-  });
-
   return (
     <StatusConfigProvider>
-    <div className="h-screen flex flex-col bg-background text-foreground overflow-hidden">
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
-        :root {
-          --background: #f8f9fa;
-          --surface: #ffffff;
-          --surface-elevated: #ffffff;
-          --surface-hover: #f1f3f5;
-          --foreground: #1a1a1a;
-          --foreground-muted: #6c757d;
-          --foreground-subtle: #adb5bd;
-          --accent: #00ff00;
-          --accent-hover: #00cc00;
-          --accent-foreground: #000000;
-          --border: #dee2e6;
-          --border-strong: #ced4da;
-          --glass-bg: rgba(255, 255, 255, 0.85);
-          --glass-border: rgba(0, 0, 0, 0.08);
-          --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
-          --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.08);
-          --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.1);
-        }
-
-        [data-theme="dark"] {
-          --background: #070d1a;
-          --surface: #0f1829;
-          --surface-elevated: #182035;
-          --surface-hover: #1e2a45;
-          --foreground: #f1f5f9;
-          --foreground-muted: #cbd5e1;
-          --foreground-subtle: #64748b;
-          --accent: #00ff00;
-          --accent-hover: #00cc00;
-          --accent-foreground: #000000;
-          --border: #334155;
-          --border-strong: #475569;
-          --glass-bg: rgba(30, 41, 59, 0.85);
-          --glass-border: rgba(255, 255, 255, 0.08);
-          --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
-          --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
-          --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.5);
-        }
-
-        body {
-          font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-          background: var(--background);
-          color: var(--foreground);
-        }
-
-        .neomorph {
-          background: var(--glass-bg);
-          backdrop-filter: blur(20px);
-          border: 1px solid var(--glass-border);
-          border-radius: 16px;
-          box-shadow: var(--shadow-md);
-        }
-
-        .neomorph-flat {
-          background: var(--surface);
-          border: 1px solid var(--border);
-          border-radius: 12px;
-          box-shadow: var(--shadow-sm);
-        }
-
-        .neomorph-inset {
-          background: var(--surface);
-          border: 1px solid var(--border);
-          border-radius: 12px;
-          box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
-        }
-
-        .header-glass {
-          background: #151d44;
-          backdrop-filter: blur(24px);
-          -webkit-backdrop-filter: blur(24px);
-          border: 1px solid rgba(255,255,255,0.08);
-          border-radius: 20px;
-          box-shadow: var(--shadow-lg);
-        }
-
-        .glass-button {
-          background: rgba(255,255,255,0.08);
-          border: 1px solid rgba(255,255,255,0.15);
-          border-radius: 12px;
-          box-shadow: var(--shadow-sm);
-          transition: all 0.2s ease;
-          cursor: pointer;
-          color: rgba(255,255,255,0.9) !important;
-        }
-
-        .glass-button:hover {
-          background: rgba(255,255,255,0.16);
-          border-color: rgba(255,255,255,0.25);
-          box-shadow: var(--shadow-md);
-          transform: translateY(-1px);
-        }
-
-        .surface-button {
-          background: var(--surface);
-          border: 1px solid var(--border);
-          border-radius: 12px;
-          box-shadow: var(--shadow-sm);
-          transition: all 0.2s ease;
-          cursor: pointer;
-          color: var(--foreground);
-        }
-
-        .surface-button:hover {
-          background: var(--surface-hover);
-          border-color: var(--border-strong);
-          box-shadow: var(--shadow-md);
-        }
-
-        .mobile-menu-overlay {
-          position: fixed;
-          inset: 0;
-          background: rgba(0, 0, 0, 0.5);
-          z-index: 40;
-        }
-
-        .mobile-menu {
-          position: fixed;
-          top: 0;
-          left: 0;
-          bottom: 0;
-          width: 80%;
-          max-width: 320px;
-          background: var(--glass-bg);
-          backdrop-filter: blur(24px);
-          border-right: 1px solid var(--border-strong);
-          box-shadow: var(--shadow-lg);
-          z-index: 50;
-          transform: translateX(-100%);
-          transition: transform 0.3s ease;
-          overflow-y: auto;
-          display: flex;
-          flex-direction: column;
-        }
-
-        .mobile-menu.open {
-          transform: translateX(0);
-        }
-      `}</style>
-
-      {/* Mobile Menu */}
-      {mobileMenuOpen && (
-        <>
-          <div 
-            className="mobile-menu-overlay md:hidden" 
-            onClick={() => setMobileMenuOpen(false)}
-          />
-          <div className={`mobile-menu md:hidden ${mobileMenuOpen ? 'open' : ''}`}>
-            <div className="p-4 border-b border-border flex items-center justify-between">
-              <h2 className="font-bold text-lg">Menu</h2>
-              <button onClick={() => setMobileMenuOpen(false)} className="surface-button w-10 h-10 flex items-center justify-center">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* User Profile Card */}
-            {currentUser && (
-              <div className="p-4 border-b border-border">
-                <div className="neomorph-flat p-4 rounded-xl">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-12 h-12 rounded-full bg-accent flex items-center justify-center">
-                      <span className="text-base font-bold text-accent-foreground">
-                        {currentUser.full_name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || '?'}
-                      </span>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-bold truncate">{currentUser.full_name || 'User'}</p>
-                      <p className="text-xs text-foreground-muted truncate">{currentUser.email}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Theme Toggle */}
-            <div className="p-4 border-b border-border">
-              <button
-                onClick={toggleTheme}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl surface-button"
-              >
-                {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-                <span className="font-medium">{isDark ? 'Light Mode' : 'Dark Mode'}</span>
-              </button>
-            </div>
-
-            {/* Logout Button */}
-            <div className="p-4 mt-auto border-t border-border">
-              <button
-                onClick={() => base44.auth.logout()}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl surface-button text-red-500 font-medium"
-              >
-                <LogOut className="w-5 h-5" />
-                Log Out
-              </button>
-            </div>
+      <div className="h-full flex overflow-hidden bg-gray-100 dark:bg-gray-950">
+        {/* Desktop Sidebar */}
+        <aside className="hidden lg:flex flex-col w-56 bg-[#131d47] text-white flex-shrink-0">
+          {/* Logo */}
+          <div className="flex items-center gap-3 px-4 py-3.5 border-b border-white/10">
+            <img 
+              src="https://media.base44.com/images/public/68ee39fb8915b1b539e13c59/b2cb057e2_RCMAutomotiveLogoGreenAutomotivewithHLights.jpg" 
+              alt="RCM" 
+              className="h-8 w-auto object-contain" 
+            />
           </div>
-        </>
-      )}
 
-      {/* Header */}
-      <header className="header-glass mb-2 mx-2 md:mx-3 mt-2 md:mt-3 p-3 md:p-4 flex-shrink-0">
-        <div className="flex items-center justify-between gap-2">
-          {/* Left: Burger (mobile) + Logo */}
-          <div className="flex items-center gap-2 md:gap-4 min-w-0 flex-1">
-            {/* Mobile Burger */}
-            <button
-              onClick={() => setMobileMenuOpen(true)}
-              className="glass-button w-10 h-10 flex items-center justify-center flex-shrink-0 md:hidden"
-            >
-              <Menu className="w-4 h-4" />
-            </button>
-
-            {/* RCM Logo */}
-            <div className="h-12 md:h-14 flex-shrink-0">
-              <img
-                src="https://media.base44.com/images/public/68ee39fb8915b1b539e13c59/b2cb057e2_RCMAutomotiveLogoGreenAutomotivewithHLights.jpg"
-                alt="RCM Automotive"
-                className="h-full w-auto object-contain"
-              />
-            </div>
-
-            <span className="hidden sm:inline text-xs px-2 py-1 rounded-full font-medium" style={{ background: 'rgba(0,255,0,0.15)', color: '#00ff00' }}>
-              Referrer Portal
-            </span>
-          </div>
-          
-          {/* Right: Desktop controls */}
-          <div className="hidden md:flex items-center gap-2">
-            {referrer && (
-              <div className="flex items-center gap-2 text-sm" style={{ color: 'rgba(255,255,255,0.7)' }}>
-                <Briefcase className="w-4 h-4" />
-                {referrer.name}
+          {/* Nav links */}
+          <nav className="flex-1 overflow-y-auto py-4 px-2 space-y-0.5">
+            <div className="px-3 py-2">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-white/30 mb-1">Portal</p>
+              <div className="flex items-center gap-3 px-3 py-2 rounded-[10px] bg-white/10 text-white border border-white/15">
+                <User className="w-4 h-4" />
+                <span className="text-sm font-medium">Referrer Portal</span>
               </div>
-            )}
+            </div>
+          </nav>
 
-            <button
-              onClick={toggleTheme}
-              className="glass-button w-10 h-10 flex items-center justify-center"
-              title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-            >
-              {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-            </button>
-
+          {/* User footer */}
+          <div className="border-t border-white/10 px-3 py-3">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="glass-button w-10 h-10 flex items-center justify-center">
-                  <User className="w-4 h-4" />
-                </button>
+                <div className="flex items-center gap-3 group cursor-pointer w-full hover:bg-white/5 p-2 -mx-2 rounded-lg transition-colors">
+                  <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 bg-white/20 flex items-center justify-center">
+                    <span className="text-sm font-bold text-white">
+                      {currentUser?.full_name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || '?'}
+                    </span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-white truncate">{currentUser?.full_name || 'User'}</p>
+                    <p className="text-xs text-white/40 truncate">{currentUser?.email || ''}</p>
+                  </div>
+                </div>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
-                <div className="p-3 border-b border-border">
-                  <p className="font-medium">{currentUser?.full_name}</p>
-                  <p className="text-xs text-foreground-muted">{currentUser?.email}</p>
-                </div>
                 <DropdownMenuItem 
                   onClick={() => base44.auth.logout()}
                   className="cursor-pointer text-red-500"
@@ -313,16 +70,67 @@ export default function ReferrerLayout({ children }) {
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-        </div>
-      </header>
+        </aside>
 
-      {/* Main Content */}
-      <main className="px-2 md:px-3 pb-3 md:pb-4 flex-1 overflow-y-auto min-h-0">
-        <div className="max-w-full mx-auto h-full">
-          {children}
+        {/* Mobile sidebar overlay */}
+        {mobileMenuOpen && (
+          <>
+            <div
+              className="fixed inset-0 z-[9998] bg-black/50 lg:hidden"
+              onClick={() => setMobileMenuOpen(false)}
+            />
+            <aside className="fixed inset-y-0 left-0 z-[9999] w-56 bg-[#131d47] text-white lg:hidden">
+              <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
+                <img 
+                  src="https://media.base44.com/images/public/68ee39fb8915b1b539e13c59/b2cb057e2_RCMAutomotiveLogoGreenAutomotivewithHLights.jpg" 
+                  alt="RCM" 
+                  className="h-6 w-auto object-contain" 
+                />
+                <button onClick={() => setMobileMenuOpen(false)} className="p-1.5 hover:bg-white/10 rounded-lg">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <nav className="py-4 px-2">
+                <div className="px-3 py-2">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-white/30 mb-1">Portal</p>
+                  <div className="flex items-center gap-3 px-3 py-2 rounded-[10px] bg-white/10 text-white border border-white/15">
+                    <User className="w-4 h-4" />
+                    <span className="text-sm font-medium">Referrer Portal</span>
+                  </div>
+                </div>
+              </nav>
+              <div className="absolute bottom-0 left-0 right-0 border-t border-white/10 p-3">
+                <button
+                  onClick={() => base44.auth.logout()}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors text-sm font-medium"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Log Out
+                </button>
+              </div>
+            </aside>
+          </>
+        )}
+
+        {/* Main content area */}
+        <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+          {/* Mobile header */}
+          <div className="lg:hidden bg-[#131d47] text-white px-4 py-2.5 border-b border-white/10 flex items-center gap-3">
+            <button
+              onClick={() => setMobileMenuOpen(true)}
+              className="p-1.5 hover:bg-white/10 rounded-lg"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+            <span className="text-sm font-medium">Referrer Portal</span>
+          </div>
+
+          {/* Content */}
+          <main className="flex-1 overflow-hidden p-3 lg:p-4">
+            {children}
+          </main>
         </div>
-      </main>
-    </div>
+      </div>
     </StatusConfigProvider>
   );
 }
