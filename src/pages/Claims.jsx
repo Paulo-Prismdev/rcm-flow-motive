@@ -394,7 +394,7 @@ export default function ClaimsPage() {
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
             placeholder="Search by reg, client, job number..."
-            className="w-full pl-9 pr-4 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-[10px] focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/15 text-gray-900 dark:text-white placeholder-gray-400 transition-all"
+            className="w-full pl-9 pr-6 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-[10px] focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/15 text-gray-900 dark:text-white placeholder-gray-400 transition-all"
           />
         </div>
 
