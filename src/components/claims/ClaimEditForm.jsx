@@ -91,6 +91,24 @@ export default function ClaimEditForm({
               <div><label className="block text-sm text-gray-600 mb-2">Client Name *</label>{isInternalUser ? <div className="flex gap-2"><div className="flex-1"><ClientCombobox value={formData.client_name} onChange={handleClientChange} /></div><button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); console.log('[ClaimEditForm] Add Client modal clicked'); setShowClientModal(true); }} className="neomorph-flat p-3 rounded-lg"><Plus /></button></div> : <ClientCombobox value={formData.client_name} onChange={handleClientChange} />}</div>
               <div><label className="block text-sm text-gray-600 mb-2">Phone</label><Input value={formData.client_phone} onChange={(e) => handleChange('client_phone', e.target.value)} className="neomorph-inset px-4 py-3 text-gray-700 border-0" /></div>
               <div><label className="block text-sm text-gray-600 mb-2">Driver/Contact Name</label><Input value={formData.driver_contact_name} onChange={(e) => handleChange('driver_contact_name', e.target.value)} className="neomorph-inset px-4 py-3 text-gray-700 border-0" /></div>
+            </div>
+            {formData.driver_contact_name && (
+              <div className="neomorph-inset p-4 mt-4 space-y-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+                <h4 className="font-semibold text-sm text-gray-700 dark:text-gray-200">Driver Contact Details</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div><label className="block text-xs text-gray-500 mb-1">Phone</label><Input value={formData.driver_contact_phone} onChange={(e) => handleChange('driver_contact_phone', e.target.value)} className="neomorph-inset px-3 py-2 text-sm" /></div>
+                  <div><label className="block text-xs text-gray-500 mb-1">Email</label><Input type="email" value={formData.driver_contact_email} onChange={(e) => handleChange('driver_contact_email', e.target.value)} className="neomorph-inset px-3 py-2 text-sm" /></div>
+                </div>
+                <div><label className="block text-xs text-gray-500 mb-1">Address Line 1</label><Input value={formData.driver_contact_address_line_1} onChange={(e) => handleChange('driver_contact_address_line_1', e.target.value)} className="neomorph-inset px-3 py-2 text-sm" /></div>
+                <div><label className="block text-xs text-gray-500 mb-1">Address Line 2</label><Input value={formData.driver_contact_address_line_2} onChange={(e) => handleChange('driver_contact_address_line_2', e.target.value)} className="neomorph-inset px-3 py-2 text-sm" /></div>
+                <div className="grid grid-cols-3 gap-3">
+                  <div><label className="block text-xs text-gray-500 mb-1">Town</label><Input value={formData.driver_contact_town} onChange={(e) => handleChange('driver_contact_town', e.target.value)} className="neomorph-inset px-3 py-2 text-sm" /></div>
+                  <div><label className="block text-xs text-gray-500 mb-1">County</label><Input value={formData.driver_contact_county} onChange={(e) => handleChange('driver_contact_county', e.target.value)} className="neomorph-inset px-3 py-2 text-sm" /></div>
+                  <div><label className="block text-xs text-gray-500 mb-1">Postcode</label><Input value={formData.driver_contact_postcode} onChange={(e) => handleChange('driver_contact_postcode', e.target.value)} className="neomorph-inset px-3 py-2 text-sm" /></div>
+                </div>
+              </div>
+            )}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div><label className="block text-sm text-gray-600 mb-2">Email</label><Input type="email" value={formData.client_email} onChange={(e) => handleChange('client_email', e.target.value)} className="neomorph-inset px-4 py-3 text-gray-700 border-0" /></div>
             </div>
             <div><label className="block text-sm text-gray-600 mb-2">Address Line 1</label><Input value={formData.client_address_line_1} onChange={(e) => handleChange('client_address_line_1', e.target.value)} className="neomorph-inset px-4 py-3 text-gray-700 border-0" /></div>

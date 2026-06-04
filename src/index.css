@@ -15,6 +15,12 @@
 @layer base {
   :root {
     /* ─── Light Mode ─── */
+    --text-primary: #1B2A3B;
+    --text-secondary: #6B7280;
+    --bg-primary: #FFFFFF;
+    --bg-surface: #F5F6FA;
+    --border-color: #E2E5EB;
+    
     --background: 210 20% 97%;        /* Very soft off-white */
     --foreground: 222 47% 11%;        /* Deep navy text */
     --card: 0 0% 100%;                /* Pure white cards */
@@ -57,6 +63,12 @@
 
   .dark {
     /* ─── Dark Mode ─── */
+    --text-primary: #F1F5F9;
+    --text-secondary: #94A3B8;
+    --bg-primary: #0F1A27;
+    --bg-surface: #1B2A3B;
+    --border-color: #2D3F52;
+    
     --background: 222 47% 6%;
     --foreground: 210 40% 96%;
     --card: 222 47% 10%;
