@@ -114,6 +114,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
   };
 
   const handleVehicleLookup = async () => {
+    console.log('[ClaimForm] handleVehicleLookup called, event type:', event?.type);
     if (!formData.reg || formData.reg.trim().length < 3) {
       setVehicleLookupError('Please enter a valid registration number');
       return;
@@ -152,6 +153,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
   const [isCreating, setIsCreating] = React.useState(false);
 
   const handleSubmit = async (e) => {
+    console.log('[ClaimForm] handleSubmit called, event type:', e?.type);
     e.preventDefault();
     e.stopPropagation();
     if (isCreating) return;
@@ -209,6 +211,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
   };
 
   const handleSaveDraft = async () => {
+    console.log('[ClaimForm] handleSaveDraft called');
     setIsSavingDraft(true);
     try {
       // Validate minimum required fields for a draft
@@ -251,12 +254,14 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
   };
 
   const handleInsurerModalSuccess = (newInsurer) => {
+    console.log('[ClaimForm] handleInsurerModalSuccess called');
     queryClient.invalidateQueries({ queryKey: ['insurers'] });
     handleChange('insurer', newInsurer.name);
     setShowInsurerModal(false);
   };
 
   const handleTPChange = async (client) => {
+    console.log('[ClaimForm] handleTPChange called');
     setFormData(prev => ({
       ...prev, tp_name: client.name, tp_phone: client.phone || '', tp_email: client.email || '',
       tp_address_line_1: client.address_line_1 || '', tp_address_line_2: client.address_line_2 || '',
@@ -265,6 +270,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
   };
 
   const handleTPVehicleLookup = async () => {
+    console.log('[ClaimForm] handleTPVehicleLookup called');
     if (!formData.tp_reg || formData.tp_reg.trim().length < 3) {
       setTpVehicleLookupError('Please enter a valid registration number'); return;
     }
@@ -298,14 +304,21 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
   });
 
   const handleReferrerChange = (referrer) => {
+    console.log('[ClaimForm] handleReferrerChange called');
     setReferrerCompanyId(referrer.id);
     setFormData(prev => ({
       ...prev, referrer: referrer.name, referrer_id: referrer.id, referrer_email: referrer.email || '', file_handler: ''
     }));
   };
 
-  const nextStep = () => setCurrentStep(prev => prev + 1);
-  const prevStep = () => setCurrentStep(prev => prev - 1);
+  const nextStep = () => {
+    console.log('[ClaimForm] nextStep called');
+    setCurrentStep(prev => prev + 1);
+  };
+  const prevStep = () => {
+    console.log('[ClaimForm] prevStep called');
+    setCurrentStep(prev => prev - 1);
+  };
 
   const generateSteps = () => {
     const dynamicSteps = [
@@ -408,7 +421,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
             </div>
             <Button
               type="button"
-              onClick={() => { setEntryMode('manual'); setChoiceStep(false); }}
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); console.log('[ClaimForm choice] Start Wizard clicked'); setEntryMode('manual'); setChoiceStep(false); }}
               className="mt-auto neomorph-flat px-6 py-3 font-medium text-green-600 border border-green-300 hover:bg-green-50"
             >
               Start Wizard →
@@ -470,7 +483,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
         {/* Header & Progress */}
         <div className="neomorph p-6 flex-shrink-0">
           <div className="flex items-center gap-4 mb-6">
-            <Button onClick={onCancel} className="neomorph-flat p-3 transition-all active:neomorph-pressed">
+            <Button onClick={(e) => { e.preventDefault(); e.stopPropagation(); console.log('[ClaimForm wizard] Back button clicked'); onCancel(); }} className="neomorph-flat p-3 transition-all active:neomorph-pressed">
               <ArrowLeft className="w-4 h-4 text-gray-600" />
             </Button>
             <div className="flex-1">
@@ -541,7 +554,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
                   <div className="flex flex-col gap-2">
                     <div className="flex gap-2">
                       <Input value={formData.reg} onChange={(e) => { handleChange('reg', e.target.value); setVehicleLookupError(null); }} className="neomorph-inset px-4 py-3 text-gray-700 border-0 text-lg" placeholder="e.g. AB12 CDE" required autoFocus />
-                      <Button type="button" onClick={handleVehicleLookup} disabled={isLookingUpVehicle || !formData.reg || formData.reg.length < 3} className="neomorph-flat px-4 py-3 whitespace-nowrap">
+                      <Button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); console.log('[ClaimForm wizard] Vehicle Lookup clicked'); handleVehicleLookup(); }} disabled={isLookingUpVehicle || !formData.reg || formData.reg.length < 3} className="neomorph-flat px-4 py-3 whitespace-nowrap">
                         {isLookingUpVehicle ? <><Loader className="w-4 h-4 animate-spin mr-2" /><span className="hidden sm:inline">Looking up...</span></> : <><Search className="w-4 h-4 sm:mr-2" /><span className="hidden sm:inline">Lookup</span></>}
                       </Button>
                     </div>
@@ -723,7 +736,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
                   <h4 className="font-semibold text-gray-700">Vehicle Details</h4>
                   <div className="flex gap-2">
                     <Input value={formData.tp_reg} onChange={(e) => { handleChange('tp_reg', e.target.value.toUpperCase()); setTpVehicleLookupError(null); }} className="neomorph-inset px-4 py-3 text-gray-700 border-0 flex-1" placeholder="e.g. AB12 CDE" />
-                    <Button type="button" onClick={handleTPVehicleLookup} disabled={isLookingUpTPVehicle || !formData.tp_reg || formData.tp_reg.length < 3} className="neomorph-flat px-4 py-3">
+                    <Button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); console.log('[ClaimForm wizard] TP Vehicle Lookup clicked'); handleTPVehicleLookup(); }} disabled={isLookingUpTPVehicle || !formData.tp_reg || formData.tp_reg.length < 3} className="neomorph-flat px-4 py-3">
                       {isLookingUpTPVehicle ? <><Loader className="w-4 h-4 animate-spin mr-2" /><span className="hidden sm:inline">Looking up...</span></> : <><Search className="w-4 h-4 sm:mr-2" /><span className="hidden sm:inline">Lookup</span></>}
                     </Button>
                   </div>
@@ -778,13 +791,13 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
         {/* Navigation — outside scroll area so always visible */}
         <div className="flex justify-between pt-3 pb-2 flex-shrink-0 gap-3">
           {currentStep > 1 && (
-            <Button type="button" onClick={prevStep} className="neomorph-flat px-6 py-3 font-medium text-gray-700 transition-all active:neomorph-pressed flex items-center gap-2">
+            <Button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); console.log('[ClaimForm nav] Previous clicked'); prevStep(); }} className="neomorph-flat px-6 py-3 font-medium text-gray-700 transition-all active:neomorph-pressed flex items-center gap-2">
               <ArrowLeft className="w-4 h-4" /> Previous
             </Button>
           )}
           <Button 
             type="button" 
-            onClick={handleSaveDraft} 
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); console.log('[ClaimForm nav] Save Draft clicked'); handleSaveDraft(); }} 
             disabled={isSavingDraft || !formData.reg}
             className="neomorph-flat px-6 py-3 font-medium text-blue-600 transition-all active:neomorph-pressed flex items-center gap-2 disabled:opacity-60"
           >
@@ -792,12 +805,12 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
           </Button>
           <div className="flex-1" />
           {currentStep < steps.length && (
-            <Button type="button" onClick={nextStep} className="neomorph-flat px-6 py-3 font-medium text-blue-600 transition-all active:neomorph-pressed flex items-center gap-2" disabled={currentStep === getStepNumber("basic") && !formData.reg}>
+            <Button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); console.log('[ClaimForm nav] Next clicked'); nextStep(); }} className="neomorph-flat px-6 py-3 font-medium text-blue-600 transition-all active:neomorph-pressed flex items-center gap-2" disabled={currentStep === getStepNumber("basic") && !formData.reg}>
               Next <ArrowRight className="w-4 h-4" />
             </Button>
           )}
           {currentStep === steps.length && (
-            <Button type="button" onClick={handleSubmit} disabled={isSubmitting || isCreating} className="neomorph-flat px-8 py-3 font-medium text-gold transition-all active:neomorph-pressed flex items-center gap-2 disabled:opacity-60">
+            <Button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); console.log('[ClaimForm nav] Create Claim clicked'); handleSubmit(e); }} disabled={isSubmitting || isCreating} className="neomorph-flat px-8 py-3 font-medium text-gold transition-all active:neomorph-pressed flex items-center gap-2 disabled:opacity-60">
               {(isSubmitting || isCreating) ? <><Loader className="w-4 h-4 animate-spin" /> Creating...</> : <><Check className="w-5 h-5" /> Create Claim</>}
             </Button>
           )}

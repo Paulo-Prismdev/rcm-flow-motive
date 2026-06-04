@@ -115,6 +115,13 @@ function PublicApp() {
 function App() {
   const isPublicPath = PUBLIC_PATHS.some(p => window.location.pathname.startsWith(p));
 
+  // Add beforeunload listener to track page reloads
+  if (typeof window !== 'undefined') {
+    window.addEventListener('beforeunload', (e) => {
+      console.trace('PAGE UNLOAD TRIGGERED');
+    });
+  }
+
   if (isPublicPath) {
     return (
       <Router>

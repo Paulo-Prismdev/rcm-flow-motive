@@ -25,6 +25,7 @@ export default function ClaimEditForm({
   isInternalUser, setShowClientModal,
   aiExtractDialog, setAiExtractDialog, handleAIExtractConfirm, handleAIExtract,
 }) {
+  console.log('[ClaimEditForm] Form submit handler:', handleSubmit?.toString?.().substring(0, 100));
   const Plus = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>;
 
   return (
@@ -39,7 +40,7 @@ export default function ClaimEditForm({
       />
       <div className="neomorph p-6 flex-shrink-0">
         <div className="flex items-center gap-4">
-          <Button onClick={onCancel} className="neomorph-flat p-3 transition-all active:neomorph-pressed">
+          <Button onClick={(e) => { e.preventDefault(); e.stopPropagation(); console.log('[ClaimEditForm] Back button clicked'); onCancel(); }} className="neomorph-flat p-3 transition-all active:neomorph-pressed">
             <ArrowLeft className="w-4 h-4 text-gray-600" />
           </Button>
           <div>
@@ -60,7 +61,7 @@ export default function ClaimEditForm({
                 <div className="flex flex-col gap-2">
                   <div className="flex gap-2">
                     <Input value={formData.reg} onChange={(e) => { handleChange('reg', e.target.value); }} className="neomorph-inset px-4 py-3 text-gray-700 border-0" required />
-                    <Button type="button" onClick={handleVehicleLookup} disabled={isLookingUpVehicle || !formData.reg} className="neomorph-flat px-4 py-3 whitespace-nowrap">
+                    <Button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); console.log('[ClaimEditForm] Vehicle Lookup clicked'); handleVehicleLookup(); }} disabled={isLookingUpVehicle || !formData.reg} className="neomorph-flat px-4 py-3 whitespace-nowrap">
                       {isLookingUpVehicle ? <Loader className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
                     </Button>
                   </div>
@@ -87,7 +88,7 @@ export default function ClaimEditForm({
           <div className="neomorph-flat p-6 space-y-4">
             <h3 className="font-bold text-gray-700 mb-4">Client Details</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div><label className="block text-sm text-gray-600 mb-2">Client Name *</label>{isInternalUser ? <div className="flex gap-2"><div className="flex-1"><ClientCombobox value={formData.client_name} onChange={handleClientChange} /></div><button type="button" onClick={() => setShowClientModal(true)} className="neomorph-flat p-3 rounded-lg"><Plus /></button></div> : <ClientCombobox value={formData.client_name} onChange={handleClientChange} />}</div>
+              <div><label className="block text-sm text-gray-600 mb-2">Client Name *</label>{isInternalUser ? <div className="flex gap-2"><div className="flex-1"><ClientCombobox value={formData.client_name} onChange={handleClientChange} /></div><button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); console.log('[ClaimEditForm] Add Client modal clicked'); setShowClientModal(true); }} className="neomorph-flat p-3 rounded-lg"><Plus /></button></div> : <ClientCombobox value={formData.client_name} onChange={handleClientChange} />}</div>
               <div><label className="block text-sm text-gray-600 mb-2">Phone</label><Input value={formData.client_phone} onChange={(e) => handleChange('client_phone', e.target.value)} className="neomorph-inset px-4 py-3 text-gray-700 border-0" /></div>
               <div><label className="block text-sm text-gray-600 mb-2">Driver/Contact Name</label><Input value={formData.driver_contact_name} onChange={(e) => handleChange('driver_contact_name', e.target.value)} className="neomorph-inset px-4 py-3 text-gray-700 border-0" /></div>
               <div><label className="block text-sm text-gray-600 mb-2">Email</label><Input type="email" value={formData.client_email} onChange={(e) => handleChange('client_email', e.target.value)} className="neomorph-inset px-4 py-3 text-gray-700 border-0" /></div>
@@ -161,7 +162,7 @@ export default function ClaimEditForm({
               <h4 className="font-semibold text-gray-700 mt-4">Third Party Vehicle</h4>
               <div className="flex gap-2">
                 <Input value={formData.tp_reg} onChange={(e) => { handleChange('tp_reg', e.target.value.toUpperCase()); setTpVehicleLookupError(null); }} className="neomorph-inset px-4 py-3 text-gray-700 border-0 flex-1" placeholder="e.g. AB12 CDE" />
-                <Button type="button" onClick={handleTPVehicleLookup} disabled={isLookingUpTPVehicle || !formData.tp_reg} className="neomorph-flat px-4 py-3">
+                <Button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); console.log('[ClaimEditForm] TP Vehicle Lookup clicked'); handleTPVehicleLookup(); }} disabled={isLookingUpTPVehicle || !formData.tp_reg} className="neomorph-flat px-4 py-3">
                   {isLookingUpTPVehicle ? <Loader className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
                 </Button>
               </div>
@@ -184,8 +185,8 @@ export default function ClaimEditForm({
           </div>
 
           <div className="flex justify-end gap-4">
-            <Button type="button" onClick={onCancel} className="neomorph-flat px-6 py-3 font-medium text-gray-700 transition-all active:neomorph-pressed">Cancel</Button>
-            <Button type="submit" className="neomorph-flat px-6 py-3 font-medium text-blue-600 transition-all active:neomorph-pressed">Update Claim</Button>
+            <Button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); console.log('[ClaimEditForm] Cancel clicked'); onCancel(); }} className="neomorph-flat px-6 py-3 font-medium text-gray-700 transition-all active:neomorph-pressed">Cancel</Button>
+            <Button type="submit" onClick={(e) => { console.log('[ClaimEditForm] Update Claim submit clicked'); }} className="neomorph-flat px-6 py-3 font-medium text-blue-600 transition-all active:neomorph-pressed">Update Claim</Button>
           </div>
         </form>
       </div>
