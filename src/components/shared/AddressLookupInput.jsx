@@ -241,7 +241,7 @@ export default function AddressLookupInput({
           {/* Suggestions Dropdown */}
           {showSuggestions && suggestions.length > 0 && (
             <div 
-              className="absolute w-full mt-2 glass-elevated rounded-lg shadow-lg max-h-60 overflow-y-auto"
+              className="absolute w-full mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-60 overflow-y-auto"
               style={{ zIndex: 9999 }}
             >
               {isLoadingSuggestions && (
@@ -255,7 +255,7 @@ export default function AddressLookupInput({
                   key={index}
                   type="button"
                   onClick={() => handleSelectSuggestion(suggestion)}
-                  className="w-full text-left px-3 py-2 hover:bg-surface-hover transition-colors border-b border-border last:border-b-0 first:rounded-t-lg last:rounded-b-lg"
+                  className="w-full text-left px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors border-b border-gray-100 dark:border-gray-700 last:border-b-0 first:rounded-t-lg last:rounded-b-lg"
                 >
                   <div className="flex items-start gap-2">
                     <MapPin className="w-3.5 h-3.5 text-accent flex-shrink-0 mt-0.5" />
