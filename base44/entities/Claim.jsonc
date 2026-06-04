@@ -175,6 +175,27 @@
     "driver_contact_name": {
       "type": "string"
     },
+    "driver_contact_phone": {
+      "type": "string"
+    },
+    "driver_contact_email": {
+      "type": "string"
+    },
+    "driver_contact_address_line_1": {
+      "type": "string"
+    },
+    "driver_contact_address_line_2": {
+      "type": "string"
+    },
+    "driver_contact_town": {
+      "type": "string"
+    },
+    "driver_contact_county": {
+      "type": "string"
+    },
+    "driver_contact_postcode": {
+      "type": "string"
+    },
     "client_email": {
       "type": "string"
     },

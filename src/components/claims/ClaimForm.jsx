@@ -69,6 +69,9 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
     policy_number: '', policy_excess: 0, referrer: '', referrer_id: null,
     referrer_ref: '', file_handler: '', referrer_email: '', percent_to_referrer: 0,
     client_name: '', client_id: null, client_phone: '', driver_contact_name: '',
+    driver_contact_phone: '', driver_contact_email: '', driver_contact_address_line_1: '',
+    driver_contact_address_line_2: '', driver_contact_town: '', driver_contact_county: '',
+    driver_contact_postcode: '',
     client_email: '', client_address_line_1: '', client_address_line_2: '',
     client_town: '', client_county: '', client_postcode: '', client_vat_status: 'Unknown',
     business_division: '', client_lat: null, client_lng: null,
@@ -665,7 +668,23 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
                     <div><label className="block text-xs text-gray-500 mb-1">VAT Status</label><select value={formData.client_vat_status} onChange={(e) => handleChange('client_vat_status', e.target.value)} className="neomorph-inset w-full px-3 py-2 text-sm text-gray-700 border-0 rounded-xl"><option>VAT Registered</option><option>Non-VAT</option><option>Unknown</option></select></div>
                   </div>
                   <div><label className="block text-sm text-gray-600 mb-2">Driver/Contact Name</label><Input value={formData.driver_contact_name} onChange={(e) => handleChange('driver_contact_name', e.target.value)} className="neomorph-inset px-4 py-3 text-gray-700 border-0" placeholder="If different from client" /></div>
-                </div>
+                  {formData.driver_contact_name && (
+                    <div className="space-y-4 pt-2 border-t border-gray-200">
+                      <h5 className="font-semibold text-gray-600">Driver Contact Details</h5>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div><label className="block text-xs text-gray-500 mb-1">Phone</label><Input value={formData.driver_contact_phone} onChange={(e) => handleChange('driver_contact_phone', e.target.value)} className="neomorph-inset px-3 py-2 text-sm text-gray-700 border-0" /></div>
+                        <div><label className="block text-xs text-gray-500 mb-1">Email</label><Input type="email" value={formData.driver_contact_email} onChange={(e) => handleChange('driver_contact_email', e.target.value)} className="neomorph-inset px-3 py-2 text-sm text-gray-700 border-0" /></div>
+                      </div>
+                      <div><label className="block text-xs text-gray-500 mb-1">Address Line 1</label><Input value={formData.driver_contact_address_line_1} onChange={(e) => handleChange('driver_contact_address_line_1', e.target.value)} className="neomorph-inset px-3 py-2 text-sm text-gray-700 border-0" /></div>
+                      <div><label className="block text-xs text-gray-500 mb-1">Address Line 2</label><Input value={formData.driver_contact_address_line_2} onChange={(e) => handleChange('driver_contact_address_line_2', e.target.value)} className="neomorph-inset px-3 py-2 text-sm text-gray-700 border-0" /></div>
+                      <div className="grid grid-cols-3 gap-4">
+                        <div><label className="block text-xs text-gray-500 mb-1">Town</label><Input value={formData.driver_contact_town} onChange={(e) => handleChange('driver_contact_town', e.target.value)} className="neomorph-inset px-3 py-2 text-sm text-gray-700 border-0" /></div>
+                        <div><label className="block text-xs text-gray-500 mb-1">County</label><Input value={formData.driver_contact_county} onChange={(e) => handleChange('driver_contact_county', e.target.value)} className="neomorph-inset px-3 py-2 text-sm text-gray-700 border-0" /></div>
+                        <div><label className="block text-xs text-gray-500 mb-1">Postcode</label><Input value={formData.driver_contact_postcode} onChange={(e) => handleChange('driver_contact_postcode', e.target.value)} className="neomorph-inset px-3 py-2 text-sm text-gray-700 border-0" /></div>
+                      </div>
+                    </div>
+                  )}
+                  </div>
 
                 <div className="space-y-4">
                   <h4 className="font-semibold text-gray-700">Vehicle Information</h4>
