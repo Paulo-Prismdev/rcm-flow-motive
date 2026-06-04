@@ -50,7 +50,7 @@ export default function ClaimEditForm({
       </div>
 
       <div className="flex-1 overflow-y-auto min-h-0 pr-1">
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={(e) => { e.preventDefault(); e.stopPropagation(); handleSubmit(e); }} className="space-y-6">
           {/* Basic Info */}
           <div className="neomorph-flat p-6 space-y-4">
             <h3 className="font-bold text-gray-700 mb-4">Basic Information</h3>
@@ -87,7 +87,7 @@ export default function ClaimEditForm({
           <div className="neomorph-flat p-6 space-y-4">
             <h3 className="font-bold text-gray-700 mb-4">Client Details</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div><label className="block text-sm text-gray-600 mb-2">Client Name *</label>{isInternalUser ? <div className="flex gap-2"><div className="flex-1"><ClientCombobox value={formData.client_name} onChange={handleClientChange} /></div><Button type="button" onClick={() => setShowClientModal(true)} className="neomorph-flat p-3"><Plus /></Button></div> : <ClientCombobox value={formData.client_name} onChange={handleClientChange} />}</div>
+              <div><label className="block text-sm text-gray-600 mb-2">Client Name *</label>{isInternalUser ? <div className="flex gap-2"><div className="flex-1"><ClientCombobox value={formData.client_name} onChange={handleClientChange} /></div><button type="button" onClick={() => setShowClientModal(true)} className="neomorph-flat p-3 rounded-lg"><Plus /></button></div> : <ClientCombobox value={formData.client_name} onChange={handleClientChange} />}</div>
               <div><label className="block text-sm text-gray-600 mb-2">Phone</label><Input value={formData.client_phone} onChange={(e) => handleChange('client_phone', e.target.value)} className="neomorph-inset px-4 py-3 text-gray-700 border-0" /></div>
               <div><label className="block text-sm text-gray-600 mb-2">Driver/Contact Name</label><Input value={formData.driver_contact_name} onChange={(e) => handleChange('driver_contact_name', e.target.value)} className="neomorph-inset px-4 py-3 text-gray-700 border-0" /></div>
               <div><label className="block text-sm text-gray-600 mb-2">Email</label><Input type="email" value={formData.client_email} onChange={(e) => handleChange('client_email', e.target.value)} className="neomorph-inset px-4 py-3 text-gray-700 border-0" /></div>

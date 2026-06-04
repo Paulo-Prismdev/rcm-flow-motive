@@ -153,6 +153,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    e.stopPropagation();
     if (isCreating) return;
     setIsCreating(true);
     const { id: _id, created_date: _cd, updated_date: _ud, created_by: _cb, ...submitData } = formData;
@@ -371,7 +372,6 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
           {/* Option 2: Upload & AI Extract */}
           <div
             className="flex-1 neomorph-flat p-6 flex flex-col items-center text-center gap-4 border-2 border-transparent hover:border-purple-300 transition-all rounded-2xl"
-            onClick={(e) => e.stopPropagation()}
           >
             <div className="w-16 h-16 rounded-full bg-purple-600 flex items-center justify-center flex-shrink-0">
               <Sparkles className="w-8 h-8 text-white" />
@@ -380,7 +380,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
               <h3 className="text-lg font-bold text-gray-700 mb-2">Upload & Use AI</h3>
               <p className="text-sm text-gray-500">Upload your instruction document and let AI automatically extract all claim details for you. Fast and accurate.</p>
             </div>
-            <div className="w-full mt-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="w-full mt-auto">
               <FileUpload
                 value={Array.isArray(formData.file_urls) ? formData.file_urls : []}
                 onChange={(urls) => handleChange('file_urls', urls)}
@@ -499,7 +499,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
         </div>
 
         <div className="flex-1 overflow-y-auto min-h-0 pr-1 pb-4">
-          <form id="claim-wizard-form" onSubmit={handleSubmit}>
+          <form id="claim-wizard-form" onSubmit={(e) => { e.preventDefault(); e.stopPropagation(); handleSubmit(e); }}>
             {/* Step 1: Basic Info */}
             {currentStep === getStepNumber("basic") && (
               <div className="neomorph-flat p-6 space-y-6">
