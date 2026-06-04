@@ -17,7 +17,7 @@ import ReferrerDashboard from '../components/referrer/ReferrerDashboard';
 import FeedbackModal from '../components/shared/FeedbackModal';
 
 export default function ReferrerPortal() {
-  const [activeTab, setActiveTab] = useState('claims');
+  const [activeTab, setActiveTab] = useState('dashboard');
   const [viewingClaim, setViewingClaim] = useState(null);
   const [search, setSearch] = useState('');
   const [collapsedGroups, setCollapsedGroups] = useState({});
@@ -133,7 +133,7 @@ export default function ReferrerPortal() {
     );
   }
 
-  // Dashboard view
+  // Dashboard view (default)
   if (activeTab === 'dashboard') {
     return (
       <ReferrerLayout>
@@ -142,7 +142,7 @@ export default function ReferrerPortal() {
     );
   }
 
-  // Claims list view (default)
+  // Claims list view
 
   const getStatusDot = (statusName) => {
     const cfg = customStatuses?.find(s => s.status_name === statusName);
