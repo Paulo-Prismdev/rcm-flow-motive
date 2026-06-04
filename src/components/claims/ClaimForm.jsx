@@ -786,7 +786,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
                   {[['Vehicle Registration', formData.reg, true], ['Claim Type', formData.claim_type], ['Client', formData.client_name || 'Not specified'], ['Vehicle', formData.make_model || 'Not specified']].map(([label, value, isGold]) =>
               <div key={label} className="neomorph-inset p-4">
                       <p className="text-sm text-gray-500 mb-2">{label}</p>
-                      <p className={`font-medium ${isGold ? 'font-bold text-lg text-gold' : 'text-gray-700'}`}>{value}</p>
+                      <p className={`text-[hsl(var(--primary))] ${isGold ? "font-bold text-lg" : 'text-gray-700'}`}>{value}</p>
                     </div>
               )}
                   {formData.insurer && <div className="neomorph-inset p-4"><p className="text-sm text-gray-500 mb-2">Insurer</p><p className="font-medium text-gray-700">{formData.insurer}</p></div>}
