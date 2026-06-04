@@ -124,8 +124,12 @@ export default function ReferrerLayout({ children }) {
               title="Search">
               <Search className="w-4 h-4" />
             </button>
-            <ThemeToggle />
-            <Notifications />
+            <div className="p-1.5 rounded-[10px]">
+              <ThemeToggle />
+            </div>
+            <div className="p-1.5 rounded-[10px]">
+              <Notifications />
+            </div>
           </div>
         </header>
 
@@ -143,13 +147,13 @@ export default function ReferrerLayout({ children }) {
             <RefreshCw className="w-5 h-5" />
             <span className="text-[9px]">Refresh</span>
           </button>
-          <div className="flex flex-col items-center justify-center gap-0.5 touch-manipulation min-w-[44px] min-h-[44px]">
+          <div className="flex flex-col items-center justify-center gap-0.5 p-3 text-gray-500 dark:text-gray-400 touch-manipulation min-w-[44px] min-h-[44px]">
             <ThemeToggle />
-            <span className="text-[9px] text-gray-500">Theme</span>
+            <span className="text-[9px]">Theme</span>
           </div>
-          <div className="flex flex-col items-center justify-center gap-0.5 touch-manipulation min-w-[44px] min-h-[44px]">
+          <div className="flex flex-col items-center justify-center gap-0.5 p-3 text-gray-500 dark:text-gray-400 touch-manipulation min-w-[44px] min-h-[44px]">
             <Notifications />
-            <span className="text-[9px] text-gray-500">Alerts</span>
+            <span className="text-[9px]">Alerts</span>
           </div>
         </div>
 
