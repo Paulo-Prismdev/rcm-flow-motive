@@ -102,41 +102,31 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
 
   const createUpdateMutation = useMutation({
     mutationFn: async (updateData) => {
-      // If this is a Status Change with a description, create TWO separate records:
-      // 1. Status Change entry (no description)
-      // 2. Note entry (with the description text)
-      if (updateData.update_type === 'Status Change' && updateData.description && updateData.description.trim()) {
-        const noteText = updateData.description;
-        const { description, ...statusChangeData } = updateData;
-        
-        // Create status change entry (no description)
-        const statusChangeRecord = await base44.entities.ClaimUpdate.create({
-          ...statusChangeData,
-          claim_id: claimId,
-          description: '',
-          ...(currentUser?.company_id ? { company_id: currentUser.company_id } : {})
-        });
-        
-        // Create note entry (with description)
-        const noteRecord = await base44.entities.ClaimUpdate.create({
-          update_type: 'Other',
-          description: noteText,
-          next_steps: updateData.next_steps,
-          due_date_for_next_action: updateData.due_date_for_next_action,
-          claim_id: claimId,
-          ...(currentUser?.company_id ? { company_id: currentUser.company_id } : {})
-        });
-        
-        return { statusChangeRecord, noteRecord };
-      } else {
-        // Regular update (single record)
-        return await base44.entities.ClaimUpdate.create({
-          ...updateData,
-          claim_id: claimId,
-          ...(currentUser?.company_id ? { company_id: currentUser.company_id } : {})
-        });
-      }
-    },
+       // If this is a Status Change with a description, create ONLY a Note entry
+       // The status change itself is handled by the Claim.update() in handleSubmit
+       if (updateData.update_type === 'Status Change' && updateData.description && updateData.description.trim()) {
+         const noteText = updateData.description;
+
+         // Create note entry (with description)
+         const noteRecord = await base44.entities.ClaimUpdate.create({
+           update_type: 'Other',
+           description: noteText,
+           next_steps: updateData.next_steps,
+           due_date_for_next_action: updateData.due_date_for_next_action,
+           claim_id: claimId,
+           ...(currentUser?.company_id ? { company_id: currentUser.company_id } : {})
+         });
+
+         return noteRecord;
+       } else {
+         // Regular update (single record)
+         return await base44.entities.ClaimUpdate.create({
+           ...updateData,
+           claim_id: claimId,
+           ...(currentUser?.company_id ? { company_id: currentUser.company_id } : {})
+         });
+       }
+     },
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ['claimUpdates', claimId] });
       
