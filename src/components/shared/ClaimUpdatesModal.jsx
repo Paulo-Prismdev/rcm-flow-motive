@@ -527,20 +527,8 @@ This update was sent from ART-TEC One Claims Management System
                       </div>
                     </div>
 
-                    {isStatusChange ? (
-                      <div className="space-y-3">
-                        <div>
-                          <p className="font-semibold text-purple-700 dark:text-purple-300">Status updated</p>
-                        </div>
-                        {update.description && update.description.trim() && (
-                          <div className="bg-purple-100 dark:bg-purple-900/40 rounded p-3 border border-purple-200 dark:border-purple-700">
-                            <p className="text-xs font-medium text-purple-700 dark:text-purple-300 uppercase mb-1">Notes:</p>
-                            <p className="text-sm text-foreground whitespace-pre-wrap">{update.description}</p>
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="text-sm">
+                    {!isStatusChange && (
+                      <div className="text-sm mb-3">
                         <p className="text-foreground whitespace-pre-wrap">{update.description}</p>
                       </div>
                     )}
