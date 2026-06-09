@@ -67,7 +67,7 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
    });
 
    // Referrers can only add notes, not change statuses or set follow-ups
-   const isReferrer = currentUser?.user_type === 'referrer';
+   const isReferrer = currentUser?.user_type === 'referrer' || (currentUser?.linked_referrer_id && !currentUser?.user_type?.includes('internal'));
    const canChangeStatus = !isReferrer;
 
    // Fetch custom claim statuses
