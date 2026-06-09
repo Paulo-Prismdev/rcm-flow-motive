@@ -4,7 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { X, Clock, User, Calendar, Mail, Plus, Heart, Reply, AtSign } from 'lucide-react';
+import { X, Clock, User, Calendar, Mail, Plus, Heart, Reply, AtSign, Pencil, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
@@ -39,6 +39,8 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
   const [mentionQuery, setMentionQuery] = useState('');
   const [mentionPosition, setMentionPosition] = useState(null);
   const [showMentionPopup, setShowMentionPopup] = useState(false);
+  const [editingUpdateId, setEditingUpdateId] = useState(null);
+  const [editDescription, setEditDescription] = useState('');
 
   const queryClient = useQueryClient();
   const { data: currentUser } = useQuery({ queryKey: ['currentUser'], queryFn: () => base44.auth.me(), staleTime: 5 * 60 * 1000 });
@@ -85,6 +87,53 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['claimUpdates', claimId] }),
   });
+
+  const updateUpdateMutation = useMutation({
+    mutationFn: async ({ updateId, description, next_steps, due_date_for_next_action }) => {
+      return await base44.entities.ClaimUpdate.update(updateId, { description, next_steps, due_date_for_next_action });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['claimUpdates', claimId] });
+      setEditingUpdateId(null);
+      setEditDescription('');
+    },
+    onError: (error) => setSubmitError(error?.message || 'Failed to update'),
+  });
+
+  const deleteUpdateMutation = useMutation({
+    mutationFn: async (updateId) => {
+      return await base44.entities.ClaimUpdate.delete(updateId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['claimUpdates', claimId] });
+    },
+    onError: (error) => setSubmitError(error?.message || 'Failed to delete'),
+  });
+
+  const handleEdit = (update) => {
+    setEditingUpdateId(update.id);
+    setEditDescription(update.description);
+  };
+
+  const handleSaveEdit = async (updateId) => {
+    const update = updates.find(u => u.id === updateId);
+    updateUpdateMutation.mutate({ 
+      updateId, 
+      description: editDescription, 
+      next_steps: update.next_steps, 
+      due_date_for_next_action: update.due_date_for_next_action 
+    });
+  };
+
+  const handleDelete = async (updateId) => {
+    if (confirm('Are you sure you want to delete this update?')) {
+      deleteUpdateMutation.mutate(updateId);
+    }
+  };
+
+  const canEditDelete = (update) => {
+    return currentUser?.id === update.created_by_id || currentUser?.role === 'admin' || currentUser?.role === 'super_admin' || currentUser?.user_type === 'internal';
+  };
 
   const resetForm = () => {
     setNewUpdate({ update_type: 'Other', description: '', next_steps: '', due_date_for_next_action: '', new_status: currentStatus || '', new_secondary_status: '' });
@@ -308,17 +357,35 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
                           {update.tagged_user_ids?.length > 0 && <span className="text-[10px] text-primary flex items-center gap-1"><AtSign className="w-3 h-3" />{update.tagged_user_ids.length} tagged</span>}
                         </div>
                       </div>
-                      {update.description && <div className="text-sm mb-3"><p className="text-foreground whitespace-pre-wrap">{update.description}</p></div>}
-                      {update.next_steps && <div className="text-sm mb-2 mt-3 bg-muted/50 rounded p-2"><p className="font-medium mb-1 text-foreground text-xs uppercase tracking-wide">Next Steps:</p><p className="text-muted-foreground whitespace-pre-wrap">{update.next_steps}</p></div>}
-                      {update.due_date_for_next_action && <div className="text-xs text-muted-foreground flex items-center gap-1 mt-2"><Clock className="w-3 h-3" />Due: {format(new Date(update.due_date_for_next_action), 'dd/MM/yyyy')}</div>}
+                      {editingUpdateId === update.id ? (
+                        <div className="space-y-3 mb-3">
+                          <Textarea value={editDescription} onChange={(e) => setEditDescription(e.target.value)} className="px-3 py-2 text-sm bg-background border border-border h-24" />
+                          <div className="flex justify-end gap-2">
+                            <Button type="button" variant="outline" size="sm" onClick={() => { setEditingUpdateId(null); setEditDescription(''); }} className="text-xs">Cancel</Button>
+                            <Button type="button" size="sm" onClick={() => handleSaveEdit(update.id)} disabled={updateUpdateMutation.isPending || !editDescription.trim()} className="text-xs">{updateUpdateMutation.isPending ? 'Saving...' : 'Save'}</Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          {update.description && <div className="text-sm mb-3"><p className="text-foreground whitespace-pre-wrap">{update.description}</p></div>}
+                          {update.next_steps && <div className="text-sm mb-2 mt-3 bg-muted/50 rounded p-2"><p className="font-medium mb-1 text-foreground text-xs uppercase tracking-wide">Next Steps:</p><p className="text-muted-foreground whitespace-pre-wrap">{update.next_steps}</p></div>}
+                          {update.due_date_for_next_action && <div className="text-xs text-muted-foreground flex items-center gap-1 mt-2"><Clock className="w-3 h-3" />Due: {format(new Date(update.due_date_for_next_action), 'dd/MM/yyyy')}</div>}
+                        </>
+                      )}
                       <div className="flex items-center justify-between mt-3 pt-3 border-t border-border/50">
                         <div className="flex items-center gap-1 text-[10px] text-muted-foreground"><User className="w-3 h-3" />{update.created_by}</div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1">
+                          {canEditDelete(update) && (
+                            <>
+                              <Button type="button" variant="ghost" size="sm" onClick={() => handleEdit(update)} className="h-7 px-2 text-xs text-muted-foreground"><Pencil className="w-3.5 h-3.5" /></Button>
+                              <Button type="button" variant="ghost" size="sm" onClick={() => handleDelete(update.id)} className="h-7 px-2 text-xs text-muted-foreground"><Trash2 className="w-3.5 h-3.5" /></Button>
+                            </>
+                          )}
                           <Button type="button" variant="ghost" size="sm" onClick={() => toggleLikeMutation.mutate({ updateId: update.id, isLiked })} className={`h-7 px-2 text-xs ${isLiked ? 'text-red-500 hover:text-red-600' : 'text-muted-foreground'}`}><Heart className={`w-3.5 h-3.5 mr-1 ${isLiked ? 'fill-current' : ''}`} />{likeCount > 0 && likeCount}</Button>
                           <Button type="button" variant="ghost" size="sm" onClick={() => handleReply(update.id)} className="h-7 px-2 text-xs text-muted-foreground"><Reply className="w-3.5 h-3.5 mr-1" />Reply</Button>
                         </div>
                       </div>
-                      {replies.length > 0 && <div className="ml-6 mt-3 space-y-2 border-l-2 border-border pl-4">{replies.map(reply => { const replyIsLiked = reply.liked_by?.includes(currentUser?.id); const replyLikeCount = reply.liked_by?.length || 0; return (<div key={reply.id} className="bg-muted/30 border border-border rounded-lg p-3"><div className="flex items-center justify-between mb-2"><div className="flex items-center gap-2"><span className="text-[10px] text-muted-foreground flex items-center gap-1"><User className="w-3 h-3" />{reply.created_by}</span><span className="text-[10px] text-muted-foreground flex items-center gap-1"><Calendar className="w-3 h-3" />{format(new Date(reply.created_date), 'dd/MM/yyyy HH:mm')}</span></div><Button type="button" variant="ghost" size="sm" onClick={() => toggleLikeMutation.mutate({ updateId: reply.id, isLiked: replyIsLiked })} className={`h-6 px-1.5 text-xs ${replyIsLiked ? 'text-red-500' : 'text-muted-foreground'}`}><Heart className={`w-3 h-3 ${replyIsLiked ? 'fill-current' : ''}`} />{replyLikeCount > 0 && replyLikeCount}</Button></div>{reply.description && <p className="text-sm text-foreground whitespace-pre-wrap">{reply.description}</p>}</div>); })}</div>}
+                      {replies.length > 0 && <div className="ml-6 mt-3 space-y-2 border-l-2 border-border pl-4">{replies.map(reply => { const replyIsLiked = reply.liked_by?.includes(currentUser?.id); const replyLikeCount = reply.liked_by?.length || 0; const replyEditing = editingUpdateId === reply.id; return (<div key={reply.id} className="bg-muted/30 border border-border rounded-lg p-3">{replyEditing ? (<div className="space-y-2"><Textarea value={editDescription} onChange={(e) => setEditDescription(e.target.value)} className="px-3 py-2 text-sm bg-background border border-border h-20" /><div className="flex justify-end gap-2"><Button type="button" variant="outline" size="sm" onClick={() => { setEditingUpdateId(null); setEditDescription(''); }} className="text-xs">Cancel</Button><Button type="button" size="sm" onClick={() => handleSaveEdit(reply.id)} disabled={updateUpdateMutation.isPending || !editDescription.trim()} className="text-xs">{updateUpdateMutation.isPending ? 'Saving...' : 'Save'}</Button></div></div>) : (<><div className="flex items-center justify-between mb-2"><div className="flex items-center gap-2"><span className="text-[10px] text-muted-foreground flex items-center gap-1"><User className="w-3 h-3" />{reply.created_by}</span><span className="text-[10px] text-muted-foreground flex items-center gap-1"><Calendar className="w-3 h-3" />{format(new Date(reply.created_date), 'dd/MM/yyyy HH:mm')}</span></div><div className="flex items-center gap-1">{canEditDelete(reply) && (<><Button type="button" variant="ghost" size="sm" onClick={() => handleEdit(reply)} className="h-5 px-1 text-xs text-muted-foreground"><Pencil className="w-3 h-3" /></Button><Button type="button" variant="ghost" size="sm" onClick={() => handleDelete(reply.id)} className="h-5 px-1 text-xs text-muted-foreground"><Trash2 className="w-3 h-3" /></Button></>)}<Button type="button" variant="ghost" size="sm" onClick={() => toggleLikeMutation.mutate({ updateId: reply.id, isLiked: replyIsLiked })} className={`h-5 px-1 text-xs ${replyIsLiked ? 'text-red-500' : 'text-muted-foreground'}`}><Heart className={`w-3 h-3 ${replyIsLiked ? 'fill-current' : ''}`} />{replyLikeCount > 0 && replyLikeCount}</Button></div></div>{reply.description && <p className="text-sm text-foreground whitespace-pre-wrap">{reply.description}</p>}</>)}</div>); })}</div>}
                     </div>
                   );
                 })}
