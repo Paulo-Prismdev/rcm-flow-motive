@@ -71,11 +71,25 @@
       "$or": [
         {
           "user_condition": {
-            "user_type": "internal"
+            "role": "super_admin"
           }
         },
         {
-          "data.employee_email": "{{user.email}}"
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "$and": [
+            {
+              "user_condition": {
+                "user_type": "internal"
+              }
+            },
+            {
+              "data.employee_email": "{{user.email}}"
+            }
+          ]
         }
       ]
     },
@@ -83,7 +97,12 @@
       "$or": [
         {
           "user_condition": {
-            "user_type": "internal"
+            "role": "super_admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
           }
         },
         {
@@ -95,11 +114,13 @@
       "$or": [
         {
           "user_condition": {
-            "user_type": "internal"
+            "role": "super_admin"
           }
         },
         {
-          "data.employee_email": "{{user.email}}"
+          "user_condition": {
+            "role": "admin"
+          }
         }
       ]
     },
@@ -107,7 +128,12 @@
       "$or": [
         {
           "user_condition": {
-            "user_type": "internal"
+            "role": "super_admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
           }
         }
       ]
