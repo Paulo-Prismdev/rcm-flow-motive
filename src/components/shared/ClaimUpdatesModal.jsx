@@ -8,8 +8,7 @@ import { X, Clock, User, Calendar, Mail, Plus, Heart, Reply, AtSign } from 'luci
 import { format } from 'date-fns';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { Command, CommandItem, CommandList } from "@/components/ui/command";
 
 const UPDATE_TYPES = [
   "Status Change", "Client Communication", "Bodyshop Communication", "Insurer Communication",
@@ -37,8 +36,9 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
   const [selectedEmails, setSelectedEmails] = useState([]);
   const [submitError, setSubmitError] = useState('');
   const [taggedUsers, setTaggedUsers] = useState([]);
-  const [showUserPicker, setShowUserPicker] = useState(false);
-  const [userSearch, setUserSearch] = useState('');
+  const [mentionQuery, setMentionQuery] = useState('');
+  const [mentionPosition, setMentionPosition] = useState(null);
+  const [showMentionPopup, setShowMentionPopup] = useState(false);
 
   const queryClient = useQueryClient();
   const { data: currentUser } = useQuery({ queryKey: ['currentUser'], queryFn: () => base44.auth.me(), staleTime: 5 * 60 * 1000 });
@@ -97,6 +97,34 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
     setShowForm(true);
   };
 
+  const handleTextareaChange = (e) => {
+    const value = e.target.value;
+    setNewUpdate({ ...newUpdate, description: value });
+    
+    const cursorPosition = e.target.selectionStart;
+    const textUpToCursor = value.substring(0, cursorPosition);
+    const mentionMatch = textUpToCursor.match(/@([a-zA-Z0-9_]+)$/);
+    
+    if (mentionMatch) {
+      setMentionQuery(mentionMatch[1]);
+      setMentionPosition(cursorPosition);
+      setShowMentionPopup(true);
+    } else {
+      setShowMentionPopup(false);
+      setMentionQuery('');
+    }
+  };
+
+  const insertMention = (user) => {
+    const textBeforeMention = newUpdate.description.substring(0, mentionPosition - mentionQuery.length - 1);
+    const textAfterMention = newUpdate.description.substring(mentionPosition);
+    const newText = `${textBeforeMention}@${user.full_name} ${textAfterMention}`;
+    setNewUpdate({ ...newUpdate, description: newText });
+    setTaggedUsers(prev => prev.includes(user.id) ? prev : [...prev, user.id]);
+    setShowMentionPopup(false);
+    setMentionQuery('');
+  };
+
   const toggleUserTag = (userId) => {
     setTaggedUsers(prev => prev.includes(userId) ? prev.filter(id => id !== userId) : [...prev, userId]);
   };
@@ -128,8 +156,6 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
     if (claim.bodyshop_email) emails.push({ label: `Bodyshop: ${claim.bodyshop}`, email: claim.bodyshop_email });
     return emails;
   };
-
-  const filteredUsers = allUsers.filter(u => u.full_name?.toLowerCase().includes(userSearch.toLowerCase()) || u.email?.toLowerCase().includes(userSearch.toLowerCase()));
 
   if (!claimId) return null;
 
@@ -163,93 +189,100 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
                 <Button type="button" variant="ghost" size="sm" onClick={resetForm}><X className="w-4 h-4" /></Button>
               </div>
               <form onSubmit={handleSubmit} className="space-y-3">
-                <div>
-                  <label className="block text-xs text-muted-foreground mb-1">Update Type *</label>
-                  <select value={newUpdate.update_type} onChange={(e) => setNewUpdate({ ...newUpdate, update_type: e.target.value })} className="w-full px-3 py-2 text-sm bg-background border border-border rounded-lg" required>
-                    {isReferrer ? (<><option value="Referrer Response">Referrer Response</option><option value="Other">Other</option></>) : (UPDATE_TYPES.map(type => <option key={type} value={type}>{type}</option>))}
-                  </select>
-                </div>
+                {!replyToId && (
+                  <>
+                    <div>
+                      <label className="block text-xs text-muted-foreground mb-1">Update Type *</label>
+                      <select value={newUpdate.update_type} onChange={(e) => setNewUpdate({ ...newUpdate, update_type: e.target.value })} className="w-full px-3 py-2 text-sm bg-background border border-border rounded-lg" required>
+                        {isReferrer ? (<><option value="Referrer Response">Referrer Response</option><option value="Other">Other</option></>) : (UPDATE_TYPES.map(type => <option key={type} value={type}>{type}</option>))}
+                      </select>
+                    </div>
 
-                {newUpdate.update_type === 'Status Change' && canChangeStatus && (
-                  <div className="space-y-3">
-                    <div>
-                      <label className="block text-xs text-muted-foreground mb-1">New Primary Status *</label>
-                      <select value={newUpdate.new_status} onChange={(e) => setNewUpdate({ ...newUpdate, new_status: e.target.value })} className="w-full px-3 py-2 text-sm bg-background border border-border rounded-lg" required>
-                        <option value="">Select status...</option>
-                        {activeStatuses.map(status => <option key={status} value={status}>{status}</option>)}
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-xs text-muted-foreground mb-1">New Secondary Status (Optional)</label>
-                      <select value={newUpdate.new_secondary_status} onChange={(e) => setNewUpdate({ ...newUpdate, new_secondary_status: e.target.value })} className="w-full px-3 py-2 text-sm bg-background border border-border rounded-lg">
-                        <option value="">No secondary status</option>
-                        {activeStatuses.map(status => <option key={status} value={status}>{status}</option>)}
-                      </select>
-                    </div>
-                  </div>
+                    {newUpdate.update_type === 'Status Change' && canChangeStatus && (
+                      <div className="space-y-3">
+                        <div>
+                          <label className="block text-xs text-muted-foreground mb-1">New Primary Status *</label>
+                          <select value={newUpdate.new_status} onChange={(e) => setNewUpdate({ ...newUpdate, new_status: e.target.value })} className="w-full px-3 py-2 text-sm bg-background border border-border rounded-lg" required>
+                            <option value="">Select status...</option>
+                            {activeStatuses.map(status => <option key={status} value={status}>{status}</option>)}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-xs text-muted-foreground mb-1">New Secondary Status (Optional)</label>
+                          <select value={newUpdate.new_secondary_status} onChange={(e) => setNewUpdate({ ...newUpdate, new_secondary_status: e.target.value })} className="w-full px-3 py-2 text-sm bg-background border border-border rounded-lg">
+                            <option value="">No secondary status</option>
+                            {activeStatuses.map(status => <option key={status} value={status}>{status}</option>)}
+                          </select>
+                        </div>
+                      </div>
+                    )}
+
+                    {canChangeStatus && (
+                      <>
+                        <div><label className="block text-xs text-muted-foreground mb-1">Next Steps (Optional)</label><Textarea value={newUpdate.next_steps} onChange={(e) => setNewUpdate({ ...newUpdate, next_steps: e.target.value })} placeholder="What needs to happen next..." className="px-3 py-2 text-sm bg-background border border-border h-20" /></div>
+                        <div><label className="block text-xs text-muted-foreground mb-1">Due Date (Optional)</label><Input type="date" value={newUpdate.due_date_for_next_action} onChange={(e) => setNewUpdate({ ...newUpdate, due_date_for_next_action: e.target.value })} className="px-3 py-2 text-sm bg-background border border-border" /></div>
+                      </>
+                    )}
+
+                    {(() => {
+                      const availableEmails = claim ? [
+                        claim.client_email && { label: `Client: ${claim.client_name}`, email: claim.client_email },
+                        claim.referrer_email && { label: `Referrer: ${claim.referrer}`, email: claim.referrer_email },
+                        claim.bodyshop_email && { label: `Bodyshop: ${claim.bodyshop}`, email: claim.bodyshop_email }
+                      ].filter(Boolean) : [];
+                      
+                      return availableEmails.length > 0 && !isReferrer && (
+                        <div className="bg-muted/30 p-3 space-y-3 border border-border rounded-lg">
+                          <div className="flex items-center gap-2"><input type="checkbox" id="send_email" checked={sendEmail} onChange={(e) => setSendEmail(e.target.checked)} className="w-4 h-4" /><label htmlFor="send_email" className="text-sm font-medium flex items-center gap-2"><Mail className="w-4 h-4 text-accent" />Open email to send this update</label></div>
+                          {sendEmail && (<div className="space-y-2 pl-6"><p className="text-xs text-muted-foreground">Select recipients:</p>{availableEmails.map(({ label, email }) => (<div key={email} className="flex items-center gap-2"><input type="checkbox" id={`email_${email}`} checked={selectedEmails.includes(email)} onChange={() => setSelectedEmails(prev => prev.includes(email) ? prev.filter(e => e !== email) : [...prev, email])} className="w-4 h-4" /><label htmlFor={`email_${email}`} className="text-xs">{label} ({email})</label></div>))}</div>)}
+                        </div>
+                      );
+                    })()}
+                  </>
                 )}
 
-                <div>
-                  <label className="block text-xs text-muted-foreground mb-1">What was done? *</label>
-                  <Textarea value={newUpdate.description} onChange={(e) => setNewUpdate({ ...newUpdate, description: e.target.value })} placeholder="Describe the action taken..." className="px-3 py-2 text-sm bg-background border border-border h-24" required />
+                <div className="relative">
+                  <label className="block text-xs text-muted-foreground mb-1">{replyToId ? 'Your reply' : 'What was done?'} *</label>
+                  <Textarea 
+                    value={newUpdate.description} 
+                    onChange={handleTextareaChange} 
+                    placeholder={replyToId ? "Write your reply... Type @ to mention someone" : "Describe the action taken... Type @ to mention someone"} 
+                    className="px-3 py-2 text-sm bg-background border border-border h-24" 
+                    required 
+                  />
+                  {showMentionPopup && (
+                    <div className="absolute z-50 mt-1 w-56 bg-popover border border-border rounded-md shadow-lg max-h-48 overflow-y-auto">
+                      <Command>
+                        <CommandList>
+                          {allUsers.filter(u => u.full_name?.toLowerCase().includes(mentionQuery.toLowerCase())).slice(0, 8).map(user => (
+                            <CommandItem key={user.id} onSelect={() => insertMention(user)} className="flex items-center gap-2 cursor-pointer hover:bg-accent px-2 py-1.5">
+                              <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-xs font-medium">{user.full_name?.[0]}</div>
+                              <span className="text-sm">{user.full_name}</span>
+                            </CommandItem>
+                          ))}
+                          {allUsers.filter(u => u.full_name?.toLowerCase().includes(mentionQuery.toLowerCase())).length === 0 && (
+                            <div className="px-2 py-1.5 text-sm text-muted-foreground">No users found</div>
+                          )}
+                        </CommandList>
+                      </Command>
+                    </div>
+                  )}
                 </div>
 
-                <div>
-                  <label className="block text-xs text-muted-foreground mb-1">Tag Users (Optional)</label>
-                  <div className="flex flex-wrap gap-2 mb-2">
+                {taggedUsers.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
                     {taggedUsers.map(userId => {
                       const user = allUsers.find(u => u.id === userId);
                       return user ? <Badge key={userId} variant="secondary" className="gap-1">{user.full_name}<X className="w-3 h-3 cursor-pointer" onClick={() => toggleUserTag(userId)} /></Badge> : null;
                     })}
                   </div>
-                  <Popover open={showUserPicker} onOpenChange={setShowUserPicker}>
-                    <PopoverTrigger asChild><Button type="button" variant="outline" size="sm" className="w-full justify-start text-xs"><AtSign className="w-3 h-3 mr-1" />Tag someone...</Button></PopoverTrigger>
-                    <PopoverContent className="w-64 p-0">
-                      <Command>
-                        <CommandInput placeholder="Search users..." value={userSearch} onValueChange={setUserSearch} />
-                        <CommandList>
-                          <CommandEmpty>No users found.</CommandEmpty>
-                          <CommandGroup>
-                            {filteredUsers.map(user => (
-                              <CommandItem key={user.id} onSelect={() => { toggleUserTag(user.id); setShowUserPicker(false); }} className="flex items-center gap-2">
-                                <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-xs font-medium">{user.full_name?.[0]}</div>
-                                <span className="text-sm">{user.full_name}</span>
-                              </CommandItem>
-                            ))}
-                          </CommandGroup>
-                        </CommandList>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
-                </div>
-
-                {canChangeStatus && (
-                  <>
-                    <div><label className="block text-xs text-muted-foreground mb-1">Next Steps (Optional)</label><Textarea value={newUpdate.next_steps} onChange={(e) => setNewUpdate({ ...newUpdate, next_steps: e.target.value })} placeholder="What needs to happen next..." className="px-3 py-2 text-sm bg-background border border-border h-20" /></div>
-                    <div><label className="block text-xs text-muted-foreground mb-1">Due Date (Optional)</label><Input type="date" value={newUpdate.due_date_for_next_action} onChange={(e) => setNewUpdate({ ...newUpdate, due_date_for_next_action: e.target.value })} className="px-3 py-2 text-sm bg-background border border-border" /></div>
-                  </>
                 )}
-
-                {(() => {
-                  const availableEmails = claim ? [
-                    claim.client_email && { label: `Client: ${claim.client_name}`, email: claim.client_email },
-                    claim.referrer_email && { label: `Referrer: ${claim.referrer}`, email: claim.referrer_email },
-                    claim.bodyshop_email && { label: `Bodyshop: ${claim.bodyshop}`, email: claim.bodyshop_email }
-                  ].filter(Boolean) : [];
-                  
-                  return availableEmails.length > 0 && !isReferrer && (
-                    <div className="bg-muted/30 p-3 space-y-3 border border-border rounded-lg">
-                      <div className="flex items-center gap-2"><input type="checkbox" id="send_email" checked={sendEmail} onChange={(e) => setSendEmail(e.target.checked)} className="w-4 h-4" /><label htmlFor="send_email" className="text-sm font-medium flex items-center gap-2"><Mail className="w-4 h-4 text-accent" />Open email to send this update</label></div>
-                      {sendEmail && (<div className="space-y-2 pl-6"><p className="text-xs text-muted-foreground">Select recipients:</p>{availableEmails.map(({ label, email }) => (<div key={email} className="flex items-center gap-2"><input type="checkbox" id={`email_${email}`} checked={selectedEmails.includes(email)} onChange={() => setSelectedEmails(prev => prev.includes(email) ? prev.filter(e => e !== email) : [...prev, email])} className="w-4 h-4" /><label htmlFor={`email_${email}`} className="text-xs">{label} ({email})</label></div>))}</div>)}
-                    </div>
-                  );
-                })()}
 
                 {submitError && <div className="text-xs text-red-600 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg px-3 py-2">{submitError}</div>}
 
                 <div className="flex justify-end gap-2">
                   <Button type="button" onClick={resetForm} variant="outline" className="px-4 py-2 text-xs">Cancel</Button>
-                  <Button type="submit" disabled={createUpdateMutation.isPending || !newUpdate.description.trim()} className="px-4 py-2 text-xs bg-primary hover:bg-primary/90 text-primary-foreground">{createUpdateMutation.isPending ? 'Adding...' : 'Add Update'}</Button>
+                  <Button type="submit" disabled={createUpdateMutation.isPending || !newUpdate.description.trim()} className="px-4 py-2 text-xs bg-primary hover:bg-primary/90 text-primary-foreground">{createUpdateMutation.isPending ? 'Adding...' : replyToId ? 'Reply' : 'Add Update'}</Button>
                 </div>
               </form>
             </div>
