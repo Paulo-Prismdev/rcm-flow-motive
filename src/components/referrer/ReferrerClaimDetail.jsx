@@ -262,10 +262,88 @@ export default function ReferrerClaimDetail({ claim, onClose }) {
       case 'updates':
         return (
           <div className="neomorph-flat p-4 md:p-6 space-y-4">
-            <div className="flex items-center gap-3"><MessageSquare className="w-5 h-5 text-gold" /><h3 className="font-bold">Updates</h3></div>
-            <div className="bg-muted/30 border border-border rounded-lg p-4 text-center text-sm text-muted-foreground">
-              <p>Click the "Updates & Status" button above to view the update history and add new updates.</p>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <MessageSquare className="w-5 h-5 text-gold" />
+                <h3 className="font-bold">Updates & Activity</h3>
+              </div>
+              <Button 
+                onClick={() => setIsClaimUpdatesOpen(true)} 
+                className="h-9 px-4 text-sm font-medium rounded-lg bg-green-600 hover:bg-green-700 text-white"
+              >
+                Add Update
+              </Button>
             </div>
+            
+            {claimUpdates.length === 0 ? (
+              <div className="bg-muted/30 border border-border rounded-lg p-4 text-center text-sm text-muted-foreground">
+                <p>No updates yet. Click "Add Update" to add a note or response.</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {claimUpdates.map((update) => {
+                  const isStatusChange = update.update_type === 'Status Change';
+                  const isNote = !isStatusChange && update.description?.trim();
+                  
+                  return (
+                    <div 
+                      key={update.id} 
+                      className={`border rounded-lg p-4 border-l-4 ${
+                        isStatusChange 
+                          ? 'bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-700' 
+                          : isNote 
+                            ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700' 
+                            : 'bg-card border-border'
+                      }`}
+                      style={
+                        isStatusChange 
+                          ? { borderLeftColor: '#9333ea' } 
+                          : isNote 
+                            ? { borderLeftColor: '#0284c7' } 
+                            : { borderLeftColor: '#6B7280' }
+                      }
+                    >
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          {isNote && <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-500 text-white">Note</span>}
+                          <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                            <Calendar className="w-3 h-3" />
+                            {format(new Date(update.created_date), 'dd/MM/yyyy HH:mm')}
+                          </span>
+                        </div>
+                      </div>
+                      
+                      {update.description && (
+                        <div className="text-sm mb-3">
+                          <p className="text-foreground whitespace-pre-wrap">{update.description}</p>
+                        </div>
+                      )}
+                      
+                      {update.next_steps && (
+                        <div className="text-sm mb-2 mt-3 bg-muted/50 rounded p-2">
+                          <p className="font-medium mb-1 text-foreground text-xs uppercase tracking-wide">Next Steps:</p>
+                          <p className="text-muted-foreground whitespace-pre-wrap">{update.next_steps}</p>
+                        </div>
+                      )}
+                      
+                      {update.due_date_for_next_action && (
+                        <div className="text-xs text-muted-foreground flex items-center gap-1 mt-2">
+                          <Clock className="w-3 h-3" />
+                          Due: {format(new Date(update.due_date_for_next_action), 'dd/MM/yyyy')}
+                        </div>
+                      )}
+                      
+                      <div className="flex items-center justify-between mt-3 pt-3 border-t border-border/50">
+                        <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                          <User className="w-3 h-3" />
+                          {update.created_by}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         );
 
