@@ -196,12 +196,7 @@ This update was sent from ART-TEC One Claims Management System
     // Use the final description with email info
     updateDataToSave.description = finalDescription;
 
-    // Prepend status change info to description if not already present
-    if (newUpdate.update_type === 'Status Change' && new_status) {
-      const secondaryNote = new_secondary_status ? ` | Secondary: "${new_secondary_status}"` : (claim?.secondary_status ? ` | Secondary status cleared` : '');
-      const statusLine = `Status changed to "${new_status}"${secondaryNote}`;
-      updateDataToSave.description = `${statusLine}\n\n${updateDataToSave.description}`.trim();
-    }
+    // For status changes, don't prepend status info — it will be displayed separately in rendering
     
     // If this is a status change, update the claim's status fields directly
     if (newUpdate.update_type === 'Status Change' && new_status) {
@@ -518,7 +513,7 @@ This update was sent from ART-TEC One Claims Management System
                     }
                     style={isStatusChange ? { borderLeftColor: '#9333ea' } : { borderLeftColor: UPDATE_TYPE_COLORS[update.update_type] || '#6B7280' }}
                   >
-                    <div className="flex items-start justify-between mb-2">
+                    <div className="flex items-start justify-between mb-3">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span
                           className={`px-2 py-0.5 rounded-md text-xs font-semibold text-white ${UPDATE_TYPE_COLORS[update.update_type] || 'bg-gray-500'}`}
@@ -533,17 +528,25 @@ This update was sent from ART-TEC One Claims Management System
                     </div>
 
                     {isStatusChange ? (
-                      <div className="text-sm mb-2">
-                        <p className="font-semibold text-purple-700 dark:text-purple-300 whitespace-pre-wrap">{update.description}</p>
+                      <div className="space-y-3">
+                        <div>
+                          <p className="font-semibold text-purple-700 dark:text-purple-300">Status updated</p>
+                        </div>
+                        {update.description && update.description.trim() && (
+                          <div className="bg-purple-100 dark:bg-purple-900/40 rounded p-3 border border-purple-200 dark:border-purple-700">
+                            <p className="text-xs font-medium text-purple-700 dark:text-purple-300 uppercase mb-1">Notes:</p>
+                            <p className="text-sm text-foreground whitespace-pre-wrap">{update.description}</p>
+                          </div>
+                        )}
                       </div>
                     ) : (
-                      <div className="text-sm mb-2">
+                      <div className="text-sm">
                         <p className="text-foreground whitespace-pre-wrap">{update.description}</p>
                       </div>
                     )}
 
                     {update.next_steps && (
-                      <div className="text-sm mb-2 mt-2 bg-muted/50 rounded p-2">
+                      <div className="text-sm mb-2 mt-3 bg-muted/50 rounded p-2">
                         <p className="font-medium mb-1 text-foreground text-xs uppercase tracking-wide">Next Steps:</p>
                         <p className="text-muted-foreground whitespace-pre-wrap">{update.next_steps}</p>
                       </div>
@@ -556,7 +559,7 @@ This update was sent from ART-TEC One Claims Management System
                       </div>
                     )}
 
-                    <div className="flex items-center gap-1 mt-2 text-[10px] text-muted-foreground">
+                    <div className="flex items-center gap-1 mt-3 text-[10px] text-muted-foreground">
                       <User className="w-3 h-3" />
                       {update.created_by}
                     </div>
