@@ -176,6 +176,12 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
         return;
       }
 
+      // Referrers can only add notes, not set follow-up actions
+      if (isReferrer && (newUpdate.next_steps || newUpdate.due_date_for_next_action)) {
+        setSubmitError('Referrers cannot set follow-up actions. Please remove next steps and due date.');
+        return;
+      }
+
       // For non-status-change updates, require a description
       if (newUpdate.update_type !== 'Status Change' && !newUpdate.description.trim()) {
         setSubmitError('Please enter a description for the update.');
