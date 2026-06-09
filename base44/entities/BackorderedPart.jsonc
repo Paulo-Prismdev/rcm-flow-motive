@@ -69,6 +69,14 @@
           "user_condition": {
             "user_type": "internal"
           }
+        },
+        {
+          "user_condition": {
+            "user_type": "bodyshop"
+          },
+          "data.claim_id": {
+            "$in": "{{user.linked_claims_as_bodyshop}}"
+          }
         }
       ]
     },
@@ -77,6 +85,14 @@
         {
           "user_condition": {
             "user_type": "internal"
+          }
+        },
+        {
+          "user_condition": {
+            "user_type": "bodyshop"
+          },
+          "data.claim_id": {
+            "$in": "{{user.linked_claims_as_bodyshop}}"
           }
         }
       ]
@@ -87,17 +103,21 @@
           "user_condition": {
             "user_type": "internal"
           }
+        },
+        {
+          "user_condition": {
+            "user_type": "bodyshop"
+          },
+          "data.claim_id": {
+            "$in": "{{user.linked_claims_as_bodyshop}}"
+          }
         }
       ]
     },
     "delete": {
-      "$or": [
-        {
-          "user_condition": {
-            "user_type": "internal"
-          }
-        }
-      ]
+      "user_condition": {
+        "user_type": "internal"
+      }
     }
   }
 }

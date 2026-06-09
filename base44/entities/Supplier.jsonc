@@ -82,13 +82,9 @@
   ],
   "rls": {
     "create": {
-      "$or": [
-        {
-          "user_condition": {
-            "user_type": "internal"
-          }
-        }
-      ]
+      "user_condition": {
+        "user_type": "internal"
+      }
     },
     "read": {
       "$or": [
@@ -96,26 +92,21 @@
           "user_condition": {
             "user_type": "internal"
           }
+        },
+        {
+          "id": "{{user.linked_supplier_id}}"
         }
       ]
     },
     "update": {
-      "$or": [
-        {
-          "user_condition": {
-            "user_type": "internal"
-          }
-        }
-      ]
+      "user_condition": {
+        "user_type": "internal"
+      }
     },
     "delete": {
-      "$or": [
-        {
-          "user_condition": {
-            "user_type": "internal"
-          }
-        }
-      ]
+      "user_condition": {
+        "user_type": "internal"
+      }
     }
   }
 }

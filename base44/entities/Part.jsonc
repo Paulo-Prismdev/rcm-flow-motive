@@ -293,6 +293,12 @@
           "user_condition": {
             "user_type": "internal"
           }
+        },
+        {
+          "user_condition": {
+            "user_type": "bodyshop"
+          },
+          "data.bodyshop_company_id": "{{user.linked_bodyshop_id}}"
         }
       ]
     },
@@ -317,17 +323,25 @@
           "user_condition": {
             "user_type": "internal"
           }
+        },
+        {
+          "user_condition": {
+            "user_type": "bodyshop"
+          },
+          "data.bodyshop_company_id": "{{user.linked_bodyshop_id}}"
+        },
+        {
+          "user_condition": {
+            "user_type": "supplier"
+          },
+          "data.supplier_id": "{{user.linked_supplier_id}}"
         }
       ]
     },
     "delete": {
-      "$or": [
-        {
-          "user_condition": {
-            "user_type": "internal"
-          }
-        }
-      ]
+      "user_condition": {
+        "user_type": "internal"
+      }
     }
   }
 }
