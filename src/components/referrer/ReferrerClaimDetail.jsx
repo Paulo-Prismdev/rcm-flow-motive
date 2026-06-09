@@ -25,6 +25,7 @@ import { format } from "date-fns";
 import StatusBadge from "../shared/StatusBadge";
 import { formatUKRegistration } from '../shared/formatRegistration';
 import ClaimJourneyTimeline from '../claims/ClaimJourneyTimeline';
+import ClaimUpdatesModal from '../shared/ClaimUpdatesModal';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -81,6 +82,7 @@ export default function ReferrerClaimDetail({ claim, onClose }) {
   const [selectedSection, setSelectedSection] = useState('status');
   const [lightboxUrl, setLightboxUrl] = useState(null);
   const [replyText, setReplyText] = useState('');
+  const [isClaimUpdatesOpen, setIsClaimUpdatesOpen] = useState(false);
   const queryClient = useQueryClient();
 
   // Always fetch updates so documents/images from updates are always included
@@ -105,6 +107,11 @@ export default function ReferrerClaimDetail({ claim, onClose }) {
     const text = replyText.trim();
     if (!text) return;
     replyMutation.mutate(text);
+  };
+
+  const handleClaimUpdateCreated = () => {
+    queryClient.invalidateQueries({ queryKey: ['claimUpdates', claim.id] });
+    queryClient.invalidateQueries({ queryKey: ['claim', claim.id] });
   };
 
   const allFileUrls = claim.file_urls || [];
@@ -256,89 +263,9 @@ export default function ReferrerClaimDetail({ claim, onClose }) {
         return (
           <div className="neomorph-flat p-4 md:p-6 space-y-4">
             <div className="flex items-center gap-3"><MessageSquare className="w-5 h-5 text-gold" /><h3 className="font-bold">Updates</h3></div>
-
-            {/* Reply form */}
-            <div className="neomorph p-4 space-y-3">
-              <p className="text-sm font-medium text-foreground-muted">Send a response to RCM</p>
-              <Textarea
-                placeholder="Type your message here..."
-                value={replyText}
-                onChange={e => setReplyText(e.target.value)}
-                rows={3}
-                className="neomorph-inset resize-none"
-              />
-              <div className="flex justify-end">
-                <Button
-                  onClick={handleReply}
-                  disabled={!replyText.trim() || replyMutation.isPending}
-                  className="bg-accent/10 text-accent border border-accent/30 hover:bg-accent/20"
-                >
-                  {replyMutation.isPending ? (
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  ) : (
-                    <Send className="w-4 h-4 mr-2" />
-                  )}
-                  Send Response
-                </Button>
-              </div>
+            <div className="bg-muted/30 border border-border rounded-lg p-4 text-center text-sm text-muted-foreground">
+              <p>Click the "Updates & Status" button above to view the update history and add new updates.</p>
             </div>
-
-            {/* Updates list */}
-            {claimUpdates.length === 0 ? (
-              <p className="text-center text-muted-foreground py-8">No updates yet.</p>
-            ) : (
-              <div className="space-y-3">
-                {claimUpdates.map(update => {
-                  const isReferrerResponse = update.update_type === 'Referrer Response';
-                  return (
-                    <div
-                      key={update.id}
-                      className={`neomorph p-4 rounded-xl space-y-2 ${isReferrerResponse ? 'border-l-4 border-accent/50' : ''}`}
-                    >
-                      <div className="flex items-center justify-between flex-wrap gap-2">
-                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-                          isReferrerResponse
-                            ? 'bg-accent/20 text-accent'
-                            : 'bg-muted text-foreground-muted'
-                        }`}>
-                          {update.update_type}
-                        </span>
-                        <div className="flex items-center gap-2 text-xs text-foreground-muted">
-                          {update.created_by && <span>{update.created_by}</span>}
-                          <span>{update.created_date ? format(new Date(update.created_date), 'dd/MM/yyyy HH:mm') : ''}</span>
-                        </div>
-                      </div>
-                      <p className="text-sm leading-relaxed whitespace-pre-wrap">{update.description}</p>
-                      {update.next_steps && (
-                        <div className="py-2 px-3 rounded-lg bg-surface-hover text-xs">
-                          <span className="font-semibold text-foreground-muted">Next Steps: </span>
-                          {update.next_steps}
-                        </div>
-                      )}
-                      {update.file_urls?.length > 0 && (
-                        <div className="space-y-1 pt-1">
-                          {update.file_urls.map((url, i) => (
-                            <a
-                              key={i}
-                              href={url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="flex items-center gap-2 text-xs text-accent hover:underline"
-                            >
-                              {isImageUrl(url)
-                                ? <Image className="w-3.5 h-3.5 flex-shrink-0" />
-                                : <FileText className="w-3.5 h-3.5 flex-shrink-0" />
-                              }
-                              {getFileName(url)}
-                            </a>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            )}
           </div>
         );
 
@@ -423,6 +350,14 @@ export default function ReferrerClaimDetail({ claim, onClose }) {
         </div>
       )}
 
+      <ClaimUpdatesModal
+        claimId={claim.id}
+        currentStatus={claim.job_status}
+        isOpen={isClaimUpdatesOpen}
+        onClose={() => setIsClaimUpdatesOpen(false)}
+        onUpdateCreated={handleClaimUpdateCreated}
+      />
+
       {/* Combined Header + Section Selector */}
       <div className="neomorph p-3 flex-shrink-0 sticky top-0 z-10 bg-background">
         <div className="flex items-center gap-2">
@@ -439,27 +374,35 @@ export default function ReferrerClaimDetail({ claim, onClose }) {
             <StatusBadge status={claim.job_status || 'New'} />
             {claim.secondary_status && <StatusBadge status={claim.secondary_status} variant="secondary" />}
           </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="flex items-center gap-2 flex-shrink-0 text-sm">
-                {React.createElement(DETAIL_SECTIONS.find(s => s.id === selectedSection)?.icon || Clock, { className: "w-4 h-4" })}
-                <span className="hidden sm:inline">{DETAIL_SECTIONS.find(s => s.id === selectedSection)?.label}</span>
-                <ChevronDown className="w-4 h-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-60 max-h-80 overflow-y-auto" align="end" side="bottom">
-              {DETAIL_SECTIONS.map(section => (
-                <DropdownMenuItem
-                  key={section.id}
-                  onSelect={() => setSelectedSection(section.id)}
-                  className={selectedSection === section.id ? 'bg-muted font-semibold' : ''}
-                >
-                  <section.icon className="w-4 h-4 mr-2" />
-                  {section.label}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <div className="flex items-center gap-2">
+            <Button 
+              onClick={() => setIsClaimUpdatesOpen(true)} 
+              className="h-9 px-4 text-sm font-medium rounded-lg bg-green-600 hover:bg-green-700 text-white"
+            >
+              Updates & Status
+            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="flex items-center gap-2 flex-shrink-0 text-sm">
+                  {React.createElement(DETAIL_SECTIONS.find(s => s.id === selectedSection)?.icon || Clock, { className: "w-4 h-4" })}
+                  <span className="hidden sm:inline">{DETAIL_SECTIONS.find(s => s.id === selectedSection)?.label}</span>
+                  <ChevronDown className="w-4 h-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-60 max-h-80 overflow-y-auto" align="end" side="bottom">
+                {DETAIL_SECTIONS.map(section => (
+                  <DropdownMenuItem
+                    key={section.id}
+                    onSelect={() => setSelectedSection(section.id)}
+                    className={selectedSection === section.id ? 'bg-muted font-semibold' : ''}
+                  >
+                    <section.icon className="w-4 h-4 mr-2" />
+                    {section.label}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
       </div>
 
