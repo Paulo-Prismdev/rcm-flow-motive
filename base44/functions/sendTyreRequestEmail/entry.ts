@@ -9,6 +9,13 @@ Deno.serve(async (req) => {
             return Response.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
+        // Only internal staff, admins, or bodyshop users can submit tyre requests
+        const isAllowed = user.user_type === 'internal' || user.user_type === 'bodyshop' ||
+            user.role === 'admin' || user.role === 'super_admin';
+        if (!isAllowed) {
+            return Response.json({ error: 'Forbidden' }, { status: 403 });
+        }
+
         const {
             requestType,
             tyreMake,
