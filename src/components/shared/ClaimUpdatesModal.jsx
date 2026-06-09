@@ -469,8 +469,8 @@ This update was sent from ART-TEC One Claims Management System
                 </>
               )}
 
-              {/* Email Section */}
-              {availableEmails.length > 0 && (
+              {/* Email Section (internal users only) */}
+              {availableEmails.length > 0 && !isReferrer && (
                 <div className="bg-muted/30 p-3 space-y-3 border border-border rounded-lg">
                   <div className="flex items-center gap-2">
                     <input
