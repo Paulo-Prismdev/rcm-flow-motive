@@ -49,6 +49,26 @@
       },
       "description": "Files attached to this update",
       "default": []
+    },
+    "tagged_user_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "User IDs of users tagged in this update",
+      "default": []
+    },
+    "liked_by": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "User IDs of users who liked this update",
+      "default": []
+    },
+    "parent_update_id": {
+      "type": "string",
+      "description": "ID of parent update if this is a reply"
     }
   },
   "required": [
@@ -58,84 +78,10 @@
   ],
   "rls": {
     "create": {
-      "$or": [
-        {
-          "user_condition": {
-            "user_type": "internal"
-          }
-        },
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        },
-        {
-          "user_condition": {
-            "role": "super_admin"
-          }
-        },
-        {
-          "user_condition": {
-            "role": "company_admin"
-          }
-        },
-        {
-          "user_condition": {
-            "user_type": "referrer"
-          },
-          "data.claim_id": {
-            "$in": "{{user.linked_claims_as_referrer}}"
-          }
-        },
-        {
-          "user_condition": {
-            "user_type": "bodyshop"
-          },
-          "data.claim_id": {
-            "$in": "{{user.linked_claims_as_bodyshop}}"
-          }
-        },
-        {
-          "data.company_id": "{{user.company_id}}"
-        }
-      ]
+      "user_condition": {}
     },
     "read": {
-      "$or": [
-        {
-          "user_condition": {
-            "user_type": "internal"
-          }
-        },
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        },
-        {
-          "user_condition": {
-            "role": "super_admin"
-          }
-        },
-        {
-          "user_condition": {
-            "user_type": "referrer"
-          }
-        },
-        {
-          "user_condition": {
-            "user_type": "bodyshop"
-          }
-        },
-        {
-          "user_condition": {
-            "user_type": "client"
-          }
-        },
-        {
-          "data.company_id": "{{user.company_id}}"
-        }
-      ]
+      "user_condition": {}
     },
     "update": {
       "$or": [
