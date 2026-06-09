@@ -60,6 +60,12 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
 
    const queryClient = useQueryClient();
 
+   const { data: currentUser } = useQuery({
+     queryKey: ['currentUser'],
+     queryFn: () => base44.auth.me(),
+     staleTime: 5 * 60 * 1000,
+   });
+
    // Fetch custom claim statuses
    const { data: customStatuses = [], isLoading: isLoadingStatuses } = useQuery({
      queryKey: ['ClaimStatusConfig'],
@@ -97,7 +103,8 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
   const createUpdateMutation = useMutation({
     mutationFn: (updateData) => base44.entities.ClaimUpdate.create({
       ...updateData,
-      claim_id: claimId
+      claim_id: claimId,
+      ...(currentUser?.company_id ? { company_id: currentUser.company_id } : {})
     }),
     onSuccess: (newUpdateRecord) => {
       queryClient.invalidateQueries({ queryKey: ['claimUpdates', claimId] });
