@@ -124,6 +124,11 @@
         },
         {
           "data.claim_id": {
+            "$in": "{{user.linked_claims_as_referrer}}"
+          }
+        },
+        {
+          "data.claim_id": {
             "$in": "{{user.linked_claims_as_bodyshop}}"
           }
         },

@@ -66,6 +66,10 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
      staleTime: 5 * 60 * 1000,
    });
 
+   // Referrers can only add notes, not change statuses or set follow-ups
+   const isReferrer = currentUser?.user_type === 'referrer';
+   const canChangeStatus = !isReferrer;
+
    // Fetch custom claim statuses
    const { data: customStatuses = [], isLoading: isLoadingStatuses } = useQuery({
      queryKey: ['ClaimStatusConfig'],
@@ -166,14 +170,19 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
     setSubmitError('');
     
     try {
+      // Referrers cannot submit status changes
+      if (isReferrer && newUpdate.update_type === 'Status Change') {
+        setSubmitError('Referrers cannot change claim status. Please select "Referrer Response" or "Other".');
+        return;
+      }
 
-    // For non-status-change updates, require a description
-    if (newUpdate.update_type !== 'Status Change' && !newUpdate.description.trim()) {
-      setSubmitError('Please enter a description for the update.');
-      return;
-    }
+      // For non-status-change updates, require a description
+      if (newUpdate.update_type !== 'Status Change' && !newUpdate.description.trim()) {
+        setSubmitError('Please enter a description for the update.');
+        return;
+      }
 
-    let finalDescription = newUpdate.description;
+      let finalDescription = newUpdate.description;
 
     // If send email is checked and emails are selected, open mailto link
     if (sendEmail && selectedEmails.length > 0) {
@@ -343,14 +352,26 @@ This update was sent from ART-TEC One Claims Management System
                   className="w-full px-3 py-2 text-sm bg-background border border-border rounded-lg"
                   required
                 >
-                  {UPDATE_TYPES.map(type => (
-                    <option key={type} value={type}>{type}</option>
-                  ))}
+                  {isReferrer ? (
+                    <>
+                      <option value="Referrer Response">Referrer Response</option>
+                      <option value="Other">Other</option>
+                    </>
+                  ) : (
+                    UPDATE_TYPES.map(type => (
+                      <option key={type} value={type}>{type}</option>
+                    ))
+                  )}
                 </select>
+                {isReferrer && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Referrers can add notes and responses. Internal staff can change statuses and set follow-ups.
+                  </p>
+                )}
               </div>
 
-              {/* Show status dropdowns when Status Change is selected */}
-              {newUpdate.update_type === 'Status Change' && (
+              {/* Show status dropdowns when Status Change is selected (internal users only) */}
+              {newUpdate.update_type === 'Status Change' && canChangeStatus && (
                 <div className="space-y-3">
                   <div>
                     <label className="block text-xs text-muted-foreground mb-1">New Primary Status *</label>
@@ -399,6 +420,14 @@ This update was sent from ART-TEC One Claims Management System
                 </div>
               )}
 
+              {newUpdate.update_type === 'Status Change' && isReferrer && (
+                <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg px-3 py-2">
+                  <p className="text-xs text-amber-800 dark:text-amber-200">
+                    Status changes can only be made by internal RCM staff. Please use "Referrer Response" to add a note.
+                  </p>
+                </div>
+              )}
+
               <div>
                 <label className="block text-xs text-muted-foreground mb-1">What was done? *</label>
                 <Textarea
@@ -410,25 +439,29 @@ This update was sent from ART-TEC One Claims Management System
                 />
               </div>
 
-              <div>
-                <label className="block text-xs text-muted-foreground mb-1">Next Steps (Optional)</label>
-                <Textarea
-                  value={newUpdate.next_steps}
-                  onChange={(e) => setNewUpdate({ ...newUpdate, next_steps: e.target.value })}
-                  placeholder="What needs to happen next..."
-                  className="px-3 py-2 text-sm bg-background border border-border h-20"
-                />
-              </div>
+              {canChangeStatus && (
+                <>
+                  <div>
+                    <label className="block text-xs text-muted-foreground mb-1">Next Steps (Optional)</label>
+                    <Textarea
+                      value={newUpdate.next_steps}
+                      onChange={(e) => setNewUpdate({ ...newUpdate, next_steps: e.target.value })}
+                      placeholder="What needs to happen next..."
+                      className="px-3 py-2 text-sm bg-background border border-border h-20"
+                    />
+                  </div>
 
-              <div>
-                <label className="block text-xs text-muted-foreground mb-1">Due Date for Next Action (Optional)</label>
-                <Input
-                  type="date"
-                  value={newUpdate.due_date_for_next_action}
-                  onChange={(e) => setNewUpdate({ ...newUpdate, due_date_for_next_action: e.target.value })}
-                  className="px-3 py-2 text-sm bg-background border border-border"
-                />
-              </div>
+                  <div>
+                    <label className="block text-xs text-muted-foreground mb-1">Due Date for Next Action (Optional)</label>
+                    <Input
+                      type="date"
+                      value={newUpdate.due_date_for_next_action}
+                      onChange={(e) => setNewUpdate({ ...newUpdate, due_date_for_next_action: e.target.value })}
+                      className="px-3 py-2 text-sm bg-background border border-border"
+                    />
+                  </div>
+                </>
+              )}
 
               {/* Email Section */}
               {availableEmails.length > 0 && (
