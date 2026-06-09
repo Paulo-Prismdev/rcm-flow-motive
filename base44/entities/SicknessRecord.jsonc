@@ -64,6 +64,9 @@
           "user_condition": {
             "user_type": "internal"
           }
+        },
+        {
+          "data.employee_email": "{{user.email}}"
         }
       ]
     },

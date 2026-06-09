@@ -97,6 +97,12 @@
           "user_condition": {
             "user_type": "internal"
           }
+        },
+        {
+          "data.assigned_to": "{{user.email}}"
+        },
+        {
+          "created_by_id": "{{user.id}}"
         }
       ]
     },
@@ -106,6 +112,12 @@
           "user_condition": {
             "user_type": "internal"
           }
+        },
+        {
+          "data.assigned_to": "{{user.email}}"
+        },
+        {
+          "created_by_id": "{{user.id}}"
         }
       ]
     },
@@ -115,6 +127,12 @@
           "user_condition": {
             "user_type": "internal"
           }
+        },
+        {
+          "data.assigned_to": "{{user.email}}"
+        },
+        {
+          "created_by_id": "{{user.id}}"
         }
       ]
     }

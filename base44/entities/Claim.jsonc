@@ -681,6 +681,15 @@
           "user_condition": {
             "user_type": "internal"
           }
+        },
+        {
+          "data.referrer_id": "{{user.linked_referrer_id}}"
+        },
+        {
+          "data.bodyshop_id": "{{user.linked_bodyshop_id}}"
+        },
+        {
+          "data.client_id": "{{user.linked_client_id}}"
         }
       ]
     },

@@ -124,6 +124,16 @@
           "user_condition": {
             "user_type": "internal"
           }
+        },
+        {
+          "data.sender_email": "{{user.email}}"
+        },
+        {
+          "data.channel_members": {
+            "$in": [
+              "{{user.email}}"
+            ]
+          }
         }
       ]
     },
@@ -133,6 +143,9 @@
           "user_condition": {
             "user_type": "internal"
           }
+        },
+        {
+          "data.sender_email": "{{user.email}}"
         }
       ]
     },
@@ -142,6 +155,9 @@
           "user_condition": {
             "user_type": "internal"
           }
+        },
+        {
+          "data.sender_email": "{{user.email}}"
         }
       ]
     }

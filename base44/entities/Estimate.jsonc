@@ -258,6 +258,9 @@
           "user_condition": {
             "user_type": "internal"
           }
+        },
+        {
+          "data.repairer_id": "{{user.linked_bodyshop_id}}"
         }
       ]
     },

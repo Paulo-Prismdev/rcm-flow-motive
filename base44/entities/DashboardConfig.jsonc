@@ -91,6 +91,19 @@
           "user_condition": {
             "user_type": "internal"
           }
+        },
+        {
+          "$and": [
+            {
+              "user_condition": {}
+            },
+            {
+              "data.dashboard_type": "user"
+            },
+            {
+              "data.user_id": "{{user.id}}"
+            }
+          ]
         }
       ]
     },
@@ -100,6 +113,15 @@
           "user_condition": {
             "user_type": "internal"
           }
+        },
+        {
+          "data.user_id": "{{user.id}}"
+        },
+        {
+          "data.dashboard_type": "company"
+        },
+        {
+          "data.dashboard_type": "department"
         }
       ]
     },
@@ -109,6 +131,19 @@
           "user_condition": {
             "user_type": "internal"
           }
+        },
+        {
+          "$and": [
+            {
+              "user_condition": {}
+            },
+            {
+              "data.dashboard_type": "user"
+            },
+            {
+              "data.user_id": "{{user.id}}"
+            }
+          ]
         }
       ]
     },
@@ -118,6 +153,19 @@
           "user_condition": {
             "user_type": "internal"
           }
+        },
+        {
+          "$and": [
+            {
+              "user_condition": {}
+            },
+            {
+              "data.dashboard_type": "user"
+            },
+            {
+              "data.user_id": "{{user.id}}"
+            }
+          ]
         }
       ]
     }

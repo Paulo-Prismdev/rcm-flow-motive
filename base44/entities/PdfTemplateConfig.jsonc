@@ -242,6 +242,31 @@
           "user_condition": {
             "user_type": "internal"
           }
+        },
+        {
+          "data.visibility": "organization"
+        },
+        {
+          "data.shared_with_users": {
+            "$in": [
+              "{{user.email}}"
+            ]
+          }
+        },
+        {
+          "data.shared_with_roles": {
+            "$in": [
+              "{{user.role}}"
+            ]
+          }
+        },
+        {
+          "data.shared_with_departments": {
+            "$in": "{{user.departments_access}}"
+          }
+        },
+        {
+          "created_by": "{{user.id}}"
         }
       ]
     },
@@ -250,6 +275,16 @@
         {
           "user_condition": {
             "user_type": "internal"
+          }
+        },
+        {
+          "created_by": "{{user.id}}"
+        },
+        {
+          "data.can_edit_users": {
+            "$in": [
+              "{{user.email}}"
+            ]
           }
         }
       ]
@@ -260,6 +295,9 @@
           "user_condition": {
             "user_type": "internal"
           }
+        },
+        {
+          "created_by": "{{user.id}}"
         }
       ]
     }

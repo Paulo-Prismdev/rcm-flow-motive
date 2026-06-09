@@ -302,6 +302,12 @@
           "user_condition": {
             "user_type": "internal"
           }
+        },
+        {
+          "data.bodyshop_company_id": "{{user.linked_bodyshop_id}}"
+        },
+        {
+          "data.supplier_id": "{{user.linked_supplier_id}}"
         }
       ]
     },
