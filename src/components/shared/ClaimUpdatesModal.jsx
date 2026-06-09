@@ -18,7 +18,7 @@ const UPDATE_TYPES = [
   "Client Communication",
   "Bodyshop Communication",
   "Insurer Communication",
-  "Referrer Update",
+  "Referrer Response",
   "Action Taken",
   "Awaiting Information",
   "Documentation Received",
@@ -33,7 +33,7 @@ const UPDATE_TYPE_COLORS = {
   "Client Communication": "bg-blue-500",
   "Bodyshop Communication": "bg-green-500",
   "Insurer Communication": "bg-orange-500",
-  "Referrer Update": "bg-amber-500",
+  "Referrer Response": "bg-amber-500",
   "Action Taken": "bg-indigo-500",
   "Awaiting Information": "bg-yellow-500",
   "Documentation Received": "bg-teal-500",
@@ -55,6 +55,7 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
    });
    const [sendEmail, setSendEmail] = useState(false);
    const [selectedEmails, setSelectedEmails] = useState([]);
+   const [submitError, setSubmitError] = useState('');
 
    const queryClient = useQueryClient();
 
@@ -128,15 +129,16 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
     },
     onError: (error) => {
       console.error('Failed to create update:', error);
-      alert('Failed to create update. Please try again.');
+      setSubmitError(error?.message || 'Failed to create update. Please try again.');
     },
   });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitError('');
     
     if (!newUpdate.description.trim()) {
-      alert('Please enter a description for the update.');
+      setSubmitError('Please enter a description for the update.');
       return;
     }
 
@@ -165,8 +167,8 @@ This update was sent from ART-TEC One Claims Management System
       // Create mailto link
       const mailtoLink = `mailto:${selectedEmails.join(',')}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
       
-      // Open in Outlook/default email client
-      window.location.href = mailtoLink;
+      // Open in Outlook/default email client (use open to avoid navigating away)
+      window.open(mailtoLink, '_blank');
 
       // Get email labels for the description
       const availableEmails = getAvailableEmails();
@@ -291,18 +293,19 @@ This update was sent from ART-TEC One Claims Management System
                 variant="ghost"
                 size="sm"
                 onClick={() => {
-                  setShowForm(false);
-                  setNewUpdate({
-                    update_type: 'Other',
-                    description: '',
-                    next_steps: '',
-                    due_date_for_next_action: '',
-                    new_status: currentStatus || ''
-                  });
-                  setSendEmail(false);
-                  setSelectedEmails([]);
-                }}
-                className="text-muted-foreground hover:text-foreground"
+                    setShowForm(false);
+                    setSubmitError('');
+                    setNewUpdate({
+                      update_type: 'Other',
+                      description: '',
+                      next_steps: '',
+                      due_date_for_next_action: '',
+                      new_status: currentStatus || ''
+                    });
+                    setSendEmail(false);
+                    setSelectedEmails([]);
+                  }}
+                  className="text-muted-foreground hover:text-foreground"
               >
                 <X className="w-4 h-4" />
               </Button>
@@ -445,11 +448,18 @@ This update was sent from ART-TEC One Claims Management System
                 </div>
               )}
 
+              {submitError && (
+                <div className="text-xs text-red-600 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg px-3 py-2">
+                  {submitError}
+                </div>
+              )}
+
               <div className="flex justify-end gap-2">
-                <Button
-                  type="button"
-                  onClick={() => {
-                    setShowForm(false);
+                 <Button
+                   type="button"
+                   onClick={() => {
+                     setShowForm(false);
+                     setSubmitError('');
                     setNewUpdate({
                       update_type: 'Other',
                       description: '',
