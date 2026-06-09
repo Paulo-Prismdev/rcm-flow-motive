@@ -134,9 +134,12 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
   });
 
   const handleSubmit = async (e) => {
+    console.log('[ClaimUpdatesModal] handleSubmit fired', { update_type: newUpdate.update_type, description: newUpdate.description });
     e.preventDefault();
     setSubmitError('');
     
+    try {
+
     if (!newUpdate.description.trim()) {
       setSubmitError('Please enter a description for the update.');
       return;
@@ -210,6 +213,11 @@ This update was sent from ART-TEC One Claims Management System
       );
     } else {
       createUpdateMutation.mutate(updateDataToSave);
+    }
+
+    } catch (err) {
+      console.error('[ClaimUpdatesModal] handleSubmit crashed:', err);
+      setSubmitError(err?.message || 'An unexpected error occurred. Check the console for details.');
     }
   };
 
