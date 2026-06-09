@@ -536,23 +536,32 @@ This update was sent from ART-TEC One Claims Management System
                 {[...updates].sort((a, b) => new Date(b.created_date) - new Date(a.created_date)).map((update) => {
                   const isStatusChange = update.update_type === 'Status Change';
                   const hasDescription = update.description && update.description.trim();
+                  const isNote = !isStatusChange && hasDescription;
                   
                   return (
                   <div
                     key={update.id}
                     className={isStatusChange
                       ? "border rounded-lg p-4 border-l-4 bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-700"
+                      : isNote
+                      ? "border rounded-lg p-4 border-l-4 bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700"
                       : "bg-card border border-border rounded-lg p-4 border-l-4"
                     }
-                    style={isStatusChange ? { borderLeftColor: '#9333ea' } : { borderLeftColor: UPDATE_TYPE_COLORS[update.update_type] || '#6B7280' }}
+                    style={isStatusChange ? { borderLeftColor: '#9333ea' } : isNote ? { borderLeftColor: '#0284c7' } : { borderLeftColor: UPDATE_TYPE_COLORS[update.update_type] || '#6B7280' }}
                   >
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span
-                          className={`px-2 py-0.5 rounded-md text-xs font-semibold text-white ${UPDATE_TYPE_COLORS[update.update_type] || 'bg-gray-500'}`}
-                        >
-                          {update.update_type}
-                        </span>
+                        {isNote ? (
+                          <span className="px-2 py-0.5 rounded-md text-xs font-semibold text-white bg-blue-500">
+                            Note
+                          </span>
+                        ) : (
+                          <span
+                            className={`px-2 py-0.5 rounded-md text-xs font-semibold text-white ${UPDATE_TYPE_COLORS[update.update_type] || 'bg-gray-500'}`}
+                          >
+                            {update.update_type}
+                          </span>
+                        )}
                         <span className="text-[10px] text-muted-foreground flex items-center gap-1">
                           <Calendar className="w-3 h-3" />
                           {format(new Date(update.created_date), 'dd/MM/yyyy HH:mm')}
