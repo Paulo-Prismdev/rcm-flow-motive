@@ -118,23 +118,18 @@
           }
         },
         {
-          "data.claim_id": {
-            "$in": "{{user.linked_claims}}"
+          "user_condition": {
+            "user_type": "referrer"
           }
         },
         {
-          "data.claim_id": {
-            "$in": "{{user.linked_claims_as_referrer}}"
+          "user_condition": {
+            "user_type": "bodyshop"
           }
         },
         {
-          "data.claim_id": {
-            "$in": "{{user.linked_claims_as_bodyshop}}"
-          }
-        },
-        {
-          "data.claim_id": {
-            "$in": "{{user.linked_claims_as_client}}"
+          "user_condition": {
+            "user_type": "client"
           }
         },
         {

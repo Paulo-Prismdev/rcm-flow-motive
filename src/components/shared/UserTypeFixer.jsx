@@ -24,10 +24,18 @@ export default function UserTypeFixer() {
   });
 
   useEffect(() => {
+    if (!currentUser) return;
+    
     // If user is admin but doesn't have user_type set, set it to 'internal'
-    if (currentUser && currentUser.role === 'admin' && !currentUser.user_type) {
+    if (currentUser.role === 'admin' && !currentUser.user_type) {
       console.log('Fixing admin user - setting user_type to internal');
       updateUserMutation.mutate({ user_type: 'internal' });
+    }
+    
+    // If user has linked_referrer_id but doesn't have user_type set to 'referrer', fix it
+    if (currentUser.linked_referrer_id && currentUser.user_type !== 'referrer') {
+      console.log('Fixing referrer user - setting user_type to referrer');
+      updateUserMutation.mutate({ user_type: 'referrer' });
     }
   }, [currentUser]);
 
