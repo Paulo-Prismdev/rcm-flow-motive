@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { X, Clock, User, Calendar, Mail, Plus } from 'lucide-react';
-import { updateClaimStatus } from '@/functions/updateClaimStatus';
+
 import { format } from 'date-fns';
 import {
   Dialog,
@@ -196,10 +196,9 @@ This update was sent from ART-TEC One Claims Management System
       updateDataToSave.description = `${statusLine}\n\n${updateDataToSave.description}`.trim();
     }
     
-    // If this is a status change, update the claim's status fields via backend function
+    // If this is a status change, update the claim's status fields directly
     if (newUpdate.update_type === 'Status Change' && new_status) {
-      await updateClaimStatus({
-        claimId,
+      await base44.entities.Claim.update(claimId, {
         job_status: new_status,
         secondary_status: new_secondary_status || null
       });
