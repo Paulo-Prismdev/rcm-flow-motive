@@ -101,12 +101,43 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
 
 
   const createUpdateMutation = useMutation({
-    mutationFn: (updateData) => base44.entities.ClaimUpdate.create({
-      ...updateData,
-      claim_id: claimId,
-      ...(currentUser?.company_id ? { company_id: currentUser.company_id } : {})
-    }),
-    onSuccess: (newUpdateRecord) => {
+    mutationFn: async (updateData) => {
+      // If this is a Status Change with a description, create TWO separate records:
+      // 1. Status Change entry (no description)
+      // 2. Note entry (with the description text)
+      if (updateData.update_type === 'Status Change' && updateData.description && updateData.description.trim()) {
+        const noteText = updateData.description;
+        const { description, ...statusChangeData } = updateData;
+        
+        // Create status change entry (no description)
+        const statusChangeRecord = await base44.entities.ClaimUpdate.create({
+          ...statusChangeData,
+          claim_id: claimId,
+          description: '',
+          ...(currentUser?.company_id ? { company_id: currentUser.company_id } : {})
+        });
+        
+        // Create note entry (with description)
+        const noteRecord = await base44.entities.ClaimUpdate.create({
+          update_type: 'Other',
+          description: noteText,
+          next_steps: updateData.next_steps,
+          due_date_for_next_action: updateData.due_date_for_next_action,
+          claim_id: claimId,
+          ...(currentUser?.company_id ? { company_id: currentUser.company_id } : {})
+        });
+        
+        return { statusChangeRecord, noteRecord };
+      } else {
+        // Regular update (single record)
+        return await base44.entities.ClaimUpdate.create({
+          ...updateData,
+          claim_id: claimId,
+          ...(currentUser?.company_id ? { company_id: currentUser.company_id } : {})
+        });
+      }
+    },
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ['claimUpdates', claimId] });
       
       // If status was changed, notify parent with the new status and secondary status
@@ -504,6 +535,8 @@ This update was sent from ART-TEC One Claims Management System
               <div className="space-y-3">
                 {[...updates].sort((a, b) => new Date(b.created_date) - new Date(a.created_date)).map((update) => {
                   const isStatusChange = update.update_type === 'Status Change';
+                  const hasDescription = update.description && update.description.trim();
+                  
                   return (
                   <div
                     key={update.id}
@@ -527,7 +560,7 @@ This update was sent from ART-TEC One Claims Management System
                       </div>
                     </div>
 
-                    {!isStatusChange && (
+                    {hasDescription && (
                       <div className="text-sm mb-3">
                         <p className="text-foreground whitespace-pre-wrap">{update.description}</p>
                       </div>
