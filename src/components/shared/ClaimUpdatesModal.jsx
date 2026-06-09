@@ -177,7 +177,8 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
     
     try {
 
-    if (!newUpdate.description.trim()) {
+    // For non-status-change updates, require a description
+    if (newUpdate.update_type !== 'Status Change' && !newUpdate.description.trim()) {
       setSubmitError('Please enter a description for the update.');
       return;
     }
