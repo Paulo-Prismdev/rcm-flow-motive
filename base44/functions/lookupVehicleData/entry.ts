@@ -44,8 +44,6 @@ Deno.serve(async (req) => {
     console.log(`User email: ${user.email}`);
     console.log(`User type: ${user.user_type}`);
     console.log(`API key configured: ${!!apiKey}`);
-    console.log(`API key length: ${apiKey.length} characters`);
-    console.log(`API key preview: ${apiKey.substring(0, 4)}...${apiKey.substring(apiKey.length - 4)}`);
 
     const requestBody = {
       registrationNumber: cleanReg
@@ -125,9 +123,7 @@ DVLA Error: ${errorDetails}`,
           success: false,
           debug: {
             statusCode: 403,
-            requestedReg: cleanReg,
-            apiKeyPreview: `${apiKey.substring(0, 4)}...${apiKey.substring(apiKey.length - 4)}`,
-            apiKeyLength: apiKey.length
+            requestedReg: cleanReg
           }
         }, { status: 403 });
       }
