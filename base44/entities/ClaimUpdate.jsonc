@@ -6,6 +6,10 @@
       "type": "string",
       "description": "ID of the claim this update belongs to"
     },
+    "company_id": {
+      "type": "string",
+      "description": "Company ID of the user who created this update"
+    },
     "update_type": {
       "type": "string",
       "enum": [
@@ -62,6 +66,21 @@
         },
         {
           "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "super_admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "company_admin"
+          }
+        },
+        {
+          "user_condition": {
             "user_type": "referrer"
           },
           "data.claim_id": {
@@ -75,6 +94,9 @@
           "data.claim_id": {
             "$in": "{{user.linked_claims_as_bodyshop}}"
           }
+        },
+        {
+          "data.company_id": "{{user.company_id}}"
         }
       ]
     },
@@ -83,6 +105,16 @@
         {
           "user_condition": {
             "user_type": "internal"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "super_admin"
           }
         },
         {
@@ -99,18 +131,49 @@
           "data.claim_id": {
             "$in": "{{user.linked_claims_as_client}}"
           }
+        },
+        {
+          "data.company_id": "{{user.company_id}}"
         }
       ]
     },
     "update": {
-      "user_condition": {
-        "user_type": "internal"
-      }
+      "$or": [
+        {
+          "user_condition": {
+            "user_type": "internal"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "super_admin"
+          }
+        }
+      ]
     },
     "delete": {
-      "user_condition": {
-        "user_type": "internal"
-      }
+      "$or": [
+        {
+          "user_condition": {
+            "user_type": "internal"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "super_admin"
+          }
+        }
+      ]
     }
   }
 }

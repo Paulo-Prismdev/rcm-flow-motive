@@ -507,16 +507,21 @@ This update was sent from ART-TEC One Claims Management System
               </div>
             ) : (
               <div className="space-y-3">
-                {updates.map((update) => (
+                {[...updates].sort((a, b) => new Date(b.created_date) - new Date(a.created_date)).map((update) => {
+                  const isStatusChange = update.update_type === 'Status Change';
+                  return (
                   <div
                     key={update.id}
-                    className="bg-muted/30 border border-border rounded-lg p-4 border-l-4"
-                    style={{ borderLeftColor: UPDATE_TYPE_COLORS[update.update_type] || '#6B7280' }}
+                    className={isStatusChange
+                      ? "border rounded-lg p-4 border-l-4 bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-700"
+                      : "bg-card border border-border rounded-lg p-4 border-l-4"
+                    }
+                    style={isStatusChange ? { borderLeftColor: '#9333ea' } : { borderLeftColor: UPDATE_TYPE_COLORS[update.update_type] || '#6B7280' }}
                   >
                     <div className="flex items-start justify-between mb-2">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span
-                          className={`px-2 py-0.5 rounded-md text-xs font-medium text-white ${UPDATE_TYPE_COLORS[update.update_type] || 'bg-gray-500'}`}
+                          className={`px-2 py-0.5 rounded-md text-xs font-semibold text-white ${UPDATE_TYPE_COLORS[update.update_type] || 'bg-gray-500'}`}
                         >
                           {update.update_type}
                         </span>
@@ -527,14 +532,19 @@ This update was sent from ART-TEC One Claims Management System
                       </div>
                     </div>
 
-                    <div className="text-sm mb-2">
-                      <p className="font-medium mb-1 text-foreground">Update:</p>
-                      <p className="text-muted-foreground whitespace-pre-wrap">{update.description}</p>
-                    </div>
+                    {isStatusChange ? (
+                      <div className="text-sm mb-2">
+                        <p className="font-semibold text-purple-700 dark:text-purple-300 whitespace-pre-wrap">{update.description}</p>
+                      </div>
+                    ) : (
+                      <div className="text-sm mb-2">
+                        <p className="text-foreground whitespace-pre-wrap">{update.description}</p>
+                      </div>
+                    )}
 
                     {update.next_steps && (
-                      <div className="text-sm mb-2">
-                        <p className="font-medium mb-1 text-foreground">Next Steps:</p>
+                      <div className="text-sm mb-2 mt-2 bg-muted/50 rounded p-2">
+                        <p className="font-medium mb-1 text-foreground text-xs uppercase tracking-wide">Next Steps:</p>
                         <p className="text-muted-foreground whitespace-pre-wrap">{update.next_steps}</p>
                       </div>
                     )}
@@ -551,7 +561,8 @@ This update was sent from ART-TEC One Claims Management System
                       {update.created_by}
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
