@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { X, Clock, User, Calendar, Mail, Plus } from 'lucide-react';
+import { updateClaimStatus } from '@/functions/updateClaimStatus';
 import { format } from 'date-fns';
 import {
   Dialog,
@@ -91,9 +92,7 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
     staleTime: 0,
   });
 
-  const updateClaimMutation = useMutation({
-    mutationFn: (claimData) => base44.entities.Claim.update(claimId, claimData),
-  });
+
 
   const createUpdateMutation = useMutation({
     mutationFn: (updateData) => base44.entities.ClaimUpdate.create({
@@ -197,20 +196,14 @@ This update was sent from ART-TEC One Claims Management System
       updateDataToSave.description = `${statusLine}\n\n${updateDataToSave.description}`.trim();
     }
     
-    // If this is a status change, update the claim's status fields
+    // If this is a status change, update the claim's status fields via backend function
     if (newUpdate.update_type === 'Status Change' && new_status) {
-      updateClaimMutation.mutate(
-        { 
-          job_status: new_status,
-          secondary_status: new_secondary_status || null
-        },
-        {
-          onSuccess: () => {
-            // After claim is updated, create the update record
-            createUpdateMutation.mutate(updateDataToSave);
-          }
-        }
-      );
+      await updateClaimStatus({
+        claimId,
+        job_status: new_status,
+        secondary_status: new_secondary_status || null
+      });
+      createUpdateMutation.mutate(updateDataToSave);
     } else {
       createUpdateMutation.mutate(updateDataToSave);
     }
