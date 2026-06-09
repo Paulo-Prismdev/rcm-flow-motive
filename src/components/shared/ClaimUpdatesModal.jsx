@@ -568,6 +568,11 @@ This update was sent from ART-TEC One Claims Management System
                   const hasDescription = update.description && update.description.trim();
                   const isNote = !isStatusChange && hasDescription;
                   
+                  // Show all updates to all users (including notes and all update types)
+                  const shouldShow = true;
+                  
+                  if (!shouldShow) return null;
+                  
                   return (
                   <div
                     key={update.id}
