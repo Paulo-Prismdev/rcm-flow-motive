@@ -697,19 +697,9 @@
       ]
     },
     "update": {
-      "$or": [
-        {
-          "user_condition": {
-            "user_type": "internal"
-          }
-        },
-        {
-          "user_condition": {
-            "user_type": "bodyshop"
-          },
-          "data.bodyshop_id": "{{user.linked_bodyshop_id}}"
-        }
-      ]
+      "user_condition": {
+        "user_type": "internal"
+      }
     },
     "delete": {
       "user_condition": {

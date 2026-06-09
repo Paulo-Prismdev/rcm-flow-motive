@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.7.1';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
 Deno.serve(async (req) => {
   try {
@@ -19,7 +19,7 @@ Deno.serve(async (req) => {
     if (job_status !== undefined) updateData.job_status = job_status;
     if (secondary_status !== undefined) updateData.secondary_status = secondary_status;
 
-    await base44.asServiceRole.entities.Claim.update(claimId, updateData);
+    await base44.entities.Claim.update(claimId, updateData);
 
     return Response.json({ success: true });
   } catch (error) {
