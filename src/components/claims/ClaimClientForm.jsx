@@ -4,9 +4,11 @@ import { Input } from "@/components/ui/input";
 import ClientCombobox from '../shared/ClientCombobox';
 
 export default function ClaimClientForm({ claim, onSave, onCancel }) {
-  // Initialize formData directly from the 'claim' prop, or an empty object if 'claim' is null/undefined.
-  // This assumes the 'claim' object can serve as the initial state structure.
   const [formData, setFormData] = useState(claim || {});
+
+  const isRequiredEmpty = (value) => {
+    return value === null || value === undefined || value === '';
+  };
 
   const handleChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -47,7 +49,10 @@ export default function ClaimClientForm({ claim, onSave, onCancel }) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className="block text-sm text-foreground-muted mb-2">Client Name *</label>
+        <label className="block text-sm text-foreground-muted mb-2 flex items-center gap-1.5">
+          <span>Client Name *</span>
+          {isRequiredEmpty(formData.client_name) && <span className="w-2 h-2 rounded-full bg-red-500 flex-shrink-0" title="Required field"></span>}
+        </label>
         <ClientCombobox
           value={formData.client_name}
           onChange={handleClientChange}
@@ -56,19 +61,25 @@ export default function ClaimClientForm({ claim, onSave, onCancel }) {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm text-foreground-muted mb-2">Client Phone *</label>
+          <label className="block text-sm text-foreground-muted mb-2 flex items-center gap-1.5">
+            <span>Client Phone *</span>
+            {isRequiredEmpty(formData.client_phone) && <span className="w-2 h-2 rounded-full bg-red-500 flex-shrink-0" title="Required field"></span>}
+          </label>
           <Input
-            value={formData.client_phone || ''} // Ensure default to empty string
+            value={formData.client_phone || ''}
             onChange={(e) => handleChange('client_phone', e.target.value)}
             className="neomorph-inset px-4 py-3 border-0"
             required
           />
         </div>
         <div>
-          <label className="block text-sm text-foreground-muted mb-2">Client Email *</label>
+          <label className="block text-sm text-foreground-muted mb-2 flex items-center gap-1.5">
+            <span>Client Email *</span>
+            {isRequiredEmpty(formData.client_email) && <span className="w-2 h-2 rounded-full bg-red-500 flex-shrink-0" title="Required field"></span>}
+          </label>
           <Input
             type="email"
-            value={formData.client_email || ''} // Ensure default to empty string
+            value={formData.client_email || ''}
             onChange={(e) => handleChange('client_email', e.target.value)}
             className="neomorph-inset px-4 py-3 border-0"
             required
@@ -96,9 +107,12 @@ export default function ClaimClientForm({ claim, onSave, onCancel }) {
       </div>
 
       <div>
-        <label className="block text-sm text-foreground-muted mb-2">Address Line 1 *</label>
+        <label className="block text-sm text-foreground-muted mb-2 flex items-center gap-1.5">
+          <span>Address Line 1 *</span>
+          {isRequiredEmpty(formData.client_address_line_1) && <span className="w-2 h-2 rounded-full bg-red-500 flex-shrink-0" title="Required field"></span>}
+        </label>
         <Input
-          value={formData.client_address_line_1 || ''} // Ensure default to empty string
+          value={formData.client_address_line_1 || ''}
           onChange={(e) => handleChange('client_address_line_1', e.target.value)}
           className="neomorph-inset px-4 py-3 border-0"
           required
@@ -116,9 +130,12 @@ export default function ClaimClientForm({ claim, onSave, onCancel }) {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm text-foreground-muted mb-2">Town *</label>
+          <label className="block text-sm text-foreground-muted mb-2 flex items-center gap-1.5">
+            <span>Town *</span>
+            {isRequiredEmpty(formData.client_town) && <span className="w-2 h-2 rounded-full bg-red-500 flex-shrink-0" title="Required field"></span>}
+          </label>
           <Input
-            value={formData.client_town || ''} // Ensure default to empty string
+            value={formData.client_town || ''}
             onChange={(e) => handleChange('client_town', e.target.value)}
             className="neomorph-inset px-4 py-3 border-0"
             required
@@ -135,9 +152,12 @@ export default function ClaimClientForm({ claim, onSave, onCancel }) {
       </div>
 
       <div>
-        <label className="block text-sm text-foreground-muted mb-2">Postcode *</label>
+        <label className="block text-sm text-foreground-muted mb-2 flex items-center gap-1.5">
+          <span>Postcode *</span>
+          {isRequiredEmpty(formData.client_postcode) && <span className="w-2 h-2 rounded-full bg-red-500 flex-shrink-0" title="Required field"></span>}
+        </label>
         <Input
-          value={formData.client_postcode || ''} // Ensure default to empty string
+          value={formData.client_postcode || ''}
           onChange={(e) => handleChange('client_postcode', e.target.value)}
           className="neomorph-inset px-4 py-3 border-0"
           required
