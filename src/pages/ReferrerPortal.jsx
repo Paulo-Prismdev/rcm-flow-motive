@@ -35,34 +35,7 @@ export default function ReferrerPortal() {
     return () => window.removeEventListener('referrer-nav', handleNav);
   }, []);
 
-  // Redirect to correct portal if user type changes
-  useEffect(() => {
-    if (currentUser) {
-      const isReferrer = currentUser.user_type === 'referrer' || currentUser.linked_referrer_id;
-      
-      // Only redirect if NOT a referrer
-      if (!isReferrer) {
-        const isClient = currentUser.user_type === 'client' && currentUser.linked_client_id;
-        const isBodyshop = currentUser.user_type === 'bodyshop' && currentUser.linked_bodyshop_id;
-        const isInternal = currentUser.user_type === 'internal' || ['admin', 'super_admin', 'company_admin'].includes(currentUser.role);
-        
-        if (isClient) {
-          window.location.href = '/ClientPortal';
-          return;
-        }
-        if (isBodyshop) {
-          window.location.href = '/RepairerPortal';
-          return;
-        }
-        if (isInternal) {
-          window.location.href = '/Dashboard';
-          return;
-        }
-      }
-    }
-  }, [currentUser]);
-
-  const { data: currentUser } = useQuery({
+  const { data: currentUser, isLoading: userLoading } = useQuery({
     queryKey: ['currentUser'],
     queryFn: () => base44.auth.me(),
     refetchOnMount: 'stale',
@@ -118,7 +91,7 @@ export default function ReferrerPortal() {
     }
   }, [availableStatuses.length]);
 
-  const isLoading = !currentUser || claimsLoading;
+  const isLoading = userLoading || claimsLoading;
 
   // Get unique insurers for filter dropdown
   const uniqueInsurers = useMemo(() => {

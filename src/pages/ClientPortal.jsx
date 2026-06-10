@@ -33,34 +33,7 @@ export default function ClientPortal() {
     return () => window.removeEventListener('client-nav', handleNav);
   }, []);
 
-  // Redirect to correct portal if user type changes
-  useEffect(() => {
-    if (currentUser) {
-      const isClient = currentUser.user_type === 'client' && currentUser.linked_client_id;
-      
-      // Only redirect if NOT a client
-      if (!isClient) {
-        const isReferrer = currentUser.user_type === 'referrer' || currentUser.linked_referrer_id;
-        const isBodyshop = currentUser.user_type === 'bodyshop' && currentUser.linked_bodyshop_id;
-        const isInternal = currentUser.user_type === 'internal' || ['admin', 'super_admin', 'company_admin'].includes(currentUser.role);
-        
-        if (isReferrer) {
-          window.location.href = '/ReferrerPortal';
-          return;
-        }
-        if (isBodyshop) {
-          window.location.href = '/RepairerPortal';
-          return;
-        }
-        if (isInternal) {
-          window.location.href = '/Dashboard';
-          return;
-        }
-      }
-    }
-  }, [currentUser]);
-
-  const { data: currentUser } = useQuery({
+  const { data: currentUser, isLoading: userLoading } = useQuery({
     queryKey: ['currentUser'],
     queryFn: () => base44.auth.me(),
     refetchOnMount: 'stale',
@@ -120,7 +93,7 @@ export default function ClientPortal() {
     return matchesSearch && matchesStatus && matchesInsurer;
   }).sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
 
-  const isLoading = !currentUser || claimsLoading;
+  const isLoading = userLoading || claimsLoading;
 
   if (!currentUser) {
     return (
