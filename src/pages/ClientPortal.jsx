@@ -41,12 +41,13 @@ export default function ClientPortal() {
   const companyId = currentUser?.company_id;
 
   const { data: claims = [], isLoading: claimsLoading } = useQuery({
-    queryKey: ['clientClaims', companyId],
+    queryKey: ['clientClaimsFn', companyId],
     queryFn: async () => {
       const res = await getClientClaims({});
       return res.data?.claims || [];
     },
     enabled: !!companyId,
+    staleTime: 0,
   });
 
   const { data: customStatuses = [] } = useQuery({

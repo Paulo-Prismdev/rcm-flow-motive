@@ -9,10 +9,6 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    if (user.user_type !== 'client') {
-      return Response.json({ error: 'Forbidden' }, { status: 403 });
-    }
-
     const companyId = user.company_id;
     if (!companyId) {
       return Response.json({ claims: [] });

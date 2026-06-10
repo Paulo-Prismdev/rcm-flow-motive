@@ -22,12 +22,13 @@ export default function ClientDashboard() {
   }, []);
 
   const { data: claims = [] } = useQuery({
-    queryKey: ['clientClaims', currentUser?.company_id],
+    queryKey: ['clientClaimsFn', currentUser?.company_id],
     queryFn: async () => {
       const res = await getClientClaims({});
       return res.data?.claims || [];
     },
     enabled: !!currentUser?.company_id,
+    staleTime: 0,
   });
 
   const stats = React.useMemo(() => {
