@@ -79,6 +79,10 @@ export default function Layout({ children, currentPageName }) {
     staleTime: 0,
   });
 
+  const userRole = currentUser?.role;
+  const isSuperAdmin = userRole === 'super_admin';
+  const isAdmin = userRole === 'super_admin' || userRole === 'company_admin' || userRole === 'admin';
+
   const companyLogo = 'https://media.base44.com/images/public/68ee39fb8915b1b539e13c59/b2cb057e2_RCMAutomotiveLogoGreenAutomotivewithHLights.jpg';
 
   // Portal routing - redirect based on user type (must be before early return)
@@ -146,11 +150,8 @@ export default function Layout({ children, currentPageName }) {
     }).length;
   }, [messages, currentUser]);
 
-  const userRole = currentUser?.role;
-  const isSuperAdmin = userRole === 'super_admin';
-  const isAdmin = userRole === 'super_admin' || userRole === 'company_admin' || userRole === 'admin';
-  const isInternalUser = currentUser?.user_type === 'internal' || isAdmin;
   const canManagePermissions = isAdmin || currentUser?.can_manage_permissions;
+  const isInternalUser = currentUser?.user_type === 'internal' || isAdmin;
 
   const departments = allDepartments.filter((dept) => {
     if (!currentUser) return false;
