@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { UserPlus, Shield, Edit2, X, Check } from "lucide-react";
 import InviteUserModal from "../components/usermgmt/InviteUserModal";
+import { updateUserName } from "@/functions/updateUserName";
 
 const USER_TYPES = ["internal", "bodyshop", "referrer", "supplier", "client"];
 const ROLES = ["user", "admin"];
@@ -76,8 +77,14 @@ export default function UserManagement() {
     });
   };
 
-  const saveEdit = (userId) => {
-    updateMutation.mutate({ id: userId, data: editData });
+  const saveEdit = async (userId) => {
+    const { full_name, ...rest } = editData;
+    // Save name separately via service-role function (full_name is a protected field)
+    const originalUser = users.find(u => u.id === userId);
+    if (full_name !== (originalUser?.full_name || '')) {
+      await updateUserName({ user_id: userId, full_name });
+    }
+    updateMutation.mutate({ id: userId, data: rest });
   };
 
   const getCompanyName = (companyId) =>
