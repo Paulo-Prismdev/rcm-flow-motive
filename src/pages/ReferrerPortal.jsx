@@ -38,21 +38,26 @@ export default function ReferrerPortal() {
   // Redirect to correct portal if user type changes
   useEffect(() => {
     if (currentUser) {
-      const isClient = currentUser.user_type === 'client' || currentUser.linked_client_id;
-      const isBodyshop = currentUser.user_type === 'bodyshop' || currentUser.linked_bodyshop_id;
-      const isInternal = currentUser.user_type === 'internal' || ['admin', 'super_admin', 'company_admin'].includes(currentUser.role);
+      const isReferrer = currentUser.user_type === 'referrer' || currentUser.linked_referrer_id;
       
-      if (isClient) {
-        window.location.href = '/ClientPortal';
-        return;
-      }
-      if (isBodyshop) {
-        window.location.href = '/RepairerPortal';
-        return;
-      }
-      if (isInternal) {
-        window.location.href = '/Dashboard';
-        return;
+      // Only redirect if NOT a referrer
+      if (!isReferrer) {
+        const isClient = currentUser.user_type === 'client' && currentUser.linked_client_id;
+        const isBodyshop = currentUser.user_type === 'bodyshop' && currentUser.linked_bodyshop_id;
+        const isInternal = currentUser.user_type === 'internal' || ['admin', 'super_admin', 'company_admin'].includes(currentUser.role);
+        
+        if (isClient) {
+          window.location.href = '/ClientPortal';
+          return;
+        }
+        if (isBodyshop) {
+          window.location.href = '/RepairerPortal';
+          return;
+        }
+        if (isInternal) {
+          window.location.href = '/Dashboard';
+          return;
+        }
       }
     }
   }, [currentUser]);
