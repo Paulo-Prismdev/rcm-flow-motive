@@ -46,7 +46,7 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
   const { data: currentUser } = useQuery({ queryKey: ['currentUser'], queryFn: () => base44.auth.me(), staleTime: 5 * 60 * 1000 });
   const { data: allUsers = [] } = useQuery({ queryKey: ['allUsers'], queryFn: () => base44.entities.User.list(), staleTime: 5 * 60 * 1000 });
   
-  const isReferrer = currentUser?.user_type === 'referrer' || (currentUser?.linked_referrer_id && !currentUser?.user_type?.includes('internal'));
+  const isReferrer = currentUser?.user_type === 'referrer' || currentUser?.user_type === 'client' || (currentUser?.linked_referrer_id && !currentUser?.user_type?.includes('internal'));
   const canChangeStatus = !isReferrer;
 
   const { data: customStatuses = [], isLoading: isLoadingStatuses } = useQuery({
