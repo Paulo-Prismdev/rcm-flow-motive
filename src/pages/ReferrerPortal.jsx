@@ -58,11 +58,13 @@ export default function ReferrerPortal() {
   const { data: claims = [], isLoading: claimsLoading } = useQuery({
     queryKey: ['referrerClaims', referrerId, companyId],
     queryFn: async () => {
-      const allClaims = await base44.entities.Claim.list('-created_date', 5000);
-      return allClaims.filter(c =>
-        (referrerId && c.referrer_id === referrerId) ||
-        (companyId && c.referrer_id === companyId)
-      );
+      const referrerRes = await base44.asServiceRole.entities.Claim.filter({
+        $or: [
+          { referrer_id: referrerId },
+          { referrer_id: companyId }
+        ]
+      }, '-created_date', 5000);
+      return referrerRes || [];
     },
     enabled: isLinked,
   });

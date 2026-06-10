@@ -24,11 +24,13 @@ export default function ReferrerDashboard() {
   const { data: claims = [] } = useQuery({
     queryKey: ['referrerClaims', currentUser?.linked_referrer_id, currentUser?.company_id],
     queryFn: async () => {
-      const allClaims = await base44.entities.Claim.list('-created_date', 1000);
-      return allClaims.filter(c =>
-        (currentUser?.linked_referrer_id && c.referrer_id === currentUser.linked_referrer_id) ||
-        (currentUser?.company_id && c.referrer_id === currentUser.company_id)
-      );
+      const referrerRes = await base44.asServiceRole.entities.Claim.filter({
+        $or: [
+          { referrer_id: currentUser?.linked_referrer_id },
+          { referrer_id: currentUser?.company_id }
+        ]
+      }, '-created_date', 1000);
+      return referrerRes || [];
     },
     enabled: !!(currentUser?.linked_referrer_id || currentUser?.company_id),
   });
