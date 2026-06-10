@@ -31,6 +31,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import AddressLookupInput from '../shared/AddressLookupInput';
 import AIExtractConfirmDialog from '../shared/AIExtractConfirmDialog';
+import AIEntityLinker from '../shared/AIEntityLinker';
 
 const geocodeAddress = async (address) => {
   if (!address || address.trim() === '') return null;
@@ -49,6 +50,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
   const [isLookingUpTPVehicle, setIsLookingUpTPVehicle] = useState(false);
   const [tpVehicleLookupError, setTpVehicleLookupError] = useState(null);
   const [aiExtractDialog, setAiExtractDialog] = useState({ isOpen: false, data: null });
+  const [aiEntityLinker, setAiEntityLinker] = useState({ isOpen: false, data: null });
   const queryClient = useQueryClient();
 
   const { data: currentUser, isLoading: isLoadingUser } = useQuery({
@@ -108,7 +110,18 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
   const [entryMode, setEntryMode] = useState(null); // 'manual' | 'ai' | null
 
   const handleAIExtract = async (extractedData) => {
-    setAiExtractDialog({ isOpen: true, data: extractedData });
+    // First show entity linker if any linkable fields exist, then the confirm dialog
+    const hasLinkable = extractedData?.client_name || extractedData?.referrer || extractedData?.bodyshop;
+    if (hasLinkable) {
+      setAiEntityLinker({ isOpen: true, data: extractedData });
+    } else {
+      setAiExtractDialog({ isOpen: true, data: extractedData });
+    }
+  };
+
+  const handleEntityLinkerConfirm = (enrichedData) => {
+    setAiEntityLinker({ isOpen: false, data: null });
+    setAiExtractDialog({ isOpen: true, data: enrichedData });
   };
 
   const handleAIExtractConfirm = (selectedData) => {
@@ -438,30 +451,38 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
   // Edit mode — use extracted component
   if (isEditing) {
     return (
-      <ClaimEditForm
-        formData={formData}
-        handleChange={handleChange}
-        handleCheckboxChange={handleCheckboxChange}
-        handleSubmit={handleSubmit}
-        onCancel={onCancel}
-        handleVehicleLookup={handleVehicleLookup}
-        isLookingUpVehicle={isLookingUpVehicle}
-        vehicleLookupError={vehicleLookupError}
-        handleTPVehicleLookup={handleTPVehicleLookup}
-        isLookingUpTPVehicle={isLookingUpTPVehicle}
-        tpVehicleLookupError={tpVehicleLookupError}
-        setTpVehicleLookupError={setTpVehicleLookupError}
-        handleClientChange={handleClientChange}
-        handleReferrerChange={handleReferrerChange}
-        handleBodyshopChange={handleBodyshopChange}
-        handleIncidentLocationChange={handleIncidentLocationChange}
-        handleVehicleLocationChange={handleVehicleLocationChange}
-        handleTPChange={handleTPChange}
-        isInternalUser={isInternalUser}
-        aiExtractDialog={aiExtractDialog}
-        setAiExtractDialog={setAiExtractDialog}
-        handleAIExtractConfirm={handleAIExtractConfirm}
-        handleAIExtract={handleAIExtract} />);
+      <>
+        <AIEntityLinker
+          isOpen={aiEntityLinker.isOpen}
+          onClose={() => setAiEntityLinker({ isOpen: false, data: null })}
+          extractedData={aiEntityLinker.data}
+          onConfirm={handleEntityLinkerConfirm}
+        />
+        <ClaimEditForm
+          formData={formData}
+          handleChange={handleChange}
+          handleCheckboxChange={handleCheckboxChange}
+          handleSubmit={handleSubmit}
+          onCancel={onCancel}
+          handleVehicleLookup={handleVehicleLookup}
+          isLookingUpVehicle={isLookingUpVehicle}
+          vehicleLookupError={vehicleLookupError}
+          handleTPVehicleLookup={handleTPVehicleLookup}
+          isLookingUpTPVehicle={isLookingUpTPVehicle}
+          tpVehicleLookupError={tpVehicleLookupError}
+          setTpVehicleLookupError={setTpVehicleLookupError}
+          handleClientChange={handleClientChange}
+          handleReferrerChange={handleReferrerChange}
+          handleBodyshopChange={handleBodyshopChange}
+          handleIncidentLocationChange={handleIncidentLocationChange}
+          handleVehicleLocationChange={handleVehicleLocationChange}
+          handleTPChange={handleTPChange}
+          isInternalUser={isInternalUser}
+          aiExtractDialog={aiExtractDialog}
+          setAiExtractDialog={setAiExtractDialog}
+          handleAIExtractConfirm={handleAIExtractConfirm}
+          handleAIExtract={handleAIExtract} />
+      </>);
 
 
   }
@@ -469,6 +490,12 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
   // Wizard mode for new claims
   return (
     <div className="h-full flex flex-col gap-4 md:gap-6">
+      <AIEntityLinker
+        isOpen={aiEntityLinker.isOpen}
+        onClose={() => setAiEntityLinker({ isOpen: false, data: null })}
+        extractedData={aiEntityLinker.data}
+        onConfirm={handleEntityLinkerConfirm}
+      />
       <AIExtractConfirmDialog
         isOpen={aiExtractDialog.isOpen}
         onClose={() => setAiExtractDialog({ isOpen: false, data: null })}
