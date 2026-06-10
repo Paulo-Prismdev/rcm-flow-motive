@@ -619,7 +619,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
                   
                         <option value="">Select a file handler...</option>
                         {referrerUsers.map((u) =>
-                  <option key={u.id} value={u.full_name}>{u.full_name}</option>
+                  <option key={u.id} value={u.display_name || u.full_name}>{u.display_name || u.full_name}</option>
                   )}
                       </select> :
 
