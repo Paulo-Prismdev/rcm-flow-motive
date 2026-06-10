@@ -35,6 +35,11 @@ export default function UserManagement() {
     queryFn: () => base44.entities.Company.filter({ company_type: "referrer", is_active: true }),
   });
 
+  const { data: clients = [] } = useQuery({
+    queryKey: ["clients"],
+    queryFn: () => base44.entities.Client.list("name"),
+  });
+
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.User.update(id, data),
     onSuccess: () => {
@@ -89,8 +94,11 @@ export default function UserManagement() {
     updateMutation.mutate({ id: userId, data: rest });
   };
 
-  const getCompanyName = (companyId) =>
-    companies.find((c) => c.id === companyId)?.name || "—";
+  const getCompanyName = (user) => {
+    if (!user.company_id) return "—";
+    if (user.user_type === "client") return clients.find(c => c.id === user.company_id)?.name || "—";
+    return companies.find((c) => c.id === user.company_id)?.name || "—";
+  };
 
   return (
     <div className="h-full flex flex-col space-y-3">
@@ -222,8 +230,12 @@ export default function UserManagement() {
                            className="text-xs border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                          >
                            <option value="">— None —</option>
-                           {user.user_type === "referrer" ? (
+                           {editData.user_type === "referrer" ? (
                              referrerCompanies.map((c) => (
+                               <option key={c.id} value={c.id}>{c.name}</option>
+                             ))
+                           ) : editData.user_type === "client" ? (
+                             clients.map((c) => (
                                <option key={c.id} value={c.id}>{c.name}</option>
                              ))
                            ) : (
@@ -233,7 +245,7 @@ export default function UserManagement() {
                            )}
                          </select>
                       ) : (
-                        <span className="text-xs text-gray-500 dark:text-gray-400">{user.company_id ? getCompanyName(user.company_id) : "—"}</span>
+                        <span className="text-xs text-gray-500 dark:text-gray-400">{getCompanyName(user)}</span>
                       )}
                     </td>
                     <td className="px-4 py-2.5">
