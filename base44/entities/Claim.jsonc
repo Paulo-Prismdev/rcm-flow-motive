@@ -723,23 +723,7 @@
           ]
         },
         {
-          "$and": [
-            {
-              "user_condition": {
-                "user_type": "client"
-              }
-            },
-            {
-              "$or": [
-                {
-                  "data.client_id": "{{user.linked_client_id}}"
-                },
-                {
-                  "data.client_id": "{{user.company_id}}"
-                }
-              ]
-            }
-          ]
+          "data.client_id": "{{user.company_id}}"
         }
       ]
     },

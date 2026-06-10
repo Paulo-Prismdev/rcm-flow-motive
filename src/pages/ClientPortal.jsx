@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
+import { getClientClaims } from '@/functions/getClientClaims';
 import {
   ChevronRight,
   ChevronDown,
@@ -41,7 +42,10 @@ export default function ClientPortal() {
 
   const { data: claims = [], isLoading: claimsLoading } = useQuery({
     queryKey: ['clientClaims', companyId],
-    queryFn: () => base44.entities.Claim.filter({ client_id: companyId }, '-created_date', 5000),
+    queryFn: async () => {
+      const res = await getClientClaims({});
+      return res.data?.claims || [];
+    },
     enabled: !!companyId,
   });
 

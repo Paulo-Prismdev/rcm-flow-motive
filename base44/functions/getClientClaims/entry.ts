@@ -1,0 +1,31 @@
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+
+Deno.serve(async (req) => {
+  try {
+    const base44 = createClientFromRequest(req);
+    const user = await base44.auth.me();
+
+    if (!user) {
+      return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    if (user.user_type !== 'client') {
+      return Response.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
+    const companyId = user.company_id;
+    if (!companyId) {
+      return Response.json({ claims: [] });
+    }
+
+    const claims = await base44.asServiceRole.entities.Claim.filter(
+      { client_id: companyId },
+      '-created_date',
+      5000
+    );
+
+    return Response.json({ claims });
+  } catch (error) {
+    return Response.json({ error: error.message }, { status: 500 });
+  }
+});
