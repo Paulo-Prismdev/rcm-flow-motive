@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { FileText, TrendingUp, Clock, CheckCircle } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
+import { getClientClaims } from '@/functions/getClientClaims';
 
 export default function ClientDashboard() {
   const [activeTab, setActiveTab] = React.useState('dashboard');
@@ -22,7 +23,10 @@ export default function ClientDashboard() {
 
   const { data: claims = [] } = useQuery({
     queryKey: ['clientClaims', currentUser?.company_id],
-    queryFn: () => base44.entities.Claim.list('-created_date', 1000),
+    queryFn: async () => {
+      const res = await getClientClaims({});
+      return res.data?.claims || [];
+    },
     enabled: !!currentUser?.company_id,
   });
 
