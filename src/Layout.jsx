@@ -74,56 +74,10 @@ export default function Layout({ children, currentPageName }) {
 
   const { data: currentUser } = useQuery({
     queryKey: ['currentUser'],
-    queryFn: () => base44.auth.me(),
-    refetchOnMount: 'always',
-    staleTime: 0,
+    queryFn: () => base44.auth.me()
   });
 
-  const userRole = currentUser?.role;
-  const isSuperAdmin = userRole === 'super_admin';
-  const isAdmin = userRole === 'super_admin' || userRole === 'company_admin' || userRole === 'admin';
-
   const companyLogo = 'https://media.base44.com/images/public/68ee39fb8915b1b539e13c59/b2cb057e2_RCMAutomotiveLogoGreenAutomotivewithHLights.jpg';
-
-  // Portal routing - redirect based on user type (must be before early return)
-  useEffect(() => {
-    if (!currentUser) return;
-
-    const isInternalUserCheck = currentUser?.user_type === 'internal' || isAdmin;
-    const isReferrerUserCheck = (currentUser?.user_type === 'referrer' || currentUser?.linked_referrer_id) && !isAdmin && currentUser?.user_type !== 'internal';
-    const isClientUserCheck = currentUser?.user_type === 'client' && !isAdmin;
-    const isBodyshopUserCheck = currentUser?.user_type === 'bodyshop' && !isAdmin;
-
-    // Internal users can access everything
-    if (isInternalUserCheck) return;
-
-    // Bodyshop users must use RepairerPortal
-    if (isBodyshopUserCheck) {
-      if (currentPageName !== 'RepairerPortal') {
-        console.log('Redirecting bodyshop user to RepairerPortal');
-        window.location.href = createPageUrl('RepairerPortal');
-      }
-      return;
-    }
-
-    // Referrer users must use ReferrerPortal
-    if (isReferrerUserCheck) {
-      if (currentPageName !== 'ReferrerPortal') {
-        console.log('Redirecting referrer user to ReferrerPortal');
-        window.location.href = createPageUrl('ReferrerPortal');
-      }
-      return;
-    }
-
-    // Client users must use ClientPortal
-    if (isClientUserCheck) {
-      if (currentPageName !== 'ClientPortal') {
-        console.log('Redirecting client user to ClientPortal');
-        window.location.href = createPageUrl('ClientPortal');
-      }
-      return;
-    }
-  }, [currentUser, currentPageName, isAdmin]);
 
   const { data: messages = [] } = useQuery({
     queryKey: ['messages'],
@@ -150,8 +104,11 @@ export default function Layout({ children, currentPageName }) {
     }).length;
   }, [messages, currentUser]);
 
-  const canManagePermissions = isAdmin || currentUser?.can_manage_permissions;
+  const userRole = currentUser?.role;
+  const isSuperAdmin = userRole === 'super_admin';
+  const isAdmin = userRole === 'super_admin' || userRole === 'company_admin' || userRole === 'admin';
   const isInternalUser = currentUser?.user_type === 'internal' || isAdmin;
+  const canManagePermissions = isAdmin || currentUser?.can_manage_permissions;
 
   const departments = allDepartments.filter((dept) => {
     if (!currentUser) return false;
@@ -160,35 +117,37 @@ export default function Layout({ children, currentPageName }) {
     return userAccess.includes(dept.permission);
   });
 
-  // Wait for user to load before rendering
-  if (!currentUser) {
+  // Repairer/referrer routing
+  if (currentUser?.user_type === 'bodyshop' && !isAdmin && currentPageName === 'RepairerPortal') {
+    return <RepairerLayout>{children}</RepairerLayout>;
+  }
+  if (currentUser?.user_type === 'bodyshop' && !isAdmin && currentPageName !== 'RepairerPortal') {
+    window.location.href = createPageUrl('RepairerPortal');
+    return null;
+  }
+  const isReferrerUser = (currentUser?.user_type === 'referrer' || currentUser?.linked_referrer_id) &&
+  !isAdmin && currentUser?.user_type !== 'internal';
+  if (isReferrerUser && currentPageName === 'ReferrerPortal') {
+    return children;
+  }
+  if (isReferrerUser && currentPageName !== 'ReferrerPortal') {
+    window.location.href = createPageUrl('ReferrerPortal');
     return null;
   }
 
-  // Render appropriate layout based on user type
-  const isInternalUserLayout = currentUser?.user_type === 'internal' || isAdmin;
-  const isReferrerUserLayout = (currentUser?.user_type === 'referrer' || currentUser?.linked_referrer_id) && !isAdmin && currentUser?.user_type !== 'internal';
-  const isClientUserLayout = currentUser?.user_type === 'client' && !isAdmin;
-  const isBodyshopUserLayout = currentUser?.user_type === 'bodyshop' && !isAdmin;
-
-  if (isBodyshopUserLayout && currentPageName === 'RepairerPortal') {
-    return <RepairerLayout>{children}</RepairerLayout>;
+  const isClientUser = currentUser?.user_type === 'client' && !isAdmin;
+  if (isClientUser && currentPageName === 'ClientPortal') {
+    return children;
   }
-  if (isReferrerUserLayout && currentPageName === 'ReferrerPortal') {
-    return <StatusConfigProvider>{children}</StatusConfigProvider>;
-  }
-  if (isClientUserLayout && currentPageName === 'ClientPortal') {
-    return <StatusConfigProvider>{children}</StatusConfigProvider>;
-  }
-  // Internal users see the main app
-  if (isInternalUserLayout) {
-    return <StatusConfigProvider>{children}</StatusConfigProvider>;
+  if (isClientUser && currentPageName !== 'ClientPortal') {
+    window.location.href = createPageUrl('ClientPortal');
+    return null;
   }
 
-  return null;
+  const userInitials = currentUser?.full_name?.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase() || '?';
 
   return (
-    <>
+    <StatusConfigProvider>
       <UserTypeFixer />
       <GlobalSearch open={searchOpen} onOpenChange={setSearchOpen} />
       {isInternalUser &&
@@ -394,6 +353,6 @@ export default function Layout({ children, currentPageName }) {
           </main>
         </div>
       </div>
-    </>);
+    </StatusConfigProvider>);
 
 }

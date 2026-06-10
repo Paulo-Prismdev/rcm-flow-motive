@@ -33,11 +33,9 @@ export default function ClientPortal() {
     return () => window.removeEventListener('client-nav', handleNav);
   }, []);
 
-  const { data: currentUser, isLoading: userLoading } = useQuery({
+  const { data: currentUser } = useQuery({
     queryKey: ['currentUser'],
     queryFn: () => base44.auth.me(),
-    refetchOnMount: 'stale',
-    staleTime: 0,
   });
 
   const companyId = currentUser?.company_id;
@@ -93,7 +91,7 @@ export default function ClientPortal() {
     return matchesSearch && matchesStatus && matchesInsurer;
   }).sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
 
-  const isLoading = userLoading || claimsLoading;
+  const isLoading = !currentUser || claimsLoading;
 
   if (!currentUser) {
     return (

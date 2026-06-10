@@ -35,11 +35,9 @@ export default function ReferrerPortal() {
     return () => window.removeEventListener('referrer-nav', handleNav);
   }, []);
 
-  const { data: currentUser, isLoading: userLoading } = useQuery({
+  const { data: currentUser } = useQuery({
     queryKey: ['currentUser'],
     queryFn: () => base44.auth.me(),
-    refetchOnMount: 'stale',
-    staleTime: 0,
   });
 
   const referrerId = currentUser?.linked_referrer_id;
@@ -91,7 +89,7 @@ export default function ReferrerPortal() {
     }
   }, [availableStatuses.length]);
 
-  const isLoading = userLoading || claimsLoading;
+  const isLoading = !currentUser || claimsLoading;
 
   // Get unique insurers for filter dropdown
   const uniqueInsurers = useMemo(() => {
