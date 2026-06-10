@@ -548,36 +548,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
           <div className="neomorph-flat p-6 space-y-6">
                 <h3 className="text-xl font-bold text-gray-700 mb-4">Let's start with the basics</h3>
 
-                {/* Send to client + AI — only show if not in manual mode */}
-                {entryMode !== 'manual' &&
-            <>
-                    <ClientFormLink />
 
-                    <div className="relative">
-                      <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-300"></div></div>
-                      <div className="relative flex justify-center text-sm"><span className="px-3 bg-background text-gray-500">Or fill in manually / use AI</span></div>
-                    </div>
-
-                    {/* AI Upload */}
-                    <div className="neomorph-flat p-5 bg-purple-50/50 dark:bg-purple-900/10 border-2 border-purple-200 dark:border-purple-800">
-                      <div className="flex items-start gap-3 mb-4">
-                        <div className="w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center flex-shrink-0">
-                          <Sparkles className="w-5 h-5 text-white" />
-                        </div>
-                        <div className="flex-1">
-                          <h4 className="font-bold text-gray-800 dark:text-gray-200 mb-1">Quick Start with AI</h4>
-                          <p className="text-sm text-gray-600 dark:text-gray-400">Upload your instruction document and let AI automatically extract claim details.</p>
-                        </div>
-                      </div>
-                      <FileUpload value={Array.isArray(formData.file_urls) ? formData.file_urls : []} onChange={(urls) => handleChange('file_urls', urls)} enableAI={true} analysisType="claim" onAIExtract={handleAIExtract} />
-                    </div>
-
-                    <div className="relative">
-                      <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-300"></div></div>
-                      <div className="relative flex justify-center text-sm"><span className="px-3 bg-background text-gray-500">Or enter details manually</span></div>
-                    </div>
-                  </>
-            }
 
                 <div>
                   <label className="block text-sm text-gray-600 mb-2">Vehicle Registration *</label>
