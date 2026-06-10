@@ -67,10 +67,13 @@ export default function UserManagement() {
     );
   }
 
+  // display_name is a custom field stored in user data; full_name is read-only from the platform
+  const getDisplayName = (user) => user.display_name || user.full_name || "";
+
   const startEdit = (user) => {
     setEditingId(user.id);
     setEditData({
-      full_name: user.full_name || "",
+      display_name: getDisplayName(user),
       user_type: user.user_type || "internal",
       role: user.role || "user",
       company_id: user.company_id || "",
@@ -78,11 +81,10 @@ export default function UserManagement() {
   };
 
   const saveEdit = async (userId) => {
-    const { full_name, ...rest } = editData;
-    // Save name separately via service-role function (full_name is a protected field)
+    const { display_name, ...rest } = editData;
     const originalUser = users.find(u => u.id === userId);
-    if (full_name !== (originalUser?.full_name || '')) {
-      await updateUserName({ user_id: userId, full_name });
+    if (display_name !== getDisplayName(originalUser)) {
+      await updateUserName({ user_id: userId, full_name: display_name });
     }
     updateMutation.mutate({ id: userId, data: rest });
   };
@@ -164,18 +166,18 @@ export default function UserManagement() {
                     <td className="px-4 py-2.5">
                      <div className="flex items-center gap-2">
                        <div className="w-7 h-7 rounded-full bg-[#131d47]/10 flex items-center justify-center flex-shrink-0 text-[11px] font-bold text-[#131d47] dark:text-white dark:bg-white/10">
-                         {(user.full_name || user.email)?.[0]?.toUpperCase()}
+                         {(getDisplayName(user) || user.email)?.[0]?.toUpperCase()}
                        </div>
                        {isEditing ? (
                          <input
                            type="text"
-                           value={editData.full_name}
-                           onChange={(e) => setEditData((p) => ({ ...p, full_name: e.target.value }))}
-                           placeholder="Full name"
+                           value={editData.display_name}
+                           onChange={(e) => setEditData((p) => ({ ...p, display_name: e.target.value }))}
+                           placeholder="Display name"
                            className="text-xs border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-800 text-gray-900 dark:text-white w-32"
                          />
                        ) : (
-                         <span className="font-medium text-gray-900 dark:text-white truncate">{user.full_name || "—"}</span>
+                         <span className="font-medium text-gray-900 dark:text-white truncate">{getDisplayName(user) || "—"}</span>
                        )}
                      </div>
                     </td>

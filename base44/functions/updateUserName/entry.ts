@@ -15,8 +15,8 @@ Deno.serve(async (req) => {
             return Response.json({ error: 'user_id and full_name are required' }, { status: 400 });
         }
 
-        await base44.asServiceRole.entities.User.update(user_id, { full_name: full_name.trim() });
-
+        // full_name is a read-only platform field; store custom name as display_name
+        await base44.asServiceRole.entities.User.update(user_id, { display_name: full_name.trim() });
         return Response.json({ success: true });
     } catch (error) {
         return Response.json({ error: error.message }, { status: 500 });
