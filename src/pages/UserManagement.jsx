@@ -69,6 +69,7 @@ export default function UserManagement() {
   const startEdit = (user) => {
     setEditingId(user.id);
     setEditData({
+      full_name: user.full_name || "",
       user_type: user.user_type || "internal",
       role: user.role || "user",
       company_id: user.company_id || "",
@@ -154,12 +155,22 @@ export default function UserManagement() {
                 return (
                   <tr key={user.id} className={`hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors ${isEditing ? "bg-blue-50 dark:bg-blue-900/10" : ""}`}>
                     <td className="px-4 py-2.5">
-                      <div className="flex items-center gap-2">
-                        <div className="w-7 h-7 rounded-full bg-[#131d47]/10 flex items-center justify-center flex-shrink-0 text-[11px] font-bold text-[#131d47] dark:text-white dark:bg-white/10">
-                          {(user.full_name || user.email)?.[0]?.toUpperCase()}
-                        </div>
-                        <span className="font-medium text-gray-900 dark:text-white truncate">{user.full_name || "—"}</span>
-                      </div>
+                     <div className="flex items-center gap-2">
+                       <div className="w-7 h-7 rounded-full bg-[#131d47]/10 flex items-center justify-center flex-shrink-0 text-[11px] font-bold text-[#131d47] dark:text-white dark:bg-white/10">
+                         {(user.full_name || user.email)?.[0]?.toUpperCase()}
+                       </div>
+                       {isEditing ? (
+                         <input
+                           type="text"
+                           value={editData.full_name}
+                           onChange={(e) => setEditData((p) => ({ ...p, full_name: e.target.value }))}
+                           placeholder="Full name"
+                           className="text-xs border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-800 dark:text-white w-32"
+                         />
+                       ) : (
+                         <span className="font-medium text-gray-900 dark:text-white truncate">{user.full_name || "—"}</span>
+                       )}
+                     </div>
                     </td>
                     <td className="px-4 py-2.5 text-gray-500 dark:text-gray-400 hidden md:table-cell text-xs">{user.email}</td>
                     <td className="px-4 py-2.5">
