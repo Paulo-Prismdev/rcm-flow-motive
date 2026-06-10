@@ -113,7 +113,7 @@ const EditableSection = ({ title, icon: Icon, claim, onUpdate, children, EditCom
     );
 };
 
-function DetailRow({ label, value, isCurrency = false, isDate = false, isStatus = false }) {
+function DetailRow({ label, value, isCurrency = false, isDate = false, isStatus = false, isRequired = false }) {
     let displayValue = value;
     if (isCurrency && typeof value === 'number') {
         displayValue = `£${value.toFixed(2)}`;
@@ -125,13 +125,17 @@ function DetailRow({ label, value, isCurrency = false, isDate = false, isStatus 
         }
     }
 
-    if (value === null || typeof value === 'undefined' || value === '') {
+    const isEmpty = value === null || typeof value === 'undefined' || value === '';
+    if (isEmpty) {
         displayValue = '-';
     }
 
     return (
         <div className="py-2 px-3 rounded-[8px] hover:bg-muted/50 transition-colors">
-            <div className="text-[11px] font-medium text-muted-foreground mb-0.5">{label}</div>
+            <div className="text-[11px] font-medium text-muted-foreground mb-0.5 flex items-center gap-1.5">
+                {label}
+                {isRequired && isEmpty && <span className="w-2 h-2 rounded-full bg-gold flex-shrink-0" title="Required field"></span>}
+            </div>
             <div className={`text-sm font-medium text-foreground ${(isCurrency || (typeof value === 'number')) ? 'tabular-nums' : ''}`}>
                 {isStatus ? <StatusBadge status={displayValue} /> : displayValue}
             </div>
@@ -677,13 +681,16 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                   <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">First Party — Client</span>
                 </div>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
-                  <DetailRow label="Client Name" value={claim.client_name} />
-                  <DetailRow label="Phone" value={claim.client_phone} />
-                  <DetailRow label="Email" value={claim.client_email} />
+                  <DetailRow label="Client Name" value={claim.client_name} isRequired={true} />
+                  <DetailRow label="Phone" value={claim.client_phone} isRequired={true} />
+                  <DetailRow label="Email" value={claim.client_email} isRequired={true} />
                   <DetailRow label="VAT Status" value={claim.client_vat_status} />
                 </div>
-                <div className="mt-2 py-3 px-4 rounded-lg glass-inset">
-                  <div className="text-xs font-semibold text-foreground-muted mb-2">Address</div>
+                <div className="mt-2 py-3 px-4 rounded-lg glass-inet relative">
+                  <div className="text-xs font-semibold text-foreground-muted mb-2 flex items-center gap-1.5">
+                    Address
+                    {(!claim.client_address_line_1 || !claim.client_town || !claim.client_postcode) && <span className="w-2 h-2 rounded-full bg-gold flex-shrink-0" title="Required field"></span>}
+                  </div>
                   <div className="text-sm leading-relaxed space-y-0.5">
                     {claim.client_address_line_1 && <div>{claim.client_address_line_1}</div>}
                     {claim.client_address_line_2 && <div>{claim.client_address_line_2}</div>}

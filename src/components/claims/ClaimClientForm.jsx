@@ -10,6 +10,8 @@ export default function ClaimClientForm({ claim, onSave, onCancel }) {
     return value === null || value === undefined || value === '';
   };
 
+  // Check if field has required asterisk in label
+
   const handleChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
@@ -51,7 +53,7 @@ export default function ClaimClientForm({ claim, onSave, onCancel }) {
       <div>
         <label className="block text-sm text-foreground-muted mb-2 flex items-center gap-1.5">
           <span>Client Name *</span>
-          {isRequiredEmpty(formData.client_name) && <span className="w-2 h-2 rounded-full bg-red-500 flex-shrink-0" title="Required field"></span>}
+          {isRequiredEmpty(formData.client_name) && <span className="w-2 h-2 rounded-full bg-gold flex-shrink-0" title="Required field"></span>}
         </label>
         <ClientCombobox
           value={formData.client_name}
@@ -63,7 +65,7 @@ export default function ClaimClientForm({ claim, onSave, onCancel }) {
         <div>
           <label className="block text-sm text-foreground-muted mb-2 flex items-center gap-1.5">
             <span>Client Phone *</span>
-            {isRequiredEmpty(formData.client_phone) && <span className="w-2 h-2 rounded-full bg-red-500 flex-shrink-0" title="Required field"></span>}
+            {isRequiredEmpty(formData.client_phone) && <span className="w-2 h-2 rounded-full bg-gold flex-shrink-0" title="Required field"></span>}
           </label>
           <Input
             value={formData.client_phone || ''}
@@ -75,7 +77,7 @@ export default function ClaimClientForm({ claim, onSave, onCancel }) {
         <div>
           <label className="block text-sm text-foreground-muted mb-2 flex items-center gap-1.5">
             <span>Client Email *</span>
-            {isRequiredEmpty(formData.client_email) && <span className="w-2 h-2 rounded-full bg-red-500 flex-shrink-0" title="Required field"></span>}
+            {isRequiredEmpty(formData.client_email) && <span className="w-2 h-2 rounded-full bg-gold flex-shrink-0" title="Required field"></span>}
           </label>
           <Input
             type="email"
@@ -109,7 +111,7 @@ export default function ClaimClientForm({ claim, onSave, onCancel }) {
       <div>
         <label className="block text-sm text-foreground-muted mb-2 flex items-center gap-1.5">
           <span>Address Line 1 *</span>
-          {isRequiredEmpty(formData.client_address_line_1) && <span className="w-2 h-2 rounded-full bg-red-500 flex-shrink-0" title="Required field"></span>}
+          {isRequiredEmpty(formData.client_address_line_1) && <span className="w-2 h-2 rounded-full bg-gold flex-shrink-0" title="Required field"></span>}
         </label>
         <Input
           value={formData.client_address_line_1 || ''}
@@ -132,7 +134,7 @@ export default function ClaimClientForm({ claim, onSave, onCancel }) {
         <div>
           <label className="block text-sm text-foreground-muted mb-2 flex items-center gap-1.5">
             <span>Town *</span>
-            {isRequiredEmpty(formData.client_town) && <span className="w-2 h-2 rounded-full bg-red-500 flex-shrink-0" title="Required field"></span>}
+            {isRequiredEmpty(formData.client_town) && <span className="w-2 h-2 rounded-full bg-gold flex-shrink-0" title="Required field"></span>}
           </label>
           <Input
             value={formData.client_town || ''}
@@ -154,7 +156,7 @@ export default function ClaimClientForm({ claim, onSave, onCancel }) {
       <div>
         <label className="block text-sm text-foreground-muted mb-2 flex items-center gap-1.5">
           <span>Postcode *</span>
-          {isRequiredEmpty(formData.client_postcode) && <span className="w-2 h-2 rounded-full bg-red-500 flex-shrink-0" title="Required field"></span>}
+          {isRequiredEmpty(formData.client_postcode) && <span className="w-2 h-2 rounded-full bg-gold flex-shrink-0" title="Required field"></span>}
         </label>
         <Input
           value={formData.client_postcode || ''}
