@@ -698,6 +698,9 @@
         },
         {
           "data.bodyshop_id": "{{user.company_id}}"
+        },
+        {
+          "data.client_id": "{{user.company_id}}"
         }
       ]
     },

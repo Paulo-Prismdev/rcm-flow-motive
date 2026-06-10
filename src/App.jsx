@@ -97,6 +97,11 @@ const AuthenticatedApp = () => {
           <MigrateUsers />
         </LayoutWrapper>
       } />
+      <Route path="/ClientPortal" element={
+        <LayoutWrapper currentPageName="ClientPortal">
+          <ClientPortal />
+        </LayoutWrapper>
+      } />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
