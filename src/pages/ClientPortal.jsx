@@ -33,6 +33,28 @@ export default function ClientPortal() {
     return () => window.removeEventListener('client-nav', handleNav);
   }, []);
 
+  // Redirect to correct portal if user type changes
+  useEffect(() => {
+    if (currentUser) {
+      const isReferrer = currentUser.user_type === 'referrer' || currentUser.linked_referrer_id;
+      const isBodyshop = currentUser.user_type === 'bodyshop' || currentUser.linked_bodyshop_id;
+      const isInternal = currentUser.user_type === 'internal' || ['admin', 'super_admin', 'company_admin'].includes(currentUser.role);
+      
+      if (isReferrer) {
+        window.location.href = '/ReferrerPortal';
+        return;
+      }
+      if (isBodyshop) {
+        window.location.href = '/RepairerPortal';
+        return;
+      }
+      if (isInternal) {
+        window.location.href = '/Dashboard';
+        return;
+      }
+    }
+  }, [currentUser]);
+
   const { data: currentUser } = useQuery({
     queryKey: ['currentUser'],
     queryFn: () => base44.auth.me(),
