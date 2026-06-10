@@ -421,9 +421,9 @@ button:not(.btn-sm):not(.btn-icon),
    SPECIAL TOKENS
 ═══════════════════════════════════════════ */
 
-.bg-gold { background-color: #f59e0b; }
-.text-gold { color: #f59e0b; }
-.border-gold { border-color: #f59e0b; }
+.bg-gold { background-color: #f59e0b !important; }
+.text-gold { color: #f59e0b !important; }
+.border-gold { border-color: #f59e0b !important; }
 
 /* ═══════════════════════════════════════════
    DASHBOARD WIDGET EDIT MODE ANIMATIONS
