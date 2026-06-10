@@ -64,7 +64,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
   const canSaveClients = currentUser?.role === 'admin' || currentUser?.role === 'super_admin' || currentUser?.user_type === 'internal';
 
   const [formData, setFormData] = useState(claim || {
-    job_number: '', reg: '', job_statuses: ['New'], claim_type: 'Credit Repair',
+    job_number: '', reg: '', job_statuses: ['New'], claim_type: '',
     circumstances: '', loss_date: '', loss_time: '', incident_location: '',
     vehicle_use: '', courtesy_car_required: false, has_third_party: false,
     requires_indemnity: false, file_urls: [], insurer: '', claim_ref: '',
@@ -567,7 +567,11 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
                 <div>
                   <label className="block text-sm text-gray-600 mb-2">Claim Type *</label>
                   <select value={formData.claim_type} onChange={(e) => handleChange('claim_type', e.target.value)} className="neomorph-inset w-full px-4 py-3 text-gray-700 border-0 rounded-xl" required>
-                    <option>Credit Repair</option><option>Fault Claim</option><option>Non-Fault Claim</option><option>Total Loss</option><option>Glass Claim</option>
+                    <option value="">Select claim type...</option>
+                    <option>Fault Claim</option>
+                    <option>3rd Party Direct</option>
+                    <option>Credit Repair</option>
+                    <option>Glass Claim</option>
                   </select>
                 </div>
 

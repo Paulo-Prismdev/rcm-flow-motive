@@ -39,10 +39,9 @@
     "claim_type": {
       "type": "string",
       "enum": [
-        "Credit Repair",
         "Fault Claim",
-        "Non-Fault Claim",
-        "Total Loss",
+        "3rd Party Direct",
+        "Credit Repair",
         "Glass Claim"
       ]
     },
