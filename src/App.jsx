@@ -16,6 +16,7 @@ import ClientClaimForm from '@/pages/ClientClaimForm';
 import TyreRequests from '@/pages/TyreRequests';
 import CompanyManagement from '@/pages/CompanyManagement';
 import MigrateUsers from '@/pages/MigrateUsers';
+import ClientPortal from '@/pages/ClientPortal';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];

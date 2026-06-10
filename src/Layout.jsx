@@ -135,6 +135,15 @@ export default function Layout({ children, currentPageName }) {
     return null;
   }
 
+  const isClientUser = currentUser?.user_type === 'client' && !isAdmin;
+  if (isClientUser && currentPageName === 'ClientPortal') {
+    return children;
+  }
+  if (isClientUser && currentPageName !== 'ClientPortal') {
+    window.location.href = createPageUrl('ClientPortal');
+    return null;
+  }
+
   const userInitials = currentUser?.full_name?.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase() || '?';
 
   return (
