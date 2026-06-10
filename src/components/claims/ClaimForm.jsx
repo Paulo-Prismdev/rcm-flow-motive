@@ -718,8 +718,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
                     <label className="block text-sm text-gray-600 mb-2">Insurer</label>
                     <InsurerCombobox
                   value={formData.insurer}
-                  onChange={(v) => handleChange('insurer', v)}
-                  onAddNew={() => setShowInsurerModal(true)} />
+                  onChange={(v) => handleChange('insurer', v)} />
                 
                   </div>
                   <div><label className="block text-sm text-gray-600 mb-2">Claim Reference</label><Input value={formData.claim_ref} onChange={(e) => handleChange('claim_ref', e.target.value)} className="neomorph-inset px-4 py-3 text-gray-700 border-0" /></div>

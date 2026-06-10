@@ -30,40 +30,20 @@
   ],
   "rls": {
     "create": {
-      "$or": [
-        {
-          "user_condition": {
-            "user_type": "internal"
-          }
-        }
-      ]
+      "user_condition": {}
     },
     "read": {
-      "$or": [
-        {
-          "user_condition": {
-            "user_type": "internal"
-          }
-        }
-      ]
+      "user_condition": {}
     },
     "update": {
-      "$or": [
-        {
-          "user_condition": {
-            "user_type": "internal"
-          }
-        }
-      ]
+      "user_condition": {
+        "user_type": "internal"
+      }
     },
     "delete": {
-      "$or": [
-        {
-          "user_condition": {
-            "user_type": "internal"
-          }
-        }
-      ]
+      "user_condition": {
+        "user_type": "internal"
+      }
     }
   }
 }
