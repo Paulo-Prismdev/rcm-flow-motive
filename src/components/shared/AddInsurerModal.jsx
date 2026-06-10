@@ -31,7 +31,7 @@ export default function AddInsurerModal({ isOpen, onClose, onSuccess }) {
           <h2 className="text-xl font-bold">Add New Insurer</h2>
           <Button onClick={handleClose} variant="ghost" size="icon"><X className="w-5 h-5" /></Button>
         </div>
-        <form onSubmit={(e) => { e.preventDefault(); createMutation.mutate(formData); }} className="space-y-4">
+        <form onSubmit={(e) => { e.preventDefault(); e.stopPropagation(); createMutation.mutate(formData); }} className="space-y-4">
           <div>
             <label className="block text-sm text-muted-foreground mb-1">Insurer Name *</label>
             <Input value={formData.name} onChange={(e) => set('name', e.target.value)} className="neomorph-inset" required autoFocus />
