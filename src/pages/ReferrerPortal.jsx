@@ -15,6 +15,7 @@ import ReferrerLayout from '../components/referrer/ReferrerLayout';
 import ReferrerClaimDetail from '../components/referrer/ReferrerClaimDetail';
 import ReferrerDashboard from '../components/referrer/ReferrerDashboard';
 import FeedbackModal from '../components/shared/FeedbackModal';
+import { getReferrerClaims } from '@/functions/getReferrerClaims';
 
 export default function ReferrerPortal() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -58,15 +59,11 @@ export default function ReferrerPortal() {
   const { data: claims = [], isLoading: claimsLoading } = useQuery({
     queryKey: ['referrerClaims', referrerId, companyId],
     queryFn: async () => {
-      const referrerRes = await base44.asServiceRole.entities.Claim.filter({
-        $or: [
-          { referrer_id: referrerId },
-          { referrer_id: companyId }
-        ]
-      }, '-created_date', 5000);
-      return referrerRes || [];
+      const res = await getReferrerClaims({});
+      return res.data?.claims || [];
     },
     enabled: isLinked,
+    staleTime: 0,
   });
 
   const { data: customStatuses = [] } = useQuery({

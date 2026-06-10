@@ -2,6 +2,7 @@ import React, { useMemo, useState, useEffect } from 'react';
 import { FileText, TrendingUp, Clock, CheckCircle } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
+import { getReferrerClaims } from '@/functions/getReferrerClaims';
 
 export default function ReferrerDashboard() {
   const [activeTab, setActiveTab] = React.useState('dashboard');
@@ -24,15 +25,11 @@ export default function ReferrerDashboard() {
   const { data: claims = [] } = useQuery({
     queryKey: ['referrerClaims', currentUser?.linked_referrer_id, currentUser?.company_id],
     queryFn: async () => {
-      const referrerRes = await base44.asServiceRole.entities.Claim.filter({
-        $or: [
-          { referrer_id: currentUser?.linked_referrer_id },
-          { referrer_id: currentUser?.company_id }
-        ]
-      }, '-created_date', 1000);
-      return referrerRes || [];
+      const res = await getReferrerClaims({});
+      return res.data?.claims || [];
     },
     enabled: !!(currentUser?.linked_referrer_id || currentUser?.company_id),
+    staleTime: 0,
   });
 
   // Calculate stats
