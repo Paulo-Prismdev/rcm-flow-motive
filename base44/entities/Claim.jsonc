@@ -3,38 +3,31 @@
   "type": "object",
   "properties": {
     "job_number": {
-      "type": "string",
-      "description": "Unique job number (e.g. CLM-0001)"
+      "type": "string"
     },
     "archived": {
       "type": "boolean",
-      "default": false,
-      "description": "Whether this claim is archived"
+      "default": false
     },
     "draft": {
       "type": "boolean",
-      "default": false,
-      "description": "Whether this claim is a draft (incomplete)"
+      "default": false
     },
     "reg": {
-      "type": "string",
-      "description": "Vehicle registration number"
+      "type": "string"
     },
     "job_status": {
-      "type": "string",
-      "description": "Primary status of the claim"
+      "type": "string"
     },
     "secondary_status": {
-      "type": "string",
-      "description": "Secondary status for additional tracking"
+      "type": "string"
     },
     "job_statuses": {
       "type": "array",
       "items": {
         "type": "string"
       },
-      "default": [],
-      "description": "Array of job statuses (multi-select)"
+      "default": []
     },
     "claim_type": {
       "type": "string",
@@ -50,16 +43,13 @@
     },
     "loss_date": {
       "type": "string",
-      "format": "date",
-      "description": "Date when the incident/loss occurred"
+      "format": "date"
     },
     "loss_time": {
-      "type": "string",
-      "description": "Time when the incident/loss occurred (HH:MM format)"
+      "type": "string"
     },
     "incident_location": {
-      "type": "string",
-      "description": "Location where the incident occurred"
+      "type": "string"
     },
     "vehicle_use": {
       "type": "string",
@@ -67,8 +57,7 @@
         "Business",
         "Social",
         "Commuting"
-      ],
-      "description": "Use of vehicle at time of incident"
+      ]
     },
     "courtesy_car_required": {
       "type": "boolean"
@@ -146,8 +135,7 @@
       "type": "string"
     },
     "referrer_id": {
-      "type": "string",
-      "description": "ID of the Referrer or Company entity"
+      "type": "string"
     },
     "referrer_ref": {
       "type": "string"
@@ -165,8 +153,7 @@
       "type": "string"
     },
     "client_id": {
-      "type": "string",
-      "description": "ID of the Client entity"
+      "type": "string"
     },
     "client_phone": {
       "type": "string"
@@ -382,8 +369,7 @@
       "type": "string"
     },
     "bodyshop_id": {
-      "type": "string",
-      "description": "ID of the Bodyshop entity"
+      "type": "string"
     },
     "bodyshop_email": {
       "type": "string"
@@ -594,7 +580,6 @@
       "items": {
         "type": "string"
       },
-      "description": "Image attachments for this claim",
       "default": []
     },
     "last_updated_at": {
@@ -685,22 +670,76 @@
           }
         },
         {
-          "data.referrer_id": "{{user.linked_referrer_id}}"
+          "user_condition": {
+            "role": "admin"
+          }
         },
         {
-          "data.bodyshop_id": "{{user.linked_bodyshop_id}}"
+          "user_condition": {
+            "role": "super_admin"
+          }
         },
         {
-          "data.client_id": "{{user.linked_client_id}}"
+          "user_condition": {
+            "role": "company_admin"
+          }
         },
         {
-          "data.referrer_id": "{{user.company_id}}"
+          "$and": [
+            {
+              "user_condition": {
+                "user_type": "referrer"
+              }
+            },
+            {
+              "$or": [
+                {
+                  "data.referrer_id": "{{user.linked_referrer_id}}"
+                },
+                {
+                  "data.referrer_id": "{{user.company_id}}"
+                }
+              ]
+            }
+          ]
         },
         {
-          "data.bodyshop_id": "{{user.company_id}}"
+          "$and": [
+            {
+              "user_condition": {
+                "user_type": "bodyshop"
+              }
+            },
+            {
+              "$or": [
+                {
+                  "data.bodyshop_id": "{{user.linked_bodyshop_id}}"
+                },
+                {
+                  "data.bodyshop_id": "{{user.company_id}}"
+                }
+              ]
+            }
+          ]
         },
         {
-          "data.client_id": "{{user.company_id}}"
+          "$and": [
+            {
+              "user_condition": {
+                "user_type": "client"
+              }
+            },
+            {
+              "$or": [
+                {
+                  "data.client_id": "{{user.linked_client_id}}"
+                },
+                {
+                  "data.client_id": "{{user.company_id}}"
+                }
+              ]
+            }
+          ]
         }
       ]
     },

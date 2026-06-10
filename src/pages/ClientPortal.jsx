@@ -62,8 +62,8 @@ export default function ClientPortal() {
   useEffect(() => {
     if (availableStatuses.length > 0) {
       const collapsed = {};
-      availableStatuses.forEach(s => { collapsed[s] = true; });
-      collapsed['__other__'] = true;
+      availableStatuses.forEach(s => { collapsed[s] = false; });
+      collapsed['__other__'] = false;
       setCollapsedGroups(collapsed);
     }
   }, [availableStatuses.length]);
