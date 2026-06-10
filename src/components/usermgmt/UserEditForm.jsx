@@ -29,6 +29,11 @@ export default function UserEditForm({ user, onSave, onCancel, isSaving }) {
     queryFn: () => base44.entities.Company.list('name'),
   });
 
+  const { data: clients = [] } = useQuery({
+    queryKey: ['clients'],
+    queryFn: () => base44.entities.Client.list('name'),
+  });
+
   const handleSubmit = (e) => {
     e.preventDefault();
     onSave(formData);
@@ -93,26 +98,42 @@ export default function UserEditForm({ user, onSave, onCancel, isSaving }) {
         </label>
       </div>
 
-      <div>
-         <label className="block text-xs font-medium text-foreground-muted mb-1">Company *</label>
-         {companies.length === 0 ? (
-           <div className="w-full px-3 py-2 rounded-lg text-sm border border-yellow-500/30 bg-yellow-500/5 flex items-start gap-2">
-             <AlertCircle className="w-4 h-4 text-yellow-600 flex-shrink-0 mt-0.5" />
-             <span className="text-yellow-700 dark:text-yellow-500 text-xs">No companies available. Check user permissions.</span>
-           </div>
-         ) : (
-           <select
-             value={formData.company_id}
-             onChange={(e) => setFormData(p => ({ ...p, company_id: e.target.value }))}
-             className="neomorph-inset w-full px-3 py-2 rounded-lg text-sm"
-           >
-             <option value="">— Select Company —</option>
-             {companies.map(c => (
-               <option key={c.id} value={c.id}>{c.name}</option>
-             ))}
-           </select>
-         )}
-       </div>
+      {formData.user_type === 'client' ? (
+        <div>
+          <label className="block text-xs font-medium text-foreground-muted mb-1">Linked Client *</label>
+          <select
+            value={formData.company_id}
+            onChange={(e) => setFormData(p => ({ ...p, company_id: e.target.value }))}
+            className="neomorph-inset w-full px-3 py-2 rounded-lg text-sm"
+          >
+            <option value="">— Select Client —</option>
+            {clients.map(c => (
+              <option key={c.id} value={c.id}>{c.name}</option>
+            ))}
+          </select>
+        </div>
+      ) : (
+        <div>
+          <label className="block text-xs font-medium text-foreground-muted mb-1">Company *</label>
+          {companies.length === 0 ? (
+            <div className="w-full px-3 py-2 rounded-lg text-sm border border-yellow-500/30 bg-yellow-500/5 flex items-start gap-2">
+              <AlertCircle className="w-4 h-4 text-yellow-600 flex-shrink-0 mt-0.5" />
+              <span className="text-yellow-700 dark:text-yellow-500 text-xs">No companies available. Check user permissions.</span>
+            </div>
+          ) : (
+            <select
+              value={formData.company_id}
+              onChange={(e) => setFormData(p => ({ ...p, company_id: e.target.value }))}
+              className="neomorph-inset w-full px-3 py-2 rounded-lg text-sm"
+            >
+              <option value="">— Select Company —</option>
+              {companies.map(c => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+            </select>
+          )}
+        </div>
+      )}
 
       <div className="flex justify-end gap-2 pt-2">
         <Button type="button" onClick={onCancel} className="neomorph-flat px-3 py-1.5 text-sm">
