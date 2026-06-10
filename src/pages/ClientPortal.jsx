@@ -41,7 +41,7 @@ export default function ClientPortal() {
 
   const { data: claims = [], isLoading: claimsLoading } = useQuery({
     queryKey: ['clientClaims', companyId],
-    queryFn: () => base44.entities.Claim.list('-created_date', 5000),
+    queryFn: () => base44.entities.Claim.filter({ client_id: companyId }, '-created_date', 5000),
     enabled: !!companyId,
   });
 
