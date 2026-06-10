@@ -175,20 +175,20 @@ export default function Layout({ children, currentPageName }) {
     return <RepairerLayout>{children}</RepairerLayout>;
   }
   if (isReferrerUserLayout && currentPageName === 'ReferrerPortal') {
-    return children;
+    return <StatusConfigProvider>{children}</StatusConfigProvider>;
   }
   if (isClientUserLayout && currentPageName === 'ClientPortal') {
-    return children;
+    return <StatusConfigProvider>{children}</StatusConfigProvider>;
   }
   // Internal users see the main app
   if (isInternalUserLayout) {
-    return children;
+    return <StatusConfigProvider>{children}</StatusConfigProvider>;
   }
 
   return null;
 
   return (
-    <StatusConfigProvider>
+    <>
       <UserTypeFixer />
       <GlobalSearch open={searchOpen} onOpenChange={setSearchOpen} />
       {isInternalUser &&
@@ -394,6 +394,6 @@ export default function Layout({ children, currentPageName }) {
           </main>
         </div>
       </div>
-    </StatusConfigProvider>);
+    </>);
 
 }
