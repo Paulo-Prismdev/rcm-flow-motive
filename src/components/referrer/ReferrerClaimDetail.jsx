@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Button } from "@/components/ui/button";
@@ -33,20 +33,38 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-function DetailRow({ label, value, isCurrency = false, isDate = false, isStatus = false }) {
+// Fields considered required per section
+const SECTION_REQUIRED_FIELDS = {
+  status:        ['claim_type', 'loss_date', 'circumstances'],
+  client:        ['client_name', 'client_phone', 'client_email', 'client_address_line_1', 'client_postcode'],
+  vehicle:       ['make_model', 'vehicle_colour', 'vehicle_type'],
+  vehicleDamage: ['vehicle_damage'],
+  insurance:     ['insurer', 'claim_ref', 'policy_number'],
+  dates:         ['date_received'],
+  bodyshop:      ['bodyshop'],
+};
+
+function isEmpty(val) {
+  return val === null || val === undefined || val === '' || (Array.isArray(val) && val.length === 0);
+}
+
+function DetailRow({ label, value, isCurrency = false, isDate = false, isStatus = false, missing = false }) {
   let displayValue = value;
   if (isCurrency && typeof value === 'number') {
     displayValue = `£${value.toFixed(2)}`;
   } else if (isDate && value) {
     try { displayValue = format(new Date(value), 'dd/MM/yyyy'); } catch (e) { displayValue = 'Invalid Date'; }
   }
-  if (value === null || typeof value === 'undefined' || value === '') displayValue = '-';
+  if (isEmpty(value)) displayValue = '-';
 
   return (
-    <div className="py-3 px-4 rounded-lg hover:bg-surface-hover transition-colors">
-      <div className="text-xs font-semibold text-foreground-muted mb-1">{label}</div>
+    <div className={`py-3 px-4 rounded-lg transition-colors ${missing ? 'bg-amber-50 dark:bg-amber-900/15 border border-amber-200 dark:border-amber-700/50' : 'hover:bg-surface-hover'}`}>
+      <div className="flex items-center gap-1.5 mb-1">
+        <span className="text-xs font-semibold text-foreground-muted">{label}</span>
+        {missing && <span className="inline-block w-1.5 h-1.5 rounded-full bg-amber-400 flex-shrink-0" />}
+      </div>
       <div className="text-sm font-medium">
-        {isStatus ? <StatusBadge status={displayValue} /> : displayValue}
+        {isStatus ? <StatusBadge status={displayValue} /> : <span className={missing ? 'text-amber-600 dark:text-amber-400 italic text-xs' : ''}>{missing ? 'Not filled in' : displayValue}</span>}
       </div>
     </div>
   );
@@ -113,6 +131,15 @@ export default function ReferrerClaimDetail({ claim, onClose }) {
     queryClient.invalidateQueries({ queryKey: ['claim', claim.id] });
   };
 
+  const incompleteSections = useMemo(() => {
+    return Object.entries(SECTION_REQUIRED_FIELDS).reduce((acc, [sectionId, fields]) => {
+      if (fields.some(f => isEmpty(claim[f]))) acc.add(sectionId);
+      return acc;
+    }, new Set());
+  }, [claim]);
+
+  const m = (field) => isEmpty(claim[field]);
+
   const allFileUrls = claim.file_urls || [];
   const allImageUrls = claim.image_urls || [];
 
@@ -131,17 +158,20 @@ export default function ReferrerClaimDetail({ claim, onClose }) {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
               <DetailRow label="Job Status" value={claim.job_status} isStatus />
               {claim.secondary_status && <DetailRow label="Secondary Status" value={claim.secondary_status} isStatus />}
-              <DetailRow label="Claim Type" value={claim.claim_type} />
-              <DetailRow label="Date of Loss" value={claim.loss_date} isDate />
+              <DetailRow label="Claim Type" value={claim.claim_type} missing={m('claim_type')} />
+              <DetailRow label="Date of Loss" value={claim.loss_date} isDate missing={m('loss_date')} />
               <DetailRow label="Time of Loss" value={claim.loss_time} />
               <DetailRow label="Use of Vehicle" value={claim.vehicle_use} />
               <DetailRow label="Courtesy Car Required" value={claim.courtesy_car_required ? 'Yes' : 'No'} />
             </div>
-            <div className="mt-2 py-3 px-4 rounded-lg glass-inset">
+            <div className={`mt-2 py-3 px-4 rounded-lg ${m('circumstances') ? 'bg-amber-50 dark:bg-amber-900/15 border border-amber-200 dark:border-amber-700/50' : 'glass-inset'}`}>
               <div className="text-xs font-semibold text-foreground-muted mb-2">Incident Location</div>
               <div className="text-sm font-medium mb-3">{claim.incident_location || '-'}</div>
-              <div className="text-xs font-semibold text-foreground-muted mb-2">Circumstances</div>
-              <div className="text-sm leading-relaxed whitespace-pre-wrap">{claim.circumstances || '-'}</div>
+              <div className="flex items-center gap-1.5 mb-2">
+                <span className="text-xs font-semibold text-foreground-muted">Circumstances</span>
+                {m('circumstances') && <span className="inline-block w-1.5 h-1.5 rounded-full bg-amber-400" />}
+              </div>
+              <div className={`text-sm leading-relaxed whitespace-pre-wrap ${m('circumstances') ? 'text-amber-600 dark:text-amber-400 italic' : ''}`}>{claim.circumstances || 'Not filled in'}</div>
             </div>
           </div>
         );
@@ -151,22 +181,25 @@ export default function ReferrerClaimDetail({ claim, onClose }) {
           <div className="neomorph-flat p-4 md:p-6">
             <div className="flex items-center gap-3 mb-4"><User className="w-5 h-5 text-gold" /><h3 className="font-bold">Client Details</h3></div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
-              <DetailRow label="Client Name" value={claim.client_name} />
-              <DetailRow label="Client Phone" value={claim.client_phone} />
-              <DetailRow label="Client Email" value={claim.client_email} />
+              <DetailRow label="Client Name" value={claim.client_name} missing={m('client_name')} />
+              <DetailRow label="Client Phone" value={claim.client_phone} missing={m('client_phone')} />
+              <DetailRow label="Client Email" value={claim.client_email} missing={m('client_email')} />
               <DetailRow label="Driver/Contact" value={claim.driver_contact_name} />
               <DetailRow label="VAT Status" value={claim.client_vat_status} />
               <DetailRow label="Business Division" value={claim.business_division} />
             </div>
-            <div className="mt-2 py-3 px-4 rounded-lg glass-inset">
-              <div className="text-xs font-semibold text-foreground-muted mb-2">Address</div>
+            <div className={`mt-2 py-3 px-4 rounded-lg ${(m('client_address_line_1') || m('client_postcode')) ? 'bg-amber-50 dark:bg-amber-900/15 border border-amber-200 dark:border-amber-700/50' : 'glass-inset'}`}>
+              <div className="flex items-center gap-1.5 mb-2">
+                <span className="text-xs font-semibold text-foreground-muted">Address</span>
+                {(m('client_address_line_1') || m('client_postcode')) && <span className="inline-block w-1.5 h-1.5 rounded-full bg-amber-400" />}
+              </div>
               <div className="text-sm leading-relaxed space-y-0.5">
                 {claim.client_address_line_1 && <div>{claim.client_address_line_1}</div>}
                 {claim.client_address_line_2 && <div>{claim.client_address_line_2}</div>}
                 {claim.client_town && <div>{claim.client_town}</div>}
                 {claim.client_county && <div>{claim.client_county}</div>}
                 {claim.client_postcode && <div>{claim.client_postcode}</div>}
-                {!claim.client_address_line_1 && !claim.client_town && !claim.client_postcode && '-'}
+                {!claim.client_address_line_1 && !claim.client_town && !claim.client_postcode && <span className="text-amber-600 dark:text-amber-400 italic">Not filled in</span>}
               </div>
             </div>
           </div>
@@ -179,11 +212,11 @@ export default function ReferrerClaimDetail({ claim, onClose }) {
             <div className="mb-6">
               <h4 className="text-sm font-semibold text-gray-600 mb-3">Basic Information</h4>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
-                <DetailRow label="Make/Model" value={claim.make_model} />
-                <DetailRow label="Colour" value={claim.vehicle_colour} />
+                <DetailRow label="Make/Model" value={claim.make_model} missing={m('make_model')} />
+                <DetailRow label="Colour" value={claim.vehicle_colour} missing={m('vehicle_colour')} />
                 <DetailRow label="Fuel Type" value={claim.vehicle_fuel_type} />
                 <DetailRow label="Year of Manufacture" value={claim.vehicle_year_of_manufacture} />
-                <DetailRow label="Vehicle Type" value={claim.vehicle_type} />
+                <DetailRow label="Vehicle Type" value={claim.vehicle_type} missing={m('vehicle_type')} />
               </div>
             </div>
             <div>
@@ -206,11 +239,14 @@ export default function ReferrerClaimDetail({ claim, onClose }) {
               <DetailRow label="Courtesy Car Needed" value={claim.courtesy_car_required ? 'Yes' : 'No'} />
               <DetailRow label="Undriveable / Drivable" value={claim.unroadworthy ? 'Undriveable' : 'Drivable'} />
             </div>
-            <div className="mt-2 py-3 px-4 rounded-lg glass-inset">
+            <div className={`mt-2 py-3 px-4 rounded-lg ${m('vehicle_damage') ? 'bg-amber-50 dark:bg-amber-900/15 border border-amber-200 dark:border-amber-700/50' : 'glass-inset'}`}>
               <div className="text-xs font-semibold text-foreground-muted mb-2">Vehicle Location</div>
               <div className="text-sm mb-3">{claim.vehicle_location || '-'}</div>
-              <div className="text-xs font-semibold text-foreground-muted mb-2">Damage Description</div>
-              <div className="text-sm leading-relaxed whitespace-pre-wrap">{claim.vehicle_damage || '-'}</div>
+              <div className="flex items-center gap-1.5 mb-2">
+                <span className="text-xs font-semibold text-foreground-muted">Damage Description</span>
+                {m('vehicle_damage') && <span className="inline-block w-1.5 h-1.5 rounded-full bg-amber-400" />}
+              </div>
+              <div className={`text-sm leading-relaxed whitespace-pre-wrap ${m('vehicle_damage') ? 'text-amber-600 dark:text-amber-400 italic' : ''}`}>{claim.vehicle_damage || 'Not filled in'}</div>
             </div>
           </div>
         );
@@ -220,9 +256,9 @@ export default function ReferrerClaimDetail({ claim, onClose }) {
           <div className="neomorph-flat p-4 md:p-6">
             <div className="flex items-center gap-3 mb-4"><Shield className="w-5 h-5 text-gold" /><h3 className="font-bold">Insurance Details</h3></div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
-              <DetailRow label="Insurer" value={claim.insurer} />
-              <DetailRow label="Claim Ref" value={claim.claim_ref} />
-              <DetailRow label="Policy Number" value={claim.policy_number} />
+              <DetailRow label="Insurer" value={claim.insurer} missing={m('insurer')} />
+              <DetailRow label="Claim Ref" value={claim.claim_ref} missing={m('claim_ref')} />
+              <DetailRow label="Policy Number" value={claim.policy_number} missing={m('policy_number')} />
               <DetailRow label="Policy Excess" value={claim.policy_excess} isCurrency />
             </div>
           </div>
@@ -233,7 +269,7 @@ export default function ReferrerClaimDetail({ claim, onClose }) {
           <div className="neomorph-flat p-4 md:p-6">
             <div className="flex items-center gap-3 mb-4"><Calendar className="w-5 h-5 text-gold" /><h3 className="font-bold">Key Dates</h3></div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
-              <DetailRow label="Date Received" value={claim.date_received} isDate />
+              <DetailRow label="Date Received" value={claim.date_received} isDate missing={m('date_received')} />
               <DetailRow label="Loss Date" value={claim.loss_date} isDate />
               <DetailRow label="Estimate Completed" value={claim.estimate_completed} isDate />
               <DetailRow label="Authority Received" value={claim.authority_received} isDate />
@@ -251,7 +287,7 @@ export default function ReferrerClaimDetail({ claim, onClose }) {
           <div className="neomorph-flat p-4 md:p-6">
             <div className="flex items-center gap-3 mb-4"><Wrench className="w-5 h-5 text-gold" /><h3 className="font-bold">Bodyshop Details</h3></div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
-              <DetailRow label="Bodyshop" value={claim.bodyshop} />
+              <DetailRow label="Bodyshop" value={claim.bodyshop} missing={m('bodyshop')} />
               <DetailRow label="Bodyshop Email" value={claim.bodyshop_email} />
               <DetailRow label="Authorising Party" value={claim.authorising_party} />
             </div>
@@ -385,8 +421,11 @@ export default function ReferrerClaimDetail({ claim, onClose }) {
                     onSelect={() => setSelectedSection(section.id)}
                     className={selectedSection === section.id ? 'bg-muted font-semibold' : ''}
                   >
-                    <section.icon className="w-4 h-4 mr-2" />
-                    {section.label}
+                    <section.icon className="w-4 h-4 mr-2 flex-shrink-0" />
+                    <span className="flex-1">{section.label}</span>
+                    {incompleteSections.has(section.id) && (
+                      <span className="ml-2 w-2 h-2 rounded-full bg-amber-400 flex-shrink-0" />
+                    )}
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuContent>
