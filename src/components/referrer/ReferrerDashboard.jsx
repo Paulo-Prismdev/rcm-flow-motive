@@ -28,7 +28,7 @@ export default function ReferrerDashboard() {
       const res = await getReferrerClaims({});
       return res.data?.claims || [];
     },
-    enabled: !!(currentUser?.linked_referrer_id || currentUser?.company_id),
+    enabled: !!currentUser && !!(currentUser?.linked_referrer_id || currentUser?.company_id),
     staleTime: 0,
   });
 
