@@ -60,6 +60,8 @@ export default function ReferrerPortal() {
   const { data: currentUser } = useQuery({
     queryKey: ['currentUser'],
     queryFn: () => base44.auth.me(),
+    refetchOnMount: 'stale',
+    staleTime: 0,
   });
 
   const referrerId = currentUser?.linked_referrer_id;

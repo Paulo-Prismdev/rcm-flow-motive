@@ -58,6 +58,8 @@ export default function ClientPortal() {
   const { data: currentUser } = useQuery({
     queryKey: ['currentUser'],
     queryFn: () => base44.auth.me(),
+    refetchOnMount: 'stale',
+    staleTime: 0,
   });
 
   const companyId = currentUser?.company_id;
