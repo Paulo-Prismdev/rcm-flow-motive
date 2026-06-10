@@ -165,7 +165,7 @@ export default function UserManagement() {
                            value={editData.full_name}
                            onChange={(e) => setEditData((p) => ({ ...p, full_name: e.target.value }))}
                            placeholder="Full name"
-                           className="text-xs border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-800 dark:text-white w-32"
+                           className="text-xs border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-800 text-gray-900 dark:text-white w-32"
                          />
                        ) : (
                          <span className="font-medium text-gray-900 dark:text-white truncate">{user.full_name || "—"}</span>
@@ -178,8 +178,8 @@ export default function UserManagement() {
                         <select
                           value={editData.user_type}
                           onChange={(e) => setEditData((p) => ({ ...p, user_type: e.target.value }))}
-                          className="text-xs border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-800 dark:text-white"
-                        >
+                          className="text-xs border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                          >
                           {USER_TYPES.map((t) => (
                             <option key={t} value={t}>{t}</option>
                           ))}
@@ -193,8 +193,8 @@ export default function UserManagement() {
                         <select
                           value={editData.role}
                           onChange={(e) => setEditData((p) => ({ ...p, role: e.target.value }))}
-                          className="text-xs border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-800 dark:text-white"
-                        >
+                          className="text-xs border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                          >
                           {ROLES.map((r) => (
                             <option key={r} value={r}>{r}</option>
                           ))}
@@ -210,7 +210,7 @@ export default function UserManagement() {
                         <select
                            value={editData.company_id}
                            onChange={(e) => setEditData((p) => ({ ...p, company_id: e.target.value }))}
-                           className="text-xs border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-800 dark:text-white"
+                           className="text-xs border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                          >
                            <option value="">— None —</option>
                            {user.user_type === "referrer" ? (
