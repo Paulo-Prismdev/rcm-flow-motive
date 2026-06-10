@@ -72,12 +72,19 @@ export default function Layout({ children, currentPageName }) {
     return () => observer.disconnect();
   }, []);
 
-  const { data: currentUser } = useQuery({
+  const { data: currentUser, refetch } = useQuery({
     queryKey: ['currentUser'],
     queryFn: () => base44.auth.me(),
-    refetchOnMount: 'stale',
+    refetchOnMount: 'always',
     staleTime: 0,
   });
+
+  // Refetch user when navigating to portal pages to ensure fresh user type
+  useEffect(() => {
+    if (currentPageName === 'ReferrerPortal' || currentPageName === 'ClientPortal' || currentPageName === 'RepairerPortal') {
+      refetch();
+    }
+  }, [currentPageName]);
 
   const companyLogo = 'https://media.base44.com/images/public/68ee39fb8915b1b539e13c59/b2cb057e2_RCMAutomotiveLogoGreenAutomotivewithHLights.jpg';
 
@@ -118,6 +125,11 @@ export default function Layout({ children, currentPageName }) {
     const userAccess = currentUser.departments_access || [];
     return userAccess.includes(dept.permission);
   });
+
+  // Wait for user to load before redirect checks
+  if (!currentUser) {
+    return null;
+  }
 
   // Repairer/referrer routing
   if (currentUser?.user_type === 'bodyshop' && !isAdmin && currentPageName === 'RepairerPortal') {
