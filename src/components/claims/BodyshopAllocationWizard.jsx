@@ -388,17 +388,22 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
         bs_instructed: new Date().toISOString().split('T')[0],
       });
 
-      // Create notification for the bodyshop - use the bodyshop email as user_email
+      // Create notification for the bodyshop (best-effort — may fail for non-internal users)
       if (selectedBodyshop.email) {
-        await base44.entities.Notification.create({
-          user_email: selectedBodyshop.email,
-          title: 'New Job Instruction',
-          message: `A new job has been allocated to your bodyshop: ${claim.job_number || claim.reg} - ${claim.client_name || 'Customer'}`,
-          type: 'assignment',
-          related_item_type: 'Claim',
-          related_item_id: claim.id,
-          is_read: false,
-        });
+        try {
+          await base44.entities.Notification.create({
+            user_email: selectedBodyshop.email,
+            title: 'New Job Instruction',
+            message: `A new job has been allocated to your bodyshop: ${claim.job_number || claim.reg} - ${claim.client_name || 'Customer'}`,
+            type: 'assignment',
+            related_item_type: 'Claim',
+            related_item_id: claim.id,
+            is_read: false,
+          });
+        } catch (notifError) {
+          // Notification creation is non-critical — allocation still completes
+          console.warn('Could not create bodyshop notification:', notifError.message);
+        }
       }
 
       queryClient.invalidateQueries({ queryKey: ['claims'] });
