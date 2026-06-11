@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.7.1';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 import { jsPDF } from 'npm:jspdf@2.5.1';
 
 Deno.serve(async (req) => {
@@ -14,366 +14,291 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Forbidden: Admin or internal users only' }, { status: 403 });
     }
 
-    const { claimId, templateType, templateConfigId } = await req.json();
+    const { claimId } = await req.json();
 
-    if (!claimId || !templateType) {
-      return Response.json({ error: 'Missing claimId or templateType' }, { status: 400 });
+    if (!claimId) {
+      return Response.json({ error: 'Missing claimId' }, { status: 400 });
     }
 
-    // Fetch claim data
-    const claim = await base44.entities.Claim.get(claimId);
-
+    const claim = await base44.asServiceRole.entities.Claim.get(claimId);
     if (!claim) {
       return Response.json({ error: 'Claim not found' }, { status: 404 });
     }
 
-    // Fetch custom template config if provided
-    let templateConfig = null;
-    if (templateConfigId) {
-      try {
-        templateConfig = await base44.entities.PdfTemplateConfig.get(templateConfigId);
-      } catch (error) {
-        console.log('Template config not found, using defaults');
-      }
-    }
-
-    // Default sections configuration
-    const defaultSections = [
-      {
-        section_id: 'repairer',
-        section_name: 'Repairer & Client Details',
-        enabled: true,
-        order: 1,
-        fields: [
-          { field_id: 'bodyshop', field_label: 'Appointed Repairer', enabled: true },
-          { field_id: 'client_name', field_label: 'Client Name', enabled: true },
-          { field_id: 'client_address', field_label: 'Client Address', enabled: true },
-          { field_id: 'driver_contact_name', field_label: 'Contact Name', enabled: true },
-          { field_id: 'client_email', field_label: 'Email Address', enabled: true },
-          { field_id: 'client_phone', field_label: 'Contact Number', enabled: true },
-          { field_id: 'client_vat_status', field_label: 'Clients VAT Status', enabled: true }
-        ]
-      },
-      {
-        section_id: 'vehicle',
-        section_name: 'Vehicle Details',
-        enabled: true,
-        order: 2,
-        fields: [
-          { field_id: 'make_model', field_label: 'Vehicle Make & Model', enabled: true },
-          { field_id: 'reg', field_label: 'Vehicle Registration', enabled: true },
-          { field_id: 'vehicle_location', field_label: 'Vehicle Location', enabled: true },
-          { field_id: 'vehicle_damage', field_label: 'Vehicle Damage', enabled: true },
-          { field_id: 'recovery_required', field_label: 'Urgent Recovery Required?', enabled: true },
-          { field_id: 'unroadworthy', field_label: 'Vehicle Unroadworthy', enabled: true },
-          { field_id: 'courtesy_car_required', field_label: 'Courtesy Car Required?', enabled: true }
-        ]
-      },
-      {
-        section_id: 'insurance',
-        section_name: 'Insurance Details',
-        enabled: true,
-        order: 3,
-        fields: [
-          { field_id: 'insurer', field_label: 'Insurer', enabled: true },
-          { field_id: 'claim_ref', field_label: 'Claim Number', enabled: true },
-          { field_id: 'policy_number', field_label: 'Policy Number', enabled: true },
-          { field_id: 'send_estimate_email', field_label: 'Email Estimate to', enabled: true },
-          { field_id: 'audatex_code', field_label: 'Audatex Code', enabled: true },
-          { field_id: 'policy_excess', field_label: 'Excess', enabled: true }
-        ]
-      }
-    ];
-
-    // Use custom sections if available, otherwise use defaults
-    const sectionsConfig = templateConfig?.sections_config || defaultSections;
-
-    // Create PDF
     const doc = new jsPDF();
-    doc.setFont('times', 'normal'); // Closest to Palatino
-
-    // Define margins
-    const leftMargin = 20;
-    const rightMargin = 190;
+    const leftMargin = 15;
+    const rightMargin = 195;
+    const pageWidth = 210;
     const maxWidth = rightMargin - leftMargin;
 
-    // Helper function to format boolean to Yes/No
-    const formatBoolean = (value) => value ? 'Yes' : 'No';
+    // ── Helpers ──
+    const formatBoolean = (v) => (v ? 'Yes' : 'No');
+    const today = new Date().toLocaleDateString('en-GB');
 
-    // Get field value from claim
-    const getFieldValue = (fieldId) => {
-      if (fieldId === 'client_address') {
-        return [
-          claim.client_address_line_1,
-          claim.client_address_line_2,
-          claim.client_town,
-          claim.client_postcode
-        ].filter(Boolean).join(', ') || 'N/A';
-      }
-      
-      const value = claim[fieldId];
-      
-      if (typeof value === 'boolean') {
-        return formatBoolean(value);
-      }
-      
-      if (fieldId === 'policy_excess' && value) {
-        return `GBP ${Number(value).toFixed(2)}`;
-      }
-      
-      return value || 'N/A';
+    const clientAddress = [
+      claim.client_address_line_1,
+      claim.client_address_line_2,
+      claim.client_town,
+      claim.client_county,
+      claim.client_postcode
+    ].filter(Boolean).join(', ') || 'N/A';
+
+    const fieldMap = {
+      instruction_date: today,
+      claim_type: claim.claim_type || 'N/A',
+      repairer: claim.bodyshop || 'N/A',
+      client_name: claim.client_name || 'N/A',
+      client_address: clientAddress,
+      driver_contact_name: claim.driver_contact_name || claim.client_name || 'N/A',
+      client_email: claim.client_email || 'N/A',
+      client_phone: claim.client_phone || 'N/A',
+      client_vat_status: claim.client_vat_status || 'N/A',
+      make_model: claim.make_model || 'N/A',
+      reg: claim.reg || 'N/A',
+      vehicle_location: claim.vehicle_location || 'N/A',
+      vehicle_damage: claim.vehicle_damage || 'N/A',
+      recovery_required: formatBoolean(claim.recovery_required),
+      unroadworthy: formatBoolean(claim.unroadworthy),
+      courtesy_car_required: formatBoolean(claim.courtesy_car_required),
+      insurer: claim.insurer || 'N/A',
+      claim_ref: claim.claim_ref || 'N/A',
+      policy_number: claim.policy_number || 'N/A',
+      send_estimate_email: claim.send_estimate_email || 'N/A',
+      audatex_code: claim.audatex_code || 'N/A',
+      policy_excess: claim.policy_excess ? `£${Number(claim.policy_excess).toFixed(2)}` : 'N/A'
     };
 
-    // Header configuration
-    const headerConfig = templateConfig?.header_config || { show_logo: true, show_claim_type: true };
-    
-    // RCM Automotive header
-    if (headerConfig.show_logo) {
-      doc.setFontSize(18);
-      doc.setFont('helvetica', 'bold');
-      doc.setTextColor(0, 0, 0);
-      doc.text('RCM Automotive', leftMargin, 20);
-      console.log('✓ RCM Automotive header added');
-    }
+    // ── Draw a two-column table row ──
+    const drawTableRow = (label, value, y, colWidth, labelWidth) => {
+      const lw = labelWidth || 70;
+      const vw = colWidth - lw - 2;
 
-    // Add claim type header if enabled
-    if (headerConfig.show_claim_type) {
-      doc.setFontSize(18);
-      doc.setTextColor(220, 38, 38);
-      doc.setFont('helvetica', 'bold');
-      const headerText = headerConfig.custom_text || `---${claim.claim_type || 'Claim'}---`;
-      doc.text(headerText, 105, 45, { align: 'center' });
-    }
+      doc.setDrawColor(180, 180, 180);
+      doc.rect(leftMargin, y, colWidth, 8);
+      doc.rect(leftMargin, y, lw, 8);
 
-    // Claim Reference
-    doc.setFontSize(12);
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'bold');
+      doc.text(label, leftMargin + 2, y + 5.5);
+
+      doc.setFont('helvetica', 'normal');
+      const lines = doc.splitTextToSize(String(value), vw - 2);
+      doc.text(lines[0] || '', leftMargin + lw + 2, y + 5.5);
+
+      return y + 8 * Math.max(lines.length, 1);
+    };
+
+    // ── HEADER ──
+    // Logo placeholder / company name
+    doc.setFillColor(19, 29, 71); // RCM navy
+    doc.rect(leftMargin, 10, maxWidth, 14, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(13);
+    doc.setFont('helvetica', 'bold');
+    doc.text('RCM Automotive', leftMargin + 4, 20);
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Repairer Instruction', rightMargin - 2, 20, { align: 'right' });
+
+    // Claim reference bar
+    doc.setFillColor(240, 240, 240);
+    doc.rect(leftMargin, 25, maxWidth, 8, 'F');
     doc.setTextColor(0, 0, 0);
-    doc.setFont('helvetica', 'normal');
-    doc.text(`RCM Claim Reference - ${claim.job_number || 'N/A'}`, leftMargin, 55);
-
-    // Render sections based on configuration
-    let yPos = 65;
-    const lineHeight = 7;
-
-    // Sort sections by order
-    const sortedSections = [...sectionsConfig].sort((a, b) => a.order - b.order);
-
-    for (const section of sortedSections) {
-      if (!section.enabled) continue;
-
-      // Add section spacing
-      if (yPos > 65) {
-        yPos += 5;
-      }
-
-      doc.setFontSize(10);
-
-      // Render fields in this section
-      for (const field of section.fields) {
-        if (!field.enabled) continue;
-
-        // Check if we need a new page
-        if (yPos > 270) {
-          doc.addPage();
-          yPos = 20;
-        }
-
-        const label = field.custom_label || field.field_label;
-        const value = getFieldValue(field.field_id);
-
-        doc.setFont('helvetica', 'bold');
-        doc.text(`${label} -`, leftMargin, yPos);
-        doc.setFont('helvetica', 'normal');
-
-        // Handle multiline text
-        const valueLines = doc.splitTextToSize(value, maxWidth - 50);
-        doc.text(valueLines, leftMargin + 50, yPos);
-        yPos += lineHeight * Math.max(valueLines.length, 1);
-
-        // Add template-specific notes for certain fields
-        if (field.field_id === 'client_vat_status' || field.field_id === 'policy_excess') {
-          if (templateType === 'driversure') {
-            const note = 'HOWEVER, YOU MUST NOT TAKE OR DISCUSS THIS WITH THE DRIVER. THIS NEEDS TO BE INVOICED TO DRIVERSURE UK LIMITED & SENT TO DRIVERSURE FOR PAYMENT';
-            const noteLines = doc.splitTextToSize(note, maxWidth - 50);
-            doc.text(noteLines, leftMargin + 50, yPos);
-            yPos += lineHeight * noteLines.length;
-          } else if (templateType === 'orkin') {
-            const note = 'DO NOT APPROACH THE DRIVER - MUST BE INVOICED TO RCM AUTOMOTIVE LTD';
-            const noteLines = doc.splitTextToSize(note, maxWidth - 50);
-            doc.text(noteLines, leftMargin + 50, yPos);
-            yPos += lineHeight * noteLines.length;
-          }
-        }
-      }
-    }
-
-    // Add new page for invoice details
-    doc.addPage();
-    yPos = 20;
-
-    // Invoice Deductions (if enabled)
-    const invoiceConfig = templateConfig?.invoice_deductions || { show_section: true };
-    if (invoiceConfig.show_section) {
-      doc.setFillColor(245, 245, 245);
-      doc.rect(leftMargin, yPos, 80, 50, 'F');
-      doc.setDrawColor(200, 200, 200);
-      doc.rect(leftMargin, yPos, 80, 50, 'S');
-
-      doc.setFontSize(11);
-      doc.setFont('helvetica', 'bold');
-      doc.text('Invoice Deductions', leftMargin + 5, yPos + 8);
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(10);
-
-      if (invoiceConfig.custom_deductions && invoiceConfig.custom_deductions.length > 0) {
-        let deductionY = yPos + 18;
-        for (const deduction of invoiceConfig.custom_deductions) {
-          doc.text(`- ${deduction.label}: ${deduction.value}`, leftMargin + 5, deductionY);
-          deductionY += 10;
-        }
-      } else {
-        doc.text(`- ${claim.referral_fee_repairer || 0}% Bottom Line Discount`, leftMargin + 5, yPos + 18);
-        doc.text('- Estimate Fee GBP 45', leftMargin + 5, yPos + 28);
-      }
-    }
-
-    // Payment Terms (if enabled)
-    const paymentConfig = templateConfig?.payment_terms || { show_section: true };
-    if (paymentConfig.show_section) {
-      doc.setFillColor(245, 245, 245);
-      doc.rect(110, yPos, 80, 50, 'F');
-      doc.setDrawColor(200, 200, 200);
-      doc.rect(110, yPos, 80, 50, 'S');
-
-      doc.setFontSize(11);
-      doc.setFont('helvetica', 'bold');
-      doc.text('Payment Terms', 115, yPos + 8);
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(10);
-      doc.setTextColor(0, 0, 0);
-      doc.setFillColor(255, 255, 0);
-      doc.rect(115, yPos + 12, 65, 8, 'F');
-      doc.setFont('helvetica', 'bold');
-      const paymentText = paymentConfig.terms_text || '24 HOUR PAYMENT via ACG';
-      doc.text(paymentText, 115, yPos + 18);
-      doc.setFont('helvetica', 'normal');
-    }
-
-    yPos += 60;
-
-    // Invoicing & Payment Section
-    doc.setFontSize(12);
+    doc.setFontSize(9);
     doc.setFont('helvetica', 'bold');
-    doc.text('INVOICING & PAYMENT', leftMargin, yPos);
-    yPos += 10;
+    doc.text(`RCM Claim Reference: ${claim.job_number || 'N/A'}`, leftMargin + 4, 30.5);
 
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'normal');
-    const line1 = doc.splitTextToSize('Your invoice MUST be addressed to the authorising party, as instructed on written authority.', maxWidth);
-    doc.text(line1, leftMargin, yPos);
-    yPos += 6 * line1.length;
+    let yPos = 38;
 
-    const line2 = doc.splitTextToSize('The invoice pack MUST include- Main Invoice, final authority & a signed satisfaction note.', maxWidth);
-    doc.text(line2, leftMargin, yPos);
-    yPos += 6 * line2.length;
-
-    const line3 = doc.splitTextToSize('RCM Automotive will process the invoice pack via ACG who will deduct both the BLD & Estimate Fee from the payment to you.', maxWidth);
-    doc.text(line3, leftMargin, yPos);
-    yPos += 6 * line3.length;
-
-    yPos += 3;
-
+    // ── SECTION 1: Client & Repairer Details ──
+    doc.setFillColor(19, 29, 71);
+    doc.rect(leftMargin, yPos, maxWidth, 7, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(9);
     doc.setFont('helvetica', 'bold');
-    doc.text('Invoice pack MUST be sent to -', leftMargin, yPos);
+    doc.text('Client & Repairer Details', leftMargin + 3, yPos + 5);
     yPos += 7;
 
-    doc.setTextColor(0, 0, 255);
-    doc.textWithLink('invoices@rcmautomotive.co.uk', leftMargin, yPos, { url: 'mailto:invoices@rcmautomotive.co.uk' });
     doc.setTextColor(0, 0, 0);
-    yPos += 10;
+    const clientRows = [
+      ['Instruction Date', fieldMap.instruction_date],
+      ['Claim Type', fieldMap.claim_type],
+      ['Repairer', fieldMap.repairer],
+      ['Client', fieldMap.client_name],
+      ['Client Address', fieldMap.client_address],
+      ['Contact Name', fieldMap.driver_contact_name],
+      ['Email Address', fieldMap.client_email],
+      ['Contact Number', fieldMap.client_phone],
+      ['Clients VAT Status', fieldMap.client_vat_status]
+    ];
 
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(220, 38, 38);
-    const warningLines = doc.splitTextToSize('PLEASE DO NOT SEND TO ANY OTHER PARTY WITHOUT PRIOR CONSENT', maxWidth);
-    doc.text(warningLines, leftMargin, yPos);
-    yPos += 7 * warningLines.length;
+    for (const [label, value] of clientRows) {
+      if (yPos > 270) { doc.addPage(); yPos = 15; }
+      yPos = drawTableRow(label, value, yPos, maxWidth, 55);
+    }
 
     yPos += 5;
 
+    // ── SECTION 2: Vehicle Details ──
+    doc.setFillColor(19, 29, 71);
+    doc.rect(leftMargin, yPos, maxWidth, 7, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Vehicle Details', leftMargin + 3, yPos + 5);
+    yPos += 7;
+
     doc.setTextColor(0, 0, 0);
+    const vehicleRows = [
+      ['Vehicle Make & Model', fieldMap.make_model],
+      ['Vehicle Registration Number', fieldMap.reg],
+      ['Vehicle Location', fieldMap.vehicle_location],
+      ['Vehicle Damage', fieldMap.vehicle_damage]
+    ];
+
+    for (const [label, value] of vehicleRows) {
+      if (yPos > 270) { doc.addPage(); yPos = 15; }
+      yPos = drawTableRow(label, value, yPos, maxWidth, 65);
+    }
+
+    yPos += 5;
+
+    // ── SECTION 3: Recovery / Courtesy ──
+    doc.setFillColor(19, 29, 71);
+    doc.rect(leftMargin, yPos, maxWidth, 7, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Recovery & Courtesy Details', leftMargin + 3, yPos + 5);
+    yPos += 7;
+
+    doc.setTextColor(0, 0, 0);
+    const recoveryRows = [
+      ['Urgent Recovery Required?', fieldMap.recovery_required],
+      ['Vehicle Unroadworthy', fieldMap.unroadworthy],
+      ['Courtesy Car Required?', fieldMap.courtesy_car_required]
+    ];
+
+    for (const [label, value] of recoveryRows) {
+      if (yPos > 270) { doc.addPage(); yPos = 15; }
+      yPos = drawTableRow(label, value, yPos, maxWidth, 65);
+    }
+
+    yPos += 5;
+
+    // ── SECTION 4: Insurance Details ──
+    doc.setFillColor(19, 29, 71);
+    doc.rect(leftMargin, yPos, maxWidth, 7, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Insurance Details', leftMargin + 3, yPos + 5);
+    yPos += 7;
+
+    doc.setTextColor(0, 0, 0);
+    const insuranceRows = [
+      ['Insurer', fieldMap.insurer],
+      ['Claim Number', fieldMap.claim_ref],
+      ['Policy Number', fieldMap.policy_number],
+      ['Email Estimate to', fieldMap.send_estimate_email],
+      ['Audatex Code', fieldMap.audatex_code],
+      ['Excess', fieldMap.policy_excess]
+    ];
+
+    for (const [label, value] of insuranceRows) {
+      if (yPos > 270) { doc.addPage(); yPos = 15; }
+      yPos = drawTableRow(label, value, yPos, maxWidth, 55);
+    }
+
+    yPos += 8;
+
+    // ── INVOICING SECTION ──
+    if (yPos > 220) { doc.addPage(); yPos = 15; }
+
+    doc.setFillColor(19, 29, 71);
+    doc.rect(leftMargin, yPos, maxWidth, 7, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Invoicing', leftMargin + 3, yPos + 5);
+    yPos += 10;
+
+    doc.setTextColor(0, 0, 0);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+
+    const invoicingLines = [
+      'Your invoice should be addressed and sent to the authorising party, as instructed on the authority and as per your usual practice.',
+      '',
+      'A copy of the final invoice, authority and collection note must be emailed to invoices@rcmautomotive.co.uk',
+      '',
+      'You will receive an invoice from RCM for 15% of the final repair figure and will be payable within 7 DAYS of invoice.'
+    ];
+
+    for (const line of invoicingLines) {
+      if (!line) { yPos += 3; continue; }
+      const wrapped = doc.splitTextToSize(line, maxWidth - 4);
+      doc.text(wrapped, leftMargin + 2, yPos);
+      yPos += 6 * wrapped.length;
+    }
+
+    yPos += 8;
+
+    // ── DISCLAIMER ──
     doc.setFont('helvetica', 'italic');
     doc.setFontSize(8);
-    const disclaimerLines = doc.splitTextToSize('*By accepting this repair instruction, you agree to the T&Cs within the supplied SLA provided with this instruction.', maxWidth);
-    doc.text(disclaimerLines, leftMargin, yPos);
+    doc.setTextColor(80, 80, 80);
+    const disclaimer = '*****By accepting this instruction, you agree to the T&Cs within the supplied SLA*****';
+    const disclaimerLines = doc.splitTextToSize(disclaimer, maxWidth);
+    doc.text(disclaimerLines, 105, yPos, { align: 'center' });
 
-    // Footer (if enabled)
-    const footerConfig = templateConfig?.footer_config || { show_footer: true };
-    if (footerConfig.show_footer) {
-      doc.setFillColor(0, 0, 0);
-      doc.rect(0, 280, 210, 17, 'F');
+    // ── FOOTER on all pages ──
+    const totalPages = doc.internal.getNumberOfPages();
+    for (let p = 1; p <= totalPages; p++) {
+      doc.setPage(p);
+      doc.setFillColor(19, 29, 71);
+      doc.rect(0, 282, 210, 15, 'F');
       doc.setTextColor(255, 255, 255);
-      doc.setFontSize(8);
+      doc.setFontSize(7.5);
       doc.setFont('helvetica', 'normal');
-      
-      const address = footerConfig.address || 'RCM Automotive';
-      const contact = footerConfig.contact_info || 'www.rcmautomotive.co.uk | info@rcmautomotive.co.uk';
-      
-      doc.text(address, 105, 287, { align: 'center' });
-      doc.text(contact, 105, 292, { align: 'center' });
+      doc.text('RCM Automotive Ltd', 105, 288, { align: 'center' });
+      doc.text('www.rcmautomotive.co.uk | info@rcmautomotive.co.uk', 105, 293, { align: 'center' });
     }
 
     console.log('PDF generation complete');
 
-    // Get PDF as ArrayBuffer
     const pdfBytes = doc.output('arraybuffer');
 
-    // Upload PDF to storage and save to claim's file_urls
+    // Upload & save to claim
     try {
-      console.log('Uploading PDF to storage...');
-      
-      // Create a Blob from the ArrayBuffer
       const pdfBlob = new Blob([pdfBytes], { type: 'application/pdf' });
-      
-      // Create a File object with a proper filename
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-      const filename = `${claim.job_number || 'instruction'}-${templateType}-${timestamp}.pdf`;
+      const filename = `${claim.job_number || 'instruction'}-${timestamp}.pdf`;
       const pdfFile = new File([pdfBlob], filename, { type: 'application/pdf' });
-      
-      // Upload using the Core integration
-      const uploadResult = await base44.asServiceRole.integrations.Core.UploadFile({
-        file: pdfFile
-      });
-      
+
+      const uploadResult = await base44.asServiceRole.integrations.Core.UploadFile({ file: pdfFile });
       console.log('PDF uploaded:', uploadResult.file_url);
-      
-      // Add to claim's file_urls and save instruction_pdf_url
+
       const currentFileUrls = Array.isArray(claim.file_urls) ? claim.file_urls : [];
-      const updatedFileUrls = [...currentFileUrls, uploadResult.file_url];
-      
       await base44.asServiceRole.entities.Claim.update(claim.id, {
-        file_urls: updatedFileUrls,
+        file_urls: [...currentFileUrls, uploadResult.file_url],
         instruction_pdf_url: uploadResult.file_url
       });
-      
-      console.log('✓ PDF saved to claim documents');
+      console.log('PDF saved to claim documents');
     } catch (uploadError) {
-      console.error('Failed to upload PDF to storage:', uploadError);
-      // Continue anyway - still return the PDF to the user
+      console.error('Failed to upload PDF:', uploadError);
     }
 
-    // Return PDF as blob
     return new Response(pdfBytes, {
       status: 200,
       headers: {
         'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="${claim.job_number || 'instruction'}-${templateType}.pdf"`
+        'Content-Disposition': `attachment; filename="${claim.job_number || 'instruction'}.pdf"`
       }
     });
 
   } catch (error) {
-    console.error('=== FATAL PDF GENERATION ERROR ===');
-    console.error('Error:', error.message);
-    console.error('Stack:', error.stack);
+    console.error('PDF generation error:', error.message);
     return Response.json({ error: error.message }, { status: 500 });
   }
 });
