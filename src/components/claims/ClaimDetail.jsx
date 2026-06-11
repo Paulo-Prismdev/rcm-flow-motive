@@ -704,7 +704,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
 
       case 'client':
         return (
-          <EditableSection title="Client Details" icon={Users} claim={claim} onUpdate={handleUpdate} EditComponent={ClaimPartiesForm} canEdit={canEdit}>
+          <EditableSection title="Client Details" icon={Users} claim={claim} onUpdate={handleUpdate} EditComponent={(props) => <ClaimPartiesForm {...props} mode="client" />} canEdit={canEdit}>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
               <DetailRow label="Client Name" value={claim.client_name} />
               <DetailRow label="Phone" value={claim.client_phone} />
@@ -736,7 +736,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
 
       case 'driver':
         return (
-          <EditableSection title="Driver Details" icon={Users} claim={claim} onUpdate={handleUpdate} EditComponent={ClaimPartiesForm} canEdit={canEdit}>
+          <EditableSection title="Driver Details" icon={Users} claim={claim} onUpdate={handleUpdate} EditComponent={(props) => <ClaimPartiesForm {...props} mode="driver" />} canEdit={canEdit}>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
               <DetailRow label="Driver Name" value={claim.driver_contact_name} />
               <DetailRow label="Driver Phone" value={claim.driver_contact_phone} />
@@ -759,7 +759,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
 
       case 'thirdParty':
         return (
-          <EditableSection title="Third Party Details" icon={Users} claim={claim} onUpdate={handleUpdate} EditComponent={ClaimPartiesForm} canEdit={canEdit}>
+          <EditableSection title="Third Party Details" icon={Users} claim={claim} onUpdate={handleUpdate} EditComponent={(props) => <ClaimPartiesForm {...props} mode="thirdParty" />} canEdit={canEdit}>
             {(claim.tp_name || claim.tp_reg) ? (
               <div>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
