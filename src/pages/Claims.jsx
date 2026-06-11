@@ -235,7 +235,7 @@ export default function ClaimsPage() {
     const isSelected = selectedClaim?.id === claim.id;
     const hasBackorder = claimIdsWithBackorders.has(claim.id);
     const closedList = ['Completed', 'Cancelled', 'Total Loss'];
-    const isClosedStatus = closedList.includes(claim.job_status) || (claim.job_statuses || []).some(s => closedList.includes(s));
+    const isClosedStatus = closedList.includes(claim.job_status);
     const isDraft = claim.draft === true;
 
     return (
@@ -309,7 +309,7 @@ export default function ClaimsPage() {
     const updateStatus = calculateUpdateStatus(claim);
     const hasBackorder = claimIdsWithBackorders.has(claim.id);
     const closedList = ['Completed', 'Cancelled', 'Total Loss'];
-    const isClosedStatus = closedList.includes(claim.job_status) || (claim.job_statuses || []).some(s => closedList.includes(s));
+    const isClosedStatus = closedList.includes(claim.job_status);
     const isDraft = claim.draft === true;
     return (
       <div
