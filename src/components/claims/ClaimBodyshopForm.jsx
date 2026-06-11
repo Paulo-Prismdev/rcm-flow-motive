@@ -33,18 +33,22 @@ export default function ClaimBodyshopForm({ claim, onSave, onCancel }) {
         
         setIsUnallocating(true);
         try {
-            // Log the unallocation in ActivityLog
-            await base44.entities.ActivityLog.create({
-                parent_id: claim.id,
-                parent_type: 'Claim',
-                action: 'Repairer Unallocated',
-                field_name: 'bodyshop_id',
-                old_value: claim.bodyshop || 'Allocated Repairer',
-                new_value: 'Unassigned',
-                description: `Repairer unallocated. Reason: ${unallocateReason}`,
-                user_email: currentUser?.email,
-                user_name: currentUser?.full_name,
-            });
+            // Log the unallocation in ActivityLog (non-critical, ignore permission errors)
+            try {
+                await base44.entities.ActivityLog.create({
+                    parent_id: claim.id,
+                    parent_type: 'Claim',
+                    action: 'Repairer Unallocated',
+                    field_name: 'bodyshop_id',
+                    old_value: claim.bodyshop || 'Allocated Repairer',
+                    new_value: 'Unassigned',
+                    description: `Repairer unallocated. Reason: ${unallocateReason}`,
+                    user_email: currentUser?.email,
+                    user_name: currentUser?.full_name,
+                });
+            } catch (logErr) {
+                console.warn('ActivityLog create skipped:', logErr.message);
+            }
 
             // Save with cleared bodyshop fields
             onSave({
