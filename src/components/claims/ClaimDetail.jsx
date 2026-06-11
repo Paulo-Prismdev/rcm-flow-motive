@@ -998,10 +998,6 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
         return (
           <EditableSection title="Financials" icon={DollarSign} claim={claim} onUpdate={handleUpdate} EditComponent={ClaimFinancialsForm} canEdit={canEdit}>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
-              <DetailRow label="Est. Cost (Net)" value={claim.estimate_cost_net} isCurrency />
-              <DetailRow label="Auth. Cost (Net)" value={claim.authority_cost_net} isCurrency />
-              <DetailRow label="Est. Cost (Gross)" value={claim.estimate_cost_gross} isCurrency />
-              <DetailRow label="Auth. Cost (Gross)" value={claim.authority_cost_gross} isCurrency />
               <DetailRow label="Final Repair Cost" value={claim.final_repair_cost} isCurrency />
               <DetailRow label="Repairer Referral Fee" value={claim.referral_fee_repairer ? `${claim.referral_fee_repairer}%` : '-'} />
               <DetailRow label="Total to Invoice Repairer" value={claim.total_invoice_repairer} isCurrency />
@@ -1089,6 +1085,11 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
               <DetailRow label="Audatex Code" value={claim.audatex_code} />
               <DetailRow label="Estimate Fee" value={claim.est_fee} isCurrency />
+              <DetailRow label="Authorising Party" value={claim.authorising_party} />
+              <DetailRow label="Est. Cost (Net)" value={claim.estimate_cost_net} isCurrency />
+              <DetailRow label="Auth. Cost (Net)" value={claim.authority_cost_net} isCurrency />
+              <DetailRow label="Est. Cost (Gross)" value={claim.estimate_cost_gross} isCurrency />
+              <DetailRow label="Auth. Cost (Gross)" value={claim.authority_cost_gross} isCurrency />
             </div>
             <div className="mt-2 py-3 px-4 rounded-lg glass-inset">
               <div className="text-xs font-semibold text-foreground-muted mb-2">Artura Estimate URL</div>
