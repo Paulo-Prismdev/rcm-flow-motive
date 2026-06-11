@@ -170,19 +170,19 @@ const isSectionEmpty = (sectionId, claim) => {
 
 const DETAIL_SECTIONS = [
   { id: 'status', label: 'Status & Overview', icon: Clock },
-  { id: 'thirdpartyPursuit', label: 'Third Party Pursuit', icon: Users },
+  { id: 'dates', label: 'Key Dates', icon: Calendar },
+  { id: 'estimate', label: 'Estimate Details', icon: Calculator },
   { id: 'client', label: 'Client Details', icon: Users },
   { id: 'driver', label: 'Driver Details', icon: Users },
-  { id: 'thirdParty', label: 'Third Party Details', icon: Users },
   { id: 'vehicle', label: 'Vehicle Details', icon: Car },
   { id: 'vehicleDamage', label: 'Vehicle Damage', icon: AlertTriangle },
-  { id: 'excessContribution', label: 'Excess Contribution', icon: BadgePercent },
-  { id: 'referrer', label: 'Referrer Details', icon: Briefcase },
-  { id: 'indemnity', label: 'Indemnity Details', icon: Shield },
-  { id: 'financials', label: 'Financials', icon: DollarSign },
-  { id: 'dates', label: 'Key Dates', icon: Calendar },
+  { id: 'thirdParty', label: 'Third Party Details', icon: Users },
   { id: 'bodyshop', label: 'Bodyshop Details', icon: Wrench },
-  { id: 'estimate', label: 'Estimate Details', icon: Calculator },
+  { id: 'referrer', label: 'Referrer Details', icon: Briefcase },
+  { id: 'excessContribution', label: 'Excess Contribution', icon: BadgePercent },
+  { id: 'financials', label: 'Financials', icon: DollarSign },
+  { id: 'thirdpartyPursuit', label: 'Third Party Pursuit', icon: Users },
+  { id: 'indemnity', label: 'Indemnity Details', icon: Shield },
   { id: 'backorderedParts', label: 'Backordered Parts', icon: Package },
 ];
 
