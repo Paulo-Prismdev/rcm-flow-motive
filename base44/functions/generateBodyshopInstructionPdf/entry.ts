@@ -89,7 +89,7 @@ Deno.serve(async (req) => {
     };
 
     // ── HEADER ──
-    const logoUrl = 'https://media.base44.com/images/public/68ee39fb8915b1b539e13c59/b2cb057e2_RCMAutomotiveLogoGreenAutomotivewithHLights.jpg';
+    const logoUrl = 'https://static.wixstatic.com/media/4f1563_4bcef4729fe44004ba129ca11bd270c9~mv2.jpg';
     let logoDataUrl = null;
     try {
       const logoRes = await fetch(logoUrl);
