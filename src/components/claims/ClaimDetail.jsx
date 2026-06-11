@@ -151,6 +151,7 @@ import { logActivity, logChanges } from '../shared/useActivityLogger';
 const SECTION_FIELDS = {
   status: ['claim_type', 'loss_date', 'vehicle_use', 'incident_location', 'circumstances'],
   client: ['client_name', 'client_phone', 'client_email', 'client_address_line_1', 'client_town', 'client_postcode', 'insurer', 'claim_ref'],
+  driver: ['driver_contact_name', 'driver_contact_phone', 'driver_contact_email'],
   thirdParty: ['tp_name', 'tp_phone', 'tp_reg', 'tp_insurer'],
   vehicle: ['make_model', 'vehicle_colour', 'vehicle_fuel_type', 'vehicle_type'],
   vehicleDamage: ['vehicle_location', 'vehicle_damage'],
@@ -171,6 +172,7 @@ const DETAIL_SECTIONS = [
   { id: 'status', label: 'Status & Overview', icon: Clock },
   { id: 'thirdpartyPursuit', label: 'Third Party Pursuit', icon: Users },
   { id: 'client', label: 'Client Details', icon: Users },
+  { id: 'driver', label: 'Driver Details', icon: Users },
   { id: 'thirdParty', label: 'Third Party Details', icon: Users },
   { id: 'vehicle', label: 'Vehicle Details', icon: Car },
   { id: 'vehicleDamage', label: 'Vehicle Damage', icon: AlertTriangle },
@@ -717,6 +719,29 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
               <DetailRow label="Claim Ref" value={claim.claim_ref} />
               <DetailRow label="Policy Number" value={claim.policy_number} />
               <DetailRow label="Policy Excess" value={claim.policy_excess} isCurrency />
+            </div>
+          </EditableSection>
+        );
+
+      case 'driver':
+        return (
+          <EditableSection title="Driver Details" icon={Users} claim={claim} onUpdate={handleUpdate} EditComponent={ClaimPartiesForm} canEdit={canEdit}>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+              <DetailRow label="Driver Name" value={claim.driver_contact_name} />
+              <DetailRow label="Driver Phone" value={claim.driver_contact_phone} />
+              <DetailRow label="Driver Email" value={claim.driver_contact_email} />
+              <DetailRow label="Driving License" value={claim.client_driving_license} />
+            </div>
+            <div className={`mt-2 py-3 px-4 rounded-lg glass-inset ${(!claim.driver_contact_address_line_1 && !claim.driver_contact_town) ? 'border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20' : ''}`}>
+              <div className="text-xs font-semibold text-foreground-muted mb-2">Driver Address</div>
+              <div className="text-sm leading-relaxed space-y-0.5">
+                {claim.driver_contact_address_line_1 && <div>{claim.driver_contact_address_line_1}</div>}
+                {claim.driver_contact_address_line_2 && <div>{claim.driver_contact_address_line_2}</div>}
+                {(claim.driver_contact_town || claim.driver_contact_county || claim.driver_contact_postcode) && (
+                  <div>{[claim.driver_contact_town, claim.driver_contact_county, claim.driver_contact_postcode].filter(Boolean).join(', ')}</div>
+                )}
+                {!claim.driver_contact_address_line_1 && !claim.driver_contact_town && <span className="text-amber-500">-</span>}
+              </div>
             </div>
           </EditableSection>
         );
