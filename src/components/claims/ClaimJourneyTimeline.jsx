@@ -1,5 +1,5 @@
 import React from 'react';
-import { Check, Clock } from 'lucide-react';
+import { Check, Clock, X } from 'lucide-react';
 import { format } from 'date-fns';
 
 const MILESTONES = [
@@ -35,6 +35,12 @@ function getStatusRank(status) {
 }
 
 export default function ClaimJourneyTimeline({ claim, updates = [] }) {
+  const isCancelled = claim.job_status === 'Cancelled' || claim.secondary_status === 'Cancelled';
+
+  const cancelledUpdate = isCancelled
+    ? updates.filter(u => u.description?.toLowerCase().includes('cancelled')).sort((a, b) => new Date(b.created_date) - new Date(a.created_date))[0]
+    : null;
+
   // Use the higher rank between primary and secondary status
   const primaryRank = getStatusRank(claim.job_status);
   const secondaryRank = getStatusRank(claim.secondary_status);
@@ -128,6 +134,31 @@ export default function ClaimJourneyTimeline({ claim, updates = [] }) {
     if (!d) return null;
     try { return format(new Date(d), 'dd/MM/yy'); } catch { return null; }
   };
+
+  if (isCancelled) {
+    return (
+      <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl px-3 py-2">
+        <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">Claim Journey</p>
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 bg-red-500 border-2 border-red-500 text-white">
+            <X className="w-4 h-4 stroke-[3]" />
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-red-600 dark:text-red-400">Claim Cancelled</p>
+            {cancelledUpdate && (
+              <p className="text-[11px] text-muted-foreground mt-0.5">
+                {formatDate(cancelledUpdate.created_date)}
+                {cancelledUpdate.created_by && ` · ${cancelledUpdate.created_by.split('@')[0]}`}
+              </p>
+            )}
+            {claim.cancellation_reason && (
+              <p className="text-[11px] text-muted-foreground mt-0.5">Reason: {claim.cancellation_reason}</p>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-card border border-border rounded-xl px-3 py-2 overflow-x-auto">
