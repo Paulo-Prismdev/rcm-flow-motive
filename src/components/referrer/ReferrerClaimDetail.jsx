@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   ArrowLeft,
   User,
+  Users,
   Car,
   Shield,
   Calendar,
@@ -19,7 +20,8 @@ import {
   Download,
   ExternalLink,
   Send,
-  Loader2
+  Loader2,
+  Package
 } from "lucide-react";
 import { format } from "date-fns";
 import StatusBadge from "../shared/StatusBadge";
@@ -71,15 +73,15 @@ function DetailRow({ label, value, isCurrency = false, isDate = false, isStatus 
 }
 
 const DETAIL_SECTIONS = [
-  { id: 'status',        label: 'Status & Overview',  icon: Clock },
-  { id: 'client',        label: 'Client Details',      icon: User },
-  { id: 'vehicle',       label: 'Vehicle Details',     icon: Car },
-  { id: 'vehicleDamage', label: 'Vehicle Damage',      icon: AlertTriangle },
-  { id: 'insurance',     label: 'Insurance Details',   icon: Shield },
-  { id: 'dates',         label: 'Key Dates',           icon: Calendar },
-  { id: 'bodyshop',      label: 'Bodyshop Details',    icon: Wrench },
-  { id: 'documents',     label: 'Documents',           icon: FileText },
-  { id: 'images',        label: 'Images',              icon: Image },
+  { id: 'status',          label: 'Status & Overview',  icon: Clock },
+  { id: 'dates',           label: 'Key Dates',          icon: Calendar },
+  { id: 'client',          label: 'Client Details',     icon: User },
+  { id: 'driver',          label: 'Driver Details',     icon: Users },
+  { id: 'vehicle',         label: 'Vehicle Details',    icon: Car },
+  { id: 'vehicleDamage',   label: 'Vehicle Damage',     icon: AlertTriangle },
+  { id: 'thirdParty',      label: 'Third Party Details',icon: Users },
+  { id: 'bodyshop',        label: 'Bodyshop Details',   icon: Wrench },
+  { id: 'backorderedParts',label: 'Backordered Parts',  icon: Package },
 ];
 
 function getFileName(url) {
@@ -93,6 +95,36 @@ function getFileName(url) {
 
 function isImageUrl(url) {
   return /\.(jpg|jpeg|png|gif|webp|svg|bmp)(\?|$)/i.test(url);
+}
+
+function BackorderedPartsSectionReadOnly({ claimId }) {
+  const { data: parts = [], isLoading } = useQuery({
+    queryKey: ['backorderedParts', claimId],
+    queryFn: () => base44.entities.BackorderedPart.filter({ claim_id: claimId }),
+  });
+  if (isLoading) return <div className="neomorph-flat p-6 text-center text-sm text-muted-foreground">Loading...</div>;
+  return (
+    <div className="neomorph-flat p-4 md:p-6">
+      <div className="flex items-center gap-3 mb-4"><Package className="w-5 h-5 text-gold" /><h3 className="font-bold">Backordered Parts</h3></div>
+      {parts.length === 0 ? (
+        <p className="text-center text-muted-foreground py-8 text-sm">No backordered parts reported.</p>
+      ) : (
+        <div className="space-y-2">
+          {parts.map(part => (
+            <div key={part.id} className={`p-3 rounded-xl border ${part.received_by_repairer ? 'bg-green-50 border-green-200 dark:bg-green-900/10 dark:border-green-800' : 'bg-amber-50 border-amber-200 dark:bg-amber-900/10 dark:border-amber-800'}`}>
+              <p className={`font-medium text-sm ${part.received_by_repairer ? 'line-through text-muted-foreground' : ''}`}>{part.part_description}</p>
+              <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1">
+                {part.part_number && <span className="text-xs text-muted-foreground">Part #: {part.part_number}</span>}
+                {part.supplier_name && <span className="text-xs text-muted-foreground">Supplier: {part.supplier_name}</span>}
+                {part.expected_arrival_date && <span className="text-xs text-muted-foreground">Expected: {part.expected_arrival_date}</span>}
+              </div>
+              {part.received_by_repairer && <p className="text-xs text-green-600 mt-1 font-medium">✓ Received</p>}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default function ReferrerClaimDetail({ claim, onClose }) {
@@ -251,18 +283,42 @@ export default function ReferrerClaimDetail({ claim, onClose }) {
           </div>
         );
 
-      case 'insurance':
+      case 'driver':
         return (
           <div className="neomorph-flat p-4 md:p-6">
-            <div className="flex items-center gap-3 mb-4"><Shield className="w-5 h-5 text-gold" /><h3 className="font-bold">Insurance Details</h3></div>
+            <div className="flex items-center gap-3 mb-4"><Users className="w-5 h-5 text-gold" /><h3 className="font-bold">Driver Details</h3></div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
-              <DetailRow label="Insurer" value={claim.insurer} missing={m('insurer')} />
-              <DetailRow label="Claim Ref" value={claim.claim_ref} missing={m('claim_ref')} />
-              <DetailRow label="Policy Number" value={claim.policy_number} missing={m('policy_number')} />
-              <DetailRow label="Policy Excess" value={claim.policy_excess} isCurrency />
+              <DetailRow label="Driver Name" value={claim.driver_contact_name} />
+              <DetailRow label="Driver Phone" value={claim.driver_contact_phone} />
+              <DetailRow label="Driver Email" value={claim.driver_contact_email} />
+              <DetailRow label="Address Line 1" value={claim.driver_contact_address_line_1} />
+              <DetailRow label="Address Line 2" value={claim.driver_contact_address_line_2} />
+              <DetailRow label="Town" value={claim.driver_contact_town} />
+              <DetailRow label="County" value={claim.driver_contact_county} />
+              <DetailRow label="Postcode" value={claim.driver_contact_postcode} />
             </div>
           </div>
         );
+
+      case 'thirdParty':
+        return (
+          <div className="neomorph-flat p-4 md:p-6">
+            <div className="flex items-center gap-3 mb-4"><Users className="w-5 h-5 text-gold" /><h3 className="font-bold">Third Party Details</h3></div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+              <DetailRow label="TP Name" value={claim.tp_name} />
+              <DetailRow label="TP Phone" value={claim.tp_phone} />
+              <DetailRow label="TP Email" value={claim.tp_email} />
+              <DetailRow label="TP Make/Model" value={claim.tp_make_model} />
+              <DetailRow label="TP Reg" value={claim.tp_reg} />
+              <DetailRow label="TP Insurer" value={claim.tp_insurer} />
+              <DetailRow label="TP Claim Ref" value={claim.tp_claim_ref} />
+              <DetailRow label="TP Policy Number" value={claim.tp_policy_number} />
+            </div>
+          </div>
+        );
+
+      case 'backorderedParts':
+        return <BackorderedPartsSectionReadOnly claimId={claim.id} />;
 
       case 'dates':
         return (
@@ -291,61 +347,6 @@ export default function ReferrerClaimDetail({ claim, onClose }) {
               <DetailRow label="Bodyshop Email" value={claim.bodyshop_email} />
               <DetailRow label="Authorising Party" value={claim.authorising_party} />
             </div>
-          </div>
-        );
-
-      case 'documents':
-        return (
-          <div className="neomorph-flat p-4 md:p-6">
-            <div className="flex items-center gap-3 mb-4"><FileText className="w-5 h-5 text-gold" /><h3 className="font-bold">Documents</h3></div>
-            {documents.length === 0 ? (
-              <p className="text-center text-muted-foreground py-8">No documents attached.</p>
-            ) : (
-              <div className="space-y-2">
-                {documents.map((url, i) => (
-                  <div key={i} className="neomorph-flat p-3 flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <FileText className="w-4 h-4 text-foreground-muted flex-shrink-0" />
-                      <span className="text-sm truncate">{getFileName(url)}</span>
-                    </div>
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                      <a href={url} target="_blank" rel="noopener noreferrer">
-                        <Button variant="ghost" size="sm" className="h-8 px-2">
-                          <ExternalLink className="w-3.5 h-3.5" />
-                        </Button>
-                      </a>
-                      <a href={url} download>
-                        <Button variant="ghost" size="sm" className="h-8 px-2">
-                          <Download className="w-3.5 h-3.5" />
-                        </Button>
-                      </a>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        );
-
-      case 'images':
-        return (
-          <div className="neomorph-flat p-4 md:p-6">
-            <div className="flex items-center gap-3 mb-4"><Image className="w-5 h-5 text-gold" /><h3 className="font-bold">Images</h3></div>
-            {images.length === 0 ? (
-              <p className="text-center text-muted-foreground py-8">No images attached.</p>
-            ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {images.map((url, i) => (
-                  <div
-                    key={i}
-                    className="aspect-square rounded-xl overflow-hidden cursor-pointer hover:opacity-90 transition-opacity neomorph-flat"
-                    onClick={() => setLightboxUrl(url)}
-                  >
-                    <img src={url} alt={`Image ${i + 1}`} className="w-full h-full object-cover" />
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
         );
 
