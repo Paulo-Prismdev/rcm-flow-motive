@@ -74,7 +74,7 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['claimUpdates', claimId] });
-      if (onUpdateCreated) onUpdateCreated(newUpdate.new_status || null, newUpdate.new_secondary_status || null);
+      if (onUpdateCreated) onUpdateCreated(newUpdate.new_status || null, newUpdate.new_secondary_status || null, newUpdate.update_type);
       resetForm();
     },
     onError: (error) => setSubmitError(error?.message || 'Failed to create update'),
@@ -224,7 +224,7 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2"><Clock className="w-5 h-5 text-primary" />Official Updates - Activity Log</DialogTitle>
-          <p className="text-xs text-muted-foreground mt-1">These updates reset the 48-hour tracking timer and create an audit trail</p>
+          <p className="text-xs text-muted-foreground mt-1">Client Communication updates reset the 48-hour tracking timer. All updates create an audit trail.</p>
         </DialogHeader>
 
         <div className="flex-1 overflow-y-auto space-y-4 pr-2">

@@ -158,10 +158,10 @@ export default function UpdateTrackingModal({ claim, isOpen, onClose, onSetOverr
               <AlertCircle className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
               <div className="text-xs text-muted-foreground">
                 <p className="mb-2">
-                  Claims should be updated every 48 hours to keep stakeholders informed.
+                  Claims should receive a <strong>Client Communication</strong> update every 48 hours to keep stakeholders informed.
                 </p>
                 <p>
-                  Use the <strong>Updates</strong> button to log official updates that reset the timer.
+                  Only <strong>Client Communication</strong> updates reset the timer. Other update types are logged for audit purposes only.
                   If you need to pause tracking temporarily, use the snooze option below.
                 </p>
               </div>

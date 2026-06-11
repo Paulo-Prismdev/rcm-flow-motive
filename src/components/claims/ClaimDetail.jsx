@@ -364,15 +364,26 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
     handleUpdate({ ...claim, ...overrideData, last_updated_at: new Date().toISOString() });
   };
 
-  const handleClaimUpdateCreated = (newStatus, newSecondaryStatus) => {
+  const handleClaimUpdateCreated = (newStatus, newSecondaryStatus, updateType) => {
     const now = new Date();
+    const closedStatuses = ['Completed', 'Cancelled', 'Total Loss'];
+    const effectiveStatus = newStatus || claim.job_status;
+    const isClosedAfterUpdate = closedStatuses.includes(effectiveStatus);
+
+    // Only reset the 48hr timer for Client Communication updates on active claims
+    const isClientComm = updateType === 'Client Communication';
     const fortyEightHoursFromNow = new Date(now.getTime() + 48 * 60 * 60 * 1000);
-    
+
     const updateData = {
       ...claim,
-      last_updated_at: now.toISOString(),
-      next_update_due_at: fortyEightHoursFromNow.toISOString(),
-      update_status_flag: 'Green'
+      ...(isClientComm && !isClosedAfterUpdate && {
+        last_updated_at: now.toISOString(),
+        next_update_due_at: fortyEightHoursFromNow.toISOString(),
+        update_status_flag: 'Green',
+      }),
+      ...(isClosedAfterUpdate && {
+        update_status_flag: 'Gray',
+      }),
     };
     
     if (newStatus) {
