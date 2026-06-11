@@ -89,13 +89,29 @@ Deno.serve(async (req) => {
     };
 
     // ── HEADER ──
-    const logoUrl = 'https://static.wixstatic.com/media/4f1563_4bcef4729fe44004ba129ca11bd270c9~mv2.jpg';
+    const logoUrl = 'https://media.base44.com/images/public/68ee39fb8915b1b539e13c59/b2cb057e2_RCMAutomotiveLogoGreenAutomotivewithHLights.jpg';
     let logoDataUrl = null;
     try {
-      const logoRes = await fetch(logoUrl);
-      const logoBuffer = await logoRes.arrayBuffer();
-      const logoBase64 = btoa(String.fromCharCode(...new Uint8Array(logoBuffer)));
-      logoDataUrl = `data:image/jpeg;base64,${logoBase64}`;
+      const logoRes = await fetch(logoUrl, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (compatible; PDF-Generator/1.0)',
+          'Accept': 'image/jpeg,image/*,*/*'
+        }
+      });
+      console.log('Logo fetch status:', logoRes.status);
+      if (logoRes.ok) {
+        const logoBuffer = await logoRes.arrayBuffer();
+        const bytes = new Uint8Array(logoBuffer);
+        let binary = '';
+        for (let i = 0; i < bytes.byteLength; i++) {
+          binary += String.fromCharCode(bytes[i]);
+        }
+        const logoBase64 = btoa(binary);
+        logoDataUrl = `data:image/jpeg;base64,${logoBase64}`;
+        console.log('Logo loaded, base64 length:', logoBase64.length);
+      } else {
+        console.warn('Logo fetch failed with status:', logoRes.status);
+      }
     } catch (e) {
       console.warn('Could not load logo:', e.message);
     }
