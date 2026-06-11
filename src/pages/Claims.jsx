@@ -293,7 +293,7 @@ export default function ClaimsPage() {
                 <Clock className="w-3 h-3" />
               </span>
             )}
-            {claim.claim_type === 'Fault Claim' && claim.third_party_pursuit_status === 'Awaiting Details' && (
+            {claim.claim_type === 'Fault Claim' && claim.third_party_pursuit_status === 'Awaiting Details' && !isClosedStatus && (
               <span className="flex items-center gap-0.5 px-2 py-1 rounded-md bg-amber-500 text-white text-[10px] font-semibold shadow-sm">
                 <AlertTriangle className="w-3 h-3" />
               </span>
