@@ -101,9 +101,11 @@ function StatusItem({ status, onUpdate, onDelete, onEditToggle, editingStatusId,
           </>
         ) : (
           <>
-            <Button size="icon" variant="ghost" onClick={() => onEditToggle(status)} className="text-blue-500 hover:text-blue-600">
-              <Edit className="w-4 h-4" />
-            </Button>
+            {!isProtected && (
+              <Button size="icon" variant="ghost" onClick={() => onEditToggle(status)} className="text-blue-500 hover:text-blue-600">
+                <Edit className="w-4 h-4" />
+              </Button>
+            )}
             {!isProtected && (
               <Button size="icon" variant="ghost" onClick={() => onDelete(status.id)} className="text-red-500 hover:text-red-600">
                 <Trash2 className="w-4 h-4" />
@@ -225,7 +227,7 @@ export default function StatusManagementTab({ department }) {
         <div className="flex items-start gap-2">
           <Lock className="w-4 h-4 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
           <div className="text-sm text-blue-800 dark:text-blue-200">
-            <strong>Note:</strong> The "New" status is required and will be automatically created as the default status for new records. You can change its color but not its name or delete it.
+            <strong>Note:</strong> Default statuses (marked with a lock icon) are fixed system statuses and cannot be edited or deleted.
           </div>
         </div>
       </div>
@@ -287,7 +289,7 @@ export default function StatusManagementTab({ department }) {
                           setEditingData={setEditingData}
                           provided={provided}
                           snapshot={snapshot}
-                          isProtected={status.status_name === 'New'}
+                          isProtected={status.is_default === true}
                         />
                       )}
                     </Draggable>
