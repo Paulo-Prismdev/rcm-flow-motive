@@ -65,7 +65,7 @@ Deno.serve(async (req) => {
       policy_number: claim.policy_number || 'N/A',
       send_estimate_email: claim.send_estimate_email || 'N/A',
       audatex_code: claim.audatex_code || 'N/A',
-      policy_excess: claim.policy_excess ? `£${Number(claim.policy_excess).toFixed(2)}` : 'N/A'
+      policy_excess: claim.policy_excess ? Number(claim.policy_excess).toFixed(2) : 'N/A'
     };
 
     // ── Draw a two-column table row ──
@@ -202,7 +202,7 @@ Deno.serve(async (req) => {
       ['Policy Number', fieldMap.policy_number],
       ['Email Estimate to', fieldMap.send_estimate_email],
       ['Audatex Code', fieldMap.audatex_code],
-      ['Excess', fieldMap.policy_excess]
+      ['Excess (£)', fieldMap.policy_excess]
     ];
 
     for (const [label, value] of insuranceRows) {
