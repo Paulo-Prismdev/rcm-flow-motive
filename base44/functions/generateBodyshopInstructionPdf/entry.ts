@@ -89,26 +89,41 @@ Deno.serve(async (req) => {
     };
 
     // ── HEADER ──
-    // Logo placeholder / company name
+    const logoUrl = 'https://media.base44.com/images/public/68ee39fb8915b1b539e13c59/b2cb057e2_RCMAutomotiveLogoGreenAutomotivewithHLights.jpg';
+    let logoDataUrl = null;
+    try {
+      const logoRes = await fetch(logoUrl);
+      const logoBuffer = await logoRes.arrayBuffer();
+      const logoBase64 = btoa(String.fromCharCode(...new Uint8Array(logoBuffer)));
+      logoDataUrl = `data:image/jpeg;base64,${logoBase64}`;
+    } catch (e) {
+      console.warn('Could not load logo:', e.message);
+    }
+
     doc.setFillColor(19, 29, 71); // RCM navy
-    doc.rect(leftMargin, 10, maxWidth, 14, 'F');
+    doc.rect(leftMargin, 10, maxWidth, 18, 'F');
+    if (logoDataUrl) {
+      doc.addImage(logoDataUrl, 'JPEG', leftMargin + 3, 12, 50, 14);
+    } else {
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(13);
+      doc.setFont('helvetica', 'bold');
+      doc.text('RCM Automotive', leftMargin + 4, 21);
+    }
     doc.setTextColor(255, 255, 255);
-    doc.setFontSize(13);
-    doc.setFont('helvetica', 'bold');
-    doc.text('RCM Automotive', leftMargin + 4, 20);
     doc.setFontSize(9);
     doc.setFont('helvetica', 'normal');
-    doc.text('Repairer Instruction', rightMargin - 2, 20, { align: 'right' });
+    doc.text('Repairer Instruction', rightMargin - 2, 21, { align: 'right' });
 
     // Claim reference bar
     doc.setFillColor(240, 240, 240);
-    doc.rect(leftMargin, 25, maxWidth, 8, 'F');
+    doc.rect(leftMargin, 29, maxWidth, 8, 'F');
     doc.setTextColor(0, 0, 0);
     doc.setFontSize(9);
     doc.setFont('helvetica', 'bold');
-    doc.text(`RCM Claim Reference: ${claim.job_number || 'N/A'}`, leftMargin + 4, 30.5);
+    doc.text(`RCM Claim Reference: ${claim.job_number || 'N/A'}`, leftMargin + 4, 34.5);
 
-    let yPos = 38;
+    let yPos = 42;
 
     // ── SECTION 1: Client & Repairer Details ──
     doc.setFillColor(19, 29, 71);
