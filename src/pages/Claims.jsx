@@ -281,8 +281,8 @@ export default function ClaimsPage() {
                 Draft
               </span>
             )}
+            <StatusBadge status={claim.job_status || 'New'} />
             {claim.secondary_status && <StatusBadge status={claim.secondary_status} variant="secondary" />}
-            {!isClosedStatus && <UpdateStatusBadge status={updateStatus} small />}
             {hasBackorder && (
               <span className="flex items-center gap-0.5 px-2 py-1 rounded-md bg-red-500 text-white text-[10px] font-semibold shadow-sm">
                 <Package className="w-3 h-3" />BO
