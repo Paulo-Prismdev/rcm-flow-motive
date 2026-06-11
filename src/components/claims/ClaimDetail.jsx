@@ -150,7 +150,8 @@ import { logActivity, logChanges } from '../shared/useActivityLogger';
 
 const SECTION_FIELDS = {
   status: ['claim_type', 'loss_date', 'vehicle_use', 'incident_location', 'circumstances'],
-  client: ['client_name', 'client_phone', 'client_email', 'client_address_line_1', 'client_town', 'client_postcode', 'insurer', 'claim_ref'],
+  client: ['client_name', 'client_phone', 'client_email', 'client_address_line_1', 'client_town', 'client_postcode'],
+  insurance: ['insurer', 'claim_ref'],
   driver: ['driver_contact_name', 'driver_contact_phone', 'driver_contact_email'],
   thirdParty: ['tp_name', 'tp_phone', 'tp_reg', 'tp_insurer'],
   vehicle: ['make_model', 'vehicle_colour', 'vehicle_fuel_type', 'vehicle_type'],
@@ -173,6 +174,7 @@ const DETAIL_SECTIONS = [
   { id: 'dates', label: 'Key Dates', icon: Calendar },
   { id: 'estimate', label: 'Estimate Details', icon: Calculator },
   { id: 'client', label: 'Client Details', icon: Users },
+  { id: 'insurance', label: 'Insurance & Broker', icon: Shield },
   { id: 'driver', label: 'Driver Details', icon: Users },
   { id: 'vehicle', label: 'Vehicle Details', icon: Car },
   { id: 'vehicleDamage', label: 'Vehicle Damage', icon: AlertTriangle },
@@ -724,10 +726,17 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 mt-2">
               <DetailRow label="Driver" value={claim.driver_same_as_client === false ? claim.driver_contact_name : 'Same as client'} />
-              {claim.driver_same_as_client === false && <DetailRow label="Driving License" value={claim.client_driving_license} />}
-              {claim.broker_name && <DetailRow label="Broker" value={claim.broker_name} />}
+            </div>
+          </EditableSection>
+        );
+
+      case 'insurance':
+        return (
+          <EditableSection title="Insurance & Broker" icon={Shield} claim={claim} onUpdate={handleUpdate} EditComponent={ClaimInsuranceForm} canEdit={canEdit}>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+              <DetailRow label="Broker" value={claim.broker_name} />
               <DetailRow label="Insurer" value={claim.insurer} />
-              <DetailRow label="Claim Ref" value={claim.claim_ref} />
+              <DetailRow label="Claim Reference" value={claim.claim_ref} />
               <DetailRow label="Policy Number" value={claim.policy_number} />
               <DetailRow label="Policy Excess" value={claim.policy_excess} isCurrency />
             </div>

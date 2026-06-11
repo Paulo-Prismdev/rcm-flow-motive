@@ -39,9 +39,9 @@ import {
 const SECTION_REQUIRED_FIELDS = {
   status:        ['claim_type', 'loss_date', 'circumstances'],
   client:        ['client_name', 'client_phone', 'client_email', 'client_address_line_1', 'client_postcode'],
+  insurance:     ['insurer', 'claim_ref', 'policy_number'],
   vehicle:       ['make_model', 'vehicle_colour', 'vehicle_type'],
   vehicleDamage: ['vehicle_damage'],
-  insurance:     ['insurer', 'claim_ref', 'policy_number'],
   dates:         ['date_received'],
   bodyshop:      ['bodyshop'],
 };
@@ -76,6 +76,7 @@ const DETAIL_SECTIONS = [
   { id: 'status',          label: 'Status & Overview',  icon: Clock },
   { id: 'dates',           label: 'Key Dates',          icon: Calendar },
   { id: 'client',          label: 'Client Details',     icon: User },
+  { id: 'insurance',       label: 'Insurance & Broker', icon: Shield },
   { id: 'driver',          label: 'Driver Details',     icon: Users },
   { id: 'vehicle',         label: 'Vehicle Details',    icon: Car },
   { id: 'vehicleDamage',   label: 'Vehicle Damage',     icon: AlertTriangle },
@@ -216,7 +217,6 @@ export default function ReferrerClaimDetail({ claim, onClose }) {
               <DetailRow label="Client Name" value={claim.client_name} missing={m('client_name')} />
               <DetailRow label="Client Phone" value={claim.client_phone} missing={m('client_phone')} />
               <DetailRow label="Client Email" value={claim.client_email} missing={m('client_email')} />
-              <DetailRow label="Driver/Contact" value={claim.driver_contact_name} />
               <DetailRow label="VAT Status" value={claim.client_vat_status} />
               <DetailRow label="Business Division" value={claim.business_division} />
             </div>
@@ -279,6 +279,20 @@ export default function ReferrerClaimDetail({ claim, onClose }) {
                 {m('vehicle_damage') && <span className="inline-block w-1.5 h-1.5 rounded-full bg-amber-400" />}
               </div>
               <div className={`text-sm leading-relaxed whitespace-pre-wrap ${m('vehicle_damage') ? 'text-amber-600 dark:text-amber-400 italic' : ''}`}>{claim.vehicle_damage || 'Not filled in'}</div>
+            </div>
+          </div>
+        );
+
+      case 'insurance':
+        return (
+          <div className="neomorph-flat p-4 md:p-6">
+            <div className="flex items-center gap-3 mb-4"><Shield className="w-5 h-5 text-gold" /><h3 className="font-bold">Insurance & Broker</h3></div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+              <DetailRow label="Broker" value={claim.broker_name} />
+              <DetailRow label="Insurer" value={claim.insurer} missing={m('insurer')} />
+              <DetailRow label="Claim Reference" value={claim.claim_ref} missing={m('claim_ref')} />
+              <DetailRow label="Policy Number" value={claim.policy_number} missing={m('policy_number')} />
+              <DetailRow label="Policy Excess" value={claim.policy_excess ? `£${claim.policy_excess}` : null} />
             </div>
           </div>
         );
