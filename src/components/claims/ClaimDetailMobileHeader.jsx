@@ -1,5 +1,5 @@
-import React from 'react';
-import { ArrowLeft } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { ArrowLeft, ChevronDown } from 'lucide-react';
 import { formatUKRegistration } from '../shared/formatRegistration';
 import StatusBadge from '../shared/StatusBadge';
 import UpdateStatusBadge from '../shared/UpdateStatusBadge';
@@ -25,7 +25,23 @@ const isEmpty = (sectionId, claim) => {
   return fields.some(f => claim[f] === null || claim[f] === undefined || claim[f] === '');
 };
 
-const label = (text, sectionId, claim) => isEmpty(sectionId, claim) ? `${text} ●` : text;
+const SECTIONS = [
+  { value: 'status', label: 'Status & Overview' },
+  { value: 'thirdpartyPursuit', label: 'Third Party Pursuit' },
+  { value: 'client', label: 'Client Details' },
+  { value: 'driver', label: 'Driver Details' },
+  { value: 'thirdParty', label: 'Third Party Details' },
+  { value: 'vehicle', label: 'Vehicle Details' },
+  { value: 'vehicleDamage', label: 'Vehicle Damage' },
+  { value: 'excessContribution', label: 'Excess Contribution' },
+  { value: 'referrer', label: 'Referrer Details' },
+  { value: 'indemnity', label: 'Indemnity Details' },
+  { value: 'financials', label: 'Financials' },
+  { value: 'dates', label: 'Key Dates' },
+  { value: 'bodyshop', label: 'Bodyshop Details' },
+  { value: 'estimate', label: 'Estimate Details' },
+  { value: 'backorderedParts', label: 'Backordered Parts' },
+];
 
 export default function ClaimDetailMobileHeader({
   claim,
@@ -36,11 +52,26 @@ export default function ClaimDetailMobileHeader({
   onUpdateTracking,
   onAction,
 }) {
+  const [sectionOpen, setSectionOpen] = useState(false);
+  const sectionRef = useRef(null);
+
+  useEffect(() => {
+    const handler = (e) => {
+      if (sectionRef.current && !sectionRef.current.contains(e.target)) {
+        setSectionOpen(false);
+      }
+    };
+    if (sectionOpen) document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [sectionOpen]);
+
   const handleActionChange = (e) => {
     const val = e.target.value;
     e.target.value = '';
     if (val) onAction(val);
   };
+
+  const currentSection = SECTIONS.find(s => s.value === claim._selectedSection) || SECTIONS[0];
 
   return (
     <div
@@ -127,30 +158,39 @@ export default function ClaimDetailMobileHeader({
         </select>
       </div>
 
-      {/* Row 4: native section picker */}
-      <div className="px-3 pb-2">
-        <select
-          value={claim._selectedSection}
-          onChange={(e) => onAction('section:' + e.target.value)}
-          className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-200 px-3"
+      {/* Row 4: custom section picker */}
+      <div className="px-3 pb-2 relative" ref={sectionRef}>
+        <button
+          type="button"
+          onClick={() => setSectionOpen(o => !o)}
+          className="w-full flex items-center justify-between rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-200 px-3"
           style={{ height: 36, fontSize: 14 }}
         >
-          <option value="status">{label('Status & Overview', 'status', claim)}</option>
-          <option value="thirdpartyPursuit">Third Party Pursuit</option>
-          <option value="client">{label('Client Details', 'client', claim)}</option>
-          <option value="driver">{label('Driver Details', 'driver', claim)}</option>
-          <option value="thirdParty">{label('Third Party Details', 'thirdParty', claim)}</option>
-          <option value="vehicle">{label('Vehicle Details', 'vehicle', claim)}</option>
-          <option value="vehicleDamage">{label('Vehicle Damage', 'vehicleDamage', claim)}</option>
-          <option value="excessContribution">{label('Excess Contribution', 'excessContribution', claim)}</option>
-          <option value="referrer">{label('Referrer Details', 'referrer', claim)}</option>
-          <option value="indemnity">{label('Indemnity Details', 'indemnity', claim)}</option>
-          <option value="financials">{label('Financials', 'financials', claim)}</option>
-          <option value="dates">{label('Key Dates', 'dates', claim)}</option>
-          <option value="bodyshop">{label('Bodyshop Details', 'bodyshop', claim)}</option>
-          <option value="estimate">Estimate Details</option>
-          <option value="backorderedParts">Backordered Parts</option>
-        </select>
+          <div className="flex items-center gap-2">
+            <span>{currentSection.label}</span>
+            {isEmpty(currentSection.value, claim) && (
+              <span className="w-2 h-2 rounded-full bg-amber-400 flex-shrink-0" />
+            )}
+          </div>
+          <ChevronDown className="w-4 h-4 text-gray-400 flex-shrink-0" />
+        </button>
+        {sectionOpen && (
+          <div className="absolute left-3 right-3 top-full mt-1 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 max-h-72 overflow-y-auto">
+            {SECTIONS.map(section => (
+              <button
+                key={section.value}
+                type="button"
+                onClick={() => { onAction('section:' + section.value); setSectionOpen(false); }}
+                className={`w-full flex items-center justify-between px-3 py-2.5 text-left text-sm hover:bg-gray-50 dark:hover:bg-gray-800 ${claim._selectedSection === section.value ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 font-medium' : 'text-gray-800 dark:text-gray-200'}`}
+              >
+                <span>{section.label}</span>
+                {isEmpty(section.value, claim) && (
+                  <span className="w-2 h-2 rounded-full bg-amber-400 flex-shrink-0 ml-2" />
+                )}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
