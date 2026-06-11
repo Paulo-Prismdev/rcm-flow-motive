@@ -234,7 +234,8 @@ export default function ClaimsPage() {
     const updateStatus = calculateUpdateStatus(claim);
     const isSelected = selectedClaim?.id === claim.id;
     const hasBackorder = claimIdsWithBackorders.has(claim.id);
-    const isClosedStatus = (claim.job_statuses || []).some(s => ['Completed','Cancelled','Total Loss'].includes(s));
+    const closedList = ['Completed', 'Cancelled', 'Total Loss'];
+    const isClosedStatus = closedList.includes(claim.job_status) || (claim.job_statuses || []).some(s => closedList.includes(s));
     const isDraft = claim.draft === true;
 
     return (
@@ -307,7 +308,8 @@ export default function ClaimsPage() {
   const renderMobileCard = (claim) => {
     const updateStatus = calculateUpdateStatus(claim);
     const hasBackorder = claimIdsWithBackorders.has(claim.id);
-    const isClosedStatus = (claim.job_statuses || []).some(s => ['Completed','Cancelled','Total Loss'].includes(s));
+    const closedList = ['Completed', 'Cancelled', 'Total Loss'];
+    const isClosedStatus = closedList.includes(claim.job_status) || (claim.job_statuses || []).some(s => closedList.includes(s));
     const isDraft = claim.draft === true;
     return (
       <div
