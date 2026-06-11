@@ -444,7 +444,7 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl max-h-[95vh] p-0 overflow-hidden flex flex-col">
+      <DialogContent className="max-w-6xl w-full min-h-[600px] max-h-[95vh] p-0 overflow-hidden flex flex-col">
         {/* Header with Steps */}
         <div className="p-3 lg:p-4 border-b border-border flex-shrink-0">
           <div className="flex items-center justify-between mb-3">
@@ -452,13 +452,10 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
               <Building2 className="w-4 h-4 lg:w-5 lg:h-5 text-accent" />
               <span className="truncate">Allocate - {claim.job_number || claim.reg}</span>
             </h2>
-            <Button variant="ghost" size="icon" onClick={onClose}>
-              <X className="w-4 h-4 lg:w-5 lg:h-5" />
-            </Button>
           </div>
           
-          {/* Step Indicators - Scrollable on mobile */}
-          <div className="flex items-center gap-1 overflow-x-auto pb-1">
+          {/* Step Indicators */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-1">
             {STEPS.map((step, index) => {
               const StepIcon = step.icon;
               const isActive = index === currentStep;
@@ -467,18 +464,17 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
               return (
                 <React.Fragment key={step.id}>
                   <div 
-                    className={`flex items-center gap-1.5 px-2 py-1.5 rounded-lg transition-all flex-shrink-0 ${
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all flex-shrink-0 ${
                       isActive ? 'bg-accent text-accent-foreground' : 
                       isCompleted ? 'bg-green-100 text-green-700' : 
                       'bg-surface text-foreground-muted'
                     }`}
                   >
-                    <StepIcon className="w-3.5 h-3.5 lg:w-4 lg:h-4" />
-                    <span className="text-xs font-medium hidden sm:inline">{step.title}</span>
-                    <span className="text-xs font-medium sm:hidden">{index + 1}</span>
+                    <StepIcon className="w-4 h-4" />
+                    <span className="text-sm font-medium whitespace-nowrap">{step.title}</span>
                   </div>
                   {index < STEPS.length - 1 && (
-                    <ChevronRight className="w-3.5 h-3.5 lg:w-4 lg:h-4 text-foreground-muted flex-shrink-0" />
+                    <ChevronRight className="w-4 h-4 text-foreground-muted flex-shrink-0" />
                   )}
                 </React.Fragment>
               );
@@ -973,36 +969,31 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
         </div>
 
         {/* Footer Navigation - Fixed at bottom with safe spacing */}
-        <div className="p-3 lg:p-4 border-t border-border flex justify-between gap-3 flex-shrink-0 pb-[max(env(safe-area-inset-bottom),1rem)]">
+        <div className="p-4 lg:p-5 border-t border-border flex justify-between gap-3 flex-shrink-0 pb-[max(env(safe-area-inset-bottom),1.25rem)]">
           <Button
             variant="outline"
-            size="sm"
             onClick={() => currentStep === 0 ? onClose() : setCurrentStep(currentStep - 1)}
-            className="flex-1 max-w-[140px]"
+            className="flex-1 max-w-[140px] h-10"
           >
-            <ChevronLeft className="w-3.5 h-3.5 mr-1" />
-            <span className="hidden sm:inline">{currentStep === 0 ? 'Cancel' : 'Back'}</span>
-            <span className="sm:hidden">{currentStep === 0 ? 'Cancel' : 'Back'}</span>
+            <ChevronLeft className="w-4 h-4 mr-2" />
+            <span>{currentStep === 0 ? 'Cancel' : 'Back'}</span>
           </Button>
 
           {currentStep === 0 && (
             <Button
-              size="sm"
               onClick={handleSaveValidation}
               disabled={missingFields.length > 0 || isSavingValidation}
-              className="flex-1 max-w-[140px]"
+              className="flex-1 max-w-[160px] h-10"
             >
               {isSavingValidation ? (
                 <>
-                  <Loader className="w-3.5 h-3.5 mr-1 animate-spin" />
-                  <span className="hidden sm:inline">Saving...</span>
-                  <span className="sm:hidden">Wait...</span>
+                  <Loader className="w-4 h-4 mr-2 animate-spin" />
+                  Saving...
                 </>
               ) : (
                 <>
-                  <span className="hidden sm:inline">Save & Continue</span>
-                  <span className="sm:hidden">Save</span>
-                  <ChevronRight className="w-3.5 h-3.5 ml-1" />
+                  Save & Continue
+                  <ChevronRight className="w-4 h-4 ml-2" />
                 </>
               )}
             </Button>
@@ -1010,23 +1001,12 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
 
           {currentStep > 0 && currentStep < STEPS.length - 1 && (
             <Button
-              size="sm"
               onClick={() => setCurrentStep(currentStep + 1)}
               disabled={!canProceed()}
-              className="flex-1 max-w-[140px]"
+              className="flex-1 max-w-[140px] h-10"
             >
-              {currentStep === 2 || currentStep === 3 ? (
-                <>
-                  <span className="hidden sm:inline">Skip / Next</span>
-                  <span className="sm:hidden">Next</span>
-                </>
-              ) : (
-                <>
-                  <span className="hidden sm:inline">Next</span>
-                  <span className="sm:hidden">Next</span>
-                </>
-              )}
-              <ChevronRight className="w-3.5 h-3.5 ml-1" />
+              Next
+              <ChevronRight className="w-4 h-4 ml-2" />
             </Button>
           )}
         </div>
