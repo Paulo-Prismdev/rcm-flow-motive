@@ -355,7 +355,7 @@ export default function ClaimsPage() {
   };
 
   const claimsListView = (
-    <div className="flex flex-col h-full min-h-0 bg-white dark:bg-gray-900 rounded-[10px] border border-gray-100 dark:border-gray-800 overflow-hidden shadow-sm">
+    <div className="flex flex-col h-full min-h-0 bg-white dark:bg-gray-900 lg:rounded-[10px] lg:border lg:border-gray-100 dark:lg:border-gray-800 overflow-hidden lg:shadow-sm">
       <ImportClaimsModal isOpen={showImportModal} onClose={() => setShowImportModal(false)}
         onImportComplete={() => { queryClient.invalidateQueries({ queryKey: ['claims'] }); setShowImportModal(false); }} />
       <ClaimCardFieldsModal isOpen={showFieldsModal} onClose={() => setShowFieldsModal(false)}
@@ -604,7 +604,7 @@ export default function ClaimsPage() {
       {/* Detail panel — full width, replacing the list */}
       {selectedClaim && (
         <div className="flex-1 min-w-0 min-h-0 flex flex-col w-full">
-          <div className="h-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 overflow-hidden">
+          <div className="h-full lg:rounded-xl lg:border lg:border-gray-200 dark:lg:border-gray-800 bg-white dark:bg-gray-900 overflow-hidden">
             <ClaimDetail
               key={selectedClaim.id}
               claim={selectedClaim}
