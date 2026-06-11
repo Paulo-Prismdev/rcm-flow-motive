@@ -4,7 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { X, Clock, User, Calendar, Mail, Plus, Heart, Reply, AtSign, Pencil, Trash2 } from 'lucide-react';
+import { X, Clock, User, Calendar, Mail, Plus, Heart, Reply, AtSign, Pencil, Trash2, ChevronDown } from 'lucide-react';
 import { format } from 'date-fns';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
@@ -41,6 +41,7 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
   const [showMentionPopup, setShowMentionPopup] = useState(false);
   const [editingUpdateId, setEditingUpdateId] = useState(null);
   const [editDescription, setEditDescription] = useState('');
+  const [showFollowUp, setShowFollowUp] = useState(false);
 
   const queryClient = useQueryClient();
   const { data: currentUser } = useQuery({ queryKey: ['currentUser'], queryFn: () => base44.auth.me(), staleTime: 5 * 60 * 1000 });
@@ -137,7 +138,7 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
 
   const resetForm = () => {
     setNewUpdate({ update_type: 'Other', description: '', next_steps: '', due_date_for_next_action: '', new_status: currentStatus || '', new_secondary_status: '' });
-    setSendEmail(false); setSelectedEmails([]); setShowForm(false); setReplyToId(null); setTaggedUsers([]); setSubmitError('');
+    setSendEmail(false); setSelectedEmails([]); setShowForm(false); setReplyToId(null); setTaggedUsers([]); setSubmitError(''); setShowFollowUp(false);
   };
 
   const handleReply = (parentId) => {
@@ -265,28 +266,6 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
                         </div>
                       </div>
                     )}
-
-                    {canChangeStatus && (
-                      <>
-                        <div><label className="block text-xs text-muted-foreground mb-1">Next Steps (Optional)</label><Textarea value={newUpdate.next_steps} onChange={(e) => setNewUpdate({ ...newUpdate, next_steps: e.target.value })} placeholder="What needs to happen next..." className="px-3 py-2 text-sm bg-background border border-border h-20" /></div>
-                        <div><label className="block text-xs text-muted-foreground mb-1">Due Date (Optional)</label><Input type="date" value={newUpdate.due_date_for_next_action} onChange={(e) => setNewUpdate({ ...newUpdate, due_date_for_next_action: e.target.value })} className="px-3 py-2 text-sm bg-background border border-border" /></div>
-                      </>
-                    )}
-
-                    {(() => {
-                      const availableEmails = claim ? [
-                        claim.client_email && { label: `Client: ${claim.client_name}`, email: claim.client_email },
-                        claim.referrer_email && { label: `Referrer: ${claim.referrer}`, email: claim.referrer_email },
-                        claim.bodyshop_email && { label: `Bodyshop: ${claim.bodyshop}`, email: claim.bodyshop_email }
-                      ].filter(Boolean) : [];
-                      
-                      return availableEmails.length > 0 && !isReferrer && (
-                        <div className="bg-muted/30 p-3 space-y-3 border border-border rounded-lg">
-                          <div className="flex items-center gap-2"><input type="checkbox" id="send_email" checked={sendEmail} onChange={(e) => setSendEmail(e.target.checked)} className="w-4 h-4" /><label htmlFor="send_email" className="text-sm font-medium flex items-center gap-2"><Mail className="w-4 h-4 text-accent" />Open email to send this update</label></div>
-                          {sendEmail && (<div className="space-y-2 pl-6"><p className="text-xs text-muted-foreground">Select recipients:</p>{availableEmails.map(({ label, email }) => (<div key={email} className="flex items-center gap-2"><input type="checkbox" id={`email_${email}`} checked={selectedEmails.includes(email)} onChange={() => setSelectedEmails(prev => prev.includes(email) ? prev.filter(e => e !== email) : [...prev, email])} className="w-4 h-4" /><label htmlFor={`email_${email}`} className="text-xs">{label} ({email})</label></div>))}</div>)}
-                        </div>
-                      );
-                    })()}
                   </>
                 )}
 
@@ -317,6 +296,43 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
                     </div>
                   )}
                 </div>
+
+                {!replyToId && !isReferrer && (() => {
+                  const availableEmails = claim ? [
+                    claim.client_email && { label: `Client: ${claim.client_name}`, email: claim.client_email },
+                    claim.referrer_email && { label: `Referrer: ${claim.referrer}`, email: claim.referrer_email },
+                    claim.bodyshop_email && { label: `Bodyshop: ${claim.bodyshop}`, email: claim.bodyshop_email }
+                  ].filter(Boolean) : [];
+                  
+                  return availableEmails.length > 0 && (
+                    <div className="bg-muted/30 p-3 space-y-3 border border-border rounded-lg">
+                      <div className="flex items-center gap-2"><input type="checkbox" id="send_email" checked={sendEmail} onChange={(e) => setSendEmail(e.target.checked)} className="w-4 h-4" /><label htmlFor="send_email" className="text-sm font-medium flex items-center gap-2"><Mail className="w-4 h-4 text-accent" />Open email to send this update</label></div>
+                      {sendEmail && (<div className="space-y-2 pl-6"><p className="text-xs text-muted-foreground">Select recipients:</p>{availableEmails.map(({ label, email }) => (<div key={email} className="flex items-center gap-2"><input type="checkbox" id={`email_${email}`} checked={selectedEmails.includes(email)} onChange={() => setSelectedEmails(prev => prev.includes(email) ? prev.filter(e => e !== email) : [...prev, email])} className="w-4 h-4" /><label htmlFor={`email_${email}`} className="text-xs">{label} ({email})</label></div>))}</div>)}
+                    </div>
+                  );
+                })()}
+
+                {!replyToId && canChangeStatus && (
+                  <div className="border border-border rounded-lg overflow-hidden">
+                    <button
+                      type="button"
+                      onClick={() => setShowFollowUp(prev => !prev)}
+                      className="w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted/50 transition-colors bg-muted/20"
+                    >
+                      <span className="flex items-center gap-2">
+                        <Clock className="w-4 h-4" />
+                        Add Follow-up / Next Steps (Optional)
+                      </span>
+                      <ChevronDown className={`w-4 h-4 transition-transform ${showFollowUp ? 'rotate-180' : ''}`} />
+                    </button>
+                    {showFollowUp && (
+                      <div className="p-3 space-y-3 border-t border-border">
+                        <div><label className="block text-xs text-muted-foreground mb-1">Next Steps</label><Textarea value={newUpdate.next_steps} onChange={(e) => setNewUpdate({ ...newUpdate, next_steps: e.target.value })} placeholder="What needs to happen next..." className="px-3 py-2 text-sm bg-background border border-border h-20" /></div>
+                        <div><label className="block text-xs text-muted-foreground mb-1">Due Date</label><Input type="date" value={newUpdate.due_date_for_next_action} onChange={(e) => setNewUpdate({ ...newUpdate, due_date_for_next_action: e.target.value })} className="px-3 py-2 text-sm bg-background border border-border" /></div>
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {taggedUsers.length > 0 && (
                   <div className="flex flex-wrap gap-2">
