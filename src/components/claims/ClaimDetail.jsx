@@ -1323,7 +1323,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
           </div>
 
         {(linkedEstimate || linkedEngineering || linkedParts || linkedThirdPartyClaim || linkedOriginalClaim) && (
-          <div className="bg-card border border-border rounded-[10px] p-3 flex-shrink-0 shadow-sm">
+          <div className="hidden lg:block bg-card border border-border rounded-[10px] p-3 flex-shrink-0 shadow-sm">
             <div className="flex items-center gap-2 mb-3">
               <span className="w-4 h-4 text-gold">🔗</span>
               <h3 className="font-medium">Linked Cases</h3>

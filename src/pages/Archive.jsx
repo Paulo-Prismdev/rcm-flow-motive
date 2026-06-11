@@ -75,31 +75,31 @@ export default function Archive() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="neomorph p-6">
-        <div className="flex items-center justify-between mb-6">
+    <div className="space-y-4 lg:space-y-6">
+      <div className="neomorph p-4 lg:p-6">
+        <div className="flex items-center justify-between mb-4 lg:mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-gray-700 flex items-center gap-3">
-              <ArchiveIcon className="w-7 h-7 text-gray-600" />
+            <h1 className="text-lg lg:text-2xl font-bold text-gray-700 flex items-center gap-2 lg:gap-3">
+              <ArchiveIcon className="w-5 h-5 lg:w-7 lg:h-7 text-gray-600" />
               Archive
             </h1>
             <p className="text-sm text-gray-500 mt-1">{allArchived.length} archived items</p>
           </div>
         </div>
 
-        <div className="flex gap-4 flex-wrap">
-          <div className="flex-1 min-w-[200px]">
+        <div className="flex flex-col sm:flex-row gap-2 lg:gap-4">
+          <div className="flex-1">
             <Input
               placeholder="Search archived items..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="neomorph-inset px-4 py-3 text-gray-700 border-0 focus:ring-0"
+              className="neomorph-inset px-3 py-2 text-gray-700 border-0 focus:ring-0"
             />
           </div>
           <select
             value={filterDepartment}
             onChange={(e) => setFilterDepartment(e.target.value)}
-            className="neomorph-inset px-4 py-3 text-gray-700 border-0 rounded-xl"
+            className="neomorph-inset px-3 py-2 text-gray-700 border-0 rounded-xl text-sm"
           >
             <option value="all">All Departments</option>
             <option value="Claims">Claims</option>
@@ -119,20 +119,20 @@ export default function Archive() {
           filteredItems.map((item) => {
             const Icon = item.icon;
             return (
-              <div key={`${item.department}-${item.id}`} className="neomorph card-hover p-6">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-4 mb-3">
-                      <div className="neomorph-flat p-2">
-                        <Icon className={`w-5 h-5 ${item.color}`} />
+              <div key={`${item.department}-${item.id}`} className="neomorph card-hover p-4 lg:p-6">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 lg:gap-4 mb-2 lg:mb-3 flex-wrap">
+                      <div className="neomorph-flat p-2 flex-shrink-0">
+                        <Icon className={`w-4 h-4 lg:w-5 lg:h-5 ${item.color}`} />
                       </div>
-                      <div>
-                        <h3 className="text-lg font-bold text-gray-700">{item.displayName}</h3>
-                        <p className="text-sm text-gray-500">{item.department}</p>
+                      <div className="min-w-0">
+                        <h3 className="text-sm lg:text-lg font-bold text-gray-700 truncate">{item.displayName}</h3>
+                        <p className="text-xs text-gray-500">{item.department}</p>
                       </div>
                       <StatusBadge status={item.job_status || item.status || item.sourcing_status || 'N/A'} />
                     </div>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mt-4">
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 lg:gap-4 text-sm mt-2 lg:mt-4">
                       {item.client_name && (
                         <div>
                           <p className="text-gray-500">Client</p>
@@ -153,17 +153,18 @@ export default function Archive() {
                       </div>
                     </div>
                   </div>
-                  <div className="flex gap-2 ml-4">
+                  <div className="flex flex-col sm:flex-row gap-2 ml-2 flex-shrink-0">
                     <Button
                       onClick={() => handleUnarchive(item)}
-                      className="neomorph-flat px-4 py-3 transition-all active:neomorph-pressed flex items-center gap-2 text-green-600"
+                      size="sm"
+                      className="neomorph-flat px-3 py-2 transition-all active:neomorph-pressed flex items-center gap-1.5 text-green-600 text-xs"
                       disabled={unarchiveMutation.isLoading}
                     >
-                      <RotateCcw className="w-4 h-4" />
+                      <RotateCcw className="w-3.5 h-3.5" />
                       Restore
                     </Button>
                     <Link to={item.link}>
-                      <Button className="neomorph-flat px-4 py-3 transition-all active:neomorph-pressed text-gray-600">
+                      <Button size="sm" className="neomorph-flat px-3 py-2 transition-all active:neomorph-pressed text-gray-600 text-xs w-full">
                         View
                       </Button>
                     </Link>

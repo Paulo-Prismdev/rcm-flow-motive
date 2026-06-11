@@ -349,7 +349,7 @@ export default function Layout({ children, currentPageName }) {
           }
 
           {/* Page content */}
-          <main className="flex-1 overflow-hidden p-2 md:p-3 lg:p-4 min-h-0 relative pb-16 md:pb-3 lg:pb-4" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'auto' }}>
+          <main className="flex-1 overflow-hidden p-0 md:p-2 lg:p-4 min-h-0 relative pb-16 md:pb-2 lg:pb-4" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'auto' }}>
             {children}
           </main>
         </div>

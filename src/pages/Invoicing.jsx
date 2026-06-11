@@ -93,17 +93,17 @@ export default function Invoicing() {
   const totalOverdueValue = overdue.reduce((sum, i) => sum + (i.invoice_amount || 0), 0);
 
   return (
-    <div className="h-full flex flex-col gap-6 overflow-hidden">
-      <div className="neomorph p-6 flex-shrink-0">
-        <div className="flex items-center justify-between mb-6">
+    <div className="h-full flex flex-col gap-3 lg:gap-6 overflow-hidden">
+      <div className="neomorph p-4 lg:p-6 flex-shrink-0">
+        <div className="flex items-center justify-between mb-4 lg:mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-gray-700">Invoicing</h1>
-            <p className="text-sm text-gray-500 mt-1">Manage invoices across all departments</p>
+            <h1 className="text-lg lg:text-2xl font-bold text-gray-700">Invoicing</h1>
+            <p className="text-sm text-gray-500 mt-0.5">Manage invoices across all departments</p>
           </div>
         </div>
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4 lg:mb-6">
           <div className="neomorph-flat p-4">
             <p className="text-sm text-gray-500 mb-1">Ready to Invoice</p>
             <p className="text-2xl font-bold text-green-600">{readyToInvoice.length}</p>
@@ -126,8 +126,8 @@ export default function Invoicing() {
         </div>
 
         {/* Filters */}
-        <div className="flex gap-4 flex-wrap">
-          <div className="flex-1 min-w-[200px]">
+        <div className="flex flex-col lg:flex-row gap-2 lg:gap-4">
+          <div className="flex-1">
             <Input
               placeholder="Search by reference, client, or invoice number..."
               value={searchTerm}
@@ -138,7 +138,7 @@ export default function Invoicing() {
           <select
             value={filterDepartment}
             onChange={(e) => setFilterDepartment(e.target.value)}
-            className="neomorph-inset px-4 py-3 text-gray-700 border-0 rounded-xl"
+            className="neomorph-inset px-3 py-2 text-gray-700 border-0 rounded-xl text-sm"
           >
             <option value="all">All Departments</option>
             <option value="Claim">Claims</option>
@@ -149,7 +149,7 @@ export default function Invoicing() {
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="neomorph-inset px-4 py-3 text-gray-700 border-0 rounded-xl"
+            className="neomorph-inset px-3 py-2 text-gray-700 border-0 rounded-xl text-sm"
           >
             <option value="all">All Statuses</option>
             <option value="Ready to Invoice">Ready to Invoice</option>
@@ -172,20 +172,20 @@ export default function Invoicing() {
             const Icon = item.icon;
             return (
               <Link to={item.link} key={`${item.type}-${item.id}`}>
-                <div className="neomorph card-hover p-6">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-4 mb-3">
-                        <div className="neomorph-flat p-3">
-                          <Icon className={`w-5 h-5 ${item.color}`} />
+                <div className="neomorph card-hover p-4 lg:p-6">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 lg:gap-4 mb-2 lg:mb-3 flex-wrap">
+                        <div className="neomorph-flat p-2 lg:p-3 flex-shrink-0">
+                          <Icon className={`w-4 h-4 lg:w-5 lg:h-5 ${item.color}`} />
                         </div>
-                        <div>
-                          <h3 className="text-lg font-bold text-gray-700">{item.reference}</h3>
-                          <p className="text-sm text-gray-500">{item.type} - {item.client || 'N/A'}</p>
+                        <div className="min-w-0">
+                          <h3 className="text-sm lg:text-lg font-bold text-gray-700 truncate">{item.reference}</h3>
+                          <p className="text-xs text-gray-500 truncate">{item.type} - {item.client || 'N/A'}</p>
                         </div>
                         <StatusBadge status={item.invoice_status || 'Not Ready for Invoicing'} />
                       </div>
-                      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-sm mt-4">
+                      <div className="grid grid-cols-2 lg:grid-cols-5 gap-2 lg:gap-4 text-sm mt-2 lg:mt-4">
                         <div>
                           <p className="text-gray-500">Invoice Amount</p>
                           <p className="font-medium text-gray-700">

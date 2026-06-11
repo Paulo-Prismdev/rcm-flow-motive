@@ -313,7 +313,7 @@ export default function Dashboard() {
   return (
     <div className="space-y-4 md:space-y-5 font-[Inter,sans-serif]">
       {/* Header Card */}
-      <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-md px-6 py-4">
+      <div className="lg:rounded-2xl lg:border lg:border-slate-200 dark:lg:border-slate-700 bg-white dark:bg-slate-900 lg:shadow-md px-4 lg:px-6 py-3 lg:py-4">
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div>
             <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Dashboard</h1>

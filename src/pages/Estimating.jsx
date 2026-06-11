@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -153,8 +152,8 @@ export default function Estimating() {
           </div>
         </div>
 
-        <div className="flex gap-3 flex-wrap">
-          <div className="flex-1 min-w-[200px]">
+        <div className="flex flex-col sm:flex-row gap-2 lg:gap-3">
+          <div className="flex-1">
             <Input
               placeholder="Search estimates..."
               value={searchTerm}
@@ -205,7 +204,7 @@ export default function Estimating() {
                         </span>
                       )}
                     </div>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+                    <div className="grid grid-cols-2 gap-2 text-xs">
                       <div>
                         <p className="text-gray-500">Repairer</p>
                         <p className="font-medium text-gray-700">{estimate.repairer || '-'}</p>

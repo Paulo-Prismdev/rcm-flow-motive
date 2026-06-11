@@ -180,28 +180,28 @@ export default function Reports() {
   return (
     <div className="h-full flex flex-col gap-4">
       {/* Header */}
-      <div className="glass p-6 flex-shrink-0">
-        <div className="flex items-center justify-between mb-4">
+      <div className="glass p-4 lg:p-6 flex-shrink-0">
+        <div className="flex items-start justify-between mb-4 gap-2">
           <div>
-            <h1 className="text-2xl font-bold">Claims Reports & Analytics</h1>
-            <p className="text-sm text-foreground-muted mt-1">Comprehensive insights into your claims data</p>
+            <h1 className="text-base lg:text-2xl font-bold">Claims Reports & Analytics</h1>
+            <p className="text-xs lg:text-sm text-foreground-muted mt-1">Comprehensive insights into your claims data</p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-shrink-0">
             {hasActiveFilters && (
-              <Button onClick={clearFilters} className="glass-button flex items-center gap-2">
-                <X className="w-4 h-4" />
-                Clear Filters
+              <Button onClick={clearFilters} size="sm" className="glass-button flex items-center gap-1.5 text-xs">
+                <X className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Clear Filters</span>
               </Button>
             )}
-            <Button onClick={handleExport} className="glass-button flex items-center gap-2">
-              <Download className="w-4 h-4" />
-              Export CSV
+            <Button onClick={handleExport} size="sm" className="glass-button flex items-center gap-1.5 text-xs">
+              <Download className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Export CSV</span>
             </Button>
           </div>
         </div>
 
         {/* Filters */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
+        <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-2 lg:gap-3">
           <div>
             <label className="block text-xs text-foreground-muted mb-1">From Date</label>
             <Input
@@ -275,39 +275,39 @@ export default function Reports() {
       <div className="flex-1 overflow-y-auto min-h-0 pr-1">
         <div className="space-y-4">
           {/* KPI Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="glass p-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
+            <div className="glass p-4 lg:p-6">
               <div className="flex items-center justify-between mb-2">
                 <h3 className="text-sm text-foreground-muted">Total Claims</h3>
                 <TrendingUp className="w-5 h-5 text-blue-500" />
               </div>
-              <p className="text-3xl font-bold">{metrics.total}</p>
+              <p className="text-2xl lg:text-3xl font-bold">{metrics.total}</p>
             </div>
 
-            <div className="glass p-6">
+            <div className="glass p-4 lg:p-6">
               <div className="flex items-center justify-between mb-2">
-                <h3 className="text-sm text-foreground-muted">Avg Repair Value</h3>
-                <TrendingUp className="w-5 h-5 text-green-500" />
+                <h3 className="text-xs lg:text-sm text-foreground-muted">Avg Repair Value</h3>
+                <TrendingUp className="w-4 h-4 lg:w-5 lg:h-5 text-green-500" />
               </div>
-              <p className="text-3xl font-bold">£{metrics.avgValue.toLocaleString(undefined, {maximumFractionDigits: 0})}</p>
+              <p className="text-2xl lg:text-3xl font-bold">£{metrics.avgValue.toLocaleString(undefined, {maximumFractionDigits: 0})}</p>
               <p className="text-xs text-foreground-muted mt-1">Total: £{metrics.totalValue.toLocaleString(undefined, {maximumFractionDigits: 0})}</p>
             </div>
 
-            <div className="glass p-6">
+            <div className="glass p-4 lg:p-6">
               <div className="flex items-center justify-between mb-2">
-                <h3 className="text-sm text-foreground-muted">Avg Resolution Time</h3>
-                <TrendingUp className="w-5 h-5 text-purple-500" />
+                <h3 className="text-xs lg:text-sm text-foreground-muted">Avg Resolution</h3>
+                <TrendingUp className="w-4 h-4 lg:w-5 lg:h-5 text-purple-500" />
               </div>
-              <p className="text-3xl font-bold">{metrics.avgResolutionTime.toFixed(1)}</p>
+              <p className="text-2xl lg:text-3xl font-bold">{metrics.avgResolutionTime.toFixed(1)}</p>
               <p className="text-xs text-foreground-muted mt-1">days</p>
             </div>
 
-            <div className="glass p-6">
+            <div className="glass p-4 lg:p-6">
               <div className="flex items-center justify-between mb-2">
-                <h3 className="text-sm text-foreground-muted">Completed Claims</h3>
-                <TrendingUp className="w-5 h-5 text-orange-500" />
+                <h3 className="text-xs lg:text-sm text-foreground-muted">Completed</h3>
+                <TrendingUp className="w-4 h-4 lg:w-5 lg:h-5 text-orange-500" />
               </div>
-              <p className="text-3xl font-bold">{metrics.completedClaims}</p>
+              <p className="text-2xl lg:text-3xl font-bold">{metrics.completedClaims}</p>
               <p className="text-xs text-foreground-muted mt-1">{((metrics.completedClaims / metrics.total) * 100 || 0).toFixed(1)}% of total</p>
             </div>
           </div>

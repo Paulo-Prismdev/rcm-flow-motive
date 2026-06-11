@@ -187,11 +187,18 @@
 
 @media (max-width: 1023px) {
   .app-card {
-    padding: 1rem;
+    padding: 0.875rem;
     border-radius: 0;
     border-left: none;
     border-right: none;
     box-shadow: none;
+  }
+  /* Remove outer container padding on mobile for edge-to-edge layout */
+  .neomorph, .glass {
+    border-radius: 0 !important;
+    border-left: none !important;
+    border-right: none !important;
+    box-shadow: none !important;
   }
 }
 

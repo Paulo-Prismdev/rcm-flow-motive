@@ -214,7 +214,7 @@ export default function BodyshopMap() {
 
   return (
     <div className="h-full flex flex-col gap-3" style={{ position: 'relative', zIndex: 1 }}>
-      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-4 flex-shrink-0">
+      <div className="bg-white dark:bg-gray-900 lg:border lg:border-gray-200 dark:lg:border-gray-800 lg:rounded-xl p-3 lg:p-4 flex-shrink-0">
         <div className="mb-3 flex items-center gap-3">
           <button
             onClick={() => window.history.back()}
@@ -343,7 +343,7 @@ export default function BodyshopMap() {
         </div>
       </div>
 
-      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-3 flex-1 min-h-0" style={{ isolation: 'isolate' }}>
+      <div className="bg-white dark:bg-gray-900 lg:border lg:border-gray-200 dark:lg:border-gray-800 lg:rounded-xl p-0 lg:p-3 flex-1 min-h-0" style={{ isolation: 'isolate' }}>
         {isLoading ? (
           <div className="flex justify-center items-center h-full">
             <Loader className="w-8 h-8 animate-spin text-accent" />
