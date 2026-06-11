@@ -444,21 +444,21 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl max-h-[95vh] p-0 overflow-hidden">
+      <DialogContent className="max-w-6xl max-h-[95vh] p-0 overflow-hidden flex flex-col">
         {/* Header with Steps */}
-        <div className="p-4 border-b border-border">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold flex items-center gap-2">
-              <Building2 className="w-5 h-5 text-accent" />
-              Allocate Job - {claim.job_number || claim.reg}
+        <div className="p-3 lg:p-4 border-b border-border flex-shrink-0">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-base lg:text-xl font-bold flex items-center gap-2">
+              <Building2 className="w-4 h-4 lg:w-5 lg:h-5 text-accent" />
+              <span className="truncate">Allocate - {claim.job_number || claim.reg}</span>
             </h2>
             <Button variant="ghost" size="icon" onClick={onClose}>
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4 lg:w-5 lg:h-5" />
             </Button>
           </div>
           
-          {/* Step Indicators */}
-          <div className="flex items-center gap-2">
+          {/* Step Indicators - Scrollable on mobile */}
+          <div className="flex items-center gap-1 overflow-x-auto pb-1">
             {STEPS.map((step, index) => {
               const StepIcon = step.icon;
               const isActive = index === currentStep;
@@ -467,18 +467,18 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
               return (
                 <React.Fragment key={step.id}>
                   <div 
-                    className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${
+                    className={`flex items-center gap-1.5 px-2 py-1.5 rounded-lg transition-all flex-shrink-0 ${
                       isActive ? 'bg-accent text-accent-foreground' : 
                       isCompleted ? 'bg-green-100 text-green-700' : 
                       'bg-surface text-foreground-muted'
                     }`}
                   >
-                    <StepIcon className="w-4 h-4" />
-                    <span className="text-sm font-medium hidden md:inline">{step.title}</span>
-                    <span className="text-sm font-medium md:hidden">{index + 1}</span>
+                    <StepIcon className="w-3.5 h-3.5 lg:w-4 lg:h-4" />
+                    <span className="text-xs font-medium hidden sm:inline">{step.title}</span>
+                    <span className="text-xs font-medium sm:hidden">{index + 1}</span>
                   </div>
                   {index < STEPS.length - 1 && (
-                    <ChevronRight className="w-4 h-4 text-foreground-muted" />
+                    <ChevronRight className="w-3.5 h-3.5 lg:w-4 lg:h-4 text-foreground-muted flex-shrink-0" />
                   )}
                 </React.Fragment>
               );
@@ -486,8 +486,8 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
           </div>
         </div>
 
-        {/* Step Content */}
-        <div className="p-4 overflow-y-auto" style={{ maxHeight: 'calc(95vh - 200px)' }}>
+        {/* Step Content - Scrollable */}
+        <div className="flex-1 overflow-y-auto p-3 lg:p-4" style={{ minHeight: 0 }}>
           {/* Step 0: Validate Details */}
           {currentStep === 0 && (
             <div className="space-y-4">
@@ -603,56 +603,56 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
           {currentStep === 1 && (
             <div className="space-y-4">
               {isGeocoding && (
-                <div className="p-4 rounded-lg border border-blue-500/30 bg-blue-50/50 flex items-center gap-3">
-                  <Loader className="w-5 h-5 text-blue-500 animate-spin" />
-                  <p className="text-sm">Locating client address on map...</p>
+                <div className="p-3 rounded-lg border border-blue-500/30 bg-blue-50/50 flex items-center gap-2">
+                  <Loader className="w-4 h-4 text-blue-500 animate-spin" />
+                  <p className="text-xs">Locating client...</p>
                 </div>
               )}
 
               {!isGeocoding && geocodeMessage && (
-                <div className={`p-4 rounded-lg border ${
+                <div className={`p-3 rounded-lg border ${
                   geocodeMessage.type === 'success' ? 'border-green-500/30 bg-green-50/50' : 
                   geocodeMessage.type === 'warning' ? 'border-orange-500/30 bg-orange-50/50' : 
                   'border-blue-500/30 bg-blue-50/50'
                 }`}>
-                  <div className="flex items-start gap-3">
+                  <div className="flex items-start gap-2">
                     {geocodeMessage.type === 'success' ? (
-                      <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
+                      <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
                     ) : (
-                      <AlertCircle className="w-5 h-5 text-orange-500 flex-shrink-0" />
+                      <AlertCircle className="w-4 h-4 text-orange-500 flex-shrink-0" />
                     )}
-                    <p className="text-sm">{geocodeMessage.text}</p>
+                    <p className="text-xs">{geocodeMessage.text}</p>
                   </div>
                 </div>
               )}
 
-              {/* Legend */}
-              <div className="flex flex-wrap gap-4 text-sm">
+              {/* Legend - Compact */}
+              <div className="flex flex-wrap gap-2 text-xs">
                 {clientLocation && (
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                    <span>Client: {claim.client_name || 'Client Location'}</span>
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-2 h-2 rounded-full bg-red-500"></div>
+                    <span className="truncate">Client: {claim.client_name || 'Location'}</span>
                   </div>
                 )}
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2 h-2 rounded-full bg-blue-500"></div>
                   <span>Bodyshops ({validBodyshops.length})</span>
                 </div>
                 {selectedBodyshop && (
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                    <span>Selected (30 Mile Radius)</span>
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                    <span>Selected</span>
                   </div>
                 )}
               </div>
 
               {/* Map */}
-              <div className="rounded-xl overflow-hidden border" style={{ height: '400px' }}>
+              <div className="rounded-xl overflow-hidden border" style={{ height: '300px' }}>
                 <MapContainer 
                   center={mapCenter}
                   zoom={mapZoom}
                   style={{ height: '100%', width: '100%' }}
-                  scrollWheelZoom={true}
+                  scrollWheelZoom={false}
                 >
                   <TileLayer
                     attribution='&copy; OpenStreetMap contributors &copy; CARTO'
@@ -691,49 +691,49 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
                 </MapContainer>
               </div>
 
-              {/* Selected Bodyshop Info */}
+              {/* Selected Bodyshop Info - Compact */}
               {selectedBodyshop ? (
-                <div className="p-4 rounded-xl border-2 border-accent bg-accent/5">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <h4 className="font-bold text-lg flex items-center gap-2 text-accent mb-3">
-                        <CheckCircle className="w-5 h-5" />
+                <div className="p-2 lg:p-3 rounded-xl border-2 border-accent bg-accent/5">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-bold text-xs lg:text-sm flex items-center gap-1.5 text-accent mb-1.5">
+                        <CheckCircle className="w-3.5 h-3.5" />
                         Selected Repairer
                       </h4>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <p className="font-semibold text-lg">{selectedBodyshop.name}</p>
-                          <p className="text-sm text-foreground-muted">{selectedBodyshop.contact_name}</p>
-                          <p className="text-sm flex items-center gap-2">
-                            <Phone className="w-4 h-4" />
-                            {selectedBodyshop.phone}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-[11px] lg:text-xs">
+                        <div className="space-y-1">
+                          <p className="font-semibold text-xs lg:text-sm truncate">{selectedBodyshop.name}</p>
+                          <p className="text-foreground-muted truncate">{selectedBodyshop.contact_name}</p>
+                          <p className="flex items-center gap-1 truncate">
+                            <Phone className="w-3 h-3 flex-shrink-0" />
+                            <span className="truncate">{selectedBodyshop.phone}</span>
                           </p>
-                          <p className="text-sm flex items-center gap-2">
-                            <Mail className="w-4 h-4" />
-                            {selectedBodyshop.email}
+                          <p className="flex items-center gap-1 truncate">
+                            <Mail className="w-3 h-3 flex-shrink-0" />
+                            <span className="truncate">{selectedBodyshop.email}</span>
                           </p>
                         </div>
-                        <div>
-                          <p className="text-xs text-foreground-muted mb-1 flex items-center gap-1">
-                            <MapPinned className="w-3 h-3" />
+                        <div className="space-y-1">
+                          <p className="text-[11px] lg:text-xs text-foreground-muted flex items-center gap-1">
+                            <MapPinned className="w-2.5 h-2.5" />
                             Address
                           </p>
-                          <div className="text-sm">
-                            {selectedBodyshop.address_line_1 && <p>{selectedBodyshop.address_line_1}</p>}
-                            {selectedBodyshop.town && <p>{selectedBodyshop.town}</p>}
+                          <div className="text-[11px] lg:text-xs">
+                            {selectedBodyshop.address_line_1 && <p className="truncate">{selectedBodyshop.address_line_1}</p>}
+                            {selectedBodyshop.town && <p className="truncate">{selectedBodyshop.town}</p>}
                             {selectedBodyshop.postcode && <p className="font-semibold">{selectedBodyshop.postcode}</p>}
                           </div>
                         </div>
                       </div>
                     </div>
-                    <Button variant="ghost" size="icon" onClick={() => setSelectedBodyshop(null)}>
-                      <X className="w-4 h-4" />
+                    <Button variant="ghost" size="icon" className="flex-shrink-0 -mt-1 -mr-1" onClick={() => setSelectedBodyshop(null)}>
+                      <X className="w-3.5 h-3.5" />
                     </Button>
                   </div>
                 </div>
               ) : (
-                <div className="text-center text-sm text-foreground-muted p-4 bg-surface rounded-lg">
-                  Click on any blue bodyshop marker to select a repairer
+                <div className="text-center text-xs text-foreground-muted p-2 lg:p-3 bg-surface rounded-lg">
+                  Click on a blue marker to select a repairer
                 </div>
               )}
             </div>
@@ -972,30 +972,37 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
           )}
         </div>
 
-        {/* Footer Navigation */}
-        <div className="p-4 border-t border-border flex justify-between">
+        {/* Footer Navigation - Fixed at bottom with safe spacing */}
+        <div className="p-3 lg:p-4 border-t border-border flex justify-between gap-3 flex-shrink-0 pb-[max(env(safe-area-inset-bottom),1rem)]">
           <Button
             variant="outline"
+            size="sm"
             onClick={() => currentStep === 0 ? onClose() : setCurrentStep(currentStep - 1)}
+            className="flex-1 max-w-[140px]"
           >
-            <ChevronLeft className="w-4 h-4 mr-2" />
-            {currentStep === 0 ? 'Cancel' : 'Back'}
+            <ChevronLeft className="w-3.5 h-3.5 mr-1" />
+            <span className="hidden sm:inline">{currentStep === 0 ? 'Cancel' : 'Back'}</span>
+            <span className="sm:hidden">{currentStep === 0 ? 'Cancel' : 'Back'}</span>
           </Button>
 
           {currentStep === 0 && (
             <Button
+              size="sm"
               onClick={handleSaveValidation}
               disabled={missingFields.length > 0 || isSavingValidation}
+              className="flex-1 max-w-[140px]"
             >
               {isSavingValidation ? (
                 <>
-                  <Loader className="w-4 h-4 mr-2 animate-spin" />
-                  Saving...
+                  <Loader className="w-3.5 h-3.5 mr-1 animate-spin" />
+                  <span className="hidden sm:inline">Saving...</span>
+                  <span className="sm:hidden">Wait...</span>
                 </>
               ) : (
                 <>
-                  Save & Continue
-                  <ChevronRight className="w-4 h-4 ml-2" />
+                  <span className="hidden sm:inline">Save & Continue</span>
+                  <span className="sm:hidden">Save</span>
+                  <ChevronRight className="w-3.5 h-3.5 ml-1" />
                 </>
               )}
             </Button>
@@ -1003,11 +1010,23 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
 
           {currentStep > 0 && currentStep < STEPS.length - 1 && (
             <Button
+              size="sm"
               onClick={() => setCurrentStep(currentStep + 1)}
               disabled={!canProceed()}
+              className="flex-1 max-w-[140px]"
             >
-              {currentStep === 2 || currentStep === 3 ? 'Skip / Next' : 'Next'}
-              <ChevronRight className="w-4 h-4 ml-2" />
+              {currentStep === 2 || currentStep === 3 ? (
+                <>
+                  <span className="hidden sm:inline">Skip / Next</span>
+                  <span className="sm:hidden">Next</span>
+                </>
+              ) : (
+                <>
+                  <span className="hidden sm:inline">Next</span>
+                  <span className="sm:hidden">Next</span>
+                </>
+              )}
+              <ChevronRight className="w-3.5 h-3.5 ml-1" />
             </Button>
           )}
         </div>

@@ -485,3 +485,8 @@ button:not(.btn-sm):not(.btn-icon),
 .dark textarea::placeholder {
   color: #94A3B8 !important;
 }
+
+/* Safe area insets for mobile devices (iPhone home indicator) */
+.pb-safe {
+  padding-bottom: max(env(safe-area-inset-bottom), 1rem);
+}
