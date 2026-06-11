@@ -4,6 +4,29 @@ import { formatUKRegistration } from '../shared/formatRegistration';
 import StatusBadge from '../shared/StatusBadge';
 import UpdateStatusBadge from '../shared/UpdateStatusBadge';
 
+const SECTION_FIELDS = {
+  status: ['claim_type', 'loss_date', 'vehicle_use', 'incident_location', 'circumstances'],
+  client: ['client_name', 'client_phone', 'client_email', 'client_address_line_1', 'client_town', 'client_postcode'],
+  insurance: ['insurer', 'claim_ref'],
+  driver: ['driver_contact_name', 'driver_contact_phone', 'driver_contact_email'],
+  thirdParty: ['tp_name', 'tp_phone', 'tp_reg', 'tp_insurer'],
+  vehicle: ['make_model', 'vehicle_colour', 'vehicle_fuel_type', 'vehicle_type'],
+  vehicleDamage: ['vehicle_location', 'vehicle_damage'],
+  referrer: ['referrer', 'referrer_ref', 'file_handler'],
+  bodyshop: ['bodyshop'],
+  financials: ['estimate_cost_net', 'authority_cost_net', 'final_repair_cost'],
+  dates: ['date_received', 'loss_date', 'booking_in_date', 'completion_date'],
+  excessContribution: ['excess_contribution_amount', 'excess_contribution_method'],
+  indemnity: ['indemnity_driver_dob', 'indemnity_registered_owner'],
+};
+
+const isEmpty = (sectionId, claim) => {
+  const fields = SECTION_FIELDS[sectionId] || [];
+  return fields.some(f => claim[f] === null || claim[f] === undefined || claim[f] === '');
+};
+
+const label = (text, sectionId, claim) => isEmpty(sectionId, claim) ? `${text} ●` : text;
+
 export default function ClaimDetailMobileHeader({
   claim,
   isClosedStatus,
@@ -112,17 +135,19 @@ export default function ClaimDetailMobileHeader({
           className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-200 px-3"
           style={{ height: 36, fontSize: 14 }}
         >
-          <option value="status">Status &amp; Overview</option>
+          <option value="status">{label('Status & Overview', 'status', claim)}</option>
           <option value="thirdpartyPursuit">Third Party Pursuit</option>
-          <option value="parties">Parties Details</option>
-          <option value="vehicle">Vehicle Details</option>
-          <option value="vehicleDamage">Vehicle Damage</option>
-          <option value="excessContribution">Excess Contribution</option>
-          <option value="referrer">Referrer Details</option>
-          <option value="indemnity">Indemnity Details</option>
-          <option value="financials">Financials</option>
-          <option value="dates">Key Dates</option>
-          <option value="bodyshop">Bodyshop Details</option>
+          <option value="client">{label('Client Details', 'client', claim)}</option>
+          <option value="driver">{label('Driver Details', 'driver', claim)}</option>
+          <option value="thirdParty">{label('Third Party Details', 'thirdParty', claim)}</option>
+          <option value="vehicle">{label('Vehicle Details', 'vehicle', claim)}</option>
+          <option value="vehicleDamage">{label('Vehicle Damage', 'vehicleDamage', claim)}</option>
+          <option value="excessContribution">{label('Excess Contribution', 'excessContribution', claim)}</option>
+          <option value="referrer">{label('Referrer Details', 'referrer', claim)}</option>
+          <option value="indemnity">{label('Indemnity Details', 'indemnity', claim)}</option>
+          <option value="financials">{label('Financials', 'financials', claim)}</option>
+          <option value="dates">{label('Key Dates', 'dates', claim)}</option>
+          <option value="bodyshop">{label('Bodyshop Details', 'bodyshop', claim)}</option>
           <option value="estimate">Estimate Details</option>
           <option value="backorderedParts">Backordered Parts</option>
         </select>
