@@ -113,7 +113,7 @@ const EditableSection = ({ title, icon: Icon, claim, onUpdate, children, EditCom
     );
 };
 
-function DetailRow({ label, value, isCurrency = false, isDate = false, isStatus = false, isRequired = false }) {
+function DetailRow({ label, value, isCurrency = false, isDate = false, isStatus = false }) {
     let displayValue = value;
     if (isCurrency && typeof value === 'number') {
         displayValue = `£${value.toFixed(2)}`;
@@ -131,12 +131,11 @@ function DetailRow({ label, value, isCurrency = false, isDate = false, isStatus 
     }
 
     return (
-        <div className="py-2 px-3 rounded-[8px] hover:bg-muted/50 transition-colors">
-            <div className="text-[11px] font-medium text-muted-foreground mb-0.5 flex items-center gap-1.5">
+        <div className={`py-2 px-3 rounded-[8px] transition-colors ${isEmpty ? 'bg-amber-50 dark:bg-amber-900/20 border border-amber-300 dark:border-amber-700' : 'hover:bg-muted/50'}`}>
+            <div className="text-[11px] font-medium text-muted-foreground mb-0.5">
                 {label}
-                {isRequired && isEmpty && <span className="w-2 h-2 rounded-full bg-gold flex-shrink-0" title="Required field"></span>}
             </div>
-            <div className={`text-sm font-medium text-foreground ${(isCurrency || (typeof value === 'number')) ? 'tabular-nums' : ''}`}>
+            <div className={`text-sm font-medium ${isEmpty ? 'text-amber-500' : 'text-foreground'} ${(isCurrency || (typeof value === 'number')) ? 'tabular-nums' : ''}`}>
                 {isStatus ? <StatusBadge status={displayValue} /> : displayValue}
             </div>
         </div>
@@ -148,6 +147,24 @@ import ActivityLogSection from '../shared/ActivityLogSection';
 import TimeLogsModal from '../shared/TimeLogsModal';
 import ActivityLogModal from '../shared/ActivityLogModal';
 import { logActivity, logChanges } from '../shared/useActivityLogger';
+
+const SECTION_FIELDS = {
+  status: ['claim_type', 'loss_date', 'vehicle_use', 'incident_location', 'circumstances'],
+  parties: ['client_name', 'client_phone', 'client_email', 'client_address_line_1', 'client_town', 'client_postcode', 'insurer', 'claim_ref'],
+  vehicle: ['make_model', 'vehicle_colour', 'vehicle_fuel_type', 'vehicle_type'],
+  vehicleDamage: ['vehicle_location', 'vehicle_damage'],
+  referrer: ['referrer', 'referrer_ref', 'file_handler'],
+  bodyshop: ['bodyshop'],
+  financials: ['estimate_cost_net', 'authority_cost_net', 'final_repair_cost'],
+  dates: ['date_received', 'loss_date', 'booking_in_date', 'completion_date'],
+  excessContribution: ['excess_contribution_amount', 'excess_contribution_method'],
+  indemnity: ['indemnity_driver_dob', 'indemnity_registered_owner'],
+};
+
+const isSectionEmpty = (sectionId, claim) => {
+  const fields = SECTION_FIELDS[sectionId] || [];
+  return fields.some(f => claim[f] === null || claim[f] === undefined || claim[f] === '');
+};
 
 const DETAIL_SECTIONS = [
   { id: 'status', label: 'Status & Overview', icon: Clock },
@@ -1352,7 +1369,10 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                   className={selectedSection === section.id ? 'bg-glass-hover' : ''}
                 >
                   <section.icon className="w-4 h-4 mr-2" />
-                  {section.label}
+                  <span className="flex-1">{section.label}</span>
+                  {isSectionEmpty(section.id, claim) && (
+                    <span className="w-2 h-2 rounded-full bg-amber-400 flex-shrink-0 ml-2" />
+                  )}
                 </DropdownMenuItem>
               ))}
             </DropdownMenuContent>
