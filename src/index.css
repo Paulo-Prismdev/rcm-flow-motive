@@ -185,10 +185,13 @@
   padding: 1.5rem;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1023px) {
   .app-card {
     padding: 1rem;
-    border-radius: calc(var(--radius) - 2px);
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    box-shadow: none;
   }
 }
 

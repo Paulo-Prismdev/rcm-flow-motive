@@ -166,15 +166,16 @@ export default function Layout({ children, currentPageName }) {
           w-56 bg-[#131d47] text-white
           transition-transform duration-300
           ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
-          lg:relative lg:translate-x-0 lg:flex-shrink-0
+          md:relative md:translate-x-0 md:flex-shrink-0 md:w-12
+          lg:w-56
         `}>
           {/* Logo */}
-          <div className="flex items-center gap-3 px-4 py-3.5 border-b border-white/10">
-            <img src={companyLogo} alt="RCM" className="h-8 w-auto object-contain" />
+          <div className="flex items-center gap-3 px-4 py-3.5 border-b border-white/10 md:justify-center lg:justify-start">
+            <img src={companyLogo} alt="RCM" className="h-8 w-auto object-contain md:hidden lg:block" />
+            <div className="hidden md:flex lg:hidden items-center justify-center w-8 h-8 rounded-lg bg-white/10 text-white font-bold text-xs">R</div>
             <button
               onClick={() => setMobileMenuOpen(false)}
-              className="ml-auto lg:hidden text-white/60 hover:text-white">
-              
+              className="ml-auto md:hidden text-white/60 hover:text-white">
               <X className="w-5 h-5" />
             </button>
           </div>
@@ -188,15 +189,15 @@ export default function Layout({ children, currentPageName }) {
                   key={dept.name}
                   to={dept.url}
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`flex items-center gap-3 px-3 py-2 rounded-[10px] text-sm font-medium transition-all ${
+                  title={dept.name}
+                  className={`flex items-center gap-3 px-3 py-2 rounded-[10px] text-sm font-medium transition-all md:justify-center md:px-2 lg:justify-start lg:px-3 ${
                   isActive ?
                   'bg-white/10 text-white border border-white/15' :
                   'text-white/60 hover:bg-white/8 hover:text-white/90'}`
                   }>
-                  
                   <dept.icon className="w-4 h-4 flex-shrink-0" />
-                  <span>{dept.name}</span>
-                  {isActive && <ChevronRight className="w-3 h-3 ml-auto opacity-60" />}
+                  <span className="md:hidden lg:block">{dept.name}</span>
+                  {isActive && <ChevronRight className="w-3 h-3 ml-auto opacity-60 md:hidden lg:block" />}
                 </Link>);
 
             })}
@@ -204,24 +205,28 @@ export default function Layout({ children, currentPageName }) {
             {/* Management section */}
             {(isAdmin || canManagePermissions) &&
             <>
-                <div className="pt-4 pb-1 px-3">
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-white/30">Management</p>
+                <div className="pt-4 pb-1 px-3 md:px-2 lg:px-3">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-white/30 md:hidden lg:block">Management</p>
+                  <div className="hidden md:block lg:hidden border-t border-white/10 mt-1" />
                 </div>
                 {isAdmin &&
               <>
                     <Link to={createPageUrl("Settings")} onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center gap-3 px-3 py-2 rounded-[10px] text-sm font-medium text-white/60 hover:bg-white/8 hover:text-white/90 transition-all">
-                      <Settings className="w-4 h-4" /><span>Settings</span>
+                title="Settings"
+                className="flex items-center gap-3 px-3 py-2 rounded-[10px] text-sm font-medium text-white/60 hover:bg-white/8 hover:text-white/90 transition-all md:justify-center md:px-2 lg:justify-start lg:px-3">
+                      <Settings className="w-4 h-4 flex-shrink-0" /><span className="md:hidden lg:block">Settings</span>
                     </Link>
                     <Link to={createPageUrl("Archive")} onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center gap-3 px-3 py-2 rounded-[10px] text-sm font-medium text-white/60 hover:bg-white/8 hover:text-white/90 transition-all">
-                      <Archive className="w-4 h-4" /><span>Archive</span>
+                title="Archive"
+                className="flex items-center gap-3 px-3 py-2 rounded-[10px] text-sm font-medium text-white/60 hover:bg-white/8 hover:text-white/90 transition-all md:justify-center md:px-2 lg:justify-start lg:px-3">
+                      <Archive className="w-4 h-4 flex-shrink-0" /><span className="md:hidden lg:block">Archive</span>
                     </Link>
 
                     {isSuperAdmin &&
                 <Link to={createPageUrl("FeedbackHub")} onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center gap-3 px-3 py-2 rounded-[10px] text-sm font-medium text-white/60 hover:bg-white/8 hover:text-white/90 transition-all">
-                        <MessageSquare className="w-4 h-4" /><span>Feedback Hub</span>
+                title="Feedback Hub"
+                className="flex items-center gap-3 px-3 py-2 rounded-[10px] text-sm font-medium text-white/60 hover:bg-white/8 hover:text-white/90 transition-all md:justify-center md:px-2 lg:justify-start lg:px-3">
+                        <MessageSquare className="w-4 h-4 flex-shrink-0" /><span className="md:hidden lg:block">Feedback Hub</span>
                       </Link>
                 }
                   </>
@@ -231,18 +236,16 @@ export default function Layout({ children, currentPageName }) {
           </nav>
 
           {/* User footer */}
-          <div className="border-t border-white/10 px-3 py-3">
+          <div className="border-t border-white/10 px-3 py-3 md:px-1 lg:px-3">
             <UserProfile
               customTrigger={
-              <div className="flex items-center gap-3 group cursor-pointer w-full hover:bg-white/5 p-2 -mx-2 rounded-lg transition-colors">
+              <div className="flex items-center gap-3 group cursor-pointer w-full hover:bg-white/5 p-2 -mx-2 rounded-lg transition-colors md:justify-center md:mx-0 lg:justify-start lg:-mx-2">
                   <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
                     {currentUser?.profile_picture_url ?
                   <img
                     src={currentUser.profile_picture_url}
                     alt="Profile"
                     className="w-full h-full object-cover" /> :
-
-
                   <div className={`w-full h-full flex items-center justify-center ${getAvatarColor(currentUser?.email)}`}>
                         <span className="text-sm font-bold text-white">
                           {getUserInitials(currentUser)}
@@ -250,30 +253,28 @@ export default function Layout({ children, currentPageName }) {
                       </div>
                   }
                   </div>
-                  <div className="flex-1 min-w-0">
+                  <div className="flex-1 min-w-0 md:hidden lg:block">
                     <p className="text-sm font-medium text-white truncate">{currentUser?.full_name || 'User'}</p>
                     <p className="text-xs text-white/40 truncate">{currentUser?.email || ''}</p>
                     <p className="text-[10px] text-white/30 truncate mt-0.5">Click for profile & logout</p>
                   </div>
                 </div>
               } />
-            
           </div>
         </aside>
 
         {/* Mobile overlay */}
         {mobileMenuOpen &&
         <div
-          className="fixed inset-0 z-[9998] bg-black/50 lg:hidden"
+          className="fixed inset-0 z-[9998] bg-black/50 md:hidden"
           onClick={() => setMobileMenuOpen(false)} />
-
         }
 
         {/* ── MAIN CONTENT ── */}
         <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
           {/* ── MOBILE bottom tab bar (< lg) ── */}
           {!claimDetailOpen &&
-          <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 flex items-center justify-around px-2 safe-area-inset-bottom" style={{ height: '60px', zIndex: 1000 }}>
+          <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 flex items-center justify-around px-2 safe-area-inset-bottom" style={{ height: '60px', zIndex: 1000 }}>
               <button onClick={() => setMobileMenuOpen((prev) => !prev)} className="flex flex-col items-center justify-center gap-0.5 p-3 text-gray-500 dark:text-gray-400 touch-manipulation min-w-[44px] min-h-[44px]">
                 <Menu className="w-5 h-5" />
                 <span className="text-[9px]">Menu</span>
@@ -310,7 +311,7 @@ export default function Layout({ children, currentPageName }) {
 
               {/* ── DESKTOP top bar (≥ lg) ── */}
           {!claimDetailOpen &&
-          <header className="hidden lg:flex flex-shrink-0 dark:bg-gray-900/95 border-b border-gray-100 dark:border-gray-800/80 items-center gap-3 px-5 relative z-30 backdrop-blur-sm bg-[hsl(var(--background))]" style={{ height: '48px', minHeight: '48px' }}>
+          <header className="hidden md:flex flex-shrink-0 dark:bg-gray-900/95 border-b border-gray-100 dark:border-gray-800/80 items-center gap-3 px-5 relative z-30 backdrop-blur-sm bg-[hsl(var(--background))]" style={{ height: '48px', minHeight: '48px' }}>
               <div className="flex-1" />
               <div className="flex items-center gap-2">
                 <button
@@ -348,7 +349,7 @@ export default function Layout({ children, currentPageName }) {
           }
 
           {/* Page content */}
-          <main className="flex-1 overflow-hidden p-3 lg:p-4 min-h-0 relative lg:pb-4 pb-16" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'auto' }}>
+          <main className="flex-1 overflow-hidden p-2 md:p-3 lg:p-4 min-h-0 relative pb-16 md:pb-3 lg:pb-4" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'auto' }}>
             {children}
           </main>
         </div>
