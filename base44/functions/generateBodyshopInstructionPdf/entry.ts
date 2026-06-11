@@ -89,57 +89,26 @@ Deno.serve(async (req) => {
     };
 
     // ── HEADER ──
-    const logoUrl = 'https://media.base44.com/images/public/68ee39fb8915b1b539e13c59/b2cb057e2_RCMAutomotiveLogoGreenAutomotivewithHLights.jpg';
-    let logoDataUrl = null;
-    try {
-      const logoRes = await fetch(logoUrl, {
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (compatible; PDF-Generator/1.0)',
-          'Accept': 'image/jpeg,image/*,*/*'
-        }
-      });
-      console.log('Logo fetch status:', logoRes.status);
-      if (logoRes.ok) {
-        const logoBuffer = await logoRes.arrayBuffer();
-        const bytes = new Uint8Array(logoBuffer);
-        let binary = '';
-        for (let i = 0; i < bytes.byteLength; i++) {
-          binary += String.fromCharCode(bytes[i]);
-        }
-        const logoBase64 = btoa(binary);
-        logoDataUrl = `data:image/jpeg;base64,${logoBase64}`;
-        console.log('Logo loaded, base64 length:', logoBase64.length);
-      } else {
-        console.warn('Logo fetch failed with status:', logoRes.status);
-      }
-    } catch (e) {
-      console.warn('Could not load logo:', e.message);
-    }
-
+    // ── HEADER ──
     doc.setFillColor(19, 29, 71); // RCM navy
-    doc.rect(leftMargin, 10, maxWidth, 18, 'F');
-    if (logoDataUrl) {
-      doc.addImage(logoDataUrl, 'JPEG', leftMargin + 3, 12, 50, 14);
-    } else {
-      doc.setTextColor(255, 255, 255);
-      doc.setFontSize(13);
-      doc.setFont('helvetica', 'bold');
-      doc.text('RCM Automotive', leftMargin + 4, 21);
-    }
+    doc.rect(leftMargin, 10, maxWidth, 14, 'F');
     doc.setTextColor(255, 255, 255);
+    doc.setFontSize(13);
+    doc.setFont('helvetica', 'bold');
+    doc.text('RCM Automotive', leftMargin + 4, 20);
     doc.setFontSize(9);
     doc.setFont('helvetica', 'normal');
-    doc.text('Repairer Instruction', rightMargin - 2, 21, { align: 'right' });
+    doc.text('Repairer Instruction', rightMargin - 2, 20, { align: 'right' });
 
     // Claim reference bar
     doc.setFillColor(240, 240, 240);
-    doc.rect(leftMargin, 29, maxWidth, 8, 'F');
+    doc.rect(leftMargin, 25, maxWidth, 8, 'F');
     doc.setTextColor(0, 0, 0);
     doc.setFontSize(9);
     doc.setFont('helvetica', 'bold');
-    doc.text(`RCM Claim Reference: ${claim.job_number || 'N/A'}`, leftMargin + 4, 34.5);
+    doc.text(`RCM Claim Reference: ${claim.job_number || 'N/A'}`, leftMargin + 4, 30.5);
 
-    let yPos = 42;
+    let yPos = 38;
 
     // ── SECTION 1: Client & Repairer Details ──
     doc.setFillColor(19, 29, 71);
