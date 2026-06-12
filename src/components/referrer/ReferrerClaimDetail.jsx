@@ -83,6 +83,8 @@ const DETAIL_SECTIONS = [
   { id: 'thirdParty',      label: 'Third Party Details',icon: Users },
   { id: 'bodyshop',        label: 'Bodyshop Details',   icon: Wrench },
   { id: 'backorderedParts',label: 'Backordered Parts',  icon: Package },
+  { id: 'documents',       label: 'Documents',          icon: FileText },
+  { id: 'images',          label: 'Images',             icon: Image },
 ];
 
 function getFileName(url) {
@@ -361,6 +363,59 @@ export default function ReferrerClaimDetail({ claim, onClose }) {
               <DetailRow label="Bodyshop Email" value={claim.bodyshop_email} />
               <DetailRow label="Authorising Party" value={claim.authorising_party} />
             </div>
+          </div>
+        );
+
+      case 'documents':
+        return (
+          <div className="neomorph-flat p-4 md:p-6">
+            <div className="flex items-center gap-3 mb-4"><FileText className="w-5 h-5 text-gold" /><h3 className="font-bold">Documents</h3></div>
+            {documents.length === 0 ? (
+              <p className="text-center text-muted-foreground py-8 text-sm">No documents attached to this claim.</p>
+            ) : (
+              <div className="space-y-2">
+                {documents.map((url, idx) => {
+                  const fileName = getFileName(url);
+                  return (
+                    <a
+                      key={idx}
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-between p-3 rounded-xl border border-border hover:bg-surface-hover transition-colors group"
+                    >
+                      <div className="flex items-center gap-3">
+                        <FileText className="w-5 h-5 text-primary group-hover:text-primary/80" />
+                        <span className="text-sm font-medium truncate max-w-[200px] md:max-w-md">{fileName}</span>
+                      </div>
+                      <ExternalLink className="w-4 h-4 text-muted-foreground" />
+                    </a>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        );
+
+      case 'images':
+        return (
+          <div className="neomorph-flat p-4 md:p-6">
+            <div className="flex items-center gap-3 mb-4"><Image className="w-5 h-5 text-gold" /><h3 className="font-bold">Images</h3></div>
+            {images.length === 0 ? (
+              <p className="text-center text-muted-foreground py-8 text-sm">No images attached to this claim.</p>
+            ) : (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                {images.map((url, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setLightboxUrl(url)}
+                    className="aspect-square rounded-xl overflow-hidden border border-border hover:ring-2 hover:ring-primary/50 transition-all"
+                  >
+                    <img src={url} alt={`Claim image ${idx + 1}`} className="w-full h-full object-cover" />
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         );
 
