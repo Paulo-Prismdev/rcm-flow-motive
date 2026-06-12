@@ -1053,7 +1053,6 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
               <DetailRow label="Bodyshop" value={claim.bodyshop} />
               <DetailRow label="Bodyshop Email" value={claim.bodyshop_email} />
-              <DetailRow label="Authorising Party" value={claim.authorising_party} />
             </div>
             
             {/* Instruction PDF Download - Only show if there's a PDF */}

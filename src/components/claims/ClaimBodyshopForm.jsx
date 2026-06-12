@@ -228,14 +228,6 @@ export default function ClaimBodyshopForm({ claim, onSave, onCancel }) {
                             placeholder="Auto-filled from selection"
                         />
                     </div>
-                    <div>
-                        <label className="text-sm text-gray-500">Authorising Party</label>
-                        <Input 
-                            value={formData.authorising_party} 
-                            onChange={e => handleChange('authorising_party', e.target.value)} 
-                            className="neomorph-inset" 
-                        />
-                    </div>
                 </div>
                 <div className="flex justify-end gap-3 pt-4">
                     <Button onClick={onCancel} className="neomorph-flat">Cancel</Button>
