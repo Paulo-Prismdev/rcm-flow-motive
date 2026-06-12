@@ -105,7 +105,7 @@ const EditableSection = ({ title, icon: Icon, claim, onUpdate, children, EditCom
             </div>
             <div className="">
                 {isEditing ? (
-                    EditComponent({ claim, onSave: handleSave, onCancel: () => setIsEditing(false) })
+                    <EditComponent claim={claim} onSave={handleSave} onCancel={() => setIsEditing(false)} />
                 ) : (
                     children
                 )}
