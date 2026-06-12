@@ -123,22 +123,20 @@ export default function FinancialSummary({ claim, onClaimUpdated }) {
 
     const handleRevertInvoiced = async () => {
         if (!window.confirm('Mark this claim as Not Ready for Invoicing? This will allow you to make changes and resend the accounts email.')) return;
+        await base44.entities.Claim.update(claim.id, {
+            invoice_status: 'Not Ready for Invoicing',
+            invoice_sent_date: null,
+        });
         try {
-            await base44.entities.Claim.update(claim.id, {
-                invoice_status: 'Not Ready for Invoicing',
-                invoice_sent_date: null,
-            });
             await base44.entities.ActivityLog.create({
                 parent_id: claim.id,
                 parent_type: 'Claim',
                 action: 'Invoice Status Reverted',
                 description: 'Invoice status reverted from Invoiced to Not Ready for Invoicing.',
             });
-            toast({ title: 'Reverted', description: 'Invoice status reset. You can now resend the email.' });
-            if (onClaimUpdated) onClaimUpdated({ ...claim, invoice_status: 'Not Ready for Invoicing', invoice_sent_date: null });
-        } catch (err) {
-            toast({ title: 'Error', description: 'Failed to revert status.', variant: 'destructive' });
-        }
+        } catch (_) { /* activity log is best-effort */ }
+        toast({ title: 'Reverted', description: 'Invoice status reset. You can now resend the email.' });
+        if (onClaimUpdated) onClaimUpdated({ ...claim, invoice_status: 'Not Ready for Invoicing', invoice_sent_date: null });
     };
 
     const buildEmailBody = () => {
