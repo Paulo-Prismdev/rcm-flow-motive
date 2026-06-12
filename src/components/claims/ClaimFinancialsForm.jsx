@@ -6,7 +6,6 @@ export default function ClaimFinancialsForm({ claim, onSave, onCancel }) {
     const [formData, setFormData] = useState({
         final_repair_cost: claim.final_repair_cost ?? '',
         referral_fee_repairer: claim.referral_fee_repairer ?? '',
-        total_invoice_repairer: claim.total_invoice_repairer ?? '',
         invoice_notes: claim.invoice_notes || '',
         external_invoice_ref: claim.external_invoice_ref || '',
     });
@@ -17,7 +16,7 @@ export default function ClaimFinancialsForm({ claim, onSave, onCancel }) {
 
     const handleSave = () => {
         const data = { ...formData };
-        ['final_repair_cost', 'referral_fee_repairer', 'total_invoice_repairer'].forEach(f => {
+        ['final_repair_cost', 'referral_fee_repairer'].forEach(f => {
             data[f] = data[f] !== '' ? parseFloat(data[f]) : null;
         });
         onSave(data);
@@ -33,10 +32,6 @@ export default function ClaimFinancialsForm({ claim, onSave, onCancel }) {
                 <div>
                     <label className="text-sm text-gray-500">Repairer Referral Fee (%)</label>
                     <Input type="number" step="0.01" value={formData.referral_fee_repairer} onChange={e => handleChange('referral_fee_repairer', e.target.value)} className="neomorph-inset" placeholder="e.g. 20" />
-                </div>
-                <div>
-                    <label className="text-sm text-gray-500">Total Invoice to Repairer (£)</label>
-                    <Input type="number" step="0.01" value={formData.total_invoice_repairer} onChange={e => handleChange('total_invoice_repairer', e.target.value)} className="neomorph-inset" />
                 </div>
                 <div>
                     <label className="text-sm text-gray-500">External Invoice Ref</label>
