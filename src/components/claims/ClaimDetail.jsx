@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Button } from "@/components/ui/button";
 import {
     ArrowLeft,
@@ -223,6 +223,10 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
   const [isBackorderedPartsModalOpen, setIsBackorderedPartsModalOpen] = useState(false);
 
   const canEdit = true;
+
+  const ClientEditComponent = useCallback((props) => <ClaimPartiesForm {...props} mode="client" />, []);
+  const DriverEditComponent = useCallback((props) => <ClaimPartiesForm {...props} mode="driver" />, []);
+  const ThirdPartyEditComponent = useCallback((props) => <ClaimPartiesForm {...props} mode="thirdParty" />, []);
 
   const isClosedStatus = ['Completed', 'Cancelled', 'Total Loss'].includes(claim.job_status);
 
@@ -707,7 +711,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
 
       case 'client':
         return (
-          <EditableSection title="Client Details" icon={Users} claim={claim} onUpdate={handleUpdate} EditComponent={(props) => <ClaimPartiesForm {...props} mode="client" />} canEdit={canEdit}>
+          <EditableSection title="Client Details" icon={Users} claim={claim} onUpdate={handleUpdate} EditComponent={ClientEditComponent} canEdit={canEdit}>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
               <DetailRow label="Client Name" value={claim.client_name} />
               <DetailRow label="Phone" value={claim.client_phone} />
@@ -746,7 +750,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
 
       case 'driver':
         return (
-          <EditableSection title="Driver Details" icon={Users} claim={claim} onUpdate={handleUpdate} EditComponent={(props) => <ClaimPartiesForm {...props} mode="driver" />} canEdit={canEdit}>
+          <EditableSection title="Driver Details" icon={Users} claim={claim} onUpdate={handleUpdate} EditComponent={DriverEditComponent} canEdit={canEdit}>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
               <DetailRow label="Driver Name" value={claim.driver_contact_name} />
               <DetailRow label="Driver Phone" value={claim.driver_contact_phone} />
@@ -769,7 +773,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
 
       case 'thirdParty':
         return (
-          <EditableSection title="Third Party Details" icon={Users} claim={claim} onUpdate={handleUpdate} EditComponent={(props) => <ClaimPartiesForm {...props} mode="thirdParty" />} canEdit={canEdit}>
+          <EditableSection title="Third Party Details" icon={Users} claim={claim} onUpdate={handleUpdate} EditComponent={ThirdPartyEditComponent} canEdit={canEdit}>
             {(claim.tp_name || claim.tp_reg) ? (
               <div>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
