@@ -1003,7 +1003,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
       case 'financials':
         return (
           <EditableSection title="Financials" icon={DollarSign} claim={claim} onUpdate={handleUpdate} EditComponent={ClaimFinancialsForm} canEdit={canEdit}>
-            <FinancialSummary claim={claim} />
+            <FinancialSummary claim={claim} onClaimUpdated={(updated) => handleUpdate(updated)} />
           </EditableSection>
         );
 

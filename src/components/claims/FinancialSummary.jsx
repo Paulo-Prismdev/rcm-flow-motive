@@ -166,7 +166,7 @@ export default function FinancialSummary({ claim, onClaimUpdated }) {
                 parent_type: 'Claim',
                 action: 'Invoice Email Sent',
                 description: `Accounts email sent to ${ACCOUNTS_EMAIL}. Invoice status updated to Invoiced. Final repair cost: ${fmt(calc.totalInc)}.`,
-                user_email: '',
+    
             });
 
             toast({ title: 'Email triggered', description: 'Invoice status updated to Invoiced.' });
