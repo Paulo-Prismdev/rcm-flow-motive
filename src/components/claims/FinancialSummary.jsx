@@ -104,13 +104,8 @@ export default function FinancialSummary({ claim }) {
 
     return (
         <div className="space-y-4">
-            {/* Summary Cards */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
-                <SummaryCard label="Final Repair (inc. VAT)" value={fmt(calc.totalInc)} sub={`Ex VAT: ${fmt(calc.totalEx)} | VAT: ${fmt(calc.vatContent)}`} color="blue" />
-                <SummaryCard label="Client Liability" value={fmt(calc.clientLiability)} sub={calc.clientVat > 0 ? `Inc. VAT: ${fmt(calc.clientVat)}` : 'Excess only (non-VAT)'} color="yellow" />
-                <SummaryCard label="Referrer Payment" value={fmt(calc.referrerGross)} sub={`Ex VAT: ${fmt(calc.referrerEx)} | VAT: ${fmt(calc.referrerVat)}`} color="green" />
-                <SummaryCard label="Repairer Charge" value={fmt(calc.repairerGross)} sub={`Ex VAT: ${fmt(calc.repairerEx)} | VAT: ${fmt(calc.repairerVat)}`} color="purple" />
-            </div>
+            {/* Summary Card — Final Repair only */}
+            <SummaryCard label="Final Repair (inc. VAT)" value={fmt(calc.totalInc)} sub={`Ex VAT: ${fmt(calc.totalEx)} | VAT: ${fmt(calc.vatContent)}`} color="blue" />
 
             {/* Party Breakdown */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
