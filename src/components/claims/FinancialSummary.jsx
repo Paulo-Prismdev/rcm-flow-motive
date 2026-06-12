@@ -24,14 +24,15 @@ function SummaryCard({ label, value, color }) {
     );
 }
 
-function CheckItem({ label, ok }) {
+function CheckItem({ label, value, ok }) {
     return (
         <div className="flex items-center gap-2.5 py-1.5">
             {ok
                 ? <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0" />
                 : <AlertTriangle className="w-4 h-4 text-amber-500 flex-shrink-0" />
             }
-            <span className={`text-sm ${ok ? 'text-foreground' : 'text-amber-700 dark:text-amber-300'}`}>{label}</span>
+            <span className={`text-sm flex-1 ${ok ? 'text-foreground' : 'text-amber-700 dark:text-amber-300'}`}>{label}</span>
+            {value && <span className="text-sm font-semibold tabular-nums text-foreground">{value}</span>}
         </div>
     );
 }
@@ -54,11 +55,11 @@ export default function FinancialSummary({ claim }) {
     }, [claim.final_repair_cost, claim.policy_excess, claim.client_vat_status, claim.percent_to_referrer, claim.referral_fee_repairer]);
 
     const checks = [
-        { label: 'Final repair cost entered', ok: !!claim.final_repair_cost && claim.final_repair_cost > 0 },
-        { label: 'VAT status confirmed (not blank)', ok: !!claim.client_vat_status },
-        { label: 'Policy excess entered', ok: claim.policy_excess !== null && claim.policy_excess !== undefined && claim.policy_excess !== '' },
-        { label: 'Referrer fee % confirmed', ok: !!claim.percent_to_referrer && claim.percent_to_referrer > 0 },
-        { label: 'Repairer referral fee % confirmed', ok: !!claim.referral_fee_repairer && claim.referral_fee_repairer > 0 },
+        { label: 'Final repair cost entered', value: claim.final_repair_cost > 0 ? fmt(claim.final_repair_cost) : null, ok: !!claim.final_repair_cost && claim.final_repair_cost > 0 },
+        { label: 'VAT status confirmed', value: claim.client_vat_status || null, ok: !!claim.client_vat_status },
+        { label: 'Policy excess entered', value: (claim.policy_excess !== null && claim.policy_excess !== undefined && claim.policy_excess !== '') ? fmt(parseFloat(claim.policy_excess)) : null, ok: claim.policy_excess !== null && claim.policy_excess !== undefined && claim.policy_excess !== '' },
+        { label: `Referrer fee %${claim.referrer ? ` (${claim.referrer})` : ''}`, value: claim.percent_to_referrer > 0 ? `${claim.percent_to_referrer}%` : null, ok: !!claim.percent_to_referrer && claim.percent_to_referrer > 0 },
+        { label: 'Repairer referral fee %', value: claim.referral_fee_repairer > 0 ? `${claim.referral_fee_repairer}%` : null, ok: !!claim.referral_fee_repairer && claim.referral_fee_repairer > 0 },
     ];
 
     const allReady = checks.every(c => c.ok);
@@ -85,7 +86,7 @@ export default function FinancialSummary({ claim }) {
                     </span>
                 </div>
                 <div className="divide-y divide-border/40">
-                    {checks.map((c, i) => <CheckItem key={i} label={c.label} ok={c.ok} />)}
+                    {checks.map((c, i) => <CheckItem key={i} label={c.label} value={c.value} ok={c.ok} />)}
                 </div>
             </div>
 
