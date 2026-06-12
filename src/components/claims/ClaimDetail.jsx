@@ -40,6 +40,7 @@ import ClaimDatesForm from './ClaimDatesForm';
 import ClaimBodyshopForm from './ClaimBodyshopForm';
 import ClaimEstimateForm from './ClaimEstimateForm';
 import ClaimStatusForm from './ClaimStatusForm';
+import FinancialCalculator from './FinancialCalculator';
 
 import ClaimVehicleDamageForm from './ClaimVehicleDamageForm';
 import ClaimIndemnityForm from './ClaimIndemnityForm';
@@ -1004,6 +1005,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
               <DetailRow label="Invoice Status" value={claim.invoice_status} isStatus />
               <DetailRow label="Invoice Amount" value={claim.invoice_amount} isCurrency />
             </div>
+            <FinancialCalculator claim={claim} />
           </EditableSection>
         );
 
