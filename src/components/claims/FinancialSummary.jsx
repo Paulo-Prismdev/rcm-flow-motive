@@ -121,6 +121,26 @@ export default function FinancialSummary({ claim, onClaimUpdated }) {
     const allReady = checks.every(c => c.ok);
     const alreadyInvoiced = claim.invoice_status === 'Invoiced';
 
+    const handleRevertInvoiced = async () => {
+        if (!window.confirm('Mark this claim as Not Ready for Invoicing? This will allow you to make changes and resend the accounts email.')) return;
+        try {
+            await base44.entities.Claim.update(claim.id, {
+                invoice_status: 'Not Ready for Invoicing',
+                invoice_sent_date: null,
+            });
+            await base44.entities.ActivityLog.create({
+                parent_id: claim.id,
+                parent_type: 'Claim',
+                action: 'Invoice Status Reverted',
+                description: 'Invoice status reverted from Invoiced to Not Ready for Invoicing.',
+            });
+            toast({ title: 'Reverted', description: 'Invoice status reset. You can now resend the email.' });
+            if (onClaimUpdated) onClaimUpdated({ ...claim, invoice_status: 'Not Ready for Invoicing', invoice_sent_date: null });
+        } catch (err) {
+            toast({ title: 'Error', description: 'Failed to revert status.', variant: 'destructive' });
+        }
+    };
+
     const buildEmailBody = () => {
         const lines = [
             `Hi Accounts,`,
@@ -209,7 +229,16 @@ export default function FinancialSummary({ claim, onClaimUpdated }) {
                         Invoice Readiness — {allReady ? 'Ready to Invoice' : 'Action Required'}
                     </span>
                     {alreadyInvoiced ? (
-                        <span className="text-xs font-semibold text-green-700 dark:text-green-300 bg-green-100 dark:bg-green-900/40 px-2 py-0.5 rounded-full">Invoiced ✓</span>
+                        <div className="flex items-center gap-2">
+                            <span className="text-xs font-semibold text-green-700 dark:text-green-300 bg-green-100 dark:bg-green-900/40 px-2 py-0.5 rounded-full">Invoiced ✓</span>
+                            <button
+                                onClick={handleRevertInvoiced}
+                                className="text-xs text-amber-600 dark:text-amber-400 underline hover:text-amber-800 transition-colors"
+                                title="Revert to Not Ready for Invoicing"
+                            >
+                                Undo
+                            </button>
+                        </div>
                     ) : (
                         <Button
                             size="sm"
