@@ -9,7 +9,6 @@ import {
   Send,
   Package,
   Users,
-  Percent,
   CalendarDays,
   ChevronRight,
 } from "lucide-react";
@@ -27,7 +26,6 @@ import ChaserEmailSettings from "./ChaserEmailSettings";
 import SupplierManagement from "./SupplierManagement";
 import CompanyIdLookup from "./CompanyIdLookup";
 import EmployeeManagement from "./EmployeeManagement";
-import ReferrerRatesTab from "../components/settings/ReferrerRatesTab";
 
 const STATUS_TYPES = ["Claim", "Estimate", "Engineering", "Part"];
 
@@ -38,7 +36,6 @@ const SETTINGS_SECTIONS = [
       { id: "status", label: "Status Settings", icon: Shield, adminOnly: false },
       { id: "companies", label: "Companies", icon: Building2, adminOnly: false },
       { id: "suppliers", label: "Suppliers", icon: Package, adminOnly: false },
-      { id: "referrer_rates", label: "Referrer Rates", icon: Percent, adminOnly: true },
     ],
   },
   {
@@ -120,9 +117,8 @@ export default function Settings() {
       case "suppliers":   return <SupplierManagement />;
       case "users":       return <UserManagement />;
       case "companyids":  return <CompanyIdLookup />;
-      case "employees":       return <EmployeeManagement />;
-      case "referrer_rates":  return <ReferrerRatesTab />;
-      default:                return null;
+      case "employees":   return <EmployeeManagement />;
+      default:            return null;
     }
   };
 
