@@ -74,7 +74,31 @@ export default function FinancialSummary({ claim }) {
                 <SummaryCard label="Repairer Charge" value={fmt(calc.repairerGross)} color="purple" />
             </div>
 
-            {/* Invoice Readiness */}
+            {/* Referrer Highlight */}
+            {claim.referrer && (
+                <div className="flex items-center gap-3 px-3 py-2.5 rounded-[10px] border border-indigo-200 dark:border-indigo-700 bg-indigo-50 dark:bg-indigo-900/20">
+                    <div className="w-7 h-7 rounded-full bg-indigo-100 dark:bg-indigo-800 flex items-center justify-center flex-shrink-0">
+                        <span className="text-indigo-700 dark:text-indigo-300 text-xs font-bold">{claim.referrer.charAt(0).toUpperCase()}</span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                        <p className="text-[11px] font-semibold uppercase tracking-wider text-indigo-500 dark:text-indigo-400">Referrer</p>
+                        <p className="text-sm font-semibold text-indigo-800 dark:text-indigo-200 truncate">{claim.referrer}</p>
+                    </div>
+                    {claim.referrer_ref && (
+                        <div className="text-right flex-shrink-0">
+                            <p className="text-[11px] text-indigo-400">Ref</p>
+                            <p className="text-sm font-medium text-indigo-700 dark:text-indigo-300">{claim.referrer_ref}</p>
+                        </div>
+                    )}
+                    {claim.percent_to_referrer > 0 && (
+                        <div className="px-2 py-1 rounded-md bg-indigo-100 dark:bg-indigo-800 text-indigo-700 dark:text-indigo-300 text-sm font-bold flex-shrink-0">
+                            {claim.percent_to_referrer}%
+                        </div>
+                    )}
+                </div>
+            )}
+
+        {/* Invoice Readiness */}
             <div className={`rounded-[10px] border p-3 ${allReady ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700' : 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-700'}`}>
                 <div className="flex items-center gap-2 mb-2">
                     {allReady
