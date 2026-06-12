@@ -1,10 +1,29 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import ReferrerCombobox from '../shared/ReferrerCombobox';
+import { base44 } from '@/api/base44Client';
 
 export default function ClaimReferrerForm({ claim, onSave, onCancel }) {
     const [formData, setFormData] = useState(claim || {});
+
+    // On mount: if referrer_id is set but rates are 0/empty, pull defaults from Company record
+    useEffect(() => {
+        if (claim?.referrer_id && (!claim.percent_to_referrer || !claim.referral_fee_repairer)) {
+            base44.entities.Company.get(claim.referrer_id).then(company => {
+                if (!company) return;
+                setFormData(prev => ({
+                    ...prev,
+                    ...(!prev.percent_to_referrer && company.default_percent_to_referrer != null && {
+                        percent_to_referrer: company.default_percent_to_referrer
+                    }),
+                    ...(!prev.referral_fee_repairer && company.default_repairer_referral_fee != null && {
+                        referral_fee_repairer: company.default_repairer_referral_fee
+                    }),
+                }));
+            }).catch(() => {});
+        }
+    }, []);
 
     const handleChange = (field, value) => {
         setFormData(prev => ({ ...prev, [field]: value }));
