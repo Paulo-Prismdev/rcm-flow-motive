@@ -104,6 +104,22 @@ export default function FinancialSummary({ claim }) {
 
     return (
         <div className="space-y-4">
+            {/* Invoice Readiness — shown first */}
+            <div className={`rounded-[10px] border p-3 ${allReady ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700' : 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-700'}`}>
+                <div className="flex items-center gap-2 mb-2">
+                    {allReady
+                        ? <CheckCircle2 className="w-4 h-4 text-green-600" />
+                        : <AlertTriangle className="w-4 h-4 text-amber-600" />
+                    }
+                    <span className={`text-sm font-semibold ${allReady ? 'text-green-700 dark:text-green-300' : 'text-amber-700 dark:text-amber-300'}`}>
+                        Invoice Readiness — {allReady ? 'Ready to Invoice' : 'Action Required'}
+                    </span>
+                </div>
+                <div className="divide-y divide-border/40">
+                    {checks.map((c, i) => <CheckItem key={i} label={c.label} value={c.value} ok={c.ok} />)}
+                </div>
+            </div>
+
             {/* Summary Card — Final Repair only */}
             <SummaryCard label="Final Repair (inc. VAT)" value={fmt(calc.totalInc)} sub={`Ex VAT: ${fmt(calc.totalEx)} | VAT: ${fmt(calc.vatContent)}`} color="blue" />
 
@@ -143,22 +159,6 @@ export default function FinancialSummary({ claim }) {
                     vat={calc.repairerVat}
                     color="purple"
                 />
-            </div>
-
-        {/* Invoice Readiness */}
-            <div className={`rounded-[10px] border p-3 ${allReady ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700' : 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-700'}`}>
-                <div className="flex items-center gap-2 mb-2">
-                    {allReady
-                        ? <CheckCircle2 className="w-4 h-4 text-green-600" />
-                        : <AlertTriangle className="w-4 h-4 text-amber-600" />
-                    }
-                    <span className={`text-sm font-semibold ${allReady ? 'text-green-700 dark:text-green-300' : 'text-amber-700 dark:text-amber-300'}`}>
-                        Invoice Readiness — {allReady ? 'Ready to Invoice' : 'Action Required'}
-                    </span>
-                </div>
-                <div className="divide-y divide-border/40">
-                    {checks.map((c, i) => <CheckItem key={i} label={c.label} value={c.value} ok={c.ok} />)}
-                </div>
             </div>
 
             {/* Collapsible breakdown */}
