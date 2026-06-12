@@ -56,6 +56,14 @@
       "default": [
         "Claims"
       ]
+    },
+    "default_percent_to_referrer": {
+      "type": "number",
+      "description": "Default % fee owed to this referrer per claim (referrer type only)"
+    },
+    "default_repairer_referral_fee": {
+      "type": "number",
+      "description": "Default repairer referral fee % for jobs from this referrer (referrer type only)"
     }
   },
   "required": [
