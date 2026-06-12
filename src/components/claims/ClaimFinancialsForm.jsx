@@ -26,7 +26,7 @@ export default function ClaimFinancialsForm({ claim, onSave, onCancel }) {
         <div className="space-y-4 pt-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label className="text-sm text-gray-500">Final Repair Cost (£)</label>
+                    <label className="text-sm text-gray-500">Final Repair Cost inc VAT (£)</label>
                     <Input type="number" step="0.01" value={formData.final_repair_cost} onChange={e => handleChange('final_repair_cost', e.target.value)} className="neomorph-inset" />
                 </div>
                 <div>
