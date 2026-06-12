@@ -10,7 +10,6 @@ import {
   Search,
   Archive,
   ChevronDown,
-  DollarSign,
   Users,
   Settings,
   Menu,
