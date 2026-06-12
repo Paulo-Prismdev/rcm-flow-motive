@@ -12,7 +12,6 @@ export default function ClaimReferrerForm({ claim, onSave, onCancel }) {
 
     const handleReferrerChange = (referrer) => {
         if (!referrer) {
-            // Clear referrer details
             setFormData(prev => ({
                 ...prev,
                 referrer: '',
@@ -20,14 +19,22 @@ export default function ClaimReferrerForm({ claim, onSave, onCancel }) {
                 referrer_email: '',
                 referrer_ref: '',
                 file_handler: '',
-                percent_to_referrer: 0
+                percent_to_referrer: 0,
+                referral_fee_repairer: 0
             }));
         } else {
             setFormData(prev => ({
                 ...prev,
                 referrer: referrer.name,
                 referrer_id: referrer.id,
-                referrer_email: referrer.email || referrer.contact_email || ''
+                referrer_email: referrer.email || referrer.contact_email || '',
+                // Auto-populate rates from referrer defaults if set
+                ...(referrer.default_percent_to_referrer != null && {
+                    percent_to_referrer: referrer.default_percent_to_referrer
+                }),
+                ...(referrer.default_repairer_referral_fee != null && {
+                    referral_fee_repairer: referrer.default_repairer_referral_fee
+                }),
             }));
         }
     };
@@ -78,6 +85,16 @@ export default function ClaimReferrerForm({ claim, onSave, onCancel }) {
                         value={formData.percent_to_referrer} 
                         onChange={e => handleChange('percent_to_referrer', parseFloat(e.target.value) || 0)} 
                         className="neomorph-inset" 
+                    />
+                </div>
+                <div>
+                    <label className="text-sm text-gray-500">Repairer Referral Fee (%)</label>
+                    <Input 
+                        type="number" 
+                        value={formData.referral_fee_repairer ?? ''} 
+                        onChange={e => handleChange('referral_fee_repairer', parseFloat(e.target.value) || 0)} 
+                        className="neomorph-inset" 
+                        placeholder="e.g. 20"
                     />
                 </div>
             </div>

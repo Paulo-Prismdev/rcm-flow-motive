@@ -44,6 +44,14 @@
       "type": "string",
       "description": "Additional notes about this referrer"
     },
+    "default_percent_to_referrer": {
+      "type": "number",
+      "description": "Default % fee owed to this referrer (e.g. 5 for 5%)"
+    },
+    "default_repairer_referral_fee": {
+      "type": "number",
+      "description": "Default % repairer referral fee for jobs from this referrer (e.g. 20 for 20%)"
+    },
     "last_feedback_prompted_date": {
       "type": "string",
       "format": "date",
