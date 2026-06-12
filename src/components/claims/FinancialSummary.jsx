@@ -179,18 +179,24 @@ export default function FinancialSummary({ claim, onClaimUpdated }) {
                 invoice_sent_date: today,
             });
 
-            await base44.entities.ActivityLog.create({
-                parent_id: claim.id,
-                parent_type: 'Claim',
-                action: 'Invoice Email Sent',
-                description: `Accounts email sent to ${ACCOUNTS_EMAIL}. Invoice status updated to Invoiced. Final repair cost: ${fmt(calc.totalInc)}.`,
-    
-            });
+            try {
+                await base44.entities.ActivityLog.create({
+                    parent_id: claim.id,
+                    parent_type: 'Claim',
+                    action: 'Invoice Email Sent',
+                    description: `Accounts email sent to ${ACCOUNTS_EMAIL}. Invoice status updated to Invoiced. Final repair cost: ${fmt(calc.totalInc)}.`,
+                });
+            } catch (_) { /* activity log is best-effort */ }
 
             toast({ title: 'Email triggered', description: 'Invoice status updated to Invoiced.' });
             if (onClaimUpdated) onClaimUpdated({ ...claim, invoice_status: 'Invoiced', invoice_sent_date: today });
         } catch (err) {
-            toast({ title: 'Error', description: 'Failed to update claim status.', variant: 'destructive' });
+            console.error('Failed to update claim:', err);
+            toast({ 
+                title: 'Error', 
+                description: err.message?.includes('429') ? 'Server is busy. Please wait a moment and try again.' : 'Failed to update claim status. Please try again.', 
+                variant: 'destructive' 
+            });
         } finally {
             setIsSending(false);
             setShowConfirm(false);
