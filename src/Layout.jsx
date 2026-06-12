@@ -51,7 +51,7 @@ const allDepartments = [
 { name: "Engineering", url: createPageUrl("Engineering"), icon: Wrench, permission: "Engineering" },
 { name: "Parts", url: createPageUrl("Parts"), icon: Package, permission: "Parts" },
 { name: "Tyre Requests", url: createPageUrl("TyreRequests"), icon: Package, permission: "Parts" },
-{ name: "Invoicing", url: createPageUrl("Invoicing"), icon: DollarSign, permission: "Invoicing" },
+
 { name: "Reports", url: createPageUrl("Reports"), icon: BarChart3, permission: "Reports" },
 { name: "Map", url: createPageUrl("BodyshopMap"), icon: Search, permission: "Map" }];
 
