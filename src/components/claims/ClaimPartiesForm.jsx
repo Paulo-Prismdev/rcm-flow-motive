@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import ClientCombobox from '../shared/ClientCombobox';
 import BrokerCombobox from '../shared/BrokerCombobox';
 import InsurerCombobox from '../shared/InsurerCombobox';
@@ -229,11 +230,16 @@ export default function ClaimPartiesForm({ claim, onSave, onCancel, mode }) {
         </div>
         <div>
           <label className="block text-xs text-muted-foreground mb-1">VAT Status</label>
-          <select value={data.client_vat_status} onChange={(e) => set('client_vat_status', e.target.value)} className="neomorph-inset w-full px-3 py-2 text-sm rounded-lg">
-            <option>VAT Registered</option>
-            <option>Non-VAT</option>
-            <option>Unknown</option>
-          </select>
+          <Select value={data.client_vat_status} onValueChange={(v) => set('client_vat_status', v)}>
+            <SelectTrigger className="neomorph-inset w-full">
+              <SelectValue placeholder="Select VAT status..." />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="VAT Registered">VAT Registered</SelectItem>
+              <SelectItem value="Non-VAT">Non-VAT</SelectItem>
+              <SelectItem value="Unknown">Unknown</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         <div className="flex justify-end gap-3 pt-2">
           <Button onClick={onCancel} variant="outline">Cancel</Button>
@@ -419,7 +425,17 @@ export default function ClaimPartiesForm({ claim, onSave, onCancel, mode }) {
           <div><label className="block text-xs text-muted-foreground mb-1">County</label><Input value={data.client_county} onChange={(e) => set('client_county', e.target.value)} className="neomorph-inset" /></div>
           <div><label className="block text-xs text-muted-foreground mb-1">Postcode</label><Input value={data.client_postcode} onChange={(e) => set('client_postcode', e.target.value)} className="neomorph-inset" /></div>
         </div>
-        <div><label className="block text-xs text-muted-foreground mb-1">VAT Status</label><select value={data.client_vat_status} onChange={(e) => set('client_vat_status', e.target.value)} className="neomorph-inset w-full px-3 py-2 text-sm rounded-lg"><option>VAT Registered</option><option>Non-VAT</option><option>Unknown</option></select></div>
+        <div>
+          <label className="block text-xs text-muted-foreground mb-1">VAT Status</label>
+          <Select value={data.client_vat_status} onValueChange={(v) => set('client_vat_status', v)}>
+            <SelectTrigger className="neomorph-inset w-full"><SelectValue placeholder="Select VAT status..." /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="VAT Registered">VAT Registered</SelectItem>
+              <SelectItem value="Non-VAT">Non-VAT</SelectItem>
+              <SelectItem value="Unknown">Unknown</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
         <SectionDivider label="Driver" />
         <div className="flex items-center justify-between">
           <span className="text-sm font-medium">Driver same as client?</span>
