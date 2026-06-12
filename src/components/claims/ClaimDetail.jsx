@@ -41,6 +41,7 @@ import ClaimBodyshopForm from './ClaimBodyshopForm';
 import ClaimEstimateForm from './ClaimEstimateForm';
 import ClaimStatusForm from './ClaimStatusForm';
 import FinancialCalculator from './FinancialCalculator';
+import FinancialSummary from './FinancialSummary';
 
 import ClaimVehicleDamageForm from './ClaimVehicleDamageForm';
 import ClaimIndemnityForm from './ClaimIndemnityForm';
@@ -1002,11 +1003,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
       case 'financials':
         return (
           <EditableSection title="Financials" icon={DollarSign} claim={claim} onUpdate={handleUpdate} EditComponent={ClaimFinancialsForm} canEdit={canEdit}>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
-              <DetailRow label="Final Repair Cost" value={claim.final_repair_cost} isCurrency />
-              <DetailRow label="Repairer Referral Fee" value={claim.referral_fee_repairer ? `${claim.referral_fee_repairer}%` : '-'} />
-            </div>
-            <FinancialCalculator claim={claim} />
+            <FinancialSummary claim={claim} />
           </EditableSection>
         );
 
