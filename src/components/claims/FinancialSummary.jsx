@@ -3,6 +3,7 @@ import { CheckCircle2, AlertTriangle, ChevronDown, ChevronUp, Mail } from 'lucid
 import FinancialCalculator from './FinancialCalculator';
 import { Button } from '@/components/ui/button';
 import { base44 } from '@/api/base44Client';
+import { updateClaimInvoiceStatus } from '@/functions/updateClaimInvoiceStatus';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -123,10 +124,7 @@ export default function FinancialSummary({ claim, onClaimUpdated }) {
 
     const handleRevertInvoiced = async () => {
         if (!window.confirm('Mark this claim as Not Ready for Invoicing? This will allow you to make changes and resend the accounts email.')) return;
-        await base44.entities.Claim.update(claim.id, {
-            invoice_status: 'Not Ready for Invoicing',
-            invoice_sent_date: null,
-        });
+        await updateClaimInvoiceStatus({ claim_id: claim.id, updates: { invoice_status: 'Not Ready for Invoicing', invoice_sent_date: null } });
         try {
             await base44.entities.ActivityLog.create({
                 parent_id: claim.id,
@@ -174,10 +172,7 @@ export default function FinancialSummary({ claim, onClaimUpdated }) {
             window.location.href = `mailto:${ACCOUNTS_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
             const today = new Date().toISOString().split('T')[0];
-            await base44.entities.Claim.update(claim.id, {
-                invoice_status: 'Invoiced',
-                invoice_sent_date: today,
-            });
+            await updateClaimInvoiceStatus({ claim_id: claim.id, updates: { invoice_status: 'Invoiced', invoice_sent_date: today } });
 
             try {
                 await base44.entities.ActivityLog.create({
