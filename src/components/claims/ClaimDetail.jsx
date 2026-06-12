@@ -1414,7 +1414,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
           </DropdownMenu>
         </div>
 
-        <div className="flex-1 overflow-y-auto min-h-0 pr-1 pb-4" style={{WebkitOverflowScrolling: 'touch', overflowY: 'scroll'}}>
+        <div className="flex-1 overflow-y-auto min-h-0 pr-1 pb-4" style={{WebkitOverflowScrolling: 'touch', overflowY: 'auto'}}>
           <div>
             {renderSelectedSection()}
           </div>
