@@ -160,12 +160,35 @@ export default function ClaimJourneyTimeline({ claim, updates = [] }) {
     );
   }
 
+  // Calculate which line segments should be green (between completed milestones)
+  const completedCount = MILESTONES.filter((m) => getMilestoneInfo(m.id).isCompleted).length;
+
   return (
     <div className="bg-card border border-border rounded-xl px-3 py-2 overflow-x-auto">
       <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">Claim Journey</p>
       <div className="relative flex items-start" style={{ minWidth: 520 }}>
-        {/* Background connector line — sits at the vertical center of the circles (circle is 36px = top-[18px]) */}
-        <div className="absolute left-0 right-0 h-[2px] bg-border z-0" style={{ top: 18 }} />
+        {/* Background connector line segments */}
+        <div className="absolute left-0 right-0 h-[2px] z-0" style={{ top: 18 }}>
+          {MILESTONES.map((_, index) => {
+            if (index === MILESTONES.length - 1) return null;
+            const currentCompleted = getMilestoneInfo(MILESTONES[index].id).isCompleted;
+            const nextCompleted = getMilestoneInfo(MILESTONES[index + 1].id).isCompleted;
+            const isGreen = currentCompleted;
+            const segmentWidth = 100 / (MILESTONES.length - 1);
+            return (
+              <div
+                key={`segment-${index}`}
+                className={`absolute h-full transition-all duration-300 ${
+                  isGreen ? 'bg-green-500' : 'bg-border'
+                }`}
+                style={{
+                  left: `${index * segmentWidth}%`,
+                  width: `${segmentWidth}%`,
+                }}
+              />
+            );
+          })}
+        </div>
 
         {MILESTONES.map((milestone, index) => {
           const info = getMilestoneInfo(milestone.id);
