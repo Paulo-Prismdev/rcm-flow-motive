@@ -1006,8 +1006,6 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
               <DetailRow label="Final Repair Cost" value={claim.final_repair_cost} isCurrency />
               <DetailRow label="Repairer Referral Fee" value={claim.referral_fee_repairer ? `${claim.referral_fee_repairer}%` : '-'} />
               <DetailRow label="Total to Invoice Repairer" value={claim.total_invoice_repairer} isCurrency />
-              <DetailRow label="Invoice Status" value={claim.invoice_status} isStatus />
-              <DetailRow label="Invoice Amount" value={claim.invoice_amount} isCurrency />
             </div>
             <FinancialCalculator claim={claim} />
           </EditableSection>
