@@ -1,6 +1,19 @@
 import React, { useState, useMemo } from 'react';
-import { CheckCircle2, AlertTriangle, ChevronDown, ChevronUp } from 'lucide-react';
+import { CheckCircle2, AlertTriangle, ChevronDown, ChevronUp, Mail } from 'lucide-react';
 import FinancialCalculator from './FinancialCalculator';
+import { Button } from '@/components/ui/button';
+import { base44 } from '@/api/base44Client';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { useToast } from '@/components/ui/use-toast';
 
 const VAT_RATE = 0.20;
 
@@ -66,8 +79,13 @@ function CheckItem({ label, value, ok }) {
     );
 }
 
-export default function FinancialSummary({ claim }) {
+const ACCOUNTS_EMAIL = 'accounts@rcmltd.co.uk';
+
+export default function FinancialSummary({ claim, onClaimUpdated }) {
     const [showBreakdown, setShowBreakdown] = useState(false);
+    const [showConfirm, setShowConfirm] = useState(false);
+    const [isSending, setIsSending] = useState(false);
+    const { toast } = useToast();
 
     const calc = useMemo(() => {
         const totalInc = parseFloat(claim.final_repair_cost) || 0;
@@ -101,19 +119,107 @@ export default function FinancialSummary({ claim }) {
     ];
 
     const allReady = checks.every(c => c.ok);
+    const alreadyInvoiced = claim.invoice_status === 'Invoiced';
+
+    const buildEmailBody = () => {
+        const lines = [
+            `Hi Accounts,`,
+            ``,
+            `Please process the following repairer invoice for job ${claim.job_number || '—'}:`,
+            ``,
+            `  Job Number:          ${claim.job_number || '—'}`,
+            `  Vehicle Reg:         ${claim.reg || '—'}`,
+            `  Client:              ${claim.client_name || '—'}`,
+            `  Repairer (Bodyshop): ${claim.bodyshop || '—'}`,
+            ``,
+            `  Final Repair Cost (inc. VAT): ${fmt(calc.totalInc)}`,
+            `  Repair Cost (ex. VAT):        ${fmt(calc.totalEx)}`,
+            `  VAT (20%):                    ${fmt(calc.vatContent)}`,
+            ``,
+            `  Referrer: ${claim.referrer || '—'} (${claim.percent_to_referrer || 0}% = ${fmt(calc.referrerGross)} inc. VAT)`,
+            `  Repairer Referral Fee: ${claim.referral_fee_repairer || 0}% = ${fmt(calc.repairerGross)} inc. VAT`,
+            ``,
+            `  Client Excess Liability: ${fmt(calc.clientLiability)}`,
+            ``,
+            `Please raise the invoice to the repairer at your earliest convenience.`,
+            ``,
+            `Thanks`,
+        ];
+        return lines.join('\n');
+    };
+
+    const handleSendEmail = async () => {
+        setIsSending(true);
+        try {
+            const subject = `Invoice Required - Job ${claim.job_number || ''} | ${claim.reg || ''} | ${claim.bodyshop || ''}`;
+            const body = buildEmailBody();
+            window.location.href = `mailto:${ACCOUNTS_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+            const today = new Date().toISOString().split('T')[0];
+            await base44.entities.Claim.update(claim.id, {
+                invoice_status: 'Invoiced',
+                invoice_sent_date: today,
+            });
+
+            await base44.entities.ActivityLog.create({
+                parent_id: claim.id,
+                parent_type: 'Claim',
+                action: 'Invoice Email Sent',
+                description: `Accounts email sent to ${ACCOUNTS_EMAIL}. Invoice status updated to Invoiced. Final repair cost: ${fmt(calc.totalInc)}.`,
+                user_email: '',
+            });
+
+            toast({ title: 'Email triggered', description: 'Invoice status updated to Invoiced.' });
+            if (onClaimUpdated) onClaimUpdated({ ...claim, invoice_status: 'Invoiced', invoice_sent_date: today });
+        } catch (err) {
+            toast({ title: 'Error', description: 'Failed to update claim status.', variant: 'destructive' });
+        } finally {
+            setIsSending(false);
+            setShowConfirm(false);
+        }
+    };
 
     return (
         <div className="space-y-4">
             {/* Invoice Readiness — shown first */}
-            <div className={`rounded-[10px] border p-3 ${allReady ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700' : 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-700'}`}>
+            <AlertDialog open={showConfirm} onOpenChange={setShowConfirm}>
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle>Send Invoice Email to Accounts?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        This will open your email client with a pre-filled message to <strong>{ACCOUNTS_EMAIL}</strong> and automatically update this claim's invoice status to <strong>Invoiced</strong>. This action will be logged.
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <AlertDialogCancel disabled={isSending}>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleSendEmail} disabled={isSending}>
+                        {isSending ? 'Processing...' : 'Confirm & Send'}
+                    </AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
+
+        <div className={`rounded-[10px] border p-3 ${allReady ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700' : 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-700'}`}>
                 <div className="flex items-center gap-2 mb-2">
                     {allReady
                         ? <CheckCircle2 className="w-4 h-4 text-green-600" />
                         : <AlertTriangle className="w-4 h-4 text-amber-600" />
                     }
-                    <span className={`text-sm font-semibold ${allReady ? 'text-green-700 dark:text-green-300' : 'text-amber-700 dark:text-amber-300'}`}>
+                    <span className={`text-sm font-semibold flex-1 ${allReady ? 'text-green-700 dark:text-green-300' : 'text-amber-700 dark:text-amber-300'}`}>
                         Invoice Readiness — {allReady ? 'Ready to Invoice' : 'Action Required'}
                     </span>
+                    {alreadyInvoiced ? (
+                        <span className="text-xs font-semibold text-green-700 dark:text-green-300 bg-green-100 dark:bg-green-900/40 px-2 py-0.5 rounded-full">Invoiced ✓</span>
+                    ) : (
+                        <Button
+                            size="sm"
+                            variant="outline"
+                            className="gap-1.5 text-xs h-7 border-green-400 text-green-700 hover:bg-green-100 dark:border-green-600 dark:text-green-300"
+                            onClick={() => setShowConfirm(true)}
+                        >
+                            <Mail className="w-3.5 h-3.5" /> Email Accounts
+                        </Button>
+                    )}
                 </div>
                 <div className="divide-y divide-border/40">
                     {checks.map((c, i) => <CheckItem key={i} label={c.label} value={c.value} ok={c.ok} />)}
