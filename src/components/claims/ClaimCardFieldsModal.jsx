@@ -13,6 +13,7 @@ const AVAILABLE_FIELDS = [
   { id: 'referrer', label: 'Referrer' },
   { id: 'insurer', label: 'Insurer' },
   { id: 'bodyshop', label: 'Bodyshop' },
+  { id: 'driver_contact_name', label: 'Driver Name' },
   { id: 'claim_type', label: 'Claim Type' },
   { id: 'booking_in_date', label: 'Booking In Date' },
   { id: 'ecd', label: 'ECD' },
@@ -22,6 +23,7 @@ const AVAILABLE_FIELDS = [
   { id: 'policy_number', label: 'Policy Number' },
   { id: 'client_phone', label: 'Client Phone' },
   { id: 'vehicle_location', label: 'Vehicle Location' },
+  { id: 'documents', label: 'Documents' },
 ];
 
 export default function ClaimCardFieldsModal({ isOpen, onClose, selectedFields, onSave }) {

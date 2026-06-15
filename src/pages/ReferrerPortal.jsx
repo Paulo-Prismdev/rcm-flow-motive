@@ -184,15 +184,29 @@ export default function ReferrerPortal() {
     loss_date: 'Loss Date',
     insurer: 'Insurer',
     referrer_ref: 'Ref',
+    driver_contact_name: 'Driver',
     claim_type: 'Claim Type',
     claim_ref: 'Claim Ref',
     policy_number: 'Policy No',
     vehicle_location: 'Location',
     booking_in_date: 'Booking In',
     ecd: 'ECD',
+    documents: 'Docs',
   };
 
   const renderFieldValue = (claim, fieldId) => {
+    if (fieldId === 'documents') {
+      const docCount = (claim.file_urls?.length || 0) + (claim.image_urls?.length || 0);
+      return (
+        <button
+          onClick={(e) => { e.stopPropagation(); setViewingClaim(claim); }}
+          className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 text-xs font-medium hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors"
+        >
+          <FileText className="w-3 h-3" />
+          {docCount}
+        </button>
+      );
+    }
     const val = claim[fieldId];
     if (fieldId === 'loss_date' || fieldId === 'booking_in_date' || fieldId === 'ecd') return formatDate(val);
     if (val === null || val === undefined || val === '') return '—';
