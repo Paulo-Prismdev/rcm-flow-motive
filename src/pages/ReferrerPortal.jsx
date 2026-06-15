@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { base44 } from '@/api/base44Client';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
   ChevronRight,
   ChevronDown,
   AlertCircle,
   X,
-  FileText
+  FileText,
+  Settings2
 } from 'lucide-react';
 import { format } from 'date-fns';
 import StatusBadge from '../components/shared/StatusBadge';
@@ -15,6 +16,7 @@ import ReferrerLayout from '../components/referrer/ReferrerLayout';
 import ReferrerClaimDetail from '../components/referrer/ReferrerClaimDetail';
 import ReferrerDashboard from '../components/referrer/ReferrerDashboard';
 import FeedbackModal from '../components/shared/FeedbackModal';
+import ClaimCardFieldsModal from '../components/claims/ClaimCardFieldsModal';
 import { getReferrerClaims } from '@/functions/getReferrerClaims';
 
 export default function ReferrerPortal() {
@@ -24,6 +26,8 @@ export default function ReferrerPortal() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [insurerFilter, setInsurerFilter] = useState('all');
   const [collapsedGroups, setCollapsedGroups] = useState({});
+  const [showFieldsModal, setShowFieldsModal] = useState(false);
+  const queryClient = useQueryClient();
 
   // Listen for navigation events from layout
   useEffect(() => {
@@ -38,6 +42,14 @@ export default function ReferrerPortal() {
   const { data: currentUser } = useQuery({
     queryKey: ['currentUser'],
     queryFn: () => base44.auth.me(),
+  });
+
+  const savedFields = currentUser?.claim_card_fields || [];
+  const userCardFields = [...savedFields.filter(f => f !== 'referrer')];
+
+  const updateUserFieldsMutation = useMutation({
+    mutationFn: (fields) => base44.auth.updateMe({ claim_card_fields: fields }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['currentUser'] }),
   });
 
   const referrerId = currentUser?.linked_referrer_id;
@@ -166,6 +178,30 @@ export default function ReferrerPortal() {
     try { return format(new Date(val), 'dd/MM/yyyy'); } catch { return val; }
   };
 
+  const FIELD_LABELS = {
+    client_name: 'Client',
+    make_model: 'Vehicle',
+    loss_date: 'Loss Date',
+    insurer: 'Insurer',
+    referrer_ref: 'Ref',
+    claim_type: 'Claim Type',
+    claim_ref: 'Claim Ref',
+    policy_number: 'Policy No',
+    vehicle_location: 'Location',
+    booking_in_date: 'Booking In',
+    ecd: 'ECD',
+  };
+
+  const renderFieldValue = (claim, fieldId) => {
+    const val = claim[fieldId];
+    if (fieldId === 'loss_date' || fieldId === 'booking_in_date' || fieldId === 'ecd') return formatDate(val);
+    if (val === null || val === undefined || val === '') return '—';
+    return String(val);
+  };
+
+  // Default fields if none saved yet
+  const displayFields = userCardFields.length > 0 ? userCardFields : ['client_name', 'make_model', 'loss_date', 'insurer'];
+
   return (
     <ReferrerLayout>
       {currentUser?.show_feedback_prompt && (
@@ -189,6 +225,13 @@ export default function ReferrerPortal() {
                 )}
               </div>
               <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setShowFieldsModal(true)}
+                  className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                  title="Customise columns"
+                >
+                  <Settings2 className="w-4 h-4" />
+                </button>
                 <select
                   value={statusFilter}
                   onChange={e => setStatusFilter(e.target.value)}
@@ -326,10 +369,11 @@ export default function ReferrerPortal() {
                     <thead className="sticky top-0 bg-white dark:bg-gray-900 z-10">
                       <tr className="border-b border-gray-200 dark:border-gray-700">
                         <th className="sticky left-0 z-20 bg-white dark:bg-gray-900 px-4 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap">REG</th>
-                        <th className="px-4 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap">CLIENT</th>
-                        <th className="px-4 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap">VEHICLE</th>
-                        <th className="px-4 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap">LOSS DATE</th>
-                        <th className="px-4 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap">INSURER</th>
+                        {displayFields.map(fieldId => (
+                          <th key={fieldId} className="px-4 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap">
+                            {FIELD_LABELS[fieldId] || fieldId}
+                          </th>
+                        ))}
                         <th className="sticky right-0 z-20 bg-white dark:bg-gray-900 px-4 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap">STATUS</th>
                       </tr>
                     </thead>
@@ -339,13 +383,14 @@ export default function ReferrerPortal() {
                         if (claimsInGroup.length === 0) return null;
                         const isCollapsed = collapsedGroups[statusGroup];
                         const dotColor = getStatusDot(statusGroup);
+                        const colSpan = displayFields.length + 2;
                         return (
                           <React.Fragment key={statusGroup}>
                             <tr
                               className="bg-gray-50 dark:bg-gray-800/60 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-800"
                               onClick={() => toggleGroup(statusGroup)}
                             >
-                              <td colSpan={6} className="px-4 py-2">
+                              <td colSpan={colSpan} className="px-4 py-2">
                                 <div className="flex items-center gap-2">
                                   {isCollapsed ? <ChevronRight className="w-3.5 h-3.5 text-gray-400" /> : <ChevronDown className="w-3.5 h-3.5 text-gray-400" />}
                                   <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: dotColor }} />
@@ -370,18 +415,11 @@ export default function ReferrerPortal() {
                                       {claim.reg ? formatUKRegistration(claim.reg) : ''}
                                     </span>
                                   </td>
-                                  <td className="px-4 py-2.5 text-gray-700 dark:text-gray-300 whitespace-nowrap max-w-[160px] truncate">
-                                    {claim.client_name || '—'}
-                                  </td>
-                                  <td className="px-4 py-2.5 text-gray-600 dark:text-gray-400 whitespace-nowrap">
-                                    {claim.make_model || '—'}
-                                  </td>
-                                  <td className="px-4 py-2.5 text-gray-600 dark:text-gray-400 whitespace-nowrap">
-                                    {formatDate(claim.loss_date)}
-                                  </td>
-                                  <td className="px-4 py-2.5 text-gray-600 dark:text-gray-400 whitespace-nowrap max-w-[120px] truncate">
-                                    {claim.insurer || '—'}
-                                  </td>
+                                  {displayFields.map(fieldId => (
+                                    <td key={fieldId} className="px-4 py-2.5 text-gray-600 dark:text-gray-400 whitespace-nowrap max-w-[160px] truncate">
+                                      {renderFieldValue(claim, fieldId)}
+                                    </td>
+                                  ))}
                                   <td className="sticky right-0 z-10 px-3 py-2.5 whitespace-nowrap bg-white dark:bg-gray-900 group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50">
                                     <div className="flex items-center gap-1.5 justify-end flex-wrap">
                                       {claim.secondary_status && <StatusBadge status={claim.secondary_status} variant="secondary" />}
@@ -399,10 +437,11 @@ export default function ReferrerPortal() {
                         const ungrouped = filteredClaims.filter(c => !known.has(c.job_status || 'New'));
                         if (ungrouped.length === 0) return null;
                         const isCollapsed = collapsedGroups['__other__'];
+                        const colSpan = displayFields.length + 2;
                         return (
                           <React.Fragment>
                             <tr className="bg-gray-50 dark:bg-gray-800/60 cursor-pointer select-none" onClick={() => toggleGroup('__other__')}>
-                              <td colSpan={6} className="px-4 py-2">
+                              <td colSpan={colSpan} className="px-4 py-2">
                                 <div className="flex items-center gap-2">
                                   {isCollapsed ? <ChevronRight className="w-3.5 h-3.5 text-gray-400" /> : <ChevronDown className="w-3.5 h-3.5 text-gray-400" />}
                                   <span className="w-2 h-2 rounded-full bg-gray-400 flex-shrink-0" />
@@ -418,18 +457,11 @@ export default function ReferrerPortal() {
                                     {claim.reg ? formatUKRegistration(claim.reg) : ''}
                                   </span>
                                 </td>
-                                <td className="px-4 py-2.5 text-gray-700 dark:text-gray-300 whitespace-nowrap max-w-[160px] truncate">
-                                  {claim.client_name || '—'}
-                                </td>
-                                <td className="px-4 py-2.5 text-gray-600 dark:text-gray-400 whitespace-nowrap">
-                                  {claim.make_model || '—'}
-                                </td>
-                                <td className="px-4 py-2.5 text-gray-600 dark:text-gray-400 whitespace-nowrap">
-                                  {formatDate(claim.loss_date)}
-                                </td>
-                                <td className="px-4 py-2.5 text-gray-600 dark:text-gray-400 whitespace-nowrap max-w-[120px] truncate">
-                                  {claim.insurer || '—'}
-                                </td>
+                                {displayFields.map(fieldId => (
+                                  <td key={fieldId} className="px-4 py-2.5 text-gray-600 dark:text-gray-400 whitespace-nowrap max-w-[160px] truncate">
+                                    {renderFieldValue(claim, fieldId)}
+                                  </td>
+                                ))}
                                 <td className="sticky right-0 z-10 px-3 py-2.5 whitespace-nowrap bg-white dark:bg-gray-900 group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50">
                                   <div className="flex items-center gap-1.5 justify-end flex-wrap">
                                     {claim.secondary_status && <StatusBadge status={claim.secondary_status} variant="secondary" />}
@@ -452,6 +484,12 @@ export default function ReferrerPortal() {
               {filteredClaims.length} of {claims.length} claims
             </div>
           </div>
+      <ClaimCardFieldsModal
+        isOpen={showFieldsModal}
+        onClose={() => setShowFieldsModal(false)}
+        selectedFields={savedFields}
+        onSave={(fields) => updateUserFieldsMutation.mutate(fields)}
+      />
     </ReferrerLayout>
   );
 }
