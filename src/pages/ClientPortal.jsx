@@ -162,7 +162,7 @@ export default function ClientPortal() {
       const val = claim.vehicle_damage;
       if (!val) return '—';
       return (
-        <span className="relative group cursor-default" title={val}>
+        <span className="relative group cursor-default">
           <span className="truncate max-w-[120px] inline-block">{val}</span>
           <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 hidden group-hover:block z-50 bg-gray-900 text-white text-xs rounded-lg px-3 py-2 max-w-xs break-words shadow-lg">
             {val}
