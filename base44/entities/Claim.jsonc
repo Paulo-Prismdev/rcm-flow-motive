@@ -214,6 +214,9 @@
     "business_division": {
       "type": "string"
     },
+    "company_brand": {
+      "type": "string"
+    },
     "client_lat": {
       "type": "number"
     },

@@ -52,6 +52,7 @@ export default function ClaimPartiesForm({ claim, onSave, onCancel, mode }) {
     client_county: claim.client_county || '',
     client_postcode: claim.client_postcode || '',
     client_vat_status: claim.client_vat_status || 'Unknown',
+    company_brand: claim.company_brand || '',
     broker_id: claim.broker_id || '',
     broker_name: claim.broker_name || '',
     insurer: claim.insurer || '',
@@ -146,6 +147,7 @@ export default function ClaimPartiesForm({ claim, onSave, onCancel, mode }) {
         client_county: data.client_county,
         client_postcode: data.client_postcode,
         client_vat_status: data.client_vat_status,
+        company_brand: data.company_brand,
         broker_id: data.broker_id,
         broker_name: data.broker_name,
         insurer: data.insurer,
@@ -233,6 +235,10 @@ export default function ClaimPartiesForm({ claim, onSave, onCancel, mode }) {
             <label className="block text-xs text-muted-foreground mb-1">Postcode</label>
             <Input value={data.client_postcode} onChange={(e) => set('client_postcode', e.target.value)} className="neomorph-inset" />
           </div>
+        </div>
+        <div>
+          <label className="block text-xs text-muted-foreground mb-1">Company Brand</label>
+          <Input value={data.company_brand} onChange={(e) => set('company_brand', e.target.value)} className="neomorph-inset" />
         </div>
         <div>
           <label className="block text-xs text-muted-foreground mb-1">VAT Status</label>

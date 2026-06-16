@@ -717,6 +717,8 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
               <DetailRow label="Client Name" value={claim.client_name} />
               <DetailRow label="Phone" value={claim.client_phone} />
               <DetailRow label="Email" value={claim.client_email} />
+              <DetailRow label="Company Brand" value={claim.company_brand} />
+              <DetailRow label="Business Division" value={claim.business_division} />
               <DetailRow label="VAT Status" value={claim.client_vat_status} />
             </div>
             <div className={`mt-2 py-3 px-4 rounded-lg glass-inset ${(!claim.client_address_line_1 && !claim.client_town) ? 'border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20' : ''}`}>

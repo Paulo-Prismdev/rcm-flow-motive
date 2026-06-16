@@ -219,6 +219,7 @@ export default function ReferrerClaimDetail({ claim, onClose, initialSection }) 
               <DetailRow label="Client Name" value={claim.client_name} missing={m('client_name')} />
               <DetailRow label="Client Phone" value={claim.client_phone} missing={m('client_phone')} />
               <DetailRow label="Client Email" value={claim.client_email} missing={m('client_email')} />
+              <DetailRow label="Company Brand" value={claim.company_brand} />
               <DetailRow label="VAT Status" value={claim.client_vat_status} />
               <DetailRow label="Business Division" value={claim.business_division} />
             </div>
