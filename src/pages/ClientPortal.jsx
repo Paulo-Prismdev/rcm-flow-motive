@@ -25,7 +25,6 @@ export default function ClientPortal() {
   const [initialSection, setInitialSection] = useState(null);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [insurerFilter, setInsurerFilter] = useState('');
   const [claimTypeFilter, setClaimTypeFilter] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [collapsedGroups, setCollapsedGroups] = useState({});
@@ -95,12 +94,11 @@ export default function ClientPortal() {
       c.make_model?.toLowerCase().includes(q) ||
       c.insurer?.toLowerCase().includes(q);
     const matchesStatus = statusFilter === 'all' || (c.job_status || 'New') === statusFilter;
-    const matchesInsurer = !insurerFilter || c.insurer === insurerFilter;
     const matchesClaimType = !claimTypeFilter || c.claim_type === claimTypeFilter;
-    return matchesSearch && matchesStatus && matchesInsurer && matchesClaimType;
+    return matchesSearch && matchesStatus && matchesClaimType;
   }).sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
 
-  const activeFiltersCount = [statusFilter !== 'all', insurerFilter, claimTypeFilter].filter(Boolean).length;
+  const activeFiltersCount = [statusFilter !== 'all', claimTypeFilter].filter(Boolean).length;
 
   const savedFields = currentUser?.claim_card_fields || [];
   const userCardFields = [...savedFields.filter(f => f !== 'referrer')];
@@ -244,7 +242,7 @@ export default function ClientPortal() {
               Filters{activeFiltersCount > 0 ? ` (${activeFiltersCount})` : ''}
             </button>
             {activeFiltersCount > 0 && (
-              <button onClick={() => { setStatusFilter('all'); setInsurerFilter(''); setClaimTypeFilter(''); }}
+              <button onClick={() => { setStatusFilter('all'); setClaimTypeFilter(''); }}
                 className="p-1.5 text-gray-400 hover:text-gray-600 transition-colors"><X className="w-3.5 h-3.5" /></button>
             )}
           </div>
@@ -253,7 +251,7 @@ export default function ClientPortal() {
         {/* Filter panel */}
         {showFilters && (
           <div className="px-5 py-3 border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/30 flex-shrink-0">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+            <div className="grid grid-cols-2 gap-2">
               <div>
                 <label className="block text-[10px] font-medium text-gray-400 dark:text-gray-500 mb-0.5">Status</label>
                 <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
@@ -271,14 +269,6 @@ export default function ClientPortal() {
                   <option value="3rd Party Direct">3rd Party Direct</option>
                   <option value="Credit Repair">Credit Repair</option>
                   <option value="Glass Claim">Glass Claim</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-[10px] font-medium text-gray-400 dark:text-gray-500 mb-0.5">Insurer</label>
-                <select value={insurerFilter} onChange={e => setInsurerFilter(e.target.value)}
-                  className="w-full px-2 py-1 text-[11px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-700 dark:text-gray-300 focus:outline-none">
-                  <option value="">All Insurers</option>
-                  {uniqueInsurers.map(i => <option key={i} value={i}>{i}</option>)}
                 </select>
               </div>
             </div>
