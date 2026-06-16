@@ -215,7 +215,7 @@ export default function ReferrerPortal() {
   };
 
   // Default fields if none saved yet
-  const displayFields = userCardFields.length > 0 ? userCardFields : ['client_name', 'make_model', 'loss_date', 'insurer'];
+  const displayFields = userCardFields;
 
   return (
     <ReferrerLayout>
@@ -504,6 +504,7 @@ export default function ReferrerPortal() {
         onClose={() => setShowFieldsModal(false)}
         selectedFields={savedFields}
         onSave={(fields) => updateUserFieldsMutation.mutate(fields)}
+        mandatoryFields={[]}
       />
     </ReferrerLayout>
   );

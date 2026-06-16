@@ -3,8 +3,7 @@ import { Button } from "@/components/ui/button";
 import { X, GripVertical, Check, Lock } from "lucide-react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 
-// These fields are always shown and cannot be removed
-const MANDATORY_FIELDS = ['client_name', 'make_model', 'loss_date', 'referrer'];
+const DEFAULT_MANDATORY_FIELDS = ['client_name', 'make_model', 'loss_date', 'referrer'];
 
 const AVAILABLE_FIELDS = [
   { id: 'client_name', label: 'Client Name' },
@@ -26,15 +25,16 @@ const AVAILABLE_FIELDS = [
   { id: 'documents', label: 'Documents' },
 ];
 
-export default function ClaimCardFieldsModal({ isOpen, onClose, selectedFields, onSave }) {
+export default function ClaimCardFieldsModal({ isOpen, onClose, selectedFields, onSave, mandatoryFields }) {
+  const effectiveMandatory = mandatoryFields !== undefined ? mandatoryFields : DEFAULT_MANDATORY_FIELDS;
   // Ensure mandatory fields are always included
   const initialFields = selectedFields || [];
-  const mergedFields = [...MANDATORY_FIELDS, ...initialFields.filter(f => !MANDATORY_FIELDS.includes(f))];
+  const mergedFields = [...effectiveMandatory, ...initialFields.filter(f => !effectiveMandatory.includes(f))];
   const [fields, setFields] = useState(mergedFields);
 
   if (!isOpen) return null;
 
-  const isMandatory = (fieldId) => MANDATORY_FIELDS.includes(fieldId);
+  const isMandatory = (fieldId) => effectiveMandatory.includes(fieldId);
 
   const toggleField = (fieldId) => {
     // Don't allow removing mandatory fields

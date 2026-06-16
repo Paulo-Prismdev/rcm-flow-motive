@@ -175,7 +175,7 @@ export default function ClientPortal() {
     return String(val);
   };
 
-  const displayFields = userCardFields.length > 0 ? userCardFields : ['client_name', 'make_model', 'loss_date', 'insurer'];
+  const displayFields = userCardFields;
 
   if (viewingClaim) {
     return (
@@ -463,6 +463,7 @@ export default function ClientPortal() {
         onClose={() => setShowFieldsModal(false)}
         selectedFields={savedFields}
         onSave={(fields) => updateUserFieldsMutation.mutate(fields)}
+        mandatoryFields={[]}
       />
     </ClientLayout>
   );

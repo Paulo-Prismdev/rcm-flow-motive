@@ -63,7 +63,7 @@ export default function RepairerClaimsList({ claims }) {
     return String(val);
   };
 
-  const displayFields = userCardFields.length > 0 ? userCardFields : ['client_name', 'make_model', 'loss_date', 'insurer'];
+  const displayFields = userCardFields;
 
   const filteredClaims = claims.filter(c => {
     if (filter === 'active') return !['Completed', 'Cancelled', 'Total Loss'].includes(c.job_status);
@@ -181,6 +181,7 @@ export default function RepairerClaimsList({ claims }) {
         onClose={() => setShowFieldsModal(false)}
         selectedFields={savedFields}
         onSave={(fields) => updateUserFieldsMutation.mutate(fields)}
+        mandatoryFields={[]}
       />
     </div>
   );
