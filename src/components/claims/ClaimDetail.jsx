@@ -1282,6 +1282,12 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                             Updates
                           </Button>
                         )}
+                        <Button onClick={() => setIsImagesOpen(true)} variant="outline" className="h-9 px-3 text-sm font-medium rounded-lg gap-1.5">
+                          <Image className="w-4 h-4" /> Images
+                        </Button>
+                        <Button onClick={() => setIsAttachmentsOpen(true)} variant="outline" className="h-9 px-3 text-sm font-medium rounded-lg gap-1.5">
+                          <FileText className="w-4 h-4" /> Docs
+                        </Button>
                         {canEdit && (
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>

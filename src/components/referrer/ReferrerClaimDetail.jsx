@@ -476,6 +476,12 @@ export default function ReferrerClaimDetail({ claim, onClose }) {
             >
               Updates & Status
             </Button>
+            <Button onClick={() => setSelectedSection('images')} variant="outline" className="h-9 px-3 text-sm font-medium rounded-lg gap-1.5">
+              <Image className="w-4 h-4" /> Images
+            </Button>
+            <Button onClick={() => setSelectedSection('documents')} variant="outline" className="h-9 px-3 text-sm font-medium rounded-lg gap-1.5">
+              <FileText className="w-4 h-4" /> Docs
+            </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" className="flex items-center gap-2 flex-shrink-0 text-sm">
