@@ -192,7 +192,7 @@ export default function ReferrerPortal() {
     insurer: 'Insurer',
     referrer_ref: 'Ref',
     driver_contact_name: 'Driver',
-    company_brand: 'Company Brand',
+    business_division: 'Business Division',
     referrer_ref: 'Ref',
     claim_type: 'Claim Type',
     claim_ref: 'Claim Ref',

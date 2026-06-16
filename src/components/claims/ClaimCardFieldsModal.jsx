@@ -21,7 +21,7 @@ const AVAILABLE_FIELDS = [
   { id: 'claim_ref', label: 'Claim Reference' },
   { id: 'policy_number', label: 'Policy Number' },
   { id: 'client_phone', label: 'Client Phone' },
-  { id: 'company_brand', label: 'Company Brand' },
+  { id: 'business_division', label: 'Business Division' },
   { id: 'vehicle_location', label: 'Vehicle Location' },
   { id: 'documents', label: 'Documents' },
   { id: 'vehicle_damage', label: 'Vehicle Damage' },

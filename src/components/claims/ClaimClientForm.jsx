@@ -168,14 +168,6 @@ export default function ClaimClientForm({ claim, onSave, onCancel }) {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm text-foreground-muted mb-2">Company Brand</label>
-          <Input
-            value={formData.company_brand || ''}
-            onChange={(e) => handleChange('company_brand', e.target.value)}
-            className="neomorph-inset px-4 py-3 border-0"
-          />
-        </div>
-        <div>
           <label className="block text-sm text-foreground-muted mb-2">VAT Status</label>
           <select
             value={formData.client_vat_status || 'Unknown'} // Ensure default
