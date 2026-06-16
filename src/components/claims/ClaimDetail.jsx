@@ -152,7 +152,7 @@ import { logActivity, logChanges } from '../shared/useActivityLogger';
 
 const SECTION_FIELDS = {
   status: ['claim_type', 'loss_date', 'vehicle_use', 'incident_location', 'circumstances'],
-  client: ['client_name', 'client_phone', 'client_email', 'client_address_line_1', 'client_town', 'client_postcode'],
+  client: ['client_name', 'client_phone', 'client_email', 'client_address_line_1', 'client_town', 'client_postcode', 'business_division'],
   insurance: ['insurer', 'claim_ref'],
   driver: ['driver_contact_name', 'driver_contact_phone', 'driver_contact_email'],
   thirdParty: ['tp_name', 'tp_phone', 'tp_reg', 'tp_insurer'],
