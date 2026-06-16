@@ -23,6 +23,7 @@ const AVAILABLE_FIELDS = [
   { id: 'client_phone', label: 'Client Phone' },
   { id: 'vehicle_location', label: 'Vehicle Location' },
   { id: 'documents', label: 'Documents' },
+  { id: 'vehicle_damage', label: 'Vehicle Damage' },
 ];
 
 export default function ClaimCardFieldsModal({ isOpen, onClose, selectedFields, onSave, mandatoryFields }) {
