@@ -9,7 +9,7 @@ import { Settings2, FileText, ChevronRight, Filter, X } from 'lucide-react';
 
 const FILTERS = ['active', 'completed', 'all'];
 
-export default function RepairerClaimsList({ claims }) {
+export default function RepairerClaimsList({ claims, onViewClaim }) {
   const [filter, setFilter] = useState('active');
   const [showFieldsModal, setShowFieldsModal] = useState(false);
   const [search, setSearch] = useState('');
@@ -68,10 +68,13 @@ export default function RepairerClaimsList({ claims }) {
     if (fieldId === 'documents') {
       const docCount = (claim.file_urls?.length || 0) + (claim.image_urls?.length || 0);
       return (
-        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 text-xs font-medium">
+        <button
+          onClick={(e) => { e.stopPropagation(); onViewClaim?.(claim, 'documents'); }}
+          className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 text-xs font-medium hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors cursor-pointer"
+        >
           <FileText className="w-3 h-3" />
           {docCount}
-        </span>
+        </button>
       );
     }
     const val = claim[fieldId];
@@ -196,7 +199,7 @@ export default function RepairerClaimsList({ claims }) {
           </thead>
           <tbody>
             {filteredClaims.map(claim => (
-              <tr key={claim.id} className="border-b border-border hover:bg-surface-hover transition-colors text-sm">
+              <tr key={claim.id} onClick={() => onViewClaim?.(claim, null)} className="border-b border-border hover:bg-surface-hover transition-colors text-sm cursor-pointer">
                 <td className="px-4 py-2.5 whitespace-nowrap">
                   <span
                     className="inline-flex items-center justify-center rounded-md bg-[#1e2d4a] text-white font-semibold uppercase"
@@ -230,7 +233,7 @@ export default function RepairerClaimsList({ claims }) {
       {/* Mobile card view */}
       <div className="lg:hidden space-y-3">
         {filteredClaims.map(claim => (
-          <div key={claim.id} className="neomorph-flat p-4">
+          <div key={claim.id} onClick={() => onViewClaim?.(claim, null)} className="neomorph-flat p-4 cursor-pointer active:bg-gray-50">
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2 flex-wrap">

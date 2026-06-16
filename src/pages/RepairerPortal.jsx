@@ -9,6 +9,7 @@ import RepairerEstimatesTab from '@/components/repairer/RepairerEstimatesTab';
 import RepairerPartsTab from '@/components/repairer/RepairerPartsTab';
 import RepairerProductsTab from '@/components/repairer/RepairerProductsTab';
 import TyreRequestForm from '@/components/repairer/TyreRequestForm';
+import ReferrerClaimDetail from '@/components/referrer/ReferrerClaimDetail';
 
 const TABS = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -22,6 +23,8 @@ const TABS = [
 export default function RepairerPortal() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [viewingClaim, setViewingClaim] = useState(null);
+  const [initialSection, setInitialSection] = useState(null);
 
   const { data: currentUser } = useQuery({
     queryKey: ['currentUser'],
@@ -69,6 +72,14 @@ export default function RepairerPortal() {
           <div className="animate-spin w-8 h-8 border-4 border-accent border-t-transparent rounded-full mx-auto" />
           <p className="mt-4 text-foreground-muted">Loading...</p>
         </div>
+      </div>
+    );
+  }
+
+  if (viewingClaim) {
+    return (
+      <div className="h-full flex flex-col">
+        <ReferrerClaimDetail claim={viewingClaim} onClose={() => { setViewingClaim(null); setInitialSection(null); }} initialSection={initialSection} />
       </div>
     );
   }
@@ -190,7 +201,7 @@ export default function RepairerPortal() {
             bodyshopId={bodyshopId}
           />
         )}
-        {activeTab === 'claims' && <RepairerClaimsList claims={claims} />}
+        {activeTab === 'claims' && <RepairerClaimsList claims={claims} onViewClaim={(claim, section) => { setInitialSection(section); setViewingClaim(claim); }} />}
         {activeTab === 'estimates' && (
           <RepairerEstimatesTab estimates={estimates} bodyshopId={bodyshopId} bodyshopName={bodyshop?.name} />
         )}
