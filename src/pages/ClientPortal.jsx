@@ -405,7 +405,7 @@ export default function ClientPortal() {
                               </span>
                             </td>
                             {displayFields.map(fieldId => (
-                              <td key={fieldId} className="px-4 py-2.5 text-gray-600 dark:text-gray-400 whitespace-nowrap max-w-[160px] truncate">
+                              <td key={fieldId} className={`px-4 py-2.5 text-gray-600 dark:text-gray-400 whitespace-nowrap max-w-[160px] ${fieldId === 'vehicle_damage' ? 'overflow-visible' : 'overflow-hidden text-ellipsis'}`}>
                                 {renderFieldValue(claim, fieldId)}
                               </td>
                             ))}
@@ -446,7 +446,7 @@ export default function ClientPortal() {
                               </span>
                             </td>
                             {displayFields.map(fieldId => (
-                              <td key={fieldId} className="px-4 py-2.5 text-gray-600 dark:text-gray-400 whitespace-nowrap max-w-[160px] truncate">
+                              <td key={fieldId} className={`px-4 py-2.5 text-gray-600 dark:text-gray-400 whitespace-nowrap max-w-[160px] ${fieldId === 'vehicle_damage' ? 'overflow-visible' : 'overflow-hidden text-ellipsis'}`}>
                                 {renderFieldValue(claim, fieldId)}
                               </td>
                             ))}
