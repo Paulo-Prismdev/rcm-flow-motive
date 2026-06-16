@@ -5,13 +5,17 @@ import { base44 } from '@/api/base44Client';
 import { formatUKRegistration } from '@/components/shared/formatRegistration';
 import StatusBadge from '@/components/shared/StatusBadge';
 import ClaimCardFieldsModal from '@/components/claims/ClaimCardFieldsModal';
-import { Settings2, FileText, ChevronRight } from 'lucide-react';
+import { Settings2, FileText, ChevronRight, Filter, X } from 'lucide-react';
 
 const FILTERS = ['active', 'completed', 'all'];
 
 export default function RepairerClaimsList({ claims }) {
   const [filter, setFilter] = useState('active');
   const [showFieldsModal, setShowFieldsModal] = useState(false);
+  const [search, setSearch] = useState('');
+  const [insurerFilter, setInsurerFilter] = useState('');
+  const [claimTypeFilter, setClaimTypeFilter] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: currentUser } = useQuery({
@@ -79,15 +83,31 @@ export default function RepairerClaimsList({ claims }) {
   const displayFields = userCardFields;
 
   const filteredClaims = claims.filter(c => {
-    if (filter === 'active') return !['Completed', 'Cancelled', 'Total Loss'].includes(c.job_status);
-    if (filter === 'completed') return c.job_status === 'Completed';
-    return true;
+    if (filter === 'active') {
+      if (['Completed', 'Cancelled', 'Total Loss'].includes(c.job_status)) return false;
+    } else if (filter === 'completed') {
+      if (c.job_status !== 'Completed') return false;
+    }
+    const q = search.toLowerCase();
+    const matchesSearch = !q ||
+      c.reg?.toLowerCase().includes(q) ||
+      c.client_name?.toLowerCase().includes(q) ||
+      c.job_number?.toLowerCase().includes(q) ||
+      c.make_model?.toLowerCase().includes(q) ||
+      c.insurer?.toLowerCase().includes(q);
+    const matchesInsurer = !insurerFilter || c.insurer === insurerFilter;
+    const matchesClaimType = !claimTypeFilter || c.claim_type === claimTypeFilter;
+    return matchesSearch && matchesInsurer && matchesClaimType;
   });
+
+  const uniqueInsurers = [...new Set(claims.map(c => c.insurer).filter(Boolean))].sort();
+  const activeFiltersCount = [search, insurerFilter, claimTypeFilter].filter(Boolean).length;
 
   return (
     <div className="neomorph p-4 space-y-4">
-      <div className="flex items-center justify-between gap-2 flex-wrap">
-        <div className="flex gap-2">
+      {/* Toolbar */}
+      <div className="space-y-2">
+        <div className="flex items-center gap-2 flex-wrap">
           {FILTERS.map(f => (
             <button
               key={f}
@@ -99,14 +119,65 @@ export default function RepairerClaimsList({ claims }) {
               {f}
             </button>
           ))}
+          <div className="flex-1" />
+          <button
+            onClick={() => setShowFieldsModal(true)}
+            className="p-2 text-foreground-muted hover:text-foreground transition-colors"
+            title="Customise columns"
+          >
+            <Settings2 className="w-4 h-4" />
+          </button>
         </div>
-        <button
-          onClick={() => setShowFieldsModal(true)}
-          className="p-2 text-foreground-muted hover:text-foreground transition-colors"
-          title="Customise columns"
-        >
-          <Settings2 className="w-4 h-4" />
-        </button>
+        <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex-1 min-w-[200px] relative">
+            <input
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Search by reg, client, job number..."
+              className="w-full px-4 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-[10px] focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/15 text-gray-900 dark:text-white placeholder-gray-400 transition-all"
+            />
+            {search && (
+              <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
+          <button onClick={() => setShowFilters(!showFilters)}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-[10px] text-xs font-medium border transition-all ${activeFiltersCount > 0 ? 'bg-blue-50 border-blue-200 text-blue-700 dark:bg-blue-900/20 dark:border-blue-700 dark:text-blue-300' : 'border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-800 hover:border-gray-300'}`}>
+            <Filter className="w-3.5 h-3.5" />
+            Filters{activeFiltersCount > 0 ? ` (${activeFiltersCount})` : ''}
+          </button>
+          {activeFiltersCount > 0 && (
+            <button onClick={() => { setSearch(''); setInsurerFilter(''); setClaimTypeFilter(''); }}
+              className="p-1.5 text-gray-400 hover:text-gray-600 transition-colors"><X className="w-3.5 h-3.5" /></button>
+          )}
+        </div>
+        {/* Filter panel */}
+        {showFilters && (
+          <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-800">
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="block text-[10px] font-medium text-gray-400 dark:text-gray-500 mb-0.5">Claim Type</label>
+                <select value={claimTypeFilter} onChange={e => setClaimTypeFilter(e.target.value)}
+                  className="w-full px-2 py-1 text-[11px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-700 dark:text-gray-300 focus:outline-none">
+                  <option value="">All Types</option>
+                  <option value="Fault Claim">Fault Claim</option>
+                  <option value="3rd Party Direct">3rd Party Direct</option>
+                  <option value="Credit Repair">Credit Repair</option>
+                  <option value="Glass Claim">Glass Claim</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-[10px] font-medium text-gray-400 dark:text-gray-500 mb-0.5">Insurer</label>
+                <select value={insurerFilter} onChange={e => setInsurerFilter(e.target.value)}
+                  className="w-full px-2 py-1 text-[11px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-700 dark:text-gray-300 focus:outline-none">
+                  <option value="">All Insurers</option>
+                  {uniqueInsurers.map(i => <option key={i} value={i}>{i}</option>)}
+                </select>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Desktop table view */}

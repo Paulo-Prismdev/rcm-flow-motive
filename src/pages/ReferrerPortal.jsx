@@ -7,7 +7,8 @@ import {
   AlertCircle,
   X,
   FileText,
-  Settings2
+  Settings2,
+  Filter
 } from 'lucide-react';
 import { format } from 'date-fns';
 import StatusBadge from '../components/shared/StatusBadge';
@@ -25,7 +26,9 @@ export default function ReferrerPortal() {
   const [initialSection, setInitialSection] = useState(null);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [insurerFilter, setInsurerFilter] = useState('all');
+  const [insurerFilter, setInsurerFilter] = useState('');
+  const [claimTypeFilter, setClaimTypeFilter] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
   const [collapsedGroups, setCollapsedGroups] = useState({});
   const [showFieldsModal, setShowFieldsModal] = useState(false);
   const queryClient = useQueryClient();
@@ -120,9 +123,12 @@ export default function ReferrerPortal() {
       c.make_model?.toLowerCase().includes(q) ||
       c.insurer?.toLowerCase().includes(q);
     const matchesStatus = statusFilter === 'all' || (c.job_status || 'New') === statusFilter;
-    const matchesInsurer = insurerFilter === 'all' || c.insurer === insurerFilter;
-    return matchesSearch && matchesStatus && matchesInsurer;
+    const matchesInsurer = !insurerFilter || c.insurer === insurerFilter;
+    const matchesClaimType = !claimTypeFilter || c.claim_type === claimTypeFilter;
+    return matchesSearch && matchesStatus && matchesInsurer && matchesClaimType;
   }).sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
+
+  const activeFiltersCount = [statusFilter !== 'all', insurerFilter, claimTypeFilter].filter(Boolean).length;
 
   const displayName = referrer?.name || company?.name || 'Referrer';
 
@@ -260,36 +266,52 @@ export default function ReferrerPortal() {
                 >
                   <Settings2 className="w-4 h-4" />
                 </button>
-                <select
-                  value={statusFilter}
-                  onChange={e => setStatusFilter(e.target.value)}
-                  className="px-3 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-[10px] focus:outline-none focus:border-blue-400 text-gray-900 dark:text-white"
-                >
-                  <option value="all">All Statuses</option>
-                  {availableStatuses.map(status => (
-                    <option key={status} value={status}>{status}</option>
-                  ))}
-                </select>
-                <select
-                  value={insurerFilter}
-                  onChange={e => setInsurerFilter(e.target.value)}
-                  className="px-3 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-[10px] focus:outline-none focus:border-blue-400 text-gray-900 dark:text-white"
-                >
-                  <option value="all">All Insurers</option>
-                  {uniqueInsurers.map(insurer => (
-                    <option key={insurer} value={insurer}>{insurer}</option>
-                  ))}
-                </select>
-                {(statusFilter !== 'all' || insurerFilter !== 'all') && (
-                  <button
-                    onClick={() => { setStatusFilter('all'); setInsurerFilter('all'); }}
-                    className="px-3 py-2 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                  >
-                    Clear
-                  </button>
+                <button onClick={() => setShowFilters(!showFilters)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-[10px] text-xs font-medium border transition-all ${activeFiltersCount > 0 ? 'bg-blue-50 border-blue-200 text-blue-700 dark:bg-blue-900/20 dark:border-blue-700 dark:text-blue-300' : 'border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-800 hover:border-gray-300'}`}>
+                  <Filter className="w-3.5 h-3.5" />
+                  Filters{activeFiltersCount > 0 ? ` (${activeFiltersCount})` : ''}
+                </button>
+                {activeFiltersCount > 0 && (
+                  <button onClick={() => { setStatusFilter('all'); setInsurerFilter(''); setClaimTypeFilter(''); }}
+                    className="p-1.5 text-gray-400 hover:text-gray-600 transition-colors"><X className="w-3.5 h-3.5" /></button>
                 )}
               </div>
             </div>
+
+            {/* Filter panel */}
+            {showFilters && (
+              <div className="px-5 py-3 border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/30 flex-shrink-0">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                  <div>
+                    <label className="block text-[10px] font-medium text-gray-400 dark:text-gray-500 mb-0.5">Status</label>
+                    <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
+                      className="w-full px-2 py-1 text-[11px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-700 dark:text-gray-300 focus:outline-none">
+                      <option value="all">All Statuses</option>
+                      {availableStatuses.map(s => <option key={s} value={s}>{s}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-medium text-gray-400 dark:text-gray-500 mb-0.5">Claim Type</label>
+                    <select value={claimTypeFilter} onChange={e => setClaimTypeFilter(e.target.value)}
+                      className="w-full px-2 py-1 text-[11px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-700 dark:text-gray-300 focus:outline-none">
+                      <option value="">All Types</option>
+                      <option value="Fault Claim">Fault Claim</option>
+                      <option value="3rd Party Direct">3rd Party Direct</option>
+                      <option value="Credit Repair">Credit Repair</option>
+                      <option value="Glass Claim">Glass Claim</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-medium text-gray-400 dark:text-gray-500 mb-0.5">Insurer</label>
+                    <select value={insurerFilter} onChange={e => setInsurerFilter(e.target.value)}
+                      className="w-full px-2 py-1 text-[11px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-700 dark:text-gray-300 focus:outline-none">
+                      <option value="">All Insurers</option>
+                      {uniqueInsurers.map(i => <option key={i} value={i}>{i}</option>)}
+                    </select>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Table/List with status grouping */}
             <div className="flex-1 overflow-auto min-h-0" style={{WebkitOverflowScrolling: 'touch'}}>
