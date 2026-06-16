@@ -130,8 +130,8 @@ function BackorderedPartsSectionReadOnly({ claimId }) {
   );
 }
 
-export default function ReferrerClaimDetail({ claim, onClose }) {
-  const [selectedSection, setSelectedSection] = useState('status');
+export default function ReferrerClaimDetail({ claim, onClose, initialSection }) {
+  const [selectedSection, setSelectedSection] = useState(initialSection || 'status');
   const [lightboxUrl, setLightboxUrl] = useState(null);
   const [replyText, setReplyText] = useState('');
   const [isClaimUpdatesOpen, setIsClaimUpdatesOpen] = useState(false);

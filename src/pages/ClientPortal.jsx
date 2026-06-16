@@ -21,6 +21,7 @@ import ClaimCardFieldsModal from '../components/claims/ClaimCardFieldsModal';
 export default function ClientPortal() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [viewingClaim, setViewingClaim] = useState(null);
+  const [initialSection, setInitialSection] = useState(null);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [insurerFilter, setInsurerFilter] = useState('all');
@@ -160,7 +161,7 @@ export default function ClientPortal() {
       const docCount = (claim.file_urls?.length || 0) + (claim.image_urls?.length || 0);
       return (
         <button
-          onClick={(e) => { e.stopPropagation(); setViewingClaim(claim); }}
+          onClick={(e) => { e.stopPropagation(); setInitialSection('documents'); setViewingClaim(claim); }}
           className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 text-xs font-medium hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors"
         >
           <FileText className="w-3 h-3" />
@@ -179,7 +180,7 @@ export default function ClientPortal() {
   if (viewingClaim) {
     return (
       <ClientLayout>
-        <ReferrerClaimDetail claim={viewingClaim} onClose={() => setViewingClaim(null)} />
+        <ReferrerClaimDetail claim={viewingClaim} onClose={() => { setViewingClaim(null); setInitialSection(null); }} initialSection={initialSection} />
       </ClientLayout>
     );
   }
