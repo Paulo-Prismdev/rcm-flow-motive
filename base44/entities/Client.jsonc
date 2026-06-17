@@ -70,32 +70,9 @@
     "name"
   ],
   "rls": {
-    "create": {
-      "user_condition": {
-        "user_type": "internal"
-      }
-    },
-    "read": {
-      "$or": [
-        {
-          "user_condition": {
-            "user_type": "internal"
-          }
-        },
-        {
-          "id": "{{user.linked_client_id}}"
-        }
-      ]
-    },
-    "update": {
-      "user_condition": {
-        "user_type": "internal"
-      }
-    },
-    "delete": {
-      "user_condition": {
-        "user_type": "internal"
-      }
-    }
+    "create": null,
+    "read": null,
+    "update": null,
+    "delete": null
   }
 }
