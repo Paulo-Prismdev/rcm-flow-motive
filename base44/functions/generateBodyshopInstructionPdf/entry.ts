@@ -269,7 +269,8 @@ Deno.serve(async (req) => {
     const supplierLines = [
       { text: 'Signs Plus', bold: true, size: 10 },
       { text: '147 Main Road, Biggin Hill, Kent, TN16 3JP', bold: false, size: 9 },
-      { text: 'Email: enquiries@signsplus.uk    |    Tel: 01959 571 074', bold: false, size: 9 },
+      { text: 'Email: enquiries@signsplus.uk', bold: false, size: 9 },
+      { text: 'Phone: 01959 571 074', bold: false, size: 9 },
     ];
 
     const supplierTopPad = 5;
