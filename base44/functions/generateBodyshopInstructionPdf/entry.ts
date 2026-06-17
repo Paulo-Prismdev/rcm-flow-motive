@@ -229,46 +229,88 @@ Deno.serve(async (req) => {
     doc.setFontSize(9);
     doc.setFont('helvetica', 'bold');
     doc.text('Branded Decals & Signage', leftMargin + 3, yPos + 5);
-    yPos += 10;
+    yPos += 12;
+
+    const decalX = leftMargin + 5;
+    const decalW = maxWidth - 10;
+    const lineSpacing = 5.5;
 
     doc.setTextColor(0, 0, 0);
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(9);
 
-    const decalLines = [
+    // Body paragraph 1
+    const body1 = doc.splitTextToSize(
       'All repairers MUST use the RCM Automotive approved decal supplier for any branded vehicle decals or signage.',
+      decalW
+    );
+    doc.text(body1, decalX, yPos);
+    yPos += lineSpacing * body1.length + 2;
+
+    // Body paragraph 2
+    const body2 = doc.splitTextToSize(
       'Where a vehicle requires decals, these MUST be ordered as soon as the repair is authorised - if the vehicle is already on site, this should be done immediately. If the vehicle has not yet arrived, decals MUST be ordered prior to the vehicle coming on site.',
+      decalW
+    );
+    doc.text(body2, decalX, yPos);
+    yPos += lineSpacing * body2.length + 3;
+
+    // Intro line to supplier
+    const intro = doc.splitTextToSize(
       'Please contact John or Michael Welch at our approved supplier, quoting Orkin as the client and providing the vehicle registration number:',
-      'Signs Plus',
-      '147 Main Road, Biggin Hill, Kent, TN16 3JP',
-      'Email: enquiries@signsplus.uk    |    Tel: 01959 571 074',
+      decalW
+    );
+    doc.text(intro, decalX, yPos);
+    yPos += lineSpacing * intro.length + 3;
+
+    // ── Supplier contact box ──
+    const boxX = decalX + 4;
+    const boxW = decalW - 8;
+    const supplierLines = [
+      { text: 'Signs Plus', bold: true, size: 10 },
+      { text: '147 Main Road, Biggin Hill, Kent, TN16 3JP', bold: false, size: 9 },
+      { text: 'Email: enquiries@signsplus.uk    |    Tel: 01959 571 074', bold: false, size: 9 },
     ];
 
-    for (const line of decalLines) {
-      if (yPos > 270) { doc.addPage(); yPos = 15; }
-      const wrapped = doc.splitTextToSize(line, maxWidth - 4);
-      doc.text(wrapped, leftMargin + 3, yPos);
-      yPos += 6 * wrapped.length;
+    const supplierTopPad = 5;
+    const supplierLineH = 6;
+    const supplierBottomPad = 5;
+    const supplierBoxH = supplierTopPad + supplierLineH * supplierLines.length + supplierBottomPad;
+    const supplierBoxY = yPos;
+
+    // Light grey background
+    doc.setFillColor(245, 245, 248);
+    doc.setDrawColor(180, 180, 190);
+    doc.roundedRect(boxX, supplierBoxY, boxW, supplierBoxH, 3, 3, 'FD');
+
+    let sY = supplierBoxY + supplierTopPad;
+    for (const sl of supplierLines) {
+      doc.setFontSize(sl.size);
+      doc.setFont('helvetica', sl.bold ? 'bold' : 'normal');
+      doc.setTextColor(0, 0, 0);
+      doc.text(sl.text, boxX + 4, sY);
+      sY += supplierLineH;
     }
+    yPos = supplierBoxY + supplierBoxH + 6;
 
-    yPos += 2;
-
-    // Warnings
+    // ── Warnings ──
     doc.setFont('helvetica', 'bold');
+    doc.setFontSize(9);
     doc.setTextColor(200, 0, 0);
+
     const decalWarn1 = doc.splitTextToSize(
       'WARNING: Use of any other supplier for RCM Automotive branded decals is not permitted without prior written approval.',
-      maxWidth - 4
+      decalW
     );
-    doc.text(decalWarn1, leftMargin + 3, yPos);
-    yPos += 6 * decalWarn1.length + 2;
+    doc.text(decalWarn1, decalX, yPos);
+    yPos += lineSpacing * decalWarn1.length + 3;
 
     const decalWarn2 = doc.splitTextToSize(
       'WARNING: Any repair delayed as a result of the mismanagement of a decal order - including failure to order on time - will result in a charge of GBP 100 per day for each day of delay attributable to the repairer. This will be deducted from any outstanding VAT and excess payments due.',
-      maxWidth - 4
+      decalW
     );
-    doc.text(decalWarn2, leftMargin + 3, yPos);
-    yPos += 6 * decalWarn2.length;
+    doc.text(decalWarn2, decalX, yPos);
+    yPos += lineSpacing * decalWarn2.length;
 
     doc.setTextColor(0, 0, 0);
     yPos += 5;
