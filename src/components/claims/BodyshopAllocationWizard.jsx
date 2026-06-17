@@ -460,6 +460,14 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
 
   const radiusInMeters = 30 * 1609.34;
 
+  // Prevent body scroll while wizard is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+      return () => { document.body.style.overflow = ''; };
+    }
+  }, [isOpen]);
+
   if (!isOpen || !claim) return null;
 
   const builtInPdfTemplates = [
@@ -468,8 +476,11 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
   ];
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl w-full min-h-[600px] max-h-[95vh] p-0 overflow-hidden flex flex-col">
+    <Dialog open={isOpen} onOpenChange={onClose} modal={false}>
+      <DialogContent
+        className="max-w-6xl w-full min-h-[600px] max-h-[95vh] p-0 overflow-hidden flex flex-col"
+        onInteractOutside={(e) => e.preventDefault()}
+      >
         {/* Header with Steps */}
         <div className="p-3 lg:p-4 border-b border-border flex-shrink-0">
           <div className="flex items-center justify-between mb-3">
