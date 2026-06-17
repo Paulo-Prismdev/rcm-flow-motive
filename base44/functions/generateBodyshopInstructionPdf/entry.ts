@@ -227,28 +227,133 @@ Deno.serve(async (req) => {
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(9);
 
-    const invoicingLines = [
-      'Your invoice should be addressed and sent to the authorising party, as instructed on the authority and as per your usual practice.',
-      '',
-      'A copy of the final invoice, authority and collection note must be emailed to invoices@rcmautomotive.co.uk',
-      '',
-      'You will receive an invoice from RCM for 15% of the final repair figure and will be payable within 7 DAYS of invoice.'
-    ];
+    // Deductions box on left, Payment Terms on right
+    const deductionsBoxW = 55;
+    const paymentBoxW = maxWidth - deductionsBoxW;
+    const boxStartY = yPos;
 
-    for (const line of invoicingLines) {
-      if (!line) { yPos += 3; continue; }
-      const wrapped = doc.splitTextToSize(line, maxWidth - 4);
-      doc.text(wrapped, leftMargin + 2, yPos);
-      yPos += 6 * wrapped.length;
+    // Left box: Invoice Deductions
+    doc.setDrawColor(150, 150, 150);
+    doc.rect(leftMargin, boxStartY, deductionsBoxW, 7, 'S');
+    doc.setFillColor(220, 220, 220);
+    doc.rect(leftMargin, boxStartY, deductionsBoxW, 7, 'F');
+    doc.setTextColor(0, 0, 0);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(9);
+    doc.text('Invoice Deductions', leftMargin + 2, boxStartY + 5);
+
+    const percentToReferrer = claim.percent_to_referrer ? `${claim.percent_to_referrer}%` : 'N/A';
+    const estFee = claim.est_fee ? `£${Number(claim.est_fee).toFixed(2)}` : null;
+
+    const deductionItems = [`• ${percentToReferrer} Bottom Line Discount`];
+    if (estFee) deductionItems.push(`• Estimate Fee ${estFee}`);
+
+    doc.setFont('helvetica', 'normal');
+    let dedY = boxStartY + 13;
+    for (const item of deductionItems) {
+      doc.text(item, leftMargin + 3, dedY);
+      dedY += 7;
     }
 
+    // Right box: Payment Terms + Invoicing & Payment text
+    const payX = leftMargin + deductionsBoxW;
+    doc.setDrawColor(150, 150, 150);
+    doc.rect(payX, boxStartY, paymentBoxW, 7, 'S');
+    doc.setFillColor(220, 220, 220);
+    doc.rect(payX, boxStartY, paymentBoxW, 7, 'F');
+    doc.setTextColor(0, 0, 0);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(9);
+    doc.text('Payment Terms', payX + 3, boxStartY + 5);
+
+    let ptY = boxStartY + 13;
+    const payWidth = paymentBoxW - 5;
+
+    // Payment terms bullet
+    doc.setFont('helvetica', 'normal');
+    doc.text('• Payment within 7 days of invoice', payX + 3, ptY);
+    ptY += 8;
+
+    // INVOICING & PAYMENT heading
+    doc.setFont('helvetica', 'bold');
+    doc.text('INVOICING & PAYMENT', payX + 3, ptY);
+    ptY += 6;
+
+    const paymentTextLines = [
+      { text: 'Your invoice ', bold: false },
+      { text: 'MUST', bold: true },
+      { text: ' be addressed to the authorising party, as instructed on written authority.', bold: false }
+    ];
+
+    doc.setFont('helvetica', 'normal');
+    const line1 = 'Your invoice MUST be addressed to the authorising party, as instructed on written authority.';
+    const line1Wrapped = doc.splitTextToSize(line1, payWidth);
+    doc.text(line1Wrapped, payX + 3, ptY);
+    ptY += 6 * line1Wrapped.length;
+
+    const line2 = 'The invoice pack MUST include - Main Invoice, final authority & a signed satisfaction note.';
+    const line2Wrapped = doc.splitTextToSize(line2, payWidth);
+    doc.text(line2Wrapped, payX + 3, ptY);
+    ptY += 6 * line2Wrapped.length;
+
+    const line3 = 'Invoice pack MUST be sent to - invoices@rcmautomotive.co.uk';
+    const line3Wrapped = doc.splitTextToSize(line3, payWidth);
+    doc.text(line3Wrapped, payX + 3, ptY);
+    ptY += 6 * line3Wrapped.length;
+
+    doc.setFont('helvetica', 'bold');
+    const line4 = 'VAT and EXCESS MUST be made out and sent to RCM Automotive Ltd, who will invoice the client directly for this payment.';
+    const line4Wrapped = doc.splitTextToSize(line4, payWidth);
+    doc.text(line4Wrapped, payX + 3, ptY);
+    ptY += 6 * line4Wrapped.length + 5;
+
+    doc.setFont('helvetica', 'bold');
+    doc.text('Critical Notice:', payX + 3, ptY);
+    ptY += 6;
+
+    doc.setFont('helvetica', 'normal');
+    const criticalLines = [
+      'Failure to submit your complete invoice pack to us as per our instructions, constitutes a breach of our Service Level Agreement.',
+      '',
+      'In accordance with our terms, this will result in:',
+      '  • A financial penalty of £1,000.00 being added to our standard referral fee',
+      '  • Delayed payment processing',
+      '  • Potential suspension from future allocations',
+      '',
+      'The Repairer agrees to comply with all invoicing procedures as detailed in this agreement. Should the Repairer rectify the breach within 48 hours of written notification, this penalty will be waived in full.',
+      '',
+      'Repeated non-compliance may result in further action or removal from the network.'
+    ];
+
+    for (const line of criticalLines) {
+      if (!line) { ptY += 3; continue; }
+      const wrapped = doc.splitTextToSize(line, payWidth);
+      if (ptY > 265) { doc.addPage(); ptY = 15; }
+      doc.text(wrapped, payX + 3, ptY);
+      ptY += 6 * wrapped.length;
+    }
+
+    // Draw the left deductions box border to match height of right box
+    const boxEndY = Math.max(dedY, ptY) + 5;
+    doc.setDrawColor(150, 150, 150);
+    doc.rect(leftMargin, boxStartY, deductionsBoxW, boxEndY - boxStartY, 'S');
+    doc.rect(payX, boxStartY, paymentBoxW, boxEndY - boxStartY, 'S');
+
+    yPos = boxEndY + 8;
+
+    // PLEASE DO NOT SEND warning
+    if (yPos > 270) { doc.addPage(); yPos = 15; }
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(9);
+    doc.setTextColor(200, 0, 0);
+    doc.text('PLEASE DO NOT SEND TO ANY OTHER PARTY WITHOUT PRIOR CONSENT', 105, yPos, { align: 'center' });
     yPos += 8;
 
     // ── DISCLAIMER ──
     doc.setFont('helvetica', 'italic');
     doc.setFontSize(8);
     doc.setTextColor(80, 80, 80);
-    const disclaimer = '*****By accepting this instruction, you agree to the T&Cs within the supplied SLA*****';
+    const disclaimer = '*By accepting this repair instruction, you agree to the T&Cs within the supplied SLA provided with this instruction.';
     const disclaimerLines = doc.splitTextToSize(disclaimer, maxWidth);
     doc.text(disclaimerLines, 105, yPos, { align: 'center' });
 
