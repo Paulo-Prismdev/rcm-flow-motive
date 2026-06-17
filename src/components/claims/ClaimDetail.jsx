@@ -244,6 +244,8 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
   const ClientEditComponent = useCallback((props) => <ClaimPartiesForm {...props} mode="client" />, []);
   const DriverEditComponent = useCallback((props) => <ClaimPartiesForm {...props} mode="driver" />, []);
   const ThirdPartyEditComponent = useCallback((props) => <ClaimPartiesForm {...props} mode="thirdParty" />, []);
+  const VehicleLocationEditComponent = useCallback((props) => <ClaimVehicleDamageForm {...props} mode="location" />, []);
+  const VehicleDamageEditComponent = useCallback((props) => <ClaimVehicleDamageForm {...props} mode="damage" />, []);
 
   const isClosedStatus = ['Completed', 'Cancelled', 'Total Loss'].includes(claim.job_status);
 
@@ -810,7 +812,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
             icon={MapPin} 
             claim={claim} 
             onUpdate={handleUpdate} 
-            EditComponent={ClaimVehicleDamageForm} 
+            EditComponent={VehicleLocationEditComponent} 
             canEdit={canEdit}
           >
             <DetailRow label="Vehicle Location" value={claim.vehicle_location} />
@@ -824,7 +826,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
             icon={AlertTriangle} 
             claim={claim} 
             onUpdate={handleUpdate} 
-            EditComponent={ClaimVehicleDamageForm} 
+            EditComponent={VehicleDamageEditComponent} 
             canEdit={canEdit}
           >
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
