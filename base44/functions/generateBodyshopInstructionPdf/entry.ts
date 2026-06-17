@@ -242,10 +242,12 @@ Deno.serve(async (req) => {
     doc.setFontSize(9);
     doc.text('Invoice Deductions', leftMargin + 2, boxStartY + 5);
 
-    const percentToReferrer = claim.percent_to_referrer ? `${claim.percent_to_referrer}%` : 'N/A';
+    const percentToReferrer = (claim.percent_to_referrer != null) ? `${claim.percent_to_referrer}%` : 'N/A';
+    const repairerReferralFee = (claim.referral_fee_repairer != null) ? `${claim.referral_fee_repairer}%` : null;
     const estFee = claim.est_fee ? `GBP ${Number(claim.est_fee).toFixed(2)}` : null;
 
     const deductionItems = [`- ${percentToReferrer} Bottom Line Discount`];
+    if (repairerReferralFee) deductionItems.push(`- Rep. Referral Fee ${repairerReferralFee}`);
     if (estFee) deductionItems.push(`- Estimate Fee ${estFee}`);
 
     doc.setFont('helvetica', 'normal');
