@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { 
   X, MapPin, CheckCircle, Phone, Mail, MapPinned, AlertCircle, Loader,
-  ChevronRight, ChevronLeft, FileText, Send, Building2, Settings, ClipboardCheck
+  ChevronRight, ChevronLeft, FileText, Send, Building2, Settings, ClipboardCheck, Wrench
 } from 'lucide-react';
 import {
   Dialog,
@@ -437,8 +437,8 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
   if (!isOpen || !claim) return null;
 
   const builtInPdfTemplates = [
-    { id: 'standard', name: 'Standard Instructions', icon: '📄' },
-    { id: 'orkin', name: 'Orkin Instructions', icon: '🔧' },
+    { id: 'standard', name: 'Standard Instructions', icon: FileText },
+    { id: 'orkin', name: 'Orkin Instructions', icon: Wrench },
   ];
 
   return (
@@ -748,21 +748,24 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
               </p>
 
               {/* Built-in Templates */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {builtInPdfTemplates.map((template) => (
-                  <div
-                    key={template.id}
-                    className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
-                      selectedPdfTemplate === template.id ? 'border-accent bg-accent/5' : 'border-border hover:border-accent/50'
-                    }`}
-                    onClick={() => setSelectedPdfTemplate(template.id)}
-                  >
-                    <div className="text-center">
-                      <div className="text-3xl mb-2">{template.icon}</div>
-                      <p className="font-medium">{template.name}</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {builtInPdfTemplates.map((template) => {
+                  const IconComponent = template.icon;
+                  return (
+                    <div
+                      key={template.id}
+                      className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                        selectedPdfTemplate === template.id ? 'border-accent bg-accent/5' : 'border-border hover:border-accent/50'
+                      }`}
+                      onClick={() => setSelectedPdfTemplate(template.id)}
+                    >
+                      <div className="text-center">
+                        <IconComponent className="w-8 h-8 mx-auto mb-2 text-accent" />
+                        <p className="font-medium">{template.name}</p>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
 
               {/* Custom Templates */}
