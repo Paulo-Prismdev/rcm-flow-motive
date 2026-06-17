@@ -83,6 +83,11 @@ import ClaimStatusEditForm from './ClaimStatusEditForm';
 const EditableSection = ({ title, icon: Icon, claim, onUpdate, children, EditComponent, canEdit = true }) => {
     const [isEditing, setIsEditing] = useState(false);
 
+    // Exit edit mode when claim is updated externally (e.g. wizard save)
+    useEffect(() => {
+        setIsEditing(false);
+    }, [claim]);
+
     const handleSave = (updatedData) => {
         onUpdate({ ...claim, ...updatedData });
         setIsEditing(false);
