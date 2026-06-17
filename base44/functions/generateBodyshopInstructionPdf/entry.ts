@@ -242,11 +242,10 @@ Deno.serve(async (req) => {
     doc.setFontSize(9);
     doc.text('Invoice Deductions', leftMargin + 2, boxStartY + 5);
 
-    const percentToReferrer = (claim.percent_to_referrer != null) ? `${claim.percent_to_referrer}%` : 'N/A';
     const repairerReferralFee = (claim.referral_fee_repairer != null) ? `${claim.referral_fee_repairer}%` : null;
     const estFee = claim.est_fee ? `GBP ${Number(claim.est_fee).toFixed(2)}` : null;
 
-    const deductionItems = [`- ${percentToReferrer} Bottom Line Discount`];
+    const deductionItems = [];
     if (repairerReferralFee) deductionItems.push(`- Rep. Referral Fee ${repairerReferralFee}`);
     if (estFee) deductionItems.push(`- Estimate Fee ${estFee}`);
 
@@ -271,60 +270,41 @@ Deno.serve(async (req) => {
     let ptY = boxStartY + 13;
     const payWidth = paymentBoxW - 5;
 
-    // Payment terms bullet
-    doc.setFont('helvetica', 'normal');
-    doc.text('- Payment within 7 days of invoice', payX + 3, ptY);
+    // INVOICING & PAYMENTS heading
+    doc.setFont('helvetica', 'bold');
+    doc.text('INVOICING & PAYMENTS', payX + 3, ptY);
     ptY += 8;
 
-    // INVOICING & PAYMENT heading
-    doc.setFont('helvetica', 'bold');
-    doc.text('INVOICING & PAYMENT', payX + 3, ptY);
-    ptY += 6;
-
-    const paymentTextLines = [
-      { text: 'Your invoice ', bold: false },
-      { text: 'MUST', bold: true },
-      { text: ' be addressed to the authorising party, as instructed on written authority.', bold: false }
+    doc.setFont('helvetica', 'normal');
+    const invoicingLines = [
+      "Your invoice for the insurer's element of the repair should be addressed and sent to the authorising party, as instructed on the authority and as per your usual practice.",
+      'Your full invoice pack MUST also be sent to invoices@rcmautomotive.co.uk and MUST include: main invoice, any excess or VAT invoices, final authority, and a signed satisfaction note.',
+      'Your invoice pack MUST be submitted within 48 hours of vehicle completion approval or final authority being issued - whichever applies.',
+      'VAT and excess invoices MUST be made out to RCM Automotive Ltd - payment will be made within 14 days.',
+      '',
+      'NEVER INVOICE THE CLIENT DIRECTLY FOR VAT OR EXCESS',
+      '',
+      'Upon receipt of your invoice pack, you will receive an invoice from RCM Automotive for our referral fee, which will be payable within 7 days of invoice.',
     ];
 
-    doc.setFont('helvetica', 'normal');
-    const line1 = 'Your invoice MUST be addressed to the authorising party, as instructed on written authority.';
-    const line1Wrapped = doc.splitTextToSize(line1, payWidth);
-    doc.text(line1Wrapped, payX + 3, ptY);
-    ptY += 6 * line1Wrapped.length;
+    for (const line of invoicingLines) {
+      if (!line) { ptY += 3; continue; }
+      const wrapped = doc.splitTextToSize(line, payWidth);
+      if (ptY > 265) { doc.addPage(); ptY = 15; }
+      doc.text(wrapped, payX + 3, ptY);
+      ptY += 6 * wrapped.length;
+    }
 
-    const line2 = 'The invoice pack MUST include - Main Invoice, final authority & a signed satisfaction note.';
-    const line2Wrapped = doc.splitTextToSize(line2, payWidth);
-    doc.text(line2Wrapped, payX + 3, ptY);
-    ptY += 6 * line2Wrapped.length;
-
-    const line3 = 'Invoice pack MUST be sent to - invoices@rcmautomotive.co.uk';
-    const line3Wrapped = doc.splitTextToSize(line3, payWidth);
-    doc.text(line3Wrapped, payX + 3, ptY);
-    ptY += 6 * line3Wrapped.length;
+    ptY += 3;
 
     doc.setFont('helvetica', 'bold');
-    const line4 = 'VAT and EXCESS MUST be made out and sent to RCM Automotive Ltd, who will invoice the client directly for this payment.';
-    const line4Wrapped = doc.splitTextToSize(line4, payWidth);
-    doc.text(line4Wrapped, payX + 3, ptY);
-    ptY += 6 * line4Wrapped.length + 5;
-
-    doc.setFont('helvetica', 'bold');
-    doc.text('Critical Notice:', payX + 3, ptY);
-    ptY += 6;
+    doc.text('IMPORTANT - FAILURE TO COMPLY', payX + 3, ptY);
+    ptY += 7;
 
     doc.setFont('helvetica', 'normal');
     const criticalLines = [
-      'Failure to submit your complete invoice pack to us as per our instructions, constitutes a breach of our Service Level Agreement.',
-      '',
-      'In accordance with our terms, this will result in:',
-      '  - A financial penalty of GBP 1,000.00 being added to our standard referral fee',
-      '  - Delayed payment processing',
-      '  - Potential suspension from future allocations',
-      '',
-      'The Repairer agrees to comply with all invoicing procedures as detailed in this agreement. Should the Repairer rectify the breach within 48 hours of written notification, this penalty will be waived in full.',
-      '',
-      'Repeated non-compliance may result in further action or removal from the network.'
+      'Failure to submit your invoice pack within 48 hours will result in delays to your VAT and excess payment, and an admin charge of GBP 150 will be added to your referral fee invoice.',
+      'Failure to pay your referral fee within 7 days will result in an additional admin charge of GBP 150 and removal from the RCM Automotive network.',
     ];
 
     for (const line of criticalLines) {
