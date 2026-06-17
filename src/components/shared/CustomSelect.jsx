@@ -1,9 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { ChevronDown } from 'lucide-react';
 
 /**
  * CustomSelect — a React-rendered dropdown that bypasses native OS select behaviour.
- * Uses position:fixed for the list so it escapes all scroll containers.
+ * Renders the list via a portal to document.body so it escapes ALL parent containment
+ * (overflow, transform, z-index stacking contexts).
  */
 export default function CustomSelect({ value, onChange, options, className = '' }) {
   const [open, setOpen] = useState(false);
@@ -60,11 +62,11 @@ export default function CustomSelect({ value, onChange, options, className = '' 
         <ChevronDown className={`w-4 h-4 text-muted-foreground flex-shrink-0 transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
 
-      {open && (
+      {open && createPortal(
         <div
           ref={listRef}
           style={listStyle}
-          className="bg-card border border-border rounded-lg shadow-lg overflow-hidden"
+          className="bg-card border border-border rounded-lg shadow-lg overflow-auto max-h-60"
         >
           {options.map(opt => (
             <div
@@ -75,7 +77,8 @@ export default function CustomSelect({ value, onChange, options, className = '' 
               {opt.label}
             </div>
           ))}
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
