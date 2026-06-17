@@ -203,24 +203,6 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
     return hasPostcode || hasStreetAndTown;
   }, [claim]);
 
-  // Update contact fields when contact type changes
-  useEffect(() => {
-    if (!claim || !isOpen) return;
-    if (contactType === 'client') {
-      setValidationData(prev => ({
-        ...prev,
-        client_email: claim.client_email ?? '',
-        client_phone: claim.client_phone ?? '',
-      }));
-    } else if (contactType === 'driver') {
-      setValidationData(prev => ({
-        ...prev,
-        client_email: claim.driver_contact_email ?? '',
-        client_phone: claim.driver_contact_phone ?? '',
-      }));
-    }
-  }, [contactType, claim, isOpen]);
-
   // Reset when modal opens
   useEffect(() => {
     if (isOpen && claim) {
@@ -281,54 +263,50 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
     }
   };
 
-  // Geocode vehicle/client location for the map
+  // Geocode client address
   useEffect(() => {
     if (!isOpen || hasAttemptedGeocode.current || isGeocoding) return;
 
-    hasAttemptedGeocode.current = true;
-
-    // Determine what to geocode: client address first, then vehicle_location as fallback
-    const addressToGeocode = (hasValidAddress && clientAddress.trim()) 
-      ? clientAddress 
-      : (claim?.vehicle_location || '').trim();
-
-    if (!addressToGeocode) {
+    if (!hasValidAddress || !clientAddress.trim()) {
       setGeocodeMessage({
         type: 'info',
-        text: 'No address or vehicle location available. Showing all bodyshops on the map.'
+        text: 'No client address available. Showing all bodyshops on the map.'
       });
+      hasAttemptedGeocode.current = true;
       return;
     }
 
-    const geocodeAddress = async () => {
+    hasAttemptedGeocode.current = true;
+
+    const geocodeClientAddress = async () => {
       setIsGeocoding(true);
       try {
-        const result = await base44.functions.invoke('geocodeAddress', { address: addressToGeocode });
+        const result = await base44.functions.invoke('geocodeAddress', { address: clientAddress });
         
         let coordinates = null;
         if (result && result.latitude && result.longitude) {
-          coordinates = { lat: result.latitude, lng: result.longitude, display_name: result.display_name || addressToGeocode };
+          coordinates = { lat: result.latitude, lng: result.longitude, display_name: result.display_name || clientAddress };
         } else if (result?.data && result.data.latitude && result.data.longitude) {
-          coordinates = { lat: result.data.latitude, lng: result.data.longitude, display_name: result.data.display_name || addressToGeocode };
+          coordinates = { lat: result.data.latitude, lng: result.data.longitude, display_name: result.data.display_name || clientAddress };
         }
 
         if (coordinates) {
           setClientLocation(coordinates);
           setMapCenter([coordinates.lat, coordinates.lng]);
           setMapZoom(10);
-          setGeocodeMessage({ type: 'success', text: `Location found: ${coordinates.display_name}` });
+          setGeocodeMessage({ type: 'success', text: `Client location found: ${coordinates.display_name}` });
         } else {
-          setGeocodeMessage({ type: 'warning', text: 'Could not find location. Showing all bodyshops.' });
+          setGeocodeMessage({ type: 'warning', text: 'Could not find client location. Showing all bodyshops.' });
         }
       } catch (error) {
-        setGeocodeMessage({ type: 'warning', text: 'Unable to locate address. Showing all bodyshops.' });
+        setGeocodeMessage({ type: 'warning', text: 'Unable to locate client address. Showing all bodyshops.' });
       } finally {
         setIsGeocoding(false);
       }
     };
 
-    geocodeAddress();
-  }, [isOpen, hasValidAddress, clientAddress, isGeocoding, claim?.vehicle_location]);
+    geocodeClientAddress();
+  }, [isOpen, hasValidAddress, clientAddress, isGeocoding]);
 
   // When bodyshop is selected, pre-fill email
   useEffect(() => {
@@ -642,9 +620,7 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
                         ) : (
                           <CheckCircle className="w-4 h-4 text-green-500" />
                         )}
-                        {contactType === 'driver' && field.key === 'client_email' ? 'Contact Email' :
-                         contactType === 'driver' && field.key === 'client_phone' ? 'Contact Phone' :
-                         field.label}
+                        {field.label}
                         {isMissing && <span className="text-red-500">*</span>}
                       </label>
                       
