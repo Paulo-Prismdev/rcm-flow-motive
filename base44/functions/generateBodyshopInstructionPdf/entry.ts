@@ -270,17 +270,7 @@ Deno.serve(async (req) => {
     let ptY = boxStartY + 13;
     const payWidth = paymentBoxW - 5;
 
-    // Helper: draw a line with mixed bold/normal segments
-    const drawMixedLine = (segments, x, y, maxW) => {
-      let cx = x;
-      for (const seg of segments) {
-        doc.setFont('helvetica', seg.bold ? 'bold' : 'normal');
-        doc.setTextColor(...(seg.color || [0, 0, 0]));
-        const segWrapped = doc.splitTextToSize(seg.text, maxW - (cx - x));
-        doc.text(segWrapped[0], cx, y);
-        cx += doc.getTextWidth(segWrapped[0]) + 0.5;
-      }
-    };
+
 
     // INVOICING & PAYMENTS heading
     doc.setFont('helvetica', 'bold');
@@ -288,43 +278,22 @@ Deno.serve(async (req) => {
     doc.text('INVOICING & PAYMENTS', payX + 3, ptY);
     ptY += 8;
 
-    // Line 1 - normal
     doc.setFont('helvetica', 'normal');
-    const l1 = doc.splitTextToSize(
+    const invoicingLines = [
       "Your invoice for the insurer's element of the repair should be addressed and sent to the authorising party, as instructed on the authority and as per your usual practice.",
-      payWidth
-    );
-    doc.text(l1, payX + 3, ptY);
-    ptY += 6 * l1.length;
+      'Your full invoice pack MUST also be sent to invoices@rcmautomotive.co.uk and MUST include: main invoice, any excess or VAT invoices, final authority, and a signed satisfaction note.',
+      'Your invoice pack MUST be submitted within 48 hours of vehicle completion approval or final authority being issued - whichever applies.',
+      'VAT and excess invoices MUST be made out to RCM Automotive Ltd - payment will be made within 14 days.',
+    ];
 
-    // Line 2 - mixed: normal + MUST bold + normal + MUST bold + normal
-    if (ptY > 265) { doc.addPage(); ptY = 15; }
-    drawMixedLine([
-      { text: 'Your full invoice pack ', bold: false, color: [0,0,0] },
-      { text: 'MUST', bold: true, color: [0,0,0] },
-      { text: ' also be sent to invoices@rcmautomotive.co.uk and ', bold: false, color: [0,0,0] },
-      { text: 'MUST', bold: true, color: [0,0,0] },
-      { text: ' include: main invoice, any excess or VAT invoices, final authority, and a signed satisfaction note.', bold: false, color: [0,0,0] },
-    ], payX + 3, ptY, payWidth);
-    ptY += 6;
+    for (const line of invoicingLines) {
+      if (ptY > 265) { doc.addPage(); ptY = 15; }
+      const wrapped = doc.splitTextToSize(line, payWidth);
+      doc.text(wrapped, payX + 3, ptY);
+      ptY += 6 * wrapped.length;
+    }
 
-    // Line 3 - mixed: normal + MUST bold + normal
-    if (ptY > 265) { doc.addPage(); ptY = 15; }
-    drawMixedLine([
-      { text: 'Your invoice pack ', bold: false, color: [0,0,0] },
-      { text: 'MUST', bold: true, color: [0,0,0] },
-      { text: ' be submitted within 48 hours of vehicle completion approval or final authority being issued - whichever applies.', bold: false, color: [0,0,0] },
-    ], payX + 3, ptY, payWidth);
-    ptY += 6;
-
-    // Line 4 - mixed: normal + MUST bold + normal
-    if (ptY > 265) { doc.addPage(); ptY = 15; }
-    drawMixedLine([
-      { text: 'VAT and excess invoices ', bold: false, color: [0,0,0] },
-      { text: 'MUST', bold: true, color: [0,0,0] },
-      { text: ' be made out to RCM Automotive Ltd - payment will be made within 14 days.', bold: false, color: [0,0,0] },
-    ], payX + 3, ptY, payWidth);
-    ptY += 8;
+    ptY += 2;
 
     // NEVER INVOICE line - red, bold, with *****
     if (ptY > 265) { doc.addPage(); ptY = 15; }
