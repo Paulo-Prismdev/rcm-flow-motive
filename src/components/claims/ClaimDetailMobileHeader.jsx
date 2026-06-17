@@ -21,6 +21,8 @@ const SECTION_FIELDS = {
 };
 
 const isEmpty = (sectionId, claim) => {
+  // "No Referrer" is a deliberate choice — not missing data
+  if (sectionId === 'referrer' && !claim.referrer_id) return false;
   const fields = SECTION_FIELDS[sectionId] || [];
   return fields.some(f => claim[f] === null || claim[f] === undefined || claim[f] === '');
 };
