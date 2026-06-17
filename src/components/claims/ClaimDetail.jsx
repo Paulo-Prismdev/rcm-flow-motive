@@ -935,13 +935,21 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
       case 'referrer':
         return (
           <EditableSection title="Referrer Details" icon={Briefcase} claim={claim} onUpdate={handleUpdate} EditComponent={ClaimReferrerForm} canEdit={canEdit}>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
-              <DetailRow label="Referrer" value={claim.referrer} />
-              <DetailRow label="Referrer Email" value={claim.referrer_email} />
-              <DetailRow label="Referrer Ref" value={claim.referrer_ref} />
-              <DetailRow label="File Handler" value={claim.file_handler} />
-              <DetailRow label="% to Referrer" value={claim.percent_to_referrer} />
-            </div>
+            {claim.referrer ? (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+                <DetailRow label="Referrer" value={claim.referrer} />
+                <DetailRow label="Referrer Email" value={claim.referrer_email} />
+                <DetailRow label="Referrer Ref" value={claim.referrer_ref} />
+                <DetailRow label="File Handler" value={claim.file_handler} />
+                <DetailRow label="% to Referrer" value={claim.percent_to_referrer} />
+                <DetailRow label="Repairer Referral Fee %" value={claim.referral_fee_repairer} />
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground text-sm">No Referrer — Direct Client</p>
+                <p className="text-xs text-muted-foreground mt-1">No referral fees are payable for this claim.</p>
+              </div>
+            )}
           </EditableSection>
         );
 

@@ -94,6 +94,21 @@ export default function ReferrerCombobox({ value, onChange, onAddNew }) {
                   <CommandEmpty>No results found.</CommandEmpty>
                 )}
                 <CommandGroup>
+                  <CommandItem
+                    value="No Referrer"
+                    onSelect={() => { onChange(null); setOpen(false); }}
+                    className="text-muted-foreground italic"
+                  >
+                    <Check
+                      className={cn(
+                        "mr-2 h-4 w-4",
+                        !selectedName ? "opacity-100" : "opacity-0"
+                      )}
+                    />
+                    No Referrer (Direct Client)
+                  </CommandItem>
+                </CommandGroup>
+                <CommandGroup>
                   {companies.map((company) => (
                     <CommandItem
                       key={company.id}
