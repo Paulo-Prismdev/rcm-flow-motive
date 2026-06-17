@@ -170,6 +170,8 @@ const SECTION_FIELDS = {
 const isSectionEmpty = (sectionId, claim) => {
   // "No Referrer" is a deliberate choice — not missing data
   if (sectionId === 'referrer' && !claim.referrer_id) return false;
+  // "None" excess contribution method means not applicable — not missing data
+  if (sectionId === 'excessContribution' && (!claim.excess_contribution_method || claim.excess_contribution_method === 'None')) return false;
   const fields = SECTION_FIELDS[sectionId] || [];
   return fields.some(f => claim[f] === null || claim[f] === undefined || claim[f] === '');
 };
@@ -907,29 +909,38 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
         return (
           <EditableSection 
             title="Excess Contribution" 
-            icon={BadgePercent} // Changed from Percent to BadgePercent
+            icon={BadgePercent}
             claim={claim} 
             onUpdate={handleUpdate} 
             EditComponent={ClaimExcessContributionForm} 
             canEdit={canEdit}
           >
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
-              <DetailRow label="Contribution Amount" value={claim.excess_contribution_amount} isCurrency />
-              <DetailRow label="Payment Method" value={claim.excess_contribution_method || 'None'} />
-              <DetailRow label="Contribution Paid" value={claim.excess_contribution_paid ? 'Yes' : 'No'} />
-              <DetailRow label="Date Paid" value={claim.excess_contribution_paid_date} isDate />
-            </div>
-            {claim.excess_contribution_method === 'Via Repairer' && (
-              <div className="mt-2 py-3 px-4 rounded-lg glass-inset">
-                <div className="text-xs font-semibold text-foreground-muted mb-2">Invoice from Repairer</div>
-                <div className="text-sm">{claim.excess_contribution_invoice_received ? 'Received ✓' : 'Not Received'}</div>
+            {(!claim.excess_contribution_method || claim.excess_contribution_method === 'None') ? (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground text-sm">Excess Contribution — Not Applicable</p>
+                <p className="text-xs text-muted-foreground mt-1">Toggle this on in the edit form if an excess contribution is needed.</p>
               </div>
-            )}
-            {claim.excess_contribution_notes && (
-              <div className="mt-2 py-3 px-4 rounded-lg glass-inset">
-                <div className="text-xs font-semibold text-foreground-muted mb-2">Notes</div>
-                <div className="text-sm leading-relaxed whitespace-pre-wrap">{claim.excess_contribution_notes}</div>
-              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+                  <DetailRow label="Contribution Amount" value={claim.excess_contribution_amount} isCurrency />
+                  <DetailRow label="Payment Method" value={claim.excess_contribution_method || 'None'} />
+                  <DetailRow label="Contribution Paid" value={claim.excess_contribution_paid ? 'Yes' : 'No'} />
+                  <DetailRow label="Date Paid" value={claim.excess_contribution_paid_date} isDate />
+                </div>
+                {claim.excess_contribution_method === 'Via Repairer' && (
+                  <div className="mt-2 py-3 px-4 rounded-lg glass-inset">
+                    <div className="text-xs font-semibold text-foreground-muted mb-2">Invoice from Repairer</div>
+                    <div className="text-sm">{claim.excess_contribution_invoice_received ? 'Received ✓' : 'Not Received'}</div>
+                  </div>
+                )}
+                {claim.excess_contribution_notes && (
+                  <div className="mt-2 py-3 px-4 rounded-lg glass-inset">
+                    <div className="text-xs font-semibold text-foreground-muted mb-2">Notes</div>
+                    <div className="text-sm leading-relaxed whitespace-pre-wrap">{claim.excess_contribution_notes}</div>
+                  </div>
+                )}
+              </>
             )}
           </EditableSection>
         );

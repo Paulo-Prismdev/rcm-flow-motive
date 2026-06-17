@@ -23,6 +23,8 @@ const SECTION_FIELDS = {
 const isEmpty = (sectionId, claim) => {
   // "No Referrer" is a deliberate choice — not missing data
   if (sectionId === 'referrer' && !claim.referrer_id) return false;
+  // "None" excess contribution method means not applicable — not missing data
+  if (sectionId === 'excessContribution' && (!claim.excess_contribution_method || claim.excess_contribution_method === 'None')) return false;
   const fields = SECTION_FIELDS[sectionId] || [];
   return fields.some(f => claim[f] === null || claim[f] === undefined || claim[f] === '');
 };
