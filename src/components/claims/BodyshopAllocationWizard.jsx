@@ -7,7 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { 
   X, MapPin, CheckCircle, Phone, Mail, MapPinned, AlertCircle, Loader,
-  ChevronRight, ChevronLeft, FileText, Send, Building2, Settings, ClipboardCheck, Wrench
+  ChevronRight, ChevronLeft, FileText, Send, Building2, Settings, ClipboardCheck, Wrench,
+  User, Car, Pencil
 } from 'lucide-react';
 import {
   Dialog,
@@ -133,6 +134,8 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [generatedPdfUrl, setGeneratedPdfUrl] = useState(null);
   const [selectedPdfTemplate, setSelectedPdfTemplate] = useState('standard');
+  const [contactType, setContactType] = useState('client');
+  const [customContact, setCustomContact] = useState({ name: '', phone: '', email: '' });
   
   // Email step
   const [emailTo, setEmailTo] = useState('');
@@ -212,6 +215,8 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
       setEmailSubject('');
       setEmailBody('');
       setSelectedEmailTemplateId('');
+      setContactType('client');
+      setCustomContact({ name: '', phone: '', email: '' });
       
       // Initialize validation data from claim
       const initialValidation = {};
@@ -327,11 +332,31 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
     }
   };
 
+  const getContactOverrides = () => {
+    if (contactType === 'client') {
+      return {
+        name: validationData.client_name || claim.client_name || '',
+        phone: validationData.client_phone || claim.client_phone || '',
+        email: validationData.client_email || claim.client_email || '',
+      };
+    }
+    if (contactType === 'driver') {
+      return {
+        name: validationData.driver_contact_name || claim.driver_contact_name || '',
+        phone: validationData.driver_contact_phone || claim.driver_contact_phone || '',
+        email: validationData.driver_contact_email || claim.driver_contact_email || '',
+      };
+    }
+    return customContact;
+  };
+
   const handleGeneratePdf = async () => {
     setIsGeneratingPdf(true);
     try {
+      const contactOverrides = getContactOverrides();
       const response = await base44.functions.invoke('generateBodyshopInstructionPdf', {
         claimId: claim.id,
+        contactOverrides,
         templateType: selectedPdfTemplate,
         templateConfigId: pdfTemplates.find(t => t.id === selectedPdfTemplate)?.id
       });
@@ -742,7 +767,74 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
                 <p className="text-sm text-foreground-muted">{selectedBodyshop?.email}</p>
               </div>
 
-              <h3 className="font-bold text-lg">Generate Instruction Document</h3>
+              <h3 className="font-bold text-lg">Instruction Contact</h3>
+              <p className="text-sm text-foreground-muted">
+                Who should the repairer contact for drop-off, updates and collection?
+              </p>
+
+              <div className="space-y-3">
+                {[
+                  { value: 'client', label: 'Client', icon: User, description: 'Use the client as the repair contact', details: (validationData.client_name || claim.client_name) ? `${validationData.client_name || claim.client_name}${(validationData.client_phone || claim.client_phone) ? ' — ' + (validationData.client_phone || claim.client_phone) : ''}` : 'No client details' },
+                  { value: 'driver', label: 'Driver / Repair Contact', icon: Car, description: 'Use the driver as the repair contact', disabled: !claim.driver_contact_name, details: claim.driver_contact_name ? `${claim.driver_contact_name}${claim.driver_contact_phone ? ' — ' + claim.driver_contact_phone : ''}` : 'No driver details on file' },
+                  { value: 'custom', label: 'Custom', icon: Pencil, description: 'Enter custom contact details', details: null },
+                ].map((option) => {
+                  const IconComponent = option.icon;
+                  return (
+                    <button
+                      key={option.value}
+                      onClick={() => !option.disabled && setContactType(option.value)}
+                      disabled={option.disabled}
+                      className={`w-full text-left p-3 rounded-lg border-2 transition-all ${
+                        contactType === option.value 
+                          ? 'border-accent bg-accent/5' 
+                          : 'border-border hover:border-gray-300'
+                      } ${option.disabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
+                    >
+                      <div className="flex items-start gap-3">
+                        <IconComponent className={`w-5 h-5 mt-0.5 flex-shrink-0 ${contactType === option.value ? 'text-accent' : 'text-foreground-muted'}`} />
+                        <div>
+                          <p className="font-medium text-sm">{option.label}</p>
+                          <p className="text-xs text-foreground-muted mt-0.5">{option.description}</p>
+                          {option.details && <p className="text-xs text-foreground-muted mt-1 font-mono">{option.details}</p>}
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Custom contact fields */}
+              {contactType === 'custom' && (
+                <div className="space-y-3 p-4 rounded-lg bg-muted">
+                  <div>
+                    <label className="block text-xs text-foreground-muted mb-1">Contact Name</label>
+                    <Input 
+                      value={customContact.name} 
+                      onChange={(e) => setCustomContact(prev => ({ ...prev, name: e.target.value }))}
+                      placeholder="Enter name..."
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-foreground-muted mb-1">Contact Phone</label>
+                    <Input 
+                      value={customContact.phone} 
+                      onChange={(e) => setCustomContact(prev => ({ ...prev, phone: e.target.value }))}
+                      placeholder="Enter phone..."
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-foreground-muted mb-1">Contact Email</label>
+                    <Input 
+                      type="email"
+                      value={customContact.email} 
+                      onChange={(e) => setCustomContact(prev => ({ ...prev, email: e.target.value }))}
+                      placeholder="Enter email..."
+                    />
+                  </div>
+                </div>
+              )}
+
+              <h3 className="font-bold text-lg pt-2">Select Template</h3>
               <p className="text-sm text-foreground-muted">
                 Select a template to generate the bodyshop instruction PDF. This will open in a new tab and be saved to the claim.
               </p>

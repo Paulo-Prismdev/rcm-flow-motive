@@ -156,7 +156,6 @@ export default function ClaimDetailMobileHeader({
           <option value="activity">Activity Log</option>
           <option value="email">Send Email</option>
           <option value="tasks">Manage Tasks</option>
-          <option value="instructions">Generate Instructions</option>
           {claim.instruction_pdf_url && <option value="download_pdf">Download Instruction PDF</option>}
           <option value="estimate">Request Estimate</option>
           <option value="parts">Log Parts Issue</option>

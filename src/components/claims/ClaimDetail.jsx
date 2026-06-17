@@ -64,7 +64,7 @@ import NotesModal from '../shared/NotesModal';
 import UpdateTrackingModal from './UpdateTrackingModal';
 import UpdateOverrideModal from './UpdateOverrideModal';
 import ClaimUpdatesModal from '../shared/ClaimUpdatesModal';
-import InstructionTemplateModal from './InstructionTemplateModal';
+
 import BackorderedPartsModal from './BackorderedPartsModal';
 import { Textarea } from "@/components/ui/textarea";
 import { formatUKRegistration } from '../shared/formatRegistration';
@@ -223,7 +223,6 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
   const queryClient = useQueryClient();
   const [isOverrideModalOpen, setIsOverrideModalOpen] = useState(false);
   const [isUpdateTrackingOpen, setIsUpdateTrackingOpen] = useState(false);
-  const [isInstructionModalOpen, setIsInstructionModalOpen] = useState(false);
   const [isTasksModalOpen, setIsTasksModalOpen] = useState(false);
   const [isTimeLogsOpen, setIsTimeLogsOpen] = useState(false);
   const [isActivityLogOpen, setIsActivityLogOpen] = useState(false);
@@ -1220,13 +1219,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
         canEdit={canEdit}
       />
 
-      <InstructionTemplateModal
-                claim={claim}
-                isOpen={isInstructionModalOpen}
-                onClose={() => setIsInstructionModalOpen(false)}
-              />
-
-              <TasksModal
+      <TasksModal
                 claimId={claim.id}
                 claimJobNumber={claim.job_number}
                 claimReg={claim.reg}
@@ -1274,7 +1267,6 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
               else if (val === 'activity') setIsActivityLogOpen(true);
               else if (val === 'email') setIsEmailModalOpen(true);
               else if (val === 'tasks') setIsTasksModalOpen(true);
-              else if (val === 'instructions') setIsInstructionModalOpen(true);
               else if (val === 'download_pdf') window.open(claim.instruction_pdf_url, '_blank');
               else if (val === 'estimate') setIsEstimateModalOpen(true);
               else if (val === 'parts') setIsPartsModalOpen(true);
@@ -1334,7 +1326,6 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                               <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsActivityLogOpen(true); }}><History className="w-4 h-4 mr-2" />Activity Log</DropdownMenuItem>
                               <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsEmailModalOpen(true); }}><Mail className="w-4 h-4 mr-2" />Send Email</DropdownMenuItem>
                               <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsTasksModalOpen(true); }}><ListTodo className="w-4 h-4 mr-2" />Manage Tasks</DropdownMenuItem>
-                              <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsInstructionModalOpen(true); }}><FileText className="w-4 h-4 mr-2" />Generate Instructions</DropdownMenuItem>
                               {claim.instruction_pdf_url && <DropdownMenuItem onSelect={(e) => { e.preventDefault(); window.open(claim.instruction_pdf_url, '_blank'); }}><Download className="w-4 h-4 mr-2" />Download Instruction PDF</DropdownMenuItem>}
                               <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsEstimateModalOpen(true); }}><Calculator className="w-4 h-4 mr-2" />Request Estimate</DropdownMenuItem>
                               <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsPartsModalOpen(true); }}><Package className="w-4 h-4 mr-2" />Log Parts Issue</DropdownMenuItem>
