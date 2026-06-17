@@ -212,6 +212,59 @@ Deno.serve(async (req) => {
 
     yPos += 8;
 
+    // ── BRANDED DECALS & SIGNAGE ──
+    if (yPos > 250) { doc.addPage(); yPos = 15; }
+
+    doc.setFillColor(19, 29, 71);
+    doc.rect(leftMargin, yPos, maxWidth, 7, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Branded Decals & Signage', leftMargin + 3, yPos + 5);
+    yPos += 10;
+
+    doc.setTextColor(0, 0, 0);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+
+    const decalLines = [
+      'All repairers MUST use the RCM Automotive approved decal supplier for any branded vehicle decals or signage.',
+      'Where a vehicle requires decals, these MUST be ordered as soon as the repair is authorised — if the vehicle is already on site, this should be done immediately. If the vehicle has not yet arrived, decals MUST be ordered prior to the vehicle coming on site.',
+      'Please contact John or Michael Welch at our approved supplier, quoting Orkin as the client and providing the vehicle registration number:',
+      'Signs Plus',
+      '147 Main Road, Biggin Hill, Kent, TN16 3JP',
+      'Email: enquiries@signsplus.uk    |    Tel: 01959 571 074',
+    ];
+
+    for (const line of decalLines) {
+      if (yPos > 270) { doc.addPage(); yPos = 15; }
+      const wrapped = doc.splitTextToSize(line, maxWidth - 4);
+      doc.text(wrapped, leftMargin + 3, yPos);
+      yPos += 6 * wrapped.length;
+    }
+
+    yPos += 2;
+
+    // Warnings
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(200, 0, 0);
+    const decalWarn1 = doc.splitTextToSize(
+      'WARNING: Use of any other supplier for RCM Automotive branded decals is not permitted without prior written approval.',
+      maxWidth - 4
+    );
+    doc.text(decalWarn1, leftMargin + 3, yPos);
+    yPos += 6 * decalWarn1.length + 2;
+
+    const decalWarn2 = doc.splitTextToSize(
+      'WARNING: Any repair delayed as a result of the mismanagement of a decal order — including failure to order on time — will result in a charge of GBP 100 per day for each day of delay attributable to the repairer. This will be deducted from any outstanding VAT and excess payments due.',
+      maxWidth - 4
+    );
+    doc.text(decalWarn2, leftMargin + 3, yPos);
+    yPos += 6 * decalWarn2.length;
+
+    doc.setTextColor(0, 0, 0);
+    yPos += 5;
+
     // ── INVOICING SECTION ──
     if (yPos > 220) { doc.addPage(); yPos = 15; }
 
