@@ -104,6 +104,18 @@
     "policy_excess": {
       "type": "number"
     },
+    "broker_id": {
+      "type": "string"
+    },
+    "broker_name": {
+      "type": "string"
+    },
+    "tp_broker_id": {
+      "type": "string"
+    },
+    "tp_broker_name": {
+      "type": "string"
+    },
     "excess_contribution_amount": {
       "type": "number"
     },
@@ -157,6 +169,10 @@
     },
     "client_phone": {
       "type": "string"
+    },
+    "driver_same_as_client": {
+      "type": "boolean",
+      "default": true
     },
     "driver_contact_name": {
       "type": "string"
