@@ -68,24 +68,32 @@ Deno.serve(async (req) => {
       policy_excess: claim.policy_excess ? Number(claim.policy_excess).toFixed(2) : 'N/A'
     };
 
-    // ── Draw a two-column table row ──
+    // ── Draw a two-column table row (auto-expands for wrapped value text) ──
     const drawTableRow = (label, value, y, colWidth, labelWidth) => {
       const lw = labelWidth || 70;
-      const vw = colWidth - lw - 2;
-
-      doc.setDrawColor(180, 180, 180);
-      doc.rect(leftMargin, y, colWidth, 8);
-      doc.rect(leftMargin, y, lw, 8);
+      const vw = colWidth - lw - 4;
+      const lineH = 5.5;
+      const padTop = 5;
+      const padBottom = 3;
 
       doc.setFontSize(9);
+      doc.setFont('helvetica', 'normal');
+      const lines = doc.splitTextToSize(String(value), vw);
+      const rowH = padTop + lineH * lines.length + padBottom;
+
+      doc.setDrawColor(180, 180, 180);
+      doc.rect(leftMargin, y, colWidth, rowH);
+      doc.rect(leftMargin, y, lw, rowH);
+
       doc.setFont('helvetica', 'bold');
-      doc.text(label, leftMargin + 2, y + 5.5);
+      doc.text(label, leftMargin + 2, y + padTop);
 
       doc.setFont('helvetica', 'normal');
-      const lines = doc.splitTextToSize(String(value), vw - 2);
-      doc.text(lines[0] || '', leftMargin + lw + 2, y + 5.5);
+      lines.forEach((line, i) => {
+        doc.text(line, leftMargin + lw + 2, y + padTop + lineH * i);
+      });
 
-      return y + 8 * Math.max(lines.length, 1);
+      return y + rowH;
     };
 
     // ── HEADER ──
@@ -229,7 +237,7 @@ Deno.serve(async (req) => {
 
     const decalLines = [
       'All repairers MUST use the RCM Automotive approved decal supplier for any branded vehicle decals or signage.',
-      'Where a vehicle requires decals, these MUST be ordered as soon as the repair is authorised — if the vehicle is already on site, this should be done immediately. If the vehicle has not yet arrived, decals MUST be ordered prior to the vehicle coming on site.',
+      'Where a vehicle requires decals, these MUST be ordered as soon as the repair is authorised - if the vehicle is already on site, this should be done immediately. If the vehicle has not yet arrived, decals MUST be ordered prior to the vehicle coming on site.',
       'Please contact John or Michael Welch at our approved supplier, quoting Orkin as the client and providing the vehicle registration number:',
       'Signs Plus',
       '147 Main Road, Biggin Hill, Kent, TN16 3JP',
@@ -256,7 +264,7 @@ Deno.serve(async (req) => {
     yPos += 6 * decalWarn1.length + 2;
 
     const decalWarn2 = doc.splitTextToSize(
-      'WARNING: Any repair delayed as a result of the mismanagement of a decal order — including failure to order on time — will result in a charge of GBP 100 per day for each day of delay attributable to the repairer. This will be deducted from any outstanding VAT and excess payments due.',
+      'WARNING: Any repair delayed as a result of the mismanagement of a decal order - including failure to order on time - will result in a charge of GBP 100 per day for each day of delay attributable to the repairer. This will be deducted from any outstanding VAT and excess payments due.',
       maxWidth - 4
     );
     doc.text(decalWarn2, leftMargin + 3, yPos);
@@ -396,7 +404,7 @@ Deno.serve(async (req) => {
     yPos = boxEndY + 8;
 
     // PLEASE DO NOT SEND warning
-    if (yPos > 270) { doc.addPage(); yPos = 15; }
+    if (yPos > 255) { doc.addPage(); yPos = 15; }
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(9);
     doc.setTextColor(200, 0, 0);
