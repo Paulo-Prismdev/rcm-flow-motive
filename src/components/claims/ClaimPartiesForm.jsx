@@ -80,7 +80,6 @@ export default function ClaimPartiesForm({ claim, onSave, onCancel, mode }) {
     tp_town: claim.tp_town || '',
     tp_county: claim.tp_county || '',
     tp_postcode: claim.tp_postcode || '',
-    tp_driver_same_as_client: claim.tp_driver_same_as_client !== false,
     tp_driver_contact: claim.tp_driver_contact || '',
     tp_broker_id: claim.tp_broker_id || '',
     tp_broker_name: claim.tp_broker_name || '',
@@ -178,7 +177,6 @@ export default function ClaimPartiesForm({ claim, onSave, onCancel, mode }) {
         tp_town: data.tp_town,
         tp_county: data.tp_county,
         tp_postcode: data.tp_postcode,
-        tp_driver_same_as_client: data.tp_driver_same_as_client,
         tp_driver_contact: data.tp_driver_contact,
         tp_broker_id: data.tp_broker_id,
         tp_broker_name: data.tp_broker_name,
@@ -361,16 +359,10 @@ export default function ClaimPartiesForm({ claim, onSave, onCancel, mode }) {
           </div>
         </div>
         <SectionDivider label="TP Driver" />
-        <div className="flex items-center justify-between">
-          <span className="text-sm font-medium">TP driver same as client?</span>
-          <Toggle checked={data.tp_driver_same_as_client} onChange={(v) => set('tp_driver_same_as_client', v)} />
+        <div className="p-3 bg-muted/30 rounded-lg border border-border">
+          <label className="block text-xs text-muted-foreground mb-1">TP Driver/Contact Name</label>
+          <Input value={data.tp_driver_contact} onChange={(e) => set('tp_driver_contact', e.target.value)} className="neomorph-inset" />
         </div>
-        {!data.tp_driver_same_as_client && (
-          <div className="p-3 bg-muted/30 rounded-lg border border-border">
-            <label className="block text-xs text-muted-foreground mb-1">TP Driver/Contact Name</label>
-            <Input value={data.tp_driver_contact} onChange={(e) => set('tp_driver_contact', e.target.value)} className="neomorph-inset" />
-          </div>
-        )}
         <SectionDivider label="TP Broker" />
         <div>
           <label className="block text-xs text-muted-foreground mb-1">TP Broker</label>
@@ -479,8 +471,7 @@ export default function ClaimPartiesForm({ claim, onSave, onCancel, mode }) {
               <div><label className="block text-xs text-muted-foreground mb-1">Postcode</label><Input value={data.tp_postcode} onChange={(e) => set('tp_postcode', e.target.value)} className="neomorph-inset" /></div>
             </div>
             <SectionDivider label="TP Driver" />
-            <div className="flex items-center justify-between"><span className="text-sm font-medium">TP driver same as client?</span><Toggle checked={data.tp_driver_same_as_client} onChange={(v) => set('tp_driver_same_as_client', v)} /></div>
-            {!data.tp_driver_same_as_client && (<div className="p-3 bg-muted/30 rounded-lg border border-border"><label className="block text-xs text-muted-foreground mb-1">TP Driver/Contact Name</label><Input value={data.tp_driver_contact} onChange={(e) => set('tp_driver_contact', e.target.value)} className="neomorph-inset" /></div>)}
+            <div className="p-3 bg-muted/30 rounded-lg border border-border"><label className="block text-xs text-muted-foreground mb-1">TP Driver/Contact Name</label><Input value={data.tp_driver_contact} onChange={(e) => set('tp_driver_contact', e.target.value)} className="neomorph-inset" /></div>
             <SectionDivider label="TP Broker" />
             <div><label className="block text-xs text-muted-foreground mb-1">TP Broker</label><BrokerCombobox value={data.tp_broker_name} onChange={handleTPBrokerSelect} placeholder="Select TP broker..." /></div>
             <SectionDivider label="TP Insurance & Vehicle" />
