@@ -174,7 +174,10 @@ const isSectionEmpty = (sectionId, claim) => {
   // "None" excess contribution method means not applicable — not missing data
   if (sectionId === 'excessContribution' && (!claim.excess_contribution_method || claim.excess_contribution_method === 'None')) return false;
   const fields = SECTION_FIELDS[sectionId] || [];
-  return fields.some(f => claim[f] === null || claim[f] === undefined || claim[f] === '');
+  return fields.some(f => {
+    const val = claim[f];
+    return val === null || val === undefined || val === '' || val === 0;
+  });
 };
 
 const DETAIL_SECTIONS = [
