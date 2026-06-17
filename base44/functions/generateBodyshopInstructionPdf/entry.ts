@@ -14,7 +14,7 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Forbidden: Admin or internal users only' }, { status: 403 });
     }
 
-    const { claimId } = await req.json();
+    const { claimId, contactOverrides } = await req.json();
 
     if (!claimId) {
       return Response.json({ error: 'Missing claimId' }, { status: 400 });
@@ -49,9 +49,9 @@ Deno.serve(async (req) => {
       repairer: claim.bodyshop || 'N/A',
       client_name: claim.client_name || 'N/A',
       client_address: clientAddress,
-      driver_contact_name: claim.driver_contact_name || claim.client_name || 'N/A',
-      client_email: claim.client_email || 'N/A',
-      client_phone: claim.client_phone || 'N/A',
+      driver_contact_name: contactOverrides?.name || claim.driver_contact_name || claim.client_name || 'N/A',
+      client_email: contactOverrides?.email || claim.client_email || 'N/A',
+      client_phone: contactOverrides?.phone || claim.client_phone || 'N/A',
       client_vat_status: claim.client_vat_status || 'N/A',
       make_model: claim.make_model || 'N/A',
       reg: claim.reg || 'N/A',
