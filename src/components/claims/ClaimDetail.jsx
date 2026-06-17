@@ -23,7 +23,8 @@ import {
     BadgePercent,
     Download,
     Image,
-    RefreshCw
+    RefreshCw,
+    MapPin
 } from "lucide-react";
 import { format } from "date-fns";
 import StatusBadge from "../shared/StatusBadge";
@@ -164,7 +165,8 @@ const SECTION_FIELDS = {
   estimate: ['audatex_code', 'est_fee', 'authorising_party', 'estimate_cost_net', 'authority_cost_net', 'estimate_cost_gross', 'authority_cost_gross'],
   thirdParty: ['tp_name', 'tp_phone', 'tp_reg', 'tp_insurer'],
   vehicle: ['make_model', 'vehicle_colour', 'vehicle_fuel_type', 'vehicle_type'],
-  vehicleDamage: ['vehicle_location', 'vehicle_damage'],
+  vehicleLocation: ['vehicle_location'],
+  vehicleDamage: ['vehicle_damage'],
   referrer: ['referrer', 'referrer_ref', 'file_handler'],
   bodyshop: ['bodyshop'],
   financials: ['estimate_cost_net', 'authority_cost_net', 'final_repair_cost'],
@@ -194,6 +196,7 @@ const DETAIL_SECTIONS = [
   { id: 'driver', label: 'Repair Contact (Driver)', icon: Users },
   { id: 'vehicle', label: 'Vehicle Details', icon: Car },
   { id: 'vehicleDamage', label: 'Vehicle Damage', icon: AlertTriangle },
+  { id: 'vehicleLocation', label: 'Vehicle Location', icon: MapPin },
   { id: 'thirdParty', label: 'Third Party Details', icon: Users },
   { id: 'bodyshop', label: 'Bodyshop Details', icon: Wrench },
   { id: 'referrer', label: 'Referrer Details', icon: Briefcase },
@@ -800,6 +803,24 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
           </EditableSection>
         );
 
+      case 'vehicleLocation':
+        return (
+          <EditableSection 
+            title="Vehicle Location" 
+            icon={MapPin} 
+            claim={claim} 
+            onUpdate={handleUpdate} 
+            EditComponent={ClaimVehicleDamageForm} 
+            canEdit={canEdit}
+          >
+            <DetailRow label="Vehicle Location" value={claim.vehicle_location} />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 mt-2">
+              <DetailRow label="Courtesy Car (CC) Needed" value={claim.courtesy_car_required ? 'Yes' : 'No'} />
+              <DetailRow label="Undriveable / Drivable" value={claim.unroadworthy ? 'Undriveable' : 'Drivable'} />
+            </div>
+          </EditableSection>
+        );
+
       case 'vehicleDamage':
         return (
           <EditableSection 
@@ -810,13 +831,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
             EditComponent={ClaimVehicleDamageForm} 
             canEdit={canEdit}
           >
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
-              <DetailRow label="Courtesy Car (CC) Needed" value={claim.courtesy_car_required ? 'Yes' : 'No'} />
-              <DetailRow label="Undriveable / Drivable" value={claim.unroadworthy ? 'Undriveable' : 'Drivable'} />
-            </div>
-            <div className="mt-2 py-3 px-4 rounded-lg glass-inset">
-              <div className="text-xs font-semibold text-foreground-muted mb-2">Vehicle Location</div>
-              <div className="text-sm mb-3">{claim.vehicle_location || '-'}</div>
+            <div className="py-3 px-4 rounded-lg glass-inset">
               <div className="text-xs font-semibold text-foreground-muted mb-2">Damage Description</div>
               <div className="text-sm leading-relaxed whitespace-pre-wrap">{claim.vehicle_damage || '-'}</div>
             </div>
