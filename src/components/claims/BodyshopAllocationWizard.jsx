@@ -511,6 +511,75 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
           {/* Step 0: Validate Details */}
           {currentStep === 0 && (
             <div className="space-y-4">
+              {/* Instruction Contact */}
+              <div>
+                <h3 className="font-bold text-lg mb-2">Instruction Contact</h3>
+                <p className="text-sm text-foreground-muted mb-3">
+                  Who should the repairer contact for drop-off, updates and collection?
+                </p>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  {[
+                    { value: 'client', label: 'Client', icon: User, description: 'Use client details', details: (validationData.client_name || claim.client_name) ? `${validationData.client_name || claim.client_name}${(validationData.client_phone || claim.client_phone) ? ' — ' + (validationData.client_phone || claim.client_phone) : ''}` : 'No client details' },
+                    { value: 'driver', label: 'Driver / Repair Contact', icon: Car, description: 'Use driver details', disabled: !claim.driver_contact_name, details: claim.driver_contact_name ? `${claim.driver_contact_name}${claim.driver_contact_phone ? ' — ' + claim.driver_contact_phone : ''}` : 'No driver details on file' },
+                    { value: 'custom', label: 'Custom', icon: Pencil, description: 'Enter custom details', details: null },
+                  ].map((option) => {
+                    const IconComponent = option.icon;
+                    return (
+                      <button
+                        key={option.value}
+                        onClick={() => !option.disabled && setContactType(option.value)}
+                        disabled={option.disabled}
+                        className={`text-left p-3 rounded-lg border-2 transition-all ${
+                          contactType === option.value 
+                            ? 'border-accent bg-accent/5' 
+                            : 'border-border hover:border-gray-300'
+                        } ${option.disabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
+                      >
+                        <div className="flex items-start gap-2">
+                          <IconComponent className={`w-4 h-4 mt-0.5 flex-shrink-0 ${contactType === option.value ? 'text-accent' : 'text-foreground-muted'}`} />
+                          <div className="min-w-0">
+                            <p className="font-medium text-sm">{option.label}</p>
+                            <p className="text-xs text-foreground-muted">{option.description}</p>
+                            {option.details && <p className="text-[11px] text-foreground-muted mt-1 truncate">{option.details}</p>}
+                          </div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {contactType === 'custom' && (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 p-4 mt-3 rounded-lg bg-muted">
+                    <div>
+                      <label className="block text-xs text-foreground-muted mb-1">Contact Name</label>
+                      <Input 
+                        value={customContact.name} 
+                        onChange={(e) => setCustomContact(prev => ({ ...prev, name: e.target.value }))}
+                        placeholder="Enter name..."
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-foreground-muted mb-1">Contact Phone</label>
+                      <Input 
+                        value={customContact.phone} 
+                        onChange={(e) => setCustomContact(prev => ({ ...prev, phone: e.target.value }))}
+                        placeholder="Enter phone..."
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-foreground-muted mb-1">Contact Email</label>
+                      <Input 
+                        type="email"
+                        value={customContact.email} 
+                        onChange={(e) => setCustomContact(prev => ({ ...prev, email: e.target.value }))}
+                        placeholder="Enter email..."
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
               <div className="p-4 rounded-lg bg-amber-50 border border-amber-200">
                 <div className="flex items-start gap-3">
                   <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
@@ -608,76 +677,6 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
                     </div>
                   );
                 })}
-              </div>
-
-              {/* Instruction Contact */}
-              <div className="pt-2">
-                <h3 className="font-bold text-lg mb-2">Instruction Contact</h3>
-                <p className="text-sm text-foreground-muted mb-3">
-                  Who should the repairer contact for drop-off, updates and collection?
-                </p>
-
-                <div className="space-y-3">
-                  {[
-                    { value: 'client', label: 'Client', icon: User, description: 'Use the client as the repair contact', details: (validationData.client_name || claim.client_name) ? `${validationData.client_name || claim.client_name}${(validationData.client_phone || claim.client_phone) ? ' — ' + (validationData.client_phone || claim.client_phone) : ''}` : 'No client details' },
-                    { value: 'driver', label: 'Driver / Repair Contact', icon: Car, description: 'Use the driver as the repair contact', disabled: !claim.driver_contact_name, details: claim.driver_contact_name ? `${claim.driver_contact_name}${claim.driver_contact_phone ? ' — ' + claim.driver_contact_phone : ''}` : 'No driver details on file' },
-                    { value: 'custom', label: 'Custom', icon: Pencil, description: 'Enter custom contact details', details: null },
-                  ].map((option) => {
-                    const IconComponent = option.icon;
-                    return (
-                      <button
-                        key={option.value}
-                        onClick={() => !option.disabled && setContactType(option.value)}
-                        disabled={option.disabled}
-                        className={`w-full text-left p-3 rounded-lg border-2 transition-all ${
-                          contactType === option.value 
-                            ? 'border-accent bg-accent/5' 
-                            : 'border-border hover:border-gray-300'
-                        } ${option.disabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
-                      >
-                        <div className="flex items-start gap-3">
-                          <IconComponent className={`w-5 h-5 mt-0.5 flex-shrink-0 ${contactType === option.value ? 'text-accent' : 'text-foreground-muted'}`} />
-                          <div>
-                            <p className="font-medium text-sm">{option.label}</p>
-                            <p className="text-xs text-foreground-muted mt-0.5">{option.description}</p>
-                            {option.details && <p className="text-xs text-foreground-muted mt-1 font-mono">{option.details}</p>}
-                          </div>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-
-                {/* Custom contact fields */}
-                {contactType === 'custom' && (
-                  <div className="space-y-3 p-4 mt-3 rounded-lg bg-muted">
-                    <div>
-                      <label className="block text-xs text-foreground-muted mb-1">Contact Name</label>
-                      <Input 
-                        value={customContact.name} 
-                        onChange={(e) => setCustomContact(prev => ({ ...prev, name: e.target.value }))}
-                        placeholder="Enter name..."
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs text-foreground-muted mb-1">Contact Phone</label>
-                      <Input 
-                        value={customContact.phone} 
-                        onChange={(e) => setCustomContact(prev => ({ ...prev, phone: e.target.value }))}
-                        placeholder="Enter phone..."
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs text-foreground-muted mb-1">Contact Email</label>
-                      <Input 
-                        type="email"
-                        value={customContact.email} 
-                        onChange={(e) => setCustomContact(prev => ({ ...prev, email: e.target.value }))}
-                        placeholder="Enter email..."
-                      />
-                    </div>
-                  </div>
-                )}
               </div>
 
               {missingFields.length === 0 && (
