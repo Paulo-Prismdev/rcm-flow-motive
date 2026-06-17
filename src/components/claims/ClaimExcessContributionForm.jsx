@@ -30,7 +30,10 @@ export default function ClaimExcessContributionForm({ claim, onSave, onCancel })
       });
       return;
     }
-    onSave(formData);
+    onSave({
+      ...formData,
+      ...(formData.excess_contribution_method === 'None' && { excess_contribution_method: 'Direct to Client' }),
+    });
   };
 
   const handlePaidCheckboxChange = (checked) => {
@@ -52,7 +55,7 @@ export default function ClaimExcessContributionForm({ claim, onSave, onCancel })
             <span className="text-sm font-medium">No</span>
           </label>
           <label className={`flex items-center gap-2 px-4 py-2 rounded-lg border cursor-pointer transition-colors ${applicable ? 'bg-green-50 border-green-300 dark:bg-green-900/20 dark:border-green-700' : 'bg-card border-border hover:bg-muted'}`}>
-            <input type="radio" name="applicable" checked={applicable} onChange={() => setApplicable(true)} className="w-4 h-4" />
+            <input type="radio" name="applicable" checked={applicable} onChange={() => { setApplicable(true); if (formData.excess_contribution_method === 'None') setFormData(prev => ({ ...prev, excess_contribution_method: 'Direct to Client' })); }} className="w-4 h-4" />
             <span className="text-sm font-medium">Yes</span>
           </label>
         </div>
