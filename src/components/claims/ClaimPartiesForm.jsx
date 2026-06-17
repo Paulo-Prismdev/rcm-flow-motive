@@ -252,12 +252,16 @@ export default function ClaimPartiesForm({ claim, onSave, onCancel, mode }) {
     );
   }
 
-  // ── DRIVER mode ──────────────────────────────────────────────
+  // ── DRIVER (Repair Contact) mode ────────────────────────────
   if (mode === 'driver') {
     return (
       <div className="space-y-4 pt-2">
-        <div className="flex items-center justify-between">
-          <span className="text-sm font-medium">Driver same as client?</span>
+        <p className="text-xs text-muted-foreground mb-1">This is the person the repairer will contact for vehicle drop-off, updates, and collection.</p>
+        <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border border-border">
+          <div>
+            <span className="text-sm font-medium">Same as the Client?</span>
+            <p className="text-xs text-muted-foreground mt-0.5">If yes, the client details will be used as the repair contact</p>
+          </div>
           <Toggle checked={data.driver_same_as_client} onChange={(v) => set('driver_same_as_client', v)} />
         </div>
         {!data.driver_same_as_client && (
@@ -432,9 +436,13 @@ export default function ClaimPartiesForm({ claim, onSave, onCancel, mode }) {
           <label className="block text-xs text-muted-foreground mb-1">VAT Status</label>
           <CustomSelect value={data.client_vat_status} onChange={(v) => set('client_vat_status', v)} options={VAT_OPTIONS} />
         </div>
-        <SectionDivider label="Driver" />
-        <div className="flex items-center justify-between">
-          <span className="text-sm font-medium">Driver same as client?</span>
+        <SectionDivider label="Repair Contact (Driver)" />
+        <p className="text-xs text-muted-foreground -mt-2">The person the repairer should contact for vehicle drop-off, updates, and collection.</p>
+        <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border border-border">
+          <div>
+            <span className="text-sm font-medium">Same as the Client?</span>
+            <p className="text-xs text-muted-foreground mt-0.5">If yes, the client details will be used as the repair contact</p>
+          </div>
           <Toggle checked={data.driver_same_as_client} onChange={(v) => set('driver_same_as_client', v)} />
         </div>
         {!data.driver_same_as_client && (

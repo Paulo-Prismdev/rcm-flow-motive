@@ -32,6 +32,7 @@ import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import ClaimClientForm from './ClaimClientForm';
 import ClaimPartiesForm from './ClaimPartiesForm';
+import PartyDisplayCard from '../shared/PartyDisplayCard';
 import ClaimVehicleForm from './ClaimVehicleForm';
 import ClaimInsuranceForm from './ClaimInsuranceForm';
 import ClaimReferrerForm from './ClaimReferrerForm';
@@ -177,7 +178,7 @@ const DETAIL_SECTIONS = [
   { id: 'estimate', label: 'Estimate Details', icon: Calculator },
   { id: 'client', label: 'Client Details', icon: Users },
   { id: 'insurance', label: 'Insurance & Broker', icon: Shield },
-  { id: 'driver', label: 'Driver Details', icon: Users },
+  { id: 'driver', label: 'Repair Contact (Driver)', icon: Users },
   { id: 'vehicle', label: 'Vehicle Details', icon: Car },
   { id: 'vehicleDamage', label: 'Vehicle Damage', icon: AlertTriangle },
   { id: 'thirdParty', label: 'Third Party Details', icon: Users },
@@ -712,28 +713,28 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
 
       case 'client':
         return (
-          <EditableSection title="Client Details" icon={Users} claim={claim} onUpdate={handleUpdate} EditComponent={ClientEditComponent} canEdit={canEdit}>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
-              <DetailRow label="Client Name" value={claim.client_name} />
-              <DetailRow label="Phone" value={claim.client_phone} />
-              <DetailRow label="Email" value={claim.client_email} />
-              <DetailRow label="Business Division" value={claim.business_division} />
-              <DetailRow label="VAT Status" value={claim.client_vat_status} />
-            </div>
-            <div className={`mt-2 py-3 px-4 rounded-lg glass-inset ${(!claim.client_address_line_1 && !claim.client_town) ? 'border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20' : ''}`}>
-              <div className="text-xs font-semibold text-foreground-muted mb-2">Address</div>
-              <div className="text-sm leading-relaxed space-y-0.5">
-                {claim.client_address_line_1 && <div>{claim.client_address_line_1}</div>}
-                {claim.client_address_line_2 && <div>{claim.client_address_line_2}</div>}
-                {(claim.client_town || claim.client_county || claim.client_postcode) && (
-                  <div>{[claim.client_town, claim.client_county, claim.client_postcode].filter(Boolean).join(', ')}</div>
-                )}
-                {!claim.client_address_line_1 && !claim.client_town && <span className="text-amber-500">-</span>}
-              </div>
-            </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 mt-2">
-              <DetailRow label="Driver" value={claim.driver_same_as_client === false ? claim.driver_contact_name : 'Same as client'} />
-            </div>
+          <EditableSection title="Billing Party — Client" icon={Users} claim={claim} onUpdate={handleUpdate} EditComponent={ClientEditComponent} canEdit={canEdit}>
+            <PartyDisplayCard
+              title="Billing Party — Client"
+              partyType="client"
+              data={{
+                name: claim.client_name,
+                phone: claim.client_phone,
+                email: claim.client_email,
+                address_line_1: claim.client_address_line_1,
+                address_line_2: claim.client_address_line_2,
+                town: claim.client_town,
+                county: claim.client_county,
+                postcode: claim.client_postcode,
+              }}
+              extras={[
+                { label: 'Business Division', value: claim.business_division, isEmpty: !claim.business_division },
+                { label: 'VAT Status', value: claim.client_vat_status || 'Unknown', isEmpty: !claim.client_vat_status },
+                { label: 'Driver', value: claim.driver_same_as_client === false ? claim.driver_contact_name || '—' : 'Same as client', isEmpty: false, meta: claim.driver_same_as_client === false ? 'Different person' : null },
+              ]}
+              canEdit={false}
+              bare={true}
+            />
           </EditableSection>
         );
 
@@ -752,54 +753,60 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
 
       case 'driver':
         return (
-          <EditableSection title="Driver Details" icon={Users} claim={claim} onUpdate={handleUpdate} EditComponent={DriverEditComponent} canEdit={canEdit}>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
-              <DetailRow label="Driver Name" value={claim.driver_contact_name} />
-              <DetailRow label="Driver Phone" value={claim.driver_contact_phone} />
-              <DetailRow label="Driver Email" value={claim.driver_contact_email} />
-              <DetailRow label="Driving License" value={claim.client_driving_license} />
-            </div>
-            <div className={`mt-2 py-3 px-4 rounded-lg glass-inset ${(!claim.driver_contact_address_line_1 && !claim.driver_contact_town) ? 'border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20' : ''}`}>
-              <div className="text-xs font-semibold text-foreground-muted mb-2">Driver Address</div>
-              <div className="text-sm leading-relaxed space-y-0.5">
-                {claim.driver_contact_address_line_1 && <div>{claim.driver_contact_address_line_1}</div>}
-                {claim.driver_contact_address_line_2 && <div>{claim.driver_contact_address_line_2}</div>}
-                {(claim.driver_contact_town || claim.driver_contact_county || claim.driver_contact_postcode) && (
-                  <div>{[claim.driver_contact_town, claim.driver_contact_county, claim.driver_contact_postcode].filter(Boolean).join(', ')}</div>
-                )}
-                {!claim.driver_contact_address_line_1 && !claim.driver_contact_town && <span className="text-amber-500">-</span>}
-              </div>
-            </div>
+          <EditableSection title="Repair Contact — Driver" icon={User} claim={claim} onUpdate={handleUpdate} EditComponent={DriverEditComponent} canEdit={canEdit}>
+            <PartyDisplayCard
+              title="Repair Contact — Driver"
+              partyType="driver"
+              data={{
+                name: claim.driver_contact_name,
+                phone: claim.driver_contact_phone,
+                email: claim.driver_contact_email,
+                address_line_1: claim.driver_contact_address_line_1,
+                address_line_2: claim.driver_contact_address_line_2,
+                town: claim.driver_contact_town,
+                county: claim.driver_contact_county,
+                postcode: claim.driver_contact_postcode,
+              }}
+              extras={[
+                { label: 'Driving License', value: claim.client_driving_license, isEmpty: !claim.client_driving_license },
+                { label: 'Same as Client', value: claim.driver_same_as_client === false ? 'No — different person' : 'Yes', isEmpty: false },
+              ]}
+              canEdit={false}
+              bare={true}
+            />
           </EditableSection>
         );
 
       case 'thirdParty':
         return (
-          <EditableSection title="Third Party Details" icon={Users} claim={claim} onUpdate={handleUpdate} EditComponent={ThirdPartyEditComponent} canEdit={canEdit}>
+          <EditableSection title="Third Party" icon={Users} claim={claim} onUpdate={handleUpdate} EditComponent={ThirdPartyEditComponent} canEdit={canEdit}>
             {(claim.tp_name || claim.tp_reg) ? (
-              <div>
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
-                  <DetailRow label="TP Name" value={claim.tp_name} />
-                  <DetailRow label="TP Phone" value={claim.tp_phone} />
-                  <DetailRow label="TP Email" value={claim.tp_email} />
-                  <DetailRow label="TP Driver" value={claim.tp_driver_contact} />
-                  {claim.tp_broker_name && <DetailRow label="TP Broker" value={claim.tp_broker_name} />}
-                  <DetailRow label="TP Insurer" value={claim.tp_insurer} />
-                  <DetailRow label="TP Claim Ref" value={claim.tp_claim_ref} />
-                  <DetailRow label="TP Policy No." value={claim.tp_policy_number} />
-                  <DetailRow label="TP Registration" value={claim.tp_reg} />
-                  <DetailRow label="TP Vehicle" value={claim.tp_make_model} />
-                </div>
-                {(claim.tp_town || claim.tp_postcode) && (
-                  <div className="mt-2 py-3 px-4 rounded-lg glass-inset">
-                    <div className="text-xs font-semibold text-foreground-muted mb-2">TP Address</div>
-                    <div className="text-sm leading-relaxed space-y-0.5">
-                      {claim.tp_address_line_1 && <div>{claim.tp_address_line_1}</div>}
-                      {claim.tp_address_line_2 && <div>{claim.tp_address_line_2}</div>}
-                      {[claim.tp_town, claim.tp_county, claim.tp_postcode].filter(Boolean).join(', ')}
-                    </div>
-                  </div>
-                )}
+              <div className="space-y-3">
+                <PartyDisplayCard
+                  title="Third Party"
+                  partyType="thirdParty"
+                  data={{
+                    name: claim.tp_name,
+                    phone: claim.tp_phone,
+                    email: claim.tp_email,
+                    address_line_1: claim.tp_address_line_1,
+                    address_line_2: claim.tp_address_line_2,
+                    town: claim.tp_town,
+                    county: claim.tp_county,
+                    postcode: claim.tp_postcode,
+                  }}
+                  extras={[
+                    { label: 'TP Driver/Contact', value: claim.tp_driver_contact, isEmpty: !claim.tp_driver_contact },
+                    { label: 'TP Broker', value: claim.tp_broker_name, isEmpty: !claim.tp_broker_name },
+                    { label: 'TP Insurer', value: claim.tp_insurer, isEmpty: !claim.tp_insurer },
+                    { label: 'TP Claim Ref', value: claim.tp_claim_ref, isEmpty: !claim.tp_claim_ref },
+                    { label: 'TP Policy No.', value: claim.tp_policy_number, isEmpty: !claim.tp_policy_number },
+                    { label: 'TP Registration', value: claim.tp_reg, isEmpty: !claim.tp_reg },
+                    { label: 'TP Make / Model', value: claim.tp_make_model, isEmpty: !claim.tp_make_model },
+                  ]}
+                  canEdit={false}
+                  bare={true}
+                />
               </div>
             ) : (
               <p className="text-sm text-muted-foreground text-center py-8">No third party involvement recorded. Click edit to add details.</p>
