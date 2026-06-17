@@ -438,7 +438,6 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
 
   const builtInPdfTemplates = [
     { id: 'standard', name: 'Standard Instructions', icon: '📄' },
-    { id: 'driversure', name: 'Driversure Instructions', icon: '🚗' },
     { id: 'orkin', name: 'Orkin Instructions', icon: '🔧' },
   ];
 
