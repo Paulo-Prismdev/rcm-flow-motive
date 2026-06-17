@@ -1,22 +1,19 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { ChevronDown } from 'lucide-react';
 
-/**
- * CustomSelect — a React-rendered dropdown that bypasses native OS select behaviour.
- * Renders the list via a portal to document.body so it escapes ALL parent containment
- * (overflow, transform, z-index stacking contexts).
- */
 export default function CustomSelect({ value, onChange, options, className = '' }) {
   const [open, setOpen] = useState(false);
   const [listStyle, setListStyle] = useState({});
   const triggerRef = useRef(null);
   const listRef = useRef(null);
+  const justOpenedRef = useRef(false);
 
   const selectedLabel = options.find(o => o.value === value)?.label ?? value ?? '';
 
-  // Position the fixed list under the trigger button
-  const openDropdown = () => {
+  const openDropdown = useCallback((e) => {
+    e.preventDefault();
+    e.stopPropagation();
     if (triggerRef.current) {
       const rect = triggerRef.current.getBoundingClientRect();
       setListStyle({
@@ -28,12 +25,15 @@ export default function CustomSelect({ value, onChange, options, className = '' 
       });
     }
     setOpen(true);
-  };
+    justOpenedRef.current = true;
+    setTimeout(() => { justOpenedRef.current = false; }, 100);
+  }, []);
 
-  // Close on outside mousedown
+  // Close on outside mousedown — but ignore events within 100ms of opening
   useEffect(() => {
     if (!open) return;
     const handler = (e) => {
+      if (justOpenedRef.current) return;
       if (
         triggerRef.current && !triggerRef.current.contains(e.target) &&
         listRef.current && !listRef.current.contains(e.target)
@@ -41,8 +41,8 @@ export default function CustomSelect({ value, onChange, options, className = '' 
         setOpen(false);
       }
     };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
+    document.addEventListener('mousedown', handler, true);
+    return () => document.removeEventListener('mousedown', handler, true);
   }, [open]);
 
   const handleSelect = (optValue) => {
@@ -55,7 +55,7 @@ export default function CustomSelect({ value, onChange, options, className = '' 
       <button
         ref={triggerRef}
         type="button"
-        onClick={open ? () => setOpen(false) : openDropdown}
+        onMouseDown={open ? () => setOpen(false) : openDropdown}
         className={`neomorph-inset w-full px-3 py-2 text-sm rounded-lg flex items-center justify-between text-left ${className}`}
       >
         <span>{selectedLabel}</span>
