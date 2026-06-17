@@ -270,38 +270,88 @@ Deno.serve(async (req) => {
     let ptY = boxStartY + 13;
     const payWidth = paymentBoxW - 5;
 
+    // Helper: draw a line with mixed bold/normal segments
+    const drawMixedLine = (segments, x, y, maxW) => {
+      let cx = x;
+      for (const seg of segments) {
+        doc.setFont('helvetica', seg.bold ? 'bold' : 'normal');
+        doc.setTextColor(...(seg.color || [0, 0, 0]));
+        const segWrapped = doc.splitTextToSize(seg.text, maxW - (cx - x));
+        doc.text(segWrapped[0], cx, y);
+        cx += doc.getTextWidth(segWrapped[0]) + 0.5;
+      }
+    };
+
     // INVOICING & PAYMENTS heading
     doc.setFont('helvetica', 'bold');
+    doc.setTextColor(0, 0, 0);
     doc.text('INVOICING & PAYMENTS', payX + 3, ptY);
     ptY += 8;
 
+    // Line 1 - normal
     doc.setFont('helvetica', 'normal');
-    const invoicingLines = [
+    const l1 = doc.splitTextToSize(
       "Your invoice for the insurer's element of the repair should be addressed and sent to the authorising party, as instructed on the authority and as per your usual practice.",
-      'Your full invoice pack MUST also be sent to invoices@rcmautomotive.co.uk and MUST include: main invoice, any excess or VAT invoices, final authority, and a signed satisfaction note.',
-      'Your invoice pack MUST be submitted within 48 hours of vehicle completion approval or final authority being issued - whichever applies.',
-      'VAT and excess invoices MUST be made out to RCM Automotive Ltd - payment will be made within 14 days.',
-      '',
-      'NEVER INVOICE THE CLIENT DIRECTLY FOR VAT OR EXCESS',
-      '',
-      'Upon receipt of your invoice pack, you will receive an invoice from RCM Automotive for our referral fee, which will be payable within 7 days of invoice.',
-    ];
+      payWidth
+    );
+    doc.text(l1, payX + 3, ptY);
+    ptY += 6 * l1.length;
 
-    for (const line of invoicingLines) {
-      if (!line) { ptY += 3; continue; }
-      const wrapped = doc.splitTextToSize(line, payWidth);
-      if (ptY > 265) { doc.addPage(); ptY = 15; }
-      doc.text(wrapped, payX + 3, ptY);
-      ptY += 6 * wrapped.length;
-    }
+    // Line 2 - mixed: normal + MUST bold + normal + MUST bold + normal
+    if (ptY > 265) { doc.addPage(); ptY = 15; }
+    drawMixedLine([
+      { text: 'Your full invoice pack ', bold: false, color: [0,0,0] },
+      { text: 'MUST', bold: true, color: [0,0,0] },
+      { text: ' also be sent to invoices@rcmautomotive.co.uk and ', bold: false, color: [0,0,0] },
+      { text: 'MUST', bold: true, color: [0,0,0] },
+      { text: ' include: main invoice, any excess or VAT invoices, final authority, and a signed satisfaction note.', bold: false, color: [0,0,0] },
+    ], payX + 3, ptY, payWidth);
+    ptY += 6;
 
-    ptY += 3;
+    // Line 3 - mixed: normal + MUST bold + normal
+    if (ptY > 265) { doc.addPage(); ptY = 15; }
+    drawMixedLine([
+      { text: 'Your invoice pack ', bold: false, color: [0,0,0] },
+      { text: 'MUST', bold: true, color: [0,0,0] },
+      { text: ' be submitted within 48 hours of vehicle completion approval or final authority being issued - whichever applies.', bold: false, color: [0,0,0] },
+    ], payX + 3, ptY, payWidth);
+    ptY += 6;
 
+    // Line 4 - mixed: normal + MUST bold + normal
+    if (ptY > 265) { doc.addPage(); ptY = 15; }
+    drawMixedLine([
+      { text: 'VAT and excess invoices ', bold: false, color: [0,0,0] },
+      { text: 'MUST', bold: true, color: [0,0,0] },
+      { text: ' be made out to RCM Automotive Ltd - payment will be made within 14 days.', bold: false, color: [0,0,0] },
+    ], payX + 3, ptY, payWidth);
+    ptY += 8;
+
+    // NEVER INVOICE line - red, bold, with *****
+    if (ptY > 265) { doc.addPage(); ptY = 15; }
     doc.setFont('helvetica', 'bold');
+    doc.setTextColor(200, 0, 0);
+    const neverWrapped = doc.splitTextToSize('***** NEVER INVOICE THE CLIENT DIRECTLY FOR VAT OR EXCESS *****', payWidth);
+    doc.text(neverWrapped, payX + 3, ptY);
+    ptY += 6 * neverWrapped.length + 2;
+
+    // Normal line
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(0, 0, 0);
+    const receiptWrapped = doc.splitTextToSize(
+      'Upon receipt of your invoice pack, you will receive an invoice from RCM Automotive for our referral fee, which will be payable within 7 days of invoice.',
+      payWidth
+    );
+    doc.text(receiptWrapped, payX + 3, ptY);
+    ptY += 6 * receiptWrapped.length + 4;
+
+    // IMPORTANT - FAILURE TO COMPLY heading (red, bold)
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(200, 0, 0);
     doc.text('IMPORTANT - FAILURE TO COMPLY', payX + 3, ptY);
     ptY += 7;
 
     doc.setFont('helvetica', 'normal');
+    doc.setTextColor(0, 0, 0);
     const criticalLines = [
       'Failure to submit your invoice pack within 48 hours will result in delays to your VAT and excess payment, and an admin charge of GBP 150 will be added to your referral fee invoice.',
       'Failure to pay your referral fee within 7 days will result in an additional admin charge of GBP 150 and removal from the RCM Automotive network.',
