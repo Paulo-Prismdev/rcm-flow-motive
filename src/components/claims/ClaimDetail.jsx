@@ -128,7 +128,7 @@ function DetailRow({ label, value, isCurrency = false, isDate = false, isStatus 
         }
     }
 
-    const isEmpty = value === null || typeof value === 'undefined' || value === '';
+    const isEmpty = value === null || typeof value === 'undefined' || value === '' || value === 0;
     if (isEmpty) {
         displayValue = '-';
     }
