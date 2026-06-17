@@ -26,6 +26,7 @@ import { createPageUrl } from '@/utils';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import InsurerCombobox from '../shared/InsurerCombobox';
+import CustomSelect from '../shared/CustomSelect';
 
 // Fix for default marker icons in React Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
@@ -613,16 +614,12 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
                       </label>
                       
                       {field.type === 'select' && (
-                        <Select value={value || ''} onValueChange={(v) => handleValidationChange(field.key, v)}>
-                          <SelectTrigger className="bg-white">
-                            <SelectValue placeholder={`Select ${field.label}`} />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {field.options.map(opt => (
-                              <SelectItem key={opt} value={opt}>{opt}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <CustomSelect
+                          value={value || ''}
+                          onChange={(v) => handleValidationChange(field.key, v)}
+                          options={field.options.map(opt => ({ value: opt, label: opt }))}
+                          className="bg-white"
+                        />
                       )}
                       
                       {field.type === 'text' && (
