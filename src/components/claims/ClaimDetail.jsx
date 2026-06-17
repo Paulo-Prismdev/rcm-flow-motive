@@ -814,10 +814,6 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
             canEdit={canEdit}
           >
             <DetailRow label="Vehicle Location" value={claim.vehicle_location} />
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 mt-2">
-              <DetailRow label="Courtesy Car (CC) Needed" value={claim.courtesy_car_required ? 'Yes' : 'No'} />
-              <DetailRow label="Undriveable / Drivable" value={claim.unroadworthy ? 'Undriveable' : 'Drivable'} />
-            </div>
           </EditableSection>
         );
 
@@ -831,7 +827,11 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
             EditComponent={ClaimVehicleDamageForm} 
             canEdit={canEdit}
           >
-            <div className="py-3 px-4 rounded-lg glass-inset">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+              <DetailRow label="Courtesy Car (CC) Needed" value={claim.courtesy_car_required ? 'Yes' : 'No'} />
+              <DetailRow label="Undriveable / Drivable" value={claim.unroadworthy ? 'Undriveable' : 'Drivable'} />
+            </div>
+            <div className="mt-2 py-3 px-4 rounded-lg glass-inset">
               <div className="text-xs font-semibold text-foreground-muted mb-2">Damage Description</div>
               <div className="text-sm leading-relaxed whitespace-pre-wrap">{claim.vehicle_damage || '-'}</div>
             </div>
