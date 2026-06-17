@@ -202,7 +202,7 @@ Deno.serve(async (req) => {
       ['Policy Number', fieldMap.policy_number],
       ['Email Estimate to', fieldMap.send_estimate_email],
       ['Audatex Code', fieldMap.audatex_code],
-      ['Excess (£)', fieldMap.policy_excess]
+      ['Excess (GBP)', fieldMap.policy_excess]
     ];
 
     for (const [label, value] of insuranceRows) {
@@ -243,10 +243,10 @@ Deno.serve(async (req) => {
     doc.text('Invoice Deductions', leftMargin + 2, boxStartY + 5);
 
     const percentToReferrer = claim.percent_to_referrer ? `${claim.percent_to_referrer}%` : 'N/A';
-    const estFee = claim.est_fee ? `£${Number(claim.est_fee).toFixed(2)}` : null;
+    const estFee = claim.est_fee ? `GBP ${Number(claim.est_fee).toFixed(2)}` : null;
 
-    const deductionItems = [`• ${percentToReferrer} Bottom Line Discount`];
-    if (estFee) deductionItems.push(`• Estimate Fee ${estFee}`);
+    const deductionItems = [`- ${percentToReferrer} Bottom Line Discount`];
+    if (estFee) deductionItems.push(`- Estimate Fee ${estFee}`);
 
     doc.setFont('helvetica', 'normal');
     let dedY = boxStartY + 13;
@@ -271,7 +271,7 @@ Deno.serve(async (req) => {
 
     // Payment terms bullet
     doc.setFont('helvetica', 'normal');
-    doc.text('• Payment within 7 days of invoice', payX + 3, ptY);
+    doc.text('- Payment within 7 days of invoice', payX + 3, ptY);
     ptY += 8;
 
     // INVOICING & PAYMENT heading
@@ -316,9 +316,9 @@ Deno.serve(async (req) => {
       'Failure to submit your complete invoice pack to us as per our instructions, constitutes a breach of our Service Level Agreement.',
       '',
       'In accordance with our terms, this will result in:',
-      '  • A financial penalty of £1,000.00 being added to our standard referral fee',
-      '  • Delayed payment processing',
-      '  • Potential suspension from future allocations',
+      '  - A financial penalty of GBP 1,000.00 being added to our standard referral fee',
+      '  - Delayed payment processing',
+      '  - Potential suspension from future allocations',
       '',
       'The Repairer agrees to comply with all invoicing procedures as detailed in this agreement. Should the Repairer rectify the breach within 48 hours of written notification, this penalty will be waived in full.',
       '',
