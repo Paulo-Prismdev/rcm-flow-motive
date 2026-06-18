@@ -54,7 +54,9 @@ export default function GlobalSearch({ open, onOpenChange }) {
       c.client_name?.toLowerCase().includes(term) ||
       c.job_number?.toLowerCase().includes(term) ||
       c.insurer?.toLowerCase().includes(term) ||
-      c.referrer?.toLowerCase().includes(term)
+      c.referrer?.toLowerCase().includes(term) ||
+      c.business_division?.toLowerCase().includes(term) ||
+      c.driver_contact_name?.toLowerCase().includes(term)
     ).slice(0, 8).map(item => ({ ...item, type: 'Claims', display: `${formatUKRegistration(item.reg)} — ${item.client_name || ''}`, link: createPageUrl(`Claims?id=${item.id}`) }));
 
     const matchedEstimates = allEstimates.filter(e =>

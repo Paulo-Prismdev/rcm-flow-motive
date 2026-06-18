@@ -42,6 +42,7 @@ export default function ClaimsPage() {
   const [updateStatusFilter, setUpdateStatusFilter] = useState('');
   const [repairerAcceptanceFilter, setRepairerAcceptanceFilter] = useState('');
   const [repairerFilter, setRepairerFilter] = useState('');
+  const [businessDivisionFilter, setBusinessDivisionFilter] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [selectedClaim, setSelectedClaim] = useState(null);
@@ -113,6 +114,7 @@ export default function ClaimsPage() {
   const uniqueInsurers = [...new Set(claims.map(c => c.insurer).filter(Boolean))].sort();
   const uniqueReferrers = [...new Set(claims.map(c => c.referrer).filter(Boolean))].sort();
   const uniqueRepairers = [...new Set(claims.map(c => c.bodyshop).filter(Boolean))].sort();
+  const uniqueBusinessDivisions = [...new Set(claims.map(c => c.business_division).filter(Boolean))].sort();
 
   const location = useLocation();
   useEffect(() => {
@@ -158,9 +160,10 @@ export default function ClaimsPage() {
     setSearchTerm(''); setStatusFilter([]); setClaimTypeFilter('');
     setInsurerFilter(''); setReferrerFilter(''); setRepairerFilter('');
     setUpdateStatusFilter(''); setRepairerAcceptanceFilter(''); setHasBackorderedPartsFilter(false);
+    setBusinessDivisionFilter('');
   };
 
-  const activeFiltersCount = [(statusFilter?.length || 0) > 0, claimTypeFilter, insurerFilter, referrerFilter, repairerFilter, updateStatusFilter, repairerAcceptanceFilter, hasBackorderedPartsFilter].filter(Boolean).length;
+  const activeFiltersCount = [(statusFilter?.length || 0) > 0, claimTypeFilter, insurerFilter, referrerFilter, repairerFilter, businessDivisionFilter, updateStatusFilter, repairerAcceptanceFilter, hasBackorderedPartsFilter].filter(Boolean).length;
 
   const allClaims = showArchived ? claims : claims.filter(c => !c.archived);
 
@@ -169,7 +172,9 @@ export default function ClaimsPage() {
     const matchesSearch = !searchTerm ||
       c.reg?.toLowerCase().includes(s) || c.client_name?.toLowerCase().includes(s) ||
       c.job_number?.toLowerCase().includes(s) || c.insurer?.toLowerCase().includes(s) ||
-      c.referrer?.toLowerCase().includes(s);
+      c.referrer?.toLowerCase().includes(s) ||
+      c.business_division?.toLowerCase().includes(s) ||
+      c.driver_contact_name?.toLowerCase().includes(s);
     const matchesStatus = !statusFilter.length || (c.job_statuses || []).some(st => statusFilter.includes(st));
     const matchesClaimType = !claimTypeFilter || c.claim_type === claimTypeFilter;
     const matchesInsurer = !insurerFilter || c.insurer === insurerFilter;
@@ -180,7 +185,8 @@ export default function ClaimsPage() {
     if (repairerAcceptanceFilter === 'awaiting') matchesRepairerAcceptance = c.bodyshop_id && !c.repairer_accepted && !['Completed','Cancelled','Total Loss'].includes(c.job_status);
     else if (repairerAcceptanceFilter === 'accepted') matchesRepairerAcceptance = c.repairer_accepted === true;
     const matchesBackorders = !hasBackorderedPartsFilter || claimIdsWithBackorders.has(c.id);
-    return matchesSearch && matchesStatus && matchesClaimType && matchesInsurer && matchesReferrer && matchesRepairer && matchesUpdateStatus && matchesRepairerAcceptance && matchesBackorders;
+    const matchesBusinessDivision = !businessDivisionFilter || c.business_division === businessDivisionFilter;
+    return matchesSearch && matchesStatus && matchesClaimType && matchesInsurer && matchesReferrer && matchesRepairer && matchesUpdateStatus && matchesRepairerAcceptance && matchesBackorders && matchesBusinessDivision;
   }).sort((a, b) => {
     const prio = { Red: 1, Amber: 2, Green: 3, Blue: 3, Gray: 4 };
     const pa = prio[calculateUpdateStatus(a)] || 3, pb = prio[calculateUpdateStatus(b)] || 3;
@@ -394,7 +400,7 @@ export default function ClaimsPage() {
           <input
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
-            placeholder="Search by reg, client, job number..."
+            placeholder="Search by reg, client, job number, driver..."
             className="w-full pl-10 pr-6 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-[10px] focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/15 text-gray-900 dark:text-white placeholder-gray-400 transition-all"
           />
         </div>
@@ -419,6 +425,7 @@ export default function ClaimsPage() {
               { label: 'Insurer', value: insurerFilter, onChange: setInsurerFilter, options: uniqueInsurers },
               { label: 'Referrer', value: referrerFilter, onChange: setReferrerFilter, options: uniqueReferrers },
               { label: 'Repairer', value: repairerFilter, onChange: setRepairerFilter, options: uniqueRepairers },
+              { label: 'Business Division', value: businessDivisionFilter, onChange: setBusinessDivisionFilter, options: uniqueBusinessDivisions },
             ].map(f => (
               <div key={f.label}>
                 <label className="block text-[10px] font-medium text-gray-400 dark:text-gray-500 mb-0.5">{f.label}</label>

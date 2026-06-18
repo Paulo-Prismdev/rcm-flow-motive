@@ -15,6 +15,7 @@ export default function RepairerClaimsList({ claims, onViewClaim }) {
   const [search, setSearch] = useState('');
   const [insurerFilter, setInsurerFilter] = useState('');
   const [claimTypeFilter, setClaimTypeFilter] = useState('');
+  const [businessDivisionFilter, setBusinessDivisionFilter] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const queryClient = useQueryClient();
 
@@ -99,14 +100,18 @@ export default function RepairerClaimsList({ claims, onViewClaim }) {
       c.client_name?.toLowerCase().includes(q) ||
       c.job_number?.toLowerCase().includes(q) ||
       c.make_model?.toLowerCase().includes(q) ||
-      c.insurer?.toLowerCase().includes(q);
+      c.insurer?.toLowerCase().includes(q) ||
+      c.business_division?.toLowerCase().includes(q) ||
+      c.driver_contact_name?.toLowerCase().includes(q);
     const matchesInsurer = !insurerFilter || c.insurer === insurerFilter;
     const matchesClaimType = !claimTypeFilter || c.claim_type === claimTypeFilter;
-    return matchesSearch && matchesInsurer && matchesClaimType;
+    const matchesBusinessDivision = !businessDivisionFilter || c.business_division === businessDivisionFilter;
+    return matchesSearch && matchesInsurer && matchesClaimType && matchesBusinessDivision;
   });
 
   const uniqueInsurers = [...new Set(claims.map(c => c.insurer).filter(Boolean))].sort();
-  const activeFiltersCount = [search, insurerFilter, claimTypeFilter].filter(Boolean).length;
+  const uniqueBusinessDivisions = [...new Set(claims.map(c => c.business_division).filter(Boolean))].sort();
+  const activeFiltersCount = [search, insurerFilter, claimTypeFilter, businessDivisionFilter].filter(Boolean).length;
 
   return (
     <div className="neomorph p-4 space-y-4">
@@ -138,7 +143,7 @@ export default function RepairerClaimsList({ claims, onViewClaim }) {
             <input
               value={search}
               onChange={e => setSearch(e.target.value)}
-              placeholder="Search by reg, client, job number..."
+              placeholder="Search by reg, client, job number, driver..."
               className="w-full px-4 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-[10px] focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/15 text-gray-900 dark:text-white placeholder-gray-400 transition-all"
             />
             {search && (
@@ -153,14 +158,14 @@ export default function RepairerClaimsList({ claims, onViewClaim }) {
             Filters{activeFiltersCount > 0 ? ` (${activeFiltersCount})` : ''}
           </button>
           {activeFiltersCount > 0 && (
-            <button onClick={() => { setSearch(''); setInsurerFilter(''); setClaimTypeFilter(''); }}
+            <button onClick={() => { setSearch(''); setInsurerFilter(''); setClaimTypeFilter(''); setBusinessDivisionFilter(''); }}
               className="p-1.5 text-gray-400 hover:text-gray-600 transition-colors"><X className="w-3.5 h-3.5" /></button>
           )}
         </div>
         {/* Filter panel */}
         {showFilters && (
           <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-800">
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
               <div>
                 <label className="block text-[10px] font-medium text-gray-400 dark:text-gray-500 mb-0.5">Claim Type</label>
                 <select value={claimTypeFilter} onChange={e => setClaimTypeFilter(e.target.value)}
@@ -178,6 +183,14 @@ export default function RepairerClaimsList({ claims, onViewClaim }) {
                   className="w-full px-2 py-1 text-[11px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-700 dark:text-gray-300 focus:outline-none">
                   <option value="">All Insurers</option>
                   {uniqueInsurers.map(i => <option key={i} value={i}>{i}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="block text-[10px] font-medium text-gray-400 dark:text-gray-500 mb-0.5">Business Division</label>
+                <select value={businessDivisionFilter} onChange={e => setBusinessDivisionFilter(e.target.value)}
+                  className="w-full px-2 py-1 text-[11px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-700 dark:text-gray-300 focus:outline-none">
+                  <option value="">All Divisions</option>
+                  {uniqueBusinessDivisions.map(d => <option key={d} value={d}>{d}</option>)}
                 </select>
               </div>
             </div>

@@ -28,6 +28,7 @@ export default function ReferrerPortal() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [insurerFilter, setInsurerFilter] = useState('');
   const [claimTypeFilter, setClaimTypeFilter] = useState('');
+  const [businessDivisionFilter, setBusinessDivisionFilter] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [collapsedGroups, setCollapsedGroups] = useState({});
   const [showFieldsModal, setShowFieldsModal] = useState(false);
@@ -113,6 +114,11 @@ export default function ReferrerPortal() {
     return insurers.sort();
   }, [claims]);
 
+  const uniqueBusinessDivisions = useMemo(() => {
+    const divisions = [...new Set(claims.map(c => c.business_division).filter(Boolean))];
+    return divisions.sort();
+  }, [claims]);
+
   const filteredClaims = claims.filter(c => {
     const q = search.toLowerCase();
     const matchesSearch = !q ||
@@ -121,14 +127,17 @@ export default function ReferrerPortal() {
       c.job_number?.toLowerCase().includes(q) ||
       c.referrer_ref?.toLowerCase().includes(q) ||
       c.make_model?.toLowerCase().includes(q) ||
-      c.insurer?.toLowerCase().includes(q);
+      c.insurer?.toLowerCase().includes(q) ||
+      c.business_division?.toLowerCase().includes(q) ||
+      c.driver_contact_name?.toLowerCase().includes(q);
     const matchesStatus = statusFilter === 'all' || (c.job_status || 'New') === statusFilter;
     const matchesInsurer = !insurerFilter || c.insurer === insurerFilter;
     const matchesClaimType = !claimTypeFilter || c.claim_type === claimTypeFilter;
-    return matchesSearch && matchesStatus && matchesInsurer && matchesClaimType;
+    const matchesBusinessDivision = !businessDivisionFilter || c.business_division === businessDivisionFilter;
+    return matchesSearch && matchesStatus && matchesInsurer && matchesClaimType && matchesBusinessDivision;
   }).sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
 
-  const activeFiltersCount = [statusFilter !== 'all', insurerFilter, claimTypeFilter].filter(Boolean).length;
+  const activeFiltersCount = [statusFilter !== 'all', insurerFilter, claimTypeFilter, businessDivisionFilter].filter(Boolean).length;
 
   const displayName = referrer?.name || company?.name || 'Referrer';
 
@@ -251,7 +260,7 @@ export default function ReferrerPortal() {
                 <input
                   value={search}
                   onChange={e => setSearch(e.target.value)}
-                  placeholder="Search by reg, client, job number..."
+                  placeholder="Search by reg, client, job number, driver..."
                   className="w-full px-4 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-[10px] focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/15 text-gray-900 dark:text-white placeholder-gray-400 transition-all"
                 />
                 {search && (
@@ -274,9 +283,9 @@ export default function ReferrerPortal() {
                   Filters{activeFiltersCount > 0 ? ` (${activeFiltersCount})` : ''}
                 </button>
                 {activeFiltersCount > 0 && (
-                  <button onClick={() => { setStatusFilter('all'); setInsurerFilter(''); setClaimTypeFilter(''); }}
-                    className="p-1.5 text-gray-400 hover:text-gray-600 transition-colors"><X className="w-3.5 h-3.5" /></button>
-                )}
+                        <button onClick={() => { setStatusFilter('all'); setInsurerFilter(''); setClaimTypeFilter(''); setBusinessDivisionFilter(''); }}
+                          className="p-1.5 text-gray-400 hover:text-gray-600 transition-colors"><X className="w-3.5 h-3.5" /></button>
+                      )}
               </div>
             </div>
 
@@ -309,6 +318,14 @@ export default function ReferrerPortal() {
                       className="w-full px-2 py-1 text-[11px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-700 dark:text-gray-300 focus:outline-none">
                       <option value="">All Insurers</option>
                       {uniqueInsurers.map(i => <option key={i} value={i}>{i}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-medium text-gray-400 dark:text-gray-500 mb-0.5">Business Division</label>
+                    <select value={businessDivisionFilter} onChange={e => setBusinessDivisionFilter(e.target.value)}
+                      className="w-full px-2 py-1 text-[11px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-700 dark:text-gray-300 focus:outline-none">
+                      <option value="">All Divisions</option>
+                      {uniqueBusinessDivisions.map(d => <option key={d} value={d}>{d}</option>)}
                     </select>
                   </div>
                 </div>

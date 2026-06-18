@@ -26,6 +26,7 @@ export default function ClientPortal() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [claimTypeFilter, setClaimTypeFilter] = useState('');
+  const [businessDivisionFilter, setBusinessDivisionFilter] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [collapsedGroups, setCollapsedGroups] = useState({});
   const [showFieldsModal, setShowFieldsModal] = useState(false);
@@ -85,6 +86,11 @@ export default function ClientPortal() {
     return insurers.sort();
   }, [claims]);
 
+  const uniqueBusinessDivisions = useMemo(() => {
+    const divisions = [...new Set(claims.map(c => c.business_division).filter(Boolean))];
+    return divisions.sort();
+  }, [claims]);
+
   const filteredClaims = claims.filter(c => {
     const q = search.toLowerCase();
     const matchesSearch = !q ||
@@ -92,13 +98,16 @@ export default function ClientPortal() {
       c.client_name?.toLowerCase().includes(q) ||
       c.job_number?.toLowerCase().includes(q) ||
       c.make_model?.toLowerCase().includes(q) ||
-      c.insurer?.toLowerCase().includes(q);
+      c.insurer?.toLowerCase().includes(q) ||
+      c.business_division?.toLowerCase().includes(q) ||
+      c.driver_contact_name?.toLowerCase().includes(q);
     const matchesStatus = statusFilter === 'all' || (c.job_status || 'New') === statusFilter;
     const matchesClaimType = !claimTypeFilter || c.claim_type === claimTypeFilter;
-    return matchesSearch && matchesStatus && matchesClaimType;
+    const matchesBusinessDivision = !businessDivisionFilter || c.business_division === businessDivisionFilter;
+    return matchesSearch && matchesStatus && matchesClaimType && matchesBusinessDivision;
   }).sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
 
-  const activeFiltersCount = [statusFilter !== 'all', claimTypeFilter].filter(Boolean).length;
+  const activeFiltersCount = [statusFilter !== 'all', claimTypeFilter, businessDivisionFilter].filter(Boolean).length;
 
   const savedFields = currentUser?.claim_card_fields || [];
   const userCardFields = [...savedFields.filter(f => f !== 'referrer')];
@@ -221,7 +230,7 @@ export default function ClientPortal() {
             <input
               value={search}
               onChange={e => setSearch(e.target.value)}
-              placeholder="Search by reg, job number, vehicle..."
+              placeholder="Search by reg, client, job number, vehicle..."
               className="w-full px-4 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-[10px] focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/15 text-gray-900 dark:text-white placeholder-gray-400 transition-all"
             />
             {search && (
@@ -244,7 +253,7 @@ export default function ClientPortal() {
               Filters{activeFiltersCount > 0 ? ` (${activeFiltersCount})` : ''}
             </button>
             {activeFiltersCount > 0 && (
-              <button onClick={() => { setStatusFilter('all'); setClaimTypeFilter(''); }}
+              <button onClick={() => { setStatusFilter('all'); setClaimTypeFilter(''); setBusinessDivisionFilter(''); }}
                 className="p-1.5 text-gray-400 hover:text-gray-600 transition-colors"><X className="w-3.5 h-3.5" /></button>
             )}
           </div>
@@ -253,7 +262,7 @@ export default function ClientPortal() {
         {/* Filter panel */}
         {showFilters && (
           <div className="px-5 py-3 border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/30 flex-shrink-0">
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
               <div>
                 <label className="block text-[10px] font-medium text-gray-400 dark:text-gray-500 mb-0.5">Status</label>
                 <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
@@ -271,6 +280,14 @@ export default function ClientPortal() {
                   <option value="3rd Party Direct">3rd Party Direct</option>
                   <option value="Credit Repair">Credit Repair</option>
                   <option value="Glass Claim">Glass Claim</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-[10px] font-medium text-gray-400 dark:text-gray-500 mb-0.5">Business Division</label>
+                <select value={businessDivisionFilter} onChange={e => setBusinessDivisionFilter(e.target.value)}
+                  className="w-full px-2 py-1 text-[11px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-700 dark:text-gray-300 focus:outline-none">
+                  <option value="">All Divisions</option>
+                  {uniqueBusinessDivisions.map(d => <option key={d} value={d}>{d}</option>)}
                 </select>
               </div>
             </div>
