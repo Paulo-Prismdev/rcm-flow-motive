@@ -1,9 +1,7 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import ManufacturerModelCombobox from '../shared/ManufacturerModelCombobox';
 import AddressLookupInput from '../shared/AddressLookupInput';
 
 export default function ClaimVehicleForm({ claim, onSave, onCancel }) {
@@ -52,14 +50,6 @@ export default function ClaimVehicleForm({ claim, onSave, onCancel }) {
             <div className="space-y-4">
                 <h4 className="font-semibold text-gray-700">Basic Vehicle Information</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <div>
-                        <label className="text-sm text-gray-500">Make/Model</label>
-                        <ManufacturerModelCombobox
-                          value={formData.make_model}
-                          onChange={(value) => handleChange('make_model', value)}
-                          placeholder="Select make & model..."
-                        />
-                    </div>
                     <div>
                         <label className="text-sm text-gray-500">Make (DVLA)</label>
                         <Input 

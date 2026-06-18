@@ -8,7 +8,6 @@ import BodyshopCombobox from "../shared/BodyshopCombobox";
 import FileUpload from '../shared/FileUpload';
 import ClientCombobox from '../shared/ClientCombobox';
 import ReferrerCombobox from '../shared/ReferrerCombobox';
-import ManufacturerModelCombobox from '../shared/ManufacturerModelCombobox';
 import StatusMultiSelect from '../shared/StatusMultiSelect';
 import ClaimIndemnityFields from './ClaimIndemnityFields';
 import AddressLookupInput from '../shared/AddressLookupInput';
@@ -126,7 +125,6 @@ export default function ClaimEditForm({
           <div className="neomorph-flat p-6 space-y-4">
             <h3 className="font-bold text-gray-700 mb-4">Vehicle Details</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div><label className="block text-sm text-gray-600 mb-2">Make/Model</label><ManufacturerModelCombobox value={formData.make_model} onChange={(v) => handleChange('make_model', v)} placeholder="Select make & model..." /></div>
               <div><label className="block text-sm text-gray-600 mb-2">Vehicle Type</label><select value={formData.vehicle_type} onChange={(e) => handleChange('vehicle_type', e.target.value)} className="neomorph-inset w-full px-4 py-3 text-gray-700 border-0 rounded-xl"><option>Car</option><option>Van</option><option>Motorcycle</option><option>HGV</option><option>Other</option></select></div>
               <div className="md:col-span-2"><label className="block text-sm text-gray-600 mb-2">Vehicle Location</label><AddressLookupInput value={formData.vehicle_location} onChange={handleVehicleLocationChange} placeholder="Start typing address..." className="neomorph-inset" /></div>
             </div>

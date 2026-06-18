@@ -771,7 +771,6 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
             <div className="mb-6">
               <h4 className="text-sm font-semibold text-gray-600 mb-3">Basic Information</h4>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
-                <DetailRow label="Make/Model" value={claim.make_model} />
                 <DetailRow label="Make (DVLA)" value={claim.vehicle_make} />
                 <DetailRow label="Model (DVLA)" value={claim.vehicle_model} />
                 <DetailRow label="Colour" value={claim.vehicle_colour} />
