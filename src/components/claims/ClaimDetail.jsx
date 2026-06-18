@@ -624,6 +624,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
               <DetailRow label="Job Status" value={claim.job_status} isStatus />
               <DetailRow label="Claim Type" value={claim.claim_type} />
+              <DetailRow label="Date Created (System)" value={claim.created_date} isDate />
               <DetailRow label="Date of Loss" value={claim.loss_date} isDate />
               <DetailRow label="Time of Loss" value={claim.loss_time} />
               <DetailRow label="Use of Vehicle" value={claim.vehicle_use} />

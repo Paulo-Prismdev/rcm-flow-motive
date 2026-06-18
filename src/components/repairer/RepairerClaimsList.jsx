@@ -13,6 +13,7 @@ export default function RepairerClaimsList({ claims, onViewClaim }) {
   const [filter, setFilter] = useState('active');
   const [showFieldsModal, setShowFieldsModal] = useState(false);
   const [search, setSearch] = useState('');
+  const [sortBy, setSortBy] = useState('created_desc');
   const [insurerFilter, setInsurerFilter] = useState('');
   const [claimTypeFilter, setClaimTypeFilter] = useState('');
   const [businessDivisionFilter, setBusinessDivisionFilter] = useState('');
@@ -107,6 +108,11 @@ export default function RepairerClaimsList({ claims, onViewClaim }) {
     const matchesClaimType = !claimTypeFilter || c.claim_type === claimTypeFilter;
     const matchesBusinessDivision = !businessDivisionFilter || c.business_division === businessDivisionFilter;
     return matchesSearch && matchesInsurer && matchesClaimType && matchesBusinessDivision;
+  }).sort((a, b) => {
+    if (sortBy === 'created_asc') return new Date(a.created_date) - new Date(b.created_date);
+    if (sortBy === 'loss_asc') return new Date(a.loss_date || 0) - new Date(b.loss_date || 0);
+    if (sortBy === 'loss_desc') return new Date(b.loss_date || 0) - new Date(a.loss_date || 0);
+    return new Date(b.created_date) - new Date(a.created_date);
   });
 
   const uniqueInsurers = [...new Set(claims.map(c => c.insurer).filter(Boolean))].sort();
@@ -130,6 +136,13 @@ export default function RepairerClaimsList({ claims, onViewClaim }) {
             </button>
           ))}
           <div className="flex-1" />
+          <select value={sortBy} onChange={e => setSortBy(e.target.value)}
+            className="px-2 py-1 text-[11px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-700 dark:text-gray-300 focus:outline-none cursor-pointer">
+            <option value="created_desc">Created (Newest)</option>
+            <option value="created_asc">Created (Oldest)</option>
+            <option value="loss_desc">Accident Date (Newest)</option>
+            <option value="loss_asc">Accident Date (Oldest)</option>
+          </select>
           <button
             onClick={() => setShowFieldsModal(true)}
             className="p-2 text-foreground-muted hover:text-foreground transition-colors"

@@ -32,6 +32,7 @@ export default function ReferrerPortal() {
   const [showFilters, setShowFilters] = useState(false);
   const [collapsedGroups, setCollapsedGroups] = useState({});
   const [showFieldsModal, setShowFieldsModal] = useState(false);
+  const [sortBy, setSortBy] = useState('created_desc');
   const queryClient = useQueryClient();
 
   // Listen for navigation events from layout
@@ -135,7 +136,12 @@ export default function ReferrerPortal() {
     const matchesClaimType = !claimTypeFilter || c.claim_type === claimTypeFilter;
     const matchesBusinessDivision = !businessDivisionFilter || c.business_division === businessDivisionFilter;
     return matchesSearch && matchesStatus && matchesInsurer && matchesClaimType && matchesBusinessDivision;
-  }).sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
+  }).sort((a, b) => {
+    if (sortBy === 'created_asc') return new Date(a.created_date) - new Date(b.created_date);
+    if (sortBy === 'loss_asc') return new Date(a.loss_date || 0) - new Date(b.loss_date || 0);
+    if (sortBy === 'loss_desc') return new Date(b.loss_date || 0) - new Date(a.loss_date || 0);
+    return new Date(b.created_date) - new Date(a.created_date);
+  });
 
   const activeFiltersCount = [statusFilter !== 'all', insurerFilter, claimTypeFilter, businessDivisionFilter].filter(Boolean).length;
 
@@ -270,6 +276,13 @@ export default function ReferrerPortal() {
                 )}
               </div>
               <div className="flex items-center gap-2">
+                <select value={sortBy} onChange={e => setSortBy(e.target.value)}
+                  className="px-2 py-1.5 text-[11px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-[10px] text-gray-700 dark:text-gray-300 focus:outline-none focus:border-blue-400 cursor-pointer">
+                  <option value="created_desc">Created (Newest)</option>
+                  <option value="created_asc">Created (Oldest)</option>
+                  <option value="loss_desc">Accident Date (Newest)</option>
+                  <option value="loss_asc">Accident Date (Oldest)</option>
+                </select>
                 <button
                   onClick={() => setShowFieldsModal(true)}
                   className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"

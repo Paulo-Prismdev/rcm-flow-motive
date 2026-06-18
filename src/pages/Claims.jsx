@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Search, Archive, Filter, X, AlertTriangle, Clock, Upload, Package, ChevronDown, ChevronRight, Settings2 } from 'lucide-react';
+import { Plus, Search, Archive, Filter, X, AlertTriangle, Clock, Upload, Package, ChevronDown, ChevronRight, Settings2, ArrowUpDown } from 'lucide-react';
 import ClaimDetail from '../components/claims/ClaimDetail';
 import ClaimFormWrapper from '../components/claims/ClaimFormWrapper';
 import ImportClaimsModal from '../components/claims/ImportClaimsModal';
@@ -51,6 +51,7 @@ export default function ClaimsPage() {
   const [showImportModal, setShowImportModal] = useState(false);
   const [hasBackorderedPartsFilter, setHasBackorderedPartsFilter] = useState(false);
   const [claimIdsWithBackorders, setClaimIdsWithBackorders] = useState(new Set());
+  const [sortBy, setSortBy] = useState('priority');
   const [collapsedGroups, setCollapsedGroups] = useState({});
   const containerRef = React.useRef(null);
   const queryClient = useQueryClient();
@@ -188,6 +189,12 @@ export default function ClaimsPage() {
     const matchesBusinessDivision = !businessDivisionFilter || c.business_division === businessDivisionFilter;
     return matchesSearch && matchesStatus && matchesClaimType && matchesInsurer && matchesReferrer && matchesRepairer && matchesUpdateStatus && matchesRepairerAcceptance && matchesBackorders && matchesBusinessDivision;
   }).sort((a, b) => {
+    if (sortBy === 'created_asc') return new Date(a.created_date) - new Date(b.created_date);
+    if (sortBy === 'created_desc') return new Date(b.created_date) - new Date(a.created_date);
+    if (sortBy === 'loss_asc') return new Date(a.loss_date || 0) - new Date(b.loss_date || 0);
+    if (sortBy === 'loss_desc') return new Date(b.loss_date || 0) - new Date(a.loss_date || 0);
+    if (sortBy === 'updated_desc') return new Date(b.last_updated_at || b.created_date) - new Date(a.last_updated_at || a.created_date);
+    // Default: priority sort
     const prio = { Red: 1, Amber: 2, Green: 3, Blue: 3, Gray: 4 };
     const pa = prio[calculateUpdateStatus(a)] || 3, pb = prio[calculateUpdateStatus(b)] || 3;
     if (pa !== pb) return pa - pb;
@@ -404,6 +411,17 @@ export default function ClaimsPage() {
             className="w-full pl-10 pr-6 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-[10px] focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/15 text-gray-900 dark:text-white placeholder-gray-400 transition-all"
           />
         </div>
+
+        {/* Sort dropdown */}
+        <select value={sortBy} onChange={e => setSortBy(e.target.value)}
+          className="px-2 py-1.5 text-[11px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-[10px] text-gray-700 dark:text-gray-300 focus:outline-none focus:border-blue-400 cursor-pointer">
+          <option value="priority">Sort: Priority</option>
+          <option value="created_desc">Sort: Created (Newest)</option>
+          <option value="created_asc">Sort: Created (Oldest)</option>
+          <option value="loss_desc">Sort: Accident Date (Newest)</option>
+          <option value="loss_asc">Sort: Accident Date (Oldest)</option>
+          <option value="updated_desc">Sort: Last Updated</option>
+        </select>
 
         {/* Quick filter dropdowns */}
         <button onClick={() => setShowFilters(!showFilters)}
