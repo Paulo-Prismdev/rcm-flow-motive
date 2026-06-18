@@ -6,59 +6,46 @@ Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
 
-    if (!user) {
-      return Response.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
+    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
     if (user.role !== 'admin' && user.user_type !== 'internal') {
-      return Response.json({ error: 'Forbidden: Admin or internal users only' }, { status: 403 });
+      return Response.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     const { claimId, contactOverrides } = await req.json();
-
-    if (!claimId) {
-      return Response.json({ error: 'Missing claimId' }, { status: 400 });
-    }
+    if (!claimId) return Response.json({ error: 'Missing claimId' }, { status: 400 });
 
     const claim = await base44.asServiceRole.entities.Claim.get(claimId);
-    if (!claim) {
-      return Response.json({ error: 'Claim not found' }, { status: 404 });
-    }
+    if (!claim) return Response.json({ error: 'Claim not found' }, { status: 404 });
 
     const doc = new jsPDF();
 
     // ═══════════════════════════════════════════
-    // PAGE & MARGIN SETUP (A4, 20mm all sides)
+    // PAGE & MARGIN SETUP
     // ═══════════════════════════════════════════
-    const LM = 20;              // left margin mm
-    const PW = 210;             // A4 width
-    const MW = PW - LM * 2;     // max content width = 170mm
-    const PH = 297;             // A4 height
-    const TOP = 20;             // top margin
-    const BL = PH - 20;         // bottom limit = 277mm
-    const FOOTER_Y = 282;       // footer baseline
-
-    // ═══════════════════════════════════════════
-    // SPACING & TYPOGRAPHY
-    // ═══════════════════════════════════════════
-    const SECTION_GAP = 5;      // 16-20px equivalent gap between sections
-    const PAD_X = 5;            // internal horizontal padding (16px)
-    const PAD_TOP = 4;          // internal top padding (12px)
-    const PAD_BOTTOM = 4;       // internal bottom padding (12px)
-    const HEADER_H = 8;         // section header bar height
-    const ROW_H = 6.2;          // single data row height
-    const LINE_H = 5.5;         // line height for wrapped text
-    const LABEL_W = 60;         // label column width for two-column layout
-    const VAL_GAP = 4;          // gap between label and value columns
-    const TX = LM + PAD_X;      // text start X (left margin + pad)
-    const VX = TX + LABEL_W + VAL_GAP; // value column X
+    const LM = 20;
+    const PW = 210;
+    const MW = PW - LM * 2;
+    const PH = 297;
+    const TOP = 20;
+    const BL = PH - 20;
+    const FOOTER_Y = 282;
+    const PAD_X = 5;
+    const PAD_TOP = 4;
+    const PAD_BOTTOM = 4;
+    const SECTION_GAP = 5;
+    const HEADER_H = 8;
+    const ROW_H = 6.2;
+    const LABEL_W = 60;
+    const VAL_GAP = 4;
+    const TX = LM + PAD_X;
+    const VX = TX + LABEL_W + VAL_GAP;
 
     // ═══════════════════════════════════════════
     // COLOURS
     // ═══════════════════════════════════════════
-    const NAVY = [19, 29, 71];           // RCM brand: #131d47
-    const AMBER_BG = [255, 248, 230];    // light amber
-    const AMBER_BD = [230, 180, 30];     // amber border
+    const NAVY = [19, 29, 71];
+    const AMBER_BG = [255, 248, 230];
+    const AMBER_BD = [230, 180, 30];
     const RED = [200, 0, 0];
     const MID_GREY = [220, 220, 220];
     const LIGHT_GREY = [245, 245, 248];
@@ -104,69 +91,31 @@ Deno.serve(async (req) => {
       policy_excess: claim.policy_excess ? Number(claim.policy_excess).toFixed(2) : 'N/A'
     };
 
-    // ═══════════════════════════════════════════
-    // STATE
-    // ═══════════════════════════════════════════
     let yPos = TOP;
 
     // ═══════════════════════════════════════════
-    // HELPERS — Height Estimation
+    // HELPERS
     // ═══════════════════════════════════════════
 
     const valWidth = () => MW - PAD_X * 2 - LABEL_W - VAL_GAP;
 
-    /** Estimate height of a single data row (handles multi-line values) */
     function estimateRow(value) {
       doc.setFontSize(9);
       const lines = doc.splitTextToSize(String(value), valWidth());
       return Math.max(ROW_H, lines.length * ROW_H);
     }
 
-    /** Estimate total height of a section (header + padding + rows + warnings + body blocks) */
-    function estimateSection(rows, warnings, bodyBlocks) {
+    function estimateSection(rows) {
       let h = HEADER_H + PAD_TOP + PAD_BOTTOM;
-      // Data rows
-      if (rows) {
-        for (const [, value] of rows) h += estimateRow(value);
-      }
-      // Section gap between rows and body text
-      if ((rows && rows.length) && (warnings && warnings.length || bodyBlocks && bodyBlocks.length)) h += 2;
-      // Body text blocks
-      if (bodyBlocks) {
-        doc.setFontSize(9);
-        for (const { text } of bodyBlocks) {
-          const lines = doc.splitTextToSize(String(text), MW - PAD_X * 2);
-          h += lines.length * LINE_H + 1;
-        }
-        h += 2;
-      }
-      // Warning blocks
-      if (warnings) {
-        for (const text of warnings) {
-          doc.setFontSize(9);
-          const lines = doc.splitTextToSize(String(text), MW - PAD_X * 2 - 8);
-          h += lines.length * ROW_H + 12; // box padding + text
-        }
-        h += 3;
-      }
+      if (rows) { for (const [, value] of rows) h += estimateRow(value); }
       return h;
     }
 
-    /** Page-break if section won't fit; returns new yPos */
     function ensureSpace(neededH) {
-      if (yPos + neededH > BL) {
-        doc.addPage();
-        yPos = TOP;
-        return true;
-      }
+      if (yPos + neededH > BL) { doc.addPage(); yPos = TOP; return true; }
       return false;
     }
 
-    // ═══════════════════════════════════════════
-    // HELPERS — Drawing
-    // ═══════════════════════════════════════════
-
-    /** Draw a section header bar */
     function drawHeader(title) {
       doc.setFillColor(...NAVY);
       doc.rect(LM, yPos, MW, HEADER_H, 'F');
@@ -177,86 +126,32 @@ Deno.serve(async (req) => {
       yPos += HEADER_H + PAD_TOP;
     }
 
-    /** Draw a two-column labelled row: bold label | regular value */
     function drawRow(label, value) {
       const vw = valWidth();
       doc.setFontSize(9);
       const lines = doc.splitTextToSize(String(value), vw);
       const rh = Math.max(ROW_H, lines.length * ROW_H);
-
       if (yPos + rh > BL) { doc.addPage(); yPos = TOP; }
-
-      // Label (bold)
       doc.setFont('helvetica', 'bold');
       doc.setTextColor(...DARK_TEXT);
       doc.text(label, TX, yPos + 4.2);
-
-      // Value (regular) — top-align with label, but multi-line wrapped
       doc.setFont('helvetica', 'normal');
       doc.setTextColor(...DARK_TEXT);
-      lines.forEach((line, i) => {
-        doc.text(line, VX, yPos + 4.2 + ROW_H * i);
-      });
-
+      lines.forEach((line, i) => { doc.text(line, VX, yPos + 4.2 + ROW_H * i); });
       yPos += rh;
     }
 
-    /** Draw a warning alert box with amber background */
-    function drawWarning(text) {
-      doc.setFontSize(9);
-      const ww = MW - PAD_X * 2 - 8;
-      const lines = doc.splitTextToSize(text, ww);
-      const boxH = 12 + lines.length * ROW_H;
-
-      if (yPos + boxH > BL) { doc.addPage(); yPos = TOP; }
-
-      doc.setFillColor(...AMBER_BG);
-      doc.setDrawColor(...AMBER_BD);
-      doc.setLineWidth(0.5);
-      doc.roundedRect(TX, yPos, MW - PAD_X * 2, boxH, 2, 2, 'FD');
-
-      // "WARNING:" prefix in red bold
-      doc.setFont('helvetica', 'bold');
-      doc.setTextColor(...RED);
-      doc.text('WARNING:', TX + 4, yPos + 6);
-
-      // Warning text
-      doc.setFont('helvetica', 'normal');
-      doc.setTextColor(...DARK_TEXT);
-      lines.forEach((line, i) => {
-        doc.text(line, TX + 4, yPos + 6 + ROW_H * (i + 1));
-      });
-
-      yPos += boxH + 3;
+    function finishSection() {
+      yPos += PAD_BOTTOM + SECTION_GAP;
     }
 
-    /** Draw body text block (regular paragraphs) */
-    function drawBodyText(text, opts = {}) {
-      const { bold = false, color = DARK_TEXT } = opts;
-      doc.setFontSize(9);
-      doc.setFont('helvetica', bold ? 'bold' : 'normal');
-      doc.setTextColor(...color);
-      const lines = doc.splitTextToSize(String(text), MW - PAD_X * 2);
-      lines.forEach((line, i) => {
-        if (yPos + LINE_H > BL) { doc.addPage(); yPos = TOP; }
-        doc.text(line, TX, yPos + 4);
-        yPos += LINE_H;
-      });
-      yPos += 1;
-    }
-
-    /** Draw footer on all pages */
     function drawAllFooters() {
       const totalPages = doc.internal.getNumberOfPages();
       for (let p = 1; p <= totalPages; p++) {
         doc.setPage(p);
-
-        // Thin rule line above footer
         doc.setDrawColor(...NAVY);
         doc.setLineWidth(0.3);
         doc.line(LM, FOOTER_Y - 2, PW - LM, FOOTER_Y - 2);
-
-        // Footer text
         doc.setTextColor(...NAVY);
         doc.setFontSize(7.5);
         doc.setFont('helvetica', 'normal');
@@ -264,36 +159,25 @@ Deno.serve(async (req) => {
       }
     }
 
-    /** Finish a section: add bottom padding and gap */
-    function finishSection() {
-      yPos += PAD_BOTTOM + SECTION_GAP;
-    }
-
     // ═══════════════════════════════════════════
     // DOCUMENT HEADER
     // ═══════════════════════════════════════════
-    {
-      // RCM Navy brand bar
-      doc.setFillColor(...NAVY);
-      doc.rect(LM, 12, MW, 12, 'F');
-      doc.setTextColor(...WHITE);
-      doc.setFontSize(14);
-      doc.setFont('helvetica', 'bold');
-      doc.text('RCM Automotive', TX, 20.5);
-      doc.setFontSize(9);
-      doc.setFont('helvetica', 'normal');
-      doc.text('Repairer Instruction', PW - LM - PAD_X, 20.5, { align: 'right' });
-
-      // Claim reference sub-bar
-      doc.setFillColor(240, 240, 240);
-      doc.rect(LM, 25, MW, 7, 'F');
-      doc.setTextColor(...DARK_TEXT);
-      doc.setFontSize(9);
-      doc.setFont('helvetica', 'bold');
-      doc.text(`RCM Claim Reference: ${claim.job_number || 'N/A'}`, TX, 29.5);
-
-      yPos = 37;
-    }
+    doc.setFillColor(...NAVY);
+    doc.rect(LM, 12, MW, 12, 'F');
+    doc.setTextColor(...WHITE);
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('RCM Automotive', TX, 20.5);
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Repairer Instruction', PW - LM - PAD_X, 20.5, { align: 'right' });
+    doc.setFillColor(240, 240, 240);
+    doc.rect(LM, 25, MW, 7, 'F');
+    doc.setTextColor(...DARK_TEXT);
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'bold');
+    doc.text(`RCM Claim Reference: ${claim.job_number || 'N/A'}`, TX, 29.5);
+    yPos = 37;
 
     // ═══════════════════════════════════════════
     // SECTION 1 — Client & Repairer Details
@@ -366,232 +250,188 @@ Deno.serve(async (req) => {
     }
 
     // ═══════════════════════════════════════════
+    // PAGE 2
+    // ═══════════════════════════════════════════
+    doc.addPage();
+    yPos = TOP;
+
+    // ═══════════════════════════════════════════
     // SECTION 5 — Branded Decals & Signage
     // ═══════════════════════════════════════════
     {
-      const bodyBlocks = [
-        {
-          text: 'All repairers MUST use the RCM Automotive approved decal supplier for any branded vehicle decals or signage.'
-        },
-        {
-          text: 'Where a vehicle requires decals, these MUST be ordered as soon as the repair is authorised - if the vehicle is already on site, this should be done immediately. If the vehicle has not yet arrived, decals MUST be ordered prior to the vehicle coming on site.'
-        },
-        {
-          text: 'Please contact John or Michael Welch at our approved supplier, quoting Orkin as the client and providing the vehicle registration number:'
-        },
+      const FS = 8;
+      const LH = 4.8;
+      const textW = MW - PAD_X * 2;
+
+      drawHeader('Branded Decals & Signage');
+
+      const bodyParas = [
+        'All repairers MUST use the RCM Automotive approved decal supplier for any branded vehicle decals or signage.',
+        'Where a vehicle requires decals, these MUST be ordered as soon as the repair is authorised - if the vehicle is already on site, this should be done immediately. If the vehicle has not yet arrived, decals MUST be ordered prior to the vehicle coming on site.',
+        'Please contact John or Michael Welch at our approved supplier, quoting Orkin as the client and providing the vehicle registration number:',
       ];
+
+      doc.setFontSize(FS);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(...DARK_TEXT);
+      for (const p of bodyParas) {
+        const lines = doc.splitTextToSize(p, textW);
+        for (const line of lines) { doc.text(line, TX, yPos + 3.2); yPos += LH; }
+        yPos += 1;
+      }
+
+      yPos += 1;
+
+      // Supplier box
+      const supplierLines = [
+        { text: 'Signs Plus', bold: true, size: 9 },
+        { text: '147 Main Road, Biggin Hill, Kent, TN16 3JP', bold: false, size: 8 },
+        { text: 'Email: enquiries@signsplus.uk', bold: false, size: 8 },
+        { text: 'Phone: 01959 571 074', bold: false, size: 8 },
+      ];
+      const sBoxH = 3 + 5 * supplierLines.length + 3;
+      doc.setFillColor(...LIGHT_GREY);
+      doc.setDrawColor(180, 180, 190);
+      doc.roundedRect(TX + 4, yPos, textW - 8, sBoxH, 2, 2, 'FD');
+      let sy = yPos + 3;
+      for (const sl of supplierLines) {
+        doc.setFontSize(sl.size);
+        doc.setFont('helvetica', sl.bold ? 'bold' : 'normal');
+        doc.setTextColor(...DARK_TEXT);
+        doc.text(sl.text, TX + 8, sy + 3.2);
+        sy += 5;
+      }
+      yPos += sBoxH + 3;
+
+      // Warnings
       const warnings = [
         'Use of any other supplier for RCM Automotive branded decals is not permitted without prior written approval.',
         'Any repair delayed as a result of the mismanagement of a decal order - including failure to order on time - will result in a charge of GBP 100 per day for each day of delay attributable to the repairer. This will be deducted from any outstanding VAT and excess payments due.',
       ];
-
-      const supplierLines = [
-        { text: 'Signs Plus', bold: true, size: 10 },
-        { text: '147 Main Road, Biggin Hill, Kent, TN16 3JP', bold: false, size: 9 },
-        { text: 'Email: enquiries@signsplus.uk', bold: false, size: 9 },
-        { text: 'Phone: 01959 571 074', bold: false, size: 9 },
-      ];
-
-      // Only force a page break if the section header + first paragraph won't fit
-      if (yPos + HEADER_H + 20 > BL) { doc.addPage(); yPos = TOP; }
-      drawHeader('Branded Decals & Signage');
-
-      // Body paragraphs
-      for (const { text } of bodyBlocks) {
-        doc.setFontSize(9);
+      doc.setFontSize(FS);
+      for (const w of warnings) {
+        const lines = doc.splitTextToSize(w, textW - 8);
+        const boxH = 9 + lines.length * LH;
+        doc.setFillColor(...AMBER_BG);
+        doc.setDrawColor(...AMBER_BD);
+        doc.setLineWidth(0.5);
+        doc.roundedRect(TX, yPos, textW, boxH, 2, 2, 'FD');
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(...RED);
+        doc.text('WARNING:', TX + 3, yPos + 5);
         doc.setFont('helvetica', 'normal');
         doc.setTextColor(...DARK_TEXT);
-        const lines = doc.splitTextToSize(String(text), MW - PAD_X * 2);
-        lines.forEach((line) => {
-          if (yPos + LINE_H > BL) { doc.addPage(); yPos = TOP; }
-          doc.text(line, TX, yPos + 4);
-          yPos += LINE_H;
-        });
-        yPos += 1;
-      }
-
-      yPos += 2;
-
-      // Supplier info box
-      {
-        const boxX = TX + 4;
-        const boxW = MW - PAD_X * 2 - 8;
-        const sTopPad = 5;
-        const sLineH = 6;
-        const sBottomPad = 5;
-        const sBoxH = sTopPad + sLineH * supplierLines.length + sBottomPad;
-
-        if (yPos + sBoxH > BL) { doc.addPage(); yPos = TOP; }
-
-        doc.setFillColor(...LIGHT_GREY);
-        doc.setDrawColor(180, 180, 190);
-        doc.roundedRect(boxX, yPos, boxW, sBoxH, 3, 3, 'FD');
-
-        let sy = yPos + sTopPad;
-        for (const sl of supplierLines) {
-          doc.setFontSize(sl.size);
-          doc.setFont('helvetica', sl.bold ? 'bold' : 'normal');
-          doc.setTextColor(...DARK_TEXT);
-          doc.text(sl.text, boxX + 4, sy);
-          sy += sLineH;
+        for (let i = 0; i < lines.length; i++) {
+          doc.text(lines[i], TX + 3, yPos + 5 + LH * (i + 1));
         }
-        yPos += sBoxH + 6;
+        yPos += boxH + 2.5;
       }
 
-      // Warnings
-      for (const text of warnings) {
-        drawWarning(text);
-      }
-
-      finishSection();
+      yPos += 3;
     }
 
-   // ═══════════════════════════════════════════
+    // ═══════════════════════════════════════════
     // SECTION 6 — Invoicing
     // ═══════════════════════════════════════════
     {
+      const FS = 8;
+      const LH = 4.8;
+      const textW = MW - PAD_X * 2;
+
       const repairerReferralFee = (claim.referral_fee_repairer != null) ? `${claim.referral_fee_repairer}%` : '0%';
       const estFee = claim.est_fee ? `GBP ${Number(claim.est_fee).toFixed(2)}` : null;
 
-      const BODY_ROW = 5.2;
-      const textW = MW - PAD_X * 2;
-      const FS = 8.5;
+      drawHeader('Invoicing');
 
-      // ── Pre-measure entire section ──
-      let estH = HEADER_H + PAD_TOP;
-      // Deductions
-      estH += 7 + 6 + (estFee ? 6 : 0) + 4;
-      // Payments heading
-      estH += 7;
-      // Body paragraphs
+      // Deductions bar
+      doc.setFillColor(...MID_GREY);
+      doc.setDrawColor(150, 150, 150);
+      doc.rect(LM, yPos, MW, 6, 'FD');
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(8.5);
+      doc.setTextColor(...DARK_TEXT);
+      doc.text('Invoice Deductions', TX, yPos + 4.2);
+      yPos += 6;
+      doc.setFont('helvetica', 'normal');
       doc.setFontSize(FS);
-      const allBodyLines = [
+      doc.text(`- Rep. Referral Fee ${repairerReferralFee}`, TX, yPos + 4);
+      yPos += 5.5;
+      if (estFee) { doc.text(`- Estimate Fee ${estFee}`, TX, yPos + 4); yPos += 5.5; }
+      yPos += 2;
+
+      // INVOICING & PAYMENTS heading
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(8.5);
+      doc.setTextColor(...DARK_TEXT);
+      doc.text('INVOICING & PAYMENTS', TX, yPos + 4);
+      yPos += 6;
+
+      // Body paragraphs
+      const bodyLines = [
         "Your invoice for the insurer's element of the repair should be addressed and sent to the authorising party, as instructed on the authority and as per your usual practice.",
         'Your full invoice pack MUST also be sent to invoices@rcmautomotive.co.uk and MUST include: main invoice, any excess or VAT invoices, final authority, and a signed satisfaction note.',
         'Your invoice pack MUST be submitted within 48 hours of vehicle completion approval or final authority being issued - whichever applies.',
         'VAT and excess invoices MUST be made out to RCM Automotive Ltd - payment will be made within 14 days.',
         'Upon receipt of your invoice pack, you will receive an invoice from RCM Automotive for our referral fee, which will be payable within 7 days of invoice.',
       ];
-      for (const t of allBodyLines) {
-        estH += doc.splitTextToSize(t, textW).length * BODY_ROW + 1.5;
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(FS);
+      doc.setTextColor(...DARK_TEXT);
+      for (const t of bodyLines) {
+        const wrapped = doc.splitTextToSize(t, textW);
+        for (const line of wrapped) { doc.text(line, TX, yPos + 3.2); yPos += LH; }
+        yPos += 1;
       }
+
       // NEVER INVOICE
-      estH += doc.splitTextToSize('***** NEVER INVOICE THE CLIENT DIRECTLY FOR VAT OR EXCESS *****', textW).length * BODY_ROW + 3;
-      // IMPORTANT heading + 2 critical lines
-      estH += 7;
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(FS);
+      doc.setTextColor(...RED);
+      const neverW = doc.splitTextToSize('***** NEVER INVOICE THE CLIENT DIRECTLY FOR VAT OR EXCESS *****', textW);
+      for (const line of neverW) { doc.text(line, PW / 2, yPos + 3.2, { align: 'center' }); yPos += LH; }
+      yPos += 2;
+
+      // IMPORTANT heading
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(8.5);
+      doc.setTextColor(...RED);
+      doc.text('IMPORTANT - FAILURE TO COMPLY', TX, yPos + 4);
+      yPos += 6;
+
+      // Critical lines
       const criticalLines = [
         'Failure to submit your invoice pack within 48 hours will result in delays to your VAT and excess payment, and an admin charge of GBP 150 will be added to your referral fee invoice.',
         'Failure to pay your referral fee within 7 days will result in an additional admin charge of GBP 150 and removal from the RCM Automotive network.',
       ];
-      for (const t of criticalLines) {
-        estH += doc.splitTextToSize(t, textW).length * BODY_ROW + 1.5;
-      }
-      // Final lines
-      estH += 7 + 7 + PAD_BOTTOM;
-
-      // Move to new page if needed
-      ensureSpace(estH);
-      drawHeader('Invoicing');
-
-      // ── Invoice Deductions ──
-      doc.setFillColor(...MID_GREY);
-      doc.setDrawColor(150, 150, 150);
-      doc.rect(LM, yPos, MW, 7, 'FD');
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(9);
-      doc.setTextColor(...DARK_TEXT);
-      doc.text('Invoice Deductions', TX, yPos + 5);
-      yPos += 7;
-
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(FS);
-      doc.text(`- Rep. Referral Fee ${repairerReferralFee}`, TX, yPos + 4.5);
+      doc.setTextColor(...DARK_TEXT);
+      for (const t of criticalLines) {
+        const wrapped = doc.splitTextToSize(t, textW);
+        for (const line of wrapped) { doc.text(line, TX, yPos + 3.2); yPos += LH; }
+        yPos += 1;
+      }
+      yPos += 2;
+
+      // Final notice
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(FS);
+      doc.setTextColor(...RED);
+      doc.text('PLEASE DO NOT SEND TO ANY OTHER PARTY WITHOUT PRIOR CONSENT', PW / 2, yPos + 3.2, { align: 'center' });
       yPos += 6;
-      if (estFee) {
-        doc.text(`- Estimate Fee ${estFee}`, TX, yPos + 4.5);
-        yPos += 6;
-      }
-      yPos += 4;
 
-      // ── INVOICING & PAYMENTS heading ──
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(9);
-      doc.setTextColor(...DARK_TEXT);
-      doc.text('INVOICING & PAYMENTS', TX, yPos + 5);
-      yPos += 7;
-
-      // ── Body paragraphs ──
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(FS);
-      doc.setTextColor(...DARK_TEXT);
-      for (const t of allBodyLines) {
-        const wrapped = doc.splitTextToSize(t, textW);
-        for (const line of wrapped) {
-          doc.text(line, TX, yPos + 3.5);
-          yPos += BODY_ROW;
-        }
-        yPos += 1.5;
-      }
-
-      // ── NEVER INVOICE ──
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(FS);
-      doc.setTextColor(...RED);
-      const neverWrapped = doc.splitTextToSize('***** NEVER INVOICE THE CLIENT DIRECTLY FOR VAT OR EXCESS *****', textW);
-      for (const line of neverWrapped) {
-        doc.text(line, PW / 2, yPos + 3.5, { align: 'center' });
-        yPos += BODY_ROW;
-      }
-      yPos += 3;
-
-      // ── IMPORTANT heading ──
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(9);
-      doc.setTextColor(...RED);
-      doc.text('IMPORTANT - FAILURE TO COMPLY', TX, yPos + 5);
-      yPos += 7;
-
-      // ── Critical lines ──
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(FS);
-      doc.setTextColor(...DARK_TEXT);
-      for (const t of criticalLines) {
-        const wrapped = doc.splitTextToSize(t, textW);
-        for (const line of wrapped) {
-          doc.text(line, TX, yPos + 3.5);
-          yPos += BODY_ROW;
-        }
-        yPos += 1.5;
-      }
-      yPos += 3;
-
-      // ── Final notice ──
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(FS);
-      doc.setTextColor(...RED);
-      doc.text('PLEASE DO NOT SEND TO ANY OTHER PARTY WITHOUT PRIOR CONSENT', PW / 2, yPos, { align: 'center' });
-      yPos += 6.5;
-
-      // ── Disclaimer ──
+      // Disclaimer
       doc.setFont('helvetica', 'italic');
-      doc.setFontSize(8);
+      doc.setFontSize(7.5);
       doc.setTextColor(80, 80, 80);
-      const disclaimer = '*By accepting this repair instruction, you agree to the T&Cs within the supplied SLA provided with this instruction.';
-      const discLines = doc.splitTextToSize(disclaimer, MW);
-      for (const line of discLines) {
-        doc.text(line, PW / 2, yPos, { align: 'center' });
-        yPos += 5;
-      }
-
-      yPos += PAD_BOTTOM;
+      const discW = doc.splitTextToSize('*By accepting this repair instruction, you agree to the T&Cs within the supplied SLA provided with this instruction.', MW);
+      for (const line of discW) { doc.text(line, PW / 2, yPos + 3.2, { align: 'center' }); yPos += LH; }
     }
 
     // ═══════════════════════════════════════════
     // FOOTERS — on every page
     // ═══════════════════════════════════════════
     drawAllFooters();
-
-    console.log('PDF generation complete');
 
     const pdfBytes = doc.output('arraybuffer');
 
@@ -601,16 +441,12 @@ Deno.serve(async (req) => {
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
       const filename = `${claim.job_number || 'instruction'}-${timestamp}.pdf`;
       const pdfFile = new File([pdfBlob], filename, { type: 'application/pdf' });
-
       const uploadResult = await base44.asServiceRole.integrations.Core.UploadFile({ file: pdfFile });
-      console.log('PDF uploaded:', uploadResult.file_url);
-
       const currentFileUrls = Array.isArray(claim.file_urls) ? claim.file_urls : [];
       await base44.asServiceRole.entities.Claim.update(claim.id, {
         file_urls: [...currentFileUrls, uploadResult.file_url],
         instruction_pdf_url: uploadResult.file_url
       });
-      console.log('PDF saved to claim documents');
     } catch (uploadError) {
       console.error('Failed to upload PDF:', uploadError);
     }
