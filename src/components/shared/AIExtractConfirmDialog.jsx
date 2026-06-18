@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { X, Sparkles, CheckSquare, Square, ArrowRight, Check, Link } from 'lucide-react';
 
@@ -10,19 +10,21 @@ const LINKED_ENTITY_FIELDS = {
 };
 
 export default function AIExtractConfirmDialog({ isOpen, onClose, onConfirm, extractedData, existingData = {}, linkedEntityTypes = [], title = 'AI Data Extraction' }) {
+  // Compute locked fields from linkedEntityTypes — re-evaluated on every render
+  const lockedFields = useMemo(
+    () => new Set(linkedEntityTypes.flatMap(t => LINKED_ENTITY_FIELDS[t] || [])),
+    [linkedEntityTypes]
+  );
+
+  // Track only user-toggleable fields; locked fields are always applied
   const [selectedFields, setSelectedFields] = useState(() => {
     const initial = {};
-    const lockedFields = new Set(linkedEntityTypes.flatMap(t => LINKED_ENTITY_FIELDS[t] || []));
-    
     Object.keys(extractedData || {}).forEach(key => {
       const extractedValue = extractedData[key];
       const existingValue = existingData[key];
       
       if (extractedValue !== null && extractedValue !== undefined && extractedValue !== '') {
-        if (lockedFields.has(key)) {
-          // Linked-entity field: always selected, always applied
-          initial[key] = true;
-        } else {
+        if (!lockedFields.has(key)) {
           const valuesMatch = String(existingValue) === String(extractedValue);
           initial[key] = !valuesMatch;
         }
@@ -31,13 +33,32 @@ export default function AIExtractConfirmDialog({ isOpen, onClose, onConfirm, ext
     return initial;
   });
 
+  // Re-initialize selectedFields when linkedEntityTypes changes (and dialog re-opens)
+  useEffect(() => {
+    if (!isOpen || !extractedData) return;
+    setSelectedFields(prev => {
+      const updated = { ...prev };
+      Object.keys(extractedData).forEach(key => {
+        const value = extractedData[key];
+        if (value !== null && value !== undefined && value !== '') {
+          if (!lockedFields.has(key)) {
+            const valuesMatch = String(existingData[key] || '') === String(value);
+            updated[key] = !valuesMatch;
+          }
+        }
+      });
+      return updated;
+    });
+  }, [isOpen, lockedFields, extractedData, existingData]);
+
   if (!isOpen || !extractedData) return null;
 
   const fields = Object.entries(extractedData).filter(([_, value]) => 
     value !== null && value !== undefined && value !== ''
   );
 
-  const lockedFields = new Set(linkedEntityTypes.flatMap(t => LINKED_ENTITY_FIELDS[t] || []));
+  // Effective selection: locked fields are always considered selected
+  const isFieldSelected = (key) => lockedFields.has(key) || !!selectedFields[key];
 
   const getLinkedEntityLabel = (fieldName) => {
     for (const [entityType, fieldNames] of Object.entries(LINKED_ENTITY_FIELDS)) {
@@ -58,7 +79,7 @@ export default function AIExtractConfirmDialog({ isOpen, onClose, onConfirm, ext
 
   const toggleAll = () => {
     const toggleable = fields.filter(([key]) => !lockedFields.has(key));
-    const allSelected = toggleable.every(([key]) => selectedFields[key]);
+    const allSelected = toggleable.every(([key]) => isFieldSelected(key));
     const newState = { ...selectedFields };
     toggleable.forEach(([key]) => {
       newState[key] = !allSelected;
@@ -67,10 +88,9 @@ export default function AIExtractConfirmDialog({ isOpen, onClose, onConfirm, ext
   };
 
   const handleConfirm = () => {
-    // Pass selected fields to the parent — locked fields are always included
     const dataToApply = {};
-    Object.keys(selectedFields).forEach(key => {
-      if (selectedFields[key] || lockedFields.has(key)) {
+    fields.forEach(([key]) => {
+      if (isFieldSelected(key)) {
         dataToApply[key] = extractedData[key];
       }
     });
@@ -79,9 +99,9 @@ export default function AIExtractConfirmDialog({ isOpen, onClose, onConfirm, ext
   };
 
   const toggleableFields = fields.filter(([key]) => !lockedFields.has(key));
-  const selectedCount = Object.values(selectedFields).filter(Boolean).length;
+  const selectedCount = fields.filter(([key]) => isFieldSelected(key)).length;
   const lockedCount = fields.length - toggleableFields.length;
-  const allToggleableSelected = toggleableFields.length > 0 && toggleableFields.every(([key]) => selectedFields[key]);
+  const allToggleableSelected = toggleableFields.length > 0 && toggleableFields.every(([key]) => isFieldSelected(key));
 
   const formatFieldName = (key) => {
     // Convert snake_case to Title Case
@@ -163,14 +183,14 @@ export default function AIExtractConfirmDialog({ isOpen, onClose, onConfirm, ext
                   onClick={() => toggleField(key)}
                   className={`neomorph-flat p-4 rounded-lg transition-all ${
                     isLocked ? 'cursor-default border-2 border-blue-300 dark:border-blue-700 bg-blue-50/50 dark:bg-blue-900/10' 
-                    : `cursor-pointer hover:bg-surface-hover ${selectedFields[key] ? 'ring-2 ring-purple-500 dark:ring-purple-400' : ''}`
+                    : `cursor-pointer hover:bg-surface-hover ${isFieldSelected(key) ? 'ring-2 ring-purple-500 dark:ring-purple-400' : ''}`
                   } ${valuesMatch && !isLocked ? 'opacity-60' : ''}`}
                 >
                   <div className="flex items-start gap-3">
                     <div className="flex-shrink-0 mt-0.5">
                       {isLocked ? (
                         <Link className="w-5 h-5 text-blue-500" />
-                      ) : selectedFields[key] ? (
+                      ) : isFieldSelected(key) ? (
                         <CheckSquare className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                       ) : (
                         <Square className="w-5 h-5 text-foreground-muted" />
