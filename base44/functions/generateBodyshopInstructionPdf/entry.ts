@@ -499,8 +499,9 @@ yPos += 2;
     // Upload & save to claim
     try {
       const pdfBlob = new Blob([pdfBytes], { type: 'application/pdf' });
-      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-      const filename = `${claim.job_number || 'instruction'}-${isOrkin ? 'orkin' : 'standard'}-${timestamp}.pdf`;
+      const reg = claim.reg || 'Unknown';
+      const clientName = claim.client_name || 'Unknown';
+      const filename = `Repairer Instruction - ${reg} - ${clientName}.pdf`;
       const pdfFile = new File([pdfBlob], filename, { type: 'application/pdf' });
       const uploadResult = await base44.asServiceRole.integrations.Core.UploadFile({ file: pdfFile });
       const currentFileUrls = Array.isArray(claim.file_urls) ? claim.file_urls : [];
