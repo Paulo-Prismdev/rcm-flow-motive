@@ -96,15 +96,22 @@ export default function ClaimPartiesForm({ claim, onSave, onCancel, mode }) {
     if (!client) { set('client_id', ''); set('client_name', ''); return; }
     setData(prev => ({
       ...prev,
+      // Overwrite client fields from the database record — never fall back to old values
       client_id: client.id,
       client_name: client.name,
-      client_phone: client.phone || prev.client_phone,
-      client_email: client.email || prev.client_email,
-      client_address_line_1: client.address_line_1 || prev.client_address_line_1,
-      client_address_line_2: client.address_line_2 || prev.client_address_line_2,
-      client_town: client.town || prev.client_town,
-      client_county: client.county || prev.client_county,
-      client_postcode: client.postcode || prev.client_postcode,
+      client_phone: client.phone || '',
+      client_email: client.email || '',
+      client_address_line_1: client.address_line_1 || '',
+      client_address_line_2: client.address_line_2 || '',
+      client_town: client.town || '',
+      client_county: client.county || '',
+      client_postcode: client.postcode || '',
+      // Reset owner-specific fields that belong to the previous client
+      business_division: '',
+      driver_same_as_client: true,
+      driver_contact_name: '', driver_contact_phone: '', driver_contact_email: '',
+      driver_contact_address_line_1: '', driver_contact_address_line_2: '',
+      driver_contact_town: '', driver_contact_county: '', driver_contact_postcode: '',
     }));
   };
 

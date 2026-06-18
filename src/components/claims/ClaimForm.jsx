@@ -218,11 +218,16 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
     }
     setFormData((prev) => ({
       ...prev,
+      // Overwrite all client fields from the selected database record
       client_name: client.name, client_id: client.id, client_phone: client.phone || '',
       client_email: client.email || '', client_address_line_1: client.address_line_1 || '',
       client_address_line_2: client.address_line_2 || '', client_town: client.town || '',
       client_county: client.county || '', client_postcode: client.postcode || '',
-      vehicle_location: fullAddress || '', client_lat: geocodedLat, client_lng: geocodedLng
+      client_vat_status: client.vat_status || 'Unknown', business_division: '', client_lat: geocodedLat, client_lng: geocodedLng,
+      // Reset driver/repair contact — no longer valid for the new client
+      driver_same_as_client: true, driver_contact_name: '', driver_contact_phone: '',
+      driver_contact_email: '', driver_contact_address_line_1: '', driver_contact_address_line_2: '',
+      driver_contact_town: '', driver_contact_county: '', driver_contact_postcode: ''
     }));
   };
 
