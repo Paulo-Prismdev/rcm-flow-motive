@@ -148,6 +148,26 @@ Deno.serve(async (req) => {
       yPos += PAD_BOTTOM + SECTION_GAP;
     }
 
+    function drawWarningBox(label, text, fontSize, lineHeight) {
+      const textW = MW - PAD_X * 2;
+      doc.setFontSize(fontSize);
+      const lines = doc.splitTextToSize(text, textW - 8);
+      const boxH = 9 + lines.length * lineHeight;
+      doc.setFillColor(...AMBER_BG);
+      doc.setDrawColor(...AMBER_BD);
+      doc.setLineWidth(0.5);
+      doc.roundedRect(TX, yPos, textW, boxH, 2, 2, 'FD');
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(...RED);
+      doc.text(`${label}:`, TX + 3, yPos + 5);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(...DARK_TEXT);
+      for (let i = 0; i < lines.length; i++) {
+        doc.text(lines[i], TX + 3, yPos + 5 + lineHeight * (i + 1));
+      }
+      yPos += boxH + 2.5;
+    }
+
     function drawAllFooters() {
       const totalPages = doc.internal.getNumberOfPages();
       for (let p = 1; p <= totalPages; p++) {
@@ -259,6 +279,7 @@ Deno.serve(async (req) => {
     yPos = TOP;
 
     if (isOrkin) {
+
       // ═══════════════════════════════════════════
       // ORKIN — SECTION 5: Branded Decals & Signage
       // ═══════════════════════════════════════════
@@ -307,29 +328,8 @@ Deno.serve(async (req) => {
         }
         yPos += sBoxH + 3;
 
-        // Warnings
-        const warnings = [
-          'Use of any other supplier for RCM Automotive branded decals is not permitted without prior written approval.',
-          'Any repair delayed as a result of the mismanagement of a decal order - including failure to order on time - will result in a charge of GBP 100 per day for each day of delay attributable to the repairer. This will be deducted from any outstanding VAT and excess payments due.',
-        ];
-        doc.setFontSize(FS);
-        for (const w of warnings) {
-          const lines = doc.splitTextToSize(w, textW - 8);
-          const boxH = 9 + lines.length * LH;
-          doc.setFillColor(...AMBER_BG);
-          doc.setDrawColor(...AMBER_BD);
-          doc.setLineWidth(0.5);
-          doc.roundedRect(TX, yPos, textW, boxH, 2, 2, 'FD');
-          doc.setFont('helvetica', 'bold');
-          doc.setTextColor(...RED);
-          doc.text('WARNING:', TX + 3, yPos + 5);
-          doc.setFont('helvetica', 'normal');
-          doc.setTextColor(...DARK_TEXT);
-          for (let i = 0; i < lines.length; i++) {
-            doc.text(lines[i], TX + 3, yPos + 5 + LH * (i + 1));
-          }
-          yPos += boxH + 2.5;
-        }
+        drawWarningBox('WARNING', 'Use of any other supplier for RCM Automotive branded decals is not permitted without prior written approval.', FS, LH);
+        drawWarningBox('WARNING', 'Any repair delayed as a result of the mismanagement of a decal order - including failure to order on time - will result in a charge of GBP 100 per day for each day of delay attributable to the repairer. This will be deducted from any outstanding VAT and excess payments due.', FS, LH);
 
         yPos += 3;
       }
@@ -338,8 +338,8 @@ Deno.serve(async (req) => {
       // ORKIN — SECTION 6: Invoicing
       // ═══════════════════════════════════════════
       {
-        const FS = 9;
-        const LH = 5.5;
+        const FS = 8;
+        const LH = 4.8;
         const textW = MW - PAD_X * 2;
 
         drawHeader('Invoicing');
@@ -353,10 +353,14 @@ Deno.serve(async (req) => {
         doc.setTextColor(...DARK_TEXT);
         doc.text('Invoice Deductions', TX, yPos + 4.2);
         yPos += 6;
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(13);
+        doc.setTextColor(...NAVY);
+        doc.text(`Repairer Referral Fee ${fields.referral_fee}`, TX, yPos + 6);
+        yPos += 9;
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(FS);
-        doc.text(`Repairer Referral Fee ${fields.referral_fee}`, TX, yPos + 4);
-        yPos += 5.5;
+        doc.setTextColor(...DARK_TEXT);
         yPos += 2;
 
         // INVOICING & PAYMENTS heading
@@ -383,34 +387,12 @@ Deno.serve(async (req) => {
           yPos += 1;
         }
 
-        // NEVER INVOICE
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(FS);
-        doc.setTextColor(...RED);
-        const neverW = doc.splitTextToSize('***** NEVER INVOICE THE CLIENT DIRECTLY FOR VAT OR EXCESS *****', textW);
-        for (const line of neverW) { doc.text(line, PW / 2, yPos + 3.2, { align: 'center' }); yPos += LH; }
-        yPos += 2;
+        yPos += 1;
 
-        // IMPORTANT heading
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(8.5);
-        doc.setTextColor(...RED);
-        doc.text('IMPORTANT - FAILURE TO COMPLY', TX, yPos + 4);
-        yPos += 6;
+        drawWarningBox('WARNING', 'NEVER INVOICE THE CLIENT DIRECTLY FOR VAT OR EXCESS', FS, LH);
+        drawWarningBox('IMPORTANT', 'Failure to submit your invoice pack within 48 hours will result in delays to your VAT and excess payment, and an admin charge of GBP 150 will be added to your referral fee invoice.', FS, LH);
+        drawWarningBox('IMPORTANT', 'Failure to pay your referral fee within 7 days will result in an additional admin charge of GBP 150 and removal from the RCM Automotive network.', FS, LH);
 
-        // Critical lines
-        const criticalLines = [
-          'Failure to submit your invoice pack within 48 hours will result in delays to your VAT and excess payment, and an admin charge of GBP 150 will be added to your referral fee invoice.',
-          'Failure to pay your referral fee within 7 days will result in an additional admin charge of GBP 150 and removal from the RCM Automotive network.',
-        ];
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(FS);
-        doc.setTextColor(...DARK_TEXT);
-        for (const t of criticalLines) {
-          const wrapped = doc.splitTextToSize(t, textW);
-          for (const line of wrapped) { doc.text(line, TX, yPos + 3.2); yPos += LH; }
-          yPos += 1;
-        }
         yPos += 2;
 
         // Final notice
@@ -429,6 +411,7 @@ Deno.serve(async (req) => {
       }
 
     } else {
+
       // ═══════════════════════════════════════════
       // STANDARD — Invoicing
       // ═══════════════════════════════════════════
@@ -448,10 +431,14 @@ Deno.serve(async (req) => {
         doc.setTextColor(...DARK_TEXT);
         doc.text('Invoice Deductions', TX, yPos + 4.2);
         yPos += 6;
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(13);
+        doc.setTextColor(...NAVY);
+        doc.text(`Repairer Referral Fee ${fields.referral_fee}`, TX, yPos + 6);
+        yPos += 9;
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(FS);
-        doc.text(`Repairer Referral Fee ${fields.referral_fee}`, TX, yPos + 4);
-        yPos += 5.5;
+        doc.setTextColor(...DARK_TEXT);
         yPos += 2;
 
         // Body text
@@ -469,6 +456,11 @@ Deno.serve(async (req) => {
           for (const line of wrapped) { doc.text(line, TX, yPos + 4); yPos += LH; }
           yPos += 2;
         }
+
+        yPos += 2;
+
+        drawWarningBox('IMPORTANT', 'Failure to submit your invoice pack within 48 hours will result in delays to your VAT and excess payment, and an admin charge of GBP 150 will be added to your referral fee invoice.', FS, LH);
+        drawWarningBox('IMPORTANT', 'Failure to pay your referral fee within 7 days will result in an additional admin charge of GBP 150 and removal from the RCM Automotive network.', FS, LH);
 
         yPos += 4;
 
