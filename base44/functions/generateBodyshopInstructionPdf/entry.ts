@@ -446,137 +446,144 @@ Deno.serve(async (req) => {
       finishSection();
     }
 
-    // ═══════════════════════════════════════════
+   // ═══════════════════════════════════════════
     // SECTION 6 — Invoicing
     // ═══════════════════════════════════════════
     {
-      const repairerReferralFee = (claim.referral_fee_repairer != null) ? `${claim.referral_fee_repairer}%` : null;
+      const repairerReferralFee = (claim.referral_fee_repairer != null) ? `${claim.referral_fee_repairer}%` : '0%';
       const estFee = claim.est_fee ? `GBP ${Number(claim.est_fee).toFixed(2)}` : null;
 
-      const invoicingTexts = [
+      const BODY_ROW = 5.2;
+      const textW = MW - PAD_X * 2;
+      const FS = 8.5;
+
+      // ── Pre-measure entire section ──
+      let estH = HEADER_H + PAD_TOP;
+      // Deductions
+      estH += 7 + 6 + (estFee ? 6 : 0) + 4;
+      // Payments heading
+      estH += 7;
+      // Body paragraphs
+      doc.setFontSize(FS);
+      const allBodyLines = [
         "Your invoice for the insurer's element of the repair should be addressed and sent to the authorising party, as instructed on the authority and as per your usual practice.",
         'Your full invoice pack MUST also be sent to invoices@rcmautomotive.co.uk and MUST include: main invoice, any excess or VAT invoices, final authority, and a signed satisfaction note.',
         'Your invoice pack MUST be submitted within 48 hours of vehicle completion approval or final authority being issued - whichever applies.',
         'VAT and excess invoices MUST be made out to RCM Automotive Ltd - payment will be made within 14 days.',
+        'Upon receipt of your invoice pack, you will receive an invoice from RCM Automotive for our referral fee, which will be payable within 7 days of invoice.',
       ];
-
+      for (const t of allBodyLines) {
+        estH += doc.splitTextToSize(t, textW).length * BODY_ROW + 1.5;
+      }
+      // NEVER INVOICE
+      estH += doc.splitTextToSize('***** NEVER INVOICE THE CLIENT DIRECTLY FOR VAT OR EXCESS *****', textW).length * BODY_ROW + 3;
+      // IMPORTANT heading + 2 critical lines
+      estH += 7;
       const criticalLines = [
         'Failure to submit your invoice pack within 48 hours will result in delays to your VAT and excess payment, and an admin charge of GBP 150 will be added to your referral fee invoice.',
         'Failure to pay your referral fee within 7 days will result in an additional admin charge of GBP 150 and removal from the RCM Automotive network.',
       ];
+      for (const t of criticalLines) {
+        estH += doc.splitTextToSize(t, textW).length * BODY_ROW + 1.5;
+      }
+      // Final lines
+      estH += 7 + 7 + PAD_BOTTOM;
 
-      // Only break if section header + minimal content won't fit
-      if (yPos + HEADER_H + 20 > BL) { doc.addPage(); yPos = TOP; }
+      // Move to new page if needed
+      ensureSpace(estH);
       drawHeader('Invoicing');
 
-      // ── Deductions + Payment Terms side-by-side boxes ──
-      const dedW = 55;
-      const payW = MW - dedW;
-      const boxStartY = yPos;
-
-      // Left: Invoice Deductions
-      doc.setDrawColor(150, 150, 150);
-      doc.rect(LM, boxStartY, dedW, 7, 'S');
+      // ── Invoice Deductions ──
       doc.setFillColor(...MID_GREY);
-      doc.rect(LM, boxStartY, dedW, 7, 'F');
-      doc.setTextColor(...DARK_TEXT);
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(9);
-      doc.text('Invoice Deductions', LM + 3, boxStartY + 5);
-
-      let dedY = boxStartY + 12;
-      doc.setFont('helvetica', 'normal');
-      if (repairerReferralFee) { doc.text(`- Rep. Referral Fee ${repairerReferralFee}`, LM + 3, dedY); dedY += 7; }
-      if (estFee) { doc.text(`- Estimate Fee ${estFee}`, LM + 3, dedY); dedY += 7; }
-
-      // Right: Payment Terms
-      const payX = LM + dedW;
       doc.setDrawColor(150, 150, 150);
-      doc.rect(payX, boxStartY, payW, 7, 'S');
-      doc.setFillColor(...MID_GREY);
-      doc.rect(payX, boxStartY, payW, 7, 'F');
-      doc.setTextColor(...DARK_TEXT);
+      doc.rect(LM, yPos, MW, 7, 'FD');
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(9);
-      doc.text('Payment Terms', payX + 3, boxStartY + 5);
-
-      let ptY = boxStartY + 12;
-      const textW = payW - 6;
-
-      // Invoicing body
-      doc.setFont('helvetica', 'bold');
       doc.setTextColor(...DARK_TEXT);
-      doc.text('INVOICING & PAYMENTS', payX + 3, ptY);
-      ptY += 8;
-
-      doc.setFont('helvetica', 'normal');
-      for (const line of invoicingTexts) {
-        if (ptY > BL - 10) { doc.addPage(); ptY = TOP; }
-        const wrapped = doc.splitTextToSize(line, textW);
-        doc.text(wrapped, payX + 3, ptY);
-        ptY += ROW_H * wrapped.length;
-      }
-
-      ptY += 2;
-
-      // NEVER INVOICE line
-      if (ptY > BL - 10) { doc.addPage(); ptY = TOP; }
-      doc.setFont('helvetica', 'bold');
-      doc.setTextColor(...RED);
-      const neverWrapped = doc.splitTextToSize('***** NEVER INVOICE THE CLIENT DIRECTLY FOR VAT OR EXCESS *****', textW);
-      doc.text(neverWrapped, payX + 3, ptY);
-      ptY += ROW_H * neverWrapped.length + 2;
-
-      // Receipt notice
-      doc.setFont('helvetica', 'normal');
-      doc.setTextColor(...DARK_TEXT);
-      const receiptWrapped = doc.splitTextToSize(
-        'Upon receipt of your invoice pack, you will receive an invoice from RCM Automotive for our referral fee, which will be payable within 7 days of invoice.',
-        textW
-      );
-      doc.text(receiptWrapped, payX + 3, ptY);
-      ptY += ROW_H * receiptWrapped.length + 4;
-
-      // IMPORTANT heading
-      doc.setFont('helvetica', 'bold');
-      doc.setTextColor(...RED);
-      doc.text('IMPORTANT - FAILURE TO COMPLY', payX + 3, ptY);
-      ptY += 7;
-
-      doc.setFont('helvetica', 'normal');
-      doc.setTextColor(...DARK_TEXT);
-      for (const line of criticalLines) {
-        if (ptY > BL - 10) { doc.addPage(); ptY = TOP; }
-        const wrapped = doc.splitTextToSize(line, textW);
-        doc.text(wrapped, payX + 3, ptY);
-        ptY += ROW_H * wrapped.length;
-      }
-
-      // Draw outer box borders to match content height
-      const boxEndY = Math.max(dedY, ptY) + 4;
-      doc.setDrawColor(150, 150, 150);
-      doc.rect(LM, boxStartY, dedW, boxEndY - boxStartY, 'S');
-      doc.rect(payX, boxStartY, payW, boxEndY - boxStartY, 'S');
-
-      yPos = boxEndY + 8;
-
-      // Final warning
-      if (yPos > BL - 10) { doc.addPage(); yPos = TOP; }
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(9);
-      doc.setTextColor(...RED);
-      doc.text('PLEASE DO NOT SEND TO ANY OTHER PARTY WITHOUT PRIOR CONSENT', PW / 2, yPos, { align: 'center' });
+      doc.text('Invoice Deductions', TX, yPos + 5);
       yPos += 7;
 
-      // Disclaimer
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(FS);
+      doc.text(`- Rep. Referral Fee ${repairerReferralFee}`, TX, yPos + 4.5);
+      yPos += 6;
+      if (estFee) {
+        doc.text(`- Estimate Fee ${estFee}`, TX, yPos + 4.5);
+        yPos += 6;
+      }
+      yPos += 4;
+
+      // ── INVOICING & PAYMENTS heading ──
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      doc.setTextColor(...DARK_TEXT);
+      doc.text('INVOICING & PAYMENTS', TX, yPos + 5);
+      yPos += 7;
+
+      // ── Body paragraphs ──
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(FS);
+      doc.setTextColor(...DARK_TEXT);
+      for (const t of allBodyLines) {
+        const wrapped = doc.splitTextToSize(t, textW);
+        for (const line of wrapped) {
+          doc.text(line, TX, yPos + 3.5);
+          yPos += BODY_ROW;
+        }
+        yPos += 1.5;
+      }
+
+      // ── NEVER INVOICE ──
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(FS);
+      doc.setTextColor(...RED);
+      const neverWrapped = doc.splitTextToSize('***** NEVER INVOICE THE CLIENT DIRECTLY FOR VAT OR EXCESS *****', textW);
+      for (const line of neverWrapped) {
+        doc.text(line, PW / 2, yPos + 3.5, { align: 'center' });
+        yPos += BODY_ROW;
+      }
+      yPos += 3;
+
+      // ── IMPORTANT heading ──
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      doc.setTextColor(...RED);
+      doc.text('IMPORTANT - FAILURE TO COMPLY', TX, yPos + 5);
+      yPos += 7;
+
+      // ── Critical lines ──
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(FS);
+      doc.setTextColor(...DARK_TEXT);
+      for (const t of criticalLines) {
+        const wrapped = doc.splitTextToSize(t, textW);
+        for (const line of wrapped) {
+          doc.text(line, TX, yPos + 3.5);
+          yPos += BODY_ROW;
+        }
+        yPos += 1.5;
+      }
+      yPos += 3;
+
+      // ── Final notice ──
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(FS);
+      doc.setTextColor(...RED);
+      doc.text('PLEASE DO NOT SEND TO ANY OTHER PARTY WITHOUT PRIOR CONSENT', PW / 2, yPos, { align: 'center' });
+      yPos += 6.5;
+
+      // ── Disclaimer ──
       doc.setFont('helvetica', 'italic');
       doc.setFontSize(8);
       doc.setTextColor(80, 80, 80);
       const disclaimer = '*By accepting this repair instruction, you agree to the T&Cs within the supplied SLA provided with this instruction.';
       const discLines = doc.splitTextToSize(disclaimer, MW);
-      doc.text(discLines, PW / 2, yPos, { align: 'center' });
+      for (const line of discLines) {
+        doc.text(line, PW / 2, yPos, { align: 'center' });
+        yPos += 5;
+      }
 
-      yPos += PAD_BOTTOM + SECTION_GAP;
+      yPos += PAD_BOTTOM;
     }
 
     // ═══════════════════════════════════════════
