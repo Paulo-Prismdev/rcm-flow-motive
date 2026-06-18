@@ -32,10 +32,11 @@ export default function ClaimEditForm({
     <div className="h-full flex flex-col gap-4 md:gap-6">
       <AIExtractConfirmDialog
         isOpen={aiExtractDialog.isOpen}
-        onClose={() => setAiExtractDialog({ isOpen: false, data: null })}
+        onClose={() => setAiExtractDialog({ isOpen: false, data: null, linkedEntityTypes: [] })}
         onConfirm={handleAIExtractConfirm}
         extractedData={aiExtractDialog.data}
         existingData={formData}
+        linkedEntityTypes={aiExtractDialog.linkedEntityTypes || []}
         title="AI Data Extraction"
       />
       <div className="neomorph p-6 flex-shrink-0">

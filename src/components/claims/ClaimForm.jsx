@@ -49,7 +49,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
   const [vehicleLookupError, setVehicleLookupError] = useState(null);
   const [isLookingUpTPVehicle, setIsLookingUpTPVehicle] = useState(false);
   const [tpVehicleLookupError, setTpVehicleLookupError] = useState(null);
-  const [aiExtractDialog, setAiExtractDialog] = useState({ isOpen: false, data: null });
+  const [aiExtractDialog, setAiExtractDialog] = useState({ isOpen: false, data: null, linkedEntityTypes: [] });
   const [aiEntityLinker, setAiEntityLinker] = useState({ isOpen: false, data: null });
   const queryClient = useQueryClient();
 
@@ -115,13 +115,13 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
     if (hasLinkable) {
       setAiEntityLinker({ isOpen: true, data: extractedData });
     } else {
-      setAiExtractDialog({ isOpen: true, data: extractedData });
+      setAiExtractDialog({ isOpen: true, data: extractedData, linkedEntityTypes: [] });
     }
   };
 
-  const handleEntityLinkerConfirm = (enrichedData) => {
+  const handleEntityLinkerConfirm = (enrichedData, linkedTypes) => {
     setAiEntityLinker({ isOpen: false, data: null });
-    setAiExtractDialog({ isOpen: true, data: enrichedData });
+    setAiExtractDialog({ isOpen: true, data: enrichedData, linkedEntityTypes: linkedTypes || [] });
   };
 
   const handleAIExtractConfirm = (selectedData) => {
@@ -498,10 +498,11 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
       />
       <AIExtractConfirmDialog
         isOpen={aiExtractDialog.isOpen}
-        onClose={() => setAiExtractDialog({ isOpen: false, data: null })}
+        onClose={() => setAiExtractDialog({ isOpen: false, data: null, linkedEntityTypes: [] })}
         onConfirm={handleAIExtractConfirm}
         extractedData={aiExtractDialog.data}
         existingData={formData}
+        linkedEntityTypes={aiExtractDialog.linkedEntityTypes}
         title="AI Data Extraction" />
       
         {!isLoadingUser && isInternalUser &&

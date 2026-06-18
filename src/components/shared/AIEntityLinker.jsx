@@ -200,14 +200,16 @@ export default function AIEntityLinker({ isOpen, onClose, extractedData, onConfi
 
   if (linkableFields === 0) {
     // Nothing to link, pass through
-    onConfirm(extractedData);
+    onConfirm(extractedData, []);
     return null;
   }
 
   const handleConfirm = () => {
     const enriched = { ...extractedData };
+    const linkedTypes = [];
 
     if (links.client) {
+      linkedTypes.push('client');
       enriched.client_name = links.client.name;
       enriched.client_id = links.client.id;
       enriched.client_phone = links.client.phone || enriched.client_phone || '';
@@ -220,18 +222,20 @@ export default function AIEntityLinker({ isOpen, onClose, extractedData, onConfi
     }
 
     if (links.referrer) {
+      linkedTypes.push('referrer');
       enriched.referrer = links.referrer.name;
       enriched.referrer_id = links.referrer.id;
       enriched.referrer_email = links.referrer.contact_email || enriched.referrer_email || '';
     }
 
     if (links.bodyshop) {
+      linkedTypes.push('bodyshop');
       enriched.bodyshop = links.bodyshop.name;
       enriched.bodyshop_id = links.bodyshop.id;
       enriched.bodyshop_email = links.bodyshop.email || enriched.bodyshop_email || '';
     }
 
-    onConfirm(enriched);
+    onConfirm(enriched, linkedTypes);
   };
 
   return (
