@@ -561,11 +561,14 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
             <div className="space-y-1.5"><label className="text-xs text-muted-foreground">County</label><Input value={formData.client_county} onChange={e => handleChange('client_county', e.target.value)} /></div>
             <div className="space-y-1.5"><label className="text-xs text-muted-foreground">Postcode</label><Input value={formData.client_postcode} onChange={e => handleChange('client_postcode', e.target.value)} /></div>
           </div>
-          <div className="space-y-1.5"><label className="text-xs text-muted-foreground">VAT Status</label>
-            <select value={formData.client_vat_status} onChange={e => handleChange('client_vat_status', e.target.value)}
-              className="w-full px-3 py-2 text-sm rounded-[10px] border border-input bg-card text-foreground">
-              <option>VAT Registered</option><option>Non-VAT</option><option>Unknown</option>
-            </select>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5"><label className="text-xs text-muted-foreground">VAT Status</label>
+              <select value={formData.client_vat_status} onChange={e => handleChange('client_vat_status', e.target.value)}
+                className="w-full px-3 py-2 text-sm rounded-[10px] border border-input bg-card text-foreground">
+                <option>VAT Registered</option><option>Non-VAT</option><option>Unknown</option>
+              </select>
+            </div>
+            <div className="space-y-1.5"><label className="text-xs text-muted-foreground">Business Division</label><Input value={formData.business_division} onChange={e => handleChange('business_division', e.target.value)} placeholder="e.g. Fleet, Retail, Commercial" /></div>
           </div>
         </div>
 
@@ -756,6 +759,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
               <ReviewRow label="Phone" value={formData.client_phone} />
               <ReviewRow label="Email" value={formData.client_email} />
               <ReviewRow label="VAT Status" value={formData.client_vat_status} />
+              <ReviewRow label="Business Division" value={formData.business_division} />
               <ReviewRow label="Address" value={[formData.client_address_line_1, formData.client_town, formData.client_postcode].filter(Boolean).join(', ')} />
               <ReviewRow label="Driver Contact" value={formData.driver_contact_name} />
             </div>
