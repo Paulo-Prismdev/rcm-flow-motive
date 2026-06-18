@@ -385,32 +385,15 @@ Deno.serve(async (req) => {
         'Any repair delayed as a result of the mismanagement of a decal order - including failure to order on time - will result in a charge of GBP 100 per day for each day of delay attributable to the repairer. This will be deducted from any outstanding VAT and excess payments due.',
       ];
 
-      // Estimate: header + body text + supplier box + 2 warnings
-      let sectionH = HEADER_H + PAD_TOP + PAD_BOTTOM;
-
-      doc.setFontSize(9);
-      for (const { text } of bodyBlocks) {
-        const lines = doc.splitTextToSize(String(text), MW - PAD_X * 2);
-        sectionH += lines.length * LINE_H + 1;
-      }
-
-      // Supplier info box
       const supplierLines = [
         { text: 'Signs Plus', bold: true, size: 10 },
         { text: '147 Main Road, Biggin Hill, Kent, TN16 3JP', bold: false, size: 9 },
         { text: 'Email: enquiries@signsplus.uk', bold: false, size: 9 },
         { text: 'Phone: 01959 571 074', bold: false, size: 9 },
       ];
-      sectionH += 8 + supplierLines.length * 6 + 6; // supplier box
-      sectionH += 3;
 
-      for (const text of warnings) {
-        const lines = doc.splitTextToSize(String(text), MW - PAD_X * 2 - 8);
-        sectionH += lines.length * ROW_H + 12;
-        sectionH += 3;
-      }
-
-      ensureSpace(sectionH);
+      // Only force a page break if the section header + first paragraph won't fit
+      if (yPos + HEADER_H + 20 > BL) { doc.addPage(); yPos = TOP; }
       drawHeader('Branded Decals & Signage');
 
       // Body paragraphs
@@ -470,7 +453,6 @@ Deno.serve(async (req) => {
       const repairerReferralFee = (claim.referral_fee_repairer != null) ? `${claim.referral_fee_repairer}%` : null;
       const estFee = claim.est_fee ? `GBP ${Number(claim.est_fee).toFixed(2)}` : null;
 
-      // Calculate invoicing body text lines
       const invoicingTexts = [
         "Your invoice for the insurer's element of the repair should be addressed and sent to the authorising party, as instructed on the authority and as per your usual practice.",
         'Your full invoice pack MUST also be sent to invoices@rcmautomotive.co.uk and MUST include: main invoice, any excess or VAT invoices, final authority, and a signed satisfaction note.',
@@ -478,31 +460,13 @@ Deno.serve(async (req) => {
         'VAT and excess invoices MUST be made out to RCM Automotive Ltd - payment will be made within 14 days.',
       ];
 
-      // Estimate: header + deductions/payment terms boxes + invoicing text + warnings
-      let sectionH = HEADER_H + PAD_TOP + PAD_BOTTOM;
-      sectionH += 5; // box title height + padding
-      sectionH += (repairerReferralFee ? 7 : 0) + (estFee ? 7 : 0) + 5; // deductions items
-
-      doc.setFontSize(9);
-      for (const text of invoicingTexts) {
-        const lines = doc.splitTextToSize(text, MW - PAD_X * 2 - 60); // after deductions col
-        sectionH += lines.length * ROW_H;
-      }
-      sectionH += 10; // never invoice line + receipt line
-      sectionH += 7;  // failure heading
-      sectionH += 5;
-
       const criticalLines = [
         'Failure to submit your invoice pack within 48 hours will result in delays to your VAT and excess payment, and an admin charge of GBP 150 will be added to your referral fee invoice.',
         'Failure to pay your referral fee within 7 days will result in an additional admin charge of GBP 150 and removal from the RCM Automotive network.',
       ];
-      for (const text of criticalLines) {
-        const lines = doc.splitTextToSize(text, MW - PAD_X * 2 - 60);
-        sectionH += lines.length * ROW_H;
-      }
-      sectionH += 12; // final warning line + padding
 
-      ensureSpace(sectionH);
+      // Only break if section header + minimal content won't fit
+      if (yPos + HEADER_H + 20 > BL) { doc.addPage(); yPos = TOP; }
       drawHeader('Invoicing');
 
       // ── Deductions + Payment Terms side-by-side boxes ──
