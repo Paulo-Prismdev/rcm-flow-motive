@@ -371,81 +371,79 @@ Deno.serve(async (req) => {
     // SECTION 5 — Branded Decals & Signage
     // ═══════════════════════════════════════════
     {
-      const bodyBlocks = [
-        {
-          text: 'All repairers MUST use the RCM Automotive approved decal supplier for any branded vehicle decals or signage.'
-        },
-        {
-          text: 'Where a vehicle requires decals, these MUST be ordered as soon as the repair is authorised - if the vehicle is already on site, this should be done immediately. If the vehicle has not yet arrived, decals MUST be ordered prior to the vehicle coming on site.'
-        },
-        {
-          text: 'Please contact John or Michael Welch at our approved supplier, quoting Orkin as the client and providing the vehicle registration number:'
-        },
+      // Pre-measure the entire section before drawing anything
+      const bodyParas = [
+        'All repairers MUST use the RCM Automotive approved decal supplier for any branded vehicle decals or signage.',
+        'Where a vehicle requires decals, these MUST be ordered as soon as the repair is authorised - if the vehicle is already on site, this should be done immediately. If the vehicle has not yet arrived, decals MUST be ordered prior to the vehicle coming on site.',
+        'Please contact John or Michael Welch at our approved supplier, quoting Orkin as the client and providing the vehicle registration number:',
       ];
       const warnings = [
         'Use of any other supplier for RCM Automotive branded decals is not permitted without prior written approval.',
         'Any repair delayed as a result of the mismanagement of a decal order - including failure to order on time - will result in a charge of GBP 100 per day for each day of delay attributable to the repairer. This will be deducted from any outstanding VAT and excess payments due.',
       ];
 
-      const supplierLines = [
-        { text: 'Signs Plus', bold: true, size: 10 },
-        { text: '147 Main Road, Biggin Hill, Kent, TN16 3JP', bold: false, size: 8.5 },
-        { text: 'Email: enquiries@signsplus.uk', bold: false, size: 8.5 },
-        { text: 'Phone: 01959 571 074', bold: false, size: 8.5 },
-      ];
+      // Measure body paras
+      let estH = HEADER_H + PAD_TOP;
+      doc.setFontSize(8.5);
+      for (const p of bodyParas) {
+        const lines = doc.splitTextToSize(p, MW - PAD_X * 2);
+        estH += lines.length * 5.2 + 0.8;
+      }
+      // Supplier box
+      estH += 1.5 + (4 + 5.5 * 4 + 4) + 4; // gap + box + gap
+      // Warnings
+      for (const w of warnings) {
+        const lines = doc.splitTextToSize(w, MW - PAD_X * 2 - 8);
+        estH += 12 + lines.length * ROW_H + 3;
+      }
+      estH += PAD_BOTTOM + SECTION_GAP;
 
-      // Page 2 — already on a fresh page from the forced break after Insurance
+      // If section won't fit, go to next page (should already be page 2)
+      ensureSpace(estH);
       drawHeader('Branded Decals & Signage');
 
-      // Body paragraphs — 8.5pt, tighter line height
-      for (const { text } of bodyBlocks) {
+      // Body paragraphs
+      for (const p of bodyParas) {
         doc.setFontSize(8.5);
         doc.setFont('helvetica', 'normal');
         doc.setTextColor(...DARK_TEXT);
-        const lines = doc.splitTextToSize(String(text), MW - PAD_X * 2);
-        lines.forEach((line) => {
-          if (yPos + 5.2 > BL) { doc.addPage(); yPos = TOP; }
+        const lines = doc.splitTextToSize(p, MW - PAD_X * 2);
+        for (const line of lines) {
           doc.text(line, TX, yPos + 3.5);
           yPos += 5.2;
-        });
+        }
         yPos += 0.8;
       }
 
       yPos += 1.5;
 
       // Supplier info box
-      {
-        const boxX = TX + 4;
-        const boxW = MW - PAD_X * 2 - 8;
-        const sTopPad = 4;
-        const sLineH = 5.5;
-        const sBottomPad = 4;
-        const sBoxH = sTopPad + sLineH * supplierLines.length + sBottomPad;
+      const supplierLines = [
+        { text: 'Signs Plus', bold: true, size: 9.5 },
+        { text: '147 Main Road, Biggin Hill, Kent, TN16 3JP', bold: false, size: 8.5 },
+        { text: 'Email: enquiries@signsplus.uk', bold: false, size: 8.5 },
+        { text: 'Phone: 01959 571 074', bold: false, size: 8.5 },
+      ];
+      const sBoxH = 4 + 5.5 * supplierLines.length + 4;
+      doc.setFillColor(...LIGHT_GREY);
+      doc.setDrawColor(180, 180, 190);
+      doc.roundedRect(TX + 4, yPos, MW - PAD_X * 2 - 8, sBoxH, 2, 2, 'FD');
+      let sy = yPos + 4;
+      for (const sl of supplierLines) {
+        doc.setFontSize(sl.size);
+        doc.setFont('helvetica', sl.bold ? 'bold' : 'normal');
+        doc.setTextColor(...DARK_TEXT);
+        doc.text(sl.text, TX + 8, sy + 3.5);
+        sy += 5.5;
+      }
+      yPos += sBoxH + 4;
 
-        if (yPos + sBoxH > BL) { doc.addPage(); yPos = TOP; }
-
-        doc.setFillColor(...LIGHT_GREY);
-        doc.setDrawColor(180, 180, 190);
-        doc.roundedRect(boxX, yPos, boxW, sBoxH, 3, 3, 'FD');
-
-        let sy = yPos + sTopPad;
-        for (const sl of supplierLines) {
-          doc.setFontSize(sl.size);
-          doc.setFont('helvetica', sl.bold ? 'bold' : 'normal');
-          doc.setTextColor(...DARK_TEXT);
-          doc.text(sl.text, boxX + 4, sy);
-          sy += sLineH;
-        }
-        yPos += sBoxH + 4;
+      // Warning boxes
+      for (const w of warnings) {
+        drawWarning(w, 8.5);
       }
 
-      // Warnings — 8.5pt
-      for (const text of warnings) {
-        drawWarning(text, 8.5);
-      }
-
-      // Tight section gap (10px ≈ 2.6mm)
-      yPos += 2.1 + 2.6;
+      yPos += PAD_BOTTOM + SECTION_GAP;
     }
 
     // ═══════════════════════════════════════════
@@ -460,134 +458,147 @@ Deno.serve(async (req) => {
         'Your full invoice pack MUST also be sent to invoices@rcmautomotive.co.uk and MUST include: main invoice, any excess or VAT invoices, final authority, and a signed satisfaction note.',
         'Your invoice pack MUST be submitted within 48 hours of vehicle completion approval or final authority being issued - whichever applies.',
         'VAT and excess invoices MUST be made out to RCM Automotive Ltd - payment will be made within 14 days.',
+        'Upon receipt of your invoice pack, you will receive an invoice from RCM Automotive for our referral fee, which will be payable within 7 days of invoice.',
       ];
-
       const criticalLines = [
         'Failure to submit your invoice pack within 48 hours will result in delays to your VAT and excess payment, and an admin charge of GBP 150 will be added to your referral fee invoice.',
         'Failure to pay your referral fee within 7 days will result in an additional admin charge of GBP 150 and removal from the RCM Automotive network.',
       ];
+      const BODY_ROW = 5.8;
+      const textW = MW - PAD_X * 2;
 
-      // Page 2 — already on a fresh page; section header only breaks if near page bottom
-      if (yPos + HEADER_H + 15 > BL) { doc.addPage(); yPos = TOP; }
-      drawHeader('Invoicing');
+      // ── Pre-measure entire Invoicing section ──
+      let estH = HEADER_H + PAD_TOP;
 
-      // ── Deductions + Payment Terms side-by-side boxes ──
-      const dedW = 55;
-      const payW = MW - dedW;
-      const boxStartY = yPos;
+      // Deductions rows (small)
+      let dedRows = 0;
+      if (repairerReferralFee) dedRows++;
+      if (estFee) dedRows++;
+      estH += 7 + (dedRows > 0 ? dedRows * 6.5 : 0) + 4; // header bar + rows + gap
 
-      // Left: Invoice Deductions
-      doc.setDrawColor(150, 150, 150);
-      doc.rect(LM, boxStartY, dedW, 7, 'S');
-      doc.setFillColor(...MID_GREY);
-      doc.rect(LM, boxStartY, dedW, 7, 'F');
-      doc.setTextColor(...DARK_TEXT);
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(9);
-      doc.text('Invoice Deductions', LM + 3, boxStartY + 5);
-
-      let dedY = boxStartY + 11;
-      doc.setFont('helvetica', 'normal');
+      // Invoicing body text
       doc.setFontSize(8.5);
-      if (repairerReferralFee) { doc.text(`- Rep. Referral Fee ${repairerReferralFee}`, LM + 3, dedY); dedY += 6.5; }
-      if (estFee) { doc.text(`- Estimate Fee ${estFee}`, LM + 3, dedY); dedY += 6.5; }
+      estH += 7; // INVOICING & PAYMENTS heading
+      for (const t of invoicingTexts) {
+        const lines = doc.splitTextToSize(t, textW);
+        estH += BODY_ROW * lines.length;
+      }
+      estH += 1.5; // gap before NEVER INVOICE
 
-      // Right: Payment Terms
-      const payX = LM + dedW;
-      doc.setDrawColor(150, 150, 150);
-      doc.rect(payX, boxStartY, payW, 7, 'S');
-      doc.setFillColor(...MID_GREY);
-      doc.rect(payX, boxStartY, payW, 7, 'F');
-      doc.setTextColor(...DARK_TEXT);
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(9);
-      doc.text('Payment Terms', payX + 3, boxStartY + 5);
+      // NEVER INVOICE line
+      const neverLines = doc.splitTextToSize('***** NEVER INVOICE THE CLIENT DIRECTLY FOR VAT OR EXCESS *****', textW);
+      estH += BODY_ROW * neverLines.length + 1.5;
 
-      let ptY = boxStartY + 11;
-      const textW = payW - 6;
-      const BODY_ROW = 5.8; // tighter row height for 8.5pt body
-
-      // Invoicing body — 8.5pt
-      doc.setFont('helvetica', 'bold');
-      doc.setTextColor(...DARK_TEXT);
-      doc.setFontSize(9);
-      doc.text('INVOICING & PAYMENTS', payX + 3, ptY);
-      ptY += 7;
-
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(8.5);
-      for (const line of invoicingTexts) {
-        if (ptY > BL - 8) { doc.addPage(); ptY = TOP; }
-        const wrapped = doc.splitTextToSize(line, textW);
-        doc.text(wrapped, payX + 3, ptY);
-        ptY += BODY_ROW * wrapped.length;
+      // IMPORTANT heading + critical lines
+      estH += 6.5;
+      for (const t of criticalLines) {
+        const lines = doc.splitTextToSize(t, textW);
+        estH += BODY_ROW * lines.length;
       }
 
-      ptY += 1.5;
+      // Final notice + disclaimer
+      estH += 6.5 + 6.5 + PAD_BOTTOM + SECTION_GAP;
 
-      // NEVER INVOICE line — 8.5pt bold red
-      if (ptY > BL - 8) { doc.addPage(); ptY = TOP; }
+      // Force to next page if entire section won't fit
+      ensureSpace(estH);
+      drawHeader('Invoicing');
+
+      // ── Invoice Deductions (compact single-column block) ──
+      if (repairerReferralFee || estFee) {
+        doc.setFillColor(...MID_GREY);
+        doc.rect(LM, yPos, MW, 7, 'F');
+        doc.setDrawColor(150, 150, 150);
+        doc.rect(LM, yPos, MW, 7, 'S');
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(9);
+        doc.setTextColor(...DARK_TEXT);
+        doc.text('Invoice Deductions', TX, yPos + 5);
+        yPos += 7;
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8.5);
+        if (repairerReferralFee) {
+          doc.text(`Rep. Referral Fee: ${repairerReferralFee}`, TX, yPos + 5);
+          yPos += 6.5;
+        }
+        if (estFee) {
+          doc.text(`Estimate Fee: ${estFee}`, TX, yPos + 5);
+          yPos += 6.5;
+        }
+        yPos += 3;
+      }
+
+      // ── INVOICING & PAYMENTS heading ──
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      doc.setTextColor(...DARK_TEXT);
+      doc.text('INVOICING & PAYMENTS', TX, yPos + 5);
+      yPos += 7;
+
+      // ── Body text ──
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8.5);
+      doc.setTextColor(...DARK_TEXT);
+      for (const t of invoicingTexts) {
+        const lines = doc.splitTextToSize(t, textW);
+        for (const line of lines) {
+          doc.text(line, TX, yPos + 4);
+          yPos += BODY_ROW;
+        }
+      }
+      yPos += 1.5;
+
+      // ── NEVER INVOICE (red bold, centred) ──
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(8.5);
       doc.setTextColor(...RED);
       const neverWrapped = doc.splitTextToSize('***** NEVER INVOICE THE CLIENT DIRECTLY FOR VAT OR EXCESS *****', textW);
-      doc.text(neverWrapped, payX + 3, ptY);
-      ptY += BODY_ROW * neverWrapped.length + 1.5;
+      for (const line of neverWrapped) {
+        doc.text(line, PW / 2, yPos + 4, { align: 'center' });
+        yPos += BODY_ROW;
+      }
+      yPos += 1.5;
 
-      // Receipt notice — 8.5pt
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(8.5);
-      doc.setTextColor(...DARK_TEXT);
-      const receiptWrapped = doc.splitTextToSize(
-        'Upon receipt of your invoice pack, you will receive an invoice from RCM Automotive for our referral fee, which will be payable within 7 days of invoice.',
-        textW
-      );
-      doc.text(receiptWrapped, payX + 3, ptY);
-      ptY += BODY_ROW * receiptWrapped.length + 3;
-
-      // IMPORTANT heading — 9pt bold
+      // ── IMPORTANT heading ──
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(9);
       doc.setTextColor(...RED);
-      doc.text('IMPORTANT - FAILURE TO COMPLY', payX + 3, ptY);
-      ptY += 6.5;
+      doc.text('IMPORTANT - FAILURE TO COMPLY', TX, yPos + 5);
+      yPos += 6.5;
 
-      // Critical lines — 8.5pt
+      // ── Critical lines ──
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(8.5);
       doc.setTextColor(...DARK_TEXT);
-      for (const line of criticalLines) {
-        if (ptY > BL - 8) { doc.addPage(); ptY = TOP; }
-        const wrapped = doc.splitTextToSize(line, textW);
-        doc.text(wrapped, payX + 3, ptY);
-        ptY += BODY_ROW * wrapped.length;
+      for (const t of criticalLines) {
+        const lines = doc.splitTextToSize(t, textW);
+        for (const line of lines) {
+          doc.text(line, TX, yPos + 4);
+          yPos += BODY_ROW;
+        }
+        yPos += 1;
       }
+      yPos += 3;
 
-      // Draw outer box borders to match content height
-      const boxEndY = Math.max(dedY, ptY) + 3;
-      doc.setDrawColor(150, 150, 150);
-      doc.rect(LM, boxStartY, dedW, boxEndY - boxStartY, 'S');
-      doc.rect(payX, boxStartY, payW, boxEndY - boxStartY, 'S');
-
-      yPos = boxEndY + 6;
-
-      // Final warning — 8.5pt
-      if (yPos > BL - 8) { doc.addPage(); yPos = TOP; }
+      // ── Final notice ──
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(8.5);
       doc.setTextColor(...RED);
       doc.text('PLEASE DO NOT SEND TO ANY OTHER PARTY WITHOUT PRIOR CONSENT', PW / 2, yPos, { align: 'center' });
       yPos += 6.5;
 
-      // Disclaimer — 8pt italic
+      // ── Disclaimer ──
       doc.setFont('helvetica', 'italic');
       doc.setFontSize(8);
       doc.setTextColor(80, 80, 80);
       const disclaimer = '*By accepting this repair instruction, you agree to the T&Cs within the supplied SLA provided with this instruction.';
       const discLines = doc.splitTextToSize(disclaimer, MW);
-      doc.text(discLines, PW / 2, yPos, { align: 'center' });
+      for (const line of discLines) {
+        doc.text(line, PW / 2, yPos, { align: 'center' });
+        yPos += 5;
+      }
 
-      yPos += 2.1;
+      yPos += PAD_BOTTOM + SECTION_GAP;
     }
 
     // ═══════════════════════════════════════════
