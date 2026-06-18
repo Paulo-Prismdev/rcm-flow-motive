@@ -344,24 +344,20 @@ Deno.serve(async (req) => {
 
         drawHeader('Invoicing');
 
-      // Deductions bar
-doc.setFillColor(...MID_GREY);
-doc.setDrawColor(150, 150, 150);
-doc.rect(LM, yPos, MW, 6, 'FD');
-doc.setFont('helvetica', 'bold');
-doc.setFontSize(8.5);
-doc.setTextColor(...DARK_TEXT);
-doc.text('Invoice Deductions', TX, yPos + 4.2);
-yPos += 6;
-doc.setFont('helvetica', 'bold');
-doc.setFontSize(13);
-doc.setTextColor(...NAVY);
-doc.text(`Repairer Referral Fee ${fields.referral_fee}`, TX, yPos + 6);
-yPos += 9;
-doc.setFont('helvetica', 'normal');
-doc.setFontSize(FS);
-doc.setTextColor(...DARK_TEXT);
-yPos += 2;
+        // Deductions bar
+        doc.setFillColor(...MID_GREY);
+        doc.setDrawColor(150, 150, 150);
+        doc.rect(LM, yPos, MW, 6, 'FD');
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(8.5);
+        doc.setTextColor(...DARK_TEXT);
+        doc.text('Invoice Deductions', TX, yPos + 4.2);
+        yPos += 6;
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(FS);
+        doc.text(`- Rep. Referral Fee ${fields.referral_fee}`, TX, yPos + 4);
+        yPos += 5.5;
+        yPos += 2;
 
         // INVOICING & PAYMENTS heading
         doc.setFont('helvetica', 'bold');
@@ -443,24 +439,20 @@ yPos += 2;
 
         drawHeader('Invoicing');
 
-// Deductions bar
-doc.setFillColor(...MID_GREY);
-doc.setDrawColor(150, 150, 150);
-doc.rect(LM, yPos, MW, 6, 'FD');
-doc.setFont('helvetica', 'bold');
-doc.setFontSize(8.5);
-doc.setTextColor(...DARK_TEXT);
-doc.text('Invoice Deductions', TX, yPos + 4.2);
-yPos += 6;
-doc.setFont('helvetica', 'bold');
-doc.setFontSize(13);
-doc.setTextColor(...NAVY);
-doc.text(`Repairer Referral Fee ${fields.referral_fee}`, TX, yPos + 6);
-yPos += 9;
-doc.setFont('helvetica', 'normal');
-doc.setFontSize(FS);
-doc.setTextColor(...DARK_TEXT);
-yPos += 2;
+        // Deductions bar
+        doc.setFillColor(...MID_GREY);
+        doc.setDrawColor(150, 150, 150);
+        doc.rect(LM, yPos, MW, 6, 'FD');
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(9);
+        doc.setTextColor(...DARK_TEXT);
+        doc.text('Invoice Deductions', TX, yPos + 4.2);
+        yPos += 6;
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(FS);
+        doc.text(`- Rep. Referral Fee ${fields.referral_fee}`, TX, yPos + 4.5);
+        yPos += 6.5;
+        yPos += 3;
 
         // Body text
         const invoicingParas = [
@@ -499,9 +491,8 @@ yPos += 2;
     // Upload & save to claim
     try {
       const pdfBlob = new Blob([pdfBytes], { type: 'application/pdf' });
-      const reg = claim.reg || 'Unknown';
-      const clientName = claim.client_name || 'Unknown';
-      const filename = `Repairer Instruction - ${reg} - ${clientName}.pdf`;
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      const filename = `${claim.job_number || 'instruction'}-${isOrkin ? 'orkin' : 'standard'}-${timestamp}.pdf`;
       const pdfFile = new File([pdfBlob], filename, { type: 'application/pdf' });
       const uploadResult = await base44.asServiceRole.integrations.Core.UploadFile({ file: pdfFile });
       const currentFileUrls = Array.isArray(claim.file_urls) ? claim.file_urls : [];
@@ -517,7 +508,7 @@ yPos += 2;
       status: 200,
       headers: {
         'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="${filename}"`
+        'Content-Disposition': `attachment; filename="${claim.job_number || 'instruction'}-${isOrkin ? 'orkin' : 'standard'}.pdf"`
       }
     });
 
