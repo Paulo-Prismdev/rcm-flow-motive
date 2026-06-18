@@ -11,11 +11,13 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const { claimId, contactOverrides } = await req.json();
+    const { claimId, contactOverrides, templateType } = await req.json();
     if (!claimId) return Response.json({ error: 'Missing claimId' }, { status: 400 });
 
     const claim = await base44.asServiceRole.entities.Claim.get(claimId);
     if (!claim) return Response.json({ error: 'Claim not found' }, { status: 404 });
+
+    const isOrkin = templateType === 'orkin';
 
     const doc = new jsPDF();
 
@@ -88,7 +90,8 @@ Deno.serve(async (req) => {
       policy_number: claim.policy_number || 'N/A',
       send_estimate_email: claim.send_estimate_email || 'N/A',
       audatex_code: claim.audatex_code || 'N/A',
-      policy_excess: claim.policy_excess ? Number(claim.policy_excess).toFixed(2) : 'N/A'
+      policy_excess: claim.policy_excess ? Number(claim.policy_excess).toFixed(2) : 'N/A',
+      referral_fee: claim.referral_fee_repairer != null ? `${claim.referral_fee_repairer}%` : '0%',
     };
 
     let yPos = TOP;
@@ -255,177 +258,227 @@ Deno.serve(async (req) => {
     doc.addPage();
     yPos = TOP;
 
-    // ═══════════════════════════════════════════
-    // SECTION 5 — Branded Decals & Signage
-    // ═══════════════════════════════════════════
-    {
-      const FS = 8;
-      const LH = 4.8;
-      const textW = MW - PAD_X * 2;
+    if (isOrkin) {
+      // ═══════════════════════════════════════════
+      // ORKIN — SECTION 5: Branded Decals & Signage
+      // ═══════════════════════════════════════════
+      {
+        const FS = 8;
+        const LH = 4.8;
+        const textW = MW - PAD_X * 2;
 
-      drawHeader('Branded Decals & Signage');
+        drawHeader('Branded Decals & Signage');
 
-      const bodyParas = [
-        'All repairers MUST use the RCM Automotive approved decal supplier for any branded vehicle decals or signage.',
-        'Where a vehicle requires decals, these MUST be ordered as soon as the repair is authorised - if the vehicle is already on site, this should be done immediately. If the vehicle has not yet arrived, decals MUST be ordered prior to the vehicle coming on site.',
-        'Please contact John or Michael Welch at our approved supplier, quoting Orkin as the client and providing the vehicle registration number:',
-      ];
+        const bodyParas = [
+          'All repairers MUST use the RCM Automotive approved decal supplier for any branded vehicle decals or signage.',
+          'Where a vehicle requires decals, these MUST be ordered as soon as the repair is authorised - if the vehicle is already on site, this should be done immediately. If the vehicle has not yet arrived, decals MUST be ordered prior to the vehicle coming on site.',
+          'Please contact John or Michael Welch at our approved supplier, quoting Orkin as the client and providing the vehicle registration number:',
+        ];
 
-      doc.setFontSize(FS);
-      doc.setFont('helvetica', 'normal');
-      doc.setTextColor(...DARK_TEXT);
-      for (const p of bodyParas) {
-        const lines = doc.splitTextToSize(p, textW);
-        for (const line of lines) { doc.text(line, TX, yPos + 3.2); yPos += LH; }
-        yPos += 1;
-      }
-
-      yPos += 1;
-
-      // Supplier box
-      const supplierLines = [
-        { text: 'Signs Plus', bold: true, size: 9 },
-        { text: '147 Main Road, Biggin Hill, Kent, TN16 3JP', bold: false, size: 8 },
-        { text: 'Email: enquiries@signsplus.uk', bold: false, size: 8 },
-        { text: 'Phone: 01959 571 074', bold: false, size: 8 },
-      ];
-      const sBoxH = 3 + 5 * supplierLines.length + 3;
-      doc.setFillColor(...LIGHT_GREY);
-      doc.setDrawColor(180, 180, 190);
-      doc.roundedRect(TX + 4, yPos, textW - 8, sBoxH, 2, 2, 'FD');
-      let sy = yPos + 3;
-      for (const sl of supplierLines) {
-        doc.setFontSize(sl.size);
-        doc.setFont('helvetica', sl.bold ? 'bold' : 'normal');
-        doc.setTextColor(...DARK_TEXT);
-        doc.text(sl.text, TX + 8, sy + 3.2);
-        sy += 5;
-      }
-      yPos += sBoxH + 3;
-
-      // Warnings
-      const warnings = [
-        'Use of any other supplier for RCM Automotive branded decals is not permitted without prior written approval.',
-        'Any repair delayed as a result of the mismanagement of a decal order - including failure to order on time - will result in a charge of GBP 100 per day for each day of delay attributable to the repairer. This will be deducted from any outstanding VAT and excess payments due.',
-      ];
-      doc.setFontSize(FS);
-      for (const w of warnings) {
-        const lines = doc.splitTextToSize(w, textW - 8);
-        const boxH = 9 + lines.length * LH;
-        doc.setFillColor(...AMBER_BG);
-        doc.setDrawColor(...AMBER_BD);
-        doc.setLineWidth(0.5);
-        doc.roundedRect(TX, yPos, textW, boxH, 2, 2, 'FD');
-        doc.setFont('helvetica', 'bold');
-        doc.setTextColor(...RED);
-        doc.text('WARNING:', TX + 3, yPos + 5);
+        doc.setFontSize(FS);
         doc.setFont('helvetica', 'normal');
         doc.setTextColor(...DARK_TEXT);
-        for (let i = 0; i < lines.length; i++) {
-          doc.text(lines[i], TX + 3, yPos + 5 + LH * (i + 1));
+        for (const p of bodyParas) {
+          const lines = doc.splitTextToSize(p, textW);
+          for (const line of lines) { doc.text(line, TX, yPos + 3.2); yPos += LH; }
+          yPos += 1;
         }
-        yPos += boxH + 2.5;
-      }
 
-      yPos += 3;
-    }
-
-    // ═══════════════════════════════════════════
-    // SECTION 6 — Invoicing
-    // ═══════════════════════════════════════════
-    {
-      const FS = 8;
-      const LH = 4.8;
-      const textW = MW - PAD_X * 2;
-
-      const repairerReferralFee = (claim.referral_fee_repairer != null) ? `${claim.referral_fee_repairer}%` : '0%';
-      const estFee = claim.est_fee ? `GBP ${Number(claim.est_fee).toFixed(2)}` : null;
-
-      drawHeader('Invoicing');
-
-      // Deductions bar
-      doc.setFillColor(...MID_GREY);
-      doc.setDrawColor(150, 150, 150);
-      doc.rect(LM, yPos, MW, 6, 'FD');
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(8.5);
-      doc.setTextColor(...DARK_TEXT);
-      doc.text('Invoice Deductions', TX, yPos + 4.2);
-      yPos += 6;
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(FS);
-      doc.text(`- Rep. Referral Fee ${repairerReferralFee}`, TX, yPos + 4);
-      yPos += 5.5;
-      if (estFee) { doc.text(`- Estimate Fee ${estFee}`, TX, yPos + 4); yPos += 5.5; }
-      yPos += 2;
-
-      // INVOICING & PAYMENTS heading
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(8.5);
-      doc.setTextColor(...DARK_TEXT);
-      doc.text('INVOICING & PAYMENTS', TX, yPos + 4);
-      yPos += 6;
-
-      // Body paragraphs
-      const bodyLines = [
-        "Your invoice for the insurer's element of the repair should be addressed and sent to the authorising party, as instructed on the authority and as per your usual practice.",
-        'Your full invoice pack MUST also be sent to invoices@rcmautomotive.co.uk and MUST include: main invoice, any excess or VAT invoices, final authority, and a signed satisfaction note.',
-        'Your invoice pack MUST be submitted within 48 hours of vehicle completion approval or final authority being issued - whichever applies.',
-        'VAT and excess invoices MUST be made out to RCM Automotive Ltd - payment will be made within 14 days.',
-        'Upon receipt of your invoice pack, you will receive an invoice from RCM Automotive for our referral fee, which will be payable within 7 days of invoice.',
-      ];
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(FS);
-      doc.setTextColor(...DARK_TEXT);
-      for (const t of bodyLines) {
-        const wrapped = doc.splitTextToSize(t, textW);
-        for (const line of wrapped) { doc.text(line, TX, yPos + 3.2); yPos += LH; }
         yPos += 1;
+
+        // Supplier box
+        const supplierLines = [
+          { text: 'Signs Plus', bold: true, size: 9 },
+          { text: '147 Main Road, Biggin Hill, Kent, TN16 3JP', bold: false, size: 8 },
+          { text: 'Email: enquiries@signsplus.uk', bold: false, size: 8 },
+          { text: 'Phone: 01959 571 074', bold: false, size: 8 },
+        ];
+        const sBoxH = 3 + 5 * supplierLines.length + 3;
+        doc.setFillColor(...LIGHT_GREY);
+        doc.setDrawColor(180, 180, 190);
+        doc.roundedRect(TX + 4, yPos, textW - 8, sBoxH, 2, 2, 'FD');
+        let sy = yPos + 3;
+        for (const sl of supplierLines) {
+          doc.setFontSize(sl.size);
+          doc.setFont('helvetica', sl.bold ? 'bold' : 'normal');
+          doc.setTextColor(...DARK_TEXT);
+          doc.text(sl.text, TX + 8, sy + 3.2);
+          sy += 5;
+        }
+        yPos += sBoxH + 3;
+
+        // Warnings
+        const warnings = [
+          'Use of any other supplier for RCM Automotive branded decals is not permitted without prior written approval.',
+          'Any repair delayed as a result of the mismanagement of a decal order - including failure to order on time - will result in a charge of GBP 100 per day for each day of delay attributable to the repairer. This will be deducted from any outstanding VAT and excess payments due.',
+        ];
+        doc.setFontSize(FS);
+        for (const w of warnings) {
+          const lines = doc.splitTextToSize(w, textW - 8);
+          const boxH = 9 + lines.length * LH;
+          doc.setFillColor(...AMBER_BG);
+          doc.setDrawColor(...AMBER_BD);
+          doc.setLineWidth(0.5);
+          doc.roundedRect(TX, yPos, textW, boxH, 2, 2, 'FD');
+          doc.setFont('helvetica', 'bold');
+          doc.setTextColor(...RED);
+          doc.text('WARNING:', TX + 3, yPos + 5);
+          doc.setFont('helvetica', 'normal');
+          doc.setTextColor(...DARK_TEXT);
+          for (let i = 0; i < lines.length; i++) {
+            doc.text(lines[i], TX + 3, yPos + 5 + LH * (i + 1));
+          }
+          yPos += boxH + 2.5;
+        }
+
+        yPos += 3;
       }
 
-      // NEVER INVOICE
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(FS);
-      doc.setTextColor(...RED);
-      const neverW = doc.splitTextToSize('***** NEVER INVOICE THE CLIENT DIRECTLY FOR VAT OR EXCESS *****', textW);
-      for (const line of neverW) { doc.text(line, PW / 2, yPos + 3.2, { align: 'center' }); yPos += LH; }
-      yPos += 2;
+      // ═══════════════════════════════════════════
+      // ORKIN — SECTION 6: Invoicing
+      // ═══════════════════════════════════════════
+      {
+        const FS = 8;
+        const LH = 4.8;
+        const textW = MW - PAD_X * 2;
 
-      // IMPORTANT heading
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(8.5);
-      doc.setTextColor(...RED);
-      doc.text('IMPORTANT - FAILURE TO COMPLY', TX, yPos + 4);
-      yPos += 6;
+        drawHeader('Invoicing');
 
-      // Critical lines
-      const criticalLines = [
-        'Failure to submit your invoice pack within 48 hours will result in delays to your VAT and excess payment, and an admin charge of GBP 150 will be added to your referral fee invoice.',
-        'Failure to pay your referral fee within 7 days will result in an additional admin charge of GBP 150 and removal from the RCM Automotive network.',
-      ];
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(FS);
-      doc.setTextColor(...DARK_TEXT);
-      for (const t of criticalLines) {
-        const wrapped = doc.splitTextToSize(t, textW);
-        for (const line of wrapped) { doc.text(line, TX, yPos + 3.2); yPos += LH; }
-        yPos += 1;
+        // Deductions bar
+        doc.setFillColor(...MID_GREY);
+        doc.setDrawColor(150, 150, 150);
+        doc.rect(LM, yPos, MW, 6, 'FD');
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(8.5);
+        doc.setTextColor(...DARK_TEXT);
+        doc.text('Invoice Deductions', TX, yPos + 4.2);
+        yPos += 6;
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(FS);
+        doc.text(`- Rep. Referral Fee ${fields.referral_fee}`, TX, yPos + 4);
+        yPos += 5.5;
+        yPos += 2;
+
+        // INVOICING & PAYMENTS heading
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(8.5);
+        doc.setTextColor(...DARK_TEXT);
+        doc.text('INVOICING & PAYMENTS', TX, yPos + 4);
+        yPos += 6;
+
+        // Body paragraphs
+        const bodyLines = [
+          "Your invoice for the insurer's element of the repair should be addressed and sent to the authorising party, as instructed on the authority and as per your usual practice.",
+          'Your full invoice pack MUST also be sent to invoices@rcmautomotive.co.uk and MUST include: main invoice, any excess or VAT invoices, final authority, and a signed satisfaction note.',
+          'Your invoice pack MUST be submitted within 48 hours of vehicle completion approval or final authority being issued - whichever applies.',
+          'VAT and excess invoices MUST be made out to RCM Automotive Ltd - payment will be made within 14 days.',
+          'Upon receipt of your invoice pack, you will receive an invoice from RCM Automotive for our referral fee, which will be payable within 7 days of invoice.',
+        ];
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(FS);
+        doc.setTextColor(...DARK_TEXT);
+        for (const t of bodyLines) {
+          const wrapped = doc.splitTextToSize(t, textW);
+          for (const line of wrapped) { doc.text(line, TX, yPos + 3.2); yPos += LH; }
+          yPos += 1;
+        }
+
+        // NEVER INVOICE
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(FS);
+        doc.setTextColor(...RED);
+        const neverW = doc.splitTextToSize('***** NEVER INVOICE THE CLIENT DIRECTLY FOR VAT OR EXCESS *****', textW);
+        for (const line of neverW) { doc.text(line, PW / 2, yPos + 3.2, { align: 'center' }); yPos += LH; }
+        yPos += 2;
+
+        // IMPORTANT heading
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(8.5);
+        doc.setTextColor(...RED);
+        doc.text('IMPORTANT - FAILURE TO COMPLY', TX, yPos + 4);
+        yPos += 6;
+
+        // Critical lines
+        const criticalLines = [
+          'Failure to submit your invoice pack within 48 hours will result in delays to your VAT and excess payment, and an admin charge of GBP 150 will be added to your referral fee invoice.',
+          'Failure to pay your referral fee within 7 days will result in an additional admin charge of GBP 150 and removal from the RCM Automotive network.',
+        ];
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(FS);
+        doc.setTextColor(...DARK_TEXT);
+        for (const t of criticalLines) {
+          const wrapped = doc.splitTextToSize(t, textW);
+          for (const line of wrapped) { doc.text(line, TX, yPos + 3.2); yPos += LH; }
+          yPos += 1;
+        }
+        yPos += 2;
+
+        // Final notice
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(FS);
+        doc.setTextColor(...RED);
+        doc.text('PLEASE DO NOT SEND TO ANY OTHER PARTY WITHOUT PRIOR CONSENT', PW / 2, yPos + 3.2, { align: 'center' });
+        yPos += 6;
+
+        // Disclaimer
+        doc.setFont('helvetica', 'italic');
+        doc.setFontSize(7.5);
+        doc.setTextColor(80, 80, 80);
+        const discW = doc.splitTextToSize('*By accepting this repair instruction, you agree to the T&Cs within the supplied SLA provided with this instruction.', MW);
+        for (const line of discW) { doc.text(line, PW / 2, yPos + 3.2, { align: 'center' }); yPos += LH; }
       }
-      yPos += 2;
 
-      // Final notice
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(FS);
-      doc.setTextColor(...RED);
-      doc.text('PLEASE DO NOT SEND TO ANY OTHER PARTY WITHOUT PRIOR CONSENT', PW / 2, yPos + 3.2, { align: 'center' });
-      yPos += 6;
+    } else {
+      // ═══════════════════════════════════════════
+      // STANDARD — Invoicing
+      // ═══════════════════════════════════════════
+      {
+        const FS = 9;
+        const LH = 5.5;
+        const textW = MW - PAD_X * 2;
 
-      // Disclaimer
-      doc.setFont('helvetica', 'italic');
-      doc.setFontSize(7.5);
-      doc.setTextColor(80, 80, 80);
-      const discW = doc.splitTextToSize('*By accepting this repair instruction, you agree to the T&Cs within the supplied SLA provided with this instruction.', MW);
-      for (const line of discW) { doc.text(line, PW / 2, yPos + 3.2, { align: 'center' }); yPos += LH; }
+        drawHeader('Invoicing');
+
+        // Deductions bar
+        doc.setFillColor(...MID_GREY);
+        doc.setDrawColor(150, 150, 150);
+        doc.rect(LM, yPos, MW, 6, 'FD');
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(9);
+        doc.setTextColor(...DARK_TEXT);
+        doc.text('Invoice Deductions', TX, yPos + 4.2);
+        yPos += 6;
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(FS);
+        doc.text(`- Rep. Referral Fee ${fields.referral_fee}`, TX, yPos + 4.5);
+        yPos += 6.5;
+        yPos += 3;
+
+        // Body text
+        const invoicingParas = [
+          'Your invoice should be addressed and sent to the authorising party, as instructed on the authority and as per your usual practice.',
+          'A copy of the final invoice, authority and collection note must be emailed to invoices@rcmautomotive.co.uk',
+          `You will receive an invoice from RCM for ${fields.referral_fee} of the final repair figure and will be payable within 7 DAYS of invoice.`,
+        ];
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(FS);
+        doc.setTextColor(...DARK_TEXT);
+        for (const p of invoicingParas) {
+          const wrapped = doc.splitTextToSize(p, textW);
+          for (const line of wrapped) { doc.text(line, TX, yPos + 4); yPos += LH; }
+          yPos += 2;
+        }
+
+        yPos += 4;
+
+        // Disclaimer
+        doc.setFont('helvetica', 'italic');
+        doc.setFontSize(8);
+        doc.setTextColor(80, 80, 80);
+        const discW = doc.splitTextToSize('*By accepting this instruction, you agree to the T&Cs within the supplied SLA provided with this instruction.', MW);
+        for (const line of discW) { doc.text(line, PW / 2, yPos + 3.2, { align: 'center' }); yPos += LH; }
+      }
     }
 
     // ═══════════════════════════════════════════
@@ -439,7 +492,7 @@ Deno.serve(async (req) => {
     try {
       const pdfBlob = new Blob([pdfBytes], { type: 'application/pdf' });
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-      const filename = `${claim.job_number || 'instruction'}-${timestamp}.pdf`;
+      const filename = `${claim.job_number || 'instruction'}-${isOrkin ? 'orkin' : 'standard'}-${timestamp}.pdf`;
       const pdfFile = new File([pdfBlob], filename, { type: 'application/pdf' });
       const uploadResult = await base44.asServiceRole.integrations.Core.UploadFile({ file: pdfFile });
       const currentFileUrls = Array.isArray(claim.file_urls) ? claim.file_urls : [];
@@ -455,7 +508,7 @@ Deno.serve(async (req) => {
       status: 200,
       headers: {
         'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="${claim.job_number || 'instruction'}.pdf"`
+        'Content-Disposition': `attachment; filename="${claim.job_number || 'instruction'}-${isOrkin ? 'orkin' : 'standard'}.pdf"`
       }
     });
 
