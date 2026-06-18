@@ -20,6 +20,7 @@ const EMPTY_FORM = {
   town: '',
   county: '',
   postcode: '',
+  vat_status: 'Unknown',
   notes: '',
   latitude: null,
   longitude: null
@@ -175,6 +176,14 @@ export default function AddClientModal({ isOpen, onClose, onSuccess }) {
               <label className="block text-sm text-muted-foreground mb-1">Postcode</label>
               <Input value={formData.postcode} onChange={(e) => set('postcode', e.target.value)} className="neomorph-inset" />
             </div>
+          </div>
+
+          <div>
+            <label className="block text-sm text-muted-foreground mb-1">VAT Status</label>
+            <select value={formData.vat_status} onChange={e => set('vat_status', e.target.value)}
+              className="w-full px-3 py-2 text-sm rounded-[10px] border border-input bg-card text-foreground">
+              <option>Unknown</option><option>VAT Registered</option><option>Non-VAT</option>
+            </select>
           </div>
 
           <div>

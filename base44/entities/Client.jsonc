@@ -53,6 +53,16 @@
       "type": "string",
       "description": "Postal code"
     },
+    "vat_status": {
+      "type": "string",
+      "enum": [
+        "VAT Registered",
+        "Non-VAT",
+        "Unknown"
+      ],
+      "default": "Unknown",
+      "description": "VAT registration status"
+    },
     "notes": {
       "type": "string",
       "description": "Additional notes about this client"
