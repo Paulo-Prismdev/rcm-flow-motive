@@ -363,8 +363,25 @@ Deno.serve(async (req) => {
       drawHeader('Insurance Details');
       for (const [label, value] of rows) drawRow(label, value);
       finishSection();
-      // Force page 2 for all remaining content
-      doc.addPage(); yPos = TOP;
+      // Measure both remaining sections combined
+const decalsH = estimateSection(null, [
+  'Use of any other supplier for RCM Automotive branded decals is not permitted without prior written approval.',
+  'Any repair delayed as a result of the mismanagement of a decal order - including failure to order on time - will result in a charge of GBP 100 per day for each day of delay attributable to the repairer. This will be deducted from any outstanding VAT and excess payments due.',
+], [
+  { text: 'All repairers MUST use the RCM Automotive approved decal supplier for any branded vehicle decals or signage.' },
+  { text: 'Where a vehicle requires decals, these MUST be ordered as soon as the repair is authorised - if the vehicle is already on site, this should be done immediately. If the vehicle has not yet arrived, decals MUST be ordered prior to the vehicle coming on site.' },
+  { text: 'Please contact John or Michael Welch at our approved supplier, quoting Orkin as the client and providing the vehicle registration number:' },
+]);
+
+const invoicingH = 120; // conservative fixed estimate for invoicing section
+
+const combinedH = decalsH + invoicingH;
+const remainingSpace = BL - yPos;
+
+if (remainingSpace < combinedH) {
+  doc.addPage(); yPos = TOP;
+
+}
     }
 
     // ═══════════════════════════════════════════
