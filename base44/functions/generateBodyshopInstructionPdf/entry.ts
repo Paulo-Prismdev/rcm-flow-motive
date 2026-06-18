@@ -338,8 +338,8 @@ Deno.serve(async (req) => {
       // ORKIN — SECTION 6: Invoicing
       // ═══════════════════════════════════════════
       {
-        const FS = 8;
-        const LH = 4.8;
+        const FS = 9;
+        const LH = 5.5;
         const textW = MW - PAD_X * 2;
 
         drawHeader('Invoicing');
@@ -349,13 +349,13 @@ Deno.serve(async (req) => {
         doc.setDrawColor(150, 150, 150);
         doc.rect(LM, yPos, MW, 6, 'FD');
         doc.setFont('helvetica', 'bold');
-        doc.setFontSize(8.5);
+        doc.setFontSize(9);
         doc.setTextColor(...DARK_TEXT);
         doc.text('Invoice Deductions', TX, yPos + 4.2);
         yPos += 6;
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(FS);
-        doc.text(`- Rep. Referral Fee ${fields.referral_fee}`, TX, yPos + 4);
+        doc.text(`Repairer Referral Fee ${fields.referral_fee}`, TX, yPos + 4);
         yPos += 5.5;
         yPos += 2;
 
@@ -450,9 +450,9 @@ Deno.serve(async (req) => {
         yPos += 6;
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(FS);
-        doc.text(`- Rep. Referral Fee ${fields.referral_fee}`, TX, yPos + 4.5);
-        yPos += 6.5;
-        yPos += 3;
+        doc.text(`Repairer Referral Fee ${fields.referral_fee}`, TX, yPos + 4);
+        yPos += 5.5;
+        yPos += 2;
 
         // Body text
         const invoicingParas = [
