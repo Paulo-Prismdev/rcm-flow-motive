@@ -517,7 +517,7 @@ yPos += 2;
       status: 200,
       headers: {
         'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="${claim.job_number || 'instruction'}-${isOrkin ? 'orkin' : 'standard'}.pdf"`
+        'Content-Disposition': `attachment; filename="${filename}"`
       }
     });
 
