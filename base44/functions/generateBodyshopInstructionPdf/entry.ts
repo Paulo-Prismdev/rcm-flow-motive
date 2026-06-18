@@ -202,8 +202,8 @@ Deno.serve(async (req) => {
     }
 
     /** Draw a warning alert box with amber background */
-    function drawWarning(text) {
-      doc.setFontSize(9);
+    function drawWarning(text, fontSize = 9) {
+      doc.setFontSize(fontSize);
       const ww = MW - PAD_X * 2 - 8;
       const lines = doc.splitTextToSize(text, ww);
       const boxH = 12 + lines.length * ROW_H;
@@ -363,6 +363,8 @@ Deno.serve(async (req) => {
       drawHeader('Insurance Details');
       for (const [label, value] of rows) drawRow(label, value);
       finishSection();
+      // Force page 2 for all remaining content
+      doc.addPage(); yPos = TOP;
     }
 
     // ═══════════════════════════════════════════
@@ -387,38 +389,37 @@ Deno.serve(async (req) => {
 
       const supplierLines = [
         { text: 'Signs Plus', bold: true, size: 10 },
-        { text: '147 Main Road, Biggin Hill, Kent, TN16 3JP', bold: false, size: 9 },
-        { text: 'Email: enquiries@signsplus.uk', bold: false, size: 9 },
-        { text: 'Phone: 01959 571 074', bold: false, size: 9 },
+        { text: '147 Main Road, Biggin Hill, Kent, TN16 3JP', bold: false, size: 8.5 },
+        { text: 'Email: enquiries@signsplus.uk', bold: false, size: 8.5 },
+        { text: 'Phone: 01959 571 074', bold: false, size: 8.5 },
       ];
 
-      // Only force a page break if the section header + first paragraph won't fit
-      if (yPos + HEADER_H + 20 > BL) { doc.addPage(); yPos = TOP; }
+      // Page 2 — already on a fresh page from the forced break after Insurance
       drawHeader('Branded Decals & Signage');
 
-      // Body paragraphs
+      // Body paragraphs — 8.5pt, tighter line height
       for (const { text } of bodyBlocks) {
-        doc.setFontSize(9);
+        doc.setFontSize(8.5);
         doc.setFont('helvetica', 'normal');
         doc.setTextColor(...DARK_TEXT);
         const lines = doc.splitTextToSize(String(text), MW - PAD_X * 2);
         lines.forEach((line) => {
-          if (yPos + LINE_H > BL) { doc.addPage(); yPos = TOP; }
-          doc.text(line, TX, yPos + 4);
-          yPos += LINE_H;
+          if (yPos + 5.2 > BL) { doc.addPage(); yPos = TOP; }
+          doc.text(line, TX, yPos + 3.5);
+          yPos += 5.2;
         });
-        yPos += 1;
+        yPos += 0.8;
       }
 
-      yPos += 2;
+      yPos += 1.5;
 
       // Supplier info box
       {
         const boxX = TX + 4;
         const boxW = MW - PAD_X * 2 - 8;
-        const sTopPad = 5;
-        const sLineH = 6;
-        const sBottomPad = 5;
+        const sTopPad = 4;
+        const sLineH = 5.5;
+        const sBottomPad = 4;
         const sBoxH = sTopPad + sLineH * supplierLines.length + sBottomPad;
 
         if (yPos + sBoxH > BL) { doc.addPage(); yPos = TOP; }
@@ -435,15 +436,16 @@ Deno.serve(async (req) => {
           doc.text(sl.text, boxX + 4, sy);
           sy += sLineH;
         }
-        yPos += sBoxH + 6;
+        yPos += sBoxH + 4;
       }
 
-      // Warnings
+      // Warnings — 8.5pt
       for (const text of warnings) {
-        drawWarning(text);
+        drawWarning(text, 8.5);
       }
 
-      finishSection();
+      // Tight section gap (10px ≈ 2.6mm)
+      yPos += 2.1 + 2.6;
     }
 
     // ═══════════════════════════════════════════
@@ -465,8 +467,8 @@ Deno.serve(async (req) => {
         'Failure to pay your referral fee within 7 days will result in an additional admin charge of GBP 150 and removal from the RCM Automotive network.',
       ];
 
-      // Only break if section header + minimal content won't fit
-      if (yPos + HEADER_H + 20 > BL) { doc.addPage(); yPos = TOP; }
+      // Page 2 — already on a fresh page; section header only breaks if near page bottom
+      if (yPos + HEADER_H + 15 > BL) { doc.addPage(); yPos = TOP; }
       drawHeader('Invoicing');
 
       // ── Deductions + Payment Terms side-by-side boxes ──
@@ -484,10 +486,11 @@ Deno.serve(async (req) => {
       doc.setFontSize(9);
       doc.text('Invoice Deductions', LM + 3, boxStartY + 5);
 
-      let dedY = boxStartY + 12;
+      let dedY = boxStartY + 11;
       doc.setFont('helvetica', 'normal');
-      if (repairerReferralFee) { doc.text(`- Rep. Referral Fee ${repairerReferralFee}`, LM + 3, dedY); dedY += 7; }
-      if (estFee) { doc.text(`- Estimate Fee ${estFee}`, LM + 3, dedY); dedY += 7; }
+      doc.setFontSize(8.5);
+      if (repairerReferralFee) { doc.text(`- Rep. Referral Fee ${repairerReferralFee}`, LM + 3, dedY); dedY += 6.5; }
+      if (estFee) { doc.text(`- Estimate Fee ${estFee}`, LM + 3, dedY); dedY += 6.5; }
 
       // Right: Payment Terms
       const payX = LM + dedW;
@@ -500,75 +503,83 @@ Deno.serve(async (req) => {
       doc.setFontSize(9);
       doc.text('Payment Terms', payX + 3, boxStartY + 5);
 
-      let ptY = boxStartY + 12;
+      let ptY = boxStartY + 11;
       const textW = payW - 6;
+      const BODY_ROW = 5.8; // tighter row height for 8.5pt body
 
-      // Invoicing body
+      // Invoicing body — 8.5pt
       doc.setFont('helvetica', 'bold');
       doc.setTextColor(...DARK_TEXT);
+      doc.setFontSize(9);
       doc.text('INVOICING & PAYMENTS', payX + 3, ptY);
-      ptY += 8;
+      ptY += 7;
 
       doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8.5);
       for (const line of invoicingTexts) {
-        if (ptY > BL - 10) { doc.addPage(); ptY = TOP; }
+        if (ptY > BL - 8) { doc.addPage(); ptY = TOP; }
         const wrapped = doc.splitTextToSize(line, textW);
         doc.text(wrapped, payX + 3, ptY);
-        ptY += ROW_H * wrapped.length;
+        ptY += BODY_ROW * wrapped.length;
       }
 
-      ptY += 2;
+      ptY += 1.5;
 
-      // NEVER INVOICE line
-      if (ptY > BL - 10) { doc.addPage(); ptY = TOP; }
+      // NEVER INVOICE line — 8.5pt bold red
+      if (ptY > BL - 8) { doc.addPage(); ptY = TOP; }
       doc.setFont('helvetica', 'bold');
+      doc.setFontSize(8.5);
       doc.setTextColor(...RED);
       const neverWrapped = doc.splitTextToSize('***** NEVER INVOICE THE CLIENT DIRECTLY FOR VAT OR EXCESS *****', textW);
       doc.text(neverWrapped, payX + 3, ptY);
-      ptY += ROW_H * neverWrapped.length + 2;
+      ptY += BODY_ROW * neverWrapped.length + 1.5;
 
-      // Receipt notice
+      // Receipt notice — 8.5pt
       doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8.5);
       doc.setTextColor(...DARK_TEXT);
       const receiptWrapped = doc.splitTextToSize(
         'Upon receipt of your invoice pack, you will receive an invoice from RCM Automotive for our referral fee, which will be payable within 7 days of invoice.',
         textW
       );
       doc.text(receiptWrapped, payX + 3, ptY);
-      ptY += ROW_H * receiptWrapped.length + 4;
+      ptY += BODY_ROW * receiptWrapped.length + 3;
 
-      // IMPORTANT heading
+      // IMPORTANT heading — 9pt bold
       doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
       doc.setTextColor(...RED);
       doc.text('IMPORTANT - FAILURE TO COMPLY', payX + 3, ptY);
-      ptY += 7;
+      ptY += 6.5;
 
+      // Critical lines — 8.5pt
       doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8.5);
       doc.setTextColor(...DARK_TEXT);
       for (const line of criticalLines) {
-        if (ptY > BL - 10) { doc.addPage(); ptY = TOP; }
+        if (ptY > BL - 8) { doc.addPage(); ptY = TOP; }
         const wrapped = doc.splitTextToSize(line, textW);
         doc.text(wrapped, payX + 3, ptY);
-        ptY += ROW_H * wrapped.length;
+        ptY += BODY_ROW * wrapped.length;
       }
 
       // Draw outer box borders to match content height
-      const boxEndY = Math.max(dedY, ptY) + 4;
+      const boxEndY = Math.max(dedY, ptY) + 3;
       doc.setDrawColor(150, 150, 150);
       doc.rect(LM, boxStartY, dedW, boxEndY - boxStartY, 'S');
       doc.rect(payX, boxStartY, payW, boxEndY - boxStartY, 'S');
 
-      yPos = boxEndY + 8;
+      yPos = boxEndY + 6;
 
-      // Final warning
-      if (yPos > BL - 10) { doc.addPage(); yPos = TOP; }
+      // Final warning — 8.5pt
+      if (yPos > BL - 8) { doc.addPage(); yPos = TOP; }
       doc.setFont('helvetica', 'bold');
-      doc.setFontSize(9);
+      doc.setFontSize(8.5);
       doc.setTextColor(...RED);
       doc.text('PLEASE DO NOT SEND TO ANY OTHER PARTY WITHOUT PRIOR CONSENT', PW / 2, yPos, { align: 'center' });
-      yPos += 7;
+      yPos += 6.5;
 
-      // Disclaimer
+      // Disclaimer — 8pt italic
       doc.setFont('helvetica', 'italic');
       doc.setFontSize(8);
       doc.setTextColor(80, 80, 80);
@@ -576,7 +587,7 @@ Deno.serve(async (req) => {
       const discLines = doc.splitTextToSize(disclaimer, MW);
       doc.text(discLines, PW / 2, yPos, { align: 'center' });
 
-      yPos += PAD_BOTTOM + SECTION_GAP;
+      yPos += 2.1;
     }
 
     // ═══════════════════════════════════════════
