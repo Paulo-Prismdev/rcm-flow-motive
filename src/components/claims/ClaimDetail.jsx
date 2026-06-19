@@ -158,7 +158,7 @@ import ActivityLogModal from '../shared/ActivityLogModal';
 import { logActivity, logChanges } from '../shared/useActivityLogger';
 
 const SECTION_FIELDS = {
-  status: ['claim_type', 'loss_date', 'vehicle_use', 'incident_location', 'circumstances'],
+  status: ['reg', 'claim_type', 'loss_date', 'vehicle_use', 'incident_location', 'circumstances'],
   client: ['client_name', 'client_phone', 'client_email', 'client_address_line_1', 'client_town', 'client_postcode', 'business_division'],
   insurance: ['insurer', 'claim_ref', 'policy_number', 'policy_excess'],
   driver: ['driver_contact_name', 'driver_contact_phone', 'driver_contact_email'],
@@ -622,6 +622,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
             canEdit={canEdit}
           >
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+              <DetailRow label="Registration" value={claim.reg} />
               <DetailRow label="Job Status" value={claim.job_status} isStatus />
               <DetailRow label="Claim Type" value={claim.claim_type} />
               <DetailRow label="Date Created (System)" value={claim.created_date} isDate />

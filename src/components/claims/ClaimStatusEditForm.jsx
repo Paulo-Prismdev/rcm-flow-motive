@@ -8,6 +8,16 @@ export default function ClaimStatusEditForm({ claim: editClaim, onSave, onCancel
     <div className="space-y-3">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
         <div>
+          <label className="block text-xs font-medium text-foreground-muted mb-1">Registration</label>
+          <input
+            type="text"
+            value={editClaim.reg || ''}
+            onChange={(e) => onSave({ reg: e.target.value.toUpperCase() })}
+            placeholder="e.g. AB12 CDE"
+            className="glass-inset w-full px-3 py-2 text-sm"
+          />
+        </div>
+        <div>
           <label className="block text-xs font-medium text-foreground-muted mb-1">Job Status (Read-only)</label>
           <div className="px-3 py-2 glass-inset text-sm">{editClaim.job_status || 'Not set'}</div>
         </div>
