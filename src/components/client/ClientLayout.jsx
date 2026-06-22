@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
-import { X, Search, RefreshCw, Menu, FileText, LayoutDashboard } from 'lucide-react';
+import { X, Search, RefreshCw, Menu, FileText, LayoutDashboard, LogOut } from 'lucide-react';
 import { StatusConfigProvider } from '../shared/StatusConfigContext';
 import GlobalSearch from '../layout/GlobalSearch';
 import Notifications from '../layout/Notifications';
@@ -96,6 +96,12 @@ export default function ClientLayout({ children }) {
                 <p className="text-sm font-medium text-white truncate">{currentUser?.display_name || currentUser?.full_name || 'User'}</p>
                 <p className="text-xs text-white/40 truncate">{currentUser?.email || ''}</p>
               </div>
+              <button
+                onClick={() => base44.auth.logout()}
+                title="Log Out"
+                className="text-white/40 hover:text-red-400 transition-colors flex-shrink-0">
+                <LogOut className="w-4 h-4" />
+              </button>
             </div>
           </div>
         </aside>
