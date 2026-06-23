@@ -2,18 +2,20 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { MapPin, Loader, Search, X } from 'lucide-react';
-import { base44 } from '@/api/base44Client';
+import { geocodeAddress } from '@/functions/geocodeAddress';
 
 /**
- * AddressLookupInput - A reusable component for address lookup with autocomplete
- * 
- * @param {Object} props
- * @param {string} props.value - Current address value
- * @param {function} props.onChange - Callback with full address data: { address, latitude, longitude, display_name, address_line_1, town, county, postcode }
- * @param {string} props.placeholder - Input placeholder text
- * @param {boolean} props.disabled - Whether input is disabled
- * @param {string} props.className - Additional CSS classes
- * @param {boolean} props.showSearchButton - Whether to show the search button (default: false)
+ * AddressLookupInput — Google Places-powered address autocomplete.
+ *
+ * All address data across the app uses this component so the shape is always:
+ * { address, display_name, latitude, longitude, address_line_1, address_line_2, town, county, postcode }
+ *
+ * @param {string}   props.value           - Current address display value
+ * @param {function} props.onChange        - Callback with the full address data object
+ * @param {string}   props.placeholder     - Input placeholder text
+ * @param {boolean}  props.disabled        - Whether input is disabled
+ * @param {string}   props.className       - Additional CSS classes
+ * @param {boolean}  props.showSearchButton - Whether to show a manual "Find" button
  */
 export default function AddressLookupInput({
   value = '',
@@ -37,7 +39,7 @@ export default function AddressLookupInput({
     setSearchText(value);
   }, [value]);
 
-  // Fetch address suggestions from Nominatim
+  // Fetch address suggestions from Google Places Autocomplete (via backend)
   const fetchSuggestions = async (text) => {
     if (!text || text.trim().length < 3) {
       setSuggestions([]);
@@ -49,26 +51,13 @@ export default function AddressLookupInput({
     setIsLoadingSuggestions(true);
 
     try {
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(text)}&format=json&addressdetails=1&limit=5&countrycodes=gb`,
-        {
-          headers: {
-            'User-Agent': 'ART-TEC-One-App/1.0'
-          }
-        }
-      );
-
-      if (response.ok) {
-        const data = await response.json();
-        setSuggestions(data);
-        setShowSuggestions(data.length > 0);
-      } else {
-        console.error('Suggestions API error:', response.status);
-        setSuggestions([]);
-        setShowSuggestions(false);
-      }
-    } catch (error) {
-      console.log('Suggestions fetch failed:', error);
+      const response = await geocodeAddress({ action: 'autocomplete', input: text });
+      const data = response.data || response;
+      const list = data.suggestions || [];
+      setSuggestions(list);
+      setShowSuggestions(list.length > 0);
+    } catch (err) {
+      console.error('Suggestions fetch failed:', err);
       setSuggestions([]);
       setShowSuggestions(false);
     } finally {
@@ -91,40 +80,34 @@ export default function AddressLookupInput({
     }, 300);
   };
 
-  // Parse address components from Nominatim result
-  const parseAddressComponents = (suggestion) => {
-    const addr = suggestion.address || {};
-
-    return {
-      address: suggestion.display_name,
-      display_name: suggestion.display_name,
-      latitude: parseFloat(suggestion.lat),
-      longitude: parseFloat(suggestion.lon),
-      address_line_1: addr.road || addr.suburb || addr.village || '',
-      address_line_2: addr.neighbourhood || '',
-      town: addr.town || addr.city || addr.village || '',
-      county: addr.county || addr.state || '',
-      postcode: addr.postcode || ''
-    };
-  };
-
-  // Handle suggestion selection
-  const handleSelectSuggestion = (suggestion) => {
-    const addressData = parseAddressComponents(suggestion);
-    setSearchText(addressData.display_name);
+  // Handle suggestion selection — fetch full details from Google Place Details
+  const handleSelectSuggestion = async (suggestion) => {
     setShowSuggestions(false);
     setSuggestions([]);
     setError(null);
+    setIsGeocoding(true);
 
-    if (onChange) {
-      onChange(addressData);
+    try {
+      const response = await geocodeAddress({ action: 'details', place_id: suggestion.place_id });
+      const addressData = response.data || response;
+
+      setSearchText(addressData.display_name || suggestion.description);
+
+      if (onChange) {
+        onChange(addressData);
+      }
+    } catch (err) {
+      console.error('Place details error:', err);
+      setError('Unable to retrieve address details. Please try again.');
+    } finally {
+      setIsGeocoding(false);
     }
   };
 
-  // Manual geocode using backend function
+  // Manual geocode — converts a typed address string to coordinates
   const handleManualGeocode = async () => {
     if (!searchText || searchText.trim().length < 3) {
-      setError("Please enter a valid address or postcode");
+      setError('Please enter a valid address or postcode');
       return;
     }
 
@@ -133,35 +116,22 @@ export default function AddressLookupInput({
     setShowSuggestions(false);
 
     try {
-      const result = await base44.functions.invoke('geocodeAddress', {
-        address: searchText
-      });
+      const response = await geocodeAddress({ action: 'geocode', address: searchText });
+      const result = response.data || response;
 
       if (result && result.latitude && result.longitude) {
-        const addressData = {
-          address: searchText,
-          display_name: result.display_name || searchText,
-          latitude: result.latitude,
-          longitude: result.longitude,
-          address_line_1: result.address_line_1 || '',
-          address_line_2: result.address_line_2 || '',
-          town: result.town || '',
-          county: result.county || '',
-          postcode: result.postcode || ''
-        };
-
-        setSearchText(addressData.display_name);
+        setSearchText(result.display_name || searchText);
         setError(null);
 
         if (onChange) {
-          onChange(addressData);
+          onChange(result);
         }
       } else {
-        setError("Address not found. Please try a different format.");
+        setError('Address not found. Please try a different format.');
       }
-    } catch (error) {
-      console.error("Geocoding error:", error);
-      setError("Unable to locate address. Please try again.");
+    } catch (err) {
+      console.error('Geocoding error:', err);
+      setError('Unable to locate address. Please try again.');
     } finally {
       setIsGeocoding(false);
     }
@@ -225,77 +195,67 @@ export default function AddressLookupInput({
                 setShowSuggestions(false);
               }
             }} />
-          
-          
+
           {searchText && !disabled &&
-          <button
-            onClick={handleClear}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground-muted hover:text-foreground"
-            style={{ zIndex: 10 }}
-            type="button">
-            
+            <button
+              onClick={handleClear}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground-muted hover:text-foreground"
+              style={{ zIndex: 10 }}
+              type="button">
               <X className="w-4 h-4" />
             </button>
           }
 
           {/* Suggestions Dropdown */}
-          {showSuggestions && suggestions.length > 0 &&
-          <div
-            className="absolute w-full mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-60 overflow-y-auto"
-            style={{ zIndex: 9999 }}>
-            
+          {showSuggestions && (suggestions.length > 0 || isLoadingSuggestions) &&
+            <div
+              className="absolute w-full mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-60 overflow-y-auto"
+              style={{ zIndex: 9999 }}>
+
               {isLoadingSuggestions &&
-            <div className="p-3 text-center text-xs text-foreground-muted">
+                <div className="p-3 text-center text-xs text-foreground-muted">
                   <Loader className="w-4 h-4 animate-spin inline mr-2" />
                   Searching...
                 </div>
-            }
+              }
               {suggestions.map((suggestion, index) =>
-            <button
-              key={index}
-              type="button"
-              onClick={() => handleSelectSuggestion(suggestion)}
-              className="w-full text-left px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors border-b border-gray-100 dark:border-gray-700 last:border-b-0 first:rounded-t-lg last:rounded-b-lg">
-              
+                <button
+                  key={suggestion.place_id || index}
+                  type="button"
+                  onClick={() => handleSelectSuggestion(suggestion)}
+                  className="w-full text-left px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors border-b border-gray-100 dark:border-gray-700 last:border-b-0 first:rounded-t-lg last:rounded-b-lg">
                   <div className="flex items-start gap-2">
                     <MapPin className="w-3.5 h-3.5 text-accent flex-shrink-0 mt-0.5" />
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium truncate">{suggestion.display_name}</p>
-                      {suggestion.address &&
-                  <p className="text-xs text-foreground-muted mt-0.5">
-                          {suggestion.address.postcode || suggestion.address.town || ''}
-                        </p>
-                  }
+                      <p className="text-xs font-medium truncate">{suggestion.description}</p>
                     </div>
                   </div>
                 </button>
-            )}
+              )}
             </div>
           }
         </div>
 
         {showSearchButton &&
-        <Button
-          type="button"
-          onClick={handleManualGeocode}
-          disabled={isGeocoding || !searchText || searchText.trim().length < 3}
-          className="glass-button px-4 py-2 flex items-center gap-2 text-accent text-sm">
-          
-            {isGeocoding ?
-          <><Loader className="w-4 h-4 animate-spin" /> Locating...</> :
-
-          <><Search className="w-4 h-4" /> Find</>
-          }
+          <Button
+            type="button"
+            onClick={handleManualGeocode}
+            disabled={isGeocoding || !searchText || searchText.trim().length < 3}
+            className="glass-button px-4 py-2 flex items-center gap-2 text-accent text-sm">
+            {isGeocoding
+              ? <><Loader className="w-4 h-4 animate-spin" /> Locating...</>
+              : <><Search className="w-4 h-4" /> Find</>
+            }
           </Button>
         }
       </div>
 
       {error &&
-      <div className="mt-2 p-2 glass-inset rounded-lg border border-orange-500 border-opacity-30 text-orange-600 text-xs flex items-start gap-2">
+        <div className="mt-2 p-2 glass-inset rounded-lg border border-orange-500 border-opacity-30 text-orange-600 text-xs flex items-start gap-2">
           <span>⚠️</span>
           <span>{error}</span>
         </div>
       }
-    </div>);
-
+    </div>
+  );
 }
