@@ -1,8 +1,9 @@
 import React from 'react';
-import { ArrowLeft, ChevronDown, MoreVertical, FileText, Image, Mail, ListTodo, Timer, History, Package, Download, Archive, Trash2, Calculator } from 'lucide-react';
+import { ArrowLeft, ChevronDown, FileText, Image, Mail, ListTodo, Timer, History, Package, Download, Archive, Trash2, Calculator } from 'lucide-react';
 import { formatUKRegistration } from '../shared/formatRegistration';
 import StatusBadge from '../shared/StatusBadge';
 import UpdateStatusBadge from '../shared/UpdateStatusBadge';
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -75,12 +76,12 @@ export default function ClaimDetailMobileHeader({
       className="lg:hidden flex-shrink-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800"
       style={{ position: 'relative', zIndex: 20, isolation: 'isolate' }}
     >
-      {/* Row 1: back + title + primary actions */}
-      <div className="flex items-center gap-2 px-3 pt-1.5 pb-1">
+      {/* Row 1: back + title + status badges */}
+      <div className="flex items-center gap-2 px-3 pt-2 pb-1">
         <button
           type="button"
           onClick={onClose}
-          style={{ minWidth: 48, minHeight: 48 }}
+          style={{ minWidth: 44, minHeight: 44 }}
           className="flex-shrink-0 flex items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800"
         >
           <ArrowLeft className="w-5 h-5" />
@@ -96,27 +97,10 @@ export default function ClaimDetailMobileHeader({
             </p>
           )}
         </div>
-
-        <button
-          type="button"
-          onClick={onUpdates}
-          style={{ minHeight: 48 }}
-          className="flex-shrink-0 px-3 text-sm font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 rounded-lg"
-        >
-          Updates
-        </button>
-        <button
-          type="button"
-          onClick={onChangeStatus}
-          style={{ minHeight: 48 }}
-          className="flex-shrink-0 px-3 text-sm font-semibold text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/20 rounded-lg"
-        >
-          Status
-        </button>
       </div>
 
       {/* Row 2: status badges */}
-      <div className="flex items-center gap-2 px-3 py-0.5 flex-wrap">
+      <div className="flex items-center gap-2 px-3 py-1 flex-wrap">
         <StatusBadge status={claim.job_status || 'New'} />
         {claim.secondary_status && <StatusBadge status={claim.secondary_status} variant="secondary" />}
         {!isClosedStatus && claim.update_status_flag && (
@@ -129,53 +113,28 @@ export default function ClaimDetailMobileHeader({
         )}
       </div>
 
-      {/* Row 3: Actions dropdown (3 dots) + Section dropdown */}
-      <div className="flex items-center gap-2 px-3 pb-2 pt-1">
+      {/* Row 3: Updates & Status + Images + Docs + More dropdown */}
+      <div className="flex items-center gap-2 px-3 pb-3 pt-1 flex-wrap">
+        <Button onClick={onUpdates} className="h-9 px-3 text-sm font-medium rounded-lg bg-green-600 hover:bg-green-700 text-white flex-shrink-0">
+          Updates & Status
+        </Button>
+        <Button onClick={() => onAction('images')} variant="outline" className="h-9 px-3 text-sm font-medium rounded-lg gap-1.5 flex-shrink-0">
+          <Image className="w-4 h-4" /> Images
+        </Button>
+        <Button onClick={() => onAction('docs')} variant="outline" className="h-9 px-3 text-sm font-medium rounded-lg gap-1.5 flex-shrink-0">
+          <FileText className="w-4 h-4" /> Docs
+        </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button
-              type="button"
-              className="flex-1 flex items-center justify-between px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-200 text-sm font-medium"
-              style={{ minHeight: 36 }}
-            >
-              <span>Actions</span>
-              <MoreVertical className="w-4 h-4 text-gray-400" />
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onAction('notes'); }}><FileText className="w-4 h-4 mr-2" />Internal Notes</DropdownMenuItem>
-            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onAction('docs'); }}><FileText className="w-4 h-4 mr-2" />Documents</DropdownMenuItem>
-            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onAction('images'); }}><Image className="w-4 h-4 mr-2" />Images</DropdownMenuItem>
-            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onAction('timelogs'); }}><Timer className="w-4 h-4 mr-2" />Time Logs</DropdownMenuItem>
-            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onAction('activity'); }}><History className="w-4 h-4 mr-2" />Activity Log</DropdownMenuItem>
-            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onAction('email'); }}><Mail className="w-4 h-4 mr-2" />Send Email</DropdownMenuItem>
-            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onAction('tasks'); }}><ListTodo className="w-4 h-4 mr-2" />Manage Tasks</DropdownMenuItem>
-            {claim.instruction_pdf_url && <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onAction('download_pdf'); }}><Download className="w-4 h-4 mr-2" />Download Instruction PDF</DropdownMenuItem>}
-            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onAction('estimate'); }}><Calculator className="w-4 h-4 mr-2" />Request Estimate</DropdownMenuItem>
-            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onAction('parts'); }}><Package className="w-4 h-4 mr-2" />Log Parts Issue</DropdownMenuItem>
-            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onAction('backorders'); }}><Package className="w-4 h-4 mr-2" />Backordered Parts</DropdownMenuItem>
-            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onAction('archive'); }} disabled={false}><Archive className="w-4 h-4 mr-2" />{claim.archived ? 'Unarchive' : 'Archive'}</DropdownMenuItem>
-            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onAction('delete'); }} className="text-red-600"><Trash2 className="w-4 h-4 mr-2" />Delete</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button
-              type="button"
-              className="flex-1 flex items-center justify-between px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-200 text-sm font-medium"
-              style={{ minHeight: 36 }}
-            >
-              <div className="flex items-center gap-2">
-                <span className="truncate">{currentSection.label}</span>
-                {isEmpty(currentSection.value, claim) && (
-                  <span className="w-2 h-2 rounded-full bg-amber-400 flex-shrink-0" />
-                )}
-              </div>
-              <ChevronDown className="w-4 h-4 text-gray-400 flex-shrink-0" />
-            </button>
+            <Button variant="outline" className="h-9 w-9 p-0 flex-shrink-0">
+              <ChevronDown className="w-4 h-4" />
+            </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56 max-h-72 overflow-y-auto">
+            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onAction('section:' + currentSection.value); }} className="font-medium bg-muted/50">
+              <span>Current Section:</span>
+              <span className="ml-2 text-muted-foreground">{currentSection.label}</span>
+            </DropdownMenuItem>
             {SECTIONS.map(section => (
               <DropdownMenuItem
                 key={section.value}
@@ -188,6 +147,17 @@ export default function ClaimDetailMobileHeader({
                 )}
               </DropdownMenuItem>
             ))}
+            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onAction('notes'); }}><FileText className="w-4 h-4 mr-2" />Internal Notes</DropdownMenuItem>
+            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onAction('timelogs'); }}><Timer className="w-4 h-4 mr-2" />Time Logs</DropdownMenuItem>
+            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onAction('activity'); }}><History className="w-4 h-4 mr-2" />Activity Log</DropdownMenuItem>
+            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onAction('email'); }}><Mail className="w-4 h-4 mr-2" />Send Email</DropdownMenuItem>
+            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onAction('tasks'); }}><ListTodo className="w-4 h-4 mr-2" />Manage Tasks</DropdownMenuItem>
+            {claim.instruction_pdf_url && <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onAction('download_pdf'); }}><Download className="w-4 h-4 mr-2" />Download Instruction PDF</DropdownMenuItem>}
+            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onAction('estimate'); }}><Calculator className="w-4 h-4 mr-2" />Request Estimate</DropdownMenuItem>
+            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onAction('parts'); }}><Package className="w-4 h-4 mr-2" />Log Parts Issue</DropdownMenuItem>
+            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onAction('backorders'); }}><Package className="w-4 h-4 mr-2" />Backordered Parts</DropdownMenuItem>
+            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onAction('archive'); }}><Archive className="w-4 h-4 mr-2" />{claim.archived ? 'Unarchive' : 'Archive'}</DropdownMenuItem>
+            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onAction('delete'); }} className="text-red-600"><Trash2 className="w-4 h-4 mr-2" />Delete</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
