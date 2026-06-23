@@ -1,8 +1,14 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { ArrowLeft, ChevronDown } from 'lucide-react';
+import React from 'react';
+import { ArrowLeft, ChevronDown, MoreVertical, FileText, Image, Mail, ListTodo, Timer, History, Package, Download, Archive, Trash2, Calculator } from 'lucide-react';
 import { formatUKRegistration } from '../shared/formatRegistration';
 import StatusBadge from '../shared/StatusBadge';
 import UpdateStatusBadge from '../shared/UpdateStatusBadge';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const SECTION_FIELDS = {
   status: ['claim_type', 'loss_date', 'vehicle_use', 'incident_location', 'circumstances'],
@@ -62,25 +68,6 @@ export default function ClaimDetailMobileHeader({
   onUpdateTracking,
   onAction,
 }) {
-  const [sectionOpen, setSectionOpen] = useState(false);
-  const sectionRef = useRef(null);
-
-  useEffect(() => {
-    const handler = (e) => {
-      if (sectionRef.current && !sectionRef.current.contains(e.target)) {
-        setSectionOpen(false);
-      }
-    };
-    if (sectionOpen) document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, [sectionOpen]);
-
-  const handleActionChange = (e) => {
-    const val = e.target.value;
-    e.target.value = '';
-    if (val) onAction(val);
-  };
-
   const currentSection = SECTIONS.find(s => s.value === claim._selectedSection) || SECTIONS[0];
 
   return (
@@ -142,64 +129,67 @@ export default function ClaimDetailMobileHeader({
         )}
       </div>
 
-      {/* Row 3: native actions picker */}
-      <div className="px-3 pb-1.5 pt-1">
-        <select
-          value=""
-          onChange={handleActionChange}
-          className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-200 px-3"
-          style={{ height: 36, fontSize: 14 }}
-        >
-          <option value="" disabled>More Actions</option>
-          <option value="notes">Internal Notes</option>
-          <option value="docs">Documents</option>
-          <option value="images">Images</option>
-          <option value="timelogs">Time Logs</option>
-          <option value="activity">Activity Log</option>
-          <option value="email">Send Email</option>
-          <option value="tasks">Manage Tasks</option>
-          {claim.instruction_pdf_url && <option value="download_pdf">Download Instruction PDF</option>}
-          <option value="estimate">Request Estimate</option>
-          <option value="parts">Log Parts Issue</option>
-          <option value="backorders">Backordered Parts</option>
-          <option value="archive">{claim.archived ? 'Unarchive' : 'Archive'}</option>
-          <option value="delete">Delete</option>
-        </select>
-      </div>
+      {/* Row 3: Actions dropdown (3 dots) + Section dropdown */}
+      <div className="flex items-center gap-2 px-3 pb-2 pt-1">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              className="flex-1 flex items-center justify-between px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-200 text-sm font-medium"
+              style={{ minHeight: 36 }}
+            >
+              <span>Actions</span>
+              <MoreVertical className="w-4 h-4 text-gray-400" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onAction('notes'); }}><FileText className="w-4 h-4 mr-2" />Internal Notes</DropdownMenuItem>
+            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onAction('docs'); }}><FileText className="w-4 h-4 mr-2" />Documents</DropdownMenuItem>
+            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onAction('images'); }}><Image className="w-4 h-4 mr-2" />Images</DropdownMenuItem>
+            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onAction('timelogs'); }}><Timer className="w-4 h-4 mr-2" />Time Logs</DropdownMenuItem>
+            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onAction('activity'); }}><History className="w-4 h-4 mr-2" />Activity Log</DropdownMenuItem>
+            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onAction('email'); }}><Mail className="w-4 h-4 mr-2" />Send Email</DropdownMenuItem>
+            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onAction('tasks'); }}><ListTodo className="w-4 h-4 mr-2" />Manage Tasks</DropdownMenuItem>
+            {claim.instruction_pdf_url && <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onAction('download_pdf'); }}><Download className="w-4 h-4 mr-2" />Download Instruction PDF</DropdownMenuItem>}
+            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onAction('estimate'); }}><Calculator className="w-4 h-4 mr-2" />Request Estimate</DropdownMenuItem>
+            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onAction('parts'); }}><Package className="w-4 h-4 mr-2" />Log Parts Issue</DropdownMenuItem>
+            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onAction('backorders'); }}><Package className="w-4 h-4 mr-2" />Backordered Parts</DropdownMenuItem>
+            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onAction('archive'); }} disabled={false}><Archive className="w-4 h-4 mr-2" />{claim.archived ? 'Unarchive' : 'Archive'}</DropdownMenuItem>
+            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onAction('delete'); }} className="text-red-600"><Trash2 className="w-4 h-4 mr-2" />Delete</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
 
-      {/* Row 4: custom section picker */}
-      <div className="px-3 pb-2 relative" ref={sectionRef}>
-        <button
-          type="button"
-          onClick={() => setSectionOpen(o => !o)}
-          className="w-full flex items-center justify-between rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-200 px-3"
-          style={{ height: 36, fontSize: 14 }}
-        >
-          <div className="flex items-center gap-2">
-            <span>{currentSection.label}</span>
-            {isEmpty(currentSection.value, claim) && (
-              <span className="w-2 h-2 rounded-full bg-amber-400 flex-shrink-0" />
-            )}
-          </div>
-          <ChevronDown className="w-4 h-4 text-gray-400 flex-shrink-0" />
-        </button>
-        {sectionOpen && (
-          <div className="absolute left-3 right-3 top-full mt-1 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 max-h-72 overflow-y-auto">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              className="flex-1 flex items-center justify-between px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-200 text-sm font-medium"
+              style={{ minHeight: 36 }}
+            >
+              <div className="flex items-center gap-2">
+                <span className="truncate">{currentSection.label}</span>
+                {isEmpty(currentSection.value, claim) && (
+                  <span className="w-2 h-2 rounded-full bg-amber-400 flex-shrink-0" />
+                )}
+              </div>
+              <ChevronDown className="w-4 h-4 text-gray-400 flex-shrink-0" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56 max-h-72 overflow-y-auto">
             {SECTIONS.map(section => (
-              <button
+              <DropdownMenuItem
                 key={section.value}
-                type="button"
-                onClick={() => { onAction('section:' + section.value); setSectionOpen(false); }}
-                className={`w-full flex items-center justify-between px-3 py-2.5 text-left text-sm hover:bg-gray-50 dark:hover:bg-gray-800 ${claim._selectedSection === section.value ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 font-medium' : 'text-gray-800 dark:text-gray-200'}`}
+                onSelect={() => { onAction('section:' + section.value); }}
+                className={claim._selectedSection === section.value ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : ''}
               >
-                <span>{section.label}</span>
+                <span className="flex-1">{section.label}</span>
                 {isEmpty(section.value, claim) && (
                   <span className="w-2 h-2 rounded-full bg-amber-400 flex-shrink-0 ml-2" />
                 )}
-              </button>
+              </DropdownMenuItem>
             ))}
-          </div>
-        )}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
   );
