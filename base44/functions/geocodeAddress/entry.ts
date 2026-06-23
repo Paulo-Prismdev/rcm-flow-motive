@@ -126,6 +126,90 @@ Deno.serve(async (req) => {
       return Response.json(addressData);
     }
 
+    // ── DISTANCE MATRIX: calculate driving time/distance from origin to multiple destinations ──
+    if (action === 'distance_matrix') {
+      const { origin, destinations } = body;
+      if (!origin || !destinations || !Array.isArray(destinations) || destinations.length === 0) {
+        return Response.json({ error: 'origin and destinations array are required' }, { status: 400 });
+      }
+
+      const BATCH_SIZE = 25;
+      const results = [];
+
+      for (let i = 0; i < destinations.length; i += BATCH_SIZE) {
+        const batch = destinations.slice(i, i + BATCH_SIZE);
+        const destStr = batch.map(d => `${d.lat},${d.lng}`).join('|');
+
+        const params = new URLSearchParams({
+          origins: `${origin.lat},${origin.lng}`,
+          destinations: destStr,
+          mode: 'driving',
+          units: 'imperial',
+          key: GOOGLE_API_KEY
+        });
+
+        const response = await fetch(
+          `https://maps.googleapis.com/maps/api/distancematrix/json?${params}`,
+          { signal: AbortSignal.timeout(15000) }
+        );
+
+        if (!response.ok) {
+          throw new Error(`Google Distance Matrix API error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        const elements = data.rows?.[0]?.elements || [];
+        elements.forEach((el, idx) => {
+          results.push({
+            index: i + idx,
+            duration_text: el.duration?.text || null,
+            duration_seconds: el.duration?.value || null,
+            distance_text: el.distance?.text || null,
+            distance_meters: el.distance?.value || null,
+            reachable: el.status === 'OK'
+          });
+        });
+      }
+
+      return Response.json({ results });
+    }
+
+    // ── DIRECTIONS: get driving route polyline between two points ──
+    if (action === 'directions') {
+      const { origin, destination } = body;
+      if (!origin || !destination) {
+        return Response.json({ error: 'origin and destination are required' }, { status: 400 });
+      }
+
+      const params = new URLSearchParams({
+        origin: `${origin.lat},${origin.lng}`,
+        destination: `${destination.lat},${destination.lng}`,
+        mode: 'driving',
+        key: GOOGLE_API_KEY
+      });
+
+      const response = await fetch(
+        `https://maps.googleapis.com/maps/api/directions/json?${params}`,
+        { signal: AbortSignal.timeout(10000) }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Google Directions API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      if (data.status === 'OK' && data.routes?.[0]) {
+        const route = data.routes[0];
+        return Response.json({
+          points: route.overview_polyline?.points || null,
+          duration_text: route.legs?.[0]?.duration?.text || null,
+          distance_text: route.legs?.[0]?.distance?.text || null
+        });
+      }
+
+      return Response.json({ points: null });
+    }
+
     // ── GEOCODE (default): convert an address string to coordinates + components ──
     const address = body.address;
     if (!address || address.trim() === '') {
