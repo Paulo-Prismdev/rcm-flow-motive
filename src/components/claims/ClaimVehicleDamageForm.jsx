@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import AddressLookupInput from '../shared/AddressLookupInput';
 
 export default function ClaimVehicleDamageForm({ claim, onSave, onCancel, mode = 'damage' }) {
   const isLocationOnly = mode === 'location';
@@ -12,6 +13,13 @@ export default function ClaimVehicleDamageForm({ claim, onSave, onCancel, mode =
     unroadworthy: claim.unroadworthy || false,
     vehicle_location: claim.vehicle_location || '',
   });
+
+  const handleVehicleLocationChange = (addressData) => {
+    setFormData(prev => ({
+      ...prev,
+      vehicle_location: addressData.display_name || addressData.address || ''
+    }));
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -34,10 +42,10 @@ export default function ClaimVehicleDamageForm({ claim, onSave, onCancel, mode =
 
       <div>
         <label className="block text-sm font-medium mb-2">Vehicle Location</label>
-        <Input
+        <AddressLookupInput
           value={formData.vehicle_location}
-          onChange={(e) => setFormData({ ...formData, vehicle_location: e.target.value })}
-          placeholder="Current location of the vehicle..."
+          onChange={handleVehicleLocationChange}
+          placeholder="Start typing address or postcode..."
           className="neomorph-inset"
         />
       </div>
