@@ -3,34 +3,27 @@ import { X, Eye, Download, Sparkles, Loader, FileText, Upload } from 'lucide-rea
 import { Button } from '@/components/ui/button';
 import FileViewer from './FileViewer';
 import AIExtractConfirmDialog from './AIExtractConfirmDialog';
+import { useFileUpload } from '@/hooks/useFileUpload';
+import UploadProgressList from './UploadProgressList';
 import { base44 } from '@/api/base44Client';
 
 export default function FileAttachmentModal({ fileUrls = [], onAdd, onRemove, isOpen, onClose, enableAI = false, analysisType = 'general', onAIExtract = null, existingData = {} }) {
   const [viewingFile, setViewingFile] = useState(null);
   const [analyzingFile, setAnalyzingFile] = useState(null);
   const [aiExtractDialog, setAiExtractDialog] = useState({ isOpen: false, data: null });
-  const [isUploading, setIsUploading] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef(null);
 
-  const handleUpload = async (files) => {
-    if (!files || files.length === 0) return;
-    setIsUploading(true);
-    const newUrls = [];
-    for (const file of Array.from(files)) {
-      const result = await base44.integrations.Core.UploadFile({ file });
-      newUrls.push(result.file_url);
-    }
-    if (onAdd) onAdd(newUrls);
-    setIsUploading(false);
-  };
+  const { uploads, isUploading, uploadFiles, retryUpload } = useFileUpload({
+    onComplete: (urls) => { if (onAdd) onAdd(urls); },
+  });
 
   const handleDragOver = (e) => { e.preventDefault(); setIsDragging(true); };
   const handleDragLeave = (e) => { e.preventDefault(); setIsDragging(false); };
   const handleDrop = async (e) => {
     e.preventDefault();
     setIsDragging(false);
-    await handleUpload(e.dataTransfer.files);
+    await uploadFiles(e.dataTransfer.files);
   };
 
   if (!isOpen) return null;
@@ -326,7 +319,7 @@ export default function FileAttachmentModal({ fileUrls = [], onAdd, onRemove, is
               {isUploading ? (
                 <div className="flex flex-col items-center gap-2 text-gray-500 dark:text-gray-400">
                   <Loader className="w-6 h-6 animate-spin" />
-                  <span className="text-sm">Uploading...</span>
+                  <span className="text-sm">Uploading {uploads.filter(u => u.status === 'uploading').length} of {uploads.length}...</span>
                 </div>
               ) : (
                 <div className="flex flex-col items-center gap-2 text-gray-500 dark:text-gray-400">
@@ -340,11 +333,18 @@ export default function FileAttachmentModal({ fileUrls = [], onAdd, onRemove, is
                 type="file"
                 multiple
                 className="sr-only"
-                onChange={(e) => { handleUpload(e.target.files); e.target.value = ''; }}
+                onChange={(e) => { uploadFiles(e.target.files); e.target.value = ''; }}
                 disabled={isUploading}
               />
             </div>
           </div>
+
+          {/* Upload Progress */}
+          {uploads.length > 0 && (
+            <div className="px-8 pb-2 flex-shrink-0">
+              <UploadProgressList uploads={uploads} onRetry={retryUpload} />
+            </div>
+          )}
 
           {/* Files List - Scrollable */}
           <div className="flex-1 overflow-y-auto px-8 py-6">

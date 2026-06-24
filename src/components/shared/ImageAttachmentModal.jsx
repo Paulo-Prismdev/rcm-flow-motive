@@ -1,35 +1,22 @@
 import React, { useState, useRef } from 'react';
 import { X, Upload, Loader, Image, ZoomIn } from 'lucide-react';
-import { base44 } from '@/api/base44Client';
+import { useFileUpload } from '@/hooks/useFileUpload';
+import UploadProgressList from './UploadProgressList';
 
 export default function ImageAttachmentModal({ imageUrls = [], onAdd, onRemove, isOpen, onClose }) {
-  const [isUploading, setIsUploading] = useState(false);
   const [viewingImage, setViewingImage] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef(null);
 
+  const { uploads, isUploading, uploadFiles, retryUpload } = useFileUpload({
+    accept: 'image',
+    onComplete: (urls) => { if (onAdd) onAdd(urls); },
+  });
+
   if (!isOpen) return null;
 
-  const uploadImages = async (files) => {
-    if (!files || files.length === 0) return;
-    const imageFiles = Array.from(files).filter(f => f.type.startsWith('image/'));
-    if (imageFiles.length === 0) {
-      alert('Please select image files only (JPG, PNG, GIF, WebP, etc.)');
-      return;
-    }
-
-    setIsUploading(true);
-    const newUrls = [];
-    for (const file of imageFiles) {
-      const result = await base44.integrations.Core.UploadFile({ file });
-      newUrls.push(result.file_url);
-    }
-    if (onAdd) onAdd(newUrls);
-    setIsUploading(false);
-  };
-
   const handleFileChange = async (e) => {
-    await uploadImages(e.target.files);
+    await uploadFiles(e.target.files);
     e.target.value = '';
   };
 
@@ -38,7 +25,7 @@ export default function ImageAttachmentModal({ imageUrls = [], onAdd, onRemove, 
   const handleDrop = async (e) => {
     e.preventDefault();
     setIsDragging(false);
-    await uploadImages(e.dataTransfer.files);
+    await uploadFiles(e.dataTransfer.files);
   };
 
   return (
@@ -99,7 +86,7 @@ export default function ImageAttachmentModal({ imageUrls = [], onAdd, onRemove, 
               {isUploading ? (
                 <div className="flex flex-col items-center gap-2 text-gray-500 dark:text-gray-400">
                   <Loader className="w-6 h-6 animate-spin" />
-                  <span className="text-sm">Uploading...</span>
+                  <span className="text-sm">Uploading {uploads.filter(u => u.status === 'uploading').length} of {uploads.length}...</span>
                 </div>
               ) : (
                 <div className="flex flex-col items-center gap-3 text-gray-500 dark:text-gray-400">
@@ -121,6 +108,13 @@ export default function ImageAttachmentModal({ imageUrls = [], onAdd, onRemove, 
               />
             </div>
           </div>
+
+          {/* Upload Progress */}
+          {uploads.length > 0 && (
+            <div className="px-8 pb-2 flex-shrink-0">
+              <UploadProgressList uploads={uploads} onRetry={retryUpload} />
+            </div>
+          )}
 
           {/* Image Grid - Scrollable */}
           <div className="flex-1 overflow-y-auto px-8 py-6">

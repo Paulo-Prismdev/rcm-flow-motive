@@ -3,6 +3,8 @@ import { base44 } from '@/api/base44Client';
 import { Upload, FileText, X, Loader, Eye, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import FileViewer from './FileViewer';
+import UploadProgressList from './UploadProgressList';
+import { useFileUpload } from '@/hooks/useFileUpload';
 
 export default function FileUpload({ 
   value = [], 
@@ -11,33 +13,20 @@ export default function FileUpload({
   analysisType = 'general',
   onAIExtract = null 
 }) {
-  const [isUploading, setIsUploading] = useState(false);
   const [viewingFile, setViewingFile] = useState(null);
   const [analyzingFile, setAnalyzingFile] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
 
-  const uploadFiles = async (files) => {
-    if (!files || files.length === 0) return;
-
-    setIsUploading(true);
-    const currentUrls = Array.isArray(value) ? [...value] : [];
-
-    try {
-      for (const file of files) {
-        const result = await base44.integrations.Core.UploadFile({ file });
-        currentUrls.push(result.file_url);
-      }
-      onChange(currentUrls);
-    } catch (error) {
-      console.error("File upload failed:", error);
-    } finally {
-      setIsUploading(false);
-    }
-  };
+  const { uploads, isUploading, uploadFiles: doUpload, retryUpload } = useFileUpload({
+    onComplete: (urls) => {
+      const currentUrls = Array.isArray(value) ? [...value] : [];
+      onChange([...currentUrls, ...urls]);
+    },
+  });
 
   const handleFileChange = async (event) => {
     const files = event.target.files;
-    await uploadFiles(files);
+    await doUpload(files);
   };
 
   const handleDragEnter = (e) => {
@@ -63,7 +52,7 @@ export default function FileUpload({
     setIsDragging(false);
 
     const files = e.dataTransfer.files;
-    await uploadFiles(files);
+    await doUpload(files);
   };
 
   const handleRemoveFile = (urlToRemove) => {
@@ -218,7 +207,7 @@ export default function FileUpload({
               {isUploading ? (
                 <>
                   <Loader className="w-8 h-8 animate-spin" />
-                  <p>Uploading...</p>
+                  <p>Uploading {uploads.filter(u => u.status === 'uploading').length} of {uploads.length}...</p>
                 </>
               ) : (
                 <>
@@ -243,6 +232,11 @@ export default function FileUpload({
             />
           </label>
         </div>
+
+        {/* Upload Progress */}
+        {uploads.length > 0 && (
+          <UploadProgressList uploads={uploads} onRetry={retryUpload} />
+        )}
 
         {(value || []).length > 0 && (
           <div className="space-y-2">
