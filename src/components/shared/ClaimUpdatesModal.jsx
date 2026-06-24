@@ -136,6 +136,8 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
     return currentUser?.id === update.created_by_id || currentUser?.role === 'admin' || currentUser?.role === 'super_admin' || currentUser?.user_type === 'internal';
   };
 
+  const getDisplayName = (user) => user?.display_name || user?.full_name || user?.email || 'Unknown';
+
   const resetForm = () => {
     setNewUpdate({ update_type: 'Other', description: '', next_steps: '', due_date_for_next_action: '', new_status: currentStatus || '', new_secondary_status: '' });
     setSendEmail(false); setSelectedEmails([]); setShowForm(false); setReplyToId(null); setTaggedUsers([]); setSubmitError(''); setShowFollowUp(false);
@@ -168,7 +170,7 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
   const insertMention = (user) => {
     const textBeforeMention = newUpdate.description.substring(0, mentionPosition - mentionQuery.length - 1);
     const textAfterMention = newUpdate.description.substring(mentionPosition);
-    const newText = `${textBeforeMention}@${user.full_name} ${textAfterMention}`;
+    const newText = `${textBeforeMention}@${getDisplayName(user)} ${textAfterMention}`;
     setNewUpdate({ ...newUpdate, description: newText });
     setTaggedUsers(prev => prev.includes(user.id) ? prev : [...prev, user.id]);
     setShowMentionPopup(false);
@@ -282,16 +284,16 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
                     <div className="absolute z-50 mt-1 w-56 bg-popover border border-border rounded-md shadow-lg max-h-48 overflow-y-auto">
                       <Command>
                         <CommandList>
-                          {allUsers.filter(u => u.full_name?.toLowerCase().includes(mentionQuery.toLowerCase())).slice(0, 8).map(user => (
+                          {allUsers.filter(u => (u.display_name || u.full_name || u.email)?.toLowerCase().includes(mentionQuery.toLowerCase())).slice(0, 8).map(user => (
                             <CommandItem key={user.id} onSelect={() => insertMention(user)} className="flex items-center gap-2 cursor-pointer hover:bg-accent px-2 py-1.5">
-                              <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-xs font-medium">{user.full_name?.[0]}</div>
+                              <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-xs font-medium">{(getDisplayName(user))[0]?.toUpperCase()}</div>
                               <div className="flex flex-col min-w-0">
-                                <span className="text-sm truncate">{user.full_name}</span>
+                                <span className="text-sm truncate">{getDisplayName(user)}</span>
                                 <span className="text-[10px] text-muted-foreground truncate">{user.email}</span>
                               </div>
                             </CommandItem>
                           ))}
-                          {allUsers.filter(u => u.full_name?.toLowerCase().includes(mentionQuery.toLowerCase())).length === 0 && (
+                          {allUsers.filter(u => (u.display_name || u.full_name || u.email)?.toLowerCase().includes(mentionQuery.toLowerCase())).length === 0 && (
                             <div className="px-2 py-1.5 text-sm text-muted-foreground">No users found</div>
                           )}
                         </CommandList>
@@ -341,7 +343,7 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
                   <div className="flex flex-wrap gap-2">
                     {taggedUsers.map(userId => {
                        const user = allUsers.find(u => u.id === userId);
-                       return user ? <Badge key={userId} variant="secondary" className="gap-1.5 px-2 py-1"><span className="text-sm">{user.full_name}</span><span className="text-[10px] text-muted-foreground">({user.email})</span><X className="w-3 h-3 cursor-pointer" onClick={() => toggleUserTag(userId)} /></Badge> : null;
+                       return user ? <Badge key={userId} variant="secondary" className="gap-1.5 px-2 py-1"><span className="text-sm">{getDisplayName(user)}</span><span className="text-[10px] text-muted-foreground">({user.email})</span><X className="w-3 h-3 cursor-pointer" onClick={() => toggleUserTag(userId)} /></Badge> : null;
                      })}
                   </div>
                 )}
