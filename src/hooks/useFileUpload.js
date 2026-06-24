@@ -59,7 +59,7 @@ function uploadFileWithProgress(file, onProgress) {
 
     xhr.onerror = () => reject(new Error('Network error during upload'));
     xhr.ontimeout = () => reject(new Error('Upload timed out'));
-    xhr.timeout = 120000;
+    xhr.timeout = 300000; // 5 minutes — generous for slow connections / large batches
 
     xhr.send(formData);
   });
@@ -172,8 +172,22 @@ export function useFileUpload({ onComplete, accept = 'all', label = 'file' } = {
 
     setIsUploading(true);
 
-    // Upload all files in parallel for much faster batch uploads
-    const results = await Promise.all(fileArray.map(file => uploadSingleFile(file)));
+    // Upload with limited concurrency to avoid bandwidth contention and timeouts
+    const MAX_CONCURRENT = 3;
+    const results = [];
+    let index = 0;
+
+    async function runNext() {
+      while (index < fileArray.length) {
+        const currentIndex = index++;
+        const url = await uploadSingleFile(fileArray[currentIndex]);
+        results[currentIndex] = url;
+      }
+    }
+
+    const workers = Array.from({ length: Math.min(MAX_CONCURRENT, fileArray.length) }, () => runNext());
+    await Promise.all(workers);
+
     const successfulUrls = results.filter(url => url !== null);
 
     const failedCount = fileArray.length - successfulUrls.length;
