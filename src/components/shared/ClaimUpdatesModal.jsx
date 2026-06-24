@@ -285,7 +285,10 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
                           {allUsers.filter(u => u.full_name?.toLowerCase().includes(mentionQuery.toLowerCase())).slice(0, 8).map(user => (
                             <CommandItem key={user.id} onSelect={() => insertMention(user)} className="flex items-center gap-2 cursor-pointer hover:bg-accent px-2 py-1.5">
                               <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-xs font-medium">{user.full_name?.[0]}</div>
-                              <span className="text-sm">{user.full_name}</span>
+                              <div className="flex flex-col min-w-0">
+                                <span className="text-sm truncate">{user.full_name}</span>
+                                <span className="text-[10px] text-muted-foreground truncate">{user.email}</span>
+                              </div>
                             </CommandItem>
                           ))}
                           {allUsers.filter(u => u.full_name?.toLowerCase().includes(mentionQuery.toLowerCase())).length === 0 && (
@@ -337,9 +340,9 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
                 {taggedUsers.length > 0 && (
                   <div className="flex flex-wrap gap-2">
                     {taggedUsers.map(userId => {
-                      const user = allUsers.find(u => u.id === userId);
-                      return user ? <Badge key={userId} variant="secondary" className="gap-1">{user.full_name}<X className="w-3 h-3 cursor-pointer" onClick={() => toggleUserTag(userId)} /></Badge> : null;
-                    })}
+                       const user = allUsers.find(u => u.id === userId);
+                       return user ? <Badge key={userId} variant="secondary" className="gap-1.5 px-2 py-1"><span className="text-sm">{user.full_name}</span><span className="text-[10px] text-muted-foreground">({user.email})</span><X className="w-3 h-3 cursor-pointer" onClick={() => toggleUserTag(userId)} /></Badge> : null;
+                     })}
                   </div>
                 )}
 
