@@ -11,6 +11,7 @@ import {
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import AddressLookupInput from '@/components/shared/AddressLookupInput';
+import { geocodeAddress } from '@/functions/geocodeAddress';
 
 // ── Leaflet icon setup ──
 delete L.Icon.Default.prototype._getIconUrl;
@@ -138,7 +139,7 @@ export default function BodyshopMap() {
           const addressParts = [b.address_line_1, b.address_line_2, b.town, b.county, b.postcode].filter(Boolean);
           const fullAddress = addressParts.join(', ');
           try {
-            const response = await base44.functions.invoke('geocodeAddress', { address: fullAddress });
+            const response = await geocodeAddress({ address: fullAddress });
             const data = response?.data || response;
             if (data?.latitude && data?.longitude) {
               return { id: b.id, lat: data.latitude, lng: data.longitude };
@@ -179,7 +180,7 @@ export default function BodyshopMap() {
           const c = getCoords(b);
           return { lat: c.lat, lng: c.lng };
         });
-        const response = await base44.functions.invoke('geocodeAddress', {
+        const response = await geocodeAddress({
           action: 'distance_matrix', origin: customerLocation, destinations
         });
         const data = response?.data || response;
@@ -215,7 +216,7 @@ export default function BodyshopMap() {
 
     const fetchRoute = async () => {
       try {
-        const response = await base44.functions.invoke('geocodeAddress', {
+        const response = await geocodeAddress({
           action: 'directions',
           origin: customerLocation,
           destination: getCoords(selectedBodyshop)
