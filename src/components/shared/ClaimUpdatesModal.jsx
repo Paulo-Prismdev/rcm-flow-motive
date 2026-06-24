@@ -235,12 +235,12 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
               <Plus className="w-4 h-4" />Add New Update
             </Button>
           ) : (
-            <div className="bg-muted/30 border border-border rounded-lg p-4 border-l-4 border-l-primary">
-              <div className="flex items-center justify-between mb-3">
+            <div className="bg-muted/30 border border-border rounded-lg p-3">
+              <div className="flex items-center justify-between mb-2">
                 <h3 className="font-semibold text-sm text-foreground">{replyToId ? 'Reply to Update' : 'Add New Update'}</h3>
                 <Button type="button" variant="ghost" size="sm" onClick={resetForm}><X className="w-4 h-4" /></Button>
               </div>
-              <form onSubmit={handleSubmit} className="space-y-3">
+              <form onSubmit={handleSubmit} className="space-y-2">
                 {!replyToId && (
                   <>
                     <div>
