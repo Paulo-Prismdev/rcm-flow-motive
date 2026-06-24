@@ -160,12 +160,10 @@ export function useFileUpload({ onComplete, accept = 'all', label = 'file' } = {
     }
 
     setIsUploading(true);
-    const successfulUrls = [];
 
-    for (const file of fileArray) {
-      const url = await uploadSingleFile(file);
-      if (url) successfulUrls.push(url);
-    }
+    // Upload all files in parallel for much faster batch uploads
+    const results = await Promise.all(fileArray.map(file => uploadSingleFile(file)));
+    const successfulUrls = results.filter(url => url !== null);
 
     const failedCount = fileArray.length - successfulUrls.length;
     if (successfulUrls.length > 0 && onComplete) {
