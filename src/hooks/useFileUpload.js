@@ -1,5 +1,5 @@
-import { useState, useCallback, useRef } from 'react';
-import { base44 } from '@/api/base44Client';
+import { useState, useCallback } from 'react';
+import { appParams } from '@/lib/app-params';
 import { toast } from '@/components/ui/use-toast';
 
 const MAX_FILE_SIZE_MB = 25;
@@ -15,55 +15,69 @@ function genId() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 }
 
+/**
+ * Uploads a file using XMLHttpRequest to get real upload progress events.
+ * Replaces the base44 SDK's axios-based call (which can't report progress).
+ */
+function uploadFileWithProgress(file, onProgress) {
+  return new Promise((resolve, reject) => {
+    const { serverUrl, appId, token } = appParams;
+    const authToken = token || localStorage.getItem('base44_access_token');
+
+    const formData = new FormData();
+    formData.append('file', file, file.name);
+
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', `${serverUrl}/api/apps/${appId}/integration-endpoints/Core/UploadFile`);
+    xhr.setRequestHeader('X-App-Id', String(appId));
+    if (authToken) {
+      xhr.setRequestHeader('Authorization', `Bearer ${authToken}`);
+    }
+
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable) {
+        onProgress(Math.round((e.loaded / e.total) * 100));
+      }
+    };
+
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try {
+          resolve(JSON.parse(xhr.responseText));
+        } catch {
+          reject(new Error('Invalid response from server'));
+        }
+      } else {
+        let msg = `Upload failed (${xhr.status})`;
+        try {
+          const errData = JSON.parse(xhr.responseText);
+          msg = errData.detail || errData.message || msg;
+        } catch { /* use default */ }
+        reject(new Error(msg));
+      }
+    };
+
+    xhr.onerror = () => reject(new Error('Network error during upload'));
+    xhr.ontimeout = () => reject(new Error('Upload timed out'));
+    xhr.timeout = 120000;
+
+    xhr.send(formData);
+  });
+}
+
 export function useFileUpload({ onComplete, accept = 'all', label = 'file' } = {}) {
   const [uploads, setUploads] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
-  const progressTimers = useRef(new Map());
 
   const updateUpload = useCallback((id, patch) => {
     setUploads(prev => prev.map(u => u.id === id ? { ...u, ...patch } : u));
   }, []);
-
-  const clearTimers = useCallback((id) => {
-    const timer = progressTimers.current.get(id);
-    if (timer) {
-      clearInterval(timer);
-      progressTimers.current.delete(id);
-    }
-  }, []);
-
-  const simulateProgress = useCallback((id, fileSize) => {
-    // Estimate upload duration: ~2s per MB, minimum 1.5s
-    const estimatedMs = Math.max(1500, (fileSize / (1024 * 1024)) * 2000);
-    const intervalMs = 200;
-    const totalSteps = estimatedMs / intervalMs;
-    const incrementPerStep = 90 / totalSteps;
-
-    let current = 0;
-    const timer = setInterval(() => {
-      current += incrementPerStep;
-      if (current < 90) {
-        // Normal acceleration towards 90%
-        const eased = current < 70 ? current : 70 + (current - 70) * 0.3;
-        updateUpload(id, { progress: Math.round(eased) });
-      } else {
-        // Keep creeping slowly towards 99% so the bar never looks stuck
-        // while the actual upload finishes
-        current += 0.4;
-        const capped = Math.min(99, current);
-        updateUpload(id, { progress: Math.round(capped) });
-        if (capped >= 99) clearTimers(id);
-      }
-    }, intervalMs);
-    progressTimers.current.set(id, timer);
-  }, [updateUpload, clearTimers]);
 
   const uploadSingleFile = useCallback(async (file) => {
     const uploadId = genId();
     const fileLabel = file.name || label;
     const sizeLabel = formatFileSize(file.size);
 
-    // Size validation
     if (file.size > MAX_FILE_SIZE_BYTES) {
       const entry = {
         id: uploadId,
@@ -92,16 +106,15 @@ export function useFileUpload({ onComplete, accept = 'all', label = 'file' } = {
       file,
     };
     setUploads(prev => [...prev, entry]);
-    simulateProgress(uploadId, file.size);
 
     try {
-      const result = await base44.integrations.Core.UploadFile({ file });
-      clearTimers(uploadId);
+      const result = await uploadFileWithProgress(file, (progress) => {
+        updateUpload(uploadId, { progress });
+      });
       updateUpload(uploadId, { status: 'done', progress: 100, url: result.file_url });
       return result.file_url;
     } catch (error) {
-      clearTimers(uploadId);
-      const errorMsg = error?.response?.data?.message || error?.message || 'Upload failed';
+      const errorMsg = error?.message || 'Upload failed';
       updateUpload(uploadId, { status: 'failed', error: errorMsg });
       toast({
         title: 'Upload failed',
@@ -110,18 +123,18 @@ export function useFileUpload({ onComplete, accept = 'all', label = 'file' } = {
       });
       return null;
     }
-  }, [updateUpload, clearTimers, simulateProgress, label]);
+  }, [updateUpload, label]);
 
   const retryUpload = useCallback(async (uploadId) => {
     const uploadEntry = uploads.find(u => u.id === uploadId);
     if (!uploadEntry?.file) return;
 
     updateUpload(uploadId, { status: 'uploading', progress: 0, error: undefined });
-    simulateProgress(uploadId, uploadEntry.file.size);
 
     try {
-      const result = await base44.integrations.Core.UploadFile({ file: uploadEntry.file });
-      clearTimers(uploadId);
+      const result = await uploadFileWithProgress(uploadEntry.file, (progress) => {
+        updateUpload(uploadId, { progress });
+      });
       updateUpload(uploadId, { status: 'done', progress: 100, url: result.file_url, error: undefined });
       toast({
         title: 'Upload complete',
@@ -129,8 +142,7 @@ export function useFileUpload({ onComplete, accept = 'all', label = 'file' } = {
       });
       return result.file_url;
     } catch (error) {
-      clearTimers(uploadId);
-      const errorMsg = error?.response?.data?.message || error?.message || 'Upload failed';
+      const errorMsg = error?.message || 'Upload failed';
       updateUpload(uploadId, { status: 'failed', error: errorMsg });
       toast({
         title: 'Retry failed',
@@ -139,14 +151,13 @@ export function useFileUpload({ onComplete, accept = 'all', label = 'file' } = {
       });
       return null;
     }
-  }, [uploads, updateUpload, clearTimers, simulateProgress]);
+  }, [uploads, updateUpload]);
 
   const uploadFiles = useCallback(async (files) => {
     if (!files || files.length === 0) return [];
 
     let fileArray = Array.from(files);
 
-    // Filter by accepted type if specified
     if (accept === 'image') {
       fileArray = fileArray.filter(f => f.type.startsWith('image/'));
       if (fileArray.length === 0) {
@@ -188,9 +199,8 @@ export function useFileUpload({ onComplete, accept = 'all', label = 'file' } = {
   }, [uploadSingleFile, onComplete]);
 
   const clearUploads = useCallback(() => {
-    progressTimers.current.forEach((_, id) => clearTimers(id));
     setUploads([]);
-  }, [clearTimers]);
+  }, []);
 
   return {
     uploads,
