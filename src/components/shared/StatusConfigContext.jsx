@@ -15,23 +15,23 @@ export const useStatusConfigs = () => {
 export const StatusConfigProvider = ({ children }) => {
   const { data: claimStatuses = [] } = useQuery({ 
     queryKey: ['ClaimStatusConfig'], 
-    queryFn: () => base44.entities.ClaimStatusConfig.list(), 
-    staleTime: Infinity 
+    queryFn: () => base44.entities.ClaimStatusConfig.list('sort_order'), 
+    staleTime: 5 * 60 * 1000 
   });
   const { data: partStatuses = [] } = useQuery({ 
     queryKey: ['PartStatusConfig'], 
-    queryFn: () => base44.entities.PartStatusConfig.list(), 
-    staleTime: Infinity 
+    queryFn: () => base44.entities.PartStatusConfig.list('sort_order'), 
+    staleTime: 5 * 60 * 1000 
   });
   const { data: estimateStatuses = [] } = useQuery({ 
     queryKey: ['EstimateStatusConfig'], 
-    queryFn: () => base44.entities.EstimateStatusConfig.list(), 
-    staleTime: Infinity 
+    queryFn: () => base44.entities.EstimateStatusConfig.list('sort_order'), 
+    staleTime: 5 * 60 * 1000 
   });
   const { data: engineeringStatuses = [] } = useQuery({ 
     queryKey: ['EngineeringStatusConfig'], 
-    queryFn: () => base44.entities.EngineeringStatusConfig.list(), 
-    staleTime: Infinity 
+    queryFn: () => base44.entities.EngineeringStatusConfig.list('sort_order'), 
+    staleTime: 5 * 60 * 1000 
   });
 
   const allStatuses = useMemo(() => {
