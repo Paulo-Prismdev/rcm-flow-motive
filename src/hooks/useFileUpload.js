@@ -37,19 +37,22 @@ export function useFileUpload({ onComplete, accept = 'all', label = 'file' } = {
     const estimatedMs = Math.max(1500, (fileSize / (1024 * 1024)) * 2000);
     const intervalMs = 200;
     const totalSteps = estimatedMs / intervalMs;
-    // We animate to 90% — the remaining 10% resolves on actual completion
     const incrementPerStep = 90 / totalSteps;
 
     let current = 0;
     const timer = setInterval(() => {
       current += incrementPerStep;
-      // Slow down as we approach 90% so it doesn't slam to 90 instantly
-      const eased = current < 70 ? current : 70 + (current - 70) * 0.3;
-      if (eased >= 90) {
-        updateUpload(id, { progress: 90 });
-        clearTimers(id);
-      } else {
+      if (current < 90) {
+        // Normal acceleration towards 90%
+        const eased = current < 70 ? current : 70 + (current - 70) * 0.3;
         updateUpload(id, { progress: Math.round(eased) });
+      } else {
+        // Keep creeping slowly towards 99% so the bar never looks stuck
+        // while the actual upload finishes
+        current += 0.4;
+        const capped = Math.min(99, current);
+        updateUpload(id, { progress: Math.round(capped) });
+        if (capped >= 99) clearTimers(id);
       }
     }, intervalMs);
     progressTimers.current.set(id, timer);
