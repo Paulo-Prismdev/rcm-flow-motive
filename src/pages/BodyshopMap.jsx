@@ -97,30 +97,88 @@ export default function BodyshopMap() {
   const [maxTimeFilter, setMaxTimeFilter] = useState(null);
   const [mapCenter, setMapCenter] = useState([54.5, -2.0]);
   const [mapZoom, setMapZoom] = useState(7);
+  const [geocodedCoords, setGeocodedCoords] = useState({});
+  const [isGeocoding, setIsGeocoding] = useState(false);
 
   const { data: bodyshops = [], isLoading } = useQuery({
     queryKey: ['bodyshops'],
     queryFn: () => base44.entities.Bodyshop.list(),
   });
 
-  const validBodyshops = useMemo(() =>
-    bodyshops.filter(b =>
+  // Resolve coordinates: use stored lat/lng if present, otherwise geocoded address
+  const getCoords = (b) => {
+    if (!b) return null;
+    if (b.latitude && b.longitude &&
+      !isNaN(parseFloat(b.latitude)) && !isNaN(parseFloat(b.longitude))) {
+      return { lat: parseFloat(b.latitude), lng: parseFloat(b.longitude) };
+    }
+    return geocodedCoords[b.id] || null;
+  };
+
+  // ── Geocode bodyshops that have an address but no stored coordinates ──
+  useEffect(() => {
+    if (!bodyshops.length) return;
+    let cancelled = false;
+
+    const hasStoredCoords = (b) =>
       b.latitude && b.longitude &&
-      !isNaN(parseFloat(b.latitude)) && !isNaN(parseFloat(b.longitude))
-    ), [bodyshops]);
+      !isNaN(parseFloat(b.latitude)) && !isNaN(parseFloat(b.longitude));
+
+    const toGeocode = bodyshops.filter(b =>
+      !hasStoredCoords(b) && (b.address_line_1 || b.postcode || b.town)
+    );
+
+    if (toGeocode.length === 0) return;
+
+    setIsGeocoding(true);
+
+    const run = async () => {
+      const results = await Promise.all(
+        toGeocode.map(async (b) => {
+          const addressParts = [b.address_line_1, b.address_line_2, b.town, b.county, b.postcode].filter(Boolean);
+          const fullAddress = addressParts.join(', ');
+          try {
+            const response = await base44.functions.invoke('geocodeAddress', { address: fullAddress });
+            const data = response?.data || response;
+            if (data?.latitude && data?.longitude) {
+              return { id: b.id, lat: data.latitude, lng: data.longitude };
+            }
+          } catch (err) {
+            console.error('Geocode failed for bodyshop', b.name, err);
+          }
+          return null;
+        })
+      );
+
+      if (cancelled) return;
+      const coordsMap = {};
+      results.forEach(r => {
+        if (r) coordsMap[r.id] = { lat: r.lat, lng: r.lng };
+      });
+      setGeocodedCoords(coordsMap);
+      setIsGeocoding(false);
+    };
+
+    run();
+    return () => { cancelled = true; };
+  }, [bodyshops]);
+
+  const resolvedBodyshops = useMemo(() =>
+    bodyshops.filter(b => getCoords(b) !== null),
+    [bodyshops, geocodedCoords]);
 
   // ── Fetch distance matrix when customer location is available ──
   useEffect(() => {
-    if (!customerLocation || validBodyshops.length === 0) return;
+    if (!customerLocation || resolvedBodyshops.length === 0) return;
     let cancelled = false;
 
     const fetchLogistics = async () => {
       setIsLoadingLogistics(true);
       try {
-        const destinations = validBodyshops.map(b => ({
-          lat: parseFloat(b.latitude),
-          lng: parseFloat(b.longitude)
-        }));
+        const destinations = resolvedBodyshops.map(b => {
+          const c = getCoords(b);
+          return { lat: c.lat, lng: c.lng };
+        });
         const response = await base44.functions.invoke('geocodeAddress', {
           action: 'distance_matrix', origin: customerLocation, destinations
         });
@@ -130,8 +188,8 @@ export default function BodyshopMap() {
         const logMap = {};
         if (data?.results) {
           data.results.forEach((r, idx) => {
-            if (idx < validBodyshops.length) {
-              logMap[validBodyshops[idx].id] = r;
+            if (idx < resolvedBodyshops.length) {
+              logMap[resolvedBodyshops[idx].id] = r;
             }
           });
         }
@@ -145,7 +203,7 @@ export default function BodyshopMap() {
 
     fetchLogistics();
     return () => { cancelled = true; };
-  }, [customerLocation, validBodyshops]);
+  }, [customerLocation, resolvedBodyshops, geocodedCoords]);
 
   // ── Fetch driving route polyline when a bodyshop is selected ──
   useEffect(() => {
@@ -160,10 +218,7 @@ export default function BodyshopMap() {
         const response = await base44.functions.invoke('geocodeAddress', {
           action: 'directions',
           origin: customerLocation,
-          destination: {
-            lat: parseFloat(selectedBodyshop.latitude),
-            lng: parseFloat(selectedBodyshop.longitude)
-          }
+          destination: getCoords(selectedBodyshop)
         });
         const data = response?.data || response;
         if (cancelled) return;
@@ -184,17 +239,18 @@ export default function BodyshopMap() {
     if (customerLocation) {
       setMapCenter([customerLocation.lat, customerLocation.lng]);
       setMapZoom(12);
-    } else if (validBodyshops.length > 0) {
-      const avgLat = validBodyshops.reduce((sum, b) => sum + parseFloat(b.latitude), 0) / validBodyshops.length;
-      const avgLng = validBodyshops.reduce((sum, b) => sum + parseFloat(b.longitude), 0) / validBodyshops.length;
+    } else if (resolvedBodyshops.length > 0) {
+      const coords = resolvedBodyshops.map(b => getCoords(b));
+      const avgLat = coords.reduce((sum, c) => sum + c.lat, 0) / coords.length;
+      const avgLng = coords.reduce((sum, c) => sum + c.lng, 0) / coords.length;
       setMapCenter([avgLat, avgLng]);
       setMapZoom(7);
     }
-  }, [customerLocation, validBodyshops]);
+  }, [customerLocation, resolvedBodyshops, geocodedCoords]);
 
   // ── Sorted + filtered bodyshops ──
   const sortedBodyshops = useMemo(() => {
-    let list = [...validBodyshops];
+    let list = [...resolvedBodyshops];
 
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
@@ -223,7 +279,7 @@ export default function BodyshopMap() {
     }
 
     return list;
-  }, [validBodyshops, logistics, sortBy, searchQuery, maxTimeFilter]);
+  }, [resolvedBodyshops, logistics, sortBy, searchQuery, maxTimeFilter, geocodedCoords]);
 
   const hasLogistics = Object.keys(logistics).length > 0;
 
@@ -296,10 +352,17 @@ export default function BodyshopMap() {
           </div>
         )}
 
+        {isGeocoding && (
+          <div className="mt-3 p-2 rounded-lg border border-amber-500/30 bg-amber-50/50 flex items-center gap-2">
+            <MapPinned className="w-4 h-4 text-amber-500 animate-pulse" />
+            <p className="text-xs">Resolving bodyshop addresses on the map...</p>
+          </div>
+        )}
+
         <div className="mt-3 flex items-center gap-4 text-xs">
           <div className="flex items-center gap-1.5">
             <div className="w-2.5 h-2.5 rounded-full bg-blue-500"></div>
-            <span className="text-foreground-muted">Bodyshops ({validBodyshops.length})</span>
+            <span className="text-foreground-muted">Bodyshops ({resolvedBodyshops.length})</span>
           </div>
           {customerLocation && (
             <div className="flex items-center gap-1.5">
@@ -321,11 +384,11 @@ export default function BodyshopMap() {
           <div className="flex justify-center items-center h-full">
             <Loader className="w-8 h-8 animate-spin text-accent" />
           </div>
-        ) : validBodyshops.length === 0 ? (
+        ) : resolvedBodyshops.length === 0 ? (
           <div className="flex flex-col justify-center items-center h-full text-foreground-muted">
             <MapPinned className="w-12 h-12 mb-4 opacity-50" />
-            <p>No bodyshops with location data found.</p>
-            <p className="text-sm mt-2">Add bodyshops with addresses to see them on the map.</p>
+            <p>No bodyshops with address data found.</p>
+            <p className="text-sm mt-2">Add bodyshops with an address to see them on the map.</p>
           </div>
         ) : (
           <div className="flex flex-col lg:flex-row gap-3 h-full">
@@ -420,12 +483,11 @@ export default function BodyshopMap() {
                   )}
 
                   {sortedBodyshops.map((bodyshop) => {
-                    const lat = parseFloat(bodyshop.latitude);
-                    const lng = parseFloat(bodyshop.longitude);
-                    if (isNaN(lat) || isNaN(lng)) return null;
+                    const coords = getCoords(bodyshop);
+                    if (!coords) return null;
                     const log = logistics[bodyshop.id];
                     return (
-                      <Marker key={bodyshop.id} position={[lat, lng]}
+                      <Marker key={bodyshop.id} position={[coords.lat, coords.lng]}
                         icon={selectedBodyshop?.id === bodyshop.id ? bodyshopSelectedIcon : bodyshopIcon}
                         eventHandlers={{ click: () => handleSelectBodyshop(bodyshop) }}>
                         <Tooltip sticky>
