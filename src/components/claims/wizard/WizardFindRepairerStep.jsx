@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
+import { geocodeAddress } from '@/functions/geocodeAddress';
 
 // ── Leaflet icon setup ──
 delete L.Icon.Default.prototype._getIconUrl;
@@ -94,12 +95,60 @@ export default function WizardFindRepairerStep({
   const [sortBy, setSortBy] = useState('time');
   const [maxTimeFilter, setMaxTimeFilter] = useState(null);
   const [routePoints, setRoutePoints] = useState([]);
+  const [geocodedCoords, setGeocodedCoords] = useState({});
+  const [isGeocodingBodyshops, setIsGeocodingBodyshops] = useState(false);
+
+  // ── Geocode bodyshops that lack stored coordinates ──
+  useEffect(() => {
+    const needingGeocode = bodyshops.filter(b =>
+      !(b.latitude && b.longitude) &&
+      (b.address_line_1 || b.postcode || b.town)
+    );
+    if (needingGeocode.length === 0) return;
+    let cancelled = false;
+
+    const geocodeMissing = async () => {
+      setIsGeocodingBodyshops(true);
+      const resolved = {};
+      for (const b of needingGeocode) {
+        if (cancelled) return;
+        const fullAddress = [b.address_line_1, b.address_line_2, b.town, b.county, b.postcode]
+          .filter(Boolean).join(', ');
+        try {
+          const result = await geocodeAddress({ address: fullAddress });
+          const data = result?.data || result;
+          if (data && data.latitude && data.longitude) {
+            resolved[b.id] = { latitude: data.latitude, longitude: data.longitude };
+            // Persist coordinates back to database
+            base44.entities.Bodyshop.update(b.id, {
+              latitude: data.latitude,
+              longitude: data.longitude
+            }).catch(err => console.warn('Failed to save coords for', b.name, err));
+          }
+        } catch (err) {
+          console.error('Geocode failed for', b.name, err);
+        }
+      }
+      if (!cancelled && Object.keys(resolved).length > 0) {
+        setGeocodedCoords(prev => ({ ...prev, ...resolved }));
+      }
+      setIsGeocodingBodyshops(false);
+    };
+
+    geocodeMissing();
+    return () => { cancelled = true; };
+  }, [bodyshops]);
 
   const validBodyshops = useMemo(() =>
-    bodyshops.filter(b =>
-      b.latitude && b.longitude &&
-      !isNaN(parseFloat(b.latitude)) && !isNaN(parseFloat(b.longitude))
-    ), [bodyshops]);
+    bodyshops.filter(b => {
+      const lat = b.latitude || geocodedCoords[b.id]?.latitude;
+      const lng = b.longitude || geocodedCoords[b.id]?.longitude;
+      return lat && lng && !isNaN(parseFloat(lat)) && !isNaN(parseFloat(lng));
+    }).map(b => ({
+      ...b,
+      latitude: b.latitude || geocodedCoords[b.id]?.latitude,
+      longitude: b.longitude || geocodedCoords[b.id]?.longitude
+    })), [bodyshops, geocodedCoords]);
 
   // ── Fetch distance matrix when client location is available ──
   useEffect(() => {
@@ -113,7 +162,7 @@ export default function WizardFindRepairerStep({
           lat: parseFloat(b.latitude),
           lng: parseFloat(b.longitude)
         }));
-        const response = await base44.functions.invoke('geocodeAddress', {
+        const response = await geocodeAddress({
           action: 'distance_matrix', origin: clientLocation, destinations
         });
         const data = response?.data || response;
@@ -149,7 +198,7 @@ export default function WizardFindRepairerStep({
 
     const fetchRoute = async () => {
       try {
-        const response = await base44.functions.invoke('geocodeAddress', {
+        const response = await geocodeAddress({
           action: 'directions',
           origin: clientLocation,
           destination: {
@@ -232,6 +281,12 @@ export default function WizardFindRepairerStep({
         <div className="p-3 rounded-lg border border-blue-500/30 bg-blue-50/50 flex items-center gap-2">
           <Navigation className="w-4 h-4 text-blue-500 animate-pulse" />
           <p className="text-xs">Calculating driving distances to all repairers...</p>
+        </div>
+      )}
+      {isGeocodingBodyshops && (
+        <div className="p-3 rounded-lg border border-blue-500/30 bg-blue-50/50 flex items-center gap-2">
+          <MapPinned className="w-4 h-4 text-blue-500 animate-pulse" />
+          <p className="text-xs">Locating repairers without coordinates...</p>
         </div>
       )}
 

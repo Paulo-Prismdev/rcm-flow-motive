@@ -10,6 +10,7 @@ import WizardFindRepairerStep from './wizard/WizardFindRepairerStep';
 import WizardInstructionStep from './wizard/WizardInstructionStep';
 import WizardEmailStep from './wizard/WizardEmailStep';
 import WizardConfirmStep from './wizard/WizardConfirmStep';
+import { geocodeAddress } from '@/functions/geocodeAddress';
 
 export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAllocationComplete }) {
   const [currentStep, setCurrentStep] = useState(0);
@@ -151,7 +152,7 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
     const geocodeClientAddress = async () => {
       setIsGeocoding(true);
       try {
-        const result = await base44.functions.invoke('geocodeAddress', { address: clientAddress });
+        const result = await geocodeAddress({ address: clientAddress });
         const data = result?.data || result;
 
         let coordinates = null;
