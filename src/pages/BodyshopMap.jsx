@@ -597,22 +597,20 @@ export default function BodyshopMap() {
         </div>
       )}
 
-      {/* ── TIER TOGGLE DOTS (floating on map) ── */}
-      <div className={`absolute z-[998] right-3 transition-all ${selectedBodyshop ? 'bottom-[340px]' : 'bottom-3'}`}>
-        <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-full shadow-lg p-1.5 flex flex-col gap-2">
-          {tierDots.map(t => (
-            <button
-              key={t.key}
-              onClick={() => setVisibleTiers(prev => ({ ...prev, [t.key]: !prev[t.key] }))}
-              title={t.label}
-              className={`w-7 h-7 rounded-full flex items-center justify-center transition-all ${
-                visibleTiers[t.key] ? 'opacity-100' : 'opacity-30'
-              }`}
-            >
-              <div className={`w-5 h-5 rounded-full ${t.color} ring-2 ${visibleTiers[t.key] ? t.ring : 'ring-transparent'} ring-offset-1 ring-offset-white dark:ring-offset-gray-800`}></div>
-            </button>
-          ))}
-        </div>
+      {/* ── TIER TOGGLE PILLS (floating on map) ── */}
+      <div className={`absolute z-[998] left-3 bottom-3 flex flex-col gap-1.5`}>
+        {tierDots.map(t => (
+          <button
+            key={t.key}
+            onClick={() => setVisibleTiers(prev => ({ ...prev, [t.key]: !prev[t.key] }))}
+            className={`flex items-center gap-1.5 pl-2 pr-2.5 py-1 rounded-full bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm shadow-md border border-border transition-all ${
+              visibleTiers[t.key] ? 'opacity-100' : 'opacity-40'
+            }`}
+          >
+            <div className={`w-3 h-3 rounded-full ${t.color}`}></div>
+            <span className="text-xs font-medium text-gray-700 dark:text-gray-200">{t.label}</span>
+          </button>
+        ))}
       </div>
 
       {/* ── MOBILE LIST VIEW (when mobileView='list') ── */}
