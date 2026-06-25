@@ -480,6 +480,9 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
     const currentUrls = Array.isArray(claim.file_urls) ? claim.file_urls : [];
     const updatedUrls = [...currentUrls, ...newFileUrls];
     handleUpdate({ ...claim, file_urls: updatedUrls });
+    // Invalidate query cache so uploads appear immediately
+    queryClient.invalidateQueries({ queryKey: ['claims'] });
+    queryClient.invalidateQueries({ queryKey: ['claim', claim.id] });
   };
 
   const handleFileRemove = (urlToRemove) => {
@@ -491,6 +494,9 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
   const handleImagesAdd = (newImageUrls) => {
     const currentUrls = Array.isArray(claim.image_urls) ? claim.image_urls : [];
     handleUpdate({ ...claim, image_urls: [...currentUrls, ...newImageUrls] });
+    // Invalidate query cache so uploads appear immediately
+    queryClient.invalidateQueries({ queryKey: ['claims'] });
+    queryClient.invalidateQueries({ queryKey: ['claim', claim.id] });
   };
 
   const handleImageRemove = (urlToRemove) => {
