@@ -125,17 +125,34 @@ export default function RepairerDetailDrawer({ bodyshopId, onClose }) {
             {bodyshop?.name || "Repairer Details"}
           </SheetTitle>
           <div className="flex flex-wrap gap-1.5 mt-1">
-            {data?.tier && <Badge variant="outline">{data.tier}</Badge>}
-            {data?.acg_signed_up === "Yes" && <Badge className="bg-green-100 text-green-700">ACG</Badge>}
-            {data?.bs10125_certified === "Yes" && <Badge className="bg-blue-100 text-blue-700">BS10125</Badge>}
+          {data?.tier && <Badge variant="outline">{data.tier}</Badge>}
+          {data?.acg_signed_up === "Yes" && <Badge className="bg-green-100 text-green-700">ACG</Badge>}
+          {data?.bs10125_certified === "Yes" && <Badge className="bg-blue-100 text-blue-700">BS10125</Badge>}
           </div>
-        </SheetHeader>
+          <div className="flex gap-2 mt-3 pb-3 border-b border-border">
+          {isEditing ? (
+            <>
+              <Button onClick={handleCancel} variant="outline" className="flex-1" disabled={saveMutation.isPending}>
+                <X className="w-4 h-4" /> Cancel
+              </Button>
+              <Button onClick={handleSave} disabled={saveMutation.isPending} className="flex-1">
+                {saveMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                Save
+              </Button>
+            </>
+          ) : (
+            <Button onClick={() => setIsEditing(true)} className="w-full">
+              <Pencil className="w-4 h-4" /> Edit Details
+            </Button>
+          )}
+          </div>
+          </SheetHeader>
 
         {isLoading ? (
           <div className="p-8 text-center text-sm text-muted-foreground">Loading...</div>
         ) : bodyshop ? (
           <>
-            <div className="px-1 pb-20">
+            <div className="px-1 pb-8">
               <Section title="Company Information" icon={Building2}>
                 {isEditing ? (
                   <>
@@ -262,24 +279,7 @@ export default function RepairerDetailDrawer({ bodyshopId, onClose }) {
               </Section>
             </div>
 
-            {/* Sticky Action Bar */}
-            <div className="sticky bottom-0 left-0 right-0 bg-card border-t border-border p-3 flex gap-2">
-              {isEditing ? (
-                <>
-                  <Button onClick={handleCancel} variant="outline" className="flex-1" disabled={saveMutation.isPending}>
-                    <X className="w-4 h-4" /> Cancel
-                  </Button>
-                  <Button onClick={handleSave} disabled={saveMutation.isPending} className="flex-1">
-                    {saveMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                    Save Changes
-                  </Button>
-                </>
-              ) : (
-                <Button onClick={() => setIsEditing(true)} className="w-full">
-                  <Pencil className="w-4 h-4" /> Edit Details
-                </Button>
-              )}
-            </div>
+
           </>
         ) : null}
       </SheetContent>
