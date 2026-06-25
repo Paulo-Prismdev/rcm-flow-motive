@@ -169,7 +169,14 @@ export default function RepairerDirectory() {
                     <div className="text-xs text-muted-foreground">{b.phone || b.email || ""}</div>
                   </td>
                   <td className="p-3">
-                    {b.tier ? <Badge variant="outline" className="text-xs">{b.tier}</Badge> : <span className="text-muted-foreground text-sm">—</span>}
+                    {b.tier ? (
+                      <Badge className={`text-xs ${
+                        b.tier?.toUpperCase().includes("TIER 1") || b.tier?.toUpperCase() === "TIER1" ? "bg-green-100 text-green-700"
+                        : b.tier?.toUpperCase().includes("TIER 2") || b.tier?.toUpperCase() === "TIER2" ? "bg-amber-100 text-amber-700"
+                        : b.tier?.toLowerCase().includes("previously") ? "bg-red-100 text-red-700"
+                        : "bg-gray-100 text-gray-700"
+                      }`}>{b.tier}</Badge>
+                    ) : <span className="text-muted-foreground text-sm">—</span>}
                   </td>
                   <td className="p-3 hidden sm:table-cell">
                     {b.acg_signed_up === "Yes" ? (
