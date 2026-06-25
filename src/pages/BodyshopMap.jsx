@@ -145,7 +145,7 @@ export default function BodyshopMap() {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('name');
   const [maxTimeFilter, setMaxTimeFilter] = useState(null);
-  const [mobileView, setMobileView] = useState('list');
+  const [mobileView, setMobileView] = useState('map');
   const [showSettings, setShowSettings] = useState(false);
   const [visibleTiers, setVisibleTiers] = useState({
     'TIER 1': true,
