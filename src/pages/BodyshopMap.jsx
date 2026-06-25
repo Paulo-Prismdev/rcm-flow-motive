@@ -455,7 +455,7 @@ export default function BodyshopMap() {
 
       {/* ── FLOATING SEARCH PILL (top) ── */}
       <div className="absolute top-3 left-3 right-3 z-[1000] flex items-center gap-2">
-        <div className="flex-1 min-w-0 bg-white dark:bg-gray-800 shadow-lg rounded-full border border-border overflow-hidden">
+        <div className="flex-1 min-w-0 bg-white dark:bg-gray-800 shadow-lg rounded-full border border-border overflow-visible">
           <AddressLookupInput
             placeholder="Search postcode or address..."
             onChange={handleAddressSelect}
