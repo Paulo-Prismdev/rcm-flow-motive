@@ -118,11 +118,20 @@ function TravelBadge({ log }) {
   );
 }
 
-function MapCenterUpdater({ center, zoom }) {
+function MapCenterUpdater({ center, zoom, mobileView }) {
   const map = useMap();
   useEffect(() => {
     if (center) map.setView(center, zoom, { animate: true });
   }, [center, zoom, map]);
+
+  // Invalidate size when the map becomes visible (mobile tab switch)
+  useEffect(() => {
+    if (mobileView === 'map') {
+      const t = setTimeout(() => map.invalidateSize(), 100);
+      return () => clearTimeout(t);
+    }
+  }, [mobileView, map]);
+
   return null;
 }
 
@@ -563,7 +572,7 @@ export default function BodyshopMap() {
                     subdomains={['mt0','mt1','mt2','mt3']}
                     maxZoom={20}
                   />
-                  <MapCenterUpdater center={mapCenter} zoom={mapZoom} />
+                  <MapCenterUpdater center={mapCenter} zoom={mapZoom} mobileView={mobileView} />
 
                   {customerLocation && (
                     <Marker position={[customerLocation.lat, customerLocation.lng]} icon={customerIcon}>
