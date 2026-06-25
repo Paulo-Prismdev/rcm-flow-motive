@@ -17,6 +17,7 @@ import TyreRequests from '@/pages/TyreRequests';
 import CompanyManagement from '@/pages/CompanyManagement';
 import MigrateUsers from '@/pages/MigrateUsers';
 import ClientPortal from '@/pages/ClientPortal';
+import RepairerDirectory from '@/pages/RepairerDirectory';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -100,6 +101,11 @@ const AuthenticatedApp = () => {
       <Route path="/ClientPortal" element={
         <LayoutWrapper currentPageName="ClientPortal">
           <ClientPortal />
+        </LayoutWrapper>
+      } />
+      <Route path="/RepairerDirectory" element={
+        <LayoutWrapper currentPageName="RepairerDirectory">
+          <RepairerDirectory />
         </LayoutWrapper>
       } />
       <Route path="*" element={<PageNotFound />} />

@@ -20,7 +20,8 @@ import {
   CheckSquare,
   RefreshCw,
   Plus,
-  ChevronRight } from
+  ChevronRight,
+  Building2 } from
 "lucide-react";
 import GlobalSearch from "./components/layout/GlobalSearch";
 import Notifications from "./components/layout/Notifications";
@@ -52,7 +53,8 @@ const allDepartments = [
 { name: "Tyre Requests", url: createPageUrl("TyreRequests"), icon: Package, permission: "Parts" },
 
 { name: "Reports", url: createPageUrl("Reports"), icon: BarChart3, permission: "Reports" },
-{ name: "Map", url: createPageUrl("BodyshopMap"), icon: Search, permission: "Map" }];
+{ name: "Map", url: createPageUrl("BodyshopMap"), icon: Search, permission: "Map" },
+{ name: "Repairer Directory", url: createPageUrl("RepairerDirectory"), icon: Building2, permission: "Map" }];
 
 
 

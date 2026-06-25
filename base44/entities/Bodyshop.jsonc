@@ -11,13 +11,24 @@
       "description": "URL of the company logo (JPEG or PNG)"
     },
     "contact_name": {
-      "type": "string"
+      "type": "string",
+      "description": "Main contact person"
     },
     "phone": {
-      "type": "string"
+      "type": "string",
+      "description": "Landline phone number"
+    },
+    "mobile_phone": {
+      "type": "string",
+      "description": "Mobile phone number"
     },
     "email": {
-      "type": "string"
+      "type": "string",
+      "description": "Main email address"
+    },
+    "full_address": {
+      "type": "string",
+      "description": "Full address as recorded in the master directory"
     },
     "address_line_1": {
       "type": "string",
@@ -47,6 +58,134 @@
       "type": "number",
       "description": "Geographic longitude coordinate"
     },
+    "acg_signed_up": {
+      "type": "string",
+      "enum": [
+        "Yes",
+        "No",
+        "TBC",
+        ""
+      ],
+      "default": "",
+      "description": "Whether signed up to ACG"
+    },
+    "tier": {
+      "type": "string",
+      "description": "Network tier (e.g. TIER 1, TIER 2, Previously on Network)"
+    },
+    "group_name": {
+      "type": "string",
+      "description": "Group the bodyshop belongs to"
+    },
+    "bodyshop_manager": {
+      "type": "string",
+      "description": "Bodyshop manager name(s)"
+    },
+    "bs_manager_email": {
+      "type": "string",
+      "description": "Bodyshop manager email"
+    },
+    "referral_email": {
+      "type": "string",
+      "description": "Referral email address"
+    },
+    "accounts_contact": {
+      "type": "string",
+      "description": "Accounts contact name"
+    },
+    "accounts_email": {
+      "type": "string",
+      "description": "Accounts email address"
+    },
+    "web_address": {
+      "type": "string",
+      "description": "Website URL"
+    },
+    "company_registration_number": {
+      "type": "string",
+      "description": "Companies House registration number"
+    },
+    "company_directors": {
+      "type": "string",
+      "description": "Company director(s)"
+    },
+    "radius_covered": {
+      "type": "string",
+      "description": "Radius covered in miles"
+    },
+    "audatex_code": {
+      "type": "string",
+      "description": "Audatex code"
+    },
+    "bs10125_certified": {
+      "type": "string",
+      "enum": [
+        "Yes",
+        "No",
+        "TBC",
+        ""
+      ],
+      "default": "",
+      "description": "Whether BS10125 certified"
+    },
+    "bs10125_number": {
+      "type": "string",
+      "description": "BS10125 certification number"
+    },
+    "ico_number": {
+      "type": "string",
+      "description": "ICO registration number"
+    },
+    "vat_number": {
+      "type": "string",
+      "description": "VAT registration number"
+    },
+    "largest_vehicle_repairable": {
+      "type": "string",
+      "description": "Largest vehicle the bodyshop can repair"
+    },
+    "bodyshop_management_system": {
+      "type": "string",
+      "description": "Bodyshop management system used"
+    },
+    "wheel_alignment": {
+      "type": "string",
+      "enum": [
+        "In House",
+        "Outsourced",
+        ""
+      ],
+      "default": "",
+      "description": "Wheel alignment capability"
+    },
+    "adas": {
+      "type": "string",
+      "enum": [
+        "In House",
+        "Outsourced",
+        ""
+      ],
+      "default": "",
+      "description": "ADAS capability"
+    },
+    "jig": {
+      "type": "string",
+      "enum": [
+        "In House",
+        "Outsourced",
+        ""
+      ],
+      "default": "",
+      "description": "JIG capability"
+    },
+    "manufacturer_approvals": {
+      "type": "string",
+      "description": "Manufacturer approvals"
+    },
+    "insurer_approvals": {
+      "type": "string",
+      "description": "Insurer approvals"
+    },
     "last_feedback_prompted_date": {
       "type": "string",
       "format": "date",
@@ -66,10 +205,7 @@
     }
   },
   "required": [
-    "name",
-    "contact_name",
-    "phone",
-    "email"
+    "name"
   ],
   "rls": {
     "create": {

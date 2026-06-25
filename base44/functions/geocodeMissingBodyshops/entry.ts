@@ -17,14 +17,15 @@ Deno.serve(async (req) => {
     const allBodyshops = await base44.asServiceRole.entities.Bodyshop.list('-created_date', 500);
     const missingCoords = allBodyshops.filter(b =>
       (!b.latitude || !b.longitude) &&
-      (b.address_line_1 || b.postcode || b.town)
+      (b.full_address || b.address_line_1 || b.postcode || b.town)
     );
 
     const results = { total_missing: missingCoords.length, geocoded: 0, failed: 0, skipped: 0, details: [] };
 
     for (const b of missingCoords) {
-      const fullAddress = [b.address_line_1, b.address_line_2, b.town, b.county, b.postcode]
+      const componentAddress = [b.address_line_1, b.address_line_2, b.town, b.county, b.postcode]
         .filter(Boolean).join(', ');
+      const fullAddress = b.full_address || componentAddress;
 
       if (!fullAddress.trim()) {
         results.skipped++;
@@ -72,8 +73,8 @@ Deno.serve(async (req) => {
           results.details.push({ id: b.id, name: b.name, status: `geocoding failed: ${geoData.status}` });
         }
 
-        // Small delay to respect API rate limits
-        await new Promise(resolve => setTimeout(resolve, 200));
+        // Delay to respect API rate limits
+        await new Promise(resolve => setTimeout(resolve, 500));
       } catch (err) {
         results.failed++;
         results.details.push({ id: b.id, name: b.name, status: `error: ${err.message}` });
