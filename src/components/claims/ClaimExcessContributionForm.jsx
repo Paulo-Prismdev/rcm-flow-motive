@@ -85,6 +85,7 @@ export default function ClaimExcessContributionForm({ claim, onSave, onCancel })
               >
                 <option value="Direct to Client">Direct to Client (Client paid full excess, we reimburse)</option>
                 <option value="Via Repairer">Via Repairer (Repairer takes excess less our contribution)</option>
+                <option value="Waived">Waived (No excess contribution required)</option>
               </select>
             </div>
           </div>
