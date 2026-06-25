@@ -1024,7 +1024,12 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
             </div>
 
             {/* Extended bodyshop information when allocated */}
-            {claim.bodyshop_id && <ClaimBodyshopInfo bodyshopId={claim.bodyshop_id} />}
+            {claim.bodyshop_id && (
+              <>
+                <div className="text-xs text-muted-foreground mt-2">Debug: bodyshop_id = {claim.bodyshop_id}</div>
+                <ClaimBodyshopInfo bodyshopId={claim.bodyshop_id} />
+              </>
+            )}
             
             {/* Instruction PDF Download - Only show if there's a PDF */}
             {claim.instruction_pdf_url && (

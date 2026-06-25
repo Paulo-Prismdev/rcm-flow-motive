@@ -37,28 +37,39 @@ function StatusPill({ label, value }) {
 export default function ClaimBodyshopInfo({ bodyshopId }) {
   const { data: bodyshop, isLoading, error } = useQuery({
     queryKey: ['bodyshop', bodyshopId],
-    queryFn: () => base44.entities.Bodyshop.get(bodyshopId),
+    queryFn: async () => {
+      try {
+        const result = await base44.entities.Bodyshop.get(bodyshopId);
+        console.log('Bodyshop fetched:', result);
+        return result;
+      } catch (err) {
+        console.error('Failed to fetch bodyshop:', err);
+        throw err;
+      }
+    },
     enabled: !!bodyshopId,
     staleTime: 60000,
   });
 
-  console.log('ClaimBodyshopInfo - bodyshopId:', bodyshopId, 'bodyshop:', bodyshop, 'isLoading:', isLoading, 'error:', error);
+  console.log('ClaimBodyshopInfo render - bodyshopId:', bodyshopId, 'bodyshop:', bodyshop, 'isLoading:', isLoading, 'error:', error);
 
-  if (!bodyshopId) {
-    console.log('ClaimBodyshopInfo: No bodyshopId provided');
-    return null;
-  }
+  if (!bodyshopId) return null;
   if (isLoading) {
     return (
-      <div className="mt-3 p-3 rounded-lg border border-border bg-muted/30 animate-pulse">
-        <div className="h-4 w-32 bg-muted rounded mb-2" />
-        <div className="h-3 w-full bg-muted rounded mb-1.5" />
-        <div className="h-3 w-3/4 bg-muted rounded" />
+      <div className="mt-3 p-3 rounded-lg border border-border">
+        <div className="text-sm text-muted-foreground">Loading bodyshop details...</div>
       </div>
     );
   }
-  if (!bodyshop || error) {
-    console.log('ClaimBodyshopInfo: No bodyshop data or error');
+  if (error) {
+    console.error('Bodyshop query error:', error);
+    return (
+      <div className="mt-3 p-3 rounded-lg border border-red-300 bg-red-50">
+        <div className="text-sm text-red-700">Error loading bodyshop details</div>
+      </div>
+    );
+  }
+  if (!bodyshop) {
     return null;
   }
 
