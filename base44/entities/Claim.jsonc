@@ -102,8 +102,8 @@
       "type": "string"
     },
     "policy_excess": {
-      "type": "string",
-      "description": "Policy excess amount (numeric) or 'Waived' or '0'"
+      "type": "number",
+      "description": "Policy excess amount in pounds. Use 0 for waived."
     },
     "broker_id": {
       "type": "string"
