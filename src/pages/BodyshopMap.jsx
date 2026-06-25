@@ -103,7 +103,7 @@ export default function BodyshopMap() {
 
   const { data: bodyshops = [], isLoading } = useQuery({
     queryKey: ['bodyshops'],
-    queryFn: () => base44.entities.Bodyshop.list(),
+    queryFn: () => base44.entities.Bodyshop.list('-created_date', 500),
   });
 
   // Resolve coordinates: use stored lat/lng if present, otherwise geocoded address
@@ -126,7 +126,7 @@ export default function BodyshopMap() {
       !isNaN(parseFloat(b.latitude)) && !isNaN(parseFloat(b.longitude));
 
     const toGeocode = bodyshops.filter(b =>
-      !hasStoredCoords(b) && (b.address_line_1 || b.postcode || b.town)
+      !hasStoredCoords(b) && (b.full_address || b.address_line_1 || b.postcode || b.town)
     );
 
     if (toGeocode.length === 0) return;
@@ -136,8 +136,8 @@ export default function BodyshopMap() {
     const run = async () => {
       const results = await Promise.all(
         toGeocode.map(async (b) => {
-          const addressParts = [b.address_line_1, b.address_line_2, b.town, b.county, b.postcode].filter(Boolean);
-          const fullAddress = addressParts.join(', ');
+          const fullAddress = b.full_address ||
+            [b.address_line_1, b.address_line_2, b.town, b.county, b.postcode].filter(Boolean).join(', ');
           try {
             const response = await geocodeAddress({ address: fullAddress });
             const data = response?.data || response;
