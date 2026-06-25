@@ -352,6 +352,10 @@ export default function BodyshopMap() {
 
   const handleSelectBodyshop = (bodyshop) => {
     setSelectedBodyshop(prev => prev?.id === bodyshop.id ? null : bodyshop);
+  };
+
+  const handleSelectBodyshopFromList = (bodyshop) => {
+    setSelectedBodyshop(prev => prev?.id === bodyshop.id ? null : bodyshop);
     const coords = getCoords(bodyshop);
     if (coords) {
       setMapCenter([coords.lat, coords.lng]);
@@ -545,7 +549,7 @@ export default function BodyshopMap() {
                     return (
                       <div
                         key={bodyshop.id}
-                        onClick={() => handleSelectBodyshop(bodyshop)}
+                        onClick={() => handleSelectBodyshopFromList(bodyshop)}
                         className={`p-3 rounded-lg border-2 cursor-pointer transition-all ${
                           isSelected ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'
                         }`}
@@ -574,7 +578,7 @@ export default function BodyshopMap() {
         <div className="absolute inset-0 z-[1100] flex items-end" onClick={() => setSelectedBodyshop(null)}>
           <div className="absolute inset-0 bg-black/30" />
           <div
-            className="relative w-full bg-white dark:bg-gray-900 rounded-t-2xl shadow-2xl max-h-[60vh] overflow-y-auto"
+            className="relative w-full bg-white dark:bg-gray-900 rounded-t-2xl shadow-2xl max-h-[30vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Drag handle */}
@@ -666,45 +670,18 @@ export default function BodyshopMap() {
                 )}
               </div>
 
-              {/* Action buttons */}
-              <div className="grid grid-cols-3 gap-2 pt-2">
-                {selectedBodyshop.phone ? (
+              {/* Action button */}
+              {selectedBodyshop.phone && (
+                <div className="pt-2">
                   <a
                     href={`tel:${selectedBodyshop.phone}`}
-                    className="flex flex-col items-center justify-center gap-1 py-2.5 rounded-xl bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors"
+                    className="flex w-full items-center justify-center gap-2 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
                   >
                     <Phone className="w-4 h-4" />
                     Call
                   </a>
-                ) : (
-                  <div className="flex flex-col items-center justify-center gap-1 py-2.5 rounded-xl bg-muted text-muted-foreground text-xs font-medium">
-                    <Phone className="w-4 h-4" />
-                    Call
-                  </div>
-                )}
-                <a
-                  href={directionsUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex flex-col items-center justify-center gap-1 py-2.5 rounded-xl bg-secondary text-secondary-foreground text-xs font-medium hover:bg-secondary/80 transition-colors"
-                >
-                  <Navigation className="w-4 h-4" />
-                  Directions
-                </a>
-                <a
-                  href={selectedBodyshop.web_address || '#'}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`flex flex-col items-center justify-center gap-1 py-2.5 rounded-xl text-xs font-medium transition-colors ${
-                    selectedBodyshop.web_address
-                      ? 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
-                      : 'bg-muted text-muted-foreground'
-                  }`}
-                >
-                  <ExternalLink className="w-4 h-4" />
-                  Onboard
-                </a>
-              </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
