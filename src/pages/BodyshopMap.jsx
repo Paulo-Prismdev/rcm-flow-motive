@@ -128,25 +128,6 @@ function MapCenterUpdater({ center, zoom }) {
 }
 
 export default function BodyshopMap() {
-  // ── Pre-select bodyshop from URL param (?bodyshop_id=...) ──
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const targetId = urlParams.get('bodyshop_id');
-    if (!targetId || !bodyshops.length) return;
-    const target = bodyshops.find(b => b.id === targetId);
-    if (!target) return;
-    setSelectedBodyshop(target);
-    const coords = getCoords(target);
-    if (coords) {
-      setMapCenter([coords.lat, coords.lng]);
-      setMapZoom(14);
-    }
-    // Clean the URL so re-renders don't re-trigger
-    if (window.history.replaceState) {
-      const cleanUrl = window.location.pathname + window.location.hash;
-      window.history.replaceState({}, document.title, cleanUrl);
-    }
-  }, [bodyshops, geocodedCoords]);
   const [customerLocation, setCustomerLocation] = useState(null);
   const [selectedBodyshop, setSelectedBodyshop] = useState(null);
   const [logistics, setLogistics] = useState({});
@@ -182,6 +163,25 @@ export default function BodyshopMap() {
     }
     return geocodedCoords[b.id] || null;
   };
+
+  // ── Pre-select bodyshop from URL param (?bodyshop_id=...) ──
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const targetId = urlParams.get('bodyshop_id');
+    if (!targetId || !bodyshops.length) return;
+    const target = bodyshops.find(b => b.id === targetId);
+    if (!target) return;
+    setSelectedBodyshop(target);
+    const coords = getCoords(target);
+    if (coords) {
+      setMapCenter([coords.lat, coords.lng]);
+      setMapZoom(14);
+    }
+    if (window.history.replaceState) {
+      const cleanUrl = window.location.pathname + window.location.hash;
+      window.history.replaceState({}, document.title, cleanUrl);
+    }
+  }, [bodyshops, geocodedCoords]);
 
   // ── Geocode bodyshops that have an address but no stored coordinates ──
   useEffect(() => {
