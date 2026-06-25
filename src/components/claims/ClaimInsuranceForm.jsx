@@ -11,7 +11,7 @@ export default function ClaimInsuranceForm({ claim, onSave, onCancel }) {
         insurer: claim.insurer || '',
         claim_ref: claim.claim_ref || '',
         policy_number: claim.policy_number || '',
-        policy_excess: claim.policy_excess || 0,
+        policy_excess: claim.policy_excess || '0',
     });
 
     const set = (field, value) => setFormData(prev => ({ ...prev, [field]: value }));
@@ -41,7 +41,13 @@ export default function ClaimInsuranceForm({ claim, onSave, onCancel }) {
             </div>
             <div>
                 <label className="text-sm text-gray-500">Policy Excess (£)</label>
-                <Input type="number" step="0.01" value={formData.policy_excess} onChange={e => set('policy_excess', parseFloat(e.target.value) || 0)} className="neomorph-inset" />
+                <Input 
+                  type="text" 
+                  value={formData.policy_excess} 
+                  onChange={e => set('policy_excess', e.target.value)} 
+                  placeholder="Enter amount or 'Waived'"
+                  className="neomorph-inset" 
+                />
             </div>
             <div className="flex justify-end gap-3 pt-4">
                 <Button onClick={onCancel} variant="outline">Cancel</Button>
