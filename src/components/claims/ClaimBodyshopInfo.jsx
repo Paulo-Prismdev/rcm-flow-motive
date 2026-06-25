@@ -53,8 +53,12 @@ export default function ClaimBodyshopInfo({ bodyshopId }) {
 
   console.log('ClaimBodyshopInfo render - bodyshopId:', bodyshopId, 'bodyshop:', bodyshop, 'isLoading:', isLoading, 'error:', error);
 
-  if (!bodyshopId) return null;
+  if (!bodyshopId) {
+    console.log('No bodyshopId provided');
+    return null;
+  }
   if (isLoading) {
+    console.log('Still loading...');
     return (
       <div className="mt-3 p-3 rounded-lg border border-border">
         <div className="text-sm text-muted-foreground">Loading bodyshop details...</div>
@@ -65,13 +69,20 @@ export default function ClaimBodyshopInfo({ bodyshopId }) {
     console.error('Bodyshop query error:', error);
     return (
       <div className="mt-3 p-3 rounded-lg border border-red-300 bg-red-50">
-        <div className="text-sm text-red-700">Error loading bodyshop details</div>
+        <div className="text-sm text-red-700">Error: {error.message || 'Failed to load'}</div>
       </div>
     );
   }
   if (!bodyshop) {
-    return null;
+    console.log('No bodyshop data returned');
+    return (
+      <div className="mt-3 p-3 rounded-lg border border-border">
+        <div className="text-sm text-muted-foreground">No bodyshop data found</div>
+      </div>
+    );
   }
+  
+  console.log('Rendering bodyshop:', bodyshop.name, bodyshop.email);
 
   const fullAddress = [bodyshop.address_line_1, bodyshop.address_line_2, bodyshop.town, bodyshop.county, bodyshop.postcode]
     .filter(Boolean)
