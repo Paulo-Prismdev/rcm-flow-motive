@@ -119,20 +119,11 @@ function TravelBadge({ log }) {
   );
 }
 
-function MapCenterUpdater({ center, zoom, mobileView }) {
+function MapCenterUpdater({ center, zoom }) {
   const map = useMap();
   useEffect(() => {
     if (center) map.setView(center, zoom, { animate: true });
   }, [center, zoom, map]);
-
-  // Invalidate size when the map becomes visible (mobile tab switch)
-  useEffect(() => {
-    if (mobileView === 'map') {
-      const t = setTimeout(() => map.invalidateSize(), 100);
-      return () => clearTimeout(t);
-    }
-  }, [mobileView, map]);
-
   return null;
 }
 
@@ -145,8 +136,8 @@ export default function BodyshopMap() {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('name');
   const [maxTimeFilter, setMaxTimeFilter] = useState(null);
-  const [mobileView, setMobileView] = useState('map');
   const [showSettings, setShowSettings] = useState(false);
+  const [listExpanded, setListExpanded] = useState(false);
   const [visibleTiers, setVisibleTiers] = useState({
     'TIER 1': true,
     'TIER 2': true,
@@ -365,7 +356,7 @@ export default function BodyshopMap() {
     if (coords) {
       setMapCenter([coords.lat, coords.lng]);
       setMapZoom(14);
-      setMobileView('map');
+      setListExpanded(false);
     }
   };
 
@@ -420,7 +411,7 @@ export default function BodyshopMap() {
               maxZoom={20}
             />
 
-            <MapCenterUpdater center={mapCenter} zoom={mapZoom} mobileView={mobileView} />
+            <MapCenterUpdater center={mapCenter} zoom={mapZoom} />
 
             {customerLocation && (
               <Marker position={[customerLocation.lat, customerLocation.lng]} icon={customerIcon}>
@@ -482,105 +473,30 @@ export default function BodyshopMap() {
         </button>
       </div>
 
-      {/* ── SETTINGS PANEL (collapsible) ── */}
+      {/* ── SETTINGS PANEL (tier filters) ── */}
       {showSettings && (
-        <div className="absolute top-16 left-3 right-3 z-[999] bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-border p-3 space-y-3">
-          {/* List/Map toggle */}
-          <div className="flex rounded-lg bg-muted p-1">
-            <button
-              onClick={() => setMobileView('list')}
-              className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 text-xs font-medium rounded-md transition-colors ${
-                mobileView === 'list' ? 'bg-white dark:bg-gray-700 text-primary shadow-sm' : 'text-muted-foreground'
-              }`}
-            >
-              <List className="w-3.5 h-3.5" /> List
-            </button>
-            <button
-              onClick={() => setMobileView('map')}
-              className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 text-xs font-medium rounded-md transition-colors ${
-                mobileView === 'map' ? 'bg-white dark:bg-gray-700 text-primary shadow-sm' : 'text-muted-foreground'
-              }`}
-            >
-              <MapIcon className="w-3.5 h-3.5" /> Map
-            </button>
+        <div className="absolute top-16 left-3 right-3 z-[999] bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-border p-3 space-y-2">
+          <p className="text-xs font-medium text-muted-foreground">Filter by tier</p>
+          <div className="flex flex-col gap-1.5">
+            {[...tierDots, { key: 'None', label: 'No Tier', color: 'bg-gray-400' }].map(t => (
+              <button
+                key={t.key}
+                onClick={() => setVisibleTiers(prev => ({ ...prev, [t.key]: !prev[t.key] }))}
+                className={`flex items-center gap-1.5 pl-2 pr-2.5 py-1.5 rounded-full bg-muted/50 border border-border transition-all ${
+                  visibleTiers[t.key] ? 'opacity-100' : 'opacity-40'
+                }`}
+              >
+                <div className={`w-3 h-3 rounded-full ${t.color}`}></div>
+                <span className="text-xs font-medium text-gray-700 dark:text-gray-200">{t.label}</span>
+              </button>
+            ))}
           </div>
-
-          {/* Text search */}
-          <Input
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search by name, town, or postcode..."
-            className="h-9"
-          />
-
-          {/* Sort + Time filters */}
-          <div className="flex items-center gap-2">
-            <Button
-              variant={sortBy === 'time' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setSortBy('time')}
-              disabled={!customerLocation || !hasLogistics}
-              className="h-8 flex-1"
-            >
-              <Clock className="w-3 h-3" /> Travel
-            </Button>
-            <Button
-              variant={sortBy === 'name' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setSortBy('name')}
-              className="h-8 flex-1"
-            >
-              Name
-            </Button>
-          </div>
-
-          {customerLocation && hasLogistics && (
-            <div className="flex gap-1.5 flex-wrap">
-              {[
-                { label: '15m', value: 15 },
-                { label: '30m', value: 30 },
-                { label: '45m', value: 45 },
-                { label: 'All', value: null },
-              ].map(chip => (
-                <button
-                  key={chip.label}
-                  onClick={() => setMaxTimeFilter(chip.value)}
-                  className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors ${
-                    maxTimeFilter === chip.value
-                      ? 'bg-primary text-primary-foreground'
-                      : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                  }`}
-                >
-                  {chip.label}
-                </button>
-              ))}
-            </div>
-          )}
-
-          {/* "No tier" toggle for desktop parity */}
-          <label className="flex items-center gap-2 cursor-pointer select-none text-xs text-muted-foreground">
-            <Switch
-              checked={visibleTiers['None']}
-              onCheckedChange={(checked) => setVisibleTiers(prev => ({ ...prev, 'None': checked }))}
-              className="scale-75 origin-left"
-            />
-            Show un-tiered bodyshops
-          </label>
-
-          {customerLocation && (
-            <button
-              onClick={handleClearLocation}
-              className="w-full text-xs text-red-500 font-medium py-1.5 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-            >
-              Clear location
-            </button>
-          )}
         </div>
       )}
 
       {/* ── STATUS INDICATORS (below search pill) ── */}
       {(isLoadingLogistics || isGeocoding) && (
-        <div className={`absolute z-[998] left-3 ${showSettings ? 'top-[280px]' : 'top-16'}`}>
+        <div className="absolute z-[998] left-3 top-16">
           <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-full shadow-md px-3 py-1.5 flex items-center gap-2">
             {isLoadingLogistics ? (
               <>
@@ -597,59 +513,57 @@ export default function BodyshopMap() {
         </div>
       )}
 
-      {/* ── TIER TOGGLE PILLS (floating on map) ── */}
-      <div className={`absolute z-[998] left-3 bottom-3 flex flex-col gap-1.5`}>
-        {tierDots.map(t => (
-          <button
-            key={t.key}
-            onClick={() => setVisibleTiers(prev => ({ ...prev, [t.key]: !prev[t.key] }))}
-            className={`flex items-center gap-1.5 pl-2 pr-2.5 py-1 rounded-full bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm shadow-md border border-border transition-all ${
-              visibleTiers[t.key] ? 'opacity-100' : 'opacity-40'
-            }`}
-          >
-            <div className={`w-3 h-3 rounded-full ${t.color}`}></div>
-            <span className="text-xs font-medium text-gray-700 dark:text-gray-200">{t.label}</span>
-          </button>
-        ))}
-      </div>
 
-      {/* ── MOBILE LIST VIEW (when mobileView='list') ── */}
-      {mobileView === 'list' && !isLoading && resolvedBodyshops.length > 0 && (
-        <div className="absolute inset-0 z-[997] bg-white dark:bg-gray-900 pt-16 pb-4 px-3 overflow-y-auto">
-          <div className="space-y-2">
-            {tierFilteredBodyshops.length === 0 ? (
-              <div className="text-center text-sm text-muted-foreground p-4">
-                No bodyshops match your filters. Try enabling more tiers.
-              </div>
-            ) : (
-              tierFilteredBodyshops.map((bodyshop) => {
-                const isSelected = selectedBodyshop?.id === bodyshop.id;
-                const log = logistics[bodyshop.id];
-                return (
-                  <div
-                    key={bodyshop.id}
-                    onClick={() => {
-                      handleSelectBodyshop(bodyshop);
-                      setMobileView('map');
-                    }}
-                    className={`p-3 rounded-lg border-2 cursor-pointer transition-all ${
-                      isSelected ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'
-                    }`}
-                  >
-                    <div className="flex items-start justify-between gap-2 mb-1">
-                      <p className="font-semibold text-sm truncate flex-1">{bodyshop.name}</p>
-                      <TravelBadge log={log} />
-                    </div>
-                    <div className="space-y-0.5 text-xs text-muted-foreground">
-                      {bodyshop.contact_name && <p className="truncate">{bodyshop.contact_name}</p>}
-                      {bodyshop.phone && <p className="flex items-center gap-1 truncate"><Phone className="w-3 h-3 flex-shrink-0" />{bodyshop.phone}</p>}
-                      {bodyshop.town && <p className="flex items-center gap-1 truncate"><MapPinned className="w-3 h-3 flex-shrink-0" />{bodyshop.town} {bodyshop.postcode}</p>}
-                    </div>
+
+      {/* ── BOTTOM LIST SHEET (drag up to expand) ── */}
+      {!isLoading && resolvedBodyshops.length > 0 && (
+        <div className={`absolute left-0 right-0 bottom-0 z-[997] bg-white dark:bg-gray-900 rounded-t-2xl shadow-2xl border-t border-border transition-all duration-300 overflow-hidden ${
+          listExpanded ? 'h-[50vh]' : 'h-[52px]'
+        }`}>
+          <button
+            onClick={() => setListExpanded(!listExpanded)}
+            className="w-full flex flex-col items-center pt-2 pb-1.5 touch-manipulation"
+          >
+            <ChevronUp className={`w-5 h-5 text-gray-400 transition-transform ${listExpanded ? '' : 'rotate-180'}`} />
+            <span className="text-xs font-medium text-muted-foreground">
+              {listExpanded ? 'Hide list' : `${tierFilteredBodyshops.length} bodyshops`}
+            </span>
+          </button>
+          {listExpanded && (
+            <div className="overflow-y-auto px-3 pb-4" style={{ height: 'calc(50vh - 52px)' }}>
+              <div className="space-y-2">
+                {tierFilteredBodyshops.length === 0 ? (
+                  <div className="text-center text-sm text-muted-foreground p-4">
+                    No bodyshops match your filters.
                   </div>
-                );
-              })
-            )}
-          </div>
+                ) : (
+                  tierFilteredBodyshops.map((bodyshop) => {
+                    const isSelected = selectedBodyshop?.id === bodyshop.id;
+                    const log = logistics[bodyshop.id];
+                    return (
+                      <div
+                        key={bodyshop.id}
+                        onClick={() => handleSelectBodyshop(bodyshop)}
+                        className={`p-3 rounded-lg border-2 cursor-pointer transition-all ${
+                          isSelected ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'
+                        }`}
+                      >
+                        <div className="flex items-start justify-between gap-2 mb-1">
+                          <p className="font-semibold text-sm truncate flex-1">{bodyshop.name}</p>
+                          <TravelBadge log={log} />
+                        </div>
+                        <div className="space-y-0.5 text-xs text-muted-foreground">
+                          {bodyshop.contact_name && <p className="truncate">{bodyshop.contact_name}</p>}
+                          {bodyshop.phone && <p className="flex items-center gap-1 truncate"><Phone className="w-3 h-3 flex-shrink-0" />{bodyshop.phone}</p>}
+                          {bodyshop.town && <p className="flex items-center gap-1 truncate"><MapPinned className="w-3 h-3 flex-shrink-0" />{bodyshop.town} {bodyshop.postcode}</p>}
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
