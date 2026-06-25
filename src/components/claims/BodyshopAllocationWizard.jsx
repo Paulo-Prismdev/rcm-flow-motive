@@ -128,16 +128,17 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
   const handleSaveValidation = async () => {
     setIsSavingValidation(true);
     try {
-      const dataToSave = { ...validationData };
-      if ('policy_excess' in dataToSave && dataToSave.policy_excess !== null && dataToSave.policy_excess !== undefined) {
-        dataToSave.policy_excess = String(dataToSave.policy_excess);
-      }
-      await base44.entities.Claim.update(claim.id, {
-        ...dataToSave,
-        last_contact_source: contactType.charAt(0).toUpperCase() + contactType.slice(1),
-        authorised_by: authorisedBy,
+      const dataToSave = {};
+      REQUIRED_FIELDS.forEach(field => {
+        if (field.key in validationData) {
+          dataToSave[field.key] = validationData[field.key];
+        }
       });
+      dataToSave.last_contact_source = contactType.charAt(0).toUpperCase() + contactType.slice(1);
+      dataToSave.authorised_by = authorisedBy;
+      await base44.entities.Claim.update(claim.id, dataToSave);
       queryClient.invalidateQueries({ queryKey: ['claims'] });
+      queryClient.invalidateQueries({ queryKey: ['claim', claim.id] });
       setCurrentStep(1);
     } catch (error) {
       console.error('Error saving validation data:', error);
