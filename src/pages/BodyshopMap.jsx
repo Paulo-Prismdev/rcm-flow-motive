@@ -463,12 +463,6 @@ export default function BodyshopMap() {
 
       {/* ── FLOATING SEARCH PILL (top) ── */}
       <div className="absolute top-3 left-3 right-3 z-[1000] flex items-center gap-2">
-        <button
-          onClick={() => window.history.back()}
-          className="flex-shrink-0 w-10 h-10 rounded-full bg-white dark:bg-gray-800 shadow-lg border border-border flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" />
-        </button>
         <div className="flex-1 min-w-0 bg-white dark:bg-gray-800 shadow-lg rounded-full border border-border overflow-hidden">
           <AddressLookupInput
             placeholder="Search postcode or address..."
