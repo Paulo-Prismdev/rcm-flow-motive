@@ -186,7 +186,7 @@ export default function AddressLookupInput({
             onChange={(e) => handleSearchChange(e.target.value)}
             placeholder={placeholder}
             disabled={disabled || isGeocoding}
-            className="pr-8 bg-[hsl(var(--background))]"
+            className="pr-8 bg-[hsl(var(--background))] focus:!ring-0 focus:!border-transparent focus:!shadow-none border-transparent shadow-none"
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !showSuggestions && showSearchButton) {
                 e.preventDefault();
