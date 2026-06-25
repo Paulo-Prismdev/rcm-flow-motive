@@ -235,7 +235,9 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
       const url = window.URL.createObjectURL(blob);
       setGeneratedPdfUrl(url);
       window.open(url, '_blank');
+      // Invalidate both list and individual claim queries
       queryClient.invalidateQueries({ queryKey: ['claims'] });
+      queryClient.invalidateQueries({ queryKey: ['claim', claim.id] });
     } catch (error) {
       console.error('Error generating PDF:', error);
       alert('Failed to generate PDF. Please try again.');
