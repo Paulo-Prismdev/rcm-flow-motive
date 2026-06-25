@@ -419,7 +419,7 @@ export default function BodyshopMap() {
               subdomains={['mt0','mt1','mt2','mt3']}
               maxZoom={20}
             />
-            <ZoomControl position="bottomright" />
+
             <MapCenterUpdater center={mapCenter} zoom={mapZoom} mobileView={mobileView} />
 
             {customerLocation && (
