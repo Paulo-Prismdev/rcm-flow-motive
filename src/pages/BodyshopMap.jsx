@@ -349,6 +349,11 @@ export default function BodyshopMap() {
 
   const handleSelectBodyshop = (bodyshop) => {
     setSelectedBodyshop(prev => prev?.id === bodyshop.id ? null : bodyshop);
+    const coords = getCoords(bodyshop);
+    if (coords) {
+      setMapCenter([coords.lat, coords.lng]);
+      setMapZoom(14);
+    }
   };
 
   const handleClearLocation = () => {
