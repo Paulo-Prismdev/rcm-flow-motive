@@ -490,3 +490,14 @@ button:not(.btn-sm):not(.btn-icon),
 .pb-safe {
   padding-bottom: max(env(safe-area-inset-bottom), 1rem);
 }
+
+/* ── Leaflet attribution: minimize and lift above bottom list ── */
+.leaflet-control-attribution {
+  background: rgba(255,255,255,0.6) !important;
+  font-size: 8px !important;
+  padding: 0 3px !important;
+  line-height: 1.2 !important;
+  margin-bottom: 56px !important;
+}
+.leaflet-control-attribution svg { display: none !important; }
+.leaflet-control-attribution a { font-size: 8px !important; }
