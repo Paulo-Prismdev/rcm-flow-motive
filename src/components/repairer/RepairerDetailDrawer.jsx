@@ -279,7 +279,7 @@ export default function RepairerDetailDrawer({ bodyshopId, onClose }) {
             </div>
 
             {/* Edit / Save / Cancel — sticky bottom bar */}
-            <div className="sticky bottom-0 -mx-1 px-1 py-3 bg-background border-t border-border mt-2">
+            <div className="sticky bottom-0 -mx-1 px-1 pt-3 pb-20 md:pb-3 bg-background border-t border-border mt-2">
               {isEditing ? (
                 <div className="flex gap-2">
                   <Button onClick={handleCancel} variant="outline" className="flex-1" disabled={saveMutation.isPending}>
