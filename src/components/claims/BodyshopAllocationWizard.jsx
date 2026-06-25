@@ -128,8 +128,12 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
   const handleSaveValidation = async () => {
     setIsSavingValidation(true);
     try {
+      const dataToSave = { ...validationData };
+      if ('policy_excess' in dataToSave && dataToSave.policy_excess !== null && dataToSave.policy_excess !== undefined) {
+        dataToSave.policy_excess = String(dataToSave.policy_excess);
+      }
       await base44.entities.Claim.update(claim.id, {
-        ...validationData,
+        ...dataToSave,
         last_contact_source: contactType.charAt(0).toUpperCase() + contactType.slice(1),
         authorised_by: authorisedBy,
       });
