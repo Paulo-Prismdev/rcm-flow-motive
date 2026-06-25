@@ -8,8 +8,10 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import {
   Building2, MapPin, Globe, Users, Wrench,
-  Shield, Save, Loader2, Pencil, X, ExternalLink
+  Shield, Save, Loader2, Pencil, X, ExternalLink, Map as MapIcon
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { createPageUrl } from "@/utils";
 
 const TIER_OPTIONS = ["TIER 1", "TIER 2", "Previously on Network", ""];
 const YES_NO_OPTIONS = ["Yes", "No", "TBC", ""];
@@ -71,6 +73,7 @@ function Section({ title, icon: Icon, children }) {
 export default function RepairerDetailDrawer({ bodyshopId, onClose }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({});
 
@@ -129,23 +132,19 @@ export default function RepairerDetailDrawer({ bodyshopId, onClose }) {
           {data?.acg_signed_up === "Yes" && <Badge className="bg-green-100 text-green-700">ACG</Badge>}
           {data?.bs10125_certified === "Yes" && <Badge className="bg-blue-100 text-blue-700">BS10125</Badge>}
           </div>
-          <div className="flex gap-2 mt-3 pb-3 border-b border-border">
-          {isEditing ? (
-            <>
-              <Button onClick={handleCancel} variant="outline" className="flex-1" disabled={saveMutation.isPending}>
-                <X className="w-4 h-4" /> Cancel
+          {!isEditing && (
+            <div className="flex gap-2 mt-3 pb-3 border-b border-border">
+              <Button
+                onClick={() => {
+                  onClose();
+                  navigate(`${createPageUrl("BodyshopMap")}?bodyshop_id=${bodyshopId}`);
+                }}
+                className="w-full"
+              >
+                <MapIcon className="w-4 h-4" /> See on Map
               </Button>
-              <Button onClick={handleSave} disabled={saveMutation.isPending} className="flex-1">
-                {saveMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                Save
-              </Button>
-            </>
-          ) : (
-            <Button onClick={() => setIsEditing(true)} className="w-full">
-              <Pencil className="w-4 h-4" /> Edit Details
-            </Button>
+            </div>
           )}
-          </div>
           </SheetHeader>
 
         {isLoading ? (
@@ -279,7 +278,24 @@ export default function RepairerDetailDrawer({ bodyshopId, onClose }) {
               </Section>
             </div>
 
-
+            {/* Edit / Save / Cancel — sticky bottom bar */}
+            <div className="sticky bottom-0 -mx-1 px-1 py-3 bg-background border-t border-border mt-2">
+              {isEditing ? (
+                <div className="flex gap-2">
+                  <Button onClick={handleCancel} variant="outline" className="flex-1" disabled={saveMutation.isPending}>
+                    <X className="w-4 h-4" /> Cancel
+                  </Button>
+                  <Button onClick={handleSave} disabled={saveMutation.isPending} className="flex-1">
+                    {saveMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                    Save
+                  </Button>
+                </div>
+              ) : (
+                <Button onClick={() => setIsEditing(true)} className="w-full">
+                  <Pencil className="w-4 h-4" /> Edit Details
+                </Button>
+              )}
+            </div>
           </>
         ) : null}
       </SheetContent>
