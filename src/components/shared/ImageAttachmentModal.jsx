@@ -2,11 +2,24 @@ import React, { useState, useRef } from 'react';
 import { X, Upload, Loader, Image, ZoomIn } from 'lucide-react';
 import { useFileUpload } from '@/hooks/useFileUpload';
 import UploadProgressList from './UploadProgressList';
+import ConfirmDialog from './ConfirmDialog';
 
 export default function ImageAttachmentModal({ imageUrls = [], onAdd, onRemove, isOpen, onClose }) {
   const [viewingImage, setViewingImage] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [imageToRemove, setImageToRemove] = useState(null);
   const fileInputRef = useRef(null);
+
+  const handleRemoveImage = (url) => {
+    setImageToRemove(url);
+  };
+
+  const confirmRemoveImage = () => {
+    if (imageToRemove && onRemove) {
+      onRemove(imageToRemove);
+    }
+    setImageToRemove(null);
+  };
 
   const { uploads, isUploading, uploadFiles, retryUpload } = useFileUpload({
     accept: 'image',
@@ -30,6 +43,18 @@ export default function ImageAttachmentModal({ imageUrls = [], onAdd, onRemove, 
 
   return (
     <>
+      {/* Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={!!imageToRemove}
+        onClose={() => setImageToRemove(null)}
+        onConfirm={confirmRemoveImage}
+        title="Remove Image"
+        message="Are you sure you want to remove this image? This action cannot be undone."
+        confirmText="Remove"
+        cancelText="Cancel"
+        variant="destructive"
+      />
+
       {/* Lightbox */}
       {viewingImage && (
         <div
@@ -143,7 +168,7 @@ export default function ImageAttachmentModal({ imageUrls = [], onAdd, onRemove, 
                       </button>
                       {onRemove && (
                         <button
-                          onClick={() => onRemove(url)}
+                          onClick={() => handleRemoveImage(url)}
                           className="bg-red-500/90 text-white rounded-full p-1.5 hover:bg-red-600 transition-colors"
                           title="Remove image"
                         >
