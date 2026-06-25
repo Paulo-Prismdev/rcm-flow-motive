@@ -29,6 +29,7 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
   const [selectedPdfTemplate, setSelectedPdfTemplate] = useState('standard');
   const [contactType, setContactType] = useState('client');
   const [customContact, setCustomContact] = useState({ name: '', phone: '', email: '' });
+  const [authorisedBy, setAuthorisedBy] = useState('Client Insurer');
 
   const [emailTo, setEmailTo] = useState('');
   const [emailSubject, setEmailSubject] = useState('');
@@ -92,8 +93,9 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
       setGeneratedPdfUrl(null);
       setEmailTo(''); setEmailSubject(''); setEmailBody('');
       setSelectedEmailTemplateId('');
-      setContactType('client');
+      setContactType(claim.last_contact_source ? claim.last_contact_source.toLowerCase() : 'client');
       setCustomContact({ name: '', phone: '', email: '' });
+      setAuthorisedBy(claim.authorised_by || 'Client Insurer');
 
       const initialValidation = {};
       REQUIRED_FIELDS.forEach(field => {
@@ -126,7 +128,11 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
   const handleSaveValidation = async () => {
     setIsSavingValidation(true);
     try {
-      await base44.entities.Claim.update(claim.id, validationData);
+      await base44.entities.Claim.update(claim.id, {
+        ...validationData,
+        last_contact_source: contactType.charAt(0).toUpperCase() + contactType.slice(1),
+        authorised_by: authorisedBy,
+      });
       queryClient.invalidateQueries({ queryKey: ['claims'] });
       setCurrentStep(1);
     } catch (error) {
@@ -346,8 +352,10 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
               missingFields={missingFields}
               contactType={contactType}
               customContact={customContact}
+              authorisedBy={authorisedBy}
               onValidationChange={handleValidationChange}
               onContactTypeChange={setContactType}
+              onAuthorisedByChange={setAuthorisedBy}
               onCustomContactChange={(field, value) => setCustomContact(prev => ({ ...prev, [field]: value }))}
             />
           )}

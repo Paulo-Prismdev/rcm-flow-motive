@@ -176,6 +176,18 @@
       "type": "boolean",
       "default": true
     },
+    "driver_name": {
+      "type": "string",
+      "description": "Driver / Contact Name (when different from client)"
+    },
+    "driver_phone": {
+      "type": "string",
+      "description": "Driver / Contact Phone (when different from client)"
+    },
+    "driver_email": {
+      "type": "string",
+      "description": "Driver / Contact Email (when different from client)"
+    },
     "driver_contact_name": {
       "type": "string"
     },
@@ -664,6 +676,24 @@
     },
     "indemnity_vehicle_modifications": {
       "type": "string"
+    },
+    "last_contact_source": {
+      "type": "string",
+      "enum": [
+        "Client",
+        "Driver",
+        "Custom"
+      ],
+      "description": "Default instruction contact source from last allocation"
+    },
+    "authorised_by": {
+      "type": "string",
+      "enum": [
+        "Client Insurer",
+        "Third Party Insurer",
+        "Uninsured"
+      ],
+      "description": "Authorising insurer selection from last allocation"
     }
   },
   "required": [],

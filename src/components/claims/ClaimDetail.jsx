@@ -49,6 +49,7 @@ import FinancialSummary from './FinancialSummary';
 import ClaimVehicleDamageForm from './ClaimVehicleDamageForm';
 import ClaimIndemnityForm from './ClaimIndemnityForm';
 import ClaimExcessContributionForm from './ClaimExcessContributionForm';
+import InstructionDefaultsForm from './InstructionDefaultsForm';
 import ThirdPartyPursuitSection from './ThirdPartyPursuitSection';
 import BackorderedPartsSection from './BackorderedPartsSection';
 import NotesSection from '../shared/NotesSection';
@@ -201,6 +202,7 @@ const DETAIL_SECTIONS = [
   { id: 'thirdParty', label: 'Third Party Details', icon: Users },
   { id: 'bodyshop', label: 'Bodyshop Details', icon: Wrench },
   { id: 'referrer', label: 'Referrer Details', icon: Briefcase },
+  { id: 'instructionDefaults', label: 'Instruction Defaults', icon: FileText },
   { id: 'excessContribution', label: 'Excess Contribution', icon: BadgePercent },
   { id: 'financials', label: 'Financials', icon: DollarSign },
   { id: 'thirdpartyPursuit', label: 'Third Party Pursuit', icon: Users },
@@ -887,6 +889,23 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                 )}
               </>
             )}
+          </EditableSection>
+        );
+
+      case 'instructionDefaults':
+        return (
+          <EditableSection 
+            title="Instruction Defaults" 
+            icon={FileText}
+            claim={claim} 
+            onUpdate={handleUpdate} 
+            EditComponent={InstructionDefaultsForm}
+            canEdit={canEdit}
+          >
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+              <DetailRow label="Default Contact Source" value={claim.last_contact_source || 'Not set'} />
+              <DetailRow label="Authorised By" value={claim.authorised_by || 'Not set'} />
+            </div>
           </EditableSection>
         );
 
