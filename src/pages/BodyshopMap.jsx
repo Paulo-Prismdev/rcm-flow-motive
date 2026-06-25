@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import {
   Phone, Mail, MapPinned, Loader, Clock, Navigation,
-  CheckCircle, X, ArrowLeft
+  CheckCircle, X, ArrowLeft, List, Map as MapIcon
 } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -135,6 +135,7 @@ export default function BodyshopMap() {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('name');
   const [maxTimeFilter, setMaxTimeFilter] = useState(null);
+  const [mobileView, setMobileView] = useState('list');
   const [visibleTiers, setVisibleTiers] = useState({
     'TIER 1': true,
     'TIER 2': true,
@@ -353,6 +354,7 @@ export default function BodyshopMap() {
     if (coords) {
       setMapCenter([coords.lat, coords.lng]);
       setMapZoom(14);
+      setMobileView('map');
     }
   };
 
@@ -454,7 +456,27 @@ export default function BodyshopMap() {
         </div>
       </div>
 
-      <div className="bg-white dark:bg-gray-900 lg:border lg:border-gray-200 dark:lg:border-gray-800 lg:rounded-xl p-0 lg:p-3 flex-1 min-h-0" style={{ isolation: 'isolate' }}>
+      <div className="bg-white dark:bg-gray-900 lg:border lg:border-gray-200 dark:lg:border-gray-800 lg:rounded-xl p-0 lg:p-3 flex-1 min-h-0 flex flex-col" style={{ isolation: 'isolate' }}>
+        {/* Mobile tab toggle */}
+        <div className="flex lg:hidden flex-shrink-0 border-b border-border">
+          <button
+            onClick={() => setMobileView('list')}
+            className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-sm font-medium transition-colors ${
+              mobileView === 'list' ? 'text-primary border-b-2 border-primary bg-primary/5' : 'text-muted-foreground'
+            }`}
+          >
+            <List className="w-4 h-4" /> List
+          </button>
+          <button
+            onClick={() => setMobileView('map')}
+            className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-sm font-medium transition-colors ${
+              mobileView === 'map' ? 'text-primary border-b-2 border-primary bg-primary/5' : 'text-muted-foreground'
+            }`}
+          >
+            <MapIcon className="w-4 h-4" /> Map
+          </button>
+        </div>
+
         {isLoading ? (
           <div className="flex justify-center items-center h-full">
             <Loader className="w-8 h-8 animate-spin text-accent" />
@@ -468,7 +490,7 @@ export default function BodyshopMap() {
         ) : (
           <div className="flex flex-col lg:flex-row gap-3 h-full">
             {/* Bodyshop list */}
-            <div className="lg:w-2/5 lg:max-h-full lg:overflow-y-auto space-y-2 lg:pr-1 order-2 lg:order-1">
+            <div className={`lg:w-2/5 lg:max-h-full lg:overflow-y-auto space-y-2 lg:pr-1 order-2 lg:order-1 flex-1 min-h-0 overflow-y-auto ${mobileView === 'list' ? 'block' : 'hidden lg:block'}`}>
               {/* Search + Sort controls */}
               <div className="flex flex-col sm:flex-row gap-2">
                 <div className="relative flex-1">
@@ -503,7 +525,7 @@ export default function BodyshopMap() {
                 </div>
               )}
 
-              <div className="space-y-2 max-h-[300px] lg:max-h-none overflow-y-auto lg:overflow-visible pr-1">
+              <div className="space-y-2 lg:max-h-none overflow-y-auto lg:overflow-visible pr-1">
                 {tierFilteredBodyshops.length === 0 ? (
                   <div className="text-center text-sm text-muted-foreground p-4">No bodyshops match your filters. Try enabling more tiers.</div>
                 ) : (
@@ -532,7 +554,7 @@ export default function BodyshopMap() {
             </div>
 
             {/* Map */}
-            <div className="lg:w-3/5 order-1 lg:order-2 h-[280px] sm:h-[350px] lg:h-full" style={{ flex: 1, minHeight: 0 }}>
+            <div className={`lg:w-3/5 order-1 lg:order-2 lg:h-full ${mobileView === 'map' ? 'block flex-1' : 'hidden lg:block'}`} style={{ flex: 1, minHeight: 0 }}>
               <div className="rounded-xl overflow-hidden border h-full">
                 <MapContainer center={mapCenter} zoom={mapZoom} style={{ height: '100%', width: '100%' }} scrollWheelZoom={true}>
                   <TileLayer
