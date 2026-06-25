@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { MapContainer, TileLayer, Marker, Polyline, Tooltip, useMap } from 'react-leaflet';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
 import {
   Phone, Mail, MapPinned, Loader, Clock, Navigation,
   CheckCircle, X, ArrowLeft
@@ -70,6 +71,13 @@ function getTierIcon(tier) {
   return greyIcon;
 }
 
+function getTierKey(tier) {
+  if (tier === 'TIER 1') return 'TIER 1';
+  if (tier === 'TIER 2') return 'TIER 2';
+  if (tier === 'Previously on Network') return 'Previously on Network';
+  return 'None';
+}
+
 // Decode Google encoded polyline into [lat, lng] pairs
 function decodePolyline(encoded) {
   if (!encoded) return [];
@@ -127,6 +135,12 @@ export default function BodyshopMap() {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('name');
   const [maxTimeFilter, setMaxTimeFilter] = useState(null);
+  const [visibleTiers, setVisibleTiers] = useState({
+    'TIER 1': true,
+    'TIER 2': true,
+    'Previously on Network': true,
+    'None': true,
+  });
   const [mapCenter, setMapCenter] = useState([54.5, -2.0]);
   const [mapZoom, setMapZoom] = useState(7);
   const [geocodedCoords, setGeocodedCoords] = useState({});
@@ -315,6 +329,10 @@ export default function BodyshopMap() {
 
   const hasLogistics = Object.keys(logistics).length > 0;
 
+  const tierFilteredBodyshops = useMemo(() =>
+    sortedBodyshops.filter(b => visibleTiers[getTierKey(b.tier)]),
+    [sortedBodyshops, visibleTiers]);
+
   const handleAddressSelect = (addressData) => {
     if (addressData && addressData.latitude && addressData.longitude) {
       setCustomerLocation({
@@ -408,11 +426,23 @@ export default function BodyshopMap() {
               <span className="text-foreground-muted">Selected</span>
             </div>
           )}
-          <div className="flex items-center gap-3 ml-auto">
-            <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full bg-green-500"></div><span className="text-foreground-muted">Tier 1</span></div>
-            <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full bg-orange-400"></div><span className="text-foreground-muted">Tier 2</span></div>
-            <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full bg-red-500"></div><span className="text-foreground-muted">Previously on Network</span></div>
-            <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full bg-gray-400"></div><span className="text-foreground-muted">No Tier</span></div>
+          <div className="flex items-center gap-3 ml-auto flex-wrap">
+            {[
+              { key: 'TIER 1', label: 'Tier 1', color: 'bg-green-500' },
+              { key: 'TIER 2', label: 'Tier 2', color: 'bg-orange-400' },
+              { key: 'Previously on Network', label: 'Prev. Network', color: 'bg-red-500' },
+              { key: 'None', label: 'No Tier', color: 'bg-gray-400' },
+            ].map(t => (
+              <label key={t.key} className="flex items-center gap-1.5 cursor-pointer select-none">
+                <div className={`w-2.5 h-2.5 rounded-full ${t.color}`}></div>
+                <span className="text-foreground-muted">{t.label}</span>
+                <Switch
+                  checked={visibleTiers[t.key]}
+                  onCheckedChange={(checked) => setVisibleTiers(prev => ({ ...prev, [t.key]: checked }))}
+                  className="scale-75 origin-left"
+                />
+              </label>
+            ))}
           </div>
         </div>
       </div>
@@ -467,10 +497,10 @@ export default function BodyshopMap() {
               )}
 
               <div className="space-y-2 max-h-[300px] lg:max-h-none overflow-y-auto lg:overflow-visible pr-1">
-                {sortedBodyshops.length === 0 ? (
-                  <div className="text-center text-sm text-muted-foreground p-4">No bodyshops match your filters.</div>
+                {tierFilteredBodyshops.length === 0 ? (
+                  <div className="text-center text-sm text-muted-foreground p-4">No bodyshops match your filters. Try enabling more tiers.</div>
                 ) : (
-                  sortedBodyshops.map((bodyshop) => {
+                  tierFilteredBodyshops.map((bodyshop) => {
                     const isSelected = selectedBodyshop?.id === bodyshop.id;
                     const log = logistics[bodyshop.id];
                     return (
@@ -521,7 +551,7 @@ export default function BodyshopMap() {
                     <Polyline positions={routePoints} pathOptions={{ color: '#10b981', weight: 4, opacity: 0.7 }} />
                   )}
 
-                  {sortedBodyshops.map((bodyshop) => {
+                  {tierFilteredBodyshops.map((bodyshop) => {
                     const coords = getCoords(bodyshop);
                     if (!coords) return null;
                     const log = logistics[bodyshop.id];
