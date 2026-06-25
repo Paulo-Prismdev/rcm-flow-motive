@@ -18,7 +18,7 @@ export default function RepairerDirectory() {
 
   const { data: bodyshops = [], isLoading } = useQuery({
     queryKey: ["repairer-directory"],
-    queryFn: () => base44.entities.Bodyshop.list("-name", 500),
+    queryFn: () => base44.entities.Bodyshop.list("name", 500),
     staleTime: 60000,
   });
 
@@ -27,9 +27,15 @@ export default function RepairerDirectory() {
     return Array.from(set).sort();
   }, [bodyshops]);
 
+  const sortedBodyshops = useMemo(() => {
+    return [...bodyshops].sort((a, b) =>
+      (a.name || "").localeCompare(b.name || "", undefined, { sensitivity: "base" })
+    );
+  }, [bodyshops]);
+
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
-    return bodyshops.filter((b) => {
+    return sortedBodyshops.filter((b) => {
       const matchesSearch =
         !q ||
         b.name?.toLowerCase().includes(q) ||
@@ -42,7 +48,7 @@ export default function RepairerDirectory() {
       const matchesAcg = acgFilter === "all" || b.acg_signed_up === acgFilter;
       return matchesSearch && matchesTier && matchesAcg;
     });
-  }, [bodyshops, search, tierFilter, acgFilter]);
+  }, [sortedBodyshops, search, tierFilter, acgFilter]);
 
   const handleImportClick = () => fileInputRef.current?.click();
 
@@ -168,13 +174,17 @@ export default function RepairerDirectory() {
                   <td className="p-3 hidden sm:table-cell">
                     {b.acg_signed_up === "Yes" ? (
                       <Badge className="bg-green-100 text-green-700 text-xs">Yes</Badge>
+                    ) : b.acg_signed_up === "No" ? (
+                      <Badge className="bg-red-100 text-red-700 text-xs">No</Badge>
                     ) : (
                       <span className="text-xs text-muted-foreground">{b.acg_signed_up || "—"}</span>
                     )}
                   </td>
                   <td className="p-3 hidden sm:table-cell">
                     {b.bs10125_certified === "Yes" ? (
-                      <Badge className="bg-blue-100 text-blue-700 text-xs">Yes</Badge>
+                      <Badge className="bg-green-100 text-green-700 text-xs">Yes</Badge>
+                    ) : b.bs10125_certified === "No" ? (
+                      <Badge className="bg-red-100 text-red-700 text-xs">No</Badge>
                     ) : (
                       <span className="text-xs text-muted-foreground">{b.bs10125_certified || "—"}</span>
                     )}
