@@ -468,7 +468,7 @@ export default function BodyshopMap() {
         </div>
         <button
           onClick={() => setShowSettings(s => !s)}
-          className={`flex-shrink-0 w-10 h-10 rounded-full shadow-lg border flex items-center justify-center transition-colors ${
+          className={`relative z-[1001] flex-shrink-0 w-10 h-10 rounded-full shadow-lg border flex items-center justify-center transition-colors ${
             showSettings
               ? 'bg-primary text-primary-foreground border-primary'
               : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-border hover:bg-gray-50 dark:hover:bg-gray-700'
