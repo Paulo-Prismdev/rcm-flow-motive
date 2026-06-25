@@ -40,6 +40,7 @@ import ClaimReferrerForm from './ClaimReferrerForm';
 import ClaimFinancialsForm from './ClaimFinancialsForm';
 import ClaimDatesForm from './ClaimDatesForm';
 import ClaimBodyshopForm from './ClaimBodyshopForm';
+import ClaimBodyshopInfo from './ClaimBodyshopInfo';
 import ClaimEstimateForm from './ClaimEstimateForm';
 import ClaimStatusForm from './ClaimStatusForm';
 import FinancialCalculator from './FinancialCalculator';
@@ -1021,6 +1022,9 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
               <DetailRow label="Bodyshop" value={claim.bodyshop} />
               <DetailRow label="Bodyshop Email" value={claim.bodyshop_email} />
             </div>
+
+            {/* Extended bodyshop information when allocated */}
+            {claim.bodyshop_id && <ClaimBodyshopInfo bodyshopId={claim.bodyshop_id} />}
             
             {/* Instruction PDF Download - Only show if there's a PDF */}
             {claim.instruction_pdf_url && (
