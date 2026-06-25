@@ -39,6 +39,37 @@ const customerIcon = new L.Icon({
   iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
 });
 
+const tier1Icon = new L.Icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+  iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+});
+
+const tier2Icon = new L.Icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+  iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+});
+
+const prevNetworkIcon = new L.Icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+  iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+});
+
+const greyIcon = new L.Icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-grey.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+  iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+});
+
+function getTierIcon(tier) {
+  if (tier === 'TIER 1') return tier1Icon;
+  if (tier === 'TIER 2') return tier2Icon;
+  if (tier === 'Previously on Network') return prevNetworkIcon;
+  return greyIcon;
+}
+
 // Decode Google encoded polyline into [lat, lng] pairs
 function decodePolyline(encoded) {
   if (!encoded) return [];
@@ -377,6 +408,12 @@ export default function BodyshopMap() {
               <span className="text-foreground-muted">Selected</span>
             </div>
           )}
+          <div className="flex items-center gap-3 ml-auto">
+            <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full bg-green-500"></div><span className="text-foreground-muted">Tier 1</span></div>
+            <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full bg-orange-400"></div><span className="text-foreground-muted">Tier 2</span></div>
+            <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full bg-red-500"></div><span className="text-foreground-muted">Previously on Network</span></div>
+            <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full bg-gray-400"></div><span className="text-foreground-muted">No Tier</span></div>
+          </div>
         </div>
       </div>
 
@@ -490,7 +527,7 @@ export default function BodyshopMap() {
                     const log = logistics[bodyshop.id];
                     return (
                       <Marker key={bodyshop.id} position={[coords.lat, coords.lng]}
-                        icon={selectedBodyshop?.id === bodyshop.id ? bodyshopSelectedIcon : bodyshopIcon}
+                        icon={selectedBodyshop?.id === bodyshop.id ? bodyshopSelectedIcon : getTierIcon(bodyshop.tier)}
                         eventHandlers={{ click: () => handleSelectBodyshop(bodyshop) }}>
                         <Tooltip sticky>
                           <div className="text-xs">
