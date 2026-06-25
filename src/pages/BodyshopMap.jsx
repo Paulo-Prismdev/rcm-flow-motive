@@ -403,6 +403,7 @@ export default function BodyshopMap() {
             style={{ height: '100%', width: '100%' }}
             scrollWheelZoom={true}
             zoomControl={false}
+            attributionControl={false}
           >
             <TileLayer
               attribution='&copy; Google Maps'
@@ -522,12 +523,13 @@ export default function BodyshopMap() {
         }`}>
           <button
             onClick={() => setListExpanded(!listExpanded)}
-            className="w-full flex flex-col items-center pt-2 pb-1.5 touch-manipulation"
+            className="w-full flex items-center justify-center gap-2 pt-2 pb-1.5 touch-manipulation"
           >
             <ChevronUp className={`w-5 h-5 text-gray-400 transition-transform ${listExpanded ? '' : 'rotate-180'}`} />
             <span className="text-xs font-medium text-muted-foreground">
               {listExpanded ? 'Hide list' : `${tierFilteredBodyshops.length} bodyshops`}
             </span>
+            <span className="text-[8px] text-gray-300 dark:text-gray-500">© Google Maps</span>
           </button>
           {listExpanded && (
             <div className="overflow-y-auto px-3 pb-4" style={{ height: 'calc(50vh - 52px)' }}>
