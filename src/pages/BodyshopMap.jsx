@@ -94,7 +94,7 @@ export default function BodyshopMap() {
   const [isLoadingLogistics, setIsLoadingLogistics] = useState(false);
   const [routePoints, setRoutePoints] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState('time');
+  const [sortBy, setSortBy] = useState('name');
   const [maxTimeFilter, setMaxTimeFilter] = useState(null);
   const [mapCenter, setMapCenter] = useState([54.5, -2.0]);
   const [mapZoom, setMapZoom] = useState(7);
@@ -458,7 +458,7 @@ export default function BodyshopMap() {
             </div>
 
             {/* Map */}
-            <div className="lg:w-3/5 order-1 lg:order-2" style={{ minHeight: '300px', height: '300px', flex: 1 }}>
+            <div className="lg:w-3/5 order-1 lg:order-2 h-[300px] lg:h-full" style={{ flex: 1, minHeight: 0 }}>
               <div className="rounded-xl overflow-hidden border h-full">
                 <MapContainer center={mapCenter} zoom={mapZoom} style={{ height: '100%', width: '100%' }} scrollWheelZoom={true}>
                   <TileLayer
