@@ -40,7 +40,7 @@ import ClaimReferrerForm from './ClaimReferrerForm';
 import ClaimFinancialsForm from './ClaimFinancialsForm';
 import ClaimDatesForm from './ClaimDatesForm';
 import ClaimBodyshopForm from './ClaimBodyshopForm';
-import ClaimBodyshopInfo from './ClaimBodyshopInfo';
+import ClaimBodyshopInfo from './ClaimBodyshopInfo.jsx';
 import ClaimEstimateForm from './ClaimEstimateForm';
 import ClaimStatusForm from './ClaimStatusForm';
 import FinancialCalculator from './FinancialCalculator';
