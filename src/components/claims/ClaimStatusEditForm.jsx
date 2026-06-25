@@ -53,10 +53,9 @@ export default function ClaimStatusEditForm({ claim: editClaim, onSave, onCancel
             value={form.claim_type}
             onChange={(v) => set('claim_type', v)}
             options={[
-              { value: 'Credit Repair', label: 'Credit Repair' },
               { value: 'Fault Claim', label: 'Fault Claim' },
-              { value: 'Non-Fault Claim', label: 'Non-Fault Claim' },
-              { value: 'Total Loss', label: 'Total Loss' },
+              { value: '3rd Party Direct', label: '3rd Party Direct' },
+              { value: 'Credit Repair', label: 'Credit Repair' },
               { value: 'Glass Claim', label: 'Glass Claim' },
             ]}
             className="glass-inset w-full px-3 py-2 text-sm"
