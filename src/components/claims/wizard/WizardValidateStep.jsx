@@ -47,25 +47,25 @@ export default function WizardValidateStep({
 
   const insurerOptions = [
     {
-      value: 'client',
+      value: 'Client Insurer',
       label: 'Client\'s Insurer',
       icon: Building2,
-      subtitle: (validationData.insurer || claim.insurer)
-        ? `${validationData.insurer || claim.insurer} — ${validationData.claim_ref || claim.claim_ref || 'No claim ref'}`
+      subtitle: (claim.insurer)
+        ? `${claim.insurer} — ${claim.claim_ref || 'No claim ref'}`
         : 'No insurer on file',
-      disabled: !(validationData.insurer || claim.insurer)
+      disabled: !claim.insurer
     },
     {
-      value: 'third_party',
+      value: 'Third Party Insurer',
       label: 'Third Party Insurer',
       icon: Building2,
-      subtitle: (validationData.tp_insurer || claim.tp_insurer)
-        ? `${validationData.tp_insurer || claim.tp_insurer} — ${validationData.tp_claim_ref || claim.tp_claim_ref || 'No claim ref'}`
+      subtitle: (claim.tp_insurer)
+        ? `${claim.tp_insurer} — ${claim.tp_claim_ref || 'No claim ref'}`
         : 'No TP insurer on file',
-      disabled: !(validationData.tp_insurer || claim.tp_insurer)
+      disabled: !claim.tp_insurer
     },
     {
-      value: 'uninsured',
+      value: 'Uninsured',
       label: 'Uninsured / Client Direct',
       icon: Building2,
       subtitle: 'No insurer — client paying directly',
@@ -73,27 +73,27 @@ export default function WizardValidateStep({
     },
   ];
 
-  const isClientInsurer = authorisedBy === 'Client Insurer' || authorisedBy === 'client';
-  const isThirdPartyInsurer = authorisedBy === 'Third Party Insurer' || authorisedBy === 'third_party';
-  const isUninsured = authorisedBy === 'Uninsured' || authorisedBy === 'uninsured';
+  const isClientInsurer = authorisedBy === 'Client Insurer';
+  const isThirdPartyInsurer = authorisedBy === 'Third Party Insurer';
+  const isUninsured = authorisedBy === 'Uninsured';
 
   const getInsurerFields = () => {
     if (isClientInsurer) {
       return {
-        insurer_name: validationData.insurer || claim.insurer || '',
-        claim_ref: validationData.claim_ref || claim.claim_ref || '',
-        policy_number: validationData.policy_number || claim.policy_number || '',
-        policy_excess: validationData.policy_excess || claim.policy_excess || '',
-        audatex_code: validationData.audatex_code || claim.audatex_code || '',
-        send_estimate_email: validationData.send_estimate_email || claim.send_estimate_email || '',
+        insurer_name: claim.insurer || '',
+        claim_ref: claim.claim_ref || '',
+        policy_number: claim.policy_number || '',
+        policy_excess: claim.policy_excess || '0',
+        audatex_code: claim.audatex_code || '',
+        send_estimate_email: claim.send_estimate_email || '',
       };
     }
     if (isThirdPartyInsurer) {
       return {
-        insurer_name: validationData.tp_insurer || claim.tp_insurer || '',
-        claim_ref: validationData.tp_claim_ref || claim.tp_claim_ref || '',
-        policy_number: validationData.tp_policy_number || claim.tp_policy_number || '',
-        policy_excess: validationData.tp_policy_excess || claim.tp_policy_excess || '',
+        insurer_name: claim.tp_insurer || '',
+        claim_ref: claim.tp_claim_ref || '',
+        policy_number: claim.tp_policy_number || '',
+        policy_excess: claim.tp_policy_excess || '0',
         audatex_code: '',
         send_estimate_email: '',
       };
@@ -102,7 +102,7 @@ export default function WizardValidateStep({
       insurer_name: '',
       claim_ref: '',
       policy_number: '',
-      policy_excess: '0',
+      policy_excess: claim.policy_excess || '0',
       audatex_code: '',
       send_estimate_email: '',
     };
@@ -237,8 +237,7 @@ export default function WizardValidateStep({
                   if (isClientInsurer) onValidationChange('insurer', e.target.value);
                   else if (isThirdPartyInsurer) onValidationChange('tp_insurer', e.target.value);
                 }}
-                placeholder="Enter insurer name"
-                readOnly={isUninsured}
+                placeholder={isClientInsurer ? "Enter insurer name" : isThirdPartyInsurer ? "Enter TP insurer name" : "Enter insurer name"}
               />
             </div>
             <div>
@@ -249,7 +248,7 @@ export default function WizardValidateStep({
                   if (isClientInsurer) onValidationChange('claim_ref', e.target.value);
                   else if (isThirdPartyInsurer) onValidationChange('tp_claim_ref', e.target.value);
                 }}
-                placeholder="Enter claim reference"
+                placeholder={isClientInsurer ? "Enter claim reference" : "Enter TP claim reference"}
                 className={isFieldRequired('claim_ref') && !insurerFields.claim_ref ? 'border-red-300 bg-red-50' : ''}
               />
             </div>
@@ -261,7 +260,7 @@ export default function WizardValidateStep({
                   if (isClientInsurer) onValidationChange('policy_number', e.target.value);
                   else if (isThirdPartyInsurer) onValidationChange('tp_policy_number', e.target.value);
                 }}
-                placeholder="Enter policy number"
+                placeholder={isClientInsurer ? "Enter policy number" : "Enter TP policy number"}
               />
             </div>
             <div>
