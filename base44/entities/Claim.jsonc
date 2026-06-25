@@ -124,7 +124,8 @@
       "enum": [
         "None",
         "Via Repairer",
-        "Direct to Client"
+        "Direct to Client",
+        "Waived"
       ],
       "default": "None"
     },
@@ -666,18 +667,7 @@
   },
   "required": [],
   "rls": {
-    "create": {
-      "$or": [
-        {
-          "user_condition": {
-            "user_type": "internal"
-          }
-        },
-        {
-          "user_condition": {}
-        }
-      ]
-    },
+    "create": true,
     "read": {
       "$or": [
         {
