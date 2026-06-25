@@ -414,24 +414,26 @@ export default function BodyshopMap() {
           </div>
         )}
 
-        <div className="mt-3 flex items-center gap-4 text-xs">
-          <div className="flex items-center gap-1.5">
-            <div className="w-2.5 h-2.5 rounded-full bg-blue-500"></div>
-            <span className="text-foreground-muted">Bodyshops ({resolvedBodyshops.length})</span>
+        <div className="mt-3 flex flex-col gap-2 text-xs">
+          <div className="flex items-center gap-3 flex-wrap">
+            <div className="flex items-center gap-1.5">
+              <div className="w-2.5 h-2.5 rounded-full bg-blue-500"></div>
+              <span className="text-foreground-muted">Bodyshops ({resolvedBodyshops.length})</span>
+            </div>
+            {customerLocation && (
+              <div className="flex items-center gap-1.5">
+                <div className="w-2.5 h-2.5 rounded-full bg-red-500"></div>
+                <span className="text-foreground-muted">Your Location</span>
+              </div>
+            )}
+            {selectedBodyshop && (
+              <div className="flex items-center gap-1.5">
+                <div className="w-2.5 h-2.5 rounded-full bg-green-500"></div>
+                <span className="text-foreground-muted">Selected</span>
+              </div>
+            )}
           </div>
-          {customerLocation && (
-            <div className="flex items-center gap-1.5">
-              <div className="w-2.5 h-2.5 rounded-full bg-red-500"></div>
-              <span className="text-foreground-muted">Your Location</span>
-            </div>
-          )}
-          {selectedBodyshop && (
-            <div className="flex items-center gap-1.5">
-              <div className="w-2.5 h-2.5 rounded-full bg-green-500"></div>
-              <span className="text-foreground-muted">Selected</span>
-            </div>
-          )}
-          <div className="flex items-center gap-3 ml-auto flex-wrap">
+          <div className="flex items-center gap-x-3 gap-y-1.5 flex-wrap">
             {[
               { key: 'TIER 1', label: 'Tier 1', color: 'bg-green-500' },
               { key: 'TIER 2', label: 'Tier 2', color: 'bg-orange-400' },
@@ -473,10 +475,10 @@ export default function BodyshopMap() {
                   <Input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search by name, town, or postcode..." />
                 </div>
                 <div className="flex gap-2">
-                  <Button variant={sortBy === 'time' ? 'default' : 'outline'} size="sm" onClick={() => setSortBy('time')} disabled={!customerLocation || !hasLogistics} className="h-9">
-                    <Clock className="w-3.5 h-3.5 mr-1" /> Travel Time
+                  <Button variant={sortBy === 'time' ? 'default' : 'outline'} size="sm" onClick={() => setSortBy('time')} disabled={!customerLocation || !hasLogistics} className="h-9 flex-1 sm:flex-none">
+                    <Clock className="w-3.5 h-3.5 sm:mr-1" /> <span className="sm:inline">Travel Time</span>
                   </Button>
-                  <Button variant={sortBy === 'name' ? 'default' : 'outline'} size="sm" onClick={() => setSortBy('name')} className="h-9">
+                  <Button variant={sortBy === 'name' ? 'default' : 'outline'} size="sm" onClick={() => setSortBy('name')} className="h-9 flex-1 sm:flex-none">
                     Name
                   </Button>
                 </div>
@@ -530,7 +532,7 @@ export default function BodyshopMap() {
             </div>
 
             {/* Map */}
-            <div className="lg:w-3/5 order-1 lg:order-2 h-[300px] lg:h-full" style={{ flex: 1, minHeight: 0 }}>
+            <div className="lg:w-3/5 order-1 lg:order-2 h-[280px] sm:h-[350px] lg:h-full" style={{ flex: 1, minHeight: 0 }}>
               <div className="rounded-xl overflow-hidden border h-full">
                 <MapContainer center={mapCenter} zoom={mapZoom} style={{ height: '100%', width: '100%' }} scrollWheelZoom={true}>
                   <TileLayer
@@ -582,7 +584,7 @@ export default function BodyshopMap() {
 
       {/* Selected bodyshop detail card */}
       {selectedBodyshop && (
-        <div className="bg-white dark:bg-gray-900 lg:border lg:border-gray-200 dark:lg:border-gray-800 lg:rounded-xl p-3 flex-shrink-0 border-2 border-primary bg-primary/5">
+        <div className="bg-white dark:bg-gray-900 lg:border lg:border-gray-200 dark:lg:border-gray-800 lg:rounded-xl p-3 flex-shrink-0 border-2 border-primary bg-primary/5 max-h-[40vh] overflow-y-auto">
           <div className="flex items-start justify-between gap-2">
             <div className="flex-1 min-w-0">
               <h4 className="font-bold text-sm flex items-center gap-1.5 text-primary mb-2">

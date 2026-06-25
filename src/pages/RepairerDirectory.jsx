@@ -74,19 +74,19 @@ export default function RepairerDirectory() {
   return (
     <div className="h-full flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-card">
-        <div>
+      <div className="flex items-center justify-between px-3 sm:px-4 py-3 border-b border-border bg-card">
+        <div className="min-w-0">
           <h1 className="text-page-title flex items-center gap-2">
-            <Building2 className="w-5 h-5 text-primary" />
-            Repairer Directory
+            <Building2 className="w-5 h-5 text-primary flex-shrink-0" />
+            <span className="truncate">Repairer Directory</span>
           </h1>
           <p className="text-xs text-muted-foreground mt-0.5">
             {filtered.length} of {bodyshops.length} repairers
           </p>
         </div>
-        <Button onClick={handleImportClick} disabled={importing} variant="outline" size="sm">
+        <Button onClick={handleImportClick} disabled={importing} variant="outline" size="sm" className="flex-shrink-0">
           {importing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-          {importing ? "Importing..." : "Import Excel"}
+          <span className="hidden sm:inline">{importing ? "Importing..." : "Import Excel"}</span>
         </Button>
         <input
           ref={fileInputRef}
@@ -98,37 +98,39 @@ export default function RepairerDirectory() {
       </div>
 
       {/* Filters */}
-      <div className="flex items-center gap-2 px-4 py-2 border-b border-border bg-card flex-wrap">
-        <div className="flex-1 min-w-[200px]">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 px-3 sm:px-4 py-2 border-b border-border bg-card">
+        <div className="flex-1 min-w-0">
           <Input
             placeholder="Search name, address, email, manager..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <select
-          value={tierFilter}
-          onChange={(e) => setTierFilter(e.target.value)}
-          className="h-9 rounded-md border border-input bg-transparent px-3 text-sm"
-        >
-          <option value="all">All Tiers</option>
-          {tiers.map((t) => (
-            <option key={t} value={t}>{t}</option>
-          ))}
-        </select>
-        <select
-          value={acgFilter}
-          onChange={(e) => setAcgFilter(e.target.value)}
-          className="h-9 rounded-md border border-input bg-transparent px-3 text-sm"
-        >
-          <option value="all">All ACG</option>
-          <option value="Yes">ACG: Yes</option>
-          <option value="No">ACG: No</option>
-          <option value="TBC">ACG: TBC</option>
-        </select>
+        <div className="flex gap-2">
+          <select
+            value={tierFilter}
+            onChange={(e) => setTierFilter(e.target.value)}
+            className="h-9 rounded-md border border-input bg-transparent px-3 text-sm flex-1 sm:flex-none"
+          >
+            <option value="all">All Tiers</option>
+            {tiers.map((t) => (
+              <option key={t} value={t}>{t}</option>
+            ))}
+          </select>
+          <select
+            value={acgFilter}
+            onChange={(e) => setAcgFilter(e.target.value)}
+            className="h-9 rounded-md border border-input bg-transparent px-3 text-sm flex-1 sm:flex-none"
+          >
+            <option value="all">All ACG</option>
+            <option value="Yes">ACG: Yes</option>
+            <option value="No">ACG: No</option>
+            <option value="TBC">ACG: TBC</option>
+          </select>
+        </div>
       </div>
 
-      {/* Table */}
+      {/* List */}
       <div className="flex-1 overflow-auto">
         {isLoading ? (
           <div className="p-8 text-center">
@@ -137,67 +139,109 @@ export default function RepairerDirectory() {
         ) : filtered.length === 0 ? (
           <div className="p-8 text-center text-sm text-muted-foreground">No repairers found</div>
         ) : (
-          <table className="w-full">
-            <thead className="sticky top-0 bg-card border-b border-border z-10">
-              <tr>
-                <th className="text-left p-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Name</th>
-                <th className="text-left p-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground hidden md:table-cell">Location</th>
-                <th className="text-left p-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground hidden lg:table-cell">Contact</th>
-                <th className="text-left p-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Tier</th>
-                <th className="text-left p-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground hidden sm:table-cell">ACG</th>
-                <th className="text-left p-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground hidden sm:table-cell">BS10125</th>
-              </tr>
-            </thead>
-            <tbody>
+          <>
+            {/* Mobile cards */}
+            <div className="sm:hidden divide-y divide-border">
               {filtered.map((b) => (
-                <tr
+                <div
                   key={b.id}
                   onClick={() => setSelectedId(b.id)}
-                  className="border-b border-border hover:bg-muted/50 cursor-pointer transition-colors"
+                  className="p-3 hover:bg-muted/50 cursor-pointer transition-colors"
                 >
-                  <td className="p-3">
-                    <div className="font-medium text-sm">{b.name}</div>
-                    {b.group_name && <div className="text-xs text-muted-foreground">{b.group_name}</div>}
-                  </td>
-                  <td className="p-3 text-sm hidden md:table-cell">
-                    {b.postcode || b.town || (b.full_address ? b.full_address.split(",").slice(-2).join(",").trim() : "—")}
-                  </td>
-                  <td className="p-3 text-sm hidden lg:table-cell">
-                    <div className="font-medium">{b.contact_name || b.bodyshop_manager || "—"}</div>
-                    <div className="text-xs text-muted-foreground">{b.phone || b.email || ""}</div>
-                  </td>
-                  <td className="p-3">
+                  <div className="flex items-start justify-between gap-2 mb-1">
+                    <div className="min-w-0">
+                      <div className="font-medium text-sm truncate">{b.name}</div>
+                      {b.group_name && <div className="text-xs text-muted-foreground truncate">{b.group_name}</div>}
+                    </div>
                     {b.tier ? (
-                      <Badge className={`text-xs ${
+                      <Badge className={`text-xs flex-shrink-0 ${
                         b.tier?.toUpperCase().includes("TIER 1") || b.tier?.toUpperCase() === "TIER1" ? "bg-green-100 text-green-700"
                         : b.tier?.toUpperCase().includes("TIER 2") || b.tier?.toUpperCase() === "TIER2" ? "bg-amber-100 text-amber-700"
                         : b.tier?.toLowerCase().includes("previously") ? "bg-red-100 text-red-700"
                         : "bg-gray-100 text-gray-700"
                       }`}>{b.tier}</Badge>
-                    ) : <span className="text-muted-foreground text-sm">—</span>}
-                  </td>
-                  <td className="p-3 hidden sm:table-cell">
-                    {b.acg_signed_up === "Yes" ? (
-                      <Badge className="bg-green-100 text-green-700 text-xs">Yes</Badge>
-                    ) : b.acg_signed_up === "No" ? (
-                      <Badge className="bg-red-100 text-red-700 text-xs">No</Badge>
-                    ) : (
-                      <span className="text-xs text-muted-foreground">{b.acg_signed_up || "—"}</span>
+                    ) : null}
+                  </div>
+                  <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                    {(b.town || b.postcode) && (
+                      <span className="truncate">{[b.town, b.postcode].filter(Boolean).join(" ")}</span>
                     )}
-                  </td>
-                  <td className="p-3 hidden sm:table-cell">
-                    {b.bs10125_certified === "Yes" ? (
-                      <Badge className="bg-green-100 text-green-700 text-xs">Yes</Badge>
-                    ) : b.bs10125_certified === "No" ? (
-                      <Badge className="bg-red-100 text-red-700 text-xs">No</Badge>
-                    ) : (
-                      <span className="text-xs text-muted-foreground">{b.bs10125_certified || "—"}</span>
-                    )}
-                  </td>
-                </tr>
+                    {b.contact_name || b.bodyshop_manager ? (
+                      <span className="truncate">{b.contact_name || b.bodyshop_manager}</span>
+                    ) : null}
+                  </div>
+                  <div className="flex items-center gap-2 mt-1.5">
+                    {b.acg_signed_up === "Yes" && <Badge className="bg-green-100 text-green-700 text-[10px] px-1.5 py-0">ACG: Yes</Badge>}
+                    {b.acg_signed_up === "No" && <Badge className="bg-red-100 text-red-700 text-[10px] px-1.5 py-0">ACG: No</Badge>}
+                    {b.bs10125_certified === "Yes" && <Badge className="bg-green-100 text-green-700 text-[10px] px-1.5 py-0">BS10125</Badge>}
+                  </div>
+                </div>
               ))}
-            </tbody>
-          </table>
+            </div>
+
+            {/* Desktop/tablet table */}
+            <table className="hidden sm:table w-full">
+              <thead className="sticky top-0 bg-card border-b border-border z-10">
+                <tr>
+                  <th className="text-left p-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Name</th>
+                  <th className="text-left p-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground hidden md:table-cell">Location</th>
+                  <th className="text-left p-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground hidden lg:table-cell">Contact</th>
+                  <th className="text-left p-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Tier</th>
+                  <th className="text-left p-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground hidden sm:table-cell">ACG</th>
+                  <th className="text-left p-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground hidden sm:table-cell">BS10125</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map((b) => (
+                  <tr
+                    key={b.id}
+                    onClick={() => setSelectedId(b.id)}
+                    className="border-b border-border hover:bg-muted/50 cursor-pointer transition-colors"
+                  >
+                    <td className="p-3">
+                      <div className="font-medium text-sm">{b.name}</div>
+                      {b.group_name && <div className="text-xs text-muted-foreground">{b.group_name}</div>}
+                    </td>
+                    <td className="p-3 text-sm hidden md:table-cell">
+                      {b.postcode || b.town || (b.full_address ? b.full_address.split(",").slice(-2).join(",").trim() : "—")}
+                    </td>
+                    <td className="p-3 text-sm hidden lg:table-cell">
+                      <div className="font-medium">{b.contact_name || b.bodyshop_manager || "—"}</div>
+                      <div className="text-xs text-muted-foreground">{b.phone || b.email || ""}</div>
+                    </td>
+                    <td className="p-3">
+                      {b.tier ? (
+                        <Badge className={`text-xs ${
+                          b.tier?.toUpperCase().includes("TIER 1") || b.tier?.toUpperCase() === "TIER1" ? "bg-green-100 text-green-700"
+                          : b.tier?.toUpperCase().includes("TIER 2") || b.tier?.toUpperCase() === "TIER2" ? "bg-amber-100 text-amber-700"
+                          : b.tier?.toLowerCase().includes("previously") ? "bg-red-100 text-red-700"
+                          : "bg-gray-100 text-gray-700"
+                        }`}>{b.tier}</Badge>
+                      ) : <span className="text-muted-foreground text-sm">—</span>}
+                    </td>
+                    <td className="p-3 hidden sm:table-cell">
+                      {b.acg_signed_up === "Yes" ? (
+                        <Badge className="bg-green-100 text-green-700 text-xs">Yes</Badge>
+                      ) : b.acg_signed_up === "No" ? (
+                        <Badge className="bg-red-100 text-red-700 text-xs">No</Badge>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">{b.acg_signed_up || "—"}</span>
+                      )}
+                    </td>
+                    <td className="p-3 hidden sm:table-cell">
+                      {b.bs10125_certified === "Yes" ? (
+                        <Badge className="bg-green-100 text-green-700 text-xs">Yes</Badge>
+                      ) : b.bs10125_certified === "No" ? (
+                        <Badge className="bg-red-100 text-red-700 text-xs">No</Badge>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">{b.bs10125_certified || "—"}</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </>
         )}
       </div>
 
