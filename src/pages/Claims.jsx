@@ -25,14 +25,16 @@ const calculateUpdateStatus = (claim) => {
   if (closedStatuses.includes(claim.job_status)) return 'Gray';
   if (claim.override_active && claim.override_expiry_at && now < new Date(claim.override_expiry_at)) return 'Blue';
   // 48-hour update tracker: based on time since last update or status change
-  const lastUpdate = claim.last_updated_at || claim.created_date;
+  const lastUpdate = claim.last_updated_at;
   if (lastUpdate) {
     const hours = (now - new Date(lastUpdate)) / 3600000;
     if (hours >= 48) return 'Red';
     if (hours >= 24) return 'Amber';
     return 'Green';
   }
-  return 'Green';
+  // No update has ever been logged — never show Green
+  const sinceCreated = claim.created_date ? (now - new Date(claim.created_date)) / 3600000 : 48;
+  return sinceCreated >= 48 ? 'Red' : 'Amber';
 };
 
 export default function ClaimsPage() {
