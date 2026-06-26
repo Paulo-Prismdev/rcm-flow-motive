@@ -1,9 +1,11 @@
-import React from 'react';
-import { useQuery } from '@tanstack/react-query';
+import React, { useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { Clock, Calendar, User, MessageSquare } from 'lucide-react';
+import { Clock, Calendar, User, MessageSquare, Plus } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
+import ClaimUpdateForm from './ClaimUpdateForm';
 
 const UPDATE_TYPE_COLORS = {
   "Status Change": "bg-purple-500", "Client Communication": "bg-blue-500",
@@ -16,6 +18,8 @@ const UPDATE_TYPE_COLORS = {
 
 export default function ClaimUpdatesQuickView({ claim, isOpen, onClose }) {
   const claimId = claim?.id;
+  const queryClient = useQueryClient();
+  const [showForm, setShowForm] = useState(false);
 
   const { data: updates = [], isLoading } = useQuery({
     queryKey: ['claimUpdates', claimId],
@@ -23,6 +27,35 @@ export default function ClaimUpdatesQuickView({ claim, isOpen, onClose }) {
     enabled: isOpen && !!claimId,
     staleTime: 0,
   });
+
+  const handleUpdateCreated = (newStatus, newSecondaryStatus) => {
+    const now = new Date();
+    const closedStatuses = ['Completed', 'Cancelled', 'Total Loss'];
+    const effectiveStatus = newStatus || claim?.job_status;
+    const isClosedAfterUpdate = closedStatuses.includes(effectiveStatus);
+    const fortyEightHoursFromNow = new Date(now.getTime() + 48 * 60 * 60 * 1000);
+
+    const updateData = {
+      ...(!isClosedAfterUpdate && {
+        last_updated_at: now.toISOString(),
+        next_update_due_at: fortyEightHoursFromNow.toISOString(),
+        update_status_flag: 'Green',
+      }),
+      ...(isClosedAfterUpdate && {
+        update_status_flag: 'Gray',
+      }),
+    };
+    if (newStatus) updateData.job_status = newStatus;
+    if (newSecondaryStatus !== undefined) updateData.secondary_status = newSecondaryStatus;
+
+    base44.entities.Claim.update(claimId, updateData).then(() => {
+      queryClient.invalidateQueries({ queryKey: ['claims'] });
+      queryClient.invalidateQueries({ queryKey: ['claim', claimId] });
+      queryClient.invalidateQueries({ queryKey: ['claimUpdates', claimId] });
+    }).catch(err => console.error('Failed to reset update timer:', err));
+
+    setShowForm(false);
+  };
 
   const topLevelUpdates = updates.filter(u => !u.parent_update_id)
     .sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
@@ -41,6 +74,23 @@ export default function ClaimUpdatesQuickView({ claim, isOpen, onClose }) {
         </SheetHeader>
 
         <div className="flex-1 overflow-y-auto px-5 py-4 space-y-3">
+          {!showForm ? (
+            <Button
+              onClick={() => setShowForm(true)}
+              className="w-full px-4 py-3 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-lg flex items-center justify-center gap-2"
+            >
+              <Plus className="w-4 h-4" />Add New Update
+            </Button>
+          ) : (
+            <ClaimUpdateForm
+              claimId={claimId}
+              claim={claim}
+              currentStatus={claim?.job_status}
+              onUpdateCreated={handleUpdateCreated}
+              onCancel={() => setShowForm(false)}
+            />
+          )}
+
           {isLoading ? (
             <div className="text-center text-sm text-muted-foreground py-8">Loading updates...</div>
           ) : topLevelUpdates.length === 0 ? (

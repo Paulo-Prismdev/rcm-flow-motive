@@ -3,12 +3,11 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
-import { X, Clock, User, Calendar, Mail, Plus, Heart, Reply, AtSign, Pencil, Trash2, ChevronDown } from 'lucide-react';
+import { X, Clock, User, Calendar, Plus, Heart, Reply, AtSign, Pencil, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Command, CommandItem, CommandList } from "@/components/ui/command";
+import ClaimUpdateForm from '../claims/ClaimUpdateForm';
 
 const UPDATE_TYPES = [
   "Status Change", "Client Communication", "Bodyshop Communication", "Insurer Communication",
@@ -235,127 +234,17 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
               <Plus className="w-4 h-4" />Add New Update
             </Button>
           ) : (
-            <div className="bg-muted/30 border border-border rounded-lg p-3">
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="font-semibold text-sm text-foreground">{replyToId ? 'Reply to Update' : 'Add New Update'}</h3>
-                <Button type="button" variant="ghost" size="sm" onClick={resetForm}><X className="w-4 h-4" /></Button>
-              </div>
-              <form onSubmit={handleSubmit} className="space-y-2">
-                {!replyToId && (
-                  <>
-                    <div>
-                      <label className="block text-xs text-muted-foreground mb-1">Update Type *</label>
-                      <select value={newUpdate.update_type} onChange={(e) => setNewUpdate({ ...newUpdate, update_type: e.target.value })} className="w-full px-3 py-2 text-sm bg-background border border-border rounded-lg" required>
-                        {isReferrer ? (<><option value="Referrer Response">Referrer Response</option><option value="Other">Other</option></>) : (UPDATE_TYPES.map(type => <option key={type} value={type}>{type}</option>))}
-                      </select>
-                    </div>
-
-                    {newUpdate.update_type === 'Status Change' && canChangeStatus && (
-                      <div className="space-y-3">
-                        <div>
-                          <label className="block text-xs text-muted-foreground mb-1">New Primary Status *</label>
-                          <select value={newUpdate.new_status} onChange={(e) => setNewUpdate({ ...newUpdate, new_status: e.target.value })} className="w-full px-3 py-2 text-sm bg-background border border-border rounded-lg" required>
-                            <option value="">Select status...</option>
-                            {activeStatuses.map(status => <option key={status} value={status}>{status}</option>)}
-                          </select>
-                        </div>
-                        <div>
-                          <label className="block text-xs text-muted-foreground mb-1">New Secondary Status (Optional)</label>
-                          <select value={newUpdate.new_secondary_status} onChange={(e) => setNewUpdate({ ...newUpdate, new_secondary_status: e.target.value })} className="w-full px-3 py-2 text-sm bg-background border border-border rounded-lg">
-                            <option value="">No secondary status</option>
-                            {activeStatuses.map(status => <option key={status} value={status}>{status}</option>)}
-                          </select>
-                        </div>
-                      </div>
-                    )}
-                  </>
-                )}
-
-                <div className="relative">
-                  <label className="block text-xs text-muted-foreground mb-1">{replyToId ? 'Your reply' : 'What was done?'} *</label>
-                  <Textarea 
-                    value={newUpdate.description} 
-                    onChange={handleTextareaChange} 
-                    placeholder={replyToId ? "Write your reply... Type @ to mention someone" : "Describe the action taken... Type @ to mention someone"} 
-                    className="px-3 py-2 text-sm bg-background border border-border h-24" 
-                    required 
-                  />
-                  {showMentionPopup && (
-                    <div className="absolute z-50 mt-1 w-56 bg-popover border border-border rounded-md shadow-lg max-h-48 overflow-y-auto">
-                      <Command>
-                        <CommandList>
-                          {allUsers.filter(u => (u.display_name || u.full_name || u.email)?.toLowerCase().includes(mentionQuery.toLowerCase())).slice(0, 8).map(user => (
-                            <CommandItem key={user.id} onSelect={() => insertMention(user)} className="flex items-center gap-2 cursor-pointer hover:bg-accent px-2 py-1.5">
-                              <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-xs font-medium">{(getDisplayName(user))[0]?.toUpperCase()}</div>
-                              <div className="flex flex-col min-w-0">
-                                <span className="text-sm truncate">{getDisplayName(user)}</span>
-                                <span className="text-[10px] text-muted-foreground truncate">{user.email}</span>
-                              </div>
-                            </CommandItem>
-                          ))}
-                          {allUsers.filter(u => (u.display_name || u.full_name || u.email)?.toLowerCase().includes(mentionQuery.toLowerCase())).length === 0 && (
-                            <div className="px-2 py-1.5 text-sm text-muted-foreground">No users found</div>
-                          )}
-                        </CommandList>
-                      </Command>
-                    </div>
-                  )}
-                </div>
-
-                {!replyToId && !isReferrer && (() => {
-                  const availableEmails = claim ? [
-                    claim.client_email && { label: `Client: ${claim.client_name}`, email: claim.client_email },
-                    claim.referrer_email && { label: `Referrer: ${claim.referrer}`, email: claim.referrer_email },
-                    claim.bodyshop_email && { label: `Bodyshop: ${claim.bodyshop}`, email: claim.bodyshop_email }
-                  ].filter(Boolean) : [];
-                  
-                  return availableEmails.length > 0 && (
-                    <div className="bg-muted/30 p-3 space-y-3 border border-border rounded-lg">
-                      <div className="flex items-center gap-2"><input type="checkbox" id="send_email" checked={sendEmail} onChange={(e) => setSendEmail(e.target.checked)} className="w-4 h-4" /><label htmlFor="send_email" className="text-sm font-medium flex items-center gap-2"><Mail className="w-4 h-4 text-accent" />Open email to send this update</label></div>
-                      {sendEmail && (<div className="space-y-2 pl-6"><p className="text-xs text-muted-foreground">Select recipients:</p>{availableEmails.map(({ label, email }) => (<div key={email} className="flex items-center gap-2"><input type="checkbox" id={`email_${email}`} checked={selectedEmails.includes(email)} onChange={() => setSelectedEmails(prev => prev.includes(email) ? prev.filter(e => e !== email) : [...prev, email])} className="w-4 h-4" /><label htmlFor={`email_${email}`} className="text-xs">{label} ({email})</label></div>))}</div>)}
-                    </div>
-                  );
-                })()}
-
-                {!replyToId && canChangeStatus && (
-                  <div className="border border-border rounded-lg overflow-hidden">
-                    <button
-                      type="button"
-                      onClick={() => setShowFollowUp(prev => !prev)}
-                      className="w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted/50 transition-colors bg-muted/20"
-                    >
-                      <span className="flex items-center gap-2">
-                        <Clock className="w-4 h-4" />
-                        Add Follow-up / Next Steps (Optional)
-                      </span>
-                      <ChevronDown className={`w-4 h-4 transition-transform ${showFollowUp ? 'rotate-180' : ''}`} />
-                    </button>
-                    {showFollowUp && (
-                      <div className="p-3 space-y-3 border-t border-border">
-                        <div><label className="block text-xs text-muted-foreground mb-1">Next Steps</label><Textarea value={newUpdate.next_steps} onChange={(e) => setNewUpdate({ ...newUpdate, next_steps: e.target.value })} placeholder="What needs to happen next..." className="px-3 py-2 text-sm bg-background border border-border h-20" /></div>
-                        <div><label className="block text-xs text-muted-foreground mb-1">Due Date</label><Input type="date" value={newUpdate.due_date_for_next_action} onChange={(e) => setNewUpdate({ ...newUpdate, due_date_for_next_action: e.target.value })} className="px-3 py-2 text-sm bg-background border border-border" /></div>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {taggedUsers.length > 0 && (
-                  <div className="flex flex-wrap gap-2">
-                    {taggedUsers.map(userId => {
-                       const user = allUsers.find(u => u.id === userId);
-                       return user ? <Badge key={userId} variant="secondary" className="gap-1.5 px-2 py-1"><span className="text-sm">{getDisplayName(user)}</span><span className="text-[10px] text-muted-foreground">({user.email})</span><X className="w-3 h-3 cursor-pointer" onClick={() => toggleUserTag(userId)} /></Badge> : null;
-                     })}
-                  </div>
-                )}
-
-                {submitError && <div className="text-xs text-red-600 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg px-3 py-2">{submitError}</div>}
-
-                <div className="flex justify-end gap-2">
-                  <Button type="button" onClick={resetForm} variant="outline" className="px-4 py-2 text-xs">Cancel</Button>
-                  <Button type="submit" disabled={createUpdateMutation.isPending || !newUpdate.description.trim()} className="px-4 py-2 text-xs bg-primary hover:bg-primary/90 text-primary-foreground">{createUpdateMutation.isPending ? 'Adding...' : replyToId ? 'Reply' : 'Add Update'}</Button>
-                </div>
-              </form>
-            </div>
+            <ClaimUpdateForm
+              claimId={claimId}
+              claim={claim}
+              currentStatus={currentStatus}
+              replyToId={replyToId}
+              onUpdateCreated={(newStatus, newSecondaryStatus, updateType) => {
+                if (onUpdateCreated) onUpdateCreated(newStatus, newSecondaryStatus, updateType);
+                resetForm();
+              }}
+              onCancel={() => { setReplyToId(null); setShowForm(false); }}
+            />
           )}
 
           <div>
