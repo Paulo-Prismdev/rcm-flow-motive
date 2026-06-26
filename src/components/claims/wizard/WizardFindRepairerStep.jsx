@@ -262,7 +262,7 @@ export default function WizardFindRepairerStep({
       {isGeocoding && (
         <div className="p-3 rounded-lg border border-blue-500/30 bg-blue-50/50 flex items-center gap-2">
           <Loader className="w-4 h-4 text-blue-500 animate-spin" />
-          <p className="text-xs">Locating client address...</p>
+          <p className="text-xs">Locating vehicle location...</p>
         </div>
       )}
       {!isGeocoding && geocodeMessage && (
@@ -370,7 +370,7 @@ export default function WizardFindRepairerStep({
                 <Marker position={[clientLocation.lat, clientLocation.lng]} icon={clientIcon}>
                   <Tooltip sticky>
                     <div className="text-xs">
-                      <p className="font-semibold">Client: {claim?.client_name || 'Location'}</p>
+                      <p className="font-semibold">Vehicle Location: {claim?.vehicle_location || claim?.client_name || 'Location'}</p>
                     </div>
                   </Tooltip>
                 </Marker>

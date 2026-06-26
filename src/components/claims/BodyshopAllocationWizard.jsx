@@ -68,19 +68,12 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
       !isNaN(parseFloat(b.latitude)) && !isNaN(parseFloat(b.longitude))
     ), [bodyshops]);
 
-  const clientAddress = useMemo(() =>
-    [
-      claim?.client_address_line_1, claim?.client_address_line_2,
-      claim?.client_town, claim?.client_county, claim?.client_postcode
-    ].filter(Boolean).join(', '), [claim]);
+  const vehicleLocation = useMemo(() => claim?.vehicle_location?.trim(), [claim]);
 
   const hasValidAddress = useMemo(() => {
     if (!claim) return false;
-    const hasPostcode = claim.client_postcode && claim.client_postcode.trim().length >= 5;
-    const hasStreetAndTown = claim.client_address_line_1 && claim.client_address_line_1.trim().length > 3 &&
-      claim.client_town && claim.client_town.trim().length > 2;
-    return hasPostcode || hasStreetAndTown;
-  }, [claim]);
+    return !!vehicleLocation && vehicleLocation.length >= 3;
+  }, [claim, vehicleLocation]);
 
   // ── Reset when modal opens ──
   useEffect(() => {
@@ -152,42 +145,42 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
   useEffect(() => {
     if (!isOpen || hasAttemptedGeocode.current || isGeocoding) return;
 
-    if (!hasValidAddress || !clientAddress.trim()) {
-      setGeocodeMessage({ type: 'info', text: 'No client address available. Showing all bodyshops on the map.' });
+    if (!hasValidAddress || !vehicleLocation) {
+      setGeocodeMessage({ type: 'info', text: 'No vehicle location available. Showing all bodyshops on the map.' });
       hasAttemptedGeocode.current = true;
       return;
     }
 
     hasAttemptedGeocode.current = true;
 
-    const geocodeClientAddress = async () => {
+    const geocodeVehicleLocation = async () => {
       setIsGeocoding(true);
       try {
-        const result = await geocodeAddress({ address: clientAddress });
+        const result = await geocodeAddress({ address: vehicleLocation });
         const data = result?.data || result;
 
         let coordinates = null;
         if (data && data.latitude && data.longitude) {
-          coordinates = { lat: data.latitude, lng: data.longitude, display_name: data.display_name || clientAddress };
+          coordinates = { lat: data.latitude, lng: data.longitude, display_name: data.display_name || vehicleLocation };
         }
 
         if (coordinates) {
           setClientLocation(coordinates);
           setMapCenter([coordinates.lat, coordinates.lng]);
           setMapZoom(10);
-          setGeocodeMessage({ type: 'success', text: `Client location found: ${coordinates.display_name}` });
+          setGeocodeMessage({ type: 'success', text: `Vehicle location found: ${coordinates.display_name}` });
         } else {
-          setGeocodeMessage({ type: 'warning', text: 'Could not find client location. Showing all bodyshops.' });
+          setGeocodeMessage({ type: 'warning', text: 'Could not find vehicle location. Showing all bodyshops.' });
         }
       } catch (error) {
-        setGeocodeMessage({ type: 'warning', text: 'Unable to locate client address. Showing all bodyshops.' });
+        setGeocodeMessage({ type: 'warning', text: 'Unable to locate vehicle location. Showing all bodyshops.' });
       } finally {
         setIsGeocoding(false);
       }
     };
 
-    geocodeClientAddress();
-  }, [isOpen, hasValidAddress, clientAddress, isGeocoding]);
+    geocodeVehicleLocation();
+  }, [isOpen, hasValidAddress, vehicleLocation, isGeocoding]);
 
   // ── Pre-fill email when bodyshop is selected ──
   useEffect(() => {
