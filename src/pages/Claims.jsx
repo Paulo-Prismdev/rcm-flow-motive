@@ -313,7 +313,7 @@ export default function ClaimsPage() {
           <UpdateStatusBadge status={updateStatus} small />
         </td>
         {/* Sticky right: Status + alerts */}
-        <td className={`sticky right-0 z-10 px-3 py-2.5 whitespace-nowrap ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-white dark:bg-gray-900 group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50'}`}>
+        <td className={`sticky right-[48px] z-10 px-3 py-2.5 whitespace-nowrap ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-white dark:bg-gray-900 group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50'}`}>
           <div className="flex items-center gap-1.5 justify-center flex-wrap">
             {isDraft && (
               <span className="px-2 py-1 rounded-md bg-yellow-100 text-yellow-700 text-[10px] font-medium">
@@ -327,14 +327,17 @@ export default function ClaimsPage() {
                 <Package className="w-3 h-3" />BO
               </span>
             )}
-            <button
-              onClick={(e) => { e.stopPropagation(); setQuickViewClaim(claim); }}
-              className="p-1 rounded-md text-gray-400 hover:text-primary hover:bg-primary/10 transition-colors"
-              title="Quick view updates"
-            >
-              <MessageSquare className="w-3.5 h-3.5" />
-            </button>
           </div>
+        </td>
+        {/* Sticky right-end: Updates quick view */}
+        <td className={`sticky right-0 z-10 w-[48px] min-w-[48px] px-2 py-2.5 whitespace-nowrap text-center ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-white dark:bg-gray-900 group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50'}`}>
+          <button
+            onClick={(e) => { e.stopPropagation(); setQuickViewClaim(claim); }}
+            className="p-1.5 rounded-md text-gray-400 hover:text-primary hover:bg-primary/10 transition-colors"
+            title="Quick view updates"
+          >
+            <MessageSquare className="w-4 h-4" />
+          </button>
         </td>
       </tr>
     );
@@ -583,7 +586,8 @@ export default function ClaimsPage() {
                     <th key={fieldId} className="px-4 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap">{CARD_FIELD_CONFIG[fieldId]?.label || fieldId}</th>
                   ))}
                   <th className="px-4 py-2 text-center text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap">48 Hour Update</th>
-                  <th className="sticky right-0 z-20 bg-white dark:bg-gray-900 px-4 py-2 text-center text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap">Status</th>
+                  <th className="sticky right-[48px] z-20 bg-white dark:bg-gray-900 px-4 py-2 text-center text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap">Status</th>
+                  <th className="sticky right-0 z-20 bg-white dark:bg-gray-900 px-2 py-2 text-center text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap w-[48px] min-w-[48px]">Updates</th>
                 </tr>
               </thead>
               <tbody>
@@ -599,7 +603,7 @@ export default function ClaimsPage() {
                         className="bg-gray-50 dark:bg-gray-800/60 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-800"
                         onClick={() => toggleGroup(statusGroup)}
                       >
-                        <td colSpan={userCardFields.length + 3} className="px-4 py-2">
+                        <td colSpan={userCardFields.length + 4} className="px-4 py-2">
                           <div className="flex items-center gap-2">
                             {isCollapsed ? <ChevronRight className="w-3.5 h-3.5 text-gray-400" /> : <ChevronDown className="w-3.5 h-3.5 text-gray-400" />}
                             <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: dotColor }} />
@@ -620,7 +624,7 @@ export default function ClaimsPage() {
                   return (
                     <React.Fragment>
                       <tr className="bg-gray-50 dark:bg-gray-800/60 cursor-pointer select-none" onClick={() => toggleGroup('__other__')}>
-                        <td colSpan={userCardFields.length + 3} className="px-4 py-2">
+                        <td colSpan={userCardFields.length + 4} className="px-4 py-2">
                           <div className="flex items-center gap-2">
                             {isCollapsed ? <ChevronRight className="w-3.5 h-3.5 text-gray-400" /> : <ChevronDown className="w-3.5 h-3.5 text-gray-400" />}
                             <span className="w-2 h-2 rounded-full bg-gray-400 flex-shrink-0" />
