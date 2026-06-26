@@ -307,12 +307,12 @@ export default function ClaimsPage() {
           );
         })}
         {/* 48 Hour Update badge */}
-        <td className={`px-3 py-2.5 whitespace-nowrap ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : 'group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50'}`}>
+        <td className={`px-3 py-2.5 whitespace-nowrap text-center ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : 'group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50'}`}>
           <UpdateStatusBadge status={updateStatus} small />
         </td>
         {/* Sticky right: Status + alerts */}
         <td className={`sticky right-0 z-10 px-3 py-2.5 whitespace-nowrap ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-white dark:bg-gray-900 group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50'}`}>
-          <div className="flex items-center gap-1.5 justify-end flex-wrap">
+          <div className="flex items-center gap-1.5 justify-center flex-wrap">
             {isDraft && (
               <span className="px-2 py-1 rounded-md bg-yellow-100 text-yellow-700 text-[10px] font-medium">
                 Draft
@@ -580,8 +580,8 @@ export default function ClaimsPage() {
                   {userCardFields.map(fieldId => (
                     <th key={fieldId} className="px-4 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap">{CARD_FIELD_CONFIG[fieldId]?.label || fieldId}</th>
                   ))}
-                  <th className="px-4 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap">48 Hour Update</th>
-                  <th className="sticky right-0 z-20 bg-white dark:bg-gray-900 px-4 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap">Status</th>
+                  <th className="px-4 py-2 text-center text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap">48 Hour Update</th>
+                  <th className="sticky right-0 z-20 bg-white dark:bg-gray-900 px-4 py-2 text-center text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap">Status</th>
                 </tr>
               </thead>
               <tbody>
