@@ -24,10 +24,12 @@ const calculateUpdateStatus = (claim) => {
   const closedStatuses = ['Completed', 'Cancelled', 'Total Loss'];
   if (closedStatuses.includes(claim.job_status)) return 'Gray';
   if (claim.override_active && claim.override_expiry_at && now < new Date(claim.override_expiry_at)) return 'Blue';
-  if (claim.next_update_due_at) {
-    const hours = (new Date(claim.next_update_due_at) - now) / 3600000;
-    if (hours < 0) return 'Red';
-    if (hours < 24) return 'Amber';
+  // 48-hour update tracker: based on time since last update or status change
+  const lastUpdate = claim.last_updated_at || claim.created_date;
+  if (lastUpdate) {
+    const hours = (now - new Date(lastUpdate)) / 3600000;
+    if (hours >= 48) return 'Red';
+    if (hours >= 24) return 'Amber';
     return 'Green';
   }
   return 'Green';

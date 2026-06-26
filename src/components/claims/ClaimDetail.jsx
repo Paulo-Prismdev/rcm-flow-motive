@@ -321,24 +321,36 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
     });
     
     if (statusChanged) {
-      const oldStatus = claim.job_status || 'New';
-      const newStatus = updatedData.job_status;
-      
-      try {
+        const oldStatus = claim.job_status || 'New';
+        const newStatus = updatedData.job_status;
+        const now = new Date();
+        const isClosedAfterUpdate = ['Completed', 'Cancelled', 'Total Loss'].includes(newStatus);
+        const fortyEightHoursFromNow = new Date(now.getTime() + 48 * 60 * 60 * 1000);
+
+        // Reset the 48hr timer when status changes
+        if (!isClosedAfterUpdate) {
+          updatedData.last_updated_at = now.toISOString();
+          updatedData.next_update_due_at = fortyEightHoursFromNow.toISOString();
+          updatedData.update_status_flag = 'Green';
+        } else {
+          updatedData.update_status_flag = 'Gray';
+        }
+
+        try {
         await base44.entities.ClaimUpdate.create({
-          claim_id: claim.id,
-          update_type: 'Status Change',
-          description: `Status changed from "${oldStatus}" to "${newStatus}"`,
-          next_steps: '',
-          due_date_for_next_action: ''
+            claim_id: claim.id,
+            update_type: 'Status Change',
+            description: `Status changed from "${oldStatus}" to "${newStatus}"`,
+            next_steps: '',
+            due_date_for_next_action: ''
         });
-        
+
         queryClient.invalidateQueries({ queryKey: ['claimUpdates', claim.id] });
-      } catch (error) {
+        } catch (error) {
         console.error('Failed to log status change:', error);
-      }
+        }
     }
-    
+
     queryClient.invalidateQueries({ queryKey: ['activityLogs', claim.id] });
     onUpdate(updatedData);
   };
@@ -399,13 +411,12 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
     const effectiveStatus = newStatus || claim.job_status;
     const isClosedAfterUpdate = closedStatuses.includes(effectiveStatus);
 
-    // Only reset the 48hr timer for Client Communication updates on active claims
-    const isClientComm = updateType === 'Client Communication';
+    // Any update or status change resets the 48hr timer on active claims
     const fortyEightHoursFromNow = new Date(now.getTime() + 48 * 60 * 60 * 1000);
 
     const updateData = {
       ...claim,
-      ...(isClientComm && !isClosedAfterUpdate && {
+      ...(!isClosedAfterUpdate && {
         last_updated_at: now.toISOString(),
         next_update_due_at: fortyEightHoursFromNow.toISOString(),
         update_status_flag: 'Green',
