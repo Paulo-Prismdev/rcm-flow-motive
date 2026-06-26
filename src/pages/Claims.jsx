@@ -2,13 +2,14 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Search, Archive, Filter, X, AlertTriangle, Clock, Upload, Package, ChevronDown, ChevronRight, Settings2, ArrowUpDown } from 'lucide-react';
+import { Plus, Search, Archive, Filter, X, AlertTriangle, Clock, Upload, Package, ChevronDown, ChevronRight, Settings2, ArrowUpDown, MessageSquare } from 'lucide-react';
 import ClaimDetail from '../components/claims/ClaimDetail';
 import ClaimFormWrapper from '../components/claims/ClaimFormWrapper';
 import ImportClaimsModal from '../components/claims/ImportClaimsModal';
 import ClaimCardFieldsModal from '../components/claims/ClaimCardFieldsModal';
 import UpdateStatusBadge from '../components/shared/UpdateStatusBadge';
 import StatusBadge from '../components/shared/StatusBadge';
+import ClaimUpdatesQuickView from '../components/claims/ClaimUpdatesQuickView';
 import { formatUKRegistration } from '../components/shared/formatRegistration';
 import { format } from 'date-fns';
 import { useStatusConfigs } from '../components/shared/StatusConfigContext';
@@ -57,6 +58,7 @@ export default function ClaimsPage() {
   const [claimIdsWithBackorders, setClaimIdsWithBackorders] = useState(new Set());
   const [sortBy, setSortBy] = useState('priority');
   const [collapsedGroups, setCollapsedGroups] = useState({});
+  const [quickViewClaim, setQuickViewClaim] = useState(null);
   const containerRef = React.useRef(null);
   const queryClient = useQueryClient();
   const { allStatuses: statusConfigs } = useStatusConfigs();
@@ -325,7 +327,13 @@ export default function ClaimsPage() {
                 <Package className="w-3 h-3" />BO
               </span>
             )}
-
+            <button
+              onClick={(e) => { e.stopPropagation(); setQuickViewClaim(claim); }}
+              className="p-1 rounded-md text-gray-400 hover:text-primary hover:bg-primary/10 transition-colors"
+              title="Quick view updates"
+            >
+              <MessageSquare className="w-3.5 h-3.5" />
+            </button>
           </div>
         </td>
       </tr>
@@ -365,6 +373,13 @@ export default function ClaimsPage() {
               </span>
             )}
 
+            <button
+              onClick={(e) => { e.stopPropagation(); setQuickViewClaim(claim); }}
+              className="p-1 rounded-md text-gray-400 hover:text-primary hover:bg-primary/10 transition-colors"
+              title="Quick view updates"
+            >
+              <MessageSquare className="w-4 h-4" />
+            </button>
             <ChevronRight className="w-4 h-4 text-gray-400 ml-1" />
           </div>
         </div>
@@ -633,6 +648,12 @@ export default function ClaimsPage() {
 
   return (
     <div ref={containerRef} className="h-full flex gap-0 min-h-0 overflow-hidden">
+      <ClaimUpdatesQuickView
+        claim={quickViewClaim}
+        isOpen={!!quickViewClaim}
+        onClose={() => setQuickViewClaim(null)}
+      />
+
       {/* Claims list — hidden when a claim is selected */}
       {!selectedClaim && (
         <div className="flex flex-col min-h-0 w-full">
