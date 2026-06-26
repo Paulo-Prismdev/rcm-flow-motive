@@ -164,7 +164,7 @@ const SECTION_FIELDS = {
   client: ['client_name', 'client_phone', 'client_email', 'client_address_line_1', 'client_town', 'client_postcode', 'business_division'],
   insurance: ['insurer', 'claim_ref', 'policy_number', 'policy_excess'],
   driver: ['driver_contact_name', 'driver_contact_phone', 'driver_contact_email'],
-  estimate: ['audatex_code', 'est_fee', 'authorising_party', 'estimate_cost_net', 'authority_cost_net', 'estimate_cost_gross', 'authority_cost_gross'],
+  estimate: ['send_estimate_email', 'audatex_code', 'est_fee', 'authorising_party', 'estimate_cost_net', 'authority_cost_net', 'estimate_cost_gross', 'authority_cost_gross'],
   thirdParty: ['tp_name', 'tp_phone', 'tp_reg', 'tp_insurer'],
   vehicle: ['make_model', 'vehicle_colour', 'vehicle_fuel_type', 'vehicle_type'],
   vehicleLocation: ['vehicle_location'],
@@ -1137,6 +1137,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
         return (
           <EditableSection title="Estimate Details" icon={Calculator} claim={claim} onUpdate={handleUpdate} EditComponent={ClaimEstimateForm} canEdit={canEdit}>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+              <DetailRow label="Email Estimate To" value={claim.send_estimate_email} />
               <DetailRow label="Audatex Code" value={claim.audatex_code} />
               <DetailRow label="Estimate Fee" value={claim.est_fee} isCurrency />
               <DetailRow label="Authorising Party" value={claim.authorising_party} />
