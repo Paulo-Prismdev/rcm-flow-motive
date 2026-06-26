@@ -223,6 +223,29 @@ export default function ClaimsPage() {
     try { return format(new Date(val), 'dd/MM/yyyy'); } catch { return val; }
   };
 
+  const CARD_FIELD_CONFIG = {
+    client_name: { label: 'Client', render: (c) => c.client_name || '—' },
+    make_model: { label: 'Vehicle', render: (c) => c.make_model || '—' },
+    loss_date: { label: 'Loss Date', render: (c) => formatDate(c.loss_date) },
+    referrer: { label: 'Referrer', render: (c) => c.referrer || '—' },
+    insurer: { label: 'Insurer', render: (c) => c.insurer || '—' },
+    bodyshop: { label: 'Bodyshop', render: (c) => c.bodyshop || '—' },
+    driver_contact_name: { label: 'Driver', render: (c) => c.driver_contact_name || '—' },
+    claim_type: { label: 'Type', render: (c) => c.claim_type || '—' },
+    booking_in_date: { label: 'Booking In', render: (c) => formatDate(c.booking_in_date) },
+    ecd: { label: 'ECD', render: (c) => formatDate(c.ecd) },
+    authority_cost_gross: { label: 'Auth Cost', render: (c) => c.authority_cost_gross ? `£${c.authority_cost_gross.toLocaleString()}` : '—' },
+    final_repair_cost: { label: 'Final Cost', render: (c) => c.final_repair_cost ? `£${c.final_repair_cost.toLocaleString()}` : '—' },
+    claim_ref: { label: 'Claim Ref', render: (c) => c.claim_ref || '—' },
+    policy_number: { label: 'Policy No', render: (c) => c.policy_number || '—' },
+    client_phone: { label: 'Phone', render: (c) => c.client_phone || '—' },
+    business_division: { label: 'Division', render: (c) => c.business_division || '—' },
+    vehicle_location: { label: 'Location', render: (c) => c.vehicle_location || '—' },
+    documents: { label: 'Docs', render: (c) => { const n = c.file_urls?.length || 0; return n > 0 ? `${n} file${n === 1 ? '' : 's'}` : '—'; } },
+    vehicle_damage: { label: 'Damage', render: (c) => c.vehicle_damage || '—' },
+    referrer_ref: { label: 'Referrer Ref', render: (c) => c.referrer_ref || '—' },
+  };
+
 
 
   if (showForm) {
@@ -270,22 +293,15 @@ export default function ClaimsPage() {
             {claim.reg ? formatUKRegistration(claim.reg) : ''}
           </span>
         </td>
-        {/* Scrollable columns */}
-        <td className="px-4 py-2.5 text-gray-700 dark:text-gray-300 whitespace-nowrap max-w-[160px] truncate">
-          {claim.client_name || '—'}
-        </td>
-        <td className="px-4 py-2.5 text-gray-600 dark:text-gray-400 whitespace-nowrap">
-          {claim.make_model || '—'}
-        </td>
-        <td className="px-4 py-2.5 text-gray-600 dark:text-gray-400 whitespace-nowrap">
-          {formatDate(claim.loss_date)}
-        </td>
-        <td className="px-4 py-2.5 text-gray-600 dark:text-gray-400 whitespace-nowrap max-w-[120px] truncate">
-          {claim.insurer || '—'}
-        </td>
-        <td className="px-4 py-2.5 text-gray-600 dark:text-gray-400 whitespace-nowrap max-w-[120px] truncate">
-          {claim.referrer || '—'}
-        </td>
+        {/* Scrollable columns — dynamic based on user's customised fields */}
+        {userCardFields.map(fieldId => {
+          const cfg = CARD_FIELD_CONFIG[fieldId];
+          return (
+            <td key={fieldId} className="px-4 py-2.5 text-gray-600 dark:text-gray-400 whitespace-nowrap max-w-[160px] truncate">
+              {cfg ? cfg.render(claim) : '—'}
+            </td>
+          );
+        })}
         {/* Sticky right: Status + alerts */}
         <td className={`sticky right-0 z-10 px-3 py-2.5 whitespace-nowrap ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-white dark:bg-gray-900 group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50'}`}>
           <div className="flex items-center gap-1.5 justify-end flex-wrap">
@@ -553,8 +569,8 @@ export default function ClaimsPage() {
               <thead className="sticky top-0 bg-white dark:bg-gray-900 z-10">
                 <tr className="border-b border-gray-200 dark:border-gray-700">
                   <th className="sticky left-0 z-20 bg-white dark:bg-gray-900 px-4 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap">Reg</th>
-                  {['Client', 'Vehicle', 'Loss Date', 'Insurer', 'Referrer'].map(h => (
-                    <th key={h} className="px-4 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap">{h}</th>
+                  {userCardFields.map(fieldId => (
+                    <th key={fieldId} className="px-4 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap">{CARD_FIELD_CONFIG[fieldId]?.label || fieldId}</th>
                   ))}
                   <th className="sticky right-0 z-20 bg-white dark:bg-gray-900 px-4 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap">Status</th>
                 </tr>
@@ -572,7 +588,7 @@ export default function ClaimsPage() {
                         className="bg-gray-50 dark:bg-gray-800/60 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-800"
                         onClick={() => toggleGroup(statusGroup)}
                       >
-                        <td colSpan={7} className="px-4 py-2">
+                        <td colSpan={userCardFields.length + 2} className="px-4 py-2">
                           <div className="flex items-center gap-2">
                             {isCollapsed ? <ChevronRight className="w-3.5 h-3.5 text-gray-400" /> : <ChevronDown className="w-3.5 h-3.5 text-gray-400" />}
                             <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: dotColor }} />
@@ -593,7 +609,7 @@ export default function ClaimsPage() {
                   return (
                     <React.Fragment>
                       <tr className="bg-gray-50 dark:bg-gray-800/60 cursor-pointer select-none" onClick={() => toggleGroup('__other__')}>
-                        <td colSpan={7} className="px-4 py-2">
+                        <td colSpan={userCardFields.length + 2} className="px-4 py-2">
                           <div className="flex items-center gap-2">
                             {isCollapsed ? <ChevronRight className="w-3.5 h-3.5 text-gray-400" /> : <ChevronDown className="w-3.5 h-3.5 text-gray-400" />}
                             <span className="w-2 h-2 rounded-full bg-gray-400 flex-shrink-0" />
