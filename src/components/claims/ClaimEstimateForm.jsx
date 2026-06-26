@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input";
 export default function ClaimEstimateForm({ claim, onSave, onCancel }) {
     const [formData, setFormData] = useState({
         audatex_code: claim.audatex_code || '',
-        send_estimate_email: claim.send_estimate_email || '',
         artura_est_url: claim.artura_est_url || '',
         est_fee: claim.est_fee ?? '',
         authorising_party: claim.authorising_party || '',
@@ -33,10 +32,6 @@ export default function ClaimEstimateForm({ claim, onSave, onCancel }) {
                 <div>
                     <label className="text-sm text-gray-500">Audatex Code</label>
                     <Input value={formData.audatex_code} onChange={e => handleChange('audatex_code', e.target.value)} className="neomorph-inset" />
-                </div>
-                <div>
-                    <label className="text-sm text-gray-500">Send Estimate To</label>
-                    <Input type="email" value={formData.send_estimate_email} onChange={e => handleChange('send_estimate_email', e.target.value)} className="neomorph-inset" placeholder="Email address to send estimate to" />
                 </div>
                 <div>
                     <label className="text-sm text-gray-500">Estimate Fee (£)</label>

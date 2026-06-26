@@ -1095,7 +1095,6 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
           <EditableSection title="Estimate Details" icon={Calculator} claim={claim} onUpdate={handleUpdate} EditComponent={ClaimEstimateForm} canEdit={canEdit}>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
               <DetailRow label="Audatex Code" value={claim.audatex_code} />
-              <DetailRow label="Send Estimate To" value={claim.send_estimate_email} />
               <DetailRow label="Estimate Fee" value={claim.est_fee} isCurrency />
               <DetailRow label="Authorising Party" value={claim.authorising_party} />
               <DetailRow label="Est. Cost (Net)" value={claim.estimate_cost_net} isCurrency />
