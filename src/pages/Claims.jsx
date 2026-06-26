@@ -325,16 +325,7 @@ export default function ClaimsPage() {
                 <Package className="w-3 h-3" />BO
               </span>
             )}
-            {claim.bodyshop_id && !claim.repairer_accepted && !isClosedStatus && (
-              <span className="flex items-center gap-0.5 px-2 py-1 rounded-md bg-orange-500 text-white text-[10px] font-semibold shadow-sm">
-                <Clock className="w-3 h-3" />
-              </span>
-            )}
-            {claim.claim_type === 'Fault Claim' && claim.third_party_pursuit_status === 'Awaiting Details' && !isClosedStatus && (
-              <span className="flex items-center gap-0.5 px-2 py-1 rounded-md bg-amber-500 text-white text-[10px] font-semibold shadow-sm">
-                <AlertTriangle className="w-3 h-3" />
-              </span>
-            )}
+
           </div>
         </td>
       </tr>
@@ -373,11 +364,7 @@ export default function ClaimsPage() {
                 <Package className="w-2.5 h-2.5" />BO
               </span>
             )}
-            {claim.bodyshop_id && !claim.repairer_accepted && !isClosedStatus && (
-              <span className="px-1.5 py-0.5 rounded-full bg-orange-100 text-orange-700 text-[10px] font-medium">
-                <Clock className="w-2.5 h-2.5 inline" />
-              </span>
-            )}
+
             <ChevronRight className="w-4 h-4 text-gray-400 ml-1" />
           </div>
         </div>
