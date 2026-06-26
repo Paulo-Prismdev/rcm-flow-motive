@@ -239,6 +239,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
   const [isActivityLogOpen, setIsActivityLogOpen] = useState(false);
   const [isFetchingVehicle, setIsFetchingVehicle] = useState(false);
   const [vehicleFetchError, setVehicleFetchError] = useState('');
+  const [isRegeneratingPdf, setIsRegeneratingPdf] = useState(false);
 
   const [isBackorderedPartsModalOpen, setIsBackorderedPartsModalOpen] = useState(false);
 
@@ -610,6 +611,36 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
 
   const openLinkedClaim = (claimId) => {
     window.open(`/claims?id=${claimId}`, '_blank');
+  };
+
+  const handleRegenerateInstruction = async () => {
+    setIsRegeneratingPdf(true);
+    try {
+      const contactSource = (claim.last_contact_source || 'Client').toLowerCase();
+      let contactOverrides = {};
+      if (contactSource === 'client') {
+        contactOverrides = { name: claim.client_name, phone: claim.client_phone, email: claim.client_email };
+      } else if (contactSource === 'driver') {
+        contactOverrides = { name: claim.driver_contact_name, phone: claim.driver_contact_phone, email: claim.driver_contact_email };
+      }
+
+      const response = await base44.functions.invoke('generateBodyshopInstructionPdf', {
+        claimId: claim.id,
+        contactOverrides,
+        templateType: 'standard',
+      });
+
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      window.open(url, '_blank');
+      queryClient.invalidateQueries({ queryKey: ['claims'] });
+      queryClient.invalidateQueries({ queryKey: ['claim', claim.id] });
+    } catch (error) {
+      console.error('Error regenerating instruction PDF:', error);
+      alert('Failed to regenerate instruction PDF. Please try again.');
+    } finally {
+      setIsRegeneratingPdf(false);
+    }
   };
 
   const renderSelectedSection = () => {
@@ -1067,26 +1098,38 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
               </>
             )}
             
-            {/* Instruction PDF Download - Only show if there's a PDF */}
-            {claim.instruction_pdf_url && (
-              <div className="mt-4 p-3 rounded-lg bg-accent/10 border border-accent/30">
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-2">
-                    <FileText className="w-4 h-4 text-accent" />
-                    <span className="text-sm font-medium">Instruction PDF</span>
-                  </div>
+            {/* Instruction PDF Download / Regenerate */}
+            <div className="mt-4 p-3 rounded-lg bg-accent/10 border border-accent/30">
+              <div className="flex items-center justify-between gap-3 flex-wrap">
+                <div className="flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-accent" />
+                  <span className="text-sm font-medium">Instruction PDF</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  {claim.instruction_pdf_url && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => window.open(claim.instruction_pdf_url, '_blank')}
+                      className="gap-2"
+                    >
+                      <Download className="w-4 h-4" />
+                      Download
+                    </Button>
+                  )}
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => window.open(claim.instruction_pdf_url, '_blank')}
+                    onClick={handleRegenerateInstruction}
+                    disabled={isRegeneratingPdf}
                     className="gap-2"
                   >
-                    <Download className="w-4 h-4" />
-                    Download
+                    <RefreshCw className={`w-4 h-4 ${isRegeneratingPdf ? 'animate-spin' : ''}`} />
+                    {isRegeneratingPdf ? 'Generating...' : 'Regenerate'}
                   </Button>
                 </div>
               </div>
-            )}
+            </div>
           </EditableSection>
         );
 
