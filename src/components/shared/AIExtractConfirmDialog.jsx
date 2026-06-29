@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { X, Sparkles, CheckSquare, Square, ArrowRight, ArrowLeft, Check, Link as LinkIcon, FileText } from 'lucide-react';
 import DocumentPreview from './DocumentPreview';
@@ -15,45 +15,43 @@ export default function AIExtractConfirmDialog({ isOpen, onClose, onConfirm, ext
     [linkedEntityTypes]
   );
 
-  const [selectedFields, setSelectedFields] = useState(() => {
+  const [selectedFields, setSelectedFields] = useState({});
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  // Use refs so the init effect only fires when the dialog actually opens,
+  // not every time the parent passes new object references (which was resetting
+  // the user's toggle selections on every parent re-render).
+  const extractedDataRef = useRef(extractedData);
+  const existingDataRef = useRef(existingData);
+  const lockedFieldsRef = useRef(lockedFields);
+  extractedDataRef.current = extractedData;
+  existingDataRef.current = existingData;
+  lockedFieldsRef.current = lockedFields;
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const ed = extractedDataRef.current || {};
+    const ex = existingDataRef.current || {};
+    const lf = lockedFieldsRef.current;
     const initial = {};
-    Object.keys(extractedData || {}).forEach(key => {
-      const extractedValue = extractedData[key];
-      const existingValue = existingData[key];
-      if (extractedValue !== null && extractedValue !== undefined && extractedValue !== '') {
-        if (!lockedFields.has(key)) {
-          const valuesMatch = String(existingValue) === String(extractedValue);
+    Object.keys(ed).forEach(key => {
+      const value = ed[key];
+      if (value !== null && value !== undefined && value !== '' && key !== '_source_snippets') {
+        if (!lf.has(key)) {
+          const valuesMatch = String(ex[key] || '') === String(value);
           initial[key] = !valuesMatch;
         }
       }
     });
-    return initial;
-  });
-
-  const [currentIndex, setCurrentIndex] = useState(0);
-
-  useEffect(() => {
-    if (!isOpen || !extractedData) return;
-    setSelectedFields(prev => {
-      const updated = { ...prev };
-      Object.keys(extractedData).forEach(key => {
-        const value = extractedData[key];
-        if (value !== null && value !== undefined && value !== '') {
-          if (!lockedFields.has(key)) {
-            const valuesMatch = String(existingData[key] || '') === String(value);
-            updated[key] = !valuesMatch;
-          }
-        }
-      });
-      return updated;
-    });
+    setSelectedFields(initial);
     setCurrentIndex(0);
-  }, [isOpen, lockedFields, extractedData, existingData]);
+  }, [isOpen]);
 
   if (!isOpen || !extractedData) return null;
 
-  const fields = Object.entries(extractedData).filter(([_, value]) =>
-    value !== null && value !== undefined && value !== ''
+  const sourceSnippets = extractedData._source_snippets || {};
+  const fields = Object.entries(extractedData).filter(([key, value]) =>
+    key !== '_source_snippets' && value !== null && value !== undefined && value !== ''
   );
 
   const isFieldSelected = (key) => lockedFields.has(key) || !!selectedFields[key];
@@ -91,6 +89,23 @@ export default function AIExtractConfirmDialog({ isOpen, onClose, onConfirm, ext
     if (typeof value === 'number') return value.toString();
     if (typeof value === 'string' && value.length > 200) return value.substring(0, 200) + '...';
     return value;
+  };
+
+  const renderHighlightedSnippet = (snippet, value) => {
+    if (!value || !snippet) return snippet;
+    const valueStr = String(value).trim();
+    if (!valueStr) return snippet;
+    const idx = snippet.toLowerCase().indexOf(valueStr.toLowerCase());
+    if (idx === -1) return snippet;
+    return (
+      <>
+        {snippet.substring(0, idx)}
+        <mark className="bg-yellow-200 dark:bg-yellow-700/50 text-gray-900 dark:text-yellow-100 rounded px-0.5 font-semibold">
+          {snippet.substring(idx, idx + valueStr.length)}
+        </mark>
+        {snippet.substring(idx + valueStr.length)}
+      </>
+    );
   };
 
   const compareValues = (key, extractedValue) => {
@@ -215,6 +230,18 @@ export default function AIExtractConfirmDialog({ isOpen, onClose, onConfirm, ext
                     </p>
                   </div>
                 </div>
+
+                {/* Source Snippet — where in the document this value came from */}
+                {sourceSnippets[currentKey] && (
+                  <div className="mb-4">
+                    <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 flex items-center gap-1">
+                      <FileText className="w-3 h-3" /> Found in Document
+                    </p>
+                    <div className="bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                      {renderHighlightedSnippet(sourceSnippets[currentKey], currentValue)}
+                    </div>
+                  </div>
+                )}
 
                 {/* Existing Value Comparison */}
                 {hasExisting && (

@@ -117,7 +117,12 @@ export default function FileAttachmentModal({ fileUrls = [], onAdd, onRemove, is
             circumstances: { type: "string", description: "Description of incident circumstances" },
             incident_location: { type: "string", description: "Where the incident occurred" },
             vehicle_use: { type: "string", description: "Use of vehicle (Business, Social, Commuting)" },
-            courtesy_car_required: { type: "boolean", description: "Whether a courtesy car is required" }
+            courtesy_car_required: { type: "boolean", description: "Whether a courtesy car is required" },
+            _source_snippets: {
+              type: "object",
+              additionalProperties: { type: "string" },
+              description: "For each field extracted above, provide the exact text snippet/quote from the source document where you found that value. Map field names to their source text. Only include fields you actually found."
+            }
           }
         };
       } else if (analysisType === 'estimate') {
@@ -180,7 +185,12 @@ export default function FileAttachmentModal({ fileUrls = [], onAdd, onRemove, is
             // Additional Info
             priority: { type: "string", description: "Priority level (High, Medium, Low)" },
             job_type: { type: "string", description: "Type of job or work" },
-            vda: { type: "string", description: "VDA number or reference" }
+            vda: { type: "string", description: "VDA number or reference" },
+            _source_snippets: {
+              type: "object",
+              additionalProperties: { type: "string" },
+              description: "For each field extracted above, provide the exact text snippet/quote from the source document where you found that value. Map field names to their source text. Only include fields you actually found."
+            }
           }
         };
       } else if (analysisType === 'engineering') {
@@ -201,7 +211,12 @@ export default function FileAttachmentModal({ fileUrls = [], onAdd, onRemove, is
             report_completed_date: { type: "string", description: "Date report was completed" },
             findings: { type: "string", description: "Engineering findings or observations" },
             recommendations: { type: "string", description: "Engineer recommendations" },
-            fee: { type: "number", description: "Engineering fee amount" }
+            fee: { type: "number", description: "Engineering fee amount" },
+            _source_snippets: {
+              type: "object",
+              additionalProperties: { type: "string" },
+              description: "For each field extracted above, provide the exact text snippet/quote from the source document where you found that value. Map field names to their source text. Only include fields you actually found."
+            }
           }
         };
       } else if (analysisType === 'part') {
@@ -226,7 +241,12 @@ export default function FileAttachmentModal({ fileUrls = [], onAdd, onRemove, is
             courier_charge: { type: "number", description: "Courier or delivery charge" },
             delivery_time: { type: "string", description: "Expected delivery time" },
             warranty: { type: "string", description: "Warranty information" },
-            work_provider: { type: "string", description: "Work provider name" }
+            work_provider: { type: "string", description: "Work provider name" },
+            _source_snippets: {
+              type: "object",
+              additionalProperties: { type: "string" },
+              description: "For each field extracted above, provide the exact text snippet/quote from the source document where you found that value. Map field names to their source text. Only include fields you actually found."
+            }
           }
         };
       } else {
