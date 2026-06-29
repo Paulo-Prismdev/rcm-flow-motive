@@ -68,6 +68,33 @@ Deno.serve(async (req) => {
       claim.client_postcode
     ].filter(Boolean).join(', ') || 'N/A';
 
+    // ── Determine which insurer's details to display on the PDF ──
+    // The wizard sets `authorised_by`: "Client Insurer", "Third Party Insurer", or "Uninsured"
+    const authorisedBy = claim.authorised_by || 'Client Insurer';
+    let displayInsurer, displayClaimRef, displayPolicyNumber, displayPolicyExcess;
+    if (authorisedBy === 'Third Party Insurer') {
+      displayInsurer = claim.tp_insurer || 'N/A';
+      displayClaimRef = claim.tp_claim_ref || 'N/A';
+      displayPolicyNumber = claim.tp_policy_number || 'N/A';
+      displayPolicyExcess = claim.tp_policy_excess != null && claim.tp_policy_excess !== ''
+        ? (isNaN(Number(claim.tp_policy_excess)) ? String(claim.tp_policy_excess) : Number(claim.tp_policy_excess).toFixed(2))
+        : 'N/A';
+    } else if (authorisedBy === 'Uninsured') {
+      displayInsurer = 'N/A';
+      displayClaimRef = 'N/A';
+      displayPolicyNumber = 'N/A';
+      displayPolicyExcess = claim.policy_excess != null && claim.policy_excess !== ''
+        ? (isNaN(Number(claim.policy_excess)) ? String(claim.policy_excess) : Number(claim.policy_excess).toFixed(2))
+        : 'N/A';
+    } else {
+      displayInsurer = claim.insurer || 'N/A';
+      displayClaimRef = claim.claim_ref || 'N/A';
+      displayPolicyNumber = claim.policy_number || 'N/A';
+      displayPolicyExcess = claim.policy_excess != null && claim.policy_excess !== ''
+        ? (isNaN(Number(claim.policy_excess)) ? String(claim.policy_excess) : Number(claim.policy_excess).toFixed(2))
+        : 'N/A';
+    }
+
     const fields = {
       instruction_date: today,
       claim_type: claim.claim_type || 'N/A',
@@ -85,12 +112,12 @@ Deno.serve(async (req) => {
       recovery_required: formatBool(claim.recovery_required),
       unroadworthy: formatBool(claim.unroadworthy),
       courtesy_car_required: formatBool(claim.courtesy_car_required),
-      insurer: claim.insurer || 'N/A',
-      claim_ref: claim.claim_ref || 'N/A',
-      policy_number: claim.policy_number || 'N/A',
-      send_estimate_email: claim.send_estimate_email || 'N/A',
-      audatex_code: claim.audatex_code || 'N/A',
-      policy_excess: claim.policy_excess ? Number(claim.policy_excess).toFixed(2) : 'N/A',
+      insurer: displayInsurer,
+      claim_ref: displayClaimRef,
+      policy_number: displayPolicyNumber,
+      send_estimate_email: authorisedBy === 'Client Insurer' ? (claim.send_estimate_email || 'N/A') : 'N/A',
+      audatex_code: authorisedBy === 'Client Insurer' ? (claim.audatex_code || 'N/A') : 'N/A',
+      policy_excess: displayPolicyExcess,
       referral_fee: claim.referral_fee_repairer != null ? `${claim.referral_fee_repairer}%` : '0%',
     };
 
