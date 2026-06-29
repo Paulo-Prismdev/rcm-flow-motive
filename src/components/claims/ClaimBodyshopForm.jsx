@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { MapPin, UserX } from "lucide-react";
+import { UserX } from "lucide-react";
 import ClaimBodyshopMapModal from './ClaimBodyshopMapModal';
 import BodyshopAllocationWizard from './BodyshopAllocationWizard';
 import { base44 } from '@/api/base44Client';
@@ -181,16 +181,6 @@ export default function ClaimBodyshopForm({ claim, onSave, onCancel }) {
                         Unallocate Repairer
                     </Button>
                 )}
-
-                {/* Find Repairer on Map — entry point for allocation */}
-                <Button
-                    type="button"
-                    onClick={() => setIsMapOpen(true)}
-                    className="w-full neomorph-flat py-3 text-accent hover:bg-accent/10 border-accent/30"
-                >
-                    <MapPin className="w-4 h-4 mr-2" />
-                    Find Repairer on Map
-                </Button>
 
                 {claim.bodyshop_id && (
                     <div className="space-y-4 pt-2 border-t border-border">
