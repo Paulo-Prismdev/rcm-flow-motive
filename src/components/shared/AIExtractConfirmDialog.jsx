@@ -1,6 +1,8 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { X, Sparkles, CheckSquare, Square, ArrowRight, ArrowLeft, Check, Link as LinkIcon, FileText } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { X, Sparkles, ArrowRight, ArrowLeft, Check, Link as LinkIcon, FileText, Loader2 } from 'lucide-react';
+import { base44 } from '@/api/base44Client';
 import DocumentPreview from './DocumentPreview';
 
 const LINKED_ENTITY_FIELDS = {
@@ -47,9 +49,48 @@ export default function AIExtractConfirmDialog({ isOpen, onClose, onConfirm, ext
     setCurrentIndex(0);
   }, [isOpen]);
 
+  // Fetch source snippets via AI when the dialog opens, so the user can see
+  // where each extracted value came from in the document.
+  const [fetchedSnippets, setFetchedSnippets] = useState({});
+  const [isFetchingSnippets, setIsFetchingSnippets] = useState(false);
+  const snippetsFetchedForRef = useRef(null);
+
+  useEffect(() => {
+    if (!isOpen || !fileUrl || !extractedData) return;
+    // Skip if the extraction already includes source snippets
+    if (extractedData._source_snippets) return;
+    // Skip if we already fetched for this file
+    if (snippetsFetchedForRef.current === fileUrl) return;
+    snippetsFetchedForRef.current = fileUrl;
+
+    const fieldsList = Object.entries(extractedData)
+      .filter(([key, value]) => key !== '_source_snippets' && value !== null && value !== undefined && value !== '')
+      .map(([key, value]) => `${key}: ${value}`)
+      .join('\n');
+
+    if (!fieldsList) return;
+
+    setIsFetchingSnippets(true);
+    base44.integrations.Core.InvokeLLM({
+      prompt: `Look at this document. For each field below, find the exact text in the document where that value appears. Return a JSON object mapping field names to short text snippets (the surrounding text, about 10-30 words, showing where the value was found in the document). Include a few words before and after the value for context. If you cannot find where a value came from in the document, omit that field.\n\nFields to find:\n${fieldsList}`,
+      file_urls: [fileUrl],
+      response_json_schema: {
+        type: "object",
+        properties: {},
+        additionalProperties: { type: "string" }
+      }
+    }).then(result => {
+      setFetchedSnippets(result || {});
+    }).catch(err => {
+      console.error('Failed to fetch source snippets:', err);
+    }).finally(() => {
+      setIsFetchingSnippets(false);
+    });
+  }, [isOpen, fileUrl, extractedData]);
+
   if (!isOpen || !extractedData) return null;
 
-  const sourceSnippets = extractedData._source_snippets || {};
+  const sourceSnippets = { ...(fetchedSnippets || {}), ...(extractedData._source_snippets || {}) };
   const fields = Object.entries(extractedData).filter(([key, value]) =>
     key !== '_source_snippets' && value !== null && value !== undefined && value !== ''
   );
@@ -197,26 +238,27 @@ export default function AIExtractConfirmDialog({ isOpen, onClose, onConfirm, ext
                       </span>
                     )}
                   </div>
-                  <button
-                    onClick={() => toggleField(currentKey)}
-                    disabled={isLocked}
-                    className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all flex-shrink-0 ${
-                      isLocked
-                        ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 cursor-default'
-                        : isFieldSelected(currentKey)
-                          ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
-                          : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
-                    }`}
-                  >
-                    {isLocked ? (
-                      <LinkIcon className="w-4 h-4" />
-                    ) : isFieldSelected(currentKey) ? (
-                      <CheckSquare className="w-4 h-4" />
-                    ) : (
-                      <Square className="w-4 h-4" />
+                  <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                    <label className="flex items-center gap-2 cursor-pointer select-none">
+                      <Switch
+                        checked={isFieldSelected(currentKey)}
+                        onCheckedChange={() => toggleField(currentKey)}
+                        disabled={isLocked}
+                      />
+                      <span className={`text-sm font-medium whitespace-nowrap ${
+                        isLocked
+                          ? 'text-blue-600 dark:text-blue-400'
+                          : isFieldSelected(currentKey)
+                            ? 'text-purple-700 dark:text-purple-300'
+                            : 'text-gray-500 dark:text-gray-400'
+                      }`}>
+                        {isLocked ? 'Locked' : isFieldSelected(currentKey) ? 'Will apply' : 'Skip'}
+                      </span>
+                    </label>
+                    {!isLocked && (
+                      <span className="text-[10px] text-gray-400 dark:text-gray-500">Click toggle to change</span>
                     )}
-                    {isLocked ? 'Locked' : isFieldSelected(currentKey) ? 'Selected' : 'Skipped'}
-                  </button>
+                  </div>
                 </div>
 
                 {/* AI Extracted Value */}
@@ -232,7 +274,7 @@ export default function AIExtractConfirmDialog({ isOpen, onClose, onConfirm, ext
                 </div>
 
                 {/* Source Snippet — where in the document this value came from */}
-                {sourceSnippets[currentKey] && (
+                {sourceSnippets[currentKey] ? (
                   <div className="mb-4">
                     <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 flex items-center gap-1">
                       <FileText className="w-3 h-3" /> Found in Document
@@ -240,6 +282,12 @@ export default function AIExtractConfirmDialog({ isOpen, onClose, onConfirm, ext
                     <div className="bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
                       {renderHighlightedSnippet(sourceSnippets[currentKey], currentValue)}
                     </div>
+                  </div>
+                ) : isFetchingSnippets && (
+                  <div className="mb-4">
+                    <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 mb-1.5 flex items-center gap-1">
+                      <Loader2 className="w-3 h-3 animate-spin" /> Searching document for source...
+                    </p>
                   </div>
                 )}
 
