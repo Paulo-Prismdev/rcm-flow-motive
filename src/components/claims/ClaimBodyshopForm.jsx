@@ -3,22 +3,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { UserX } from "lucide-react";
-import ClaimBodyshopMapModal from './ClaimBodyshopMapModal';
-import BodyshopAllocationWizard from './BodyshopAllocationWizard';
+import ClaimBodyshopAllocateButton from './ClaimBodyshopAllocateButton';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
 } from "@/components/ui/dialog";
 
 export default function ClaimBodyshopForm({ claim, onSave, onCancel }) {
     const [formData, setFormData] = useState(claim || {});
-    const [isMapOpen, setIsMapOpen] = useState(false);
-    const [isWizardOpen, setIsWizardOpen] = useState(false);
-    const [preSelectedBodyshop, setPreSelectedBodyshop] = useState(null);
     const [isUnallocateOpen, setIsUnallocateOpen] = useState(false);
     const [unallocateReason, setUnallocateReason] = useState('');
     const [isUnallocating, setIsUnallocating] = useState(false);
@@ -70,15 +66,6 @@ export default function ClaimBodyshopForm({ claim, onSave, onCancel }) {
         }
     };
 
-    const handleBodyshopChange = (bodyshop) => {
-        setFormData(prev => ({ 
-            ...prev, 
-            bodyshop: bodyshop.name,
-            bodyshop_id: bodyshop.id,
-            bodyshop_email: bodyshop.email || ''
-        }));
-    };
-    
     const handleChange = (field, value) => {
         setFormData(prev => ({ ...prev, [field]: value }));
     };
@@ -87,43 +74,8 @@ export default function ClaimBodyshopForm({ claim, onSave, onCancel }) {
         onSave(formData);
     };
 
-    const handleMapSelect = (bodyshop) => {
-        setIsMapOpen(false);
-        setPreSelectedBodyshop(bodyshop);
-        setIsWizardOpen(true);
-    };
-
-    const handleWizardComplete = (bodyshop) => {
-        handleBodyshopChange(bodyshop);
-        setIsWizardOpen(false);
-        setPreSelectedBodyshop(null);
-        // Auto-save after wizard completes
-        onSave({
-            ...formData,
-            bodyshop: bodyshop.name,
-            bodyshop_id: bodyshop.id,
-            bodyshop_email: bodyshop.email || '',
-            bs_instructed: new Date().toISOString().split('T')[0],
-        });
-    };
-
     return (
         <>
-            <ClaimBodyshopMapModal
-                claim={claim}
-                isOpen={isMapOpen}
-                onClose={() => setIsMapOpen(false)}
-                onSelectBodyshop={handleMapSelect}
-            />
-
-            <BodyshopAllocationWizard
-                claim={claim}
-                isOpen={isWizardOpen}
-                onClose={() => { setIsWizardOpen(false); setPreSelectedBodyshop(null); }}
-                onAllocationComplete={handleWizardComplete}
-                preSelectedBodyshop={preSelectedBodyshop}
-            />
-
             {/* Unallocate Confirmation Dialog */}
             <Dialog open={isUnallocateOpen} onOpenChange={setIsUnallocateOpen}>
                 <DialogContent className="neomorph max-w-md">
@@ -170,8 +122,22 @@ export default function ClaimBodyshopForm({ claim, onSave, onCancel }) {
             </Dialog>
             
             <div className="space-y-4 pt-4">
+                {/* Change or allocate repairer */}
+                <div>
+                    <label className="text-sm text-gray-500 mb-2 block">
+                        {formData.bodyshop_id ? 'Change Repairer' : 'Allocate Repairer'}
+                    </label>
+                    <ClaimBodyshopAllocateButton
+                        claim={claim}
+                        onAllocated={(data) => {
+                            setFormData(prev => ({ ...prev, ...data }));
+                            onSave({ ...formData, ...data });
+                        }}
+                    />
+                </div>
+
                 {/* Unallocate Button - only show if bodyshop is allocated */}
-                {claim.bodyshop_id && (
+                {formData.bodyshop_id && (
                     <Button
                         type="button"
                         onClick={() => setIsUnallocateOpen(true)}
@@ -182,7 +148,7 @@ export default function ClaimBodyshopForm({ claim, onSave, onCancel }) {
                     </Button>
                 )}
 
-                {claim.bodyshop_id && (
+                {formData.bodyshop_id && (
                     <div className="space-y-4 pt-2 border-t border-border">
                         <div>
                             <label className="text-sm text-gray-500 mb-2 block">Bodyshop</label>
@@ -193,7 +159,7 @@ export default function ClaimBodyshopForm({ claim, onSave, onCancel }) {
                             />
                         </div>
                         <div>
-                            <label className="text-sm text-gray-500">Bodyshop Email</label>
+                            <label className="text-sm text-gray-500 mb-2 block">Bodyshop Email</label>
                             <Input
                                 type="email"
                                 value={formData.bodyshop_email || ''}
@@ -203,7 +169,7 @@ export default function ClaimBodyshopForm({ claim, onSave, onCancel }) {
                             />
                         </div>
                         <div>
-                            <label className="text-sm text-gray-500">Repairer Referral Fee (%)</label>
+                            <label className="text-sm text-gray-500 mb-2 block">Repairer Referral Fee (%)</label>
                             <Input
                                 type="number"
                                 step="0.01"
@@ -217,9 +183,9 @@ export default function ClaimBodyshopForm({ claim, onSave, onCancel }) {
                 )}
 
                 <div className="flex justify-end gap-3 pt-4">
-                    <Button onClick={onCancel} className="neomorph-flat">Cancel</Button>
-                    {claim.bodyshop_id && (
-                        <Button onClick={handleSave} className="neomorph-flat text-blue-600">Save Changes</Button>
+                    <Button onClick={onCancel} variant="outline">Cancel</Button>
+                    {formData.bodyshop_id && (
+                        <Button onClick={handleSave} className="bg-primary text-primary-foreground">Save Changes</Button>
                     )}
                 </div>
             </div>
