@@ -12,7 +12,7 @@ import WizardEmailStep from './wizard/WizardEmailStep';
 import WizardConfirmStep from './wizard/WizardConfirmStep';
 import { geocodeAddress } from '@/functions/geocodeAddress';
 
-export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAllocationComplete }) {
+export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAllocationComplete, startStep = 0, preSelectedBodyshop = null }) {
   const [currentStep, setCurrentStep] = useState(0);
   const [selectedBodyshop, setSelectedBodyshop] = useState(null);
   const [clientLocation, setClientLocation] = useState(null);
@@ -79,8 +79,8 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
   useEffect(() => {
     if (isOpen && claim) {
       hasAttemptedGeocode.current = false;
-      setCurrentStep(0);
-      setSelectedBodyshop(null);
+      setCurrentStep(startStep);
+      setSelectedBodyshop(preSelectedBodyshop);
       setClientLocation(null);
       setGeocodeMessage(null);
       setGeneratedPdfUrl(null);
@@ -96,14 +96,31 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
       });
       setValidationData(initialValidation);
 
-      if (validBodyshops.length > 0) {
+      if (preSelectedBodyshop?.latitude && preSelectedBodyshop?.longitude) {
+        setMapCenter([parseFloat(preSelectedBodyshop.latitude), parseFloat(preSelectedBodyshop.longitude)]);
+        setMapZoom(11);
+      } else if (validBodyshops.length > 0) {
         const avgLat = validBodyshops.reduce((sum, b) => sum + parseFloat(b.latitude), 0) / validBodyshops.length;
         const avgLng = validBodyshops.reduce((sum, b) => sum + parseFloat(b.longitude), 0) / validBodyshops.length;
         setMapCenter([avgLat, avgLng]);
         setMapZoom(7);
       }
+
+      // When skipping step 0, save validation defaults + bodyshop to claim
+      if (startStep > 0 && preSelectedBodyshop) {
+        base44.entities.Claim.update(claim.id, {
+          bodyshop_id: preSelectedBodyshop.id,
+          bodyshop: preSelectedBodyshop.name,
+          bodyshop_email: preSelectedBodyshop.email,
+          last_contact_source: claim.last_contact_source || 'Client',
+          authorised_by: claim.authorised_by || 'Client Insurer',
+        }).then(() => {
+          queryClient.invalidateQueries({ queryKey: ['claims'] });
+          queryClient.invalidateQueries({ queryKey: ['claim', claim.id] });
+        }).catch(err => console.error('Error saving pre-selected bodyshop:', err));
+      }
     }
-  }, [isOpen, validBodyshops, claim]);
+  }, [isOpen, validBodyshops, claim, startStep, preSelectedBodyshop]);
 
   const missingFields = useMemo(() => {
     return REQUIRED_FIELDS.filter(field => {
