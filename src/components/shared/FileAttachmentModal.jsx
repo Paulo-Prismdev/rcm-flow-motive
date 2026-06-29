@@ -10,7 +10,7 @@ import { base44 } from '@/api/base44Client';
 export default function FileAttachmentModal({ fileUrls = [], onAdd, onRemove, isOpen, onClose, enableAI = false, analysisType = 'general', onAIExtract = null, existingData = {} }) {
   const [viewingFile, setViewingFile] = useState(null);
   const [analyzingFile, setAnalyzingFile] = useState(null);
-  const [aiExtractDialog, setAiExtractDialog] = useState({ isOpen: false, data: null });
+  const [aiExtractDialog, setAiExtractDialog] = useState({ isOpen: false, data: null, fileUrl: null });
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef(null);
 
@@ -249,7 +249,8 @@ export default function FileAttachmentModal({ fileUrls = [], onAdd, onRemove, is
       if (result.status === 'success' && result.output) {
         setAiExtractDialog({
           isOpen: true,
-          data: result.output
+          data: result.output,
+          fileUrl: fileUrl
         });
       } else {
         alert('Could not extract data from this file. ' + (result.details || 'Please try again.'));
@@ -281,6 +282,7 @@ export default function FileAttachmentModal({ fileUrls = [], onAdd, onRemove, is
         extractedData={aiExtractDialog.data}
         existingData={existingData}
         title="AI Data Extraction"
+        fileUrl={aiExtractDialog.fileUrl}
       />
 
       <FileViewer fileUrl={viewingFile} onClose={() => setViewingFile(null)} />

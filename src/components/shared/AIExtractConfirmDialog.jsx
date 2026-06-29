@@ -1,28 +1,25 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { X, Sparkles, CheckSquare, Square, ArrowRight, Check, Link } from 'lucide-react';
+import { X, Sparkles, CheckSquare, Square, ArrowRight, ArrowLeft, Check, Link as LinkIcon, FileText } from 'lucide-react';
+import DocumentPreview from './DocumentPreview';
 
-// Fields owned by each linked entity type — these come from the database and should not be overridable
 const LINKED_ENTITY_FIELDS = {
   client: ['client_name', 'client_phone', 'client_email', 'client_address_line_1', 'client_address_line_2', 'client_town', 'client_county', 'client_postcode'],
   referrer: ['referrer', 'referrer_email'],
   bodyshop: ['bodyshop', 'bodyshop_email'],
 };
 
-export default function AIExtractConfirmDialog({ isOpen, onClose, onConfirm, extractedData, existingData = {}, linkedEntityTypes = [], title = 'AI Data Extraction' }) {
-  // Compute locked fields from linkedEntityTypes — re-evaluated on every render
+export default function AIExtractConfirmDialog({ isOpen, onClose, onConfirm, extractedData, existingData = {}, linkedEntityTypes = [], title = 'AI Data Extraction', fileUrl }) {
   const lockedFields = useMemo(
     () => new Set(linkedEntityTypes.flatMap(t => LINKED_ENTITY_FIELDS[t] || [])),
     [linkedEntityTypes]
   );
 
-  // Track only user-toggleable fields; locked fields are always applied
   const [selectedFields, setSelectedFields] = useState(() => {
     const initial = {};
     Object.keys(extractedData || {}).forEach(key => {
       const extractedValue = extractedData[key];
       const existingValue = existingData[key];
-      
       if (extractedValue !== null && extractedValue !== undefined && extractedValue !== '') {
         if (!lockedFields.has(key)) {
           const valuesMatch = String(existingValue) === String(extractedValue);
@@ -33,7 +30,8 @@ export default function AIExtractConfirmDialog({ isOpen, onClose, onConfirm, ext
     return initial;
   });
 
-  // Re-initialize selectedFields when linkedEntityTypes changes (and dialog re-opens)
+  const [currentIndex, setCurrentIndex] = useState(0);
+
   useEffect(() => {
     if (!isOpen || !extractedData) return;
     setSelectedFields(prev => {
@@ -49,15 +47,15 @@ export default function AIExtractConfirmDialog({ isOpen, onClose, onConfirm, ext
       });
       return updated;
     });
+    setCurrentIndex(0);
   }, [isOpen, lockedFields, extractedData, existingData]);
 
   if (!isOpen || !extractedData) return null;
 
-  const fields = Object.entries(extractedData).filter(([_, value]) => 
+  const fields = Object.entries(extractedData).filter(([_, value]) =>
     value !== null && value !== undefined && value !== ''
   );
 
-  // Effective selection: locked fields are always considered selected
   const isFieldSelected = (key) => lockedFields.has(key) || !!selectedFields[key];
 
   const getLinkedEntityLabel = (fieldName) => {
@@ -71,20 +69,7 @@ export default function AIExtractConfirmDialog({ isOpen, onClose, onConfirm, ext
 
   const toggleField = (fieldName) => {
     if (lockedFields.has(fieldName)) return;
-    setSelectedFields(prev => ({
-      ...prev,
-      [fieldName]: !prev[fieldName]
-    }));
-  };
-
-  const toggleAll = () => {
-    const toggleable = fields.filter(([key]) => !lockedFields.has(key));
-    const allSelected = toggleable.every(([key]) => isFieldSelected(key));
-    const newState = { ...selectedFields };
-    toggleable.forEach(([key]) => {
-      newState[key] = !allSelected;
-    });
-    setSelectedFields(newState);
+    setSelectedFields(prev => ({ ...prev, [fieldName]: !prev[fieldName] }));
   };
 
   const handleConfirm = () => {
@@ -98,24 +83,13 @@ export default function AIExtractConfirmDialog({ isOpen, onClose, onConfirm, ext
     onClose();
   };
 
-  const toggleableFields = fields.filter(([key]) => !lockedFields.has(key));
-  const selectedCount = fields.filter(([key]) => isFieldSelected(key)).length;
-  const lockedCount = fields.length - toggleableFields.length;
-  const allToggleableSelected = toggleableFields.length > 0 && toggleableFields.every(([key]) => isFieldSelected(key));
-
-  const formatFieldName = (key) => {
-    // Convert snake_case to Title Case
-    return key.split('_').map(word => 
-      word.charAt(0).toUpperCase() + word.slice(1)
-    ).join(' ');
-  };
+  const formatFieldName = (key) =>
+    key.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
 
   const formatValue = (value) => {
     if (typeof value === 'boolean') return value ? 'Yes' : 'No';
     if (typeof value === 'number') return value.toString();
-    if (typeof value === 'string' && value.length > 100) {
-      return value.substring(0, 100) + '...';
-    }
+    if (typeof value === 'string' && value.length > 200) return value.substring(0, 200) + '...';
     return value;
   };
 
@@ -123,176 +97,204 @@ export default function AIExtractConfirmDialog({ isOpen, onClose, onConfirm, ext
     const existingValue = existingData[key];
     const hasExisting = existingValue !== null && existingValue !== undefined && existingValue !== '';
     const valuesMatch = hasExisting && String(existingValue) === String(extractedValue);
-
     return { hasExisting, existingValue, valuesMatch };
   };
 
+  const [currentKey, currentValue] = fields[currentIndex] || [null, null];
+  const { hasExisting, existingValue, valuesMatch } = currentKey ? compareValues(currentKey, currentValue) : {};
+  const isLocked = currentKey ? lockedFields.has(currentKey) : false;
+  const linkedEntity = currentKey ? getLinkedEntityLabel(currentKey) : null;
+  const selectedCount = fields.filter(([key]) => isFieldSelected(key)).length;
+  const isLastField = currentIndex === fields.length - 1;
+
+  const goNext = () => {
+    if (isLastField) {
+      handleConfirm();
+    } else {
+      setCurrentIndex(i => Math.min(i + 1, fields.length - 1));
+    }
+  };
+
+  const goBack = () => setCurrentIndex(i => Math.max(i - 1, 0));
+
   return (
     <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={onClose}>
-      <div 
-        className="glass-elevated w-full max-w-2xl mx-4 max-h-[80vh] flex flex-col"
+      <div
+        className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl w-full max-w-5xl mx-4 h-[85vh] flex flex-col overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-start justify-between p-6 border-b border-glass-border">
+        <div className="flex items-center justify-between px-5 py-3 border-b border-gray-200 dark:border-gray-800 flex-shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center flex-shrink-0">
-              <Sparkles className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+            <div className="w-9 h-9 rounded-full bg-purple-500/20 flex items-center justify-center flex-shrink-0">
+              <Sparkles className="w-4 h-4 text-purple-600 dark:text-purple-400" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-foreground">{title}</h3>
-              <p className="text-xs text-foreground-muted mt-1">
-                Select which fields you want to auto-fill ({selectedCount} of {fields.length} selected{lockedCount > 0 ? `, ${lockedCount} from linked records` : ''})
+              <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">{title}</h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Reviewing field {currentIndex + 1} of {fields.length} • {selectedCount} selected to apply
               </p>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="neomorph-flat p-2 hover:bg-surface-hover transition-colors rounded-lg"
-          >
-            <X className="w-4 h-4 text-foreground" />
+          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+            <X className="w-4 h-4 text-gray-400" />
           </button>
         </div>
 
-        {/* Select All Toggle */}
-        <div className="px-6 py-3 border-b border-glass-border bg-surface/50">
-          <button
-            onClick={toggleAll}
-            className="flex items-center gap-2 hover:text-purple-600 dark:hover:text-purple-400 transition-colors text-sm font-medium text-foreground"
-          >
-            {allToggleableSelected ? (
-              <CheckSquare className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-            ) : (
-              <Square className="w-4 h-4" />
-            )}
-            {allToggleableSelected ? 'Deselect All' : 'Select All'}
-          </button>
+        {/* Progress Bar */}
+        <div className="h-1 bg-gray-100 dark:bg-gray-800 flex-shrink-0">
+          <div
+            className="h-full bg-purple-500 transition-all duration-300"
+            style={{ width: `${((currentIndex + 1) / fields.length) * 100}%` }}
+          />
         </div>
 
-        {/* Fields List - Scrollable */}
-        <div className="flex-1 overflow-y-auto px-6 py-4">
-          <div className="space-y-2">
-            {fields.map(([key, value]) => {
-              const { hasExisting, existingValue, valuesMatch } = compareValues(key, value);
-              const isLocked = lockedFields.has(key);
-              const linkedEntity = getLinkedEntityLabel(key);
-              
-              return (
-                <div
-                  key={key}
-                  onClick={() => toggleField(key)}
-                  className={`neomorph-flat p-4 rounded-lg transition-all ${
-                    isLocked ? 'cursor-default border-2 border-blue-300 dark:border-blue-700 bg-blue-50/50 dark:bg-blue-900/10' 
-                    : `cursor-pointer hover:bg-surface-hover ${isFieldSelected(key) ? 'ring-2 ring-purple-500 dark:ring-purple-400' : ''}`
-                  } ${valuesMatch && !isLocked ? 'opacity-60' : ''}`}
-                >
-                  <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0 mt-0.5">
-                      {isLocked ? (
-                        <Link className="w-5 h-5 text-blue-500" />
-                      ) : isFieldSelected(key) ? (
-                        <CheckSquare className="w-5 h-5 text-purple-600 dark:text-purple-400" />
-                      ) : (
-                        <Square className="w-5 h-5 text-foreground-muted" />
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className={`font-semibold text-sm ${isLocked ? 'text-blue-700 dark:text-blue-300' : 'text-foreground'}`}>
-                          {formatFieldName(key)}
-                        </span>
-                        {isLocked && linkedEntity && (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300">
-                            <Link className="w-3 h-3 mr-1" />
-                            From linked {linkedEntity}
-                          </span>
-                        )}
-                      </div>
-                      
-                      {isLocked ? (
-                        <div className="space-y-1">
-                          <div className="text-xs text-blue-600 dark:text-blue-400 font-semibold mb-2">
-                            🔒 Always applied — data from linked {linkedEntity} record
-                          </div>
-                          <div className="text-sm text-blue-800 dark:text-blue-200 font-medium break-words bg-blue-100 dark:bg-blue-900/30 rounded-lg p-3 border border-blue-200 dark:border-blue-800">
-                            {formatValue(value)}
-                          </div>
-                        </div>
-                      ) : hasExisting ? (
-                        <div className="space-y-2">
-                          {valuesMatch ? (
-                            <div className="flex items-center gap-2 text-xs">
-                              <Check className="w-4 h-4 text-green-600 dark:text-green-400 flex-shrink-0" />
-                              <span className="text-green-700 dark:text-green-400 font-semibold">
-                                Values match - no change needed
-                              </span>
-                            </div>
-                          ) : (
-                            <div className="flex items-center gap-2 text-xs font-semibold mb-2">
-                              <span className="px-2 py-1 rounded-md bg-orange-500 dark:bg-orange-600 text-white">
-                                ⚠️ Will overwrite existing data
-                              </span>
-                            </div>
-                          )}
-                          
-                          <div className="flex items-start gap-2 text-xs">
-                            <div className="flex-1 min-w-0 bg-gray-200 dark:bg-gray-800 rounded-lg p-3 border border-gray-300 dark:border-gray-700">
-                              <div className="text-gray-900 dark:text-gray-100 font-bold mb-2 text-xs uppercase tracking-wide">Current:</div>
-                              <div className={`break-words text-sm font-medium ${valuesMatch ? 'text-gray-900 dark:text-gray-100' : 'text-gray-600 dark:text-gray-400 line-through'}`}>
-                                {formatValue(existingValue)}
-                              </div>
-                            </div>
-                            
-                            {!valuesMatch && (
-                              <>
-                                <ArrowRight className="w-5 h-5 text-purple-600 dark:text-purple-400 flex-shrink-0 mt-7" />
-                                
-                                <div className="flex-1 min-w-0 bg-purple-600 dark:bg-purple-700 rounded-lg p-3 border-2 border-purple-700 dark:border-purple-600">
-                                  <div className="text-white font-bold mb-2 text-xs uppercase tracking-wide">AI Found:</div>
-                                  <div className="text-white break-words font-semibold text-sm">
-                                    {formatValue(value)}
-                                  </div>
-                                </div>
-                              </>
-                            )}
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="space-y-1">
-                          <div className="text-xs text-green-700 dark:text-green-400 font-bold mb-2">
-                            ✨ New data
-                          </div>
-                          <div className="text-sm text-white font-medium break-words bg-purple-600 dark:bg-purple-700 rounded-lg p-3 border-2 border-purple-700 dark:border-purple-600">
-                            {formatValue(value)}
-                          </div>
-                        </div>
-                      )}
-                    </div>
+        {/* Split Pane: Document | Field Review */}
+        <div className="flex-1 flex flex-col md:flex-row overflow-hidden min-h-0">
+          {/* Document Preview */}
+          <div className="md:w-1/2 h-52 md:h-full border-b md:border-b-0 md:border-r border-gray-200 dark:border-gray-800 flex flex-col min-h-0">
+            <div className="px-3 py-2 bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700 flex items-center gap-2 flex-shrink-0">
+              <FileText className="w-3.5 h-3.5 text-gray-400" />
+              <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Source Document</span>
+            </div>
+            <div className="flex-1 min-h-0">
+              <DocumentPreview fileUrl={fileUrl} />
+            </div>
+          </div>
+
+          {/* Field Review */}
+          <div className="md:w-1/2 flex-1 overflow-y-auto p-5">
+            {currentKey && (
+              <div className="flex flex-col h-full">
+                {/* Field Name & Toggle */}
+                <div className="flex items-start justify-between gap-3 mb-4">
+                  <div className="min-w-0">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-1">
+                      Field {currentIndex + 1} of {fields.length}
+                    </p>
+                    <h4 className="text-lg font-bold text-gray-900 dark:text-gray-100 break-words">
+                      {formatFieldName(currentKey)}
+                    </h4>
+                    {isLocked && linkedEntity && (
+                      <span className="inline-flex items-center mt-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300">
+                        <LinkIcon className="w-3 h-3 mr-1" />
+                        From linked {linkedEntity}
+                      </span>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => toggleField(currentKey)}
+                    disabled={isLocked}
+                    className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all flex-shrink-0 ${
+                      isLocked
+                        ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 cursor-default'
+                        : isFieldSelected(currentKey)
+                          ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
+                          : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
+                    }`}
+                  >
+                    {isLocked ? (
+                      <LinkIcon className="w-4 h-4" />
+                    ) : isFieldSelected(currentKey) ? (
+                      <CheckSquare className="w-4 h-4" />
+                    ) : (
+                      <Square className="w-4 h-4" />
+                    )}
+                    {isLocked ? 'Locked' : isFieldSelected(currentKey) ? 'Selected' : 'Skipped'}
+                  </button>
+                </div>
+
+                {/* AI Extracted Value */}
+                <div className="mb-4">
+                  <p className="text-xs font-semibold text-purple-600 dark:text-purple-400 mb-1.5 flex items-center gap-1">
+                    <Sparkles className="w-3 h-3" /> AI Extracted
+                  </p>
+                  <div className="bg-purple-50 dark:bg-purple-900/20 border-2 border-purple-200 dark:border-purple-700 rounded-lg p-3">
+                    <p className="text-sm font-semibold text-purple-900 dark:text-purple-100 break-words">
+                      {formatValue(currentValue)}
+                    </p>
                   </div>
                 </div>
-              );
-            })}
+
+                {/* Existing Value Comparison */}
+                {hasExisting && (
+                  <div className="mb-4">
+                    {valuesMatch ? (
+                      <div className="flex items-center gap-2 text-sm">
+                        <Check className="w-4 h-4 text-green-600 dark:text-green-400 flex-shrink-0" />
+                        <span className="text-green-700 dark:text-green-400 font-medium">
+                          Values match — no change needed
+                        </span>
+                      </div>
+                    ) : (
+                      <div>
+                        <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">Current Value</p>
+                        <div className="flex items-center gap-2">
+                          <div className="flex-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700">
+                            <p className="text-sm text-gray-600 dark:text-gray-400 line-through break-words">
+                              {formatValue(existingValue)}
+                            </p>
+                          </div>
+                          <ArrowRight className="w-4 h-4 text-purple-500 flex-shrink-0" />
+                        </div>
+                        {!isLocked && isFieldSelected(currentKey) && (
+                          <p className="text-xs text-amber-600 dark:text-amber-400 mt-1.5 font-medium">
+                            ⚠️ Will overwrite existing data
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {!hasExisting && !isLocked && isFieldSelected(currentKey) && (
+                  <div className="mb-4">
+                    <p className="text-xs text-green-700 dark:text-green-400 font-semibold flex items-center gap-1">
+                      ✨ New data — will be added
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Actions */}
-        <div className="flex gap-3 justify-end p-6 border-t border-glass-border">
+        {/* Footer Navigation */}
+        <div className="flex items-center justify-between px-5 py-3 border-t border-gray-200 dark:border-gray-800 flex-shrink-0 gap-3">
           <Button
-            onClick={onClose}
-            className="neomorph-flat px-6 py-2.5 text-sm font-medium hover:bg-surface-hover transition-colors text-foreground"
+            variant="outline"
+            onClick={goBack}
+            disabled={currentIndex === 0}
+            className="gap-1.5 flex-shrink-0"
           >
-            Cancel
+            <ArrowLeft className="w-4 h-4" />
+            <span className="hidden sm:inline">Back</span>
           </Button>
+
+          {/* Field dots — quick navigation */}
+          <div className="flex items-center gap-1 overflow-x-auto max-w-[40%]">
+            {fields.map(([key], idx) => (
+              <button
+                key={key}
+                onClick={() => setCurrentIndex(idx)}
+                className={`w-2 h-2 rounded-full flex-shrink-0 transition-all ${
+                  idx === currentIndex
+                    ? 'bg-purple-600 w-4'
+                    : isFieldSelected(key)
+                      ? 'bg-purple-300 dark:bg-purple-700'
+                      : 'bg-gray-300 dark:bg-gray-600'
+                }`}
+                title={formatFieldName(key)}
+              />
+            ))}
+          </div>
+
           <Button
-            onClick={handleConfirm}
-            disabled={selectedCount === 0}
-            className={`px-6 py-2.5 text-sm font-medium transition-colors rounded-xl ${
-              selectedCount === 0 
-                ? 'bg-gray-400 text-gray-200 cursor-not-allowed' 
-                : 'bg-purple-600 hover:bg-purple-700 text-white'
-            }`}
+            onClick={goNext}
+            className="bg-purple-600 hover:bg-purple-700 text-white gap-1.5 flex-shrink-0"
           >
-            Apply Selected Fields ({selectedCount})
+            {isLastField ? `Apply (${selectedCount})` : <span className="hidden sm:inline">Next</span>}
+            {isLastField ? <Check className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
           </Button>
         </div>
       </div>
