@@ -962,7 +962,6 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                 <DetailRow label="Referrer Ref" value={claim.referrer_ref} />
                 <DetailRow label="File Handler" value={claim.file_handler} />
                 <DetailRow label="% to Referrer" value={claim.percent_to_referrer} />
-                <DetailRow label="Repairer Referral Fee %" value={claim.referral_fee_repairer} />
               </div>
             ) : (
               <div className="text-center py-8">
@@ -1093,6 +1092,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
               <DetailRow label="Bodyshop" value={claim.bodyshop} />
               <DetailRow label="Bodyshop Email" value={claim.bodyshop_email} />
+              <DetailRow label="Repairer Referral Fee (%)" value={claim.referral_fee_repairer} />
             </div>
 
             {/* Extended bodyshop information when allocated */}

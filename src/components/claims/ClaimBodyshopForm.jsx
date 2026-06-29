@@ -202,6 +202,17 @@ export default function ClaimBodyshopForm({ claim, onSave, onCancel }) {
                                 placeholder="Auto-filled from selection"
                             />
                         </div>
+                        <div>
+                            <label className="text-sm text-gray-500">Repairer Referral Fee (%)</label>
+                            <Input
+                                type="number"
+                                step="0.01"
+                                value={formData.referral_fee_repairer ?? ''}
+                                onChange={e => handleChange('referral_fee_repairer', e.target.value)}
+                                className="neomorph-inset"
+                                placeholder="e.g. 20"
+                            />
+                        </div>
                     </div>
                 )}
 
