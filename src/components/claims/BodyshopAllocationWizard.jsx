@@ -94,6 +94,12 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
       REQUIRED_FIELDS.forEach(field => {
         initialValidation[field.key] = claim[field.key] ?? (field.type === 'boolean' ? false : '');
       });
+      // Also seed insurance fields so edits are tracked and saved
+      ['insurer', 'claim_ref', 'policy_number', 'policy_excess', 'audatex_code', 'send_estimate_email',
+       'tp_insurer', 'tp_claim_ref', 'tp_policy_number', 'tp_policy_excess'
+      ].forEach(key => {
+        initialValidation[key] = claim[key] ?? '';
+      });
       setValidationData(initialValidation);
 
       if (preSelectedBodyshop?.latitude && preSelectedBodyshop?.longitude) {
@@ -138,12 +144,8 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
   const handleSaveValidation = async () => {
     setIsSavingValidation(true);
     try {
-      const dataToSave = {};
-      REQUIRED_FIELDS.forEach(field => {
-        if (field.key in validationData) {
-          dataToSave[field.key] = validationData[field.key];
-        }
-      });
+      // Save all edited fields (required checklist + insurance fields)
+      const dataToSave = { ...validationData };
       dataToSave.last_contact_source = contactType.charAt(0).toUpperCase() + contactType.slice(1);
       dataToSave.authorised_by = authorisedBy;
       await base44.entities.Claim.update(claim.id, dataToSave);

@@ -80,20 +80,20 @@ export default function WizardValidateStep({
   const getInsurerFields = () => {
     if (isClientInsurer) {
       return {
-        insurer_name: claim.insurer || '',
-        claim_ref: claim.claim_ref || '',
-        policy_number: claim.policy_number || '',
-        policy_excess: claim.policy_excess || '0',
-        audatex_code: claim.audatex_code || '',
-        send_estimate_email: claim.send_estimate_email || '',
+        insurer_name: validationData.insurer ?? claim.insurer ?? '',
+        claim_ref: validationData.claim_ref ?? claim.claim_ref ?? '',
+        policy_number: validationData.policy_number ?? claim.policy_number ?? '',
+        policy_excess: validationData.policy_excess ?? claim.policy_excess ?? '0',
+        audatex_code: validationData.audatex_code ?? claim.audatex_code ?? '',
+        send_estimate_email: validationData.send_estimate_email ?? claim.send_estimate_email ?? '',
       };
     }
     if (isThirdPartyInsurer) {
       return {
-        insurer_name: claim.tp_insurer || '',
-        claim_ref: claim.tp_claim_ref || '',
-        policy_number: claim.tp_policy_number || '',
-        policy_excess: claim.tp_policy_excess || '0',
+        insurer_name: validationData.tp_insurer ?? claim.tp_insurer ?? '',
+        claim_ref: validationData.tp_claim_ref ?? claim.tp_claim_ref ?? '',
+        policy_number: validationData.tp_policy_number ?? claim.tp_policy_number ?? '',
+        policy_excess: validationData.tp_policy_excess ?? claim.tp_policy_excess ?? '0',
         audatex_code: '',
         send_estimate_email: '',
       };
@@ -102,7 +102,7 @@ export default function WizardValidateStep({
       insurer_name: '',
       claim_ref: '',
       policy_number: '',
-      policy_excess: claim.policy_excess || '0',
+      policy_excess: validationData.policy_excess ?? claim.policy_excess ?? '0',
       audatex_code: '',
       send_estimate_email: '',
     };
