@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import * as pdfjsLib from 'pdfjs-dist';
-import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import { Loader2, ZoomIn, ZoomOut, FileText } from 'lucide-react';
 
-// Vite resolves ?url imports to the correct asset path
-pdfjsLib.GlobalWorkerOptions.workerSrc = workerUrl;
+// Use CDN-hosted worker matching the installed pdfjs-dist version
+pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
 
 function getExtension(url) {
   try {
