@@ -115,11 +115,18 @@ Deno.serve(async (req) => {
       insurer: displayInsurer,
       claim_ref: displayClaimRef,
       policy_number: displayPolicyNumber,
-      send_estimate_email: authorisedBy === 'Client Insurer' ? (claim.send_estimate_email || 'N/A') : 'N/A',
-      audatex_code: authorisedBy === 'Client Insurer' ? (claim.audatex_code || 'N/A') : 'N/A',
+      send_estimate_email: claim.send_estimate_email || 'N/A',
+      audatex_code: claim.audatex_code || 'N/A',
       policy_excess: displayPolicyExcess,
       referral_fee: claim.referral_fee_repairer != null ? `${claim.referral_fee_repairer}%` : '0%',
     };
+
+    // ── Insurer party label for the Insurance Details section header ──
+    const insurerPartyLabel = authorisedBy === 'Third Party Insurer'
+      ? 'Third Party Insurer'
+      : authorisedBy === 'Uninsured'
+        ? 'Uninsured'
+        : 'Insured (Client)';
 
     let yPos = TOP;
 
@@ -295,6 +302,18 @@ Deno.serve(async (req) => {
       ];
       ensureSpace(estimateSection(rows));
       drawHeader('Insurance Details');
+      // ── Party badge: shows whose insurance details these are ──
+      const badgeW = 42;
+      const badgeH = 5;
+      const badgeX = LM + MW - PAD_X - badgeW;
+      const badgeY = yPos - HEADER_H - PAD_TOP + (HEADER_H - badgeH) / 2;
+      const badgeColor = authorisedBy === 'Third Party Insurer' ? [200, 0, 0] : authorisedBy === 'Uninsured' ? [120, 120, 120] : [0, 120, 60];
+      doc.setFillColor(...badgeColor);
+      doc.roundedRect(badgeX, badgeY, badgeW, badgeH, 1.5, 1.5, 'F');
+      doc.setTextColor(...WHITE);
+      doc.setFontSize(6.5);
+      doc.setFont('helvetica', 'bold');
+      doc.text(insurerPartyLabel.toUpperCase(), badgeX + badgeW / 2, badgeY + 3.5, { align: 'center' });
       for (const [label, value] of rows) drawRow(label, value);
       finishSection();
     }
