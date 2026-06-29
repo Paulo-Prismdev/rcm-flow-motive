@@ -318,19 +318,45 @@ export default function WizardValidateStep({
         </div>
       )}
 
-      {/* Required Fields Summary */}
-      <div className="p-4 rounded-lg bg-amber-50 border border-amber-200">
-        <div className="flex items-start gap-3">
-          <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-          <div>
-            <h4 className="font-medium text-amber-800">Pre-Allocation Checklist</h4>
-            <p className="text-sm text-amber-700 mt-1">
-              Please ensure all required fields are completed before allocating to a repairer.
-              {missingFields.length > 0 && <span className="font-medium"> {missingFields.length} field(s) need attention.</span>}
-            </p>
+      {/* Missing Required Fields — inline editable */}
+      {missingFields.length > 0 && (
+        <div className="p-4 rounded-lg bg-amber-50 border border-amber-200">
+          <div className="flex items-start gap-3 mb-3">
+            <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <h4 className="font-medium text-amber-800">Pre-Allocation Checklist</h4>
+              <p className="text-sm text-amber-700 mt-1">
+                The following fields must be completed before allocating to a repairer:
+              </p>
+            </div>
+          </div>
+          <div className="space-y-3 ml-8">
+            {missingFields.map(field => (
+              <div key={field.key}>
+                <label className="block text-xs font-medium text-amber-800 mb-1">{field.label} *</label>
+                {field.type === 'select' ? (
+                  <select
+                    value={validationData[field.key] || ''}
+                    onChange={(e) => onValidationChange(field.key, e.target.value)}
+                    className="w-full h-9 px-3 rounded-md border border-amber-300 bg-white text-sm"
+                  >
+                    <option value="">Select {field.label}...</option>
+                    {field.options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                  </select>
+                ) : (
+                  <Input
+                    type={field.type === 'email' ? 'email' : 'text'}
+                    value={validationData[field.key] || ''}
+                    onChange={(e) => onValidationChange(field.key, e.target.value)}
+                    placeholder={`Enter ${field.label.toLowerCase()}...`}
+                    className="border-amber-300 bg-white"
+                  />
+                )}
+              </div>
+            ))}
           </div>
         </div>
-      </div>
+      )}
 
       {missingFields.length === 0 && (
         <div className="p-4 rounded-lg bg-green-50 border border-green-200 flex items-center gap-3">
