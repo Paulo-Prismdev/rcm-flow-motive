@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import * as pdfjsLib from 'pdfjs-dist';
+import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import { Loader2, ZoomIn, ZoomOut, FileText } from 'lucide-react';
 
-pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
-  'pdfjs-dist/build/pdf.worker.min.mjs',
-  import.meta.url
-).href;
+// Vite resolves ?url imports to the correct asset path
+pdfjsLib.GlobalWorkerOptions.workerSrc = workerUrl;
 
 function getExtension(url) {
   try {
@@ -25,6 +24,7 @@ export default function HighlightableDocumentViewer({ fileUrl, highlightText }) 
   const [scale, setScale] = useState(1.3);
   const [highlights, setHighlights] = useState([]);
   const [isImage, setIsImage] = useState(false);
+  const [useIframeFallback, setUseIframeFallback] = useState(false);
   const [error, setError] = useState(null);
 
   // Load & render PDF pages
@@ -35,6 +35,7 @@ export default function HighlightableDocumentViewer({ fileUrl, highlightText }) 
     setPageData([]);
     setHighlights([]);
     setError(null);
+    setUseIframeFallback(false);
     pageRefs.current = [];
 
     const ext = getExtension(fileUrl);
@@ -47,7 +48,13 @@ export default function HighlightableDocumentViewer({ fileUrl, highlightText }) 
 
     (async () => {
       try {
-        const loadingTask = pdfjsLib.getDocument(fileUrl);
+        // Fetch the PDF as an ArrayBuffer first — this avoids CORS issues
+        // with pdf.js trying to fetch via XHR internally
+        const response = await fetch(fileUrl, { mode: 'cors' });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const arrayBuffer = await response.arrayBuffer();
+
+        const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer) });
         const pdf = await loadingTask.promise;
         const pages = [];
         for (let i = 1; i <= pdf.numPages; i++) {
@@ -85,9 +92,10 @@ export default function HighlightableDocumentViewer({ fileUrl, highlightText }) 
           setLoading(false);
         }
       } catch (err) {
-        console.error('PDF load error:', err);
+        console.error('PDF render error:', err);
         if (!cancelled) {
-          setError(err.message || 'Failed to load PDF');
+          // If pdf.js rendering fails, fall back to iframe
+          setUseIframeFallback(true);
           setLoading(false);
         }
       }
@@ -173,16 +181,16 @@ export default function HighlightableDocumentViewer({ fileUrl, highlightText }) 
     );
   }
 
-  if (error) {
+  // Fallback: native PDF viewer via iframe (no highlighting, but always works)
+  if (useIframeFallback) {
     return (
-      <div className="flex items-center justify-center h-full bg-gray-100 dark:bg-gray-950">
-        <div className="text-center p-4">
-          <FileText className="w-10 h-10 mx-auto mb-2 text-gray-400" />
-          <p className="text-xs text-gray-500 mb-2">Preview unavailable</p>
-          <a href={fileUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline text-xs">
-            Open in New Tab →
-          </a>
+      <div className="h-full flex flex-col bg-gray-200 dark:bg-gray-950">
+        <div className="px-3 py-1.5 bg-amber-50 dark:bg-amber-900/20 border-b border-amber-200 dark:border-amber-700 flex-shrink-0">
+          <p className="text-[11px] text-amber-700 dark:text-amber-400">
+            Document loaded in basic mode — highlighting unavailable for this file type
+          </p>
         </div>
+        <iframe src={fileUrl} className="w-full flex-1 border-0" title="Document Preview" />
       </div>
     );
   }
