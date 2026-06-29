@@ -1,9 +1,8 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { Switch } from '@/components/ui/switch';
-import { X, Sparkles, ArrowRight, ArrowLeft, Check, Link as LinkIcon, FileText, Loader2 } from 'lucide-react';
+import { X, Sparkles, ArrowRight, ArrowLeft, Check, Link as LinkIcon, FileText, Loader2, AlertTriangle } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
-import DocumentPreview from './DocumentPreview';
+import HighlightableDocumentViewer from './HighlightableDocumentViewer';
 
 const LINKED_ENTITY_FIELDS = {
   client: ['client_name', 'client_phone', 'client_email', 'client_address_line_1', 'client_address_line_2', 'client_town', 'client_county', 'client_postcode'],
@@ -19,10 +18,10 @@ export default function AIExtractConfirmDialog({ isOpen, onClose, onConfirm, ext
 
   const [selectedFields, setSelectedFields] = useState({});
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [showSummary, setShowSummary] = useState(false);
 
   // Use refs so the init effect only fires when the dialog actually opens,
-  // not every time the parent passes new object references (which was resetting
-  // the user's toggle selections on every parent re-render).
+  // not every time the parent passes new object references.
   const extractedDataRef = useRef(extractedData);
   const existingDataRef = useRef(existingData);
   const lockedFieldsRef = useRef(lockedFields);
@@ -47,19 +46,17 @@ export default function AIExtractConfirmDialog({ isOpen, onClose, onConfirm, ext
     });
     setSelectedFields(initial);
     setCurrentIndex(0);
+    setShowSummary(false);
   }, [isOpen]);
 
-  // Fetch source snippets via AI when the dialog opens, so the user can see
-  // where each extracted value came from in the document.
+  // Fetch source snippets via AI when the dialog opens
   const [fetchedSnippets, setFetchedSnippets] = useState({});
   const [isFetchingSnippets, setIsFetchingSnippets] = useState(false);
   const snippetsFetchedForRef = useRef(null);
 
   useEffect(() => {
     if (!isOpen || !fileUrl || !extractedData) return;
-    // Skip if the extraction already includes source snippets
     if (extractedData._source_snippets) return;
-    // Skip if we already fetched for this file
     if (snippetsFetchedForRef.current === fileUrl) return;
     snippetsFetchedForRef.current = fileUrl;
 
@@ -106,9 +103,9 @@ export default function AIExtractConfirmDialog({ isOpen, onClose, onConfirm, ext
     return null;
   };
 
-  const toggleField = (fieldName) => {
+  const selectField = (fieldName, useAI) => {
     if (lockedFields.has(fieldName)) return;
-    setSelectedFields(prev => ({ ...prev, [fieldName]: !prev[fieldName] }));
+    setSelectedFields(prev => ({ ...prev, [fieldName]: useAI }));
   };
 
   const handleConfirm = () => {
@@ -163,15 +160,27 @@ export default function AIExtractConfirmDialog({ isOpen, onClose, onConfirm, ext
   const selectedCount = fields.filter(([key]) => isFieldSelected(key)).length;
   const isLastField = currentIndex === fields.length - 1;
 
+  const changesToApply = fields.filter(([key]) => {
+    if (!isFieldSelected(key)) return false;
+    const { hasExisting, valuesMatch } = compareValues(key, extractedData[key]);
+    return !hasExisting || !valuesMatch;
+  });
+
   const goNext = () => {
     if (isLastField) {
-      handleConfirm();
+      setShowSummary(true);
     } else {
       setCurrentIndex(i => Math.min(i + 1, fields.length - 1));
     }
   };
 
-  const goBack = () => setCurrentIndex(i => Math.max(i - 1, 0));
+  const goBack = () => {
+    if (showSummary) {
+      setShowSummary(false);
+    } else {
+      setCurrentIndex(i => Math.max(i - 1, 0));
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={onClose}>
@@ -186,9 +195,11 @@ export default function AIExtractConfirmDialog({ isOpen, onClose, onConfirm, ext
               <Sparkles className="w-4 h-4 text-purple-600 dark:text-purple-400" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">{title}</h3>
+              <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">{showSummary ? 'Review Changes' : title}</h3>
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                Reviewing field {currentIndex + 1} of {fields.length} • {selectedCount} selected to apply
+                {showSummary
+                  ? `${changesToApply.length} field${changesToApply.length !== 1 ? 's' : ''} will be updated`
+                  : `Reviewing field ${currentIndex + 1} of ${fields.length} • ${selectedCount} selected to apply`}
               </p>
             </div>
           </div>
@@ -197,34 +208,89 @@ export default function AIExtractConfirmDialog({ isOpen, onClose, onConfirm, ext
           </button>
         </div>
 
-        {/* Progress Bar */}
-        <div className="h-1 bg-gray-100 dark:bg-gray-800 flex-shrink-0">
-          <div
-            className="h-full bg-purple-500 transition-all duration-300"
-            style={{ width: `${((currentIndex + 1) / fields.length) * 100}%` }}
-          />
-        </div>
-
-        {/* Split Pane: Document | Field Review */}
-        <div className="flex-1 flex flex-col md:flex-row overflow-hidden min-h-0">
-          {/* Document Preview */}
-          <div className="md:w-1/2 h-52 md:h-full border-b md:border-b-0 md:border-r border-gray-200 dark:border-gray-800 flex flex-col min-h-0">
-            <div className="px-3 py-2 bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700 flex items-center gap-2 flex-shrink-0">
-              <FileText className="w-3.5 h-3.5 text-gray-400" />
-              <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Source Document</span>
-            </div>
-            <div className="flex-1 min-h-0">
-              <DocumentPreview fileUrl={fileUrl} />
-            </div>
+        {/* Progress Bar (hidden on summary) */}
+        {!showSummary && (
+          <div className="h-1 bg-gray-100 dark:bg-gray-800 flex-shrink-0">
+            <div
+              className="h-full bg-purple-500 transition-all duration-300"
+              style={{ width: `${((currentIndex + 1) / fields.length) * 100}%` }}
+            />
           </div>
+        )}
 
-          {/* Field Review */}
-          <div className="md:w-1/2 flex-1 overflow-y-auto p-5">
-            {currentKey && (
-              <div className="flex flex-col h-full">
-                {/* Field Name & Toggle */}
-                <div className="flex items-start justify-between gap-3 mb-4">
-                  <div className="min-w-0">
+        {showSummary ? (
+          /* ══ Summary Screen ══ */
+          <div className="flex-1 overflow-y-auto p-5">
+            {changesToApply.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-full text-center">
+                <Check className="w-12 h-12 text-green-500 mb-3" />
+                <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">No changes to apply</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  All AI-extracted values match the existing data.
+                </p>
+              </div>
+            ) : (
+              <>
+                <div className="flex items-center gap-2 mb-4 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg">
+                  <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0" />
+                  <p className="text-sm text-amber-700 dark:text-amber-400 font-medium">
+                    Please review all changes below before applying. This will overwrite existing data.
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  {changesToApply.map(([key, value]) => {
+                    const { hasExisting, existingValue } = compareValues(key, value);
+                    return (
+                      <div key={key} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">
+                            {formatFieldName(key)}
+                          </p>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            {hasExisting ? (
+                              <>
+                                <span className="text-sm text-gray-500 dark:text-gray-400 break-words">
+                                  {formatValue(existingValue)}
+                                </span>
+                                <ArrowRight className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
+                                <span className="text-sm font-semibold text-purple-700 dark:text-purple-300 break-words">
+                                  {formatValue(value)}
+                                </span>
+                              </>
+                            ) : (
+                              <span className="text-sm font-semibold text-green-700 dark:text-green-400 break-words">
+                                ✨ {formatValue(value)}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
+            )}
+          </div>
+        ) : (
+          /* ══ Split Pane: Document | Field Review ══ */
+          <div className="flex-1 flex flex-col md:flex-row overflow-hidden min-h-0">
+            {/* Document Preview with Highlighting */}
+            <div className="md:w-1/2 h-52 md:h-full border-b md:border-b-0 md:border-r border-gray-200 dark:border-gray-800 flex flex-col min-h-0">
+              <div className="px-3 py-2 bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700 flex items-center gap-2 flex-shrink-0">
+                <FileText className="w-3.5 h-3.5 text-gray-400" />
+                <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Source Document</span>
+              </div>
+              <div className="flex-1 min-h-0">
+                <HighlightableDocumentViewer fileUrl={fileUrl} highlightText={formatValue(currentValue)} />
+              </div>
+            </div>
+
+            {/* Field Review */}
+            <div className="md:w-1/2 flex-1 overflow-y-auto p-5">
+              {currentKey && (
+                <div className="flex flex-col h-full">
+                  {/* Field Name */}
+                  <div className="mb-4">
                     <p className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-1">
                       Field {currentIndex + 1} of {fields.length}
                     </p>
@@ -238,139 +304,199 @@ export default function AIExtractConfirmDialog({ isOpen, onClose, onConfirm, ext
                       </span>
                     )}
                   </div>
-                  <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                    <label className="flex items-center gap-2 cursor-pointer select-none">
-                      <Switch
-                        checked={isFieldSelected(currentKey)}
-                        onCheckedChange={() => toggleField(currentKey)}
-                        disabled={isLocked}
-                      />
-                      <span className={`text-sm font-medium whitespace-nowrap ${
-                        isLocked
-                          ? 'text-blue-600 dark:text-blue-400'
-                          : isFieldSelected(currentKey)
-                            ? 'text-purple-700 dark:text-purple-300'
-                            : 'text-gray-500 dark:text-gray-400'
-                      }`}>
-                        {isLocked ? 'Locked' : isFieldSelected(currentKey) ? 'Will apply' : 'Skip'}
-                      </span>
-                    </label>
-                    {!isLocked && (
-                      <span className="text-[10px] text-gray-400 dark:text-gray-500">Click toggle to change</span>
-                    )}
-                  </div>
-                </div>
 
-                {/* AI Extracted Value */}
-                <div className="mb-4">
-                  <p className="text-xs font-semibold text-purple-600 dark:text-purple-400 mb-1.5 flex items-center gap-1">
-                    <Sparkles className="w-3 h-3" /> AI Extracted
-                  </p>
-                  <div className="bg-purple-50 dark:bg-purple-900/20 border-2 border-purple-200 dark:border-purple-700 rounded-lg p-3">
-                    <p className="text-sm font-semibold text-purple-900 dark:text-purple-100 break-words">
-                      {formatValue(currentValue)}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Source Snippet — where in the document this value came from */}
-                {sourceSnippets[currentKey] ? (
-                  <div className="mb-4">
-                    <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 flex items-center gap-1">
-                      <FileText className="w-3 h-3" /> Found in Document
-                    </p>
-                    <div className="bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                      {renderHighlightedSnippet(sourceSnippets[currentKey], currentValue)}
-                    </div>
-                  </div>
-                ) : isFetchingSnippets && (
-                  <div className="mb-4">
-                    <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 mb-1.5 flex items-center gap-1">
-                      <Loader2 className="w-3 h-3 animate-spin" /> Searching document for source...
-                    </p>
-                  </div>
-                )}
-
-                {/* Existing Value Comparison */}
-                {hasExisting && (
-                  <div className="mb-4">
-                    {valuesMatch ? (
-                      <div className="flex items-center gap-2 text-sm">
-                        <Check className="w-4 h-4 text-green-600 dark:text-green-400 flex-shrink-0" />
-                        <span className="text-green-700 dark:text-green-400 font-medium">
-                          Values match — no change needed
-                        </span>
+                  {/* Source Snippet */}
+                  {sourceSnippets[currentKey] ? (
+                    <div className="mb-4">
+                      <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 flex items-center gap-1">
+                        <FileText className="w-3 h-3" /> Found in Document
+                      </p>
+                      <div className="bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                        {renderHighlightedSnippet(sourceSnippets[currentKey], currentValue)}
                       </div>
-                    ) : (
-                      <div>
-                        <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">Current Value</p>
-                        <div className="flex items-center gap-2">
-                          <div className="flex-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700">
-                            <p className="text-sm text-gray-600 dark:text-gray-400 line-through break-words">
-                              {formatValue(existingValue)}
-                            </p>
+                    </div>
+                  ) : isFetchingSnippets && (
+                    <div className="mb-4">
+                      <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 mb-1.5 flex items-center gap-1">
+                        <Loader2 className="w-3 h-3 animate-spin" /> Searching document for source...
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Locked field display */}
+                  {isLocked ? (
+                    <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-200 dark:border-blue-700 rounded-lg">
+                      <p className="text-xs font-semibold text-blue-600 dark:text-blue-400 mb-1 flex items-center gap-1">
+                        <LinkIcon className="w-3 h-3" /> From linked {linkedEntity}
+                      </p>
+                      <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 break-words">
+                        {formatValue(currentValue)}
+                      </p>
+                    </div>
+                  ) : valuesMatch ? (
+                    /* Values match — no choice needed */
+                    <div className="mb-4 flex items-center gap-2 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg">
+                      <Check className="w-4 h-4 text-green-600 dark:text-green-400 flex-shrink-0" />
+                      <span className="text-sm text-green-700 dark:text-green-400 font-medium">
+                        Values match — no change needed
+                      </span>
+                    </div>
+                  ) : (
+                    /* Choose what to save — two explicit cards */
+                    <div className="mb-4">
+                      <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2">Choose what to save:</p>
+                      <div className="space-y-2">
+                        {/* Use AI value */}
+                        <button
+                          onClick={() => selectField(currentKey, true)}
+                          className={`w-full text-left rounded-lg border-2 p-3 transition-all ${
+                            isFieldSelected(currentKey)
+                              ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
+                              : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                          } cursor-pointer`}
+                        >
+                          <div className="flex items-start gap-2.5">
+                            <div className={`w-4 h-4 rounded-full border-2 flex-shrink-0 mt-0.5 flex items-center justify-center ${
+                              isFieldSelected(currentKey)
+                                ? 'border-purple-500 bg-purple-500'
+                                : 'border-gray-300 dark:border-gray-600'
+                            }`}>
+                              {isFieldSelected(currentKey) && <Check className="w-2.5 h-2.5 text-white" />}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs font-semibold text-purple-600 dark:text-purple-400 flex items-center gap-1">
+                                <Sparkles className="w-3 h-3" /> Use AI value
+                              </p>
+                              <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 break-words mt-0.5">
+                                {formatValue(currentValue)}
+                              </p>
+                            </div>
                           </div>
-                          <ArrowRight className="w-4 h-4 text-purple-500 flex-shrink-0" />
-                        </div>
-                        {!isLocked && isFieldSelected(currentKey) && (
-                          <p className="text-xs text-amber-600 dark:text-amber-400 mt-1.5 font-medium">
-                            ⚠️ Will overwrite existing data
-                          </p>
+                        </button>
+
+                        {/* Keep existing or Skip */}
+                        {hasExisting ? (
+                          <button
+                            onClick={() => selectField(currentKey, false)}
+                            className={`w-full text-left rounded-lg border-2 p-3 transition-all ${
+                              !isFieldSelected(currentKey)
+                                ? 'border-gray-400 dark:border-gray-600 bg-gray-50 dark:bg-gray-800/50'
+                                : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                            } cursor-pointer`}
+                          >
+                            <div className="flex items-start gap-2.5">
+                              <div className={`w-4 h-4 rounded-full border-2 flex-shrink-0 mt-0.5 flex items-center justify-center ${
+                                !isFieldSelected(currentKey)
+                                  ? 'border-gray-500 bg-gray-500'
+                                  : 'border-gray-300 dark:border-gray-600'
+                              }`}>
+                                {!isFieldSelected(currentKey) && <Check className="w-2.5 h-2.5 text-white" />}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-xs font-semibold text-gray-500 dark:text-gray-400">
+                                  Keep existing value
+                                </p>
+                                <p className="text-sm font-medium text-gray-700 dark:text-gray-300 break-words mt-0.5">
+                                  {formatValue(existingValue)}
+                                </p>
+                              </div>
+                            </div>
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => selectField(currentKey, false)}
+                            className={`w-full text-left rounded-lg border-2 p-3 transition-all ${
+                              !isFieldSelected(currentKey)
+                                ? 'border-gray-400 dark:border-gray-600 bg-gray-50 dark:bg-gray-800/50'
+                                : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                            } cursor-pointer`}
+                          >
+                            <div className="flex items-start gap-2.5">
+                              <div className={`w-4 h-4 rounded-full border-2 flex-shrink-0 mt-0.5 flex items-center justify-center ${
+                                !isFieldSelected(currentKey)
+                                  ? 'border-gray-500 bg-gray-500'
+                                  : 'border-gray-300 dark:border-gray-600'
+                              }`}>
+                                {!isFieldSelected(currentKey) && <Check className="w-2.5 h-2.5 text-white" />}
+                              </div>
+                              <div>
+                                <p className="text-xs font-semibold text-gray-500 dark:text-gray-400">Skip this field</p>
+                                <p className="text-xs text-gray-400 dark:text-gray-500">Don't save anything</p>
+                              </div>
+                            </div>
+                          </button>
                         )}
                       </div>
-                    )}
-                  </div>
-                )}
+                    </div>
+                  )}
 
-                {!hasExisting && !isLocked && isFieldSelected(currentKey) && (
-                  <div className="mb-4">
+                  {/* Warning */}
+                  {!isLocked && isFieldSelected(currentKey) && hasExisting && !valuesMatch && (
+                    <p className="text-xs text-amber-600 dark:text-amber-400 font-medium flex items-center gap-1">
+                      <AlertTriangle className="w-3 h-3" /> Will overwrite existing data
+                    </p>
+                  )}
+                  {!isLocked && isFieldSelected(currentKey) && !hasExisting && (
                     <p className="text-xs text-green-700 dark:text-green-400 font-semibold flex items-center gap-1">
                       ✨ New data — will be added
                     </p>
-                  </div>
-                )}
-              </div>
-            )}
+                  )}
+                </div>
+              )}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Footer Navigation */}
         <div className="flex items-center justify-between px-5 py-3 border-t border-gray-200 dark:border-gray-800 flex-shrink-0 gap-3">
           <Button
             variant="outline"
             onClick={goBack}
-            disabled={currentIndex === 0}
+            disabled={!showSummary && currentIndex === 0}
             className="gap-1.5 flex-shrink-0"
           >
             <ArrowLeft className="w-4 h-4" />
             <span className="hidden sm:inline">Back</span>
           </Button>
 
-          {/* Field dots — quick navigation */}
-          <div className="flex items-center gap-1 overflow-x-auto max-w-[40%]">
-            {fields.map(([key], idx) => (
-              <button
-                key={key}
-                onClick={() => setCurrentIndex(idx)}
-                className={`w-2 h-2 rounded-full flex-shrink-0 transition-all ${
-                  idx === currentIndex
-                    ? 'bg-purple-600 w-4'
-                    : isFieldSelected(key)
-                      ? 'bg-purple-300 dark:bg-purple-700'
-                      : 'bg-gray-300 dark:bg-gray-600'
-                }`}
-                title={formatFieldName(key)}
-              />
-            ))}
-          </div>
+          {!showSummary && (
+            <div className="flex items-center gap-1 overflow-x-auto max-w-[40%]">
+              {fields.map(([key], idx) => (
+                <button
+                  key={key}
+                  onClick={() => setCurrentIndex(idx)}
+                  className={`w-2 h-2 rounded-full flex-shrink-0 transition-all ${
+                    idx === currentIndex
+                      ? 'bg-purple-600 w-4'
+                      : isFieldSelected(key)
+                        ? 'bg-purple-300 dark:bg-purple-700'
+                        : 'bg-gray-300 dark:bg-gray-600'
+                  }`}
+                  title={formatFieldName(key)}
+                />
+              ))}
+            </div>
+          )}
 
-          <Button
-            onClick={goNext}
-            className="bg-purple-600 hover:bg-purple-700 text-white gap-1.5 flex-shrink-0"
-          >
-            {isLastField ? `Apply (${selectedCount})` : <span className="hidden sm:inline">Next</span>}
-            {isLastField ? <Check className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
-          </Button>
+          {showSummary ? (
+            <Button
+              onClick={handleConfirm}
+              disabled={changesToApply.length === 0}
+              className="bg-purple-600 hover:bg-purple-700 text-white gap-1.5 flex-shrink-0"
+            >
+              <span className="hidden sm:inline">Confirm & Apply</span>
+              {changesToApply.length > 0 && ` (${changesToApply.length})`}
+              <Check className="w-4 h-4" />
+            </Button>
+          ) : (
+            <Button
+              onClick={goNext}
+              className="bg-purple-600 hover:bg-purple-700 text-white gap-1.5 flex-shrink-0"
+            >
+              {isLastField ? <span className="hidden sm:inline">Review Changes</span> : <span className="hidden sm:inline">Next</span>}
+              {isLastField ? <Check className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
+            </Button>
+          )}
         </div>
       </div>
     </div>
