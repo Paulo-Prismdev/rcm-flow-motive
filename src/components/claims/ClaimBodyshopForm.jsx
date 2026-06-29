@@ -71,7 +71,11 @@ export default function ClaimBodyshopForm({ claim, onSave, onCancel }) {
     };
 
     const handleSave = () => {
-        onSave(formData);
+        const sanitized = { ...formData };
+        if (sanitized.referral_fee_repairer !== undefined && sanitized.referral_fee_repairer !== '' && sanitized.referral_fee_repairer !== null) {
+            sanitized.referral_fee_repairer = parseFloat(sanitized.referral_fee_repairer);
+        }
+        onSave(sanitized);
     };
 
     return (
@@ -168,25 +172,25 @@ export default function ClaimBodyshopForm({ claim, onSave, onCancel }) {
                                 placeholder="Auto-filled from selection"
                             />
                         </div>
-                        <div>
-                            <label className="text-sm text-gray-500 mb-2 block">Repairer Referral Fee (%)</label>
-                            <Input
-                                type="number"
-                                step="0.01"
-                                value={formData.referral_fee_repairer ?? ''}
-                                onChange={e => handleChange('referral_fee_repairer', e.target.value)}
-                                className="neomorph-inset"
-                                placeholder="e.g. 20"
-                            />
-                        </div>
                     </div>
                 )}
 
+                {/* Referral Fee — always editable */}
+                <div className="pt-2 border-t border-border">
+                    <label className="text-sm text-gray-500 mb-2 block">Repairer Referral Fee (%)</label>
+                    <Input
+                        type="number"
+                        step="0.01"
+                        value={formData.referral_fee_repairer ?? ''}
+                        onChange={e => handleChange('referral_fee_repairer', e.target.value)}
+                        className="neomorph-inset"
+                        placeholder="e.g. 20"
+                    />
+                </div>
+
                 <div className="flex justify-end gap-3 pt-4">
                     <Button onClick={onCancel} variant="outline">Cancel</Button>
-                    {formData.bodyshop_id && (
-                        <Button onClick={handleSave} className="bg-primary text-primary-foreground">Save Changes</Button>
-                    )}
+                    <Button onClick={handleSave} className="bg-primary text-primary-foreground">Save Changes</Button>
                 </div>
             </div>
         </>
