@@ -89,7 +89,7 @@ export default function ClaimDetailMobileHeader({
 
         <div className="flex-1 min-w-0">
           <p className="font-bold text-sm truncate">
-            {formatUKRegistration(claim.reg) || 'Claim Details'}
+            {claim.reg || 'Claim Details'}
           </p>
           {claim.job_number && (
             <p className="text-xs text-yellow-700 dark:text-yellow-400 font-mono font-semibold truncate">
