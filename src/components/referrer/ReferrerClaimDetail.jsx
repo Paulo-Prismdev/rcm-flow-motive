@@ -143,6 +143,13 @@ export default function ReferrerClaimDetail({ claim, onClose, initialSection }) 
   const [clientRefValue, setClientRefValue] = useState(claim.client_ref || '');
   const queryClient = useQueryClient();
 
+  const { data: linkedClient } = useQuery({
+    queryKey: ['client', claim.client_id],
+    queryFn: () => base44.entities.Client.get(claim.client_id),
+    enabled: !!claim.client_id && (!claim.client_phone || !claim.client_email),
+    staleTime: 5 * 60 * 1000,
+  });
+
   const saveClientRefMutation = useMutation({
     mutationFn: (value) => base44.entities.Claim.update(claim.id, { client_ref: value }),
     onSuccess: () => {
@@ -231,8 +238,8 @@ export default function ReferrerClaimDetail({ claim, onClose, initialSection }) 
             <div className="flex items-center gap-3 mb-4"><User className="w-5 h-5 text-gold" /><h3 className="font-bold">Client Details</h3></div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
               <DetailRow label="Client Name" value={claim.client_name} missing={m('client_name')} />
-              <DetailRow label="Client Phone" value={claim.client_phone} missing={m('client_phone')} />
-              <DetailRow label="Client Email" value={claim.client_email} missing={m('client_email')} />
+              <DetailRow label="Client Phone" value={claim.client_phone || linkedClient?.company_contact_phone || linkedClient?.phone} missing={!claim.client_phone && !linkedClient?.company_contact_phone && !linkedClient?.phone} />
+              <DetailRow label="Client Email" value={claim.client_email || linkedClient?.company_contact_email || linkedClient?.email} missing={!claim.client_email && !linkedClient?.company_contact_email && !linkedClient?.email} />
               <DetailRow label="VAT Status" value={claim.client_vat_status} />
               <DetailRow label="Business Division" value={claim.business_division} />
               {/* Client Ref — inline editable */}
