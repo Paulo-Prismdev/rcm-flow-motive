@@ -1309,6 +1309,9 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
             onClose={handleClose}
             onUpdates={() => setIsClaimUpdatesOpen(true)}
             onUpdateTracking={() => setIsUpdateTrackingOpen(true)}
+            updatesCount={claimUpdates.length}
+            imagesCount={claim.image_urls?.length || 0}
+            docsCount={claim.file_urls?.length || 0}
             onAction={(val) => {
               if (val.startsWith('section:')) { setSelectedSection(val.replace('section:', '')); return; }
               if (val === 'notes') setIsNotesOpen(true);
@@ -1349,20 +1352,40 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                       </div>
                       <div className="flex items-center gap-1.5 flex-shrink-0">
                         {canEdit && (
-                          <Button onClick={() => setIsClaimUpdatesOpen(true)} className="h-9 px-4 text-sm font-medium rounded-lg bg-green-600 hover:bg-green-700 text-white">
+                          <Button onClick={() => setIsClaimUpdatesOpen(true)} className="h-9 px-4 text-sm font-medium rounded-lg bg-green-600 hover:bg-green-700 text-white relative">
                             Updates & Status
+                            {claimUpdates.length > 0 && (
+                              <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-white text-green-700 text-[10px] font-bold flex items-center justify-center leading-none shadow">
+                                {claimUpdates.length}
+                              </span>
+                            )}
                           </Button>
                         )}
                         {!canEdit && (
-                          <Button onClick={() => setIsClaimUpdatesOpen(true)} variant="outline" className="h-9 px-4 text-sm font-medium rounded-lg">
+                          <Button onClick={() => setIsClaimUpdatesOpen(true)} variant="outline" className="h-9 px-4 text-sm font-medium rounded-lg relative">
                             Updates
+                            {claimUpdates.length > 0 && (
+                              <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-green-600 text-white text-[10px] font-bold flex items-center justify-center leading-none shadow">
+                                {claimUpdates.length}
+                              </span>
+                            )}
                           </Button>
                         )}
-                        <Button onClick={() => setIsImagesOpen(true)} variant="outline" className="h-9 px-3 text-sm font-medium rounded-lg gap-1.5">
+                        <Button onClick={() => setIsImagesOpen(true)} variant="outline" className="h-9 px-3 text-sm font-medium rounded-lg gap-1.5 relative">
                           <Image className="w-4 h-4" /> Images
+                          {(claim.image_urls?.length > 0) && (
+                            <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-blue-500 text-white text-[10px] font-bold flex items-center justify-center leading-none shadow">
+                              {claim.image_urls.length}
+                            </span>
+                          )}
                         </Button>
-                        <Button onClick={() => setIsAttachmentsOpen(true)} variant="outline" className="h-9 px-3 text-sm font-medium rounded-lg gap-1.5">
+                        <Button onClick={() => setIsAttachmentsOpen(true)} variant="outline" className="h-9 px-3 text-sm font-medium rounded-lg gap-1.5 relative">
                           <FileText className="w-4 h-4" /> Docs
+                          {(claim.file_urls?.length > 0) && (
+                            <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-blue-500 text-white text-[10px] font-bold flex items-center justify-center leading-none shadow">
+                              {claim.file_urls.length}
+                            </span>
+                          )}
                         </Button>
                         {canEdit && (
                           <DropdownMenu>

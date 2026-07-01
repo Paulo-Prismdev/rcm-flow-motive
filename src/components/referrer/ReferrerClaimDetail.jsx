@@ -523,15 +523,30 @@ export default function ReferrerClaimDetail({ claim, onClose, initialSection }) 
           <div className="flex items-center gap-2">
             <Button 
               onClick={() => setIsClaimUpdatesOpen(true)} 
-              className="h-9 px-4 text-sm font-medium rounded-lg bg-green-600 hover:bg-green-700 text-white"
+              className="h-9 px-4 text-sm font-medium rounded-lg bg-green-600 hover:bg-green-700 text-white relative"
             >
               Updates & Status
+              {claimUpdates.length > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-white text-green-700 text-[10px] font-bold flex items-center justify-center leading-none shadow">
+                  {claimUpdates.length}
+                </span>
+              )}
             </Button>
-            <Button onClick={() => setSelectedSection('images')} variant="outline" className="h-9 px-3 text-sm font-medium rounded-lg gap-1.5">
+            <Button onClick={() => setSelectedSection('images')} variant="outline" className="h-9 px-3 text-sm font-medium rounded-lg gap-1.5 relative">
               <Image className="w-4 h-4" /> Images
+              {images.length > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-blue-500 text-white text-[10px] font-bold flex items-center justify-center leading-none shadow">
+                  {images.length}
+                </span>
+              )}
             </Button>
-            <Button onClick={() => setSelectedSection('documents')} variant="outline" className="h-9 px-3 text-sm font-medium rounded-lg gap-1.5">
+            <Button onClick={() => setSelectedSection('documents')} variant="outline" className="h-9 px-3 text-sm font-medium rounded-lg gap-1.5 relative">
               <FileText className="w-4 h-4" /> Docs
+              {documents.length > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-blue-500 text-white text-[10px] font-bold flex items-center justify-center leading-none shadow">
+                  {documents.length}
+                </span>
+              )}
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

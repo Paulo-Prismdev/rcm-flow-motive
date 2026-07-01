@@ -68,6 +68,9 @@ export default function ClaimDetailMobileHeader({
   onChangeStatus,
   onUpdateTracking,
   onAction,
+  updatesCount = 0,
+  imagesCount = 0,
+  docsCount = 0,
 }) {
   const currentSection = SECTIONS.find(s => s.value === claim._selectedSection) || SECTIONS[0];
 
@@ -115,14 +118,29 @@ export default function ClaimDetailMobileHeader({
 
       {/* Row 3: Updates & Status + Images + Docs + More dropdown */}
       <div className="flex items-center gap-2 px-3 pb-3 pt-1 flex-wrap">
-        <Button onClick={onUpdates} className="h-9 px-3 text-sm font-medium rounded-lg bg-green-600 hover:bg-green-700 text-white flex-shrink-0">
+        <Button onClick={onUpdates} className="h-9 px-3 text-sm font-medium rounded-lg bg-green-600 hover:bg-green-700 text-white flex-shrink-0 relative">
           Updates & Status
+          {updatesCount > 0 && (
+            <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-white text-green-700 text-[10px] font-bold flex items-center justify-center leading-none shadow">
+              {updatesCount}
+            </span>
+          )}
         </Button>
-        <Button onClick={() => onAction('images')} variant="outline" className="h-9 px-3 text-sm font-medium rounded-lg gap-1.5 flex-shrink-0">
+        <Button onClick={() => onAction('images')} variant="outline" className="h-9 px-3 text-sm font-medium rounded-lg gap-1.5 flex-shrink-0 relative">
           <Image className="w-4 h-4" /> Images
+          {imagesCount > 0 && (
+            <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-blue-500 text-white text-[10px] font-bold flex items-center justify-center leading-none shadow">
+              {imagesCount}
+            </span>
+          )}
         </Button>
-        <Button onClick={() => onAction('docs')} variant="outline" className="h-9 px-3 text-sm font-medium rounded-lg gap-1.5 flex-shrink-0">
+        <Button onClick={() => onAction('docs')} variant="outline" className="h-9 px-3 text-sm font-medium rounded-lg gap-1.5 flex-shrink-0 relative">
           <FileText className="w-4 h-4" /> Docs
+          {docsCount > 0 && (
+            <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-blue-500 text-white text-[10px] font-bold flex items-center justify-center leading-none shadow">
+              {docsCount}
+            </span>
+          )}
         </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
