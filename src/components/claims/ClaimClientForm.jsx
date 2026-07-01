@@ -23,16 +23,18 @@ export default function ClaimClientForm({ claim, onSave, onCancel }) {
     // To ensure a functional and valid file, we are omitting `client_lat` and `client_lng`
     // from the update until geocoding logic is explicitly provided.
     // The `client_id` field has been added as requested.
+    // For Company clients, phone/email may be stored on company_contact_* fields
     const newClientData = {
       client_name: client.name,
-      client_id: client.id, // Added client_id as per outline
-      client_phone: client.phone || '',
-      client_email: client.email || '',
+      client_id: client.id,
+      client_phone: client.phone || client.company_contact_phone || '',
+      client_email: client.email || client.company_contact_email || '',
       client_address_line_1: client.address_line_1 || '',
       client_address_line_2: client.address_line_2 || '',
       client_town: client.town || '',
       client_county: client.county || '',
       client_postcode: client.postcode || '',
+      client_vat_status: client.vat_status || formData.client_vat_status || 'Unknown',
     };
 
     setFormData(prev => ({
