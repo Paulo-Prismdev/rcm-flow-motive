@@ -7,9 +7,9 @@ import { base44 } from '@/api/base44Client';
 export default function ClaimClientForm({ claim, onSave, onCancel }) {
   const [formData, setFormData] = useState(claim || {});
 
-  // On mount, if phone/email are blank, fetch from Client entity (by id or name fallback)
+  // On mount, fetch from Client entity to fill in any missing contact details
   useEffect(() => {
-    if (!claim.client_phone || !claim.client_email) {
+    if (true) {
       const fetchClient = async () => {
         let client = null;
         if (claim?.client_id) {
