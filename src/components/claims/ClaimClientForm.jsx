@@ -7,10 +7,17 @@ import { base44 } from '@/api/base44Client';
 export default function ClaimClientForm({ claim, onSave, onCancel }) {
   const [formData, setFormData] = useState(claim || {});
 
-  // On mount, if phone/email are blank but client_id exists, fetch from Client entity
+  // On mount, if phone/email are blank, fetch from Client entity (by id or name fallback)
   useEffect(() => {
-    if (claim?.client_id && (!claim.client_phone || !claim.client_email)) {
-      base44.entities.Client.get(claim.client_id).then(client => {
+    if (!claim.client_phone || !claim.client_email) {
+      const fetchClient = async () => {
+        let client = null;
+        if (claim?.client_id) {
+          client = await base44.entities.Client.get(claim.client_id).catch(() => null);
+        } else if (claim?.client_name) {
+          const results = await base44.entities.Client.filter({ name: claim.client_name }).catch(() => []);
+          client = results?.[0] || null;
+        }
         if (client) {
           setFormData(prev => ({
             ...prev,
@@ -18,7 +25,8 @@ export default function ClaimClientForm({ claim, onSave, onCancel }) {
             client_email: prev.client_email || client.company_contact_email || client.email || '',
           }));
         }
-      }).catch(() => {});
+      };
+      fetchClient();
     }
   }, []);
 

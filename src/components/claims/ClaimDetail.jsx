@@ -303,9 +303,17 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
   });
 
   const { data: linkedClient } = useQuery({
-    queryKey: ['client', claim.client_id],
-    queryFn: () => base44.entities.Client.get(claim.client_id),
-    enabled: !!claim.client_id,
+    queryKey: ['client', claim.client_id || claim.client_name],
+    queryFn: async () => {
+      if (claim.client_id) return base44.entities.Client.get(claim.client_id);
+      // Fallback: search by name for older claims without client_id
+      if (claim.client_name) {
+        const results = await base44.entities.Client.filter({ name: claim.client_name });
+        return results?.[0] || null;
+      }
+      return null;
+    },
+    enabled: !!(claim.client_id || (claim.client_name && (!claim.client_phone || !claim.client_email))),
     staleTime: 5 * 60 * 1000,
   });
 
