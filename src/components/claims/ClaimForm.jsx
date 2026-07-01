@@ -504,7 +504,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
             <select value={formData.claim_type} onChange={e => handleChange('claim_type', e.target.value)}
               className="w-full px-3 py-2 text-sm rounded-[10px] border border-input bg-card text-foreground">
               <option value="">Select claim type...</option>
-              <option>Fault Claim</option><option>3rd Party Direct</option><option>Credit Repair</option><option>Glass Claim</option>
+              <option>Fault Claim</option><option>3rd Party Direct</option><option>Credit Repair</option><option>Glass Claim</option><option>Paying Privately</option>
             </select>
           </div>
           <div className="space-y-2"><label className="text-sm font-medium">Date of Loss</label><Input type="date" value={formData.loss_date} onChange={e => handleChange('loss_date', e.target.value)} /></div>

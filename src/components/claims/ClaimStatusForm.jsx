@@ -72,6 +72,7 @@ export default function ClaimStatusForm({ claim, onSave, onCancel }) {
                         <option value="Non-Fault Claim">Non-Fault Claim</option>
                         <option value="Total Loss">Total Loss</option>
                         <option value="Glass Claim">Glass Claim</option>
+                        <option value="Paying Privately">Paying Privately</option>
                     </select>
                 </div>
                 <div>

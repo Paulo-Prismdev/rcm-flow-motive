@@ -57,6 +57,7 @@ export default function ClaimStatusEditForm({ claim: editClaim, onSave, onCancel
               { value: '3rd Party Direct', label: '3rd Party Direct' },
               { value: 'Credit Repair', label: 'Credit Repair' },
               { value: 'Glass Claim', label: 'Glass Claim' },
+              { value: 'Paying Privately', label: 'Paying Privately' },
             ]}
             className="glass-inset w-full px-3 py-2 text-sm"
           />
