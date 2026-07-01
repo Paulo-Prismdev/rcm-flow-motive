@@ -302,6 +302,13 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
     queryFn: () => base44.auth.me(),
   });
 
+  const { data: linkedClient } = useQuery({
+    queryKey: ['client', claim.client_id],
+    queryFn: () => base44.entities.Client.get(claim.client_id),
+    enabled: !!claim.client_id,
+    staleTime: 5 * 60 * 1000,
+  });
+
   const { data: claimUpdates = [] } = useQuery({
     queryKey: ['claimUpdates', claim.id],
     queryFn: () => base44.entities.ClaimUpdate.filter({ claim_id: claim.id }, 'created_date', 500),
@@ -702,8 +709,8 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
               partyType="client"
               data={{
                 name: claim.client_name,
-                phone: claim.client_phone,
-                email: claim.client_email,
+                phone: claim.client_phone || linkedClient?.company_contact_phone || linkedClient?.phone,
+                email: claim.client_email || linkedClient?.company_contact_email || linkedClient?.email,
                 address_line_1: claim.client_address_line_1,
                 address_line_2: claim.client_address_line_2,
                 town: claim.client_town,
@@ -711,6 +718,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                 postcode: claim.client_postcode,
               }}
               extras={[
+                ...(linkedClient?.company_contact_name ? [{ label: 'Contact Name', value: linkedClient.company_contact_name, isEmpty: false }] : []),
                 { label: 'Client Ref', value: claim.client_ref, isEmpty: !claim.client_ref },
                 { label: 'Business Division', value: claim.business_division, isEmpty: !claim.business_division },
                 { label: 'VAT Status', value: claim.client_vat_status || 'Unknown', isEmpty: !claim.client_vat_status },
