@@ -233,8 +233,8 @@ export default function ReferrerClaimDetail({ claim, onClose, initialSection }) 
               <DetailRow label="Client Name" value={claim.client_name} missing={m('client_name')} />
               <DetailRow label="Client Phone" value={claim.client_phone} missing={m('client_phone')} />
               <DetailRow label="Client Email" value={claim.client_email} missing={m('client_email')} />
-              <DetailRow label="Business Division" value={claim.business_division} />
               <DetailRow label="VAT Status" value={claim.client_vat_status} />
+              <DetailRow label="Business Division" value={claim.business_division} />
               {/* Client Ref — inline editable */}
               <div className="py-3 px-4 rounded-lg hover:bg-surface-hover">
                 <div className="flex items-center justify-between mb-1">
