@@ -1,10 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import ClientCombobox from '../shared/ClientCombobox';
+import { base44 } from '@/api/base44Client';
 
 export default function ClaimClientForm({ claim, onSave, onCancel }) {
   const [formData, setFormData] = useState(claim || {});
+
+  // On mount, if phone/email are blank but client_id exists, fetch from Client entity
+  useEffect(() => {
+    if (claim?.client_id && (!claim.client_phone || !claim.client_email)) {
+      base44.entities.Client.get(claim.client_id).then(client => {
+        if (client) {
+          setFormData(prev => ({
+            ...prev,
+            client_phone: prev.client_phone || client.company_contact_phone || client.phone || '',
+            client_email: prev.client_email || client.company_contact_email || client.email || '',
+          }));
+        }
+      }).catch(() => {});
+    }
+  }, []);
 
   const isRequiredEmpty = (value) => {
     return value === null || value === undefined || value === '';
