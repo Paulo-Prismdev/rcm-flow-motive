@@ -176,6 +176,7 @@ export default function ClientPortal() {
     ecd: 'ECD',
     documents: 'Docs',
     vehicle_damage: 'Damage',
+    client_ref: 'Client Ref',
   };
 
   const renderFieldValue = (claim, fieldId) => {

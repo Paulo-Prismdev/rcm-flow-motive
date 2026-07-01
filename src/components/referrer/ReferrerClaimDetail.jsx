@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import {
   ArrowLeft,
   User,
@@ -21,7 +22,10 @@ import {
   ExternalLink,
   Send,
   Loader2,
-  Package
+  Package,
+  Edit,
+  Check,
+  X
 } from "lucide-react";
 import { format } from "date-fns";
 import StatusBadge from "../shared/StatusBadge";
@@ -135,7 +139,17 @@ export default function ReferrerClaimDetail({ claim, onClose, initialSection }) 
   const [lightboxUrl, setLightboxUrl] = useState(null);
   const [replyText, setReplyText] = useState('');
   const [isClaimUpdatesOpen, setIsClaimUpdatesOpen] = useState(false);
+  const [editingClientRef, setEditingClientRef] = useState(false);
+  const [clientRefValue, setClientRefValue] = useState(claim.client_ref || '');
   const queryClient = useQueryClient();
+
+  const saveClientRefMutation = useMutation({
+    mutationFn: (value) => base44.entities.Claim.update(claim.id, { client_ref: value }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['clientClaimsFn'] });
+      setEditingClientRef(false);
+    },
+  });
 
   // Always fetch updates so documents/images from updates are always included
   const { data: claimUpdates = [] } = useQuery({
@@ -221,7 +235,36 @@ export default function ReferrerClaimDetail({ claim, onClose, initialSection }) 
               <DetailRow label="Client Email" value={claim.client_email} missing={m('client_email')} />
               <DetailRow label="Business Division" value={claim.business_division} />
               <DetailRow label="VAT Status" value={claim.client_vat_status} />
-              <DetailRow label="Business Division" value={claim.business_division} />
+              {/* Client Ref — inline editable */}
+              <div className="py-3 px-4 rounded-lg hover:bg-surface-hover">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs font-semibold text-foreground-muted">Client Ref</span>
+                  {!editingClientRef && (
+                    <button onClick={() => { setClientRefValue(claim.client_ref || ''); setEditingClientRef(true); }} className="p-1 rounded text-gray-400 hover:text-primary transition-colors">
+                      <Edit className="w-3 h-3" />
+                    </button>
+                  )}
+                </div>
+                {editingClientRef ? (
+                  <div className="flex items-center gap-2 mt-1">
+                    <Input
+                      value={clientRefValue}
+                      onChange={e => setClientRefValue(e.target.value)}
+                      className="h-8 text-sm flex-1"
+                      placeholder="e.g. fleet ref, account number..."
+                      autoFocus
+                    />
+                    <button onClick={() => saveClientRefMutation.mutate(clientRefValue)} disabled={saveClientRefMutation.isPending} className="p-1.5 rounded bg-green-600 text-white hover:bg-green-700 transition-colors">
+                      <Check className="w-3.5 h-3.5" />
+                    </button>
+                    <button onClick={() => setEditingClientRef(false)} className="p-1.5 rounded bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 transition-colors">
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="text-sm font-medium">{claim.client_ref || <span className="text-muted-foreground italic text-xs">Not set — click edit to add</span>}</div>
+                )}
+              </div>
             </div>
             <div className={`mt-2 py-3 px-4 rounded-lg ${(m('client_address_line_1') || m('client_postcode')) ? 'bg-amber-50 dark:bg-amber-900/15 border border-amber-200 dark:border-amber-700/50' : 'glass-inset'}`}>
               <div className="flex items-center gap-1.5 mb-2">
