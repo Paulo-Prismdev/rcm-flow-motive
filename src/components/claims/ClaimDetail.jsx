@@ -709,34 +709,40 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
           </EditableSection>
         );
 
-      case 'client':
+      case 'client': {
+        const clientName = claim.client_name || linkedClient?.name;
+        const companyContactName = linkedClient?.company_contact_name;
+        const companyContactPhone = linkedClient?.company_contact_phone;
+        const companyContactEmail = linkedClient?.company_contact_email;
+        const clientPhone = claim.client_phone || linkedClient?.phone;
+        const clientEmail = claim.client_email || linkedClient?.email;
+        const vatStatus = claim.client_vat_status || linkedClient?.vat_status || 'Unknown';
         return (
           <EditableSection title="Billing Party — Client" icon={Users} claim={claim} onUpdate={handleUpdate} EditComponent={ClientEditComponent} canEdit={canEdit}>
-            <PartyDisplayCard
-              title="Billing Party — Client"
-              partyType="client"
-              data={{
-                name: claim.client_name,
-                phone: claim.client_phone || linkedClient?.company_contact_phone || linkedClient?.phone,
-                email: claim.client_email || linkedClient?.company_contact_email || linkedClient?.email,
-                address_line_1: claim.client_address_line_1,
-                address_line_2: claim.client_address_line_2,
-                town: claim.client_town,
-                county: claim.client_county,
-                postcode: claim.client_postcode,
-              }}
-              extras={[
-                ...(linkedClient?.company_contact_name ? [{ label: 'Contact Name', value: linkedClient.company_contact_name, isEmpty: false }] : []),
-                { label: 'Client Ref', value: claim.client_ref, isEmpty: !claim.client_ref },
-                { label: 'Business Division', value: claim.business_division, isEmpty: !claim.business_division },
-                { label: 'VAT Status', value: claim.client_vat_status || 'Unknown', isEmpty: !claim.client_vat_status },
-                { label: 'Driver', value: claim.driver_same_as_client === false ? claim.driver_contact_name || '—' : 'Same as client', isEmpty: false, meta: claim.driver_same_as_client === false ? 'Different person' : null },
-              ]}
-              canEdit={false}
-              bare={true}
-            />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+              <div className="py-2 px-3 rounded-[8px] hover:bg-muted/50"><div className="text-[11px] font-medium text-muted-foreground mb-0.5">Name</div><div className="text-sm font-medium">{clientName || '-'}</div></div>
+              {companyContactName && <div className="py-2 px-3 rounded-[8px] hover:bg-muted/50"><div className="text-[11px] font-medium text-muted-foreground mb-0.5">Company Contact Name</div><div className="text-sm font-medium">{companyContactName}</div></div>}
+              {companyContactPhone && <div className="py-2 px-3 rounded-[8px] hover:bg-muted/50"><div className="text-[11px] font-medium text-muted-foreground mb-0.5">Company Contact Phone</div><div className="text-sm font-medium">{companyContactPhone}</div></div>}
+              {companyContactEmail && <div className="py-2 px-3 rounded-[8px] hover:bg-muted/50"><div className="text-[11px] font-medium text-muted-foreground mb-0.5">Company Contact Email</div><div className="text-sm font-medium">{companyContactEmail}</div></div>}
+              <div className={`py-2 px-3 rounded-[8px] ${!clientPhone ? 'bg-amber-50 dark:bg-amber-900/20 border border-amber-300 dark:border-amber-700' : 'hover:bg-muted/50'}`}><div className="text-[11px] font-medium text-muted-foreground mb-0.5">Phone</div><div className={`text-sm font-medium ${!clientPhone ? 'text-amber-500' : ''}`}>{clientPhone || '-'}</div></div>
+              <div className={`py-2 px-3 rounded-[8px] ${!clientEmail ? 'bg-amber-50 dark:bg-amber-900/20 border border-amber-300 dark:border-amber-700' : 'hover:bg-muted/50'}`}><div className="text-[11px] font-medium text-muted-foreground mb-0.5">Email</div><div className={`text-sm font-medium ${!clientEmail ? 'text-amber-500' : ''}`}>{clientEmail || '-'}</div></div>
+              <div className="py-2 px-3 rounded-[8px] hover:bg-muted/50"><div className="text-[11px] font-medium text-muted-foreground mb-0.5">VAT Status</div><div className="text-sm font-medium">{vatStatus}</div></div>
+              { claim.client_ref && <div className="py-2 px-3 rounded-[8px] hover:bg-muted/50"><div className="text-[11px] font-medium text-muted-foreground mb-0.5">Client Ref</div><div className="text-sm font-medium">{claim.client_ref}</div></div>}
+              {claim.business_division && <div className="py-2 px-3 rounded-[8px] hover:bg-muted/50"><div className="text-[11px] font-medium text-muted-foreground mb-0.5">Business Division</div><div className="text-sm font-medium">{claim.business_division}</div></div>}
+            </div>
+            {(claim.client_address_line_1 || claim.client_town || claim.client_postcode) && (
+              <div className="mt-2 py-3 px-4 rounded-lg bg-muted/40">
+                <div className="text-xs font-semibold text-muted-foreground mb-2">Address</div>
+                <div className="text-sm leading-relaxed space-y-0.5">
+                  {claim.client_address_line_1 && <div>{claim.client_address_line_1}</div>}
+                  {claim.client_address_line_2 && <div>{claim.client_address_line_2}</div>}
+                  {(claim.client_town || claim.client_county || claim.client_postcode) && <div>{[claim.client_town, claim.client_county, claim.client_postcode].filter(Boolean).join(', ')}</div>}
+                </div>
+              </div>
+            )}
           </EditableSection>
         );
+      }
 
       case 'insurance':
         return (
