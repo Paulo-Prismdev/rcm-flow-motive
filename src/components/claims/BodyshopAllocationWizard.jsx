@@ -130,12 +130,31 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
 
   const missingFields = useMemo(() => {
     return REQUIRED_FIELDS.filter(field => {
-      const value = validationData[field.key];
       if (field.type === 'boolean') return false;
+      // For contact-specific fields, check the selected contact source instead
+      if (field.key === 'client_email') {
+        if (contactType === 'driver') {
+          const v = validationData.driver_contact_email || claim.driver_contact_email;
+          return !v;
+        }
+        if (contactType === 'custom') {
+          return !customContact.email;
+        }
+      }
+      if (field.key === 'client_phone') {
+        if (contactType === 'driver') {
+          const v = validationData.driver_contact_phone || claim.driver_contact_phone;
+          return !v;
+        }
+        if (contactType === 'custom') {
+          return !customContact.phone;
+        }
+      }
+      const value = validationData[field.key];
       if (value === null || value === undefined || value === '') return true;
       return false;
     });
-  }, [validationData]);
+  }, [validationData, contactType, customContact, claim]);
 
   const handleValidationChange = (key, value) => {
     setValidationData(prev => ({ ...prev, [key]: value }));
@@ -148,6 +167,14 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
       const dataToSave = { ...validationData };
       dataToSave.last_contact_source = contactType.charAt(0).toUpperCase() + contactType.slice(1);
       dataToSave.authorised_by = authorisedBy;
+      // Persist the effective contact phone/email so the PDF always has the right values
+      if (contactType === 'driver') {
+        dataToSave.client_email = validationData.driver_contact_email || claim.driver_contact_email || validationData.client_email || claim.client_email || '';
+        dataToSave.client_phone = validationData.driver_contact_phone || claim.driver_contact_phone || validationData.client_phone || claim.client_phone || '';
+      } else if (contactType === 'custom') {
+        dataToSave.client_email = customContact.email || validationData.client_email || '';
+        dataToSave.client_phone = customContact.phone || validationData.client_phone || '';
+      }
       await base44.entities.Claim.update(claim.id, dataToSave);
       queryClient.invalidateQueries({ queryKey: ['claims'] });
       queryClient.invalidateQueries({ queryKey: ['claim', claim.id] });

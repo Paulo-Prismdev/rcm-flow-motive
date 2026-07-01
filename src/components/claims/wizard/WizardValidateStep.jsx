@@ -8,6 +8,16 @@ export default function WizardValidateStep({
   authorisedBy, onContactTypeChange, onAuthorisedByChange, onCustomContactChange,
   onValidationChange, onSaveDefaults
 }) {
+  // Resolve the actual field key/value for contact-specific missing fields
+  const resolveField = (field) => {
+    if (field.key === 'client_email' && contactType === 'driver') {
+      return { ...field, key: 'driver_contact_email', label: 'Driver / Contact Email' };
+    }
+    if (field.key === 'client_phone' && contactType === 'driver') {
+      return { ...field, key: 'driver_contact_phone', label: 'Driver / Contact Phone' };
+    }
+    return field;
+  };
   const [showDriverFields, setShowDriverFields] = useState(false);
 
   useEffect(() => {
@@ -331,29 +341,32 @@ export default function WizardValidateStep({
             </div>
           </div>
           <div className="space-y-3 ml-8">
-            {missingFields.map(field => (
-              <div key={field.key}>
-                <label className="block text-xs font-medium text-amber-800 mb-1">{field.label} *</label>
-                {field.type === 'select' ? (
-                  <select
-                    value={validationData[field.key] || ''}
-                    onChange={(e) => onValidationChange(field.key, e.target.value)}
-                    className="w-full h-9 px-3 rounded-md border border-amber-300 bg-white text-sm"
-                  >
-                    <option value="">Select {field.label}...</option>
-                    {field.options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-                  </select>
-                ) : (
-                  <Input
-                    type={field.type === 'email' ? 'email' : 'text'}
-                    value={validationData[field.key] || ''}
-                    onChange={(e) => onValidationChange(field.key, e.target.value)}
-                    placeholder={`Enter ${field.label.toLowerCase()}...`}
-                    className="border-amber-300 bg-white"
-                  />
-                )}
-              </div>
-            ))}
+            {missingFields.map(rawField => {
+              const field = resolveField(rawField);
+              return (
+                <div key={field.key}>
+                  <label className="block text-xs font-medium text-amber-800 mb-1">{field.label} *</label>
+                  {field.type === 'select' ? (
+                    <select
+                      value={validationData[field.key] || ''}
+                      onChange={(e) => onValidationChange(field.key, e.target.value)}
+                      className="w-full h-9 px-3 rounded-md border border-amber-300 bg-white text-sm"
+                    >
+                      <option value="">Select {field.label}...</option>
+                      {field.options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                    </select>
+                  ) : (
+                    <Input
+                      type={field.type === 'email' ? 'email' : 'text'}
+                      value={validationData[field.key] || ''}
+                      onChange={(e) => onValidationChange(field.key, e.target.value)}
+                      placeholder={`Enter ${field.label.toLowerCase()}...`}
+                      className="border-amber-300 bg-white"
+                    />
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
