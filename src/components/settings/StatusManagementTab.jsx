@@ -203,21 +203,37 @@ export default function StatusManagementTab({ department }) {
     updateMutation.mutate({ id, data: editingData });
   };
 
+  const [optimisticOrder, setOptimisticOrder] = useState(null);
+
+  const bulkReorderMutation = useMutation({
+    mutationFn: (updates) => base44.entities[entityName].bulkUpdate(updates),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey });
+      setOptimisticOrder(null);
+    },
+    onError: () => {
+      setOptimisticOrder(null);
+    },
+  });
+
+  const displayStatuses = optimisticOrder || sortedStatuses;
+
   function handleDragEnd(result) {
     const { destination, source } = result;
     if (!destination || (destination.droppableId === source.droppableId && destination.index === source.index)) {
       return;
     }
 
-    const newOrder = Array.from(sortedStatuses);
+    const newOrder = Array.from(displayStatuses);
     const [reorderedItem] = newOrder.splice(source.index, 1);
     newOrder.splice(destination.index, 0, reorderedItem);
 
-    newOrder.forEach((status, index) => {
-      if (status.sort_order !== index) {
-        updateMutation.mutate({ id: status.id, data: { sort_order: index } });
-      }
-    });
+    // Optimistically update UI immediately
+    setOptimisticOrder(newOrder);
+
+    // Send a single bulk update
+    const updates = newOrder.map((status, index) => ({ id: status.id, sort_order: index }));
+    bulkReorderMutation.mutate(updates);
   }
 
   return (
@@ -276,7 +292,7 @@ export default function StatusManagementTab({ department }) {
             <Droppable droppableId="statuses">
               {(provided) => (
                 <div {...provided.droppableProps} ref={provided.innerRef}>
-                  {sortedStatuses.map((status, index) => (
+                  {displayStatuses.map((status, index) => (
                     <Draggable key={status.id} draggableId={status.id} index={index}>
                       {(provided, snapshot) => (
                         <StatusItem
