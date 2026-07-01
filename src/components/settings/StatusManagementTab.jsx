@@ -24,7 +24,7 @@ const colorOptions = [
   { name: "slate", bg: "#64748b", label: "Slate" },
 ];
 
-function StatusItem({ status, onUpdate, onDelete, onEditToggle, editingStatusId, editingData, setEditingData, provided, snapshot, isProtected }) {
+function StatusItem({ status, onUpdate, onDelete, onEditToggle, editingStatusId, editingData, setEditingData, provided, snapshot, isProtected, isInUse }) {
   const isEditing = editingStatusId === status.id;
   
   // Get the color object for display
@@ -85,6 +85,12 @@ function StatusItem({ status, onUpdate, onDelete, onEditToggle, editingStatusId,
                   <span>Default</span>
                 </div>
               )}
+              {isInUse && !isProtected && (
+                <div className="flex items-center gap-1 text-xs text-amber-600 dark:text-amber-400">
+                  <Lock className="w-3 h-3" />
+                  <span>In use</span>
+                </div>
+              )}
             </div>
           </>
         )}
@@ -106,7 +112,7 @@ function StatusItem({ status, onUpdate, onDelete, onEditToggle, editingStatusId,
                 <Edit className="w-4 h-4" />
               </Button>
             )}
-            {!isProtected && (
+            {!isProtected && !isInUse && (
               <Button size="icon" variant="ghost" onClick={() => onDelete(status.id)} className="text-red-500 hover:text-red-600">
                 <Trash2 className="w-4 h-4" />
               </Button>
@@ -132,6 +138,19 @@ export default function StatusManagementTab({ department }) {
     queryKey,
     queryFn: () => base44.entities[entityName].list('sort_order'),
   });
+
+  // Determine which entity/field to check for in-use statuses
+  const statusField = department === 'Claim' ? 'job_status' : 'status';
+  const recordEntityName = department === 'Claim' ? 'Claim' : department === 'Estimate' ? 'Estimate' : department === 'Engineering' ? 'Engineering' : department === 'Part' ? 'Part' : null;
+
+  const { data: liveRecords = [] } = useQuery({
+    queryKey: [recordEntityName, 'statusCheck'],
+    queryFn: () => base44.entities[recordEntityName].list(statusField, 5000),
+    enabled: !!recordEntityName,
+    staleTime: 60000,
+  });
+
+  const usedStatusNames = useMemo(() => new Set(liveRecords.map(r => r[statusField]).filter(Boolean)), [liveRecords, statusField]);
 
   // Check if "New" status exists
   const hasNewStatus = statuses.some(s => s.status_name === 'New');
@@ -243,7 +262,7 @@ export default function StatusManagementTab({ department }) {
         <div className="flex items-start gap-2">
           <Lock className="w-4 h-4 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
           <div className="text-sm text-blue-800 dark:text-blue-200">
-            <strong>Note:</strong> Default statuses (marked with a lock icon) are fixed system statuses and cannot be edited or deleted.
+            <strong>Note:</strong> Default statuses (marked with a lock icon) are fixed system statuses and cannot be edited or deleted. Statuses currently in use on active records cannot be deleted.
           </div>
         </div>
       </div>
@@ -306,6 +325,7 @@ export default function StatusManagementTab({ department }) {
                           provided={provided}
                           snapshot={snapshot}
                           isProtected={status.is_default === true}
+                          isInUse={usedStatusNames.has(status.status_name)}
                         />
                       )}
                     </Draggable>
