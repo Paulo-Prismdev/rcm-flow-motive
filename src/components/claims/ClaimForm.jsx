@@ -290,8 +290,10 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
       try { const c = await geocodeAddress(fullAddress); if (c) { geocodedLat = c.lat; geocodedLng = c.lng; } } catch {}
     }
     setFormData(prev => ({
-      ...prev, client_name: client.name, client_id: client.id, client_phone: client.phone || '',
-      client_email: client.email || '', client_address_line_1: client.address_line_1 || '',
+      ...prev, client_name: client.name, client_id: client.id,
+      client_phone: client.phone || client.company_contact_phone || '',
+      client_email: client.email || client.company_contact_email || '',
+      client_address_line_1: client.address_line_1 || '',
       client_address_line_2: client.address_line_2 || '', client_town: client.town || '',
       client_county: client.county || '', client_postcode: client.postcode || '',
       client_vat_status: client.vat_status || 'Unknown', business_division: '', client_lat: geocodedLat, client_lng: geocodedLng,
