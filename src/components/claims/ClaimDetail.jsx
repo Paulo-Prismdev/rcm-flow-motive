@@ -162,7 +162,7 @@ import { logActivity, logChanges } from '../shared/useActivityLogger';
 
 const SECTION_FIELDS = {
   status: ['reg', 'claim_type', 'loss_date', 'vehicle_use', 'incident_location', 'circumstances'],
-  client: ['client_name', 'client_phone', 'client_email', 'client_address_line_1', 'client_town', 'client_postcode', 'business_division'],
+  client: ['client_name', 'client_phone', 'client_email', 'client_address_line_1', 'client_town', 'client_postcode', 'business_division', 'client_ref'],
   insurance: ['insurer', 'claim_ref', 'policy_number', 'policy_excess'],
   driver: ['driver_contact_name', 'driver_contact_phone', 'driver_contact_email'],
   estimate: ['send_estimate_email', 'audatex_code', 'est_fee', 'authorising_party', 'estimate_cost_net', 'authority_cost_net', 'estimate_cost_gross', 'authority_cost_gross'],
@@ -711,6 +711,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                 postcode: claim.client_postcode,
               }}
               extras={[
+                { label: 'Client Ref', value: claim.client_ref, isEmpty: !claim.client_ref },
                 { label: 'Business Division', value: claim.business_division, isEmpty: !claim.business_division },
                 { label: 'VAT Status', value: claim.client_vat_status || 'Unknown', isEmpty: !claim.client_vat_status },
                 { label: 'Driver', value: claim.driver_same_as_client === false ? claim.driver_contact_name || '—' : 'Same as client', isEmpty: false, meta: claim.driver_same_as_client === false ? 'Different person' : null },

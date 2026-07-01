@@ -250,6 +250,7 @@ export default function ClaimsPage() {
     documents: { label: 'Docs', render: (c) => { const n = c.file_urls?.length || 0; return n > 0 ? `${n} file${n === 1 ? '' : 's'}` : '—'; } },
     vehicle_damage: { label: 'Damage', render: (c) => c.vehicle_damage || '—' },
     referrer_ref: { label: 'Referrer Ref', render: (c) => c.referrer_ref || '—' },
+    client_ref: { label: 'Client Ref', render: (c) => c.client_ref || '—' },
   };
 
 
