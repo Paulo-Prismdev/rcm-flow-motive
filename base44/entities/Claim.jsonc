@@ -438,6 +438,10 @@
     "referral_fee_repairer": {
       "type": "number"
     },
+    "referral_fee_repairer_gbp": {
+      "type": "number",
+      "description": "Repairer referral fee as a fixed monetary amount (GBP), used as an alternative to the percentage field."
+    },
     "percent_bld_instruction": {
       "type": "number"
     },

@@ -75,6 +75,9 @@ export default function ClaimBodyshopForm({ claim, onSave, onCancel }) {
         if (sanitized.referral_fee_repairer !== undefined && sanitized.referral_fee_repairer !== '' && sanitized.referral_fee_repairer !== null) {
             sanitized.referral_fee_repairer = parseFloat(sanitized.referral_fee_repairer);
         }
+        if (sanitized.referral_fee_repairer_gbp !== undefined && sanitized.referral_fee_repairer_gbp !== '' && sanitized.referral_fee_repairer_gbp !== null) {
+            sanitized.referral_fee_repairer_gbp = parseFloat(sanitized.referral_fee_repairer_gbp);
+        }
         onSave(sanitized);
     };
 
@@ -177,15 +180,31 @@ export default function ClaimBodyshopForm({ claim, onSave, onCancel }) {
 
                 {/* Referral Fee — always editable */}
                 <div className="pt-2 border-t border-border">
-                    <label className="text-sm text-gray-500 mb-2 block">Repairer Referral Fee (%)</label>
-                    <Input
-                        type="number"
-                        step="0.01"
-                        value={formData.referral_fee_repairer ?? ''}
-                        onChange={e => handleChange('referral_fee_repairer', e.target.value)}
-                        className="neomorph-inset"
-                        placeholder="e.g. 20"
-                    />
+                    <div className="grid grid-cols-2 gap-3">
+                        <div>
+                            <label className="text-sm text-gray-500 mb-2 block">Repairer Referral Fee (%)</label>
+                            <Input
+                                type="number"
+                                step="0.01"
+                                value={formData.referral_fee_repairer ?? ''}
+                                onChange={e => handleChange('referral_fee_repairer', e.target.value)}
+                                className="neomorph-inset"
+                                placeholder="e.g. 20"
+                            />
+                        </div>
+                        <div>
+                            <label className="text-sm text-gray-500 mb-2 block">Repairer Referral Fee (£)</label>
+                            <Input
+                                type="number"
+                                step="0.01"
+                                value={formData.referral_fee_repairer_gbp ?? ''}
+                                onChange={e => handleChange('referral_fee_repairer_gbp', e.target.value)}
+                                className="neomorph-inset"
+                                placeholder="e.g. 150"
+                            />
+                        </div>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1.5">Enter a percentage OR a fixed amount — whichever applies will show on the instruction PDF.</p>
                 </div>
 
                 <div className="flex justify-end gap-3 pt-4">

@@ -118,7 +118,8 @@ Deno.serve(async (req) => {
       send_estimate_email: claim.send_estimate_email || 'N/A',
       audatex_code: claim.audatex_code || 'N/A',
       policy_excess: displayPolicyExcess,
-      referral_fee: claim.referral_fee_repairer != null ? `${claim.referral_fee_repairer}%` : '0%',
+      referral_fee: claim.referral_fee_repairer != null && claim.referral_fee_repairer !== '' ? `${claim.referral_fee_repairer}%` : '0%',
+      referral_fee_gbp: claim.referral_fee_repairer_gbp != null && claim.referral_fee_repairer_gbp !== '' ? `GBP ${Number(claim.referral_fee_repairer_gbp).toFixed(2)}` : null,
     };
 
     // ── Insurer party label for the Insurance Details section header ──
@@ -403,6 +404,9 @@ Deno.serve(async (req) => {
         doc.setFontSize(13);
         doc.setTextColor(...NAVY);
         doc.text(`Repairer Referral Fee ${fields.referral_fee}`, TX, yPos + 6);
+        if (fields.referral_fee_gbp) {
+          doc.text(`Repairer Referral Fee ${fields.referral_fee_gbp}`, PW - LM - PAD_X, yPos + 6, { align: 'right' });
+        }
         yPos += 9;
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(FS);
@@ -481,6 +485,9 @@ Deno.serve(async (req) => {
         doc.setFontSize(13);
         doc.setTextColor(...NAVY);
         doc.text(`Repairer Referral Fee ${fields.referral_fee}`, TX, yPos + 6);
+        if (fields.referral_fee_gbp) {
+          doc.text(`Repairer Referral Fee ${fields.referral_fee_gbp}`, PW - LM - PAD_X, yPos + 6, { align: 'right' });
+        }
         yPos += 9;
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(FS);
