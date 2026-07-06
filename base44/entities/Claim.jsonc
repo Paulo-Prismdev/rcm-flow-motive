@@ -703,6 +703,22 @@
         "Uninsured"
       ],
       "description": "Authorising insurer selection from last allocation"
+    },
+    "instruction_contact_type": {
+      "type": "string",
+      "description": "Which contact type (client/driver/custom) was chosen for the instruction at allocation time"
+    },
+    "instruction_contact_name": {
+      "type": "string",
+      "description": "Contact name used on the instruction PDF, captured at allocation time"
+    },
+    "instruction_contact_email": {
+      "type": "string",
+      "description": "Contact email used on the instruction PDF, captured at allocation time"
+    },
+    "instruction_contact_phone": {
+      "type": "string",
+      "description": "Contact phone used on the instruction PDF, captured at allocation time"
     }
   },
   "required": [],

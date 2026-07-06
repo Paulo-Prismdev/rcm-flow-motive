@@ -112,8 +112,8 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
         setMapZoom(7);
       }
 
-      // When skipping step 0, save validation defaults + bodyshop to claim
-      if (startStep > 0 && preSelectedBodyshop) {
+      // Save pre-selected bodyshop to claim as soon as the wizard opens
+      if (preSelectedBodyshop) {
         base44.entities.Claim.update(claim.id, {
           bodyshop_id: preSelectedBodyshop.id,
           bodyshop: preSelectedBodyshop.name,
@@ -167,18 +167,18 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
       const dataToSave = { ...validationData };
       dataToSave.last_contact_source = contactType.charAt(0).toUpperCase() + contactType.slice(1);
       dataToSave.authorised_by = authorisedBy;
-      // Persist the effective contact phone/email so the PDF always has the right values
-      if (contactType === 'driver') {
-        dataToSave.client_email = validationData.driver_contact_email || claim.driver_contact_email || validationData.client_email || claim.client_email || '';
-        dataToSave.client_phone = validationData.driver_contact_phone || claim.driver_contact_phone || validationData.client_phone || claim.client_phone || '';
-      } else if (contactType === 'custom') {
-        dataToSave.client_email = customContact.email || validationData.client_email || '';
-        dataToSave.client_phone = customContact.phone || validationData.client_phone || '';
-      }
+      // Persist the chosen instruction contact into dedicated fields (non-destructive —
+      // does NOT overwrite the real client_email/client_phone on the claim)
+      const contactOverrides = getContactOverrides();
+      dataToSave.instruction_contact_type = contactType;
+      dataToSave.instruction_contact_name = contactOverrides.name || '';
+      dataToSave.instruction_contact_email = contactOverrides.email || '';
+      dataToSave.instruction_contact_phone = contactOverrides.phone || '';
       await base44.entities.Claim.update(claim.id, dataToSave);
       queryClient.invalidateQueries({ queryKey: ['claims'] });
       queryClient.invalidateQueries({ queryKey: ['claim', claim.id] });
-      setCurrentStep(1);
+      // Skip the "Find Repairer" map step if a bodyshop is already selected
+      setCurrentStep(selectedBodyshop ? 2 : 1);
     } catch (error) {
       console.error('Error saving validation data:', error);
       alert('Failed to save. Please try again.');
@@ -347,6 +347,8 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
     }
   }, [isOpen]);
 
+  const isLocked = !!claim?.bs_instructed;
+
   if (!isOpen || !claim) return null;
 
   return (
@@ -401,6 +403,7 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
               onContactTypeChange={setContactType}
               onAuthorisedByChange={setAuthorisedBy}
               onCustomContactChange={(field, value) => setCustomContact(prev => ({ ...prev, [field]: value }))}
+              isLocked={isLocked}
             />
           )}
           {currentStep === 1 && (

@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
-import { CheckCircle, AlertCircle, User, Car, Building2, Phone } from 'lucide-react';
+import { CheckCircle, AlertCircle, User, Car, Building2, Phone, Lock } from 'lucide-react';
 import { REQUIRED_FIELDS } from './WizardConstants';
 
 export default function WizardValidateStep({
   claim, validationData, missingFields, contactType, customContact,
   authorisedBy, onContactTypeChange, onAuthorisedByChange, onCustomContactChange,
-  onValidationChange, onSaveDefaults
+  onValidationChange, onSaveDefaults, isLocked = false
 }) {
   // Resolve the actual field key/value for contact-specific missing fields
   const resolveField = (field) => {
@@ -142,6 +142,14 @@ export default function WizardValidateStep({
 
   return (
     <div className="space-y-6">
+      {isLocked && (
+        <div className="p-3 rounded-lg border border-amber-300 bg-amber-50 dark:bg-amber-900/20 flex items-center gap-2">
+          <Lock className="w-4 h-4 text-amber-600 flex-shrink-0" />
+          <p className="text-sm text-amber-800 dark:text-amber-200 font-medium">
+            Locked after allocation — un-allocate this job to change these details.
+          </p>
+        </div>
+      )}
       {/* Authorising Insurer Selection */}
       <div className="p-4 rounded-lg border bg-card">
         <div className="mb-4">
@@ -156,13 +164,13 @@ export default function WizardValidateStep({
             return (
               <button
                 key={option.value}
-                onClick={() => !option.disabled && onAuthorisedByChange(option.label)}
-                disabled={option.disabled}
+                onClick={() => !option.disabled && !isLocked && onAuthorisedByChange(option.label)}
+                disabled={option.disabled || isLocked}
                 className={`text-left p-3 rounded-lg border-2 transition-all ${
                   (authorisedBy === option.label || authorisedBy === option.value)
                     ? 'border-primary bg-primary/5'
                     : 'border-border hover:border-gray-300'
-                } ${option.disabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
+                } ${(option.disabled || isLocked) ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
               >
                 <div className="flex items-start gap-2">
                   <IconComponent className={`w-4 h-4 mt-0.5 flex-shrink-0 ${
@@ -193,13 +201,13 @@ export default function WizardValidateStep({
             return (
               <button
                 key={option.value}
-                onClick={() => !option.disabled && onContactTypeChange(option.value)}
-                disabled={option.disabled}
+                onClick={() => !option.disabled && !isLocked && onContactTypeChange(option.value)}
+                disabled={option.disabled || isLocked}
                 className={`text-left p-3 rounded-lg border-2 transition-all ${
                   contactType === option.value
                     ? 'border-primary bg-primary/5'
                     : 'border-border hover:border-gray-300'
-                } ${option.disabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
+                } ${(option.disabled || isLocked) ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
               >
                 <div className="flex items-start gap-2">
                   <IconComponent className={`w-4 h-4 mt-0.5 flex-shrink-0 ${
@@ -220,15 +228,15 @@ export default function WizardValidateStep({
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 p-4 rounded-lg bg-muted">
             <div>
               <label className="block text-xs text-muted-foreground mb-1">Contact Name</label>
-              <Input value={customContact.name} onChange={(e) => onCustomContactChange('name', e.target.value)} placeholder="Enter name..." />
+              <Input value={customContact.name} onChange={(e) => onCustomContactChange('name', e.target.value)} placeholder="Enter name..." disabled={isLocked} />
             </div>
             <div>
               <label className="block text-xs text-muted-foreground mb-1">Contact Phone</label>
-              <Input value={customContact.phone} onChange={(e) => onCustomContactChange('phone', e.target.value)} placeholder="Enter phone..." />
+              <Input value={customContact.phone} onChange={(e) => onCustomContactChange('phone', e.target.value)} placeholder="Enter phone..." disabled={isLocked} />
             </div>
             <div>
               <label className="block text-xs text-muted-foreground mb-1">Contact Email</label>
-              <Input type="email" value={customContact.email} onChange={(e) => onCustomContactChange('email', e.target.value)} placeholder="Enter email..." />
+              <Input type="email" value={customContact.email} onChange={(e) => onCustomContactChange('email', e.target.value)} placeholder="Enter email..." disabled={isLocked} />
             </div>
           </div>
         )}
@@ -248,6 +256,7 @@ export default function WizardValidateStep({
                   else if (isThirdPartyInsurer) onValidationChange('tp_insurer', e.target.value);
                 }}
                 placeholder={isClientInsurer ? "Enter insurer name" : isThirdPartyInsurer ? "Enter TP insurer name" : "Enter insurer name"}
+                disabled={isLocked}
               />
             </div>
             <div>
@@ -260,6 +269,7 @@ export default function WizardValidateStep({
                 }}
                 placeholder={isClientInsurer ? "Enter claim reference" : "Enter TP claim reference"}
                 className={isFieldRequired('claim_ref') && !insurerFields.claim_ref ? 'border-red-300 bg-red-50' : ''}
+                disabled={isLocked}
               />
             </div>
             <div>
@@ -271,6 +281,7 @@ export default function WizardValidateStep({
                   else if (isThirdPartyInsurer) onValidationChange('tp_policy_number', e.target.value);
                 }}
                 placeholder={isClientInsurer ? "Enter policy number" : "Enter TP policy number"}
+                disabled={isLocked}
               />
             </div>
             <div>
@@ -283,6 +294,7 @@ export default function WizardValidateStep({
                   else if (isThirdPartyInsurer) onValidationChange('tp_policy_excess', e.target.value);
                 }}
                 placeholder="Enter amount or 'Waived'"
+                disabled={isLocked}
               />
             </div>
             {isClientInsurer && (
@@ -295,6 +307,7 @@ export default function WizardValidateStep({
                     onChange={(e) => onValidationChange('send_estimate_email', e.target.value)}
                     placeholder="Enter email address"
                     className={isFieldRequired('send_estimate_email') && !insurerFields.send_estimate_email ? 'border-red-300 bg-red-50' : ''}
+                    disabled={isLocked}
                   />
                 </div>
                 <div>
@@ -304,6 +317,7 @@ export default function WizardValidateStep({
                     onChange={(e) => onValidationChange('audatex_code', e.target.value)}
                     placeholder="Enter Audatex code"
                     className={isFieldRequired('audatex_code') && !insurerFields.audatex_code ? 'border-red-300 bg-red-50' : ''}
+                    disabled={isLocked}
                   />
                 </div>
               </>
@@ -323,6 +337,7 @@ export default function WizardValidateStep({
               value={insurerFields.policy_excess}
               onChange={(e) => onValidationChange('policy_excess', e.target.value)}
               placeholder="Enter amount or 'Waived'"
+              disabled={isLocked}
             />
           </div>
         </div>
