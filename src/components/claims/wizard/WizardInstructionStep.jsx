@@ -11,29 +11,29 @@ export default function WizardInstructionStep({
   const activeCustomTemplates = pdfTemplates.filter(t => t.is_active);
 
   return (
-    <div className="space-y-4">
-      <div className="p-4 rounded-lg bg-primary/10 border border-primary/20">
-        <p className="font-medium">Selected Repairer: {selectedBodyshop?.name}</p>
-        <p className="text-sm text-muted-foreground">{selectedBodyshop?.email}</p>
+    <div className="space-y-3">
+      <div className="p-3 rounded-lg bg-primary/10 border border-primary/20">
+        <p className="font-medium text-sm">Selected Repairer: {selectedBodyshop?.name}</p>
+        <p className="text-xs text-muted-foreground">{selectedBodyshop?.email}</p>
       </div>
 
-      <h3 className="font-bold text-lg">Select Template</h3>
-      <p className="text-sm text-muted-foreground">
+      <h3 className="font-bold text-sm">Select Template</h3>
+      <p className="text-xs text-muted-foreground">
         Select a template to generate the bodyshop instruction PDF. This will open in a new tab and be saved to the claim.
       </p>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {BUILT_IN_PDF_TEMPLATES.map((template) => {
           const IconComponent = template.icon;
           return (
             <div key={template.id}
-              className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
+              className={`p-3 rounded-lg border-2 cursor-pointer transition-all ${
                 selectedPdfTemplate === template.id ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'
               }`}
               onClick={() => onSelectTemplate(template.id)}>
               <div className="text-center">
-                <IconComponent className="w-8 h-8 mx-auto mb-2 text-primary" />
-                <p className="font-medium">{template.name}</p>
+                <IconComponent className="w-6 h-6 mx-auto mb-1 text-primary" />
+                <p className="font-medium text-sm">{template.name}</p>
               </div>
             </div>
           );
@@ -42,17 +42,17 @@ export default function WizardInstructionStep({
 
       {activeCustomTemplates.length > 0 && (
         <>
-          <h4 className="font-medium mt-4">Custom Templates</h4>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <h4 className="font-medium text-sm mt-2">Custom Templates</h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
             {activeCustomTemplates.map((template) => (
               <div key={template.id}
-                className={`p-3 rounded-lg border-2 cursor-pointer transition-all ${
+                className={`p-2.5 rounded-lg border-2 cursor-pointer transition-all ${
                   selectedPdfTemplate === template.id ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'
                 }`}
                 onClick={() => onSelectTemplate(template.id)}>
-                <div className="flex items-center gap-3">
-                  <FileText className="w-5 h-5 text-primary" />
-                  <p className="font-medium">{template.template_name}</p>
+                <div className="flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-primary" />
+                  <p className="font-medium text-sm">{template.template_name}</p>
                 </div>
               </div>
             ))}
@@ -60,7 +60,7 @@ export default function WizardInstructionStep({
         </>
       )}
 
-      <Button onClick={onGeneratePdf} disabled={isGeneratingPdf} className="w-full py-3">
+      <Button onClick={onGeneratePdf} disabled={isGeneratingPdf} className="w-full h-10">
         {isGeneratingPdf ? (
           <><Loader className="w-4 h-4 mr-2 animate-spin" /> Generating...</>
         ) : (
@@ -69,13 +69,13 @@ export default function WizardInstructionStep({
       </Button>
 
       {generatedPdfUrl && (
-        <div className="p-3 rounded-lg bg-green-50 border border-green-200 text-green-700 flex items-center gap-2">
+        <div className="p-2.5 rounded-lg bg-green-50 border border-green-200 text-green-700 flex items-center gap-2">
           <CheckCircle className="w-4 h-4" />
-          PDF generated successfully and saved to claim attachments
+          <span className="text-sm">PDF generated successfully and saved to claim attachments</span>
         </div>
       )}
 
-      <p className="text-xs text-muted-foreground">
+      <p className="text-xs text-muted-foreground text-center">
         You can skip this step if you don't need to generate an instruction document.
       </p>
     </div>

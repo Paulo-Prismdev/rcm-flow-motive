@@ -41,19 +41,19 @@ export default function WizardEmailStep({
   };
 
   return (
-    <div className="space-y-4">
-      <div className="p-4 rounded-lg bg-primary/10 border border-primary/20">
-        <p className="font-medium">Selected Repairer: {selectedBodyshop?.name}</p>
-        <p className="text-sm text-muted-foreground">{selectedBodyshop?.email}</p>
+    <div className="space-y-3">
+      <div className="p-3 rounded-lg bg-primary/10 border border-primary/20">
+        <p className="font-medium text-sm">Selected Repairer: {selectedBodyshop?.name}</p>
+        <p className="text-xs text-muted-foreground">{selectedBodyshop?.email}</p>
       </div>
 
-      <h3 className="font-bold text-lg">Compose Email to Repairer</h3>
-      <p className="text-sm text-muted-foreground">
+      <h3 className="font-bold text-sm">Compose Email to Repairer</h3>
+      <p className="text-xs text-muted-foreground">
         Send the instruction email to the bodyshop. This will open in your default email client (Outlook).
       </p>
 
       <div>
-        <label className="block text-sm font-medium mb-2">Email Template (Optional)</label>
+        <label className="block text-xs font-medium mb-1">Email Template (Optional)</label>
         <Select value={selectedEmailTemplateId || 'none'} onValueChange={handleTemplateSelect}>
           <SelectTrigger>
             <SelectValue placeholder="Select a template or write custom email" />
@@ -67,26 +67,28 @@ export default function WizardEmailStep({
         </Select>
       </div>
 
-      <div>
-        <label className="block text-sm font-medium mb-2">To *</label>
-        <Input type="email" value={emailTo} onChange={(e) => onEmailToChange(e.target.value)} placeholder="recipient@example.com" />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div>
+          <label className="block text-xs font-medium mb-1">To *</label>
+          <Input type="email" value={emailTo} onChange={(e) => onEmailToChange(e.target.value)} placeholder="recipient@example.com" />
+        </div>
+
+        <div>
+          <label className="block text-xs font-medium mb-1">Subject</label>
+          <Input value={emailSubject} onChange={(e) => onEmailSubjectChange(e.target.value)} placeholder="Email subject" />
+        </div>
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-2">Subject</label>
-        <Input value={emailSubject} onChange={(e) => onEmailSubjectChange(e.target.value)} placeholder="Email subject" />
+        <label className="block text-xs font-medium mb-1">Message</label>
+        <Textarea value={emailBody} onChange={(e) => onEmailBodyChange(e.target.value)} placeholder="Email message" className="h-28" />
       </div>
 
-      <div>
-        <label className="block text-sm font-medium mb-2">Message</label>
-        <Textarea value={emailBody} onChange={(e) => onEmailBodyChange(e.target.value)} placeholder="Email message" className="h-40" />
-      </div>
-
-      <Button onClick={handleOpenInOutlook} className="w-full py-3">
+      <Button onClick={handleOpenInOutlook} className="w-full h-10">
         <Mail className="w-4 h-4 mr-2" /> Open in Outlook
       </Button>
 
-      <p className="text-xs text-muted-foreground">
+      <p className="text-xs text-muted-foreground text-center">
         You can skip this step if you prefer to send the email manually later.
       </p>
     </div>

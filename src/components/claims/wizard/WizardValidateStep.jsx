@@ -141,7 +141,7 @@ export default function WizardValidateStep({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3">
       {isLocked && (
         <div className="p-3 rounded-lg border border-amber-300 bg-amber-50 dark:bg-amber-900/20 flex items-center gap-2">
           <Lock className="w-4 h-4 text-amber-600 flex-shrink-0" />
@@ -151,14 +151,14 @@ export default function WizardValidateStep({
         </div>
       )}
       {/* Authorising Insurer Selection */}
-      <div className="p-4 rounded-lg border bg-card">
-        <div className="mb-4">
-          <h3 className="font-bold text-lg mb-2">Who is authorising the repair?</h3>
-          <p className="text-sm text-muted-foreground">
+      <div className="p-3 rounded-lg border bg-card">
+        <div className="mb-2.5">
+          <h3 className="font-bold text-sm mb-0.5">Who is authorising the repair?</h3>
+          <p className="text-xs text-muted-foreground">
             Select which insurer will authorise the repairs. This determines which insurance details appear on the instruction.
           </p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
           {insurerOptions.map((option) => {
             const IconComponent = option.icon;
             return (
@@ -166,19 +166,19 @@ export default function WizardValidateStep({
                 key={option.value}
                 onClick={() => !option.disabled && !isLocked && onAuthorisedByChange(option.value)}
                 disabled={option.disabled || isLocked}
-                className={`text-left p-3 rounded-lg border-2 transition-all ${
+                className={`text-left p-2.5 rounded-lg border-2 transition-all ${
                   (authorisedBy === option.label || authorisedBy === option.value)
                     ? 'border-primary bg-primary/5'
                     : 'border-border hover:border-gray-300'
                 } ${(option.disabled || isLocked) ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
               >
                 <div className="flex items-start gap-2">
-                  <IconComponent className={`w-4 h-4 mt-0.5 flex-shrink-0 ${
+                  <IconComponent className={`w-3.5 h-3.5 mt-0.5 flex-shrink-0 ${
                     (authorisedBy === option.label || authorisedBy === option.value) ? 'text-primary' : 'text-muted-foreground'
                   }`} />
                   <div className="min-w-0">
-                    <p className="font-medium text-sm">{option.label}</p>
-                    <p className="text-xs text-muted-foreground truncate">{option.subtitle}</p>
+                    <p className="font-medium text-xs">{option.label}</p>
+                    <p className="text-[11px] text-muted-foreground truncate">{option.subtitle}</p>
                   </div>
                 </div>
               </button>
@@ -188,14 +188,14 @@ export default function WizardValidateStep({
       </div>
 
       {/* Instruction Contact Selection */}
-      <div className="p-4 rounded-lg border bg-card">
-        <div className="mb-4">
-          <h3 className="font-bold text-lg mb-2">Instruction Contact</h3>
-          <p className="text-sm text-muted-foreground">
+      <div className="p-3 rounded-lg border bg-card">
+        <div className="mb-2.5">
+          <h3 className="font-bold text-sm mb-0.5">Instruction Contact</h3>
+          <p className="text-xs text-muted-foreground">
             Who should the repairer contact for drop-off, updates and collection?
           </p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-2.5">
           {contactOptions.map((option) => {
             const IconComponent = option.icon;
             return (
@@ -203,20 +203,20 @@ export default function WizardValidateStep({
                 key={option.value}
                 onClick={() => !option.disabled && !isLocked && onContactTypeChange(option.value)}
                 disabled={option.disabled || isLocked}
-                className={`text-left p-3 rounded-lg border-2 transition-all ${
+                className={`text-left p-2.5 rounded-lg border-2 transition-all ${
                   contactType === option.value
                     ? 'border-primary bg-primary/5'
                     : 'border-border hover:border-gray-300'
                 } ${(option.disabled || isLocked) ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
               >
                 <div className="flex items-start gap-2">
-                  <IconComponent className={`w-4 h-4 mt-0.5 flex-shrink-0 ${
+                  <IconComponent className={`w-3.5 h-3.5 mt-0.5 flex-shrink-0 ${
                     contactType === option.value ? 'text-primary' : 'text-muted-foreground'
                   }`} />
                   <div className="min-w-0">
-                    <p className="font-medium text-sm">{option.label}</p>
-                    <p className="text-xs text-muted-foreground">{option.description}</p>
-                    {option.details && <p className="text-[11px] text-muted-foreground mt-1 truncate">{option.details}</p>}
+                    <p className="font-medium text-xs">{option.label}</p>
+                    <p className="text-[11px] text-muted-foreground">{option.description}</p>
+                    {option.details && <p className="text-[10px] text-muted-foreground mt-0.5 truncate">{option.details}</p>}
                   </div>
                 </div>
               </button>
@@ -225,7 +225,7 @@ export default function WizardValidateStep({
         </div>
 
         {contactType === 'custom' && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 p-4 rounded-lg bg-muted">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-2 p-3 rounded-lg bg-muted">
             <div>
               <label className="block text-xs text-muted-foreground mb-1">Contact Name</label>
               <Input value={customContact.name} onChange={(e) => onCustomContactChange('name', e.target.value)} placeholder="Enter name..." disabled={isLocked} />
@@ -244,9 +244,9 @@ export default function WizardValidateStep({
 
       {/* Dynamic Insurance Fields */}
       {!isUninsured && (
-        <div className="p-4 rounded-lg border bg-card">
-          <h3 className="font-bold text-lg mb-3">Insurance Details</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="p-3 rounded-lg border bg-card">
+          <h3 className="font-bold text-sm mb-2">Insurance Details</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
             <div>
               <label className="block text-xs text-muted-foreground mb-1">Insurer Name</label>
               <Input
@@ -328,8 +328,8 @@ export default function WizardValidateStep({
 
       {/* Policy Excess for Uninsured */}
       {isUninsured && (
-        <div className="p-4 rounded-lg border bg-card">
-          <h3 className="font-bold text-lg mb-3">Policy Excess</h3>
+        <div className="p-3 rounded-lg border bg-card">
+          <h3 className="font-bold text-sm mb-2">Policy Excess</h3>
           <div className="max-w-xs">
             <label className="block text-xs text-muted-foreground mb-1">Policy Excess (£)</label>
             <Input
@@ -345,17 +345,17 @@ export default function WizardValidateStep({
 
       {/* Missing Required Fields — inline editable */}
       {missingFields.length > 0 && (
-        <div className="p-4 rounded-lg bg-amber-50 border border-amber-200">
-          <div className="flex items-start gap-3 mb-3">
-            <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+        <div className="p-3 rounded-lg bg-amber-50 border border-amber-200">
+          <div className="flex items-start gap-2 mb-2">
+            <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
             <div>
-              <h4 className="font-medium text-amber-800">Pre-Allocation Checklist</h4>
-              <p className="text-sm text-amber-700 mt-1">
+              <h4 className="font-medium text-sm text-amber-800">Pre-Allocation Checklist</h4>
+              <p className="text-xs text-amber-700 mt-0.5">
                 The following fields must be completed before allocating to a repairer:
               </p>
             </div>
           </div>
-          <div className="space-y-3 ml-8">
+          <div className="space-y-2 ml-6">
             {missingFields.map(rawField => {
               const field = resolveField(rawField);
               return (
@@ -387,9 +387,9 @@ export default function WizardValidateStep({
       )}
 
       {missingFields.length === 0 && (
-        <div className="p-4 rounded-lg bg-green-50 border border-green-200 flex items-center gap-3">
-          <CheckCircle className="w-5 h-5 text-green-600" />
-          <p className="text-sm text-green-800 font-medium">All required fields are complete. You can proceed to select a repairer.</p>
+        <div className="p-2.5 rounded-lg bg-green-50 border border-green-200 flex items-center gap-2">
+          <CheckCircle className="w-4 h-4 text-green-600" />
+          <p className="text-xs text-green-800 font-medium">All required fields are complete. You can proceed to select a repairer.</p>
         </div>
       )}
     </div>

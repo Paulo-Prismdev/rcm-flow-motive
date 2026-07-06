@@ -327,7 +327,7 @@ export default function WizardFindRepairerStep({
       {/* Main content: List + Map */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-3">
         {/* Bodyshop list */}
-        <div className="lg:col-span-2 space-y-2 max-h-[400px] lg:max-h-[500px] overflow-y-auto pr-1">
+        <div className="lg:col-span-2 space-y-1.5 max-h-[350px] lg:max-h-[450px] overflow-y-auto pr-1">
           {sortedBodyshops.length === 0 ? (
             <div className="text-center text-sm text-muted-foreground p-4">No repairers match your filters.</div>
           ) : (
@@ -336,10 +336,10 @@ export default function WizardFindRepairerStep({
               const log = logistics[bodyshop.id];
               return (
                 <div key={bodyshop.id} onClick={() => onSelectBodyshop(bodyshop)}
-                  className={`p-3 rounded-lg border-2 cursor-pointer transition-all ${
+                  className={`p-2.5 rounded-lg border-2 cursor-pointer transition-all ${
                     isSelected ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'
                   }`}>
-                  <div className="flex items-start justify-between gap-2 mb-1">
+                  <div className="flex items-start justify-between gap-2 mb-0.5">
                     <p className="font-semibold text-sm truncate flex-1">{bodyshop.name}</p>
                     <TravelBadge log={log} />
                   </div>
@@ -356,7 +356,7 @@ export default function WizardFindRepairerStep({
 
         {/* Map */}
         <div className="lg:col-span-3">
-          <div className="rounded-xl overflow-hidden border" style={{ height: '400px', minHeight: '300px' }}>
+          <div className="rounded-xl overflow-hidden border" style={{ height: '350px', minHeight: '250px' }}>
             <MapContainer center={mapCenter} zoom={mapZoom} style={{ height: '100%', width: '100%' }} scrollWheelZoom={false}>
               <TileLayer
                 attribution='&copy; Google Maps'
@@ -413,10 +413,10 @@ export default function WizardFindRepairerStep({
 
       {/* Selected bodyshop detail card */}
       {selectedBodyshop ? (
-        <div className="p-3 rounded-xl border-2 border-primary bg-primary/5">
+        <div className="p-2.5 rounded-xl border-2 border-primary bg-primary/5">
           <div className="flex items-start justify-between gap-2">
             <div className="flex-1 min-w-0">
-              <h4 className="font-bold text-sm flex items-center gap-1.5 text-primary mb-2">
+              <h4 className="font-bold text-sm flex items-center gap-1.5 text-primary mb-1.5">
                 <CheckCircle className="w-4 h-4" /> Selected Repairer
               </h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
