@@ -164,7 +164,7 @@ export default function WizardValidateStep({
             return (
               <button
                 key={option.value}
-                onClick={() => !option.disabled && !isLocked && onAuthorisedByChange(option.label)}
+                onClick={() => !option.disabled && !isLocked && onAuthorisedByChange(option.value)}
                 disabled={option.disabled || isLocked}
                 className={`text-left p-3 rounded-lg border-2 transition-all ${
                   (authorisedBy === option.label || authorisedBy === option.value)
