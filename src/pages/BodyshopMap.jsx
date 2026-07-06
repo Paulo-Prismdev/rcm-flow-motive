@@ -149,7 +149,10 @@ export default function BodyshopMap() {
   const [mapZoom, setMapZoom] = useState(7);
   const [geocodedCoords, setGeocodedCoords] = useState({});
   const [isGeocoding, setIsGeocoding] = useState(false);
-  const [showSupplierCoverage, setShowSupplierCoverage] = useState(false);
+  const [showSupplierPanel, setShowSupplierPanel] = useState(false);
+  const [enabledSuppliers, setEnabledSuppliers] = useState(
+    () => Object.fromEntries(SUPPLIER_COVERAGE_AREAS.map(s => [s.supplier_name, false]))
+  );
 
   const { data: bodyshops = [], isLoading } = useQuery({
     queryKey: ['bodyshops'],
@@ -440,7 +443,7 @@ export default function BodyshopMap() {
             <MapCenterUpdater center={mapCenter} zoom={mapZoom} />
 
             {/* ── Supplier coverage circles ── */}
-            {showSupplierCoverage && SUPPLIER_COVERAGE_AREAS.map((supplier) =>
+            {SUPPLIER_COVERAGE_AREAS.filter(s => enabledSuppliers[s.supplier_name]).map((supplier) =>
               supplier.sites.map((site, idx) => (
                 <Circle
                   key={`${supplier.supplier_name}-${idx}`}
@@ -449,7 +452,7 @@ export default function BodyshopMap() {
                   pathOptions={{
                     color: supplier.color,
                     fillColor: supplier.color,
-                    fillOpacity: 0.08,
+                    fillOpacity: supplier.nationwide ? 0.04 : 0.08,
                     weight: 2,
                     opacity: 0.5,
                   }}
@@ -458,15 +461,15 @@ export default function BodyshopMap() {
                     <div className="text-xs">
                       <p className="font-semibold">{supplier.supplier_name} — {site.location}</p>
                       <p className="text-muted-foreground">{site.site_name}</p>
-                      <p className="text-muted-foreground">{supplier.radius_miles} mile coverage</p>
+                      <p className="text-muted-foreground">{supplier.nationwide ? 'Nationwide coverage' : `${supplier.radius_miles} mile coverage`}</p>
                     </div>
                   </Tooltip>
                 </Circle>
               ))
             )}
 
-            {/* ── Supplier site markers ── */}
-            {showSupplierCoverage && SUPPLIER_COVERAGE_AREAS.map((supplier) =>
+            {/* ── Supplier site markers (skip for nationwide) ── */}
+            {SUPPLIER_COVERAGE_AREAS.filter(s => enabledSuppliers[s.supplier_name] && !s.nationwide).map((supplier) =>
               supplier.sites.map((site, idx) => (
                 <Marker
                   key={`supplier-marker-${supplier.supplier_name}-${idx}`}
@@ -538,13 +541,13 @@ export default function BodyshopMap() {
           />
         </div>
         <button
-          onClick={() => setShowSupplierCoverage(s => !s)}
+          onClick={() => setShowSupplierPanel(s => !s)}
           className={`relative z-[1001] flex-shrink-0 w-10 h-10 rounded-full shadow-lg border flex items-center justify-center transition-colors ${
-            showSupplierCoverage
+            showSupplierPanel || Object.values(enabledSuppliers).some(Boolean)
               ? 'bg-blue-500 text-white border-blue-500'
               : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-border hover:bg-gray-50 dark:hover:bg-gray-700'
           }`}
-          title="Toggle supplier coverage areas"
+          title="Supplier coverage areas"
         >
           <Package className="w-4 h-4" />
         </button>
@@ -560,19 +563,25 @@ export default function BodyshopMap() {
         </button>
       </div>
 
-      {/* ── SUPPLIER COVERAGE LEGEND ── */}
-      {showSupplierCoverage && (
-        <div className="absolute top-16 right-3 z-[999] bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-border p-2.5 space-y-1.5 max-w-[200px]">
+      {/* ── SUPPLIER COVERAGE PANEL ── */}
+      {showSupplierPanel && (
+        <div className="absolute top-16 right-3 z-[999] bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-border p-2.5 space-y-2 w-[210px]">
           <p className="text-xs font-semibold text-muted-foreground">Supplier Coverage</p>
           {SUPPLIER_COVERAGE_AREAS.map(supplier => (
-            <div key={supplier.supplier_name} className="flex items-center gap-1.5">
-              <div className="w-3 h-3 rounded-full border-2 border-white shadow" style={{ backgroundColor: supplier.color }} />
-              <span className="text-xs font-medium text-gray-700 dark:text-gray-200">{supplier.supplier_name}</span>
-              <span className="text-[10px] text-muted-foreground ml-auto">{supplier.radius_miles}mi</span>
+            <div key={supplier.supplier_name} className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full border-2 border-white shadow flex-shrink-0" style={{ backgroundColor: supplier.color }} />
+              <span className="text-xs font-medium text-gray-700 dark:text-gray-200 flex-1">{supplier.supplier_name}</span>
+              <span className="text-[10px] text-muted-foreground">{supplier.nationwide ? 'Nationwide' : `${supplier.radius_miles}mi`}</span>
+              <Switch
+                checked={!!enabledSuppliers[supplier.supplier_name]}
+                onCheckedChange={(checked) =>
+                  setEnabledSuppliers(prev => ({ ...prev, [supplier.supplier_name]: checked }))
+                }
+              />
             </div>
           ))}
           <p className="text-[10px] text-muted-foreground pt-1 border-t border-border">
-            {SUPPLIER_COVERAGE_AREAS.reduce((sum, s) => sum + s.sites.length, 0)} sites • Blue circles show 30mi coverage
+            Toggle suppliers on/off to show their coverage areas on the map.
           </p>
         </div>
       )}

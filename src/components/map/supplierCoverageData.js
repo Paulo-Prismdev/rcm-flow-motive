@@ -1,5 +1,6 @@
 // Supplier coverage areas — extend with more suppliers as needed
 // radius_miles controls the coverage circle drawn around each site
+// nationwide: true = single large circle covering the whole UK (no site markers)
 
 export const SUPPLIER_COVERAGE_AREAS = [
   {
@@ -22,6 +23,15 @@ export const SUPPLIER_COVERAGE_AREAS = [
       { location: "Colchester", site_name: "Group 1 BMW", address: "Ipswich Rd, Ardleigh, Colchester CO4 9TD, UK", lat: 51.9198, lng: 0.9336 },
       { location: "Reading", site_name: "Group 1 BMW", address: "Drake Way, Reading, Berkshire RG2 0GH, UK", lat: 51.4289, lng: -0.9782 },
       { location: "Norwich", site_name: "Group 1 Assured", address: "481-489 Hall Rd, Norwich NR4 6ET, UK", lat: 52.6049, lng: 1.2864 },
+    ]
+  },
+  {
+    supplier_name: "Tomo",
+    color: "#f97316", // orange-500
+    radius_miles: 400,
+    nationwide: true,
+    sites: [
+      { location: "Nationwide", site_name: "Tomo", address: "Nationwide coverage — all UK bodyshops", lat: 54.5, lng: -2.5 },
     ]
   }
 ];
