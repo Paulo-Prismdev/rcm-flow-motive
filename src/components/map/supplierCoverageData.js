@@ -7,6 +7,14 @@ export const SUPPLIER_COVERAGE_AREAS = [
     supplier_name: "Group 1",
     color: "#3b82f6", // blue-500
     radius_miles: 30,
+    coverage_polygon: [
+      [51.25, -1.15], [51.05, -0.95], [50.72, -0.55], [50.68, -0.10],
+      [50.72, 0.35], [50.95, 0.55], [51.30, 0.85], [51.55, 0.95],
+      [51.75, 1.05], [52.05, 1.25], [52.35, 1.40], [52.75, 1.45],
+      [52.95, 1.20], [53.10, 0.60], [53.35, -0.10], [53.45, -0.55],
+      [53.30, -0.75], [52.90, -0.85], [52.50, -0.95], [52.15, -0.85],
+      [51.80, -0.70], [51.50, -0.60], [51.25, -1.15]
+    ],
     sites: [
       { location: "Farnborough", site_name: "Group 1 BMW", address: "105 Farnborough Rd, Farnborough GU14 6TL, UK", lat: 51.2848, lng: -0.7535 },
       { location: "Hailsham", site_name: "Group 1 BMW", address: "Gleneagles Dr, Hailsham BN27 3UA, UK", lat: 50.8627, lng: 0.2442 },

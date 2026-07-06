@@ -443,7 +443,7 @@ export default function BodyshopMap() {
 
             <MapCenterUpdater center={mapCenter} zoom={mapZoom} />
 
-            {/* ── Supplier coverage: nationwide = GB landmass fill; others = circles ── */}
+            {/* ── Supplier coverage: nationwide = GB landmass; coverage_polygon = single area; else = circles ── */}
             {SUPPLIER_COVERAGE_AREAS.filter(s => enabledSuppliers[s.supplier_name] && s.nationwide).map((supplier) => (
               <GeoJSON
                 key={`gb-${supplier.supplier_name}`}
@@ -457,7 +457,27 @@ export default function BodyshopMap() {
                 }}
               />
             ))}
-            {SUPPLIER_COVERAGE_AREAS.filter(s => enabledSuppliers[s.supplier_name] && !s.nationwide).map((supplier) =>
+            {SUPPLIER_COVERAGE_AREAS.filter(s => enabledSuppliers[s.supplier_name] && s.coverage_polygon).map((supplier) => (
+              <GeoJSON
+                key={`poly-${supplier.supplier_name}`}
+                data={{
+                  type: "Feature",
+                  properties: { name: supplier.supplier_name },
+                  geometry: {
+                    type: "Polygon",
+                    coordinates: [supplier.coverage_polygon.map(([lat, lng]) => [lng, lat])]
+                  }
+                }}
+                style={{
+                  color: supplier.color,
+                  fillColor: supplier.color,
+                  fillOpacity: 0.12,
+                  weight: 2,
+                  opacity: 0.6,
+                }}
+              />
+            ))}
+            {SUPPLIER_COVERAGE_AREAS.filter(s => enabledSuppliers[s.supplier_name] && !s.nationwide && !s.coverage_polygon).map((supplier) =>
               supplier.sites.map((site, idx) => (
                 <Circle
                   key={`${supplier.supplier_name}-${idx}`}
