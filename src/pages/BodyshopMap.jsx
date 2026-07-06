@@ -1,19 +1,20 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
-import { MapContainer, TileLayer, Marker, Polyline, Tooltip, useMap, ZoomControl } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Polyline, Circle, Tooltip, useMap, ZoomControl } from 'react-leaflet';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import {
   Phone, Mail, MapPinned, Loader, Clock, Navigation,
   CheckCircle, X, ArrowLeft, List, Map as MapIcon,
-  Settings, Sliders, ChevronUp, ExternalLink
+  Settings, Sliders, ChevronUp, ExternalLink, Package
 } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import AddressLookupInput from '@/components/shared/AddressLookupInput';
 import { geocodeAddress } from '@/functions/geocodeAddress';
+import { SUPPLIER_COVERAGE_AREAS, milesToMeters } from '@/components/map/supplierCoverageData';
 
 // ── Leaflet icon setup ──
 delete L.Icon.Default.prototype._getIconUrl;
@@ -148,6 +149,7 @@ export default function BodyshopMap() {
   const [mapZoom, setMapZoom] = useState(7);
   const [geocodedCoords, setGeocodedCoords] = useState({});
   const [isGeocoding, setIsGeocoding] = useState(false);
+  const [showSupplierCoverage, setShowSupplierCoverage] = useState(false);
 
   const { data: bodyshops = [], isLoading } = useQuery({
     queryKey: ['bodyshops'],
@@ -437,6 +439,56 @@ export default function BodyshopMap() {
 
             <MapCenterUpdater center={mapCenter} zoom={mapZoom} />
 
+            {/* ── Supplier coverage circles ── */}
+            {showSupplierCoverage && SUPPLIER_COVERAGE_AREAS.map((supplier) =>
+              supplier.sites.map((site, idx) => (
+                <Circle
+                  key={`${supplier.supplier_name}-${idx}`}
+                  center={[site.lat, site.lng]}
+                  radius={milesToMeters(supplier.radius_miles)}
+                  pathOptions={{
+                    color: supplier.color,
+                    fillColor: supplier.color,
+                    fillOpacity: 0.08,
+                    weight: 2,
+                    opacity: 0.5,
+                  }}
+                >
+                  <Tooltip sticky>
+                    <div className="text-xs">
+                      <p className="font-semibold">{supplier.supplier_name} — {site.location}</p>
+                      <p className="text-muted-foreground">{site.site_name}</p>
+                      <p className="text-muted-foreground">{supplier.radius_miles} mile coverage</p>
+                    </div>
+                  </Tooltip>
+                </Circle>
+              ))
+            )}
+
+            {/* ── Supplier site markers ── */}
+            {showSupplierCoverage && SUPPLIER_COVERAGE_AREAS.map((supplier) =>
+              supplier.sites.map((site, idx) => (
+                <Marker
+                  key={`supplier-marker-${supplier.supplier_name}-${idx}`}
+                  position={[site.lat, site.lng]}
+                  icon={new L.divIcon({
+                    className: 'supplier-marker',
+                    html: `<div style="background-color:${supplier.color};width:14px;height:14px;border-radius:50%;border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.4);"></div>`,
+                    iconSize: [14, 14],
+                    iconAnchor: [7, 7],
+                  })}
+                >
+                  <Tooltip sticky>
+                    <div className="text-xs">
+                      <p className="font-semibold">{site.site_name}</p>
+                      <p className="text-muted-foreground">{site.location}</p>
+                      <p className="text-muted-foreground truncate max-w-[180px]">{site.address}</p>
+                    </div>
+                  </Tooltip>
+                </Marker>
+              ))
+            )}
+
             {customerLocation && (
               <Marker position={[customerLocation.lat, customerLocation.lng]} icon={customerIcon}>
                 <Tooltip sticky>
@@ -486,6 +538,17 @@ export default function BodyshopMap() {
           />
         </div>
         <button
+          onClick={() => setShowSupplierCoverage(s => !s)}
+          className={`relative z-[1001] flex-shrink-0 w-10 h-10 rounded-full shadow-lg border flex items-center justify-center transition-colors ${
+            showSupplierCoverage
+              ? 'bg-blue-500 text-white border-blue-500'
+              : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-border hover:bg-gray-50 dark:hover:bg-gray-700'
+          }`}
+          title="Toggle supplier coverage areas"
+        >
+          <Package className="w-4 h-4" />
+        </button>
+        <button
           onClick={() => setShowSettings(s => !s)}
           className={`relative z-[1001] flex-shrink-0 w-10 h-10 rounded-full shadow-lg border flex items-center justify-center transition-colors ${
             showSettings
@@ -497,9 +560,26 @@ export default function BodyshopMap() {
         </button>
       </div>
 
+      {/* ── SUPPLIER COVERAGE LEGEND ── */}
+      {showSupplierCoverage && (
+        <div className="absolute top-16 right-3 z-[999] bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-border p-2.5 space-y-1.5 max-w-[200px]">
+          <p className="text-xs font-semibold text-muted-foreground">Supplier Coverage</p>
+          {SUPPLIER_COVERAGE_AREAS.map(supplier => (
+            <div key={supplier.supplier_name} className="flex items-center gap-1.5">
+              <div className="w-3 h-3 rounded-full border-2 border-white shadow" style={{ backgroundColor: supplier.color }} />
+              <span className="text-xs font-medium text-gray-700 dark:text-gray-200">{supplier.supplier_name}</span>
+              <span className="text-[10px] text-muted-foreground ml-auto">{supplier.radius_miles}mi</span>
+            </div>
+          ))}
+          <p className="text-[10px] text-muted-foreground pt-1 border-t border-border">
+            {SUPPLIER_COVERAGE_AREAS.reduce((sum, s) => sum + s.sites.length, 0)} sites • Blue circles show 30mi coverage
+          </p>
+        </div>
+      )}
+
       {/* ── SETTINGS PANEL (tier filters) ── */}
       {showSettings && (
-        <div className="absolute top-16 left-3 right-3 z-[999] bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-border p-3 space-y-2">
+        <div className="absolute top-16 left-3 z-[999] bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-border p-3 space-y-2 w-[220px]">
           <p className="text-xs font-medium text-muted-foreground">Filter by tier</p>
           <div className="flex flex-col gap-1.5">
             {[...tierDots, { key: 'None', label: 'No Tier', color: 'bg-gray-400' }].map(t => (
