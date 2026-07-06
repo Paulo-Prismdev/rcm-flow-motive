@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
-import { MapContainer, TileLayer, Marker, Polyline, Circle, Tooltip, useMap, ZoomControl } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Polyline, Circle, GeoJSON, Tooltip, useMap, ZoomControl } from 'react-leaflet';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
@@ -15,6 +15,7 @@ import L from 'leaflet';
 import AddressLookupInput from '@/components/shared/AddressLookupInput';
 import { geocodeAddress } from '@/functions/geocodeAddress';
 import { SUPPLIER_COVERAGE_AREAS, milesToMeters } from '@/components/map/supplierCoverageData';
+import { GREAT_BRITAIN_GEOJSON } from '@/components/map/greatBritainOutline';
 
 // ── Leaflet icon setup ──
 delete L.Icon.Default.prototype._getIconUrl;
@@ -442,8 +443,21 @@ export default function BodyshopMap() {
 
             <MapCenterUpdater center={mapCenter} zoom={mapZoom} />
 
-            {/* ── Supplier coverage circles ── */}
-            {SUPPLIER_COVERAGE_AREAS.filter(s => enabledSuppliers[s.supplier_name]).map((supplier) =>
+            {/* ── Supplier coverage: nationwide = GB landmass fill; others = circles ── */}
+            {SUPPLIER_COVERAGE_AREAS.filter(s => enabledSuppliers[s.supplier_name] && s.nationwide).map((supplier) => (
+              <GeoJSON
+                key={`gb-${supplier.supplier_name}`}
+                data={GREAT_BRITAIN_GEOJSON}
+                style={{
+                  color: supplier.color,
+                  fillColor: supplier.color,
+                  fillOpacity: 0.18,
+                  weight: 1.5,
+                  opacity: 0.6,
+                }}
+              />
+            ))}
+            {SUPPLIER_COVERAGE_AREAS.filter(s => enabledSuppliers[s.supplier_name] && !s.nationwide).map((supplier) =>
               supplier.sites.map((site, idx) => (
                 <Circle
                   key={`${supplier.supplier_name}-${idx}`}
@@ -452,7 +466,7 @@ export default function BodyshopMap() {
                   pathOptions={{
                     color: supplier.color,
                     fillColor: supplier.color,
-                    fillOpacity: supplier.nationwide ? 0.04 : 0.08,
+                    fillOpacity: 0.08,
                     weight: 2,
                     opacity: 0.5,
                   }}
@@ -461,7 +475,7 @@ export default function BodyshopMap() {
                     <div className="text-xs">
                       <p className="font-semibold">{supplier.supplier_name} — {site.location}</p>
                       <p className="text-muted-foreground">{site.site_name}</p>
-                      <p className="text-muted-foreground">{supplier.nationwide ? 'Nationwide coverage' : `${supplier.radius_miles} mile coverage`}</p>
+                      <p className="text-muted-foreground">{supplier.radius_miles} mile coverage</p>
                     </div>
                   </Tooltip>
                 </Circle>
