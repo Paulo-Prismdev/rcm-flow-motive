@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
-import { MapContainer, TileLayer, Marker, Polyline, Circle, GeoJSON, Tooltip, useMap, ZoomControl } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Polyline, Circle, GeoJSON, Polygon, Tooltip, useMap, ZoomControl } from 'react-leaflet';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
@@ -458,17 +458,10 @@ export default function BodyshopMap() {
               />
             ))}
             {SUPPLIER_COVERAGE_AREAS.filter(s => enabledSuppliers[s.supplier_name] && s.coverage_polygon).map((supplier) => (
-              <GeoJSON
+              <Polygon
                 key={`poly-${supplier.supplier_name}`}
-                data={{
-                  type: "Feature",
-                  properties: { name: supplier.supplier_name },
-                  geometry: {
-                    type: "Polygon",
-                    coordinates: [supplier.coverage_polygon.map(([lat, lng]) => [lng, lat])]
-                  }
-                }}
-                style={{
+                positions={supplier.coverage_polygon}
+                pathOptions={{
                   color: supplier.color,
                   fillColor: supplier.color,
                   fillOpacity: 0.12,
