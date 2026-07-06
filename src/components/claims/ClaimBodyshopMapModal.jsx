@@ -461,45 +461,34 @@ export default function ClaimBodyshopMapModal({ claim, isOpen, onClose, onSelect
             </div>
           </div>
 
-          {/* Selected bodyshop detail card */}
-          {selectedBodyshop ? (
-            <div className="p-3 rounded-xl border-2 border-primary bg-primary/5">
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex-1 min-w-0">
-                  <h4 className="font-bold text-sm flex items-center gap-1.5 text-primary mb-2">
-                    <CheckCircle className="w-4 h-4" /> Selected Repairer
-                  </h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                    <div className="space-y-1">
-                      <p className="font-semibold text-sm truncate">{selectedBodyshop.name}</p>
-                      {selectedBodyshop.contact_name && <p className="text-muted-foreground truncate">{selectedBodyshop.contact_name}</p>}
-                      {selectedBodyshop.phone && <p className="flex items-center gap-1 truncate"><Phone className="w-3 h-3 flex-shrink-0" /><span className="truncate">{selectedBodyshop.phone}</span></p>}
-                      {selectedBodyshop.email && <p className="flex items-center gap-1 truncate"><Mail className="w-3 h-3 flex-shrink-0" /><span className="truncate">{selectedBodyshop.email}</span></p>}
-                    </div>
-                    <div className="space-y-1">
-                      {logistics[selectedBodyshop.id] && (
-                        <div className="mb-1"><TravelBadge log={logistics[selectedBodyshop.id]} /></div>
-                      )}
-                      <p className="text-muted-foreground flex items-center gap-1"><MapPinned className="w-3 h-3" /> Address</p>
-                      <div className="text-muted-foreground">
-                        {selectedBodyshop.address_line_1 && <p className="truncate">{selectedBodyshop.address_line_1}</p>}
-                        {selectedBodyshop.town && <p className="truncate">{selectedBodyshop.town}</p>}
-                        {selectedBodyshop.postcode && <p className="font-semibold">{selectedBodyshop.postcode}</p>}
-                      </div>
-                    </div>
+        </div>
+
+        {/* Selected repairer confirmation strip — fixed, always visible (outside scroll area) */}
+        {selectedBodyshop ? (
+          <div className="p-3 border-t border-primary/40 bg-primary/5 flex-shrink-0">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2 min-w-0 flex-1">
+                <CheckCircle className="w-4 h-4 text-primary flex-shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <p className="font-semibold text-sm truncate text-primary">{selectedBodyshop.name}</p>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground truncate">
+                    {selectedBodyshop.town && <span className="truncate">{selectedBodyshop.town}</span>}
+                    {selectedBodyshop.postcode && <span className="font-semibold truncate">{selectedBodyshop.postcode}</span>}
+                    {selectedBodyshop.phone && <span className="hidden sm:flex items-center gap-1 truncate"><Phone className="w-3 h-3 flex-shrink-0" />{selectedBodyshop.phone}</span>}
+                    {logistics[selectedBodyshop.id] && <TravelBadge log={logistics[selectedBodyshop.id]} />}
                   </div>
                 </div>
-                <Button variant="ghost" size="icon" className="flex-shrink-0" onClick={() => setSelectedBodyshop(null)}>
-                  <X className="w-4 h-4" />
-                </Button>
               </div>
+              <Button variant="ghost" size="icon" className="flex-shrink-0 h-8 w-8" onClick={() => setSelectedBodyshop(null)}>
+                <X className="w-4 h-4" />
+              </Button>
             </div>
-          ) : (
-            <div className="text-center text-sm text-muted-foreground p-3 bg-muted/50 rounded-lg">
-              Click a repairer from the list or map to select
-            </div>
-          )}
-        </div>
+          </div>
+        ) : (
+          <div className="p-2.5 border-t flex-shrink-0 text-center text-xs text-muted-foreground bg-muted/30">
+            Click a repairer from the list or map to select
+          </div>
+        )}
 
         {/* Actions */}
         <div className="flex justify-end gap-3 p-4 border-t flex-shrink-0">
