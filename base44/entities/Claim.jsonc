@@ -686,6 +686,20 @@
     "indemnity_vehicle_modifications": {
       "type": "string"
     },
+    "indemnity_token": {
+      "type": "string",
+      "description": "Secure token for the external indemnity form link"
+    },
+    "indemnity_link_sent_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the indemnity form link was generated/sent"
+    },
+    "indemnity_completed_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the customer completed the external indemnity form"
+    },
     "last_contact_source": {
       "type": "string",
       "enum": [
