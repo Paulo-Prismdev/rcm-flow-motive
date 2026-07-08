@@ -7,6 +7,7 @@ import { format, parse, isValid } from 'date-fns';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { CalendarIcon } from 'lucide-react';
 import { submitIndemnityForm } from '@/functions/submitIndemnityForm';
+import { getPublicFormToken } from '@/functions/getPublicFormToken';
 
 const companyLogo = 'https://media.base44.com/images/public/68ee39fb8915b1b539e13c59/b2cb057e2_RCMAutomotiveLogoGreenAutomotivewithHLights.jpg';
 
@@ -64,6 +65,7 @@ export default function IndemnityForm() {
   const [claimInfo, setClaimInfo] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [formToken, setFormToken] = useState('');
   const [formData, setFormData] = useState({
     indemnity_driver_dob: '',
     indemnity_registered_owner: '',
@@ -76,13 +78,25 @@ export default function IndemnityForm() {
   });
 
   useEffect(() => {
-    validateToken();
+    initForm();
   }, []);
 
-  const validateToken = async () => {
+  const initForm = async () => {
+    try {
+      const tokenRes = await getPublicFormToken({});
+      const token = tokenRes.data?.token || '';
+      setFormToken(token);
+      await validateToken(token);
+    } catch {
+      await validateToken('');
+    }
+  };
+
+  const validateToken = async (token) => {
     setLoading(true);
     try {
       const res = await submitIndemnityForm({
+        _form_secret: token,
         claimId: urlClaimId,
         token: urlToken,
         action: 'validate',
@@ -109,9 +123,10 @@ export default function IndemnityForm() {
     setError('');
     try {
       const res = await submitIndemnityForm({
+        _form_secret: formToken,
         claimId: urlClaimId,
         token: urlToken,
-        formData,
+        formData: formData,
       });
       if (res.data?.success) {
         setSubmitted(true);

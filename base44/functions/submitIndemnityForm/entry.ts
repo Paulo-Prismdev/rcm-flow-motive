@@ -18,8 +18,14 @@ Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
     const body = await req.json();
 
+    // Public form: validate _form_secret to bypass platform auth gate
+    const secret = body._form_secret;
+    if (!secret || secret !== Deno.env.get('PUBLIC_FORM_SECRET')) {
+      return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    delete body._form_secret;
+
     // Security is provided by the indemnity_token (32-byte crypto-random, stored on claim).
-    // No _form_secret needed — the token IS the secret.
     const { claimId, token, formData, action } = body;
     if (!claimId || !token) {
       return Response.json({ error: 'Missing claimId or token' }, { status: 400 });
