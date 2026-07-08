@@ -42,7 +42,7 @@ const AuthenticatedApp = () => {
         <Route path="/parts-request" element={<PublicPartsRequest />} />
         <Route path="/backorder-form" element={<BackorderForm />} />
         <Route path="/client-claim-form" element={<ClientClaimForm />} />
-        <Route path="/indemnity-form/:claimId/:token" element={<IndemnityForm />} />
+        <Route path="/indemnity-form" element={<IndemnityForm />} />
       </Routes>
     );
   }
