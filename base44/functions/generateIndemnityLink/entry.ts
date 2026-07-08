@@ -39,7 +39,7 @@ Deno.serve(async (req) => {
 
     // Build the public URL
     const origin = req.headers.get('origin') || req.headers.get('referer')?.replace(/\/$/, '') || '';
-    const link = `${origin}/indemnity-form/${claimId}/${token}`;
+    const link = `${origin}/indemnity-form?claimId=${claimId}&token=${token}`;
 
     return Response.json({ success: true, link, token });
   } catch (error) {

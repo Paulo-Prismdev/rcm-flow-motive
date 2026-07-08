@@ -28,7 +28,7 @@ const LayoutWrapper = ({ children, currentPageName }) => Layout ?
   <Layout currentPageName={currentPageName}>{children}</Layout>
   : <>{children}</>;
 
-const PUBLIC_PATHS = ['/backorder-form', '/parts-request', '/client-claim-form', '/indemnity-form'];
+const PUBLIC_PATHS = ['/backorder-form', '/parts-request', '/client-claim-form', '/indemnity-form']; // indemnity-form now uses query params
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, isAuthenticated, navigateToLogin } = useAuth();
@@ -85,7 +85,7 @@ const AuthenticatedApp = () => {
       <Route path="/parts-request" element={<PublicPartsRequest />} />
       <Route path="/backorder-form" element={<BackorderForm />} />
       <Route path="/client-claim-form" element={<ClientClaimForm />} />
-      <Route path="/indemnity-form/:claimId/:token" element={<IndemnityForm />} />
+      <Route path="/indemnity-form" element={<IndemnityForm />} />
       <Route path="/TyreRequests" element={
         <LayoutWrapper currentPageName="TyreRequests">
           <TyreRequests />
@@ -123,7 +123,7 @@ function PublicApp() {
       <Route path="/parts-request" element={<PublicPartsRequest />} />
       <Route path="/backorder-form" element={<BackorderForm />} />
       <Route path="/client-claim-form" element={<ClientClaimForm />} />
-      <Route path="/indemnity-form/:claimId/:token" element={<IndemnityForm />} />
+      <Route path="/indemnity-form" element={<IndemnityForm />} />
     </Routes>
   );
 }

@@ -56,9 +56,9 @@ function DOBCalendar({ selected, onSelect }) {
 }
 
 export default function IndemnityForm() {
-  const pathParts = window.location.pathname.split('/');
-  const urlClaimId = pathParts[pathParts.length - 2];
-  const urlToken = pathParts[pathParts.length - 1];
+  const params = new URLSearchParams(window.location.search);
+  const urlClaimId = params.get('claimId');
+  const urlToken = params.get('token');
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
