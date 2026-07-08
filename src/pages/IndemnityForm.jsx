@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { submitIndemnityForm } from '@/functions/submitIndemnityForm';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -7,8 +6,28 @@ import { Check, Loader, ShieldCheck, Car } from 'lucide-react';
 import { format, parse, isValid } from 'date-fns';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { CalendarIcon } from 'lucide-react';
+import { appParams } from '@/lib/app-params';
 
 const companyLogo = 'https://media.base44.com/images/public/68ee39fb8915b1b539e13c59/b2cb057e2_RCMAutomotiveLogoGreenAutomotivewithHLights.jpg';
+
+// Direct fetch to the function endpoint — bypasses the SDK entirely,
+// so no auth.me() call and no 403 on public pages.
+async function callFunction(functionName, payload) {
+  const { serverUrl, appId } = appParams;
+  const url = `${serverUrl}/api/apps/${appId}/functions/${functionName}`;
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    const err = new Error(data.error || 'Request failed');
+    err.response = { data };
+    throw err;
+  }
+  return { data };
+}
 
 function DOBCalendar({ selected, onSelect }) {
   const currentYear = new Date().getFullYear();
@@ -82,7 +101,7 @@ export default function IndemnityForm() {
   const validateToken = async () => {
     setLoading(true);
     try {
-      const res = await submitIndemnityForm({
+      const res = await callFunction('submitIndemnityForm', {
         claimId: urlClaimId,
         token: urlToken,
         action: 'validate',
@@ -108,7 +127,7 @@ export default function IndemnityForm() {
     setSubmitting(true);
     setError('');
     try {
-      const res = await submitIndemnityForm({
+      const res = await callFunction('submitIndemnityForm', {
         claimId: urlClaimId,
         token: urlToken,
         formData,

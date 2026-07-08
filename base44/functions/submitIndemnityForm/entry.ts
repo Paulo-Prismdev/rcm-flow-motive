@@ -4,6 +4,16 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 // or submits indemnity form data (POST).
 // Uses PUBLIC_FORM_SECRET for access control, same as other public forms.
 Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response(null, {
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type',
+      },
+    });
+  }
+
   try {
     const base44 = createClientFromRequest(req);
     const body = await req.json();
