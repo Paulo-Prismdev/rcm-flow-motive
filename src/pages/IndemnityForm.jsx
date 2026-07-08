@@ -1,13 +1,14 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { base44 } from '@/api/base44Client';
-import { getPublicFormToken } from '@/functions/getPublicFormToken';
+import React, { useState, useEffect } from 'react';
+import { submitIndemnityForm } from '@/functions/submitIndemnityForm';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Check, Loader, ShieldCheck, Car, User } from 'lucide-react';
+import { Check, Loader, ShieldCheck, Car } from 'lucide-react';
 import { format, parse, isValid } from 'date-fns';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { CalendarIcon } from 'lucide-react';
+
+const companyLogo = 'https://media.base44.com/images/public/68ee39fb8915b1b539e13c59/b2cb057e2_RCMAutomotiveLogoGreenAutomotivewithHLights.jpg';
 
 function DOBCalendar({ selected, onSelect }) {
   const currentYear = new Date().getFullYear();
@@ -54,9 +55,6 @@ function DOBCalendar({ selected, onSelect }) {
 }
 
 export default function IndemnityForm() {
-  const { claimId, token } = React.useParams ? {} : {};
-  // Use URL params from router
-  const params = new URLSearchParams(window.location.search);
   const pathParts = window.location.pathname.split('/');
   const urlClaimId = pathParts[pathParts.length - 2];
   const urlToken = pathParts[pathParts.length - 1];
@@ -64,7 +62,6 @@ export default function IndemnityForm() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [claimInfo, setClaimInfo] = useState(null);
-  const [formToken, setFormToken] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [formData, setFormData] = useState({
@@ -79,27 +76,21 @@ export default function IndemnityForm() {
   });
 
   useEffect(() => {
-    getPublicFormToken({}).then(res => setFormToken(res.data?.token || '')).catch(() => {});
-  }, []);
-
-  useEffect(() => {
-    if (!formToken) return;
     validateToken();
-  }, [formToken]);
+  }, []);
 
   const validateToken = async () => {
     setLoading(true);
     try {
-      const result = await base44.functions.invoke('submitIndemnityForm', {
-        _form_secret: formToken,
+      const res = await submitIndemnityForm({
         claimId: urlClaimId,
         token: urlToken,
         action: 'validate',
       });
-      if (result.data?.success) {
-        setClaimInfo(result.data.claim);
+      if (res.data?.success) {
+        setClaimInfo(res.data.claim);
       } else {
-        setError(result.data?.error || 'Invalid or expired link.');
+        setError(res.data?.error || 'Invalid or expired link.');
       }
     } catch (err) {
       setError(err.response?.data?.error || 'Invalid or expired link.');
@@ -109,7 +100,6 @@ export default function IndemnityForm() {
   };
 
   const handleSubmit = async () => {
-    // Basic validation
     if (!formData.indemnity_driver_dob) { setError('Please enter the driver\'s date of birth.'); return; }
     if (!formData.indemnity_registered_owner) { setError('Please enter the registered owner.'); return; }
     if (!formData.indemnity_full_license_12_months) { setError('Please confirm license held for 12+ months.'); return; }
@@ -118,16 +108,15 @@ export default function IndemnityForm() {
     setSubmitting(true);
     setError('');
     try {
-      const result = await base44.functions.invoke('submitIndemnityForm', {
-        _form_secret: formToken,
+      const res = await submitIndemnityForm({
         claimId: urlClaimId,
         token: urlToken,
         formData,
       });
-      if (result.data?.success) {
+      if (res.data?.success) {
         setSubmitted(true);
       } else {
-        setError(result.data?.error || 'Submission failed. Please try again.');
+        setError(res.data?.error || 'Submission failed. Please try again.');
       }
     } catch (err) {
       setError(err.response?.data?.error || 'Submission failed. Please try again.');
@@ -183,6 +172,7 @@ export default function IndemnityForm() {
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="text-center mb-6">
+          <img src={companyLogo} alt="RCM Automotive" className="h-16 w-auto object-contain mx-auto mb-3" />
           <div className="w-14 h-14 rounded-full bg-blue-100 flex items-center justify-center mx-auto mb-3">
             <ShieldCheck className="w-7 h-7 text-blue-600" />
           </div>
