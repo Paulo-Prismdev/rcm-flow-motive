@@ -1086,7 +1086,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
 
       case 'bodyshop':
         return (
-          <EditableSection title="Bodyshop Details" icon={Wrench} claim={claim} onUpdate={handleUpdate} EditComponent={ClaimBodyshopForm} canEdit={canEdit && !claim.bs_instructed}>
+          <EditableSection title="Bodyshop Details" icon={Wrench} claim={claim} onUpdate={handleUpdate} EditComponent={ClaimBodyshopForm} canEdit={canEdit}>
             {/* Find Repairer on Map — always visible, no edit mode needed */}
             <div className="mb-4">
               <ClaimBodyshopAllocateButton claim={claim} onAllocated={(data) => handleUpdate({ ...claim, ...data })} />
