@@ -70,6 +70,18 @@ export const SUPPLIER_COVERAGE_AREAS = [
     sites: [
       { location: "Nationwide", site_name: "Tomo", address: "Nationwide coverage — all UK bodyshops", lat: 54.5, lng: -2.5 },
     ]
+  },
+  {
+    supplier_name: "Smith's",
+    color: "#10b981", // emerald-500
+    radius_miles: 30,
+    coverage_polygon: [
+      [51.358, -0.668], [51.373, -0.493], [51.322, -0.273],
+      [51.393, -0.143], [52.643, 0.244], [53.102, -0.426],
+      [53.111, -0.988], [53.093, -1.352], [52.700, -1.338],
+      [51.920, -0.938], [51.609, -0.796]
+    ],
+    sites: []
   }
 ];
 
