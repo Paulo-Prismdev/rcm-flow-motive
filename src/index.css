@@ -118,7 +118,7 @@
     user-select: text;
     -webkit-touch-callout: default;
   }
-  button, a, [role="button"], [onClick] {
+  button, a, [role="button"] {
     touch-action: manipulation;
     cursor: pointer;
   }
