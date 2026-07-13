@@ -24,7 +24,8 @@ import {
     Download,
     Image,
     RefreshCw,
-    MapPin
+    MapPin,
+    Eye
 } from "lucide-react";
 import { format } from "date-fns";
 import StatusBadge from "../shared/StatusBadge";
@@ -69,6 +70,7 @@ import NotesModal from '../shared/NotesModal';
 import UpdateTrackingModal from './UpdateTrackingModal';
 import UpdateOverrideModal from './UpdateOverrideModal';
 import ClaimUpdatesModal from '../shared/ClaimUpdatesModal';
+import ClaimQuickViewModal from './ClaimQuickViewModal';
 
 import BackorderedPartsModal from './BackorderedPartsModal';
 import { formatUKRegistration } from '../shared/formatRegistration';
@@ -228,6 +230,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
   const [isImagesOpen, setIsImagesOpen] = useState(false);
   const [isNotesOpen, setIsNotesOpen] = useState(false);
   const [isClaimUpdatesOpen, setIsClaimUpdatesOpen] = useState(false);
+  const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
   const [startTime] = useState(new Date());
   const [currentDuration, setCurrentDuration] = useState(0);
   const [selectedSection, setSelectedSection] = useState('status');
@@ -1262,6 +1265,11 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
         onClose={() => setIsClaimUpdatesOpen(false)}
         onUpdateCreated={handleClaimUpdateCreated}
       />
+      <ClaimQuickViewModal
+        claim={claim}
+        isOpen={isQuickViewOpen}
+        onClose={() => setIsQuickViewOpen(false)}
+      />
 
       <UpdateTrackingModal
         claim={claim}
@@ -1355,6 +1363,9 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                           </div>
                       </div>
                       <div className="flex items-center gap-1.5 flex-shrink-0">
+                        <Button onClick={() => setIsQuickViewOpen(true)} variant="outline" className="h-9 px-4 text-sm font-medium rounded-lg gap-1.5">
+                          <Eye className="w-4 h-4" /> Quick View
+                        </Button>
                         {canEdit && (
                           <Button onClick={() => setIsClaimUpdatesOpen(true)} className="h-9 px-4 text-sm font-medium rounded-lg bg-green-600 hover:bg-green-700 text-white relative">
                             Updates & Status
