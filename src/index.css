@@ -114,7 +114,9 @@
   }
   body {
     @apply bg-background text-foreground;
-    touch-action: manipulation;
+    -webkit-user-select: text;
+    user-select: text;
+    -webkit-touch-callout: default;
   }
   button, a, [role="button"], [onClick] {
     touch-action: manipulation;
