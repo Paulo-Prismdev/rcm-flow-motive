@@ -84,7 +84,7 @@ export default function ClaimQuickViewModal({ claim, isOpen, onClose }) {
           </Section>
 
           {/* Insurance */}
-          <Section icon={Shield} title="Insurance" color="bg-orange-50 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300">
+          <Section icon={Shield} title="Client's Insurance" color="bg-orange-50 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300">
             <InfoRow label="Insurer" value={claim.insurer} />
             <InfoRow label="Claim Reference" value={claim.claim_ref} />
             <InfoRow label="Policy Number" value={claim.policy_number} />
@@ -104,14 +104,27 @@ export default function ClaimQuickViewModal({ claim, isOpen, onClose }) {
           </Section>
 
           {/* Third Party */}
-          {(claim.tp_name || claim.tp_reg || claim.tp_insurer) && (
+          {(claim.tp_name || claim.tp_reg || claim.tp_insurer || claim.tp_phone) && (
             <Section icon={Users} title="Third Party" color="bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300">
               <InfoRow label="TP Name" value={claim.tp_name} />
               <InfoRow label="TP Phone" value={claim.tp_phone} href={claim.tp_phone ? `tel:${claim.tp_phone}` : null} />
-              <InfoRow label="TP Insurer" value={claim.tp_insurer} />
-              <InfoRow label="TP Claim Ref" value={claim.tp_claim_ref} />
+              <InfoRow label="TP Email" value={claim.tp_email} href={claim.tp_email ? `mailto:${claim.tp_email}` : null} />
+              <InfoRow label="TP Driver / Contact" value={claim.tp_driver_contact} />
               <InfoRow label="TP Registration" value={claim.tp_reg} />
               <InfoRow label="TP Make / Model" value={claim.tp_make_model} />
+              {(claim.tp_address_line_1 || claim.tp_town || claim.tp_postcode) && (
+                <InfoRow label="TP Address" value={[claim.tp_address_line_1, claim.tp_address_line_2, claim.tp_town, claim.tp_county, claim.tp_postcode].filter(Boolean).join(', ')} fullWidth />
+              )}
+            </Section>
+          )}
+
+          {/* Third Party Insurance */}
+          {(claim.tp_insurer || claim.tp_policy_number || claim.tp_claim_ref || claim.tp_broker_name) && (
+            <Section icon={Shield} title="Third Party Insurance" color="bg-rose-50 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300">
+              <InfoRow label="TP Insurer" value={claim.tp_insurer} />
+              <InfoRow label="TP Claim Reference" value={claim.tp_claim_ref} />
+              <InfoRow label="TP Policy Number" value={claim.tp_policy_number} />
+              <InfoRow label="TP Broker" value={claim.tp_broker_name} />
             </Section>
           )}
 
