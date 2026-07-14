@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { 
   Plus, 
-  Search, 
   Building2, 
   Phone, 
   Mail, 
@@ -25,7 +24,6 @@ export default function SupplierManagement() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
   const [filterManufacturer, setFilterManufacturer] = useState('all');
-  const [filterLocation, setFilterLocation] = useState('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingSupplier, setEditingSupplier] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -140,22 +138,25 @@ export default function SupplierManagement() {
   const uniqueManufacturers = [...new Set(allManufacturers)].sort();
 
   const filteredSuppliers = suppliers.filter(supplier => {
-    const matchesSearch = supplier.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      supplier.contact_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      supplier.emails?.some(email => email.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      supplier.email?.toLowerCase().includes(searchTerm.toLowerCase());
+    const term = searchTerm.toLowerCase();
+    const matchesSearch = !term ||
+      supplier.name?.toLowerCase().includes(term) ||
+      supplier.contact_name?.toLowerCase().includes(term) ||
+      supplier.phone?.toLowerCase().includes(term) ||
+      supplier.emails?.some(email => email.toLowerCase().includes(term)) ||
+      supplier.email?.toLowerCase().includes(term) ||
+      supplier.town?.toLowerCase().includes(term) ||
+      supplier.county?.toLowerCase().includes(term) ||
+      supplier.postcode?.toLowerCase().includes(term) ||
+      supplier.part_supply_type?.toLowerCase().includes(term) ||
+      (supplier.manufacturer_associations && supplier.manufacturer_associations.some(m => m.toLowerCase().includes(term)));
     
     const matchesType = filterType === 'all' || supplier.part_supply_type === filterType;
     
     const matchesManufacturer = filterManufacturer === 'all' || 
       (supplier.manufacturer_associations && supplier.manufacturer_associations.includes(filterManufacturer));
     
-    const matchesLocation = !filterLocation || 
-      supplier.town?.toLowerCase().includes(filterLocation.toLowerCase()) ||
-      supplier.county?.toLowerCase().includes(filterLocation.toLowerCase()) ||
-      supplier.postcode?.toLowerCase().includes(filterLocation.toLowerCase());
-    
-    return matchesSearch && matchesType && matchesManufacturer && matchesLocation;
+    return matchesSearch && matchesType && matchesManufacturer;
   });
 
   return (
@@ -218,59 +219,42 @@ export default function SupplierManagement() {
           </div>
         </div>
 
-        <div className="flex flex-col gap-3">
-          <div className="flex gap-3 flex-wrap">
-            <div className="relative flex-1 min-w-[200px]">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-foreground-muted" />
-              <Input
-                placeholder="Search by name, contact, email..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="neomorph-inset pl-10"
-              />
-            </div>
-            <select
-              value={filterType}
-              onChange={(e) => setFilterType(e.target.value)}
-              className="neomorph-inset px-4 py-2 rounded-xl border-0 min-w-[150px]"
-            >
-              <option value="all">All Types</option>
-              <option value="OEM">OEM</option>
-              <option value="Green">Green (Used)</option>
-              <option value="Aftermarket">Aftermarket</option>
-              <option value="Reconditioned">Reconditioned</option>
-              <option value="Glass">Glass</option>
-            </select>
-          </div>
-          <div className="flex gap-3 flex-wrap">
-            <div className="relative flex-1 min-w-[200px]">
-              <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-foreground-muted" />
-              <Input
-                placeholder="Filter by location (town, county, postcode)..."
-                value={filterLocation}
-                onChange={(e) => setFilterLocation(e.target.value)}
-                className="neomorph-inset pl-10"
-              />
-            </div>
-            <select
-              value={filterManufacturer}
-              onChange={(e) => setFilterManufacturer(e.target.value)}
-              className="neomorph-inset px-4 py-2 rounded-xl border-0 min-w-[200px]"
-            >
-              <option value="all">All Manufacturers</option>
-              {uniqueManufacturers.map(mfr => (
-                <option key={mfr} value={mfr}>{mfr}</option>
-              ))}
-            </select>
-          </div>
-          {(filterLocation || filterManufacturer !== 'all' || filterType !== 'all' || searchTerm) && (
+        <div className="flex gap-3 flex-wrap items-center">
+          <Input
+            placeholder="Search suppliers (name, contact, email, phone, location, manufacturer...)"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="neomorph-inset flex-1 min-w-[200px]"
+          />
+          <select
+            value={filterType}
+            onChange={(e) => setFilterType(e.target.value)}
+            className="neomorph-inset px-4 py-2 rounded-xl border-0 min-w-[150px]"
+          >
+            <option value="all">All Types</option>
+            <option value="OEM">OEM</option>
+            <option value="Green">Green (Used)</option>
+            <option value="Aftermarket">Aftermarket</option>
+            <option value="Reconditioned">Reconditioned</option>
+            <option value="Glass">Glass</option>
+          </select>
+          <select
+            value={filterManufacturer}
+            onChange={(e) => setFilterManufacturer(e.target.value)}
+            className="neomorph-inset px-4 py-2 rounded-xl border-0 min-w-[200px]"
+          >
+            <option value="all">All Manufacturers</option>
+            {uniqueManufacturers.map(mfr => (
+              <option key={mfr} value={mfr}>{mfr}</option>
+            ))}
+          </select>
+          {(filterManufacturer !== 'all' || filterType !== 'all' || searchTerm) && (
             <Button 
               variant="ghost" 
               size="sm"
               onClick={() => {
                 setSearchTerm('');
                 setFilterType('all');
-                setFilterLocation('');
                 setFilterManufacturer('all');
               }}
               className="w-fit"
