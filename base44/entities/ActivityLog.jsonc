@@ -52,41 +52,9 @@
     "description"
   ],
   "rls": {
-    "create": {
-      "$or": [
-        {
-          "user_condition": {
-            "user_type": "internal"
-          }
-        }
-      ]
-    },
-    "read": {
-      "$or": [
-        {
-          "user_condition": {
-            "user_type": "internal"
-          }
-        }
-      ]
-    },
-    "update": {
-      "$or": [
-        {
-          "user_condition": {
-            "user_type": "internal"
-          }
-        }
-      ]
-    },
-    "delete": {
-      "$or": [
-        {
-          "user_condition": {
-            "user_type": "internal"
-          }
-        }
-      ]
-    }
+    "create": null,
+    "read": null,
+    "update": null,
+    "delete": null
   }
 }
