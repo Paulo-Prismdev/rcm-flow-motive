@@ -457,7 +457,7 @@ export default function ClaimsPage() {
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
             placeholder="Search by reg, client, job number, driver..."
-            className="w-full pl-10 pr-6 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-[10px] focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/15 text-gray-900 dark:text-white placeholder-gray-400 transition-all"
+            className="w-full pl-3 pr-3 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-[10px] focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/15 text-gray-900 dark:text-white placeholder-gray-400 transition-all"
           />
         </div>
 
@@ -488,7 +488,7 @@ export default function ClaimsPage() {
       {/* Filter panel */}
       {showFilters && (
         <div className="px-5 py-3 border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/30 flex-shrink-0">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
             {[
               { label: 'Claim Type', value: claimTypeFilter, onChange: setClaimTypeFilter, options: ['Credit Repair','Fault Claim','Non-Fault Claim','Total Loss','Glass Claim'] },
               { label: 'Insurer', value: insurerFilter, onChange: setInsurerFilter, options: uniqueInsurers },

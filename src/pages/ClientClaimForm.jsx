@@ -291,13 +291,13 @@ export default function ClientClaimForm() {
           {currentStepKey === 'personal' && (
             <div className="space-y-4">
               <div><label className={labelCls}>Full Name *</label><Input value={formData.client_name} onChange={e => field('client_name', e.target.value)} className={inputCls} placeholder="Your full name" /></div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div><label className={labelCls}>Phone *</label><Input value={formData.client_phone} onChange={e => field('client_phone', e.target.value)} className={inputCls} placeholder="07700..." /></div>
                 <div><label className={labelCls}>Email</label><Input type="email" value={formData.client_email} onChange={e => field('client_email', e.target.value)} className={inputCls} placeholder="you@example.com" /></div>
               </div>
               <div><label className={labelCls}>Address Line 1</label><Input value={formData.client_address_line_1} onChange={e => field('client_address_line_1', e.target.value)} className={inputCls} placeholder="House/flat & street" /></div>
               <div><label className={labelCls}>Address Line 2</label><Input value={formData.client_address_line_2} onChange={e => field('client_address_line_2', e.target.value)} className={inputCls} placeholder="Optional" /></div>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div><label className={labelCls}>Town</label><Input value={formData.client_town} onChange={e => field('client_town', e.target.value)} className={inputCls} /></div>
                 <div><label className={labelCls}>County</label><Input value={formData.client_county} onChange={e => field('client_county', e.target.value)} className={inputCls} /></div>
                 <div><label className={labelCls}>Postcode</label><Input value={formData.client_postcode} onChange={e => field('client_postcode', e.target.value)} className={inputCls} /></div>
@@ -318,7 +318,7 @@ export default function ClientClaimForm() {
                   <option value="Glass Claim">Glass Claim</option>
                 </select>
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div><label className={labelCls}>Date of Loss *</label><Input type="date" value={formData.loss_date} onChange={e => field('loss_date', e.target.value)} className={inputCls} /></div>
                 <div><label className={labelCls}>Time of Loss</label><Input type="time" value={formData.loss_time} onChange={e => field('loss_time', e.target.value)} className={inputCls} /></div>
               </div>
@@ -344,7 +344,7 @@ export default function ClientClaimForm() {
           {currentStepKey === 'vehicle' && (
             <div className="space-y-4">
               <div><label className={labelCls}>Vehicle Registration *</label><Input value={formData.reg} onChange={e => field('reg', e.target.value.toUpperCase())} className={inputCls} placeholder="e.g. AB12 CDE" /></div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div><label className={labelCls}>Make & Model</label><Input value={formData.make_model} onChange={e => field('make_model', e.target.value)} className={inputCls} placeholder="e.g. Ford Focus" /></div>
                 <div><label className={labelCls}>Colour</label><Input value={formData.vehicle_colour} onChange={e => field('vehicle_colour', e.target.value)} className={inputCls} placeholder="e.g. Blue" /></div>
               </div>
