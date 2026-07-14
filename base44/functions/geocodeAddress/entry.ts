@@ -57,7 +57,6 @@ Deno.serve(async (req) => {
 
       const params = new URLSearchParams({
         input,
-        types: 'address',
         components: 'country:gb',
         key: GOOGLE_API_KEY
       });
