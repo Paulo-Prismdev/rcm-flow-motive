@@ -9,21 +9,21 @@ const buttonVariants = cva(
       variants: {
         variant: {
           default:
-            "bg-primary text-primary-foreground shadow hover:bg-[#2563eb] h-9 px-4",
+            "bg-primary text-primary-foreground shadow hover:bg-[#2563eb] h-11 lg:h-9 px-4",
           destructive:
-            "bg-[#ef4444] text-destructive-foreground shadow-sm hover:bg-[#ef4444]/90 h-9 px-4",
+            "bg-[#ef4444] text-destructive-foreground shadow-sm hover:bg-[#ef4444]/90 h-11 lg:h-9 px-4",
           outline:
-            "border border-input bg-transparent shadow-sm hover:bg-accent hover:text-accent-foreground h-9 px-4",
+            "border border-input bg-transparent shadow-sm hover:bg-accent hover:text-accent-foreground h-11 lg:h-9 px-4",
           secondary:
-            "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80 h-9 px-4",
-          ghost: "hover:bg-accent hover:text-accent-foreground h-9 px-4",
+            "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80 h-11 lg:h-9 px-4",
+          ghost: "hover:bg-accent hover:text-accent-foreground h-11 lg:h-9 px-4",
           link: "text-primary underline-offset-4 hover:underline h-auto px-0",
         },
         size: {
           default: "h-9 px-4",
           sm: "h-[30px] rounded-md px-[10px] text-[13px]",
           lg: "h-9 rounded-md px-4",
-          icon: "h-[30px] w-[30px]",
+          icon: "h-11 w-11 lg:h-[30px] lg:w-[30px]",
         },
       },
     defaultVariants: {
