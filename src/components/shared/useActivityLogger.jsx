@@ -3,7 +3,9 @@ import { base44 } from '@/api/base44Client';
 // Helper to log activity
 export async function logActivity({ parentId, parentType, action, fieldName, oldValue, newValue, description, user }) {
   try {
-    await base44.entities.ActivityLog.create({
+    // Use service role so activity logging always succeeds regardless of user RLS.
+    // The user identity (email/name) is captured explicitly in the record fields.
+    await base44.asServiceRole.entities.ActivityLog.create({
       parent_id: parentId,
       parent_type: parentType,
       action,
