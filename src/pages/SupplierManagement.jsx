@@ -194,7 +194,7 @@ export default function SupplierManagement() {
               disabled={isUploading} />
             
             <label htmlFor="csv-upload">
-              <Button className="neomorph-flat gap-2 text-[hsl(var(--foreground))] bg-[hsl(var(--card))]" disabled={isUploading} as="span">
+              <Button className="neomorph-flat gap-2 text-[hsl(var(--card-foreground))] bg-[hsl(var(--card))]" disabled={isUploading} as="span">
                 {isUploading ?
                 <>
                     <Loader className="w-4 h-4 animate-spin" />
@@ -208,7 +208,7 @@ export default function SupplierManagement() {
                 }
               </Button>
             </label>
-            <Button onClick={handleExportCSV} className="neomorph-flat gap-2">
+            <Button onClick={handleExportCSV} className="neomorph-flat gap-2 text-[hsl(var(--foreground))]">
               <Download className="w-4 h-4" />
               Export CSV
             </Button>
