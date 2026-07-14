@@ -355,7 +355,7 @@ export default function SupplierManagement() {
                     <p className="text-xs font-semibold text-foreground-muted mb-2">Manufacturers:</p>
                     <div className="flex flex-wrap gap-1 max-w-full">
                       {supplier.manufacturer_associations.slice(0, 3).map((mfr, idx) =>
-                <span key={idx} className="text-xs px-2 py-0.5 rounded-full bg-accent/10 text-accent max-w-full truncate">
+                <span key={idx} title={mfr} className="text-xs px-2 py-0.5 rounded-full bg-accent/10 text-accent max-w-full truncate">
                           {mfr}
                         </span>
                 )}
