@@ -283,7 +283,7 @@ export default function SupplierManagement() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredSuppliers.map((supplier) =>
-          <div key={supplier.id} className="neomorph-flat p-4 hover:shadow-lg transition-all">
+          <div key={supplier.id} className="neomorph-flat p-4 hover:shadow-lg transition-all overflow-hidden">
                 <div className="flex justify-between items-start mb-3">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
@@ -353,9 +353,9 @@ export default function SupplierManagement() {
                 {supplier.manufacturer_associations && supplier.manufacturer_associations.length > 0 &&
             <div className="mt-3 pt-3 border-t border-border">
                     <p className="text-xs font-semibold text-foreground-muted mb-2">Manufacturers:</p>
-                    <div className="flex flex-wrap gap-1">
+                    <div className="flex flex-wrap gap-1 max-w-full">
                       {supplier.manufacturer_associations.slice(0, 3).map((mfr, idx) =>
-                <span key={idx} className="text-xs px-2 py-0.5 rounded-full bg-accent/10 text-accent">
+                <span key={idx} className="text-xs px-2 py-0.5 rounded-full bg-accent/10 text-accent max-w-full truncate">
                           {mfr}
                         </span>
                 )}
