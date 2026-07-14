@@ -208,7 +208,7 @@ export default function SupplierManagement() {
                 }
               </Button>
             </label>
-            <Button onClick={handleExportCSV} className="neomorph-flat gap-2 text-[hsl(var(--foreground))]">
+            <Button onClick={handleExportCSV} className="neomorph-flat gap-2 text-[hsl(var(--foreground))] bg-[hsl(var(--card))]">
               <Download className="w-4 h-4" />
               Export CSV
             </Button>
