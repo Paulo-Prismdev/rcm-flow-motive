@@ -173,7 +173,7 @@ export default function SupplierManagement() {
       <div className="neomorph p-4">
         <div className="flex items-center gap-3 mb-4">
           <Link to={createPageUrl("Settings")}>
-            <Button className="neomorph-flat p-2 bg-[hsl(var(--popover))] text-[hsl(var(--card))]">
+            <Button className="neomorph-flat p-2 bg-[hsl(var(--card))] text-[hsl(var(--foreground))]">
               <ArrowLeft className="w-4 h-4" />
             </Button>
           </Link>
@@ -194,7 +194,7 @@ export default function SupplierManagement() {
               disabled={isUploading} />
             
             <label htmlFor="csv-upload">
-              <Button className="neomorph-flat gap-2" disabled={isUploading} as="span">
+              <Button className="neomorph-flat gap-2 text-[hsl(var(--foreground))] bg-[hsl(var(--card))]" disabled={isUploading} as="span">
                 {isUploading ?
                 <>
                     <Loader className="w-4 h-4 animate-spin" />
