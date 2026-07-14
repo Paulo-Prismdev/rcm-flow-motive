@@ -351,22 +351,33 @@ export default function SupplierManagement() {
                 </div>
 
                 {supplier.manufacturer_associations && supplier.manufacturer_associations.length > 0 &&
-            <div className="mt-3 pt-3 border-t border-border">
+                (() => {
+                const allMfrs = supplier.manufacturer_associations
+                  .flatMap(m => String(m).split('|'))
+                  .map(m => m.trim())
+                  .filter(m => m.length > 0);
+                if (allMfrs.length === 0) return null;
+                return (
+                  <div className="mt-3 pt-3 border-t border-border">
                     <p className="text-xs font-semibold text-foreground-muted mb-2">Manufacturers:</p>
                     <div className="flex flex-wrap gap-1 max-w-full">
-                      {supplier.manufacturer_associations.slice(0, 3).map((mfr, idx) =>
-                <span key={idx} title={mfr} className="text-xs px-2 py-0.5 rounded-full bg-accent/10 text-accent max-w-full truncate">
+                      {allMfrs.slice(0, 3).map((mfr, idx) => (
+                        <span key={idx} title={mfr} className="text-xs px-2 py-0.5 rounded-full bg-accent/10 text-accent max-w-full truncate">
                           {mfr}
                         </span>
-                )}
-                      {supplier.manufacturer_associations.length > 3 &&
-                <span className="text-xs px-2 py-0.5 rounded-full bg-surface text-foreground-muted">
-                          +{supplier.manufacturer_associations.length - 3} more
+                      ))}
+                      {allMfrs.length > 3 && (
+                        <span
+                          title={allMfrs.slice(3).join(', ')}
+                          className="text-xs px-2 py-0.5 rounded-full bg-surface text-foreground-muted cursor-help">
+                          +{allMfrs.length - 3} more
                         </span>
-                }
+                      )}
                     </div>
                   </div>
-            }
+                );
+                })()
+                }
               </div>
           )}
           </div>
