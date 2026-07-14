@@ -12,6 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { useToast } from "@/components/ui/use-toast";
 
 // Function to parse note content and highlight @mentions
 const parseContentWithMentions = (content) => {
@@ -50,6 +51,7 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
   const [cursorPosition, setCursorPosition] = useState(0);
   const textareaRef = useRef(null);
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   const { data: currentUser } = useQuery({
     queryKey: ['currentUser'],
@@ -83,6 +85,13 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
       queryClient.invalidateQueries({ queryKey: ['notes', parentId, parentType] });
       setNewNote('');
       setReplyingTo(null);
+    },
+    onError: (error) => {
+      toast({
+        title: "Failed to add note",
+        description: error?.message || "Please try again.",
+        variant: "destructive",
+      });
     },
   });
 
@@ -392,28 +401,27 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
                 </span>
               </div>
             </div>
-          </form>
-        </div>
 
-        {/* Footer */}
-        <div className="flex justify-end gap-3 mt-6 pt-6 border-t border-gray-200 dark:border-gray-800">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onClose}
-            className="h-9 px-4 text-sm font-medium rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
-          >
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            onClick={handleSubmit}
-            disabled={!newNote.trim() || createNoteMutation.isPending}
-            className="h-9 px-4 text-sm font-medium rounded-lg bg-blue-600 hover:bg-blue-700 text-white"
-          >
-            <Send className="w-4 h-4 mr-2" />
-            {replyingTo ? 'Reply' : 'Add Note'}
-          </Button>
+            {/* Action buttons — inside the form so type="submit" triggers handleSubmit */}
+            <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-800">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onClose}
+                className="h-9 px-4 text-sm font-medium rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={!newNote.trim() || createNoteMutation.isPending}
+                className="h-9 px-4 text-sm font-medium rounded-lg bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                <Send className="w-4 h-4 mr-2" />
+                {createNoteMutation.isPending ? 'Sending...' : (replyingTo ? 'Reply' : 'Add Note')}
+              </Button>
+            </div>
+          </form>
         </div>
       </DialogContent>
     </Dialog>
