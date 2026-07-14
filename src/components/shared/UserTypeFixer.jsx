@@ -26,14 +26,17 @@ export default function UserTypeFixer() {
   useEffect(() => {
     if (!currentUser) return;
     
-    // If user is admin but doesn't have user_type set, set it to 'internal'
-    if (currentUser.role === 'admin' && !currentUser.user_type) {
-      console.log('Fixing admin user - setting user_type to internal');
+    const isAdminRole = ['admin', 'super_admin', 'company_admin'].includes(currentUser.role);
+    
+    // If user has an admin role, they must be internal — fix if missing or wrong
+    if (isAdminRole && currentUser.user_type !== 'internal') {
+      console.log('Fixing admin user - setting user_type to internal (was:', currentUser.user_type, ')');
       updateUserMutation.mutate({ user_type: 'internal' });
+      return; // Don't run the referrer check for admin users
     }
     
     // If user has linked_referrer_id but doesn't have user_type set to 'referrer', fix it
-    if (currentUser.linked_referrer_id && currentUser.user_type !== 'referrer') {
+    if (!isAdminRole && currentUser.linked_referrer_id && currentUser.user_type !== 'referrer') {
       console.log('Fixing referrer user - setting user_type to referrer');
       updateUserMutation.mutate({ user_type: 'referrer' });
     }
