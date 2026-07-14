@@ -7,7 +7,6 @@ import {
   Globe,
   Mail,
   Send,
-  Package,
   Users,
   CalendarDays,
   ChevronRight,
@@ -23,7 +22,6 @@ import { base44 } from "@/api/base44Client";
 import EmailTemplates from "./EmailTemplates";
 import UserManagement from "./UserManagement";
 import ChaserEmailSettings from "./ChaserEmailSettings";
-import SupplierManagement from "./SupplierManagement";
 import CompanyIdLookup from "./CompanyIdLookup";
 import EmployeeManagement from "./EmployeeManagement";
 
@@ -35,7 +33,6 @@ const SETTINGS_SECTIONS = [
     items: [
       { id: "status", label: "Status Settings", icon: Shield, adminOnly: false },
       { id: "companies", label: "Companies", icon: Building2, adminOnly: false },
-      { id: "suppliers", label: "Suppliers", icon: Package, adminOnly: false },
     ],
   },
   {
@@ -114,7 +111,6 @@ export default function Settings() {
       case "portals":     return <PortalManagementTab />;
       case "email":       return <EmailTemplates />;
       case "chasers":     return <ChaserEmailSettings />;
-      case "suppliers":   return <SupplierManagement />;
       case "users":       return <UserManagement />;
       case "companyids":  return <CompanyIdLookup />;
       case "employees":   return <EmployeeManagement />;
