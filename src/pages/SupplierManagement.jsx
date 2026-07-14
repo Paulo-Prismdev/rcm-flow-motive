@@ -3,18 +3,18 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { 
-  Plus, 
-  Building2, 
-  Phone, 
-  Mail, 
-  MapPin, 
-  Edit, 
-  Trash2, 
+import {
+  Plus,
+  Building2,
+  Phone,
+  Mail,
+  MapPin,
+  Edit,
+  Trash2,
   Upload,
   Download,
-  Loader
-} from 'lucide-react';
+  Loader } from
+'lucide-react';
 import AddSupplierModal from '../components/shared/AddSupplierModal';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -31,14 +31,14 @@ export default function SupplierManagement() {
 
   const { data: suppliers = [], isLoading } = useQuery({
     queryKey: ['suppliers'],
-    queryFn: () => base44.entities.Supplier.list('name'),
+    queryFn: () => base44.entities.Supplier.list('name')
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id) => base44.entities.Supplier.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['suppliers'] });
-    },
+    }
   });
 
   const handleDelete = (supplier) => {
@@ -64,25 +64,25 @@ export default function SupplierManagement() {
     setIsUploading(true);
     try {
       const text = await file.text();
-      const lines = text.split('\n').filter(line => line.trim());
-      const headers = lines[0].split(',').map(h => h.trim());
-      
+      const lines = text.split('\n').filter((line) => line.trim());
+      const headers = lines[0].split(',').map((h) => h.trim());
+
       const suppliers = [];
       for (let i = 1; i < lines.length; i++) {
-        const values = lines[i].split(',').map(v => v.trim());
+        const values = lines[i].split(',').map((v) => v.trim());
         const supplier = {};
-        
+
         headers.forEach((header, index) => {
           const value = values[index] || '';
-          
+
           // Handle emails and manufacturer_associations - expect pipe-separated list
           if (header === 'emails' || header === 'manufacturer_associations') {
-            supplier[header] = value ? value.split('|').map(m => m.trim()).filter(Boolean) : [];
+            supplier[header] = value ? value.split('|').map((m) => m.trim()).filter(Boolean) : [];
           } else {
             supplier[header] = value;
           }
         });
-        
+
         // Only add if required fields are present
         if (supplier.name && supplier.contact_name && supplier.phone && supplier.emails && supplier.emails.length > 0) {
           suppliers.push(supplier);
@@ -105,22 +105,22 @@ export default function SupplierManagement() {
   const handleExportCSV = () => {
     const headers = ['name', 'contact_name', 'phone', 'emails', 'part_supply_type', 'address_line_1', 'address_line_2', 'town', 'county', 'postcode', 'website', 'account_number', 'portal_username', 'portal_password', 'manufacturer_associations', 'notes'];
     const csvContent = [
-      headers.join(','),
-      ...suppliers.map(s => 
-        headers.map(h => {
-          const value = s[h];
-          // Join emails and manufacturer_associations with pipe separator
-          if ((h === 'emails' || h === 'manufacturer_associations') && Array.isArray(value)) {
-            return value.join('|');
-          }
-          // Backward compatibility: if old 'email' field exists, migrate it
-          if (h === 'emails' && !value && s.email) {
-            return s.email;
-          }
-          return value || '';
-        }).join(',')
-      )
-    ].join('\n');
+    headers.join(','),
+    ...suppliers.map((s) =>
+    headers.map((h) => {
+      const value = s[h];
+      // Join emails and manufacturer_associations with pipe separator
+      if ((h === 'emails' || h === 'manufacturer_associations') && Array.isArray(value)) {
+        return value.join('|');
+      }
+      // Backward compatibility: if old 'email' field exists, migrate it
+      if (h === 'emails' && !value && s.email) {
+        return s.email;
+      }
+      return value || '';
+    }).join(',')
+    )].
+    join('\n');
 
     // Add UTF-8 BOM to ensure proper encoding recognition
     const BOM = '\uFEFF';
@@ -134,28 +134,28 @@ export default function SupplierManagement() {
   };
 
   // Extract unique manufacturers from all suppliers for filter dropdown
-  const allManufacturers = suppliers.flatMap(s => s.manufacturer_associations || []).filter(Boolean);
+  const allManufacturers = suppliers.flatMap((s) => s.manufacturer_associations || []).filter(Boolean);
   const uniqueManufacturers = [...new Set(allManufacturers)].sort();
 
-  const filteredSuppliers = suppliers.filter(supplier => {
+  const filteredSuppliers = suppliers.filter((supplier) => {
     const term = searchTerm.toLowerCase();
     const matchesSearch = !term ||
-      supplier.name?.toLowerCase().includes(term) ||
-      supplier.contact_name?.toLowerCase().includes(term) ||
-      supplier.phone?.toLowerCase().includes(term) ||
-      supplier.emails?.some(email => email.toLowerCase().includes(term)) ||
-      supplier.email?.toLowerCase().includes(term) ||
-      supplier.town?.toLowerCase().includes(term) ||
-      supplier.county?.toLowerCase().includes(term) ||
-      supplier.postcode?.toLowerCase().includes(term) ||
-      supplier.part_supply_type?.toLowerCase().includes(term) ||
-      (supplier.manufacturer_associations && supplier.manufacturer_associations.some(m => m.toLowerCase().includes(term)));
-    
+    supplier.name?.toLowerCase().includes(term) ||
+    supplier.contact_name?.toLowerCase().includes(term) ||
+    supplier.phone?.toLowerCase().includes(term) ||
+    supplier.emails?.some((email) => email.toLowerCase().includes(term)) ||
+    supplier.email?.toLowerCase().includes(term) ||
+    supplier.town?.toLowerCase().includes(term) ||
+    supplier.county?.toLowerCase().includes(term) ||
+    supplier.postcode?.toLowerCase().includes(term) ||
+    supplier.part_supply_type?.toLowerCase().includes(term) ||
+    supplier.manufacturer_associations && supplier.manufacturer_associations.some((m) => m.toLowerCase().includes(term));
+
     const matchesType = filterType === 'all' || supplier.part_supply_type === filterType;
-    
-    const matchesManufacturer = filterManufacturer === 'all' || 
-      (supplier.manufacturer_associations && supplier.manufacturer_associations.includes(filterManufacturer));
-    
+
+    const matchesManufacturer = filterManufacturer === 'all' ||
+    supplier.manufacturer_associations && supplier.manufacturer_associations.includes(filterManufacturer);
+
     return matchesSearch && matchesType && matchesManufacturer;
   });
 
@@ -167,13 +167,13 @@ export default function SupplierManagement() {
         onSuccess={() => {
           queryClient.invalidateQueries({ queryKey: ['suppliers'] });
         }}
-        editingSupplier={editingSupplier}
-      />
+        editingSupplier={editingSupplier} />
+      
 
       <div className="neomorph p-4">
         <div className="flex items-center gap-3 mb-4">
           <Link to={createPageUrl("Settings")}>
-            <Button className="neomorph-flat p-2">
+            <Button className="neomorph-flat p-2 bg-[hsl(var(--popover))] text-[hsl(var(--card))]">
               <ArrowLeft className="w-4 h-4" />
             </Button>
           </Link>
@@ -191,21 +191,21 @@ export default function SupplierManagement() {
               onChange={handleCSVUpload}
               className="hidden"
               id="csv-upload"
-              disabled={isUploading}
-            />
+              disabled={isUploading} />
+            
             <label htmlFor="csv-upload">
               <Button className="neomorph-flat gap-2" disabled={isUploading} as="span">
-                {isUploading ? (
-                  <>
+                {isUploading ?
+                <>
                     <Loader className="w-4 h-4 animate-spin" />
                     Uploading...
-                  </>
-                ) : (
-                  <>
+                  </> :
+
+                <>
                     <Upload className="w-4 h-4" />
                     Import CSV
                   </>
-                )}
+                }
               </Button>
             </label>
             <Button onClick={handleExportCSV} className="neomorph-flat gap-2">
@@ -224,13 +224,13 @@ export default function SupplierManagement() {
             placeholder="Search suppliers (name, contact, email, phone, location, manufacturer...)"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="neomorph-inset flex-1 min-w-[200px]"
-          />
+            className="neomorph-inset flex-1 min-w-[200px]" />
+          
           <select
             value={filterType}
             onChange={(e) => setFilterType(e.target.value)}
-            className="neomorph-inset px-4 py-2 rounded-xl border-0 min-w-[150px]"
-          >
+            className="neomorph-inset px-4 py-2 rounded-xl border-0 min-w-[150px]">
+            
             <option value="all">All Types</option>
             <option value="OEM">OEM</option>
             <option value="Green">Green (Used)</option>
@@ -241,82 +241,82 @@ export default function SupplierManagement() {
           <select
             value={filterManufacturer}
             onChange={(e) => setFilterManufacturer(e.target.value)}
-            className="neomorph-inset px-4 py-2 rounded-xl border-0 min-w-[200px]"
-          >
+            className="neomorph-inset px-4 py-2 rounded-xl border-0 min-w-[200px]">
+            
             <option value="all">All Manufacturers</option>
-            {uniqueManufacturers.map(mfr => (
-              <option key={mfr} value={mfr}>{mfr}</option>
-            ))}
+            {uniqueManufacturers.map((mfr) =>
+            <option key={mfr} value={mfr}>{mfr}</option>
+            )}
           </select>
-          {(filterManufacturer !== 'all' || filterType !== 'all' || searchTerm) && (
-            <Button 
-              variant="ghost" 
-              size="sm"
-              onClick={() => {
-                setSearchTerm('');
-                setFilterType('all');
-                setFilterManufacturer('all');
-              }}
-              className="w-fit"
-            >
+          {(filterManufacturer !== 'all' || filterType !== 'all' || searchTerm) &&
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              setSearchTerm('');
+              setFilterType('all');
+              setFilterManufacturer('all');
+            }}
+            className="w-fit">
+            
               Clear Filters
             </Button>
-          )}
+          }
         </div>
       </div>
 
       <div className="neomorph p-4">
-        {isLoading ? (
-          <div className="text-center py-12">
+        {isLoading ?
+        <div className="text-center py-12">
             <Loader className="w-8 h-8 animate-spin mx-auto mb-2 text-accent" />
             <p className="text-foreground-muted">Loading suppliers...</p>
-          </div>
-        ) : filteredSuppliers.length === 0 ? (
-          <div className="text-center py-12">
+          </div> :
+        filteredSuppliers.length === 0 ?
+        <div className="text-center py-12">
             <Building2 className="w-12 h-12 mx-auto mb-4 text-foreground-muted" />
             <p className="text-foreground-muted mb-4">No suppliers found</p>
             <Button onClick={() => setIsAddModalOpen(true)} className="neomorph-flat gap-2">
               <Plus className="w-4 h-4" />
               Add First Supplier
             </Button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredSuppliers.map(supplier => (
-              <div key={supplier.id} className="neomorph-flat p-4 hover:shadow-lg transition-all">
+          </div> :
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filteredSuppliers.map((supplier) =>
+          <div key={supplier.id} className="neomorph-flat p-4 hover:shadow-lg transition-all">
                 <div className="flex justify-between items-start mb-3">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
                       <h3 className="font-bold text-lg">{supplier.name}</h3>
-                      {supplier.part_supply_type && (
-                        <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                          supplier.part_supply_type === 'OEM' ? 'bg-amber-100 text-amber-700' :
-                          supplier.part_supply_type === 'Green' ? 'bg-green-100 text-green-700' :
-                          supplier.part_supply_type === 'Aftermarket' ? 'bg-blue-100 text-blue-700' :
-                          supplier.part_supply_type === 'Reconditioned' ? 'bg-purple-100 text-purple-700' :
-                          'bg-gray-100 text-gray-700'
-                        }`}>
+                      {supplier.part_supply_type &&
+                  <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                  supplier.part_supply_type === 'OEM' ? 'bg-amber-100 text-amber-700' :
+                  supplier.part_supply_type === 'Green' ? 'bg-green-100 text-green-700' :
+                  supplier.part_supply_type === 'Aftermarket' ? 'bg-blue-100 text-blue-700' :
+                  supplier.part_supply_type === 'Reconditioned' ? 'bg-purple-100 text-purple-700' :
+                  'bg-gray-100 text-gray-700'}`
+                  }>
                           {supplier.part_supply_type}
                         </span>
-                      )}
+                  }
                     </div>
                     <p className="text-sm text-foreground-muted">{supplier.contact_name}</p>
                   </div>
                   <div className="flex gap-1">
                     <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleEdit(supplier)}
-                      className="h-8 w-8"
-                    >
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handleEdit(supplier)}
+                  className="h-8 w-8">
+                  
                       <Edit className="w-4 h-4" />
                     </Button>
                     <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleDelete(supplier)}
-                      className="h-8 w-8 text-red-600 hover:text-red-700"
-                    >
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handleDelete(supplier)}
+                  className="h-8 w-8 text-red-600 hover:text-red-700">
+                  
                       <Trash2 className="w-4 h-4" />
                     </Button>
                   </div>
@@ -327,51 +327,51 @@ export default function SupplierManagement() {
                     <Phone className="w-3 h-3" />
                     <span>{supplier.phone}</span>
                   </div>
-                  {(supplier.emails && supplier.emails.length > 0) ? (
-                    <div className="space-y-1">
-                      {supplier.emails.map((email, idx) => (
-                        <div key={idx} className="flex items-center gap-2 text-foreground-muted">
+                  {supplier.emails && supplier.emails.length > 0 ?
+              <div className="space-y-1">
+                      {supplier.emails.map((email, idx) =>
+                <div key={idx} className="flex items-center gap-2 text-foreground-muted">
                           <Mail className="w-3 h-3" />
                           <span className="truncate">{email}</span>
                         </div>
-                      ))}
-                    </div>
-                  ) : supplier.email ? (
-                    <div className="flex items-center gap-2 text-foreground-muted">
+                )}
+                    </div> :
+              supplier.email ?
+              <div className="flex items-center gap-2 text-foreground-muted">
                       <Mail className="w-3 h-3" />
                       <span className="truncate">{supplier.email}</span>
-                    </div>
-                  ) : null}
-                  {supplier.postcode && (
-                    <div className="flex items-center gap-2 text-foreground-muted">
+                    </div> :
+              null}
+                  {supplier.postcode &&
+              <div className="flex items-center gap-2 text-foreground-muted">
                       <MapPin className="w-3 h-3" />
                       <span>{supplier.postcode}</span>
                     </div>
-                  )}
+              }
                 </div>
 
-                {supplier.manufacturer_associations && supplier.manufacturer_associations.length > 0 && (
-                  <div className="mt-3 pt-3 border-t border-border">
+                {supplier.manufacturer_associations && supplier.manufacturer_associations.length > 0 &&
+            <div className="mt-3 pt-3 border-t border-border">
                     <p className="text-xs font-semibold text-foreground-muted mb-2">Manufacturers:</p>
                     <div className="flex flex-wrap gap-1">
-                      {supplier.manufacturer_associations.slice(0, 3).map((mfr, idx) => (
-                        <span key={idx} className="text-xs px-2 py-0.5 rounded-full bg-accent/10 text-accent">
+                      {supplier.manufacturer_associations.slice(0, 3).map((mfr, idx) =>
+                <span key={idx} className="text-xs px-2 py-0.5 rounded-full bg-accent/10 text-accent">
                           {mfr}
                         </span>
-                      ))}
-                      {supplier.manufacturer_associations.length > 3 && (
-                        <span className="text-xs px-2 py-0.5 rounded-full bg-surface text-foreground-muted">
+                )}
+                      {supplier.manufacturer_associations.length > 3 &&
+                <span className="text-xs px-2 py-0.5 rounded-full bg-surface text-foreground-muted">
                           +{supplier.manufacturer_associations.length - 3} more
                         </span>
-                      )}
+                }
                     </div>
                   </div>
-                )}
+            }
               </div>
-            ))}
+          )}
           </div>
-        )}
+        }
       </div>
-    </div>
-  );
+    </div>);
+
 }
