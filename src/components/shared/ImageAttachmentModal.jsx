@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { X, Upload, Loader, Image, ZoomIn } from 'lucide-react';
+import { X, Upload, Loader, Image, ZoomIn, Download } from 'lucide-react';
 import { useFileUpload } from '@/hooks/useFileUpload';
 import UploadProgressList from './UploadProgressList';
 import ConfirmDialog from './ConfirmDialog';
@@ -12,6 +12,23 @@ export default function ImageAttachmentModal({ imageUrls = [], onAdd, onRemove, 
 
   const handleRemoveImage = (url) => {
     setImageToRemove(url);
+  };
+
+  const handleDownloadImage = async (url) => {
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = (url.split('/').pop().split('?')[0]) || 'image.jpg';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(blobUrl);
+    } catch (err) {
+      window.open(url, '_blank');
+    }
   };
 
   const confirmRemoveImage = () => {
@@ -66,6 +83,13 @@ export default function ImageAttachmentModal({ imageUrls = [], onAdd, onRemove, 
             onClick={() => setViewingImage(null)}
           >
             <X className="w-6 h-6" />
+          </button>
+          <button
+            className="absolute top-4 right-16 text-white bg-black/50 rounded-full p-2 hover:bg-black/80"
+            onClick={(e) => { e.stopPropagation(); handleDownloadImage(viewingImage); }}
+            title="Download image"
+          >
+            <Download className="w-6 h-6" />
           </button>
           <img
             src={viewingImage}
@@ -165,6 +189,13 @@ export default function ImageAttachmentModal({ imageUrls = [], onAdd, onRemove, 
                         title="View full size"
                       >
                         <ZoomIn className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDownloadImage(url)}
+                        className="bg-white/90 text-black rounded-full p-1.5 hover:bg-white transition-colors"
+                        title="Download image"
+                      >
+                        <Download className="w-4 h-4" />
                       </button>
                       {onRemove && (
                         <button
