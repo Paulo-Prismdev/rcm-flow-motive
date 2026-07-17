@@ -124,6 +124,7 @@ export default function ClaimsPage() {
   const uniqueReferrers = [...new Set(claims.map(c => c.referrer).filter(Boolean))].sort();
   const uniqueRepairers = [...new Set(claims.map(c => c.bodyshop).filter(Boolean))].sort();
   const uniqueBusinessDivisions = [...new Set(claims.map(c => c.business_division).filter(Boolean))].sort();
+  const uniqueClaimTypes = [...new Set(claims.map(c => c.claim_type).filter(Boolean))].sort();
 
   const location = useLocation();
   useEffect(() => {
@@ -490,7 +491,7 @@ export default function ClaimsPage() {
         <div className="px-5 py-3 border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/30 flex-shrink-0">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
             {[
-              { label: 'Claim Type', value: claimTypeFilter, onChange: setClaimTypeFilter, options: ['Credit Repair','Fault Claim','Non-Fault Claim','Total Loss','Glass Claim'] },
+              { label: 'Claim Type', value: claimTypeFilter, onChange: setClaimTypeFilter, options: uniqueClaimTypes },
               { label: 'Insurer', value: insurerFilter, onChange: setInsurerFilter, options: uniqueInsurers },
               { label: 'Referrer', value: referrerFilter, onChange: setReferrerFilter, options: uniqueReferrers },
               { label: 'Repairer', value: repairerFilter, onChange: setRepairerFilter, options: uniqueRepairers },
