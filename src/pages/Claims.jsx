@@ -10,6 +10,7 @@ import ClaimCardFieldsModal from '../components/claims/ClaimCardFieldsModal';
 import UpdateStatusBadge from '../components/shared/UpdateStatusBadge';
 import StatusBadge from '../components/shared/StatusBadge';
 import ClaimUpdatesQuickView from '../components/claims/ClaimUpdatesQuickView';
+import ClaimTypeTabs from '../components/shared/ClaimTypeTabs';
 import ClaimQuickViewModal from '../components/claims/ClaimQuickViewModal';
 import { formatUKRegistration } from '../components/shared/formatRegistration';
 import { format } from 'date-fns';
@@ -61,6 +62,7 @@ export default function ClaimsPage() {
   const [collapsedGroups, setCollapsedGroups] = useState({});
   const [quickViewClaim, setQuickViewClaim] = useState(null);
   const [quickInfoClaim, setQuickInfoClaim] = useState(null);
+  const [claimTab, setClaimTab] = useState('claims');
   const containerRef = React.useRef(null);
   const queryClient = useQueryClient();
   const { allStatuses: statusConfigs } = useStatusConfigs();
@@ -176,8 +178,11 @@ export default function ClaimsPage() {
   const activeFiltersCount = [(statusFilter?.length || 0) > 0, claimTypeFilter, insurerFilter, referrerFilter, repairerFilter, businessDivisionFilter, updateStatusFilter, repairerAcceptanceFilter, hasBackorderedPartsFilter].filter(Boolean).length;
 
   const allClaims = showArchived ? claims : claims.filter(c => !c.archived);
+  const standardClaims = allClaims.filter(c => c.claim_type !== 'Paying Privately');
+  const privateClaims = allClaims.filter(c => c.claim_type === 'Paying Privately');
+  const tabClaims = claimTab === 'private' ? privateClaims : standardClaims;
 
-  const filteredClaims = allClaims.filter(c => {
+  const filteredClaims = tabClaims.filter(c => {
     const s = searchTerm.toLowerCase();
     const matchesSearch = !searchTerm ||
       c.reg?.toLowerCase().includes(s) || c.client_name?.toLowerCase().includes(s) ||
@@ -266,10 +271,11 @@ export default function ClaimsPage() {
             <span className="font-semibold">Error:</span> {createError}
           </div>
         )}
-        <ClaimFormWrapper 
-          onSubmit={(d) => { setCreateError(null); createMutation.mutate(d); }} 
+        <ClaimFormWrapper
+          onSubmit={(d) => { setCreateError(null); createMutation.mutate(d); }}
           onCancel={() => { setShowForm(false); setCreateError(null); }}
           isSubmitting={createMutation.isPending}
+          defaultClaimType={claimTab === 'private' ? 'Paying Privately' : ''}
         />
       </div>
     );
@@ -426,7 +432,7 @@ export default function ClaimsPage() {
 
       {/* Top bar */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-800 flex-shrink-0">
-        <h1 className="text-base lg:text-lg font-semibold text-gray-900 dark:text-white">Claims</h1>
+        <h1 className="text-base lg:text-lg font-semibold text-gray-900 dark:text-white">Repairs</h1>
         <div className="flex items-center gap-1.5">
           {/* Desktop-only buttons */}
           <button onClick={() => setShowFieldsModal(true)} className="hidden lg:flex p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors" title="Customise columns">
@@ -449,6 +455,11 @@ export default function ClaimsPage() {
             <Plus className="w-3.5 h-3.5" /><span>New Claim</span>
           </button>
         </div>
+      </div>
+
+      {/* Repairs / Paying Privately tabs */}
+      <div className="flex items-center px-5 py-2 border-b border-gray-100 dark:border-gray-800 flex-shrink-0">
+        <ClaimTypeTabs activeTab={claimTab} onChange={setClaimTab} claimsCount={standardClaims.length} privateCount={privateClaims.length} />
       </div>
 
       {/* Search + filters bar */}
@@ -667,7 +678,7 @@ export default function ClaimsPage() {
 
       {/* Footer count */}
       <div className="px-5 py-2 border-t border-gray-100 dark:border-gray-800 text-xs text-gray-400 flex-shrink-0">
-        {filteredClaims.length} of {allClaims.length} claims
+        {filteredClaims.length} of {tabClaims.length} {claimTab === 'private' ? 'repairs' : 'claims'}
       </div>
     </div>
   );

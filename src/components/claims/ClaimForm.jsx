@@ -94,7 +94,7 @@ const TRACKED_FIELDS = [
 
 // ── Component ──
 
-export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
+export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, defaultClaimType }) {
   const [currentStep, setCurrentStep] = useState(1);
   const [showInsurerModal, setShowInsurerModal] = useState(false);
   const [isSavingDraft, setIsSavingDraft] = useState(false);
@@ -116,7 +116,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting }) {
     ['admin', 'super_admin', 'company_admin'].includes(currentUser?.role);
 
   const [formData, setFormData] = useState(claim || {
-    job_number: '', reg: '', job_statuses: ['New'], claim_type: '',
+    job_number: '', reg: '', job_statuses: ['New'], claim_type: defaultClaimType || '',
     circumstances: '', loss_date: '', loss_time: '', incident_location: '',
     vehicle_use: '', courtesy_car_required: false, has_third_party: false,
     requires_indemnity: false, file_urls: [], insurer: '', claim_ref: '',

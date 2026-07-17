@@ -18,6 +18,7 @@ import ReferrerClaimDetail from '../components/referrer/ReferrerClaimDetail';
 import ReferrerDashboard from '../components/referrer/ReferrerDashboard';
 import FeedbackModal from '../components/shared/FeedbackModal';
 import ClaimCardFieldsModal from '../components/claims/ClaimCardFieldsModal';
+import ClaimTypeTabs from '../components/shared/ClaimTypeTabs';
 import { getReferrerClaims } from '@/functions/getReferrerClaims';
 
 export default function ReferrerPortal() {
@@ -33,6 +34,7 @@ export default function ReferrerPortal() {
   const [collapsedGroups, setCollapsedGroups] = useState({});
   const [showFieldsModal, setShowFieldsModal] = useState(false);
   const [sortBy, setSortBy] = useState('created_desc');
+  const [claimTypeTab, setClaimTypeTab] = useState('claims');
   const queryClient = useQueryClient();
 
   // Listen for navigation events from layout
@@ -120,7 +122,11 @@ export default function ReferrerPortal() {
     return divisions.sort();
   }, [claims]);
 
-  const filteredClaims = claims.filter(c => {
+  const standardClaims = claims.filter(c => c.claim_type !== 'Paying Privately');
+  const privateClaims = claims.filter(c => c.claim_type === 'Paying Privately');
+  const tabClaims = claimTypeTab === 'private' ? privateClaims : standardClaims;
+
+  const filteredClaims = tabClaims.filter(c => {
     const q = search.toLowerCase();
     const matchesSearch = !q ||
       c.reg?.toLowerCase().includes(q) ||
@@ -260,6 +266,10 @@ export default function ReferrerPortal() {
       )}
       {/* Claims list */}
       <div className="h-full flex flex-col min-h-0 bg-white dark:bg-gray-900 rounded-[10px] border border-gray-100 dark:border-gray-800 overflow-hidden shadow-sm m-4 mt-0">
+            {/* Repairs / Paying Privately tabs */}
+            <div className="flex items-center px-5 py-2 border-b border-gray-100 dark:border-gray-800 flex-shrink-0">
+              <ClaimTypeTabs activeTab={claimTypeTab} onChange={setClaimTypeTab} claimsCount={standardClaims.length} privateCount={privateClaims.length} />
+            </div>
             {/* Search bar with filters */}
             <div className="flex items-center gap-3 px-5 py-2.5 border-b border-gray-100 dark:border-gray-800 flex-shrink-0 bg-gray-50 dark:bg-gray-900/50 flex-wrap gap-y-2">
               <div className="flex-1 min-w-[200px] relative">
@@ -563,7 +573,7 @@ export default function ReferrerPortal() {
 
             {/* Footer count */}
             <div className="px-5 py-2 border-t border-gray-100 dark:border-gray-800 text-xs text-gray-400 flex-shrink-0">
-              {filteredClaims.length} of {claims.length} claims
+              {filteredClaims.length} of {tabClaims.length} {claimTypeTab === 'private' ? 'repairs' : 'claims'}
             </div>
           </div>
       <ClaimCardFieldsModal

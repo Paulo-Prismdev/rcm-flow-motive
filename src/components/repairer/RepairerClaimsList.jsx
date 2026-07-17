@@ -6,6 +6,7 @@ import { formatUKRegistration } from '@/components/shared/formatRegistration';
 import StatusBadge from '@/components/shared/StatusBadge';
 import ClaimCardFieldsModal from '@/components/claims/ClaimCardFieldsModal';
 import { Settings2, FileText, ChevronRight, Filter, X } from 'lucide-react';
+import ClaimTypeTabs from '@/components/shared/ClaimTypeTabs';
 
 const FILTERS = ['active', 'completed', 'all'];
 
@@ -18,6 +19,7 @@ export default function RepairerClaimsList({ claims, onViewClaim }) {
   const [claimTypeFilter, setClaimTypeFilter] = useState('');
   const [businessDivisionFilter, setBusinessDivisionFilter] = useState('');
   const [showFilters, setShowFilters] = useState(false);
+  const [claimTypeTab, setClaimTypeTab] = useState('claims');
   const queryClient = useQueryClient();
 
   const { data: currentUser } = useQuery({
@@ -89,7 +91,11 @@ export default function RepairerClaimsList({ claims, onViewClaim }) {
 
   const displayFields = userCardFields;
 
-  const filteredClaims = claims.filter(c => {
+  const standardClaims = claims.filter(c => c.claim_type !== 'Paying Privately');
+  const privateClaims = claims.filter(c => c.claim_type === 'Paying Privately');
+  const tabClaims = claimTypeTab === 'private' ? privateClaims : standardClaims;
+
+  const filteredClaims = tabClaims.filter(c => {
     if (filter === 'active') {
       if (['Completed', 'Cancelled', 'Total Loss'].includes(c.job_status)) return false;
     } else if (filter === 'completed') {
@@ -123,6 +129,7 @@ export default function RepairerClaimsList({ claims, onViewClaim }) {
     <div className="neomorph p-4 space-y-4">
       {/* Toolbar */}
       <div className="space-y-2">
+        <ClaimTypeTabs activeTab={claimTypeTab} onChange={setClaimTypeTab} claimsCount={standardClaims.length} privateCount={privateClaims.length} />
         <div className="flex items-center gap-2 flex-wrap">
           {FILTERS.map(f => (
             <button

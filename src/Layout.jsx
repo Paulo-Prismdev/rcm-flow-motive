@@ -45,7 +45,7 @@ import { User } from "lucide-react";
 
 const allDepartments = [
 { name: "Dashboard", url: createPageUrl("Dashboard"), icon: LayoutDashboard, permission: "Dashboard" },
-{ name: "Claims", url: createPageUrl("Claims"), icon: FileText, permission: "Claims" },
+{ name: "Repairs", url: createPageUrl("Claims"), icon: FileText, permission: "Claims" },
 { name: "My Tasks", url: createPageUrl("Tasks"), icon: CheckSquare, permission: "Claims" },
 { name: "Estimating", url: createPageUrl("Estimating"), icon: Calculator, permission: "Estimating" },
 { name: "Engineering", url: createPageUrl("Engineering"), icon: Wrench, permission: "Engineering" },
