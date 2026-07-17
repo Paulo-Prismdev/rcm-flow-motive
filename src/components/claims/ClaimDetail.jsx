@@ -332,7 +332,12 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
   const handleUpdate = async (updatedData) => {
     // Update local state immediately for instant UI feedback
     setClaim(updatedData);
-    const statusChanged = updatedData.job_status && updatedData.job_status !== claim.job_status;
+    const oldStatus = claim.job_status || 'New';
+    const newStatus = updatedData.job_status;
+    const oldSec = claim.secondary_status || '';
+    const newSec = updatedData.secondary_status || '';
+    const primaryChanged = !!(newStatus && newStatus !== oldStatus);
+    const secondaryChanged = updatedData.secondary_status !== undefined && newSec !== oldSec;
     
     // Log all changes to activity log
     await logChanges({
@@ -343,27 +348,29 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
       user: currentUser,
     });
     
-    if (statusChanged) {
-        const oldStatus = claim.job_status || 'New';
-        const newStatus = updatedData.job_status;
+    if (primaryChanged || secondaryChanged) {
         const now = new Date();
         const isClosedAfterUpdate = ['Completed', 'Cancelled', 'Total Loss'].includes(newStatus);
         const fortyEightHoursFromNow = new Date(now.getTime() + 48 * 60 * 60 * 1000);
 
-        // Reset the 48hr timer when status changes
-        if (!isClosedAfterUpdate) {
+        // Reset the 48hr timer only when the primary status changes
+        if (primaryChanged && !isClosedAfterUpdate) {
           updatedData.last_updated_at = now.toISOString();
           updatedData.next_update_due_at = fortyEightHoursFromNow.toISOString();
           updatedData.update_status_flag = 'Green';
-        } else {
+        } else if (primaryChanged && isClosedAfterUpdate) {
           updatedData.update_status_flag = 'Gray';
         }
+
+        const parts = [];
+        if (primaryChanged) parts.push(`Status changed from "${oldStatus}" to "${newStatus}"`);
+        if (secondaryChanged) parts.push(`Secondary status changed from "${oldSec || 'None'}" to "${newSec || 'None'}"`);
 
         try {
         await base44.entities.ClaimUpdate.create({
             claim_id: claim.id,
             update_type: 'Status Change',
-            description: `Status changed from "${oldStatus}" to "${newStatus}"`,
+            description: parts.join(' · '),
             next_steps: '',
             due_date_for_next_action: ''
         });
@@ -449,22 +456,23 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
       }),
     };
     
-    if (newStatus) {
-      updateData.job_status = newStatus;
-      // Keep job_statuses in sync — replace the old primary status with the new one
-      const currentStatuses = claim.job_statuses?.length ? [...claim.job_statuses] : (claim.job_status ? [claim.job_status] : ['New']);
-      const oldPrimary = claim.job_status || 'New';
-      const idx = currentStatuses.indexOf(oldPrimary);
-      if (idx !== -1) {
-        currentStatuses[idx] = newStatus;
-      } else {
-        currentStatuses.unshift(newStatus);
+    // Statuses only change when the update is an explicit Status Change —
+    // never touch job_status / secondary_status for any other update type.
+    if (updateType === 'Status Change') {
+      if (newStatus) {
+        updateData.job_status = newStatus;
+        // Keep job_statuses in sync — replace the old primary status with the new one
+        const currentStatuses = claim.job_statuses?.length ? [...claim.job_statuses] : (claim.job_status ? [claim.job_status] : ['New']);
+        const oldPrimary = claim.job_status || 'New';
+        const idx = currentStatuses.indexOf(oldPrimary);
+        if (idx !== -1) {
+          currentStatuses[idx] = newStatus;
+        } else {
+          currentStatuses.unshift(newStatus);
+        }
+        updateData.job_statuses = currentStatuses;
       }
-      updateData.job_statuses = currentStatuses;
-    }
-    
-    if (newSecondaryStatus !== undefined) {
-      updateData.secondary_status = newSecondaryStatus;
+      updateData.secondary_status = newSecondaryStatus || null;
     }
     
     handleUpdate(updateData);
