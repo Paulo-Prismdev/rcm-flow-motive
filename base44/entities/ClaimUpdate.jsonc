@@ -69,6 +69,11 @@
     "parent_update_id": {
       "type": "string",
       "description": "ID of parent update if this is a reply"
+    },
+    "starred": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this update is starred/flagged as important and blocks job completion until removed"
     }
   },
   "required": [

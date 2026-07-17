@@ -14,6 +14,8 @@ const UPDATE_TYPES = [
   "Parts Update", "Repair Progress", "Quality Check", "Other"
 ];
 
+const CLOSED_STATUSES = ['Completed', 'Cancelled', 'Total Loss'];
+
 export default function ClaimUpdateForm({
   claimId,
   claim,
@@ -115,6 +117,19 @@ export default function ClaimUpdateForm({
     if (isReferrer && newUpdate.update_type === 'Status Change') { setSubmitError('Referrers cannot change status'); return; }
     if (isReferrer && (newUpdate.next_steps || newUpdate.due_date_for_next_action)) { setSubmitError('Referrers cannot set follow-ups'); return; }
     if (newUpdate.update_type !== 'Status Change' && !newUpdate.description.trim()) { setSubmitError('Please enter a description'); return; }
+
+    // Block completion while a starred/flagged update exists
+    if (newUpdate.update_type === 'Status Change' && newUpdate.new_status && CLOSED_STATUSES.includes(newUpdate.new_status)) {
+      try {
+        const existing = await base44.entities.ClaimUpdate.filter({ claim_id: claimId }, '-created_date', 500);
+        if (existing.some(u => u.starred && !u.parent_update_id)) {
+          setSubmitError('This claim has a flagged (starred) update that must be resolved before it can be marked as complete. Please remove the star from the flagged update in the Updates history first.');
+          return;
+        }
+      } catch (err) {
+        // If the check fails, allow the change to proceed
+      }
+    }
 
     let finalDescription = newUpdate.description;
     if (sendEmail && selectedEmails.length > 0) {

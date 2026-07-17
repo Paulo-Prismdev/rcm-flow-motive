@@ -25,7 +25,8 @@ import {
     Image,
     RefreshCw,
     MapPin,
-    Eye
+    Eye,
+    Star
 } from "lucide-react";
 import { format } from "date-fns";
 import StatusBadge from "../shared/StatusBadge";
@@ -325,6 +326,8 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
     queryFn: () => base44.entities.ClaimUpdate.filter({ claim_id: claim.id }, 'created_date', 500),
     staleTime: 60000,
   });
+
+  const starredUpdates = claimUpdates.filter(u => u.starred && !u.parent_update_id);
 
   const handleUpdate = async (updatedData) => {
     // Update local state immediately for instant UI feedback
@@ -1313,6 +1316,20 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
               />
 
       <div className="flex flex-col gap-2 md:gap-3" style={{height: '100%', touchAction: 'auto', isolation: 'isolate'}}>
+
+          {/* ── Starred update notice ── */}
+          {starredUpdates.length > 0 && (
+            <div className="bg-amber-50 dark:bg-amber-900/20 border-2 border-amber-500 rounded-[10px] p-3 flex items-start gap-3 flex-shrink-0 shadow-sm">
+              <Star className="w-5 h-5 text-amber-500 fill-amber-400 flex-shrink-0 mt-0.5" />
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-amber-800 dark:text-amber-200 text-sm">Flagged update requires attention</p>
+                <p className="text-xs text-amber-700 dark:text-amber-300 mt-0.5">
+                  {starredUpdates.length} update{starredUpdates.length !== 1 ? 's' : ''} flagged as important. This job cannot be completed until the star{starredUpdates.length !== 1 ? 's' : ''} {starredUpdates.length !== 1 ? 'are' : 'is'} removed.
+                </p>
+                <button onClick={() => setIsClaimUpdatesOpen(true)} className="mt-1 text-xs font-medium text-amber-800 dark:text-amber-200 underline hover:opacity-80">View & manage flagged updates</button>
+              </div>
+            </div>
+          )}
 
           {/* ── MOBILE header (< lg) ── */}
           <ClaimDetailMobileHeader

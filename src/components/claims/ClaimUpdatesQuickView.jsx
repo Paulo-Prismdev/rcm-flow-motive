@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { Clock, Calendar, User, MessageSquare, Plus } from 'lucide-react';
+import { Clock, Calendar, User, MessageSquare, Plus, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import ClaimUpdateForm from './ClaimUpdateForm';
@@ -26,6 +26,13 @@ export default function ClaimUpdatesQuickView({ claim, isOpen, onClose }) {
     queryFn: () => base44.entities.ClaimUpdate.filter({ claim_id: claimId }, '-created_date', 500),
     enabled: isOpen && !!claimId,
     staleTime: 0,
+  });
+
+  const toggleStarMutation = useMutation({
+    mutationFn: async ({ updateId, isStarred }) => {
+      return await base44.entities.ClaimUpdate.update(updateId, { starred: !isStarred });
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['claimUpdates', claimId] }),
   });
 
   const handleUpdateCreated = (newStatus, newSecondaryStatus) => {
@@ -108,6 +115,8 @@ export default function ClaimUpdatesQuickView({ claim, isOpen, onClose }) {
                 <div
                   key={update.id}
                   className={`border rounded-lg p-3 ${
+                    update.starred ? 'ring-2 ring-amber-400 border-amber-400' : ''
+                  } ${
                     isStatusChange
                       ? 'bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-700'
                       : 'bg-card border-border'
@@ -117,6 +126,11 @@ export default function ClaimUpdatesQuickView({ claim, isOpen, onClose }) {
                     <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium text-white ${UPDATE_TYPE_COLORS[update.update_type] || 'bg-gray-500'}`}>
                       {update.update_type}
                     </span>
+                    {update.starred && (
+                      <span className="inline-flex items-center gap-1 text-amber-500 text-[10px] font-semibold">
+                        <Star className="w-3 h-3 fill-amber-400" />Flagged
+                      </span>
+                    )}
                     <span className="text-[10px] text-muted-foreground flex items-center gap-1">
                       <Calendar className="w-3 h-3" />
                       {format(new Date(update.created_date), 'dd/MM/yyyy HH:mm')}
@@ -141,9 +155,22 @@ export default function ClaimUpdatesQuickView({ claim, isOpen, onClose }) {
                     </div>
                   )}
 
-                  <div className="flex items-center gap-1 text-[10px] text-muted-foreground mt-2 pt-2 border-t border-border/50">
-                    <User className="w-3 h-3" />
-                    {update.created_by || 'Unknown'}
+                  <div className="flex items-center justify-between gap-1 text-[10px] text-muted-foreground mt-2 pt-2 border-t border-border/50">
+                    <div className="flex items-center gap-1">
+                      <User className="w-3 h-3" />
+                      {update.created_by || 'Unknown'}
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => toggleStarMutation.mutate({ updateId: update.id, isStarred: update.starred })}
+                      className={`h-6 px-2 text-xs ${update.starred ? 'text-amber-500 hover:text-amber-600' : 'text-muted-foreground'}`}
+                      title={update.starred ? 'Remove flag' : 'Flag as important'}
+                    >
+                      <Star className={`w-3 h-3 mr-1 ${update.starred ? 'fill-amber-400' : ''}`} />
+                      {update.starred ? 'Flagged' : 'Flag'}
+                    </Button>
                   </div>
 
                   {replies.length > 0 && (

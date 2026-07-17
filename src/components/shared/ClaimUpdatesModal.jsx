@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { X, Clock, User, Calendar, Plus, Heart, Reply, AtSign, Pencil, Trash2 } from 'lucide-react';
+import { X, Clock, User, Calendar, Plus, Heart, Reply, AtSign, Pencil, Trash2, Star } from 'lucide-react';
 import { format } from 'date-fns';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
@@ -84,6 +84,13 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
       const update = updates.find(u => u.id === updateId);
       const newLikedBy = isLiked ? update.liked_by.filter(id => id !== currentUser.id) : [...(update.liked_by || []), currentUser.id];
       return await base44.entities.ClaimUpdate.update(updateId, { liked_by: newLikedBy });
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['claimUpdates', claimId] }),
+  });
+
+  const toggleStarMutation = useMutation({
+    mutationFn: async ({ updateId, isStarred }) => {
+      return await base44.entities.ClaimUpdate.update(updateId, { starred: !isStarred });
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['claimUpdates', claimId] }),
   });
@@ -259,10 +266,11 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
                   const replies = updates.filter(u => u.parent_update_id === update.id).sort((a, b) => new Date(a.created_date) - new Date(b.created_date));
 
                   return (
-                    <div key={update.id} className={`border rounded-lg p-3 ${isStatusChange ? 'bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-700' : isNote ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700' : 'bg-card border-border'}`}>
+                    <div key={update.id} className={`border rounded-lg p-3 ${update.starred ? 'ring-2 ring-amber-400 border-amber-400' : ''} ${isStatusChange ? 'bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-700' : isNote ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700' : 'bg-card border-border'}`}>
                       <div className="flex items-start justify-between mb-2">
                         <div className="flex items-center gap-2 flex-wrap">
                           <Badge className={`${UPDATE_TYPE_COLORS[update.update_type] || 'bg-gray-500'} rounded-full`}>{update.update_type}</Badge>
+                          {update.starred && <span className="inline-flex items-center gap-1 text-amber-500 text-[10px] font-semibold"><Star className="w-3 h-3 fill-amber-400" />Flagged</span>}
                           <span className="text-[10px] text-muted-foreground flex items-center gap-1"><Calendar className="w-3 h-3" />{format(new Date(update.created_date), 'dd/MM/yyyy HH:mm')}</span>
                           {update.tagged_user_ids?.length > 0 && <span className="text-[10px] text-primary flex items-center gap-1"><AtSign className="w-3 h-3" />{update.tagged_user_ids.length} tagged</span>}
                         </div>
@@ -291,6 +299,7 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
                               <Button type="button" variant="ghost" size="sm" onClick={() => handleDelete(update.id)} className="h-7 px-2 text-xs text-muted-foreground"><Trash2 className="w-3.5 h-3.5" /></Button>
                             </>
                           )}
+                          <Button type="button" variant="ghost" size="sm" onClick={() => toggleStarMutation.mutate({ updateId: update.id, isStarred: update.starred })} className={`h-7 px-2 text-xs ${update.starred ? 'text-amber-500 hover:text-amber-600' : 'text-muted-foreground'}`} title={update.starred ? 'Remove flag' : 'Flag as important'}><Star className={`w-3.5 h-3.5 mr-1 ${update.starred ? 'fill-amber-400' : ''}`} />{update.starred ? 'Flagged' : 'Flag'}</Button>
                           <Button type="button" variant="ghost" size="sm" onClick={() => toggleLikeMutation.mutate({ updateId: update.id, isLiked })} className={`h-7 px-2 text-xs ${isLiked ? 'text-red-500 hover:text-red-600' : 'text-muted-foreground'}`}><Heart className={`w-3.5 h-3.5 mr-1 ${isLiked ? 'fill-current' : ''}`} />{likeCount > 0 && likeCount}</Button>
                           <Button type="button" variant="ghost" size="sm" onClick={() => handleReply(update.id)} className="h-7 px-2 text-xs text-muted-foreground"><Reply className="w-3.5 h-3.5 mr-1" />Reply</Button>
                         </div>
