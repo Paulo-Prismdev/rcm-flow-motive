@@ -20,8 +20,9 @@ export default function IndemnityLinkManager({ claim, onUpdate }) {
     setGenerating(true);
     try {
       const result = await base44.functions.invoke('generateIndemnityLink', { claimId: claim.id });
-      if (result.data?.link) {
-        setLink(result.data.link);
+      if (result.data?.token) {
+        const publicLink = `${window.location.origin}/indemnity-form?claimId=${claim.id}&token=${result.data.token}`;
+        setLink(publicLink);
         setEmailTo(claim.client_email || '');
         onUpdate({ ...claim, indemnity_link_sent_at: new Date().toISOString(), indemnity_completed_at: null });
         toast({ title: 'Indemnity link generated' });
