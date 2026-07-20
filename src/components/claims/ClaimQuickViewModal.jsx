@@ -1,4 +1,6 @@
 import React from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { base44 } from '@/api/base44Client';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { FileText, User, Shield, Wrench, Users, Car, Calendar } from 'lucide-react';
 import { format } from 'date-fns';
@@ -44,7 +46,16 @@ const Section = ({ icon: Icon, title, color, children }) => (
 );
 
 export default function ClaimQuickViewModal({ claim, isOpen, onClose }) {
+  const { data: bodyshop } = useQuery({
+    queryKey: ['bodyshop', claim?.bodyshop_id],
+    queryFn: () => base44.entities.Bodyshop.get(claim.bodyshop_id),
+    enabled: isOpen && !!claim?.bodyshop_id,
+    staleTime: 5 * 60 * 1000,
+  });
+
   if (!claim) return null;
+
+  const bodyshopPhone = bodyshop?.phone || bodyshop?.mobile_phone || '';
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
@@ -95,6 +106,7 @@ export default function ClaimQuickViewModal({ claim, isOpen, onClose }) {
           {/* Repairer */}
           <Section icon={Wrench} title="Repairer / Bodyshop" color="bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-300">
             <InfoRow label="Bodyshop" value={claim.bodyshop} />
+            <InfoRow label="Bodyshop Phone" value={bodyshopPhone} href={bodyshopPhone ? `tel:${bodyshopPhone}` : null} />
             <InfoRow label="Bodyshop Email" value={claim.bodyshop_email} href={claim.bodyshop_email ? `mailto:${claim.bodyshop_email}` : null} />
             <InfoRow label="Repairer Accepted" value={claim.repairer_accepted ? `Yes (${formatDate(claim.repairer_accepted_date)})` : claim.bodyshop_id ? 'Pending' : '—'} />
             <InfoRow label="Vehicle Location" value={claim.vehicle_location} />
