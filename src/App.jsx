@@ -13,7 +13,6 @@ import LoadingScreen from '@/components/LoadingScreen';
 import PublicPartsRequest from '@/pages/PublicPartsRequest';
 import BackorderForm from '@/pages/BackorderForm';
 import ClientClaimForm from '@/pages/ClientClaimForm';
-import IndemnityForm from '@/pages/IndemnityForm';
 import TyreRequests from '@/pages/TyreRequests';
 import CompanyManagement from '@/pages/CompanyManagement';
 import MigrateUsers from '@/pages/MigrateUsers';
@@ -28,7 +27,7 @@ const LayoutWrapper = ({ children, currentPageName }) => Layout ?
   <Layout currentPageName={currentPageName}>{children}</Layout>
   : <>{children}</>;
 
-const PUBLIC_PATHS = ['/backorder-form', '/parts-request', '/client-claim-form', '/indemnity-form']; // indemnity-form now uses query params
+const PUBLIC_PATHS = ['/backorder-form', '/parts-request', '/client-claim-form'];
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, isAuthenticated, navigateToLogin } = useAuth();
@@ -42,7 +41,6 @@ const AuthenticatedApp = () => {
         <Route path="/parts-request" element={<PublicPartsRequest />} />
         <Route path="/backorder-form" element={<BackorderForm />} />
         <Route path="/client-claim-form" element={<ClientClaimForm />} />
-        <Route path="/indemnity-form" element={<IndemnityForm />} />
       </Routes>
     );
   }
@@ -85,7 +83,6 @@ const AuthenticatedApp = () => {
       <Route path="/parts-request" element={<PublicPartsRequest />} />
       <Route path="/backorder-form" element={<BackorderForm />} />
       <Route path="/client-claim-form" element={<ClientClaimForm />} />
-      <Route path="/indemnity-form" element={<IndemnityForm />} />
       <Route path="/TyreRequests" element={
         <LayoutWrapper currentPageName="TyreRequests">
           <TyreRequests />
@@ -123,7 +120,6 @@ function PublicApp() {
       <Route path="/parts-request" element={<PublicPartsRequest />} />
       <Route path="/backorder-form" element={<BackorderForm />} />
       <Route path="/client-claim-form" element={<ClientClaimForm />} />
-      <Route path="/indemnity-form" element={<IndemnityForm />} />
     </Routes>
   );
 }
