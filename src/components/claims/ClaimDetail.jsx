@@ -1037,7 +1037,17 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
             canEdit={canEdit}
           >
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
-              <DetailRow label="Driver's Age" value={claim.indemnity_driver_age} />
+              <DetailRow label="Driver's Age" value={(() => {
+                const dob = claim.indemnity_driver_dob;
+                if (!dob) return claim.indemnity_driver_age;
+                const d = new Date(dob);
+                if (isNaN(d.getTime())) return claim.indemnity_driver_age;
+                const now = new Date();
+                let age = now.getFullYear() - d.getFullYear();
+                const m = now.getMonth() - d.getMonth();
+                if (m < 0 || (m === 0 && now.getDate() < d.getDate())) age--;
+                return age;
+              })()} />
               <DetailRow label="Driver's Date of Birth" value={claim.indemnity_driver_dob} isDate />
               <DetailRow label="Registered Owner/Keeper" value={claim.indemnity_registered_owner} />
               <DetailRow label="Pending Prosecutions?" value={claim.indemnity_pending_prosecutions} />

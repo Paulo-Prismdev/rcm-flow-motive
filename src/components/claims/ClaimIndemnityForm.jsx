@@ -6,6 +6,18 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { CalendarIcon } from 'lucide-react';
 import { format, parse, isValid } from 'date-fns';
 
+// Calculate age from a DOB string (yyyy-MM-dd). Returns null if invalid.
+const calcAge = (dob) => {
+  if (!dob) return null;
+  const d = new Date(dob);
+  if (isNaN(d.getTime())) return null;
+  const now = new Date();
+  let age = now.getFullYear() - d.getFullYear();
+  const m = now.getMonth() - d.getMonth();
+  if (m < 0 || (m === 0 && now.getDate() < d.getDate())) age--;
+  return age;
+};
+
 // Custom DOB Calendar with year/month dropdowns
 function DOBCalendar({ selected, onSelect }) {
   const currentYear = new Date().getFullYear();
@@ -116,7 +128,7 @@ export default function ClaimIndemnityForm({ claim, onSave, onCancel }) {
     e.preventDefault();
     onSave({
       ...formData,
-      indemnity_driver_age: formData.indemnity_driver_age === '' ? null : Number(formData.indemnity_driver_age),
+      indemnity_driver_age: calcAge(formData.indemnity_driver_dob),
     });
   };
 
@@ -138,19 +150,11 @@ export default function ClaimIndemnityForm({ claim, onSave, onCancel }) {
       {formData.requires_indemnity && (
         <>
           <div>
-            <label className="block text-sm font-medium mb-2">Driver's Age</label>
-            <Input
-              type="number"
-              min="0"
-              value={formData.indemnity_driver_age}
-              onChange={(e) => setFormData({ ...formData, indemnity_driver_age: e.target.value })}
-              placeholder="Enter driver's age..."
-              className="neomorph-inset"
-            />
-          </div>
-
-          <div>
             <label className="block text-sm font-medium mb-2">Driver's Date of Birth</label>
+            {(() => {
+              const age = calcAge(formData.indemnity_driver_dob);
+              return age !== null ? <p className="text-xs text-muted-foreground mb-2">Calculated age: <span className="font-semibold text-foreground">{age} years</span></p> : null;
+            })()}
             <Popover>
               <div className="relative">
                 <Input

@@ -2,6 +2,18 @@ import React from 'react';
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
+// Calculate age from a DOB string (yyyy-MM-dd). Returns null if invalid.
+const calcAge = (dob) => {
+  if (!dob) return null;
+  const d = new Date(dob);
+  if (isNaN(d.getTime())) return null;
+  const now = new Date();
+  let age = now.getFullYear() - d.getFullYear();
+  const m = now.getMonth() - d.getMonth();
+  if (m < 0 || (m === 0 && now.getDate() < d.getDate())) age--;
+  return age;
+};
+
 export default function ClaimIndemnityFields({ formData, handleChange }) {
   return (
     <div className="neomorph-flat p-6 space-y-4">
@@ -9,13 +21,17 @@ export default function ClaimIndemnityFields({ formData, handleChange }) {
       <p className="text-sm text-gray-500 mb-4">Please provide the following details for indemnity purposes.</p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm text-gray-600 mb-2">Driver's Age</label>
-          <Input type="number" min="0" value={formData.indemnity_driver_age} onChange={(e) => handleChange('indemnity_driver_age', e.target.value)} className="neomorph-inset px-4 py-3 text-gray-700 border-0" />
-        </div>
-        <div>
+        <div className="md:col-span-2">
           <label className="block text-sm text-gray-600 mb-2">Driver's Date of Birth</label>
-          <Input type="date" value={formData.indemnity_driver_dob} onChange={(e) => handleChange('indemnity_driver_dob', e.target.value)} className="neomorph-inset px-4 py-3 text-gray-700 border-0" />
+          <Input type="date" value={formData.indemnity_driver_dob} onChange={(e) => {
+            const dob = e.target.value;
+            handleChange('indemnity_driver_dob', dob);
+            handleChange('indemnity_driver_age', calcAge(dob));
+          }} className="neomorph-inset px-4 py-3 text-gray-700 border-0" />
+          {(() => {
+            const age = calcAge(formData.indemnity_driver_dob);
+            return age !== null ? <p className="text-xs text-gray-500 mt-1">Calculated age: <span className="font-semibold text-gray-700">{age} years</span></p> : null;
+          })()}
         </div>
         <div>
           <label className="block text-sm text-gray-600 mb-2">Registered Owner (Full Name)</label>
