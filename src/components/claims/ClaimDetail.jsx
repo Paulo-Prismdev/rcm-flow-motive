@@ -1040,34 +1040,34 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
           >
             <IndemnityLinkManager claim={claim} onUpdate={handleUpdate} />
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+              <DetailRow label="Driver's Age" value={claim.indemnity_driver_age} />
               <DetailRow label="Driver's Date of Birth" value={claim.indemnity_driver_dob} isDate />
               <DetailRow label="Registered Owner/Keeper" value={claim.indemnity_registered_owner} />
+              <DetailRow label="Pending Prosecutions?" value={claim.indemnity_pending_prosecutions} />
+              <DetailRow label="Told not to drive (DVLA/Medical)?" value={claim.indemnity_dvla_medical_restrictions} />
+              <DetailRow label="Convictions/points (5 yrs)?" value={claim.indemnity_convictions_last_5_years} />
+              <DetailRow label="Incidents/losses/thefts (5 yrs)?" value={claim.indemnity_incidents_last_5_years} />
+              <DetailRow label="Full UK/EU licence 12+ months?" value={claim.indemnity_full_license_12_months} />
+              <DetailRow label="Vehicle Use at Incident" value={claim.indemnity_vehicle_use_at_incident} />
+              <DetailRow label="Vehicle Modifications?" value={claim.indemnity_vehicle_modifications} />
+              <DetailRow label="Pre-existing Damages?" value={claim.indemnity_pre_existing_damage} />
+              <DetailRow label="CCTV / Dashcam Footage?" value={claim.indemnity_cctv_dashcam} />
+              <DetailRow label="Property Damaged?" value={claim.indemnity_property_damaged} />
+              <DetailRow label="More Photos Available?" value={claim.indemnity_more_photos} />
             </div>
             <div className="mt-2 space-y-3">
-              <div className="py-3 px-4 rounded-lg glass-inset">
-                <div className="text-xs font-semibold text-foreground-muted mb-2">Pending Prosecutions?</div>
-                <div className="text-sm leading-relaxed whitespace-pre-wrap">{claim.indemnity_pending_prosecutions || '-'}</div>
-              </div>
-              <div className="py-3 px-4 rounded-lg glass-inset">
-                <div className="text-xs font-semibold text-foreground-muted mb-2">Told not to drive by DVLA/Medical?</div>
-                <div className="text-sm leading-relaxed whitespace-pre-wrap">{claim.indemnity_dvla_medical_restrictions || '-'}</div>
-              </div>
-              <div className="py-3 px-4 rounded-lg glass-inset">
-                <div className="text-xs font-semibold text-foreground-muted mb-2">Held full UK/EU license for 12+ months?</div>
-                <div className="text-sm leading-relaxed whitespace-pre-wrap">{claim.indemnity_full_license_12_months ? 'Yes' : 'No'}</div>
-              </div>
-              <div className="py-3 px-4 rounded-lg glass-inset">
-                <div className="text-xs font-semibold text-foreground-muted mb-2">Motoring convictions/points in last 5 years?</div>
-                <div className="text-sm leading-relaxed whitespace-pre-wrap">{claim.indemnity_convictions_last_5_years || '-'}</div>
-              </div>
-              <div className="py-3 px-4 rounded-lg glass-inset">
-                <div className="text-xs font-semibold text-foreground-muted mb-2">Vehicle use at time of incident</div>
-                <div className="text-sm leading-relaxed whitespace-pre-wrap">{claim.indemnity_vehicle_use_at_incident || '-'}</div>
-              </div>
-              <div className="py-3 px-4 rounded-lg glass-inset">
-                <div className="text-xs font-semibold text-foreground-muted mb-2">Vehicle modifications?</div>
-                <div className="text-sm leading-relaxed whitespace-pre-wrap">{claim.indemnity_vehicle_modifications || '-'}</div>
-              </div>
+              {claim.indemnity_modification_details && (
+                <div className="py-3 px-4 rounded-lg glass-inset">
+                  <div className="text-xs font-semibold text-foreground-muted mb-2">Modification Details</div>
+                  <div className="text-sm leading-relaxed whitespace-pre-wrap">{claim.indemnity_modification_details}</div>
+                </div>
+              )}
+              {claim.indemnity_other_info && (
+                <div className="py-3 px-4 rounded-lg glass-inset">
+                  <div className="text-xs font-semibold text-foreground-muted mb-2">Other Information</div>
+                  <div className="text-sm leading-relaxed whitespace-pre-wrap">{claim.indemnity_other_info}</div>
+                </div>
+              )}
             </div>
           </EditableSection>
         );

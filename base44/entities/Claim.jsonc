@@ -665,26 +665,63 @@
       "type": "string",
       "format": "date"
     },
+    "indemnity_driver_age": {
+      "type": "number",
+      "description": "Driver's age at the time of the incident"
+    },
     "indemnity_registered_owner": {
       "type": "string"
     },
     "indemnity_pending_prosecutions": {
-      "type": "string"
+      "type": "string",
+      "description": "Does the driver have any pending prosecutions? (Yes/No)"
     },
     "indemnity_dvla_medical_restrictions": {
-      "type": "string"
+      "type": "string",
+      "description": "Has the driver been told not to drive by DVLA or any medical source? (Yes/No)"
     },
     "indemnity_full_license_12_months": {
-      "type": "string"
+      "type": "string",
+      "description": "Has the driver held a full UK/EU licence for at least 12 months? (Yes/No)"
     },
     "indemnity_convictions_last_5_years": {
-      "type": "string"
+      "type": "string",
+      "description": "Any motoring convictions or fixed penalty points in the last 5 years? (Yes/No)"
+    },
+    "indemnity_incidents_last_5_years": {
+      "type": "string",
+      "description": "Any incidents, losses or thefts in the last 5 years? (Yes/No)"
     },
     "indemnity_vehicle_use_at_incident": {
       "type": "string"
     },
     "indemnity_vehicle_modifications": {
-      "type": "string"
+      "type": "string",
+      "description": "Does the vehicle have any modifications? (Yes/No)"
+    },
+    "indemnity_modification_details": {
+      "type": "string",
+      "description": "Details of vehicle modifications, if any"
+    },
+    "indemnity_pre_existing_damage": {
+      "type": "string",
+      "description": "Did any vehicle involved have pre-existing damage? (Yes/No)"
+    },
+    "indemnity_cctv_dashcam": {
+      "type": "string",
+      "description": "Is there any CCTV or dashcam footage available? (Yes/No)"
+    },
+    "indemnity_property_damaged": {
+      "type": "string",
+      "description": "As a result of the incident was any property damaged? (Yes/No)"
+    },
+    "indemnity_more_photos": {
+      "type": "string",
+      "description": "Can you provide more photos of the damages? (Yes/No)"
+    },
+    "indemnity_other_info": {
+      "type": "string",
+      "description": "Any other information relevant to the claim"
     },
     "indemnity_token": {
       "type": "string",

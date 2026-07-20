@@ -68,13 +68,21 @@ Deno.serve(async (req) => {
     // Update only the indemnity fields on the claim
     const updateData = {
       indemnity_driver_dob: formData.indemnity_driver_dob || '',
+      indemnity_driver_age: formData.indemnity_driver_age ? Number(formData.indemnity_driver_age) : null,
       indemnity_registered_owner: formData.indemnity_registered_owner || '',
       indemnity_pending_prosecutions: formData.indemnity_pending_prosecutions || '',
       indemnity_dvla_medical_restrictions: formData.indemnity_dvla_medical_restrictions || '',
       indemnity_full_license_12_months: formData.indemnity_full_license_12_months || '',
       indemnity_convictions_last_5_years: formData.indemnity_convictions_last_5_years || '',
+      indemnity_incidents_last_5_years: formData.indemnity_incidents_last_5_years || '',
       indemnity_vehicle_use_at_incident: formData.indemnity_vehicle_use_at_incident || '',
       indemnity_vehicle_modifications: formData.indemnity_vehicle_modifications || '',
+      indemnity_modification_details: formData.indemnity_modification_details || '',
+      indemnity_pre_existing_damage: formData.indemnity_pre_existing_damage || '',
+      indemnity_cctv_dashcam: formData.indemnity_cctv_dashcam || '',
+      indemnity_property_damaged: formData.indemnity_property_damaged || '',
+      indemnity_more_photos: formData.indemnity_more_photos || '',
+      indemnity_other_info: formData.indemnity_other_info || '',
       indemnity_completed_at: new Date().toISOString(),
       requires_indemnity: true,
     };

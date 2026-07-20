@@ -83,22 +83,41 @@ function DOBCalendar({ selected, onSelect }) {
   );
 }
 
+const YesNoSelect = ({ value, onChange, className = '' }) => (
+  <select value={value} onChange={onChange} className={`neomorph-inset w-full px-3 py-2 rounded-lg border-0 text-sm ${className}`}>
+    <option value="">Select...</option>
+    <option value="Yes">Yes</option>
+    <option value="No">No</option>
+  </select>
+);
+
 export default function ClaimIndemnityForm({ claim, onSave, onCancel }) {
   const [formData, setFormData] = useState({
     requires_indemnity: claim.requires_indemnity || false,
     indemnity_driver_dob: claim.indemnity_driver_dob || '',
+    indemnity_driver_age: claim.indemnity_driver_age ?? '',
     indemnity_registered_owner: claim.indemnity_registered_owner || '',
     indemnity_pending_prosecutions: claim.indemnity_pending_prosecutions || '',
     indemnity_dvla_medical_restrictions: claim.indemnity_dvla_medical_restrictions || '',
     indemnity_full_license_12_months: claim.indemnity_full_license_12_months || '',
     indemnity_convictions_last_5_years: claim.indemnity_convictions_last_5_years || '',
+    indemnity_incidents_last_5_years: claim.indemnity_incidents_last_5_years || '',
     indemnity_vehicle_use_at_incident: claim.indemnity_vehicle_use_at_incident || '',
     indemnity_vehicle_modifications: claim.indemnity_vehicle_modifications || '',
+    indemnity_modification_details: claim.indemnity_modification_details || '',
+    indemnity_pre_existing_damage: claim.indemnity_pre_existing_damage || '',
+    indemnity_cctv_dashcam: claim.indemnity_cctv_dashcam || '',
+    indemnity_property_damaged: claim.indemnity_property_damaged || '',
+    indemnity_more_photos: claim.indemnity_more_photos || '',
+    indemnity_other_info: claim.indemnity_other_info || '',
   });
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSave(formData);
+    onSave({
+      ...formData,
+      indemnity_driver_age: formData.indemnity_driver_age === '' ? null : Number(formData.indemnity_driver_age),
+    });
   };
 
   return (
@@ -118,6 +137,18 @@ export default function ClaimIndemnityForm({ claim, onSave, onCancel }) {
 
       {formData.requires_indemnity && (
         <>
+          <div>
+            <label className="block text-sm font-medium mb-2">Driver's Age</label>
+            <Input
+              type="number"
+              min="0"
+              value={formData.indemnity_driver_age}
+              onChange={(e) => setFormData({ ...formData, indemnity_driver_age: e.target.value })}
+              placeholder="Enter driver's age..."
+              className="neomorph-inset"
+            />
+          </div>
+
           <div>
             <label className="block text-sm font-medium mb-2">Driver's Date of Birth</label>
             <Popover>
@@ -178,46 +209,27 @@ export default function ClaimIndemnityForm({ claim, onSave, onCancel }) {
 
       <div>
         <label className="block text-sm font-medium mb-2">Does the driver have any pending prosecutions?</label>
-        <Textarea
-          value={formData.indemnity_pending_prosecutions}
-          onChange={(e) => setFormData({ ...formData, indemnity_pending_prosecutions: e.target.value })}
-          placeholder="Enter details of any pending prosecutions (or 'No' if none)..."
-          className="neomorph-inset"
-          rows={2}
-        />
+        <YesNoSelect value={formData.indemnity_pending_prosecutions} onChange={(e) => setFormData({ ...formData, indemnity_pending_prosecutions: e.target.value })} />
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-2">Has the driver been told not to drive by DVLA or any medical source?</label>
-        <Textarea
-          value={formData.indemnity_dvla_medical_restrictions}
-          onChange={(e) => setFormData({ ...formData, indemnity_dvla_medical_restrictions: e.target.value })}
-          placeholder="Enter details (or 'No' if none)..."
-          className="neomorph-inset"
-          rows={2}
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium mb-2">Has the driver held a full UK/EU license for at least 12 months and driven regularly in the UK at that time?</label>
-        <Textarea
-          value={formData.indemnity_full_license_12_months}
-          onChange={(e) => setFormData({ ...formData, indemnity_full_license_12_months: e.target.value })}
-          placeholder="Enter details..."
-          className="neomorph-inset"
-          rows={2}
-        />
+        <label className="block text-sm font-medium mb-2">Has the driver been told not to drive by the DVLA or any medical source?</label>
+        <YesNoSelect value={formData.indemnity_dvla_medical_restrictions} onChange={(e) => setFormData({ ...formData, indemnity_dvla_medical_restrictions: e.target.value })} />
       </div>
 
       <div>
         <label className="block text-sm font-medium mb-2">Has the driver had any motoring convictions or fixed penalty points within the last 5 years?</label>
-        <Textarea
-          value={formData.indemnity_convictions_last_5_years}
-          onChange={(e) => setFormData({ ...formData, indemnity_convictions_last_5_years: e.target.value })}
-          placeholder="Enter details of convictions/points (or 'No' if none)..."
-          className="neomorph-inset"
-          rows={2}
-        />
+        <YesNoSelect value={formData.indemnity_convictions_last_5_years} onChange={(e) => setFormData({ ...formData, indemnity_convictions_last_5_years: e.target.value })} />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium mb-2">Has the driver been involved in any incidents, losses, or thefts in the last 5 years, regardless of whether a claim has been made?</label>
+        <YesNoSelect value={formData.indemnity_incidents_last_5_years} onChange={(e) => setFormData({ ...formData, indemnity_incidents_last_5_years: e.target.value })} />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium mb-2">Has the driver held a full UK/EU licence for at least 12 months and driven regularly in the UK at that time?</label>
+        <YesNoSelect value={formData.indemnity_full_license_12_months} onChange={(e) => setFormData({ ...formData, indemnity_full_license_12_months: e.target.value })} />
       </div>
 
       <div>
@@ -235,13 +247,51 @@ export default function ClaimIndemnityForm({ claim, onSave, onCancel }) {
       </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">Are there any modifications to the policyholder's vehicle?</label>
+            <label className="block text-sm font-medium mb-2">Does the vehicle have any modifications?</label>
+            <YesNoSelect value={formData.indemnity_vehicle_modifications} onChange={(e) => setFormData({ ...formData, indemnity_vehicle_modifications: e.target.value })} />
+          </div>
+
+          {formData.indemnity_vehicle_modifications === 'Yes' && (
+            <div>
+              <label className="block text-sm font-medium mb-2">If so, what modifications?</label>
+              <Textarea
+                value={formData.indemnity_modification_details}
+                onChange={(e) => setFormData({ ...formData, indemnity_modification_details: e.target.value })}
+                placeholder="Please describe the modifications..."
+                className="neomorph-inset"
+                rows={2}
+              />
+            </div>
+          )}
+
+          <div>
+            <label className="block text-sm font-medium mb-2">Did any vehicle involved have any pre-existing damages?</label>
+            <YesNoSelect value={formData.indemnity_pre_existing_damage} onChange={(e) => setFormData({ ...formData, indemnity_pre_existing_damage: e.target.value })} />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">Is there any CCTV or dashcam footage available?</label>
+            <YesNoSelect value={formData.indemnity_cctv_dashcam} onChange={(e) => setFormData({ ...formData, indemnity_cctv_dashcam: e.target.value })} />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">As a result of the incident was there any property damaged?</label>
+            <YesNoSelect value={formData.indemnity_property_damaged} onChange={(e) => setFormData({ ...formData, indemnity_property_damaged: e.target.value })} />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">Can you provide more photos of the damages to the vehicles involved?</label>
+            <YesNoSelect value={formData.indemnity_more_photos} onChange={(e) => setFormData({ ...formData, indemnity_more_photos: e.target.value })} />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">Any other information that you believe to be relevant and that will aid the claim?</label>
             <Textarea
-              value={formData.indemnity_vehicle_modifications}
-              onChange={(e) => setFormData({ ...formData, indemnity_vehicle_modifications: e.target.value })}
-              placeholder="Enter details of modifications (or 'No' if none)..."
+              value={formData.indemnity_other_info}
+              onChange={(e) => setFormData({ ...formData, indemnity_other_info: e.target.value })}
+              placeholder="Enter any other relevant information..."
               className="neomorph-inset"
-              rows={2}
+              rows={3}
             />
           </div>
         </>
