@@ -14,7 +14,7 @@ const calcAge = (dob) => {
   const now = new Date();
   let age = now.getFullYear() - d.getFullYear();
   const m = now.getMonth() - d.getMonth();
-  if (m < 0 || (m === 0 && now.getDate() < d.getDate())) age--;
+  if (m < 0 || m === 0 && now.getDate() < d.getDate()) age--;
   return age;
 };
 
@@ -23,15 +23,15 @@ function DOBCalendar({ selected, onSelect }) {
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 100 }, (_, i) => currentYear - i);
   const months = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
-  ];
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December'];
+
 
   const [viewDate, setViewDate] = useState(selected || new Date(currentYear - 30, 0, 1));
 
   const daysInMonth = new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 0).getDate();
   const firstDayOfMonth = new Date(viewDate.getFullYear(), viewDate.getMonth(), 1).getDay();
-  
+
   const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
   const blanks = Array.from({ length: firstDayOfMonth }, (_, i) => i);
 
@@ -42,9 +42,9 @@ function DOBCalendar({ selected, onSelect }) {
 
   const isSelected = (day) => {
     if (!selected) return false;
-    return selected.getDate() === day && 
-           selected.getMonth() === viewDate.getMonth() && 
-           selected.getFullYear() === viewDate.getFullYear();
+    return selected.getDate() === day &&
+    selected.getMonth() === viewDate.getMonth() &&
+    selected.getFullYear() === viewDate.getFullYear();
   };
 
   return (
@@ -53,55 +53,55 @@ function DOBCalendar({ selected, onSelect }) {
         <select
           value={viewDate.getMonth()}
           onChange={(e) => setViewDate(new Date(viewDate.getFullYear(), parseInt(e.target.value), 1))}
-          className="flex-1 px-2 py-1.5 text-sm border rounded-md bg-background"
-        >
-          {months.map((month, i) => (
-            <option key={month} value={i}>{month}</option>
-          ))}
+          className="flex-1 px-2 py-1.5 text-sm border rounded-md bg-background">
+          
+          {months.map((month, i) =>
+          <option key={month} value={i}>{month}</option>
+          )}
         </select>
         <select
           value={viewDate.getFullYear()}
           onChange={(e) => setViewDate(new Date(parseInt(e.target.value), viewDate.getMonth(), 1))}
-          className="w-24 px-2 py-1.5 text-sm border rounded-md bg-background"
-        >
-          {years.map(year => (
-            <option key={year} value={year}>{year}</option>
-          ))}
+          className="w-24 px-2 py-1.5 text-sm border rounded-md bg-background">
+          
+          {years.map((year) =>
+          <option key={year} value={year}>{year}</option>
+          )}
         </select>
       </div>
       <div className="grid grid-cols-7 gap-1 text-center text-xs font-medium text-foreground-muted mb-1">
-        {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(d => (
-          <div key={d} className="py-1">{d}</div>
-        ))}
+        {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map((d) =>
+        <div key={d} className="py-1">{d}</div>
+        )}
       </div>
       <div className="grid grid-cols-7 gap-1">
-        {blanks.map(i => (
-          <div key={`blank-${i}`} />
-        ))}
-        {days.map(day => (
-          <button
-            key={day}
-            type="button"
-            onClick={() => handleDayClick(day)}
-            className={`p-2 text-sm rounded-md hover:bg-accent/20 transition-colors ${
-              isSelected(day) ? 'bg-accent text-accent-foreground font-bold' : ''
-            }`}
-          >
+        {blanks.map((i) =>
+        <div key={`blank-${i}`} />
+        )}
+        {days.map((day) =>
+        <button
+          key={day}
+          type="button"
+          onClick={() => handleDayClick(day)}
+          className={`p-2 text-sm rounded-md hover:bg-accent/20 transition-colors ${
+          isSelected(day) ? 'bg-accent text-accent-foreground font-bold' : ''}`
+          }>
+          
             {day}
           </button>
-        ))}
+        )}
       </div>
-    </div>
-  );
+    </div>);
+
 }
 
-const YesNoSelect = ({ value, onChange, className = '' }) => (
-  <select value={value} onChange={onChange} className={`neomorph-inset w-full px-3 py-2 rounded-lg border-0 text-sm ${className}`}>
+const YesNoSelect = ({ value, onChange, className = '' }) =>
+<select value={value} onChange={onChange} className={`neomorph-inset w-full px-3 py-2 rounded-lg border-0 text-sm ${className}`}>
     <option value="">Select...</option>
     <option value="Yes">Yes</option>
     <option value="No">No</option>
-  </select>
-);
+  </select>;
+
 
 export default function ClaimIndemnityForm({ claim, onSave, onCancel }) {
   const [formData, setFormData] = useState({
@@ -121,14 +121,14 @@ export default function ClaimIndemnityForm({ claim, onSave, onCancel }) {
     indemnity_cctv_dashcam: claim.indemnity_cctv_dashcam || '',
     indemnity_property_damaged: claim.indemnity_property_damaged || '',
     indemnity_more_photos: claim.indemnity_more_photos || '',
-    indemnity_other_info: claim.indemnity_other_info || '',
+    indemnity_other_info: claim.indemnity_other_info || ''
   });
 
   const handleSubmit = (e) => {
     e.preventDefault();
     onSave({
       ...formData,
-      indemnity_driver_age: calcAge(formData.indemnity_driver_dob),
+      indemnity_driver_age: calcAge(formData.indemnity_driver_dob)
     });
   };
 
@@ -140,63 +140,63 @@ export default function ClaimIndemnityForm({ claim, onSave, onCancel }) {
           id="requires_indemnity"
           checked={formData.requires_indemnity}
           onChange={(e) => setFormData({ ...formData, requires_indemnity: e.target.checked })}
-          className="w-5 h-5"
-        />
+          className="w-5 h-5" />
+        
         <label htmlFor="requires_indemnity" className="text-sm font-medium">
           This claim requires indemnity details
         </label>
       </div>
 
-      {formData.requires_indemnity && (
-        <>
+      {formData.requires_indemnity &&
+      <>
           <div>
             <label className="block text-sm font-medium mb-2">Driver's Date of Birth</label>
             {(() => {
-              const age = calcAge(formData.indemnity_driver_dob);
-              return age !== null ? <p className="text-xs text-muted-foreground mb-2">Calculated age: <span className="font-semibold text-foreground">{age} years</span></p> : null;
-            })()}
+            const age = calcAge(formData.indemnity_driver_dob);
+            return age !== null ? <p className="text-xs text-muted-foreground mb-2">Calculated age: <span className="font-semibold text-foreground">{age} years</span></p> : null;
+          })()}
             <Popover>
               <div className="relative">
                 <Input
-                  type="text"
-                  placeholder="DD/MM/YYYY"
-                  value={formData.indemnity_driver_dob ? (() => {
-                    try {
-                      const d = new Date(formData.indemnity_driver_dob);
-                      return isValid(d) ? format(d, 'dd/MM/yyyy') : formData.indemnity_driver_dob;
-                    } catch {
-                      return formData.indemnity_driver_dob;
-                    }
-                  })() : ''}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    const parsed = parse(val, 'dd/MM/yyyy', new Date());
-                    if (isValid(parsed)) {
-                      setFormData({ ...formData, indemnity_driver_dob: format(parsed, 'yyyy-MM-dd') });
-                    } else {
-                      setFormData({ ...formData, indemnity_driver_dob: val });
-                    }
-                  }}
-                  className="neomorph-inset pr-10"
-                />
+                type="text"
+                placeholder="DD/MM/YYYY"
+                value={formData.indemnity_driver_dob ? (() => {
+                  try {
+                    const d = new Date(formData.indemnity_driver_dob);
+                    return isValid(d) ? format(d, 'dd/MM/yyyy') : formData.indemnity_driver_dob;
+                  } catch {
+                    return formData.indemnity_driver_dob;
+                  }
+                })() : ''}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  const parsed = parse(val, 'dd/MM/yyyy', new Date());
+                  if (isValid(parsed)) {
+                    setFormData({ ...formData, indemnity_driver_dob: format(parsed, 'yyyy-MM-dd') });
+                  } else {
+                    setFormData({ ...formData, indemnity_driver_dob: val });
+                  }
+                }}
+                className="neomorph-inset pr-10" />
+              
                 <PopoverTrigger asChild>
                   <button
-                    type="button"
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-foreground-muted hover:text-foreground"
-                  >
+                  type="button"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-foreground-muted hover:text-foreground">
+                  
                     <CalendarIcon className="w-4 h-4" />
                   </button>
                 </PopoverTrigger>
               </div>
               <PopoverContent className="w-auto p-0" align="start">
                 <DOBCalendar
-                  selected={formData.indemnity_driver_dob ? new Date(formData.indemnity_driver_dob) : undefined}
-                  onSelect={(date) => {
-                    if (date) {
-                      setFormData({ ...formData, indemnity_driver_dob: format(date, 'yyyy-MM-dd') });
-                    }
-                  }}
-                />
+                selected={formData.indemnity_driver_dob ? new Date(formData.indemnity_driver_dob) : undefined}
+                onSelect={(date) => {
+                  if (date) {
+                    setFormData({ ...formData, indemnity_driver_dob: format(date, 'yyyy-MM-dd') });
+                  }
+                }} />
+              
               </PopoverContent>
             </Popover>
           </div>
@@ -204,11 +204,11 @@ export default function ClaimIndemnityForm({ claim, onSave, onCancel }) {
       <div>
         <label className="block text-sm font-medium mb-2">Who is the registered owner and keeper of the vehicle?</label>
         <Input
-          value={formData.indemnity_registered_owner}
-          onChange={(e) => setFormData({ ...formData, indemnity_registered_owner: e.target.value })}
-          placeholder="Enter registered owner and keeper details..."
-          className="neomorph-inset"
-        />
+            value={formData.indemnity_registered_owner}
+            onChange={(e) => setFormData({ ...formData, indemnity_registered_owner: e.target.value })}
+            placeholder="Enter registered owner and keeper details..."
+            className="neomorph-inset" />
+          
       </div>
 
       <div>
@@ -239,10 +239,10 @@ export default function ClaimIndemnityForm({ claim, onSave, onCancel }) {
       <div>
         <label className="block text-sm font-medium mb-2">What was the vehicle being used for at the time of the incident?</label>
         <select
-          value={formData.indemnity_vehicle_use_at_incident}
-          onChange={(e) => setFormData({ ...formData, indemnity_vehicle_use_at_incident: e.target.value })}
-          className="neomorph-inset w-full px-3 py-2 rounded-lg border-0 text-sm"
-        >
+            value={formData.indemnity_vehicle_use_at_incident}
+            onChange={(e) => setFormData({ ...formData, indemnity_vehicle_use_at_incident: e.target.value })}
+            className="neomorph-inset w-full px-3 py-2 rounded-lg border-0 text-sm">
+            
           <option value="">Select...</option>
           <option value="Business">Business</option>
           <option value="Social">Social</option>
@@ -255,18 +255,18 @@ export default function ClaimIndemnityForm({ claim, onSave, onCancel }) {
             <YesNoSelect value={formData.indemnity_vehicle_modifications} onChange={(e) => setFormData({ ...formData, indemnity_vehicle_modifications: e.target.value })} />
           </div>
 
-          {formData.indemnity_vehicle_modifications === 'Yes' && (
-            <div>
+          {formData.indemnity_vehicle_modifications === 'Yes' &&
+        <div>
               <label className="block text-sm font-medium mb-2">If so, what modifications?</label>
               <Textarea
-                value={formData.indemnity_modification_details}
-                onChange={(e) => setFormData({ ...formData, indemnity_modification_details: e.target.value })}
-                placeholder="Please describe the modifications..."
-                className="neomorph-inset"
-                rows={2}
-              />
+            value={formData.indemnity_modification_details}
+            onChange={(e) => setFormData({ ...formData, indemnity_modification_details: e.target.value })}
+            placeholder="Please describe the modifications..."
+            className="neomorph-inset"
+            rows={2} />
+          
             </div>
-          )}
+        }
 
           <div>
             <label className="block text-sm font-medium mb-2">Did any vehicle involved have any pre-existing damages?</label>
@@ -291,24 +291,24 @@ export default function ClaimIndemnityForm({ claim, onSave, onCancel }) {
           <div>
             <label className="block text-sm font-medium mb-2">Any other information that you believe to be relevant and that will aid the claim?</label>
             <Textarea
-              value={formData.indemnity_other_info}
-              onChange={(e) => setFormData({ ...formData, indemnity_other_info: e.target.value })}
-              placeholder="Enter any other relevant information..."
-              className="neomorph-inset"
-              rows={3}
-            />
+            value={formData.indemnity_other_info}
+            onChange={(e) => setFormData({ ...formData, indemnity_other_info: e.target.value })}
+            placeholder="Enter any other relevant information..."
+            className="neomorph-inset"
+            rows={3} />
+          
           </div>
         </>
-      )}
+      }
 
       <div className="flex gap-3 pt-4">
-        <Button type="button" onClick={onCancel} className="neomorph-flat flex-1">
+        <Button type="button" onClick={onCancel} className="neomorph-flat flex-1 bg-[hsl(var(--card))] text-[hsl(var(--foreground))]">
           Cancel
         </Button>
         <Button type="submit" className="neomorph-flat bg-accent/10 text-accent flex-1">
           Save Changes
         </Button>
       </div>
-    </form>
-  );
+    </form>);
+
 }
