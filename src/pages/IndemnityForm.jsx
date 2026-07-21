@@ -42,6 +42,58 @@ const calcAge = (dob) => {
   return age;
 };
 
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+// Day / Month / Year dropdowns — partial selections persist and display; the full
+// date only commits to the form once all three parts are chosen.
+const DOBPicker = ({ value, onChange }) => {
+  const [parts, setParts] = useState(() => {
+    if (!value) return { day: '', month: '', year: '' };
+    const d = new Date(value);
+    if (isNaN(d.getTime())) return { day: '', month: '', year: '' };
+    return { day: d.getDate(), month: d.getMonth() + 1, year: d.getFullYear() };
+  });
+
+  useEffect(() => {
+    if (!value) return;
+    const d = new Date(value);
+    if (!isNaN(d.getTime())) setParts({ day: d.getDate(), month: d.getMonth() + 1, year: d.getFullYear() });
+  }, [value]);
+
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: currentYear - 1920 + 1 }, (_, i) => currentYear - i);
+  const maxDay = parts.month && parts.year ? new Date(parts.year, parts.month, 0).getDate() : 31;
+
+  const update = (newDay, newMonth, newYear) => {
+    const dd = newDay !== undefined ? newDay : parts.day;
+    const mm = newMonth !== undefined ? newMonth : parts.month;
+    const yy = newYear !== undefined ? newYear : parts.year;
+    setParts({ day: dd, month: mm, year: yy });
+    if (dd && mm && yy) {
+      const pad = n => String(n).padStart(2, '0');
+      onChange(`${yy}-${pad(mm)}-${pad(dd)}`);
+    }
+  };
+
+  const selCls = 'w-full px-3 py-3 rounded-xl border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-amber-400 text-sm';
+  return (
+    <div className="grid grid-cols-3 gap-2">
+      <select value={parts.day} onChange={e => update(e.target.value === '' ? '' : parseInt(e.target.value), undefined, undefined)} className={selCls}>
+        <option value="">Day</option>
+        {Array.from({ length: maxDay }, (_, i) => i + 1).map(n => <option key={n} value={n}>{n}</option>)}
+      </select>
+      <select value={parts.month} onChange={e => update(undefined, e.target.value === '' ? '' : parseInt(e.target.value), undefined)} className={selCls}>
+        <option value="">Month</option>
+        {MONTHS.map((m, i) => <option key={i+1} value={i+1}>{m}</option>)}
+      </select>
+      <select value={parts.year} onChange={e => update(undefined, undefined, e.target.value === '' ? '' : parseInt(e.target.value))} className={selCls}>
+        <option value="">Year</option>
+        {years.map(y => <option key={y} value={y}>{y}</option>)}
+      </select>
+    </div>
+  );
+};
+
 const initialForm = {
   indemnity_driver_dob: '',
   indemnity_registered_owner: '',
@@ -153,47 +205,6 @@ export default function IndemnityForm() {
       <div className="grid grid-cols-2 gap-2">
         <button type="button" onClick={() => onChange('Yes')} className={`px-4 py-3 rounded-xl border text-sm font-medium transition-colors ${value === 'Yes' ? `${yesColor} text-white` : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'}`}>Yes</button>
         <button type="button" onClick={() => onChange('No')} className={`px-4 py-3 rounded-xl border text-sm font-medium transition-colors ${value === 'No' ? `${noColor} text-white` : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'}`}>No</button>
-      </div>
-    );
-  };
-
-  const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-  // Day / Month / Year dropdowns — avoids the slow scroll-wheel year picker on native date inputs.
-  const DOBPicker = ({ value, onChange }) => {
-    const d = value ? new Date(value) : null;
-    const valid = d && !isNaN(d.getTime());
-    const day = valid ? d.getDate() : '';
-    const month = valid ? d.getMonth() + 1 : '';
-    const year = valid ? d.getFullYear() : '';
-    const currentYear = new Date().getFullYear();
-    const years = Array.from({ length: currentYear - 1920 + 1 }, (_, i) => currentYear - i);
-    const maxDay = month && year ? new Date(year, month, 0).getDate() : 31;
-    const set = (newDay, newMonth, newYear) => {
-      const dd = newDay || day;
-      const mm = newMonth || month;
-      const yy = newYear || year;
-      if (dd && mm && yy) {
-        const pad = n => String(n).padStart(2, '0');
-        onChange(`${yy}-${pad(mm)}-${pad(dd)}`);
-      } else {
-        onChange('');
-      }
-    };
-    const selCls = 'w-full px-3 py-3 rounded-xl border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-amber-400 text-sm';
-    return (
-      <div className="grid grid-cols-3 gap-2">
-        <select value={day} onChange={e => set(parseInt(e.target.value) || '', month, year)} className={selCls}>
-          <option value="">Day</option>
-          {Array.from({ length: maxDay }, (_, i) => i + 1).map(n => <option key={n} value={n}>{n}</option>)}
-        </select>
-        <select value={month} onChange={e => set(day, parseInt(e.target.value) || '', year)} className={selCls}>
-          <option value="">Month</option>
-          {MONTHS.map((m, i) => <option key={i+1} value={i+1}>{m}</option>)}
-        </select>
-        <select value={year} onChange={e => set(day, month, parseInt(e.target.value) || '')} className={selCls}>
-          <option value="">Year</option>
-          {years.map(y => <option key={y} value={y}>{y}</option>)}
-        </select>
       </div>
     );
   };
