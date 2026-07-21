@@ -2,7 +2,7 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { FileText, User, Shield, Wrench, Users, Car, Calendar } from 'lucide-react';
+import { FileText, User, Shield, Wrench, Users, Car, Calendar, Building2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { formatUKRegistration } from '../shared/formatRegistration';
 import StatusBadge from '../shared/StatusBadge';
@@ -93,6 +93,17 @@ export default function ClaimQuickViewModal({ claim, isOpen, onClose }) {
               <InfoRow label="Address" value={[claim.client_address_line_1, claim.client_address_line_2, claim.client_town, claim.client_county, claim.client_postcode].filter(Boolean).join(', ')} fullWidth />
             )}
           </Section>
+
+          {/* Referrer */}
+          {(claim.referrer || claim.referrer_ref || claim.referrer_email || claim.percent_to_referrer || claim.file_handler) && (
+            <Section icon={Building2} title="Referrer" color="bg-teal-50 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300">
+              <InfoRow label="Referrer" value={claim.referrer} />
+              <InfoRow label="Referrer Ref" value={claim.referrer_ref} />
+              <InfoRow label="Referrer Email" value={claim.referrer_email} href={claim.referrer_email ? `mailto:${claim.referrer_email}` : null} />
+              <InfoRow label="% to Referrer" value={claim.percent_to_referrer != null ? `${claim.percent_to_referrer}%` : '—'} />
+              <InfoRow label="File Handler" value={claim.file_handler} />
+            </Section>
+          )}
 
           {/* Insurance */}
           <Section icon={Shield} title="Client's Insurance" color="bg-orange-50 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300">
