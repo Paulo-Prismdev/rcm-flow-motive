@@ -2,10 +2,32 @@ import React, { useState } from 'react';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { Clock, Calendar, User, MessageSquare, Plus, Star } from 'lucide-react';
+import { Clock, Calendar, User, MessageSquare, Plus, Star, Copy, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import ClaimUpdateForm from './ClaimUpdateForm';
+
+const CopyTextButton = ({ text }) => {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    }).catch(() => {});
+  };
+  return (
+    <button
+      type="button"
+      onClick={handleCopy}
+      className="shrink-0 mt-0.5 text-muted-foreground/40 hover:text-primary transition-colors"
+      title="Copy"
+    >
+      {copied ? <Check className="w-3 h-3 text-green-600" /> : <Copy className="w-3 h-3" />}
+    </button>
+  );
+};
 
 const UPDATE_TYPE_COLORS = {
   "Status Change": "bg-purple-500", "Client Communication": "bg-blue-500",
@@ -142,7 +164,10 @@ export default function ClaimUpdatesQuickView({ claim, isOpen, onClose }) {
                   </div>
 
                   {update.description && (
-                    <p className="text-sm text-foreground whitespace-pre-wrap mb-2">{update.description}</p>
+                    <div className="flex items-start gap-1.5 mb-2">
+                      <p className="text-sm text-foreground whitespace-pre-wrap flex-1">{update.description}</p>
+                      <CopyTextButton text={update.description} />
+                    </div>
                   )}
 
                   {update.next_steps && (
@@ -192,7 +217,10 @@ export default function ClaimUpdatesQuickView({ claim, isOpen, onClose }) {
                             </span>
                           </div>
                           {reply.description && (
-                            <p className="text-sm text-foreground whitespace-pre-wrap">{reply.description}</p>
+                            <div className="flex items-start gap-1.5">
+                              <p className="text-sm text-foreground whitespace-pre-wrap flex-1">{reply.description}</p>
+                              <CopyTextButton text={reply.description} />
+                            </div>
                           )}
                         </div>
                       ))}
