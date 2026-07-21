@@ -292,7 +292,7 @@ export default function IndemnityForm() {
               <div><label className={labelCls}>Registered Owner / Keeper of the Vehicle *</label><Input value={formData.indemnity_registered_owner} onChange={e => field('indemnity_registered_owner', e.target.value)} className={inputCls} placeholder="Full name of the registered owner/keeper" /></div>
               <div>
                 <label className={labelCls}>Have you held a full UK/EU licence for at least 12 months and driven regularly in the UK? *</label>
-                <YesNo value={formData.indemnity_full_license_12_months} onChange={v => field('indemnity_full_license_12_months', v)} />
+                <YesNo value={formData.indemnity_full_license_12_months} onChange={v => field('indemnity_full_license_12_months', v)} yesGood />
               </div>
             </div>
           )}
