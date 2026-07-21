@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useState, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { FileText, User, Shield, Wrench, Users, Car, Calendar, Building2 } from 'lucide-react';
+import { FileText, User, Shield, Wrench, Users, Car, Calendar, Building2, Copy, Check } from 'lucide-react';
 import { format } from 'date-fns';
 import { formatUKRegistration } from '../shared/formatRegistration';
 import StatusBadge from '../shared/StatusBadge';
@@ -21,14 +21,41 @@ const formatCurrency = (val) => {
 
 const InfoRow = ({ label, value, href, fullWidth }) => {
   const isEmpty = !value || value === '—';
+  const [copied, setCopied] = useState(false);
+  const valueRef = useRef(null);
+
+  const handleCopy = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const text = valueRef.current?.textContent || '';
+    if (!text) return;
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    }).catch(() => {});
+  };
+
   return (
     <div className={fullWidth ? 'col-span-2' : ''}>
       <div className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">{label}</div>
-      {href && !isEmpty ? (
-        <a href={href} className="text-sm font-medium text-blue-600 hover:underline break-all">{value}</a>
-      ) : (
-        <div className={`text-sm font-medium ${isEmpty ? 'text-muted-foreground/50' : 'text-foreground'} ${fullWidth ? 'whitespace-pre-wrap break-words' : ''}`}>{value || '—'}</div>
-      )}
+      <div className="flex items-start gap-1.5">
+        {href && !isEmpty ? (
+          <a href={href} ref={valueRef} className="text-sm font-medium text-blue-600 hover:underline break-all flex-1">{value}</a>
+        ) : (
+          <div ref={valueRef} className={`text-sm font-medium flex-1 ${isEmpty ? 'text-muted-foreground/50' : 'text-foreground'} ${fullWidth ? 'whitespace-pre-wrap break-words' : ''}`}>{value || '—'}</div>
+        )}
+        {!isEmpty && (
+          <button
+            type="button"
+            onClick={handleCopy}
+            className="shrink-0 mt-0.5 text-muted-foreground/40 hover:text-primary transition-colors"
+            title="Copy"
+            aria-label={`Copy ${label}`}
+          >
+            {copied ? <Check className="w-3 h-3 text-green-600" /> : <Copy className="w-3 h-3" />}
+          </button>
+        )}
+      </div>
     </div>
   );
 };
