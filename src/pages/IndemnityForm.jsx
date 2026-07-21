@@ -144,12 +144,59 @@ export default function IndemnityForm() {
   const inputCls = 'w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-amber-400 text-sm';
   const labelCls = 'block text-sm font-medium text-gray-600 mb-1.5';
 
-  const YesNo = ({ value, onChange }) => (
-    <div className="grid grid-cols-2 gap-2">
-      <button type="button" onClick={() => onChange('Yes')} className={`px-4 py-3 rounded-xl border text-sm font-medium transition-colors ${value === 'Yes' ? 'bg-green-500 text-white border-green-500' : 'bg-white text-gray-600 border-gray-200 hover:border-green-300'}`}>Yes</button>
-      <button type="button" onClick={() => onChange('No')} className={`px-4 py-3 rounded-xl border text-sm font-medium transition-colors ${value === 'No' ? 'bg-red-500 text-white border-red-500' : 'bg-white text-gray-600 border-gray-200 hover:border-red-300'}`}>No</button>
-    </div>
-  );
+  // Default polarity: No = green (good), Yes = red (risk).
+  // For positive-capability questions (CCTV footage, more photos) pass yesGood to flip.
+  const YesNo = ({ value, onChange, yesGood = false }) => {
+    const yesColor = yesGood ? 'bg-green-500 border-green-500' : 'bg-red-500 border-red-500';
+    const noColor = yesGood ? 'bg-red-500 border-red-500' : 'bg-green-500 border-green-500';
+    return (
+      <div className="grid grid-cols-2 gap-2">
+        <button type="button" onClick={() => onChange('Yes')} className={`px-4 py-3 rounded-xl border text-sm font-medium transition-colors ${value === 'Yes' ? `${yesColor} text-white` : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'}`}>Yes</button>
+        <button type="button" onClick={() => onChange('No')} className={`px-4 py-3 rounded-xl border text-sm font-medium transition-colors ${value === 'No' ? `${noColor} text-white` : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'}`}>No</button>
+      </div>
+    );
+  };
+
+  const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  // Day / Month / Year dropdowns — avoids the slow scroll-wheel year picker on native date inputs.
+  const DOBPicker = ({ value, onChange }) => {
+    const d = value ? new Date(value) : null;
+    const valid = d && !isNaN(d.getTime());
+    const day = valid ? d.getDate() : '';
+    const month = valid ? d.getMonth() + 1 : '';
+    const year = valid ? d.getFullYear() : '';
+    const currentYear = new Date().getFullYear();
+    const years = Array.from({ length: currentYear - 1920 + 1 }, (_, i) => currentYear - i);
+    const maxDay = month && year ? new Date(year, month, 0).getDate() : 31;
+    const set = (newDay, newMonth, newYear) => {
+      const dd = newDay || day;
+      const mm = newMonth || month;
+      const yy = newYear || year;
+      if (dd && mm && yy) {
+        const pad = n => String(n).padStart(2, '0');
+        onChange(`${yy}-${pad(mm)}-${pad(dd)}`);
+      } else {
+        onChange('');
+      }
+    };
+    const selCls = 'w-full px-3 py-3 rounded-xl border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-amber-400 text-sm';
+    return (
+      <div className="grid grid-cols-3 gap-2">
+        <select value={day} onChange={e => set(parseInt(e.target.value) || '', month, year)} className={selCls}>
+          <option value="">Day</option>
+          {Array.from({ length: maxDay }, (_, i) => i + 1).map(n => <option key={n} value={n}>{n}</option>)}
+        </select>
+        <select value={month} onChange={e => set(day, parseInt(e.target.value) || '', year)} className={selCls}>
+          <option value="">Month</option>
+          {MONTHS.map((m, i) => <option key={i+1} value={i+1}>{m}</option>)}
+        </select>
+        <select value={year} onChange={e => set(day, month, parseInt(e.target.value) || '')} className={selCls}>
+          <option value="">Year</option>
+          {years.map(y => <option key={y} value={y}>{y}</option>)}
+        </select>
+      </div>
+    );
+  };
 
   if (!linkValid) {
     return (
@@ -228,7 +275,7 @@ export default function IndemnityForm() {
             <div className="space-y-4">
               <div>
                 <label className={labelCls}>Your Date of Birth *</label>
-                <Input type="date" value={formData.indemnity_driver_dob} onChange={e => field('indemnity_driver_dob', e.target.value)} className={inputCls} />
+                <DOBPicker value={formData.indemnity_driver_dob} onChange={v => field('indemnity_driver_dob', v)} />
                 {(() => { const a = calcAge(formData.indemnity_driver_dob); return a !== null ? <p className="text-xs text-gray-500 mt-1">Calculated age: <span className="font-semibold text-gray-700">{a} years</span></p> : null; })()}
               </div>
               <div><label className={labelCls}>Registered Owner / Keeper of the Vehicle *</label><Input value={formData.indemnity_registered_owner} onChange={e => field('indemnity_registered_owner', e.target.value)} className={inputCls} placeholder="Full name of the registered owner/keeper" /></div>
@@ -269,9 +316,9 @@ export default function IndemnityForm() {
 
           {currentStepKey === 'evidence' && (
             <div className="space-y-4">
-              <div><label className={labelCls}>Is there any CCTV or dashcam footage available? *</label><YesNo value={formData.indemnity_cctv_dashcam} onChange={v => field('indemnity_cctv_dashcam', v)} /></div>
+              <div><label className={labelCls}>Is there any CCTV or dashcam footage available? *</label><YesNo value={formData.indemnity_cctv_dashcam} onChange={v => field('indemnity_cctv_dashcam', v)} yesGood /></div>
               <div><label className={labelCls}>As a result of the incident, was any property damaged? *</label><YesNo value={formData.indemnity_property_damaged} onChange={v => field('indemnity_property_damaged', v)} /></div>
-              <div><label className={labelCls}>Can you provide more photos of the damages to the vehicles involved? *</label><YesNo value={formData.indemnity_more_photos} onChange={v => field('indemnity_more_photos', v)} /></div>
+              <div><label className={labelCls}>Can you provide more photos of the damages to the vehicles involved? *</label><YesNo value={formData.indemnity_more_photos} onChange={v => field('indemnity_more_photos', v)} yesGood /></div>
               <div><label className={labelCls}>Any other information that you believe is relevant and will aid the claim?</label><Textarea value={formData.indemnity_other_info} onChange={e => field('indemnity_other_info', e.target.value)} className={`${inputCls} h-24`} placeholder="Enter any other relevant information..." /></div>
             </div>
           )}
