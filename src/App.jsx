@@ -18,6 +18,7 @@ import CompanyManagement from '@/pages/CompanyManagement';
 import MigrateUsers from '@/pages/MigrateUsers';
 import ClientPortal from '@/pages/ClientPortal';
 import RepairerDirectory from '@/pages/RepairerDirectory';
+import IndemnityForm from '@/pages/IndemnityForm';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -27,7 +28,7 @@ const LayoutWrapper = ({ children, currentPageName }) => Layout ?
   <Layout currentPageName={currentPageName}>{children}</Layout>
   : <>{children}</>;
 
-const PUBLIC_PATHS = ['/backorder-form', '/parts-request', '/client-claim-form'];
+const PUBLIC_PATHS = ['/backorder-form', '/parts-request', '/client-claim-form', '/indemnity-form'];
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, isAuthenticated, navigateToLogin } = useAuth();
@@ -41,6 +42,7 @@ const AuthenticatedApp = () => {
         <Route path="/parts-request" element={<PublicPartsRequest />} />
         <Route path="/backorder-form" element={<BackorderForm />} />
         <Route path="/client-claim-form" element={<ClientClaimForm />} />
+        <Route path="/indemnity-form" element={<IndemnityForm />} />
       </Routes>
     );
   }
@@ -120,6 +122,7 @@ function PublicApp() {
       <Route path="/parts-request" element={<PublicPartsRequest />} />
       <Route path="/backorder-form" element={<BackorderForm />} />
       <Route path="/client-claim-form" element={<ClientClaimForm />} />
+      <Route path="/indemnity-form" element={<IndemnityForm />} />
     </Routes>
   );
 }

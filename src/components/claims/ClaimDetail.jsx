@@ -51,6 +51,7 @@ import FinancialSummary from './FinancialSummary';
 
 import ClaimVehicleDamageForm from './ClaimVehicleDamageForm';
 import ClaimIndemnityForm from './ClaimIndemnityForm';
+import IndemnityLinkManager from './IndemnityLinkManager';
 import ClaimExcessContributionForm from './ClaimExcessContributionForm';
 import InstructionDefaultsForm from './InstructionDefaultsForm';
 import ThirdPartyPursuitSection from './ThirdPartyPursuitSection';
@@ -1019,6 +1020,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
               EditComponent={ClaimIndemnityForm} 
               canEdit={canEdit}
             >
+              <IndemnityLinkManager claim={claim} onUpdate={handleUpdate} />
               <div className="text-center py-8 text-gray-500">
                 <p className="mb-4">This claim does not currently require indemnity checks.</p>
                 <p className="text-sm">Click the edit button to enable indemnity details if needed.</p>
@@ -1036,6 +1038,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
             EditComponent={ClaimIndemnityForm} 
             canEdit={canEdit}
           >
+            <IndemnityLinkManager claim={claim} onUpdate={handleUpdate} />
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
               <DetailRow label="Driver's Age" value={(() => {
                 const dob = claim.indemnity_driver_dob;
