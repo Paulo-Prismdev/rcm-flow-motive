@@ -10,15 +10,16 @@ import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import LoadingScreen from '@/components/LoadingScreen';
-import PublicPartsRequest from '@/pages/PublicPartsRequest';
-import BackorderForm from '@/pages/BackorderForm';
-import ClientClaimForm from '@/pages/ClientClaimForm';
-import TyreRequests from '@/pages/TyreRequests';
-import CompanyManagement from '@/pages/CompanyManagement';
-import MigrateUsers from '@/pages/MigrateUsers';
-import ClientPortal from '@/pages/ClientPortal';
-import RepairerDirectory from '@/pages/RepairerDirectory';
-import IndemnityForm from '@/pages/IndemnityForm';
+import { lazy, Suspense } from 'react';
+const PublicPartsRequest = lazy(() => import('@/pages/PublicPartsRequest'));
+const BackorderForm = lazy(() => import('@/pages/BackorderForm'));
+const ClientClaimForm = lazy(() => import('@/pages/ClientClaimForm'));
+const TyreRequests = lazy(() => import('@/pages/TyreRequests'));
+const CompanyManagement = lazy(() => import('@/pages/CompanyManagement'));
+const MigrateUsers = lazy(() => import('@/pages/MigrateUsers'));
+const ClientPortal = lazy(() => import('@/pages/ClientPortal'));
+const RepairerDirectory = lazy(() => import('@/pages/RepairerDirectory'));
+const IndemnityForm = lazy(() => import('@/pages/IndemnityForm'));
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -38,12 +39,14 @@ const AuthenticatedApp = () => {
   // For public pages, render IMMEDIATELY — no auth, no loading screen
   if (isPublicPath) {
     return (
-      <Routes>
-        <Route path="/parts-request" element={<PublicPartsRequest />} />
-        <Route path="/backorder-form" element={<BackorderForm />} />
-        <Route path="/client-claim-form" element={<ClientClaimForm />} />
-        <Route path="/indemnity-form" element={<IndemnityForm />} />
-      </Routes>
+      <Suspense fallback={<LoadingScreen />}>
+        <Routes>
+          <Route path="/parts-request" element={<PublicPartsRequest />} />
+          <Route path="/backorder-form" element={<BackorderForm />} />
+          <Route path="/client-claim-form" element={<ClientClaimForm />} />
+          <Route path="/indemnity-form" element={<IndemnityForm />} />
+        </Routes>
+      </Suspense>
     );
   }
 
@@ -65,6 +68,7 @@ const AuthenticatedApp = () => {
 
   // Render the main app
   return (
+    <Suspense fallback={<LoadingScreen />}>
     <Routes>
       <Route path="/" element={
         <LayoutWrapper currentPageName={mainPageKey}>
@@ -112,18 +116,21 @@ const AuthenticatedApp = () => {
       } />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
+    </Suspense>
   );
 };
 
 
 function PublicApp() {
   return (
-    <Routes>
-      <Route path="/parts-request" element={<PublicPartsRequest />} />
-      <Route path="/backorder-form" element={<BackorderForm />} />
-      <Route path="/client-claim-form" element={<ClientClaimForm />} />
-      <Route path="/indemnity-form" element={<IndemnityForm />} />
-    </Routes>
+    <Suspense fallback={<LoadingScreen />}>
+      <Routes>
+        <Route path="/parts-request" element={<PublicPartsRequest />} />
+        <Route path="/backorder-form" element={<BackorderForm />} />
+        <Route path="/client-claim-form" element={<ClientClaimForm />} />
+        <Route path="/indemnity-form" element={<IndemnityForm />} />
+      </Routes>
+    </Suspense>
   );
 }
 

@@ -1,25 +1,30 @@
-import Dashboard from './pages/Dashboard';
-import Claims from './pages/Claims';
-import Estimating from './pages/Estimating';
-import Engineering from './pages/Engineering';
-import Parts from './pages/Parts';
-import BodyshopMap from './pages/BodyshopMap';
-import Archive from './pages/Archive';
-import EmailTemplates from './pages/EmailTemplates';
-import Settings from './pages/Settings';
-import UserProfile from './pages/UserProfile';
-import EmployeeManagement from './pages/EmployeeManagement';
-import Messages from './pages/Messages';
-import PdfTemplateManager from './pages/PdfTemplateManager';
-import ChaserEmailSettings from './pages/ChaserEmailSettings';
-import Reports from './pages/Reports';
-import Tasks from './pages/Tasks';
-import RepairerPortal from './pages/RepairerPortal';
-import ReferrerPortal from './pages/ReferrerPortal';
-import SupplierManagement from './pages/SupplierManagement';
-import FeedbackHub from './pages/FeedbackHub';
-import CompanyIdLookup from './pages/CompanyIdLookup';
-import __Layout from './Layout.jsx';
+import { lazy } from 'react';
+
+// Code-split every page into its own chunk. This keeps the main bundle small,
+// so public routes (e.g. /indemnity-form) only download the form — not the entire
+// internal app. Internal pages load on demand when a signed-in user navigates.
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const Claims = lazy(() => import('./pages/Claims'));
+const Estimating = lazy(() => import('./pages/Estimating'));
+const Engineering = lazy(() => import('./pages/Engineering'));
+const Parts = lazy(() => import('./pages/Parts'));
+const BodyshopMap = lazy(() => import('./pages/BodyshopMap'));
+const Archive = lazy(() => import('./pages/Archive'));
+const EmailTemplates = lazy(() => import('./pages/EmailTemplates'));
+const Settings = lazy(() => import('./pages/Settings'));
+const UserProfile = lazy(() => import('./pages/UserProfile'));
+const EmployeeManagement = lazy(() => import('./pages/EmployeeManagement'));
+const Messages = lazy(() => import('./pages/Messages'));
+const PdfTemplateManager = lazy(() => import('./pages/PdfTemplateManager'));
+const ChaserEmailSettings = lazy(() => import('./pages/ChaserEmailSettings'));
+const Reports = lazy(() => import('./pages/Reports'));
+const Tasks = lazy(() => import('./pages/Tasks'));
+const RepairerPortal = lazy(() => import('./pages/RepairerPortal'));
+const ReferrerPortal = lazy(() => import('./pages/ReferrerPortal'));
+const SupplierManagement = lazy(() => import('./pages/SupplierManagement'));
+const FeedbackHub = lazy(() => import('./pages/FeedbackHub'));
+const CompanyIdLookup = lazy(() => import('./pages/CompanyIdLookup'));
+const __Layout = lazy(() => import('./Layout.jsx'));
 
 
 export const PAGES = {
