@@ -305,7 +305,19 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
 
   const handleReferrerChange = (referrer) => {
     setReferrerCompanyId(referrer.id);
-    setFormData(prev => ({ ...prev, referrer: referrer.name, referrer_id: referrer.id, referrer_email: referrer.email || '', file_handler: '' }));
+    if (!referrer) {
+      setFormData(prev => ({ ...prev, referrer: '', referrer_id: null, referrer_email: '', file_handler: '', percent_to_referrer: 0, referral_fee_repairer: 0 }));
+      return;
+    }
+    setFormData(prev => ({
+      ...prev,
+      referrer: referrer.name,
+      referrer_id: referrer.id,
+      referrer_email: referrer.email || '',
+      file_handler: '',
+      ...(referrer.default_percent_to_referrer != null && { percent_to_referrer: referrer.default_percent_to_referrer }),
+      ...(referrer.default_repairer_referral_fee != null && { referral_fee_repairer: referrer.default_repairer_referral_fee }),
+    }));
   };
 
   const handleTPChange = async (client) => {
