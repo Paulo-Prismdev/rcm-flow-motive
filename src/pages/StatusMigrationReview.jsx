@@ -174,7 +174,7 @@ export default function StatusMigrationReview() {
   const pendingCount = openClaims.filter((c) => !isUnchanged(c)).length;
 
   return (
-    <div className="space-y-4 p-4 max-w-6xl mx-auto">
+    <div className="h-full overflow-y-auto space-y-4 p-4 max-w-6xl mx-auto">
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-xl font-bold">Status Migration Review</h1>
