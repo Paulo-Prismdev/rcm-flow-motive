@@ -170,9 +170,12 @@ export default function ClaimsPage() {
     },
   });
 
-  const handleUpdate = (updatedClaim) => {
+  // updatedClaim = the minimal DB payload (only fields that changed).
+  // localClaim  = optional full object for immediate UI state before the
+  // refetch lands; defaults to updatedClaim for backward compatibility.
+  const handleUpdate = (updatedClaim, localClaim) => {
     updateMutation.mutate({ id: updatedClaim.id, data: updatedClaim });
-    setSelectedClaim(updatedClaim);
+    setSelectedClaim(localClaim || updatedClaim);
   };
 
   const clearAllFilters = () => {

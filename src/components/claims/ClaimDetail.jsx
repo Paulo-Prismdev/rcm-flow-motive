@@ -443,12 +443,13 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
     const closedStatuses = ['Completed', 'Cancelled', 'Total Loss'];
     const effectiveStatus = newStatus || claim.job_status;
     const isClosedAfterUpdate = closedStatuses.includes(effectiveStatus);
-
-    // Any update or status change resets the 48hr timer on active claims
     const fortyEightHoursFromNow = new Date(now.getTime() + 48 * 60 * 60 * 1000);
 
-    const updateData = {
-      ...claim,
+    // DB payload — only the fields that should actually change. Spreading the
+    // entire claim here would overwrite the stored record with any stale prop
+    // value (e.g. wiping tertiary_status that was set elsewhere).
+    const dbUpdate = {
+      id: claim.id,
       ...(!isClosedAfterUpdate && {
         last_updated_at: now.toISOString(),
         next_update_due_at: fortyEightHoursFromNow.toISOString(),
@@ -458,28 +459,39 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
         update_status_flag: 'Gray',
       }),
     };
-    
-    // Statuses only change when the update is an explicit Status Change —
-    // never touch job_status / secondary_status / tertiary_status for any other update type.
+
+    // Full local merge for immediate UI feedback (keeps all existing fields).
+    const localClaim = {
+      ...claim,
+      ...(!isClosedAfterUpdate && {
+        last_updated_at: now.toISOString(),
+        next_update_due_at: fortyEightHoursFromNow.toISOString(),
+        update_status_flag: 'Green',
+      }),
+      ...(isClosedAfterUpdate && { update_status_flag: 'Gray' }),
+    };
+
     if (updateType === 'Status Change') {
       if (newStatus) {
-        updateData.job_status = newStatus;
-        // Keep job_statuses in sync — replace the old primary status with the new one
+        dbUpdate.job_status = newStatus;
+        dbUpdate.journey_status = newStatus;
+        localClaim.job_status = newStatus;
+        localClaim.journey_status = newStatus;
         const currentStatuses = claim.job_statuses?.length ? [...claim.job_statuses] : (claim.job_status ? [claim.job_status] : ['New']);
         const oldPrimary = claim.job_status || 'New';
         const idx = currentStatuses.indexOf(oldPrimary);
-        if (idx !== -1) {
-          currentStatuses[idx] = newStatus;
-        } else {
-          currentStatuses.unshift(newStatus);
-        }
-        updateData.job_statuses = currentStatuses;
+        if (idx !== -1) currentStatuses[idx] = newStatus;
+        else currentStatuses.unshift(newStatus);
+        dbUpdate.job_statuses = currentStatuses;
+        localClaim.job_statuses = currentStatuses;
       }
-      updateData.secondary_status = newSecondaryStatus || null;
-      updateData.tertiary_status = newTertiaryStatus || null;
+      dbUpdate.secondary_status = newSecondaryStatus || null;
+      dbUpdate.tertiary_status = newTertiaryStatus || null;
+      localClaim.secondary_status = newSecondaryStatus || null;
+      localClaim.tertiary_status = newTertiaryStatus || null;
     }
-    
-    handleUpdate(updateData);
+
+    handleUpdate(dbUpdate, localClaim);
   };
 
   React.useEffect(() => {
