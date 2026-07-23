@@ -1134,6 +1134,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
               <DetailRow label="Bodyshop Instructed" value={claim.bs_instructed} isDate />
               <DetailRow label="Booking In Date (BID)" value={claim.booking_in_date} isDate />
               <DetailRow label="On-Site Date" value={claim.on_site_date} isDate />
+              <DetailRow label="Hand Over Date" value={claim.hand_over_date} isDate />
               <DetailRow label="Est. Completion (ECD)" value={claim.ecd} isDate />
               <DetailRow label="Completion Date" value={claim.completion_date} isDate />
             </div>
