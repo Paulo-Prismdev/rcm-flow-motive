@@ -21,6 +21,7 @@ const ClientPortal = lazy(() => import('@/pages/ClientPortal'));
 const RepairerDirectory = lazy(() => import('@/pages/RepairerDirectory'));
 const IndemnityForm = lazy(() => import('@/pages/IndemnityForm'));
 const RepairPreferenceForm = lazy(() => import('@/pages/RepairPreferenceForm'));
+const StatusMigrationReview = lazy(() => import('@/pages/StatusMigrationReview'));
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -104,6 +105,11 @@ const AuthenticatedApp = () => {
       <Route path="/admin/migrate-users" element={
         <LayoutWrapper currentPageName="MigrateUsers">
           <MigrateUsers />
+        </LayoutWrapper>
+      } />
+      <Route path="/admin/status-migration" element={
+        <LayoutWrapper currentPageName="StatusMigrationReview">
+          <StatusMigrationReview />
         </LayoutWrapper>
       } />
       <Route path="/ClientPortal" element={

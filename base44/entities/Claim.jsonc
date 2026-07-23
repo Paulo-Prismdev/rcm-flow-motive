@@ -22,6 +22,18 @@
     "secondary_status": {
       "type": "string"
     },
+    "journey_status": {
+      "type": "string",
+      "description": "Client Journey Status (v2) \u2014 client-facing timeline stage. Single-select."
+    },
+    "secondary_statuses": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Secondary Statuses (v2) \u2014 internal detail statuses, multi-select."
+    },
     "job_statuses": {
       "type": "array",
       "items": {
