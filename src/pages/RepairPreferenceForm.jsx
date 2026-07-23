@@ -25,19 +25,30 @@ export default function RepairPreferenceForm() {
 
   useEffect(() => {
     if (!repair_preference_token) { setLinkValid(false); setLoading(false); return; }
-    getPublicFormToken({}).then(res => setFormToken(res.data?.token || '')).catch(() => {});
-    // Fetch claim details so the client can confirm the vehicle is theirs
-    base44.entities.Claim.filter({ repair_preference_token })
-      .then(res => {
-        if (res && res.length > 0) {
-          setClaim(res[0]);
-          if (res[0].repair_preference_signed) setSubmitted(true);
+    (async () => {
+      try {
+        const tokenRes = await getPublicFormToken({});
+        const secret = tokenRes.data?.token || '';
+        setFormToken(secret);
+        // Fetch claim details via the public (auth-free) backend function,
+        // gated by the form secret + per-claim token — same as the submit path.
+        const res = await base44.functions.invoke('getRepairPreferenceClaim', {
+          _form_secret: secret,
+          repair_preference_token,
+        });
+        const data = res?.data;
+        if (data?.valid) {
+          setClaim(data);
+          if (data.signed) setSubmitted(true);
         } else {
           setLinkValid(false);
         }
-      })
-      .catch(() => setLinkValid(false))
-      .finally(() => setLoading(false));
+      } catch {
+        setLinkValid(false);
+      } finally {
+        setLoading(false);
+      }
+    })();
   }, [repair_preference_token]);
 
   // Init canvas
