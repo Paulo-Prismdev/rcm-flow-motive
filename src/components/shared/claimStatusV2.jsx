@@ -58,16 +58,29 @@ export const SECONDARY_STATUSES = [
 ];
 
 // 3. Tertiary Statuses — single-select. Extra information only (no grouping/timeline effect).
-// Edit this list freely; it is purely informational.
+// Uses the same option set as Secondary so any group status can also be flagged as extra info.
 export const TERTIARY_STATUSES = [
-  'VIP Client',
-  'Complaint',
-  'Escalated',
-  'Awaiting Docs',
-  'Supplementary Authority',
-  'Total Loss Review',
-  'Reinspection',
-  'Warranty Work',
+  'Awaiting Private Estimate',
+  'Waiting Indemnity Details',
+  'Waiting Repairer Allocation',
+  'Placed With Repairer',
+  'Awaiting Images from Client',
+  'Awaiting Recovery',
+  'Placed, Awaiting Images',
+  'Awaiting Claim Number',
+  'Awaiting Estimate',
+  'Awaiting Authority',
+  'Authorised',
+  'Awaiting Sup Authority',
+  'Awaiting Engineer',
+  'Parts Ordered',
+  'Parts Delay',
+  'In Repair',
+  'Quality Check',
+  'Completed',
+  'Awaiting BLD Invoice',
+  'Invoice Pending',
+  'Invoiced',
 ];
 
 // Best-guess mapping from legacy flat status values to the new three-field structure.
