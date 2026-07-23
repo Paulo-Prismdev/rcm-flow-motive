@@ -1494,8 +1494,8 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                       </div>
                   </div>
                   <div className="flex items-center gap-2 flex-wrap">
-                    <StatusBadge status={claim.job_status || 'New'} />
-                    {claim.secondary_status && <StatusBadge status={claim.secondary_status} variant="secondary" />}
+                    {claim.secondary_status && <StatusBadge status={claim.secondary_status} />}
+                    {claim.tertiary_status && <StatusBadge status={claim.tertiary_status} variant="secondary" />}
                     {!isClosedStatus && claim.update_status_flag && (
                       <button onClick={() => setIsUpdateTrackingOpen(true)} className="hover:opacity-80 transition-all cursor-pointer rounded-md">
                         <UpdateStatusBadge status={claim.update_status_flag} small />

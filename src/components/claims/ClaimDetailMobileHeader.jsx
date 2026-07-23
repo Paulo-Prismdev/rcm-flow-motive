@@ -104,8 +104,8 @@ export default function ClaimDetailMobileHeader({
 
       {/* Row 2: status badges */}
       <div className="flex items-center gap-2 px-3 py-1 flex-wrap">
-        <StatusBadge status={claim.job_status || 'New'} />
-        {claim.secondary_status && <StatusBadge status={claim.secondary_status} variant="secondary" />}
+        {claim.secondary_status && <StatusBadge status={claim.secondary_status} />}
+        {claim.tertiary_status && <StatusBadge status={claim.tertiary_status} variant="secondary" />}
         {!isClosedStatus && claim.update_status_flag && (
           <button type="button" onClick={onUpdateTracking}>
             <UpdateStatusBadge status={claim.update_status_flag} small />
