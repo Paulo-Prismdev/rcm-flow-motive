@@ -48,7 +48,7 @@ const calculateUpdateStatus = (claim) => {
 const getGroupKey = (c) => {
   const journey = c.journey_status || c.job_status;
   if (journey === 'Cancelled') return 'Cancelled';
-  if (c.on_site_date && !c.hand_over_date && !isClosedJourney(journey)) return 'On Site';
+  if (c.on_site_date && !c.hand_over_date) return 'On Site';
   return c.secondary_status || 'New';
 };
 
