@@ -7,15 +7,14 @@ import { Input } from "@/components/ui/input";
 import { X, Clock, Mail, Plus, AtSign, ChevronDown } from 'lucide-react';
 import { Badge } from "@/components/ui/badge";
 import { Command, CommandItem, CommandList } from "@/components/ui/command";
-import { SECONDARY_STATUSES } from "@/components/shared/claimStatusV2";
+import StatusChangeFields from "@/components/shared/StatusChangeFields";
+import { buildStatusChangeClaimUpdate, isClosedJourney } from "@/components/shared/claimStatusUpdate";
 
 const UPDATE_TYPES = [
   "Status Change", "Client Communication", "Bodyshop Communication", "Insurer Communication",
   "Referrer Response", "Action Taken", "Awaiting Information", "Documentation Received",
   "Parts Update", "Repair Progress", "Quality Check", "Other"
 ];
-
-const CLOSED_STATUSES = ['Completed', 'Cancelled', 'Total Loss'];
 
 export default function ClaimUpdateForm({
   claimId,
@@ -29,7 +28,9 @@ export default function ClaimUpdateForm({
 
   const [newUpdate, setNewUpdate] = useState({
     update_type: 'Other', description: '', next_steps: '', due_date_for_next_action: '',
-    new_status: currentStatus || '', new_secondary_status: ''
+    new_journey: claim?.journey_status || claim?.job_status || currentStatus || '',
+    new_secondary_status: claim?.secondary_status || '',
+    new_tertiary_status: claim?.tertiary_status || ''
   });
   const [sendEmail, setSendEmail] = useState(false);
   const [selectedEmails, setSelectedEmails] = useState([]);
@@ -42,19 +43,21 @@ export default function ClaimUpdateForm({
 
   const { data: currentUser } = useQuery({ queryKey: ['currentUser'], queryFn: () => base44.auth.me(), staleTime: 5 * 60 * 1000 });
   const { data: allUsers = [] } = useQuery({ queryKey: ['allUsers'], queryFn: () => base44.entities.User.list(), staleTime: 5 * 60 * 1000 });
-  const { data: customStatuses = [] } = useQuery({ queryKey: ['ClaimStatusConfig'], queryFn: () => base44.entities.ClaimStatusConfig.list('sort_order'), staleTime: 5 * 60 * 1000 });
 
   const isReferrer = currentUser?.user_type === 'referrer' || currentUser?.user_type === 'client' || (currentUser?.linked_referrer_id && !currentUser?.user_type?.includes('internal'));
   const canChangeStatus = !isReferrer;
-
-  const activeStatuses = customStatuses.filter(s => s.is_active).sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0)).map(s => s.status_name);
 
   const getDisplayName = (user) => user?.display_name || user?.full_name || user?.email || 'Unknown';
 
   const createUpdateMutation = useMutation({
     mutationFn: async (updateData) => {
       if (updateData.update_type === 'Status Change' && updateData.description?.trim()) {
-        await base44.entities.Claim.update(claimId, { job_status: updateData.new_status, secondary_status: updateData.new_secondary_status || null });
+        const claimUpdate = buildStatusChangeClaimUpdate(claim, {
+          journey: updateData.new_journey, secondary: updateData.new_secondary_status, tertiary: updateData.new_tertiary_status
+        }, updateData.update_type);
+        if (Object.keys(claimUpdate).length > 0) {
+          await base44.entities.Claim.update(claimId, claimUpdate);
+        }
         return await base44.entities.ClaimUpdate.create({
           update_type: 'Other', description: updateData.description, next_steps: updateData.next_steps,
           due_date_for_next_action: updateData.due_date_for_next_action, claim_id: claimId,
@@ -68,14 +71,14 @@ export default function ClaimUpdateForm({
       queryClient.invalidateQueries({ queryKey: ['claimUpdates', claimId] });
       queryClient.invalidateQueries({ queryKey: ['claims'] });
       queryClient.invalidateQueries({ queryKey: ['claim', claimId] });
-      if (onUpdateCreated) onUpdateCreated(newUpdate.new_status || null, newUpdate.new_secondary_status || null, newUpdate.update_type);
+      if (onUpdateCreated) onUpdateCreated(newUpdate.new_journey || null, newUpdate.new_secondary_status || null, newUpdate.new_tertiary_status || null, newUpdate.update_type);
       resetForm();
     },
     onError: (error) => setSubmitError(error?.message || 'Failed to create update'),
   });
 
   const resetForm = () => {
-    setNewUpdate({ update_type: 'Other', description: '', next_steps: '', due_date_for_next_action: '', new_status: currentStatus || '', new_secondary_status: '' });
+    setNewUpdate({ update_type: 'Other', description: '', next_steps: '', due_date_for_next_action: '', new_journey: claim?.journey_status || claim?.job_status || currentStatus || '', new_secondary_status: claim?.secondary_status || '', new_tertiary_status: claim?.tertiary_status || '' });
     setSendEmail(false); setSelectedEmails([]); setTaggedUsers([]); setSubmitError(''); setShowFollowUp(false);
     if (onCancel) onCancel();
   };
@@ -120,7 +123,7 @@ export default function ClaimUpdateForm({
     if (newUpdate.update_type !== 'Status Change' && !newUpdate.description.trim()) { setSubmitError('Please enter a description'); return; }
 
     // Block completion while a starred/flagged update exists
-    if (newUpdate.update_type === 'Status Change' && newUpdate.new_status && CLOSED_STATUSES.includes(newUpdate.new_status)) {
+    if (newUpdate.update_type === 'Status Change' && newUpdate.new_journey && isClosedJourney(newUpdate.new_journey)) {
       try {
         const existing = await base44.entities.ClaimUpdate.filter({ claim_id: claimId }, '-created_date', 500);
         if (existing.some(u => u.starred && !u.parent_update_id)) {
@@ -139,8 +142,8 @@ export default function ClaimUpdateForm({
       finalDescription = `${finalDescription}\n\n[Emailed to: ${selectedEmails.join(', ')}]`;
     }
 
-    const { new_status, new_secondary_status, ...updateDataToSave } = newUpdate;
-    createUpdateMutation.mutate({ ...updateDataToSave, description: finalDescription, tagged_user_ids: taggedUsers, new_status, new_secondary_status, ...(replyToId && { parent_update_id: replyToId }) });
+    const { new_journey, new_secondary_status, new_tertiary_status, ...updateDataToSave } = newUpdate;
+    createUpdateMutation.mutate({ ...updateDataToSave, description: finalDescription, tagged_user_ids: taggedUsers, new_journey, new_secondary_status, new_tertiary_status, ...(replyToId && { parent_update_id: replyToId }) });
   };
 
   const getAvailableEmails = () => {
@@ -169,22 +172,10 @@ export default function ClaimUpdateForm({
             </div>
 
             {newUpdate.update_type === 'Status Change' && canChangeStatus && (
-              <div className="space-y-3">
-                <div>
-                  <label className="block text-xs text-muted-foreground mb-1">New Primary Status *</label>
-                  <select value={newUpdate.new_status} onChange={(e) => setNewUpdate({ ...newUpdate, new_status: e.target.value })} className="w-full px-3 py-2 text-sm bg-background border border-border rounded-lg" required>
-                    <option value="">Select status...</option>
-                    {activeStatuses.map(status => <option key={status} value={status}>{status}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs text-muted-foreground mb-1">New Secondary Status (Optional)</label>
-                  <select value={newUpdate.new_secondary_status} onChange={(e) => setNewUpdate({ ...newUpdate, new_secondary_status: e.target.value })} className="w-full px-3 py-2 text-sm bg-background border border-border rounded-lg">
-                    <option value="">No secondary status</option>
-                    {SECONDARY_STATUSES.map(status => <option key={status} value={status}>{status}</option>)}
-                  </select>
-                </div>
-              </div>
+              <StatusChangeFields
+                value={{ journey: newUpdate.new_journey, secondary: newUpdate.new_secondary_status, tertiary: newUpdate.new_tertiary_status }}
+                onChange={(v) => setNewUpdate({ ...newUpdate, new_journey: v.journey, new_secondary_status: v.secondary, new_tertiary_status: v.tertiary })}
+              />
             )}
           </>
         )}

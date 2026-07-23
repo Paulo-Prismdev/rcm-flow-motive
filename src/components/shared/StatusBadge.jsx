@@ -1,5 +1,6 @@
 import React from 'react';
 import { useStatusConfigs } from './StatusConfigContext';
+import { getJourneyColor } from './claimStatusV2';
 
 // Low-contrast pill badge color map
 // Each entry: [bg class, text class] — same hue, low contrast
@@ -50,7 +51,10 @@ export default function StatusBadge({ status, variant = "primary" }) {
     const customStatus = allStatuses.find(
       s => s.status_name.toLowerCase() === statusName.toLowerCase()
     );
-    return customStatus?.color || 'gray';
+    if (customStatus?.color) return customStatus.color;
+    // v2 journey statuses carry their own colour map
+    const journeyColor = getJourneyColor(statusName);
+    return journeyColor || 'gray';
   };
 
   if (isLoading) {

@@ -32,6 +32,10 @@ export const EXCEPTION_JOURNEY_STATUSES = ['Cancelled', 'Potential Total Loss', 
 
 export const isExceptionJourney = (status) => EXCEPTION_JOURNEY_STATUSES.includes(status);
 
+// Colour lookup for journey statuses (reused by StatusBadge / table dots).
+export const JOURNEY_COLOR_MAP = Object.fromEntries(JOURNEY_STATUSES.map((s) => [s.name, s.color]));
+export const getJourneyColor = (name) => JOURNEY_COLOR_MAP[name];
+
 // 2. Secondary Statuses — single-select. Determines the group the job sits in on the table view.
 export const SECONDARY_STATUSES = [
   'New',
