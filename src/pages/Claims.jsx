@@ -82,6 +82,8 @@ export default function ClaimsPage() {
   const [quickInfoClaim, setQuickInfoClaim] = useState(null);
   const [claimTab, setClaimTab] = useState('claims');
   const containerRef = React.useRef(null);
+  const scrollRef = React.useRef(null);
+  const savedScrollTop = React.useRef(0);
   const queryClient = useQueryClient();
   const { allStatuses: statusConfigs } = useStatusConfigs();
 
@@ -234,6 +236,16 @@ export default function ClaimsPage() {
       document.body.classList.remove('claim-detail-open');
     }
     return () => document.body.classList.remove('claim-detail-open');
+  }, [selectedClaim]);
+
+  // Persist scroll position: save when opening a claim, restore when returning to the list
+  useEffect(() => {
+    if (selectedClaim && scrollRef.current) {
+      savedScrollTop.current = scrollRef.current.scrollTop;
+    }
+    if (!selectedClaim && scrollRef.current) {
+      scrollRef.current.scrollTop = savedScrollTop.current;
+    }
   }, [selectedClaim]);
 
   const toggleGroup = (status) => setCollapsedGroups(p => ({ ...p, [status]: !p[status] }));
@@ -575,7 +587,7 @@ export default function ClaimsPage() {
       )}
 
       {/* List / Table */}
-      <div className="flex-1 overflow-auto min-h-0" style={{WebkitOverflowScrolling: 'touch'}}>
+      <div ref={scrollRef} className="flex-1 overflow-auto min-h-0" style={{WebkitOverflowScrolling: 'touch'}}>
         {isLoading ? (
           <div className="flex items-center justify-center h-32 text-sm text-gray-400">Loading claims...</div>
         ) : filteredClaims.length === 0 ? (
