@@ -12,20 +12,20 @@ const MILESTONES = [
   { id: 'returned', label: 'Returned to Customer' },
 ];
 
-// v2 journey order, excluding exception / outcome states
+// v2 journey order, excluding exception / outcome states. "On Site" is no longer
+// a journey status — the On Site milestone is driven by the on_site_date marker.
 const JOURNEY_ORDER = JOURNEY_STATUSES.map(s => s.name).filter(n => !isExceptionJourney(n));
 
 const getJourneyRank = (status) => {
   const idx = JOURNEY_ORDER.indexOf(status);
-  return idx === -1 ? -1 : idx;
+  if (idx !== -1) return idx;
+  if (status === 'On Site') return 1; // legacy value — treat as Booked In level
+  return 0;
 };
 
-// v2 journey names that mark each milestone as reached (best-effort date attribution)
+// Best-effort date attribution for milestones without a dedicated claim date field.
 const MILESTONE_STATUS_MAP = {
-  booked_in: ['Booked In'],
-  on_site: ['On Site'],
   in_repair: ['Awaiting Parts', 'In Progress'],
-  repairs_complete: ['Repairs Complete'],
   returned: ['Returned to Customer'],
 };
 
@@ -58,8 +58,6 @@ export default function ClaimJourneyTimeline({ claim, updates = [] }) {
   };
 
   // Best-effort: earliest update whose description mentions a given journey name.
-  // (Status-change updates are saved as update_type 'Other' with free-text, so we
-  // don't filter by type — claim date fields remain the primary source below.)
   const getUpdateForStatuses = (statusNames) =>
     updates
       .filter(u => statusNames.some(s => u.description?.toLowerCase().includes(s.toLowerCase())))
@@ -93,42 +91,31 @@ export default function ClaimJourneyTimeline({ claim, updates = [] }) {
   }
 
   const currentRank = getJourneyRank(journeyStatus);
+  const onSiteSet = !!claim.on_site_date;
 
   const getMilestoneInfo = (id) => {
     const statusNames = MILESTONE_STATUS_MAP[id] || [];
     const update = statusNames.length ? getUpdateForStatuses(statusNames) : null;
 
     switch (id) {
-      case 'awaiting_booking': {
-        const isActive = currentRank === 0;
-        const isCompleted = currentRank > 0;
-        return { isCompleted, isActive, date: claim.date_received, user: null };
-      }
-      case 'booked_in': {
-        const isActive = currentRank === 1;
-        const isCompleted = currentRank > 1;
-        return { isCompleted, isActive, date: claim.booking_in_date || update?.created_date, user: update?.created_by };
-      }
-      case 'on_site': {
-        const isActive = currentRank === 2;
-        const isCompleted = currentRank > 2;
-        return { isCompleted, isActive, date: claim.on_site_date || update?.created_date, user: update?.created_by };
-      }
-      case 'in_repair': {
-        const isActive = currentRank === 3 || currentRank === 4;
-        const isCompleted = currentRank >= 5;
-        return { isCompleted, isActive, date: update?.created_date, user: update?.created_by };
-      }
-      case 'repairs_complete': {
-        const isActive = currentRank === 5;
-        const isCompleted = currentRank >= 6;
-        return { isCompleted, isActive, date: claim.completion_date || update?.created_date, user: update?.created_by };
-      }
-      case 'returned': {
-        const isActive = currentRank === 6;
-        const isCompleted = false;
-        return { isCompleted, isActive, date: update?.created_date, user: update?.created_by };
-      }
+      case 'awaiting_booking':
+        return { isCompleted: currentRank > 0 || onSiteSet, isActive: currentRank === 0 && !onSiteSet, date: claim.date_received, user: null };
+      case 'booked_in':
+        return { isCompleted: currentRank > 1 || onSiteSet, isActive: currentRank === 1 && !onSiteSet, date: claim.booking_in_date || update?.created_date, user: update?.created_by };
+      case 'on_site':
+        // Dictated by the on-site marker (on_site_date), not the journey status.
+        return {
+          isCompleted: onSiteSet && currentRank >= 2,
+          isActive: onSiteSet && currentRank < 2,
+          date: claim.on_site_date,
+          user: null,
+        };
+      case 'in_repair':
+        return { isCompleted: currentRank >= 4, isActive: currentRank === 2 || currentRank === 3, date: update?.created_date, user: update?.created_by };
+      case 'repairs_complete':
+        return { isCompleted: currentRank >= 5, isActive: currentRank === 4, date: claim.completion_date || update?.created_date, user: update?.created_by };
+      case 'returned':
+        return { isCompleted: false, isActive: currentRank === 5, date: update?.created_date, user: update?.created_by };
       default:
         return { isCompleted: false, isActive: false, date: null, user: null };
     }

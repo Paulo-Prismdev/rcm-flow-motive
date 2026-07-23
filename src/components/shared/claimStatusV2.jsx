@@ -17,7 +17,6 @@ export const CLAIM_STATUS_V2_ENABLED = false;
 export const JOURNEY_STATUSES = [
   { name: 'Awaiting BID', color: 'blue' },
   { name: 'Booked In', color: 'indigo' },
-  { name: 'On Site', color: 'cyan' },
   { name: 'Awaiting Parts', color: 'amber' },
   { name: 'In Progress', color: 'blue' },
   { name: 'Repairs Complete', color: 'green' },
@@ -96,7 +95,7 @@ const MAP_JOURNEY = {
   'New': 'Awaiting BID',
   'Awaiting BID': 'Awaiting BID',
   'Booked In': 'Booked In',
-  'On Site': 'On Site',
+  'On Site': 'Awaiting Parts',
   'Awaiting Parts': 'Awaiting Parts',
   'In Progress': 'In Progress',
   'In Repair': 'In Progress',

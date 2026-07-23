@@ -235,6 +235,7 @@ export default function ClaimsPage() {
   const toggleGroup = (status) => setCollapsedGroups(p => ({ ...p, [status]: !p[status] }));
 
   const getStatusDot = (statusName) => {
+    if (statusName === 'On Site') return STATUS_COLORS.cyan;
     const cfg = statusConfigs?.find(s => s.status_name === statusName);
     return STATUS_COLORS[cfg?.color] || STATUS_COLORS[getJourneyColor(statusName)] || '#6b7280';
   };
