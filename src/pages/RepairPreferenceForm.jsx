@@ -184,10 +184,10 @@ export default function RepairPreferenceForm() {
           <div className="mb-4 p-4 bg-white rounded-2xl shadow-sm border border-gray-100">
             <h3 className="text-sm font-semibold text-gray-700 mb-2">Your Vehicle</h3>
             <div className="grid grid-cols-2 gap-2 text-sm">
-              <div><span className="text-gray-500">Make:</span> <span className="font-medium">{claim.vehicle_make || claim.make_model || '—'}</span></div>
-              <div><span className="text-gray-500">Model:</span> <span className="font-medium">{claim.vehicle_model || '—'}</span></div>
-              <div><span className="text-gray-500">Registration:</span> <span className="font-medium">{(claim.reg || '').toUpperCase()}</span></div>
-              <div><span className="text-gray-500">Claim:</span> <span className="font-medium">{claim.job_number || '—'}</span></div>
+              <div><span className="text-gray-500">Make:</span> <span className="font-semibold text-gray-800">{claim.vehicle_make || claim.make_model || '—'}</span></div>
+              <div><span className="text-gray-500">Model:</span> <span className="font-semibold text-gray-800">{claim.vehicle_model || '—'}</span></div>
+              <div><span className="text-gray-500">Registration:</span> <span className="font-semibold text-gray-800">{(claim.reg || '').toUpperCase()}</span></div>
+              <div><span className="text-gray-500">Claim:</span> <span className="font-semibold text-gray-800">{claim.job_number || '—'}</span></div>
             </div>
           </div>
         )}
