@@ -47,7 +47,7 @@ const calculateUpdateStatus = (claim) => {
 // "On Site"; everything else groups by its Secondary status.
 const getGroupKey = (c) => {
   const journey = c.journey_status || c.job_status;
-  if (c.on_site_date && !isClosedJourney(journey)) return 'On Site';
+  if (c.on_site_date && !c.hand_over_date && !isClosedJourney(journey)) return 'On Site';
   return c.secondary_status || 'New';
 };
 

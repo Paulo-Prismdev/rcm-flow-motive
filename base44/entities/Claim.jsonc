@@ -490,6 +490,11 @@
       "type": "string",
       "format": "date"
     },
+    "hand_over_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date the vehicle was handed back to the customer (marks the vehicle off site)"
+    },
     "all_parts_on_site": {
       "type": "string",
       "format": "date"

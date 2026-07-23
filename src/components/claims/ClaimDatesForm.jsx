@@ -20,6 +20,7 @@ export default function ClaimDatesForm({ claim, onSave, onCancel }) {
         bs_instructed: toInputDate(claim.bs_instructed),
         booking_in_date: toInputDate(claim.booking_in_date),
         on_site_date: toInputDate(claim.on_site_date),
+        hand_over_date: toInputDate(claim.hand_over_date),
         ecd: toInputDate(claim.ecd),
         completion_date: toInputDate(claim.completion_date),
     });
@@ -62,6 +63,10 @@ export default function ClaimDatesForm({ claim, onSave, onCancel }) {
                  <div>
                     <label className="text-sm text-gray-500">On-Site Date</label>
                     <Input type="date" value={formData.on_site_date} onChange={e => handleChange('on_site_date', e.target.value)} className="neomorph-inset" />
+                </div>
+                <div>
+                    <label className="text-sm text-gray-500">Hand Over Date</label>
+                    <Input type="date" value={formData.hand_over_date} onChange={e => handleChange('hand_over_date', e.target.value)} className="neomorph-inset" />
                 </div>
                 <div>
                     <label className="text-sm text-gray-500">Est. Completion (ECD)</label>
