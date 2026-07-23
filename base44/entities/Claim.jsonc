@@ -770,6 +770,33 @@
     "instruction_contact_phone": {
       "type": "string",
       "description": "Contact phone used on the instruction PDF, captured at allocation time"
+    },
+    "repair_preference_token": {
+      "type": "string",
+      "description": "Secure token for the external repair preference form link"
+    },
+    "repair_preference_link_sent_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the repair preference form link was generated/sent"
+    },
+    "repair_preference_signed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the client has signed the statement of repair preference"
+    },
+    "repair_preference_signed_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the client signed the statement of repair preference"
+    },
+    "repair_preference_pdf_url": {
+      "type": "string",
+      "description": "URL of the signed statement of repair preference PDF"
+    },
+    "repair_preference_client_name": {
+      "type": "string",
+      "description": "Name of the client who signed the repair preference statement"
     }
   },
   "required": [],

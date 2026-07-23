@@ -52,6 +52,7 @@ import FinancialSummary from './FinancialSummary';
 import ClaimVehicleDamageForm from './ClaimVehicleDamageForm';
 import ClaimIndemnityForm from './ClaimIndemnityForm';
 import IndemnityLinkManager from './IndemnityLinkManager';
+import RepairPreferenceLinkManager from './RepairPreferenceLinkManager';
 import ClaimExcessContributionForm from './ClaimExcessContributionForm';
 import InstructionDefaultsForm from './InstructionDefaultsForm';
 import ThirdPartyPursuitSection from './ThirdPartyPursuitSection';
@@ -180,6 +181,7 @@ const SECTION_FIELDS = {
   dates: ['date_received', 'loss_date', 'booking_in_date', 'completion_date'],
   excessContribution: ['excess_contribution_amount', 'excess_contribution_method'],
   indemnity: ['indemnity_driver_dob', 'indemnity_registered_owner'],
+  repairPreference: ['repair_preference_signed', 'repair_preference_pdf_url'],
 };
 
 const isSectionEmpty = (sectionId, claim) => {
@@ -212,6 +214,7 @@ const DETAIL_SECTIONS = [
   { id: 'financials', label: 'Financials', icon: DollarSign },
   { id: 'thirdpartyPursuit', label: 'Third Party Pursuit', icon: Users },
   { id: 'indemnity', label: 'Indemnity Details', icon: Shield },
+  { id: 'repairPreference', label: 'Repair Preference', icon: FileText },
   { id: 'backorderedParts', label: 'Backordered Parts', icon: Package },
 ];
 
@@ -1080,6 +1083,35 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
               )}
             </div>
           </EditableSection>
+        );
+
+
+
+      case 'repairPreference':
+        return (
+          <div className="bg-card border border-border rounded-[10px] p-4 md:p-5 shadow-sm">
+            <div className="flex items-center gap-2.5 pb-3 mb-4 border-b border-border">
+              <FileText className="w-4 h-4 text-muted-foreground" />
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Statement of Repair Preference</h3>
+            </div>
+            <RepairPreferenceLinkManager claim={claim} onUpdate={handleUpdate} />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 mt-4">
+              <DetailRow label="Signed" value={claim.repair_preference_signed ? 'Yes' : 'No'} />
+              <DetailRow label="Signed At" value={claim.repair_preference_signed_at} isDate />
+              <DetailRow label="Signed By" value={claim.repair_preference_client_name} />
+            </div>
+            {claim.repair_preference_pdf_url && (
+              <div className="mt-3 p-3 rounded-lg bg-accent/10 border border-accent/30 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-accent" />
+                  <span className="text-sm font-medium">Signed PDF</span>
+                </div>
+                <Button variant="outline" size="sm" onClick={() => window.open(claim.repair_preference_pdf_url, '_blank')} className="gap-2">
+                  <Download className="w-4 h-4" /> View / Download
+                </Button>
+              </div>
+            )}
+          </div>
         );
 
 

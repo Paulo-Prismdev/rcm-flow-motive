@@ -20,6 +20,7 @@ const MigrateUsers = lazy(() => import('@/pages/MigrateUsers'));
 const ClientPortal = lazy(() => import('@/pages/ClientPortal'));
 const RepairerDirectory = lazy(() => import('@/pages/RepairerDirectory'));
 const IndemnityForm = lazy(() => import('@/pages/IndemnityForm'));
+const RepairPreferenceForm = lazy(() => import('@/pages/RepairPreferenceForm'));
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -29,7 +30,7 @@ const LayoutWrapper = ({ children, currentPageName }) => Layout ?
   <Layout currentPageName={currentPageName}>{children}</Layout>
   : <>{children}</>;
 
-const PUBLIC_PATHS = ['/backorder-form', '/parts-request', '/client-claim-form', '/indemnity-form'];
+const PUBLIC_PATHS = ['/backorder-form', '/parts-request', '/client-claim-form', '/indemnity-form', '/repair-preference-form'];
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, isAuthenticated, navigateToLogin } = useAuth();
@@ -45,6 +46,7 @@ const AuthenticatedApp = () => {
           <Route path="/backorder-form" element={<BackorderForm />} />
           <Route path="/client-claim-form" element={<ClientClaimForm />} />
           <Route path="/indemnity-form" element={<IndemnityForm />} />
+          <Route path="/repair-preference-form" element={<RepairPreferenceForm />} />
         </Routes>
       </Suspense>
     );
@@ -129,6 +131,7 @@ function PublicApp() {
         <Route path="/backorder-form" element={<BackorderForm />} />
         <Route path="/client-claim-form" element={<ClientClaimForm />} />
         <Route path="/indemnity-form" element={<IndemnityForm />} />
+        <Route path="/repair-preference-form" element={<RepairPreferenceForm />} />
       </Routes>
     </Suspense>
   );
