@@ -47,6 +47,7 @@ const calculateUpdateStatus = (claim) => {
 // "On Site"; everything else groups by its Secondary status.
 const getGroupKey = (c) => {
   const journey = c.journey_status || c.job_status;
+  if (journey === 'Cancelled') return 'Cancelled';
   if (c.on_site_date && !c.hand_over_date && !isClosedJourney(journey)) return 'On Site';
   return c.secondary_status || 'New';
 };
@@ -54,7 +55,7 @@ const getGroupKey = (c) => {
 const GROUP_STATUSES = (() => {
   const idx = SECONDARY_STATUSES.indexOf('In Repair');
   const at = idx === -1 ? SECONDARY_STATUSES.length : idx;
-  return [...SECONDARY_STATUSES.slice(0, at), 'On Site', ...SECONDARY_STATUSES.slice(at)];
+  return [...SECONDARY_STATUSES.slice(0, at), 'On Site', ...SECONDARY_STATUSES.slice(at), 'Cancelled'];
 })();
 
 export default function ClaimsPage() {
@@ -239,6 +240,7 @@ export default function ClaimsPage() {
 
   const getStatusDot = (statusName) => {
     if (statusName === 'On Site') return STATUS_COLORS.cyan;
+    if (statusName === 'Cancelled') return STATUS_COLORS.red;
     const cfg = statusConfigs?.find(s => s.status_name === statusName);
     return STATUS_COLORS[cfg?.color] || STATUS_COLORS[getJourneyColor(statusName)] || '#6b7280';
   };
