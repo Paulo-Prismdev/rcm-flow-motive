@@ -15,7 +15,7 @@ import ClaimQuickViewModal from '../components/claims/ClaimQuickViewModal';
 import { formatUKRegistration } from '../components/shared/formatRegistration';
 import { format } from 'date-fns';
 import { useStatusConfigs } from '../components/shared/StatusConfigContext';
-import { SECONDARY_STATUSES, getJourneyColor } from '@/components/shared/claimStatusV2';
+import { SECONDARY_STATUSES, getJourneyColor, isExceptionJourney } from '@/components/shared/claimStatusV2';
 import { isClosedJourney } from '@/components/shared/claimStatusUpdate';
 
 // Status dot colour map
@@ -302,6 +302,8 @@ export default function ClaimsPage() {
     const closedList = ['Completed', 'Cancelled', 'Total Loss'];
     const isClosedStatus = closedList.includes(claim.job_status);
     const isDraft = claim.draft === true;
+    const journeyStatus = claim.journey_status || claim.job_status;
+    const isException = isExceptionJourney(journeyStatus);
 
     return (
       <tr
@@ -343,6 +345,7 @@ export default function ClaimsPage() {
                 Draft
               </span>
             )}
+            {isException && <StatusBadge status={journeyStatus} />}
             {claim.secondary_status && <StatusBadge status={claim.secondary_status} />}
             {claim.tertiary_status && <StatusBadge status={claim.tertiary_status} variant="secondary" />}
             {hasBackorder && (
@@ -383,6 +386,8 @@ export default function ClaimsPage() {
     const closedList = ['Completed', 'Cancelled', 'Total Loss'];
     const isClosedStatus = closedList.includes(claim.job_status);
     const isDraft = claim.draft === true;
+    const journeyStatus = claim.journey_status || claim.job_status;
+    const isException = isExceptionJourney(journeyStatus);
     return (
       <div
         key={claim.id}
@@ -430,8 +435,9 @@ export default function ClaimsPage() {
           <span className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate">{claim.client_name || '—'}</span>
           <span className="text-xs text-gray-500 dark:text-gray-400 truncate">{claim.make_model || '—'} · {formatDate(claim.loss_date)}</span>
           {claim.referrer && <span className="text-xs text-gray-400 dark:text-gray-500 truncate">{claim.referrer}</span>}
-          {(claim.secondary_status || claim.tertiary_status) && (
+          {(isException || claim.secondary_status || claim.tertiary_status) && (
             <div className="mt-1 flex flex-wrap gap-1">
+              {isException && <StatusBadge status={journeyStatus} />}
               {claim.secondary_status && <StatusBadge status={claim.secondary_status} />}
               {claim.tertiary_status && <StatusBadge status={claim.tertiary_status} variant="secondary" />}
             </div>
