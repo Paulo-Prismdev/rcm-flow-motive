@@ -51,7 +51,7 @@ export default function ClaimUpdateForm({
 
   const createUpdateMutation = useMutation({
     mutationFn: async (updateData) => {
-      if (updateData.update_type === 'Status Change' && updateData.description?.trim()) {
+      if (updateData.update_type === 'Status Change') {
         const claimUpdate = buildStatusChangeClaimUpdate(claim, {
           journey: updateData.new_journey, secondary: updateData.new_secondary_status, tertiary: updateData.new_tertiary_status
         }, updateData.update_type);
@@ -59,7 +59,7 @@ export default function ClaimUpdateForm({
           await base44.entities.Claim.update(claimId, claimUpdate);
         }
         return await base44.entities.ClaimUpdate.create({
-          update_type: 'Other', description: updateData.description, next_steps: updateData.next_steps,
+          update_type: 'Status Change', description: updateData.description, next_steps: updateData.next_steps,
           due_date_for_next_action: updateData.due_date_for_next_action, claim_id: claimId,
           parent_update_id: updateData.parent_update_id, tagged_user_ids: updateData.tagged_user_ids,
           ...(currentUser?.company_id && { company_id: currentUser.company_id })
