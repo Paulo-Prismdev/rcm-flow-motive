@@ -15,6 +15,7 @@ import ClaimQuickViewModal from '../components/claims/ClaimQuickViewModal';
 import { formatUKRegistration } from '../components/shared/formatRegistration';
 import { format } from 'date-fns';
 import { useStatusConfigs } from '../components/shared/StatusConfigContext';
+import { SECONDARY_STATUSES } from '@/components/shared/claimStatusV2';
 
 // Status dot colour map
 const STATUS_COLORS = {
@@ -98,19 +99,8 @@ export default function ClaimsPage() {
     }
   }, [backorderedParts]);
 
-  const { data: customStatuses = [] } = useQuery({
-    queryKey: ['ClaimStatusConfig'],
-    queryFn: () => base44.entities.ClaimStatusConfig.list('sort_order'),
-    staleTime: 5 * 60 * 1000,
-  });
-
-  const availableStatuses = useMemo(() => {
-    const active = customStatuses
-      .filter(s => s.is_active !== false)
-      .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
-      .map(s => s.status_name);
-    return active.includes('New') ? active : ['New', ...active];
-  }, [customStatuses]);
+  // v2: claims are grouped on the table by their Secondary status.
+  const availableStatuses = useMemo(() => SECONDARY_STATUSES, []);
 
   // Collapse all groups by default on load
   useEffect(() => {
@@ -567,7 +557,7 @@ export default function ClaimsPage() {
             {/* ── MOBILE / TABLET card list (< lg) ── */}
             <div className="lg:hidden">
               {availableStatuses.map(statusGroup => {
-                const claimsInGroup = filteredClaims.filter(c => (c.job_status || 'New') === statusGroup);
+                const claimsInGroup = filteredClaims.filter(c => (c.secondary_status || 'New') === statusGroup);
                  if (claimsInGroup.length === 0) return null;
                  if (statusFilter.length > 0 && !statusFilter.includes(statusGroup)) return null;
                  const isCollapsed = collapsedGroups[statusGroup];
@@ -590,7 +580,7 @@ export default function ClaimsPage() {
               {(() => {
                const known = new Set(availableStatuses);
                const ungrouped = filteredClaims.filter(c => {
-                 const st = c.job_status || 'New';
+                 const st = c.secondary_status || 'New';
                  return !known.has(st);
                });
                if (ungrouped.length === 0 || statusFilter.length > 0) return null;
@@ -625,7 +615,7 @@ export default function ClaimsPage() {
               </thead>
               <tbody>
                 {availableStatuses.map(statusGroup => {
-                  const claimsInGroup = filteredClaims.filter(c => (c.job_status || 'New') === statusGroup);
+                  const claimsInGroup = filteredClaims.filter(c => (c.secondary_status || 'New') === statusGroup);
                   if (claimsInGroup.length === 0) return null;
                   if (statusFilter.length > 0 && !statusFilter.includes(statusGroup)) return null;
                   const isCollapsed = collapsedGroups[statusGroup];
@@ -651,7 +641,7 @@ export default function ClaimsPage() {
                 })}
                 {(() => {
                   const known = new Set(availableStatuses);
-                  const ungrouped = filteredClaims.filter(c => !known.has(c.job_status || 'New'));
+                  const ungrouped = filteredClaims.filter(c => !known.has(c.secondary_status || 'New'));
                   if (ungrouped.length === 0 || statusFilter.length > 0) return null;
                   const isCollapsed = collapsedGroups['__other__'];
                   return (
