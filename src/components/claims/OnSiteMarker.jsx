@@ -14,7 +14,9 @@ export default function OnSiteMarker({ claim }) {
   const isOnSite = !!claim?.on_site_date && !claim?.hand_over_date;
   const handedOver = !!claim?.hand_over_date;
   const [showHandOver, setShowHandOver] = useState(false);
+  const [showOnSite, setShowOnSite] = useState(false);
   const [handOverDate, setHandOverDate] = useState(claim?.hand_over_date || new Date().toISOString().split('T')[0]);
+  const [onSiteDate, setOnSiteDate] = useState(claim?.on_site_date || new Date().toISOString().split('T')[0]);
   const [saving, setSaving] = useState(false);
 
   const today = new Date().toISOString().split('T')[0];
@@ -28,9 +30,10 @@ export default function OnSiteMarker({ claim }) {
     setSaving(true);
     try {
       await base44.entities.Claim.update(claim.id, {
-        on_site_date: claim.on_site_date || today,
+        on_site_date: onSiteDate || today,
         hand_over_date: null,
       });
+      setShowOnSite(false);
       refresh();
     } finally {
       setSaving(false);
@@ -56,8 +59,9 @@ export default function OnSiteMarker({ claim }) {
       // Unticking a ticked (on site) marker prompts for the hand-over date.
       setShowHandOver(true);
     } else {
-      // Ticking marks the vehicle as on site.
-      markOnSite();
+      // Ticking prompts for the on-site date.
+      setOnSiteDate(claim?.on_site_date || new Date().toISOString().split('T')[0]);
+      setShowOnSite(true);
     }
   };
 
@@ -93,6 +97,24 @@ export default function OnSiteMarker({ claim }) {
           </div>
         </div>
       </div>
+
+      {showOnSite && (
+        <div className="mt-3 pl-9 space-y-2">
+          <div>
+            <label className="block text-xs text-muted-foreground mb-1">On-Site Date (Key Dates)</label>
+            <Input
+              type="date"
+              value={onSiteDate}
+              onChange={(e) => setOnSiteDate(e.target.value)}
+              className="px-3 py-2 text-sm bg-background border border-border"
+            />
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button type="button" variant="outline" size="sm" onClick={() => setShowOnSite(false)} disabled={saving}>Cancel</Button>
+            <Button type="button" size="sm" onClick={markOnSite} disabled={saving}>{saving ? 'Saving...' : 'Mark On Site'}</Button>
+          </div>
+        </div>
+      )}
 
       {showHandOver && (
         <div className="mt-3 pl-9 space-y-2">
