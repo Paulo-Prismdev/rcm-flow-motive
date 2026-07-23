@@ -164,7 +164,7 @@ export default function ClaimJourneyTimeline({ claim, updates = [] }) {
                 <p className={`text-[11px] font-semibold leading-tight ${
                   info.isActive ? 'text-primary' : info.isCompleted ? 'text-foreground' : 'text-muted-foreground'
                 }`}>
-                  {milestone.label}
+                  {milestone.id === 'in_repair' ? (claim.secondary_status || 'In Repair') : milestone.label}
                 </p>
                 {formatDate(info.date) && (
                   <p className="text-[10px] text-muted-foreground mt-0.5">{formatDate(info.date)}</p>
