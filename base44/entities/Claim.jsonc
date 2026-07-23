@@ -20,19 +20,16 @@
       "type": "string"
     },
     "secondary_status": {
-      "type": "string"
+      "type": "string",
+      "description": "Secondary Status (v2) \u2014 single-select. Dictates the group the job sits in on the table view. Reused from legacy field."
     },
     "journey_status": {
       "type": "string",
       "description": "Client Journey Status (v2) \u2014 client-facing timeline stage. Single-select."
     },
-    "secondary_statuses": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      },
-      "default": [],
-      "description": "Secondary Statuses (v2) \u2014 internal detail statuses, multi-select."
+    "tertiary_status": {
+      "type": "string",
+      "description": "Tertiary Status (v2) \u2014 single-select, extra information only (no grouping/timeline effect)."
     },
     "job_statuses": {
       "type": "array",

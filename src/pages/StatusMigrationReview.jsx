@@ -7,58 +7,31 @@ import { useToast } from '@/components/ui/use-toast';
 import {
   JOURNEY_STATUSES,
   SECONDARY_STATUSES,
+  TERTIARY_STATUSES,
   EXCEPTION_JOURNEY_STATUSES,
   isExceptionJourney,
   suggestMapping,
 } from '@/components/shared/claimStatusV2';
 
-const JOURNEY_COLORS = {
-  blue: '#3b82f6', indigo: '#6366f1', cyan: '#06b6d4', amber: '#f59e0b',
-  green: '#10b981', red: '#ef4444', orange: '#f97316', gray: '#6b7280',
-};
-
-function JourneySelect({ value, onChange }) {
+function StatusSelect({ value, onChange, options, placeholder, disabled }) {
   return (
     <select
       value={value || ''}
       onChange={(e) => onChange(e.target.value || null)}
+      disabled={disabled}
       className="input h-9 text-xs min-h-0"
     >
-      <option value="">— Select journey —</option>
-      {JOURNEY_STATUSES.map((s) => (
-        <option key={s.name} value={s.name}>
-          {s.name}{EXCEPTION_JOURNEY_STATUSES.includes(s.name) ? '  (exception)' : ''}
-        </option>
-      ))}
-    </select>
-  );
-}
-
-function SecondaryMultiSelect({ selected, onChange, disabled }) {
-  const toggle = (name) => {
-    if (disabled) return;
-    onChange(selected.includes(name) ? selected.filter((n) => n !== name) : [...selected, name]);
-  };
-  return (
-    <div className={`flex flex-wrap gap-1 ${disabled ? 'opacity-40 pointer-events-none' : ''}`}>
-      {SECONDARY_STATUSES.map((name) => {
-        const on = selected.includes(name);
+      <option value="">{placeholder}</option>
+      {options.map((opt) => {
+        const name = typeof opt === 'string' ? opt : opt.name;
+        const suffix = typeof opt === 'object' && EXCEPTION_JOURNEY_STATUSES.includes(name) ? '  (exception)' : '';
         return (
-          <button
-            key={name}
-            type="button"
-            onClick={() => toggle(name)}
-            className={`px-2 py-0.5 rounded-full text-[11px] font-medium border transition-colors ${
-              on
-                ? 'bg-primary text-primary-foreground border-primary'
-                : 'bg-transparent text-muted-foreground border-border hover:bg-muted'
-            }`}
-          >
-            {name}
-          </button>
+          <option key={name} value={name}>
+            {name}{suffix}
+          </option>
         );
       })}
-    </div>
+    </select>
   );
 }
 
@@ -77,7 +50,7 @@ export default function StatusMigrationReview() {
     [claims]
   );
 
-  // Per-claim editable mapping state: { [claimId]: { journey_status, secondary_statuses } }
+  // Per-claim editable mapping state: { [claimId]: { journey_status, secondary_status, tertiary_status } }
   const [edits, setEdits] = useState({});
 
   useEffect(() => {
@@ -87,9 +60,13 @@ export default function StatusMigrationReview() {
       openClaims.forEach((c) => {
         if (!next[c.id]) {
           // Prefer already-migrated values if present, else suggest from legacy
-          const hasMigrated = c.journey_status || (c.secondary_statuses && c.secondary_statuses.length);
+          const hasMigrated = c.journey_status || c.secondary_status || c.tertiary_status;
           next[c.id] = hasMigrated
-            ? { journey_status: c.journey_status || null, secondary_statuses: c.secondary_statuses || [] }
+            ? {
+                journey_status: c.journey_status || null,
+                secondary_status: c.secondary_status || null,
+                tertiary_status: c.tertiary_status || null,
+              }
             : suggestMapping(c);
         }
       });
@@ -101,10 +78,9 @@ export default function StatusMigrationReview() {
     const e = edits[claim.id];
     if (!e) return true;
     const sameJourney = (e.journey_status || null) === (claim.journey_status || null);
-    const curSec = claim.secondary_statuses || [];
-    const newSec = e.secondary_statuses || [];
-    const sameSec = curSec.length === newSec.length && newSec.every((s) => curSec.includes(s));
-    return sameJourney && sameSec;
+    const sameSecondary = (e.secondary_status || null) === (claim.secondary_status || null);
+    const sameTertiary = (e.tertiary_status || null) === (claim.tertiary_status || null);
+    return sameJourney && sameSecondary && sameTertiary;
   };
 
   const updateMutation = useMutation({
@@ -121,6 +97,15 @@ export default function StatusMigrationReview() {
     },
   });
 
+  const buildPayload = (e) => {
+    const exception = isExceptionJourney(e.journey_status);
+    return {
+      journey_status: e.journey_status,
+      secondary_status: exception ? null : e.secondary_status,
+      tertiary_status: exception ? null : e.tertiary_status,
+    };
+  };
+
   const applyOne = async (claim) => {
     const e = edits[claim.id];
     if (!e || !e.journey_status) {
@@ -128,13 +113,7 @@ export default function StatusMigrationReview() {
       return;
     }
     try {
-      await updateMutation.mutateAsync({
-        id: claim.id,
-        data: {
-          journey_status: e.journey_status,
-          secondary_statuses: isExceptionJourney(e.journey_status) ? [] : e.secondary_statuses,
-        },
-      });
+      await updateMutation.mutateAsync({ id: claim.id, data: buildPayload(e) });
       toast({ title: 'Updated', description: claim.job_number });
     } catch (err) {
       toast({ title: 'Failed', variant: 'destructive' });
@@ -144,21 +123,14 @@ export default function StatusMigrationReview() {
   const applyAll = async () => {
     const ready = openClaims
       .filter((c) => !isUnchanged(c) && edits[c.id]?.journey_status)
-      .map((c) => {
-        const e = edits[c.id];
-        return {
-          id: c.id,
-          journey_status: e.journey_status,
-          secondary_statuses: isExceptionJourney(e.journey_status) ? [] : e.secondary_statuses,
-        };
-      });
+      .map((c) => ({ id: c.id, ...buildPayload(edits[c.id]) }));
     if (!ready.length) {
       toast({ title: 'Nothing to apply', description: 'All open claims already match.' });
       return;
     }
     try {
       await bulkMutation.mutateAsync(ready);
-      toast({ title: `Applied to ${ready.length} claims`, description: 'Legacy fields left intact for rollback.' });
+      toast({ title: `Applied to ${ready.length} claims`, description: 'Legacy job_status left intact for rollback.' });
     } catch (err) {
       toast({ title: 'Bulk apply failed', variant: 'destructive' });
     }
@@ -180,8 +152,8 @@ export default function StatusMigrationReview() {
           <h1 className="text-xl font-bold">Status Migration Review</h1>
           <p className="text-sm text-muted-foreground">
             Review the best-guess mapping of each open claim's legacy status into the new
-            <strong> Client Journey Status</strong> + <strong>Secondary Statuses</strong>. Correct any row, then apply.
-            Legacy <code>job_status</code> / <code>secondary_status</code> are never touched — rollback by disabling the v2 flag.
+            <strong> Client Journey Status</strong> + <strong>Secondary Status</strong> (group) + <strong>Tertiary Status</strong> (info). Correct any row, then apply.
+            Legacy <code>job_status</code> is never touched — rollback by disabling the v2 flag.
           </p>
         </div>
         <div className="flex gap-2">
@@ -220,7 +192,7 @@ export default function StatusMigrationReview() {
               <div key={claim.id} className={`neomorph-flat p-3 ${changed ? 'ring-1 ring-primary/30' : ''}`}>
                 <div className="flex flex-col lg:flex-row gap-3">
                   {/* Identity */}
-                  <div className="lg:w-64 shrink-0">
+                  <div className="lg:w-56 shrink-0">
                     <div className="font-semibold text-sm">{claim.job_number || '—'}</div>
                     <div className="text-xs text-muted-foreground">
                       {claim.reg && <span className="font-medium">{claim.reg} · </span>}
@@ -232,29 +204,48 @@ export default function StatusMigrationReview() {
                     </div>
                   </div>
 
-                  {/* New mapping */}
-                  <div className="flex-1 grid md:grid-cols-[200px_1fr] gap-3 items-start">
+                  {/* New mapping — three single-selects */}
+                  <div className="flex-1 grid md:grid-cols-3 gap-3 items-start">
                     <div>
                       <label className="block text-[11px] font-medium text-muted-foreground mb-1">Client Journey Status</label>
-                      <JourneySelect value={e.journey_status} onChange={(v) => setEdits((s) => ({ ...s, [claim.id]: { ...s[claim.id], journey_status: v } }))} />
+                      <StatusSelect
+                        value={e.journey_status}
+                        onChange={(v) => setEdits((s) => ({ ...s, [claim.id]: { ...s[claim.id], journey_status: v } }))}
+                        options={JOURNEY_STATUSES}
+                        placeholder="— Select journey —"
+                      />
                       {exception && (
                         <span className="block text-[10px] text-amber-600 mt-1">Exception — banner override</span>
                       )}
                     </div>
                     <div>
                       <label className="block text-[11px] font-medium text-muted-foreground mb-1">
-                        Secondary Statuses {exception && '(not used for exception)'}
+                        Secondary Status {exception && '(not used)'}
                       </label>
-                      <SecondaryMultiSelect
-                        selected={e.secondary_statuses}
+                      <StatusSelect
+                        value={e.secondary_status}
                         disabled={exception}
-                        onChange={(v) => setEdits((s) => ({ ...s, [claim.id]: { ...s[claim.id], secondary_statuses: v } }))}
+                        onChange={(v) => setEdits((s) => ({ ...s, [claim.id]: { ...s[claim.id], secondary_status: v } }))}
+                        options={SECONDARY_STATUSES}
+                        placeholder="— Select group —"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-medium text-muted-foreground mb-1">
+                        Tertiary Status {exception && '(not used)'}
+                      </label>
+                      <StatusSelect
+                        value={e.tertiary_status}
+                        disabled={exception}
+                        onChange={(v) => setEdits((s) => ({ ...s, [claim.id]: { ...s[claim.id], tertiary_status: v } }))}
+                        options={TERTIARY_STATUSES}
+                        placeholder="— Select info —"
                       />
                     </div>
                   </div>
 
                   {/* Action */}
-                  <div className="lg:w-32 shrink-0 flex lg:flex-col gap-2 items-end">
+                  <div className="lg:w-28 shrink-0 flex lg:flex-col gap-2 items-end">
                     <Button
                       size="sm"
                       variant={changed ? 'default' : 'outline'}
