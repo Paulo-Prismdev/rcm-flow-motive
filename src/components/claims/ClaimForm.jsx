@@ -116,7 +116,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
     ['admin', 'super_admin', 'company_admin'].includes(currentUser?.role);
 
   const [formData, setFormData] = useState(claim || {
-    job_number: '', reg: '', job_statuses: ['New'], claim_type: defaultClaimType || '',
+    job_number: '', reg: '', job_statuses: ['New'], secondary_status: 'New', claim_type: defaultClaimType || '',
     circumstances: '', loss_date: '', loss_time: '', incident_location: '',
     vehicle_use: '', courtesy_car_required: false, has_third_party: false,
     requires_indemnity: false, file_urls: [], insurer: '', claim_ref: '',

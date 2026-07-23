@@ -34,6 +34,7 @@ export const isExceptionJourney = (status) => EXCEPTION_JOURNEY_STATUSES.include
 
 // 2. Secondary Statuses — single-select. Determines the group the job sits in on the table view.
 export const SECONDARY_STATUSES = [
+  'New',
   'Awaiting Private Estimate',
   'Waiting Indemnity Details',
   'Waiting Repairer Allocation',
@@ -60,6 +61,7 @@ export const SECONDARY_STATUSES = [
 // 3. Tertiary Statuses — single-select. Extra information only (no grouping/timeline effect).
 // Uses the same option set as Secondary so any group status can also be flagged as extra info.
 export const TERTIARY_STATUSES = [
+  'New',
   'Awaiting Private Estimate',
   'Waiting Indemnity Details',
   'Waiting Repairer Allocation',

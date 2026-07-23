@@ -21,7 +21,8 @@
     },
     "secondary_status": {
       "type": "string",
-      "description": "Secondary Status (v2) \u2014 single-select. Dictates the group the job sits in on the table view. Reused from legacy field."
+      "description": "Secondary Status (v2) \u2014 single-select. Dictates the group the job sits in on the table view. Reused from legacy field.",
+      "default": "New"
     },
     "journey_status": {
       "type": "string",

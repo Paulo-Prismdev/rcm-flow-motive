@@ -72,6 +72,7 @@ Deno.serve(async (req) => {
       tp_insurer: formData.tp_insurer || '',
       tp_vehicle_damage: formData.tp_vehicle_damage || '',
       job_statuses: ['New'],
+      secondary_status: 'New',
       date_received: new Date().toISOString().split('T')[0],
       file_urls: [],
       image_urls: photoUrls || [],
