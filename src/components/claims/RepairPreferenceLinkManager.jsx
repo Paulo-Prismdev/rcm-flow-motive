@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Link2, Copy, Check, RefreshCw, Loader, ExternalLink, CheckCircle2, FileText, Download } from 'lucide-react';
+import { Link2, Copy, Check, RefreshCw, Loader, ExternalLink, CheckCircle2, FileText, Download, Trash2 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 
 // Internal-only control. Generates a secure, unguessable per-claim link containing a
@@ -56,6 +56,26 @@ export default function RepairPreferenceLinkManager({ claim, onUpdate }) {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleRemove = async () => {
+    if (!confirm('Remove the repair preference link and clear the signed response? You can generate a new link afterwards.')) return;
+    setGenerating(true);
+    try {
+      await onUpdate({
+        ...claim,
+        repair_preference_token: null,
+        repair_preference_link_sent_at: null,
+        repair_preference_signed: false,
+        repair_preference_signed_at: null,
+        repair_preference_pdf_url: null,
+        repair_preference_client_name: null,
+      });
+      toast({ title: 'Repair preference link removed', description: 'You can generate a new link whenever needed.' });
+    } catch (e) {
+      toast({ title: 'Failed to remove link', variant: 'destructive' });
+    }
+    setGenerating(false);
+  };
+
   return (
     <div className="space-y-3">
       {!hasToken ? (
@@ -98,10 +118,16 @@ export default function RepairPreferenceLinkManager({ claim, onUpdate }) {
             <p className="text-xs text-muted-foreground">
               Generated {claim.repair_preference_link_sent_at ? new Date(claim.repair_preference_link_sent_at).toLocaleString('en-GB') : ''}
             </p>
-            <Button variant="ghost" size="sm" onClick={handleRegenerate} disabled={generating} className="flex items-center gap-1.5 text-xs">
-              {generating ? <Loader className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
-              Regenerate link
-            </Button>
+            <div className="flex items-center gap-1.5">
+              <Button variant="ghost" size="sm" onClick={handleRegenerate} disabled={generating} className="flex items-center gap-1.5 text-xs">
+                {generating ? <Loader className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
+                Regenerate link
+              </Button>
+              <Button variant="ghost" size="sm" onClick={handleRemove} disabled={generating} className="flex items-center gap-1.5 text-xs text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20">
+                <Trash2 className="w-3.5 h-3.5" />
+                Remove
+              </Button>
+            </div>
           </div>
         </div>
       )}
