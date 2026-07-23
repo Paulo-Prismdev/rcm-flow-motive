@@ -16,6 +16,7 @@ import { formatUKRegistration } from '../components/shared/formatRegistration';
 import { format } from 'date-fns';
 import { useStatusConfigs } from '../components/shared/StatusConfigContext';
 import { SECONDARY_STATUSES, getJourneyColor } from '@/components/shared/claimStatusV2';
+import { isClosedJourney } from '@/components/shared/claimStatusUpdate';
 
 // Status dot colour map
 const STATUS_COLORS = {
@@ -44,8 +45,11 @@ const calculateUpdateStatus = (claim) => {
 
 // v2 grouping: an "On Site" group pulls in any claim whose journey status is
 // "On Site"; everything else groups by its Secondary status.
-const getGroupKey = (c) =>
-  (c.journey_status || c.job_status) === 'On Site' ? 'On Site' : (c.secondary_status || 'New');
+const getGroupKey = (c) => {
+  const journey = c.journey_status || c.job_status;
+  if (c.on_site_date && !isClosedJourney(journey)) return 'On Site';
+  return c.secondary_status || 'New';
+};
 
 const GROUP_STATUSES = (() => {
   const idx = SECONDARY_STATUSES.indexOf('In Repair');

@@ -4,7 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { X, Clock, Mail, Plus, AtSign, ChevronDown } from 'lucide-react';
+import { X, Clock, Mail, Plus, AtSign, ChevronDown, MapPin } from 'lucide-react';
 import { Badge } from "@/components/ui/badge";
 import { Command, CommandItem, CommandList } from "@/components/ui/command";
 import StatusChangeFields from "@/components/shared/StatusChangeFields";
@@ -40,6 +40,8 @@ export default function ClaimUpdateForm({
   const [mentionPosition, setMentionPosition] = useState(null);
   const [showMentionPopup, setShowMentionPopup] = useState(false);
   const [showFollowUp, setShowFollowUp] = useState(false);
+  const [markOnSite, setMarkOnSite] = useState(false);
+  const [onSiteDate, setOnSiteDate] = useState(claim?.on_site_date || new Date().toISOString().split('T')[0]);
 
   const { data: currentUser } = useQuery({ queryKey: ['currentUser'], queryFn: () => base44.auth.me(), staleTime: 5 * 60 * 1000 });
   const { data: allUsers = [] } = useQuery({ queryKey: ['allUsers'], queryFn: () => base44.entities.User.list(), staleTime: 5 * 60 * 1000 });
@@ -51,6 +53,11 @@ export default function ClaimUpdateForm({
 
   const createUpdateMutation = useMutation({
     mutationFn: async (updateData) => {
+      if (updateData.markOnSite) {
+        await base44.entities.Claim.update(claimId, {
+          on_site_date: updateData.onSiteDate || new Date().toISOString().split('T')[0],
+        });
+      }
       if (updateData.update_type === 'Status Change' && updateData.description?.trim()) {
         const claimUpdate = buildStatusChangeClaimUpdate(claim, {
           journey: updateData.new_journey, secondary: updateData.new_secondary_status, tertiary: updateData.new_tertiary_status
@@ -80,6 +87,7 @@ export default function ClaimUpdateForm({
   const resetForm = () => {
     setNewUpdate({ update_type: 'Other', description: '', next_steps: '', due_date_for_next_action: '', new_journey: claim?.journey_status || claim?.job_status || currentStatus || '', new_secondary_status: claim?.secondary_status || '', new_tertiary_status: claim?.tertiary_status || '' });
     setSendEmail(false); setSelectedEmails([]); setTaggedUsers([]); setSubmitError(''); setShowFollowUp(false);
+    setMarkOnSite(false); setOnSiteDate(claim?.on_site_date || new Date().toISOString().split('T')[0]);
     if (onCancel) onCancel();
   };
 
@@ -143,7 +151,7 @@ export default function ClaimUpdateForm({
     }
 
     const { new_journey, new_secondary_status, new_tertiary_status, ...updateDataToSave } = newUpdate;
-    createUpdateMutation.mutate({ ...updateDataToSave, description: finalDescription, tagged_user_ids: taggedUsers, new_journey, new_secondary_status, new_tertiary_status, ...(replyToId && { parent_update_id: replyToId }) });
+    createUpdateMutation.mutate({ ...updateDataToSave, description: finalDescription, tagged_user_ids: taggedUsers, new_journey, new_secondary_status, new_tertiary_status, markOnSite, onSiteDate, ...(replyToId && { parent_update_id: replyToId }) });
   };
 
   const getAvailableEmails = () => {
@@ -210,6 +218,23 @@ export default function ClaimUpdateForm({
             </div>
           )}
         </div>
+
+        {!replyToId && canChangeStatus && (
+          <div className="bg-muted/30 p-3 space-y-3 border border-border rounded-lg">
+            <div className="flex items-center gap-2">
+              <input type="checkbox" id="mark_on_site" checked={markOnSite} onChange={(e) => setMarkOnSite(e.target.checked)} className="w-4 h-4" />
+              <label htmlFor="mark_on_site" className="text-sm font-medium flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-cyan-600" /> Mark vehicle as On Site
+              </label>
+            </div>
+            {markOnSite && (
+              <div className="pl-6">
+                <label className="block text-xs text-muted-foreground mb-1">On Site Date (Key Dates)</label>
+                <Input type="date" value={onSiteDate} onChange={(e) => setOnSiteDate(e.target.value)} className="px-3 py-2 text-sm bg-background border border-border" />
+              </div>
+            )}
+          </div>
+        )}
 
         {!replyToId && !isReferrer && (() => {
           const availableEmails = getAvailableEmails();
