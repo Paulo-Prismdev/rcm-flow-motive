@@ -136,6 +136,13 @@ export default function ClaimUpdateForm({
     }
 
     let finalDescription = newUpdate.description;
+    if (newUpdate.update_type === 'Status Change' && !finalDescription.trim()) {
+      const parts = [];
+      if (newUpdate.new_journey) parts.push(`Journey → ${newUpdate.new_journey}`);
+      if (newUpdate.new_secondary_status) parts.push(`Secondary → ${newUpdate.new_secondary_status}`);
+      if (newUpdate.new_tertiary_status) parts.push(`Tertiary → ${newUpdate.new_tertiary_status}`);
+      finalDescription = parts.length ? `Status updated: ${parts.join(' · ')}` : 'Status updated';
+    }
     if (sendEmail && selectedEmails.length > 0) {
       const mailtoLink = `mailto:${selectedEmails.join(',')}?subject=${encodeURIComponent(`Claim Update: ${claim?.reg}`)}&body=${encodeURIComponent(finalDescription)}`;
       window.open(mailtoLink, '_blank');
@@ -185,9 +192,9 @@ export default function ClaimUpdateForm({
           <Textarea
             value={newUpdate.description}
             onChange={handleTextareaChange}
-            placeholder={replyToId ? "Write your reply... Type @ to mention someone" : "Describe the action taken... Type @ to mention someone"}
+            placeholder={replyToId ? "Write your reply... Type @ to mention someone" : "Describe the action taken... (optional for status changes) Type @ to mention someone"}
             className="px-3 py-2 text-sm bg-background border border-border h-24"
-            required
+            required={newUpdate.update_type !== 'Status Change'}
           />
           {showMentionPopup && (
             <div className="absolute z-50 mt-1 w-56 bg-popover border border-border rounded-md shadow-lg max-h-48 overflow-y-auto">
@@ -256,7 +263,7 @@ export default function ClaimUpdateForm({
 
         <div className="flex justify-end gap-2">
           <Button type="button" onClick={resetForm} variant="outline" className="px-4 py-2 text-xs">Cancel</Button>
-          <Button type="submit" disabled={createUpdateMutation.isPending || !newUpdate.description.trim()} className="px-4 py-2 text-xs bg-primary hover:bg-primary/90 text-primary-foreground">{createUpdateMutation.isPending ? 'Adding...' : replyToId ? 'Reply' : 'Add Update'}</Button>
+          <Button type="submit" disabled={createUpdateMutation.isPending || (newUpdate.update_type !== 'Status Change' && !newUpdate.description.trim())} className="px-4 py-2 text-xs bg-primary hover:bg-primary/90 text-primary-foreground">{createUpdateMutation.isPending ? 'Adding...' : replyToId ? 'Reply' : 'Add Update'}</Button>
         </div>
       </form>
     </div>
