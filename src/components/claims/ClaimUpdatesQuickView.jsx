@@ -57,7 +57,7 @@ export default function ClaimUpdatesQuickView({ claim, isOpen, onClose }) {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['claimUpdates', claimId] }),
   });
 
-  const handleUpdateCreated = (newStatus, newSecondaryStatus, updateType) => {
+  const handleUpdateCreated = (newStatus, newSecondaryStatus, newTertiaryStatus, updateType) => {
     const now = new Date();
     const closedStatuses = ['Completed', 'Cancelled', 'Total Loss'];
     const effectiveStatus = newStatus || claim?.job_status;
@@ -75,10 +75,11 @@ export default function ClaimUpdatesQuickView({ claim, isOpen, onClose }) {
       }),
     };
     // Only modify statuses for an explicit Status Change — a regular update
-    // must never alter job_status or secondary_status.
+    // must never alter job_status, secondary_status or tertiary_status.
     if (updateType === 'Status Change') {
       if (newStatus) updateData.job_status = newStatus;
       updateData.secondary_status = newSecondaryStatus || null;
+      updateData.tertiary_status = newTertiaryStatus || null;
     }
 
     base44.entities.Claim.update(claimId, updateData).then(() => {

@@ -74,7 +74,7 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['claimUpdates', claimId] });
-      if (onUpdateCreated) onUpdateCreated(newUpdate.new_status || null, newUpdate.new_secondary_status || null, newUpdate.update_type);
+      if (onUpdateCreated) onUpdateCreated(newUpdate.new_status || null, newUpdate.new_secondary_status || null, claim?.tertiary_status || null, newUpdate.update_type);
       resetForm();
     },
     onError: (error) => setSubmitError(error?.message || 'Failed to create update'),

@@ -438,7 +438,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
     handleUpdate({ ...claim, ...overrideData, last_updated_at: new Date().toISOString() });
   };
 
-  const handleClaimUpdateCreated = (newStatus, newSecondaryStatus, updateType) => {
+  const handleClaimUpdateCreated = (newStatus, newSecondaryStatus, newTertiaryStatus, updateType) => {
     const now = new Date();
     const closedStatuses = ['Completed', 'Cancelled', 'Total Loss'];
     const effectiveStatus = newStatus || claim.job_status;
@@ -460,7 +460,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
     };
     
     // Statuses only change when the update is an explicit Status Change —
-    // never touch job_status / secondary_status for any other update type.
+    // never touch job_status / secondary_status / tertiary_status for any other update type.
     if (updateType === 'Status Change') {
       if (newStatus) {
         updateData.job_status = newStatus;
@@ -476,6 +476,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
         updateData.job_statuses = currentStatuses;
       }
       updateData.secondary_status = newSecondaryStatus || null;
+      updateData.tertiary_status = newTertiaryStatus || null;
     }
     
     handleUpdate(updateData);
