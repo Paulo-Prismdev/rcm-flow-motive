@@ -197,7 +197,7 @@ const isSectionEmpty = (sectionId, claim) => {
 };
 
 const DETAIL_SECTIONS = [
-  { id: 'status', label: 'Status & Overview', icon: Clock },
+  { id: 'status', label: 'Job Overview', icon: Clock },
   { id: 'dates', label: 'Key Dates', icon: Calendar },
   { id: 'estimate', label: 'Estimate Details', icon: Calculator },
   { id: 'client', label: 'Client Details', icon: Users },
@@ -698,7 +698,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
       case 'status':
         return (
           <EditableSection 
-            title="Status & Overview" 
+            title="Job Overview" 
             icon={Clock} 
             claim={claim} 
             onUpdate={handleUpdate}
@@ -707,7 +707,6 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
           >
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
               <DetailRow label="Registration" value={claim.reg} />
-              <DetailRow label="Job Status" value={claim.job_status} isStatus />
               <DetailRow label="Claim Type" value={claim.claim_type} />
               <DetailRow label="Date Created (System)" value={claim.created_date} isDate />
               <DetailRow label="Date of Loss" value={claim.loss_date} isDate />
