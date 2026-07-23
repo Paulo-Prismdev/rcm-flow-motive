@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { X, Clock, Mail, Plus, AtSign, ChevronDown } from 'lucide-react';
 import { Badge } from "@/components/ui/badge";
 import { Command, CommandItem, CommandList } from "@/components/ui/command";
+import { SECONDARY_STATUSES } from "@/components/shared/claimStatusV2";
 
 const UPDATE_TYPES = [
   "Status Change", "Client Communication", "Bodyshop Communication", "Insurer Communication",
@@ -180,7 +181,7 @@ export default function ClaimUpdateForm({
                   <label className="block text-xs text-muted-foreground mb-1">New Secondary Status (Optional)</label>
                   <select value={newUpdate.new_secondary_status} onChange={(e) => setNewUpdate({ ...newUpdate, new_secondary_status: e.target.value })} className="w-full px-3 py-2 text-sm bg-background border border-border rounded-lg">
                     <option value="">No secondary status</option>
-                    {activeStatuses.map(status => <option key={status} value={status}>{status}</option>)}
+                    {SECONDARY_STATUSES.map(status => <option key={status} value={status}>{status}</option>)}
                   </select>
                 </div>
               </div>
