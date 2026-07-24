@@ -24,6 +24,7 @@ import UserManagement from "./UserManagement";
 import ChaserEmailSettings from "./ChaserEmailSettings";
 import CompanyIdLookup from "./CompanyIdLookup";
 import EmployeeManagement from "./EmployeeManagement";
+import InsurerDirectoryTab from "../components/settings/InsurerDirectoryTab";
 
 const STATUS_TYPES = ["Claim", "Estimate", "Engineering", "Part"];
 
@@ -33,6 +34,7 @@ const SETTINGS_SECTIONS = [
     items: [
       { id: "status", label: "Status Settings", icon: Shield, adminOnly: false },
       { id: "companies", label: "Companies", icon: Building2, adminOnly: false },
+      { id: "insurers", label: "Insurer Directory", icon: Shield, adminOnly: false },
     ],
   },
   {
@@ -108,6 +110,7 @@ export default function Settings() {
           </div>
         );
       case "companies":   return <CompanyManagement />;
+      case "insurers":    return <InsurerDirectoryTab />;
       case "portals":     return <PortalManagementTab />;
       case "email":       return <EmailTemplates />;
       case "chasers":     return <ChaserEmailSettings />;
