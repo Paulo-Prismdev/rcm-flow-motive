@@ -21,6 +21,7 @@ import {
   RefreshCw,
   Plus,
   ChevronRight,
+  Shield,
   Building2 } from
 "lucide-react";
 import GlobalSearch from "./components/layout/GlobalSearch";
@@ -54,7 +55,6 @@ const allDepartments = [
 
 { name: "Reports", url: createPageUrl("Reports"), icon: BarChart3, permission: "Reports" },
 { name: "Map", url: createPageUrl("BodyshopMap"), icon: Search, permission: "Map" },
-{ name: "Repairer Directory", url: createPageUrl("RepairerDirectory"), icon: Building2, permission: "Map" },
 { name: "Suppliers", url: createPageUrl("SupplierManagement"), icon: Package, permission: "Parts" }];
 
 
@@ -203,6 +203,44 @@ export default function Layout({ children, currentPageName }) {
                 </Link>);
 
             })}
+
+            {/* Directories section */}
+            {isInternalUser &&
+            (() => {
+              const dirLinks = [
+                { name: "Repairers", url: createPageUrl("RepairerDirectory"), icon: Building2 },
+                { name: "Insurers", url: createPageUrl("InsurerDirectory"), icon: Shield },
+                { name: "Suppliers", url: createPageUrl("SupplierManagement"), icon: Package },
+                { name: "Companies", url: "/admin/companies", icon: Building2 },
+              ];
+              return (
+                <>
+                  <div className="pt-4 pb-1 px-3 md:px-2 lg:px-3">
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-white/30 md:hidden lg:block">Directories</p>
+                    <div className="hidden md:block lg:hidden border-t border-white/10 mt-1" />
+                  </div>
+                  {dirLinks.map((d) => {
+                    const isActive = location.pathname === d.url;
+                    return (
+                      <Link
+                        key={d.name}
+                        to={d.url}
+                        onClick={() => setMobileMenuOpen(false)}
+                        title={d.name}
+                        className={`flex items-center gap-3 px-3 py-2 rounded-[10px] text-sm font-medium transition-all md:justify-center md:px-2 lg:justify-start lg:px-3 ${
+                          isActive
+                            ? 'bg-white/10 text-white border border-white/15'
+                            : 'text-white/60 hover:bg-white/8 hover:text-white/90'
+                        }`}>
+                        <d.icon className="w-4 h-4 flex-shrink-0" />
+                        <span className="md:hidden lg:block">{d.name}</span>
+                      </Link>
+                    );
+                  })}
+                </>
+              );
+            })()
+            }
 
             {/* Management section */}
             {(isAdmin || canManagePermissions) &&
