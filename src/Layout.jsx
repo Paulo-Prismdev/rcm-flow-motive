@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, Suspense } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import {
@@ -33,6 +33,7 @@ import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { StatusConfigProvider } from './components/shared/StatusConfigContext';
 import UserTypeFixer from './components/shared/UserTypeFixer';
+import PageLoader from './components/PageLoader';
 import UserProfile, { getUserInitials, getAvatarColor } from "./components/layout/UserProfile";
 import {
   DropdownMenu,
@@ -399,7 +400,7 @@ export default function Layout({ children, currentPageName }) {
 
           {/* Page content */}
           <main className="flex-1 overflow-hidden p-0 md:p-2 lg:p-4 min-h-0 relative pb-16 md:pb-2 lg:pb-4" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'auto' }}>
-            {children}
+            <Suspense fallback={<PageLoader />}>{children}</Suspense>
           </main>
         </div>
       </div>
