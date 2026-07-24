@@ -15,8 +15,18 @@ export default function ClaimEstimateForm({ claim, onSave, onCancel }) {
         authority_cost_gross: claim.authority_cost_gross ?? '',
     });
 
+    // Entering a Net value auto-calculates the Gross (Net + 20% VAT).
     const handleChange = (field, value) => {
-        setFormData(prev => ({ ...prev, [field]: value }));
+        setFormData(prev => {
+            const next = { ...prev, [field]: value };
+            if (field === 'estimate_cost_net') {
+                next.estimate_cost_gross = value !== '' ? (parseFloat(value) * 1.2).toFixed(2) : '';
+            }
+            if (field === 'authority_cost_net') {
+                next.authority_cost_gross = value !== '' ? (parseFloat(value) * 1.2).toFixed(2) : '';
+            }
+            return next;
+        });
     };
 
     const handleSave = () => {
@@ -61,12 +71,12 @@ export default function ClaimEstimateForm({ claim, onSave, onCancel }) {
                     <Input type="number" step="0.01" value={formData.authority_cost_net} onChange={e => handleChange('authority_cost_net', e.target.value)} className="neomorph-inset" />
                 </div>
                 <div>
-                    <label className="text-sm text-gray-500">Est. Cost (Gross) (£)</label>
-                    <Input type="number" step="0.01" value={formData.estimate_cost_gross} onChange={e => handleChange('estimate_cost_gross', e.target.value)} className="neomorph-inset" />
+                    <label className="text-sm text-gray-500">Est. Cost (Gross) (£) <span className="text-[11px] text-gray-400">(auto)</span></label>
+                    <Input type="number" step="0.01" value={formData.estimate_cost_gross} readOnly className="neomorph-inset bg-gray-100 dark:bg-gray-800 cursor-not-allowed" />
                 </div>
                 <div>
-                    <label className="text-sm text-gray-500">Auth. Cost (Gross) (£)</label>
-                    <Input type="number" step="0.01" value={formData.authority_cost_gross} onChange={e => handleChange('authority_cost_gross', e.target.value)} className="neomorph-inset" />
+                    <label className="text-sm text-gray-500">Auth. Cost (Gross) (£) <span className="text-[11px] text-gray-400">(auto)</span></label>
+                    <Input type="number" step="0.01" value={formData.authority_cost_gross} readOnly className="neomorph-inset bg-gray-100 dark:bg-gray-800 cursor-not-allowed" />
                 </div>
             </div>
             <div className="flex justify-end gap-3 pt-4">
