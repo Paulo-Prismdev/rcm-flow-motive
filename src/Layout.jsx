@@ -54,8 +54,7 @@ const allDepartments = [
 { name: "Tyre Requests", url: createPageUrl("TyreRequests"), icon: Package, permission: "Parts" },
 
 { name: "Reports", url: createPageUrl("Reports"), icon: BarChart3, permission: "Reports" },
-{ name: "Map", url: createPageUrl("BodyshopMap"), icon: Search, permission: "Map" },
-{ name: "Suppliers", url: createPageUrl("SupplierManagement"), icon: Package, permission: "Parts" }];
+{ name: "Map", url: createPageUrl("BodyshopMap"), icon: Search, permission: "Map" }];
 
 
 
@@ -65,6 +64,7 @@ export default function Layout({ children, currentPageName }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [messagesOpen, setMessagesOpen] = useState(false);
   const [claimDetailOpen, setClaimDetailOpen] = useState(false);
+  const [directoriesOpen, setDirectoriesOpen] = useState(false);
 
   useEffect(() => {
     const observer = new MutationObserver(() => {
@@ -213,13 +213,22 @@ export default function Layout({ children, currentPageName }) {
                 { name: "Suppliers", url: createPageUrl("SupplierManagement"), icon: Package },
                 { name: "Companies", url: "/admin/companies", icon: Building2 },
               ];
+              const anyActive = dirLinks.some((d) => location.pathname === d.url);
+              const open = directoriesOpen || anyActive;
               return (
                 <>
-                  <div className="pt-4 pb-1 px-3 md:px-2 lg:px-3">
-                    <p className="text-[10px] font-semibold uppercase tracking-wider text-white/30 md:hidden lg:block">Directories</p>
-                    <div className="hidden md:block lg:hidden border-t border-white/10 mt-1" />
-                  </div>
-                  {dirLinks.map((d) => {
+                  <button
+                    type="button"
+                    onClick={() => setDirectoriesOpen((v) => !v)}
+                    title="Directories"
+                    className={`w-full flex items-center gap-3 px-3 py-2 rounded-[10px] text-sm font-medium transition-all md:justify-center md:px-2 lg:justify-start lg:px-3 ${
+                      open ? 'text-white' : 'text-white/60 hover:bg-white/8 hover:text-white/90'
+                    }`}>
+                    <Building2 className="w-4 h-4 flex-shrink-0" />
+                    <span className="md:hidden lg:block flex-1 text-left">Directories</span>
+                    <ChevronDown className={`w-3.5 h-3.5 transition-transform md:hidden lg:block ${open ? 'rotate-180' : ''}`} />
+                  </button>
+                  {open && dirLinks.map((d) => {
                     const isActive = location.pathname === d.url;
                     return (
                       <Link
@@ -227,7 +236,7 @@ export default function Layout({ children, currentPageName }) {
                         to={d.url}
                         onClick={() => setMobileMenuOpen(false)}
                         title={d.name}
-                        className={`flex items-center gap-3 px-3 py-2 rounded-[10px] text-sm font-medium transition-all md:justify-center md:px-2 lg:justify-start lg:px-3 ${
+                        className={`flex items-center gap-3 px-3 py-2 rounded-[10px] text-sm font-medium transition-all md:justify-center md:px-2 lg:justify-start lg:pl-7 lg:pr-3 ${
                           isActive
                             ? 'bg-white/10 text-white border border-white/15'
                             : 'text-white/60 hover:bg-white/8 hover:text-white/90'

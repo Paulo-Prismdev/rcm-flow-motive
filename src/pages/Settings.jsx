@@ -14,7 +14,6 @@ import {
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import StatusManagementTab from "../components/settings/StatusManagementTab";
-import CompanyManagement from "./CompanyManagement";
 import PortalManagementTab from "../components/settings/PortalManagementTab";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
@@ -24,7 +23,6 @@ import UserManagement from "./UserManagement";
 import ChaserEmailSettings from "./ChaserEmailSettings";
 import CompanyIdLookup from "./CompanyIdLookup";
 import EmployeeManagement from "./EmployeeManagement";
-import InsurerDirectoryTab from "../components/settings/InsurerDirectoryTab";
 
 const STATUS_TYPES = ["Claim", "Estimate", "Engineering", "Part"];
 
@@ -33,8 +31,6 @@ const SETTINGS_SECTIONS = [
     title: "Core Settings",
     items: [
       { id: "status", label: "Status Settings", icon: Shield, adminOnly: false },
-      { id: "companies", label: "Companies", icon: Building2, adminOnly: false },
-      { id: "insurers", label: "Insurer Directory", icon: Shield, adminOnly: false },
     ],
   },
   {
@@ -109,8 +105,6 @@ export default function Settings() {
             <StatusManagementTab key={activeStatusTab} department={activeStatusTab} />
           </div>
         );
-      case "companies":   return <CompanyManagement />;
-      case "insurers":    return <InsurerDirectoryTab />;
       case "portals":     return <PortalManagementTab />;
       case "email":       return <EmailTemplates />;
       case "chasers":     return <ChaserEmailSettings />;
