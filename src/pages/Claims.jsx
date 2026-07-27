@@ -33,7 +33,7 @@ const COL_WIDTHS = {
 const DEFAULT_COL_WIDTH = 130;
 const colWidth = (id) => COL_WIDTHS[id] || DEFAULT_COL_WIDTH;
 const REG_W = 112;
-const CASE_W = 105, CLIENT_W = 105, STATUS_W = 160, UPDATES_W = 52, INFO_W = 52;
+const CASE_W = 105, CLIENT_W = 105, STATUS_W = 160, UPDATES_W = 80, INFO_W = 52;
 
 // Status dot colour map
 const STATUS_COLORS = {
@@ -385,15 +385,15 @@ export default function ClaimsPage() {
           );
         })}
         {/* Sticky right: Case Update 48hrs badge */}
-        <td style={{ width: `${CASE_W}px`, minWidth: `${CASE_W}px`, maxWidth: `${CASE_W}px` }} className={`sticky right-[369px] z-10 px-2 py-2.5 whitespace-nowrap text-center ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-white dark:bg-gray-900 group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50'}`}>
+        <td style={{ width: `${CASE_W}px`, minWidth: `${CASE_W}px`, maxWidth: `${CASE_W}px` }} className={`sticky right-[397px] z-10 px-2 py-2.5 whitespace-nowrap text-center ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-white dark:bg-gray-900 group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50'}`}>
           <UpdateStatusBadge status={updateStatus} small />
         </td>
         {/* Sticky right: Client Update 48hrs badge */}
-        <td style={{ width: `${CLIENT_W}px`, minWidth: `${CLIENT_W}px`, maxWidth: `${CLIENT_W}px` }} className={`sticky right-[264px] z-10 px-2 py-2.5 whitespace-nowrap text-center ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-white dark:bg-gray-900 group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50'}`}>
+        <td style={{ width: `${CLIENT_W}px`, minWidth: `${CLIENT_W}px`, maxWidth: `${CLIENT_W}px` }} className={`sticky right-[292px] z-10 px-2 py-2.5 whitespace-nowrap text-center ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-white dark:bg-gray-900 group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50'}`}>
           <UpdateStatusBadge status={clientCommStatus} small />
         </td>
         {/* Sticky right: Status + alerts */}
-        <td style={{ width: `${STATUS_W}px`, minWidth: `${STATUS_W}px`, maxWidth: `${STATUS_W}px` }} className={`sticky right-[104px] z-10 px-2 py-2.5 whitespace-nowrap ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-white dark:bg-gray-900 group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50'}`}>
+        <td style={{ width: `${STATUS_W}px`, minWidth: `${STATUS_W}px`, maxWidth: `${STATUS_W}px` }} className={`sticky right-[132px] z-10 px-2 py-2.5 whitespace-nowrap ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-white dark:bg-gray-900 group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50'}`}>
           <div className="flex items-center justify-center gap-1 flex-wrap min-h-[42px]">
             {isDraft && (
               <span className="px-1.5 py-0.5 rounded-md bg-yellow-100 text-yellow-700 text-[10px] font-medium leading-none">
@@ -702,19 +702,19 @@ export default function ClaimsPage() {
                       <th key={fieldId} title={label} style={{ minWidth: `${w}px`, verticalAlign: 'bottom' }} className="px-2 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap overflow-hidden text-ellipsis">{label}</th>
                     );
                   })}
-                  <th title="Case Update 48hrs" style={{ width: `${CASE_W}px`, minWidth: `${CASE_W}px`, maxWidth: `${CASE_W}px`, verticalAlign: 'bottom' }} className="sticky right-[369px] z-20 bg-white dark:bg-gray-900 px-2 py-2 text-center text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-normal leading-[1.15]">
+                  <th title="Case Update 48hrs" style={{ width: `${CASE_W}px`, minWidth: `${CASE_W}px`, maxWidth: `${CASE_W}px`, verticalAlign: 'bottom' }} className="sticky right-[397px] z-20 bg-white dark:bg-gray-900 px-2 py-2 text-center text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-normal leading-[1.15]">
                     <div className="flex flex-col items-center">
                       <span>CASE</span>
                       <span>48HRS</span>
                     </div>
                   </th>
-                  <th title="Client Update 48hrs" style={{ width: `${CLIENT_W}px`, minWidth: `${CLIENT_W}px`, maxWidth: `${CLIENT_W}px`, verticalAlign: 'bottom' }} className="sticky right-[264px] z-20 bg-white dark:bg-gray-900 px-2 py-2 text-center text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-normal leading-[1.15]">
+                  <th title="Client Update 48hrs" style={{ width: `${CLIENT_W}px`, minWidth: `${CLIENT_W}px`, maxWidth: `${CLIENT_W}px`, verticalAlign: 'bottom' }} className="sticky right-[292px] z-20 bg-white dark:bg-gray-900 px-2 py-2 text-center text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-normal leading-[1.15]">
                     <div className="flex flex-col items-center">
                       <span>CLIENT</span>
                       <span>48HRS</span>
                     </div>
                   </th>
-                  <th title="Status" style={{ width: `${STATUS_W}px`, minWidth: `${STATUS_W}px`, maxWidth: `${STATUS_W}px`, verticalAlign: 'bottom' }} className="sticky right-[104px] z-20 bg-white dark:bg-gray-900 px-2 py-2 text-center text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap overflow-hidden text-ellipsis">Status</th>
+                  <th title="Status" style={{ width: `${STATUS_W}px`, minWidth: `${STATUS_W}px`, maxWidth: `${STATUS_W}px`, verticalAlign: 'bottom' }} className="sticky right-[132px] z-20 bg-white dark:bg-gray-900 px-2 py-2 text-center text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap overflow-hidden text-ellipsis">Status</th>
                   <th title="Updates" style={{ width: `${UPDATES_W}px`, minWidth: `${UPDATES_W}px`, maxWidth: `${UPDATES_W}px`, verticalAlign: 'bottom' }} className="sticky right-[52px] z-20 bg-white dark:bg-gray-900 px-2 py-2 text-center text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap overflow-hidden text-ellipsis">Updates</th>
                   <th title="Info" style={{ width: `${INFO_W}px`, minWidth: `${INFO_W}px`, maxWidth: `${INFO_W}px`, verticalAlign: 'bottom' }} className="sticky right-0 z-20 bg-white dark:bg-gray-900 px-2 py-2 text-center text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap overflow-hidden text-ellipsis">Info</th>
                 </tr>
