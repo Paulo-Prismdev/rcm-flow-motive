@@ -13,7 +13,8 @@ import {
   Trash2,
   Upload,
   Download,
-  Loader } from
+  Loader,
+  Copy } from
 'lucide-react';
 import AddSupplierModal from '../components/shared/AddSupplierModal';
 import { Link } from 'react-router-dom';
@@ -331,15 +332,31 @@ export default function SupplierManagement() {
               <div className="space-y-1">
                       {supplier.emails.map((email, idx) =>
                 <div key={idx} className="flex items-center gap-2 text-foreground-muted">
-                          <Mail className="w-3 h-3" />
-                          <span className="truncate">{email}</span>
+                          <Mail className="w-3 h-3 flex-shrink-0" />
+                          <span className="truncate flex-1">{email}</span>
+                          <button
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); navigator.clipboard?.writeText(email); }}
+                            title="Copy email"
+                            className="p-1 rounded text-foreground-muted hover:text-accent hover:bg-accent/10 transition-colors flex-shrink-0"
+                          >
+                            <Copy className="w-3 h-3" />
+                          </button>
                         </div>
                 )}
                     </div> :
               supplier.email ?
               <div className="flex items-center gap-2 text-foreground-muted">
-                      <Mail className="w-3 h-3" />
-                      <span className="truncate">{supplier.email}</span>
+                      <Mail className="w-3 h-3 flex-shrink-0" />
+                      <span className="truncate flex-1">{supplier.email}</span>
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); navigator.clipboard?.writeText(supplier.email); }}
+                        title="Copy email"
+                        className="p-1 rounded text-foreground-muted hover:text-accent hover:bg-accent/10 transition-colors flex-shrink-0"
+                      >
+                        <Copy className="w-3 h-3" />
+                      </button>
                     </div> :
               null}
                   {supplier.postcode &&
