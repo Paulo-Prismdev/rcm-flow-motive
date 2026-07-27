@@ -43,6 +43,24 @@ const calculateUpdateStatus = (claim) => {
   return sinceCreated >= 48 ? 'Red' : 'Amber';
 };
 
+// 48-hour client communication tracker: based on time since the last
+// "Client Communication" update (last_client_comm_at). Mirrors the general
+// update tracker but scoped to client communication updates only.
+const calculateClientCommStatus = (claim) => {
+  const now = new Date();
+  const closedStatuses = ['Completed', 'Cancelled', 'Total Loss'];
+  if (closedStatuses.includes(claim.job_status)) return 'Gray';
+  const lastComm = claim.last_client_comm_at;
+  if (lastComm) {
+    const hours = (now - new Date(lastComm)) / 3600000;
+    if (hours >= 48) return 'Red';
+    if (hours >= 24) return 'Amber';
+    return 'Green';
+  }
+  const sinceCreated = claim.created_date ? (now - new Date(claim.created_date)) / 3600000 : 48;
+  return sinceCreated >= 48 ? 'Red' : 'Amber';
+};
+
 // v2 grouping: an "On Site" group pulls in any claim whose journey status is
 // "On Site"; everything else groups by its Secondary status.
 const getGroupKey = (c) => {
@@ -309,6 +327,7 @@ export default function ClaimsPage() {
   // The claims table row (desktop)
   const renderRow = (claim) => {
     const updateStatus = calculateUpdateStatus(claim);
+    const clientCommStatus = calculateClientCommStatus(claim);
     const isSelected = selectedClaim?.id === claim.id;
     const hasBackorder = claimIdsWithBackorders.has(claim.id);
     const closedList = ['Completed', 'Cancelled', 'Total Loss'];
@@ -345,12 +364,16 @@ export default function ClaimsPage() {
             </td>
           );
         })}
-        {/* 48 Hour Update badge */}
-        <td className={`px-3 py-2.5 whitespace-nowrap text-center ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : 'group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50'}`}>
+        {/* Sticky right: 48 Hour Update badge */}
+        <td className={`sticky right-[392px] z-10 w-[96px] min-w-[96px] px-2 py-2.5 whitespace-nowrap text-center ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-white dark:bg-gray-900 group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50'}`}>
           <UpdateStatusBadge status={updateStatus} small />
         </td>
+        {/* Sticky right: Client Communication badge */}
+        <td className={`sticky right-[296px] z-10 w-[96px] min-w-[96px] px-2 py-2.5 whitespace-nowrap text-center ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-white dark:bg-gray-900 group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50'}`}>
+          <UpdateStatusBadge status={clientCommStatus} small />
+        </td>
         {/* Sticky right: Status + alerts */}
-        <td className={`sticky right-[96px] z-10 px-3 py-2.5 whitespace-nowrap ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-white dark:bg-gray-900 group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50'}`}>
+        <td className={`sticky right-[96px] z-10 w-[200px] min-w-[200px] px-3 py-2.5 whitespace-nowrap ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-white dark:bg-gray-900 group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50'}`}>
           <div className="flex items-center gap-1.5 justify-center flex-wrap">
             {isDraft && (
               <span className="px-2 py-1 rounded-md bg-yellow-100 text-yellow-700 text-[10px] font-medium">
@@ -394,6 +417,7 @@ export default function ClaimsPage() {
   // Mobile card view for a single claim
   const renderMobileCard = (claim) => {
     const updateStatus = calculateUpdateStatus(claim);
+    const clientCommStatus = calculateClientCommStatus(claim);
     const hasBackorder = claimIdsWithBackorders.has(claim.id);
     const closedList = ['Completed', 'Cancelled', 'Total Loss'];
     const isClosedStatus = closedList.includes(claim.job_status);
@@ -420,6 +444,7 @@ export default function ClaimsPage() {
               </span>
             )}
             {!isClosedStatus && <UpdateStatusBadge status={updateStatus} small />}
+            {!isClosedStatus && <UpdateStatusBadge status={clientCommStatus} small />}
             {hasBackorder && (
               <span className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-red-100 text-red-700 text-[10px] font-medium">
                 <Package className="w-2.5 h-2.5" />BO
@@ -653,8 +678,9 @@ export default function ClaimsPage() {
                   {userCardFields.map(fieldId => (
                     <th key={fieldId} className="px-4 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap">{CARD_FIELD_CONFIG[fieldId]?.label || fieldId}</th>
                   ))}
-                  <th className="px-4 py-2 text-center text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap">48 Hour Update</th>
-                  <th className="sticky right-[96px] z-20 bg-white dark:bg-gray-900 px-4 py-2 text-center text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap">Status</th>
+                  <th className="sticky right-[392px] z-20 bg-white dark:bg-gray-900 px-2 py-2 text-center text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap w-[96px] min-w-[96px]">48 Hour Update</th>
+                  <th className="sticky right-[296px] z-20 bg-white dark:bg-gray-900 px-2 py-2 text-center text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap w-[96px] min-w-[96px]">Client Comms</th>
+                  <th className="sticky right-[96px] z-20 bg-white dark:bg-gray-900 px-3 py-2 text-center text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap w-[200px] min-w-[200px]">Status</th>
                   <th className="sticky right-[48px] z-20 bg-white dark:bg-gray-900 px-2 py-2 text-center text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap w-[48px] min-w-[48px]">Updates</th>
                   <th className="sticky right-0 z-20 bg-white dark:bg-gray-900 px-2 py-2 text-center text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap w-[48px] min-w-[48px]">Info</th>
                 </tr>
@@ -672,7 +698,7 @@ export default function ClaimsPage() {
                         className="bg-gray-50 dark:bg-gray-800/60 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-800"
                         onClick={() => toggleGroup(statusGroup)}
                       >
-                        <td colSpan={userCardFields.length + 5} className="px-4 py-2">
+                        <td colSpan={userCardFields.length + 6} className="px-4 py-2">
                           <div className="flex items-center gap-2">
                             {isCollapsed ? <ChevronRight className="w-3.5 h-3.5 text-gray-400" /> : <ChevronDown className="w-3.5 h-3.5 text-gray-400" />}
                             <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: dotColor }} />
@@ -693,7 +719,7 @@ export default function ClaimsPage() {
                   return (
                     <React.Fragment>
                       <tr className="bg-gray-50 dark:bg-gray-800/60 cursor-pointer select-none" onClick={() => toggleGroup('__other__')}>
-                        <td colSpan={userCardFields.length + 5} className="px-4 py-2">
+                        <td colSpan={userCardFields.length + 6} className="px-4 py-2">
                           <div className="flex items-center gap-2">
                             {isCollapsed ? <ChevronRight className="w-3.5 h-3.5 text-gray-400" /> : <ChevronDown className="w-3.5 h-3.5 text-gray-400" />}
                             <span className="w-2 h-2 rounded-full bg-gray-400 flex-shrink-0" />

@@ -51,6 +51,7 @@ export default function ClaimUpdateForm({
 
   const createUpdateMutation = useMutation({
     mutationFn: async (updateData) => {
+      let created;
       if (updateData.update_type === 'Status Change') {
         const claimUpdate = buildStatusChangeClaimUpdate(claim, {
           journey: updateData.new_journey, secondary: updateData.new_secondary_status, tertiary: updateData.new_tertiary_status
@@ -58,14 +59,30 @@ export default function ClaimUpdateForm({
         if (Object.keys(claimUpdate).length > 0) {
           await base44.entities.Claim.update(claimId, claimUpdate);
         }
-        return await base44.entities.ClaimUpdate.create({
+        created = await base44.entities.ClaimUpdate.create({
           update_type: 'Status Change', description: updateData.description, next_steps: updateData.next_steps,
           due_date_for_next_action: updateData.due_date_for_next_action, claim_id: claimId,
           parent_update_id: updateData.parent_update_id, tagged_user_ids: updateData.tagged_user_ids,
           ...(currentUser?.company_id && { company_id: currentUser.company_id })
         });
+      } else {
+        created = await base44.entities.ClaimUpdate.create({ ...updateData, claim_id: claimId, ...(currentUser?.company_id && { company_id: currentUser.company_id }) });
       }
-      return await base44.entities.ClaimUpdate.create({ ...updateData, claim_id: claimId, ...(currentUser?.company_id && { company_id: currentUser.company_id }) });
+      // Client Communication updates reset the dedicated 48-hour client
+      // communication tracker (separate from the general update timer).
+      if (updateData.update_type === 'Client Communication') {
+        const now = new Date();
+        const closed = isClosedJourney(claim?.journey_status || claim?.job_status);
+        const commUpdate = closed
+          ? { client_comm_status_flag: 'Gray' }
+          : {
+              last_client_comm_at: now.toISOString(),
+              next_client_comm_due_at: new Date(now.getTime() + 48 * 60 * 60 * 1000).toISOString(),
+              client_comm_status_flag: 'Green',
+            };
+        await base44.entities.Claim.update(claimId, commUpdate);
+      }
+      return created;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['claimUpdates', claimId] });

@@ -655,6 +655,28 @@
       ],
       "default": "Green"
     },
+    "last_client_comm_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the last Client Communication update was logged"
+    },
+    "next_client_comm_due_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the next Client Communication update is due (48h after last)"
+    },
+    "client_comm_status_flag": {
+      "type": "string",
+      "enum": [
+        "Green",
+        "Amber",
+        "Red",
+        "Blue",
+        "Gray"
+      ],
+      "default": "Green",
+      "description": "Client communication 48h tracking flag"
+    },
     "override_active": {
       "type": "boolean",
       "default": false
