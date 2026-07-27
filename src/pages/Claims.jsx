@@ -379,7 +379,7 @@ export default function ClaimsPage() {
           const val = cfg ? cfg.render(claim) : '—';
           const w = colWidth(fieldId);
           return (
-            <td key={fieldId} title={typeof val === 'string' ? val : undefined} style={{ width: `${w}px`, minWidth: `${w}px`, maxWidth: `${w}px` }} className="px-2 py-2.5 text-gray-600 dark:text-gray-400 whitespace-nowrap overflow-hidden text-ellipsis">
+            <td key={fieldId} title={typeof val === 'string' ? val : undefined} style={{ minWidth: `${w}px` }} className="px-2 py-2.5 text-gray-600 dark:text-gray-400 whitespace-nowrap overflow-hidden text-ellipsis">
               {val}
             </td>
           );
@@ -691,7 +691,7 @@ export default function ClaimsPage() {
             </div>
 
             {/* ── DESKTOP table (≥ lg) ── */}
-            <table className="hidden lg:table" style={{ tableLayout: 'fixed', width: `${TABLE_WIDTH}px`, minWidth: `${TABLE_WIDTH}px` }}>
+            <table className="hidden lg:table w-full" style={{ minWidth: `${TABLE_WIDTH}px` }}>
               <thead className="sticky top-0 bg-white dark:bg-gray-900 z-10">
                 <tr className="border-b border-gray-200 dark:border-gray-700">
                   <th title="Reg" style={{ width: `${REG_W}px`, minWidth: `${REG_W}px`, maxWidth: `${REG_W}px`, verticalAlign: 'bottom' }} className="sticky left-0 z-20 bg-white dark:bg-gray-900 px-2 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap overflow-hidden text-ellipsis">Reg</th>
@@ -699,7 +699,7 @@ export default function ClaimsPage() {
                     const w = colWidth(fieldId);
                     const label = CARD_FIELD_CONFIG[fieldId]?.label || fieldId;
                     return (
-                      <th key={fieldId} title={label} style={{ width: `${w}px`, minWidth: `${w}px`, maxWidth: `${w}px`, verticalAlign: 'bottom' }} className="px-2 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap overflow-hidden text-ellipsis">{label}</th>
+                      <th key={fieldId} title={label} style={{ minWidth: `${w}px`, verticalAlign: 'bottom' }} className="px-2 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap overflow-hidden text-ellipsis">{label}</th>
                     );
                   })}
                   <th title="Case Update 48hrs" style={{ width: `${CASE_W}px`, minWidth: `${CASE_W}px`, maxWidth: `${CASE_W}px`, verticalAlign: 'bottom' }} className="sticky right-[369px] z-20 bg-white dark:bg-gray-900 px-2 py-2 text-center text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-normal leading-[1.15]">
