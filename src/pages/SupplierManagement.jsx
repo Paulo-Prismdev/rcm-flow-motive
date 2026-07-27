@@ -160,7 +160,7 @@ export default function SupplierManagement() {
   });
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 h-full overflow-y-auto">
       <AddSupplierModal
         isOpen={isAddModalOpen}
         onClose={handleModalClose}
