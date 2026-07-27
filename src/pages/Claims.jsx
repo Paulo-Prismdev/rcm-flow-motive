@@ -678,8 +678,8 @@ export default function ClaimsPage() {
                   {userCardFields.map(fieldId => (
                     <th key={fieldId} className="px-4 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap">{CARD_FIELD_CONFIG[fieldId]?.label || fieldId}</th>
                   ))}
-                  <th className="sticky right-[392px] z-20 bg-white dark:bg-gray-900 px-2 py-2 text-center text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap w-[96px] min-w-[96px]">48 Hour Update</th>
-                  <th className="sticky right-[296px] z-20 bg-white dark:bg-gray-900 px-2 py-2 text-center text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap w-[96px] min-w-[96px]">Client Comms</th>
+                  <th className="sticky right-[392px] z-20 bg-white dark:bg-gray-900 px-2 py-2 text-center text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap w-[96px] min-w-[96px]">Case Update 48hrs</th>
+                  <th className="sticky right-[296px] z-20 bg-white dark:bg-gray-900 px-2 py-2 text-center text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap w-[96px] min-w-[96px]">Client Update 48hrs</th>
                   <th className="sticky right-[96px] z-20 bg-white dark:bg-gray-900 px-3 py-2 text-center text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap w-[200px] min-w-[200px]">Status</th>
                   <th className="sticky right-[48px] z-20 bg-white dark:bg-gray-900 px-2 py-2 text-center text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap w-[48px] min-w-[48px]">Updates</th>
                   <th className="sticky right-0 z-20 bg-white dark:bg-gray-900 px-2 py-2 text-center text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap w-[48px] min-w-[48px]">Info</th>
