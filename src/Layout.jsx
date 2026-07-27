@@ -22,7 +22,9 @@ import {
   Plus,
   ChevronRight,
   Shield,
-  Building2 } from
+  Building2,
+  PanelLeftClose,
+  PanelLeftOpen } from
 "lucide-react";
 import GlobalSearch from "./components/layout/GlobalSearch";
 import Notifications from "./components/layout/Notifications";
@@ -66,6 +68,7 @@ export default function Layout({ children, currentPageName }) {
   const [messagesOpen, setMessagesOpen] = useState(false);
   const [claimDetailOpen, setClaimDetailOpen] = useState(false);
   const [directoriesOpen, setDirectoriesOpen] = useState(false);
+  const [desktopSidebarOpen, setDesktopSidebarOpen] = useState(true);
 
   useEffect(() => {
     const observer = new MutationObserver(() => {
@@ -169,8 +172,9 @@ export default function Layout({ children, currentPageName }) {
           w-56 bg-[#131d47] text-white
           transition-transform duration-300
           ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
-          md:relative md:translate-x-0 md:flex-shrink-0 md:w-12
-          lg:w-56
+          ${desktopSidebarOpen
+            ? 'md:relative md:translate-x-0 md:flex-shrink-0 md:w-12 lg:w-56'
+            : 'md:-translate-x-full'}
         `}>
           {/* Logo */}
           <div className="flex items-center gap-3 px-4 py-3.5 border-b border-white/10 md:justify-center lg:justify-start">
@@ -180,6 +184,12 @@ export default function Layout({ children, currentPageName }) {
               onClick={() => setMobileMenuOpen(false)}
               className="ml-auto md:hidden text-white/60 hover:text-white">
               <X className="w-5 h-5" />
+            </button>
+            <button
+              onClick={() => setDesktopSidebarOpen(false)}
+              className="ml-auto hidden md:flex items-center justify-center w-7 h-7 rounded-md text-white/50 hover:text-white hover:bg-white/10 transition-colors"
+              title="Hide sidebar">
+              <PanelLeftClose className="w-4 h-4" />
             </button>
           </div>
 
@@ -319,6 +329,16 @@ export default function Layout({ children, currentPageName }) {
           className="fixed inset-0 z-[9998] bg-black/50 md:hidden"
           onClick={() => setMobileMenuOpen(false)} />
         }
+
+        {/* Desktop sidebar restore button (shown when sidebar hidden) */}
+        {!desktopSidebarOpen && (
+          <button
+            onClick={() => setDesktopSidebarOpen(true)}
+            className="hidden md:flex fixed top-2 left-2 z-[9999] items-center justify-center w-8 h-8 rounded-md bg-[#131d47] text-white shadow-md hover:bg-[#1e2d4a] transition-colors"
+            title="Show sidebar">
+            <PanelLeftOpen className="w-4 h-4" />
+          </button>
+        )}
 
         {/* ── MAIN CONTENT ── */}
         <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
