@@ -42,8 +42,9 @@ const SECONDARY_STYLES = {
 };
 
 const PILL_BASE = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold whitespace-nowrap leading-none';
+const PILL_COMPACT = 'inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold leading-none max-w-full overflow-hidden text-ellipsis whitespace-nowrap';
 
-export default function StatusBadge({ status, variant = "primary" }) {
+export default function StatusBadge({ status, variant = "primary", compact = false }) {
   const { allStatuses, isLoading } = useStatusConfigs();
 
   const getColor = (statusName) => {
@@ -87,16 +88,19 @@ export default function StatusBadge({ status, variant = "primary" }) {
     );
   }
 
+  const base = compact ? PILL_COMPACT : PILL_BASE;
+  const title = compact && typeof status === 'string' ? status : undefined;
+
   if (variant === 'secondary') {
     return (
-      <span className={`${PILL_BASE} bg-transparent ${SECONDARY_STYLES[getColor(status)] || SECONDARY_STYLES.gray}`}>
+      <span className={`${base} bg-transparent ${SECONDARY_STYLES[getColor(status)] || SECONDARY_STYLES.gray}`} title={title}>
         {status}
       </span>
     );
   }
 
   return (
-    <span className={`${PILL_BASE} ${COLOR_STYLES[getColor(status)] || COLOR_STYLES.gray}`}>
+    <span className={`${base} ${COLOR_STYLES[getColor(status)] || COLOR_STYLES.gray}`} title={title}>
       {status}
     </span>
   );

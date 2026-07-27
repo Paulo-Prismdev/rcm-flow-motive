@@ -18,6 +18,23 @@ import { useStatusConfigs } from '../components/shared/StatusConfigContext';
 import { SECONDARY_STATUSES, getJourneyColor, isExceptionJourney } from '@/components/shared/claimStatusV2';
 import { isClosedJourney } from '@/components/shared/claimStatusUpdate';
 
+// ── Repairs table — fixed column widths (global config) ──
+// Every column has a fixed width (min = max) so the table never recomputes
+// column sizes based on cell content. Sticky right-column offsets are derived
+// from these constants so they stay in sync if widths change.
+const COL_WIDTHS = {
+  client_name: 150, make_model: 150, loss_date: 100, referrer: 140,
+  claim_type: 120, insurer: 130, bodyshop: 140, driver_contact_name: 130,
+  booking_in_date: 110, ecd: 100, authority_cost_gross: 110, final_repair_cost: 110,
+  claim_ref: 120, policy_number: 120, client_phone: 120, business_division: 120,
+  vehicle_location: 150, documents: 90, vehicle_damage: 160, referrer_ref: 120,
+  client_ref: 120,
+};
+const DEFAULT_COL_WIDTH = 130;
+const colWidth = (id) => COL_WIDTHS[id] || DEFAULT_COL_WIDTH;
+const REG_W = 112;
+const CASE_W = 150, CLIENT_W = 150, STATUS_W = 160, UPDATES_W = 52, INFO_W = 52;
+
 // Status dot colour map
 const STATUS_COLORS = {
   blue: '#3b82f6', green: '#22c55e', orange: '#f97316',
@@ -110,6 +127,7 @@ export default function ClaimsPage() {
   const MANDATORY_FIELDS = ['client_name', 'make_model', 'loss_date', 'referrer'];
   const savedFields = currentUser?.claim_card_fields || [];
   const userCardFields = [...MANDATORY_FIELDS, ...savedFields.filter(f => !MANDATORY_FIELDS.includes(f))];
+  const TABLE_WIDTH = REG_W + userCardFields.reduce((s, id) => s + colWidth(id), 0) + CASE_W + CLIENT_W + STATUS_W + UPDATES_W + INFO_W;
 
   const updateUserFieldsMutation = useMutation({
     mutationFn: (fields) => base44.auth.updateMe({ claim_card_fields: fields }),
@@ -347,7 +365,7 @@ export default function ClaimsPage() {
         }`}
       >
         {/* Sticky left: Reg */}
-        <td className={`sticky left-0 z-10 px-4 py-2.5 whitespace-nowrap ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-white dark:bg-gray-900 group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50'}`}>
+        <td style={{ width: `${REG_W}px`, minWidth: `${REG_W}px`, maxWidth: `${REG_W}px` }} className={`sticky left-0 z-10 px-2 py-2.5 whitespace-nowrap ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-white dark:bg-gray-900 group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50'}`}>
           <span
             className="inline-flex items-center justify-center rounded-md bg-[#1e2d4a] text-white font-semibold uppercase"
             style={{ fontSize: '13px', width: '96px', height: '28px', letterSpacing: '0.05em' }}
@@ -358,40 +376,42 @@ export default function ClaimsPage() {
         {/* Scrollable columns — dynamic based on user's customised fields */}
         {userCardFields.map(fieldId => {
           const cfg = CARD_FIELD_CONFIG[fieldId];
+          const val = cfg ? cfg.render(claim) : '—';
+          const w = colWidth(fieldId);
           return (
-            <td key={fieldId} className="px-4 py-2.5 text-gray-600 dark:text-gray-400 whitespace-nowrap max-w-[160px] truncate">
-              {cfg ? cfg.render(claim) : '—'}
+            <td key={fieldId} title={typeof val === 'string' ? val : undefined} style={{ width: `${w}px`, minWidth: `${w}px`, maxWidth: `${w}px` }} className="px-2 py-2.5 text-gray-600 dark:text-gray-400 whitespace-nowrap overflow-hidden text-ellipsis">
+              {val}
             </td>
           );
         })}
-        {/* Sticky right: 48 Hour Update badge */}
-        <td className={`sticky right-[392px] z-10 w-[96px] min-w-[96px] px-2 py-2.5 whitespace-nowrap text-center ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-white dark:bg-gray-900 group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50'}`}>
+        {/* Sticky right: Case Update 48hrs badge */}
+        <td style={{ width: `${CASE_W}px`, minWidth: `${CASE_W}px`, maxWidth: `${CASE_W}px` }} className={`sticky right-[414px] z-10 px-2 py-2.5 whitespace-nowrap text-center ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-white dark:bg-gray-900 group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50'}`}>
           <UpdateStatusBadge status={updateStatus} small />
         </td>
-        {/* Sticky right: Client Communication badge */}
-        <td className={`sticky right-[296px] z-10 w-[96px] min-w-[96px] px-2 py-2.5 whitespace-nowrap text-center ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-white dark:bg-gray-900 group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50'}`}>
+        {/* Sticky right: Client Update 48hrs badge */}
+        <td style={{ width: `${CLIENT_W}px`, minWidth: `${CLIENT_W}px`, maxWidth: `${CLIENT_W}px` }} className={`sticky right-[264px] z-10 px-2 py-2.5 whitespace-nowrap text-center ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-white dark:bg-gray-900 group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50'}`}>
           <UpdateStatusBadge status={clientCommStatus} small />
         </td>
         {/* Sticky right: Status + alerts */}
-        <td className={`sticky right-[96px] z-10 w-[200px] min-w-[200px] px-3 py-2.5 whitespace-nowrap ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-white dark:bg-gray-900 group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50'}`}>
-          <div className="flex items-center gap-1.5 justify-center flex-wrap">
+        <td style={{ width: `${STATUS_W}px`, minWidth: `${STATUS_W}px`, maxWidth: `${STATUS_W}px` }} className={`sticky right-[104px] z-10 px-2 py-2.5 whitespace-nowrap ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-white dark:bg-gray-900 group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50'}`}>
+          <div className="flex items-center justify-center gap-1 flex-wrap min-h-[42px]">
             {isDraft && (
-              <span className="px-2 py-1 rounded-md bg-yellow-100 text-yellow-700 text-[10px] font-medium">
+              <span className="px-1.5 py-0.5 rounded-md bg-yellow-100 text-yellow-700 text-[10px] font-medium leading-none">
                 Draft
               </span>
             )}
-            {isException && <StatusBadge status={journeyStatus} />}
-            {claim.secondary_status && <StatusBadge status={claim.secondary_status} />}
-            {claim.tertiary_status && <StatusBadge status={claim.tertiary_status} variant="secondary" />}
+            {isException && <StatusBadge status={journeyStatus} compact />}
+            {claim.secondary_status && <StatusBadge status={claim.secondary_status} compact />}
+            {claim.tertiary_status && <StatusBadge status={claim.tertiary_status} variant="secondary" compact />}
             {hasBackorder && (
-              <span className="flex items-center gap-0.5 px-2 py-1 rounded-md bg-red-500 text-white text-[10px] font-semibold shadow-sm">
-                <Package className="w-3 h-3" />BO
+              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-red-500 text-white text-[10px] font-semibold leading-none shadow-sm">
+                <Package className="w-2.5 h-2.5" />BO
               </span>
             )}
           </div>
         </td>
         {/* Sticky right: Updates quick view */}
-        <td className={`sticky right-[48px] z-10 w-[48px] min-w-[48px] px-2 py-2.5 whitespace-nowrap text-center ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-white dark:bg-gray-900 group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50'}`}>
+        <td style={{ width: `${UPDATES_W}px`, minWidth: `${UPDATES_W}px`, maxWidth: `${UPDATES_W}px` }} className={`sticky right-[52px] z-10 px-2 py-2.5 whitespace-nowrap text-center ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-white dark:bg-gray-900 group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50'}`}>
           <button
             onClick={(e) => { e.stopPropagation(); setQuickViewClaim(claim); }}
             className="p-1.5 rounded-md text-gray-400 hover:text-primary hover:bg-primary/10 transition-colors"
@@ -401,7 +421,7 @@ export default function ClaimsPage() {
           </button>
         </td>
         {/* Sticky right-end: Quick info view */}
-        <td className={`sticky right-0 z-10 w-[48px] min-w-[48px] px-2 py-2.5 whitespace-nowrap text-center ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-white dark:bg-gray-900 group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50'}`}>
+        <td style={{ width: `${INFO_W}px`, minWidth: `${INFO_W}px`, maxWidth: `${INFO_W}px` }} className={`sticky right-0 z-10 px-2 py-2.5 whitespace-nowrap text-center ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-white dark:bg-gray-900 group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50'}`}>
           <button
             onClick={(e) => { e.stopPropagation(); setQuickInfoClaim(claim); }}
             className="p-1.5 rounded-md text-gray-400 hover:text-primary hover:bg-primary/10 transition-colors"
@@ -671,18 +691,22 @@ export default function ClaimsPage() {
             </div>
 
             {/* ── DESKTOP table (≥ lg) ── */}
-            <table className="hidden lg:table w-full min-w-[700px]">
+            <table className="hidden lg:table" style={{ tableLayout: 'fixed', width: `${TABLE_WIDTH}px`, minWidth: `${TABLE_WIDTH}px` }}>
               <thead className="sticky top-0 bg-white dark:bg-gray-900 z-10">
                 <tr className="border-b border-gray-200 dark:border-gray-700">
-                  <th className="sticky left-0 z-20 bg-white dark:bg-gray-900 px-4 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap">Reg</th>
-                  {userCardFields.map(fieldId => (
-                    <th key={fieldId} className="px-4 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap">{CARD_FIELD_CONFIG[fieldId]?.label || fieldId}</th>
-                  ))}
-                  <th className="sticky right-[392px] z-20 bg-white dark:bg-gray-900 px-2 py-2 text-center text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap w-[96px] min-w-[96px]">Case Update 48hrs</th>
-                  <th className="sticky right-[296px] z-20 bg-white dark:bg-gray-900 px-2 py-2 text-center text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap w-[96px] min-w-[96px]">Client Update 48hrs</th>
-                  <th className="sticky right-[96px] z-20 bg-white dark:bg-gray-900 px-3 py-2 text-center text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap w-[200px] min-w-[200px]">Status</th>
-                  <th className="sticky right-[48px] z-20 bg-white dark:bg-gray-900 px-2 py-2 text-center text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap w-[48px] min-w-[48px]">Updates</th>
-                  <th className="sticky right-0 z-20 bg-white dark:bg-gray-900 px-2 py-2 text-center text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap w-[48px] min-w-[48px]">Info</th>
+                  <th title="Reg" style={{ width: `${REG_W}px`, minWidth: `${REG_W}px`, maxWidth: `${REG_W}px` }} className="sticky left-0 z-20 bg-white dark:bg-gray-900 px-2 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap overflow-hidden text-ellipsis">Reg</th>
+                  {userCardFields.map(fieldId => {
+                    const w = colWidth(fieldId);
+                    const label = CARD_FIELD_CONFIG[fieldId]?.label || fieldId;
+                    return (
+                      <th key={fieldId} title={label} style={{ width: `${w}px`, minWidth: `${w}px`, maxWidth: `${w}px` }} className="px-2 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap overflow-hidden text-ellipsis">{label}</th>
+                    );
+                  })}
+                  <th title="Case Update 48hrs" style={{ width: `${CASE_W}px`, minWidth: `${CASE_W}px`, maxWidth: `${CASE_W}px` }} className="sticky right-[414px] z-20 bg-white dark:bg-gray-900 px-2 py-2 text-center text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap overflow-hidden text-ellipsis">Case Update 48hrs</th>
+                  <th title="Client Update 48hrs" style={{ width: `${CLIENT_W}px`, minWidth: `${CLIENT_W}px`, maxWidth: `${CLIENT_W}px` }} className="sticky right-[264px] z-20 bg-white dark:bg-gray-900 px-2 py-2 text-center text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap overflow-hidden text-ellipsis">Client Update 48hrs</th>
+                  <th title="Status" style={{ width: `${STATUS_W}px`, minWidth: `${STATUS_W}px`, maxWidth: `${STATUS_W}px` }} className="sticky right-[104px] z-20 bg-white dark:bg-gray-900 px-2 py-2 text-center text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap overflow-hidden text-ellipsis">Status</th>
+                  <th title="Updates" style={{ width: `${UPDATES_W}px`, minWidth: `${UPDATES_W}px`, maxWidth: `${UPDATES_W}px` }} className="sticky right-[52px] z-20 bg-white dark:bg-gray-900 px-2 py-2 text-center text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap overflow-hidden text-ellipsis">Updates</th>
+                  <th title="Info" style={{ width: `${INFO_W}px`, minWidth: `${INFO_W}px`, maxWidth: `${INFO_W}px` }} className="sticky right-0 z-20 bg-white dark:bg-gray-900 px-2 py-2 text-center text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap overflow-hidden text-ellipsis">Info</th>
                 </tr>
               </thead>
               <tbody>
