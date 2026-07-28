@@ -13,6 +13,8 @@ import {
 import { format } from 'date-fns';
 import StatusBadge from '../components/shared/StatusBadge';
 import { formatUKRegistration } from '../components/shared/formatRegistration';
+import { getGroupKey, GROUP_STATUSES, getStatusDot as getSharedStatusDot } from '../components/shared/claimGrouping';
+import ClaimStatusBadges from '../components/shared/ClaimStatusBadges';
 import ReferrerLayout from '../components/referrer/ReferrerLayout';
 import ReferrerClaimDetail from '../components/referrer/ReferrerClaimDetail';
 import ReferrerDashboard from '../components/referrer/ReferrerDashboard';
@@ -92,13 +94,7 @@ export default function ReferrerPortal() {
     staleTime: 5 * 60 * 1000,
   });
 
-  const availableStatuses = useMemo(() => {
-    const active = customStatuses
-      .filter(s => s.is_active !== false)
-      .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
-      .map(s => s.status_name);
-    return active.includes('New') ? active : ['New', ...active];
-  }, [customStatuses]);
+  const availableStatuses = GROUP_STATUSES;
 
   useEffect(() => {
     if (availableStatuses.length > 0) {
@@ -137,7 +133,7 @@ export default function ReferrerPortal() {
       c.insurer?.toLowerCase().includes(q) ||
       c.business_division?.toLowerCase().includes(q) ||
       c.driver_contact_name?.toLowerCase().includes(q);
-    const matchesStatus = statusFilter === 'all' || (c.job_status || 'New') === statusFilter;
+    const matchesStatus = statusFilter === 'all' || getGroupKey(c) === statusFilter;
     const matchesInsurer = !insurerFilter || c.insurer === insurerFilter;
     const matchesClaimType = !claimTypeFilter || c.claim_type === claimTypeFilter;
     const matchesBusinessDivision = !businessDivisionFilter || c.business_division === businessDivisionFilter;
@@ -193,11 +189,7 @@ export default function ReferrerPortal() {
 
   // Claims list view
 
-  const getStatusDot = (statusName) => {
-    const cfg = customStatuses?.find(s => s.status_name === statusName);
-    const colors = { blue: '#3b82f6', green: '#22c55e', orange: '#f97316', red: '#ef4444', purple: '#a855f7', yellow: '#eab308', gray: '#6b7280' };
-    return colors[cfg?.color] || '#6b7280';
-  };
+  const getStatusDot = (statusName) => getSharedStatusDot(statusName, customStatuses);
 
   const toggleGroup = (status) => setCollapsedGroups(p => ({ ...p, [status]: !p[status] }));
 
@@ -368,7 +360,7 @@ export default function ReferrerPortal() {
                   {/* Mobile card view with grouping */}
                   <div className="lg:hidden">
                     {availableStatuses.map(statusGroup => {
-                      const claimsInGroup = filteredClaims.filter(c => (c.job_status || 'New') === statusGroup);
+                      const claimsInGroup = filteredClaims.filter(c => getGroupKey(c) === statusGroup);
                       if (claimsInGroup.length === 0) return null;
                       const isCollapsed = collapsedGroups[statusGroup];
                       const dotColor = getStatusDot(statusGroup);
@@ -384,7 +376,6 @@ export default function ReferrerPortal() {
                             <span className="text-xs text-gray-400 ml-1">{claimsInGroup.length}</span>
                           </div>
                           {!isCollapsed && claimsInGroup.map(claim => {
-                            const isClosedStatus = ['Completed', 'Cancelled', 'Total Loss'].includes(claim.job_status);
                             return (
                               <div
                                 key={claim.id}
@@ -399,8 +390,7 @@ export default function ReferrerPortal() {
                                     {claim.reg ? formatUKRegistration(claim.reg) : '—'}
                                   </span>
                                   <div className="flex items-center gap-1 flex-shrink-0">
-                                    {!isClosedStatus && <StatusBadge status={claim.job_status} />}
-                                    {claim.secondary_status && <StatusBadge status={claim.secondary_status} variant="secondary" />}
+                                    <ClaimStatusBadges claim={claim} />
                                     <ChevronRight className="w-4 h-4 text-gray-400 ml-1" />
                                   </div>
                                 </div>
@@ -419,7 +409,7 @@ export default function ReferrerPortal() {
                     {(() => {
                       const known = new Set(availableStatuses);
                       const ungrouped = filteredClaims.filter(c => {
-                        const st = c.job_status || 'New';
+                        const st = getGroupKey(c);
                         return !known.has(st);
                       });
                       if (ungrouped.length === 0) return null;
@@ -439,8 +429,7 @@ export default function ReferrerPortal() {
                                   {claim.reg ? formatUKRegistration(claim.reg) : '—'}
                                 </span>
                                 <div className="flex items-center gap-1 flex-shrink-0">
-                                  {!['Completed', 'Cancelled', 'Total Loss'].includes(claim.job_status) && <StatusBadge status={claim.job_status} />}
-                                  {claim.secondary_status && <StatusBadge status={claim.secondary_status} variant="secondary" />}
+                                  <ClaimStatusBadges claim={claim} />
                                   <ChevronRight className="w-4 h-4 text-gray-400 ml-1" />
                                 </div>
                               </div>
@@ -471,7 +460,7 @@ export default function ReferrerPortal() {
                     </thead>
                     <tbody>
                       {availableStatuses.map(statusGroup => {
-                        const claimsInGroup = filteredClaims.filter(c => (c.job_status || 'New') === statusGroup);
+                        const claimsInGroup = filteredClaims.filter(c => getGroupKey(c) === statusGroup);
                         if (claimsInGroup.length === 0) return null;
                         const isCollapsed = collapsedGroups[statusGroup];
                         const dotColor = getStatusDot(statusGroup);
@@ -492,7 +481,6 @@ export default function ReferrerPortal() {
                               </td>
                             </tr>
                             {!isCollapsed && claimsInGroup.map(claim => {
-                              const isClosedStatus = ['Completed', 'Cancelled', 'Total Loss'].includes(claim.job_status);
                               return (
                                 <tr
                                   key={claim.id}
@@ -514,8 +502,7 @@ export default function ReferrerPortal() {
                                   ))}
                                   <td className="sticky right-0 z-10 px-3 py-2.5 whitespace-nowrap bg-white dark:bg-gray-900 group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50">
                                     <div className="flex items-center gap-1.5 justify-end flex-wrap">
-                                      {claim.secondary_status && <StatusBadge status={claim.secondary_status} variant="secondary" />}
-                                      {!isClosedStatus && <StatusBadge status={claim.job_status} />}
+                                      <ClaimStatusBadges claim={claim} />
                                     </div>
                                   </td>
                                 </tr>
@@ -526,7 +513,7 @@ export default function ReferrerPortal() {
                       })}
                       {(() => {
                         const known = new Set(availableStatuses);
-                        const ungrouped = filteredClaims.filter(c => !known.has(c.job_status || 'New'));
+                        const ungrouped = filteredClaims.filter(c => !known.has(getGroupKey(c)));
                         if (ungrouped.length === 0) return null;
                         const isCollapsed = collapsedGroups['__other__'];
                         const colSpan = displayFields.length + 2;
@@ -556,8 +543,7 @@ export default function ReferrerPortal() {
                                 ))}
                                 <td className="sticky right-0 z-10 px-3 py-2.5 whitespace-nowrap bg-white dark:bg-gray-900 group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50">
                                   <div className="flex items-center gap-1.5 justify-end flex-wrap">
-                                    {claim.secondary_status && <StatusBadge status={claim.secondary_status} variant="secondary" />}
-                                    {!['Completed', 'Cancelled', 'Total Loss'].includes(claim.job_status) && <StatusBadge status={claim.job_status} />}
+                                    <ClaimStatusBadges claim={claim} />
                                   </div>
                                 </td>
                               </tr>

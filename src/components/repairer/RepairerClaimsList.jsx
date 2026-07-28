@@ -4,6 +4,7 @@ import { format } from 'date-fns';
 import { base44 } from '@/api/base44Client';
 import { formatUKRegistration } from '@/components/shared/formatRegistration';
 import StatusBadge from '@/components/shared/StatusBadge';
+import ClaimStatusBadges from '@/components/shared/ClaimStatusBadges';
 import ClaimCardFieldsModal from '@/components/claims/ClaimCardFieldsModal';
 import { Settings2, FileText, ChevronRight, Filter, X } from 'lucide-react';
 import ClaimTypeTabs from '@/components/shared/ClaimTypeTabs';
@@ -250,8 +251,7 @@ export default function RepairerClaimsList({ claims, onViewClaim }) {
                 ))}
                 <td className="px-3 py-2.5 whitespace-nowrap">
                   <div className="flex items-center gap-1.5 flex-wrap">
-                    {claim.secondary_status && <StatusBadge status={claim.secondary_status} variant="secondary" />}
-                    <StatusBadge status={claim.job_status} />
+                    <ClaimStatusBadges claim={claim} />
                   </div>
                 </td>
               </tr>
@@ -278,8 +278,7 @@ export default function RepairerClaimsList({ claims, onViewClaim }) {
                       {claim.job_number}
                     </span>
                   )}
-                  <StatusBadge status={claim.job_status} />
-                  {claim.secondary_status && <StatusBadge status={claim.secondary_status} variant="secondary" />}
+                  <ClaimStatusBadges claim={claim} />
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-sm">
                   {displayFields.map(fieldId => (
