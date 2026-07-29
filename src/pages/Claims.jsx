@@ -362,7 +362,7 @@ export default function ClaimsPage() {
   }
 
   // The claims table row (desktop)
-  const renderRow = (claim) => {
+  const renderRow = (claim, indented = false) => {
     const updateStatus = calculateUpdateStatus(claim);
     const clientCommStatus = calculateClientCommStatus(claim);
     const isSelected = selectedClaim?.id === claim.id;
@@ -377,6 +377,8 @@ export default function ClaimsPage() {
         key={claim.id}
         onClick={() => setSelectedClaim(claim)}
         className={`group border-b border-gray-100 dark:border-gray-800 cursor-pointer transition-colors text-sm ${
+          indented ? 'border-l-4 border-l-gray-200 dark:border-l-gray-700 ' : ''
+        }${
           isSelected
             ? 'bg-blue-50 dark:bg-blue-900/20'
             : 'hover:bg-gray-50 dark:hover:bg-gray-800/50'
@@ -690,12 +692,12 @@ export default function ClaimsPage() {
                             <span className="text-xs text-gray-400 font-normal">{subClaims.length}</span>
                           </div>
                         )}
-                        {subClaims.map(renderMobileCard)}
-                      </React.Fragment>
-                    ))}
-                    </React.Fragment>
-                    );
-                    })}
+                        <div className="pl-6 border-l-2 border-gray-200 dark:border-gray-700 ml-4">{subClaims.map(renderMobileCard)}</div>
+                        </React.Fragment>
+                        ))}
+                        </React.Fragment>
+                        );
+                        })}
                     {(() => {
                     const known = new Set(availableStatuses);
                     const ungrouped = filteredClaims.filter(c => {
@@ -721,7 +723,7 @@ export default function ClaimsPage() {
                             <span className="text-xs text-gray-400 font-normal">{subClaims.length}</span>
                           </div>
                         )}
-                        {subClaims.map(renderMobileCard)}
+                        <div className="pl-6 border-l-2 border-gray-200 dark:border-gray-700 ml-4">{subClaims.map(renderMobileCard)}</div>
                       </React.Fragment>
                     ))}
                     </React.Fragment>
@@ -793,7 +795,7 @@ export default function ClaimsPage() {
                               </td>
                             </tr>
                           )}
-                          {subClaims.map(renderRow)}
+                          {subClaims.map(claim => renderRow(claim, true))}
                         </React.Fragment>
                       ))}
                     </React.Fragment>
@@ -829,7 +831,7 @@ export default function ClaimsPage() {
                               </td>
                             </tr>
                           )}
-                          {subClaims.map(renderRow)}
+                          {subClaims.map(claim => renderRow(claim, true))}
                         </React.Fragment>
                       ))}
                     </React.Fragment>
