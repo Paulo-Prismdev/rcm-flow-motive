@@ -88,16 +88,16 @@ export default function ClaimUpdateForm({
       }
       // Client Communication updates reset the dedicated 48-hour client
       // communication tracker (separate from the general update timer).
+      // Always set last_client_comm_at so the tracker is correct even if the
+      // claim is later reopened (status changed away from invoiced/cancelled).
       if (updateData.update_type === 'Client Communication') {
         const now = new Date();
         const closed = isUpdateTrackingClosed({ job_status: claim?.journey_status || claim?.job_status, invoice_status: claim?.invoice_status });
-        const commUpdate = closed
-          ? { client_comm_status_flag: 'Gray' }
-          : {
-              last_client_comm_at: now.toISOString(),
-              next_client_comm_due_at: new Date(now.getTime() + 48 * 60 * 60 * 1000).toISOString(),
-              client_comm_status_flag: 'Green',
-            };
+        const commUpdate = {
+          last_client_comm_at: now.toISOString(),
+          next_client_comm_due_at: new Date(now.getTime() + 48 * 60 * 60 * 1000).toISOString(),
+          client_comm_status_flag: closed ? 'Gray' : 'Green',
+        };
         await base44.entities.Claim.update(claimId, commUpdate);
       }
       return created;

@@ -269,8 +269,8 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
               currentStatus={currentStatus}
               replyToId={replyToId}
               onDirtyChange={setFormDirty}
-              onUpdateCreated={(newStatus, newSecondaryStatus, updateType) => {
-                if (onUpdateCreated) onUpdateCreated(newStatus, newSecondaryStatus, updateType);
+              onUpdateCreated={(newStatus, newSecondaryStatus, newTertiaryStatus, updateType) => {
+                if (onUpdateCreated) onUpdateCreated(newStatus, newSecondaryStatus, newTertiaryStatus, updateType);
                 resetForm();
               }}
               onCancel={() => { setReplyToId(null); setShowForm(false); }}
