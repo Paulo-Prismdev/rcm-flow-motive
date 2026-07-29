@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Button } from "@/components/ui/button";
@@ -23,6 +23,7 @@ export default function ClaimUpdateForm({
   replyToId = null,
   onUpdateCreated,
   onCancel,
+  onDirtyChange,
 }) {
   const queryClient = useQueryClient();
 
@@ -40,6 +41,23 @@ export default function ClaimUpdateForm({
   const [mentionPosition, setMentionPosition] = useState(null);
   const [showMentionPopup, setShowMentionPopup] = useState(false);
   const [showFollowUp, setShowFollowUp] = useState(false);
+
+  const isDirty =
+    !!newUpdate.description?.trim() ||
+    !!newUpdate.next_steps?.trim() ||
+    !!newUpdate.due_date_for_next_action ||
+    taggedUsers.length > 0 ||
+    selectedEmails.length > 0 ||
+    sendEmail ||
+    (newUpdate.update_type === 'Status Change' &&
+      (newUpdate.new_journey !== (claim?.journey_status || claim?.job_status || currentStatus || '') ||
+        (newUpdate.new_secondary_status || '') !== (claim?.secondary_status || '') ||
+        (newUpdate.new_tertiary_status || '') !== (claim?.tertiary_status || '')));
+
+  useEffect(() => {
+    if (onDirtyChange) onDirtyChange(isDirty);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isDirty]);
 
   const { data: currentUser } = useQuery({ queryKey: ['currentUser'], queryFn: () => base44.auth.me(), staleTime: 5 * 60 * 1000 });
   const { data: allUsers = [] } = useQuery({ queryKey: ['allUsers'], queryFn: () => base44.entities.User.list(), staleTime: 5 * 60 * 1000 });

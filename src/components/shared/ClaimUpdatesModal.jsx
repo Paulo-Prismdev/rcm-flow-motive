@@ -41,7 +41,24 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
   const [showMentionPopup, setShowMentionPopup] = useState(false);
   const [editingUpdateId, setEditingUpdateId] = useState(null);
   const [editDescription, setEditDescription] = useState('');
+  const [editDescriptionDirty, setEditDescriptionDirty] = useState(false);
+  const [formDirty, setFormDirty] = useState(false);
   const [showFollowUp, setShowFollowUp] = useState(false);
+
+  const hasUnsavedChanges = formDirty || (editingUpdateId !== null && editDescriptionDirty);
+
+  const handleOpenChange = (open) => {
+    if (!open && hasUnsavedChanges) {
+      if (!window.confirm('You have unsaved changes. Are you sure you want to close and lose your progress?')) {
+        return;
+      }
+    }
+    if (!open) {
+      setFormDirty(false);
+      setEditDescriptionDirty(false);
+    }
+    onClose(open);
+  };
 
   const queryClient = useQueryClient();
   const { data: currentUser } = useQuery({ queryKey: ['currentUser'], queryFn: () => base44.auth.me(), staleTime: 5 * 60 * 1000 });
@@ -104,6 +121,7 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
       queryClient.invalidateQueries({ queryKey: ['claimUpdates', claimId] });
       setEditingUpdateId(null);
       setEditDescription('');
+      setEditDescriptionDirty(false);
     },
     onError: (error) => setSubmitError(error?.message || 'Failed to update'),
   });
@@ -121,6 +139,7 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
   const handleEdit = (update) => {
     setEditingUpdateId(update.id);
     setEditDescription(update.description);
+    setEditDescriptionDirty(false);
   };
 
   const handleSaveEdit = async (updateId) => {
@@ -147,7 +166,7 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
 
   const resetForm = () => {
     setNewUpdate({ update_type: 'Other', description: '', next_steps: '', due_date_for_next_action: '', new_status: currentStatus || '', new_secondary_status: '' });
-    setSendEmail(false); setSelectedEmails([]); setShowForm(false); setReplyToId(null); setTaggedUsers([]); setSubmitError(''); setShowFollowUp(false);
+    setSendEmail(false); setSelectedEmails([]); setShowForm(false); setReplyToId(null); setTaggedUsers([]); setSubmitError(''); setShowFollowUp(false); setFormDirty(false);
   };
 
   const handleReply = (parentId) => {
@@ -229,7 +248,7 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
   }, {});
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2"><Clock className="w-5 h-5 text-primary" />Official Updates - Activity Log</DialogTitle>
@@ -249,6 +268,7 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
               claim={claim}
               currentStatus={currentStatus}
               replyToId={replyToId}
+              onDirtyChange={setFormDirty}
               onUpdateCreated={(newStatus, newSecondaryStatus, updateType) => {
                 if (onUpdateCreated) onUpdateCreated(newStatus, newSecondaryStatus, updateType);
                 resetForm();
@@ -280,9 +300,9 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
                       </div>
                       {editingUpdateId === update.id ? (
                         <div className="space-y-2 mb-2">
-                          <Textarea value={editDescription} onChange={(e) => setEditDescription(e.target.value)} className="px-3 py-2 text-sm bg-background border border-border h-24" />
+                          <Textarea value={editDescription} onChange={(e) => { setEditDescription(e.target.value); setEditDescriptionDirty(true); }} className="px-3 py-2 text-sm bg-background border border-border h-24" />
                           <div className="flex justify-end gap-2">
-                            <Button type="button" variant="outline" size="sm" onClick={() => { setEditingUpdateId(null); setEditDescription(''); }} className="text-xs">Cancel</Button>
+                            <Button type="button" variant="outline" size="sm" onClick={() => { setEditingUpdateId(null); setEditDescription(''); setEditDescriptionDirty(false); }} className="text-xs">Cancel</Button>
                             <Button type="button" size="sm" onClick={() => handleSaveEdit(update.id)} disabled={updateUpdateMutation.isPending || !editDescription.trim()} className="text-xs">{updateUpdateMutation.isPending ? 'Saving...' : 'Save'}</Button>
                           </div>
                         </div>
@@ -307,7 +327,7 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
                           <Button type="button" variant="ghost" size="sm" onClick={() => handleReply(update.id)} className="h-7 px-2 text-xs text-muted-foreground"><Reply className="w-3.5 h-3.5 sm:mr-1" /><span className="hidden sm:inline">Reply</span></Button>
                         </div>
                       </div>
-                      {replies.length > 0 && <div className="ml-6 mt-3 space-y-2 border-l-2 border-border pl-4">{replies.map(reply => { const replyIsLiked = reply.liked_by?.includes(currentUser?.id); const replyLikeCount = reply.liked_by?.length || 0; const replyEditing = editingUpdateId === reply.id; return (<div key={reply.id} className="bg-muted/30 border border-border rounded-lg p-3">{replyEditing ? (<div className="space-y-2"><Textarea value={editDescription} onChange={(e) => setEditDescription(e.target.value)} className="px-3 py-2 text-sm bg-background border border-border h-20" /><div className="flex justify-end gap-2"><Button type="button" variant="outline" size="sm" onClick={() => { setEditingUpdateId(null); setEditDescription(''); }} className="text-xs">Cancel</Button><Button type="button" size="sm" onClick={() => handleSaveEdit(reply.id)} disabled={updateUpdateMutation.isPending || !editDescription.trim()} className="text-xs">{updateUpdateMutation.isPending ? 'Saving...' : 'Save'}</Button></div></div>) : (<><div className="flex items-center justify-between mb-2"><div className="flex items-center gap-2"><span className="text-[10px] text-muted-foreground flex items-center gap-1"><User className="w-3 h-3" />{reply.created_by}</span><span className="text-[10px] text-muted-foreground flex items-center gap-1"><Calendar className="w-3 h-3" />{format(new Date(reply.created_date), 'dd/MM/yyyy HH:mm')}</span></div><div className="flex items-center gap-1">{canEditDelete(reply) && (<><Button type="button" variant="ghost" size="sm" onClick={() => handleEdit(reply)} className="h-5 px-1 text-xs text-muted-foreground"><Pencil className="w-3 h-3" /></Button><Button type="button" variant="ghost" size="sm" onClick={() => handleDelete(reply.id)} className="h-5 px-1 text-xs text-muted-foreground"><Trash2 className="w-3 h-3" /></Button></>)}<Button type="button" variant="ghost" size="sm" onClick={() => toggleLikeMutation.mutate({ updateId: reply.id, isLiked: replyIsLiked })} className={`h-5 px-1 text-xs ${replyIsLiked ? 'text-red-500' : 'text-muted-foreground'}`}><Heart className={`w-3 h-3 ${replyIsLiked ? 'fill-current' : ''}`} />{replyLikeCount > 0 && replyLikeCount}</Button></div></div>{reply.description && <p className="text-sm text-foreground whitespace-pre-wrap">{reply.description}</p>}</>)}</div>); })}</div>}
+                      {replies.length > 0 && <div className="ml-6 mt-3 space-y-2 border-l-2 border-border pl-4">{replies.map(reply => { const replyIsLiked = reply.liked_by?.includes(currentUser?.id); const replyLikeCount = reply.liked_by?.length || 0; const replyEditing = editingUpdateId === reply.id; return (<div key={reply.id} className="bg-muted/30 border border-border rounded-lg p-3">{replyEditing ? (<div className="space-y-2"><Textarea value={editDescription} onChange={(e) => { setEditDescription(e.target.value); setEditDescriptionDirty(true); }} className="px-3 py-2 text-sm bg-background border border-border h-20" /><div className="flex justify-end gap-2"><Button type="button" variant="outline" size="sm" onClick={() => { setEditingUpdateId(null); setEditDescription(''); setEditDescriptionDirty(false); }} className="text-xs">Cancel</Button><Button type="button" size="sm" onClick={() => handleSaveEdit(reply.id)} disabled={updateUpdateMutation.isPending || !editDescription.trim()} className="text-xs">{updateUpdateMutation.isPending ? 'Saving...' : 'Save'}</Button></div></div>) : (<><div className="flex items-center justify-between mb-2"><div className="flex items-center gap-2"><span className="text-[10px] text-muted-foreground flex items-center gap-1"><User className="w-3 h-3" />{reply.created_by}</span><span className="text-[10px] text-muted-foreground flex items-center gap-1"><Calendar className="w-3 h-3" />{format(new Date(reply.created_date), 'dd/MM/yyyy HH:mm')}</span></div><div className="flex items-center gap-1">{canEditDelete(reply) && (<><Button type="button" variant="ghost" size="sm" onClick={() => handleEdit(reply)} className="h-5 px-1 text-xs text-muted-foreground"><Pencil className="w-3 h-3" /></Button><Button type="button" variant="ghost" size="sm" onClick={() => handleDelete(reply.id)} className="h-5 px-1 text-xs text-muted-foreground"><Trash2 className="w-3 h-3" /></Button></>)}<Button type="button" variant="ghost" size="sm" onClick={() => toggleLikeMutation.mutate({ updateId: reply.id, isLiked: replyIsLiked })} className={`h-5 px-1 text-xs ${replyIsLiked ? 'text-red-500' : 'text-muted-foreground'}`}><Heart className={`w-3 h-3 ${replyIsLiked ? 'fill-current' : ''}`} />{replyLikeCount > 0 && replyLikeCount}</Button></div></div>{reply.description && <p className="text-sm text-foreground whitespace-pre-wrap">{reply.description}</p>}</>)}</div>); })}</div>}
                     </div>
                   );
                 })}
