@@ -681,10 +681,10 @@ export default function ClaimsPage() {
                     {!isCollapsed && groupBySub(claimsInGroup).map(([subKey, subClaims]) => (
                       <React.Fragment key={subKey}>
                         {claimsInGroup.length > subClaims.length && (
-                          <div className="flex items-center gap-1.5 px-4 py-1 bg-gray-50/50 dark:bg-gray-800/30 border-b border-gray-100 dark:border-gray-800">
-                            <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: getStatusDot(subKey) }} />
-                            <span className="text-xs font-medium text-gray-500 dark:text-gray-400">{subKey}</span>
-                            <span className="text-[10px] text-gray-400">{subClaims.length}</span>
+                          <div className="flex items-center gap-1.5 px-8 py-1 bg-gray-50/50 dark:bg-gray-800/30 border-b border-gray-100 dark:border-gray-800">
+                                                       <span className="w-2 h-2 rounded-full" style={{ backgroundColor: getStatusDot(subKey) }} />
+                            <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">{subKey}</span>
+                            <span className="text-xs text-gray-400 font-normal">{subClaims.length}</span>
                           </div>
                         )}
                         {subClaims.map(renderMobileCard)}
@@ -712,10 +712,10 @@ export default function ClaimsPage() {
                     {!isCollapsed && groupBySub(ungrouped).map(([subKey, subClaims]) => (
                       <React.Fragment key={subKey}>
                         {ungrouped.length > subClaims.length && (
-                          <div className="flex items-center gap-1.5 px-4 py-1 bg-gray-50/50 dark:bg-gray-800/30 border-b border-gray-100 dark:border-gray-800">
-                            <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: getStatusDot(subKey) }} />
-                            <span className="text-xs font-medium text-gray-500 dark:text-gray-400">{subKey}</span>
-                            <span className="text-[10px] text-gray-400">{subClaims.length}</span>
+                          <div className="flex items-center gap-1.5 px-8 py-1 bg-gray-50/50 dark:bg-gray-800/30 border-b border-gray-100 dark:border-gray-800">
+                                                       <span className="w-2 h-2 rounded-full" style={{ backgroundColor: getStatusDot(subKey) }} />
+                            <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">{subKey}</span>
+                            <span className="text-xs text-gray-400 font-normal">{subClaims.length}</span>
                           </div>
                         )}
                         {subClaims.map(renderMobileCard)}
@@ -782,10 +782,10 @@ export default function ClaimsPage() {
                           {claimsInGroup.length > subClaims.length && (
                             <tr className="bg-gray-50/50 dark:bg-gray-800/30">
                               <td colSpan={userCardFields.length + 6} className="px-4 py-1">
-                                <div className="flex items-center gap-2 pl-4">
-                                  <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: getStatusDot(subKey) }} />
-                                  <span className="text-xs font-medium text-gray-500 dark:text-gray-400">{subKey}</span>
-                                  <span className="text-[10px] text-gray-400 font-normal">{subClaims.length}</span>
+                                <div className="flex items-center gap-2 pl-8">
+                                  <span className="w-2 h-2 rounded-full" style={{ backgroundColor: getStatusDot(subKey) }} />
+                                  <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">{subKey}</span>
+                                  <span className="text-xs text-gray-400 font-normal">{subClaims.length}</span>
                                 </div>
                               </td>
                             </tr>
@@ -818,10 +818,10 @@ export default function ClaimsPage() {
                           {ungrouped.length > subClaims.length && (
                             <tr className="bg-gray-50/50 dark:bg-gray-800/30">
                               <td colSpan={userCardFields.length + 6} className="px-4 py-1">
-                                <div className="flex items-center gap-2 pl-4">
-                                  <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: getStatusDot(subKey) }} />
-                                  <span className="text-xs font-medium text-gray-500 dark:text-gray-400">{subKey}</span>
-                                  <span className="text-[10px] text-gray-400 font-normal">{subClaims.length}</span>
+                                <div className="flex items-center gap-2 pl-8">
+                                  <span className="w-2 h-2 rounded-full" style={{ backgroundColor: getStatusDot(subKey) }} />
+                                  <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">{subKey}</span>
+                                  <span className="text-xs text-gray-400 font-normal">{subClaims.length}</span>
                                 </div>
                               </td>
                             </tr>
