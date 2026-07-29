@@ -81,14 +81,24 @@ export default function EmailComposerModal({ isOpen, onClose, itemType, itemData
     enabled: isOpen,
   });
 
-  // Get available emails from item
-  const availableEmails = extractEmails(itemData);
+  // Default "to" address for Estimate emails (editable — can be changed)
+  const DEFAULT_ESTIMATE_TO = itemType === 'Estimate' ? 'claims@rcmautomotive.co.uk' : null;
 
-  // Pre-select first available email
+  // Get available emails from item, prepend the estimate default when applicable
+  const availableEmails = [
+    ...(DEFAULT_ESTIMATE_TO ? [{ email: DEFAULT_ESTIMATE_TO, label: `Estimates (${DEFAULT_ESTIMATE_TO})` }] : []),
+    ...extractEmails(itemData),
+  ];
+
+  // Pre-select default / first available email
   useEffect(() => {
-    if (isOpen && availableEmails.length > 0 && !to) {
-      setTo(availableEmails[0].email);
-      setUseCustomEmail(false);
+    if (isOpen && !to) {
+      if (availableEmails.length > 0) {
+        setTo(availableEmails[0].email);
+        setUseCustomEmail(false);
+      } else if (DEFAULT_ESTIMATE_TO) {
+        setTo(DEFAULT_ESTIMATE_TO);
+      }
     }
   }, [isOpen, itemData]);
 
