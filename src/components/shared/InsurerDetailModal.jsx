@@ -1,13 +1,12 @@
 import React, { useState } from "react";
 import { createPortal } from "react-dom";
 import { base44 } from "@/api/base44Client";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { X, Pencil, Phone, Mail, Building2, Network, User, Plus, Trash2 } from "lucide-react";
-import InsurerContactsEditor from "./InsurerContactsEditor";
-import NetworkCodesEditor from "./NetworkCodesEditor";
 
 const buildForm = (insurer) => ({
   name: insurer.name || "",
@@ -27,15 +26,27 @@ export default function InsurerDetailModal({ insurer, onClose, onUpdated }) {
   const [showAddContact, setShowAddContact] = useState(false);
   const [newContact, setNewContact] = useState({ name: "", phone: "", email: "" });
 
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  const applyToCache = (updated) => {
+    queryClient.setQueryData(["insurers"], (old) =>
+      Array.isArray(old) ? old.map((i) => (i.id === updated.id ? updated : i)) : old
+    );
+    queryClient.invalidateQueries({ queryKey: ["insurers"] });
+  };
+
   const updateMutation = useMutation({
     mutationFn: (data) => base44.entities.Insurer.update(insurer.id, data),
-    onSuccess: () => onUpdated?.(),
+    onSuccess: (updated) => { applyToCache(updated); onUpdated?.(); setEditMode(false); },
+    onError: (err) => toast({ title: "Save failed", description: err?.message || "Please try again", variant: "destructive" }),
   });
 
   // Quick partial update (used by inline add/remove in read view)
   const quickMutation = useMutation({
     mutationFn: (data) => base44.entities.Insurer.update(insurer.id, data),
-    onSuccess: () => onUpdated?.(),
+    onSuccess: (updated) => { applyToCache(updated); onUpdated?.(); },
+    onError: (err) => toast({ title: "Could not save", description: err?.message || "Please try again", variant: "destructive" }),
   });
 
   const set = (field, value) => setForm((p) => ({ ...p, [field]: value }));
