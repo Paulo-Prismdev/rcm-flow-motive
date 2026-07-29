@@ -105,7 +105,10 @@ const groupBySub = (claims) => {
 const GROUP_STATUSES = (() => {
   const idx = SECONDARY_STATUSES.indexOf('In Repair');
   const at = idx === -1 ? SECONDARY_STATUSES.length : idx;
-  return ['Awaiting BID', ...SECONDARY_STATUSES.slice(0, at), 'On Site', ...SECONDARY_STATUSES.slice(at), 'Cancelled'];
+  const pre = SECONDARY_STATUSES.slice(0, at);
+  const post = SECONDARY_STATUSES.slice(at);
+  // 'New' first, then 'Awaiting BID', then everything else
+  return ['New', 'Awaiting BID', ...pre.filter(s => s !== 'New'), 'On Site', ...post, 'Cancelled'];
 })();
 
 export default function ClaimsPage() {
