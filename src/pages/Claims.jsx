@@ -689,10 +689,11 @@ export default function ClaimsPage() {
                       <span className="text-xs text-gray-400 ml-1">{claimsInGroup.length}</span>
                     </div>
                     {!isCollapsed && groupBySub(claimsInGroup).map(([subKey, subClaims]) => {
-                      const subCollapsed = isSubGroupCollapsed(statusGroup, subKey);
+                      const hasSubHeader = claimsInGroup.length > subClaims.length;
+                      const subCollapsed = hasSubHeader && isSubGroupCollapsed(statusGroup, subKey);
                       return (
                       <React.Fragment key={subKey}>
-                        {claimsInGroup.length > subClaims.length && (
+                        {hasSubHeader && (
                           <div
                             className="flex items-center gap-1.5 px-10 py-1.5 bg-gray-50/50 dark:bg-gray-800/30 border-b border-gray-100 dark:border-gray-800 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-800/50"
                             onClick={(e) => { e.stopPropagation(); toggleSubGroup(statusGroup, subKey); }}
@@ -727,10 +728,11 @@ export default function ClaimsPage() {
                       <span className="text-xs text-gray-400 ml-1">{ungrouped.length}</span>
                     </div>
                     {!isCollapsed && groupBySub(ungrouped).map(([subKey, subClaims]) => {
-                      const subCollapsed = isSubGroupCollapsed('__other__', subKey);
+                      const hasSubHeader = ungrouped.length > subClaims.length;
+                      const subCollapsed = hasSubHeader && isSubGroupCollapsed('__other__', subKey);
                       return (
                       <React.Fragment key={subKey}>
-                        {ungrouped.length > subClaims.length && (
+                        {hasSubHeader && (
                           <div
                             className="flex items-center gap-1.5 px-10 py-1.5 bg-gray-50/50 dark:bg-gray-800/30 border-b border-gray-100 dark:border-gray-800 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-800/50"
                             onClick={(e) => { e.stopPropagation(); toggleSubGroup('__other__', subKey); }}
@@ -802,10 +804,11 @@ export default function ClaimsPage() {
                         </td>
                       </tr>
                       {!isCollapsed && groupBySub(claimsInGroup).map(([subKey, subClaims]) => {
-                        const subCollapsed = isSubGroupCollapsed(statusGroup, subKey);
+                        const hasSubHeader = claimsInGroup.length > subClaims.length;
+                        const subCollapsed = hasSubHeader && isSubGroupCollapsed(statusGroup, subKey);
                         return (
                         <React.Fragment key={subKey}>
-                          {claimsInGroup.length > subClaims.length && (
+                          {hasSubHeader && (
                             <tr
                               className="bg-gray-50/50 dark:bg-gray-800/30 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-800/50"
                               onClick={(e) => { e.stopPropagation(); toggleSubGroup(statusGroup, subKey); }}
@@ -845,10 +848,11 @@ export default function ClaimsPage() {
                         </td>
                       </tr>
                       {!isCollapsed && groupBySub(ungrouped).map(([subKey, subClaims]) => {
-                        const subCollapsed = isSubGroupCollapsed('__other__', subKey);
+                        const hasSubHeader = ungrouped.length > subClaims.length;
+                        const subCollapsed = hasSubHeader && isSubGroupCollapsed('__other__', subKey);
                         return (
                         <React.Fragment key={subKey}>
-                          {ungrouped.length > subClaims.length && (
+                          {hasSubHeader && (
                             <tr
                               className="bg-gray-50/50 dark:bg-gray-800/30 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-800/50"
                               onClick={(e) => { e.stopPropagation(); toggleSubGroup('__other__', subKey); }}
