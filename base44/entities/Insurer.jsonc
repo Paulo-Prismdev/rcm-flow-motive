@@ -23,6 +23,33 @@
     "notes": {
       "type": "string",
       "description": "Additional notes about this insurer"
+    },
+    "useful_contacts": {
+      "type": "array",
+      "description": "Additional useful contacts for this insurer",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          }
+        }
+      },
+      "default": []
+    },
+    "network_codes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Network codes associated with this insurer",
+      "default": []
     }
   },
   "required": [

@@ -6,8 +6,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { X } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useMutation } from '@tanstack/react-query';
+import InsurerContactsEditor from "./InsurerContactsEditor";
+import NetworkCodesEditor from "./NetworkCodesEditor";
 
-const EMPTY_FORM = { name: '', contact_name: '', phone: '', email: '', claims_line: '', notes: '' };
+const EMPTY_FORM = { name: '', contact_name: '', phone: '', email: '', claims_line: '', notes: '', useful_contacts: [], network_codes: [] };
 
 export default function AddInsurerModal({ isOpen, onClose, onSuccess }) {
   const [formData, setFormData] = useState(EMPTY_FORM);
@@ -27,7 +29,7 @@ export default function AddInsurerModal({ isOpen, onClose, onSuccess }) {
 
   return createPortal(
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-card border border-border rounded-xl p-6 w-full max-w-lg shadow-xl">
+      <div className="bg-card border border-border rounded-xl p-6 w-full max-w-lg shadow-xl max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-5">
           <h2 className="text-xl font-bold">Add New Insurer</h2>
           <Button onClick={handleClose} variant="ghost" size="icon"><X className="w-5 h-5" /></Button>
@@ -54,6 +56,14 @@ export default function AddInsurerModal({ isOpen, onClose, onSuccess }) {
           <div>
             <label className="block text-sm text-muted-foreground mb-1">Claims Line (Phone)</label>
             <Input value={formData.claims_line} onChange={(e) => set('claims_line', e.target.value)} className="neomorph-inset" placeholder="Direct claims department number" />
+          </div>
+          <div>
+            <label className="block text-sm text-muted-foreground mb-1.5">Useful Contacts</label>
+            <InsurerContactsEditor value={formData.useful_contacts} onChange={(v) => set('useful_contacts', v)} />
+          </div>
+          <div>
+            <label className="block text-sm text-muted-foreground mb-1.5">Network Codes</label>
+            <NetworkCodesEditor value={formData.network_codes} onChange={(v) => set('network_codes', v)} />
           </div>
           <div>
             <label className="block text-sm text-muted-foreground mb-1">Notes</label>
