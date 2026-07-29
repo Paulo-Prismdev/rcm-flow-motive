@@ -6,7 +6,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { X, Pencil, Phone, Mail, Building2, Network, User, Plus, Trash2 } from "lucide-react";
+import { X, Pencil, Phone, Mail, Building2, Network, User, Plus, Trash2, Copy } from "lucide-react";
 
 const buildForm = (insurer) => ({
   name: insurer.name || "",
@@ -89,6 +89,30 @@ export default function InsurerDetailModal({ insurer, onClose, onUpdated }) {
     quickMutation.mutate({ useful_contacts: contacts.filter((_, i) => i !== idx) });
   };
 
+  const copyDetails = async () => {
+    const lines = [];
+    lines.push(`Insurer: ${insurer.name || ""}`);
+    if (insurer.contact_name) lines.push(`Contact: ${insurer.contact_name}`);
+    if (insurer.phone) lines.push(`Phone: ${insurer.phone}`);
+    if (insurer.email) lines.push(`Email: ${insurer.email}`);
+    if (insurer.claims_line) lines.push(`Claims Line: ${insurer.claims_line}`);
+    if (codes.length > 0) lines.push(`Network Codes: ${codes.join(", ")}`);
+    if (contacts.length > 0) {
+      lines.push("Useful Contacts:");
+      contacts.forEach((c) => {
+        const parts = [c.name, c.phone, c.email].filter(Boolean);
+        lines.push(`  - ${parts.join(" | ")}`);
+      });
+    }
+    if (insurer.notes) lines.push(`Notes: ${insurer.notes}`);
+    try {
+      await navigator.clipboard.writeText(lines.join("\n"));
+      toast({ title: "Copied to clipboard", description: "Insurer details copied" });
+    } catch {
+      toast({ title: "Copy failed", description: "Could not access clipboard", variant: "destructive" });
+    }
+  };
+
   const Field = ({ label, icon: Icon, children }) => (
     <div>
       <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1 flex items-center gap-1.5">
@@ -110,9 +134,14 @@ export default function InsurerDetailModal({ insurer, onClose, onUpdated }) {
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
             {!editMode && (
-              <Button variant="outline" size="sm" onClick={startEdit}>
-                <Pencil className="w-4 h-4" /> Edit
-              </Button>
+              <>
+                <Button variant="outline" size="sm" onClick={copyDetails}>
+                  <Copy className="w-4 h-4" /> Copy
+                </Button>
+                <Button variant="outline" size="sm" onClick={startEdit}>
+                  <Pencil className="w-4 h-4" /> Edit
+                </Button>
+              </>
             )}
             <Button onClick={onClose} variant="ghost" size="icon">
               <X className="w-5 h-5" />
