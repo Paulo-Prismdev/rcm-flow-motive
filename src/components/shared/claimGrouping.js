@@ -11,22 +11,25 @@ const STATUS_COLORS = {
   gray: '#6b7280', cyan: '#06b6d4', indigo: '#6366f1', amber: '#f59e0b',
 };
 
-// An "On Site" group pulls in any claim whose journey status is "On Site"
-// (or that has an on_site_date with no hand_over_date); everything else
-// groups by its Secondary status. Cancelled journeys get their own group.
+// Journey-status-driven groups: "Awaiting BID" and "On Site" pull in claims
+// whose journey status matches (On Site also falls back to on_site_date with no
+// hand_over_date); everything else groups by its Secondary status. Cancelled
+// journeys get their own group.
 export function getGroupKey(c) {
   const journey = c.journey_status || c.job_status;
   if (journey === 'Cancelled') return 'Cancelled';
+  if (journey === 'Awaiting BID') return 'Awaiting BID';
   if (c.on_site_date && !c.hand_over_date) return 'On Site';
   return c.secondary_status || 'New';
 }
 
-// Ordered list of group headers — Secondary statuses with "On Site" inserted
+// Ordered list of group headers — "Awaiting BID" prepended, "On Site" inserted
 // before "In Repair", and "Cancelled" appended at the end.
 export const GROUP_STATUSES = (() => {
   const idx = SECONDARY_STATUSES.indexOf('In Repair');
   const at = idx === -1 ? SECONDARY_STATUSES.length : idx;
   return [
+    'Awaiting BID',
     ...SECONDARY_STATUSES.slice(0, at),
     'On Site',
     ...SECONDARY_STATUSES.slice(at),
@@ -38,6 +41,7 @@ export const GROUP_STATUSES = (() => {
 // (optional) — used to resolve per-status colours, falling back to journey
 // colours then gray.
 export function getStatusDot(statusName, statusConfigs) {
+  if (statusName === 'Awaiting BID') return STATUS_COLORS.indigo;
   if (statusName === 'On Site') return STATUS_COLORS.cyan;
   if (statusName === 'Cancelled') return STATUS_COLORS.red;
   const cfg = statusConfigs?.find((s) => s.status_name === statusName);
