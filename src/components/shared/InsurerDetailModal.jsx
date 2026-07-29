@@ -103,7 +103,7 @@ export default function InsurerDetailModal({ insurer, onClose, onUpdated }) {
   <button
     type="button"
     onClick={() => copyText(value)}
-    className="p-0.5 rounded hover:text-primary hover:bg-primary/10 transition-colors opacity-0 group-hover:opacity-100 text-[hsl(var(--background))]"
+    className="p-0.5 rounded text-gray-500 hover:text-primary hover:bg-primary/10 transition-colors"
     title="Copy">
     
       <Copy className="w-3 h-3" />
@@ -227,7 +227,7 @@ export default function InsurerDetailModal({ insurer, onClose, onUpdated }) {
                             <a href={`tel:${c.phone}`} className="flex items-center gap-1.5 hover:text-primary">
                               <Phone className="w-3 h-3" /> {c.phone}
                             </a>
-                            <button type="button" onClick={() => copyText(c.phone)} className="text-gray-300 hover:text-primary" title="Copy phone">
+                            <button type="button" onClick={() => copyText(c.phone)} className="text-gray-500 hover:text-primary" title="Copy phone">
                               <Copy className="w-3 h-3" />
                             </button>
                           </span>
@@ -237,7 +237,7 @@ export default function InsurerDetailModal({ insurer, onClose, onUpdated }) {
                             <a href={`mailto:${c.email}`} className="flex items-center gap-1.5 hover:text-primary truncate">
                               <Mail className="w-3 h-3" /> {c.email}
                             </a>
-                            <button type="button" onClick={() => copyText(c.email)} className="text-gray-300 hover:text-primary" title="Copy email">
+                            <button type="button" onClick={() => copyText(c.email)} className="text-gray-500 hover:text-primary" title="Copy email">
                               <Copy className="w-3 h-3" />
                             </button>
                           </span>
