@@ -16,12 +16,12 @@ const STATUS_COLORS = {
 // hand_over_date); everything else groups by its Secondary status. Cancelled
 // journeys get their own group.
 export function getGroupKey(c) {
-  if ((c.secondary_status || 'New') === 'New') return 'New';
+  if (c.secondary_status === 'New') return 'New';
   const journey = c.journey_status || c.job_status;
   if (journey === 'Cancelled') return 'Cancelled';
   if (journey === 'Awaiting BID') return 'Awaiting BID';
   if (c.on_site_date && !c.hand_over_date) return 'On Site';
-  return c.secondary_status || 'New';
+  return c.secondary_status || journey || 'New';
 }
 
 // Ordered list of group headers — "Awaiting BID" prepended, "On Site" inserted
