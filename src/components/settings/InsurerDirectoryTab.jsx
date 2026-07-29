@@ -11,12 +11,15 @@ export default function InsurerDirectoryTab() {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [showAdd, setShowAdd] = useState(false);
-  const [detail, setDetail] = useState(null); // insurer object or null
+  const [detailId, setDetailId] = useState(null);
 
   const { data: insurers = [], isLoading } = useQuery({
     queryKey: ["insurers"],
     queryFn: () => base44.entities.Insurer.list("name", 500),
   });
+
+  // Look up the live insurer so the detail modal always shows fresh data
+  const detail = insurers.find((i) => i.id === detailId) || null;
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ["insurers"] });
 
@@ -58,7 +61,7 @@ export default function InsurerDirectoryTab() {
       {detail && (
         <InsurerDetailModal
           insurer={detail}
-          onClose={() => setDetail(null)}
+          onClose={() => setDetailId(null)}
           onUpdated={invalidate}
         />
       )}
@@ -108,7 +111,7 @@ export default function InsurerDirectoryTab() {
                 return (
                   <tr
                     key={ins.id}
-                    onClick={() => setDetail(ins)}
+                    onClick={() => setDetailId(ins.id)}
                     className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/40 cursor-pointer"
                   >
                     <td className="px-4 py-3 text-sm font-medium text-gray-900 dark:text-white">{ins.name}</td>
@@ -158,7 +161,7 @@ export default function InsurerDirectoryTab() {
             return (
               <div
                 key={ins.id}
-                onClick={() => setDetail(ins)}
+                onClick={() => setDetailId(ins.id)}
                 className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4 cursor-pointer hover:border-primary/40 transition-colors"
               >
                 <div className="flex items-start justify-between gap-2">
