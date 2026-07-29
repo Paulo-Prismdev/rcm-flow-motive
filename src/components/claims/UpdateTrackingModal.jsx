@@ -9,14 +9,13 @@ import {
 } from "@/components/ui/dialog";
 import { format, isPast, formatDistanceToNow } from 'date-fns';
 import UpdateStatusBadge from '../shared/UpdateStatusBadge';
+import { isUpdateTrackingClosed } from '../shared/claimStatusUpdate';
 
 export default function UpdateTrackingModal({ claim, isOpen, onClose, onSetOverride, canEdit }) {
   if (!claim) return null;
 
-  const isClosedStatus = ['Completed', 'Cancelled', 'Total Loss'].includes(claim.job_status);
-  
-  // Don't show tracking for closed claims
-  if (isClosedStatus) {
+  // Don't show tracking for closed claims (invoiced or cancelled only)
+  if (isUpdateTrackingClosed(claim)) {
     return (
       <Dialog open={isOpen} onOpenChange={onClose}>
         <DialogContent className="max-w-2xl bg-background border-border">

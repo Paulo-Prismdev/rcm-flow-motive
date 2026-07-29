@@ -2,14 +2,14 @@ import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Clock, AlertCircle, Pause, Edit3 } from 'lucide-react';
 import UpdateStatusBadge from '../shared/UpdateStatusBadge';
+import { isUpdateTrackingClosed } from '../shared/claimStatusUpdate';
 import { formatDistanceToNow, isPast } from 'date-fns';
 
 export default function UpdateTrackingSection({ claim, onSetOverride, canEdit }) {
   if (!claim) return null;
 
-  // Don't show for completed/cancelled claims
-  const isClosedStatus = ['Completed', 'Cancelled', 'Total Loss'].includes(claim.job_status);
-  if (isClosedStatus) return null;
+  // Don't show for closed claims (invoiced or cancelled only)
+  if (isUpdateTrackingClosed(claim)) return null;
 
   const now = new Date();
   const nextDue = claim.next_update_due_at ? new Date(claim.next_update_due_at) : null;

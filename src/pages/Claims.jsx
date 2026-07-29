@@ -16,7 +16,7 @@ import { formatUKRegistration } from '../components/shared/formatRegistration';
 import { format } from 'date-fns';
 import { useStatusConfigs } from '../components/shared/StatusConfigContext';
 import { SECONDARY_STATUSES, getJourneyColor, isExceptionJourney } from '@/components/shared/claimStatusV2';
-import { isClosedJourney } from '@/components/shared/claimStatusUpdate';
+import { isClosedJourney, isUpdateTrackingClosed } from '@/components/shared/claimStatusUpdate';
 
 // ── Repairs table — fixed column widths (global config) ──
 // Every column has a fixed width (min = max) so the table never recomputes
@@ -44,8 +44,7 @@ const STATUS_COLORS = {
 
 const calculateUpdateStatus = (claim) => {
   const now = new Date();
-  const closedStatuses = ['Completed', 'Cancelled', 'Total Loss'];
-  if (closedStatuses.includes(claim.job_status)) return 'Gray';
+  if (isUpdateTrackingClosed(claim)) return 'Gray';
   if (claim.override_active && claim.override_expiry_at && now < new Date(claim.override_expiry_at)) return 'Blue';
   // 48-hour update tracker: based on time since last update or status change
   const lastUpdate = claim.last_updated_at;
@@ -65,8 +64,7 @@ const calculateUpdateStatus = (claim) => {
 // update tracker but scoped to client communication updates only.
 const calculateClientCommStatus = (claim) => {
   const now = new Date();
-  const closedStatuses = ['Completed', 'Cancelled', 'Total Loss'];
-  if (closedStatuses.includes(claim.job_status)) return 'Gray';
+  if (isUpdateTrackingClosed(claim)) return 'Gray';
   const lastComm = claim.last_client_comm_at;
   if (lastComm) {
     const hours = (now - new Date(lastComm)) / 3600000;
@@ -348,8 +346,7 @@ export default function ClaimsPage() {
     const clientCommStatus = calculateClientCommStatus(claim);
     const isSelected = selectedClaim?.id === claim.id;
     const hasBackorder = claimIdsWithBackorders.has(claim.id);
-    const closedList = ['Completed', 'Cancelled', 'Total Loss'];
-    const isClosedStatus = closedList.includes(claim.job_status);
+    const isClosedStatus = isUpdateTrackingClosed(claim);
     const isDraft = claim.draft === true;
     const journeyStatus = claim.journey_status || claim.job_status;
     const isException = isExceptionJourney(journeyStatus);
@@ -439,8 +436,7 @@ export default function ClaimsPage() {
     const updateStatus = calculateUpdateStatus(claim);
     const clientCommStatus = calculateClientCommStatus(claim);
     const hasBackorder = claimIdsWithBackorders.has(claim.id);
-    const closedList = ['Completed', 'Cancelled', 'Total Loss'];
-    const isClosedStatus = closedList.includes(claim.job_status);
+    const isClosedStatus = isUpdateTrackingClosed(claim);
     const isDraft = claim.draft === true;
     const journeyStatus = claim.journey_status || claim.job_status;
     const isException = isExceptionJourney(journeyStatus);

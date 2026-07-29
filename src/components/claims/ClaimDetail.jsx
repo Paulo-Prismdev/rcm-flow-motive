@@ -88,6 +88,7 @@ import {
 import ClaimDetailMobileHeader from './ClaimDetailMobileHeader';
 import ClaimJourneyTimeline from './ClaimJourneyTimeline';
 import ClaimStatusEditForm from './ClaimStatusEditForm';
+import { isUpdateTrackingClosed } from '../shared/claimStatusUpdate';
 
 const EditableSection = ({ title, icon: Icon, claim, onUpdate, children, EditComponent, canEdit = true }) => {
     const [isEditing, setIsEditing] = useState(false);
@@ -260,7 +261,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
   const VehicleLocationEditComponent = useCallback((props) => <ClaimVehicleDamageForm {...props} mode="location" />, []);
   const VehicleDamageEditComponent = useCallback((props) => <ClaimVehicleDamageForm {...props} mode="damage" />, []);
 
-  const isClosedStatus = ['Completed', 'Cancelled', 'Total Loss'].includes(claim.job_status);
+  const isClosedStatus = isUpdateTrackingClosed(claim);
 
   React.useEffect(() => {
     durationRef.current = currentDuration;
@@ -353,7 +354,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
     
     if (primaryChanged || secondaryChanged) {
         const now = new Date();
-        const isClosedAfterUpdate = ['Completed', 'Cancelled', 'Total Loss'].includes(newStatus);
+        const isClosedAfterUpdate = isUpdateTrackingClosed(updatedData);
         const fortyEightHoursFromNow = new Date(now.getTime() + 48 * 60 * 60 * 1000);
 
         // Reset the 48hr timer only when the primary status changes
@@ -440,9 +441,8 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
 
   const handleClaimUpdateCreated = (newStatus, newSecondaryStatus, newTertiaryStatus, updateType) => {
     const now = new Date();
-    const closedStatuses = ['Completed', 'Cancelled', 'Total Loss'];
     const effectiveStatus = newStatus || claim.job_status;
-    const isClosedAfterUpdate = closedStatuses.includes(effectiveStatus);
+    const isClosedAfterUpdate = isUpdateTrackingClosed({ job_status: effectiveStatus, invoice_status: claim.invoice_status });
     const fortyEightHoursFromNow = new Date(now.getTime() + 48 * 60 * 60 * 1000);
 
     // DB payload — only the fields that should actually change. Spreading the
@@ -496,7 +496,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
 
   React.useEffect(() => {
     const interval = setInterval(() => {
-      if (claim && !['Completed', 'Cancelled', 'Total Loss'].includes(claim.job_status)) {
+      if (claim && !isUpdateTrackingClosed(claim)) {
         queryClient.invalidateQueries({ queryKey: ['claims'] });
       }
     }, 60000);
