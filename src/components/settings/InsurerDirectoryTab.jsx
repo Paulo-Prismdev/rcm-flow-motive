@@ -138,12 +138,10 @@ export default function InsurerDirectoryTab() {
 
       {/* Search */}
       <div className="relative mb-4">
-        <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
         <Input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search by name, contact, phone, email..."
-          className="pl-9"
         />
       </div>
 
