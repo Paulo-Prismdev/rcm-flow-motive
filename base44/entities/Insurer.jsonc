@@ -56,21 +56,9 @@
     "name"
   ],
   "rls": {
-    "create": {
-      "user_condition": {}
-    },
-    "read": {
-      "user_condition": {}
-    },
-    "update": {
-      "user_condition": {
-        "user_type": "internal"
-      }
-    },
-    "delete": {
-      "user_condition": {
-        "user_type": "internal"
-      }
-    }
+    "create": null,
+    "read": null,
+    "update": null,
+    "delete": null
   }
 }
