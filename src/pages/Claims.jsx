@@ -306,9 +306,10 @@ export default function ClaimsPage() {
   const toggleGroup = (status) => setCollapsedGroups(p => ({ ...p, [status]: !p[status] }));
   const toggleSubGroup = (groupKey, subKey) => setCollapsedSubGroups(p => {
     const key = `${groupKey}::${subKey}`;
-    return { ...p, [key]: !p[key] };
+    const current = p[key] !== false; // undefined or true = collapsed
+    return { ...p, [key]: !current };
   });
-  const isSubGroupCollapsed = (groupKey, subKey) => collapsedSubGroups[`${groupKey}::${subKey}`];
+  const isSubGroupCollapsed = (groupKey, subKey) => collapsedSubGroups[`${groupKey}::${subKey}`] !== false;
 
   const getStatusDot = (statusName) => {
     if (statusName === 'Awaiting BID') return STATUS_COLORS.indigo;
