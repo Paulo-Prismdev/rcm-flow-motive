@@ -79,6 +79,7 @@ const calculateClientCommStatus = (claim) => {
 // v2 grouping: "Awaiting BID" and "On Site" groups pull in claims whose
 // journey status matches; everything else groups by its Secondary status.
 const getGroupKey = (c) => {
+  if ((c.secondary_status || 'New') === 'New') return 'New';
   const journey = c.journey_status || c.job_status;
   if (journey === 'Cancelled') return 'Cancelled';
   if (journey === 'Awaiting BID') return 'Awaiting BID';
