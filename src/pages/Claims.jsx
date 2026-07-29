@@ -82,7 +82,7 @@ const getGroupKey = (c) => {
   if (c.secondary_status === 'New') return 'New';
   const journey = c.journey_status || c.job_status;
   if (journey === 'Cancelled') return 'Cancelled';
-  if (journey === 'Awaiting BID') return 'Awaiting BID';
+  if (c.journey_status === 'Awaiting BID') return 'Awaiting BID';
   if (c.on_site_date && !c.hand_over_date) return 'On Site';
   return c.secondary_status || journey || 'New';
 };
