@@ -362,7 +362,7 @@ export default function ClaimsPage() {
   }
 
   // The claims table row (desktop)
-  const renderRow = (claim, indented = false) => {
+  const renderRow = (claim) => {
     const updateStatus = calculateUpdateStatus(claim);
     const clientCommStatus = calculateClientCommStatus(claim);
     const isSelected = selectedClaim?.id === claim.id;
@@ -386,7 +386,7 @@ export default function ClaimsPage() {
         <td style={{ width: `${REG_W}px`, minWidth: `${REG_W}px`, maxWidth: `${REG_W}px` }} className={`sticky left-0 z-10 px-2 py-2.5 whitespace-nowrap ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-white dark:bg-gray-900 group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50'}`}>
           <span
             className="inline-flex items-center justify-center rounded-md bg-[#1e2d4a] text-white font-semibold uppercase"
-            style={{ fontSize: '13px', width: '96px', height: '28px', letterSpacing: '0.05em', marginLeft: indented ? '44px' : 0 }}
+            style={{ fontSize: '13px', width: '96px', height: '28px', letterSpacing: '0.05em' }}
           >
             {claim.reg ? formatUKRegistration(claim.reg) : ''}
           </span>
@@ -453,7 +453,7 @@ export default function ClaimsPage() {
   };
 
   // Mobile card view for a single claim
-  const renderMobileCard = (claim, indented = false) => {
+  const renderMobileCard = (claim) => {
     const updateStatus = calculateUpdateStatus(claim);
     const clientCommStatus = calculateClientCommStatus(claim);
     const hasBackorder = claimIdsWithBackorders.has(claim.id);
@@ -465,7 +465,7 @@ export default function ClaimsPage() {
       <div
         key={claim.id}
         onClick={() => setSelectedClaim(claim)}
-        className={`px-4 py-3 border-b border-gray-100 dark:border-gray-800 cursor-pointer active:bg-gray-50 dark:active:bg-gray-800/60 transition-colors ${indented ? 'pl-12' : ''}`}
+        className="px-4 py-3 border-b border-gray-100 dark:border-gray-800 cursor-pointer active:bg-gray-50 dark:active:bg-gray-800/60 transition-colors"
       >
         <div className="flex items-center justify-between gap-2">
           <span
@@ -690,7 +690,7 @@ export default function ClaimsPage() {
                             <span className="text-xs text-gray-400 font-normal">{subClaims.length}</span>
                           </div>
                         )}
-                        {subClaims.map(c => renderMobileCard(c, true))}
+                        {subClaims.map(renderMobileCard)}
                         </React.Fragment>
                         ))}
                         </React.Fragment>
@@ -721,7 +721,7 @@ export default function ClaimsPage() {
                             <span className="text-xs text-gray-400 font-normal">{subClaims.length}</span>
                           </div>
                         )}
-                        {subClaims.map(c => renderMobileCard(c, true))}
+                        {subClaims.map(renderMobileCard)}
                       </React.Fragment>
                     ))}
                     </React.Fragment>
@@ -793,7 +793,7 @@ export default function ClaimsPage() {
                               </td>
                             </tr>
                           )}
-                          {subClaims.map(claim => renderRow(claim, true))}
+                          {subClaims.map(renderRow)}
                         </React.Fragment>
                       ))}
                     </React.Fragment>
@@ -829,7 +829,7 @@ export default function ClaimsPage() {
                               </td>
                             </tr>
                           )}
-                          {subClaims.map(claim => renderRow(claim, true))}
+                          {subClaims.map(renderRow)}
                         </React.Fragment>
                       ))}
                     </React.Fragment>
