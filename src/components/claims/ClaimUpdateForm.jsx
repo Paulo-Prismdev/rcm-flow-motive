@@ -8,7 +8,7 @@ import { X, Clock, Mail, Plus, AtSign, ChevronDown } from 'lucide-react';
 import { Badge } from "@/components/ui/badge";
 import { Command, CommandItem, CommandList } from "@/components/ui/command";
 import StatusChangeFields from "@/components/shared/StatusChangeFields";
-import { buildStatusChangeClaimUpdate, isClosedJourney } from "@/components/shared/claimStatusUpdate";
+import { buildStatusChangeClaimUpdate, isUpdateTrackingClosed, isClosedJourney } from "@/components/shared/claimStatusUpdate";
 
 const UPDATE_TYPES = [
   "Status Change", "Client Communication", "Bodyshop Communication", "Insurer Communication",
@@ -72,7 +72,7 @@ export default function ClaimUpdateForm({
       // communication tracker (separate from the general update timer).
       if (updateData.update_type === 'Client Communication') {
         const now = new Date();
-        const closed = isClosedJourney(claim?.journey_status || claim?.job_status);
+        const closed = isUpdateTrackingClosed({ job_status: claim?.journey_status || claim?.job_status, invoice_status: claim?.invoice_status });
         const commUpdate = closed
           ? { client_comm_status_flag: 'Gray' }
           : {
