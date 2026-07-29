@@ -89,36 +89,36 @@ export default function InsurerDetailModal({ insurer, onClose, onUpdated }) {
     quickMutation.mutate({ useful_contacts: contacts.filter((_, i) => i !== idx) });
   };
 
-  const copyDetails = async () => {
-    const lines = [];
-    lines.push(`Insurer: ${insurer.name || ""}`);
-    if (insurer.contact_name) lines.push(`Contact: ${insurer.contact_name}`);
-    if (insurer.phone) lines.push(`Phone: ${insurer.phone}`);
-    if (insurer.email) lines.push(`Email: ${insurer.email}`);
-    if (insurer.claims_line) lines.push(`Claims Line: ${insurer.claims_line}`);
-    if (codes.length > 0) lines.push(`Network Codes: ${codes.join(", ")}`);
-    if (contacts.length > 0) {
-      lines.push("Useful Contacts:");
-      contacts.forEach((c) => {
-        const parts = [c.name, c.phone, c.email].filter(Boolean);
-        lines.push(`  - ${parts.join(" | ")}`);
-      });
-    }
-    if (insurer.notes) lines.push(`Notes: ${insurer.notes}`);
+  const copyText = async (text) => {
+    if (!text) return;
     try {
-      await navigator.clipboard.writeText(lines.join("\n"));
-      toast({ title: "Copied to clipboard", description: "Insurer details copied" });
+      await navigator.clipboard.writeText(text);
+      toast({ title: "Copied", description: text });
     } catch {
-      toast({ title: "Copy failed", description: "Could not access clipboard", variant: "destructive" });
+      toast({ title: "Copy failed", variant: "destructive" });
     }
   };
 
-  const Field = ({ label, icon: Icon, children }) => (
-    <div>
+  const CopyBtn = ({ value }) => (
+    <button
+      type="button"
+      onClick={() => copyText(value)}
+      className="p-0.5 rounded text-gray-300 hover:text-primary hover:bg-primary/10 transition-colors opacity-0 group-hover:opacity-100"
+      title="Copy"
+    >
+      <Copy className="w-3 h-3" />
+    </button>
+  );
+
+  const Field = ({ label, icon: Icon, copyValue, children }) => (
+    <div className="group">
       <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1 flex items-center gap-1.5">
         {Icon && <Icon className="w-3.5 h-3.5" />} {label}
       </p>
-      <div className="text-sm text-gray-900 dark:text-white">{children}</div>
+      <div className="text-sm text-gray-900 dark:text-white flex items-center gap-1.5">
+        <span className="min-w-0">{children}</span>
+        {copyValue && <CopyBtn value={copyValue} />}
+      </div>
     </div>
   );
 
@@ -134,14 +134,9 @@ export default function InsurerDetailModal({ insurer, onClose, onUpdated }) {
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
             {!editMode && (
-              <>
-                <Button variant="outline" size="sm" onClick={copyDetails}>
-                  <Copy className="w-4 h-4" /> Copy
-                </Button>
-                <Button variant="outline" size="sm" onClick={startEdit}>
-                  <Pencil className="w-4 h-4" /> Edit
-                </Button>
-              </>
+              <Button variant="outline" size="sm" onClick={startEdit}>
+                <Pencil className="w-4 h-4" /> Edit
+              </Button>
             )}
             <Button onClick={onClose} variant="ghost" size="icon">
               <X className="w-5 h-5" />
@@ -187,16 +182,16 @@ export default function InsurerDetailModal({ insurer, onClose, onUpdated }) {
         ) : (
           <div className="p-6 space-y-5">
             <div className="grid grid-cols-2 gap-4">
-              <Field label="Contact Name" icon={User}>
+              <Field label="Contact Name" icon={User} copyValue={insurer.contact_name}>
                 {insurer.contact_name || "—"}
               </Field>
-              <Field label="Claims Line" icon={Phone}>
+              <Field label="Claims Line" icon={Phone} copyValue={insurer.claims_line}>
                 {insurer.claims_line || "—"}
               </Field>
-              <Field label="Phone" icon={Phone}>
+              <Field label="Phone" icon={Phone} copyValue={insurer.phone}>
                 {insurer.phone || "—"}
               </Field>
-              <Field label="Email" icon={Mail}>
+              <Field label="Email" icon={Mail} copyValue={insurer.email}>
                 {insurer.email ? (
                   <a href={`mailto:${insurer.email}`} className="text-primary hover:underline truncate block">
                     {insurer.email}
@@ -228,14 +223,24 @@ export default function InsurerDetailModal({ insurer, onClose, onUpdated }) {
                       </div>
                       <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1 text-xs text-gray-600 dark:text-gray-400">
                         {c.phone && (
-                          <a href={`tel:${c.phone}`} className="flex items-center gap-1.5 hover:text-primary">
-                            <Phone className="w-3 h-3" /> {c.phone}
-                          </a>
+                          <span className="flex items-center gap-1.5">
+                            <a href={`tel:${c.phone}`} className="flex items-center gap-1.5 hover:text-primary">
+                              <Phone className="w-3 h-3" /> {c.phone}
+                            </a>
+                            <button type="button" onClick={() => copyText(c.phone)} className="text-gray-300 hover:text-primary" title="Copy phone">
+                              <Copy className="w-3 h-3" />
+                            </button>
+                          </span>
                         )}
                         {c.email && (
-                          <a href={`mailto:${c.email}`} className="flex items-center gap-1.5 hover:text-primary truncate">
-                            <Mail className="w-3 h-3" /> {c.email}
-                          </a>
+                          <span className="flex items-center gap-1.5 truncate">
+                            <a href={`mailto:${c.email}`} className="flex items-center gap-1.5 hover:text-primary truncate">
+                              <Mail className="w-3 h-3" /> {c.email}
+                            </a>
+                            <button type="button" onClick={() => copyText(c.email)} className="text-gray-300 hover:text-primary" title="Copy email">
+                              <Copy className="w-3 h-3" />
+                            </button>
+                          </span>
                         )}
                       </div>
                     </div>
@@ -283,6 +288,14 @@ export default function InsurerDetailModal({ insurer, onClose, onUpdated }) {
                   {codes.map((code) => (
                     <span key={code} className="inline-flex items-center gap-1 bg-primary/10 text-primary px-2.5 py-1 rounded-full text-xs font-medium">
                       {code}
+                      <button
+                        type="button"
+                        onClick={() => copyText(code)}
+                        className="hover:text-primary/70 transition-colors"
+                        title="Copy code"
+                      >
+                        <Copy className="w-3 h-3" />
+                      </button>
                       <button
                         type="button"
                         onClick={() => removeCode(code)}
