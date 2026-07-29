@@ -131,6 +131,7 @@ export default function ClaimsPage() {
   const [claimIdsWithBackorders, setClaimIdsWithBackorders] = useState(new Set());
   const [sortBy, setSortBy] = useState('priority');
   const [collapsedGroups, setCollapsedGroups] = useState({});
+  const [collapsedSubGroups, setCollapsedSubGroups] = useState({});
   const [quickViewClaim, setQuickViewClaim] = useState(null);
   const [quickInfoClaim, setQuickInfoClaim] = useState(null);
   const [claimTab, setClaimTab] = useState('claims');
@@ -303,6 +304,11 @@ export default function ClaimsPage() {
   }, [selectedClaim]);
 
   const toggleGroup = (status) => setCollapsedGroups(p => ({ ...p, [status]: !p[status] }));
+  const toggleSubGroup = (groupKey, subKey) => setCollapsedSubGroups(p => {
+    const key = `${groupKey}::${subKey}`;
+    return { ...p, [key]: !p[key] };
+  });
+  const isSubGroupCollapsed = (groupKey, subKey) => collapsedSubGroups[`${groupKey}::${subKey}`];
 
   const getStatusDot = (statusName) => {
     if (statusName === 'Awaiting BID') return STATUS_COLORS.indigo;
@@ -681,18 +687,25 @@ export default function ClaimsPage() {
                       <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">{statusGroup}</span>
                       <span className="text-xs text-gray-400 ml-1">{claimsInGroup.length}</span>
                     </div>
-                    {!isCollapsed && groupBySub(claimsInGroup).map(([subKey, subClaims]) => (
+                    {!isCollapsed && groupBySub(claimsInGroup).map(([subKey, subClaims]) => {
+                      const subCollapsed = isSubGroupCollapsed(statusGroup, subKey);
+                      return (
                       <React.Fragment key={subKey}>
                         {claimsInGroup.length > subClaims.length && (
-                          <div className="flex items-center gap-1.5 px-8 py-1 bg-gray-50/50 dark:bg-gray-800/30 border-b border-gray-100 dark:border-gray-800">
-                                                       <span className="w-2 h-2 rounded-full" style={{ backgroundColor: getStatusDot(subKey) }} />
-                            <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">{subKey}</span>
+                          <div
+                            className="flex items-center gap-1.5 px-10 py-1.5 bg-gray-50/50 dark:bg-gray-800/30 border-b border-gray-100 dark:border-gray-800 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-800/50"
+                            onClick={(e) => { e.stopPropagation(); toggleSubGroup(statusGroup, subKey); }}
+                          >
+                            {subCollapsed ? <ChevronRight className="w-3 h-3 text-gray-400" /> : <ChevronDown className="w-3 h-3 text-gray-400" />}
+                            <span className="w-2 h-2 rounded-full" style={{ backgroundColor: getStatusDot(subKey) }} />
+                            <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">{subKey}</span>
                             <span className="text-xs text-gray-400 font-normal">{subClaims.length}</span>
                           </div>
                         )}
-                        {subClaims.map(renderMobileCard)}
-                        </React.Fragment>
-                        ))}
+                        {!subCollapsed && subClaims.map(renderMobileCard)}
+                      </React.Fragment>
+                      );
+                    })}
                         </React.Fragment>
                         );
                         })}
@@ -712,18 +725,25 @@ export default function ClaimsPage() {
                       <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Other</span>
                       <span className="text-xs text-gray-400 ml-1">{ungrouped.length}</span>
                     </div>
-                    {!isCollapsed && groupBySub(ungrouped).map(([subKey, subClaims]) => (
+                    {!isCollapsed && groupBySub(ungrouped).map(([subKey, subClaims]) => {
+                      const subCollapsed = isSubGroupCollapsed('__other__', subKey);
+                      return (
                       <React.Fragment key={subKey}>
                         {ungrouped.length > subClaims.length && (
-                          <div className="flex items-center gap-1.5 px-8 py-1 bg-gray-50/50 dark:bg-gray-800/30 border-b border-gray-100 dark:border-gray-800">
-                                                       <span className="w-2 h-2 rounded-full" style={{ backgroundColor: getStatusDot(subKey) }} />
-                            <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">{subKey}</span>
+                          <div
+                            className="flex items-center gap-1.5 px-10 py-1.5 bg-gray-50/50 dark:bg-gray-800/30 border-b border-gray-100 dark:border-gray-800 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-800/50"
+                            onClick={(e) => { e.stopPropagation(); toggleSubGroup('__other__', subKey); }}
+                          >
+                            {subCollapsed ? <ChevronRight className="w-3 h-3 text-gray-400" /> : <ChevronDown className="w-3 h-3 text-gray-400" />}
+                            <span className="w-2 h-2 rounded-full" style={{ backgroundColor: getStatusDot(subKey) }} />
+                            <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">{subKey}</span>
                             <span className="text-xs text-gray-400 font-normal">{subClaims.length}</span>
                           </div>
                         )}
-                        {subClaims.map(renderMobileCard)}
+                        {!subCollapsed && subClaims.map(renderMobileCard)}
                       </React.Fragment>
-                    ))}
+                      );
+                    })}
                     </React.Fragment>
                     );
                     })()}
@@ -780,22 +800,29 @@ export default function ClaimsPage() {
                           </div>
                         </td>
                       </tr>
-                      {!isCollapsed && groupBySub(claimsInGroup).map(([subKey, subClaims]) => (
+                      {!isCollapsed && groupBySub(claimsInGroup).map(([subKey, subClaims]) => {
+                        const subCollapsed = isSubGroupCollapsed(statusGroup, subKey);
+                        return (
                         <React.Fragment key={subKey}>
                           {claimsInGroup.length > subClaims.length && (
-                            <tr className="bg-gray-50/50 dark:bg-gray-800/30">
+                            <tr
+                              className="bg-gray-50/50 dark:bg-gray-800/30 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-800/50"
+                              onClick={(e) => { e.stopPropagation(); toggleSubGroup(statusGroup, subKey); }}
+                            >
                               <td colSpan={userCardFields.length + 6} className="px-4 py-1">
-                                <div className="flex items-center gap-2 pl-8">
+                                <div className="flex items-center gap-2 pl-12">
+                                  {subCollapsed ? <ChevronRight className="w-3 h-3 text-gray-400" /> : <ChevronDown className="w-3 h-3 text-gray-400" />}
                                   <span className="w-2 h-2 rounded-full" style={{ backgroundColor: getStatusDot(subKey) }} />
-                                  <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">{subKey}</span>
+                                  <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">{subKey}</span>
                                   <span className="text-xs text-gray-400 font-normal">{subClaims.length}</span>
                                 </div>
                               </td>
                             </tr>
                           )}
-                          {subClaims.map(renderRow)}
+                          {!subCollapsed && subClaims.map(renderRow)}
                         </React.Fragment>
-                      ))}
+                        );
+                      })}
                     </React.Fragment>
                   );
                 })}
@@ -816,22 +843,29 @@ export default function ClaimsPage() {
                           </div>
                         </td>
                       </tr>
-                      {!isCollapsed && groupBySub(ungrouped).map(([subKey, subClaims]) => (
+                      {!isCollapsed && groupBySub(ungrouped).map(([subKey, subClaims]) => {
+                        const subCollapsed = isSubGroupCollapsed('__other__', subKey);
+                        return (
                         <React.Fragment key={subKey}>
                           {ungrouped.length > subClaims.length && (
-                            <tr className="bg-gray-50/50 dark:bg-gray-800/30">
+                            <tr
+                              className="bg-gray-50/50 dark:bg-gray-800/30 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-800/50"
+                              onClick={(e) => { e.stopPropagation(); toggleSubGroup('__other__', subKey); }}
+                            >
                               <td colSpan={userCardFields.length + 6} className="px-4 py-1">
-                                <div className="flex items-center gap-2 pl-8">
+                                <div className="flex items-center gap-2 pl-12">
+                                  {subCollapsed ? <ChevronRight className="w-3 h-3 text-gray-400" /> : <ChevronDown className="w-3 h-3 text-gray-400" />}
                                   <span className="w-2 h-2 rounded-full" style={{ backgroundColor: getStatusDot(subKey) }} />
-                                  <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">{subKey}</span>
+                                  <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">{subKey}</span>
                                   <span className="text-xs text-gray-400 font-normal">{subClaims.length}</span>
                                 </div>
                               </td>
                             </tr>
                           )}
-                          {subClaims.map(renderRow)}
+                          {!subCollapsed && subClaims.map(renderRow)}
                         </React.Fragment>
-                      ))}
+                        );
+                      })}
                     </React.Fragment>
                   );
                 })()}
