@@ -50,6 +50,14 @@
       },
       "description": "Array of user emails who are tagged/mentioned in this note",
       "default": []
+    },
+    "file_urls": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Internal documents/files attached to this note",
+      "default": []
     }
   },
   "required": [

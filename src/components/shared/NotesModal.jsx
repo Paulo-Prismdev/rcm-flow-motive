@@ -3,8 +3,9 @@ import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { X, Send, Reply, Smile, Eye, EyeOff, MessageSquare } from "lucide-react";
+import { X, Send, Reply, Smile, Eye, EyeOff, MessageSquare, Paperclip, Download, File as FileIcon } from "lucide-react";
 import VoiceInput from '@/components/shared/VoiceInput';
+import { useFileUpload } from '@/hooks/useFileUpload';
 import { format } from 'date-fns';
 import {
   Dialog,
@@ -49,9 +50,17 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
   const [showMentionDropdown, setShowMentionDropdown] = useState(false);
   const [mentionSearch, setMentionSearch] = useState('');
   const [cursorPosition, setCursorPosition] = useState(0);
+  const [attachedFiles, setAttachedFiles] = useState([]);
+  const fileInputRef = useRef(null);
   const textareaRef = useRef(null);
   const queryClient = useQueryClient();
   const { toast } = useToast();
+
+  const { uploadFiles, isUploading, uploads } = useFileUpload({
+    onComplete: (urls) => {
+      setAttachedFiles(prev => [...prev, ...urls]);
+    },
+  });
 
   const { data: currentUser } = useQuery({
     queryKey: ['currentUser'],
@@ -85,6 +94,7 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
       queryClient.invalidateQueries({ queryKey: ['notes', parentId, parentType] });
       setNewNote('');
       setReplyingTo(null);
+      setAttachedFiles([]);
     },
     onError: (error) => {
       toast({
@@ -168,16 +178,35 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
     return fullName.includes(searchLower) || email.includes(searchLower);
   }).slice(0, 5); // Limit to 5 results
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!newNote.trim()) return;
+    if (!newNote.trim() && attachedFiles.length === 0) return;
 
     createNoteMutation.mutate({
       content: newNote,
       parent_id: parentId,
       parent_type: parentType,
       parent_note_id: replyingTo?.id || null,
+      file_urls: attachedFiles,
     });
+  };
+
+  const handleFileSelect = (e) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      uploadFiles(files);
+    }
+    e.target.value = '';
+  };
+
+  const getFileName = (url) => {
+    try {
+      const decoded = decodeURIComponent(url);
+      const parts = decoded.split('/');
+      return parts[parts.length - 1].split('?')[0];
+    } catch {
+      return 'Attached file';
+    }
   };
 
   const handleReply = (note) => {
@@ -278,7 +307,26 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
                   <div className="text-sm whitespace-pre-wrap text-foreground">
                     {parseContentWithMentions(note.content)}
                   </div>
-                  
+
+                  {/* Attached files */}
+                  {note.file_urls && note.file_urls.length > 0 && (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {note.file_urls.map((url, idx) => (
+                        <a
+                          key={idx}
+                          href={url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1.5 text-xs hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                        >
+                          <FileIcon className="w-3.5 h-3.5 text-gray-500" />
+                          <span className="max-w-[200px] truncate">{getFileName(url)}</span>
+                          <Download className="w-3 h-3 text-gray-400" />
+                        </a>
+                      ))}
+                    </div>
+                  )}
+
                   {/* Show tagged users */}
                   {note.tagged_users && note.tagged_users.length > 0 && (
                     <div className="mt-2 text-xs text-muted-foreground">
@@ -333,6 +381,24 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
                   <div className="text-sm whitespace-pre-wrap text-foreground">
                     {parseContentWithMentions(reply.content)}
                   </div>
+
+                  {reply.file_urls && reply.file_urls.length > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {reply.file_urls.map((url, idx) => (
+                        <a
+                          key={idx}
+                          href={url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1.5 text-xs hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                        >
+                          <FileIcon className="w-3.5 h-3.5 text-gray-500" />
+                          <span className="max-w-[200px] truncate">{getFileName(url)}</span>
+                          <Download className="w-3 h-3 text-gray-400" />
+                        </a>
+                      ))}
+                    </div>
+                  )}
 
                   {reply.tagged_users && reply.tagged_users.length > 0 && (
                     <div className="mt-2 text-xs text-muted-foreground">
@@ -389,6 +455,24 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
                 </div>
               )}
             </div>
+            {/* Attached files preview */}
+            {attachedFiles.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {attachedFiles.map((url, idx) => (
+                  <div key={idx} className="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1.5 text-xs">
+                    <FileIcon className="w-3.5 h-3.5 text-gray-500" />
+                    <span className="max-w-[180px] truncate">{getFileName(url)}</span>
+                    <button
+                      type="button"
+                      onClick={() => setAttachedFiles(prev => prev.filter((_, i) => i !== idx))}
+                      className="text-gray-400 hover:text-red-500"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-2">
                 <VoiceInput
@@ -396,8 +480,26 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
                   onChange={setNewNote}
                   disabled={createNoteMutation.isPending}
                 />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 px-2 text-xs"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={createNoteMutation.isPending || isUploading}
+                >
+                  <Paperclip className="w-4 h-4" />
+                  {isUploading ? 'Uploading...' : 'Attach'}
+                </Button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  multiple
+                  className="hidden"
+                  onChange={handleFileSelect}
+                />
                 <span className="text-xs text-gray-500 dark:text-gray-400">
-                  Dictate or type @ to mention
+                  Dictate, type @ to mention, or attach a file
                 </span>
               </div>
             </div>
@@ -414,7 +516,7 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
               </Button>
               <Button
                 type="submit"
-                disabled={!newNote.trim() || createNoteMutation.isPending}
+                disabled={(!newNote.trim() && attachedFiles.length === 0) || createNoteMutation.isPending || isUploading}
                 className="h-9 px-4 text-sm font-medium rounded-lg bg-blue-600 hover:bg-blue-700 text-white"
               >
                 <Send className="w-4 h-4 mr-2" />
