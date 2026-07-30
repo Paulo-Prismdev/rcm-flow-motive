@@ -128,6 +128,7 @@ export default function ClaimsPage() {
   const [showFieldsModal, setShowFieldsModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
   const [hasBackorderedPartsFilter, setHasBackorderedPartsFilter] = useState(false);
+  const [overdueOnly, setOverdueOnly] = useState(false);
   const [claimIdsWithBackorders, setClaimIdsWithBackorders] = useState(new Set());
   const [sortBy, setSortBy] = useState('priority');
   const [collapsedGroups, setCollapsedGroups] = useState({});
@@ -240,10 +241,10 @@ export default function ClaimsPage() {
     setSearchTerm(''); setStatusFilter([]); setClaimTypeFilter('');
     setInsurerFilter(''); setReferrerFilter(''); setRepairerFilter('');
     setUpdateStatusFilter(''); setRepairerAcceptanceFilter(''); setHasBackorderedPartsFilter(false);
-    setBusinessDivisionFilter('');
+    setBusinessDivisionFilter(''); setOverdueOnly(false);
   };
 
-  const activeFiltersCount = [(statusFilter?.length || 0) > 0, claimTypeFilter, insurerFilter, referrerFilter, repairerFilter, businessDivisionFilter, updateStatusFilter, repairerAcceptanceFilter, hasBackorderedPartsFilter].filter(Boolean).length;
+  const activeFiltersCount = [(statusFilter?.length || 0) > 0, claimTypeFilter, insurerFilter, referrerFilter, repairerFilter, businessDivisionFilter, updateStatusFilter, repairerAcceptanceFilter, hasBackorderedPartsFilter, overdueOnly].filter(Boolean).length;
 
   const allClaims = showArchived ? claims : claims.filter(c => !c.archived);
   const standardClaims = allClaims.filter(c => c.claim_type !== 'Paying Privately');
@@ -269,7 +270,8 @@ export default function ClaimsPage() {
     else if (repairerAcceptanceFilter === 'accepted') matchesRepairerAcceptance = c.repairer_accepted === true;
     const matchesBackorders = !hasBackorderedPartsFilter || claimIdsWithBackorders.has(c.id);
     const matchesBusinessDivision = !businessDivisionFilter || c.business_division === businessDivisionFilter;
-    return matchesSearch && matchesStatus && matchesClaimType && matchesInsurer && matchesReferrer && matchesRepairer && matchesUpdateStatus && matchesRepairerAcceptance && matchesBackorders && matchesBusinessDivision;
+    const matchesOverdue = !overdueOnly || calculateUpdateStatus(c) === 'Red' || calculateClientCommStatus(c) === 'Red';
+    return matchesSearch && matchesStatus && matchesClaimType && matchesInsurer && matchesReferrer && matchesRepairer && matchesUpdateStatus && matchesRepairerAcceptance && matchesBackorders && matchesBusinessDivision && matchesOverdue;
   }).sort((a, b) => {
     if (sortBy === 'created_asc') return new Date(a.created_date) - new Date(b.created_date);
     if (sortBy === 'created_desc') return new Date(b.created_date) - new Date(a.created_date);
@@ -579,6 +581,20 @@ export default function ClaimsPage() {
         </div>
 
         <div className="flex items-center gap-3 w-full lg:w-auto">
+          {/* Overdue-only toggle */}
+          <button
+            onClick={() => setOverdueOnly(!overdueOnly)}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-[10px] text-xs font-medium border transition-all ${
+              overdueOnly
+                ? 'bg-red-50 border-red-200 text-red-700 dark:bg-red-900/20 dark:border-red-700 dark:text-red-300'
+                : 'border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-800 hover:border-gray-300'
+            }`}
+            title="Show only claims with an overdue Case or Client 48hr update"
+          >
+            <AlertTriangle className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Overdue Only</span>
+            <span className="sm:hidden">Overdue</span>
+          </button>
           {/* Sort dropdown */}
           <select value={sortBy} onChange={e => setSortBy(e.target.value)}
             className="px-2 py-1.5 text-[11px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-[10px] text-gray-700 dark:text-gray-300 focus:outline-none focus:border-blue-400 cursor-pointer">
