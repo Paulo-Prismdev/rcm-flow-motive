@@ -163,9 +163,54 @@ export default function StatusManagementTab({ department }) {
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }) => base44.entities[entityName].update(id, data),
+    mutationFn: async ({ id, data, oldName }) => {
+      const updated = await base44.entities[entityName].update(id, data);
+
+      // ── Rename cascade ──
+      // When a status is renamed, update every existing record that still
+      // references the old name so the Repairs table / portals reflect the
+      // new label immediately.
+      const newName = data.status_name;
+      if (oldName && newName && oldName !== newName) {
+        if (department === 'Claim') {
+          await base44.entities.Claim.updateMany(
+            { secondary_status: oldName },
+            { $set: { secondary_status: newName } }
+          );
+          await base44.entities.Claim.updateMany(
+            { tertiary_status: oldName },
+            { $set: { tertiary_status: newName } }
+          );
+          await base44.entities.Claim.updateMany(
+            { job_status: oldName },
+            { $set: { job_status: newName } }
+          );
+          // job_statuses is an array — fetch and bulkUpdate each match
+          const claimsWithArray = await base44.entities.Claim.filter(
+            { job_statuses: oldName }, '-updated_date', 5000
+          );
+          if (claimsWithArray.length > 0) {
+            const arrUpdates = claimsWithArray.map(c => ({
+              id: c.id,
+              job_statuses: (c.job_statuses || []).map(s => (s === oldName ? newName : s)),
+            }));
+            for (let i = 0; i < arrUpdates.length; i += 500) {
+              await base44.entities.Claim.bulkUpdate(arrUpdates.slice(i, i + 500));
+            }
+          }
+        } else if (recordEntityName) {
+          await base44.entities[recordEntityName].updateMany(
+            { [statusField]: oldName },
+            { $set: { [statusField]: newName } }
+          );
+        }
+      }
+      return updated;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey });
+      queryClient.invalidateQueries({ queryKey: ['claims'] });
+      queryClient.invalidateQueries({ queryKey: ['claimStatusConfigs'] });
       setEditingStatusId(null);
     },
   });
@@ -227,7 +272,7 @@ export default function StatusManagementTab({ department }) {
       alert('The "New" status name cannot be changed as it is the default status for new records.');
       return;
     }
-    updateMutation.mutate({ id, data: editingData });
+    updateMutation.mutate({ id, data: editingData, oldName: status?.status_name });
   };
 
   const [optimisticOrder, setOptimisticOrder] = useState(null);
