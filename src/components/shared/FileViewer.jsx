@@ -1,8 +1,21 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export default function FileViewer({ fileUrl, onClose }) {
+  useEffect(() => {
+    if (!fileUrl) return;
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        e.stopPropagation();
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown, true);
+    return () => window.removeEventListener('keydown', handleKeyDown, true);
+  }, [fileUrl, onClose]);
+
   if (!fileUrl) return null;
 
   const getFileExtension = (url) => {
@@ -35,7 +48,7 @@ export default function FileViewer({ fileUrl, onClose }) {
         <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">File Preview</h3>
           <Button
-            onClick={onClose}
+            onClick={(e) => { e.stopPropagation(); onClose(); }}
             variant="ghost"
             size="icon"
             className="hover:bg-gray-200 dark:hover:bg-gray-700"
