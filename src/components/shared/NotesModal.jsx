@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { X, Send, Reply, Smile, Eye, EyeOff, MessageSquare, Paperclip, Download, File as FileIcon } from "lucide-react";
 import VoiceInput from '@/components/shared/VoiceInput';
 import { useFileUpload } from '@/hooks/useFileUpload';
+import FileViewer from '@/components/shared/FileViewer';
 import { format } from 'date-fns';
 import {
   Dialog,
@@ -51,6 +52,8 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
   const [mentionSearch, setMentionSearch] = useState('');
   const [cursorPosition, setCursorPosition] = useState(0);
   const [attachedFiles, setAttachedFiles] = useState([]);
+  const [activeTab, setActiveTab] = useState('notes');
+  const [viewingFile, setViewingFile] = useState(null);
   const fileInputRef = useRef(null);
   const textareaRef = useRef(null);
   const queryClient = useQueryClient();
@@ -120,6 +123,27 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
       queryClient.invalidateQueries({ queryKey: ['notes', parentId, parentType] });
     },
   });
+
+  const deleteFileMutation = useMutation({
+    mutationFn: async ({ noteId, fileUrl }) => {
+      const note = notes.find(n => n.id === noteId);
+      if (!note) return;
+      const updatedUrls = (note.file_urls || []).filter(u => u !== fileUrl);
+      return base44.entities.Note.update(noteId, { file_urls: updatedUrls });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notes', parentId, parentType] });
+      toast({ title: 'File removed', description: 'The file has been removed from the note.' });
+    },
+    onError: (error) => {
+      toast({ title: 'Failed to remove file', description: error?.message || 'Please try again.', variant: 'destructive' });
+    },
+  });
+
+  // Aggregate all files from all notes with their source note reference
+  const allNoteFiles = notes.flatMap(note =>
+    (note.file_urls || []).map(url => ({ url, noteId: note.id, noteAuthor: note.created_by, noteDate: note.created_date }))
+  );
 
   // Handle textarea change and detect @ mentions
   const handleTextareaChange = (e) => {
@@ -255,13 +279,87 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-[580px] bg-white dark:bg-gray-900 rounded-xl shadow-2xl p-8 border border-gray-200 dark:border-gray-800">
-        <div className="mb-6">
+        <div className="mb-4">
           <h2 className="text-[18px] font-semibold text-gray-900 dark:text-white">Internal Notes & Team Communication</h2>
           <p className="text-[13px] text-gray-500 dark:text-gray-400 mt-1">
             These notes are for internal team communication only and do NOT affect 48-hour tracking
           </p>
         </div>
 
+        {/* Tab toggle */}
+        <div className="flex gap-1 mb-4 border-b border-gray-200 dark:border-gray-800">
+          <button
+            onClick={() => setActiveTab('notes')}
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+              activeTab === 'notes'
+                ? 'border-blue-600 text-blue-600 dark:text-blue-400'
+                : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+            }`}
+          >
+            Notes ({mainNotes.length})
+          </button>
+          <button
+            onClick={() => setActiveTab('files')}
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+              activeTab === 'files'
+                ? 'border-blue-600 text-blue-600 dark:text-blue-400'
+                : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+            }`}
+          >
+            Files ({allNoteFiles.length})
+          </button>
+        </div>
+
+        {activeTab === 'files' && (
+          <div className="flex-1 overflow-y-auto space-y-3 pr-2" style={{maxHeight: '50vh'}}>
+            {isLoading ? (
+              <div className="text-center py-8 text-muted-foreground">Loading files...</div>
+            ) : allNoteFiles.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <FileIcon className="w-10 h-10 mx-auto mb-2 opacity-40" />
+                <p>No files attached to any note yet.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {allNoteFiles.map((file, idx) => {
+                  const fileName = getFileName(file.url);
+                  return (
+                    <div key={idx} className="border border-gray-200 dark:border-gray-700 rounded-lg p-3 flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all">
+                      <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                        <FileIcon className="w-4 h-4 text-primary" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-foreground truncate">{fileName}</p>
+                        <p className="text-[11px] text-muted-foreground truncate">
+                          {file.noteAuthor} • {format(new Date(file.noteDate), 'dd/MM/yyyy')}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-1 flex-shrink-0">
+                        <button onClick={() => setViewingFile(file.url)} className="p-1.5 hover:bg-primary/10 rounded-lg text-muted-foreground hover:text-foreground transition-colors" title="View file">
+                          <Eye className="w-4 h-4" />
+                        </button>
+                        <a href={file.url} target="_blank" rel="noopener noreferrer" className="p-1.5 hover:bg-primary/10 rounded-lg text-muted-foreground hover:text-foreground transition-colors" title="Download file">
+                          <Download className="w-4 h-4" />
+                        </a>
+                        <button
+                          onClick={() => deleteFileMutation.mutate({ noteId: file.noteId, fileUrl: file.url })}
+                          disabled={deleteFileMutation.isPending}
+                          className="p-1.5 hover:bg-destructive/10 rounded-lg text-muted-foreground hover:text-destructive transition-colors disabled:opacity-50"
+                          title="Remove file"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'notes' && (
+        <>
         <div className="flex-1 overflow-y-auto space-y-4 pr-2">
           {isLoading ? (
             <div className="text-center py-8 text-muted-foreground">Loading notes...</div>
@@ -525,6 +623,10 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
             </div>
           </form>
         </div>
+        </>
+        )}
+
+        <FileViewer fileUrl={viewingFile} onClose={() => setViewingFile(null)} />
       </DialogContent>
     </Dialog>
   );
