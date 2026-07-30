@@ -140,6 +140,11 @@ export default function StatusManagementTab({ department }) {
   const statusField = department === 'Claim' ? 'job_status' : 'status';
   const recordEntityName = department === 'Claim' ? 'Claim' : department === 'Estimate' ? 'Estimate' : department === 'Engineering' ? 'Engineering' : department === 'Part' ? 'Part' : null;
 
+  // For claims, check all three status fields; for other entities, just the single status field
+  const claimStatusFields = department === 'Claim'
+    ? ['job_status', 'secondary_status', 'tertiary_status']
+    : null;
+
   const { data: liveRecords = [] } = useQuery({
     queryKey: [recordEntityName, 'statusCheck'],
     queryFn: () => base44.entities[recordEntityName].list(statusField, 5000),
@@ -147,7 +152,18 @@ export default function StatusManagementTab({ department }) {
     staleTime: 60000,
   });
 
-  const usedStatusNames = useMemo(() => new Set(liveRecords.map(r => r[statusField]).filter(Boolean)), [liveRecords, statusField]);
+  const usedStatusNames = useMemo(() => {
+    const names = new Set();
+    liveRecords.forEach(r => {
+      if (claimStatusFields) {
+        claimStatusFields.forEach(f => { if (r[f]) names.add(r[f]); });
+        if (Array.isArray(r.job_statuses)) r.job_statuses.forEach(s => names.add(s));
+      } else {
+        if (r[statusField]) names.add(r[statusField]);
+      }
+    });
+    return names;
+  }, [liveRecords, statusField, claimStatusFields]);
 
   // Check if "New" status exists
   const hasNewStatus = statuses.some(s => s.status_name === 'New');
