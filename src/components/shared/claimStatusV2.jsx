@@ -60,6 +60,7 @@ export const SECONDARY_STATUSES = [
   'Awaiting BLD Invoice',
   'Invoice Pending',
   'Invoiced',
+  'File Complete',
 ];
 
 // 3. Tertiary Statuses — single-select. Extra information only (no grouping/timeline effect).
@@ -88,6 +89,7 @@ export const TERTIARY_STATUSES = [
   'Awaiting BLD Invoice',
   'Invoice Pending',
   'Invoiced',
+  'File Complete',
 ];
 
 // Best-guess mapping from legacy flat status values to the new three-field structure.
