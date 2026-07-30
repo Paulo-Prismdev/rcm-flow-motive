@@ -333,7 +333,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
 
   const starredUpdates = claimUpdates.filter(u => u.starred && !u.parent_update_id);
 
-  const handleUpdate = async (updatedData) => {
+  const handleUpdate = async (updatedData, options = {}) => {
     // Update local state immediately for instant UI feedback
     setClaim(updatedData);
     const oldStatus = claim.job_status || 'New';
@@ -352,7 +352,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
       user: currentUser,
     });
     
-    if (primaryChanged || secondaryChanged) {
+    if ((primaryChanged || secondaryChanged) && !options.skipClaimUpdateLog) {
         const now = new Date();
         const isClosedAfterUpdate = isUpdateTrackingClosed(updatedData);
         const fortyEightHoursFromNow = new Date(now.getTime() + 48 * 60 * 60 * 1000);
@@ -382,6 +382,19 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
         queryClient.invalidateQueries({ queryKey: ['claimUpdates', claim.id] });
         } catch (error) {
         console.error('Failed to log status change:', error);
+        }
+    } else if (primaryChanged || secondaryChanged) {
+        // Status changed but the ClaimUpdate was already created by the Updates
+        // modal — still reset the 48hr timer fields on the local object.
+        const now = new Date();
+        const isClosedAfterUpdate = isUpdateTrackingClosed(updatedData);
+        const fortyEightHoursFromNow = new Date(now.getTime() + 48 * 60 * 60 * 1000);
+        if (primaryChanged && !isClosedAfterUpdate) {
+          updatedData.last_updated_at = now.toISOString();
+          updatedData.next_update_due_at = fortyEightHoursFromNow.toISOString();
+          updatedData.update_status_flag = 'Green';
+        } else if (primaryChanged && isClosedAfterUpdate) {
+          updatedData.update_status_flag = 'Gray';
         }
     }
 
@@ -491,7 +504,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
       localClaim.tertiary_status = newTertiaryStatus || null;
     }
 
-    handleUpdate(dbUpdate, localClaim);
+    handleUpdate(localClaim, { skipClaimUpdateLog: true });
   };
 
   React.useEffect(() => {
