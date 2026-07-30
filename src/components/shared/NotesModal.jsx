@@ -280,7 +280,7 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
   const commonEmojis = ['👍', '❤️', '😊', '🎉', '👀'];
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={(open) => { if (!open) { setViewingFile(null); onClose(); } }}>
       <DialogContent className="max-w-[580px] bg-white dark:bg-gray-900 rounded-xl shadow-2xl p-8 border border-gray-200 dark:border-gray-800">
         <div className="mb-4">
           <h2 className="text-[18px] font-semibold text-gray-900 dark:text-white">Internal Notes & Team Communication</h2>
@@ -346,35 +346,37 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
                 <p>No files attached yet. Click "Add File" to upload.</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-2">
                 {allNoteFiles.map((file, idx) => {
                   const fileName = getFileName(file.url);
                   return (
-                    <div key={idx} className="border border-gray-200 dark:border-gray-700 rounded-lg p-3 flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all">
+                    <div key={idx} className="border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all">
                       <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
                         <FileIcon className="w-4 h-4 text-primary" />
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-foreground truncate">{fileName}</p>
-                        <p className="text-[11px] text-muted-foreground truncate">
-                          {file.noteAuthor} • {format(new Date(file.noteDate), 'dd/MM/yyyy')}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-1 flex-shrink-0">
-                        <button onClick={() => setViewingFile(file.url)} className="p-1.5 hover:bg-primary/10 rounded-lg text-muted-foreground hover:text-foreground transition-colors" title="View file">
-                          <Eye className="w-4 h-4" />
-                        </button>
-                        <a href={file.url} target="_blank" rel="noopener noreferrer" className="p-1.5 hover:bg-primary/10 rounded-lg text-muted-foreground hover:text-foreground transition-colors" title="Download file">
-                          <Download className="w-4 h-4" />
-                        </a>
-                        <button
-                          onClick={() => deleteFileMutation.mutate({ noteId: file.noteId, fileUrl: file.url })}
-                          disabled={deleteFileMutation.isPending}
-                          className="p-1.5 hover:bg-destructive/10 rounded-lg text-muted-foreground hover:text-destructive transition-colors disabled:opacity-50"
-                          title="Remove file"
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
+                      <div className="flex-1 min-w-0 flex items-center justify-between gap-3">
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-medium text-foreground break-all">{fileName}</p>
+                          <p className="text-[11px] text-muted-foreground">
+                            {file.noteAuthor} • {format(new Date(file.noteDate), 'dd/MM/yyyy')}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-1 flex-shrink-0">
+                          <button onClick={() => setViewingFile(file.url)} className="p-1.5 hover:bg-primary/10 rounded-lg text-muted-foreground hover:text-foreground transition-colors" title="View file">
+                            <Eye className="w-4 h-4" />
+                          </button>
+                          <a href={file.url} target="_blank" rel="noopener noreferrer" className="p-1.5 hover:bg-primary/10 rounded-lg text-muted-foreground hover:text-foreground transition-colors" title="Download file">
+                            <Download className="w-4 h-4" />
+                          </a>
+                          <button
+                            onClick={() => deleteFileMutation.mutate({ noteId: file.noteId, fileUrl: file.url })}
+                            disabled={deleteFileMutation.isPending}
+                            className="p-1.5 hover:bg-destructive/10 rounded-lg text-muted-foreground hover:text-destructive transition-colors disabled:opacity-50"
+                            title="Remove file"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
                       </div>
                     </div>
                   );
@@ -617,8 +619,11 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
         </>
         )}
 
-        <FileViewer fileUrl={viewingFile} onClose={() => setViewingFile(null)} />
       </DialogContent>
+
+      {viewingFile && (
+        <FileViewer fileUrl={viewingFile} onClose={() => setViewingFile(null)} />
+      )}
     </Dialog>
   );
 }

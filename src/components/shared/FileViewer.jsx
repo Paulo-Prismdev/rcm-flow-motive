@@ -24,11 +24,11 @@ export default function FileViewer({ fileUrl, onClose }) {
 
   return (
     <div 
-      className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-[2147483647] flex items-center justify-center bg-black/90 backdrop-blur-sm"
       onClick={onClose}
     >
       <div 
-        className="relative w-full h-full max-w-6xl max-h-[90vh] bg-white dark:bg-gray-900 rounded-lg shadow-2xl overflow-hidden flex flex-col"
+        className="relative w-screen h-screen bg-white dark:bg-gray-900 shadow-2xl overflow-hidden flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
