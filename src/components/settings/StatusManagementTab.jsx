@@ -140,9 +140,10 @@ export default function StatusManagementTab({ department }) {
   const statusField = department === 'Claim' ? 'job_status' : 'status';
   const recordEntityName = department === 'Claim' ? 'Claim' : department === 'Estimate' ? 'Estimate' : department === 'Engineering' ? 'Engineering' : department === 'Part' ? 'Part' : null;
 
-  // For claims, check all three status fields; for other entities, just the single status field
+  // For claims, check secondary/tertiary fields and the job_statuses array.
+  // job_status is the *journey* field (different concept) — excluded.
   const claimStatusFields = department === 'Claim'
-    ? ['job_status', 'secondary_status', 'tertiary_status']
+    ? ['secondary_status', 'tertiary_status']
     : null;
 
   const { data: liveRecords = [] } = useQuery({
@@ -196,10 +197,6 @@ export default function StatusManagementTab({ department }) {
           await base44.entities.Claim.updateMany(
             { tertiary_status: oldName },
             { $set: { tertiary_status: newName } }
-          );
-          await base44.entities.Claim.updateMany(
-            { job_status: oldName },
-            { $set: { job_status: newName } }
           );
           // job_statuses is an array — fetch and bulkUpdate each match
           const claimsWithArray = await base44.entities.Claim.filter(
