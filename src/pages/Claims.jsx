@@ -15,7 +15,7 @@ import ClaimQuickViewModal from '../components/claims/ClaimQuickViewModal';
 import { formatUKRegistration } from '../components/shared/formatRegistration';
 import { format } from 'date-fns';
 import { useStatusConfigs } from '../components/shared/StatusConfigContext';
-import { SECONDARY_STATUSES, getJourneyColor, isExceptionJourney } from '@/components/shared/claimStatusV2';
+import { getJourneyColor, isExceptionJourney } from '@/components/shared/claimStatusV2';
 import { isClosedJourney, isUpdateTrackingClosed } from '@/components/shared/claimStatusUpdate';
 
 // ── Repairs table — fixed column widths (global config) ──
@@ -102,35 +102,6 @@ const groupBySub = (claims) => {
   return order.map(k => [k, map[k]]);
 };
 
-// Build the ordered group list from the hardcoded Secondary statuses, then
-// merge in any additional statuses configured via Settings that aren't already
-// present. This keeps the table grouping in sync with ClaimStatusConfig.
-const GROUP_STATUSES = (() => {
-  const idx = SECONDARY_STATUSES.indexOf('In Repair');
-  const at = idx === -1 ? SECONDARY_STATUSES.length : idx;
-  const pre = SECONDARY_STATUSES.slice(0, at);
-  const post = SECONDARY_STATUSES.slice(at);
-  // 'New' first, then 'Awaiting BID', then everything else
-  return ['New', 'Awaiting BID', ...pre.filter(s => s !== 'New'), 'On Site', ...post, 'Cancelled'];
-})();
-
-// Merge configured claim statuses (from Settings) into the group list so any
-// custom status appears as a known group rather than falling into "Other".
-const mergeConfiguredStatuses = (baseList, configuredStatuses) => {
-  if (!configuredStatuses || configuredStatuses.length === 0) return baseList;
-  const active = configuredStatuses
-    .filter(s => s.is_active !== false)
-    .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
-    .map(s => s.status_name);
-  const known = new Set([...baseList, 'New', 'Awaiting BID', 'On Site', 'Cancelled']);
-  const extras = active.filter(s => !known.has(s));
-  // Insert any configured statuses not already in the list before 'Cancelled'
-  if (extras.length === 0) return baseList;
-  const cancelledIdx = baseList.indexOf('Cancelled');
-  if (cancelledIdx === -1) return [...baseList, ...extras];
-  return [...baseList.slice(0, cancelledIdx), ...extras, ...baseList.slice(cancelledIdx)];
-};
-
 export default function ClaimsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState([]);
@@ -160,7 +131,7 @@ export default function ClaimsPage() {
   const scrollRef = React.useRef(null);
   const savedScrollTop = React.useRef(0);
   const queryClient = useQueryClient();
-  const { allStatuses: statusConfigs } = useStatusConfigs();
+  const { allStatuses: statusConfigs, claimStatuses } = useStatusConfigs();
 
   const { data: currentUser } = useQuery({ queryKey: ['currentUser'], queryFn: () => base44.auth.me() });
   const isInternalUser = currentUser?.user_type === 'internal' || currentUser?.role === 'admin';
@@ -194,14 +165,31 @@ export default function ClaimsPage() {
     }
   }, [backorderedParts]);
 
-  // v2: claims are grouped by Secondary status, with a dedicated "On Site"
-  // group for any claim whose journey status is "On Site".
-  // Merge in any custom statuses configured via Settings so they appear as
-  // known groups instead of falling into "Other".
+  // Group order mirrors the order of statuses configured in Settings
+  // (ClaimStatusConfig, sorted by sort_order). Special groups ('Awaiting BID',
+  // 'On Site', 'Cancelled') that aren't in the config are inserted at
+  // sensible positions so claims still render correctly.
   const availableStatuses = useMemo(() => {
-    const claimConfigs = statusConfigs?.filter(s => true) || [];
-    return mergeConfiguredStatuses(GROUP_STATUSES, claimConfigs);
-  }, [statusConfigs]);
+    const configured = (claimStatuses || [])
+      .filter(s => s.is_active !== false)
+      .map(s => s.status_name);
+    const result = [...configured];
+    const known = new Set(result);
+    if (!known.has('Awaiting BID')) {
+      const idx = result.indexOf('New');
+      result.splice(idx >= 0 ? idx + 1 : 0, 0, 'Awaiting BID');
+      known.add('Awaiting BID');
+    }
+    if (!known.has('On Site')) {
+      const idx = result.indexOf('Awaiting BID');
+      result.splice(idx >= 0 ? idx + 1 : result.length, 0, 'On Site');
+      known.add('On Site');
+    }
+    if (!known.has('Cancelled')) {
+      result.push('Cancelled');
+    }
+    return result;
+  }, [claimStatuses]);
 
   // Collapse all groups by default on load
   useEffect(() => {
