@@ -40,6 +40,7 @@ export const StatusConfigProvider = ({ children }) => {
 
   const value = {
     allStatuses,
+    claimStatuses,
     isLoading: !claimStatuses || !partStatuses || !estimateStatuses || !engineeringStatuses
   };
 

@@ -102,6 +102,9 @@ const groupBySub = (claims) => {
   return order.map(k => [k, map[k]]);
 };
 
+// Build the ordered group list from the hardcoded Secondary statuses, then
+// merge in any additional statuses configured via Settings that aren't already
+// present. This keeps the table grouping in sync with ClaimStatusConfig.
 const GROUP_STATUSES = (() => {
   const idx = SECONDARY_STATUSES.indexOf('In Repair');
   const at = idx === -1 ? SECONDARY_STATUSES.length : idx;
@@ -110,6 +113,23 @@ const GROUP_STATUSES = (() => {
   // 'New' first, then 'Awaiting BID', then everything else
   return ['New', 'Awaiting BID', ...pre.filter(s => s !== 'New'), 'On Site', ...post, 'Cancelled'];
 })();
+
+// Merge configured claim statuses (from Settings) into the group list so any
+// custom status appears as a known group rather than falling into "Other".
+const mergeConfiguredStatuses = (baseList, configuredStatuses) => {
+  if (!configuredStatuses || configuredStatuses.length === 0) return baseList;
+  const active = configuredStatuses
+    .filter(s => s.is_active !== false)
+    .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
+    .map(s => s.status_name);
+  const known = new Set([...baseList, 'New', 'Awaiting BID', 'On Site', 'Cancelled']);
+  const extras = active.filter(s => !known.has(s));
+  // Insert any configured statuses not already in the list before 'Cancelled'
+  if (extras.length === 0) return baseList;
+  const cancelledIdx = baseList.indexOf('Cancelled');
+  if (cancelledIdx === -1) return [...baseList, ...extras];
+  return [...baseList.slice(0, cancelledIdx), ...extras, ...baseList.slice(cancelledIdx)];
+};
 
 export default function ClaimsPage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -176,7 +196,12 @@ export default function ClaimsPage() {
 
   // v2: claims are grouped by Secondary status, with a dedicated "On Site"
   // group for any claim whose journey status is "On Site".
-  const availableStatuses = useMemo(() => GROUP_STATUSES, []);
+  // Merge in any custom statuses configured via Settings so they appear as
+  // known groups instead of falling into "Other".
+  const availableStatuses = useMemo(() => {
+    const claimConfigs = statusConfigs?.filter(s => true) || [];
+    return mergeConfiguredStatuses(GROUP_STATUSES, claimConfigs);
+  }, [statusConfigs]);
 
   // Collapse all groups by default on load
   useEffect(() => {

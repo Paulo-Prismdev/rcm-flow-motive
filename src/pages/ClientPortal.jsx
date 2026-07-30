@@ -14,7 +14,7 @@ import {
 import { format } from 'date-fns';
 import StatusBadge from '../components/shared/StatusBadge';
 import { formatUKRegistration } from '../components/shared/formatRegistration';
-import { getGroupKey, GROUP_STATUSES, getStatusDot as getSharedStatusDot } from '../components/shared/claimGrouping';
+import { getGroupKey, buildGroupStatuses, getStatusDot as getSharedStatusDot } from '../components/shared/claimGrouping';
 import ClaimStatusBadges from '../components/shared/ClaimStatusBadges';
 import ClientLayout from '../components/client/ClientLayout';
 import ReferrerClaimDetail from '../components/referrer/ReferrerClaimDetail';
@@ -69,7 +69,7 @@ export default function ClientPortal() {
     staleTime: 5 * 60 * 1000,
   });
 
-  const availableStatuses = GROUP_STATUSES;
+  const availableStatuses = useMemo(() => buildGroupStatuses(customStatuses), [customStatuses]);
 
   useEffect(() => {
     if (availableStatuses.length > 0) {

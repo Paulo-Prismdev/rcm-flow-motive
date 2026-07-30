@@ -38,6 +38,23 @@ export const GROUP_STATUSES = (() => {
   ];
 })();
 
+// Build a group list that includes any custom statuses from ClaimStatusConfig
+// that aren't already in the base list. Pass the ClaimStatusConfig array (e.g.
+// from useStatusConfigs().claimStatuses). Falls back to GROUP_STATUSES.
+export function buildGroupStatuses(configuredStatuses) {
+  if (!configuredStatuses || configuredStatuses.length === 0) return GROUP_STATUSES;
+  const active = configuredStatuses
+    .filter(s => s.is_active !== false)
+    .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
+    .map(s => s.status_name);
+  const known = new Set(GROUP_STATUSES);
+  const extras = active.filter(s => !known.has(s));
+  if (extras.length === 0) return GROUP_STATUSES;
+  const cancelledIdx = GROUP_STATUSES.indexOf('Cancelled');
+  if (cancelledIdx === -1) return [...GROUP_STATUSES, ...extras];
+  return [...GROUP_STATUSES.slice(0, cancelledIdx), ...extras, ...GROUP_STATUSES.slice(cancelledIdx)];
+}
+
 // Dot colour for a group header. statusConfigs is the ClaimStatusConfig list
 // (optional) — used to resolve per-status colours, falling back to journey
 // colours then gray.
