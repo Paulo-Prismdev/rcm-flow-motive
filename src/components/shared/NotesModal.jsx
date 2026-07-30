@@ -336,8 +336,11 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
 
   return (
     <>
-    <Dialog open={isOpen} onOpenChange={(open) => { if (!open) { setViewingFile(null); onClose(); } }}>
-      <DialogContent className="max-w-[580px] bg-white dark:bg-gray-900 rounded-xl shadow-2xl p-8 border border-gray-200 dark:border-gray-800">
+    <Dialog open={isOpen} onOpenChange={(open) => { if (!open) { if (viewingFile) { setViewingFile(null); return; } onClose(); } }}>
+      <DialogContent
+        onEscapeKeyDown={(e) => { if (viewingFile) { e.preventDefault(); setViewingFile(null); } }}
+        onPointerDownOutside={(e) => { if (viewingFile) { e.preventDefault(); setViewingFile(null); } }}
+        className="max-w-[580px] bg-white dark:bg-gray-900 rounded-xl shadow-2xl p-8 border border-gray-200 dark:border-gray-800">
         <div className="mb-4">
           <h2 className="text-[18px] font-semibold text-gray-900 dark:text-white">Internal Notes & Team Communication</h2>
           <p className="text-[13px] text-gray-500 dark:text-gray-400 mt-1">
