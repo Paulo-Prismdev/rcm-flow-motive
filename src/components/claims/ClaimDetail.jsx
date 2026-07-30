@@ -1495,9 +1495,11 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                             </span>
                           )}
                         </Button>
-                        <Button onClick={() => setIsNotesOpen(true)} variant="outline" className="h-9 px-3 text-sm font-medium rounded-lg gap-1.5">
-                          <Edit className="w-4 h-4" /> Notes
-                        </Button>
+                        {isInternalUser && (
+                          <Button onClick={() => setIsNotesOpen(true)} variant="outline" className="h-9 px-3 text-sm font-medium rounded-lg gap-1.5">
+                            <Edit className="w-4 h-4" /> Internal Notes
+                          </Button>
+                        )}
                         {canEdit && (
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
