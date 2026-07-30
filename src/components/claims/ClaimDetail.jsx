@@ -1495,13 +1495,15 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                             </span>
                           )}
                         </Button>
+                        <Button onClick={() => setIsNotesOpen(true)} variant="outline" className="h-9 px-3 text-sm font-medium rounded-lg gap-1.5">
+                          <Edit className="w-4 h-4" /> Notes
+                        </Button>
                         {canEdit && (
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button variant="outline" className="p-2 h-9 w-9"><ChevronDown className="w-4 h-4" /></Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-56">
-                              <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsNotesOpen(true); }}><Edit className="w-4 h-4 mr-2" />Internal Notes</DropdownMenuItem>
                               <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsAttachmentsOpen(true); }}><FileText className="w-4 h-4 mr-2" />Documents</DropdownMenuItem>
                               <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsImagesOpen(true); }}><Image className="w-4 h-4 mr-2" />Images</DropdownMenuItem>
                               <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsTimeLogsOpen(true); }}><Timer className="w-4 h-4 mr-2" />Time Logs</DropdownMenuItem>
