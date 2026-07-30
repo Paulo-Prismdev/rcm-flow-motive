@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from "@/components/ui/button";
@@ -621,8 +622,9 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
 
       </DialogContent>
 
-      {viewingFile && (
-        <FileViewer fileUrl={viewingFile} onClose={() => setViewingFile(null)} />
+      {viewingFile && createPortal(
+        <FileViewer fileUrl={viewingFile} onClose={() => setViewingFile(null)} />,
+        document.body
       )}
     </Dialog>
   );
