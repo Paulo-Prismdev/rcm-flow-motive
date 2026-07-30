@@ -331,6 +331,14 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
     staleTime: 60000,
   });
 
+  const { data: claimNotes = [] } = useQuery({
+    queryKey: ['notes', claim.id, 'Claim'],
+    queryFn: () => base44.entities.Note.filter({ parent_id: claim.id, parent_type: 'Claim' }),
+    staleTime: 30000,
+  });
+  const notesFileCount = claimNotes.reduce((sum, n) => sum + (n.file_urls?.length || 0), 0);
+  const notesTotalCount = claimNotes.length + notesFileCount;
+
   const starredUpdates = claimUpdates.filter(u => u.starred && !u.parent_update_id);
 
   const handleUpdate = async (updatedData, options = {}) => {
@@ -1496,8 +1504,13 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                           )}
                         </Button>
                         {isInternalUser && (
-                          <Button onClick={() => setIsNotesOpen(true)} variant="outline" className="h-9 px-3 text-sm font-medium rounded-lg gap-1.5">
+                          <Button onClick={() => setIsNotesOpen(true)} variant="outline" className="h-9 px-3 text-sm font-medium rounded-lg gap-1.5 relative">
                             <Edit className="w-4 h-4" /> Internal Notes
+                            {notesTotalCount > 0 && (
+                              <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-blue-500 text-white text-[10px] font-bold flex items-center justify-center leading-none shadow">
+                                {notesTotalCount}
+                              </span>
+                            )}
                           </Button>
                         )}
                         {canEdit && (
