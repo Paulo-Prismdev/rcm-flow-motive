@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { X, Send, Reply, Smile, Eye, EyeOff, MessageSquare, Paperclip, Download, File as FileIcon } from "lucide-react";
+import { X, Send, Reply, Smile, Eye, EyeOff, MessageSquare, Paperclip, Download, File as FileIcon, Trash2, Pencil, Check } from "lucide-react";
 import VoiceInput from '@/components/shared/VoiceInput';
 import { useFileUpload } from '@/hooks/useFileUpload';
 import FileViewer from '@/components/shared/FileViewer';
@@ -53,6 +53,8 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
   const [cursorPosition, setCursorPosition] = useState(0);
   const [activeTab, setActiveTab] = useState('notes');
   const [viewingFile, setViewingFile] = useState(null);
+  const [editingNoteId, setEditingNoteId] = useState(null);
+  const [editContent, setEditContent] = useState('');
   const textareaRef = useRef(null);
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -125,6 +127,32 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
       base44.entities.Note.update(noteId, { reactions }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notes', parentId, parentType] });
+    },
+  });
+
+  const deleteNoteMutation = useMutation({
+    mutationFn: (noteId) => base44.entities.Note.delete(noteId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notes', parentId, parentType] });
+      toast({ title: 'Note deleted', description: 'The note has been deleted.' });
+    },
+    onError: (error) => {
+      toast({ title: 'Failed to delete note', description: error?.message || 'Please try again.', variant: 'destructive' });
+    },
+  });
+
+  const updateNoteMutation = useMutation({
+    mutationFn: ({ noteId, content }) => {
+      const taggedEmails = extractTaggedEmails(content);
+      return base44.entities.Note.update(noteId, { content, tagged_users: taggedEmails });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notes', parentId, parentType] });
+      setEditingNoteId(null);
+      setEditContent('');
+    },
+    onError: (error) => {
+      toast({ title: 'Failed to update note', description: error?.message || 'Please try again.', variant: 'destructive' });
     },
   });
 
@@ -273,6 +301,27 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
     }
   };
 
+  const handleEditNote = (note) => {
+    setEditingNoteId(note.id);
+    setEditContent(note.content);
+  };
+
+  const handleSaveEdit = () => {
+    if (!editContent.trim()) return;
+    updateNoteMutation.mutate({ noteId: editingNoteId, content: editContent });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingNoteId(null);
+    setEditContent('');
+  };
+
+  const handleDeleteNote = (note) => {
+    if (window.confirm('Are you sure you want to delete this note?')) {
+      deleteNoteMutation.mutate(note.id);
+    }
+  };
+
   // Group notes by parent (main notes vs replies)
   const mainNotes = notes.filter(n => !n.parent_note_id);
   const getReplies = (noteId) => notes.filter(n => n.parent_note_id === noteId);
@@ -408,7 +457,7 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
                         {format(new Date(note.created_date), 'MMM d, yyyy HH:mm')}
                       </span>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex gap-1">
                       <Button
                         variant="ghost"
                         size="icon"
@@ -427,14 +476,55 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
                         size="icon"
                         className="h-7 w-7"
                         onClick={() => handleReply(note)}
+                        title="Reply"
                       >
                         <Reply className="w-4 h-4" />
                       </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7"
+                        onClick={() => handleEditNote(note)}
+                        title="Edit note"
+                        disabled={editingNoteId === note.id}
+                      >
+                        <Pencil className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 hover:text-destructive"
+                        onClick={() => handleDeleteNote(note)}
+                        title="Delete note"
+                        disabled={deleteNoteMutation.isPending}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
                     </div>
                   </div>
+                  {editingNoteId === note.id ? (
+                    <div className="space-y-2">
+                      <Textarea
+                        value={editContent}
+                        onChange={(e) => setEditContent(e.target.value)}
+                        className="min-h-[100px] bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-sm text-foreground focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                        autoFocus
+                      />
+                      <div className="flex gap-2 justify-end">
+                        <Button variant="outline" size="sm" className="h-8 px-3 text-xs" onClick={handleCancelEdit}>
+                          Cancel
+                        </Button>
+                        <Button size="sm" className="h-8 px-3 text-xs bg-blue-600 hover:bg-blue-700" onClick={handleSaveEdit} disabled={!editContent.trim() || updateNoteMutation.isPending}>
+                          <Check className="w-3.5 h-3.5 mr-1" />
+                          Save
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
                   <div className="text-sm whitespace-pre-wrap text-foreground">
                     {parseContentWithMentions(note.content)}
                   </div>
+                  )}
 
                   {/* Attached files */}
                   {note.file_urls && note.file_urls.length > 0 && (
@@ -505,10 +595,52 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
                         {format(new Date(reply.created_date), 'MMM d, yyyy HH:mm')}
                       </span>
                     </div>
+                    <div className="flex gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6"
+                        onClick={() => handleEditNote(reply)}
+                        title="Edit reply"
+                        disabled={editingNoteId === reply.id}
+                      >
+                        <Pencil className="w-3.5 h-3.5" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6 hover:text-destructive"
+                        onClick={() => handleDeleteNote(reply)}
+                        title="Delete reply"
+                        disabled={deleteNoteMutation.isPending}
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </Button>
+                    </div>
                   </div>
+                  {editingNoteId === reply.id ? (
+                    <div className="space-y-2">
+                      <Textarea
+                        value={editContent}
+                        onChange={(e) => setEditContent(e.target.value)}
+                        className="min-h-[80px] bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-sm text-foreground focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                        autoFocus
+                      />
+                      <div className="flex gap-2 justify-end">
+                        <Button variant="outline" size="sm" className="h-7 px-3 text-xs" onClick={handleCancelEdit}>
+                          Cancel
+                        </Button>
+                        <Button size="sm" className="h-7 px-3 text-xs bg-blue-600 hover:bg-blue-700" onClick={handleSaveEdit} disabled={!editContent.trim() || updateNoteMutation.isPending}>
+                          <Check className="w-3.5 h-3.5 mr-1" />
+                          Save
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
                   <div className="text-sm whitespace-pre-wrap text-foreground">
                     {parseContentWithMentions(reply.content)}
                   </div>
+                  )}
 
                   {reply.file_urls && reply.file_urls.length > 0 && (
                     <div className="mt-2 flex flex-wrap gap-2">
