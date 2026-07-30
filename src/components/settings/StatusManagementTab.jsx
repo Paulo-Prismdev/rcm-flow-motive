@@ -84,7 +84,7 @@ function StatusItem({ status, onUpdate, onDelete, onEditToggle, editingStatusId,
                   <span>Default</span>
                 </div>
               )}
-              {isInUse && !isProtected && (
+              {isInUse && (
                 <div className="flex items-center gap-1 text-xs text-amber-600 dark:text-amber-400">
                   <Lock className="w-3 h-3" />
                   <span>In use</span>
@@ -109,7 +109,7 @@ function StatusItem({ status, onUpdate, onDelete, onEditToggle, editingStatusId,
             <Button size="icon" variant="ghost" onClick={() => onEditToggle(status)} className="text-blue-500 hover:text-blue-600">
               <Edit className="w-4 h-4" />
             </Button>
-            {!isProtected && !isInUse && (
+            {!isInUse && (
               <Button size="icon" variant="ghost" onClick={() => onDelete(status.id)} className="text-red-500 hover:text-red-600">
                 <Trash2 className="w-4 h-4" />
               </Button>
@@ -189,6 +189,17 @@ export default function StatusManagementTab({ department }) {
     }
   }, [isLoading, hasNewStatus]);
 
+  // Clear is_default on any status that isn't "New" (one-time cleanup)
+  React.useEffect(() => {
+    if (isLoading || statuses.length === 0) return;
+    const toUnflag = statuses.filter(s => s.is_default === true && s.status_name !== 'New');
+    if (toUnflag.length > 0) {
+      base44.entities[entityName].bulkUpdate(
+        toUnflag.map(s => ({ id: s.id, is_default: false }))
+      ).then(() => queryClient.invalidateQueries({ queryKey }));
+    }
+  }, [isLoading, statuses]);
+
   const handleAddStatus = () => {
     if (newStatusName.trim()) {
       createMutation.mutate({
@@ -259,7 +270,7 @@ export default function StatusManagementTab({ department }) {
         <div className="flex items-start gap-2">
           <Lock className="w-4 h-4 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
           <div className="text-sm text-blue-800 dark:text-blue-200">
-            <strong>Note:</strong> All statuses can be edited (name and colour). The default "New" status cannot be renamed or deleted as it is automatically assigned to new records. Statuses currently in use on active records cannot be deleted.
+            <strong>Note:</strong> Only the "New" status is marked as Default and cannot be renamed. Any status that is currently in use on active records cannot be deleted. All other statuses can be freely edited or removed when no longer in use.
           </div>
         </div>
       </div>
@@ -321,7 +332,7 @@ export default function StatusManagementTab({ department }) {
                           setEditingData={setEditingData}
                           provided={provided}
                           snapshot={snapshot}
-                          isProtected={status.is_default === true}
+                          isProtected={status.status_name === 'New'}
                           isInUse={usedStatusNames.has(status.status_name)}
                         />
                       )}
