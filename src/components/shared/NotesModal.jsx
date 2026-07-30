@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { X, Send, Reply, Smile, Eye, EyeOff, MessageSquare, Paperclip, Download, File as FileIcon, Trash2, Pencil, Check } from "lucide-react";
+import { X, Send, Reply, Smile, Eye, EyeOff, MessageSquare, Paperclip, Download, File as FileIcon, Trash2, Pencil, Check, User } from "lucide-react";
 import VoiceInput from '@/components/shared/VoiceInput';
 import { useFileUpload } from '@/hooks/useFileUpload';
 import FileViewer from '@/components/shared/FileViewer';
@@ -328,6 +328,12 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
 
   const commonEmojis = ['👍', '❤️', '😊', '🎉', '👀'];
 
+  const getDisplayName = (emailOrName) => {
+    if (!emailOrName) return 'Unknown';
+    const user = allUsers.find(u => u.email === emailOrName);
+    return user?.full_name || emailOrName;
+  };
+
   return (
     <>
     <Dialog open={isOpen} onOpenChange={(open) => { if (!open) { setViewingFile(null); onClose(); } }}>
@@ -449,14 +455,15 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
           ) : (
             mainNotes.map((note) => (
               <div key={note.id} className="space-y-2">
-                <div className="bg-muted/30 border border-border rounded-lg p-4">
-                  <div className="flex justify-between items-start mb-2">
-                    <div>
-                      <span className="font-medium text-foreground">{note.created_by}</span>
-                      <span className="text-xs text-muted-foreground ml-2">
-                        {format(new Date(note.created_date), 'MMM d, yyyy HH:mm')}
-                      </span>
-                    </div>
+              <div className="bg-muted/30 border border-border rounded-lg p-4">
+                <div className="flex justify-between items-start mb-2">
+                  <div className="flex flex-col">
+                    <span className="font-medium text-sm text-foreground flex items-center gap-1">
+                      <User className="w-3.5 h-3.5 text-muted-foreground" />
+                      {getDisplayName(note.created_by)}
+                    </span>
+                    <span className="text-[11px] text-muted-foreground/70 ml-[18px]">{note.created_by}</span>
+                  </div>
                     <div className="flex gap-1">
                       <Button
                         variant="ghost"
@@ -589,11 +596,12 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
                 {getReplies(note.id).map(reply => (
                 <div key={reply.id} className="ml-8 bg-muted/20 border border-border rounded-lg p-3">
                   <div className="flex justify-between items-start mb-2">
-                    <div>
-                      <span className="font-medium text-sm text-foreground">{reply.created_by}</span>
-                      <span className="text-xs text-muted-foreground ml-2">
-                        {format(new Date(reply.created_date), 'MMM d, yyyy HH:mm')}
+                    <div className="flex flex-col">
+                      <span className="font-medium text-sm text-foreground flex items-center gap-1">
+                        <User className="w-3.5 h-3.5 text-muted-foreground" />
+                        {getDisplayName(reply.created_by)}
                       </span>
+                      <span className="text-[11px] text-muted-foreground/70 ml-[18px]">{reply.created_by}</span>
                     </div>
                     <div className="flex gap-1">
                       <Button
