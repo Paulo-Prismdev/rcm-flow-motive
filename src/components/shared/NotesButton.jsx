@@ -44,6 +44,10 @@ export default function NotesButton({ parentId, parentType, isOpen, onOpenChange
     !note.viewed_by?.includes(currentUser?.email || '')
   ).length;
 
+  // Count files attached across all notes
+  const fileCount = notes.reduce((sum, n) => sum + (n.file_urls?.length || 0), 0);
+  const totalCount = notes.length + fileCount;
+
   return (
     <>
       <NotesModal 
@@ -64,9 +68,9 @@ export default function NotesButton({ parentId, parentType, isOpen, onOpenChange
             {unreadCount}
           </span>
         )}
-        {notes.length > 0 && unreadCount === 0 && (
+        {totalCount > 0 && unreadCount === 0 && (
           <span className="absolute -top-2 -right-2 bg-accent text-black text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
-            {notes.length}
+            {totalCount}
           </span>
         )}
       </Button>
