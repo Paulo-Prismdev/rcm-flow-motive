@@ -51,19 +51,24 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
   const [showMentionDropdown, setShowMentionDropdown] = useState(false);
   const [mentionSearch, setMentionSearch] = useState('');
   const [cursorPosition, setCursorPosition] = useState(0);
-  const [attachedFiles, setAttachedFiles] = useState([]);
   const [activeTab, setActiveTab] = useState('notes');
   const [viewingFile, setViewingFile] = useState(null);
-  const fileInputRef = useRef(null);
   const textareaRef = useRef(null);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  const { uploadFiles, isUploading, uploads } = useFileUpload({
+  const { uploadFiles: uploadFilesForTab, isUploading: isUploadingForTab } = useFileUpload({
     onComplete: (urls) => {
-      setAttachedFiles(prev => [...prev, ...urls]);
+      createNoteMutation.mutate({
+        content: '',
+        parent_id: parentId,
+        parent_type: parentType,
+        file_urls: urls,
+      });
     },
   });
+
+  const filesTabInputRef = useRef(null);
 
   const { data: currentUser } = useQuery({
     queryKey: ['currentUser'],
@@ -97,7 +102,6 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
       queryClient.invalidateQueries({ queryKey: ['notes', parentId, parentType] });
       setNewNote('');
       setReplyingTo(null);
-      setAttachedFiles([]);
     },
     onError: (error) => {
       toast({
@@ -204,21 +208,20 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!newNote.trim() && attachedFiles.length === 0) return;
+    if (!newNote.trim()) return;
 
     createNoteMutation.mutate({
       content: newNote,
       parent_id: parentId,
       parent_type: parentType,
       parent_note_id: replyingTo?.id || null,
-      file_urls: attachedFiles,
     });
   };
 
-  const handleFileSelect = (e) => {
+  const handleFilesTabSelect = (e) => {
     const files = e.target.files;
     if (files && files.length > 0) {
-      uploadFiles(files);
+      uploadFilesForTab(files);
     }
     e.target.value = '';
   };
@@ -311,13 +314,36 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
         </div>
 
         {activeTab === 'files' && (
-          <div className="flex-1 overflow-y-auto space-y-3 pr-2" style={{maxHeight: '50vh'}}>
+          <>
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-[13px] text-gray-500 dark:text-gray-400">
+              Files attached to notes for this record
+            </p>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 px-3 text-xs"
+              onClick={() => filesTabInputRef.current?.click()}
+              disabled={isUploadingForTab}
+            >
+              <Paperclip className="w-3.5 h-3.5 mr-1" />
+              {isUploadingForTab ? 'Uploading...' : 'Add File'}
+            </Button>
+            <input
+              ref={filesTabInputRef}
+              type="file"
+              multiple
+              className="hidden"
+              onChange={handleFilesTabSelect}
+            />
+          </div>
+          <div className="flex-1 overflow-y-auto space-y-3 pr-2" style={{maxHeight: '46vh'}}>
             {isLoading ? (
               <div className="text-center py-8 text-muted-foreground">Loading files...</div>
             ) : allNoteFiles.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
                 <FileIcon className="w-10 h-10 mx-auto mb-2 opacity-40" />
-                <p>No files attached to any note yet.</p>
+                <p>No files attached yet. Click "Add File" to upload.</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -356,6 +382,7 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
               </div>
             )}
           </div>
+          </>
         )}
 
         {activeTab === 'notes' && (
@@ -553,24 +580,6 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
                 </div>
               )}
             </div>
-            {/* Attached files preview */}
-            {attachedFiles.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {attachedFiles.map((url, idx) => (
-                  <div key={idx} className="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1.5 text-xs">
-                    <FileIcon className="w-3.5 h-3.5 text-gray-500" />
-                    <span className="max-w-[180px] truncate">{getFileName(url)}</span>
-                    <button
-                      type="button"
-                      onClick={() => setAttachedFiles(prev => prev.filter((_, i) => i !== idx))}
-                      className="text-gray-400 hover:text-red-500"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-2">
                 <VoiceInput
@@ -578,26 +587,8 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
                   onChange={setNewNote}
                   disabled={createNoteMutation.isPending}
                 />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 px-2 text-xs"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={createNoteMutation.isPending || isUploading}
-                >
-                  <Paperclip className="w-4 h-4" />
-                  {isUploading ? 'Uploading...' : 'Attach'}
-                </Button>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  multiple
-                  className="hidden"
-                  onChange={handleFileSelect}
-                />
                 <span className="text-xs text-gray-500 dark:text-gray-400">
-                  Dictate, type @ to mention, or attach a file
+                  Dictate or type @ to mention someone
                 </span>
               </div>
             </div>
@@ -614,7 +605,7 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
               </Button>
               <Button
                 type="submit"
-                disabled={(!newNote.trim() && attachedFiles.length === 0) || createNoteMutation.isPending || isUploading}
+                disabled={!newNote.trim() || createNoteMutation.isPending}
                 className="h-9 px-4 text-sm font-medium rounded-lg bg-blue-600 hover:bg-blue-700 text-white"
               >
                 <Send className="w-4 h-4 mr-2" />
