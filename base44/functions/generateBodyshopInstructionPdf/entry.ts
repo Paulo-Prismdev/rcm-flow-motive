@@ -290,9 +290,31 @@ Deno.serve(async (req) => {
     }
 
     // ═══════════════════════════════════════════
-    // SECTION 4 — Insurance Details
+    // SECTION 4 — Insurance Details (or Non-Insurance notice)
     // ═══════════════════════════════════════════
-    {
+    if (authorisedBy === 'Uninsured') {
+      // Non-insurance / paying privately — no insurer details shown
+      const textW = MW - PAD_X * 2;
+      const noticeLines = doc.splitTextToSize(
+        'This repair is being carried out on a Non-Insurance basis — the client is Paying Privately. There is no insurer involvement and no insurance claim reference for this job.',
+        textW - 8
+      );
+      const noticeBoxH = 11 + noticeLines.length * 5.2;
+      ensureSpace(noticeBoxH + SECTION_GAP);
+      doc.setFillColor(...NAVY);
+      doc.roundedRect(LM, yPos, MW, noticeBoxH, 2, 2, 'F');
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11);
+      doc.setTextColor(...WHITE);
+      doc.text('NON-INSURANCE — PAYING PRIVATELY', TX + 3, yPos + 7.5);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      doc.setTextColor(220, 222, 230);
+      for (let i = 0; i < noticeLines.length; i++) {
+        doc.text(noticeLines[i], TX + 3, yPos + 7.5 + 5.2 * (i + 1));
+      }
+      yPos += noticeBoxH + SECTION_GAP;
+    } else {
       const rows = [
         ['Insurer', fields.insurer],
         ['Claim Number', fields.claim_ref],
@@ -308,7 +330,7 @@ Deno.serve(async (req) => {
       const badgeH = 5;
       const badgeX = LM + MW - PAD_X - badgeW;
       const badgeY = yPos - HEADER_H - PAD_TOP + (HEADER_H - badgeH) / 2;
-      const badgeColor = authorisedBy === 'Third Party Insurer' ? [200, 0, 0] : authorisedBy === 'Uninsured' ? [120, 120, 120] : [0, 120, 60];
+      const badgeColor = authorisedBy === 'Third Party Insurer' ? [200, 0, 0] : [0, 120, 60];
       doc.setFillColor(...badgeColor);
       doc.roundedRect(badgeX, badgeY, badgeW, badgeH, 1.5, 1.5, 'F');
       doc.setTextColor(...WHITE);
@@ -532,30 +554,26 @@ Deno.serve(async (req) => {
     drawAllFooters();
 
     const pdfBytes = doc.output('arraybuffer');
+    const filename = `${claim.job_number || 'instruction'}-${isOrkin ? 'orkin' : 'standard'}.pdf`;
 
-    // Upload & save to claim
+    // Upload & save to claim, then return the file URL as JSON (reliable over axios)
+    let file_url = null;
     try {
       const pdfBlob = new Blob([pdfBytes], { type: 'application/pdf' });
-      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-      const filename = `${claim.job_number || 'instruction'}-${isOrkin ? 'orkin' : 'standard'}-${timestamp}.pdf`;
       const pdfFile = new File([pdfBlob], filename, { type: 'application/pdf' });
       const uploadResult = await base44.asServiceRole.integrations.Core.UploadFile({ file: pdfFile });
+      file_url = uploadResult.file_url;
       const currentFileUrls = Array.isArray(claim.file_urls) ? claim.file_urls : [];
       await base44.asServiceRole.entities.Claim.update(claim.id, {
-        file_urls: [...currentFileUrls, uploadResult.file_url],
-        instruction_pdf_url: uploadResult.file_url
+        file_urls: [...currentFileUrls, file_url],
+        instruction_pdf_url: file_url
       });
     } catch (uploadError) {
       console.error('Failed to upload PDF:', uploadError);
+      return Response.json({ error: 'Failed to upload PDF: ' + uploadError.message }, { status: 500 });
     }
 
-    return new Response(pdfBytes, {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="${claim.job_number || 'instruction'}-${isOrkin ? 'orkin' : 'standard'}.pdf"`
-      }
-    });
+    return Response.json({ file_url, filename });
 
   } catch (error) {
     console.error('PDF generation error:', error.message);

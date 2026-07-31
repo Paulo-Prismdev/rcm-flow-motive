@@ -697,9 +697,9 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
         templateType: 'standard',
       });
 
-      const blob = new Blob([response.data], { type: 'application/pdf' });
-      const url = window.URL.createObjectURL(blob);
-      window.open(url, '_blank');
+      const { file_url } = response.data;
+      if (!file_url) throw new Error('No file URL returned');
+      window.open(file_url, '_blank');
       queryClient.invalidateQueries({ queryKey: ['claims'] });
       queryClient.invalidateQueries({ queryKey: ['claim', claim.id] });
     } catch (error) {

@@ -278,13 +278,12 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
         claimId: claim.id,
         contactOverrides,
         templateType: selectedPdfTemplate,
-        templateConfigId: pdfTemplates.find(t => t.id === selectedPdfTemplate)?.id
       });
 
-      const blob = new Blob([response.data], { type: 'application/pdf' });
-      const url = window.URL.createObjectURL(blob);
-      setGeneratedPdfUrl(url);
-      window.open(url, '_blank');
+      const { file_url } = response.data;
+      if (!file_url) throw new Error('No file URL returned');
+      setGeneratedPdfUrl(file_url);
+      window.open(file_url, '_blank');
       // Invalidate both list and individual claim queries
       queryClient.invalidateQueries({ queryKey: ['claims'] });
       queryClient.invalidateQueries({ queryKey: ['claim', claim.id] });
