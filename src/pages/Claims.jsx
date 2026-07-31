@@ -17,6 +17,7 @@ import { format } from 'date-fns';
 import { useStatusConfigs } from '../components/shared/StatusConfigContext';
 import { getJourneyColor, isExceptionJourney } from '@/components/shared/claimStatusV2';
 import { isClosedJourney, isUpdateTrackingClosed } from '@/components/shared/claimStatusUpdate';
+import { useToast } from "@/components/ui/use-toast";
 
 // ── Repairs table — fixed column widths (global config) ──
 // Every column has a fixed width (min = max) so the table never recomputes
@@ -115,6 +116,7 @@ export default function ClaimsPage() {
   const [showFilters, setShowFilters] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [selectedClaim, setSelectedClaim] = useState(null);
+  const { toast } = useToast();
   const [showArchived, setShowArchived] = useState(false);
   const [showFieldsModal, setShowFieldsModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
@@ -239,6 +241,16 @@ export default function ClaimsPage() {
     onSuccess: (savedClaim) => {
       queryClient.invalidateQueries({ queryKey: ['claims'] });
       if (savedClaim) setSelectedClaim(savedClaim);
+    },
+    onError: (error, variables) => {
+      // Revert the optimistic UI to the server's actual current state
+      const serverClaim = claims.find(c => c.id === variables.id);
+      setSelectedClaim(serverClaim || null);
+      toast({
+        title: "Failed to save changes",
+        description: error?.response?.data?.message || error?.message || "Please try again.",
+        variant: "destructive",
+      });
     },
   });
 
