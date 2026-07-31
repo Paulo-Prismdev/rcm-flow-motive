@@ -18,6 +18,7 @@ import { useStatusConfigs } from '../components/shared/StatusConfigContext';
 import { getJourneyColor, isExceptionJourney } from '@/components/shared/claimStatusV2';
 import { isClosedJourney, isUpdateTrackingClosed } from '@/components/shared/claimStatusUpdate';
 import { useToast } from "@/components/ui/use-toast";
+import { sanitizeClaimData } from '@/components/shared/sanitizeClaimData';
 
 // ── Repairs table — fixed column widths (global config) ──
 // Every column has a fixed width (min = max) so the table never recomputes
@@ -258,7 +259,7 @@ export default function ClaimsPage() {
   // localClaim  = optional full object for immediate UI state before the
   // refetch lands; defaults to updatedClaim for backward compatibility.
   const handleUpdate = (updatedClaim, localClaim) => {
-    updateMutation.mutate({ id: updatedClaim.id, data: updatedClaim });
+    updateMutation.mutate({ id: updatedClaim.id, data: sanitizeClaimData(updatedClaim) });
     setSelectedClaim(localClaim || updatedClaim);
   };
 
