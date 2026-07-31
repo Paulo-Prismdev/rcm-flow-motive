@@ -16,6 +16,63 @@ export default async function(req: Request): Promise<Response> {
     const base44 = createClientFromRequest(req);
     const body = await req.json().catch(() => ({} as any));
 
+    // ── Decay mode: refresh client_comm_status_flag for all active claims
+    //    based on the age of last_client_comm_at. Run on a schedule so the
+    //    stored flag stays accurate without relying on frontend recompute.
+    if (body.decay) {
+      const claims = await base44.asServiceRole.entities.Claim.filter(
+        { archived: false },
+        '-created_date',
+        500
+      );
+      let updated = 0;
+      const now = Date.now();
+      for (const claim of claims) {
+        try {
+          const isClosed =
+            claim.job_status === 'Cancelled' ||
+            ['Invoiced', 'Invoice Paid'].includes(claim.invoice_status);
+          if (isClosed) {
+            if (claim.client_comm_status_flag !== 'Gray') {
+              await base44.asServiceRole.entities.Claim.update(claim.id, {
+                client_comm_status_flag: 'Gray',
+              });
+              updated++;
+            }
+            continue;
+          }
+          if (!claim.last_client_comm_at) {
+            // No client communication ever logged — never show Green.
+            const sinceCreated = claim.created_date
+              ? (now - new Date(claim.created_date).getTime()) / 3600000
+              : 48;
+            const flag = sinceCreated >= 48 ? 'Red' : 'Amber';
+            if (claim.client_comm_status_flag !== flag) {
+              await base44.asServiceRole.entities.Claim.update(claim.id, {
+                client_comm_status_flag: flag,
+              });
+              updated++;
+            }
+            continue;
+          }
+          const hours = (now - new Date(claim.last_client_comm_at).getTime()) / 3600000;
+          let flag: string;
+          if (hours >= 48) flag = 'Red';
+          else if (hours >= 24) flag = 'Amber';
+          else flag = 'Green';
+          if (claim.client_comm_status_flag !== flag) {
+            await base44.asServiceRole.entities.Claim.update(claim.id, {
+              client_comm_status_flag: flag,
+            });
+            updated++;
+          }
+        } catch (e) {
+          // skip this claim
+        }
+      }
+      return Response.json({ decayed: updated, scanned: claims.length });
+    }
+
     // ── Backfill mode: scan all active claims ──
     if (body.backfill) {
       const claims = await base44.asServiceRole.entities.Claim.filter(

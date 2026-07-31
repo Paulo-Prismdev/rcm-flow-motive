@@ -399,7 +399,7 @@ export default function ClaimsPage() {
   // The claims table row (desktop)
   const renderRow = (claim) => {
     const updateStatus = calculateUpdateStatus(claim);
-    const clientCommStatus = calculateClientCommStatus(claim);
+    const clientCommStatus = claim.client_comm_status_flag || 'Gray';
     const isSelected = selectedClaim?.id === claim.id;
     const hasBackorder = claimIdsWithBackorders.has(claim.id);
     const isClosedStatus = isUpdateTrackingClosed(claim);
@@ -490,7 +490,7 @@ export default function ClaimsPage() {
   // Mobile card view for a single claim
   const renderMobileCard = (claim) => {
     const updateStatus = calculateUpdateStatus(claim);
-    const clientCommStatus = calculateClientCommStatus(claim);
+    const clientCommStatus = claim.client_comm_status_flag || 'Gray';
     const hasBackorder = claimIdsWithBackorders.has(claim.id);
     const isClosedStatus = isUpdateTrackingClosed(claim);
     const isDraft = claim.draft === true;
