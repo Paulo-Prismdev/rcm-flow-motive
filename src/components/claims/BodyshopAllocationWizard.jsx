@@ -11,6 +11,7 @@ import WizardInstructionStep from './wizard/WizardInstructionStep';
 import WizardEmailStep from './wizard/WizardEmailStep';
 import WizardConfirmStep from './wizard/WizardConfirmStep';
 import { geocodeAddress } from '@/functions/geocodeAddress';
+import { sanitizeClaimData } from '@/components/shared/sanitizeClaimData';
 
 export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAllocationComplete, startStep = 0, preSelectedBodyshop = null }) {
   const [currentStep, setCurrentStep] = useState(0);
@@ -174,7 +175,7 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
       dataToSave.instruction_contact_name = contactOverrides.name || '';
       dataToSave.instruction_contact_email = contactOverrides.email || '';
       dataToSave.instruction_contact_phone = contactOverrides.phone || '';
-      await base44.entities.Claim.update(claim.id, dataToSave);
+      await base44.entities.Claim.update(claim.id, sanitizeClaimData(dataToSave));
       queryClient.invalidateQueries({ queryKey: ['claims'] });
       queryClient.invalidateQueries({ queryKey: ['claim', claim.id] });
       // Skip the "Find Repairer" map step if a bodyshop is already selected
