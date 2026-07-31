@@ -74,6 +74,17 @@ export default function ClaimUpdatesQuickView({ claim, isOpen, onClose }) {
         update_status_flag: 'Gray',
       }),
     };
+    // Client Communication updates also reset the dedicated 48-hour client
+    // communication tracker (separate from the general case timer above).
+    if (updateType === 'Client Communication') {
+      if (isClosedAfterUpdate) {
+        updateData.client_comm_status_flag = 'Gray';
+      } else {
+        updateData.last_client_comm_at = now.toISOString();
+        updateData.next_client_comm_due_at = fortyEightHoursFromNow.toISOString();
+        updateData.client_comm_status_flag = 'Green';
+      }
+    }
     // Only modify statuses for an explicit Status Change — a regular update
     // must never alter job_status, secondary_status or tertiary_status.
     if (updateType === 'Status Change') {
