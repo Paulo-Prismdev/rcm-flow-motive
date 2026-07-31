@@ -152,6 +152,7 @@ export default function ClaimsPage() {
     queryKey: ['claims'],
     queryFn: () => base44.entities.Claim.list('-created_date', 5000),
     staleTime: 30000,
+    refetchInterval: 30000,
   });
 
   const { data: backorderedParts = [] } = useQuery({
