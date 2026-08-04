@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Badge } from "@/components/ui/badge";
 import ClaimUpdateForm from '../claims/ClaimUpdateForm';
 import OnSiteMarker from '../claims/OnSiteMarker';
+import { isUpdateTrackingClosed } from "@/components/shared/claimStatusUpdate";
 
 const UPDATE_TYPES = [
   "Status Change", "Client Communication", "Bodyshop Communication", "Insurer Communication",
@@ -87,10 +88,25 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
         await base44.entities.Claim.update(claimId, { job_status: updateData.new_status, secondary_status: updateData.new_secondary_status || null });
         return await base44.entities.ClaimUpdate.create({ update_type: 'Other', description: updateData.description, next_steps: updateData.next_steps, due_date_for_next_action: updateData.due_date_for_next_action, claim_id: claimId, parent_update_id: updateData.parent_update_id, tagged_user_ids: updateData.tagged_user_ids, ...(currentUser?.company_id && { company_id: currentUser.company_id }) });
       }
-      return await base44.entities.ClaimUpdate.create({ ...updateData, claim_id: claimId, ...(currentUser?.company_id && { company_id: currentUser.company_id }) });
+      const created = await base44.entities.ClaimUpdate.create({ ...updateData, claim_id: claimId, ...(currentUser?.company_id && { company_id: currentUser.company_id }) });
+      // Client Communication updates reset the dedicated 48-hour client
+      // communication tracker immediately (also handled by entity automation,
+      // but we do it here so the UI reflects the change without waiting).
+      if (updateData.update_type === 'Client Communication') {
+        const now = new Date();
+        const closed = isUpdateTrackingClosed({ job_status: claim?.journey_status || claim?.job_status, invoice_status: claim?.invoice_status });
+        await base44.entities.Claim.update(claimId, {
+          last_client_comm_at: now.toISOString(),
+          next_client_comm_due_at: new Date(now.getTime() + 48 * 60 * 60 * 1000).toISOString(),
+          client_comm_status_flag: closed ? 'Gray' : 'Green',
+        });
+      }
+      return created;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['claimUpdates', claimId] });
+      queryClient.invalidateQueries({ queryKey: ['claims'] });
+      queryClient.invalidateQueries({ queryKey: ['claim', claimId] });
       if (onUpdateCreated) onUpdateCreated(newUpdate.new_status || null, newUpdate.new_secondary_status || null, claim?.tertiary_status || null, newUpdate.update_type);
       resetForm();
     },
