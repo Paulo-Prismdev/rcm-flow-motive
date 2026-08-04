@@ -16,9 +16,10 @@ export default async function(req: Request): Promise<Response> {
     const base44 = createClientFromRequest(req);
     const body = await req.json().catch(() => ({} as any));
 
-    // ── Decay mode: refresh client_comm_status_flag for all active claims
-    //    based on the age of last_client_comm_at. Run on a schedule so the
-    //    stored flag stays accurate without relying on frontend recompute.
+    // ── Decay mode: refresh client_comm_status_flag for all active claims.
+    //    Also self-heals: if a Client Communication update was created but the
+    //    frontend/automation missed updating last_client_comm_at, sync it from
+    //    the latest update record before computing the flag. Run on a schedule.
     if (body.decay) {
       const claims = await base44.asServiceRole.entities.Claim.filter(
         { archived: false },
@@ -41,7 +42,34 @@ export default async function(req: Request): Promise<Response> {
             }
             continue;
           }
-          if (!claim.last_client_comm_at) {
+
+          // Self-heal: check if there's a newer Client Communication update
+          // than what last_client_comm_at reflects.
+          let latestCommAt = claim.last_client_comm_at;
+          const latestUpdates = await base44.asServiceRole.entities.ClaimUpdate.filter(
+            { claim_id: claim.id, update_type: 'Client Communication' },
+            '-created_date',
+            1
+          );
+          if (latestUpdates[0]) {
+            const updateDate = latestUpdates[0].created_date;
+            if (!latestCommAt || new Date(updateDate) > new Date(latestCommAt)) {
+              latestCommAt = updateDate;
+              const nextDue = new Date(
+                new Date(updateDate).getTime() + 48 * 60 * 60 * 1000
+              ).toISOString();
+              // Sync last_client_comm_at and set Green immediately.
+              await base44.asServiceRole.entities.Claim.update(claim.id, {
+                last_client_comm_at: new Date(updateDate).toISOString(),
+                next_client_comm_due_at: nextDue,
+                client_comm_status_flag: 'Green',
+              });
+              updated++;
+              continue;
+            }
+          }
+
+          if (!latestCommAt) {
             // No client communication ever logged — never show Green.
             const sinceCreated = claim.created_date
               ? (now - new Date(claim.created_date).getTime()) / 3600000
@@ -55,7 +83,7 @@ export default async function(req: Request): Promise<Response> {
             }
             continue;
           }
-          const hours = (now - new Date(claim.last_client_comm_at).getTime()) / 3600000;
+          const hours = (now - new Date(latestCommAt).getTime()) / 3600000;
           let flag: string;
           if (hours >= 48) flag = 'Red';
           else if (hours >= 24) flag = 'Amber';
