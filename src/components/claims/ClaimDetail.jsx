@@ -88,7 +88,7 @@ import {
 import ClaimDetailMobileHeader from './ClaimDetailMobileHeader';
 import ClaimJourneyTimeline from './ClaimJourneyTimeline';
 import ClaimStatusEditForm from './ClaimStatusEditForm';
-import { isUpdateTrackingClosed } from '../shared/claimStatusUpdate';
+import { isUpdateTrackingClosed, computeUpdateStatusFlag } from '../shared/claimStatusUpdate';
 
 const EditableSection = ({ title, icon: Icon, claim, onUpdate, children, EditComponent, canEdit = true }) => {
     const [isEditing, setIsEditing] = useState(false);
@@ -1541,7 +1541,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                     {claim.tertiary_status && <StatusBadge status={claim.tertiary_status} variant="secondary" />}
                     {!isClosedStatus && claim.update_status_flag && (
                       <button onClick={() => setIsUpdateTrackingOpen(true)} className="hover:opacity-80 transition-all cursor-pointer rounded-md">
-                        <UpdateStatusBadge status={claim.update_status_flag} small />
+                        <UpdateStatusBadge status={computeUpdateStatusFlag(claim)} small />
                       </button>
                     )}
                     {claim.archived && <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400">Archived</span>}

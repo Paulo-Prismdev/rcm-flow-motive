@@ -3,6 +3,7 @@ import { ArrowLeft, ChevronDown, FileText, Image, Mail, ListTodo, Timer, History
 import { formatUKRegistration } from '../shared/formatRegistration';
 import StatusBadge from '../shared/StatusBadge';
 import UpdateStatusBadge from '../shared/UpdateStatusBadge';
+import { computeUpdateStatusFlag } from '../shared/claimStatusUpdate';
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -108,7 +109,7 @@ export default function ClaimDetailMobileHeader({
         {claim.tertiary_status && <StatusBadge status={claim.tertiary_status} variant="secondary" />}
         {!isClosedStatus && claim.update_status_flag && (
           <button type="button" onClick={onUpdateTracking}>
-            <UpdateStatusBadge status={claim.update_status_flag} small />
+            <UpdateStatusBadge status={computeUpdateStatusFlag(claim)} small />
           </button>
         )}
         {claim.archived && (

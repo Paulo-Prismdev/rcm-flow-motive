@@ -19,6 +19,31 @@ export function isUpdateTrackingClosed(claim) {
   return ['Invoiced', 'Invoice Paid'].includes(claim.invoice_status);
 }
 
+// Dynamically compute the update_status_flag from timestamps so the badge
+// never shows "On Track" when the 48-hour window has actually expired.
+// The stored update_status_flag field can go stale because there is no
+// backend decay job for it (unlike client_comm_status_flag).
+export function computeUpdateStatusFlag(claim) {
+  if (!claim) return null;
+
+  // Snoozed — override active and not yet expired
+  if (claim.override_active) {
+    const expiry = claim.override_expiry_at ? new Date(claim.override_expiry_at) : null;
+    if (!expiry || expiry > new Date()) return 'Blue';
+    // Override expired — fall through to time-based calculation
+  }
+
+  if (isUpdateTrackingClosed(claim)) return 'Gray';
+
+  const nextDue = claim.next_update_due_at ? new Date(claim.next_update_due_at) : null;
+  if (!nextDue) return claim.update_status_flag || null;
+
+  const hoursRemaining = (nextDue.getTime() - Date.now()) / (1000 * 60 * 60);
+  if (hoursRemaining <= 0) return 'Red';
+  if (hoursRemaining <= 12) return 'Amber';
+  return 'Green';
+}
+
 // Build the claim-field payload written for an explicit Status Change update.
 // journey / secondary / tertiary are the v2 single-select values from the form.
 // job_status is kept in sync with journey so legacy readers (closed detection,

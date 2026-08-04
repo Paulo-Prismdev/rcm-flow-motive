@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { format, isPast, formatDistanceToNow } from 'date-fns';
 import UpdateStatusBadge from '../shared/UpdateStatusBadge';
-import { isUpdateTrackingClosed } from '../shared/claimStatusUpdate';
+import { isUpdateTrackingClosed, computeUpdateStatusFlag } from '../shared/claimStatusUpdate';
 
 export default function UpdateTrackingModal({ claim, isOpen, onClose, onSetOverride, canEdit }) {
   if (!claim) return null;
@@ -73,7 +73,7 @@ export default function UpdateTrackingModal({ claim, isOpen, onClose, onSetOverr
           {/* Status Badge */}
           <div className="flex items-center justify-between">
             <span className="text-sm text-foreground-muted">Current Status:</span>
-            <UpdateStatusBadge status={claim.update_status_flag} />
+            <UpdateStatusBadge status={computeUpdateStatusFlag(claim)} />
           </div>
 
           {/* Override Notice */}
