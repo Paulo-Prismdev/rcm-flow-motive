@@ -126,48 +126,77 @@ Deno.serve(async (req) => {
     }
 
     // ── DISTANCE MATRIX: calculate driving time/distance from origin to multiple destinations ──
+    // Per-element cache: only fetches uncached origin→destination pairs
     if (action === 'distance_matrix') {
       const { origin, destinations } = body;
       if (!origin || !destinations || !Array.isArray(destinations) || destinations.length === 0) {
         return Response.json({ error: 'origin and destinations array are required' }, { status: 400 });
       }
 
-      const BATCH_SIZE = 25;
-      const results = [];
+      const originKey = `${Number(origin.lat).toFixed(5)},${Number(origin.lng).toFixed(5)}`;
+      const results = new Array(destinations.length);
+      const uncachedIndices = [];
+      const uncachedDestinations = [];
 
-      for (let i = 0; i < destinations.length; i += BATCH_SIZE) {
-        const batch = destinations.slice(i, i + BATCH_SIZE);
-        const destStr = batch.map(d => `${d.lat},${d.lng}`).join('|');
-
-        const params = new URLSearchParams({
-          origins: `${origin.lat},${origin.lng}`,
-          destinations: destStr,
-          mode: 'driving',
-          units: 'imperial',
-          key: GOOGLE_API_KEY
-        });
-
-        const response = await fetch(
-          `https://maps.googleapis.com/maps/api/distancematrix/json?${params}`,
-          { signal: AbortSignal.timeout(15000) }
-        );
-
-        if (!response.ok) {
-          throw new Error(`Google Distance Matrix API error: ${response.status}`);
+      // Check cache for each origin→destination pair
+      destinations.forEach((dest, idx) => {
+        const destKey = `${Number(dest.lat).toFixed(5)},${Number(dest.lng).toFixed(5)}`;
+        const cacheKey = `dm:${originKey}->${destKey}`;
+        const cached = cache.get(cacheKey);
+        if (cached && (Date.now() - cached.timestamp) < CACHE_TTL) {
+          results[idx] = { ...cached.data, index: idx };
+        } else {
+          uncachedIndices.push(idx);
+          uncachedDestinations.push(dest);
         }
+      });
 
-        const data = await response.json();
-        const elements = data.rows?.[0]?.elements || [];
-        elements.forEach((el, idx) => {
-          results.push({
-            index: i + idx,
-            duration_text: el.duration?.text || null,
-            duration_seconds: el.duration?.value || null,
-            distance_text: el.distance?.text || null,
-            distance_meters: el.distance?.value || null,
-            reachable: el.status === 'OK'
+      // Only fetch uncached destinations from Google
+      if (uncachedDestinations.length > 0) {
+        const BATCH_SIZE = 25;
+        for (let i = 0; i < uncachedDestinations.length; i += BATCH_SIZE) {
+          const batch = uncachedDestinations.slice(i, i + BATCH_SIZE);
+          const batchIndices = uncachedIndices.slice(i, i + BATCH_SIZE);
+          const destStr = batch.map(d => `${d.lat},${d.lng}`).join('|');
+
+          const params = new URLSearchParams({
+            origins: `${origin.lat},${origin.lng}`,
+            destinations: destStr,
+            mode: 'driving',
+            units: 'imperial',
+            key: GOOGLE_API_KEY
           });
-        });
+
+          const response = await fetch(
+            `https://maps.googleapis.com/maps/api/distancematrix/json?${params}`,
+            { signal: AbortSignal.timeout(15000) }
+          );
+
+          if (!response.ok) {
+            throw new Error(`Google Distance Matrix API error: ${response.status}`);
+          }
+
+          const data = await response.json();
+          const elements = data.rows?.[0]?.elements || [];
+          elements.forEach((el, batchIdx) => {
+            const resultIdx = batchIndices[batchIdx];
+            const result = {
+              index: resultIdx,
+              duration_text: el.duration?.text || null,
+              duration_seconds: el.duration?.value || null,
+              distance_text: el.distance?.text || null,
+              distance_meters: el.distance?.value || null,
+              reachable: el.status === 'OK'
+            };
+            results[resultIdx] = result;
+
+            // Cache this origin→destination pair
+            const dest = batch[batchIdx];
+            const destKey = `${Number(dest.lat).toFixed(5)},${Number(dest.lng).toFixed(5)}`;
+            const cacheKey = `dm:${originKey}->${destKey}`;
+            cache.set(cacheKey, { timestamp: Date.now(), data: result });
+          });
+        }
       }
 
       return Response.json({ results });

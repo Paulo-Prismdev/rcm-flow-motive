@@ -16,6 +16,7 @@ import AddressLookupInput from '@/components/shared/AddressLookupInput';
 import { geocodeAddress } from '@/functions/geocodeAddress';
 import { SUPPLIER_COVERAGE_AREAS, milesToMeters } from '@/components/map/supplierCoverageData';
 import { GREAT_BRITAIN_GEOJSON } from '@/components/map/greatBritainOutline';
+import { haversineDistance, formatHaversineDistance } from '@/components/shared/haversine';
 
 // ── Leaflet icon setup ──
 delete L.Icon.Default.prototype._getIconUrl;
@@ -133,11 +134,10 @@ export default function BodyshopMap() {
   const [customerLocation, setCustomerLocation] = useState(null);
   const [selectedBodyshop, setSelectedBodyshop] = useState(null);
   const [logistics, setLogistics] = useState({});
-  const [isLoadingLogistics, setIsLoadingLogistics] = useState(false);
+  const [isLoadingDistance, setIsLoadingDistance] = useState(false);
   const [routePoints, setRoutePoints] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('name');
-  const [maxTimeFilter, setMaxTimeFilter] = useState(null);
   const [showSettings, setShowSettings] = useState(false);
   const [listExpanded, setListExpanded] = useState(false);
   const [visibleTiers, setVisibleTiers] = useState({
@@ -241,43 +241,30 @@ export default function BodyshopMap() {
     bodyshops.filter(b => getCoords(b) !== null),
     [bodyshops, geocodedCoords]);
 
-  // ── Fetch distance matrix when customer location is available ──
-  useEffect(() => {
-    if (!customerLocation || resolvedBodyshops.length === 0) return;
-    let cancelled = false;
+  // ── Fetch distance for a single bodyshop on demand (when user clicks a pin) ──
+  const fetchDistanceForBodyshop = async (bodyshop) => {
+    if (!customerLocation || !bodyshop) return;
+    const coords = getCoords(bodyshop);
+    if (!coords) return;
+    if (logistics[bodyshop.id]) return; // already fetched
 
-    const fetchLogistics = async () => {
-      setIsLoadingLogistics(true);
-      try {
-        const destinations = resolvedBodyshops.map(b => {
-          const c = getCoords(b);
-          return { lat: c.lat, lng: c.lng };
-        });
-        const response = await geocodeAddress({
-          action: 'distance_matrix', origin: customerLocation, destinations
-        });
-        const data = response?.data || response;
-        if (cancelled) return;
-
-        const logMap = {};
-        if (data?.results) {
-          data.results.forEach((r, idx) => {
-            if (idx < resolvedBodyshops.length) {
-              logMap[resolvedBodyshops[idx].id] = r;
-            }
-          });
-        }
-        setLogistics(logMap);
-      } catch (err) {
-        console.error('Logistics fetch failed:', err);
-      } finally {
-        if (!cancelled) setIsLoadingLogistics(false);
+    setIsLoadingDistance(true);
+    try {
+      const response = await geocodeAddress({
+        action: 'distance_matrix',
+        origin: customerLocation,
+        destinations: [{ lat: coords.lat, lng: coords.lng }]
+      });
+      const data = response?.data || response;
+      if (data?.results?.[0]) {
+        setLogistics(prev => ({ ...prev, [bodyshop.id]: data.results[0] }));
       }
-    };
-
-    fetchLogistics();
-    return () => { cancelled = true; };
-  }, [customerLocation, resolvedBodyshops, geocodedCoords]);
+    } catch (err) {
+      console.error('Distance fetch failed:', err);
+    } finally {
+      setIsLoadingDistance(false);
+    }
+  };
 
   // ── Fetch driving route polyline when a bodyshop is selected ──
   useEffect(() => {
@@ -335,25 +322,21 @@ export default function BodyshopMap() {
       );
     }
 
-    if (maxTimeFilter) {
-      list = list.filter(b => {
-        const log = logistics[b.id];
-        return log && log.duration_seconds && log.duration_seconds <= maxTimeFilter * 60;
-      });
-    }
-
-    if (sortBy === 'time') {
+    if (sortBy === 'distance' && customerLocation) {
       list.sort((a, b) => {
-        const aTime = logistics[a.id]?.duration_seconds ?? Infinity;
-        const bTime = logistics[b.id]?.duration_seconds ?? Infinity;
-        return aTime - bTime;
+        const aCoords = getCoords(a);
+        const bCoords = getCoords(b);
+        if (!aCoords || !bCoords) return 0;
+        const aDist = haversineDistance(customerLocation.lat, customerLocation.lng, aCoords.lat, aCoords.lng);
+        const bDist = haversineDistance(customerLocation.lat, customerLocation.lng, bCoords.lat, bCoords.lng);
+        return aDist - bDist;
       });
     } else {
       list.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
     }
 
     return list;
-  }, [resolvedBodyshops, logistics, sortBy, searchQuery, maxTimeFilter, geocodedCoords]);
+  }, [resolvedBodyshops, sortBy, searchQuery, customerLocation, geocodedCoords]);
 
   const hasLogistics = Object.keys(logistics).length > 0;
 
@@ -377,10 +360,12 @@ export default function BodyshopMap() {
 
   const handleSelectBodyshop = (bodyshop) => {
     setSelectedBodyshop(prev => prev?.id === bodyshop.id ? null : bodyshop);
+    fetchDistanceForBodyshop(bodyshop);
   };
 
   const handleSelectBodyshopFromList = (bodyshop) => {
     setSelectedBodyshop(prev => prev?.id === bodyshop.id ? null : bodyshop);
+    fetchDistanceForBodyshop(bodyshop);
     const coords = getCoords(bodyshop);
     if (coords) {
       setMapCenter([coords.lat, coords.lng]);
@@ -635,13 +620,13 @@ export default function BodyshopMap() {
       )}
 
       {/* ── STATUS INDICATORS (below search pill) ── */}
-      {(isLoadingLogistics || isGeocoding) && (
+      {(isLoadingDistance || isGeocoding) && (
         <div className="absolute z-[998] left-3 top-16">
           <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-full shadow-md px-3 py-1.5 flex items-center gap-2">
-            {isLoadingLogistics ? (
+            {isLoadingDistance ? (
               <>
                 <Navigation className="w-3.5 h-3.5 text-blue-500 animate-pulse" />
-                <span className="text-xs">Calculating distances...</span>
+                <span className="text-xs">Calculating distance...</span>
               </>
             ) : (
               <>
@@ -681,6 +666,10 @@ export default function BodyshopMap() {
                   tierFilteredBodyshops.map((bodyshop) => {
                     const isSelected = selectedBodyshop?.id === bodyshop.id;
                     const log = logistics[bodyshop.id];
+                    const coords = getCoords(bodyshop);
+                    const haversineMiles = (customerLocation && coords)
+                      ? haversineDistance(customerLocation.lat, customerLocation.lng, coords.lat, coords.lng)
+                      : null;
                     return (
                       <div
                         key={bodyshop.id}
@@ -691,7 +680,14 @@ export default function BodyshopMap() {
                       >
                         <div className="flex items-start justify-between gap-2 mb-1">
                           <p className="font-semibold text-sm truncate flex-1">{bodyshop.name}</p>
-                          <TravelBadge log={log} />
+                          {log ? (
+                            <TravelBadge log={log} />
+                          ) : haversineMiles != null ? (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold flex-shrink-0 bg-gray-100 text-gray-500">
+                              <Navigation className="w-3 h-3" />
+                              ≈{formatHaversineDistance(haversineMiles)}
+                            </span>
+                          ) : null}
                         </div>
                         <div className="space-y-0.5 text-xs text-muted-foreground">
                           {bodyshop.contact_name && <p className="truncate">{bodyshop.contact_name}</p>}

@@ -17,6 +17,7 @@ import {
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { geocodeAddress } from '@/functions/geocodeAddress';
+import { haversineDistance, formatHaversineDistance } from '@/components/shared/haversine';
 
 // ── Leaflet icon setup ──
 delete L.Icon.Default.prototype._getIconUrl;
@@ -100,11 +101,10 @@ export default function ClaimBodyshopMapModal({ claim, isOpen, onClose, onSelect
   const [mapCenter, setMapCenter] = useState([54.5, -2.0]);
   const [mapZoom, setMapZoom] = useState(7);
   const [logistics, setLogistics] = useState({});
-  const [isLoadingLogistics, setIsLoadingLogistics] = useState(false);
+  const [isLoadingDistance, setIsLoadingDistance] = useState(false);
   const [routePoints, setRoutePoints] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState('time');
-  const [maxTimeFilter, setMaxTimeFilter] = useState(null);
+  const [sortBy, setSortBy] = useState('distance');
 
   const hasAttemptedGeocode = useRef(false);
 
@@ -140,7 +140,6 @@ export default function ClaimBodyshopMapModal({ claim, isOpen, onClose, onSelect
       setLogistics({});
       setRoutePoints([]);
       setSearchQuery('');
-      setMaxTimeFilter(null);
 
       if (validBodyshops.length > 0) {
         const avgLat = validBodyshops.reduce((sum, b) => sum + b.latitude, 0) / validBodyshops.length;
@@ -192,48 +191,39 @@ export default function ClaimBodyshopMapModal({ claim, isOpen, onClose, onSelect
     geocodeVehicleLocation();
   }, [isOpen, hasValidAddress, vehicleLocation, isGeocoding]);
 
-  // Fetch distance matrix when client location is available
-  useEffect(() => {
-    if (!clientLocation || validBodyshops.length === 0) return;
-    let cancelled = false;
+  // ── Fetch distance for a single bodyshop on demand ──
+  const fetchDistanceForBodyshop = async (bodyshop) => {
+    if (!clientLocation || !bodyshop) return;
+    if (logistics[bodyshop.id]) return; // already fetched
 
-    const fetchLogistics = async () => {
-      setIsLoadingLogistics(true);
-      try {
-        const destinations = validBodyshops.map(b => ({ lat: b.latitude, lng: b.longitude }));
-        const response = await geocodeAddress({
-          action: 'distance_matrix', origin: clientLocation, destinations
-        });
-        const data = response?.data || response;
-        if (cancelled) return;
-
-        const logMap = {};
-        if (data?.results) {
-          data.results.forEach((r, idx) => {
-            if (idx < validBodyshops.length) {
-              logMap[validBodyshops[idx].id] = r;
-            }
-          });
-        }
-        setLogistics(logMap);
-      } catch (err) {
-        console.error('Logistics fetch failed:', err);
-      } finally {
-        if (!cancelled) setIsLoadingLogistics(false);
+    setIsLoadingDistance(true);
+    try {
+      const response = await geocodeAddress({
+        action: 'distance_matrix',
+        origin: clientLocation,
+        destinations: [{ lat: bodyshop.latitude, lng: bodyshop.longitude }]
+      });
+      const data = response?.data || response;
+      if (data?.results?.[0]) {
+        setLogistics(prev => ({ ...prev, [bodyshop.id]: data.results[0] }));
       }
-    };
+    } catch (err) {
+      console.error('Distance fetch failed:', err);
+    } finally {
+      setIsLoadingDistance(false);
+    }
+  };
 
-    fetchLogistics();
-    return () => { cancelled = true; };
-  }, [clientLocation, validBodyshops]);
-
-  // Fetch driving route polyline when a bodyshop is selected
+  // Fetch driving route polyline + distance when a bodyshop is selected
   useEffect(() => {
     if (!clientLocation || !selectedBodyshop) {
       setRoutePoints([]);
       return;
     }
     let cancelled = false;
+
+    // Fetch distance on demand
+    fetchDistanceForBodyshop(selectedBodyshop);
 
     const fetchRoute = async () => {
       try {
@@ -268,8 +258,6 @@ export default function ClaimBodyshopMapModal({ claim, isOpen, onClose, onSelect
     }
   };
 
-  const hasLogistics = Object.keys(logistics).length > 0;
-
   const sortedBodyshops = useMemo(() => {
     let list = [...validBodyshops];
 
@@ -282,25 +270,18 @@ export default function ClaimBodyshopMapModal({ claim, isOpen, onClose, onSelect
       );
     }
 
-    if (maxTimeFilter) {
-      list = list.filter(b => {
-        const log = logistics[b.id];
-        return log && log.duration_seconds && log.duration_seconds <= maxTimeFilter * 60;
-      });
-    }
-
-    if (sortBy === 'time') {
+    if (sortBy === 'distance' && clientLocation) {
       list.sort((a, b) => {
-        const aTime = logistics[a.id]?.duration_seconds ?? Infinity;
-        const bTime = logistics[b.id]?.duration_seconds ?? Infinity;
-        return aTime - bTime;
+        const aDist = haversineDistance(clientLocation.lat, clientLocation.lng, a.latitude, a.longitude);
+        const bDist = haversineDistance(clientLocation.lat, clientLocation.lng, b.latitude, b.longitude);
+        return aDist - bDist;
       });
     } else {
       list.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
     }
 
     return list;
-  }, [validBodyshops, logistics, sortBy, searchQuery, maxTimeFilter]);
+  }, [validBodyshops, sortBy, searchQuery, clientLocation]);
 
   const radiusInMeters = 30 * 1609.34;
 
@@ -336,10 +317,10 @@ export default function ClaimBodyshopMapModal({ claim, isOpen, onClose, onSelect
               </div>
             </div>
           )}
-          {isLoadingLogistics && (
+          {isLoadingDistance && (
             <div className="p-3 rounded-lg border border-blue-500/30 bg-blue-50/50 flex items-center gap-2">
               <Navigation className="w-4 h-4 text-blue-500 animate-pulse" />
-              <p className="text-xs">Calculating driving distances to all repairers...</p>
+              <p className="text-xs">Calculating driving distance...</p>
             </div>
           )}
 
@@ -349,33 +330,14 @@ export default function ClaimBodyshopMapModal({ claim, isOpen, onClose, onSelect
               <Input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search by name, town, or postcode..." />
             </div>
             <div className="flex gap-2">
-              <Button variant={sortBy === 'time' ? 'default' : 'outline'} size="sm" onClick={() => setSortBy('time')} disabled={!clientLocation || !hasLogistics} className="h-9">
-                <Clock className="w-3.5 h-3.5 mr-1" /> Travel Time
+              <Button variant={sortBy === 'distance' ? 'default' : 'outline'} size="sm" onClick={() => setSortBy('distance')} disabled={!clientLocation} className="h-9">
+                <Navigation className="w-3.5 h-3.5 mr-1" /> Distance
               </Button>
               <Button variant={sortBy === 'name' ? 'default' : 'outline'} size="sm" onClick={() => setSortBy('name')} className="h-9">
                 Name
               </Button>
             </div>
           </div>
-
-          {/* Time filter chips */}
-          {clientLocation && hasLogistics && (
-            <div className="flex gap-2 flex-wrap">
-              {[
-                { label: '15 min', value: 15 },
-                { label: '30 min', value: 30 },
-                { label: '45 min', value: 45 },
-                { label: 'No limit', value: null },
-              ].map(chip => (
-                <button key={chip.label} onClick={() => setMaxTimeFilter(chip.value)}
-                  className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
-                    maxTimeFilter === chip.value ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                  }`}>
-                  {chip.label}
-                </button>
-              ))}
-            </div>
-          )}
 
           {/* Main content: List + Map */}
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-3">
@@ -387,6 +349,9 @@ export default function ClaimBodyshopMapModal({ claim, isOpen, onClose, onSelect
                 sortedBodyshops.map((bodyshop) => {
                   const isSelected = selectedBodyshop?.id === bodyshop.id;
                   const log = logistics[bodyshop.id];
+                  const haversineMiles = clientLocation
+                    ? haversineDistance(clientLocation.lat, clientLocation.lng, bodyshop.latitude, bodyshop.longitude)
+                    : null;
                   return (
                     <div key={bodyshop.id} onClick={() => handleBodyshopClick(bodyshop)}
                       className={`p-3 rounded-lg border-2 cursor-pointer transition-all ${
@@ -394,7 +359,14 @@ export default function ClaimBodyshopMapModal({ claim, isOpen, onClose, onSelect
                       }`}>
                       <div className="flex items-start justify-between gap-2 mb-1">
                         <p className="font-semibold text-sm truncate flex-1">{bodyshop.name}</p>
-                        <TravelBadge log={log} />
+                        {log ? (
+                          <TravelBadge log={log} />
+                        ) : haversineMiles != null ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold flex-shrink-0 bg-gray-100 text-gray-500">
+                            <Navigation className="w-3 h-3" />
+                            ≈{formatHaversineDistance(haversineMiles)}
+                          </span>
+                        ) : null}
                       </div>
                       <div className="space-y-0.5 text-xs text-muted-foreground">
                         {bodyshop.contact_name && <p className="truncate">{bodyshop.contact_name}</p>}
