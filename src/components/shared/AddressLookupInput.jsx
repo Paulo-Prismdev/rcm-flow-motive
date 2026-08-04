@@ -33,6 +33,9 @@ export default function AddressLookupInput({
   const [error, setError] = useState(null);
   const suggestionsTimeout = useRef(null);
   const inputRef = useRef(null);
+  // Session-level cache: survives across form opens, dies on page reload.
+  // Prevents repeat autocomplete API calls for the same input text.
+  const sessionCache = useRef(new Map());
 
   // Update internal state when external value changes
   useEffect(() => {
@@ -48,12 +51,24 @@ export default function AddressLookupInput({
       return;
     }
 
+    const trimmed = text.trim();
+
+    // Check session cache first — avoids API call entirely for repeat searches
+    const cached = sessionCache.current.get(trimmed.toLowerCase());
+    if (cached) {
+      setSuggestions(cached);
+      setShowSuggestions(cached.length > 0);
+      return;
+    }
+
     setIsLoadingSuggestions(true);
 
     try {
       const response = await geocodeAddress({ action: 'autocomplete', input: text });
       const data = response.data || response;
       const list = data.suggestions || [];
+      // Store in session cache
+      sessionCache.current.set(trimmed.toLowerCase(), list);
       setSuggestions(list);
       setShowSuggestions(list.length > 0);
     } catch (err) {
@@ -65,7 +80,7 @@ export default function AddressLookupInput({
     }
   };
 
-  // Debounced search handler
+  // Debounced search handler — 500ms prevents rapid-fire API calls while typing
   const handleSearchChange = (text) => {
     setSearchText(text);
     setError(null);
@@ -77,7 +92,7 @@ export default function AddressLookupInput({
 
     suggestionsTimeout.current = setTimeout(() => {
       fetchSuggestions(text);
-    }, 300);
+    }, 500);
   };
 
   // Handle suggestion selection — fetch full details from Google Place Details
