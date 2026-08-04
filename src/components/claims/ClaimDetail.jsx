@@ -465,10 +465,6 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
     }
   };
 
-  const handleClientCommOverrideSave = (overrideData) => {
-    handleUpdate({ ...claim, ...overrideData });
-  };
-
   const handleClaimUpdateCreated = (newStatus, newSecondaryStatus, newTertiaryStatus, updateType) => {
     const now = new Date();
     const effectiveStatus = newStatus || claim.job_status;
@@ -1344,8 +1340,6 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
         isOpen={isNotesOpen}
         onClose={() => setIsNotesOpen(false)}
       />
-      
-
 
       <UpdateOverrideModal
         isOpen={isOverrideModalOpen}
