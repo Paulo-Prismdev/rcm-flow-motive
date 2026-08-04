@@ -694,6 +694,28 @@
     "override_notes": {
       "type": "string"
     },
+    "client_comm_override_active": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether client communication tracking is snoozed/overridden"
+    },
+    "client_comm_override_reason": {
+      "type": "string",
+      "description": "Reason for snoozing client communication tracking"
+    },
+    "client_comm_override_expiry_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the client communication override expires"
+    },
+    "client_comm_override_by_user_email": {
+      "type": "string",
+      "description": "User who set the client communication override"
+    },
+    "client_comm_override_notes": {
+      "type": "string",
+      "description": "Additional notes for the client communication override"
+    },
     "requires_indemnity": {
       "type": "boolean",
       "default": false

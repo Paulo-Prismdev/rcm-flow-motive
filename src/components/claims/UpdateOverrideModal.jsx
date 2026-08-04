@@ -21,11 +21,18 @@ const PRESET_REASONS = [
   { label: 'Legal Review', days: 14, reason: 'Under legal review' },
 ];
 
-export default function UpdateOverrideModal({ isOpen, onClose, claim, onSave }) {
+export default function UpdateOverrideModal({ isOpen, onClose, claim, onSave, trackerType = 'general' }) {
+  const isClientComm = trackerType === 'client_comm';
   const [selectedPreset, setSelectedPreset] = useState(null);
   const [customDays, setCustomDays] = useState('');
   const [reason, setReason] = useState('');
   const [notes, setNotes] = useState('');
+
+  // Read the correct fields based on tracker type
+  const activeOverride = isClientComm ? claim?.client_comm_override_active : claim?.override_active;
+  const existingReason = isClientComm ? claim?.client_comm_override_reason : claim?.override_reason;
+  const existingExpiry = isClientComm ? claim?.client_comm_override_expiry_at : claim?.override_expiry_at;
+  const existingNotes = isClientComm ? claim?.client_comm_override_notes : claim?.override_notes;
 
   const handlePresetClick = (preset) => {
     setSelectedPreset(preset);
@@ -47,13 +54,23 @@ export default function UpdateOverrideModal({ isOpen, onClose, claim, onSave }) 
     const now = new Date();
     const expiryDate = new Date(now.getTime() + days * 24 * 60 * 60 * 1000);
 
-    onSave({
-      override_active: true,
-      override_reason: reason,
-      override_expiry_at: expiryDate.toISOString(),
-      override_notes: notes,
-      update_status_flag: 'Blue'
-    });
+    if (isClientComm) {
+      onSave({
+        client_comm_override_active: true,
+        client_comm_override_reason: reason,
+        client_comm_override_expiry_at: expiryDate.toISOString(),
+        client_comm_override_notes: notes,
+        client_comm_status_flag: 'Blue'
+      });
+    } else {
+      onSave({
+        override_active: true,
+        override_reason: reason,
+        override_expiry_at: expiryDate.toISOString(),
+        override_notes: notes,
+        update_status_flag: 'Blue'
+      });
+    }
 
     onClose();
   };
@@ -62,14 +79,25 @@ export default function UpdateOverrideModal({ isOpen, onClose, claim, onSave }) 
     const now = new Date();
     const fortyEightHoursFromNow = new Date(now.getTime() + 48 * 60 * 60 * 1000);
 
-    onSave({
-      override_active: false,
-      override_reason: null,
-      override_expiry_at: null,
-      override_notes: null,
-      next_update_due_at: fortyEightHoursFromNow.toISOString(),
-      update_status_flag: 'Green'
-    });
+    if (isClientComm) {
+      onSave({
+        client_comm_override_active: false,
+        client_comm_override_reason: null,
+        client_comm_override_expiry_at: null,
+        client_comm_override_notes: null,
+        next_client_comm_due_at: fortyEightHoursFromNow.toISOString(),
+        client_comm_status_flag: 'Green'
+      });
+    } else {
+      onSave({
+        override_active: false,
+        override_reason: null,
+        override_expiry_at: null,
+        override_notes: null,
+        next_update_due_at: fortyEightHoursFromNow.toISOString(),
+        update_status_flag: 'Green'
+      });
+    }
 
     onClose();
   };
@@ -78,10 +106,12 @@ export default function UpdateOverrideModal({ isOpen, onClose, claim, onSave }) 
     if (isOpen) {
       setSelectedPreset(null);
       setCustomDays('');
-      setReason(claim?.override_reason || '');
-      setNotes(claim?.override_notes || '');
+      setReason(existingReason || '');
+      setNotes(existingNotes || '');
     }
-  }, [isOpen, claim]);
+  }, [isOpen, claim, existingReason, existingNotes]);
+
+  const title = isClientComm ? 'Client Communication Override' : 'Update Tracking Override';
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -89,29 +119,29 @@ export default function UpdateOverrideModal({ isOpen, onClose, claim, onSave }) 
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Clock className="w-5 h-5 text-accent" />
-            Update Tracking Override
+            {title}
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
-          {claim?.override_active && (
+          {activeOverride && (
             <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 p-4 border-l-4 border-l-blue-500 rounded-lg">
               <div className="flex items-start justify-between">
                 <div>
                   <p className="font-semibold text-sm mb-1 text-gray-900 dark:text-white">Current Override Active</p>
                   <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">
-                    <strong>Reason:</strong> {claim.override_reason}
+                    <strong>Reason:</strong> {existingReason}
                   </p>
                   <p className="text-xs text-gray-600 dark:text-gray-400">
-                    <strong>Expires:</strong> {new Date(claim.override_expiry_at).toLocaleString()}
+                    <strong>Expires:</strong> {existingExpiry ? new Date(existingExpiry).toLocaleString() : 'N/A'}
                   </p>
-                  {claim.override_notes && (
+                  {existingNotes && (
                     <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                      <strong>Notes:</strong> {claim.override_notes}
+                      <strong>Notes:</strong> {existingNotes}
                     </p>
                   )}
                 </div>
-                <Button 
+                <Button
                   onClick={handleRemoveOverride}
                   variant="outline"
                   className="text-red-600 border-red-300 hover:bg-red-50 px-3 py-1 text-xs"
@@ -194,8 +224,8 @@ export default function UpdateOverrideModal({ isOpen, onClose, claim, onSave }) 
           </div>
 
           <div className="bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-xs text-gray-600 dark:text-gray-400">
-            <strong>Note:</strong> The 48-hour update tracking will resume automatically after the override expires. 
-            You can update the claim at any time, even during an override.
+            <strong>Note:</strong> The 48-hour tracking will resume automatically after the override expires.
+            You can log updates at any time, even during an override.
           </div>
 
           <div className="flex justify-end gap-3">

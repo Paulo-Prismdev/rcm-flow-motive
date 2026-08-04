@@ -35,19 +35,21 @@ const configs = {
   },
 };
 
-export default function UpdateStatusBadge({ status, small = false }) {
+export default function UpdateStatusBadge({ status, small = false, labelPrefix }) {
   if (!status) return null;
 
   const config = configs[status] || configs.Gray;
   const Icon = config.icon;
+  const title = labelPrefix ? `${labelPrefix}: ${config.description}` : config.description;
 
   if (small) {
     return (
       <span
         className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold whitespace-nowrap ${config.classes}`}
-        title={config.description}
+        title={title}
       >
         <Icon className="w-3 h-3" />
+        {labelPrefix && <span className="opacity-60 font-normal">{labelPrefix}:</span>}
         {config.label}
       </span>
     );
@@ -56,9 +58,10 @@ export default function UpdateStatusBadge({ status, small = false }) {
   return (
     <span
       className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${config.classes}`}
-      title={config.description}
+      title={title}
     >
       <Icon className="w-3.5 h-3.5" />
+      {labelPrefix && <span className="opacity-60 font-normal">{labelPrefix}:</span>}
       {config.label}
     </span>
   );

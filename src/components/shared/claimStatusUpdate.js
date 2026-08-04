@@ -44,6 +44,30 @@ export function computeUpdateStatusFlag(claim) {
   return 'Green';
 }
 
+// Dynamically compute the client_comm_status_flag from timestamps so the badge
+// never shows "On Track" when the 48-hour client comm window has expired.
+// Mirrors computeUpdateStatusFlag but uses client_comm fields.
+export function computeClientCommStatusFlag(claim) {
+  if (!claim) return null;
+
+  // Snoozed — client comm override active and not yet expired
+  if (claim.client_comm_override_active) {
+    const expiry = claim.client_comm_override_expiry_at ? new Date(claim.client_comm_override_expiry_at) : null;
+    if (!expiry || expiry > new Date()) return 'Blue';
+    // Override expired — fall through to time-based calculation
+  }
+
+  if (isUpdateTrackingClosed(claim)) return 'Gray';
+
+  const nextDue = claim.next_client_comm_due_at ? new Date(claim.next_client_comm_due_at) : null;
+  if (!nextDue) return claim.client_comm_status_flag || null;
+
+  const hoursRemaining = (nextDue.getTime() - Date.now()) / (1000 * 60 * 60);
+  if (hoursRemaining <= 0) return 'Red';
+  if (hoursRemaining <= 12) return 'Amber';
+  return 'Green';
+}
+
 // Build the claim-field payload written for an explicit Status Change update.
 // journey / secondary / tertiary are the v2 single-select values from the form.
 // job_status is kept in sync with journey so legacy readers (closed detection,

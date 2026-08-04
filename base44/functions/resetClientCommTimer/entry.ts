@@ -43,6 +43,28 @@ export default async function(req: Request): Promise<Response> {
             continue;
           }
 
+          // Respect active override (snooze) — show Blue, skip time-based calc
+          if (claim.client_comm_override_active) {
+            const expiry = claim.client_comm_override_expiry_at
+              ? new Date(claim.client_comm_override_expiry_at).getTime()
+              : null;
+            if (!expiry || expiry > now) {
+              if (claim.client_comm_status_flag !== 'Blue') {
+                await base44.asServiceRole.entities.Claim.update(claim.id, {
+                  client_comm_status_flag: 'Blue',
+                });
+                updated++;
+              }
+              continue;
+            }
+            // Override expired — clear it and fall through
+            await base44.asServiceRole.entities.Claim.update(claim.id, {
+              client_comm_override_active: false,
+              client_comm_override_reason: null,
+              client_comm_override_expiry_at: null,
+            });
+          }
+
           // Self-heal: check if there's a newer Client Communication update
           // than what last_client_comm_at reflects.
           let latestCommAt = claim.last_client_comm_at;
