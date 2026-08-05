@@ -19,8 +19,11 @@ export function getGroupKey(c) {
   if (c.secondary_status === 'New') return 'New';
   const journey = c.journey_status || c.job_status;
   if (journey === 'Cancelled') return 'Cancelled';
-  if (c.journey_status === 'Awaiting BID') return 'Awaiting BID';
+  // On-site check takes priority: if the vehicle has been marked on site and
+  // not yet handed over, it belongs in the "On Site" group regardless of its
+  // journey status (e.g. even if journey is still "Awaiting BID").
   if (c.on_site_date && !c.hand_over_date) return 'On Site';
+  if (c.journey_status === 'Awaiting BID') return 'Awaiting BID';
   return c.secondary_status || journey || 'New';
 }
 
