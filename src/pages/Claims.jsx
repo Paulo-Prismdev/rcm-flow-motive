@@ -92,16 +92,26 @@ const getGroupKey = (c) => {
 // Sub-group key: within a top-level group, further group by the secondary status
 const getSubGroupKey = (c) => c.secondary_status || c.journey_status || c.job_status || 'Unspecified';
 
-// Group claims by sub-group key, preserving order of first appearance
-const groupBySub = (claims) => {
+// Group claims by sub-group key, sorted by the configured status order.
+// `statusOrder` is the ordered list of status names from ClaimStatusConfig.
+// Sub-groups not in the config are appended at the end in order of appearance.
+const groupBySub = (claims, statusOrder = []) => {
   const map = {};
-  const order = [];
+  const seen = [];
   claims.forEach(c => {
     const k = getSubGroupKey(c);
-    if (!map[k]) { map[k] = []; order.push(k); }
+    if (!map[k]) { map[k] = []; seen.push(k); }
     map[k].push(c);
   });
-  return order.map(k => [k, map[k]]);
+  const orderIdx = (k) => {
+    const i = statusOrder.indexOf(k);
+    return i === -1 ? Infinity : i;
+  };
+  seen.sort((a, b) => {
+    const diff = orderIdx(a) - orderIdx(b);
+    return diff !== 0 ? diff : seen.indexOf(a) - seen.indexOf(b);
+  });
+  return seen.map(k => [k, map[k]]);
 };
 
 export default function ClaimsPage() {
@@ -731,7 +741,7 @@ export default function ClaimsPage() {
                       <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">{statusGroup}</span>
                       <span className="text-xs text-gray-400 ml-1">{claimsInGroup.length}</span>
                     </div>
-                    {!isCollapsed && groupBySub(claimsInGroup).map(([subKey, subClaims]) => {
+                    {!isCollapsed && groupBySub(claimsInGroup, availableStatuses).map(([subKey, subClaims]) => {
                       const hasSubHeader = claimsInGroup.length > subClaims.length;
                       const subCollapsed = hasSubHeader && isSubGroupCollapsed(statusGroup, subKey);
                       return (
@@ -770,7 +780,7 @@ export default function ClaimsPage() {
                       <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Other</span>
                       <span className="text-xs text-gray-400 ml-1">{ungrouped.length}</span>
                     </div>
-                    {!isCollapsed && groupBySub(ungrouped).map(([subKey, subClaims]) => {
+                    {!isCollapsed && groupBySub(ungrouped, availableStatuses).map(([subKey, subClaims]) => {
                       const hasSubHeader = ungrouped.length > subClaims.length;
                       const subCollapsed = hasSubHeader && isSubGroupCollapsed('__other__', subKey);
                       return (
@@ -846,7 +856,7 @@ export default function ClaimsPage() {
                           </div>
                         </td>
                       </tr>
-                      {!isCollapsed && groupBySub(claimsInGroup).map(([subKey, subClaims]) => {
+                      {!isCollapsed && groupBySub(claimsInGroup, availableStatuses).map(([subKey, subClaims]) => {
                         const hasSubHeader = claimsInGroup.length > subClaims.length;
                         const subCollapsed = hasSubHeader && isSubGroupCollapsed(statusGroup, subKey);
                         return (
@@ -890,7 +900,7 @@ export default function ClaimsPage() {
                           </div>
                         </td>
                       </tr>
-                      {!isCollapsed && groupBySub(ungrouped).map(([subKey, subClaims]) => {
+                      {!isCollapsed && groupBySub(ungrouped, availableStatuses).map(([subKey, subClaims]) => {
                         const hasSubHeader = ungrouped.length > subClaims.length;
                         const subCollapsed = hasSubHeader && isSubGroupCollapsed('__other__', subKey);
                         return (
