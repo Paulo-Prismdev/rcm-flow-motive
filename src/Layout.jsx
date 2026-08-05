@@ -37,6 +37,7 @@ import { StatusConfigProvider } from './components/shared/StatusConfigContext';
 import UserTypeFixer from './components/shared/UserTypeFixer';
 import PageLoader from './components/PageLoader';
 import UserProfile, { getUserInitials, getAvatarColor } from "./components/layout/UserProfile";
+import QuickAccessOverlay from "./components/layout/QuickAccessOverlay";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -56,8 +57,8 @@ const allDepartments = [
 { name: "Parts", url: createPageUrl("Parts"), icon: Package, permission: "Parts" },
 { name: "Tyre Requests", url: createPageUrl("TyreRequests"), icon: Package, permission: "Parts" },
 
-{ name: "Reports", url: createPageUrl("Reports"), icon: BarChart3, permission: "Reports" },
-{ name: "Map", url: createPageUrl("BodyshopMap"), icon: Search, permission: "Map" }];
+{ name: "Reports", url: createPageUrl("Reports"), icon: BarChart3, permission: "Reports", overlayPage: "Reports" },
+{ name: "Map", url: createPageUrl("BodyshopMap"), icon: Search, permission: "Map", overlayPage: "BodyshopMap" }];
 
 
 
@@ -69,6 +70,7 @@ export default function Layout({ children, currentPageName }) {
   const [claimDetailOpen, setClaimDetailOpen] = useState(false);
   const [directoriesOpen, setDirectoriesOpen] = useState(false);
   const [desktopSidebarOpen, setDesktopSidebarOpen] = useState(true);
+  const [overlayPage, setOverlayPage] = useState(null);
 
   useEffect(() => {
     const observer = new MutationObserver(() => {
@@ -77,6 +79,11 @@ export default function Layout({ children, currentPageName }) {
     observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
     return () => observer.disconnect();
   }, []);
+
+  // Close the quick-access overlay whenever the route changes
+  useEffect(() => {
+    setOverlayPage(null);
+  }, [location.pathname]);
 
   const { data: currentUser } = useQuery({
     queryKey: ['currentUser'],
@@ -197,32 +204,46 @@ export default function Layout({ children, currentPageName }) {
           <nav className="flex-1 overflow-y-auto py-4 px-2 space-y-0.5" style={{ WebkitOverflowScrolling: 'touch' }}>
             {departments.map((dept) => {
               const isActive = location.pathname === dept.url;
+              const cls = `flex items-center gap-3 px-3 py-2 rounded-[10px] text-sm font-medium transition-all md:justify-center md:px-2 lg:justify-start lg:px-3 ${
+                isActive || overlayPage === dept.overlayPage ?
+                'bg-white/10 text-white border border-white/15' :
+                'text-white/60 hover:bg-white/8 hover:text-white/90'}`;
+              if (dept.overlayPage) {
+                return (
+                  <button
+                    key={dept.name}
+                    onClick={() => { setOverlayPage(dept.overlayPage); setMobileMenuOpen(false); }}
+                    title={dept.name}
+                    className={cls}
+                  >
+                    <dept.icon className="w-4 h-4 flex-shrink-0" />
+                    <span className="md:hidden lg:block">{dept.name}</span>
+                  </button>
+                );
+              }
               return (
                 <Link
                   key={dept.name}
                   to={dept.url}
                   onClick={() => setMobileMenuOpen(false)}
                   title={dept.name}
-                  className={`flex items-center gap-3 px-3 py-2 rounded-[10px] text-sm font-medium transition-all md:justify-center md:px-2 lg:justify-start lg:px-3 ${
-                  isActive ?
-                  'bg-white/10 text-white border border-white/15' :
-                  'text-white/60 hover:bg-white/8 hover:text-white/90'}`
-                  }>
+                  className={cls}
+                >
                   <dept.icon className="w-4 h-4 flex-shrink-0" />
                   <span className="md:hidden lg:block">{dept.name}</span>
                   {isActive && <ChevronRight className="w-3 h-3 ml-auto opacity-60 md:hidden lg:block" />}
-                </Link>);
-
+                </Link>
+              );
             })}
 
             {/* Directories section */}
             {isInternalUser &&
             (() => {
               const dirLinks = [
-                { name: "Repairers", url: createPageUrl("RepairerDirectory"), icon: Building2 },
-                { name: "Insurers", url: createPageUrl("InsurerDirectory"), icon: Shield },
-                { name: "Suppliers", url: createPageUrl("SupplierManagement"), icon: Package },
-                { name: "Companies", url: "/admin/companies", icon: Building2 },
+                { name: "Repairers", url: createPageUrl("RepairerDirectory"), icon: Building2, overlayPage: "RepairerDirectory" },
+                { name: "Insurers", url: createPageUrl("InsurerDirectory"), icon: Shield, overlayPage: "InsurerDirectory" },
+                { name: "Suppliers", url: createPageUrl("SupplierManagement"), icon: Package, overlayPage: "SupplierManagement" },
+                { name: "Companies", url: "/admin/companies", icon: Building2, overlayPage: "CompanyManagement" },
               ];
               const anyActive = dirLinks.some((d) => location.pathname === d.url);
               const open = directoriesOpen || anyActive;
@@ -242,19 +263,18 @@ export default function Layout({ children, currentPageName }) {
                   {open && dirLinks.map((d) => {
                     const isActive = location.pathname === d.url;
                     return (
-                      <Link
+                      <button
                         key={d.name}
-                        to={d.url}
-                        onClick={() => setMobileMenuOpen(false)}
+                        onClick={() => { setOverlayPage(d.overlayPage); setMobileMenuOpen(false); }}
                         title={d.name}
                         className={`flex items-center gap-3 px-3 py-2 rounded-[10px] text-sm font-medium transition-all md:justify-center md:px-2 lg:justify-start lg:pl-7 lg:pr-3 ${
-                          isActive
+                          isActive || overlayPage === d.overlayPage
                             ? 'bg-white/10 text-white border border-white/15'
                             : 'text-white/60 hover:bg-white/8 hover:text-white/90'
                         }`}>
                         <d.icon className="w-4 h-4 flex-shrink-0" />
                         <span className="md:hidden lg:block">{d.name}</span>
-                      </Link>
+                      </button>
                     );
                   })}
                 </>
@@ -271,11 +291,11 @@ export default function Layout({ children, currentPageName }) {
                 </div>
                 {isAdmin &&
               <>
-                    <Link to={createPageUrl("Settings")} onClick={() => setMobileMenuOpen(false)}
+                    <button onClick={() => { setOverlayPage("Settings"); setMobileMenuOpen(false); }}
                 title="Settings"
                 className="flex items-center gap-3 px-3 py-2 rounded-[10px] text-sm font-medium text-white/60 hover:bg-white/8 hover:text-white/90 transition-all md:justify-center md:px-2 lg:justify-start lg:px-3">
                       <Settings className="w-4 h-4 flex-shrink-0" /><span className="md:hidden lg:block">Settings</span>
-                    </Link>
+                    </button>
                     <Link to={createPageUrl("Archive")} onClick={() => setMobileMenuOpen(false)}
                 title="Archive"
                 className="flex items-center gap-3 px-3 py-2 rounded-[10px] text-sm font-medium text-white/60 hover:bg-white/8 hover:text-white/90 transition-all md:justify-center md:px-2 lg:justify-start lg:px-3">
@@ -424,6 +444,7 @@ export default function Layout({ children, currentPageName }) {
           </main>
         </div>
       </div>
+      <QuickAccessOverlay pageName={overlayPage} onClose={() => setOverlayPage(null)} />
     </StatusConfigProvider>);
 
 }
