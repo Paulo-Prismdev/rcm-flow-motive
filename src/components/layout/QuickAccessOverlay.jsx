@@ -17,17 +17,18 @@ export default function QuickAccessOverlay({ pageName, onClose }) {
   const PageComponent = config?.component;
 
   return (
-    <Dialog open={!!pageName} onOpenChange={(open) => { if (!open) onClose(); }}>
+    <Dialog
+      open={!!pageName}
+      onOpenChange={(open) => {
+        if (!open) {
+          // Don't close the overlay while a custom (non-Radix) modal is open on top
+          if (document.querySelector('[data-custom-portal-modal="true"]')) return;
+          onClose();
+        }
+      }}
+    >
       <DialogContent
         className="max-w-none w-[95vw] h-[92vh] max-h-[92vh] p-0 gap-0 flex flex-col overflow-hidden"
-        onInteractOutside={(e) => {
-          // Only prevent overlay dismissal when a custom (non-Radix) modal is open on top.
-          // Radix Sheets/Dialogs manage their own stacking via DismissableLayer.
-          const customModals = document.querySelectorAll('[data-custom-portal-modal="true"]');
-          if (customModals.length > 0) {
-            e.preventDefault();
-          }
-        }}
       >
         <div className="flex items-center px-4 py-2.5 border-b border-border flex-shrink-0 bg-card pr-12">
           <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">{config?.title}</h2>
