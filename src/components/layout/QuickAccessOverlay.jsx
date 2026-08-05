@@ -18,7 +18,10 @@ export default function QuickAccessOverlay({ pageName, onClose }) {
 
   return (
     <Dialog open={!!pageName} onOpenChange={(open) => { if (!open) onClose(); }}>
-      <DialogContent className="max-w-none w-[95vw] h-[92vh] max-h-[92vh] p-0 gap-0 flex flex-col overflow-hidden">
+      <DialogContent
+        className="max-w-none w-[95vw] h-[92vh] max-h-[92vh] p-0 gap-0 flex flex-col overflow-hidden"
+        onInteractOutside={(e) => e.preventDefault()}
+      >
         <div className="flex items-center px-4 py-2.5 border-b border-border flex-shrink-0 bg-card pr-12">
           <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">{config?.title}</h2>
         </div>
