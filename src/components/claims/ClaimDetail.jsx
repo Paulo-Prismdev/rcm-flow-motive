@@ -497,6 +497,20 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
       ...(isClosedAfterUpdate && { update_status_flag: 'Gray' }),
     };
 
+    // Client Communication updates also reset the dedicated 48-hour client
+    // communication tracker. The ClaimUpdateForm already persists these to
+    // the server, but we must also set them on localClaim so the badge updates
+    // instantly — otherwise setClaim(localClaim) would overwrite them with the
+    // stale values from the old claim prop.
+    if (updateType === 'Client Communication') {
+      dbUpdate.last_client_comm_at = now.toISOString();
+      dbUpdate.next_client_comm_due_at = fortyEightHoursFromNow.toISOString();
+      dbUpdate.client_comm_status_flag = isClosedAfterUpdate ? 'Gray' : 'Green';
+      localClaim.last_client_comm_at = now.toISOString();
+      localClaim.next_client_comm_due_at = fortyEightHoursFromNow.toISOString();
+      localClaim.client_comm_status_flag = isClosedAfterUpdate ? 'Gray' : 'Green';
+    }
+
     if (updateType === 'Status Change') {
       if (newStatus) {
         dbUpdate.job_status = newStatus;
