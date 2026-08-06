@@ -73,6 +73,16 @@
       "type": "string",
       "description": "Network tier (e.g. TIER 1, TIER 2, Previously on Network)"
     },
+    "map_group": {
+      "type": "string",
+      "enum": [
+        "",
+        "Solution",
+        "QAC"
+      ],
+      "default": "",
+      "description": "Map group assignment for visual categorization on the repairer map"
+    },
     "group_name": {
       "type": "string",
       "description": "Group the bodyshop belongs to"

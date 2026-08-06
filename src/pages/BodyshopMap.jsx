@@ -68,7 +68,22 @@ const greyIcon = new L.Icon({
   iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
 });
 
-function getTierIcon(tier) {
+const solutionIcon = new L.Icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-violet.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+  iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+});
+
+const qacIcon = new L.Icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-yellow.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+  iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+});
+
+function getTierIcon(bodyshop) {
+  if (bodyshop.map_group === 'Solution') return solutionIcon;
+  if (bodyshop.map_group === 'QAC') return qacIcon;
+  const tier = bodyshop.tier;
   if (tier === 'TIER 1') return tier1Icon;
   if (tier === 'TIER 2') return tier2Icon;
   if (tier === 'Previously on Network') return prevNetworkIcon;
@@ -145,6 +160,8 @@ export default function BodyshopMap() {
     'TIER 2': true,
     'Previously on Network': true,
     'None': true,
+    'Solution': true,
+    'QAC': true,
   });
   const [mapCenter, setMapCenter] = useState([54.5, -2.0]);
   const [mapZoom, setMapZoom] = useState(7);
@@ -341,7 +358,11 @@ export default function BodyshopMap() {
   const hasLogistics = Object.keys(logistics).length > 0;
 
   const tierFilteredBodyshops = useMemo(() =>
-    sortedBodyshops.filter(b => visibleTiers[getTierKey(b.tier)]),
+    sortedBodyshops.filter(b => {
+      const tierVisible = visibleTiers[getTierKey(b.tier)];
+      const groupVisible = !b.map_group || visibleTiers[b.map_group];
+      return tierVisible && groupVisible;
+    }),
     [sortedBodyshops, visibleTiers]);
 
   const handleAddressSelect = (addressData) => {
@@ -381,6 +402,18 @@ export default function BodyshopMap() {
     setLogistics({});
   };
 
+  const handleSetGroup = async (bodyshop, group) => {
+    const newGroup = bodyshop.map_group === group ? '' : group;
+    try {
+      await base44.entities.Bodyshop.update(bodyshop.id, { map_group: newGroup });
+      // Update local state so the map reflects the change immediately
+      const updated = { ...bodyshop, map_group: newGroup };
+      setSelectedBodyshop(updated);
+    } catch (err) {
+      console.error('Failed to update group:', err);
+    }
+  };
+
   const selectedLog = selectedBodyshop ? logistics[selectedBodyshop.id] : null;
   const selectedCoords = selectedBodyshop ? getCoords(selectedBodyshop) : null;
 
@@ -394,6 +427,8 @@ export default function BodyshopMap() {
     { key: 'TIER 1', label: 'Tier 1', color: 'bg-green-500', ring: 'ring-green-500' },
     { key: 'TIER 2', label: 'Tier 2', color: 'bg-orange-400', ring: 'ring-orange-400' },
     { key: 'Previously on Network', label: 'Prev. Network', color: 'bg-red-500', ring: 'ring-red-500' },
+    { key: 'Solution', label: 'Solution', color: 'bg-violet-500', ring: 'ring-violet-500' },
+    { key: 'QAC', label: 'QAC', color: 'bg-yellow-400', ring: 'ring-yellow-400' },
   ];
 
   return (
@@ -527,7 +562,7 @@ export default function BodyshopMap() {
                 <Marker
                   key={bodyshop.id}
                   position={[coords.lat, coords.lng]}
-                  icon={selectedBodyshop?.id === bodyshop.id ? bodyshopSelectedIcon : getTierIcon(bodyshop.tier)}
+                  icon={selectedBodyshop?.id === bodyshop.id ? bodyshopSelectedIcon : getTierIcon(bodyshop)}
                   eventHandlers={{ click: () => handleSelectBodyshop(bodyshop) }}
                 >
                   <Tooltip sticky>
@@ -603,7 +638,7 @@ export default function BodyshopMap() {
         <div className="absolute top-16 left-3 z-[999] bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-border p-3 space-y-2 w-[220px]">
           <p className="text-xs font-medium text-muted-foreground">Filter by tier</p>
           <div className="flex flex-col gap-1.5">
-            {[...tierDots, { key: 'None', label: 'No Tier', color: 'bg-gray-400' }].map(t => (
+            {[...tierDots.filter(t => t.key !== 'Solution' && t.key !== 'QAC'), { key: 'None', label: 'No Tier', color: 'bg-gray-400' }].map(t => (
               <button
                 key={t.key}
                 onClick={() => setVisibleTiers(prev => ({ ...prev, [t.key]: !prev[t.key] }))}
@@ -615,6 +650,23 @@ export default function BodyshopMap() {
                 <span className="text-xs font-medium text-gray-700 dark:text-gray-200">{t.label}</span>
               </button>
             ))}
+          </div>
+          <div className="pt-1 border-t border-border">
+            <p className="text-xs font-medium text-muted-foreground pb-1.5">Groups</p>
+            <div className="flex flex-col gap-1.5">
+              {tierDots.filter(t => t.key === 'Solution' || t.key === 'QAC').map(t => (
+                <button
+                  key={t.key}
+                  onClick={() => setVisibleTiers(prev => ({ ...prev, [t.key]: !prev[t.key] }))}
+                  className={`flex items-center gap-1.5 pl-2 pr-2.5 py-1.5 rounded-full bg-muted/50 border border-border transition-all ${
+                    visibleTiers[t.key] ? 'opacity-100' : 'opacity-40'
+                  }`}
+                >
+                  <div className={`w-3 h-3 rounded-full ${t.color}`}></div>
+                  <span className="text-xs font-medium text-gray-700 dark:text-gray-200">{t.label}</span>
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       )}
@@ -764,7 +816,7 @@ export default function BodyshopMap() {
                 </div>
               )}
 
-              {/* Certifications */}
+              {/* Certifications + Group badge */}
               <div className="flex flex-wrap gap-1">
                 {selectedBodyshop.acg_signed_up === 'Yes' && (
                   <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-green-100 text-green-700">
@@ -780,6 +832,41 @@ export default function BodyshopMap() {
                   <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-100 text-blue-700">
                     Audatex
                   </span>
+                )}
+                {selectedBodyshop.map_group && (
+                  <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium ${
+                    selectedBodyshop.map_group === 'Solution' ? 'bg-violet-100 text-violet-700' : 'bg-yellow-100 text-yellow-700'
+                  }`}>
+                    {selectedBodyshop.map_group}
+                  </span>
+                )}
+              </div>
+
+              {/* Group assignment */}
+              <div className="flex items-center gap-1.5 pt-1">
+                <span className="text-[10px] font-medium text-muted-foreground">Group:</span>
+                {['Solution', 'QAC'].map(g => (
+                  <button
+                    key={g}
+                    onClick={() => handleSetGroup(selectedBodyshop, g)}
+                    className={`px-2 py-0.5 rounded-full text-[10px] font-medium border transition-all ${
+                      selectedBodyshop.map_group === g
+                        ? g === 'Solution'
+                          ? 'bg-violet-500 text-white border-violet-500'
+                          : 'bg-yellow-400 text-white border-yellow-400'
+                        : 'bg-transparent text-muted-foreground border-border hover:bg-muted'
+                    }`}
+                  >
+                    {g}
+                  </button>
+                ))}
+                {selectedBodyshop.map_group && (
+                  <button
+                    onClick={() => handleSetGroup(selectedBodyshop, selectedBodyshop.map_group)}
+                    className="px-2 py-0.5 rounded-full text-[10px] font-medium border border-border text-muted-foreground hover:bg-muted transition-all"
+                  >
+                    Clear
+                  </button>
                 )}
               </div>
 
