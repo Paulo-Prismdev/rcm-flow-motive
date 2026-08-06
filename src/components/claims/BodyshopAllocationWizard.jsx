@@ -43,6 +43,7 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
 
   const hasAttemptedGeocode = useRef(false);
   const initializedForClaimId = useRef(null);
+  const wasOpen = useRef(false);
   const mapCenterInit = useRef(false);
   const queryClient = useQueryClient();
 
@@ -80,11 +81,13 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
     return !!vehicleLocation && vehicleLocation.length >= 3;
   }, [claim, vehicleLocation]);
 
-  // ── Reset when modal opens (only on fresh open / claim change, NOT on
-  // every claim data refresh — otherwise query refetches reset currentStep) ──
+  // ── Reset wizard state ONLY when the modal opens fresh or for a different
+  // claim.  Depends on claim?.id (not claim) so query refetches that change
+  // the claim object reference do NOT re-run this effect and reset the step. ──
   useEffect(() => {
     if (isOpen && claim) {
-      const isFreshOpen = initializedForClaimId.current !== claim.id;
+      const isFreshOpen = !wasOpen.current || initializedForClaimId.current !== claim.id;
+      wasOpen.current = true;
       initializedForClaimId.current = claim.id;
 
       if (isFreshOpen) {
@@ -112,38 +115,27 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
           initialValidation[key] = claim[key] ?? '';
         });
         setValidationData(initialValidation);
-
-        // Save pre-selected bodyshop to claim as soon as the wizard opens
-        if (preSelectedBodyshop) {
-          base44.entities.Claim.update(claim.id, {
-            bodyshop_id: preSelectedBodyshop.id,
-            bodyshop: preSelectedBodyshop.name,
-            bodyshop_email: preSelectedBodyshop.email,
-            last_contact_source: claim.last_contact_source || 'Client',
-            authorised_by: claim.authorised_by || 'Client Insurer',
-          }).then(() => {
-            queryClient.invalidateQueries({ queryKey: ['claims'] });
-            queryClient.invalidateQueries({ queryKey: ['claim', claim.id] });
-          }).catch(err => console.error('Error saving pre-selected bodyshop:', err));
-        }
       }
-
-      // Set map center once (on fresh open or when bodyshops first load)
-      if (!mapCenterInit.current) {
-        if (preSelectedBodyshop?.latitude && preSelectedBodyshop?.longitude) {
-          setMapCenter([parseFloat(preSelectedBodyshop.latitude), parseFloat(preSelectedBodyshop.longitude)]);
-          setMapZoom(11);
-          mapCenterInit.current = true;
-        } else if (validBodyshops.length > 0) {
-          const avgLat = validBodyshops.reduce((sum, b) => sum + parseFloat(b.latitude), 0) / validBodyshops.length;
-          const avgLng = validBodyshops.reduce((sum, b) => sum + parseFloat(b.longitude), 0) / validBodyshops.length;
-          setMapCenter([avgLat, avgLng]);
-          setMapZoom(7);
-          mapCenterInit.current = true;
-        }
-      }
+    } else {
+      wasOpen.current = false;
     }
-  }, [isOpen, validBodyshops, claim, startStep, preSelectedBodyshop]);
+  }, [isOpen, claim?.id, startStep, preSelectedBodyshop]);
+
+  // ── Map center: set once when bodyshops load or pre-selected shop exists ──
+  useEffect(() => {
+    if (!isOpen || !claim || mapCenterInit.current) return;
+    if (preSelectedBodyshop?.latitude && preSelectedBodyshop?.longitude) {
+      setMapCenter([parseFloat(preSelectedBodyshop.latitude), parseFloat(preSelectedBodyshop.longitude)]);
+      setMapZoom(11);
+      mapCenterInit.current = true;
+    } else if (validBodyshops.length > 0) {
+      const avgLat = validBodyshops.reduce((sum, b) => sum + parseFloat(b.latitude), 0) / validBodyshops.length;
+      const avgLng = validBodyshops.reduce((sum, b) => sum + parseFloat(b.longitude), 0) / validBodyshops.length;
+      setMapCenter([avgLat, avgLng]);
+      setMapZoom(7);
+      mapCenterInit.current = true;
+    }
+  }, [isOpen, validBodyshops, preSelectedBodyshop, claim]);
 
   const missingFields = useMemo(() => {
     return REQUIRED_FIELDS.filter(field => {
@@ -191,6 +183,12 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
       dataToSave.instruction_contact_name = contactOverrides.name || '';
       dataToSave.instruction_contact_email = contactOverrides.email || '';
       dataToSave.instruction_contact_phone = contactOverrides.phone || '';
+      // Persist the selected bodyshop (saved here rather than on map click)
+      if (selectedBodyshop) {
+        dataToSave.bodyshop_id = selectedBodyshop.id;
+        dataToSave.bodyshop = selectedBodyshop.name;
+        dataToSave.bodyshop_email = selectedBodyshop.email || '';
+      }
       await base44.entities.Claim.update(claim.id, sanitizeClaimData(dataToSave));
       queryClient.invalidateQueries({ queryKey: ['claims'] });
       queryClient.invalidateQueries({ queryKey: ['claim', claim.id] });
@@ -252,21 +250,13 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
     }
   }, [selectedBodyshop, currentStep]);
 
-  const handleBodyshopClick = async (bodyshop) => {
+  const handleBodyshopClick = (bodyshop) => {
     setSelectedBodyshop(bodyshop);
     setMapCenter([parseFloat(bodyshop.latitude), parseFloat(bodyshop.longitude)]);
     setMapZoom(11);
-
-    try {
-      await base44.entities.Claim.update(claim.id, {
-        bodyshop_id: bodyshop.id,
-        bodyshop: bodyshop.name,
-        bodyshop_email: bodyshop.email,
-      });
-      queryClient.invalidateQueries({ queryKey: ['claims'] });
-    } catch (error) {
-      console.error('Error saving bodyshop selection:', error);
-    }
+    // NOTE: The bodyshop is NOT saved to the claim here — it is persisted in
+    // handleSaveValidation and handleAllocate so that clicking a pin doesn't
+    // trigger a query refetch that resets the wizard step.
   };
 
   const getContactOverrides = () => {
@@ -350,6 +340,9 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
     try {
       const updateData = {
         bs_instructed: new Date().toISOString().split('T')[0],
+        bodyshop_id: selectedBodyshop.id,
+        bodyshop: selectedBodyshop.name,
+        bodyshop_email: selectedBodyshop.email || '',
       };
 
       // Persist the generated instruction PDF to the claim's docs now —
