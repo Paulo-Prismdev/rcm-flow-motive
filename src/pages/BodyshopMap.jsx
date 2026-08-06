@@ -552,7 +552,7 @@ export default function BodyshopMap() {
                 >
                   <Tooltip sticky>
                     <div className="text-xs">
-                      <p className="font-semibold">{bodyshop.name}{bodyshop.map_group ? ` (${bodyshop.map_group})` : ''}</p>
+                      <p className="font-semibold">{bodyshop.name}{[bodyshop.tier, bodyshop.map_group].filter(Boolean).join(', ') ? ` (${[bodyshop.tier, bodyshop.map_group].filter(Boolean).join(', ')})` : ''}</p>
                       {log?.duration_text && <p className="text-green-600">{log.duration_text} • {log.distance_text}</p>}
                     </div>
                   </Tooltip>
