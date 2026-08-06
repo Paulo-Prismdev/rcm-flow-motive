@@ -8,7 +8,7 @@ import { X, Clock, Mail, Plus, AtSign, ChevronDown } from 'lucide-react';
 import { Badge } from "@/components/ui/badge";
 import { Command, CommandItem, CommandList } from "@/components/ui/command";
 import StatusChangeFields from "@/components/shared/StatusChangeFields";
-import { buildStatusChangeClaimUpdate, isUpdateTrackingClosed, isClosedJourney } from "@/components/shared/claimStatusUpdate";
+import { buildStatusChangeClaimUpdate, isUpdateTrackingClosed } from "@/components/shared/claimStatusUpdate";
 
 const UPDATE_TYPES = [
   "Status Change", "Client Communication", "Bodyshop Communication", "Insurer Communication",
@@ -157,8 +157,12 @@ export default function ClaimUpdateForm({
     if (isReferrer && (newUpdate.next_steps || newUpdate.due_date_for_next_action)) { setSubmitError('Referrers cannot set follow-ups'); return; }
     if (newUpdate.update_type !== 'Status Change' && !newUpdate.description.trim()) { setSubmitError('Please enter a description'); return; }
 
-    // Block completion while a starred/flagged update exists
-    if (newUpdate.update_type === 'Status Change' && newUpdate.new_journey && isClosedJourney(newUpdate.new_journey)) {
+    // Block true completion (cancelled or invoiced) while a starred/flagged
+    // update exists. Returning the vehicle / total loss does NOT count as
+    // completion here — those still require invoicing, so a status change to
+    // "Returned to Customer" should go through without the block.
+    if (newUpdate.update_type === 'Status Change' && newUpdate.new_journey &&
+        isUpdateTrackingClosed({ job_status: newUpdate.new_journey, invoice_status: claim?.invoice_status })) {
       try {
         const existing = await base44.entities.ClaimUpdate.filter({ claim_id: claimId }, '-created_date', 500);
         if (existing.some(u => u.starred && !u.parent_update_id)) {
