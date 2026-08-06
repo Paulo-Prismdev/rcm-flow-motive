@@ -1,4 +1,4 @@
-import { ClipboardCheck, MapPin, FileText, Mail, CheckCircle, Wrench } from 'lucide-react';
+import { ClipboardCheck, MapPin, FileText, Mail, CheckCircle, Wrench, PoundSterling } from 'lucide-react';
 
 export const STEPS = [
   { id: 'map', title: 'Find Repairer', icon: MapPin },
@@ -18,6 +18,7 @@ export const REQUIRED_FIELDS = [
 export const BUILT_IN_PDF_TEMPLATES = [
   { id: 'standard', name: 'Standard Instructions', icon: FileText },
   { id: 'orkin', name: 'Orkin Instructions', icon: Wrench },
+  { id: 'private', name: 'Paying Privately', icon: PoundSterling },
 ];
 
 export const replacePlaceholders = (text, itemData) => {

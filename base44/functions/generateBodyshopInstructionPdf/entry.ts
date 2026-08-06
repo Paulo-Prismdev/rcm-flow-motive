@@ -18,6 +18,7 @@ Deno.serve(async (req) => {
     if (!claim) return Response.json({ error: 'Claim not found' }, { status: 404 });
 
     const isOrkin = templateType === 'orkin';
+    const isPrivate = templateType === 'private';
 
     const doc = new jsPDF();
 
@@ -292,7 +293,8 @@ Deno.serve(async (req) => {
     // ═══════════════════════════════════════════
     // SECTION 4 — Insurance Details (or Non-Insurance notice)
     // ═══════════════════════════════════════════
-    if (authorisedBy === 'Uninsured') {
+    // "Paying Privately" template skips the insurance section entirely.
+    if (!isPrivate && authorisedBy === 'Uninsured') {
       // Non-insurance / paying privately — no insurer details shown
       const textW = MW - PAD_X * 2;
       const noticeLines = doc.splitTextToSize(
@@ -482,6 +484,75 @@ Deno.serve(async (req) => {
         for (const line of discW) { doc.text(line, PW / 2, yPos + 3.2, { align: 'center' }); yPos += LH; }
       }
 
+    } else if (isPrivate) {
+
+      // ═══════════════════════════════════════════
+      // PAYING PRIVATELY — Invoicing
+      // ═══════════════════════════════════════════
+      {
+        const FS = 9;
+        const LH = 5.5;
+        const textW = MW - PAD_X * 2;
+
+        drawHeader('Invoicing');
+
+        // Deductions bar
+        doc.setFillColor(...MID_GREY);
+        doc.setDrawColor(150, 150, 150);
+        doc.rect(LM, yPos, MW, 6, 'FD');
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(9);
+        doc.setTextColor(...DARK_TEXT);
+        doc.text('Invoice Deductions', TX, yPos + 4.2);
+        yPos += 6;
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(13);
+        doc.setTextColor(...NAVY);
+        doc.text(`Repairer Referral Fee ${fields.referral_fee}`, TX, yPos + 6);
+        if (fields.referral_fee_gbp) {
+          doc.text(`Repairer Referral Fee ${fields.referral_fee_gbp}`, PW - LM - PAD_X, yPos + 6, { align: 'right' });
+        }
+        yPos += 9;
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(FS);
+        doc.setTextColor(...DARK_TEXT);
+        yPos += 2;
+
+        // Body text
+        const invoicingParas = [
+          'This repair is being carried out on a non-insurance (Paying Privately) basis. There is no insurer involvement.',
+          'Your full invoice MUST be addressed to RCM Automotive Ltd and sent to invoices@rcmautomotive.co.uk.',
+          'Your invoice pack MUST include: main invoice, final authority (if applicable), and a signed satisfaction note.',
+          'Your invoice MUST be submitted within 48 hours of vehicle completion.',
+          'Payment will be made within 14 DAYS of receipt of your invoice.',
+          `Upon receipt of your invoice, you will receive an invoice from RCM Automotive for our referral fee (${fields.referral_fee}), which will be payable within 7 days of invoice.`,
+        ];
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(FS);
+        doc.setTextColor(...DARK_TEXT);
+        for (const p of invoicingParas) {
+          const wrapped = doc.splitTextToSize(p, textW);
+          for (const line of wrapped) { doc.text(line, TX, yPos + 4); yPos += LH; }
+          yPos += 2;
+        }
+
+        yPos += 2;
+
+        drawWarningBox('WARNING', 'NEVER SEND ANY INVOICE OR COMMUNICATION DIRECTLY TO THE CLIENT', FS, LH);
+        drawWarningBox('IMPORTANT', 'Failure to submit your invoice pack within 48 hours will result in delays to your payment, and an admin charge of GBP 150 will be added to your referral fee invoice.', FS, LH);
+        drawWarningBox('IMPORTANT', 'Failure to pay your referral fee within 7 days will result in an additional admin charge of GBP 150 and removal from the RCM Automotive network.', FS, LH);
+
+        yPos += 4;
+
+        // Disclaimer
+        doc.setFont('helvetica', 'italic');
+        doc.setFontSize(8);
+        doc.setTextColor(80, 80, 80);
+        const discW = doc.splitTextToSize('*By accepting this instruction, you agree to the T&Cs within the supplied SLA provided with this instruction.', MW);
+        for (const line of discW) { doc.text(line, PW / 2, yPos + 3.2, { align: 'center' }); yPos += LH; }
+      }
+
     } else {
 
       // ═══════════════════════════════════════════
@@ -554,7 +625,7 @@ Deno.serve(async (req) => {
     drawAllFooters();
 
     const pdfBytes = doc.output('arraybuffer');
-    const filename = `${claim.job_number || 'instruction'}-${isOrkin ? 'orkin' : 'standard'}.pdf`;
+    const filename = `${claim.job_number || 'instruction'}-${isOrkin ? 'orkin' : isPrivate ? 'private' : 'standard'}.pdf`;
 
     // Upload the PDF. Only persist it to the claim's docs when saveToClaim is
     // true — the allocation wizard generates with saveToClaim=false so that
