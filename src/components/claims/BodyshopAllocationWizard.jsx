@@ -183,12 +183,6 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
       dataToSave.instruction_contact_name = contactOverrides.name || '';
       dataToSave.instruction_contact_email = contactOverrides.email || '';
       dataToSave.instruction_contact_phone = contactOverrides.phone || '';
-      // Persist the selected bodyshop (saved here rather than on map click)
-      if (selectedBodyshop) {
-        dataToSave.bodyshop_id = selectedBodyshop.id;
-        dataToSave.bodyshop = selectedBodyshop.name;
-        dataToSave.bodyshop_email = selectedBodyshop.email || '';
-      }
       await base44.entities.Claim.update(claim.id, sanitizeClaimData(dataToSave));
       queryClient.invalidateQueries({ queryKey: ['claims'] });
       queryClient.invalidateQueries({ queryKey: ['claim', claim.id] });
