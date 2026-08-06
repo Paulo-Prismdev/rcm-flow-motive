@@ -320,6 +320,8 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
         });
       }
       setInstructionSavedToDocs(true);
+      queryClient.invalidateQueries({ queryKey: ['claims'] });
+      queryClient.invalidateQueries({ queryKey: ['claim', claim.id] });
     } catch (error) {
       console.error('Error saving instruction to docs:', error);
       alert('Failed to save instruction to claim docs. Please try again.');
