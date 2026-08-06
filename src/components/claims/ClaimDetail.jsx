@@ -26,7 +26,9 @@ import {
     RefreshCw,
     MapPin,
     Eye,
-    Star
+    Star,
+    CheckCircle,
+    Save
 } from "lucide-react";
 import { format } from "date-fns";
 import StatusBadge from "../shared/StatusBadge";
@@ -253,6 +255,9 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
   const [isRegeneratingPdf, setIsRegeneratingPdf] = useState(false);
   const [regenTemplateOpen, setRegenTemplateOpen] = useState(false);
   const [regenTemplateType, setRegenTemplateType] = useState('standard');
+  const [regenPdfUrl, setRegenPdfUrl] = useState(null);
+  const [savedRegenToDocs, setSavedRegenToDocs] = useState(false);
+  const [isSavingRegenToDocs, setIsSavingRegenToDocs] = useState(false);
 
   const [isBackorderedPartsModalOpen, setIsBackorderedPartsModalOpen] = useState(false);
 
@@ -704,6 +709,8 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
   const handleRegenerateInstruction = async (templateType = 'standard') => {
     setIsRegeneratingPdf(true);
     setRegenTemplateOpen(false);
+    setRegenPdfUrl(null);
+    setSavedRegenToDocs(false);
     try {
       const contactSource = (claim.last_contact_source || 'Client').toLowerCase();
       let contactOverrides = {};
@@ -721,6 +728,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
 
       const { file_url } = response.data;
       if (!file_url) throw new Error('No file URL returned');
+      setRegenPdfUrl(file_url);
       window.open(file_url, '_blank');
       queryClient.invalidateQueries({ queryKey: ['claims'] });
       queryClient.invalidateQueries({ queryKey: ['claim', claim.id] });
@@ -729,6 +737,26 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
       alert('Failed to regenerate instruction PDF. Please try again.');
     } finally {
       setIsRegeneratingPdf(false);
+    }
+  };
+
+  const handleSaveRegenToDocs = async () => {
+    if (!regenPdfUrl) return;
+    setIsSavingRegenToDocs(true);
+    try {
+      const existingFiles = claim.file_urls || [];
+      const updatedFiles = existingFiles.includes(regenPdfUrl)
+        ? existingFiles
+        : [...existingFiles, regenPdfUrl];
+      await base44.entities.Claim.update(claim.id, { file_urls: updatedFiles });
+      setSavedRegenToDocs(true);
+      queryClient.invalidateQueries({ queryKey: ['claims'] });
+      queryClient.invalidateQueries({ queryKey: ['claim', claim.id] });
+    } catch (error) {
+      console.error('Error saving PDF to claim docs:', error);
+      alert('Failed to save PDF to claim docs. Please try again.');
+    } finally {
+      setIsSavingRegenToDocs(false);
     }
   };
 
@@ -1318,6 +1346,39 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                       <>Generate {regenTemplateType === 'orkin' ? 'Orkin' : 'Standard'} Instruction</>
                     )}
                   </Button>
+                </div>
+              )}
+              {regenPdfUrl && !isRegeneratingPdf && (
+                <div className="mt-3 pt-3 border-t border-accent/20 space-y-2">
+                  <div className="flex items-center gap-2 p-2.5 rounded-lg bg-green-50 border border-green-200 text-green-700">
+                    <CheckCircle className="w-4 h-4 flex-shrink-0" />
+                    <span className="text-sm flex-1">
+                      {savedRegenToDocs ? 'Saved to claim docs.' : 'PDF generated.'}
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => window.open(regenPdfUrl, '_blank')}
+                      className="gap-1.5"
+                    >
+                      <Download className="w-3.5 h-3.5" /> View
+                    </Button>
+                  </div>
+                  {!savedRegenToDocs && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleSaveRegenToDocs}
+                      disabled={isSavingRegenToDocs}
+                      className="w-full gap-2"
+                    >
+                      {isSavingRegenToDocs ? (
+                        <><RefreshCw className="w-4 h-4 animate-spin" /> Saving...</>
+                      ) : (
+                        <><Save className="w-4 h-4" /> Save to Claim Docs Now</>
+                      )}
+                    </Button>
+                  )}
                 </div>
               )}
             </div>
