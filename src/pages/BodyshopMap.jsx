@@ -56,12 +56,6 @@ const tier2Icon = new L.Icon({
   iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
 });
 
-const prevNetworkIcon = new L.Icon({
-  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-  iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
-});
-
 const greyIcon = new L.Icon({
   iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-grey.png',
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
@@ -86,14 +80,12 @@ function getTierIcon(bodyshop) {
   const tier = bodyshop.tier;
   if (tier === 'TIER 1') return tier1Icon;
   if (tier === 'TIER 2') return tier2Icon;
-  if (tier === 'Previously on Network') return prevNetworkIcon;
   return greyIcon;
 }
 
 function getTierKey(tier) {
   if (tier === 'TIER 1') return 'TIER 1';
   if (tier === 'TIER 2') return 'TIER 2';
-  if (tier === 'Previously on Network') return 'Previously on Network';
   return 'None';
 }
 
@@ -158,7 +150,6 @@ export default function BodyshopMap() {
   const [visibleTiers, setVisibleTiers] = useState({
     'TIER 1': true,
     'TIER 2': true,
-    'Previously on Network': true,
     'None': true,
     'Solution': true,
     'QAC': true,
@@ -426,7 +417,6 @@ export default function BodyshopMap() {
   const tierDots = [
     { key: 'TIER 1', label: 'Tier 1', color: 'bg-green-500', ring: 'ring-green-500' },
     { key: 'TIER 2', label: 'Tier 2', color: 'bg-orange-400', ring: 'ring-orange-400' },
-    { key: 'Previously on Network', label: 'Prev. Network', color: 'bg-red-500', ring: 'ring-red-500' },
     { key: 'Solution', label: 'Solution', color: 'bg-violet-500', ring: 'ring-violet-500' },
     { key: 'QAC', label: 'QAC', color: 'bg-yellow-400', ring: 'ring-yellow-400' },
   ];
@@ -783,7 +773,6 @@ export default function BodyshopMap() {
                   <span className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium ${
                     selectedBodyshop.tier === 'TIER 1' ? 'bg-green-100 text-green-700' :
                     selectedBodyshop.tier === 'TIER 2' ? 'bg-orange-100 text-orange-700' :
-                    selectedBodyshop.tier === 'Previously on Network' ? 'bg-red-100 text-red-700' :
                     'bg-gray-100 text-gray-600'
                   }`}>
                     {selectedBodyshop.tier || 'No Tier'}
