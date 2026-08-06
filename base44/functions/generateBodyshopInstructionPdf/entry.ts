@@ -11,7 +11,7 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const { claimId, contactOverrides, templateType } = await req.json();
+    const { claimId, contactOverrides, templateType, saveToClaim = true } = await req.json();
     if (!claimId) return Response.json({ error: 'Missing claimId' }, { status: 400 });
 
     const claim = await base44.asServiceRole.entities.Claim.get(claimId);
@@ -556,18 +556,23 @@ Deno.serve(async (req) => {
     const pdfBytes = doc.output('arraybuffer');
     const filename = `${claim.job_number || 'instruction'}-${isOrkin ? 'orkin' : 'standard'}.pdf`;
 
-    // Upload & save to claim, then return the file URL as JSON (reliable over axios)
+    // Upload the PDF. Only persist it to the claim's docs when saveToClaim is
+    // true — the allocation wizard generates with saveToClaim=false so that
+    // regenerating doesn't pile up unused PDFs; the final PDF is saved at the
+    // point of allocating the repairer instead.
     let file_url = null;
     try {
       const pdfBlob = new Blob([pdfBytes], { type: 'application/pdf' });
       const pdfFile = new File([pdfBlob], filename, { type: 'application/pdf' });
       const uploadResult = await base44.asServiceRole.integrations.Core.UploadFile({ file: pdfFile });
       file_url = uploadResult.file_url;
-      const currentFileUrls = Array.isArray(claim.file_urls) ? claim.file_urls : [];
-      await base44.asServiceRole.entities.Claim.update(claim.id, {
-        file_urls: [...currentFileUrls, file_url],
-        instruction_pdf_url: file_url
-      });
+      if (saveToClaim) {
+        const currentFileUrls = Array.isArray(claim.file_urls) ? claim.file_urls : [];
+        await base44.asServiceRole.entities.Claim.update(claim.id, {
+          file_urls: [...currentFileUrls, file_url],
+          instruction_pdf_url: file_url
+        });
+      }
     } catch (uploadError) {
       console.error('Failed to upload PDF:', uploadError);
       return Response.json({ error: 'Failed to upload PDF: ' + uploadError.message }, { status: 500 });

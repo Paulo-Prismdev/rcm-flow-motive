@@ -19,7 +19,7 @@ export default function WizardInstructionStep({
 
       <h3 className="font-bold text-sm">Select Template</h3>
       <p className="text-xs text-muted-foreground">
-        Select a template to generate the bodyshop instruction PDF. This will open in a new tab and be saved to the claim.
+      Select a template to generate the bodyshop instruction PDF. It opens in a new tab and is saved to the claim when you allocate the repairer.
       </p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -71,7 +71,7 @@ export default function WizardInstructionStep({
       {generatedPdfUrl && (
         <div className="p-2.5 rounded-lg bg-green-50 border border-green-200 text-green-700 flex items-center gap-2">
           <CheckCircle className="w-4 h-4" />
-          <span className="text-sm">PDF generated successfully and saved to claim attachments</span>
+          <span className="text-sm">PDF generated — it will be saved to the claim when you allocate the repairer</span>
         </div>
       )}
 

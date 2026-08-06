@@ -275,19 +275,20 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
     setIsGeneratingPdf(true);
     try {
       const contactOverrides = getContactOverrides();
+      // Generate without persisting to docs — the PDF is only saved to the
+      // claim at the point of allocating the repairer (handleAllocate), so
+      // regenerating here doesn't leave unused PDFs in the docs list.
       const response = await base44.functions.invoke('generateBodyshopInstructionPdf', {
         claimId: claim.id,
         contactOverrides,
         templateType: selectedPdfTemplate,
+        saveToClaim: false,
       });
 
       const { file_url } = response.data;
       if (!file_url) throw new Error('No file URL returned');
       setGeneratedPdfUrl(file_url);
       window.open(file_url, '_blank');
-      // Invalidate both list and individual claim queries
-      queryClient.invalidateQueries({ queryKey: ['claims'] });
-      queryClient.invalidateQueries({ queryKey: ['claim', claim.id] });
     } catch (error) {
       console.error('Error generating PDF:', error);
       alert('Failed to generate PDF. Please try again.');
@@ -300,9 +301,19 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
     if (!selectedBodyshop) return;
     setIsAllocating(true);
     try {
-      await base44.entities.Claim.update(claim.id, {
+      const updateData = {
         bs_instructed: new Date().toISOString().split('T')[0],
-      });
+      };
+
+      // Persist the generated instruction PDF to the claim's docs now —
+      // only the PDF actually used at allocation is saved.
+      if (generatedPdfUrl) {
+        const currentFileUrls = Array.isArray(claim.file_urls) ? claim.file_urls : [];
+        updateData.file_urls = [...currentFileUrls, generatedPdfUrl];
+        updateData.instruction_pdf_url = generatedPdfUrl;
+      }
+
+      await base44.entities.Claim.update(claim.id, updateData);
 
       if (selectedBodyshop.email) {
         try {
@@ -321,6 +332,7 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
       }
 
       queryClient.invalidateQueries({ queryKey: ['claims'] });
+      queryClient.invalidateQueries({ queryKey: ['claim', claim.id] });
       if (onAllocationComplete) onAllocationComplete(selectedBodyshop);
       onClose();
     } catch (error) {
