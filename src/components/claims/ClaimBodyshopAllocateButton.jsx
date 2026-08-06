@@ -48,6 +48,7 @@ export default function ClaimBodyshopAllocateButton({ claim, onAllocated }) {
         onClose={() => { setIsWizardOpen(false); setPreSelectedBodyshop(null); }}
         onAllocationComplete={handleWizardComplete}
         preSelectedBodyshop={preSelectedBodyshop}
+        startStep={preSelectedBodyshop ? 1 : 0}
       />
 
       <Button
