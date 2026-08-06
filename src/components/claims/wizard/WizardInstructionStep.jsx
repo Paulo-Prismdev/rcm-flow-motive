@@ -70,13 +70,13 @@ export default function WizardInstructionStep({
       </Button>
 
       {generatedPdfUrl && (
-        <>
-          <div className="p-2.5 rounded-lg bg-green-50 border border-green-200 text-green-700 flex items-center gap-2">
-            <CheckCircle className="w-4 h-4" />
+        <div className="rounded-lg border border-green-200 bg-green-50 p-2.5 space-y-2">
+          <div className="flex items-center gap-2 text-green-700">
+            <CheckCircle className="w-4 h-4 flex-shrink-0" />
             <span className="text-sm">
               {savedToDocs
-                ? 'PDF saved to claim docs — it will be attached at allocation too.'
-                : 'PDF generated — it will be saved to the claim when you allocate the repairer.'}
+                ? 'Saved to claim docs — it will be attached at allocation too.'
+                : 'PDF generated — save it to the claim docs now or at allocation.'}
             </span>
           </div>
           {!savedToDocs && (
@@ -84,7 +84,7 @@ export default function WizardInstructionStep({
               variant="outline"
               onClick={onSaveToDocs}
               disabled={isSavingToDocs}
-              className="w-full h-10"
+              className="w-full h-10 border-green-300 text-green-700 hover:bg-green-100"
             >
               {isSavingToDocs ? (
                 <><Loader className="w-4 h-4 mr-2 animate-spin" /> Saving...</>
@@ -93,7 +93,7 @@ export default function WizardInstructionStep({
               )}
             </Button>
           )}
-        </>
+        </div>
       )}
 
       <p className="text-xs text-muted-foreground text-center">
