@@ -294,7 +294,10 @@ Deno.serve(async (req) => {
     // SECTION 4 — Insurance Details (or Non-Insurance notice)
     // ═══════════════════════════════════════════
     // "Paying Privately" template skips the insurance section entirely.
-    if (!isPrivate && authorisedBy === 'Uninsured') {
+    if (isPrivate) {
+      // No insurance section for private repairs — just add spacing.
+      yPos += SECTION_GAP;
+    } else if (authorisedBy === 'Uninsured') {
       // Non-insurance / paying privately — no insurer details shown
       const textW = MW - PAD_X * 2;
       const noticeLines = doc.splitTextToSize(
