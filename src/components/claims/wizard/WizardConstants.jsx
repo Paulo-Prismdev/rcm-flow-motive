@@ -1,8 +1,8 @@
 import { ClipboardCheck, MapPin, FileText, Mail, CheckCircle, Wrench } from 'lucide-react';
 
 export const STEPS = [
-  { id: 'validate', title: 'Validate Details', icon: ClipboardCheck },
   { id: 'map', title: 'Find Repairer', icon: MapPin },
+  { id: 'validate', title: 'Validate Details', icon: ClipboardCheck },
   { id: 'instruction', title: 'Generate Instruction', icon: FileText },
   { id: 'email', title: 'Compose Email', icon: Mail },
   { id: 'confirm', title: 'Confirm Allocation', icon: CheckCircle },

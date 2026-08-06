@@ -42,6 +42,8 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
   const [isAllocating, setIsAllocating] = useState(false);
 
   const hasAttemptedGeocode = useRef(false);
+  const initializedForClaimId = useRef(null);
+  const mapCenterInit = useRef(false);
   const queryClient = useQueryClient();
 
   const { data: bodyshops = [] } = useQuery({
@@ -78,55 +80,67 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
     return !!vehicleLocation && vehicleLocation.length >= 3;
   }, [claim, vehicleLocation]);
 
-  // ── Reset when modal opens ──
+  // ── Reset when modal opens (only on fresh open / claim change, NOT on
+  // every claim data refresh — otherwise query refetches reset currentStep) ──
   useEffect(() => {
     if (isOpen && claim) {
-      hasAttemptedGeocode.current = false;
-      setCurrentStep(startStep);
-      setSelectedBodyshop(preSelectedBodyshop);
-      setClientLocation(null);
-      setGeocodeMessage(null);
-      setGeneratedPdfUrl(null);
-      setEmailTo(''); setEmailSubject(''); setEmailBody('');
-      setSelectedEmailTemplateId('');
-      setContactType(claim.last_contact_source ? claim.last_contact_source.toLowerCase() : 'client');
-      setCustomContact({ name: '', phone: '', email: '' });
-      setAuthorisedBy(claim.authorised_by || 'Client Insurer');
+      const isFreshOpen = initializedForClaimId.current !== claim.id;
+      initializedForClaimId.current = claim.id;
 
-      const initialValidation = {};
-      REQUIRED_FIELDS.forEach(field => {
-        initialValidation[field.key] = claim[field.key] ?? (field.type === 'boolean' ? false : '');
-      });
-      // Also seed insurance fields so edits are tracked and saved
-      ['insurer', 'claim_ref', 'policy_number', 'policy_excess', 'audatex_code', 'send_estimate_email',
-       'tp_insurer', 'tp_claim_ref', 'tp_policy_number', 'tp_policy_excess'
-      ].forEach(key => {
-        initialValidation[key] = claim[key] ?? '';
-      });
-      setValidationData(initialValidation);
+      if (isFreshOpen) {
+        hasAttemptedGeocode.current = false;
+        mapCenterInit.current = false;
+        setCurrentStep(startStep);
+        setSelectedBodyshop(preSelectedBodyshop);
+        setClientLocation(null);
+        setGeocodeMessage(null);
+        setGeneratedPdfUrl(null);
+        setEmailTo(''); setEmailSubject(''); setEmailBody('');
+        setSelectedEmailTemplateId('');
+        setContactType(claim.last_contact_source ? claim.last_contact_source.toLowerCase() : 'client');
+        setCustomContact({ name: '', phone: '', email: '' });
+        setAuthorisedBy(claim.authorised_by || 'Client Insurer');
 
-      if (preSelectedBodyshop?.latitude && preSelectedBodyshop?.longitude) {
-        setMapCenter([parseFloat(preSelectedBodyshop.latitude), parseFloat(preSelectedBodyshop.longitude)]);
-        setMapZoom(11);
-      } else if (validBodyshops.length > 0) {
-        const avgLat = validBodyshops.reduce((sum, b) => sum + parseFloat(b.latitude), 0) / validBodyshops.length;
-        const avgLng = validBodyshops.reduce((sum, b) => sum + parseFloat(b.longitude), 0) / validBodyshops.length;
-        setMapCenter([avgLat, avgLng]);
-        setMapZoom(7);
+        const initialValidation = {};
+        REQUIRED_FIELDS.forEach(field => {
+          initialValidation[field.key] = claim[field.key] ?? (field.type === 'boolean' ? false : '');
+        });
+        // Also seed insurance fields so edits are tracked and saved
+        ['insurer', 'claim_ref', 'policy_number', 'policy_excess', 'audatex_code', 'send_estimate_email',
+         'tp_insurer', 'tp_claim_ref', 'tp_policy_number', 'tp_policy_excess'
+        ].forEach(key => {
+          initialValidation[key] = claim[key] ?? '';
+        });
+        setValidationData(initialValidation);
+
+        // Save pre-selected bodyshop to claim as soon as the wizard opens
+        if (preSelectedBodyshop) {
+          base44.entities.Claim.update(claim.id, {
+            bodyshop_id: preSelectedBodyshop.id,
+            bodyshop: preSelectedBodyshop.name,
+            bodyshop_email: preSelectedBodyshop.email,
+            last_contact_source: claim.last_contact_source || 'Client',
+            authorised_by: claim.authorised_by || 'Client Insurer',
+          }).then(() => {
+            queryClient.invalidateQueries({ queryKey: ['claims'] });
+            queryClient.invalidateQueries({ queryKey: ['claim', claim.id] });
+          }).catch(err => console.error('Error saving pre-selected bodyshop:', err));
+        }
       }
 
-      // Save pre-selected bodyshop to claim as soon as the wizard opens
-      if (preSelectedBodyshop) {
-        base44.entities.Claim.update(claim.id, {
-          bodyshop_id: preSelectedBodyshop.id,
-          bodyshop: preSelectedBodyshop.name,
-          bodyshop_email: preSelectedBodyshop.email,
-          last_contact_source: claim.last_contact_source || 'Client',
-          authorised_by: claim.authorised_by || 'Client Insurer',
-        }).then(() => {
-          queryClient.invalidateQueries({ queryKey: ['claims'] });
-          queryClient.invalidateQueries({ queryKey: ['claim', claim.id] });
-        }).catch(err => console.error('Error saving pre-selected bodyshop:', err));
+      // Set map center once (on fresh open or when bodyshops first load)
+      if (!mapCenterInit.current) {
+        if (preSelectedBodyshop?.latitude && preSelectedBodyshop?.longitude) {
+          setMapCenter([parseFloat(preSelectedBodyshop.latitude), parseFloat(preSelectedBodyshop.longitude)]);
+          setMapZoom(11);
+          mapCenterInit.current = true;
+        } else if (validBodyshops.length > 0) {
+          const avgLat = validBodyshops.reduce((sum, b) => sum + parseFloat(b.latitude), 0) / validBodyshops.length;
+          const avgLng = validBodyshops.reduce((sum, b) => sum + parseFloat(b.longitude), 0) / validBodyshops.length;
+          setMapCenter([avgLat, avgLng]);
+          setMapZoom(7);
+          mapCenterInit.current = true;
+        }
       }
     }
   }, [isOpen, validBodyshops, claim, startStep, preSelectedBodyshop]);
@@ -180,8 +194,8 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
       await base44.entities.Claim.update(claim.id, sanitizeClaimData(dataToSave));
       queryClient.invalidateQueries({ queryKey: ['claims'] });
       queryClient.invalidateQueries({ queryKey: ['claim', claim.id] });
-      // Skip the "Find Repairer" map step if a bodyshop is already selected
-      setCurrentStep(selectedBodyshop ? 2 : 1);
+      // Bodyshop was selected in step 0 (Find Repairer), so proceed to Generate Instruction
+      setCurrentStep(2);
     } catch (error) {
       console.error('Error saving validation data:', error);
       alert('Failed to save. Please try again.');
@@ -380,8 +394,8 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
 
   const canProceed = () => {
     switch (currentStep) {
-      case 0: return missingFields.length === 0;
-      case 1: return !!selectedBodyshop;
+      case 0: return !!selectedBodyshop;
+      case 1: return missingFields.length === 0;
       default: return true;
     }
   };
@@ -439,6 +453,20 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
         {/* Step Content */}
         <div className="flex-1 overflow-y-auto p-3 lg:p-4" style={{ minHeight: 0, maxHeight: 'calc(95vh - 120px)' }}>
           {currentStep === 0 && (
+            <WizardFindRepairerStep
+              claim={claim}
+              bodyshops={bodyshops}
+              clientLocation={clientLocation}
+              isGeocoding={isGeocoding}
+              geocodeMessage={geocodeMessage}
+              mapCenter={mapCenter}
+              mapZoom={mapZoom}
+              selectedBodyshop={selectedBodyshop}
+              onSelectBodyshop={handleBodyshopClick}
+              onClearSelection={() => setSelectedBodyshop(null)}
+            />
+          )}
+          {currentStep === 1 && (
             <WizardValidateStep
               claim={claim}
               validationData={validationData}
@@ -451,20 +479,6 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
               onAuthorisedByChange={setAuthorisedBy}
               onCustomContactChange={(field, value) => setCustomContact(prev => ({ ...prev, [field]: value }))}
               isLocked={isLocked}
-            />
-          )}
-          {currentStep === 1 && (
-            <WizardFindRepairerStep
-              claim={claim}
-              bodyshops={bodyshops}
-              clientLocation={clientLocation}
-              isGeocoding={isGeocoding}
-              geocodeMessage={geocodeMessage}
-              mapCenter={mapCenter}
-              mapZoom={mapZoom}
-              selectedBodyshop={selectedBodyshop}
-              onSelectBodyshop={handleBodyshopClick}
-              onClearSelection={() => setSelectedBodyshop(null)}
             />
           )}
           {currentStep === 2 && (
@@ -515,7 +529,7 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
             <span>{currentStep === 0 ? 'Cancel' : 'Back'}</span>
           </Button>
 
-          {currentStep === 0 && (
+          {currentStep === 1 && (
             <Button onClick={handleSaveValidation} disabled={missingFields.length > 0 || isSavingValidation} className="flex-1 max-w-[160px] h-10">
               {isSavingValidation ? (
                 <><Loader className="w-4 h-4 mr-2 animate-spin" /> Saving...</>
@@ -525,7 +539,7 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
             </Button>
           )}
 
-          {currentStep > 0 && currentStep < STEPS.length - 1 && (
+          {currentStep !== 1 && currentStep < STEPS.length - 1 && (
             <Button onClick={() => setCurrentStep(currentStep + 1)} disabled={!canProceed()} className="flex-1 max-w-[140px] h-10">
               Next <ChevronRight className="w-4 h-4 ml-2" />
             </Button>
