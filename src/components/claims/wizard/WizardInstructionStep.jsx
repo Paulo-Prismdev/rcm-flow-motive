@@ -1,12 +1,13 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { FileText, Loader, CheckCircle } from 'lucide-react';
+import { FileText, Loader, CheckCircle, Save } from 'lucide-react';
 import { BUILT_IN_PDF_TEMPLATES } from './WizardConstants';
 
 export default function WizardInstructionStep({
   selectedBodyshop, pdfTemplates, selectedPdfTemplate,
   isGeneratingPdf, generatedPdfUrl,
-  onSelectTemplate, onGeneratePdf
+  isSavingToDocs, savedToDocs,
+  onSelectTemplate, onGeneratePdf, onSaveToDocs
 }) {
   const activeCustomTemplates = pdfTemplates.filter(t => t.is_active);
 
@@ -69,10 +70,30 @@ export default function WizardInstructionStep({
       </Button>
 
       {generatedPdfUrl && (
-        <div className="p-2.5 rounded-lg bg-green-50 border border-green-200 text-green-700 flex items-center gap-2">
-          <CheckCircle className="w-4 h-4" />
-          <span className="text-sm">PDF generated — it will be saved to the claim when you allocate the repairer</span>
-        </div>
+        <>
+          <div className="p-2.5 rounded-lg bg-green-50 border border-green-200 text-green-700 flex items-center gap-2">
+            <CheckCircle className="w-4 h-4" />
+            <span className="text-sm">
+              {savedToDocs
+                ? 'PDF saved to claim docs — it will be attached at allocation too.'
+                : 'PDF generated — it will be saved to the claim when you allocate the repairer.'}
+            </span>
+          </div>
+          {!savedToDocs && (
+            <Button
+              variant="outline"
+              onClick={onSaveToDocs}
+              disabled={isSavingToDocs}
+              className="w-full h-10"
+            >
+              {isSavingToDocs ? (
+                <><Loader className="w-4 h-4 mr-2 animate-spin" /> Saving...</>
+              ) : (
+                <><Save className="w-4 h-4 mr-2" /> Save to Claim Docs Now</>
+              )}
+            </Button>
+          )}
+        </>
       )}
 
       <p className="text-xs text-muted-foreground text-center">

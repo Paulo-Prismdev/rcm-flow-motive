@@ -251,6 +251,8 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
   const [isFetchingVehicle, setIsFetchingVehicle] = useState(false);
   const [vehicleFetchError, setVehicleFetchError] = useState('');
   const [isRegeneratingPdf, setIsRegeneratingPdf] = useState(false);
+  const [regenTemplateOpen, setRegenTemplateOpen] = useState(false);
+  const [regenTemplateType, setRegenTemplateType] = useState('standard');
 
   const [isBackorderedPartsModalOpen, setIsBackorderedPartsModalOpen] = useState(false);
 
@@ -699,8 +701,9 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
     window.open(`/claims?id=${claimId}`, '_blank');
   };
 
-  const handleRegenerateInstruction = async () => {
+  const handleRegenerateInstruction = async (templateType = 'standard') => {
     setIsRegeneratingPdf(true);
+    setRegenTemplateOpen(false);
     try {
       const contactSource = (claim.last_contact_source || 'Client').toLowerCase();
       let contactOverrides = {};
@@ -709,12 +712,6 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
       } else if (contactSource === 'driver') {
         contactOverrides = { name: claim.driver_contact_name, phone: claim.driver_contact_phone, email: claim.driver_contact_email };
       }
-
-      // Preserve the original template type when regenerating — the backend
-      // saves the filename as "<job>-orkin.pdf" or "<job>-standard.pdf", so
-      // detect from the existing instruction PDF URL (default to standard).
-      const existingUrl = claim.instruction_pdf_url || '';
-      const templateType = existingUrl.includes('orkin') ? 'orkin' : 'standard';
 
       const response = await base44.functions.invoke('generateBodyshopInstructionPdf', {
         claimId: claim.id,
@@ -1266,7 +1263,12 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={handleRegenerateInstruction}
+                    onClick={() => {
+                      // Pre-select based on the existing instruction's template
+                      const existingUrl = claim.instruction_pdf_url || '';
+                      setRegenTemplateType(existingUrl.includes('orkin') ? 'orkin' : 'standard');
+                      setRegenTemplateOpen((v) => !v);
+                    }}
                     disabled={isRegeneratingPdf}
                     className="gap-2"
                   >
@@ -1275,6 +1277,49 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                   </Button>
                 </div>
               </div>
+              {regenTemplateOpen && (
+                <div className="mt-3 pt-3 border-t border-accent/20 space-y-2">
+                  <p className="text-xs font-medium text-muted-foreground">Select template to regenerate:</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setRegenTemplateType('standard')}
+                      className={`p-2 rounded-lg border-2 text-sm font-medium transition-all ${
+                        regenTemplateType === 'standard'
+                          ? 'border-primary bg-primary/5 text-primary'
+                          : 'border-border hover:border-primary/50'
+                      }`}
+                    >
+                      <FileText className="w-4 h-4 mx-auto mb-1" />
+                      Standard
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setRegenTemplateType('orkin')}
+                      className={`p-2 rounded-lg border-2 text-sm font-medium transition-all ${
+                        regenTemplateType === 'orkin'
+                          ? 'border-primary bg-primary/5 text-primary'
+                          : 'border-border hover:border-primary/50'
+                      }`}
+                    >
+                      <Wrench className="w-4 h-4 mx-auto mb-1" />
+                      Orkin
+                    </button>
+                  </div>
+                  <Button
+                    size="sm"
+                    className="w-full"
+                    onClick={() => handleRegenerateInstruction(regenTemplateType)}
+                    disabled={isRegeneratingPdf}
+                  >
+                    {isRegeneratingPdf ? (
+                      <><RefreshCw className="w-4 h-4 mr-2 animate-spin" /> Generating...</>
+                    ) : (
+                      <>Generate {regenTemplateType === 'orkin' ? 'Orkin' : 'Standard'} Instruction</>
+                    )}
+                  </Button>
+                </div>
+              )}
             </div>
           </EditableSection>
         );

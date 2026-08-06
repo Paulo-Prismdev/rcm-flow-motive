@@ -28,6 +28,8 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [generatedPdfUrl, setGeneratedPdfUrl] = useState(null);
   const [selectedPdfTemplate, setSelectedPdfTemplate] = useState('standard');
+  const [isSavingInstructionToDocs, setIsSavingInstructionToDocs] = useState(false);
+  const [instructionSavedToDocs, setInstructionSavedToDocs] = useState(false);
   const [contactType, setContactType] = useState('client');
   const [customContact, setCustomContact] = useState({ name: '', phone: '', email: '' });
   const [authorisedBy, setAuthorisedBy] = useState('Client Insurer');
@@ -288,12 +290,41 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
       const { file_url } = response.data;
       if (!file_url) throw new Error('No file URL returned');
       setGeneratedPdfUrl(file_url);
+      setInstructionSavedToDocs(false);
       window.open(file_url, '_blank');
     } catch (error) {
       console.error('Error generating PDF:', error);
       alert('Failed to generate PDF. Please try again.');
     } finally {
       setIsGeneratingPdf(false);
+    }
+  };
+
+  // Optionally save the generated instruction PDF to the claim's docs
+  // immediately (before allocation), so it's persisted even if the wizard
+  // is closed without completing allocation.
+  const handleSaveInstructionToDocs = async () => {
+    if (!generatedPdfUrl) return;
+    setIsSavingInstructionToDocs(true);
+    try {
+      const currentFileUrls = Array.isArray(claim.file_urls) ? claim.file_urls : [];
+      // Avoid duplicating if already saved
+      if (!currentFileUrls.includes(generatedPdfUrl)) {
+        await base44.entities.Claim.update(claim.id, {
+          file_urls: [...currentFileUrls, generatedPdfUrl],
+          instruction_pdf_url: generatedPdfUrl,
+        });
+      } else {
+        await base44.entities.Claim.update(claim.id, {
+          instruction_pdf_url: generatedPdfUrl,
+        });
+      }
+      setInstructionSavedToDocs(true);
+    } catch (error) {
+      console.error('Error saving instruction to docs:', error);
+      alert('Failed to save instruction to claim docs. Please try again.');
+    } finally {
+      setIsSavingInstructionToDocs(false);
     }
   };
 
@@ -309,7 +340,9 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
       // only the PDF actually used at allocation is saved.
       if (generatedPdfUrl) {
         const currentFileUrls = Array.isArray(claim.file_urls) ? claim.file_urls : [];
-        updateData.file_urls = [...currentFileUrls, generatedPdfUrl];
+        updateData.file_urls = currentFileUrls.includes(generatedPdfUrl)
+          ? currentFileUrls
+          : [...currentFileUrls, generatedPdfUrl];
         updateData.instruction_pdf_url = generatedPdfUrl;
       }
 
@@ -439,8 +472,11 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
               selectedPdfTemplate={selectedPdfTemplate}
               isGeneratingPdf={isGeneratingPdf}
               generatedPdfUrl={generatedPdfUrl}
+              isSavingToDocs={isSavingInstructionToDocs}
+              savedToDocs={instructionSavedToDocs}
               onSelectTemplate={setSelectedPdfTemplate}
               onGeneratePdf={handleGeneratePdf}
+              onSaveToDocs={handleSaveInstructionToDocs}
             />
           )}
           {currentStep === 3 && (
