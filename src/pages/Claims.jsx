@@ -332,6 +332,17 @@ export default function ClaimsPage() {
     return () => document.body.classList.remove('claim-detail-open');
   }, [selectedClaim]);
 
+  // Sync selectedClaim with the latest refetched claims data so that
+  // external updates (e.g. wizard saving a PDF directly via Claim.update)
+  // are reflected in ClaimDetail without requiring a manual refresh.
+  useEffect(() => {
+    if (!selectedClaim) return;
+    const fresh = claims.find(c => c.id === selectedClaim.id);
+    if (fresh && fresh.updated_date !== selectedClaim.updated_date) {
+      setSelectedClaim(fresh);
+    }
+  }, [claims]);
+
   // Persist scroll position: save when opening a claim, restore when returning to the list
   useEffect(() => {
     if (selectedClaim && scrollRef.current) {
