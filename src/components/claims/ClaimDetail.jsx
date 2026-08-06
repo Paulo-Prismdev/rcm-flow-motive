@@ -710,10 +710,16 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
         contactOverrides = { name: claim.driver_contact_name, phone: claim.driver_contact_phone, email: claim.driver_contact_email };
       }
 
+      // Preserve the original template type when regenerating — the backend
+      // saves the filename as "<job>-orkin.pdf" or "<job>-standard.pdf", so
+      // detect from the existing instruction PDF URL (default to standard).
+      const existingUrl = claim.instruction_pdf_url || '';
+      const templateType = existingUrl.includes('orkin') ? 'orkin' : 'standard';
+
       const response = await base44.functions.invoke('generateBodyshopInstructionPdf', {
         claimId: claim.id,
         contactOverrides,
-        templateType: 'standard',
+        templateType,
       });
 
       const { file_url } = response.data;
