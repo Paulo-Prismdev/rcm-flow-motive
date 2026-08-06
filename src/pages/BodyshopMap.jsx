@@ -44,43 +44,38 @@ const customerIcon = new L.Icon({
   iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
 });
 
-const tier1Icon = new L.Icon({
-  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-  iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
-});
+// ── Custom SVG pin icons (per-tier colours) ──
+function makePinIcon(color, selected = false) {
+  const w = 25, h = 41;
+  const strokeAttr = selected ? 'stroke="white" stroke-width="3"' : '';
+  const filter = selected ? 'filter:drop-shadow(0 0 6px rgba(0,0,0,0.45));' : '';
+  const html = `<svg width="${w}" height="${h}" viewBox="0 0 25 41" xmlns="http://www.w3.org/2000/svg" style="${filter}">
+    <path d="M12.5 0C5.6 0 0 5.6 0 12.5c0 8.75 12.5 28.5 12.5 28.5S25 21.25 25 12.5C25 5.6 19.4 0 12.5 0z" fill="${color}" ${strokeAttr}/>
+    <circle cx="12.5" cy="12.5" r="5" fill="white"/>
+  </svg>`;
+  return L.divIcon({
+    className: 'tier-pin-marker',
+    html,
+    iconSize: [w, h],
+    iconAnchor: [w / 2, h],
+    popupAnchor: [1, -34],
+  });
+}
 
-const tier2Icon = new L.Icon({
-  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-  iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
-});
+const TIER_COLORS = {
+  'TIER 1': '#141d48',
+  'TIER 2': '#00ff01',
+  'Solution': '#ce7725',
+  'QAC': '#303ebb',
+};
+const NO_TIER_COLOR = '#9ca3af';
 
-const greyIcon = new L.Icon({
-  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-grey.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-  iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
-});
-
-const solutionIcon = new L.Icon({
-  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-violet.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-  iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
-});
-
-const qacIcon = new L.Icon({
-  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-yellow.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-  iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
-});
-
-function getTierIcon(bodyshop) {
-  if (bodyshop.map_group === 'Solution') return solutionIcon;
-  if (bodyshop.map_group === 'QAC') return qacIcon;
-  const tier = bodyshop.tier;
-  if (tier === 'TIER 1') return tier1Icon;
-  if (tier === 'TIER 2') return tier2Icon;
-  return greyIcon;
+function getTierIcon(bodyshop, selected = false) {
+  if (bodyshop.map_group === 'Solution') return makePinIcon(TIER_COLORS.Solution, selected);
+  if (bodyshop.map_group === 'QAC') return makePinIcon(TIER_COLORS.QAC, selected);
+  if (bodyshop.tier === 'TIER 1') return makePinIcon(TIER_COLORS['TIER 1'], selected);
+  if (bodyshop.tier === 'TIER 2') return makePinIcon(TIER_COLORS['TIER 2'], selected);
+  return makePinIcon(NO_TIER_COLOR, selected);
 }
 
 function getTierKey(tier) {
@@ -415,10 +410,10 @@ export default function BodyshopMap() {
     : '#';
 
   const tierDots = [
-    { key: 'TIER 1', label: 'Tier 1', color: 'bg-green-500', ring: 'ring-green-500' },
-    { key: 'TIER 2', label: 'Tier 2', color: 'bg-orange-400', ring: 'ring-orange-400' },
-    { key: 'Solution', label: 'Solution', color: 'bg-violet-500', ring: 'ring-violet-500' },
-    { key: 'QAC', label: 'QAC', color: 'bg-yellow-400', ring: 'ring-yellow-400' },
+    { key: 'TIER 1', label: 'Tier 1', color: '#141d48' },
+    { key: 'TIER 2', label: 'Tier 2', color: '#00ff01' },
+    { key: 'Solution', label: 'Solution', color: '#ce7725' },
+    { key: 'QAC', label: 'QAC', color: '#303ebb' },
   ];
 
   return (
@@ -552,7 +547,7 @@ export default function BodyshopMap() {
                 <Marker
                   key={bodyshop.id}
                   position={[coords.lat, coords.lng]}
-                  icon={selectedBodyshop?.id === bodyshop.id ? bodyshopSelectedIcon : getTierIcon(bodyshop)}
+                  icon={getTierIcon(bodyshop, selectedBodyshop?.id === bodyshop.id)}
                   eventHandlers={{ click: () => handleSelectBodyshop(bodyshop) }}
                 >
                   <Tooltip sticky>
@@ -628,7 +623,7 @@ export default function BodyshopMap() {
         <div className="absolute top-16 left-3 z-[999] bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-border p-3 space-y-2 w-[220px]">
           <p className="text-xs font-medium text-muted-foreground">Filter by tier</p>
           <div className="flex flex-col gap-1.5">
-            {[...tierDots.filter(t => t.key !== 'Solution' && t.key !== 'QAC'), { key: 'None', label: 'No Tier', color: 'bg-gray-400' }].map(t => (
+            {[...tierDots.filter(t => t.key !== 'Solution' && t.key !== 'QAC'), { key: 'None', label: 'No Tier', color: '#9ca3af' }].map(t => (
               <button
                 key={t.key}
                 onClick={() => setVisibleTiers(prev => ({ ...prev, [t.key]: !prev[t.key] }))}
@@ -636,7 +631,7 @@ export default function BodyshopMap() {
                   visibleTiers[t.key] ? 'opacity-100' : 'opacity-40'
                 }`}
               >
-                <div className={`w-3 h-3 rounded-full ${t.color}`}></div>
+                <div className="w-3 h-3 rounded-full border border-white shadow-sm" style={{ backgroundColor: t.color }}></div>
                 <span className="text-xs font-medium text-gray-700 dark:text-gray-200">{t.label}</span>
               </button>
             ))}
@@ -652,7 +647,7 @@ export default function BodyshopMap() {
                     visibleTiers[t.key] ? 'opacity-100' : 'opacity-40'
                   }`}
                 >
-                  <div className={`w-3 h-3 rounded-full ${t.color}`}></div>
+                  <div className="w-3 h-3 rounded-full border border-white shadow-sm" style={{ backgroundColor: t.color }}></div>
                   <span className="text-xs font-medium text-gray-700 dark:text-gray-200">{t.label}</span>
                 </button>
               ))}
