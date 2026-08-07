@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
-import { X, Upload, Loader, Image, ZoomIn, Download } from 'lucide-react';
+import { X, Upload, Loader, Image, ZoomIn,
+  Play, Download } from 'lucide-react';
 import { useFileUpload } from '@/hooks/useFileUpload';
 import UploadProgressList from './UploadProgressList';
 import ConfirmDialog from './ConfirmDialog';
@@ -215,9 +216,9 @@ export default function ImageAttachmentModal({ imageUrls = [], onAdd, onRemove, 
                       <button
                         onClick={(e) => { e.stopPropagation(); setViewingImage(url); }}
                         className="bg-white/90 text-black rounded-full p-1.5 hover:bg-white transition-colors pointer-events-auto"
-                        title="View full size"
+                        title={isVideoUrl(url) ? "Play video" : "View full size"}
                       >
-                        <ZoomIn className="w-4 h-4" />
+                        {isVideoUrl(url) ? <Play className="w-4 h-4 fill-current" /> : <ZoomIn className="w-4 h-4" />}
                       </button>
                       <button
                         onClick={(e) => { e.stopPropagation(); handleDownloadImage(url); }}
