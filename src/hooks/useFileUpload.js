@@ -168,6 +168,16 @@ export function useFileUpload({ onComplete, accept = 'all', label = 'file' } = {
         });
         return [];
       }
+    } else if (accept === 'media') {
+      fileArray = fileArray.filter(f => f.type.startsWith('image/') || f.type.startsWith('video/'));
+      if (fileArray.length === 0) {
+        toast({
+          title: 'No valid files',
+          description: 'Please select image or video files (JPG, PNG, MP4, MOV, WebM).',
+          variant: 'destructive',
+        });
+        return [];
+      }
     }
 
     setIsUploading(true);

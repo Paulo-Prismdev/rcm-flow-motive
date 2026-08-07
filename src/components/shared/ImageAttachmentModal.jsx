@@ -39,9 +39,11 @@ export default function ImageAttachmentModal({ imageUrls = [], onAdd, onRemove, 
   };
 
   const { uploads, isUploading, uploadFiles, retryUpload } = useFileUpload({
-    accept: 'image',
+    accept: 'media',
     onComplete: (urls) => { if (onAdd) onAdd(urls); },
   });
+
+  const isVideoUrl = (url) => /\.(mp4|mov|webm|m4v|ogg|avi)(\?|$)/i.test(url);
 
   if (!isOpen) return null;
 
@@ -91,12 +93,22 @@ export default function ImageAttachmentModal({ imageUrls = [], onAdd, onRemove, 
           >
             <Download className="w-6 h-6" />
           </button>
-          <img
-            src={viewingImage}
-            alt="Preview"
-            className="max-w-full max-h-full object-contain rounded-lg"
-            onClick={(e) => e.stopPropagation()}
-          />
+          {isVideoUrl(viewingImage) ? (
+            <video
+              src={viewingImage}
+              controls
+              autoPlay
+              className="max-w-full max-h-full object-contain rounded-lg"
+              onClick={(e) => e.stopPropagation()}
+            />
+          ) : (
+            <img
+              src={viewingImage}
+              alt="Preview"
+              className="max-w-full max-h-full object-contain rounded-lg"
+              onClick={(e) => e.stopPropagation()}
+            />
+          )}
         </div>
       )}
 
@@ -108,9 +120,9 @@ export default function ImageAttachmentModal({ imageUrls = [], onAdd, onRemove, 
           {/* Header */}
           <div className="flex items-center justify-between px-8 py-6 border-b border-gray-200 dark:border-gray-800 flex-shrink-0">
             <div>
-              <h3 className="text-[18px] font-semibold text-gray-900 dark:text-white">Images</h3>
+              <h3 className="text-[18px] font-semibold text-gray-900 dark:text-white">Images & Videos</h3>
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                {imageUrls.length} {imageUrls.length === 1 ? 'image' : 'images'}
+                {imageUrls.length} {imageUrls.length === 1 ? 'item' : 'items'}
               </p>
             </div>
             <button
@@ -141,15 +153,15 @@ export default function ImageAttachmentModal({ imageUrls = [], onAdd, onRemove, 
                 <div className="flex flex-col items-center gap-3 text-gray-500 dark:text-gray-400">
                   <Upload className={`w-8 h-8 ${isDragging ? 'text-blue-500' : ''}`} />
                   <div>
-                    <span className="text-sm font-medium">{isDragging ? 'Drop images here!' : 'Click or drag & drop images to upload'}</span>
-                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">JPG, PNG, GIF, WebP supported</p>
-                  </div>
+                     <span className="text-sm font-medium">{isDragging ? 'Drop images or videos here!' : 'Click or drag & drop images or videos to upload'}</span>
+                     <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Images (JPG, PNG, GIF, WebP) and Videos (MP4, MOV, WebM) up to 25MB</p>
+                   </div>
                 </div>
               )}
               <input
                 ref={fileInputRef}
                 type="file"
-                accept="image/*"
+                accept="image/*,video/*"
                 multiple
                 className="sr-only"
                 onChange={handleFileChange}
@@ -176,11 +188,24 @@ export default function ImageAttachmentModal({ imageUrls = [], onAdd, onRemove, 
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                 {imageUrls.map((url, index) => (
                   <div key={index} className="relative group rounded-lg overflow-hidden aspect-square bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-                    <img
-                      src={url}
-                      alt={`Image ${index + 1}`}
-                      className="w-full h-full object-cover"
-                    />
+                    {isVideoUrl(url) ? (
+                      <video
+                        src={url}
+                        className="w-full h-full object-cover"
+                        muted
+                      />
+                    ) : (
+                      <img
+                        src={url}
+                        alt={`Image ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                    )}
+                    {isVideoUrl(url) && (
+                      <div className="absolute top-1.5 left-1.5 bg-black/60 text-white rounded-full p-1 pointer-events-none">
+                        <svg className="w-3 h-3" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                      </div>
+                    )}
                     {/* Hover overlay */}
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-all flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
                       <button
