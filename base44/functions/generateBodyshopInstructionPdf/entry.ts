@@ -11,11 +11,22 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const { claimId, contactOverrides, templateType, saveToClaim = true } = await req.json();
+    const { claimId, contactOverrides, templateType, saveToClaim = true, repairerName: repairerOverride } = await req.json();
     if (!claimId) return Response.json({ error: 'Missing claimId' }, { status: 400 });
 
     const claim = await base44.asServiceRole.entities.Claim.get(claimId);
     if (!claim) return Response.json({ error: 'Claim not found' }, { status: 404 });
+
+    // ── Resolve the repairer name: prefer an explicit override (passed from
+    //    the wizard before allocation), then the claim's bodyshop field, then
+    //    a lookup by bodyshop_id ──
+    let repairerName = repairerOverride || claim.bodyshop || '';
+    if (!repairerName && claim.bodyshop_id) {
+      try {
+        const bodyshop = await base44.asServiceRole.entities.Bodyshop.get(claim.bodyshop_id);
+        if (bodyshop?.name) repairerName = bodyshop.name;
+      } catch (_) { /* ignore — fall back to N/A */ }
+    }
 
     const isOrkin = templateType === 'orkin';
     const isPrivate = templateType === 'private';
@@ -99,7 +110,7 @@ Deno.serve(async (req) => {
     const fields = {
       instruction_date: today,
       claim_type: claim.claim_type || 'N/A',
-      repairer: claim.bodyshop || 'N/A',
+      repairer: repairerName || 'N/A',
       client_name: claim.client_name || 'N/A',
       client_address: clientAddress,
       driver_contact_name: claim.instruction_contact_name || contactOverrides?.name || claim.driver_contact_name || claim.client_name || 'N/A',

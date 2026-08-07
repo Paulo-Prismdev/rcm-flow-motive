@@ -283,6 +283,7 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
         contactOverrides,
         templateType: selectedPdfTemplate,
         saveToClaim: false,
+        repairerName: selectedBodyshop?.name || '',
       });
 
       const { file_url } = response.data;
