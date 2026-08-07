@@ -187,7 +187,11 @@ export default function ImageAttachmentModal({ imageUrls = [], onAdd, onRemove, 
             ) : (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                 {imageUrls.map((url, index) => (
-                  <div key={index} className="relative group rounded-lg overflow-hidden aspect-square bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                  <div
+                    key={index}
+                    className="relative group rounded-lg overflow-hidden aspect-square bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 cursor-pointer"
+                    onClick={() => setViewingImage(url)}
+                  >
                     {isVideoUrl(url) ? (
                       <video
                         src={url}
@@ -207,7 +211,7 @@ export default function ImageAttachmentModal({ imageUrls = [], onAdd, onRemove, 
                       </div>
                     )}
                     {/* Hover overlay */}
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-all flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-all flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100" onClick={(e) => e.stopPropagation()}>
                       <button
                         onClick={() => setViewingImage(url)}
                         className="bg-white/90 text-black rounded-full p-1.5 hover:bg-white transition-colors"
