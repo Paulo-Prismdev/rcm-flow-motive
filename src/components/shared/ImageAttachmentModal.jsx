@@ -211,25 +211,25 @@ export default function ImageAttachmentModal({ imageUrls = [], onAdd, onRemove, 
                       </div>
                     )}
                     {/* Hover overlay */}
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-all flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100" onClick={(e) => e.stopPropagation()}>
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-all flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto">
                       <button
-                        onClick={() => setViewingImage(url)}
-                        className="bg-white/90 text-black rounded-full p-1.5 hover:bg-white transition-colors"
+                        onClick={(e) => { e.stopPropagation(); setViewingImage(url); }}
+                        className="bg-white/90 text-black rounded-full p-1.5 hover:bg-white transition-colors pointer-events-auto"
                         title="View full size"
                       >
                         <ZoomIn className="w-4 h-4" />
                       </button>
                       <button
-                        onClick={() => handleDownloadImage(url)}
-                        className="bg-white/90 text-black rounded-full p-1.5 hover:bg-white transition-colors"
+                        onClick={(e) => { e.stopPropagation(); handleDownloadImage(url); }}
+                        className="bg-white/90 text-black rounded-full p-1.5 hover:bg-white transition-colors pointer-events-auto"
                         title="Download image"
                       >
                         <Download className="w-4 h-4" />
                       </button>
                       {onRemove && (
                         <button
-                          onClick={() => handleRemoveImage(url)}
-                          className="bg-red-500/90 text-white rounded-full p-1.5 hover:bg-red-600 transition-colors"
+                          onClick={(e) => { e.stopPropagation(); handleRemoveImage(url); }}
+                          className="bg-red-500/90 text-white rounded-full p-1.5 hover:bg-red-600 transition-colors pointer-events-auto"
                           title="Remove image"
                         >
                           <X className="w-4 h-4" />
