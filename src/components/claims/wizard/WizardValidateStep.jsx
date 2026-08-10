@@ -336,10 +336,10 @@ export default function WizardValidateStep({
         </div>
       )}
 
-      {/* Third Party Details (paying directly) */}
+      {/* Third Party Invoice Details (paying directly) */}
       {isThirdPartyDirect && (
         <div className="p-3 rounded-lg border bg-card">
-          <h3 className="font-bold text-sm mb-2">Third Party Details (Paying Directly)</h3>
+          <h3 className="font-bold text-sm mb-2">Third Party Invoice Details</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
             <div>
               <label className="block text-xs text-muted-foreground mb-1">Third Party Name</label>
@@ -347,25 +347,6 @@ export default function WizardValidateStep({
                 value={validationData.tp_name ?? claim.tp_name ?? ''}
                 onChange={(e) => onValidationChange('tp_name', e.target.value)}
                 placeholder="Enter third party name"
-                disabled={isLocked}
-              />
-            </div>
-            <div>
-              <label className="block text-xs text-muted-foreground mb-1">Third Party Phone</label>
-              <Input
-                value={validationData.tp_phone ?? claim.tp_phone ?? ''}
-                onChange={(e) => onValidationChange('tp_phone', e.target.value)}
-                placeholder="Enter third party phone"
-                disabled={isLocked}
-              />
-            </div>
-            <div>
-              <label className="block text-xs text-muted-foreground mb-1">Third Party Email</label>
-              <Input
-                type="email"
-                value={validationData.tp_email ?? claim.tp_email ?? ''}
-                onChange={(e) => onValidationChange('tp_email', e.target.value)}
-                placeholder="Enter third party email"
                 disabled={isLocked}
               />
             </div>
@@ -394,6 +375,16 @@ export default function WizardValidateStep({
                 onChange={(e) => onValidationChange('tp_postcode', e.target.value)}
                 placeholder="Postcode"
                 disabled={isLocked}
+              />
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-xs text-muted-foreground mb-1">Send Invoice To</label>
+              <Input
+                type="email"
+                value="invoices@rcmautomotive.co.uk"
+                readOnly
+                disabled
+                className="bg-muted text-muted-foreground"
               />
             </div>
           </div>
