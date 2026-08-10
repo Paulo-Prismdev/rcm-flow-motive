@@ -19,6 +19,7 @@ export const BUILT_IN_PDF_TEMPLATES = [
   { id: 'standard', name: 'Standard Instructions', icon: FileText },
   { id: 'orkin', name: 'Orkin Instructions', icon: Wrench },
   { id: 'private', name: 'Paying Privately', icon: PoundSterling },
+  { id: 'third_party', name: 'Third-Party Paying', icon: PoundSterling },
 ];
 
 export const replacePlaceholders = (text, itemData) => {

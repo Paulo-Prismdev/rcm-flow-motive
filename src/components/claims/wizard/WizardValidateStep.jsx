@@ -16,12 +16,6 @@ export default function WizardValidateStep({
     if (field.key === 'client_phone' && contactType === 'driver') {
       return { ...field, key: 'driver_contact_phone', label: 'Driver / Contact Phone' };
     }
-    if (field.key === 'client_email' && contactType === 'third_party') {
-      return { ...field, key: 'tp_email', label: 'Third Party Email' };
-    }
-    if (field.key === 'client_phone' && contactType === 'third_party') {
-      return { ...field, key: 'tp_phone', label: 'Third Party Phone' };
-    }
     return field;
   };
   const [showDriverFields, setShowDriverFields] = useState(false);
@@ -50,16 +44,6 @@ export default function WizardValidateStep({
         ? `${claim.driver_contact_name || validationData.driver_contact_name}${(claim.driver_contact_phone || validationData.driver_contact_phone) ? ' — ' + (claim.driver_contact_phone || validationData.driver_contact_phone) : ''}`
         : (claim.driver_same_as_client ? 'Same as client' : 'Add driver details to claim'),
       disabled: claim.driver_same_as_client
-    },
-    {
-      value: 'third_party',
-      label: 'Third Party',
-      icon: Users,
-      description: 'Use third party details',
-      details: (claim.tp_name)
-        ? `${claim.tp_name}${claim.tp_phone ? ' — ' + claim.tp_phone : ''}`
-        : 'No third party details on file',
-      disabled: !claim.tp_name
     },
     {
       value: 'custom',
@@ -91,6 +75,15 @@ export default function WizardValidateStep({
       disabled: !claim.tp_insurer
     },
     {
+      value: 'Third Party',
+      label: 'Third Party (Paying Directly)',
+      icon: Users,
+      subtitle: (claim.tp_name)
+        ? `${claim.tp_name}${claim.tp_phone ? ' — ' + claim.tp_phone : ''}`
+        : 'No third party details on file',
+      disabled: !claim.tp_name
+    },
+    {
       value: 'Uninsured',
       label: 'Uninsured / Client Direct',
       icon: Building2,
@@ -101,6 +94,7 @@ export default function WizardValidateStep({
 
   const isClientInsurer = authorisedBy === 'Client Insurer';
   const isThirdPartyInsurer = authorisedBy === 'Third Party Insurer';
+  const isThirdPartyDirect = authorisedBy === 'Third Party';
   const isUninsured = authorisedBy === 'Uninsured';
 
   const getInsurerFields = () => {
@@ -211,7 +205,7 @@ export default function WizardValidateStep({
             Who should the repairer contact for drop-off, updates and collection?
           </p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 mb-2.5">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-2.5">
           {contactOptions.map((option) => {
             const IconComponent = option.icon;
             return (
@@ -259,7 +253,7 @@ export default function WizardValidateStep({
       </div>
 
       {/* Dynamic Insurance Fields */}
-      {!isUninsured && (
+      {!isUninsured && !isThirdPartyDirect && (
         <div className="p-3 rounded-lg border bg-card">
           <h3 className="font-bold text-sm mb-2">Insurance Details</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
@@ -338,6 +332,70 @@ export default function WizardValidateStep({
                 </div>
               </>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Third Party Details (paying directly) */}
+      {isThirdPartyDirect && (
+        <div className="p-3 rounded-lg border bg-card">
+          <h3 className="font-bold text-sm mb-2">Third Party Details (Paying Directly)</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            <div>
+              <label className="block text-xs text-muted-foreground mb-1">Third Party Name</label>
+              <Input
+                value={validationData.tp_name ?? claim.tp_name ?? ''}
+                onChange={(e) => onValidationChange('tp_name', e.target.value)}
+                placeholder="Enter third party name"
+                disabled={isLocked}
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-muted-foreground mb-1">Third Party Phone</label>
+              <Input
+                value={validationData.tp_phone ?? claim.tp_phone ?? ''}
+                onChange={(e) => onValidationChange('tp_phone', e.target.value)}
+                placeholder="Enter third party phone"
+                disabled={isLocked}
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-muted-foreground mb-1">Third Party Email</label>
+              <Input
+                type="email"
+                value={validationData.tp_email ?? claim.tp_email ?? ''}
+                onChange={(e) => onValidationChange('tp_email', e.target.value)}
+                placeholder="Enter third party email"
+                disabled={isLocked}
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-muted-foreground mb-1">Address Line 1</label>
+              <Input
+                value={validationData.tp_address_line_1 ?? claim.tp_address_line_1 ?? ''}
+                onChange={(e) => onValidationChange('tp_address_line_1', e.target.value)}
+                placeholder="Address line 1"
+                disabled={isLocked}
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-muted-foreground mb-1">Town</label>
+              <Input
+                value={validationData.tp_town ?? claim.tp_town ?? ''}
+                onChange={(e) => onValidationChange('tp_town', e.target.value)}
+                placeholder="Town"
+                disabled={isLocked}
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-muted-foreground mb-1">Postcode</label>
+              <Input
+                value={validationData.tp_postcode ?? claim.tp_postcode ?? ''}
+                onChange={(e) => onValidationChange('tp_postcode', e.target.value)}
+                placeholder="Postcode"
+                disabled={isLocked}
+              />
+            </div>
           </div>
         </div>
       )}

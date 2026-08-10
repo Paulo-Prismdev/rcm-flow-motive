@@ -100,8 +100,7 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
         setGeneratedPdfUrl(null);
         setEmailTo(''); setEmailSubject(''); setEmailBody('');
         setSelectedEmailTemplateId('');
-        const sourceMap = { client: 'client', driver: 'driver', custom: 'custom', 'third party': 'third_party' };
-        setContactType(claim.last_contact_source ? (sourceMap[claim.last_contact_source.toLowerCase()] || 'client') : 'client');
+        setContactType(claim.last_contact_source ? claim.last_contact_source.toLowerCase() : 'client');
         setCustomContact({ name: '', phone: '', email: '' });
         setAuthorisedBy(claim.authorised_by || 'Client Insurer');
 
@@ -111,7 +110,8 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
         });
         // Also seed insurance fields so edits are tracked and saved
         ['insurer', 'claim_ref', 'policy_number', 'policy_excess', 'audatex_code', 'send_estimate_email',
-         'tp_insurer', 'tp_claim_ref', 'tp_policy_number', 'tp_policy_excess'
+         'tp_insurer', 'tp_claim_ref', 'tp_policy_number', 'tp_policy_excess',
+         'tp_name', 'tp_phone', 'tp_email', 'tp_address_line_1', 'tp_address_line_2', 'tp_town', 'tp_county', 'tp_postcode'
         ].forEach(key => {
           initialValidation[key] = claim[key] ?? '';
         });
@@ -150,10 +150,6 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
         if (contactType === 'custom') {
           return !customContact.email;
         }
-        if (contactType === 'third_party') {
-          const v = validationData.tp_email || claim.tp_email;
-          return !v;
-        }
       }
       if (field.key === 'client_phone') {
         if (contactType === 'driver') {
@@ -162,10 +158,6 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
         }
         if (contactType === 'custom') {
           return !customContact.phone;
-        }
-        if (contactType === 'third_party') {
-          const v = validationData.tp_phone || claim.tp_phone;
-          return !v;
         }
       }
       const value = validationData[field.key];
@@ -183,7 +175,7 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
     try {
       // Save all edited fields (required checklist + insurance fields)
       const dataToSave = { ...validationData };
-      dataToSave.last_contact_source = contactType === 'third_party' ? 'Third Party' : contactType.charAt(0).toUpperCase() + contactType.slice(1);
+      dataToSave.last_contact_source = contactType.charAt(0).toUpperCase() + contactType.slice(1);
       dataToSave.authorised_by = authorisedBy;
       // Persist the chosen instruction contact into dedicated fields (non-destructive —
       // does NOT overwrite the real client_email/client_phone on the claim)
@@ -275,13 +267,6 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
         name: validationData.driver_contact_name || claim.driver_contact_name || '',
         phone: validationData.driver_contact_phone || claim.driver_contact_phone || '',
         email: validationData.driver_contact_email || claim.driver_contact_email || '',
-      };
-    }
-    if (contactType === 'third_party') {
-      return {
-        name: validationData.tp_name || claim.tp_name || '',
-        phone: validationData.tp_phone || claim.tp_phone || '',
-        email: validationData.tp_email || claim.tp_email || '',
       };
     }
     return customContact;

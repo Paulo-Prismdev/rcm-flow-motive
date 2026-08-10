@@ -30,6 +30,7 @@ Deno.serve(async (req) => {
 
     const isOrkin = templateType === 'orkin';
     const isPrivate = templateType === 'private';
+    const isThirdParty = templateType === 'third_party';
 
     const doc = new jsPDF();
 
@@ -91,6 +92,11 @@ Deno.serve(async (req) => {
       displayPolicyExcess = claim.tp_policy_excess != null && claim.tp_policy_excess !== ''
         ? (isNaN(Number(claim.tp_policy_excess)) ? String(claim.tp_policy_excess) : Number(claim.tp_policy_excess).toFixed(2))
         : 'N/A';
+    } else if (authorisedBy === 'Third Party') {
+      displayInsurer = 'N/A';
+      displayClaimRef = 'N/A';
+      displayPolicyNumber = 'N/A';
+      displayPolicyExcess = 'N/A';
     } else if (authorisedBy === 'Uninsured') {
       displayInsurer = 'N/A';
       displayClaimRef = 'N/A';
@@ -130,6 +136,16 @@ Deno.serve(async (req) => {
       send_estimate_email: claim.send_estimate_email || 'N/A',
       audatex_code: claim.audatex_code || 'N/A',
       policy_excess: displayPolicyExcess,
+      tp_name: claim.tp_name || 'N/A',
+      tp_phone: claim.tp_phone || 'N/A',
+      tp_email: claim.tp_email || 'N/A',
+      tp_address: [
+        claim.tp_address_line_1,
+        claim.tp_address_line_2,
+        claim.tp_town,
+        claim.tp_county,
+        claim.tp_postcode
+      ].filter(Boolean).join(', ') || 'N/A',
       referral_fee: claim.referral_fee_repairer != null && claim.referral_fee_repairer !== '' ? `${claim.referral_fee_repairer}%` : '0%',
       referral_fee_gbp: claim.referral_fee_repairer_gbp != null && claim.referral_fee_repairer_gbp !== '' ? `GBP ${Number(claim.referral_fee_repairer_gbp).toFixed(2)}` : null,
     };
@@ -137,9 +153,11 @@ Deno.serve(async (req) => {
     // ── Insurer party label for the Insurance Details section header ──
     const insurerPartyLabel = authorisedBy === 'Third Party Insurer'
       ? 'Third Party Insurer'
-      : authorisedBy === 'Uninsured'
-        ? 'Uninsured'
-        : 'Insured (Client)';
+      : authorisedBy === 'Third Party'
+        ? 'Third Party'
+        : authorisedBy === 'Uninsured'
+          ? 'Uninsured'
+          : 'Insured (Client)';
 
     let yPos = TOP;
 
@@ -308,6 +326,18 @@ Deno.serve(async (req) => {
     if (isPrivate) {
       // No insurance section for private repairs — just add spacing.
       yPos += SECTION_GAP;
+    } else if (authorisedBy === 'Third Party') {
+      // Third Party paying directly — show their contact details in place of insurer
+      const tpRows = [
+        ['Third Party Name', fields.tp_name],
+        ['Third Party Phone', fields.tp_phone],
+        ['Third Party Email', fields.tp_email],
+        ['Third Party Address', fields.tp_address],
+      ];
+      ensureSpace(estimateSection(tpRows));
+      drawHeader('Third Party (Paying Directly)');
+      for (const [label, value] of tpRows) drawRow(label, value);
+      finishSection();
     } else if (authorisedBy === 'Uninsured') {
       // Non-insurance / paying privately — no insurer details shown
       const textW = MW - PAD_X * 2;
@@ -498,6 +528,75 @@ Deno.serve(async (req) => {
         for (const line of discW) { doc.text(line, PW / 2, yPos + 3.2, { align: 'center' }); yPos += LH; }
       }
 
+    } else if (isThirdParty) {
+
+      // ═══════════════════════════════════════════
+      // THIRD PARTY PAYING — Invoicing
+      // ═══════════════════════════════════════════
+      {
+        const FS = 9;
+        const LH = 5.5;
+        const textW = MW - PAD_X * 2;
+
+        drawHeader('Invoicing');
+
+        // Deductions bar
+        doc.setFillColor(...MID_GREY);
+        doc.setDrawColor(150, 150, 150);
+        doc.rect(LM, yPos, MW, 6, 'FD');
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(9);
+        doc.setTextColor(...DARK_TEXT);
+        doc.text('Invoice Deductions', TX, yPos + 4.2);
+        yPos += 6;
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(13);
+        doc.setTextColor(...NAVY);
+        doc.text(`Repairer Referral Fee ${fields.referral_fee}`, TX, yPos + 6);
+        if (fields.referral_fee_gbp) {
+          doc.text(`Repairer Referral Fee ${fields.referral_fee_gbp}`, PW - LM - PAD_X, yPos + 6, { align: 'right' });
+        }
+        yPos += 9;
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(FS);
+        doc.setTextColor(...DARK_TEXT);
+        yPos += 2;
+
+        // Body text
+        const invoicingParas = [
+          'This repair is being carried out on a Third-Party Paying basis. The third party named on this instruction is responsible for payment of the repair directly.',
+          'Your full invoice MUST be addressed to the third party and a copy sent to invoices@rcmautomotive.co.uk.',
+          'Your invoice pack MUST include: main invoice, final authority (if applicable), and a signed satisfaction note.',
+          'Your invoice MUST be submitted within 48 hours of vehicle completion.',
+          'Payment will be made within 14 DAYS of receipt of your invoice.',
+          `Upon receipt of your invoice, you will receive an invoice from RCM Automotive for our referral fee (${fields.referral_fee}), which will be payable within 7 days of invoice.`,
+        ];
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(FS);
+        doc.setTextColor(...DARK_TEXT);
+        for (const p of invoicingParas) {
+          const wrapped = doc.splitTextToSize(p, textW);
+          for (const line of wrapped) { doc.text(line, TX, yPos + 4); yPos += LH; }
+          yPos += 2;
+        }
+
+        yPos += 2;
+
+        drawWarningBox('WARNING', 'NEVER SEND ANY INVOICE OR COMMUNICATION DIRECTLY TO THE CLIENT', FS, LH);
+        drawWarningBox('IMPORTANT', 'Failure to submit your invoice pack within 48 hours will result in delays to your payment, and an admin charge of GBP 150 will be added to your referral fee invoice.', FS, LH);
+        drawWarningBox('IMPORTANT', 'Failure to pay your referral fee within 7 days will result in an additional admin charge of GBP 150 and removal from the RCM Automotive network.', FS, LH);
+
+        yPos += 4;
+
+        // Disclaimer
+        doc.setFont('helvetica', 'italic');
+        doc.setFontSize(8);
+        doc.setTextColor(80, 80, 80);
+        const discW = doc.splitTextToSize('*By accepting this instruction, you agree to the T&Cs within the supplied SLA provided with this instruction.', MW);
+        for (const line of discW) { doc.text(line, PW / 2, yPos + 3.2, { align: 'center' }); yPos += LH; }
+      }
+
     } else if (isPrivate) {
 
       // ═══════════════════════════════════════════
@@ -639,7 +738,7 @@ Deno.serve(async (req) => {
     drawAllFooters();
 
     const pdfBytes = doc.output('arraybuffer');
-    const filename = `${claim.job_number || 'instruction'}-${isOrkin ? 'orkin' : isPrivate ? 'private' : 'standard'}.pdf`;
+    const filename = `${claim.job_number || 'instruction'}-${isOrkin ? 'orkin' : isPrivate ? 'private' : isThirdParty ? 'third-party' : 'standard'}.pdf`;
 
     // Upload the PDF. Only persist it to the claim's docs when saveToClaim is
     // true — the allocation wizard generates with saveToClaim=false so that
