@@ -327,15 +327,14 @@ Deno.serve(async (req) => {
       // No insurance section for private repairs — just add spacing.
       yPos += SECTION_GAP;
     } else if (authorisedBy === 'Third Party') {
-      // Third Party paying directly — show their contact details in place of insurer
+      // Third Party paying directly — show invoice details in place of insurer
       const tpRows = [
         ['Third Party Name', fields.tp_name],
-        ['Third Party Phone', fields.tp_phone],
-        ['Third Party Email', fields.tp_email],
         ['Third Party Address', fields.tp_address],
+        ['Send Invoice To', 'invoices@rcmautomotive.co.uk'],
       ];
       ensureSpace(estimateSection(tpRows));
-      drawHeader('Third Party (Paying Directly)');
+      drawHeader('Third Party Invoice Details');
       for (const [label, value] of tpRows) drawRow(label, value);
       finishSection();
     } else if (authorisedBy === 'Uninsured') {
