@@ -284,8 +284,8 @@ export default function ClaimsPage() {
   const activeFiltersCount = [(statusFilter?.length || 0) > 0, claimTypeFilter, insurerFilter, referrerFilter, repairerFilter, businessDivisionFilter, updateStatusFilter, repairerAcceptanceFilter, hasBackorderedPartsFilter, overdueOnly].filter(Boolean).length;
 
   const allClaims = showArchived ? claims : claims.filter(c => !c.archived);
-  const standardClaims = allClaims.filter(c => c.claim_type !== 'Paying Privately');
-  const privateClaims = allClaims.filter(c => c.claim_type === 'Paying Privately');
+  const standardClaims = allClaims.filter(c => c.claim_type !== 'Paying Privately' && c.claim_type !== '3rd Party Paying Privately');
+  const privateClaims = allClaims.filter(c => c.claim_type === 'Paying Privately' || c.claim_type === '3rd Party Paying Privately');
   const tabClaims = claimTab === 'private' ? privateClaims : standardClaims;
 
   const filteredClaims = tabClaims.filter(c => {

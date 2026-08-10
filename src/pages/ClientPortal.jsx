@@ -90,8 +90,8 @@ export default function ClientPortal() {
     return divisions.sort();
   }, [claims]);
 
-  const standardClaims = claims.filter(c => c.claim_type !== 'Paying Privately');
-  const privateClaims = claims.filter(c => c.claim_type === 'Paying Privately');
+  const standardClaims = claims.filter(c => c.claim_type !== 'Paying Privately' && c.claim_type !== '3rd Party Paying Privately');
+  const privateClaims = claims.filter(c => c.claim_type === 'Paying Privately' || c.claim_type === '3rd Party Paying Privately');
   const tabClaims = claimTypeTab === 'private' ? privateClaims : standardClaims;
 
   const filteredClaims = tabClaims.filter(c => {
