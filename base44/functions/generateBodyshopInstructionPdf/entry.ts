@@ -337,6 +337,15 @@ Deno.serve(async (req) => {
       drawHeader('Third Party Invoice Details');
       for (const [label, value] of tpRows) drawRow(label, value);
       finishSection();
+
+      // Estimate & Authority section for third-party direct instructions
+      const eaRows = [
+        ['Send Estimate To', 'claims@rcmautomotive.co.uk'],
+      ];
+      ensureSpace(estimateSection(eaRows));
+      drawHeader('Estimate & Authority');
+      for (const [label, value] of eaRows) drawRow(label, value);
+      finishSection();
     } else if (authorisedBy === 'Uninsured') {
       // Non-insurance / paying privately — no insurer details shown
       const textW = MW - PAD_X * 2;
