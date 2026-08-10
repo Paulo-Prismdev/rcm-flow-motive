@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
-import { CheckCircle, AlertCircle, User, Car, Building2, Phone, Lock } from 'lucide-react';
+import { CheckCircle, AlertCircle, User, Car, Building2, Phone, Lock, Users } from 'lucide-react';
 import { REQUIRED_FIELDS } from './WizardConstants';
 
 export default function WizardValidateStep({
@@ -15,6 +15,12 @@ export default function WizardValidateStep({
     }
     if (field.key === 'client_phone' && contactType === 'driver') {
       return { ...field, key: 'driver_contact_phone', label: 'Driver / Contact Phone' };
+    }
+    if (field.key === 'client_email' && contactType === 'third_party') {
+      return { ...field, key: 'tp_email', label: 'Third Party Email' };
+    }
+    if (field.key === 'client_phone' && contactType === 'third_party') {
+      return { ...field, key: 'tp_phone', label: 'Third Party Phone' };
     }
     return field;
   };
@@ -44,6 +50,16 @@ export default function WizardValidateStep({
         ? `${claim.driver_contact_name || validationData.driver_contact_name}${(claim.driver_contact_phone || validationData.driver_contact_phone) ? ' — ' + (claim.driver_contact_phone || validationData.driver_contact_phone) : ''}`
         : (claim.driver_same_as_client ? 'Same as client' : 'Add driver details to claim'),
       disabled: claim.driver_same_as_client
+    },
+    {
+      value: 'third_party',
+      label: 'Third Party',
+      icon: Users,
+      description: 'Use third party details',
+      details: (claim.tp_name)
+        ? `${claim.tp_name}${claim.tp_phone ? ' — ' + claim.tp_phone : ''}`
+        : 'No third party details on file',
+      disabled: !claim.tp_name
     },
     {
       value: 'custom',
@@ -195,7 +211,7 @@ export default function WizardValidateStep({
             Who should the repairer contact for drop-off, updates and collection?
           </p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-2.5">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 mb-2.5">
           {contactOptions.map((option) => {
             const IconComponent = option.icon;
             return (

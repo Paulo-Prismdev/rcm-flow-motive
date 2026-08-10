@@ -801,7 +801,8 @@
       "enum": [
         "Client",
         "Driver",
-        "Custom"
+        "Custom",
+        "Third Party"
       ],
       "description": "Default instruction contact source from last allocation"
     },
@@ -816,7 +817,7 @@
     },
     "instruction_contact_type": {
       "type": "string",
-      "description": "Which contact type (client/driver/custom) was chosen for the instruction at allocation time"
+      "description": "Which contact type (client/driver/custom/third party) was chosen for the instruction at allocation time"
     },
     "instruction_contact_name": {
       "type": "string",
