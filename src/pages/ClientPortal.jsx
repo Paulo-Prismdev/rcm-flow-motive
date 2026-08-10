@@ -293,7 +293,8 @@ export default function ClientPortal() {
                   className="w-full px-2 py-1 text-[11px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-700 dark:text-gray-300 focus:outline-none">
                   <option value="">All Types</option>
                   <option value="Fault Claim">Fault Claim</option>
-                  <option value="3rd Party Direct">3rd Party Direct</option>
+                  <option value="3rd Party Insurer Direct">3rd Party Insurer Direct</option>
+                  <option value="3rd Party Paying Privately">3rd Party Paying Privately</option>
                   <option value="Credit Repair">Credit Repair</option>
                   <option value="Glass Claim">Glass Claim</option>
                 </select>

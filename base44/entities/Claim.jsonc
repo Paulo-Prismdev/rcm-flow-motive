@@ -43,7 +43,8 @@
       "type": "string",
       "enum": [
         "Fault Claim",
-        "3rd Party Direct",
+        "3rd Party Insurer Direct",
+        "3rd Party Paying Privately",
         "Credit Repair",
         "Glass Claim",
         "Paying Privately"

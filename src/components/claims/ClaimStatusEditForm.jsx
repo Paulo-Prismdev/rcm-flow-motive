@@ -54,7 +54,8 @@ export default function ClaimStatusEditForm({ claim: editClaim, onSave, onCancel
             onChange={(v) => set('claim_type', v)}
             options={[
               { value: 'Fault Claim', label: 'Fault Claim' },
-              { value: '3rd Party Direct', label: '3rd Party Direct' },
+              { value: '3rd Party Insurer Direct', label: '3rd Party Insurer Direct' },
+              { value: '3rd Party Paying Privately', label: '3rd Party Paying Privately' },
               { value: 'Credit Repair', label: 'Credit Repair' },
               { value: 'Glass Claim', label: 'Glass Claim' },
               { value: 'Paying Privately', label: 'Paying Privately' },

@@ -9,7 +9,7 @@ export const STEPS = [
 ];
 
 export const REQUIRED_FIELDS = [
-  { key: 'claim_type', label: 'Claim Type', type: 'select', options: ['Fault Claim', '3rd Party Direct', 'Credit Repair', 'Glass Claim'] },
+  { key: 'claim_type', label: 'Claim Type', type: 'select', options: ['Fault Claim', '3rd Party Insurer Direct', '3rd Party Paying Privately', 'Credit Repair', 'Glass Claim'] },
   { key: 'client_name', label: 'Client Name', type: 'text' },
   { key: 'client_email', label: 'Client Email', type: 'email' },
   { key: 'client_phone', label: 'Client Phone', type: 'text' },
