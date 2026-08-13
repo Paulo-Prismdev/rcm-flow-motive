@@ -369,19 +369,6 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
     });
     
     if ((primaryChanged || secondaryChanged) && !options.skipClaimUpdateLog) {
-        const now = new Date();
-        const isClosedAfterUpdate = isUpdateTrackingClosed(updatedData);
-        const fortyEightHoursFromNow = new Date(now.getTime() + 48 * 60 * 60 * 1000);
-
-        // Reset the 48hr timer only when the primary status changes
-        if (primaryChanged && !isClosedAfterUpdate) {
-          updatedData.last_updated_at = now.toISOString();
-          updatedData.next_update_due_at = fortyEightHoursFromNow.toISOString();
-          updatedData.update_status_flag = 'Green';
-        } else if (primaryChanged && isClosedAfterUpdate) {
-          updatedData.update_status_flag = 'Gray';
-        }
-
         const parts = [];
         if (primaryChanged) parts.push(`Status changed from "${oldStatus}" to "${newStatus}"`);
         if (secondaryChanged) parts.push(`Secondary status changed from "${oldSec || 'None'}" to "${newSec || 'None'}"`);
@@ -398,19 +385,6 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
         queryClient.invalidateQueries({ queryKey: ['claimUpdates', claim.id] });
         } catch (error) {
         console.error('Failed to log status change:', error);
-        }
-    } else if (primaryChanged || secondaryChanged) {
-        // Status changed but the ClaimUpdate was already created by the Updates
-        // modal — still reset the 48hr timer fields on the local object.
-        const now = new Date();
-        const isClosedAfterUpdate = isUpdateTrackingClosed(updatedData);
-        const fortyEightHoursFromNow = new Date(now.getTime() + 48 * 60 * 60 * 1000);
-        if (primaryChanged && !isClosedAfterUpdate) {
-          updatedData.last_updated_at = now.toISOString();
-          updatedData.next_update_due_at = fortyEightHoursFromNow.toISOString();
-          updatedData.update_status_flag = 'Green';
-        } else if (primaryChanged && isClosedAfterUpdate) {
-          updatedData.update_status_flag = 'Gray';
         }
     }
 
@@ -472,23 +446,28 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
     }
   };
 
-  const handleClaimUpdateCreated = (newStatus, newSecondaryStatus, newTertiaryStatus, updateType) => {
+  const handleClaimUpdateCreated = (newStatus, newSecondaryStatus, newTertiaryStatus, updateType, direction) => {
     const now = new Date();
     const effectiveStatus = newStatus || claim.job_status;
     const isClosedAfterUpdate = isUpdateTrackingClosed({ job_status: effectiveStatus, invoice_status: claim.invoice_status });
     const fortyEightHoursFromNow = new Date(now.getTime() + 48 * 60 * 60 * 1000);
+
+    // General 48hr timer only resets on an Incoming update (any type).
+    // Client comm timer only resets on an Outgoing Client Communication.
+    const resetGeneral = direction === 'Incoming';
+    const resetClientComm = updateType === 'Client Communication' && direction === 'Outgoing';
 
     // DB payload — only the fields that should actually change. Spreading the
     // entire claim here would overwrite the stored record with any stale prop
     // value (e.g. wiping tertiary_status that was set elsewhere).
     const dbUpdate = {
       id: claim.id,
-      ...(!isClosedAfterUpdate && {
+      ...(resetGeneral && !isClosedAfterUpdate && {
         last_updated_at: now.toISOString(),
         next_update_due_at: fortyEightHoursFromNow.toISOString(),
         update_status_flag: 'Green',
       }),
-      ...(isClosedAfterUpdate && {
+      ...(resetGeneral && isClosedAfterUpdate && {
         update_status_flag: 'Gray',
       }),
     };
@@ -496,12 +475,12 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
     // Full local merge for immediate UI feedback (keeps all existing fields).
     const localClaim = {
       ...claim,
-      ...(!isClosedAfterUpdate && {
+      ...(resetGeneral && !isClosedAfterUpdate && {
         last_updated_at: now.toISOString(),
         next_update_due_at: fortyEightHoursFromNow.toISOString(),
         update_status_flag: 'Green',
       }),
-      ...(isClosedAfterUpdate && { update_status_flag: 'Gray' }),
+      ...(resetGeneral && isClosedAfterUpdate && { update_status_flag: 'Gray' }),
     };
 
     // Client Communication updates also reset the dedicated 48-hour client
@@ -509,7 +488,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
     // the server, but we must also set them on localClaim so the badge updates
     // instantly — otherwise setClaim(localClaim) would overwrite them with the
     // stale values from the old claim prop.
-    if (updateType === 'Client Communication') {
+    if (resetClientComm) {
       dbUpdate.last_client_comm_at = now.toISOString();
       dbUpdate.next_client_comm_due_at = fortyEightHoursFromNow.toISOString();
       dbUpdate.client_comm_status_flag = isClosedAfterUpdate ? 'Gray' : 'Green';

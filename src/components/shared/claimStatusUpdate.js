@@ -76,9 +76,7 @@ export function buildStatusChangeClaimUpdate(claim, { journey, secondary, tertia
   const updateData = {};
   if (updateType !== 'Status Change') return updateData;
 
-  const now = new Date();
   const effectiveJourney = journey || claim?.journey_status;
-  const closed = isUpdateTrackingClosed({ job_status: effectiveJourney, invoice_status: claim?.invoice_status });
 
   if (effectiveJourney) {
     updateData.journey_status = effectiveJourney;
@@ -87,12 +85,8 @@ export function buildStatusChangeClaimUpdate(claim, { journey, secondary, tertia
   updateData.secondary_status = secondary || null;
   updateData.tertiary_status = tertiary || null;
 
-  if (!closed) {
-    updateData.last_updated_at = now.toISOString();
-    updateData.next_update_due_at = new Date(now.getTime() + 48 * 60 * 60 * 1000).toISOString();
-    updateData.update_status_flag = 'Green';
-  } else {
-    updateData.update_status_flag = 'Gray';
-  }
+  // Note: the general 48hr update timer is no longer reset by a status change.
+  // It only resets when an Incoming update is logged (any type) — see
+  // handleClaimUpdateCreated / handleUpdateCreated in the update UI.
   return updateData;
 }

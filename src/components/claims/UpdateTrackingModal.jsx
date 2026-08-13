@@ -204,7 +204,7 @@ export default function UpdateTrackingModal({ claim, isOpen, onClose, onSetOverr
               <AlertCircle className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
               <div className="text-xs text-muted-foreground">
                 <p className="mb-2">
-                  <strong>General Updates</strong> — reset by any status change or update logged on this claim.
+                  <strong>General Updates</strong> — only reset when an <strong>Incoming</strong> update is logged (any type).
                 </p>
                 <p className="mb-2">
                   <strong>Client Communication</strong> — only reset when an <strong>Outgoing</strong> "Client Communication" update is logged. This ensures the client is kept informed at least every 48 hours.

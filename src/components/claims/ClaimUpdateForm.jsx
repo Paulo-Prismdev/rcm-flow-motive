@@ -91,7 +91,7 @@ export default function ClaimUpdateForm({
       // communication tracker (separate from the general update timer).
       // Always set last_client_comm_at so the tracker is correct even if the
       // claim is later reopened (status changed away from invoiced/cancelled).
-      if (updateData.update_type === 'Client Communication') {
+      if (updateData.update_type === 'Client Communication' && updateData.direction === 'Outgoing') {
         const now = new Date();
         const closed = isUpdateTrackingClosed({ job_status: claim?.journey_status || claim?.job_status, invoice_status: claim?.invoice_status });
         const commUpdate = {
@@ -107,7 +107,7 @@ export default function ClaimUpdateForm({
       queryClient.invalidateQueries({ queryKey: ['claimUpdates', claimId] });
       queryClient.invalidateQueries({ queryKey: ['claims'] });
       queryClient.invalidateQueries({ queryKey: ['claim', claimId] });
-      if (onUpdateCreated) onUpdateCreated(newUpdate.new_journey || null, newUpdate.new_secondary_status || null, newUpdate.new_tertiary_status || null, newUpdate.update_type);
+      if (onUpdateCreated) onUpdateCreated(newUpdate.new_journey || null, newUpdate.new_secondary_status || null, newUpdate.new_tertiary_status || null, newUpdate.update_type, newUpdate.direction);
       resetForm();
     },
     onError: (error) => setSubmitError(error?.message || 'Failed to create update'),

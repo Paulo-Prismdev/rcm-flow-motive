@@ -57,26 +57,29 @@ export default function ClaimUpdatesQuickView({ claim, isOpen, onClose }) {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['claimUpdates', claimId] }),
   });
 
-  const handleUpdateCreated = (newStatus, newSecondaryStatus, newTertiaryStatus, updateType) => {
+  const handleUpdateCreated = (newStatus, newSecondaryStatus, newTertiaryStatus, updateType, direction) => {
     const now = new Date();
     const closedStatuses = ['Completed', 'Cancelled', 'Total Loss'];
     const effectiveStatus = newStatus || claim?.job_status;
     const isClosedAfterUpdate = closedStatuses.includes(effectiveStatus);
     const fortyEightHoursFromNow = new Date(now.getTime() + 48 * 60 * 60 * 1000);
 
+    // General 48hr timer only resets on an Incoming update (any type).
+    // Client comm timer only resets on an Outgoing Client Communication.
+    const resetGeneral = direction === 'Incoming';
+    const resetClientComm = updateType === 'Client Communication' && direction === 'Outgoing';
+
     const updateData = {
-      ...(!isClosedAfterUpdate && {
+      ...(resetGeneral && !isClosedAfterUpdate && {
         last_updated_at: now.toISOString(),
         next_update_due_at: fortyEightHoursFromNow.toISOString(),
         update_status_flag: 'Green',
       }),
-      ...(isClosedAfterUpdate && {
+      ...(resetGeneral && isClosedAfterUpdate && {
         update_status_flag: 'Gray',
       }),
     };
-    // Client Communication updates also reset the dedicated 48-hour client
-    // communication tracker (separate from the general case timer above).
-    if (updateType === 'Client Communication') {
+    if (resetClientComm) {
       if (isClosedAfterUpdate) {
         updateData.client_comm_status_flag = 'Gray';
       } else {
