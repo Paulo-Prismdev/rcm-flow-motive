@@ -11,6 +11,7 @@ import ClaimUpdateForm from '../claims/ClaimUpdateForm';
 import OnSiteMarker from '../claims/OnSiteMarker';
 import UpdateDirectionBadges from '../claims/UpdateDirectionBadges';
 import { isUpdateTrackingClosed } from "@/components/shared/claimStatusUpdate";
+import { recomputeUpdateTimers } from "@/components/shared/recomputeUpdateTimers";
 
 const UPDATE_TYPES = [
   "Status Change", "Client Communication", "Bodyshop Communication", "Insurer Communication",
@@ -147,8 +148,15 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
     mutationFn: async (updateId) => {
       return await base44.entities.ClaimUpdate.delete(updateId);
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ['claimUpdates', claimId] });
+      try {
+        await recomputeUpdateTimers(claimId);
+      } catch (e) {
+        console.error('Failed to recompute timers after delete:', e);
+      }
+      queryClient.invalidateQueries({ queryKey: ['claim', claimId] });
+      queryClient.invalidateQueries({ queryKey: ['claims'] });
     },
     onError: (error) => setSubmitError(error?.message || 'Failed to delete'),
   });
