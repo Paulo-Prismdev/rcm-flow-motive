@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Badge } from "@/components/ui/badge";
 import ClaimUpdateForm from '../claims/ClaimUpdateForm';
 import OnSiteMarker from '../claims/OnSiteMarker';
+import UpdateDirectionBadges from '../claims/UpdateDirectionBadges';
 import { isUpdateTrackingClosed } from "@/components/shared/claimStatusUpdate";
 
 const UPDATE_TYPES = [
@@ -309,6 +310,7 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
                       <div className="flex items-start justify-between mb-2">
                         <div className="flex items-center gap-2 flex-wrap">
                           <Badge className={`${UPDATE_TYPE_COLORS[update.update_type] || 'bg-gray-500'} rounded-full`}>{update.update_type}</Badge>
+                          <UpdateDirectionBadges update={update} />
                           {update.starred && <span className="inline-flex items-center gap-1 text-amber-500 text-[10px] font-semibold"><Star className="w-3 h-3 fill-amber-400" />Flagged</span>}
                           <span className="text-[10px] text-muted-foreground flex items-center gap-1"><Calendar className="w-3 h-3" />{format(new Date(update.created_date), 'dd/MM/yyyy HH:mm')}</span>
                           {update.tagged_user_ids?.length > 0 && <span className="text-[10px] text-primary flex items-center gap-1"><AtSign className="w-3 h-3" />{update.tagged_user_ids.length} tagged</span>}

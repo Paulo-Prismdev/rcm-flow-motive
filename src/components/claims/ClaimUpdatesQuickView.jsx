@@ -6,6 +6,7 @@ import { Clock, Calendar, User, MessageSquare, Plus, Star, Copy, Check } from 'l
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import ClaimUpdateForm from './ClaimUpdateForm';
+import UpdateDirectionBadges from './UpdateDirectionBadges';
 
 const CopyTextButton = ({ text }) => {
   const [copied, setCopied] = useState(false);
@@ -167,6 +168,7 @@ export default function ClaimUpdatesQuickView({ claim, isOpen, onClose }) {
                     <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium text-white ${UPDATE_TYPE_COLORS[update.update_type] || 'bg-gray-500'}`}>
                       {update.update_type}
                     </span>
+                    <UpdateDirectionBadges update={update} />
                     {update.starred && (
                       <span className="inline-flex items-center gap-1 text-amber-500 text-[10px] font-semibold">
                         <Star className="w-3 h-3 fill-amber-400" />Flagged
