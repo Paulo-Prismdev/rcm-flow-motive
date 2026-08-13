@@ -12,8 +12,7 @@ import { buildStatusChangeClaimUpdate, isUpdateTrackingClosed } from "@/componen
 
 const UPDATE_TYPES = [
   "Status Change", "Client Communication", "Bodyshop Communication", "Insurer Communication",
-  "Referrer Response", "Action Taken", "Awaiting Information", "Documentation Received",
-  "Parts Update", "Repair Progress", "Quality Check", "Other"
+  "Referrer Communication", "Parts", "Other"
 ];
 
 export default function ClaimUpdateForm({
@@ -213,7 +212,7 @@ export default function ClaimUpdateForm({
             <div>
               <label className="block text-xs text-muted-foreground mb-1">Update Type *</label>
               <select value={newUpdate.update_type} onChange={(e) => setNewUpdate({ ...newUpdate, update_type: e.target.value })} className="w-full px-3 py-2 text-sm bg-background border border-border rounded-lg" required>
-                {isReferrer ? (<><option value="Referrer Response">Referrer Response</option><option value="Other">Other</option></>) : (UPDATE_TYPES.map(type => <option key={type} value={type}>{type}</option>))}
+                {isReferrer ? (<><option value="Referrer Communication">Referrer Communication</option><option value="Other">Other</option></>) : (UPDATE_TYPES.map(type => <option key={type} value={type}>{type}</option>))}
               </select>
             </div>
 
