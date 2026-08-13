@@ -207,7 +207,7 @@ export default function UpdateTrackingModal({ claim, isOpen, onClose, onSetOverr
                   <strong>General Updates</strong> — reset by any status change or update logged on this claim.
                 </p>
                 <p className="mb-2">
-                  <strong>Client Communication</strong> — only reset when a "Client Communication" update type is logged. This ensures the client is kept informed at least every 48 hours.
+                  <strong>Client Communication</strong> — only reset when an <strong>Outgoing</strong> "Client Communication" update is logged. This ensures the client is kept informed at least every 48 hours.
                 </p>
                 <p>
                   Each tracker can be snoozed independently if tracking needs to be paused temporarily.

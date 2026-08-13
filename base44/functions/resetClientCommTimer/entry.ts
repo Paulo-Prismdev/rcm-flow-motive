@@ -69,7 +69,7 @@ export default async function(req: Request): Promise<Response> {
           // than what last_client_comm_at reflects.
           let latestCommAt = claim.last_client_comm_at;
           const latestUpdates = await base44.asServiceRole.entities.ClaimUpdate.filter(
-            { claim_id: claim.id, update_type: 'Client Communication' },
+            { claim_id: claim.id, update_type: 'Client Communication', direction: 'Outgoing' },
             '-created_date',
             1
           );
@@ -134,7 +134,7 @@ export default async function(req: Request): Promise<Response> {
       for (const claim of claims) {
         try {
           const latest = await base44.asServiceRole.entities.ClaimUpdate.filter(
-            { claim_id: claim.id, update_type: 'Client Communication' },
+            { claim_id: claim.id, update_type: 'Client Communication', direction: 'Outgoing' },
             '-created_date',
             1
           );
@@ -165,8 +165,12 @@ export default async function(req: Request): Promise<Response> {
       return Response.json({ error: 'No claim_id provided' }, { status: 400 });
     }
 
-    // Skip non–Client Communication updates when triggered by automation
+    // Skip non–Client Communication updates when triggered by automation.
+    // Only an OUTGOING Client Communication resets the 48h tracker to Green.
     if (updateData.update_type && updateData.update_type !== 'Client Communication') {
+      return Response.json({ skipped: true });
+    }
+    if (updateData.update_type === 'Client Communication' && updateData.direction && updateData.direction !== 'Outgoing') {
       return Response.json({ skipped: true });
     }
 
@@ -183,7 +187,7 @@ export default async function(req: Request): Promise<Response> {
     let latestCommDate = updateData.created_date;
     if (!latestCommDate) {
       const updates = await base44.asServiceRole.entities.ClaimUpdate.filter(
-        { claim_id: claimId, update_type: 'Client Communication' },
+        { claim_id: claimId, update_type: 'Client Communication', direction: 'Outgoing' },
         '-created_date',
         1
       );
