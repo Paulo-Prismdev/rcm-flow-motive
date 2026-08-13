@@ -27,7 +27,7 @@ export default function ClaimUpdateForm({
   const queryClient = useQueryClient();
 
   const [newUpdate, setNewUpdate] = useState({
-    update_type: 'Other', description: '', next_steps: '', due_date_for_next_action: '',
+    update_type: 'Other', direction: '', platform: '', description: '', next_steps: '', due_date_for_next_action: '',
     new_journey: claim?.journey_status || claim?.job_status || currentStatus || '',
     new_secondary_status: claim?.secondary_status || '',
     new_tertiary_status: claim?.tertiary_status || ''
@@ -45,6 +45,8 @@ export default function ClaimUpdateForm({
     !!newUpdate.description?.trim() ||
     !!newUpdate.next_steps?.trim() ||
     !!newUpdate.due_date_for_next_action ||
+    !!newUpdate.direction ||
+    !!newUpdate.platform ||
     taggedUsers.length > 0 ||
     selectedEmails.length > 0 ||
     sendEmail ||
@@ -112,7 +114,7 @@ export default function ClaimUpdateForm({
   });
 
   const resetForm = () => {
-    setNewUpdate({ update_type: 'Other', description: '', next_steps: '', due_date_for_next_action: '', new_journey: claim?.journey_status || claim?.job_status || currentStatus || '', new_secondary_status: claim?.secondary_status || '', new_tertiary_status: claim?.tertiary_status || '' });
+    setNewUpdate({ update_type: 'Other', direction: '', platform: '', description: '', next_steps: '', due_date_for_next_action: '', new_journey: claim?.journey_status || claim?.job_status || currentStatus || '', new_secondary_status: claim?.secondary_status || '', new_tertiary_status: claim?.tertiary_status || '' });
     setSendEmail(false); setSelectedEmails([]); setTaggedUsers([]); setSubmitError(''); setShowFollowUp(false);
     if (onCancel) onCancel();
   };
@@ -154,6 +156,8 @@ export default function ClaimUpdateForm({
     setSubmitError('');
     if (isReferrer && newUpdate.update_type === 'Status Change') { setSubmitError('Referrers cannot change status'); return; }
     if (isReferrer && (newUpdate.next_steps || newUpdate.due_date_for_next_action)) { setSubmitError('Referrers cannot set follow-ups'); return; }
+    if (newUpdate.update_type !== 'Status Change' && !newUpdate.direction) { setSubmitError('Please select a direction (Incoming or Outgoing)'); return; }
+    if (newUpdate.update_type !== 'Status Change' && newUpdate.direction && !newUpdate.platform) { setSubmitError('Please select a platform'); return; }
     if (newUpdate.update_type !== 'Status Change' && !newUpdate.description.trim()) { setSubmitError('Please enter a description'); return; }
 
     // Block true completion (cancelled or invoiced) while a starred/flagged
@@ -211,10 +215,34 @@ export default function ClaimUpdateForm({
           <>
             <div>
               <label className="block text-xs text-muted-foreground mb-1">Update Type *</label>
-              <select value={newUpdate.update_type} onChange={(e) => setNewUpdate({ ...newUpdate, update_type: e.target.value })} className="w-full px-3 py-2 text-sm bg-background border border-border rounded-lg" required>
+              <select value={newUpdate.update_type} onChange={(e) => setNewUpdate({ ...newUpdate, update_type: e.target.value, direction: '', platform: '' })} className="w-full px-3 py-2 text-sm bg-background border border-border rounded-lg" required>
                 {isReferrer ? (<><option value="Referrer Communication">Referrer Communication</option><option value="Other">Other</option></>) : (UPDATE_TYPES.map(type => <option key={type} value={type}>{type}</option>))}
               </select>
             </div>
+
+            {newUpdate.update_type !== 'Status Change' && (
+              <div>
+                <label className="block text-xs text-muted-foreground mb-1">Direction *</label>
+                <select value={newUpdate.direction} onChange={(e) => setNewUpdate({ ...newUpdate, direction: e.target.value, platform: '' })} className="w-full px-3 py-2 text-sm bg-background border border-border rounded-lg" required>
+                  <option value="">Select direction...</option>
+                  <option value="Incoming">Incoming</option>
+                  <option value="Outgoing">Outgoing</option>
+                </select>
+              </div>
+            )}
+
+            {newUpdate.update_type !== 'Status Change' && newUpdate.direction && (
+              <div>
+                <label className="block text-xs text-muted-foreground mb-1">Platform *</label>
+                <select value={newUpdate.platform} onChange={(e) => setNewUpdate({ ...newUpdate, platform: e.target.value })} className="w-full px-3 py-2 text-sm bg-background border border-border rounded-lg" required>
+                  <option value="">Select platform...</option>
+                  <option value="Phone">Phone</option>
+                  <option value="E-Mail">E-Mail</option>
+                  <option value="Whatsapp">Whatsapp</option>
+                  <option value="Text Message">Text Message</option>
+                </select>
+              </div>
+            )}
 
             {newUpdate.update_type === 'Status Change' && canChangeStatus && (
               <StatusChangeFields

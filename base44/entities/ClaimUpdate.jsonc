@@ -17,17 +17,30 @@
         "Client Communication",
         "Bodyshop Communication",
         "Insurer Communication",
-        "Action Taken",
-        "Awaiting Information",
-        "Documentation Received",
-        "Parts Update",
-        "Repair Progress",
-        "Quality Check",
-        "Referrer Response",
+        "Referrer Communication",
+        "Parts",
         "Other"
       ],
       "default": "Other",
       "description": "Type of update - categorizes the activity"
+    },
+    "direction": {
+      "type": "string",
+      "enum": [
+        "Incoming",
+        "Outgoing"
+      ],
+      "description": "Whether this communication was incoming or outgoing"
+    },
+    "platform": {
+      "type": "string",
+      "enum": [
+        "Phone",
+        "E-Mail",
+        "Whatsapp",
+        "Text Message"
+      ],
+      "description": "Communication platform used for this update"
     },
     "description": {
       "type": "string",
