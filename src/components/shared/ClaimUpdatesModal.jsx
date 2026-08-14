@@ -28,6 +28,23 @@ const UPDATE_TYPE_COLORS = {
   "Quality Check": "bg-emerald-500", "Other": "bg-gray-500"
 };
 
+const Highlight = ({ text, query }) => {
+  if (!text) return text;
+  const q = (query || '').trim();
+  if (!q) return text;
+  try {
+    const escaped = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const parts = String(text).split(new RegExp(`(${escaped})`, 'gi'));
+    return parts.map((part, i) =>
+      part.toLowerCase() === q.toLowerCase()
+        ? <mark key={i} className="bg-yellow-200 dark:bg-yellow-500/50 rounded px-0.5">{part}</mark>
+        : <React.Fragment key={i}>{part}</React.Fragment>
+    );
+  } catch {
+    return text;
+  }
+};
+
 export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onClose, onUpdateCreated }) {
   const [showForm, setShowForm] = useState(false);
   const [replyToId, setReplyToId] = useState(null);
@@ -91,6 +108,16 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
   const { data: updates = [], isLoading } = useQuery({
     queryKey: ['claimUpdates', claimId], queryFn: () => base44.entities.ClaimUpdate.filter({ claim_id: claimId }, '-created_date', 500), enabled: isOpen && !!claimId, staleTime: 0
   });
+
+  const q = searchQuery.trim();
+  const matchInUpdate = (u) => [u.description, u.next_steps, u.update_type, u.created_by].some(f => f && f.toLowerCase().includes(q.toLowerCase()));
+  const firstMatchId = q ? updates.find(u => !u.parent_update_id && (matchInUpdate(u) || updates.some(r => r.parent_update_id === u.id && matchInUpdate(r))))?.id : null;
+  const matchRefs = useRef({});
+  useEffect(() => {
+    if (firstMatchId && matchRefs.current[firstMatchId]) {
+      matchRefs.current[firstMatchId].scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [firstMatchId]);
 
   const createUpdateMutation = useMutation({
     mutationFn: async (updateData) => {
@@ -280,19 +307,6 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
     return acc;
   }, {});
 
-  const q = searchQuery.trim().toLowerCase();
-  const matchesQuery = (u) => {
-    if (!q) return true;
-    return [u.description, u.next_steps, u.update_type, u.created_by].some(
-      (f) => f && f.toLowerCase().includes(q)
-    );
-  };
-  const filteredTopUpdates = updates.filter(u => !u.parent_update_id).filter(u => {
-    if (matchesQuery(u)) return true;
-    // include if any reply matches
-    return (groupedUpdates[u.id] || []).some(matchesQuery);
-  });
-
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
@@ -331,7 +345,7 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search updates..."
+                  placeholder="Find in updates..."
                   className="w-full h-8 pl-3 pr-7 text-xs rounded-md border border-border bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
                 />
                 {searchQuery && (
@@ -341,9 +355,9 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
                 )}
               </div>
             </div>
-            {isLoading ? <div className="bg-muted/30 border border-border rounded-lg p-4 text-center text-sm text-muted-foreground">Loading updates...</div> : updates.length === 0 ? <div className="bg-muted/30 border border-border rounded-lg p-4 text-center text-sm text-muted-foreground">No updates yet.</div> : filteredTopUpdates.length === 0 ? <div className="bg-muted/30 border border-border rounded-lg p-4 text-center text-sm text-muted-foreground">No updates match "{searchQuery}".</div> : (
+            {isLoading ? <div className="bg-muted/30 border border-border rounded-lg p-4 text-center text-sm text-muted-foreground">Loading updates...</div> : updates.length === 0 ? <div className="bg-muted/30 border border-border rounded-lg p-4 text-center text-sm text-muted-foreground">No updates yet.</div> : (
               <div className="space-y-2">
-                {filteredTopUpdates.sort((a, b) => new Date(b.created_date) - new Date(a.created_date)).map(update => {
+                {updates.filter(u => !u.parent_update_id).sort((a, b) => new Date(b.created_date) - new Date(a.created_date)).map(update => {
                   const isStatusChange = update.update_type === 'Status Change';
                   const isNote = !isStatusChange && update.description?.trim();
                   const isLiked = update.liked_by?.includes(currentUser?.id);
@@ -351,7 +365,7 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
                   const replies = updates.filter(u => u.parent_update_id === update.id).sort((a, b) => new Date(a.created_date) - new Date(b.created_date));
 
                   return (
-                    <div key={update.id} className={`border rounded-lg p-3 ${update.starred ? 'ring-2 ring-amber-400 border-amber-400' : ''} ${isStatusChange ? 'bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-700' : isNote ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700' : 'bg-card border-border'}`}>
+                    <div key={update.id} ref={el => { matchRefs.current[update.id] = el; }} className={`border rounded-lg p-3 ${update.starred ? 'ring-2 ring-amber-400 border-amber-400' : ''} ${firstMatchId === update.id ? 'ring-2 ring-blue-400' : ''} ${isStatusChange ? 'bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-700' : isNote ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700' : 'bg-card border-border'}`}>
                       <div className="flex items-start justify-between mb-2">
                         <div className="flex items-center gap-2 flex-wrap">
                           <Badge className={`${UPDATE_TYPE_COLORS[update.update_type] || 'bg-gray-500'} rounded-full`}>{update.update_type}</Badge>
@@ -371,13 +385,13 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
                         </div>
                       ) : (
                         <>
-                          {update.description && <div className="text-sm mb-2"><p className="text-foreground whitespace-pre-wrap">{update.description}</p></div>}
-                          {update.next_steps && <div className="text-sm mb-2 mt-2 bg-muted/50 rounded p-2"><p className="font-medium mb-1 text-foreground text-xs uppercase tracking-wide">Next Steps:</p><p className="text-muted-foreground whitespace-pre-wrap">{update.next_steps}</p></div>}
+                          {update.description && <div className="text-sm mb-2"><p className="text-foreground whitespace-pre-wrap"><Highlight text={update.description} query={q} /></p></div>}
+                          {update.next_steps && <div className="text-sm mb-2 mt-2 bg-muted/50 rounded p-2"><p className="font-medium mb-1 text-foreground text-xs uppercase tracking-wide">Next Steps:</p><p className="text-muted-foreground whitespace-pre-wrap"><Highlight text={update.next_steps} query={q} /></p></div>}
                           {update.due_date_for_next_action && <div className="text-xs text-muted-foreground flex items-center gap-1 mt-2"><Clock className="w-3 h-3" />Due: {format(new Date(update.due_date_for_next_action), 'dd/MM/yyyy')}</div>}
                         </>
                       )}
                       <div className="flex items-center justify-between flex-wrap gap-y-2 mt-2 pt-2 border-t border-border/50">
-                        <div className="flex items-center gap-1 text-[10px] text-muted-foreground min-w-0"><User className="w-3 h-3 flex-shrink-0" /><span className="truncate">{update.created_by}</span></div>
+                        <div className="flex items-center gap-1 text-[10px] text-muted-foreground min-w-0"><User className="w-3 h-3 flex-shrink-0" /><span className="truncate"><Highlight text={update.created_by} query={q} /></span></div>
                         <div className="flex items-center gap-1">
                           {canEditDelete(update) && (
                             <>
@@ -406,7 +420,7 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
                           />
                         </div>
                       )}
-                      {replies.length > 0 && <div className="ml-6 mt-3 space-y-2 border-l-2 border-border pl-4">{replies.map(reply => { const replyIsLiked = reply.liked_by?.includes(currentUser?.id); const replyLikeCount = reply.liked_by?.length || 0; const replyEditing = editingUpdateId === reply.id; return (<div key={reply.id} className="bg-muted/30 border border-border rounded-lg p-3">{replyEditing ? (<div className="space-y-2"><Textarea value={editDescription} onChange={(e) => { setEditDescription(e.target.value); setEditDescriptionDirty(true); }} className="px-3 py-2 text-sm bg-background border border-border h-20" /><div className="flex justify-end gap-2"><Button type="button" variant="outline" size="sm" onClick={() => { setEditingUpdateId(null); setEditDescription(''); setEditDescriptionDirty(false); }} className="text-xs">Cancel</Button><Button type="button" size="sm" onClick={() => handleSaveEdit(reply.id)} disabled={updateUpdateMutation.isPending || !editDescription.trim()} className="text-xs">{updateUpdateMutation.isPending ? 'Saving...' : 'Save'}</Button></div></div>) : (<><div className="flex items-center justify-between mb-2"><div className="flex items-center gap-2"><span className="text-[10px] text-muted-foreground flex items-center gap-1"><User className="w-3 h-3" />{reply.created_by}</span><span className="text-[10px] text-muted-foreground flex items-center gap-1"><Calendar className="w-3 h-3" />{format(new Date(reply.created_date), 'dd/MM/yyyy HH:mm')}</span></div><div className="flex items-center gap-1">{canEditDelete(reply) && (<><Button type="button" variant="ghost" size="sm" onClick={() => handleEdit(reply)} className="h-5 px-1 text-xs text-muted-foreground"><Pencil className="w-3 h-3" /></Button><Button type="button" variant="ghost" size="sm" onClick={() => handleDelete(reply.id)} className="h-5 px-1 text-xs text-muted-foreground"><Trash2 className="w-3 h-3" /></Button></>)}<Button type="button" variant="ghost" size="sm" onClick={() => toggleLikeMutation.mutate({ updateId: reply.id, isLiked: replyIsLiked })} className={`h-5 px-1 text-xs ${replyIsLiked ? 'text-red-500' : 'text-muted-foreground'}`}><Heart className={`w-3 h-3 ${replyIsLiked ? 'fill-current' : ''}`} />{replyLikeCount > 0 && replyLikeCount}</Button></div></div>{reply.description && <p className="text-sm text-foreground whitespace-pre-wrap">{reply.description}</p>}</>)}</div>); })}</div>}
+                      {replies.length > 0 && <div className="ml-6 mt-3 space-y-2 border-l-2 border-border pl-4">{replies.map(reply => { const replyIsLiked = reply.liked_by?.includes(currentUser?.id); const replyLikeCount = reply.liked_by?.length || 0; const replyEditing = editingUpdateId === reply.id; return (<div key={reply.id} className="bg-muted/30 border border-border rounded-lg p-3">{replyEditing ? (<div className="space-y-2"><Textarea value={editDescription} onChange={(e) => { setEditDescription(e.target.value); setEditDescriptionDirty(true); }} className="px-3 py-2 text-sm bg-background border border-border h-20" /><div className="flex justify-end gap-2"><Button type="button" variant="outline" size="sm" onClick={() => { setEditingUpdateId(null); setEditDescription(''); setEditDescriptionDirty(false); }} className="text-xs">Cancel</Button><Button type="button" size="sm" onClick={() => handleSaveEdit(reply.id)} disabled={updateUpdateMutation.isPending || !editDescription.trim()} className="text-xs">{updateUpdateMutation.isPending ? 'Saving...' : 'Save'}</Button></div></div>) : (<><div className="flex items-center justify-between mb-2"><div className="flex items-center gap-2"><span className="text-[10px] text-muted-foreground flex items-center gap-1"><User className="w-3 h-3" />{reply.created_by}</span><span className="text-[10px] text-muted-foreground flex items-center gap-1"><Calendar className="w-3 h-3" />{format(new Date(reply.created_date), 'dd/MM/yyyy HH:mm')}</span></div><div className="flex items-center gap-1">{canEditDelete(reply) && (<><Button type="button" variant="ghost" size="sm" onClick={() => handleEdit(reply)} className="h-5 px-1 text-xs text-muted-foreground"><Pencil className="w-3 h-3" /></Button><Button type="button" variant="ghost" size="sm" onClick={() => handleDelete(reply.id)} className="h-5 px-1 text-xs text-muted-foreground"><Trash2 className="w-3 h-3" /></Button></>)}<Button type="button" variant="ghost" size="sm" onClick={() => toggleLikeMutation.mutate({ updateId: reply.id, isLiked: replyIsLiked })} className={`h-5 px-1 text-xs ${replyIsLiked ? 'text-red-500' : 'text-muted-foreground'}`}><Heart className={`w-3 h-3 ${replyIsLiked ? 'fill-current' : ''}`} />{replyLikeCount > 0 && replyLikeCount}</Button></div></div>{reply.description && <p className="text-sm text-foreground whitespace-pre-wrap"><Highlight text={reply.description} query={q} /></p>}</>)}</div>); })}</div>}
                     </div>
                   );
                 })}
