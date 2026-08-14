@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Button } from "@/components/ui/button";
@@ -47,6 +47,13 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
   const [editDescriptionDirty, setEditDescriptionDirty] = useState(false);
   const [formDirty, setFormDirty] = useState(false);
   const [showFollowUp, setShowFollowUp] = useState(false);
+  const replyFormRef = useRef(null);
+
+  useEffect(() => {
+    if (replyToId && replyFormRef.current) {
+      replyFormRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [replyToId]);
 
   const hasUnsavedChanges = formDirty || (editingUpdateId !== null && editDescriptionDirty);
 
@@ -287,20 +294,20 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
             <Button onClick={() => setShowForm(true)} className="w-full px-4 py-3 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-lg flex items-center justify-center gap-2">
               <Plus className="w-4 h-4" />Add New Update
             </Button>
-          ) : (
+          ) : !replyToId ? (
             <ClaimUpdateForm
               claimId={claimId}
               claim={claim}
               currentStatus={currentStatus}
-              replyToId={replyToId}
+              replyToId={null}
               onDirtyChange={setFormDirty}
               onUpdateCreated={(newStatus, newSecondaryStatus, newTertiaryStatus, updateType, direction) => {
                 if (onUpdateCreated) onUpdateCreated(newStatus, newSecondaryStatus, newTertiaryStatus, updateType, direction);
                 resetForm();
               }}
-              onCancel={() => { setReplyToId(null); setShowForm(false); }}
+              onCancel={() => { setShowForm(false); }}
             />
-          )}
+          ) : null}
 
           <div>
             <h3 className="font-semibold mb-3 text-sm text-foreground">Update History</h3>
@@ -353,6 +360,22 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
                           <Button type="button" variant="ghost" size="sm" onClick={() => handleReply(update.id)} className="h-7 px-2 text-xs text-muted-foreground"><Reply className="w-3.5 h-3.5 sm:mr-1" /><span className="hidden sm:inline">Reply</span></Button>
                         </div>
                       </div>
+                      {replyToId === update.id && (
+                        <div ref={replyFormRef} className="ml-6 mt-3 border-l-2 border-border pl-4">
+                          <ClaimUpdateForm
+                            claimId={claimId}
+                            claim={claim}
+                            currentStatus={currentStatus}
+                            replyToId={replyToId}
+                            onDirtyChange={setFormDirty}
+                            onUpdateCreated={(newStatus, newSecondaryStatus, newTertiaryStatus, updateType, direction) => {
+                              if (onUpdateCreated) onUpdateCreated(newStatus, newSecondaryStatus, newTertiaryStatus, updateType, direction);
+                              resetForm();
+                            }}
+                            onCancel={() => { setReplyToId(null); setShowForm(false); }}
+                          />
+                        </div>
+                      )}
                       {replies.length > 0 && <div className="ml-6 mt-3 space-y-2 border-l-2 border-border pl-4">{replies.map(reply => { const replyIsLiked = reply.liked_by?.includes(currentUser?.id); const replyLikeCount = reply.liked_by?.length || 0; const replyEditing = editingUpdateId === reply.id; return (<div key={reply.id} className="bg-muted/30 border border-border rounded-lg p-3">{replyEditing ? (<div className="space-y-2"><Textarea value={editDescription} onChange={(e) => { setEditDescription(e.target.value); setEditDescriptionDirty(true); }} className="px-3 py-2 text-sm bg-background border border-border h-20" /><div className="flex justify-end gap-2"><Button type="button" variant="outline" size="sm" onClick={() => { setEditingUpdateId(null); setEditDescription(''); setEditDescriptionDirty(false); }} className="text-xs">Cancel</Button><Button type="button" size="sm" onClick={() => handleSaveEdit(reply.id)} disabled={updateUpdateMutation.isPending || !editDescription.trim()} className="text-xs">{updateUpdateMutation.isPending ? 'Saving...' : 'Save'}</Button></div></div>) : (<><div className="flex items-center justify-between mb-2"><div className="flex items-center gap-2"><span className="text-[10px] text-muted-foreground flex items-center gap-1"><User className="w-3 h-3" />{reply.created_by}</span><span className="text-[10px] text-muted-foreground flex items-center gap-1"><Calendar className="w-3 h-3" />{format(new Date(reply.created_date), 'dd/MM/yyyy HH:mm')}</span></div><div className="flex items-center gap-1">{canEditDelete(reply) && (<><Button type="button" variant="ghost" size="sm" onClick={() => handleEdit(reply)} className="h-5 px-1 text-xs text-muted-foreground"><Pencil className="w-3 h-3" /></Button><Button type="button" variant="ghost" size="sm" onClick={() => handleDelete(reply.id)} className="h-5 px-1 text-xs text-muted-foreground"><Trash2 className="w-3 h-3" /></Button></>)}<Button type="button" variant="ghost" size="sm" onClick={() => toggleLikeMutation.mutate({ updateId: reply.id, isLiked: replyIsLiked })} className={`h-5 px-1 text-xs ${replyIsLiked ? 'text-red-500' : 'text-muted-foreground'}`}><Heart className={`w-3 h-3 ${replyIsLiked ? 'fill-current' : ''}`} />{replyLikeCount > 0 && replyLikeCount}</Button></div></div>{reply.description && <p className="text-sm text-foreground whitespace-pre-wrap">{reply.description}</p>}</>)}</div>); })}</div>}
                     </div>
                   );
