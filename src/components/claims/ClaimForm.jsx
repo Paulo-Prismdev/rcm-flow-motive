@@ -278,6 +278,18 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
   const handleChange = (field, value) => setFormData(prev => ({ ...prev, [field]: value }));
   const handleCheckboxChange = (field, checked) => setFormData(prev => ({ ...prev, [field]: checked }));
 
+  const handleDriverSameToggle = (v) => {
+    setFormData(prev => ({
+      ...prev,
+      driver_same_as_client: v,
+      ...(v && {
+        driver_contact_name: '', driver_contact_phone: '', driver_contact_email: '',
+        driver_contact_address_line_1: '', driver_contact_address_line_2: '',
+        driver_contact_town: '', driver_contact_county: '', driver_contact_postcode: ''
+      })
+    }));
+  };
+
   const handleIncidentLocationChange = (addr) => handleChange('incident_location', addr.display_name || addr.address || '');
   const handleVehicleLocationChange = (addr) => handleChange('vehicle_location', addr.display_name || addr.address || '');
 
@@ -587,23 +599,37 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
         </div>
 
         {/* Driver / Repair Contact */}
-        <div className="space-y-1.5"><label className="text-sm font-medium">Driver / Repair Contact</label><Input value={formData.driver_contact_name} onChange={e => handleChange('driver_contact_name', e.target.value)} placeholder="If different from client" /></div>
-        {formData.driver_contact_name && (
-          <div className="p-4 rounded-lg bg-muted/50 space-y-3 border-t border-border">
-            <h5 className="font-medium text-sm text-muted-foreground">Driver Contact Details</h5>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5"><label className="text-xs text-muted-foreground">Phone</label><Input value={formData.driver_contact_phone} onChange={e => handleChange('driver_contact_phone', e.target.value)} /></div>
-              <div className="space-y-1.5"><label className="text-xs text-muted-foreground">Email</label><Input type="email" value={formData.driver_contact_email} onChange={e => handleChange('driver_contact_email', e.target.value)} /></div>
+        <div className="space-y-3">
+          <div className="flex items-center justify-between gap-3 p-3 rounded-lg bg-muted/50">
+            <div>
+              <p className="text-sm font-medium">Same as the Client?</p>
+              <p className="text-xs text-muted-foreground">If yes, the client details will be used as the repair contact</p>
             </div>
-            <div className="space-y-1.5"><label className="text-xs text-muted-foreground">Address Line 1</label><Input value={formData.driver_contact_address_line_1} onChange={e => handleChange('driver_contact_address_line_1', e.target.value)} /></div>
-            <div className="space-y-1.5"><label className="text-xs text-muted-foreground">Address Line 2</label><Input value={formData.driver_contact_address_line_2} onChange={e => handleChange('driver_contact_address_line_2', e.target.value)} /></div>
-            <div className="grid grid-cols-3 gap-3">
-              <div className="space-y-1.5"><label className="text-xs text-muted-foreground">Town</label><Input value={formData.driver_contact_town} onChange={e => handleChange('driver_contact_town', e.target.value)} /></div>
-              <div className="space-y-1.5"><label className="text-xs text-muted-foreground">County</label><Input value={formData.driver_contact_county} onChange={e => handleChange('driver_contact_county', e.target.value)} /></div>
-              <div className="space-y-1.5"><label className="text-xs text-muted-foreground">Postcode</label><Input value={formData.driver_contact_postcode} onChange={e => handleChange('driver_contact_postcode', e.target.value)} /></div>
+            <div className="flex gap-0.5 flex-shrink-0">
+              <button type="button" onClick={() => handleDriverSameToggle(true)}
+                className={`px-3 py-1.5 rounded-l-lg text-xs font-medium transition-colors ${formData.driver_same_as_client === true ? 'bg-accent text-accent-foreground' : 'bg-muted text-muted-foreground hover:bg-muted/80'}`}>Yes</button>
+              <button type="button" onClick={() => handleDriverSameToggle(false)}
+                className={`px-3 py-1.5 rounded-r-lg text-xs font-medium transition-colors ${formData.driver_same_as_client === false ? 'bg-accent text-accent-foreground' : 'bg-muted text-muted-foreground hover:bg-muted/80'}`}>No</button>
             </div>
           </div>
-        )}
+          {formData.driver_same_as_client === false && (
+            <div className="p-4 rounded-lg bg-muted/50 space-y-3 border-t border-border">
+              <h5 className="font-medium text-sm text-muted-foreground">Driver Contact Details</h5>
+              <div className="space-y-1.5"><label className="text-xs text-muted-foreground">Contact Name</label><Input value={formData.driver_contact_name} onChange={e => handleChange('driver_contact_name', e.target.value)} placeholder="Driver / contact name" /></div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5"><label className="text-xs text-muted-foreground">Phone</label><Input value={formData.driver_contact_phone} onChange={e => handleChange('driver_contact_phone', e.target.value)} /></div>
+                <div className="space-y-1.5"><label className="text-xs text-muted-foreground">Email</label><Input type="email" value={formData.driver_contact_email} onChange={e => handleChange('driver_contact_email', e.target.value)} /></div>
+              </div>
+              <div className="space-y-1.5"><label className="text-xs text-muted-foreground">Address Line 1</label><Input value={formData.driver_contact_address_line_1} onChange={e => handleChange('driver_contact_address_line_1', e.target.value)} /></div>
+              <div className="space-y-1.5"><label className="text-xs text-muted-foreground">Address Line 2</label><Input value={formData.driver_contact_address_line_2} onChange={e => handleChange('driver_contact_address_line_2', e.target.value)} /></div>
+              <div className="grid grid-cols-3 gap-3">
+                <div className="space-y-1.5"><label className="text-xs text-muted-foreground">Town</label><Input value={formData.driver_contact_town} onChange={e => handleChange('driver_contact_town', e.target.value)} /></div>
+                <div className="space-y-1.5"><label className="text-xs text-muted-foreground">County</label><Input value={formData.driver_contact_county} onChange={e => handleChange('driver_contact_county', e.target.value)} /></div>
+                <div className="space-y-1.5"><label className="text-xs text-muted-foreground">Postcode</label><Input value={formData.driver_contact_postcode} onChange={e => handleChange('driver_contact_postcode', e.target.value)} /></div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     );
   }
