@@ -212,45 +212,43 @@ export default function ClaimUpdateForm({
       </div>
       <form onSubmit={handleSubmit} className="space-y-2">
         {!replyToId && (
-          <>
-            <div>
-              <label className="block text-xs text-muted-foreground mb-1">Update Type *</label>
-              <select value={newUpdate.update_type} onChange={(e) => setNewUpdate({ ...newUpdate, update_type: e.target.value, direction: '', platform: '' })} className="w-full px-3 py-2 text-sm bg-background border border-border rounded-lg" required>
-                {isReferrer ? (<><option value="Referrer Communication">Referrer Communication</option><option value="Other">Other</option></>) : (UPDATE_TYPES.map(type => <option key={type} value={type}>{type}</option>))}
-              </select>
-            </div>
+          <div>
+            <label className="block text-xs text-muted-foreground mb-1">Update Type *</label>
+            <select value={newUpdate.update_type} onChange={(e) => setNewUpdate({ ...newUpdate, update_type: e.target.value, direction: '', platform: '' })} className="w-full px-3 py-2 text-sm bg-background border border-border rounded-lg" required>
+              {isReferrer ? (<><option value="Referrer Communication">Referrer Communication</option><option value="Other">Other</option></>) : (UPDATE_TYPES.map(type => <option key={type} value={type}>{type}</option>))}
+            </select>
+          </div>
+        )}
 
-            {newUpdate.update_type !== 'Status Change' && (
-              <div>
-                <label className="block text-xs text-muted-foreground mb-1">Direction *</label>
-                <select value={newUpdate.direction} onChange={(e) => setNewUpdate({ ...newUpdate, direction: e.target.value, platform: '' })} className="w-full px-3 py-2 text-sm bg-background border border-border rounded-lg" required>
-                  <option value="">Select direction...</option>
-                  <option value="Incoming">Incoming</option>
-                  <option value="Outgoing">Outgoing</option>
-                </select>
-              </div>
-            )}
+        {newUpdate.update_type !== 'Status Change' && (
+          <div>
+            <label className="block text-xs text-muted-foreground mb-1">Direction *</label>
+            <select value={newUpdate.direction} onChange={(e) => setNewUpdate({ ...newUpdate, direction: e.target.value, platform: '' })} className="w-full px-3 py-2 text-sm bg-background border border-border rounded-lg" required>
+              <option value="">Select direction...</option>
+              <option value="Incoming">Incoming</option>
+              <option value="Outgoing">Outgoing</option>
+            </select>
+          </div>
+        )}
 
-            {newUpdate.update_type !== 'Status Change' && newUpdate.direction && (
-              <div>
-                <label className="block text-xs text-muted-foreground mb-1">Platform *</label>
-                <select value={newUpdate.platform} onChange={(e) => setNewUpdate({ ...newUpdate, platform: e.target.value })} className="w-full px-3 py-2 text-sm bg-background border border-border rounded-lg" required>
-                  <option value="">Select platform...</option>
-                  <option value="Phone">Phone</option>
-                  <option value="E-Mail">E-Mail</option>
-                  <option value="Whatsapp">Whatsapp</option>
-                  <option value="Text Message">Text Message</option>
-                </select>
-              </div>
-            )}
+        {newUpdate.update_type !== 'Status Change' && newUpdate.direction && (
+          <div>
+            <label className="block text-xs text-muted-foreground mb-1">Platform *</label>
+            <select value={newUpdate.platform} onChange={(e) => setNewUpdate({ ...newUpdate, platform: e.target.value })} className="w-full px-3 py-2 text-sm bg-background border border-border rounded-lg" required>
+              <option value="">Select platform...</option>
+              <option value="Phone">Phone</option>
+              <option value="E-Mail">E-Mail</option>
+              <option value="Whatsapp">Whatsapp</option>
+              <option value="Text Message">Text Message</option>
+            </select>
+          </div>
+        )}
 
-            {newUpdate.update_type === 'Status Change' && canChangeStatus && (
-              <StatusChangeFields
-                value={{ journey: newUpdate.new_journey, secondary: newUpdate.new_secondary_status, tertiary: newUpdate.new_tertiary_status }}
-                onChange={(v) => setNewUpdate({ ...newUpdate, new_journey: v.journey, new_secondary_status: v.secondary, new_tertiary_status: v.tertiary })}
-              />
-            )}
-          </>
+        {!replyToId && newUpdate.update_type === 'Status Change' && canChangeStatus && (
+          <StatusChangeFields
+            value={{ journey: newUpdate.new_journey, secondary: newUpdate.new_secondary_status, tertiary: newUpdate.new_tertiary_status }}
+            onChange={(v) => setNewUpdate({ ...newUpdate, new_journey: v.journey, new_secondary_status: v.secondary, new_tertiary_status: v.tertiary })}
+          />
         )}
 
         <div className="relative">
