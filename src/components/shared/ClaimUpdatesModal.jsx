@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { X, Clock, User, Calendar, Plus, Heart, Reply, AtSign, Pencil, Trash2, Star } from 'lucide-react';
+import { X, Clock, User, Calendar, Plus, Heart, Reply, AtSign, Pencil, Trash2, Star, ChevronUp, ChevronDown } from 'lucide-react';
 import { format } from 'date-fns';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
@@ -110,14 +110,25 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
   });
 
   const q = searchQuery.trim();
-  const matchInUpdate = (u) => [u.description, u.next_steps, u.update_type, u.created_by].some(f => f && f.toLowerCase().includes(q.toLowerCase()));
-  const firstMatchId = q ? updates.find(u => !u.parent_update_id && (matchInUpdate(u) || updates.some(r => r.parent_update_id === u.id && matchInUpdate(r))))?.id : null;
+  const matchInUpdate = (u) => [u.description, u.next_steps, u.update_type, u.created_by].some(f => f && f && f.toLowerCase().includes(q.toLowerCase()));
+  const matchIds = useMemo(() => {
+    if (!q) return [];
+    return updates.filter(u => !u.parent_update_id && (matchInUpdate(u) || updates.some(r => r.parent_update_id === u.id && matchInUpdate(r))))
+      .sort((a, b) => new Date(b.created_date) - new Date(a.created_date))
+      .map(u => u.id);
+  }, [q, updates]);
+  const [matchIdx, setMatchIdx] = useState(0);
   const matchRefs = useRef({});
+  const currentMatchId = matchIds[matchIdx];
+  useEffect(() => { setMatchIdx(0); }, [q]);
   useEffect(() => {
-    if (firstMatchId && matchRefs.current[firstMatchId]) {
-      matchRefs.current[firstMatchId].scrollIntoView({ behavior: 'smooth', block: 'center' });
+    if (currentMatchId && matchRefs.current[currentMatchId]) {
+      const el = matchRefs.current[currentMatchId];
+      requestAnimationFrame(() => el.scrollIntoView({ behavior: 'smooth', block: 'center' }));
     }
-  }, [firstMatchId]);
+  }, [currentMatchId]);
+  const goNext = () => setMatchIdx(i => (i + 1) % matchIds.length);
+  const goPrev = () => setMatchIdx(i => (i - 1 + matchIds.length) % matchIds.length);
 
   const createUpdateMutation = useMutation({
     mutationFn: async (updateData) => {
@@ -340,18 +351,21 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
           <div>
             <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
               <h3 className="font-semibold text-sm text-foreground">Update History</h3>
-              <div className="relative flex-1 min-w-[180px] max-w-xs">
+              <div className="relative flex-1 min-w-[200px] max-w-xs">
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Find in updates..."
-                  className="w-full h-8 pl-3 pr-7 text-xs rounded-md border border-border bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                  className={`w-full h-8 pl-3 ${searchQuery ? 'pr-24' : 'pr-3'} text-xs rounded-md border border-border bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-ring`}
                 />
                 {searchQuery && (
-                  <button type="button" onClick={() => setSearchQuery('')} className="absolute right-1.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-                    <X className="w-3.5 h-3.5" />
-                  </button>
+                  <div className="absolute right-1.5 top-1/2 -translate-y-1/2 flex items-center gap-0.5">
+                    <span className="text-[10px] text-muted-foreground tabular-nums">{matchIds.length > 0 ? `${matchIdx + 1}/${matchIds.length}` : '0/0'}</span>
+                    <button type="button" onClick={goPrev} disabled={matchIds.length === 0} className="text-muted-foreground hover:text-foreground disabled:opacity-40 p-0.5"><ChevronUp className="w-3.5 h-3.5" /></button>
+                    <button type="button" onClick={goNext} disabled={matchIds.length === 0} className="text-muted-foreground hover:text-foreground disabled:opacity-40 p-0.5"><ChevronDown className="w-3.5 h-3.5" /></button>
+                    <button type="button" onClick={() => setSearchQuery('')} className="text-muted-foreground hover:text-foreground p-0.5"><X className="w-3.5 h-3.5" /></button>
+                  </div>
                 )}
               </div>
             </div>
@@ -365,7 +379,7 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
                   const replies = updates.filter(u => u.parent_update_id === update.id).sort((a, b) => new Date(a.created_date) - new Date(b.created_date));
 
                   return (
-                    <div key={update.id} ref={el => { matchRefs.current[update.id] = el; }} className={`border rounded-lg p-3 ${update.starred ? 'ring-2 ring-amber-400 border-amber-400' : ''} ${firstMatchId === update.id ? 'ring-2 ring-blue-400' : ''} ${isStatusChange ? 'bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-700' : isNote ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700' : 'bg-card border-border'}`}>
+                    <div key={update.id} ref={el => { matchRefs.current[update.id] = el; }} className={`border rounded-lg p-3 ${update.starred ? 'ring-2 ring-amber-400 border-amber-400' : ''} ${currentMatchId === update.id ? 'ring-2 ring-blue-400' : ''} ${isStatusChange ? 'bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-700' : isNote ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700' : 'bg-card border-border'}`}>
                       <div className="flex items-start justify-between mb-2">
                         <div className="flex items-center gap-2 flex-wrap">
                           <Badge className={`${UPDATE_TYPE_COLORS[update.update_type] || 'bg-gray-500'} rounded-full`}>{update.update_type}</Badge>
