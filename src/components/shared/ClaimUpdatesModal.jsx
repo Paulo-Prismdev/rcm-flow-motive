@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { X, Clock, User, Calendar, Plus, Heart, Reply, AtSign, Pencil, Trash2, Star, Search } from 'lucide-react';
+import { X, Clock, User, Calendar, Plus, Heart, Reply, AtSign, Pencil, Trash2, Star } from 'lucide-react';
 import { format } from 'date-fns';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
@@ -327,13 +327,12 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
             <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
               <h3 className="font-semibold text-sm text-foreground">Update History</h3>
               <div className="relative flex-1 min-w-[180px] max-w-xs">
-                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search updates..."
-                  className="w-full h-8 pl-8 pr-7 text-xs rounded-md border border-border bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                  className="w-full h-8 pl-3 pr-7 text-xs rounded-md border border-border bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
                 />
                 {searchQuery && (
                   <button type="button" onClick={() => setSearchQuery('')} className="absolute right-1.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
