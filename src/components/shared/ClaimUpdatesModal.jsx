@@ -349,7 +349,7 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
           ) : null}
 
           <div>
-            <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
+            <div className="sticky top-0 z-20 flex items-center justify-between gap-2 mb-3 flex-wrap bg-background/95 backdrop-blur-sm py-1 -mx-1 px-1 rounded">
               <h3 className="font-semibold text-sm text-foreground">Update History</h3>
               <div className="relative flex-1 min-w-[200px] max-w-xs">
                 <input
