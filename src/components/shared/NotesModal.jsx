@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { X, Send, Reply, Smile, Eye, EyeOff, MessageSquare, Paperclip, Download, File as FileIcon, Trash2, Pencil, Check, User } from "lucide-react";
+import { X, Send, Reply, Smile, Eye, EyeOff, MessageSquare, Paperclip, Download, File as FileIcon, Trash2, Pencil, Check, User, Calendar } from "lucide-react";
 import VoiceInput from '@/components/shared/VoiceInput';
 import { useFileUpload } from '@/hooks/useFileUpload';
 import FileViewer from '@/components/shared/FileViewer';
@@ -466,6 +466,7 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
                       {getDisplayName(note.created_by)}
                     </span>
                     <span className="text-[11px] text-muted-foreground/70 ml-[18px]">{note.created_by}</span>
+                    <span className="text-[11px] text-muted-foreground/70 ml-[18px] flex items-center gap-1"><Calendar className="w-3 h-3" />{format(new Date(note.created_date), 'dd/MM/yyyy HH:mm')}</span>
                   </div>
                     <div className="flex gap-1">
                       <Button
@@ -605,6 +606,7 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
                         {getDisplayName(reply.created_by)}
                       </span>
                       <span className="text-[11px] text-muted-foreground/70 ml-[18px]">{reply.created_by}</span>
+                      <span className="text-[11px] text-muted-foreground/70 ml-[18px] flex items-center gap-1"><Calendar className="w-3 h-3" />{format(new Date(reply.created_date), 'dd/MM/yyyy HH:mm')}</span>
                     </div>
                     <div className="flex gap-1">
                       <Button
