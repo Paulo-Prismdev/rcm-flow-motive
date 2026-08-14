@@ -645,6 +645,12 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
               </select>
             ) : <Input value={formData.file_handler} onChange={e => handleChange('file_handler', e.target.value)} placeholder="Enter file handler name" />}
           </div>
+          <div className="space-y-2"><label className="text-sm font-medium">Percentage to Referrer (%)</label>
+            <Input type="number" value={formData.percent_to_referrer ?? ''} onChange={e => handleChange('percent_to_referrer', parseFloat(e.target.value) || 0)} placeholder="e.g. 10" />
+          </div>
+          <div className="space-y-2"><label className="text-sm font-medium">Repairer Referral Fee (%)</label>
+            <Input type="number" value={formData.referral_fee_repairer ?? ''} onChange={e => handleChange('referral_fee_repairer', parseFloat(e.target.value) || 0)} placeholder="e.g. 20" />
+          </div>
         </div>
       </div>
     );
