@@ -448,7 +448,80 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
 
         {activeTab === 'notes' && (
         <>
-        <div className="flex-1 overflow-y-auto space-y-4 pr-2">
+        {/* New Note Form */}
+        <div className="border-b border-gray-200 dark:border-gray-800 pb-4 mb-4">
+          {replyingTo && (
+            <div className="mb-3 flex items-center justify-between bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-2 text-sm">
+              <span className="text-gray-700 dark:text-gray-300">Replying to {replyingTo.created_by}</span>
+              <button
+                onClick={() => setReplyingTo(null)}
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+          <form onSubmit={handleSubmit} className="space-y-3">
+            <div className="relative">
+              <label className="block text-[14px] font-medium text-gray-700 dark:text-gray-300 mb-[6px]">
+                Add Note
+              </label>
+              <Textarea
+                ref={textareaRef}
+                value={newNote}
+                onChange={handleTextareaChange}
+                placeholder="Type your note here... (type @ to mention someone)"
+                className="min-h-[120px] bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-[14px] text-gray-900 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+              />
+              {showMentionDropdown && filteredUsers.length > 0 && (
+                <div className="absolute top-full left-0 mt-1 w-64 neomorph-flat max-h-48 overflow-y-auto z-50">
+                  {filteredUsers.map(user => (
+                    <button
+                      key={user.id}
+                      type="button"
+                      onClick={() => insertMention(user)}
+                      className="w-full text-left px-3 py-2 hover:bg-glass-hover transition-colors"
+                    >
+                      <div className="font-medium">{user.full_name || user.email}</div>
+                      <div className="text-xs text-foreground-muted">{user.email}</div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className="flex justify-between items-center">
+              <div className="flex items-center gap-2">
+                <VoiceInput
+                  value={newNote}
+                  onChange={setNewNote}
+                  disabled={createNoteMutation.isPending}
+                />
+                <span className="text-xs text-gray-500 dark:text-gray-400">
+                  Dictate or type @ to mention someone
+                </span>
+              </div>
+              <div className="flex gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={onClose}
+                  className="h-9 px-4 text-sm font-medium rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={!newNote.trim() || createNoteMutation.isPending}
+                  className="h-9 px-4 text-sm font-medium rounded-lg bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  <Send className="w-4 h-4 mr-2" />
+                  {createNoteMutation.isPending ? 'Sending...' : (replyingTo ? 'Reply' : 'Add Note')}
+                </Button>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div className="flex-1 overflow-y-auto space-y-4 pr-2" style={{maxHeight: '40vh'}}>
           {isLoading ? (
             <div className="text-center py-8 text-muted-foreground">Loading notes...</div>
           ) : mainNotes.length === 0 ? (
@@ -683,84 +756,6 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
               </div>
             ))
           )}
-        </div>
-
-        {/* New Note Form */}
-        <div className="border-t border-gray-200 dark:border-gray-800 pt-6 mt-6">
-          {replyingTo && (
-            <div className="mb-3 flex items-center justify-between bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-2 text-sm">
-              <span className="text-gray-700 dark:text-gray-300">Replying to {replyingTo.created_by}</span>
-              <button
-                onClick={() => setReplyingTo(null)}
-                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-          )}
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="relative">
-              <label className="block text-[14px] font-medium text-gray-700 dark:text-gray-300 mb-[6px]">
-                Add Note
-              </label>
-              <Textarea
-                ref={textareaRef}
-                value={newNote}
-                onChange={handleTextareaChange}
-                placeholder="Type your note here... (type @ to mention someone)"
-                className="min-h-[160px] bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-[14px] text-gray-900 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
-              />
-              
-              {/* Mention Dropdown */}
-              {showMentionDropdown && filteredUsers.length > 0 && (
-                <div className="absolute bottom-full left-0 mb-1 w-64 neomorph-flat max-h-48 overflow-y-auto z-50">
-                  {filteredUsers.map(user => (
-                    <button
-                      key={user.id}
-                      type="button"
-                      onClick={() => insertMention(user)}
-                      className="w-full text-left px-3 py-2 hover:bg-glass-hover transition-colors"
-                    >
-                      <div className="font-medium">{user.full_name || user.email}</div>
-                      <div className="text-xs text-foreground-muted">{user.email}</div>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-            <div className="flex justify-between items-center">
-              <div className="flex items-center gap-2">
-                <VoiceInput
-                  value={newNote}
-                  onChange={setNewNote}
-                  disabled={createNoteMutation.isPending}
-                />
-                <span className="text-xs text-gray-500 dark:text-gray-400">
-                  Dictate or type @ to mention someone
-                </span>
-              </div>
-            </div>
-
-            {/* Action buttons — inside the form so type="submit" triggers handleSubmit */}
-            <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-800">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={onClose}
-                className="h-9 px-4 text-sm font-medium rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                disabled={!newNote.trim() || createNoteMutation.isPending}
-                className="h-9 px-4 text-sm font-medium rounded-lg bg-blue-600 hover:bg-blue-700 text-white"
-              >
-                <Send className="w-4 h-4 mr-2" />
-                {createNoteMutation.isPending ? 'Sending...' : (replyingTo ? 'Reply' : 'Add Note')}
-              </Button>
-            </div>
-          </form>
         </div>
         </>
         )}
