@@ -182,7 +182,10 @@ export default function ChaserEmailSettings() {
 
       <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
         <p className="text-xs text-blue-900 dark:text-blue-300">
-          <strong>How it works:</strong> Claims stay in a status for N days → email sent automatically. Runs once daily. Use "Run Now" to trigger manually.
+          <strong>How it works:</strong> For bodyshop chaser rules, the system checks each claim with an allocated bodyshop.
+          If no incoming update has been logged for <strong>48 hours</strong>, the first chaser email is sent automatically.
+          Further chasers are sent every <strong>24 hours</strong> until the bodyshop logs an update (via the link in the email or manually).
+          Each chaser is logged in the claim's update history as an Outgoing Bodyshop Communication. Use the toggle to turn chasers off.
         </p>
       </div>
 

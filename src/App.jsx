@@ -22,6 +22,7 @@ const RepairerDirectory = lazy(() => import('@/pages/RepairerDirectory'));
 const InsurerDirectory = lazy(() => import('@/pages/InsurerDirectory'));
 const IndemnityForm = lazy(() => import('@/pages/IndemnityForm'));
 const RepairPreferenceForm = lazy(() => import('@/pages/RepairPreferenceForm'));
+const BodyshopUpdateForm = lazy(() => import('@/pages/BodyshopUpdateForm'));
 const StatusMigrationReview = lazy(() => import('@/pages/StatusMigrationReview'));
 
 const { Pages, Layout, mainPage } = pagesConfig;
@@ -32,7 +33,7 @@ const LayoutWrapper = ({ children, currentPageName }) => Layout ?
   <Layout currentPageName={currentPageName}>{children}</Layout>
   : <>{children}</>;
 
-const PUBLIC_PATHS = ['/backorder-form', '/parts-request', '/client-claim-form', '/indemnity-form', '/repair-preference-form'];
+const PUBLIC_PATHS = ['/backorder-form', '/parts-request', '/client-claim-form', '/indemnity-form', '/repair-preference-form', '/bodyshop-update'];
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, isAuthenticated, navigateToLogin } = useAuth();
@@ -49,6 +50,7 @@ const AuthenticatedApp = () => {
           <Route path="/client-claim-form" element={<ClientClaimForm />} />
           <Route path="/indemnity-form" element={<IndemnityForm />} />
           <Route path="/repair-preference-form" element={<RepairPreferenceForm />} />
+          <Route path="/bodyshop-update" element={<BodyshopUpdateForm />} />
         </Routes>
       </Suspense>
     );
@@ -144,6 +146,7 @@ function PublicApp() {
         <Route path="/client-claim-form" element={<ClientClaimForm />} />
         <Route path="/indemnity-form" element={<IndemnityForm />} />
         <Route path="/repair-preference-form" element={<RepairPreferenceForm />} />
+        <Route path="/bodyshop-update" element={<BodyshopUpdateForm />} />
       </Routes>
     </Suspense>
   );
