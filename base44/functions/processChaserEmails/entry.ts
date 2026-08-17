@@ -75,13 +75,47 @@ async function sendViaSendGrid(to: string, cc: string, subject: string, textBody
   const fromEmail = 'info@rcmautomotive.co.uk';
   if (!apiKey) throw new Error('SENDGRID_API_KEY secret is not set');
 
-  const htmlBody = textBody
+  const logoUrl = 'https://media.base44.com/images/public/68ee39fb8915b1b539e13c59/b2cb057e2_RCMAutomotiveLogoGreenAutomotivewithHLights.jpg';
+  const innerHtml = textBody
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     // Linkify bare URLs (after HTML-escaping so the href stays safe)
     .replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" style="color:#2563eb;text-decoration:underline;">click here</a>')
     .replace(/\n/g, '<br>');
+
+  const htmlBody = `<!DOCTYPE html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background-color:#f4f5fa;font-family:Inter,Arial,sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f5fa;padding:32px 16px;">
+    <tr><td align="center">
+      <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background-color:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+        <!-- Header -->
+        <tr>
+          <td style="background-color:#131d47;padding:24px 32px;text-align:center;">
+            <img src="${logoUrl}" alt="RCM Automotive" style="max-height:48px;width:auto;display:inline-block;" />
+          </td>
+        </tr>
+        <!-- Body -->
+        <tr>
+          <td style="padding:32px;color:#1B2A3B;font-size:15px;line-height:1.6;">
+            ${innerHtml}
+          </td>
+        </tr>
+        <!-- Footer -->
+        <tr>
+          <td style="background-color:#131d47;padding:20px 32px;text-align:center;">
+            <p style="margin:0 0 4px;color:#ffffff;font-size:14px;font-weight:600;">RCM Automotive</p>
+            <p style="margin:0;color:#9aa7c7;font-size:12px;line-height:1.5;">
+              info@rcmautomotive.co.uk &nbsp;|&nbsp; www.rcmautomotive.co.uk
+            </p>
+            <p style="margin:8px 0 0;color:#5d6b8c;font-size:11px;">This is an automated message — please do not reply directly.</p>
+          </td>
+        </tr>
+      </table>
+    </td></tr>
+  </table>
+</body></html>`;
 
   const personalization: any = { to: [{ email: to }] };
   if (cc) {
