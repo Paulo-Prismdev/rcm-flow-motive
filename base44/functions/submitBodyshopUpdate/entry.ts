@@ -13,7 +13,7 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { token, description, next_steps } = body;
+    const { token, description, next_steps, ecd } = body;
     if (!token) {
       return Response.json({ error: 'Missing token' }, { status: 400 });
     }
@@ -31,13 +31,24 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Claim not found' }, { status: 404 });
     }
 
+    // Update the ECD on the claim if a value was provided
+    if (ecd && ecd.trim()) {
+      await base44.asServiceRole.entities.Claim.update(claimId, { ecd: ecd.trim() });
+    }
+
+    // Build the update description, noting the ECD if it changed
+    let updateDescription = description.trim();
+    if (ecd && ecd.trim() && ecd.trim() !== (claim.ecd || '')) {
+      updateDescription += `\n\nUpdated ECD: ${ecd.trim()}`;
+    }
+
     // Create the incoming update — this resets the 48h chaser timer
     await base44.asServiceRole.entities.ClaimUpdate.create({
       claim_id: claimId,
       update_type: 'Bodyshop Communication',
       direction: 'Incoming',
       platform: 'E-Mail',
-      description: description.trim(),
+      description: updateDescription,
       next_steps: (next_steps || '').trim()
     });
 

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Check, Loader, AlertTriangle, Car, Building2 } from 'lucide-react';
+import { Check, Loader, AlertTriangle, Car } from 'lucide-react';
 
 export default function BodyshopUpdateForm() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -12,6 +12,7 @@ export default function BodyshopUpdateForm() {
   const [claim, setClaim] = useState(null);
   const [description, setDescription] = useState('');
   const [nextSteps, setNextSteps] = useState('');
+  const [ecd, setEcd] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
@@ -37,6 +38,7 @@ export default function BodyshopUpdateForm() {
         });
         if (res.data?.success) {
           setClaim(res.data.claim);
+          setEcd(res.data.claim.ecd || '');
         } else {
           setLinkValid(false);
         }
@@ -60,7 +62,8 @@ export default function BodyshopUpdateForm() {
         _form_secret: formToken,
         token,
         description,
-        next_steps: nextSteps
+        next_steps: nextSteps,
+        ecd
       });
       if (result.data?.success) {
         setSubmitted(true);
@@ -126,8 +129,12 @@ export default function BodyshopUpdateForm() {
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="text-center mb-6">
-          <div className="w-14 h-14 bg-[#131d47] rounded-2xl flex items-center justify-center mx-auto mb-3">
-            <Building2 className="w-7 h-7 text-white" />
+          <div className="flex items-center justify-center mb-3">
+            <img
+              src="https://media.base44.com/images/public/68ee39fb8915b1b539e13c59/b2cb057e2_RCMAutomotiveLogoGreenAutomotivewithHLights.jpg"
+              alt="RCM Automotive"
+              className="max-h-16 w-auto object-contain"
+            />
           </div>
           <h1 className="text-2xl font-bold text-gray-900">Repair Update Form</h1>
           <p className="text-sm text-gray-500 mt-1">Please provide an update on the repair status</p>
@@ -170,6 +177,18 @@ export default function BodyshopUpdateForm() {
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Please provide a detailed update on the current repair status..."
               className={`${inputCls} h-32 resize-y`}
+            />
+          </div>
+
+          <div>
+            <label className={labelCls}>
+              Estimated Completion Date {ecd ? '(update if changed)' : '(please enter)'}
+            </label>
+            <input
+              type="date"
+              value={ecd}
+              onChange={(e) => setEcd(e.target.value)}
+              className={inputCls}
             />
           </div>
 

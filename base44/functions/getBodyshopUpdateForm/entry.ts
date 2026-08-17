@@ -36,7 +36,8 @@ Deno.serve(async (req) => {
         reg: claim.reg || '',
         make_model: claim.make_model || '',
         bodyshop: claim.bodyshop || '',
-        client_name: claim.client_name || ''
+        client_name: claim.client_name || '',
+        ecd: claim.ecd || ''
       }
     });
   } catch (error: any) {
