@@ -79,6 +79,8 @@ async function sendViaSendGrid(to: string, cc: string, subject: string, textBody
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
+    // Linkify bare URLs (after HTML-escaping so the href stays safe)
+    .replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" style="color:#2563eb;text-decoration:underline;">$1</a>')
     .replace(/\n/g, '<br>');
 
   const personalization: any = { to: [{ email: to }] };
