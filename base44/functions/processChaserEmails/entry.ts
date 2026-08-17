@@ -1,7 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 
 // ── Token helpers (stateless, HMAC-style) ──
-// Token = base64(claimId) + "." + first 24 hex chars of SHA-256(claimId:secret)
 async function generateBodyshopToken(claimId: string, secret: string): Promise<string> {
   const encoder = new TextEncoder();
   const data = encoder.encode(claimId + ':' + secret);
@@ -14,39 +13,79 @@ async function generateBodyshopToken(claimId: string, secret: string): Promise<s
 // ── Template placeholder replacement ──
 function replacePlaceholders(template: string, claim: any): string {
   if (!template) return '';
-  return template.replace(/\{\{claim\.(\w+)\}\}/g, (_match, fieldName) => claim[fieldName] || '');
+  return template.replace(/\{\{claim\.(\w+)\}\}/g, (_match, fieldName) => claim[fieldName] ?? '');
 }
 
-// ── Closed-claim check (don't chase closed/invoiced/completed claims) ──
-// These job statuses mean the vehicle is gone / repair done — no point chasing.
-const CLOSED_JOB_STATUSES = [
-  'Cancelled',
-  'Returned to Customer',
-  'Hand Over',
-  'Completed',
-  'Complete',
-  'Collection Only',
-  'Vehicle Collected'
-];
-
-function isClaimClosed(claim: any): boolean {
-  if (CLOSED_JOB_STATUSES.includes(claim.job_status)) return true;
+// ── Closed-claim check ──
+// Update tracking is closed once invoiced or cancelled. Such claims are never chased.
+function isUpdateTrackingClosed(claim: any): boolean {
+  if (!claim) return true;
+  if (claim.job_status === 'Cancelled') return true;
   return ['Invoiced', 'Invoice Paid'].includes(claim.invoice_status);
 }
 
+// ── 48-hour timer computations ──
+// Returns how many hours the timer has been overdue (Red), or null if not overdue.
+function getCaseOverdueHours(claim: any): number | null {
+  // Snoozed (override active & not expired) → Blue, not overdue
+  if (claim.override_active) {
+    const expiry = claim.override_expiry_at ? new Date(claim.override_expiry_at) : null;
+    if (!expiry || expiry > new Date()) return null;
+  }
+  if (isUpdateTrackingClosed(claim)) return null; // Gray
+  const nextDue = claim.next_update_due_at ? new Date(claim.next_update_due_at) : null;
+  if (!nextDue) return null;
+  const hours = (Date.now() - nextDue.getTime()) / (1000 * 60 * 60);
+  return hours > 0 ? hours : null;
+}
+
+function getClientOverdueHours(claim: any): number | null {
+  if (claim.client_comm_override_active) {
+    const expiry = claim.client_comm_override_expiry_at ? new Date(claim.client_comm_override_expiry_at) : null;
+    if (!expiry || expiry > new Date()) return null;
+  }
+  if (isUpdateTrackingClosed(claim)) return null;
+  const nextDue = claim.next_client_comm_due_at ? new Date(claim.next_client_comm_due_at) : null;
+  if (!nextDue) return null;
+  const hours = (Date.now() - nextDue.getTime()) / (1000 * 60 * 60);
+  return hours > 0 ? hours : null;
+}
+
+// ── Recipient email resolution ──
+function getRecipientEmail(claim: any, rule: any): string | null {
+  switch (rule.recipient_type) {
+    case 'Bodyshop': return claim.bodyshop_email || null;
+    case 'Client': return claim.client_email || null;
+    case 'Referrer': return claim.referrer_email || null;
+    case 'Custom Email': return rule.custom_email || null;
+    default: return null; // Insurer / File Handler — no email stored on the claim
+  }
+}
+
+const FREQUENCY_HOURS: Record<string, number> = {
+  'Once': Infinity,
+  'Daily': 24,
+  'Every 3 Days': 72,
+  'Weekly': 168,
+};
+
 // ── Send email via SendGrid API ──
-async function sendViaSendGrid(to: string, subject: string, textBody: string): Promise<void> {
+async function sendViaSendGrid(to: string, cc: string, subject: string, textBody: string): Promise<void> {
   const apiKey = Deno.env.get('SENDGRID_API_KEY');
   const fromEmail = 'info@rcmautomotive.co.uk';
-
   if (!apiKey) throw new Error('SENDGRID_API_KEY secret is not set');
 
-  // Convert plain-text body to simple HTML
   const htmlBody = textBody
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/\n/g, '<br>');
+
+  const personalization: any = { to: [{ email: to }] };
+  if (cc) {
+    const ccList = cc.split(',').map((e) => e.trim()).filter(Boolean).map((e) => ({ email: e }));
+    if (ccList.length) personalization.cc = ccList;
+  }
 
   const res = await fetch('https://api.sendgrid.com/v3/mail/send', {
     method: 'POST',
@@ -55,7 +94,7 @@ async function sendViaSendGrid(to: string, subject: string, textBody: string): P
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      personalizations: [{ to: [{ email: to }] }],
+      personalizations: [personalization],
       from: { email: fromEmail, name: 'RCM Flow-motive' },
       subject,
       content: [{ type: 'text/plain', value: textBody }, { type: 'text/html', value: htmlBody }]
@@ -95,25 +134,19 @@ Deno.serve(async (req) => {
       // No user context — automated/scheduled call, proceed
     }
 
-    // Find the active bodyshop chaser rule (use first active rule with recipient_type = Bodyshop)
-    const rules = await base44.asServiceRole.entities.ChaserEmailRule.filter(
-      { is_active: true, recipient_type: 'Bodyshop' },
-      'sort_order'
-    );
-
+    // Fetch all active rules (sorted by sort_order)
+    const rules = await base44.asServiceRole.entities.ChaserEmailRule.filter({ is_active: true }, 'sort_order');
     if (!rules || rules.length === 0) {
       return Response.json({
         success: true,
-        message: 'No active bodyshop chaser rule found',
+        message: 'No active chaser rules found',
         claims_evaluated: 0,
         emails_sent: 0,
         emails_skipped: 0
       });
     }
 
-    const rule = rules[0];
-
-    // Fetch all non-archived claims that have a bodyshop allocated
+    // Fetch all non-archived claims once (reused across rules)
     const claims = await base44.asServiceRole.entities.Claim.filter({ archived: false });
 
     let totalProcessed = 0;
@@ -122,170 +155,175 @@ Deno.serve(async (req) => {
     let totalErrors = 0;
     let firstError = '';
 
-    for (const claim of claims) {
-      totalProcessed++;
+    for (const rule of rules) {
+      for (const claim of claims) {
+        totalProcessed++;
+        try {
+          // Closed claims — never chase
+          if (isUpdateTrackingClosed(claim)) { totalSkipped++; continue; }
 
-      try {
-        // Skip if no bodyshop email to send to
-        if (!claim.bodyshop_email) {
-          totalSkipped++;
-          continue;
-        }
+          // Recipient email must be available
+          const recipientEmail = getRecipientEmail(claim, rule);
+          if (!recipientEmail) { totalSkipped++; continue; }
 
-        // Skip closed claims
-        if (isClaimClosed(claim)) {
-          totalSkipped++;
-          continue;
-        }
+          // Journey status filter (empty = all statuses eligible)
+          if (rule.trigger_journey_statuses && rule.trigger_journey_statuses.length > 0) {
+            if (!rule.trigger_journey_statuses.includes(claim.journey_status)) { totalSkipped++; continue; }
+          }
 
-        // ── Find the last INCOMING Bodyshop Communication update ──
-        const incomingUpdates = await base44.asServiceRole.entities.ClaimUpdate.filter(
-          { claim_id: claim.id, update_type: 'Bodyshop Communication', direction: 'Incoming' },
-          '-created_date',
-          1
-        );
+          // ── Timer check (fully configurable per rule) ──
+          const threshold = rule.hours_overdue_before_send || 0;
+          const caseHours = getCaseOverdueHours(claim);
+          const clientHours = getClientOverdueHours(claim);
+          const caseOverdue = caseHours != null && caseHours >= threshold;
+          const clientOverdue = clientHours != null && clientHours >= threshold;
 
-        // Reference time = last incoming update, or bodyshop instruction date, or claim creation
-        let referenceTime: Date;
-        if (incomingUpdates && incomingUpdates.length > 0) {
-          referenceTime = new Date(incomingUpdates[0].created_date);
-        } else if (claim.bs_instructed) {
-          referenceTime = new Date(claim.bs_instructed);
-        } else {
-          referenceTime = new Date(claim.created_date);
-        }
+          let triggered = false;
+          let referenceForCounting: Date | null = null;
+          const refs: Date[] = [];
+          if (caseOverdue && claim.last_updated_at) refs.push(new Date(claim.last_updated_at));
+          if (clientOverdue && claim.last_client_comm_at) refs.push(new Date(claim.last_client_comm_at));
 
-        const hoursSinceReference = (Date.now() - referenceTime.getTime()) / (1000 * 60 * 60);
+          switch (rule.trigger_timer) {
+            case 'Case 48hrs':
+              triggered = caseOverdue;
+              referenceForCounting = claim.last_updated_at ? new Date(claim.last_updated_at) : null;
+              break;
+            case 'Client 48hrs':
+              triggered = clientOverdue;
+              referenceForCounting = claim.last_client_comm_at ? new Date(claim.last_client_comm_at) : null;
+              break;
+            case 'Either':
+              triggered = caseOverdue || clientOverdue;
+              referenceForCounting = refs.length ? new Date(Math.max(...refs.map(r => r.getTime()))) : null;
+              break;
+            case 'Both':
+              triggered = caseOverdue && clientOverdue;
+              referenceForCounting = refs.length ? new Date(Math.max(...refs.map(r => r.getTime()))) : null;
+              break;
+            default:
+              triggered = false;
+          }
+          if (!triggered) { totalSkipped++; continue; }
 
-        // If less than 48 hours since last incoming update / instruction → on track, skip
-        if (hoursSinceReference < 48) {
-          totalSkipped++;
-          continue;
-        }
+          const hoursOverdue = Math.max(caseHours ?? 0, clientHours ?? 0);
 
-        // ── Find chaser logs sent since the reference time ──
-        const allChaserLogs = await base44.asServiceRole.entities.ChaserEmailLog.filter(
-          { claim_id: claim.id, rule_id: rule.id, status: 'Sent' },
-          '-sent_at',
-          20
-        );
+          // ── Chaser logs since the reference (current overdue episode) ──
+          const allLogs = await base44.asServiceRole.entities.ChaserEmailLog.filter(
+            { claim_id: claim.id, rule_id: rule.id, status: 'Sent' },
+            '-sent_at',
+            50
+          );
+          const logsSinceRef = referenceForCounting
+            ? (allLogs || []).filter((l) => new Date(l.sent_at) > referenceForCounting)
+            : (allLogs || []);
 
-        const logsSinceReference = (allChaserLogs || []).filter(
-          (log) => new Date(log.sent_at) > referenceTime
-        );
+          const maxSends = rule.max_sends || 3;
+          if (logsSinceRef.length >= maxSends) { totalSkipped++; continue; }
 
-        // Check max sends
-        const maxSends = rule.max_sends || 5;
-        if (logsSinceReference.length >= maxSends) {
-          totalSkipped++;
-          continue;
-        }
+          // Frequency gap between repeat chasers
+          const freqHours = FREQUENCY_HOURS[rule.send_frequency] ?? 24;
+          if (logsSinceRef.length > 0) {
+            const lastSent = new Date(logsSinceRef[0].sent_at);
+            if ((Date.now() - lastSent.getTime()) / (1000 * 60 * 60) < freqHours) { totalSkipped++; continue; }
+          }
 
-        // Determine if we should send now:
-        // - No chaser sent since reference → send first chaser
-        // - Last chaser > 24h ago → send another
-        if (logsSinceReference.length > 0) {
-          const lastChaserTime = new Date(logsSinceReference[0].sent_at);
-          const hoursSinceLastChaser = (Date.now() - lastChaserTime.getTime()) / (1000 * 60 * 60);
-          if (hoursSinceLastChaser < 24) {
-            totalSkipped++;
+          // ── Build email content ──
+          const emailSubject = replacePlaceholders(rule.email_subject_template, claim);
+          let emailBody = replacePlaceholders(rule.email_body_template, claim);
+
+          // Append the secure bodyshop update link for bodyshop recipients
+          if (rule.recipient_type === 'Bodyshop' && formSecret) {
+            const token = await generateBodyshopToken(claim.id, formSecret);
+            const updateLink = `${baseUrl}/bodyshop-update?token=${token}`;
+            emailBody += `\n\n---\n\nYou can log your update directly via this link:\n${updateLink}\n\nAlternatively, you can reply to this email with your update.\n\nKind regards,\nRCM Flow-motive Team`;
+          }
+
+          // ── Dry-run: record who would be emailed, skip actual send ──
+          if (dryRun) {
+            preview.push({
+              rule_name: rule.rule_name,
+              job_number: claim.job_number,
+              reg: claim.reg,
+              client_name: claim.client_name,
+              journey_status: claim.journey_status,
+              recipient_type: rule.recipient_type,
+              recipient_email: recipientEmail,
+              bodyshop: claim.bodyshop,
+              trigger_timer: rule.trigger_timer,
+              hours_overdue: Math.round(hoursOverdue),
+              email_subject: emailSubject
+            });
+            totalSent++;
             continue;
           }
-        }
 
-        // ── Generate the bodyshop update link ──
-        const token = await generateBodyshopToken(claim.id, formSecret);
-        const updateLink = `${baseUrl}/bodyshop-update?token=${token}`;
+          // ── Send the email via SendGrid ──
+          try {
+            await sendViaSendGrid(recipientEmail, rule.cc_emails || '', emailSubject, emailBody);
+            console.log(`✅ Sent chaser "${rule.rule_name}" for claim ${claim.job_number} to ${recipientEmail}`);
 
-        // ── Build email content ──
-        const emailSubject = replacePlaceholders(rule.email_subject_template, claim);
-        let emailBody = replacePlaceholders(rule.email_body_template, claim);
+            await base44.asServiceRole.entities.ChaserEmailLog.create({
+              claim_id: claim.id,
+              rule_id: rule.id,
+              rule_name: rule.rule_name,
+              recipient_email: recipientEmail,
+              recipient_type: rule.recipient_type,
+              email_subject: emailSubject,
+              email_body: emailBody,
+              sent_at: new Date().toISOString(),
+              status: 'Sent',
+              claim_status_at_send: claim.journey_status || claim.job_status,
+              days_in_status_at_send: Math.round(hoursOverdue)
+            });
 
-        // Append the update link
-        emailBody += `\n\n---\n\nYou can log your update directly via this link:\n${updateLink}\n\nAlternatively, you can reply to this email with your update.\n\nKind regards,\nRCM Flow-motive Team`;
+            // Log an Outgoing Bodyshop Communication on the claim for bodyshop chasers
+            if (rule.recipient_type === 'Bodyshop') {
+              await base44.asServiceRole.entities.ClaimUpdate.create({
+                claim_id: claim.id,
+                update_type: 'Bodyshop Communication',
+                direction: 'Outgoing',
+                platform: 'E-Mail',
+                description: `[Automated Chaser: ${rule.rule_name}] Sent to ${recipientEmail}`,
+                next_steps: 'Awaiting bodyshop response'
+              });
+            }
 
-        // ── Dry-run: record who would be emailed, skip actual send ──
-        if (dryRun) {
-          preview.push({
-            job_number: claim.job_number,
-            reg: claim.reg,
-            client_name: claim.client_name,
-            bodyshop: claim.bodyshop,
-            bodyshop_email: claim.bodyshop_email,
-            job_status: claim.job_status,
-            days_since_reference: Math.floor(hoursSinceReference / 24),
-            email_subject: emailSubject
-          });
-          totalSent++;
-          continue;
-        }
+            totalSent++;
+          } catch (emailError: any) {
+            const errMsg = emailError?.message || String(emailError);
+            console.error(`❌ Failed to send chaser for claim ${claim.job_number}:`, errMsg);
+            if (!firstError) firstError = errMsg;
+            totalErrors++;
 
-        // ── Send the email via SendGrid ──
-        try {
-          await sendViaSendGrid(claim.bodyshop_email, emailSubject, emailBody);
-
-          console.log(`✅ Sent chaser for claim ${claim.job_number} to ${claim.bodyshop_email}`);
-
-          // Log to ChaserEmailLog
-          await base44.asServiceRole.entities.ChaserEmailLog.create({
-            claim_id: claim.id,
-            rule_id: rule.id,
-            rule_name: rule.rule_name,
-            recipient_email: claim.bodyshop_email,
-            recipient_type: 'Bodyshop',
-            email_subject: emailSubject,
-            email_body: emailBody,
-            sent_at: new Date().toISOString(),
-            status: 'Sent',
-            claim_status_at_send: claim.job_status,
-            days_in_status_at_send: Math.floor(hoursSinceReference / 24)
-          });
-
-          // Also create a ClaimUpdate for tracking (Outgoing Bodyshop Communication)
-          await base44.asServiceRole.entities.ClaimUpdate.create({
-            claim_id: claim.id,
-            update_type: 'Bodyshop Communication',
-            direction: 'Outgoing',
-            platform: 'E-Mail',
-            description: `[Automated Chaser] Sent to ${claim.bodyshop_email}`,
-            next_steps: 'Awaiting bodyshop response'
-          });
-
-          totalSent++;
-        } catch (emailError: any) {
-          const errMsg = emailError?.message || String(emailError);
-          console.error(`❌ Failed to send chaser for claim ${claim.job_number}:`, errMsg);
+            await base44.asServiceRole.entities.ChaserEmailLog.create({
+              claim_id: claim.id,
+              rule_id: rule.id,
+              rule_name: rule.rule_name,
+              recipient_email: recipientEmail,
+              recipient_type: rule.recipient_type,
+              email_subject: emailSubject,
+              email_body: emailBody,
+              sent_at: new Date().toISOString(),
+              status: 'Failed',
+              error_message: errMsg,
+              claim_status_at_send: claim.journey_status || claim.job_status,
+              days_in_status_at_send: Math.round(hoursOverdue)
+            });
+          }
+        } catch (claimError: any) {
+          const errMsg = claimError?.message || String(claimError);
+          console.error(`Error processing claim ${claim.job_number}:`, errMsg);
           if (!firstError) firstError = errMsg;
           totalErrors++;
-
-          await base44.asServiceRole.entities.ChaserEmailLog.create({
-            claim_id: claim.id,
-            rule_id: rule.id,
-            rule_name: rule.rule_name,
-            recipient_email: claim.bodyshop_email,
-            recipient_type: 'Bodyshop',
-            email_subject: emailSubject,
-            email_body: emailBody,
-            sent_at: new Date().toISOString(),
-            status: 'Failed',
-            error_message: errMsg,
-            claim_status_at_send: claim.job_status,
-            days_in_status_at_send: Math.floor(hoursSinceReference / 24)
-          });
         }
-      } catch (claimError: any) {
-        const errMsg = claimError?.message || String(claimError);
-        console.error(`Error processing claim ${claim.job_number}:`, errMsg);
-        if (!firstError) firstError = errMsg;
-        totalErrors++;
       }
     }
 
     return Response.json({
       success: true,
-      message: dryRun ? 'Dry run complete — no emails sent' : 'Bodyshop chaser email processing complete',
+      message: dryRun ? 'Dry run complete — no emails sent' : 'Chaser email processing complete',
       dry_run: dryRun,
-      rule_used: rule.rule_name,
       claims_evaluated: totalProcessed,
       emails_sent: totalSent,
       emails_skipped: totalSkipped,

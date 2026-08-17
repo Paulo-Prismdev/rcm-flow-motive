@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Plus, Edit, Trash2, Play, History, Power, PowerOff, Eye, X } from 'lucide-react';
+import { JOURNEY_STATUSES } from '@/components/shared/claimStatusV2';
 
 export default function ChaserEmailSettings() {
   const [showForm, setShowForm] = useState(false);
@@ -62,7 +63,7 @@ export default function ChaserEmailSettings() {
     setIsRunning(true);
     try {
       const result = await base44.functions.invoke('processChaserEmails');
-      alert(`Chaser emails processed!\n\nSent: ${result.data.emails_sent}\nSkipped: ${result.data.emails_skipped}\nFailed: ${result.data.emails_failed}`);
+      alert(`Chaser emails processed!\n\nSent: ${result.data.emails_sent}\nSkipped: ${result.data.emails_skipped}\nFailed: ${result.data.errors}`);
       queryClient.invalidateQueries({ queryKey: ['chaserEmailLogs'] });
     } catch (error) {
       alert(`Error: ${error.message}`);
@@ -205,10 +206,12 @@ export default function ChaserEmailSettings() {
 
       <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
         <p className="text-xs text-blue-900 dark:text-blue-300">
-          <strong>How it works:</strong> For bodyshop chaser rules, the system checks each claim with an allocated bodyshop.
-          If no incoming update has been logged for <strong>48 hours</strong>, the first chaser email is sent automatically.
-          Further chasers are sent every <strong>24 hours</strong> until the bodyshop logs an update (via the link in the email or manually).
-          Each chaser is logged in the claim's update history as an Outgoing Bodyshop Communication. Use the toggle to turn chasers off.
+          <strong>How it works:</strong> Each rule is fully configurable — choose which Journey Statuses to chase, which 48-hour
+          update timer (Case 48hrs / Client 48hrs / Either / Both) must be overdue, and how many hours after the timer goes Red to
+          wait before sending. The first chaser sends when the timer is overdue by your chosen threshold; repeat chasers follow the
+          Send Frequency up to the Max Sends limit. Bodyshop chasers include a secure update link and are logged in the claim's
+          update history. Closed/invoiced claims are always skipped. Use <strong>Preview</strong> to see exactly who would be
+          emailed without sending anything.
         </p>
       </div>
 
@@ -236,10 +239,10 @@ export default function ChaserEmailSettings() {
                     
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs mb-2">
                       <div>
-                        <span className="text-gray-500 dark:text-gray-400">Trigger:</span> <span className="font-medium text-gray-900 dark:text-white">{rule.trigger_status}</span>
+                        <span className="text-gray-500 dark:text-gray-400">Timer:</span> <span className="font-medium text-gray-900 dark:text-white">{rule.trigger_timer || '—'}</span>
                       </div>
                       <div>
-                        <span className="text-gray-500 dark:text-gray-400">After:</span> <span className="font-medium text-gray-900 dark:text-white">{rule.days_in_status}d</span>
+                        <span className="text-gray-500 dark:text-gray-400">Wait:</span> <span className="font-medium text-gray-900 dark:text-white">{rule.hours_overdue_before_send || 0}h overdue</span>
                       </div>
                       <div>
                         <span className="text-gray-500 dark:text-gray-400">To:</span> <span className="font-medium text-gray-900 dark:text-white">{rule.recipient_type}</span>
@@ -248,6 +251,13 @@ export default function ChaserEmailSettings() {
                         <span className="text-gray-500 dark:text-gray-400">Freq:</span> <span className="font-medium text-gray-900 dark:text-white">{rule.send_frequency}</span>
                       </div>
                     </div>
+                    {rule.trigger_journey_statuses && rule.trigger_journey_statuses.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mb-2">
+                        {rule.trigger_journey_statuses.map((s) => (
+                          <span key={s} className="text-[10px] px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300">{s}</span>
+                        ))}
+                      </div>
+                    )}
 
                     <div className="text-xs text-gray-600 dark:text-gray-400 line-clamp-1">
                       Subject: {rule.email_subject_template}
@@ -309,12 +319,13 @@ export default function ChaserEmailSettings() {
                           <span className="text-sm font-semibold text-gray-900 dark:text-white">{p.job_number}</span>
                           <span className="text-xs text-gray-500 ml-2">{p.reg}</span>
                         </div>
-                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 flex-shrink-0">{p.job_status}</span>
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 flex-shrink-0">{p.journey_status || p.job_status}</span>
                       </div>
                       <div className="text-xs text-gray-600 dark:text-gray-400">
-                        <div><span className="text-gray-500">To:</span> {p.bodyshop} &lt;{p.bodyshop_email}&gt;</div>
+                        <div><span className="text-gray-500">Rule:</span> {p.rule_name}</div>
+                        <div><span className="text-gray-500">To:</span> {p.recipient_type} &lt;{p.recipient_email}&gt;</div>
                         <div><span className="text-gray-500">Client:</span> {p.client_name || '—'}</div>
-                        <div><span className="text-gray-500">Last contact:</span> {p.days_since_reference} day(s) ago</div>
+                        <div><span className="text-gray-500">Timer:</span> {p.trigger_timer} · {p.hours_overdue}h overdue</div>
                         <div className="truncate text-gray-400 mt-1 italic">{p.email_subject}</div>
                       </div>
                     </div>
@@ -340,32 +351,29 @@ function ChaserEmailRuleForm({ rule, onSubmit, onCancel }) {
   const [formData, setFormData] = useState(rule || {
     rule_name: '',
     is_active: true,
-    trigger_status: 'Awaiting Authority',
-    days_in_status: 3,
-    recipient_type: 'Client',
+    recipient_type: 'Bodyshop',
     custom_email: '',
+    trigger_journey_statuses: [],
+    trigger_timer: 'Case 48hrs',
+    hours_overdue_before_send: 0,
     email_subject_template: '',
     email_body_template: '',
-    send_frequency: 'Once',
+    send_frequency: 'Daily',
     max_sends: 3,
     cc_emails: '',
     sort_order: 0,
   });
 
-  const { data: customStatuses = [] } = useQuery({
-    queryKey: ['ClaimStatusConfig'],
-    queryFn: () => base44.entities.ClaimStatusConfig.list('sort_order'),
-  });
+  const journeyStatuses = JOURNEY_STATUSES.map((s) => s.name);
 
-  const availableStatuses = React.useMemo(() => {
-    const active = customStatuses
-      .filter(s => s.is_active)
-      .map(s => s.status_name);
-    if (!active.includes('New')) {
-      return ['New', ...active];
+  const toggleJourneyStatus = (status) => {
+    const current = formData.trigger_journey_statuses || [];
+    if (current.includes(status)) {
+      setFormData({ ...formData, trigger_journey_statuses: current.filter((s) => s !== status) });
+    } else {
+      setFormData({ ...formData, trigger_journey_statuses: [...current, status] });
     }
-    return active;
-  }, [customStatuses]);
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -410,33 +418,58 @@ function ChaserEmailRuleForm({ rule, onSubmit, onCancel }) {
               />
             </div>
 
+            <div>
+              <label className="block text-sm font-medium mb-2">Trigger Journey Statuses</label>
+              <p className="text-xs text-gray-500 mb-2">Only chase claims in these Journey Statuses. Leave empty to chase all.</p>
+              <div className="flex flex-wrap gap-2 neomorph-inset p-3">
+                {journeyStatuses.map((status) => {
+                  const selected = (formData.trigger_journey_statuses || []).includes(status);
+                  return (
+                    <button
+                      key={status}
+                      type="button"
+                      onClick={() => toggleJourneyStatus(status)}
+                      className={`px-2.5 py-1 text-xs rounded-full border transition-colors ${
+                        selected
+                          ? 'bg-[#131d47] text-white border-[#131d47]'
+                          : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'
+                      }`}
+                    >
+                      {status}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-2">Trigger Status *</label>
+                <label className="block text-sm font-medium mb-2">Trigger Timer *</label>
                 <select
-                  value={formData.trigger_status}
-                  onChange={(e) => setFormData({ ...formData, trigger_status: e.target.value })}
+                  value={formData.trigger_timer}
+                  onChange={(e) => setFormData({ ...formData, trigger_timer: e.target.value })}
                   className="neomorph-inset w-full px-4 py-3 border-0 rounded-xl"
                   required
                 >
-                  {availableStatuses.map(status => (
-                    <option key={status} value={status}>{status}</option>
-                  ))}
+                  <option value="Case 48hrs">Case 48hrs (file update)</option>
+                  <option value="Client 48hrs">Client 48hrs (client communication)</option>
+                  <option value="Either">Either timer overdue</option>
+                  <option value="Both">Both timers overdue</option>
                 </select>
-                <p className="text-xs text-gray-500 mt-1">Claims in this status will trigger the rule</p>
+                <p className="text-xs text-gray-500 mt-1">Which 48-hour update timer must be overdue</p>
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">Days in Status *</label>
+                <label className="block text-sm font-medium mb-2">Hours Overdue Before Send *</label>
                 <Input
                   type="number"
-                  min="1"
-                  value={formData.days_in_status}
-                  onChange={(e) => setFormData({ ...formData, days_in_status: parseInt(e.target.value) })}
+                  min="0"
+                  value={formData.hours_overdue_before_send}
+                  onChange={(e) => setFormData({ ...formData, hours_overdue_before_send: parseInt(e.target.value) || 0 })}
                   required
                   className="neomorph-inset"
                 />
-                <p className="text-xs text-gray-500 mt-1">Send email after this many days</p>
+                <p className="text-xs text-gray-500 mt-1">Wait this many hours after the timer goes Red before sending (0 = immediately)</p>
               </div>
             </div>
 

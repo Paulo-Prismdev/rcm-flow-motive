@@ -11,14 +11,6 @@
       "default": true,
       "description": "Whether this rule is currently active"
     },
-    "trigger_status": {
-      "type": "string",
-      "description": "The job_status that triggers this rule"
-    },
-    "days_in_status": {
-      "type": "number",
-      "description": "Number of days claim must be in status before email is sent"
-    },
     "recipient_type": {
       "type": "string",
       "enum": [
@@ -34,6 +26,30 @@
     "custom_email": {
       "type": "string",
       "description": "If recipient_type is Custom Email, specify the email here"
+    },
+    "trigger_journey_statuses": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Journey Statuses that make a claim eligible. Empty = all journey statuses."
+    },
+    "trigger_timer": {
+      "type": "string",
+      "enum": [
+        "Case 48hrs",
+        "Client 48hrs",
+        "Either",
+        "Both"
+      ],
+      "default": "Case 48hrs",
+      "description": "Which 48-hour update timer(s) must be overdue to trigger the chaser"
+    },
+    "hours_overdue_before_send": {
+      "type": "number",
+      "default": 0,
+      "description": "How many hours after the timer goes Red (overdue) before the first chaser is sent. 0 = send immediately when overdue."
     },
     "email_subject_template": {
       "type": "string",
@@ -51,17 +67,13 @@
         "Every 3 Days",
         "Weekly"
       ],
-      "default": "Once",
-      "description": "How often to send after initial trigger"
+      "default": "Daily",
+      "description": "How often to repeat the chaser after the first send"
     },
     "max_sends": {
       "type": "number",
       "default": 3,
-      "description": "Maximum number of times to send this chaser per claim"
-    },
-    "additional_conditions": {
-      "type": "object",
-      "description": "Additional JSON conditions to match (e.g., claim_type, insurer)"
+      "description": "Maximum number of chasers per claim per overdue episode"
     },
     "cc_emails": {
       "type": "string",
@@ -74,9 +86,8 @@
   },
   "required": [
     "rule_name",
-    "trigger_status",
-    "days_in_status",
     "recipient_type",
+    "trigger_timer",
     "email_subject_template",
     "email_body_template"
   ],
