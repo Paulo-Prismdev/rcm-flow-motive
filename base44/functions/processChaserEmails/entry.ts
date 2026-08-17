@@ -111,7 +111,10 @@ Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     const url = new URL(req.url);
-    const baseUrl = `${url.protocol}//${url.host}`;
+    // App public URL for building external form links. Prefer the configured
+    // APP_PUBLIC_URL secret, then the request Origin header (frontend-triggered
+    // runs), then the request's own host as a last resort.
+    const baseUrl = (Deno.env.get('APP_PUBLIC_URL') || req.headers.get('origin') || `${url.protocol}//${url.host}`).replace(/\/+$/, '');
     const formSecret = Deno.env.get('PUBLIC_FORM_SECRET');
 
     // ── Dry-run mode: preview who WOULD be emailed without sending anything ──
@@ -242,15 +245,15 @@ Deno.serve(async (req) => {
           }
 
           // ── Build email content ──
-          const emailSubject = replacePlaceholders(rule.email_subject_template, claim);
-          let emailBody = replacePlaceholders(rule.email_body_template, claim);
-
-          // Append the secure bodyshop update link for bodyshop recipients
+          // Inject the secure bodyshop update link as a placeholder value so admins
+          // can place it anywhere in the template via {{claim.bodyshop_update_link}}.
+          const claimForTemplate = { ...claim };
           if (rule.recipient_type === 'Bodyshop' && formSecret) {
             const token = await generateBodyshopToken(claim.id, formSecret);
-            const updateLink = `${baseUrl}/bodyshop-update?token=${token}`;
-            emailBody += `\n\n---\n\nYou can log your update directly via this link:\n${updateLink}\n\nAlternatively, you can reply to this email with your update.\n\nKind regards,\nRCM Flow-motive Team`;
+            claimForTemplate.bodyshop_update_link = `${baseUrl}/bodyshop-update?token=${token}`;
           }
+          const emailSubject = replacePlaceholders(rule.email_subject_template, claimForTemplate);
+          const emailBody = replacePlaceholders(rule.email_body_template, claimForTemplate);
 
           // ── Dry-run: record who would be emailed, skip actual send ──
           if (dryRun) {

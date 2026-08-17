@@ -391,7 +391,8 @@ function ChaserEmailRuleForm({ rule, onSubmit, onCancel }) {
     '{{claim.make_model}}',
     '{{claim.insurer}}',
     '{{claim.referrer}}',
-    '{{claim.claim_ref}}'
+    '{{claim.claim_ref}}',
+    '{{claim.bodyshop_update_link}}'
   ];
 
   return (
@@ -552,6 +553,9 @@ function ChaserEmailRuleForm({ rule, onSubmit, onCancel }) {
             <div className="neomorph-inset p-4 bg-purple-50 mb-4">
               <p className="text-sm text-purple-800 mb-2">
                 <strong>Available Placeholders:</strong> Click to insert
+              </p>
+              <p className="text-xs text-purple-600 mb-2">
+                Tip: For Bodyshop recipients, use <code className="bg-purple-100 px-1 rounded">{'{{claim.bodyshop_update_link}}'}</code> to insert a secure, job-specific link the repairer can use to log their update directly into the system.
               </p>
               <div className="flex flex-wrap gap-2">
                 {placeholders.map(placeholder => (
