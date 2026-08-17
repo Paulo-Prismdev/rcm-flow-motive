@@ -116,10 +116,12 @@ Deno.serve(async (req) => {
 
     // ── Dry-run mode: preview who WOULD be emailed without sending anything ──
     let dryRun = false;
+    let ruleId: string | null = null;
     try {
       if (req.method === 'POST') {
         const body = await req.json();
         if (body && body.dry_run === true) dryRun = true;
+        if (body && typeof body.rule_id === 'string' && body.rule_id) ruleId = body.rule_id;
       }
     } catch { /* no body or invalid JSON — not a dry run */ }
     const preview: any[] = [];
@@ -134,8 +136,19 @@ Deno.serve(async (req) => {
       // No user context — automated/scheduled call, proceed
     }
 
-    // Fetch all active rules (sorted by sort_order)
-    const rules = await base44.asServiceRole.entities.ChaserEmailRule.filter({ is_active: true }, 'sort_order');
+    // Fetch rules — a specific rule when rule_id is supplied (per-rule run/preview),
+    // otherwise all active rules (automated / global run).
+    let rules: any[];
+    if (ruleId) {
+      try {
+        const single = await base44.asServiceRole.entities.ChaserEmailRule.get(ruleId);
+        rules = single ? [single] : [];
+      } catch {
+        rules = [];
+      }
+    } else {
+      rules = await base44.asServiceRole.entities.ChaserEmailRule.filter({ is_active: true }, 'sort_order');
+    }
     if (!rules || rules.length === 0) {
       return Response.json({
         success: true,

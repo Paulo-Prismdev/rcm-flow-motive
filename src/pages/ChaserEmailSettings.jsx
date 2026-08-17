@@ -11,9 +11,9 @@ export default function ChaserEmailSettings() {
   const [showForm, setShowForm] = useState(false);
   const [editingRule, setEditingRule] = useState(null);
   const [showLogs, setShowLogs] = useState(false);
-  const [isRunning, setIsRunning] = useState(false);
+  const [runningRuleId, setRunningRuleId] = useState(null);
   const [previewData, setPreviewData] = useState(null);
-  const [isPreviewing, setIsPreviewing] = useState(false);
+  const [previewingRuleId, setPreviewingRuleId] = useState(null);
   const queryClient = useQueryClient();
 
   const { data: rules = [], isLoading } = useQuery({
@@ -59,28 +59,28 @@ export default function ChaserEmailSettings() {
     },
   });
 
-  const handleRunNow = async () => {
-    setIsRunning(true);
+  const handleRunNow = async (rule) => {
+    setRunningRuleId(rule.id);
     try {
-      const result = await base44.functions.invoke('processChaserEmails');
-      alert(`Chaser emails processed!\n\nSent: ${result.data.emails_sent}\nSkipped: ${result.data.emails_skipped}\nFailed: ${result.data.errors}`);
+      const result = await base44.functions.invoke('processChaserEmails', { rule_id: rule.id });
+      alert(`"${rule.rule_name}" processed!\n\nSent: ${result.data.emails_sent}\nSkipped: ${result.data.emails_skipped}\nFailed: ${result.data.errors}`);
       queryClient.invalidateQueries({ queryKey: ['chaserEmailLogs'] });
     } catch (error) {
       alert(`Error: ${error.message}`);
     } finally {
-      setIsRunning(false);
+      setRunningRuleId(null);
     }
   };
 
-  const handlePreview = async () => {
-    setIsPreviewing(true);
+  const handlePreview = async (rule) => {
+    setPreviewingRuleId(rule.id);
     try {
-      const result = await base44.functions.invoke('processChaserEmails', { dry_run: true });
-      setPreviewData(result.data);
+      const result = await base44.functions.invoke('processChaserEmails', { dry_run: true, rule_id: rule.id });
+      setPreviewData({ ...result.data, rule_name: rule.rule_name });
     } catch (error) {
       alert(`Error: ${error.message}`);
     } finally {
-      setIsPreviewing(false);
+      setPreviewingRuleId(null);
     }
   };
 
@@ -178,23 +178,6 @@ export default function ChaserEmailSettings() {
             <span className="hidden sm:inline">Logs</span>
           </button>
           <button
-            onClick={handlePreview}
-            disabled={isPreviewing}
-            className="px-3 py-1.5 text-sm font-medium text-amber-900 bg-amber-100 hover:bg-amber-200 border border-amber-300 rounded-lg flex items-center gap-2 transition-colors disabled:opacity-50"
-            title="See who would be emailed without sending anything"
-          >
-            <Eye className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">{isPreviewing ? 'Checking...' : 'Preview'}</span>
-          </button>
-          <button
-            onClick={handleRunNow}
-            disabled={isRunning}
-            className="px-3 py-1.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg flex items-center gap-2 transition-colors disabled:opacity-50"
-          >
-            <Play className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">{isRunning ? 'Running...' : 'Run Now'}</span>
-          </button>
-          <button
             onClick={() => setShowForm(true)}
             className="px-3 py-1.5 text-sm font-medium text-white bg-[#131d47] hover:bg-[#1a2660] rounded-lg flex items-center gap-2 transition-colors"
           >
@@ -266,6 +249,22 @@ export default function ChaserEmailSettings() {
 
                   <div className="flex gap-1 flex-shrink-0">
                     <button
+                      onClick={() => handlePreview(rule)}
+                      disabled={previewingRuleId === rule.id}
+                      className="p-1.5 text-amber-600 hover:bg-amber-100 dark:hover:bg-amber-900/20 rounded transition-colors disabled:opacity-50"
+                      title="Preview who would be emailed"
+                    >
+                      {previewingRuleId === rule.id ? <span className="text-[10px] px-1">...</span> : <Eye className="w-3.5 h-3.5" />}
+                    </button>
+                    <button
+                      onClick={() => handleRunNow(rule)}
+                      disabled={runningRuleId === rule.id}
+                      className="p-1.5 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/20 rounded transition-colors disabled:opacity-50"
+                      title="Run this rule now"
+                    >
+                      {runningRuleId === rule.id ? <span className="text-[10px] px-1">...</span> : <Play className="w-3.5 h-3.5" />}
+                    </button>
+                    <button
                       onClick={() => handleToggleActive(rule)}
                       className="p-1.5 text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white rounded transition-colors"
                       title={rule.is_active ? 'Deactivate' : 'Activate'}
@@ -299,7 +298,7 @@ export default function ChaserEmailSettings() {
               <div>
                 <h2 className="text-base font-semibold text-gray-900 dark:text-white flex items-center gap-2">
                   <Eye className="w-4 h-4 text-amber-600" />
-                  Dry Run Preview
+                  Dry Run Preview{previewData.rule_name ? ` · ${previewData.rule_name}` : ''}
                 </h2>
                 <p className="text-xs text-gray-500 mt-0.5">
                   {previewData.emails_sent} claim(s) would be emailed · {previewData.emails_skipped} skipped · {previewData.claims_evaluated} evaluated
