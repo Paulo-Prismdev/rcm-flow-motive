@@ -208,15 +208,23 @@ export default function ChaserEmailSettings() {
         ) : (
           <div className="space-y-2">
             {rules.map((rule) => (
-              <div key={rule.id} className={`bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 p-3 ${!rule.is_active ? 'opacity-50' : ''}`}>
+              <div key={rule.id} className={`bg-white dark:bg-gray-900 rounded-lg border-2 p-3 pl-4 transition-all ${
+                rule.is_active
+                  ? 'border-l-green-500 border-l-4 border-t-gray-200 border-r-gray-200 border-b-gray-200 dark:border-t-gray-800 dark:border-r-gray-800 dark:border-b-gray-800'
+                  : 'border-gray-300 dark:border-gray-700 border-l-4 border-l-gray-400 dark:border-l-gray-600 opacity-60'
+              }`}>
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-2">
                       <h3 className="text-sm font-semibold text-gray-900 dark:text-white truncate">{rule.rule_name}</h3>
                       {rule.is_active ? (
-                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 flex-shrink-0">Active</span>
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-green-500 text-white flex-shrink-0 shadow-sm">
+                          <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>ACTIVE
+                        </span>
                       ) : (
-                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400 flex-shrink-0">Off</span>
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-gray-400 text-white flex-shrink-0">
+                          <span className="w-1.5 h-1.5 rounded-full bg-white"></span>PAUSED
+                        </span>
                       )}
                     </div>
                     
@@ -266,8 +274,12 @@ export default function ChaserEmailSettings() {
                     </button>
                     <button
                       onClick={() => handleToggleActive(rule)}
-                      className="p-1.5 text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white rounded transition-colors"
-                      title={rule.is_active ? 'Deactivate' : 'Activate'}
+                      className={`p-1.5 rounded transition-colors ${
+                        rule.is_active
+                          ? 'text-green-600 bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/40'
+                          : 'text-gray-400 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700'
+                      }`}
+                      title={rule.is_active ? 'Deactivate (currently ACTIVE)' : 'Activate (currently PAUSED)'}
                     >
                       {rule.is_active ? <PowerOff className="w-3.5 h-3.5" /> : <Power className="w-3.5 h-3.5" />}
                     </button>
