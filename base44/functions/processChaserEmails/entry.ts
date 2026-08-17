@@ -23,6 +23,40 @@ function isClaimClosed(claim: any): boolean {
   return ['Invoiced', 'Invoice Paid'].includes(claim.invoice_status);
 }
 
+// ── Send email via Resend API ──
+async function sendViaResend(to: string, subject: string, textBody: string): Promise<void> {
+  const apiKey = Deno.env.get('RESEND_API_KEY');
+  const fromEmail = Deno.env.get('RESEND_FROM_EMAIL') || 'chaser@resend.dev';
+
+  if (!apiKey) throw new Error('RESEND_API_KEY secret is not set');
+
+  // Convert plain-text body to simple HTML
+  const htmlBody = textBody
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/\n/g, '<br>');
+
+  const res = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      from: fromEmail,
+      to: [to],
+      subject,
+      html: htmlBody
+    })
+  });
+
+  if (!res.ok) {
+    const errText = await res.text();
+    throw new Error(`Resend API error (${res.status}): ${errText}`);
+  }
+}
+
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
@@ -39,8 +73,6 @@ Deno.serve(async (req) => {
     } catch {
       // No user context — automated/scheduled call, proceed
     }
-
-    console.log('Starting bodyshop chaser email processing...');
 
     // Find the active bodyshop chaser rule (use first active rule with recipient_type = Bodyshop)
     const rules = await base44.asServiceRole.entities.ChaserEmailRule.filter(
@@ -59,7 +91,6 @@ Deno.serve(async (req) => {
     }
 
     const rule = rules[0];
-    console.log(`Using rule: ${rule.rule_name}`);
 
     // Fetch all non-archived claims that have a bodyshop allocated
     const claims = await base44.asServiceRole.entities.Claim.filter({ archived: false });
@@ -69,14 +100,11 @@ Deno.serve(async (req) => {
     let totalSkipped = 0;
     let totalErrors = 0;
     let firstError = '';
-    const debugSteps: string[] = [];
 
     for (const claim of claims) {
       totalProcessed++;
 
       try {
-        if (totalProcessed <= 10) debugSteps.push(`claim${totalProcessed}:start bs=${!!claim.bodyshop_email}`);
-
         // Skip if no bodyshop email to send to
         if (!claim.bodyshop_email) {
           totalSkipped++;
@@ -90,13 +118,11 @@ Deno.serve(async (req) => {
         }
 
         // ── Find the last INCOMING Bodyshop Communication update ──
-        if (totalProcessed <= 10) debugSteps.push(`claim${totalProcessed}:beforeFilter`);
         const incomingUpdates = await base44.asServiceRole.entities.ClaimUpdate.filter(
           { claim_id: claim.id, update_type: 'Bodyshop Communication', direction: 'Incoming' },
           '-created_date',
           1
         );
-        if (totalProcessed <= 10) debugSteps.push(`claim${totalProcessed}:afterFilter count=${incomingUpdates?.length || 0}`);
 
         // Reference time = last incoming update, or bodyshop instruction date, or claim creation
         let referenceTime: Date;
@@ -117,13 +143,11 @@ Deno.serve(async (req) => {
         }
 
         // ── Find chaser logs sent since the reference time ──
-        if (totalProcessed <= 10) debugSteps.push(`claim${totalProcessed}:beforeLogFilter hrs=${hoursSinceReference.toFixed(1)}`);
         const allChaserLogs = await base44.asServiceRole.entities.ChaserEmailLog.filter(
           { claim_id: claim.id, rule_id: rule.id, status: 'Sent' },
           '-sent_at',
           20
         );
-        if (totalProcessed <= 10) debugSteps.push(`claim${totalProcessed}:afterLogFilter count=${allChaserLogs?.length || 0}`);
 
         const logsSinceReference = (allChaserLogs || []).filter(
           (log) => new Date(log.sent_at) > referenceTime
@@ -149,9 +173,7 @@ Deno.serve(async (req) => {
         }
 
         // ── Generate the bodyshop update link ──
-        if (totalProcessed <= 10) debugSteps.push(`claim${totalProcessed}:beforeToken`);
         const token = await generateBodyshopToken(claim.id, formSecret);
-        if (totalProcessed <= 10) debugSteps.push(`claim${totalProcessed}:afterToken`);
         const updateLink = `${baseUrl}/bodyshop-update?token=${token}`;
 
         // ── Build email content ──
@@ -161,15 +183,9 @@ Deno.serve(async (req) => {
         // Append the update link
         emailBody += `\n\n---\n\nYou can log your update directly via this link:\n${updateLink}\n\nAlternatively, you can reply to this email with your update.\n\nKind regards,\nRCM Flow-motive Team`;
 
-        // ── Send the email ──
-        if (totalProcessed <= 10) debugSteps.push(`claim${totalProcessed}:beforeSendEmail to=${claim.bodyshop_email}`);
+        // ── Send the email via Resend ──
         try {
-          await base44.asServiceRole.integrations.Core.SendEmail({
-            to: claim.bodyshop_email,
-            subject: emailSubject,
-            body: emailBody
-          });
-          if (totalProcessed <= 10) debugSteps.push(`claim${totalProcessed}:afterSendEmail`);
+          await sendViaResend(claim.bodyshop_email, emailSubject, emailBody);
 
           console.log(`✅ Sent chaser for claim ${claim.job_number} to ${claim.bodyshop_email}`);
 
@@ -200,9 +216,8 @@ Deno.serve(async (req) => {
 
           totalSent++;
         } catch (emailError: any) {
-          const errMsg = emailError?.message || emailError?.toString?.() || JSON.stringify(emailError) || 'Unknown';
+          const errMsg = emailError?.message || String(emailError);
           console.error(`❌ Failed to send chaser for claim ${claim.job_number}:`, errMsg);
-          if (totalProcessed <= 10) debugSteps.push(`claim${totalProcessed}:sendEmailError=${errMsg.substring(0, 100)}`);
           if (!firstError) firstError = errMsg;
           totalErrors++;
 
@@ -216,20 +231,20 @@ Deno.serve(async (req) => {
             email_body: emailBody,
             sent_at: new Date().toISOString(),
             status: 'Failed',
-            error_message: emailError?.message || 'Unknown error',
+            error_message: errMsg,
             claim_status_at_send: claim.job_status,
             days_in_status_at_send: Math.floor(hoursSinceReference / 24)
           });
         }
       } catch (claimError: any) {
-        const errMsg = claimError?.message || claimError?.toString?.() || JSON.stringify(claimError) || 'Unknown';
+        const errMsg = claimError?.message || String(claimError);
         console.error(`Error processing claim ${claim.job_number}:`, errMsg);
         if (!firstError) firstError = errMsg;
         totalErrors++;
       }
     }
 
-    const summary = {
+    return Response.json({
       success: true,
       message: 'Bodyshop chaser email processing complete',
       rule_used: rule.rule_name,
@@ -237,12 +252,8 @@ Deno.serve(async (req) => {
       emails_sent: totalSent,
       emails_skipped: totalSkipped,
       errors: totalErrors,
-      first_error: firstError,
-      debug: debugSteps
-    };
-
-    console.log('Summary:', summary);
-    return Response.json(summary);
+      first_error: firstError
+    });
   } catch (error: any) {
     console.error('Error processing chaser emails:', error);
     return Response.json({ success: false, error: error.message }, { status: 500 });
