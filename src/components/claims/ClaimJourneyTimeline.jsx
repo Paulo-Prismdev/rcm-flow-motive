@@ -25,7 +25,7 @@ const getJourneyRank = (status) => {
 
 // Best-effort date attribution for milestones without a dedicated claim date field.
 const MILESTONE_STATUS_MAP = {
-  in_repair: ['Awaiting Parts', 'In Progress'],
+  in_repair: ['Awaiting Parts', 'In Repair'],
   returned: ['Returned to Customer'],
 };
 
