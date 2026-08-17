@@ -162,12 +162,14 @@ Deno.serve(async (req) => {
         emailBody += `\n\n---\n\nYou can log your update directly via this link:\n${updateLink}\n\nAlternatively, you can reply to this email with your update.\n\nKind regards,\nRCM Flow-motive Team`;
 
         // ── Send the email ──
+        if (totalProcessed <= 10) debugSteps.push(`claim${totalProcessed}:beforeSendEmail to=${claim.bodyshop_email}`);
         try {
           await base44.asServiceRole.integrations.Core.SendEmail({
             to: claim.bodyshop_email,
             subject: emailSubject,
             body: emailBody
           });
+          if (totalProcessed <= 10) debugSteps.push(`claim${totalProcessed}:afterSendEmail`);
 
           console.log(`✅ Sent chaser for claim ${claim.job_number} to ${claim.bodyshop_email}`);
 
@@ -198,7 +200,10 @@ Deno.serve(async (req) => {
 
           totalSent++;
         } catch (emailError: any) {
-          console.error(`❌ Failed to send chaser for claim ${claim.job_number}:`, emailError);
+          const errMsg = emailError?.message || emailError?.toString?.() || JSON.stringify(emailError) || 'Unknown';
+          console.error(`❌ Failed to send chaser for claim ${claim.job_number}:`, errMsg);
+          if (totalProcessed <= 10) debugSteps.push(`claim${totalProcessed}:sendEmailError=${errMsg.substring(0, 100)}`);
+          if (!firstError) firstError = errMsg;
           totalErrors++;
 
           await base44.asServiceRole.entities.ChaserEmailLog.create({
