@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Plus, Edit, Trash2, Play, History, Power, PowerOff, Eye, X } from 'lucide-react';
+import { Plus, Edit, Trash2, Play, History, Power, PowerOff, Eye, X, Send } from 'lucide-react';
 import { JOURNEY_STATUSES } from '@/components/shared/claimStatusV2';
 
 export default function ChaserEmailSettings() {
@@ -14,6 +14,7 @@ export default function ChaserEmailSettings() {
   const [runningRuleId, setRunningRuleId] = useState(null);
   const [previewData, setPreviewData] = useState(null);
   const [previewingRuleId, setPreviewingRuleId] = useState(null);
+  const [testingRuleId, setTestingRuleId] = useState(null);
   const queryClient = useQueryClient();
 
   const { data: rules = [], isLoading } = useQuery({
@@ -92,6 +93,30 @@ export default function ChaserEmailSettings() {
 
   const handleToggleActive = (rule) => {
     toggleActiveMutation.mutate({ id: rule.id, is_active: !rule.is_active });
+  };
+
+  const handleSendTest = async (rule) => {
+    const email = window.prompt('Send a test email to (email address):', '');
+    if (!email || !email.trim()) return;
+    setTestingRuleId(rule.id);
+    try {
+      const result = await base44.functions.invoke('processChaserEmails', {
+        test_email: email.trim(),
+        rule_id: rule.id
+      });
+      const d = result.data || {};
+      if (d.success === false) {
+        alert(`Test failed: ${d.error || 'Unknown error'}`);
+      } else {
+        const claimInfo = d.claim_used ? `\n\nRendered using claim ${d.claim_used.job_number || ''} (${d.claim_used.reg || ''})` : '';
+        const linkInfo = d.bodyshop_update_link ? `\n\nUpdate link in email:\n${d.bodyshop_update_link}` : '';
+        alert(`✅ Test email sent to ${d.test_email || email.trim()}${claimInfo}${linkInfo}`);
+      }
+    } catch (error) {
+      alert(`Error: ${error.message}`);
+    } finally {
+      setTestingRuleId(null);
+    }
   };
 
   if (showForm || editingRule) {
@@ -256,6 +281,14 @@ export default function ChaserEmailSettings() {
                   </div>
 
                   <div className="flex gap-1 flex-shrink-0">
+                    <button
+                      onClick={() => handleSendTest(rule)}
+                      disabled={testingRuleId === rule.id}
+                      className="p-1.5 text-purple-600 hover:bg-purple-100 dark:hover:bg-purple-900/20 rounded transition-colors disabled:opacity-50"
+                      title="Send a real test email now (bypasses 48h wait)"
+                    >
+                      {testingRuleId === rule.id ? <span className="text-[10px] px-1">...</span> : <Send className="w-3.5 h-3.5" />}
+                    </button>
                     <button
                       onClick={() => handlePreview(rule)}
                       disabled={previewingRuleId === rule.id}

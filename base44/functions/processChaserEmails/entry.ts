@@ -119,14 +119,19 @@ Deno.serve(async (req) => {
 
     // ── Dry-run mode: preview who WOULD be emailed without sending anything ──
     let dryRun = false;
+    let testEmail: string | null = null;
+    let testClaimId: string | null = null;
     let ruleId: string | null = null;
     try {
       if (req.method === 'POST') {
         const body = await req.json();
         if (body && body.dry_run === true) dryRun = true;
         if (body && typeof body.rule_id === 'string' && body.rule_id) ruleId = body.rule_id;
+        if (body && typeof body.test_email === 'string' && body.test_email.trim()) testEmail = body.test_email.trim();
+        if (body && typeof body.test_claim_id === 'string' && body.test_claim_id.trim()) testClaimId = body.test_claim_id.trim();
       }
     } catch { /* no body or invalid JSON — not a dry run */ }
+    const isTestMode = !!testEmail;
     const preview: any[] = [];
 
     // Allow both admin manual runs and automated (no-user) scheduled runs
@@ -164,6 +169,56 @@ Deno.serve(async (req) => {
 
     // Fetch all non-archived claims once (reused across rules)
     const claims = await base44.asServiceRole.entities.Claim.filter({ archived: false });
+
+    // ── TEST MODE: send one real email to a chosen address, bypassing all
+    // overdue / frequency / max-sends checks. Uses a real claim's data so the
+    // bodyshop update link and placeholders render exactly as they would live.
+    // Nothing is logged to ChaserEmailLog or ClaimUpdate (it's a test). ──
+    if (isTestMode) {
+      const rule = rules[0];
+      if (!rule) {
+        return Response.json({ success: false, error: 'Rule not found' }, { status: 404 });
+      }
+      // Pick the claim to render: specified one, else first non-closed claim that
+      // has a recipient email for this rule type (so placeholders look real).
+      let testClaim: any = null;
+      if (testClaimId) {
+        testClaim = claims.find((c) => c.id === testClaimId) || null;
+      }
+      if (!testClaim) {
+        testClaim = claims.find((c) => !isUpdateTrackingClosed(c) && getRecipientEmail(c, rule));
+      }
+      if (!testClaim) {
+        testClaim = claims.find((c) => !isUpdateTrackingClosed(c)) || claims[0] || null;
+      }
+      if (!testClaim) {
+        return Response.json({ success: false, error: 'No non-archived claim found to render the test with' }, { status: 404 });
+      }
+
+      const claimForTemplate = { ...testClaim };
+      if (rule.recipient_type === 'Bodyshop' && formSecret) {
+        const token = await generateBodyshopToken(testClaim.id, formSecret);
+        claimForTemplate.bodyshop_update_link = `${baseUrl}/bodyshop-update?token=${token}`;
+      }
+      const emailSubject = replacePlaceholders(rule.email_subject_template, claimForTemplate);
+      const emailBody = replacePlaceholders(rule.email_body_template, claimForTemplate);
+
+      try {
+        await sendViaSendGrid(testEmail!, rule.cc_emails || '', emailSubject, emailBody);
+        return Response.json({
+          success: true,
+          message: `Test email sent to ${testEmail}`,
+          test_mode: true,
+          test_email: testEmail,
+          rule_name: rule.rule_name,
+          claim_used: { id: testClaim.id, job_number: testClaim.job_number, reg: testClaim.reg },
+          email_subject: emailSubject,
+          bodyshop_update_link: claimForTemplate.bodyshop_update_link || null
+        });
+      } catch (e: any) {
+        return Response.json({ success: false, error: e?.message || String(e) }, { status: 500 });
+      }
+    }
 
     let totalProcessed = 0;
     let totalSent = 0;
