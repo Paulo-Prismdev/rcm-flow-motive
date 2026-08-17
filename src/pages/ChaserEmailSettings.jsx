@@ -4,13 +4,15 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Plus, Edit, Trash2, Play, History, Power, PowerOff } from 'lucide-react';
+import { Plus, Edit, Trash2, Play, History, Power, PowerOff, Eye, X } from 'lucide-react';
 
 export default function ChaserEmailSettings() {
   const [showForm, setShowForm] = useState(false);
   const [editingRule, setEditingRule] = useState(null);
   const [showLogs, setShowLogs] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
+  const [previewData, setPreviewData] = useState(null);
+  const [isPreviewing, setIsPreviewing] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: rules = [], isLoading } = useQuery({
@@ -66,6 +68,18 @@ export default function ChaserEmailSettings() {
       alert(`Error: ${error.message}`);
     } finally {
       setIsRunning(false);
+    }
+  };
+
+  const handlePreview = async () => {
+    setIsPreviewing(true);
+    try {
+      const result = await base44.functions.invoke('processChaserEmails', { dry_run: true });
+      setPreviewData(result.data);
+    } catch (error) {
+      alert(`Error: ${error.message}`);
+    } finally {
+      setIsPreviewing(false);
     }
   };
 
@@ -163,6 +177,15 @@ export default function ChaserEmailSettings() {
             <span className="hidden sm:inline">Logs</span>
           </button>
           <button
+            onClick={handlePreview}
+            disabled={isPreviewing}
+            className="px-3 py-1.5 text-sm font-medium text-amber-900 bg-amber-100 hover:bg-amber-200 border border-amber-300 rounded-lg flex items-center gap-2 transition-colors disabled:opacity-50"
+            title="See who would be emailed without sending anything"
+          >
+            <Eye className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">{isPreviewing ? 'Checking...' : 'Preview'}</span>
+          </button>
+          <button
             onClick={handleRunNow}
             disabled={isRunning}
             className="px-3 py-1.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg flex items-center gap-2 transition-colors disabled:opacity-50"
@@ -258,6 +281,57 @@ export default function ChaserEmailSettings() {
           </div>
         )}
       </div>
+
+      {previewData && (
+        <div className="fixed inset-0 z-[100] bg-black/50 flex items-center justify-center p-4" onClick={() => setPreviewData(null)}>
+          <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 shadow-xl w-full max-w-3xl max-h-[85vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-5 py-3 border-b border-gray-200 dark:border-gray-800">
+              <div>
+                <h2 className="text-base font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                  <Eye className="w-4 h-4 text-amber-600" />
+                  Dry Run Preview
+                </h2>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  {previewData.emails_sent} claim(s) would be emailed · {previewData.emails_skipped} skipped · {previewData.claims_evaluated} evaluated
+                </p>
+              </div>
+              <button onClick={() => setPreviewData(null)} className="p-1.5 text-gray-400 hover:text-gray-900 dark:hover:text-white rounded">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto min-h-0 p-4">
+              {previewData.preview && previewData.preview.length > 0 ? (
+                <div className="space-y-2">
+                  {previewData.preview.map((p, i) => (
+                    <div key={i} className="bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-800 p-3">
+                      <div className="flex items-start justify-between gap-2 mb-1">
+                        <div className="min-w-0">
+                          <span className="text-sm font-semibold text-gray-900 dark:text-white">{p.job_number}</span>
+                          <span className="text-xs text-gray-500 ml-2">{p.reg}</span>
+                        </div>
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 flex-shrink-0">{p.job_status}</span>
+                      </div>
+                      <div className="text-xs text-gray-600 dark:text-gray-400">
+                        <div><span className="text-gray-500">To:</span> {p.bodyshop} &lt;{p.bodyshop_email}&gt;</div>
+                        <div><span className="text-gray-500">Client:</span> {p.client_name || '—'}</div>
+                        <div><span className="text-gray-500">Last contact:</span> {p.days_since_reference} day(s) ago</div>
+                        <div className="truncate text-gray-400 mt-1 italic">{p.email_subject}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-sm text-gray-400">
+                  No claims would be emailed right now.
+                </div>
+              )}
+            </div>
+            <div className="px-5 py-3 border-t border-gray-200 dark:border-gray-800 flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setPreviewData(null)}>Close</Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

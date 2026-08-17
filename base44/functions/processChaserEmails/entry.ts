@@ -17,9 +17,20 @@ function replacePlaceholders(template: string, claim: any): string {
   return template.replace(/\{\{claim\.(\w+)\}\}/g, (_match, fieldName) => claim[fieldName] || '');
 }
 
-// ── Closed-claim check (don't chase closed/invoiced claims) ──
+// ── Closed-claim check (don't chase closed/invoiced/completed claims) ──
+// These job statuses mean the vehicle is gone / repair done — no point chasing.
+const CLOSED_JOB_STATUSES = [
+  'Cancelled',
+  'Returned to Customer',
+  'Hand Over',
+  'Completed',
+  'Complete',
+  'Collection Only',
+  'Vehicle Collected'
+];
+
 function isClaimClosed(claim: any): boolean {
-  if (claim.job_status === 'Cancelled') return true;
+  if (CLOSED_JOB_STATUSES.includes(claim.job_status)) return true;
   return ['Invoiced', 'Invoice Paid'].includes(claim.invoice_status);
 }
 
@@ -63,6 +74,16 @@ Deno.serve(async (req) => {
     const url = new URL(req.url);
     const baseUrl = `${url.protocol}//${url.host}`;
     const formSecret = Deno.env.get('PUBLIC_FORM_SECRET');
+
+    // ── Dry-run mode: preview who WOULD be emailed without sending anything ──
+    let dryRun = false;
+    try {
+      if (req.method === 'POST') {
+        const body = await req.json();
+        if (body && body.dry_run === true) dryRun = true;
+      }
+    } catch { /* no body or invalid JSON — not a dry run */ }
+    const preview: any[] = [];
 
     // Allow both admin manual runs and automated (no-user) scheduled runs
     try {
@@ -183,6 +204,22 @@ Deno.serve(async (req) => {
         // Append the update link
         emailBody += `\n\n---\n\nYou can log your update directly via this link:\n${updateLink}\n\nAlternatively, you can reply to this email with your update.\n\nKind regards,\nRCM Flow-motive Team`;
 
+        // ── Dry-run: record who would be emailed, skip actual send ──
+        if (dryRun) {
+          preview.push({
+            job_number: claim.job_number,
+            reg: claim.reg,
+            client_name: claim.client_name,
+            bodyshop: claim.bodyshop,
+            bodyshop_email: claim.bodyshop_email,
+            job_status: claim.job_status,
+            days_since_reference: Math.floor(hoursSinceReference / 24),
+            email_subject: emailSubject
+          });
+          totalSent++;
+          continue;
+        }
+
         // ── Send the email via SendGrid ──
         try {
           await sendViaSendGrid(claim.bodyshop_email, emailSubject, emailBody);
@@ -246,13 +283,15 @@ Deno.serve(async (req) => {
 
     return Response.json({
       success: true,
-      message: 'Bodyshop chaser email processing complete',
+      message: dryRun ? 'Dry run complete — no emails sent' : 'Bodyshop chaser email processing complete',
+      dry_run: dryRun,
       rule_used: rule.rule_name,
       claims_evaluated: totalProcessed,
       emails_sent: totalSent,
       emails_skipped: totalSkipped,
       errors: totalErrors,
-      first_error: firstError
+      first_error: firstError,
+      preview: dryRun ? preview : undefined
     });
   } catch (error: any) {
     console.error('Error processing chaser emails:', error);
