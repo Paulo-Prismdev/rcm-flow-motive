@@ -23,12 +23,12 @@ function isClaimClosed(claim: any): boolean {
   return ['Invoiced', 'Invoice Paid'].includes(claim.invoice_status);
 }
 
-// ── Send email via Resend API ──
-async function sendViaResend(to: string, subject: string, textBody: string): Promise<void> {
-  const apiKey = Deno.env.get('RESEND_API_KEY');
-  const fromEmail = Deno.env.get('RESEND_FROM_EMAIL') || 'chaser@resend.dev';
+// ── Send email via SendGrid API ──
+async function sendViaSendGrid(to: string, subject: string, textBody: string): Promise<void> {
+  const apiKey = Deno.env.get('SENDGRID_API_KEY');
+  const fromEmail = 'info@rcmautomotive.co.uk';
 
-  if (!apiKey) throw new Error('RESEND_API_KEY secret is not set');
+  if (!apiKey) throw new Error('SENDGRID_API_KEY secret is not set');
 
   // Convert plain-text body to simple HTML
   const htmlBody = textBody
@@ -37,23 +37,23 @@ async function sendViaResend(to: string, subject: string, textBody: string): Pro
     .replace(/>/g, '&gt;')
     .replace(/\n/g, '<br>');
 
-  const res = await fetch('https://api.resend.com/emails', {
+  const res = await fetch('https://api.sendgrid.com/v3/mail/send', {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${apiKey}`,
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      from: fromEmail,
-      to: [to],
+      personalizations: [{ to: [{ email: to }] }],
+      from: { email: fromEmail, name: 'RCM Flow-motive' },
       subject,
-      html: htmlBody
+      content: [{ type: 'text/plain', value: textBody }, { type: 'text/html', value: htmlBody }]
     })
   });
 
   if (!res.ok) {
     const errText = await res.text();
-    throw new Error(`Resend API error (${res.status}): ${errText}`);
+    throw new Error(`SendGrid API error (${res.status}): ${errText}`);
   }
 }
 
@@ -183,9 +183,9 @@ Deno.serve(async (req) => {
         // Append the update link
         emailBody += `\n\n---\n\nYou can log your update directly via this link:\n${updateLink}\n\nAlternatively, you can reply to this email with your update.\n\nKind regards,\nRCM Flow-motive Team`;
 
-        // ── Send the email via Resend ──
+        // ── Send the email via SendGrid ──
         try {
-          await sendViaResend(claim.bodyshop_email, emailSubject, emailBody);
+          await sendViaSendGrid(claim.bodyshop_email, emailSubject, emailBody);
 
           console.log(`✅ Sent chaser for claim ${claim.job_number} to ${claim.bodyshop_email}`);
 
