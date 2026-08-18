@@ -38,9 +38,15 @@ const NOTIFICATION_PREFS = [
   { key: 'engineering_updates', label: 'Engineering Updates', desc: 'Engineering report updates' },
 ];
 
+const EMAIL_PREFS = [
+  { key: 'email_tagged_in_notes', label: 'Tagged in Notes', desc: 'Email me when mentioned' },
+  { key: 'email_status_changes', label: 'Status Changes', desc: 'Email me on status changes' },
+];
+
 const DEFAULT_PREFS = {
   tagged_in_notes: true, status_changes: true, new_assignments: true, task_assignments: true,
   invoice_updates: true, estimate_requests: true, parts_updates: false, engineering_updates: false,
+  email_tagged_in_notes: true, email_status_changes: false,
 };
 
 const Field = ({ label, icon: Icon, children, full }) => (
@@ -309,16 +315,35 @@ export default function UserProfile() {
           <div className="app-card !p-3 md:!p-4">
             <h3 className="font-semibold mb-1 flex items-center gap-2 text-sm"><Bell className="w-4 h-4 text-primary" />Notification Preferences</h3>
             <p className="text-xs text-muted-foreground mb-3">Changes save automatically.</p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {NOTIFICATION_PREFS.map(({ key, label, desc }) => (
-                <div key={key} className="flex items-center justify-between gap-2 p-2.5 bg-muted/50 border rounded-md">
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm">{label}</p>
-                    <p className="text-[11px] text-muted-foreground truncate">{desc}</p>
-                  </div>
-                  <Switch checked={formData.notification_preferences[key]} onCheckedChange={() => handleNotificationToggle(key)} />
+            <div className="space-y-4">
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">In-App</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {NOTIFICATION_PREFS.map(({ key, label, desc }) => (
+                    <div key={key} className="flex items-center justify-between gap-2 p-2.5 bg-muted/50 border rounded-md">
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm">{label}</p>
+                        <p className="text-[11px] text-muted-foreground truncate">{desc}</p>
+                      </div>
+                      <Switch checked={formData.notification_preferences[key]} onCheckedChange={() => handleNotificationToggle(key)} />
+                    </div>
+                  ))}
                 </div>
-              ))}
+              </div>
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">Email</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {EMAIL_PREFS.map(({ key, label, desc }) => (
+                    <div key={key} className="flex items-center justify-between gap-2 p-2.5 bg-muted/50 border rounded-md">
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm">{label}</p>
+                        <p className="text-[11px] text-muted-foreground truncate">{desc}</p>
+                      </div>
+                      <Switch checked={formData.notification_preferences[key]} onCheckedChange={() => handleNotificationToggle(key)} />
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         )}
