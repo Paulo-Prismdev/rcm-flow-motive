@@ -149,10 +149,6 @@ export default function BodyshopUpdateForm() {
             </div>
             <div className="grid grid-cols-2 gap-3 text-sm">
               <div>
-                <p className="text-xs text-gray-500">Job Number</p>
-                <p className="font-medium text-gray-900">{claim.job_number || '—'}</p>
-              </div>
-              <div>
                 <p className="text-xs text-gray-500">Registration</p>
                 <p className="font-medium text-gray-900">{claim.reg || '—'}</p>
               </div>
