@@ -312,10 +312,14 @@ export default function UserProfile() {
             <h3 className="font-semibold mb-1 flex items-center gap-2 text-sm"><Bell className="w-4 h-4 text-primary" />Notification Preferences</h3>
             <p className="text-xs text-muted-foreground mb-3">Changes save automatically.</p>
             <div className="space-y-2">
-              <div className="flex items-center gap-2 px-1 pb-1">
-                <div className="flex-1" />
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground w-12 text-center">In-App</span>
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground w-12 text-center">Email</span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {[0, 1].map(col => (
+                  <div key={col} className="flex items-center gap-2 px-1 pb-1">
+                    <div className="flex-1" />
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground w-12 text-center">In-App</span>
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground w-12 text-center">Email</span>
+                  </div>
+                ))}
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {NOTIFICATION_PREFS.map(({ key, emailKey, label, desc }) => (
