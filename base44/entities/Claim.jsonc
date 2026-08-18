@@ -858,6 +858,11 @@
     "repair_preference_client_name": {
       "type": "string",
       "description": "Name of the client who signed the repair preference statement"
+    },
+    "unread_bodyshop_update": {
+      "type": "boolean",
+      "default": false,
+      "description": "True when a bodyshop has submitted an update via the Repair Update Form that has not yet been viewed by an internal user"
     }
   },
   "required": [],

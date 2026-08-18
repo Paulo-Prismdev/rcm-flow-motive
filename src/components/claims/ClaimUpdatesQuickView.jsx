@@ -51,6 +51,15 @@ export default function ClaimUpdatesQuickView({ claim, isOpen, onClose }) {
     staleTime: 0,
   });
 
+  // Clear the unread bodyshop update bubble once an internal user opens the updates view
+  React.useEffect(() => {
+    if (isOpen && claimId && claim?.unread_bodyshop_update) {
+      base44.entities.Claim.update(claimId, { unread_bodyshop_update: false })
+        .then(() => queryClient.invalidateQueries({ queryKey: ['claims'] }))
+        .catch(err => console.error('Failed to clear unread bodyshop update flag:', err));
+    }
+  }, [isOpen, claimId, claim?.unread_bodyshop_update, queryClient]);
+
   const toggleStarMutation = useMutation({
     mutationFn: async ({ updateId, isStarred }) => {
       return await base44.entities.ClaimUpdate.update(updateId, { starred: !isStarred });

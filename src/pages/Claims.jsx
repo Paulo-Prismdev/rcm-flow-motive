@@ -489,10 +489,13 @@ export default function ClaimsPage() {
         <td style={{ width: `${UPDATES_W}px`, minWidth: `${UPDATES_W}px`, maxWidth: `${UPDATES_W}px` }} className={`sticky right-[52px] z-10 px-2 py-2.5 whitespace-nowrap text-center ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-white dark:bg-gray-900 group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50'}`}>
           <button
             onClick={(e) => { e.stopPropagation(); setQuickViewClaim(claim); }}
-            className="p-1.5 rounded-md text-gray-400 hover:text-primary hover:bg-primary/10 transition-colors"
+            className="relative p-1.5 rounded-md text-gray-400 hover:text-primary hover:bg-primary/10 transition-colors"
             title="Quick view updates"
           >
             <MessageSquare className="w-4 h-4" />
+            {claim.unread_bodyshop_update && (
+              <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-green-500 ring-2 ring-white dark:ring-gray-900 flex-shrink-0" />
+            )}
           </button>
         </td>
         {/* Sticky right-end: Quick info view */}
@@ -547,10 +550,13 @@ export default function ClaimsPage() {
 
             <button
               onClick={(e) => { e.stopPropagation(); setQuickViewClaim(claim); }}
-              className="p-1 rounded-md text-gray-400 hover:text-primary hover:bg-primary/10 transition-colors"
+              className="relative p-1 rounded-md text-gray-400 hover:text-primary hover:bg-primary/10 transition-colors"
               title="Quick view updates"
             >
               <MessageSquare className="w-4 h-4" />
+              {claim.unread_bodyshop_update && (
+                <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-green-500 ring-2 ring-white dark:ring-gray-900 flex-shrink-0" />
+              )}
             </button>
             <button
               onClick={(e) => { e.stopPropagation(); setQuickInfoClaim(claim); }}

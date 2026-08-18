@@ -339,6 +339,15 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
     staleTime: 60000,
   });
 
+  // Clear the unread bodyshop update bubble once an internal user opens the updates modal
+  React.useEffect(() => {
+    if (isClaimUpdatesOpen && claim?.unread_bodyshop_update) {
+      base44.entities.Claim.update(claim.id, { unread_bodyshop_update: false })
+        .then(() => queryClient.invalidateQueries({ queryKey: ['claims'] }))
+        .catch(err => console.error('Failed to clear unread bodyshop update flag:', err));
+    }
+  }, [isClaimUpdatesOpen, claim?.unread_bodyshop_update, claim.id, queryClient]);
+
   const { data: claimNotes = [] } = useQuery({
     queryKey: ['notes', claim.id, 'Claim'],
     queryFn: () => base44.entities.Note.filter({ parent_id: claim.id, parent_type: 'Claim' }),
@@ -1585,8 +1594,11 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                         {canEdit && (
                           <Button onClick={() => setIsClaimUpdatesOpen(true)} className="h-9 px-4 text-sm font-medium rounded-lg bg-green-600 hover:bg-green-700 text-white relative">
                             Updates & Status
+                            {claim.unread_bodyshop_update && (
+                              <span className="absolute -top-1.5 -right-1.5 w-3.5 h-3.5 rounded-full bg-blue-500 ring-2 ring-white flex-shrink-0" />
+                            )}
                             {claimUpdates.length > 0 && (
-                              <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-white text-green-700 text-[10px] font-bold flex items-center justify-center leading-none shadow">
+                              <span className="absolute -top-1.5 right-3 min-w-[18px] h-[18px] px-1 rounded-full bg-white text-green-700 text-[10px] font-bold flex items-center justify-center leading-none shadow">
                                 {claimUpdates.length}
                               </span>
                             )}

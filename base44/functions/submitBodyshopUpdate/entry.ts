@@ -36,6 +36,9 @@ Deno.serve(async (req) => {
       await base44.asServiceRole.entities.Claim.update(claimId, { ecd: ecd.trim() });
     }
 
+    // Mark the claim as having an unread bodyshop update so internal users see a notification bubble
+    await base44.asServiceRole.entities.Claim.update(claimId, { unread_bodyshop_update: true });
+
     // Build the update description, noting the ECD if it changed
     let updateDescription = description.trim();
     if (ecd && ecd.trim() && ecd.trim() !== (claim.ecd || '')) {
