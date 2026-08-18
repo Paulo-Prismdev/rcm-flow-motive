@@ -28,25 +28,21 @@ const getAvatarColor = (email) => {
 };
 
 const NOTIFICATION_PREFS = [
-  { key: 'tagged_in_notes', label: 'Tagged in Notes', desc: 'Mentions in notes or updates' },
-  { key: 'status_changes', label: 'Status Changes', desc: 'Status changes on your items' },
-  { key: 'new_assignments', label: 'New Assignments', desc: 'New items assigned to you' },
-  { key: 'task_assignments', label: 'Task Assignments', desc: 'Tasks assigned to you' },
-  { key: 'invoice_updates', label: 'Invoice Updates', desc: 'Invoice status changes' },
-  { key: 'estimate_requests', label: 'Estimate Requests', desc: 'New estimate requests' },
-  { key: 'parts_updates', label: 'Parts Updates', desc: 'Parts order updates' },
-  { key: 'engineering_updates', label: 'Engineering Updates', desc: 'Engineering report updates' },
-];
-
-const EMAIL_PREFS = [
-  { key: 'email_tagged_in_notes', label: 'Tagged in Notes', desc: 'Email me when mentioned' },
-  { key: 'email_status_changes', label: 'Status Changes', desc: 'Email me on status changes' },
+  { key: 'tagged_in_notes', emailKey: 'email_tagged_in_notes', label: 'Tagged in Notes', desc: 'Mentions in notes or updates' },
+  { key: 'status_changes', emailKey: 'email_status_changes', label: 'Status Changes', desc: 'Status changes on your items' },
+  { key: 'new_assignments', emailKey: 'email_new_assignments', label: 'New Assignments', desc: 'New items assigned to you' },
+  { key: 'task_assignments', emailKey: 'email_task_assignments', label: 'Task Assignments', desc: 'Tasks assigned to you' },
+  { key: 'invoice_updates', emailKey: 'email_invoice_updates', label: 'Invoice Updates', desc: 'Invoice status changes' },
+  { key: 'estimate_requests', emailKey: 'email_estimate_requests', label: 'Estimate Requests', desc: 'New estimate requests' },
+  { key: 'parts_updates', emailKey: 'email_parts_updates', label: 'Parts Updates', desc: 'Parts order updates' },
+  { key: 'engineering_updates', emailKey: 'email_engineering_updates', label: 'Engineering Updates', desc: 'Engineering report updates' },
 ];
 
 const DEFAULT_PREFS = {
   tagged_in_notes: true, status_changes: true, new_assignments: true, task_assignments: true,
   invoice_updates: true, estimate_requests: true, parts_updates: false, engineering_updates: false,
-  email_tagged_in_notes: true, email_status_changes: false,
+  email_tagged_in_notes: true, email_status_changes: false, email_new_assignments: false, email_task_assignments: false,
+  email_invoice_updates: false, email_estimate_requests: false, email_parts_updates: false, email_engineering_updates: false,
 };
 
 const Field = ({ label, icon: Icon, children, full }) => (
@@ -315,34 +311,23 @@ export default function UserProfile() {
           <div className="app-card !p-3 md:!p-4">
             <h3 className="font-semibold mb-1 flex items-center gap-2 text-sm"><Bell className="w-4 h-4 text-primary" />Notification Preferences</h3>
             <p className="text-xs text-muted-foreground mb-3">Changes save automatically.</p>
-            <div className="space-y-4">
-              <div>
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">In-App</p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {NOTIFICATION_PREFS.map(({ key, label, desc }) => (
-                    <div key={key} className="flex items-center justify-between gap-2 p-2.5 bg-muted/50 border rounded-md">
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm">{label}</p>
-                        <p className="text-[11px] text-muted-foreground truncate">{desc}</p>
-                      </div>
-                      <Switch checked={formData.notification_preferences[key]} onCheckedChange={() => handleNotificationToggle(key)} />
-                    </div>
-                  ))}
-                </div>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 px-1 pb-1">
+                <div className="flex-1" />
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground w-12 text-center">In-App</span>
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground w-12 text-center">Email</span>
               </div>
-              <div>
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">Email</p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {EMAIL_PREFS.map(({ key, label, desc }) => (
-                    <div key={key} className="flex items-center justify-between gap-2 p-2.5 bg-muted/50 border rounded-md">
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm">{label}</p>
-                        <p className="text-[11px] text-muted-foreground truncate">{desc}</p>
-                      </div>
-                      <Switch checked={formData.notification_preferences[key]} onCheckedChange={() => handleNotificationToggle(key)} />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {NOTIFICATION_PREFS.map(({ key, emailKey, label, desc }) => (
+                  <div key={key} className="flex items-center gap-2 p-2.5 bg-muted/50 border rounded-md">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm">{label}</p>
+                      <p className="text-[11px] text-muted-foreground truncate">{desc}</p>
                     </div>
-                  ))}
-                </div>
+                    <Switch checked={!!formData.notification_preferences[key]} onCheckedChange={() => handleNotificationToggle(key)} className="flex-shrink-0" />
+                    <Switch checked={!!formData.notification_preferences[emailKey]} onCheckedChange={() => handleNotificationToggle(emailKey)} className="flex-shrink-0" />
+                  </div>
+                ))}
               </div>
             </div>
           </div>

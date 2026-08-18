@@ -27,13 +27,8 @@ const getAvatarColor = (email) => {
 };
 
 const NOTIFICATION_PREFS = [
-  { key: 'status_changes', label: 'Status Changes', desc: 'When a claim/repair status changes' },
-  { key: 'tagged_in_notes', label: 'Tagged in Notes', desc: 'When someone mentions you' },
-];
-
-const EMAIL_PREFS = [
-  { key: 'email_status_changes', label: 'Status Changes', desc: 'Email me when a claim/repair status changes' },
-  { key: 'email_tagged_in_notes', label: 'Tagged in Notes', desc: 'Email me when someone mentions me' },
+  { key: 'status_changes', emailKey: 'email_status_changes', label: 'Status Changes', desc: 'When a claim/repair status changes' },
+  { key: 'tagged_in_notes', emailKey: 'email_tagged_in_notes', label: 'Tagged in Notes', desc: 'When someone mentions you' },
 ];
 
 const DEFAULT_PREFS = {
@@ -152,24 +147,19 @@ export default function PortalProfileModal({ open, onClose }) {
               <h3 className="font-semibold mb-1 flex items-center gap-2 text-sm"><Bell className="w-4 h-4 text-primary" />Notification Preferences</h3>
               <p className="text-xs text-muted-foreground mb-3">Choose what updates you receive. Changes save automatically.</p>
               <div className="space-y-2">
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">In-App</p>
-                {NOTIFICATION_PREFS.map(({ key, label, desc }) => (
-                  <div key={key} className="flex items-center justify-between gap-2 p-2.5 bg-muted/50 border rounded-md">
+                <div className="flex items-center gap-2 px-1 pb-1">
+                  <div className="flex-1" />
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground w-12 text-center">In-App</span>
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground w-12 text-center">Email</span>
+                </div>
+                {NOTIFICATION_PREFS.map(({ key, emailKey, label, desc }) => (
+                  <div key={key} className="flex items-center gap-2 p-2.5 bg-muted/50 border rounded-md">
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-sm">{label}</p>
                       <p className="text-[11px] text-muted-foreground">{desc}</p>
                     </div>
-                    <Switch checked={!!formData.notification_preferences[key]} onCheckedChange={() => handleNotificationToggle(key)} />
-                  </div>
-                ))}
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground pt-2">Email</p>
-                {EMAIL_PREFS.map(({ key, label, desc }) => (
-                  <div key={key} className="flex items-center justify-between gap-2 p-2.5 bg-muted/50 border rounded-md">
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm">{label}</p>
-                      <p className="text-[11px] text-muted-foreground">{desc}</p>
-                    </div>
-                    <Switch checked={!!formData.notification_preferences[key]} onCheckedChange={() => handleNotificationToggle(key)} />
+                    <Switch checked={!!formData.notification_preferences[key]} onCheckedChange={() => handleNotificationToggle(key)} className="flex-shrink-0" />
+                    <Switch checked={!!formData.notification_preferences[emailKey]} onCheckedChange={() => handleNotificationToggle(emailKey)} className="flex-shrink-0" />
                   </div>
                 ))}
               </div>
