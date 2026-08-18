@@ -12,14 +12,14 @@ const MILESTONES = [
   { id: 'returned', label: 'Returned to Customer' },
 ];
 
-// v2 journey order, excluding exception / outcome states. "On Site" is no longer
-// a journey status — the On Site milestone is driven by the on_site_date marker.
+// v2 journey order, excluding exception / outcome states. The On Site milestone
+// is also driven by the on_site_date marker.
 const JOURNEY_ORDER = JOURNEY_STATUSES.map(s => s.name).filter(n => !isExceptionJourney(n));
 
 const getJourneyRank = (status) => {
   const idx = JOURNEY_ORDER.indexOf(status);
   if (idx !== -1) return idx;
-  if (status === 'On Site') return 1; // legacy value — treat as Booked In level
+  if (status === 'On Site') return 2; // legacy value — treat as On-Site level
   return 0;
 };
 
@@ -105,17 +105,17 @@ export default function ClaimJourneyTimeline({ claim, updates = [] }) {
       case 'on_site':
         // Dictated by the on-site marker (on_site_date), not the journey status.
         return {
-          isCompleted: onSiteSet && currentRank >= 2,
-          isActive: onSiteSet && currentRank < 2,
+          isCompleted: onSiteSet && currentRank >= 3,
+          isActive: onSiteSet && currentRank < 3,
           date: claim.on_site_date,
           user: null,
         };
       case 'in_repair':
-        return { isCompleted: currentRank >= 4, isActive: currentRank === 2 || currentRank === 3, date: update?.created_date, user: update?.created_by };
+        return { isCompleted: currentRank >= 5, isActive: currentRank === 3 || currentRank === 4, date: update?.created_date, user: update?.created_by };
       case 'repairs_complete':
-        return { isCompleted: currentRank >= 5, isActive: currentRank === 4, date: claim.completion_date || update?.created_date, user: update?.created_by };
+        return { isCompleted: currentRank >= 6, isActive: currentRank === 5, date: claim.completion_date || update?.created_date, user: update?.created_by };
       case 'returned':
-        return { isCompleted: false, isActive: currentRank === 5, date: update?.created_date, user: update?.created_by };
+        return { isCompleted: false, isActive: currentRank === 6, date: update?.created_date, user: update?.created_by };
       default:
         return { isCompleted: false, isActive: false, date: null, user: null };
     }
