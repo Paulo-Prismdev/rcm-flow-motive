@@ -27,17 +27,12 @@ const getAvatarColor = (email) => {
 };
 
 const NOTIFICATION_PREFS = [
-  { key: 'status_changes', label: 'Status Changes', desc: 'Updates on your claims/repairs' },
-  { key: 'new_assignments', label: 'New Assignments', desc: 'When new work is assigned to you' },
-  { key: 'invoice_updates', label: 'Invoice Updates', desc: 'Invoice status changes' },
-  { key: 'estimate_requests', label: 'Estimate Requests', desc: 'New estimate requests' },
-  { key: 'parts_updates', label: 'Parts Updates', desc: 'Parts order updates' },
+  { key: 'status_changes', label: 'Status Changes', desc: 'When a claim/repair status changes' },
   { key: 'tagged_in_notes', label: 'Tagged in Notes', desc: 'When someone mentions you' },
 ];
 
 const DEFAULT_PREFS = {
-  status_changes: true, new_assignments: true, invoice_updates: true,
-  estimate_requests: true, parts_updates: false, tagged_in_notes: true,
+  status_changes: true, tagged_in_notes: true,
 };
 
 export default function PortalProfileModal({ open, onClose }) {
