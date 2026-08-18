@@ -185,13 +185,17 @@ export default function ClaimsPage() {
 
   // Group order mirrors the order of statuses configured in Settings
   // (ClaimStatusConfig, sorted by sort_order). Special groups ('Awaiting BID',
-  // 'On Site', 'Cancelled') that aren't in the config are inserted at
-  // sensible positions so claims still render correctly.
+  // 'On Site') that aren't in the config are inserted at sensible positions.
+  // "Cancelled" and "Invoiced" are relegated to the "Other" bucket at the
+  // bottom; "Awaiting Sup Authority", "Awaiting BLD Invoice" and "Invoice
+  // Pending" are positioned just above "Other".
   const availableStatuses = useMemo(() => {
     const configured = (claimStatuses || [])
       .filter(s => s.is_active !== false)
       .map(s => s.status_name);
-    const result = [...configured];
+    const otherStatuses = new Set(['Cancelled', 'Invoiced']);
+    const endStatuses = ['Awaiting Sup Authority', 'Awaiting BLD Invoice', 'Invoice Pending'];
+    let result = configured.filter(s => !otherStatuses.has(s) && !endStatuses.includes(s));
     const known = new Set(result);
     if (!known.has('Awaiting BID')) {
       const idx = result.indexOf('New');
@@ -203,9 +207,12 @@ export default function ClaimsPage() {
       result.splice(idx >= 0 ? idx + 1 : result.length, 0, 'On Site');
       known.add('On Site');
     }
-    if (!known.has('Cancelled')) {
-      result.push('Cancelled');
-    }
+    endStatuses.forEach(s => {
+      if (configured.includes(s)) {
+        result.push(s);
+        known.add(s);
+      }
+    });
     return result;
   }, [claimStatuses]);
 
