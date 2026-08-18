@@ -13,6 +13,10 @@ export default function BodyshopUpdateForm() {
   const [description, setDescription] = useState('');
   const [nextSteps, setNextSteps] = useState('');
   const [ecd, setEcd] = useState('');
+  const [hasBackorder, setHasBackorder] = useState(false);
+  const [backorderParts, setBackorderParts] = useState([
+    { part_description: '', part_number: '', supplier_name: '', expected_arrival_date: '', additional_notes: '' }
+  ]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
@@ -58,12 +62,16 @@ export default function BodyshopUpdateForm() {
     setError('');
     setIsSubmitting(true);
     try {
+      const validParts = hasBackorder
+        ? backorderParts.filter(p => p.part_description.trim())
+        : [];
       const result = await base44.functions.invoke('submitBodyshopUpdate', {
         _form_secret: formToken,
         token,
         description,
         next_steps: nextSteps,
-        ecd
+        ecd,
+        backordered_parts: validParts
       });
       if (result.data?.success) {
         setSubmitted(true);
@@ -78,6 +86,12 @@ export default function BodyshopUpdateForm() {
 
   const inputCls = 'w-full px-4 py-3 rounded-xl border border-gray-200 bg-white !bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm';
   const labelCls = 'block text-sm font-medium text-gray-600 mb-1.5';
+
+  const updatePart = (index, field, value) => {
+    setBackorderParts(prev => prev.map((p, i) => i === index ? { ...p, [field]: value } : p));
+  };
+  const addPart = () => setBackorderParts(prev => [...prev, { part_description: '', part_number: '', supplier_name: '', expected_arrival_date: '', additional_notes: '' }]);
+  const removePart = (index) => setBackorderParts(prev => prev.filter((_, i) => i !== index));
 
   // ── Loading state ──
   if (loading) {
@@ -189,6 +203,87 @@ export default function BodyshopUpdateForm() {
               onChange={(e) => setEcd(e.target.value)}
               className={inputCls}
             />
+          </div>
+
+          {/* Backordered parts */}
+          <div>
+            <label className="flex items-center gap-2.5 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={hasBackorder}
+                onChange={(e) => setHasBackorder(e.target.checked)}
+                className="w-5 h-5 rounded border-gray-300 text-[#131d47] focus:ring-[#131d47] cursor-pointer"
+              />
+              <span className="text-sm font-medium text-gray-700">Are there any backordered parts?</span>
+            </label>
+
+            {hasBackorder && (
+              <div className="mt-4 space-y-3">
+                {backorderParts.map((part, index) => (
+                  <div key={index} className="border border-gray-200 rounded-xl p-4 bg-gray-50">
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Part {index + 1}</span>
+                      {backorderParts.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => removePart(index)}
+                          className="text-gray-400 hover:text-red-500 text-xs font-medium"
+                        >
+                          Remove
+                        </button>
+                      )}
+                    </div>
+                    <div className="space-y-3">
+                      <div>
+                        <label className="block text-xs font-medium text-gray-500 mb-1">Part Description *</label>
+                        <input
+                          value={part.part_description}
+                          onChange={(e) => updatePart(index, 'part_description', e.target.value)}
+                          placeholder="e.g. Front bumper, Headlight LH..."
+                          className={inputCls}
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-xs font-medium text-gray-500 mb-1">Part Number</label>
+                          <input
+                            value={part.part_number}
+                            onChange={(e) => updatePart(index, 'part_number', e.target.value)}
+                            placeholder="OEM part number"
+                            className={inputCls}
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-500 mb-1">Supplier</label>
+                          <input
+                            value={part.supplier_name}
+                            onChange={(e) => updatePart(index, 'supplier_name', e.target.value)}
+                            placeholder="Supplier name"
+                            className={inputCls}
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-500 mb-1">Expected Arrival Date</label>
+                        <input
+                          type="date"
+                          value={part.expected_arrival_date}
+                          onChange={(e) => updatePart(index, 'expected_arrival_date', e.target.value)}
+                          className={inputCls}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={addPart}
+                  className="text-sm font-medium text-[#131d47] hover:underline"
+                >
+                  + Add another part
+                </button>
+              </div>
+            )}
           </div>
 
           <div>

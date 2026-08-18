@@ -13,7 +13,7 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { token, description, next_steps, ecd } = body;
+    const { token, description, next_steps, ecd, backordered_parts } = body;
     if (!token) {
       return Response.json({ error: 'Missing token' }, { status: 400 });
     }
@@ -40,6 +40,32 @@ Deno.serve(async (req) => {
     let updateDescription = description.trim();
     if (ecd && ecd.trim() && ecd.trim() !== (claim.ecd || '')) {
       updateDescription += `\n\nUpdated ECD: ${ecd.trim()}`;
+    }
+
+    // ── Create backordered part records if any were reported ──
+    if (backordered_parts && Array.isArray(backordered_parts) && backordered_parts.length > 0) {
+      const validParts = backordered_parts.filter((p: any) => p.part_description && p.part_description.trim());
+      if (validParts.length > 0) {
+        for (const part of validParts) {
+          await base44.asServiceRole.entities.BackorderedPart.create({
+            claim_id: claimId,
+            claim_job_number: claim.job_number || '',
+            claim_reg: claim.reg || '',
+            part_description: part.part_description.trim(),
+            part_number: (part.part_number || '').trim(),
+            supplier_name: (part.supplier_name || '').trim(),
+            expected_arrival_date: part.expected_arrival_date || '',
+            additional_notes: (part.additional_notes || '').trim(),
+            submitted_by_name: claim.bodyshop || '',
+            submitted_by_phone: '',
+            received_by_repairer: false,
+          });
+        }
+        const partsSummary = validParts.map((p: any) =>
+          `${p.part_description.trim()}${p.part_number ? ` (Part #: ${p.part_number.trim()})` : ''}`
+        ).join('; ');
+        updateDescription += `\n\nBackordered Parts: ${partsSummary}`;
+      }
     }
 
     // Create the incoming update — this resets the 48h chaser timer
