@@ -13,12 +13,11 @@ const STATUS_COLORS = {
 
 // Journey status drives the group when set; claims without a journey status
 // fall back to their Secondary status. "On Site" (via the on_site_date marker)
-// is special-cased. "Cancelled" and "Invoiced" claims are bucketed into the
-// "Other" group.
+// and "Cancelled" are special-cased as before.
 export function getGroupKey(c) {
   if (c.secondary_status === 'New') return 'New';
   const journey = c.journey_status || c.job_status;
-  if (journey === 'Cancelled') return '__other__';
+  if (journey === 'Cancelled') return 'Cancelled';
   // On-site check takes priority: if the vehicle has been marked on site and
   // not yet handed over, it belongs in the "On Site" group regardless of its
   // journey status (e.g. even if journey is still "Awaiting BID").
@@ -27,7 +26,6 @@ export function getGroupKey(c) {
     if (c.journey_status === 'On-Site') return 'On Site';
     return c.journey_status;
   }
-  if (c.secondary_status === 'Invoiced') return '__other__';
   return c.secondary_status || journey || 'New';
 }
 
