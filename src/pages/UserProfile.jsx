@@ -36,13 +36,14 @@ const NOTIFICATION_PREFS = [
   { key: 'estimate_requests', emailKey: 'email_estimate_requests', label: 'Estimate Requests', desc: 'New estimate requests' },
   { key: 'parts_updates', emailKey: 'email_parts_updates', label: 'Parts Updates', desc: 'Parts order updates' },
   { key: 'engineering_updates', emailKey: 'email_engineering_updates', label: 'Engineering Updates', desc: 'Engineering report updates' },
+  { key: 'repair_update_received', emailKey: 'email_repair_update_received', label: 'Repair Update Received', desc: 'Bodyshop repair update form submissions' },
 ];
 
 const DEFAULT_PREFS = {
   tagged_in_notes: true, status_changes: true, new_assignments: true, task_assignments: true,
-  invoice_updates: true, estimate_requests: true, parts_updates: false, engineering_updates: false,
+  invoice_updates: true, estimate_requests: true, parts_updates: false, engineering_updates: false, repair_update_received: true,
   email_tagged_in_notes: true, email_status_changes: false, email_new_assignments: false, email_task_assignments: false,
-  email_invoice_updates: false, email_estimate_requests: false, email_parts_updates: false, email_engineering_updates: false,
+  email_invoice_updates: false, email_estimate_requests: false, email_parts_updates: false, email_engineering_updates: false, email_repair_update_received: false,
 };
 
 const Field = ({ label, icon: Icon, children, full }) => (

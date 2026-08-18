@@ -24,6 +24,7 @@
         "estimate_request",
         "parts_update",
         "engineering_update",
+        "repair_update_received",
         "general"
       ],
       "description": "Type of notification"

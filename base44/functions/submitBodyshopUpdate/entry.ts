@@ -81,6 +81,54 @@ Deno.serve(async (req) => {
       next_steps: (next_steps || '').trim()
     });
 
+    // ── Notify internal users who have the "Repair Update Received" preference enabled ──
+    try {
+      const internalUsers = await base44.asServiceRole.entities.User.list('-created_date', 500);
+      const regPart = claim.reg ? ` [${claim.reg}]` : '';
+      const notifTitle = `Repair update received from ${claim.bodyshop || 'bodyshop'}${regPart}`;
+      const notifMessage = `Job ${claim.job_number || 'Unknown'}: ${updateDescription.slice(0, 200)}${updateDescription.length > 200 ? '...' : ''}`;
+      const notifLink = `/claims?id=${claimId}`;
+
+      const recipients = internalUsers.filter((u: any) => {
+        const prefs = u.notification_preferences || {};
+        return prefs.repair_update_received !== false; // default ON
+      });
+
+      for (const user of recipients) {
+        if (!user.email) continue;
+        await base44.asServiceRole.entities.Notification.create({
+          user_email: user.email,
+          title: notifTitle,
+          message: notifMessage,
+          type: 'repair_update_received',
+          related_item_type: 'Claim',
+          related_item_id: claimId,
+          link: notifLink,
+          is_read: false,
+        }).catch(() => {});
+
+        // Send email if the user has the email pref enabled
+        const prefs = user.notification_preferences || {};
+        if (prefs.email_repair_update_received) {
+          await base44.asServiceRole.integrations.Core.SendEmail({
+            to: user.email,
+            subject: notifTitle,
+            body: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">
+              <h2 style="color:#131d47;">Repair Update Received</h2>
+              <p><strong>Job:</strong> ${claim.job_number || 'Unknown'}</p>
+              <p><strong>Vehicle:</strong> ${claim.reg || 'N/A'}</p>
+              <p><strong>Bodyshop:</strong> ${claim.bodyshop || 'N/A'}</p>
+              <p><strong>Update:</strong></p>
+              <p style="background:#f5f6fa;padding:12px;border-radius:8px;white-space:pre-wrap;">${updateDescription.replace(/\n/g, '<br>')}</p>
+              <p><a href="https://app.base44.com/claims?id=${claimId}" style="background:#131d47;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;display:inline-block;">View Claim</a></p>
+            </div>`,
+          }).catch(() => {});
+        }
+      }
+    } catch (notifErr: any) {
+      console.error('Failed to send repair update notifications:', notifErr.message);
+    }
+
     console.log(`✅ Bodyshop update logged for claim ${claim.job_number}`);
 
     return Response.json({ success: true, claim_id: claimId });
