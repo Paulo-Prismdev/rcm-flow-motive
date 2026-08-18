@@ -11,10 +11,9 @@ const STATUS_COLORS = {
   gray: '#6b7280', cyan: '#06b6d4', indigo: '#6366f1', amber: '#f59e0b',
 };
 
-// Journey-status-driven groups: "Awaiting BID" and "On Site" pull in claims
-// whose journey status matches (On Site also falls back to on_site_date with no
-// hand_over_date); everything else groups by its Secondary status. Cancelled
-// journeys get their own group.
+// Journey status drives the group when set; claims without a journey status
+// fall back to their Secondary status. "On Site" (via the on_site_date marker)
+// and "Cancelled" are special-cased as before.
 export function getGroupKey(c) {
   if (c.secondary_status === 'New') return 'New';
   const journey = c.journey_status || c.job_status;
@@ -23,7 +22,10 @@ export function getGroupKey(c) {
   // not yet handed over, it belongs in the "On Site" group regardless of its
   // journey status (e.g. even if journey is still "Awaiting BID").
   if (c.on_site_date && !c.hand_over_date) return 'On Site';
-  if (c.journey_status === 'Awaiting BID') return 'Awaiting BID';
+  if (c.journey_status) {
+    if (c.journey_status === 'On-Site') return 'On Site';
+    return c.journey_status;
+  }
   return c.secondary_status || journey || 'New';
 }
 

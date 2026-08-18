@@ -78,14 +78,18 @@ const calculateClientCommStatus = (claim) => {
   return sinceCreated >= 48 ? 'Red' : 'Amber';
 };
 
-// v2 grouping: "Awaiting BID" and "On Site" groups pull in claims whose
-// journey status matches; everything else groups by its Secondary status.
+// v2 grouping: Journey status drives the group when set; claims without a
+// journey status fall back to their Secondary status. "On Site" (via the
+// on_site_date marker) and "Cancelled" are special-cased as before.
 const getGroupKey = (c) => {
   if (c.secondary_status === 'New') return 'New';
   const journey = c.journey_status || c.job_status;
   if (journey === 'Cancelled') return 'Cancelled';
   if (c.on_site_date && !c.hand_over_date) return 'On Site';
-  if (c.journey_status === 'Awaiting BID') return 'Awaiting BID';
+  if (c.journey_status) {
+    if (c.journey_status === 'On-Site') return 'On Site';
+    return c.journey_status;
+  }
   return c.secondary_status || journey || 'New';
 };
 
