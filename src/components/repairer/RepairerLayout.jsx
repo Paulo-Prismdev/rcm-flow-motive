@@ -12,10 +12,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { StatusConfigProvider } from '@/components/shared/StatusConfigContext';
 import RepairerNotifications from '@/components/repairer/RepairerNotifications';
+import PortalProfileModal from '@/components/shared/PortalProfileModal';
 
 export default function RepairerLayout({ children }) {
   const [isDark, setIsDark] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
 
   React.useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
@@ -212,6 +214,13 @@ export default function RepairerLayout({ children }) {
                       <p className="text-xs text-foreground-muted truncate">{currentUser.email}</p>
                     </div>
                   </div>
+                  <button
+                    onClick={() => { setProfileOpen(true); setMobileMenuOpen(false); }}
+                    className="w-full flex items-center gap-2 px-3 py-2 rounded-lg glass-button text-sm font-medium"
+                  >
+                    <User className="w-4 h-4" />
+                    My Profile
+                  </button>
                 </div>
               </div>
             )}
@@ -306,7 +315,14 @@ export default function RepairerLayout({ children }) {
                   <p className="font-medium">{currentUser?.full_name}</p>
                   <p className="text-xs text-foreground-muted">{currentUser?.email}</p>
                 </div>
-                <DropdownMenuItem 
+                <DropdownMenuItem
+                  onClick={() => setProfileOpen(true)}
+                  className="cursor-pointer"
+                >
+                  <User className="w-4 h-4 mr-2" />
+                  My Profile
+                </DropdownMenuItem>
+                <DropdownMenuItem
                   onClick={() => base44.auth.logout()}
                   className="cursor-pointer text-red-500"
                 >
@@ -326,6 +342,7 @@ export default function RepairerLayout({ children }) {
         </div>
       </main>
       </div>
+      <PortalProfileModal open={profileOpen} onClose={() => setProfileOpen(false)} />
     </StatusConfigProvider>
   );
 }

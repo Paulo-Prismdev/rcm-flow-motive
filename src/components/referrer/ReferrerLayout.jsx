@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
-import { LogOut, Menu, X, Search, RefreshCw, FileText, LayoutDashboard } from 'lucide-react';
+import { LogOut, Menu, X, Search, RefreshCw, FileText, LayoutDashboard, User } from 'lucide-react';
 import { StatusConfigProvider } from '../shared/StatusConfigContext';
 import GlobalSearch from '../layout/GlobalSearch';
 import Notifications from '../layout/Notifications';
 import ThemeToggle from '../layout/ThemeToggle';
+import PortalProfileModal from '../shared/PortalProfileModal';
 
 export default function ReferrerLayout({ children }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [profileOpen, setProfileOpen] = useState(false);
 
   React.useEffect(() => {
     const handleNav = (e) => {
@@ -101,6 +103,12 @@ export default function ReferrerLayout({ children }) {
               <p className="text-xs text-white/40 truncate">{currentUser?.email || ''}</p>
             </div>
             <button
+              onClick={() => setProfileOpen(true)}
+              title="My Profile"
+              className="text-white/40 hover:text-white transition-colors flex-shrink-0">
+              <User className="w-4 h-4" />
+            </button>
+            <button
               onClick={() => base44.auth.logout()}
               title="Log Out"
               className="text-white/40 hover:text-red-400 transition-colors flex-shrink-0">
@@ -190,6 +198,7 @@ export default function ReferrerLayout({ children }) {
         </main>
       </div>
     </div>
+    <PortalProfileModal open={profileOpen} onClose={() => setProfileOpen(false)} />
     </StatusConfigProvider>
   );
 }
