@@ -12,6 +12,7 @@ import OnSiteMarker from '../claims/OnSiteMarker';
 import UpdateDirectionBadges from '../claims/UpdateDirectionBadges';
 import { isUpdateTrackingClosed } from "@/components/shared/claimStatusUpdate";
 import { recomputeUpdateTimers } from "@/components/shared/recomputeUpdateTimers";
+import { createTagNotifications } from "@/components/shared/createTagNotifications";
 
 const UPDATE_TYPES = [
   "Status Change", "Client Communication", "Bodyshop Communication", "Insurer Communication",
@@ -147,6 +148,19 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
           last_client_comm_at: now.toISOString(),
           next_client_comm_due_at: new Date(now.getTime() + 48 * 60 * 60 * 1000).toISOString(),
           client_comm_status_flag: closed ? 'Gray' : 'Green',
+        });
+      }
+      // Create in-app notifications for any tagged users
+      if (updateData.tagged_user_ids && updateData.tagged_user_ids.length > 0) {
+        await createTagNotifications({
+          taggedUserIds: updateData.tagged_user_ids,
+          allUsers,
+          claim,
+          claimId,
+          updateType: updateData.update_type,
+          description: updateData.description,
+          createdByName: getDisplayName(currentUser),
+          createdByEmail: currentUser?.email,
         });
       }
       return created;

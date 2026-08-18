@@ -33,6 +33,9 @@ Deno.serve(async (req) => {
           user_email: task.assigned_to,
           title: 'Task Overdue',
           message: `Task "${task.title}" for claim ${task.claim_job_number || task.claim_reg || 'Unknown'} is overdue!`,
+          type: 'assignment',
+          related_item_type: 'Claim',
+          related_item_id: task.claim_id,
           link: `/claims?id=${task.claim_id}`,
           is_read: false
         });
@@ -52,6 +55,9 @@ Deno.serve(async (req) => {
           user_email: task.assigned_to,
           title: 'Task Due Soon',
           message: `Task "${task.title}" for claim ${task.claim_job_number || task.claim_reg || 'Unknown'} is due ${dueText}.`,
+          type: 'assignment',
+          related_item_type: 'Claim',
+          related_item_id: task.claim_id,
           link: `/claims?id=${task.claim_id}`,
           is_read: false
         });
