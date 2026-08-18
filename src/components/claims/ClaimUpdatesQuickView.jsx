@@ -51,13 +51,39 @@ export default function ClaimUpdatesQuickView({ claim, isOpen, onClose }) {
     staleTime: 0,
   });
 
-  // Clear the unread bodyshop update bubble once an internal user opens the updates view
+  // Clear the unread bodyshop update bubble and mark repair_update_received
+  // notifications as read once an internal user opens the updates view
   React.useEffect(() => {
-    if (isOpen && claimId && claim?.unread_bodyshop_update) {
+    if (!isOpen || !claimId) return;
+
+    if (claim?.unread_bodyshop_update) {
       base44.entities.Claim.update(claimId, { unread_bodyshop_update: false })
         .then(() => queryClient.invalidateQueries({ queryKey: ['claims'] }))
         .catch(err => console.error('Failed to clear unread bodyshop update flag:', err));
     }
+
+    // Always mark the current user's repair_update_received notifications for
+    // this claim as read when they open the updates view — this cleans up any
+    // notifications that were created before this auto-read logic existed.
+    (async () => {
+      try {
+        const me = await base44.auth.me();
+        if (!me?.email) return;
+        const notifs = await base44.entities.Notification.filter({
+          user_email: me.email,
+          related_item_id: claimId,
+          type: 'repair_update_received',
+          is_read: false,
+        });
+        if (notifs.length === 0) return;
+        await base44.entities.Notification.bulkUpdate(
+          notifs.map(n => ({ id: n.id, is_read: true }))
+        );
+        queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      } catch (err) {
+        console.error('Failed to mark repair update notifications as read:', err);
+      }
+    })();
   }, [isOpen, claimId, claim?.unread_bodyshop_update, queryClient]);
 
   const toggleStarMutation = useMutation({
