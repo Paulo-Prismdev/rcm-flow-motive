@@ -208,7 +208,7 @@ export default function ClaimsPage() {
       known.add('On Site');
     }
     endStatuses.forEach(s => {
-      if (configured.includes(s)) {
+      if (!known.has(s)) {
         result.push(s);
         known.add(s);
       }
