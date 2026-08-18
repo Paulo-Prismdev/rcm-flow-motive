@@ -76,7 +76,7 @@ export default function BodyshopUpdateForm() {
     setIsSubmitting(false);
   };
 
-  const inputCls = 'w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm';
+  const inputCls = 'w-full px-4 py-3 rounded-xl border border-gray-200 bg-white !bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm';
   const labelCls = 'block text-sm font-medium text-gray-600 mb-1.5';
 
   // ── Loading state ──
@@ -125,17 +125,20 @@ export default function BodyshopUpdateForm() {
 
   // ── Form ──
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
-      <div className="max-w-2xl mx-auto">
-        {/* Header */}
+    <div className="min-h-screen bg-gray-50">
+      {/* Full-width header */}
+      <div className="w-full bg-[#131d47] py-6 px-4 mb-8">
+        <div className="flex items-center justify-center">
+          <img
+            src="https://media.base44.com/images/public/68ee39fb8915b1b539e13c59/b2cb057e2_RCMAutomotiveLogoGreenAutomotivewithHLights.jpg"
+            alt="RCM Automotive"
+            className="max-h-16 w-auto object-contain"
+          />
+        </div>
+      </div>
+
+      <div className="max-w-2xl mx-auto px-4">
         <div className="text-center mb-6">
-          <div className="flex items-center justify-center mb-3">
-            <img
-              src="https://media.base44.com/images/public/68ee39fb8915b1b539e13c59/b2cb057e2_RCMAutomotiveLogoGreenAutomotivewithHLights.jpg"
-              alt="RCM Automotive"
-              className="max-h-16 w-auto object-contain"
-            />
-          </div>
           <h1 className="text-2xl font-bold text-gray-900">Repair Update Form</h1>
           <p className="text-sm text-gray-500 mt-1">Please provide an update on the repair status</p>
         </div>
