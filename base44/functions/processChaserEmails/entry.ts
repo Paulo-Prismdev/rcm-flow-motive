@@ -273,9 +273,15 @@ Deno.serve(async (req) => {
           const recipientEmail = getRecipientEmail(claim, rule);
           if (!recipientEmail) { totalSkipped++; continue; }
 
-          // Journey status filter (empty = all statuses eligible)
+          // Journey status filter (empty = all statuses eligible).
+          // Mirror the Claims page grouping (claimGrouping.getGroupKey): a claim
+          // with on_site_date set and no hand_over_date is treated as "On-Site"
+          // regardless of its stored journey_status, so the chaser matches the
+          // same "On Site" group the user sees on the status list.
           if (rule.trigger_journey_statuses && rule.trigger_journey_statuses.length > 0) {
-            if (!rule.trigger_journey_statuses.includes(claim.journey_status)) { totalSkipped++; continue; }
+            let effectiveJourney = claim.journey_status;
+            if (claim.on_site_date && !claim.hand_over_date) effectiveJourney = 'On-Site';
+            if (!rule.trigger_journey_statuses.includes(effectiveJourney)) { totalSkipped++; continue; }
           }
 
           // ── Timer check (fully configurable per rule) ──
