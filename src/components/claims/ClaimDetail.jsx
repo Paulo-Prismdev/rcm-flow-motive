@@ -28,7 +28,8 @@ import {
     Eye,
     Star,
     CheckCircle,
-    Save
+    Save,
+    Copy
 } from "lucide-react";
 import { format } from "date-fns";
 import StatusBadge from "../shared/StatusBadge";
@@ -78,6 +79,7 @@ import ClaimQuickViewModal from './ClaimQuickViewModal';
 
 import BackorderedPartsModal from './BackorderedPartsModal';
 import { formatUKRegistration } from '../shared/formatRegistration';
+import DuplicateClaimModal from './DuplicateClaimModal';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 
@@ -260,6 +262,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
   const [isSavingRegenToDocs, setIsSavingRegenToDocs] = useState(false);
 
   const [isBackorderedPartsModalOpen, setIsBackorderedPartsModalOpen] = useState(false);
+  const [isDuplicateModalOpen, setIsDuplicateModalOpen] = useState(false);
 
   const canEdit = true;
 
@@ -1523,6 +1526,16 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                 onSendEmail={() => setIsEmailModalOpen(true)}
               />
 
+              <DuplicateClaimModal
+                claim={claim}
+                isOpen={isDuplicateModalOpen}
+                onClose={() => setIsDuplicateModalOpen(false)}
+                onDuplicated={(newClaim) => {
+                  setIsDuplicateModalOpen(false);
+                  navigate(`/Claims?id=${newClaim.id}`);
+                }}
+              />
+
       <div className="flex flex-col gap-2 md:gap-3" style={{height: '100%', touchAction: 'auto', isolation: 'isolate'}}>
 
           {/* ── Starred update notice ── */}
@@ -1562,6 +1575,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
               else if (val === 'estimate') setIsEstimateModalOpen(true);
               else if (val === 'parts') setIsPartsModalOpen(true);
               else if (val === 'backorders') setIsBackorderedPartsModalOpen(true);
+              else if (val === 'duplicate') setIsDuplicateModalOpen(true);
               else if (val === 'archive') handleArchive();
               else if (val === 'delete') handleDelete();
             }}
@@ -1656,6 +1670,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                               <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsEstimateModalOpen(true); }}><Calculator className="w-4 h-4 mr-2" />Request Estimate</DropdownMenuItem>
                               <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsPartsModalOpen(true); }}><Package className="w-4 h-4 mr-2" />Log Parts Issue</DropdownMenuItem>
                               <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsBackorderedPartsModalOpen(true); }}><Package className="w-4 h-4 mr-2" />Backordered Parts</DropdownMenuItem>
+                              <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsDuplicateModalOpen(true); }}><Copy className="w-4 h-4 mr-2" />Duplicate Claim</DropdownMenuItem>
                               <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleArchive(); }} disabled={archiveMutation.isLoading}><Archive className="w-4 h-4 mr-2" />{claim.archived ? 'Unarchive' : 'Archive'}</DropdownMenuItem>
                               <DropdownMenuItem onSelect={() => handleDelete()} disabled={deleteMutation.isLoading} className="text-red-600"><Trash2 className="w-4 h-4 mr-2" />Delete</DropdownMenuItem>
                             </DropdownMenuContent>

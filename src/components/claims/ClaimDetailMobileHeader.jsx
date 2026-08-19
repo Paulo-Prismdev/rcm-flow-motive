@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowLeft, ChevronDown, FileText, Image, Mail, ListTodo, Timer, History, Package, Download, Archive, Trash2, Calculator } from 'lucide-react';
+import { ArrowLeft, ChevronDown, FileText, Image, Mail, ListTodo, Timer, History, Package, Download, Archive, Trash2, Calculator, Copy } from 'lucide-react';
 import { formatUKRegistration } from '../shared/formatRegistration';
 import StatusBadge from '../shared/StatusBadge';
 import UpdateStatusBadge from '../shared/UpdateStatusBadge';
@@ -180,6 +180,7 @@ export default function ClaimDetailMobileHeader({
             <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onAction('estimate'); }}><Calculator className="w-4 h-4 mr-2" />Request Estimate</DropdownMenuItem>
             <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onAction('parts'); }}><Package className="w-4 h-4 mr-2" />Log Parts Issue</DropdownMenuItem>
             <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onAction('backorders'); }}><Package className="w-4 h-4 mr-2" />Backordered Parts</DropdownMenuItem>
+            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onAction('duplicate'); }}><Copy className="w-4 h-4 mr-2" />Duplicate Claim</DropdownMenuItem>
             <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onAction('archive'); }}><Archive className="w-4 h-4 mr-2" />{claim.archived ? 'Unarchive' : 'Archive'}</DropdownMenuItem>
             <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onAction('delete'); }} className="text-red-600"><Trash2 className="w-4 h-4 mr-2" />Delete</DropdownMenuItem>
           </DropdownMenuContent>
