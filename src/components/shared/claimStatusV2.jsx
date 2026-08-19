@@ -19,7 +19,6 @@ export const JOURNEY_STATUSES = [
   { name: 'Booked In', color: 'indigo' },
   { name: 'On-Site', color: 'cyan' },
   { name: 'Awaiting Parts', color: 'amber' },
-  { name: 'In Repair', color: 'blue' },
   { name: 'Repairs Complete', color: 'green' },
   { name: 'Returned to Customer', color: 'green' },
   { name: 'Cancelled', color: 'red' },          // exception
@@ -103,8 +102,8 @@ const MAP_JOURNEY = {
   'On Site': 'On-Site',
   'On-Site': 'On-Site',
   'Awaiting Parts': 'Awaiting Parts',
-  'In Progress': 'In Repair',
-  'In Repair': 'In Repair',
+  'In Progress': 'On-Site',
+  'In Repair': 'On-Site',
   'Repairs Complete': 'Repairs Complete',
   'Completed': 'Returned to Customer',
   'Returned to Customer': 'Returned to Customer',
@@ -145,7 +144,12 @@ export function suggestMapping(claim) {
   const oldSecondary = (claim?.secondary_status || '').trim();
 
   const journey = MAP_JOURNEY[oldPrimary] || (oldPrimary && JOURNEY_STATUSES.some(s => s.name === oldPrimary) ? oldPrimary : 'Awaiting BID');
-  const secondary = MAP_SECONDARY[oldSecondary] || (oldSecondary && SECONDARY_STATUSES.includes(oldSecondary) ? oldSecondary : null);
+  let secondary = MAP_SECONDARY[oldSecondary] || (oldSecondary && SECONDARY_STATUSES.includes(oldSecondary) ? oldSecondary : null);
+  // Legacy "In Repair" / "In Progress" primary statuses now map to journey
+  // "On-Site" — carry the in-repair stage into the secondary status.
+  if (journey === 'On-Site' && !secondary && ['In Repair', 'In Progress'].includes(oldPrimary)) {
+    secondary = 'In Repair';
+  }
 
   // If the mapped journey is an exception, the group/tertiary statuses don't apply.
   const tertiary = null;

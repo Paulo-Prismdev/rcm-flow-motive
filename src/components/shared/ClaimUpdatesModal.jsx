@@ -8,7 +8,6 @@ import { format } from 'date-fns';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import ClaimUpdateForm from '../claims/ClaimUpdateForm';
-import OnSiteMarker from '../claims/OnSiteMarker';
 import UpdateDirectionBadges from '../claims/UpdateDirectionBadges';
 import { isUpdateTrackingClosed } from "@/components/shared/claimStatusUpdate";
 import { recomputeUpdateTimers } from "@/components/shared/recomputeUpdateTimers";
@@ -341,8 +340,6 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
         </DialogHeader>
 
         <div className="flex-1 overflow-y-auto overflow-x-hidden space-y-4 pr-2">
-          {claim && canChangeStatus && <OnSiteMarker claim={claim} />}
-
           {!showForm ? (
             <Button onClick={() => setShowForm(true)} className="w-full px-4 py-3 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-lg flex items-center justify-center gap-2">
               <Plus className="w-4 h-4" />Add New Update

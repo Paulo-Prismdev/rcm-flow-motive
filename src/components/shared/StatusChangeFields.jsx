@@ -3,14 +3,27 @@ import { JOURNEY_STATUSES, SECONDARY_STATUSES, TERTIARY_STATUSES } from './claim
 import { useStatusConfigs } from './StatusConfigContext';
 
 // Three-field v2 status selector used by the Status Change update form.
-// value: { journey, secondary, tertiary } — each '' means "no change / clear".
+// value: { journey, secondary, tertiary, on_site_date, hand_over_date } —
+// each '' means "no change / clear".
 //
 // Secondary and Tertiary options are sourced from the ClaimStatusConfig entity
 // (managed via Settings → Status Management) so the Status Settings tab is the
 // single source of truth. The hardcoded arrays in claimStatusV2 are used only
 // as a fallback when no configs have been loaded yet.
-export default function StatusChangeFields({ value, onChange }) {
+//
+// On-Site is driven by the journey status (single source of truth). Selecting
+// "On-Site" prompts for the on-site date; moving off "On-Site" to a completion
+// status (Repairs Complete / Returned to Customer) prompts for the hand-over
+// date. The dates are persisted alongside the status change via
+// buildStatusChangeClaimUpdate.
+const HANDOVER_TARGETS = ['Repairs Complete', 'Returned to Customer'];
+
+export default function StatusChangeFields({ value, onChange, claim }) {
   const { claimStatuses } = useStatusConfigs();
+  const currentJourney = claim?.journey_status || claim?.job_status || '';
+  const today = new Date().toISOString().split('T')[0];
+  const onSiteDate = value?.on_site_date || claim?.on_site_date || today;
+  const handOverDate = value?.hand_over_date || claim?.hand_over_date || today;
 
   const secondaryOptions = React.useMemo(() => {
     const configured = (claimStatuses || [])
@@ -32,6 +45,20 @@ export default function StatusChangeFields({ value, onChange }) {
     const next = { ...value, [field]: v };
     if (v && field === 'tertiary' && v === value.secondary) next.tertiary = '';
     if (v && field === 'secondary' && v === value.tertiary) next.tertiary = '';
+    // On-Site date is captured when entering On-Site; hand-over date when
+    // leaving On-Site for a completion status.
+    if (field === 'journey') {
+      if (v === 'On-Site') {
+        next.on_site_date = onSiteDate;
+        next.hand_over_date = '';
+      } else if (currentJourney === 'On-Site' && HANDOVER_TARGETS.includes(v)) {
+        next.hand_over_date = handOverDate;
+        next.on_site_date = '';
+      } else {
+        next.on_site_date = '';
+        next.hand_over_date = '';
+      }
+    }
     onChange(next);
   };
   const selectCls = 'w-full px-3 py-2 text-sm bg-background border border-border rounded-lg';
@@ -49,6 +76,9 @@ export default function StatusChangeFields({ value, onChange }) {
   const secondaryList = ensureIncluded(secondaryOptions, value.secondary);
   const tertiaryList = ensureIncluded(tertiaryOptions, value.tertiary);
 
+  const showOnSiteDate = value.journey === 'On-Site';
+  const showHandOverDate = currentJourney === 'On-Site' && HANDOVER_TARGETS.includes(value.journey);
+
   return (
     <div className="space-y-3">
       <div>
@@ -58,6 +88,20 @@ export default function StatusChangeFields({ value, onChange }) {
           {JOURNEY_STATUSES.map((s) => <option key={s.name} value={s.name}>{s.name}</option>)}
         </select>
       </div>
+      {showOnSiteDate && (
+        <div>
+          <label className={labelCls}>On-Site Date</label>
+          <input type="date" value={onSiteDate} onChange={(e) => onChange({ ...value, on_site_date: e.target.value })} className={selectCls} />
+          <p className="text-[10px] text-muted-foreground mt-0.5">Recorded in Key Dates as the on-site date.</p>
+        </div>
+      )}
+      {showHandOverDate && (
+        <div>
+          <label className={labelCls}>Hand-Over Date</label>
+          <input type="date" value={handOverDate} onChange={(e) => onChange({ ...value, hand_over_date: e.target.value })} className={selectCls} />
+          <p className="text-[10px] text-muted-foreground mt-0.5">Vehicle handed back to customer — recorded in Key Dates.</p>
+        </div>
+      )}
       <div>
         <label className={labelCls}>Secondary Status (group)</label>
         <select value={value.secondary || ''} onChange={(e) => set('secondary', e.target.value)} className={selectCls}>
