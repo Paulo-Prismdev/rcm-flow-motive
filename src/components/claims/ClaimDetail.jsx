@@ -183,7 +183,7 @@ const SECTION_FIELDS = {
   referrer: ['referrer', 'referrer_ref', 'file_handler'],
   bodyshop: ['bodyshop'],
   financials: ['estimate_cost_net', 'authority_cost_net', 'final_repair_cost'],
-  dates: ['date_received', 'loss_date', 'booking_in_date', 'completion_date'],
+  dates: ['date_received', 'loss_date', 'booking_in_date', 'completion_date', 'claim_complete_date'],
   excessContribution: ['excess_contribution_amount', 'excess_contribution_method'],
   indemnity: ['indemnity_driver_dob', 'indemnity_registered_owner'],
   repairPreference: ['repair_preference_signed', 'repair_preference_pdf_url'],
@@ -1211,6 +1211,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
               <DetailRow label="Hand Over Date" value={claim.hand_over_date} isDate />
               <DetailRow label="Est. Completion (ECD)" value={claim.ecd} isDate />
               <DetailRow label="Completion Date" value={claim.completion_date} isDate />
+              <DetailRow label="Claim Complete Date" value={claim.claim_complete_date} isDate />
             </div>
           </EditableSection>
         );
