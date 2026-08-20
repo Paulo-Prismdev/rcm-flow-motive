@@ -72,13 +72,11 @@ export function computeClientCommStatusFlag(claim) {
 // journey / secondary / tertiary are the v2 single-select values from the form.
 // job_status is kept in sync with journey so legacy readers (closed detection,
 // existing reports) keep working during the v2 transition.
-export function buildStatusChangeClaimUpdate(claim, { journey, secondary, tertiary, on_site_date, hand_over_date }, updateType) {
+export function buildStatusChangeClaimUpdate(claim, { journey, secondary, tertiary, on_site_date, hand_over_date, completion_date }, updateType) {
   const updateData = {};
   if (updateType !== 'Status Change') return updateData;
 
   const effectiveJourney = journey || claim?.journey_status;
-  const currentJourney = claim?.journey_status || claim?.job_status;
-  const HANDOVER_TARGETS = ['Repairs Complete', 'Returned to Customer'];
   const today = new Date().toISOString().split('T')[0];
 
   if (effectiveJourney) {
@@ -89,13 +87,17 @@ export function buildStatusChangeClaimUpdate(claim, { journey, secondary, tertia
   updateData.tertiary_status = tertiary || null;
 
   // On-Site is driven by the journey status (single source of truth). Entering
-  // "On-Site" sets the on-site date (clearing any prior hand-over); leaving
-  // "On-Site" for a completion status sets the hand-over date.
+  // "On-Site" sets the on-site date (clearing any prior hand-over — the vehicle
+  // is back on site). "Repairs Complete" sets the completion date; "Returned to
+  // Customer" sets the hand-over date. Each milestone only writes its own date.
   if (effectiveJourney === 'On-Site') {
     updateData.on_site_date = on_site_date || claim?.on_site_date || today;
     updateData.hand_over_date = null;
   }
-  if (currentJourney === 'On-Site' && HANDOVER_TARGETS.includes(effectiveJourney)) {
+  if (effectiveJourney === 'Repairs Complete') {
+    updateData.completion_date = completion_date || claim?.completion_date || today;
+  }
+  if (effectiveJourney === 'Returned to Customer') {
     updateData.hand_over_date = hand_over_date || claim?.hand_over_date || today;
   }
 

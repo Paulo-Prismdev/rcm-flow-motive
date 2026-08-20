@@ -33,6 +33,7 @@ export default function ClaimUpdateForm({
     new_secondary_status: claim?.secondary_status || '',
     new_tertiary_status: claim?.tertiary_status || '',
     new_on_site_date: '',
+    new_completion_date: '',
     new_hand_over_date: ''
   });
   const [sendEmail, setSendEmail] = useState(false);
@@ -77,7 +78,7 @@ export default function ClaimUpdateForm({
       if (updateData.update_type === 'Status Change') {
         const claimUpdate = buildStatusChangeClaimUpdate(claim, {
           journey: updateData.new_journey, secondary: updateData.new_secondary_status, tertiary: updateData.new_tertiary_status,
-          on_site_date: updateData.new_on_site_date, hand_over_date: updateData.new_hand_over_date
+          on_site_date: updateData.new_on_site_date, completion_date: updateData.new_completion_date, hand_over_date: updateData.new_hand_over_date
         }, updateData.update_type);
         if (Object.keys(claimUpdate).length > 0) {
           await base44.entities.Claim.update(claimId, claimUpdate);
@@ -131,7 +132,7 @@ export default function ClaimUpdateForm({
   });
 
   const resetForm = () => {
-    setNewUpdate({ update_type: 'Other', direction: '', platform: '', description: '', next_steps: '', due_date_for_next_action: '', new_journey: claim?.journey_status || claim?.job_status || currentStatus || '', new_secondary_status: claim?.secondary_status || '', new_tertiary_status: claim?.tertiary_status || '', new_on_site_date: '', new_hand_over_date: '' });
+    setNewUpdate({ update_type: 'Other', direction: '', platform: '', description: '', next_steps: '', due_date_for_next_action: '', new_journey: claim?.journey_status || claim?.job_status || currentStatus || '', new_secondary_status: claim?.secondary_status || '', new_tertiary_status: claim?.tertiary_status || '', new_on_site_date: '', new_completion_date: '', new_hand_over_date: '' });
     setSendEmail(false); setSelectedEmails([]); setTaggedUsers([]); setSubmitError(''); setShowFollowUp(false);
     if (onCancel) onCancel();
   };
@@ -208,8 +209,8 @@ export default function ClaimUpdateForm({
       finalDescription = `${finalDescription}\n\n[Emailed to: ${selectedEmails.join(', ')}]`;
     }
 
-    const { new_journey, new_secondary_status, new_tertiary_status, new_on_site_date, new_hand_over_date, ...updateDataToSave } = newUpdate;
-    createUpdateMutation.mutate({ ...updateDataToSave, description: finalDescription, tagged_user_ids: taggedUsers, new_journey, new_secondary_status, new_tertiary_status, new_on_site_date, new_hand_over_date, ...(replyToId && { parent_update_id: replyToId }) });
+    const { new_journey, new_secondary_status, new_tertiary_status, new_on_site_date, new_completion_date, new_hand_over_date, ...updateDataToSave } = newUpdate;
+    createUpdateMutation.mutate({ ...updateDataToSave, description: finalDescription, tagged_user_ids: taggedUsers, new_journey, new_secondary_status, new_tertiary_status, new_on_site_date, new_completion_date, new_hand_over_date, ...(replyToId && { parent_update_id: replyToId }) });
   };
 
   const getAvailableEmails = () => {
@@ -264,8 +265,8 @@ export default function ClaimUpdateForm({
         {!replyToId && newUpdate.update_type === 'Status Change' && canChangeStatus && (
           <StatusChangeFields
             claim={claim}
-            value={{ journey: newUpdate.new_journey, secondary: newUpdate.new_secondary_status, tertiary: newUpdate.new_tertiary_status, on_site_date: newUpdate.new_on_site_date, hand_over_date: newUpdate.new_hand_over_date }}
-            onChange={(v) => setNewUpdate({ ...newUpdate, new_journey: v.journey, new_secondary_status: v.secondary, new_tertiary_status: v.tertiary, new_on_site_date: v.on_site_date || '', new_hand_over_date: v.hand_over_date || '' })}
+            value={{ journey: newUpdate.new_journey, secondary: newUpdate.new_secondary_status, tertiary: newUpdate.new_tertiary_status, on_site_date: newUpdate.new_on_site_date, completion_date: newUpdate.new_completion_date, hand_over_date: newUpdate.new_hand_over_date }}
+            onChange={(v) => setNewUpdate({ ...newUpdate, new_journey: v.journey, new_secondary_status: v.secondary, new_tertiary_status: v.tertiary, new_on_site_date: v.on_site_date || '', new_completion_date: v.completion_date || '', new_hand_over_date: v.hand_over_date || '' })}
           />
         )}
 

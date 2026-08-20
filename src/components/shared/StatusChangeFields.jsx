@@ -12,17 +12,15 @@ import { useStatusConfigs } from './StatusConfigContext';
 // as a fallback when no configs have been loaded yet.
 //
 // On-Site is driven by the journey status (single source of truth). Selecting
-// "On-Site" prompts for the on-site date; moving off "On-Site" to a completion
-// status (Repairs Complete / Returned to Customer) prompts for the hand-over
-// date. The dates are persisted alongside the status change via
+// "On-Site" prompts for the on-site date; "Repairs Complete" prompts for the
+// completion date; "Returned to Customer" prompts for the hand-over date. The
+// dates are persisted alongside the status change via
 // buildStatusChangeClaimUpdate.
-const HANDOVER_TARGETS = ['Repairs Complete', 'Returned to Customer'];
-
 export default function StatusChangeFields({ value, onChange, claim }) {
   const { claimStatuses } = useStatusConfigs();
-  const currentJourney = claim?.journey_status || claim?.job_status || '';
   const today = new Date().toISOString().split('T')[0];
   const onSiteDate = value?.on_site_date || claim?.on_site_date || today;
+  const completionDate = value?.completion_date || claim?.completion_date || today;
   const handOverDate = value?.hand_over_date || claim?.hand_over_date || today;
 
   const secondaryOptions = React.useMemo(() => {
@@ -45,17 +43,24 @@ export default function StatusChangeFields({ value, onChange, claim }) {
     const next = { ...value, [field]: v };
     if (v && field === 'tertiary' && v === value.secondary) next.tertiary = '';
     if (v && field === 'secondary' && v === value.tertiary) next.tertiary = '';
-    // On-Site date is captured when entering On-Site; hand-over date when
-    // leaving On-Site for a completion status.
+    // On-Site date when entering On-Site; completion date for Repairs Complete;
+    // hand-over date for Returned to Customer.
     if (field === 'journey') {
       if (v === 'On-Site') {
         next.on_site_date = onSiteDate;
+        next.completion_date = '';
         next.hand_over_date = '';
-      } else if (currentJourney === 'On-Site' && HANDOVER_TARGETS.includes(v)) {
+      } else if (v === 'Repairs Complete') {
+        next.completion_date = completionDate;
+        next.on_site_date = '';
+        next.hand_over_date = '';
+      } else if (v === 'Returned to Customer') {
         next.hand_over_date = handOverDate;
         next.on_site_date = '';
+        next.completion_date = '';
       } else {
         next.on_site_date = '';
+        next.completion_date = '';
         next.hand_over_date = '';
       }
     }
@@ -77,7 +82,8 @@ export default function StatusChangeFields({ value, onChange, claim }) {
   const tertiaryList = ensureIncluded(tertiaryOptions, value.tertiary);
 
   const showOnSiteDate = value.journey === 'On-Site';
-  const showHandOverDate = currentJourney === 'On-Site' && HANDOVER_TARGETS.includes(value.journey);
+  const showCompletionDate = value.journey === 'Repairs Complete';
+  const showHandOverDate = value.journey === 'Returned to Customer';
 
   return (
     <div className="space-y-3">
@@ -93,6 +99,13 @@ export default function StatusChangeFields({ value, onChange, claim }) {
           <label className={labelCls}>On-Site Date</label>
           <input type="date" value={onSiteDate} onChange={(e) => onChange({ ...value, on_site_date: e.target.value })} className={selectCls} />
           <p className="text-[10px] text-muted-foreground mt-0.5">Recorded in Key Dates as the on-site date.</p>
+        </div>
+      )}
+      {showCompletionDate && (
+        <div>
+          <label className={labelCls}>Completion Date</label>
+          <input type="date" value={completionDate} onChange={(e) => onChange({ ...value, completion_date: e.target.value })} className={selectCls} />
+          <p className="text-[10px] text-muted-foreground mt-0.5">Repairs complete — recorded in Key Dates as the completion date.</p>
         </div>
       )}
       {showHandOverDate && (
