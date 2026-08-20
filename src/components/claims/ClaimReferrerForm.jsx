@@ -39,7 +39,7 @@ export default function ClaimReferrerForm({ claim, onSave, onCancel }) {
                 referrer_ref: '',
                 file_handler: '',
                 percent_to_referrer: 0,
-                referral_fee_repairer: 0
+                referral_fee_repairer: 20
             }));
         } else {
             setFormData(prev => ({

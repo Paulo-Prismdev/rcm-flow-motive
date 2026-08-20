@@ -144,7 +144,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
     tp_vehicle_damage: '', tp_vehicle_type: 'Car', tp_unroadworthy: false,
     tp_recovery_required: false, bodyshop: '', bodyshop_id: null, bodyshop_email: '',
     authorising_party: '', audatex_code: '', send_estimate_email: '', artura_est_url: '',
-    est_fee: 0, referral_fee_repairer: 0, percent_bld_instruction: 0,
+    est_fee: 0, referral_fee_repairer: 20, percent_bld_instruction: 0,
     date_received: new Date().toISOString().split('T')[0],
     estimate_completed: '', authority_received: '', bs_instructed: '',
     booking_in_date: '', on_site_date: '', all_parts_on_site: '', ecd: '',
@@ -318,7 +318,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
   const handleReferrerChange = (referrer) => {
     setReferrerCompanyId(referrer.id);
     if (!referrer) {
-      setFormData(prev => ({ ...prev, referrer: '', referrer_id: null, referrer_email: '', file_handler: '', percent_to_referrer: 0, referral_fee_repairer: 0 }));
+      setFormData(prev => ({ ...prev, referrer: '', referrer_id: null, referrer_email: '', file_handler: '', percent_to_referrer: 0, referral_fee_repairer: 20 }));
       return;
     }
     setFormData(prev => ({

@@ -14,7 +14,13 @@ import {
 } from "@/components/ui/dialog";
 
 export default function ClaimBodyshopForm({ claim, onSave, onCancel }) {
-    const [formData, setFormData] = useState(claim || {});
+    const [formData, setFormData] = useState(() => {
+        if (!claim) return {};
+        // Default the % referral fee to 20 when neither the % nor the £
+        // amount has been set (referrer schemes / manual edits win otherwise).
+        const feeUnset = !claim.referral_fee_repairer && !claim.referral_fee_repairer_gbp;
+        return { ...claim, ...(feeUnset && { referral_fee_repairer: 20 }) };
+    });
     const [isUnallocateOpen, setIsUnallocateOpen] = useState(false);
     const [unallocateReason, setUnallocateReason] = useState('');
     const [isUnallocating, setIsUnallocating] = useState(false);
