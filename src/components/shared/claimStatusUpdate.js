@@ -57,6 +57,10 @@ export function computeClientCommStatusFlag(claim) {
     // Override expired — fall through to time-based calculation
   }
 
+  // Once the vehicle has been handed back to the customer, client 48h
+  // communication tracking is complete — show Blue regardless of timers.
+  if (claim.hand_over_date) return 'Blue';
+
   if (isUpdateTrackingClosed(claim)) return 'Gray';
 
   const nextDue = claim.next_client_comm_due_at ? new Date(claim.next_client_comm_due_at) : null;
