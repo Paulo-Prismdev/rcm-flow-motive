@@ -23,6 +23,7 @@ export default function ClaimDatesForm({ claim, onSave, onCancel }) {
         hand_over_date: toInputDate(claim.hand_over_date),
         ecd: toInputDate(claim.ecd),
         completion_date: toInputDate(claim.completion_date),
+        claim_complete_date: toInputDate(claim.claim_complete_date),
     });
 
     const handleChange = (field, value) => {
@@ -75,6 +76,10 @@ export default function ClaimDatesForm({ claim, onSave, onCancel }) {
                 <div>
                     <label className="text-sm text-gray-500">Completion Date</label>
                     <Input type="date" value={formData.completion_date} onChange={e => handleChange('completion_date', e.target.value)} className="neomorph-inset" />
+                </div>
+                <div>
+                    <label className="text-sm text-gray-500">Claim Complete Date</label>
+                    <Input type="date" value={formData.claim_complete_date} onChange={e => handleChange('claim_complete_date', e.target.value)} className="neomorph-inset" />
                 </div>
             </div>
             <div className="flex justify-end gap-3 pt-4">

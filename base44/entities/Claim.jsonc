@@ -508,6 +508,11 @@
       "type": "string",
       "format": "date"
     },
+    "claim_complete_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date the claim was marked Claim Complete (final closure of the job)"
+    },
     "invoice_received_repairer": {
       "type": "string",
       "format": "date"

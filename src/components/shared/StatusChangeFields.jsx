@@ -21,6 +21,7 @@ export default function StatusChangeFields({ value, onChange, claim }) {
   const today = new Date().toISOString().split('T')[0];
   const onSiteDate = value?.on_site_date || claim?.on_site_date || today;
   const completionDate = value?.completion_date || claim?.completion_date || today;
+  const claimCompleteDate = value?.claim_complete_date || claim?.claim_complete_date || today;
   const handOverDate = value?.hand_over_date || claim?.hand_over_date || today;
 
   const secondaryOptions = React.useMemo(() => {
@@ -58,9 +59,16 @@ export default function StatusChangeFields({ value, onChange, claim }) {
         next.hand_over_date = handOverDate;
         next.on_site_date = '';
         next.completion_date = '';
+        next.claim_complete_date = '';
+      } else if (v === 'Claim Complete') {
+        next.claim_complete_date = claimCompleteDate;
+        next.on_site_date = '';
+        next.completion_date = '';
+        next.hand_over_date = '';
       } else {
         next.on_site_date = '';
         next.completion_date = '';
+        next.claim_complete_date = '';
         next.hand_over_date = '';
       }
     }
@@ -84,6 +92,7 @@ export default function StatusChangeFields({ value, onChange, claim }) {
   const showOnSiteDate = value.journey === 'On-Site';
   const showCompletionDate = value.journey === 'Repairs Complete';
   const showHandOverDate = value.journey === 'Returned to Customer';
+  const showClaimCompleteDate = value.journey === 'Claim Complete';
 
   return (
     <div className="space-y-3">
@@ -113,6 +122,13 @@ export default function StatusChangeFields({ value, onChange, claim }) {
           <label className={labelCls}>Hand-Over Date</label>
           <input type="date" value={handOverDate} onChange={(e) => onChange({ ...value, hand_over_date: e.target.value })} className={selectCls} />
           <p className="text-[10px] text-muted-foreground mt-0.5">Vehicle handed back to customer — recorded in Key Dates.</p>
+        </div>
+      )}
+      {showClaimCompleteDate && (
+        <div>
+          <label className={labelCls}>Claim Complete Date</label>
+          <input type="date" value={claimCompleteDate} onChange={(e) => onChange({ ...value, claim_complete_date: e.target.value })} className={selectCls} />
+          <p className="text-[10px] text-muted-foreground mt-0.5">Claim fully closed — recorded in Key Dates as the claim complete date.</p>
         </div>
       )}
       <div>

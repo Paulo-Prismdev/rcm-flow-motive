@@ -76,7 +76,7 @@ export function computeClientCommStatusFlag(claim) {
 // journey / secondary / tertiary are the v2 single-select values from the form.
 // job_status is kept in sync with journey so legacy readers (closed detection,
 // existing reports) keep working during the v2 transition.
-export function buildStatusChangeClaimUpdate(claim, { journey, secondary, tertiary, on_site_date, hand_over_date, completion_date }, updateType) {
+export function buildStatusChangeClaimUpdate(claim, { journey, secondary, tertiary, on_site_date, hand_over_date, completion_date, claim_complete_date }, updateType) {
   const updateData = {};
   if (updateType !== 'Status Change') return updateData;
 
@@ -103,6 +103,9 @@ export function buildStatusChangeClaimUpdate(claim, { journey, secondary, tertia
   }
   if (effectiveJourney === 'Returned to Customer') {
     updateData.hand_over_date = hand_over_date || claim?.hand_over_date || today;
+  }
+  if (effectiveJourney === 'Claim Complete') {
+    updateData.claim_complete_date = claim_complete_date || claim?.claim_complete_date || today;
   }
 
   // Note: the general 48hr update timer is no longer reset by a status change.
