@@ -21,6 +21,7 @@ export const JOURNEY_STATUSES = [
   { name: 'Awaiting Parts', color: 'amber' },
   { name: 'Repairs Complete', color: 'green' },
   { name: 'Returned to Customer', color: 'green' },
+  { name: 'Claim Complete', color: 'green' },
   { name: 'Cancelled', color: 'red' },          // exception
   { name: 'Potential Total Loss', color: 'orange' }, // exception
   { name: 'Total Loss', color: 'gray' },        // exception
