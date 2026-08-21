@@ -458,7 +458,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
     }
   };
 
-  const handleClaimUpdateCreated = (newStatus, newSecondaryStatus, newTertiaryStatus, updateType, direction) => {
+  const handleClaimUpdateCreated = (newStatus, newSecondaryStatus, newTertiaryStatus, updateType, direction, dates) => {
     const now = new Date();
     const effectiveStatus = newStatus || claim.job_status;
     const isClosedAfterUpdate = isUpdateTrackingClosed({ job_status: effectiveStatus, invoice_status: claim.invoice_status });
@@ -527,6 +527,17 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
       dbUpdate.tertiary_status = newTertiaryStatus || null;
       localClaim.secondary_status = newSecondaryStatus || null;
       localClaim.tertiary_status = newTertiaryStatus || null;
+      // Preserve milestone dates set by the update form (on_site_date,
+      // completion_date, etc.) so the optimistic full-object save below does
+      // not overwrite them with stale values from the old claim prop.
+      if (dates) {
+        ['on_site_date', 'completion_date', 'claim_complete_date', 'hand_over_date'].forEach((k) => {
+          if (dates[k]) {
+            dbUpdate[k] = dates[k];
+            localClaim[k] = dates[k];
+          }
+        });
+      }
     }
 
     handleUpdate(localClaim, { skipClaimUpdateLog: true });

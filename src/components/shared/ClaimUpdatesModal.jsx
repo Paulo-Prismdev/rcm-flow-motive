@@ -351,8 +351,8 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
               currentStatus={currentStatus}
               replyToId={null}
               onDirtyChange={setFormDirty}
-              onUpdateCreated={(newStatus, newSecondaryStatus, newTertiaryStatus, updateType, direction) => {
-                if (onUpdateCreated) onUpdateCreated(newStatus, newSecondaryStatus, newTertiaryStatus, updateType, direction);
+              onUpdateCreated={(newStatus, newSecondaryStatus, newTertiaryStatus, updateType, direction, dates) => {
+                if (onUpdateCreated) onUpdateCreated(newStatus, newSecondaryStatus, newTertiaryStatus, updateType, direction, dates);
                 resetForm();
               }}
               onCancel={() => { setShowForm(false); }}
@@ -437,8 +437,8 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
                             currentStatus={currentStatus}
                             replyToId={replyToId}
                             onDirtyChange={setFormDirty}
-                            onUpdateCreated={(newStatus, newSecondaryStatus, newTertiaryStatus, updateType, direction) => {
-                              if (onUpdateCreated) onUpdateCreated(newStatus, newSecondaryStatus, newTertiaryStatus, updateType, direction);
+                            onUpdateCreated={(newStatus, newSecondaryStatus, newTertiaryStatus, updateType, direction, dates) => {
+                              if (onUpdateCreated) onUpdateCreated(newStatus, newSecondaryStatus, newTertiaryStatus, updateType, direction, dates);
                               resetForm();
                             }}
                             onCancel={() => { setReplyToId(null); setShowForm(false); }}

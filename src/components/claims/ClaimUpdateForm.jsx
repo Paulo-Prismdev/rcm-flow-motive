@@ -136,7 +136,12 @@ export default function ClaimUpdateForm({
       queryClient.invalidateQueries({ queryKey: ['claimUpdates', claimId] });
       queryClient.invalidateQueries({ queryKey: ['claims'] });
       queryClient.invalidateQueries({ queryKey: ['claim', claimId] });
-      if (onUpdateCreated) onUpdateCreated(newUpdate.new_journey || null, newUpdate.new_secondary_status || null, newUpdate.new_tertiary_status || null, newUpdate.update_type, newUpdate.direction);
+      if (onUpdateCreated) onUpdateCreated(newUpdate.new_journey || null, newUpdate.new_secondary_status || null, newUpdate.new_tertiary_status || null, newUpdate.update_type, newUpdate.direction, {
+        on_site_date: newUpdate.new_on_site_date || null,
+        completion_date: newUpdate.new_completion_date || null,
+        claim_complete_date: newUpdate.new_claim_complete_date || null,
+        hand_over_date: newUpdate.new_hand_over_date || null,
+      });
       resetForm();
     },
     onError: (error) => setSubmitError(error?.message || 'Failed to create update'),
