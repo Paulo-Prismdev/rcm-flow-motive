@@ -93,6 +93,16 @@ export default function ClaimUpdateForm({
       } else {
         created = await base44.entities.ClaimUpdate.create({ ...updateData, claim_id: claimId, ...(currentUser?.company_id && { company_id: currentUser.company_id }) });
       }
+      // Incoming updates (any type) reset the general 48-hour case update timer.
+      if (updateData.update_type !== 'Status Change' && updateData.direction === 'Incoming') {
+        const now = new Date();
+        const closed = isUpdateTrackingClosed({ job_status: claim?.journey_status || claim?.job_status, invoice_status: claim?.invoice_status });
+        await base44.entities.Claim.update(claimId, {
+          last_updated_at: now.toISOString(),
+          next_update_due_at: new Date(now.getTime() + 48 * 60 * 60 * 1000).toISOString(),
+          update_status_flag: closed ? 'Gray' : 'Green',
+        });
+      }
       // Client Communication updates reset the dedicated 48-hour client
       // communication tracker (separate from the general update timer).
       // Always set last_client_comm_at so the tracker is correct even if the

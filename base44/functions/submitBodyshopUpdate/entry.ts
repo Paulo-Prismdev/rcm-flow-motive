@@ -81,6 +81,18 @@ Deno.serve(async (req) => {
       next_steps: (next_steps || '').trim()
     });
 
+    // ── Reset the general 48-hour case update timer ──
+    // An Incoming update means the case is no longer overdue for an update,
+    // so push the next-due time 48h forward and flag Green (or Gray if closed).
+    const closed = claim.job_status === 'Cancelled' ||
+      ['Invoiced', 'Invoice Paid'].includes(claim.invoice_status);
+    const now = new Date();
+    await base44.asServiceRole.entities.Claim.update(claimId, {
+      last_updated_at: now.toISOString(),
+      next_update_due_at: new Date(now.getTime() + 48 * 60 * 60 * 1000).toISOString(),
+      update_status_flag: closed ? 'Gray' : 'Green',
+    });
+
     // ── Notify internal users who have the "Repair Update Received" preference enabled ──
     try {
       const internalUsers = await base44.asServiceRole.entities.User.list('-created_date', 500);
