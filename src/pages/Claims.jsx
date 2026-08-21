@@ -16,7 +16,7 @@ import { formatUKRegistration } from '../components/shared/formatRegistration';
 import { format } from 'date-fns';
 import { useStatusConfigs } from '../components/shared/StatusConfigContext';
 import { getJourneyColor, isExceptionJourney } from '@/components/shared/claimStatusV2';
-import { isClosedJourney, isUpdateTrackingClosed } from '@/components/shared/claimStatusUpdate';
+import { isClosedJourney, isUpdateTrackingClosed, computeClientCommStatusFlag } from '@/components/shared/claimStatusUpdate';
 import { useToast } from "@/components/ui/use-toast";
 import { sanitizeClaimData } from '@/components/shared/sanitizeClaimData';
 
@@ -57,25 +57,6 @@ const calculateUpdateStatus = (claim) => {
     return 'Green';
   }
   // No update has ever been logged — never show Green
-  const sinceCreated = claim.created_date ? (now - new Date(claim.created_date)) / 3600000 : 48;
-  return sinceCreated >= 48 ? 'Red' : 'Amber';
-};
-
-// 48-hour client communication tracker: based on time since the last
-// "Client Communication" update (last_client_comm_at). Mirrors the general
-// update tracker but scoped to client communication updates only.
-const calculateClientCommStatus = (claim) => {
-  const now = new Date();
-  // Once handed back to the customer, client 48h tracking is complete (Blue)
-  if (claim.hand_over_date) return 'Complete';
-  if (isUpdateTrackingClosed(claim)) return 'Gray';
-  const lastComm = claim.last_client_comm_at;
-  if (lastComm) {
-    const hours = (now - new Date(lastComm)) / 3600000;
-    if (hours >= 48) return 'Red';
-    if (hours >= 24) return 'Amber';
-    return 'Green';
-  }
   const sinceCreated = claim.created_date ? (now - new Date(claim.created_date)) / 3600000 : 48;
   return sinceCreated >= 48 ? 'Red' : 'Amber';
 };
@@ -320,7 +301,7 @@ export default function ClaimsPage() {
     else if (repairerAcceptanceFilter === 'accepted') matchesRepairerAcceptance = c.repairer_accepted === true;
     const matchesBackorders = !hasBackorderedPartsFilter || claimIdsWithBackorders.has(c.id);
     const matchesBusinessDivision = !businessDivisionFilter || c.business_division === businessDivisionFilter;
-    const matchesOverdue = !overdueOnly || calculateUpdateStatus(c) === 'Red' || calculateClientCommStatus(c) === 'Red';
+    const matchesOverdue = !overdueOnly || calculateUpdateStatus(c) === 'Red' || computeClientCommStatusFlag(c) === 'Red';
     return matchesSearch && matchesStatus && matchesClaimType && matchesInsurer && matchesReferrer && matchesRepairer && matchesUpdateStatus && matchesRepairerAcceptance && matchesBackorders && matchesBusinessDivision && matchesOverdue;
   }).sort((a, b) => {
     if (sortBy === 'created_asc') return new Date(a.created_date) - new Date(b.created_date);
@@ -434,7 +415,7 @@ export default function ClaimsPage() {
   // The claims table row (desktop)
   const renderRow = (claim) => {
     const updateStatus = calculateUpdateStatus(claim);
-    const clientCommStatus = claim.client_comm_status_flag || 'Gray';
+    const clientCommStatus = computeClientCommStatusFlag(claim) || 'Gray';
     const isSelected = selectedClaim?.id === claim.id;
     const hasBackorder = claimIdsWithBackorders.has(claim.id);
     const isClosedStatus = isUpdateTrackingClosed(claim);
@@ -528,7 +509,7 @@ export default function ClaimsPage() {
   // Mobile card view for a single claim
   const renderMobileCard = (claim) => {
     const updateStatus = calculateUpdateStatus(claim);
-    const clientCommStatus = claim.client_comm_status_flag || 'Gray';
+    const clientCommStatus = computeClientCommStatusFlag(claim) || 'Gray';
     const hasBackorder = claimIdsWithBackorders.has(claim.id);
     const isClosedStatus = isUpdateTrackingClosed(claim);
     const isDraft = claim.draft === true;
