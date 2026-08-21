@@ -58,8 +58,8 @@ export function computeClientCommStatusFlag(claim) {
   }
 
   // Once the vehicle has been handed back to the customer, client 48h
-  // communication tracking is complete — show Blue regardless of timers.
-  if (claim.hand_over_date) return 'Blue';
+  // communication tracking is complete — show "Complete" (Blue) regardless of timers.
+  if (claim.hand_over_date) return 'Complete';
 
   if (isUpdateTrackingClosed(claim)) return 'Gray';
 

@@ -66,6 +66,8 @@ const calculateUpdateStatus = (claim) => {
 // update tracker but scoped to client communication updates only.
 const calculateClientCommStatus = (claim) => {
   const now = new Date();
+  // Once handed back to the customer, client 48h tracking is complete (Blue)
+  if (claim.hand_over_date) return 'Complete';
   if (isUpdateTrackingClosed(claim)) return 'Gray';
   const lastComm = claim.last_client_comm_at;
   if (lastComm) {

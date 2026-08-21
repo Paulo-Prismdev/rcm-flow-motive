@@ -27,6 +27,12 @@ const configs = {
     label: 'Snoozed',
     description: 'Update tracking paused',
   },
+  Complete: {
+    classes: 'bg-blue-50 text-blue-700 dark:bg-blue-900/25 dark:text-blue-300',
+    icon: CheckCircle,
+    label: 'Complete',
+    description: 'Tracking complete',
+  },
   Gray: {
     classes: 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400',
     icon: XCircle,
