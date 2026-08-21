@@ -150,7 +150,13 @@ Deno.serve(async (req) => {
     // App public URL for building external form links. Prefer the configured
     // APP_PUBLIC_URL secret, then the request Origin header (frontend-triggered
     // runs), then the request's own host as a last resort.
-    const baseUrl = (Deno.env.get('APP_PUBLIC_URL') || req.headers.get('origin') || `${url.protocol}//${url.host}`).replace(/\/+$/, '');
+    // App public URL for building external form links. Prefer the configured
+    // APP_PUBLIC_URL secret, then the request Origin header (frontend-triggered
+    // runs), then the known production app domain. We must NOT fall back to the
+    // request's own host for scheduled/automated runs — that host is the
+    // platform dispatcher (base44-dispatcher-production...), which does not serve
+    // the public /bodyshop-update page, so every link in the email would 404.
+    const baseUrl = (Deno.env.get('APP_PUBLIC_URL') || req.headers.get('origin') || 'https://app.rcmautomotive.co.uk').replace(/\/+$/, '');
     const formSecret = Deno.env.get('PUBLIC_FORM_SECRET');
 
     // ── Dry-run mode: preview who WOULD be emailed without sending anything ──
