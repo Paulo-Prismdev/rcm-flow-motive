@@ -4,13 +4,37 @@ import { secrets } from 'base44:runtime';
 const LOGO_URL = 'https://media.base44.com/images/public/68ee39fb8915b1b539e13c59/b2cb057e2_RCMAutomotiveLogoGreenAutomotivewithHLights.jpg';
 const FROM_EMAIL = 'info@rcmautomotive.co.uk';
 
-function buildBrandedHtml(textBody: string): string {
-  const innerHtml = textBody
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" style="color:#2563eb;text-decoration:underline;">click here</a>')
-    .replace(/\n/g, '<br>');
+function isHtml(s: string): boolean {
+  return /<[a-z][\s\S]*>/i.test(s);
+}
+
+function htmlToPlain(html: string): string {
+  return html
+    .replace(/<style[\s\S]*?<\/style>/gi, '')
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/p>/gi, '\n')
+    .replace(/<\/div>/gi, '\n')
+    .replace(/<\/li>/gi, '\n')
+    .replace(/<li[^>]*>/gi, '• ')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
+function buildBrandedHtml(content: string): string {
+  const isHtmlBody = isHtml(content);
+  const innerHtml = isHtmlBody
+    ? content
+    : content
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" style="color:#2563eb;text-decoration:underline;">click here</a>')
+      .replace(/\n/g, '<br>');
 
   return `<!DOCTYPE html>
 <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
@@ -58,6 +82,8 @@ export default async function(req: Request): Promise<Response> {
     const apiKey = secrets.get('SENDGRID_API_KEY');
     if (!apiKey) return Response.json({ error: 'SENDGRID_API_KEY secret is not set' }, { status: 500 });
 
+    const isHtmlBody = isHtml(email_body);
+    const plainText = isHtmlBody ? htmlToPlain(email_body) : email_body;
     const htmlBody = buildBrandedHtml(email_body);
     const fromName = user.full_name ? `${user.full_name} — RCM Automotive` : 'RCM Automotive';
 
@@ -78,7 +104,7 @@ export default async function(req: Request): Promise<Response> {
         from: { email: FROM_EMAIL, name: fromName },
         subject,
         content: [
-          { type: 'text/plain', value: email_body },
+          { type: 'text/plain', value: plainText },
           { type: 'text/html', value: htmlBody }
         ]
       })

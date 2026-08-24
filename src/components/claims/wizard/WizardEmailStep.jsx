@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+import RichTextEditor from '@/components/shared/RichTextEditor';
 import { Mail, Send } from 'lucide-react';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
@@ -41,8 +41,17 @@ export default function WizardEmailStep({
       alert('Please enter a recipient email');
       return;
     }
+    const plainBody = (emailBody || '')
+      .replace(/<br\s*\/?>/gi, '\n')
+      .replace(/<\/p>/gi, '\n')
+      .replace(/<\/li>/gi, '\n')
+      .replace(/<li[^>]*>/gi, '• ')
+      .replace(/<[^>]+>/g, '')
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&amp;/g, '&')
+      .trim();
     const ccParam = emailCc ? `&cc=${encodeURIComponent(emailCc)}` : '';
-    const mailtoUrl = `mailto:${encodeURIComponent(emailTo)}?subject=${encodeURIComponent(emailSubject || '')}${ccParam}&body=${encodeURIComponent(emailBody || '')}`;
+    const mailtoUrl = `mailto:${encodeURIComponent(emailTo)}?subject=${encodeURIComponent(emailSubject || '')}${ccParam}&body=${encodeURIComponent(plainBody)}`;
     window.location.href = mailtoUrl;
   };
 
@@ -125,7 +134,7 @@ export default function WizardEmailStep({
 
       <div>
         <label className="block text-xs font-medium mb-1">Message</label>
-        <Textarea value={emailBody} onChange={(e) => onEmailBodyChange(e.target.value)} placeholder="Email message" className="h-28" />
+        <RichTextEditor value={emailBody} onChange={onEmailBodyChange} placeholder="Email message" minHeight={160} />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">

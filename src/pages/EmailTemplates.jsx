@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Plus, Edit, Trash2, X, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import RichTextEditor from "@/components/shared/RichTextEditor";
 import {
   Select,
   SelectContent,
@@ -247,7 +247,7 @@ function TemplateFormModal({ isOpen, onClose, template, onSubmit, isLoading }) {
    });
 
    const subjectRef = useRef(null);
-   const bodyRef = useRef(null);
+   const editorRef = useRef(null);
 
    React.useEffect(() => {
     if (template) {
@@ -287,22 +287,20 @@ function TemplateFormModal({ isOpen, onClose, template, onSubmit, isLoading }) {
         input.focus();
         input.setSelectionRange(start + placeholder.length, start + placeholder.length);
       }, 0);
-    } else if (field === 'body' && bodyRef.current) {
-      const textarea = bodyRef.current;
-      const start = textarea.selectionStart || formData.body.length;
-      const end = textarea.selectionEnd || formData.body.length;
-      const newValue = formData.body.substring(0, start) + placeholder + formData.body.substring(end);
-      setFormData({ ...formData, body: newValue });
-      
-      // Set cursor position after inserted placeholder
-      setTimeout(() => {
-        textarea.focus();
-        textarea.setSelectionRange(start + placeholder.length, start + placeholder.length);
-      }, 0);
+    } else if (field === 'body') {
+      const editor = editorRef.current;
+      if (editor) {
+        const range = editor.getSelection();
+        editor.insertText(range ? range.index : editor.getLength(), placeholder);
+      } else {
+        setFormData(prev => ({ ...prev, body: (prev.body || '') + placeholder }));
+      }
     }
   };
 
   const availablePlaceholders = PLACEHOLDERS[formData.item_type] || PLACEHOLDERS.General;
+
+  const bodyIsEmpty = !formData.body || (formData.body.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, '').trim() === '' && !/<img/i.test(formData.body));
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -413,13 +411,11 @@ function TemplateFormModal({ isOpen, onClose, template, onSubmit, isLoading }) {
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
-            <Textarea
-              ref={bodyRef}
+            <RichTextEditor
               value={formData.body}
-              onChange={(e) => setFormData({ ...formData, body: e.target.value })}
+              onChange={(content) => setFormData(prev => ({ ...prev, body: content }))}
+              onEditorReady={(editor) => { editorRef.current = editor; }}
               placeholder="Email body"
-              className="h-40 font-mono text-xs"
-              required
             />
           </div>
 
@@ -434,7 +430,7 @@ function TemplateFormModal({ isOpen, onClose, template, onSubmit, isLoading }) {
             </button>
             <button
               type="button"
-              disabled={isLoading || !formData.name || !formData.subject || !formData.body}
+              disabled={isLoading || !formData.name || !formData.subject || bodyIsEmpty}
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
