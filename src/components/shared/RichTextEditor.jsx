@@ -23,9 +23,12 @@ export default function RichTextEditor({ value, onChange, onEditorReady, placeho
 
   useEffect(() => {
     if (ref.current && onEditorReady) {
-      onEditorReady(ref.current.getEditor());
+      const editor = typeof ref.current.getEditor === 'function'
+        ? ref.current.getEditor()
+        : ref.current;
+      if (editor) onEditorReady(editor);
     }
-  }, [onEditorReady]);
+  });
 
   return (
     <div className="rich-text-editor">

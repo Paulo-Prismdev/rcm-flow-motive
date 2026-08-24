@@ -251,11 +251,16 @@ function TemplateFormModal({ isOpen, onClose, template, onSubmit, isLoading }) {
 
    React.useEffect(() => {
     if (template) {
+      let body = template.body || '';
+      // Preserve line breaks for legacy plain-text bodies when loading into the rich editor
+      if (body && !/<[a-z][\s\S]*>/i.test(body)) {
+        body = body.replace(/\n/g, '<br>');
+      }
       setFormData({
         name: template.name || '',
         item_type: template.item_type || 'General',
         subject: template.subject || '',
-        body: template.body || '',
+        body,
         description: template.description || '',
       });
     } else {
@@ -289,9 +294,11 @@ function TemplateFormModal({ isOpen, onClose, template, onSubmit, isLoading }) {
       }, 0);
     } else if (field === 'body') {
       const editor = editorRef.current;
-      if (editor) {
+      if (editor && typeof editor.insertText === 'function') {
         const range = editor.getSelection();
-        editor.insertText(range ? range.index : editor.getLength(), placeholder);
+        const index = range ? range.index : editor.getLength();
+        editor.insertText(index, placeholder);
+        setFormData(prev => ({ ...prev, body: editor.root ? editor.root.innerHTML : prev.body }));
       } else {
         setFormData(prev => ({ ...prev, body: (prev.body || '') + placeholder }));
       }
