@@ -18,9 +18,9 @@ export default function WizardInstructionStep({
         <p className="text-xs text-muted-foreground">{selectedBodyshop?.email}</p>
       </div>
 
-      <h3 className="font-bold text-sm">Select Template</h3>
+      <h3 className="font-bold text-sm">Instruction Template</h3>
       <p className="text-xs text-muted-foreground">
-      Select a template to generate the bodyshop instruction PDF. It opens in a new tab and is saved to the claim when you allocate the repairer.
+        Pre-selected from your instruction type. Switch only if you need a different layout — the PDF opens in a new tab and is saved to the claim when you allocate the repairer.
       </p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">

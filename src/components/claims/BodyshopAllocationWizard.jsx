@@ -13,6 +13,15 @@ import WizardConfirmStep from './wizard/WizardConfirmStep';
 import { geocodeAddress } from '@/functions/geocodeAddress';
 import { sanitizeClaimData } from '@/components/shared/sanitizeClaimData';
 
+// Derive the PDF template from the instruction type captured in the Pre-Check
+// (authorised_by). Orkin is a branded variant the user can still pick on the
+// Generate Instruction step.
+const deriveTemplate = (ab) => {
+  if (ab === 'Third Party') return 'third_party';
+  if (ab === 'Uninsured') return 'private';
+  return 'standard';
+};
+
 export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAllocationComplete, startStep = 0, preSelectedBodyshop = null }) {
   const [currentStep, setCurrentStep] = useState(0);
   const [selectedBodyshop, setSelectedBodyshop] = useState(null);
@@ -103,15 +112,18 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
         setContactType(claim.last_contact_source ? claim.last_contact_source.toLowerCase() : 'client');
         setCustomContact({ name: '', phone: '', email: '' });
         setAuthorisedBy(claim.authorised_by || 'Client Insurer');
+        setSelectedPdfTemplate(deriveTemplate(claim.authorised_by));
 
         const initialValidation = {};
         REQUIRED_FIELDS.forEach(field => {
           initialValidation[field.key] = claim[field.key] ?? (field.type === 'boolean' ? false : '');
         });
-        // Also seed insurance fields so edits are tracked and saved
+        // Seed insurance + instruction-contact fields so any inline edits in
+        // the review step are tracked and saved.
         ['insurer', 'claim_ref', 'policy_number', 'policy_excess', 'audatex_code', 'send_estimate_email',
          'tp_insurer', 'tp_claim_ref', 'tp_policy_number', 'tp_policy_excess',
-         'tp_name', 'tp_phone', 'tp_email', 'tp_address_line_1', 'tp_address_line_2', 'tp_town', 'tp_county', 'tp_postcode'
+         'tp_name', 'tp_phone', 'tp_email', 'tp_address_line_1', 'tp_address_line_2', 'tp_town', 'tp_county', 'tp_postcode',
+         'instruction_contact_name', 'instruction_contact_email', 'instruction_contact_phone',
         ].forEach(key => {
           initialValidation[key] = claim[key] ?? '';
         });
@@ -138,33 +150,32 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
     }
   }, [isOpen, validBodyshops, preSelectedBodyshop, claim]);
 
+  // Essentials that must be present before allocation. These are normally
+  // captured in the Instruction Pre-Check panel; the review step only flags
+  // what's still missing and lets the user inline-edit those.
   const missingFields = useMemo(() => {
-    return REQUIRED_FIELDS.filter(field => {
-      if (field.type === 'boolean') return false;
-      // For contact-specific fields, check the selected contact source instead
-      if (field.key === 'client_email') {
-        if (contactType === 'driver') {
-          const v = validationData.driver_contact_email || claim.driver_contact_email;
-          return !v;
-        }
-        if (contactType === 'custom') {
-          return !customContact.email;
-        }
-      }
-      if (field.key === 'client_phone') {
-        if (contactType === 'driver') {
-          const v = validationData.driver_contact_phone || claim.driver_contact_phone;
-          return !v;
-        }
-        if (contactType === 'custom') {
-          return !customContact.phone;
-        }
-      }
-      const value = validationData[field.key];
-      if (value === null || value === undefined || value === '') return true;
-      return false;
-    });
-  }, [validationData, contactType, customContact, claim]);
+    if (!claim) return [];
+    const ab = claim.authorised_by || 'Client Insurer';
+    const isInsurer = ab === 'Client Insurer' || ab === 'Third Party Insurer';
+    const isTp = ab === 'Third Party';
+    const list = [];
+    const has = (key, fallback = '') => {
+      const v = validationData[key] ?? claim[key] ?? fallback;
+      return !(v === null || v === undefined || v === '');
+    };
+    if (!has('claim_type')) list.push({ key: 'claim_type', label: 'Claim Type', type: 'select', options: ['Fault Claim', '3rd Party Insurer Direct', '3rd Party Paying Privately', 'Credit Repair', 'Glass Claim', 'Paying Privately'] });
+    if (!has('client_name')) list.push({ key: 'client_name', label: 'Client Name', type: 'text' });
+    if (!has('instruction_contact_email', claim.client_email)) list.push({ key: 'instruction_contact_email', label: 'Contact Email', type: 'email' });
+    if (!has('instruction_contact_phone', claim.client_phone)) list.push({ key: 'instruction_contact_phone', label: 'Contact Phone', type: 'text' });
+    if (isInsurer) {
+      const insKey = ab === 'Client Insurer' ? 'insurer' : 'tp_insurer';
+      const refKey = ab === 'Client Insurer' ? 'claim_ref' : 'tp_claim_ref';
+      if (!has(insKey)) list.push({ key: insKey, label: 'Insurer Name', type: 'text' });
+      if (!has(refKey)) list.push({ key: refKey, label: 'Claim Reference', type: 'text' });
+    }
+    if (isTp && !has('tp_name')) list.push({ key: 'tp_name', label: 'Third Party Name', type: 'text' });
+    return list;
+  }, [validationData, claim]);
 
   const handleValidationChange = (key, value) => {
     setValidationData(prev => ({ ...prev, [key]: value }));
@@ -173,20 +184,18 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
   const handleSaveValidation = async () => {
     setIsSavingValidation(true);
     try {
-      // Save all edited fields (required checklist + insurance fields)
-      const dataToSave = { ...validationData };
-      dataToSave.last_contact_source = contactType.charAt(0).toUpperCase() + contactType.slice(1);
-      dataToSave.authorised_by = authorisedBy;
-      // Persist the chosen instruction contact into dedicated fields (non-destructive —
-      // does NOT overwrite the real client_email/client_phone on the claim)
-      const contactOverrides = getContactOverrides();
-      dataToSave.instruction_contact_type = contactType;
-      dataToSave.instruction_contact_name = contactOverrides.name || '';
-      dataToSave.instruction_contact_email = contactOverrides.email || '';
-      dataToSave.instruction_contact_phone = contactOverrides.phone || '';
-      await base44.entities.Claim.update(claim.id, sanitizeClaimData(dataToSave));
-      queryClient.invalidateQueries({ queryKey: ['claims'] });
-      queryClient.invalidateQueries({ queryKey: ['claim', claim.id] });
+      // The Pre-Check panel already persists instruction details. Here we only
+      // save any essentials the user inline-edited in the review step.
+      const dataToSave = {};
+      Object.keys(validationData).forEach(k => {
+        const v = validationData[k];
+        if (v !== null && v !== undefined && v !== '' && v !== claim[k]) dataToSave[k] = v;
+      });
+      if (Object.keys(dataToSave).length > 0) {
+        await base44.entities.Claim.update(claim.id, sanitizeClaimData(dataToSave));
+        queryClient.invalidateQueries({ queryKey: ['claims'] });
+        queryClient.invalidateQueries({ queryKey: ['claim', claim.id] });
+      }
       // Bodyshop was selected in step 0 (Find Repairer), so proceed to Generate Instruction
       setCurrentStep(2);
     } catch (error) {
@@ -254,23 +263,14 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
     // trigger a query refetch that resets the wizard step.
   };
 
-  const getContactOverrides = () => {
-    if (contactType === 'client') {
-      return {
-        name: validationData.client_name || claim.client_name || '',
-        phone: validationData.client_phone || claim.client_phone || '',
-        email: validationData.client_email || claim.client_email || '',
-      };
-    }
-    if (contactType === 'driver') {
-      return {
-        name: validationData.driver_contact_name || claim.driver_contact_name || '',
-        phone: validationData.driver_contact_phone || claim.driver_contact_phone || '',
-        email: validationData.driver_contact_email || claim.driver_contact_email || '',
-      };
-    }
-    return customContact;
-  };
+  // Contact details used on the instruction PDF. The Pre-Check panel writes
+  // these to the dedicated instruction_contact_* fields; fall back to the
+  // client fields if they haven't been set.
+  const getContactOverrides = () => ({
+    name: validationData.instruction_contact_name || claim.instruction_contact_name || claim.client_name || '',
+    phone: validationData.instruction_contact_phone || claim.instruction_contact_phone || claim.client_phone || '',
+    email: validationData.instruction_contact_email || claim.instruction_contact_email || claim.client_email || '',
+  });
 
   const handleGeneratePdf = async () => {
     setIsGeneratingPdf(true);
@@ -460,13 +460,7 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
               claim={claim}
               validationData={validationData}
               missingFields={missingFields}
-              contactType={contactType}
-              customContact={customContact}
-              authorisedBy={authorisedBy}
               onValidationChange={handleValidationChange}
-              onContactTypeChange={setContactType}
-              onAuthorisedByChange={setAuthorisedBy}
-              onCustomContactChange={(field, value) => setCustomContact(prev => ({ ...prev, [field]: value }))}
               isLocked={isLocked}
             />
           )}

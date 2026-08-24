@@ -1,15 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { AlertTriangle, Pencil, Check } from 'lucide-react';
+import { AlertTriangle, Pencil, Check, User, Car, Phone } from 'lucide-react';
 
 const CLAIM_TYPES = ['Fault Claim', '3rd Party Insurer Direct', '3rd Party Paying Privately', 'Credit Repair', 'Glass Claim', 'Paying Privately'];
 const VAT_STATUSES = ['VAT Registered', 'Non-VAT', 'Unknown'];
-
-function resolveContactSource(claim) {
-  const nameField = claim.instruction_contact_name ? 'instruction_contact_name' : claim.driver_contact_name ? 'driver_contact_name' : 'client_name';
-  const phoneField = claim.instruction_contact_phone ? 'instruction_contact_phone' : claim.driver_contact_phone ? 'driver_contact_phone' : 'client_phone';
-  const emailField = claim.instruction_contact_email ? 'instruction_contact_email' : claim.driver_contact_email ? 'driver_contact_email' : 'client_email';
-  return { nameField, phoneField, emailField };
-}
 
 const INSTRUCTION_TYPES = [
   { value: 'standard', label: 'Standard (Client Insurer)' },
@@ -26,6 +19,12 @@ function deriveInstructionType(claim) {
   if (ab === 'Third Party Insurer') return 'tp_insurer';
   return 'standard';
 }
+
+const CONTACT_SOURCES = [
+  { value: 'client', label: 'Client', icon: User },
+  { value: 'driver', label: 'Driver', icon: Car },
+  { value: 'custom', label: 'Custom', icon: Phone },
+];
 
 function Row({ label, field, value, claim, onFieldChange, type = 'text', options, sourceLabel }) {
   const [val, setVal] = useState(value ?? '');
@@ -105,7 +104,6 @@ function Group({ title, children }) {
   );
 }
 
-// Insurance field sets per instruction type — mirrors what the PDF renders
 function InsuranceSection({ instructionType, claim, onUpdate }) {
   if (instructionType === 'private') {
     return (
@@ -133,7 +131,6 @@ function InsuranceSection({ instructionType, claim, onUpdate }) {
       </Group>
     );
   }
-  // standard & orkin — client insurer details
   return (
     <Group title={`Insurance Details${instructionType === 'orkin' ? ' (Orkin)' : ''}`}>
       <Row label="Insurer" field="insurer" value={claim.insurer} claim={claim} onFieldChange={onUpdate} />
@@ -148,15 +145,31 @@ function InsuranceSection({ instructionType, claim, onUpdate }) {
 
 export default function InstructionPreCheck({ claim, onUpdate }) {
   const [instructionType, setInstructionType] = useState(deriveInstructionType(claim));
-  const c = resolveContactSource(claim);
+  const [contactSource, setContactSource] = useState((claim.last_contact_source || 'Client').toLowerCase());
+
   const clientAddress = [claim.client_address_line_1, claim.client_address_line_2, claim.client_town, claim.client_county, claim.client_postcode].filter(Boolean).join(', ');
 
-  // Persist the chosen instruction type onto the claim's authorised_by so the
-  // PDF generator picks the right template/insurer party.
   const handleTypeChange = (newType) => {
     setInstructionType(newType);
     const abMap = { standard: 'Client Insurer', tp_insurer: 'Third Party Insurer', third_party: 'Third Party', private: 'Uninsured', orkin: 'Client Insurer' };
     onUpdate({ authorised_by: abMap[newType] });
+  };
+
+  const handleContactSourceChange = (source) => {
+    setContactSource(source);
+    let name = '', email = '', phone = '';
+    if (source === 'client') {
+      name = claim.client_name || ''; email = claim.client_email || ''; phone = claim.client_phone || '';
+    } else if (source === 'driver') {
+      name = claim.driver_contact_name || ''; email = claim.driver_contact_email || ''; phone = claim.driver_contact_phone || '';
+    }
+    onUpdate({
+      last_contact_source: source.charAt(0).toUpperCase() + source.slice(1),
+      instruction_contact_type: source,
+      instruction_contact_name: name,
+      instruction_contact_email: email,
+      instruction_contact_phone: phone,
+    });
   };
 
   return (
@@ -178,14 +191,30 @@ export default function InstructionPreCheck({ claim, onUpdate }) {
         </select>
       </div>
 
+      {/* Instruction Contact selector */}
+      <Group title="Instruction Contact">
+        <div className="flex gap-1.5 px-1 pb-1.5">
+          {CONTACT_SOURCES.map((s) => {
+            const Icon = s.icon;
+            const active = contactSource === s.value;
+            return (
+              <button key={s.value} type="button" onClick={() => handleContactSourceChange(s.value)}
+                className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md border text-[11px] font-medium transition-colors ${active ? 'border-accent bg-accent/10 text-accent' : 'border-border text-muted-foreground hover:bg-muted/60'}`}>
+                <Icon className="w-3 h-3" /> {s.label}
+              </button>
+            );
+          })}
+        </div>
+        <Row label="Contact Name" field="instruction_contact_name" value={claim.instruction_contact_name} claim={claim} onFieldChange={onUpdate} sourceLabel={contactSource} />
+        <Row label="Email Address" field="instruction_contact_email" value={claim.instruction_contact_email} claim={claim} onFieldChange={onUpdate} sourceLabel={contactSource} />
+        <Row label="Contact Number" field="instruction_contact_phone" value={claim.instruction_contact_phone} claim={claim} onFieldChange={onUpdate} sourceLabel={contactSource} />
+      </Group>
+
       <Group title="Client & Repairer Details">
         <Row label="Claim Type" field="claim_type" value={claim.claim_type} claim={claim} onFieldChange={onUpdate} type="select" options={CLAIM_TYPES} />
         <Row label="Repairer" field="bodyshop" value={claim.bodyshop} claim={claim} onFieldChange={onUpdate} />
         <Row label="Client" field="client_name" value={claim.client_name} claim={claim} onFieldChange={onUpdate} />
         <Row label="Client Address" field="client_address_line_1" value={clientAddress || claim.client_address_line_1} claim={claim} onFieldChange={onUpdate} />
-        <Row label="Contact Name" field={c.nameField} value={claim[c.nameField]} claim={claim} onFieldChange={onUpdate} sourceLabel={claim.instruction_contact_name ? 'Instruction' : claim.driver_contact_name ? 'Driver' : 'Client'} />
-        <Row label="Email Address" field={c.emailField} value={claim[c.emailField]} claim={claim} onFieldChange={onUpdate} sourceLabel={claim.instruction_contact_email ? 'Instruction' : claim.driver_contact_email ? 'Driver' : 'Client'} />
-        <Row label="Contact Number" field={c.phoneField} value={claim[c.phoneField]} claim={claim} onFieldChange={onUpdate} sourceLabel={claim.instruction_contact_phone ? 'Instruction' : claim.driver_contact_phone ? 'Driver' : 'Client'} />
         <Row label="Client VAT Status" field="client_vat_status" value={claim.client_vat_status} claim={claim} onFieldChange={onUpdate} type="select" options={VAT_STATUSES} />
       </Group>
 
