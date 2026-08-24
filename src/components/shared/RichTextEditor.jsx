@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 
@@ -19,6 +19,14 @@ const FORMATS = [
 ];
 
 export default function RichTextEditor({ value, onChange, onEditorReady, placeholder, minHeight = 200 }) {
+  const ref = useRef(null);
+
+  useEffect(() => {
+    if (ref.current && onEditorReady) {
+      onEditorReady(ref.current.getEditor());
+    }
+  }, [onEditorReady]);
+
   return (
     <div className="rich-text-editor">
       <style>{`
@@ -27,14 +35,12 @@ export default function RichTextEditor({ value, onChange, onEditorReady, placeho
         .rich-text-editor .ql-container { border-bottom-left-radius: 6px; border-bottom-right-radius: 6px; }
       `}</style>
       <ReactQuill
+        ref={ref}
         theme="snow"
         modules={MODULES}
         formats={FORMATS}
         value={value || ''}
-        onChange={(content, delta, source, editor) => {
-          onChange(content);
-          if (onEditorReady) onEditorReady(editor);
-        }}
+        onChange={onChange}
         placeholder={placeholder}
       />
     </div>
