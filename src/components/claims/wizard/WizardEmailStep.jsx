@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Mail, Sparkles } from 'lucide-react';
+import { Mail, Sparkles, Send } from 'lucide-react';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { replacePlaceholders } from './WizardConstants';
 import { base44 } from '@/api/base44Client';
+import { sendInstructionEmail } from '@/functions/sendInstructionEmail';
+import { useToast } from '@/components/ui/use-toast';
 
 export default function WizardEmailStep({
   selectedBodyshop, emailTemplates, emailTo, emailSubject, emailBody,
@@ -15,6 +17,8 @@ export default function WizardEmailStep({
   onEmailToChange, onEmailSubjectChange, onEmailBodyChange, onTemplateSelect
 }) {
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isSending, setIsSending] = useState(false);
+  const { toast } = useToast();
 
   const handleTemplateSelect = (templateId) => {
     onTemplateSelect(templateId);
@@ -69,15 +73,17 @@ Courtesy car required: ${claim.courtesy_car_required ? 'Yes' : 'No'}
 Recovery required: ${claim.recovery_required ? 'Yes' : 'No'}
 Unroadworthy: ${claim.unroadworthy ? 'Yes' : 'No'}
 
-Instructions:
-- Write a clear, professional email body addressed to the repairer.
-- Ask them to confirm acceptance of the repair and to book the vehicle in.
-- Mention the vehicle, damage, and where it is located.
-- Include the contact details for the customer so the repairer can arrange collection/booking.
-- Mention whether a courtesy car is needed and whether recovery is required.
-- Reference the insurer and claim reference where relevant.
-- Keep it concise and polite. Sign off as "RCM Automotive".
-- Return JSON with two fields: "subject" (a short email subject line including the job number and vehicle reg) and "body" (the full email body as plain text, no markdown).`;
+Instructions for the email body:
+- Start with a one-line greeting to the repairer.
+- Write a short opening paragraph explaining that we are instructing them to carry out repairs on the vehicle above.
+- Then use a CLEARLY LABELED section titled "Vehicle Details" (in capitals on its own line) listing the vehicle, reg, and damage.
+- Then a section titled "Customer Contact Details" listing the contact name, phone, and email.
+- Then a section titled "Insurance Details" listing the authorised by, insurer, claim reference, and policy number (only include lines that have values).
+- Then a section titled "Additional Requirements" listing courtesy car, recovery, and unroadworthy status (only if any are relevant/yes).
+- Then a short closing paragraph asking them to confirm acceptance and to contact the customer to arrange booking/collection.
+- Sign off with "Kind regards," followed by "RCM Automotive" on the next line.
+- Use blank lines between paragraphs and sections so it is easy to read.
+- Return JSON with two fields: "subject" (a short email subject line including the job number and vehicle reg) and "body" (the full email body as plain text with the structure above, no markdown).`;
 
       const result = await base44.integrations.Core.InvokeLLM({
         prompt,
@@ -109,6 +115,38 @@ Instructions:
     }
     const mailtoUrl = `mailto:${encodeURIComponent(emailTo)}?subject=${encodeURIComponent(emailSubject || '')}&body=${encodeURIComponent(emailBody || '')}`;
     window.location.href = mailtoUrl;
+  };
+
+  const handleSendBranded = async () => {
+    if (!emailTo) {
+      toast({ title: 'Recipient required', description: 'Please enter a recipient email before sending.', variant: 'destructive' });
+      return;
+    }
+    if (!emailSubject || !emailBody) {
+      toast({ title: 'Content required', description: 'Please add a subject and message before sending.', variant: 'destructive' });
+      return;
+    }
+    setIsSending(true);
+    try {
+      const res = await sendInstructionEmail({
+        to: emailTo,
+        subject: emailSubject,
+        email_body: emailBody,
+        claim_id: claim?.id,
+        job_number: claim?.job_number
+      });
+      const data = res?.data || res;
+      if (data?.success) {
+        toast({ title: 'Email sent', description: `Branded instruction email sent to ${emailTo}.` });
+      } else {
+        throw new Error(data?.error || 'Unknown error');
+      }
+    } catch (error) {
+      console.error('Failed to send branded email:', error);
+      toast({ title: 'Send failed', description: error.message || 'Could not send the email. Please try again or use Outlook.', variant: 'destructive' });
+    } finally {
+      setIsSending(false);
+    }
   };
 
   return (
@@ -168,12 +206,18 @@ Instructions:
         <Textarea value={emailBody} onChange={(e) => onEmailBodyChange(e.target.value)} placeholder="Email message" className="h-28" />
       </div>
 
-      <Button onClick={handleOpenInOutlook} className="w-full h-10">
-        <Mail className="w-4 h-4 mr-2" /> Open in Outlook
-      </Button>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <Button onClick={handleSendBranded} disabled={isSending} className="h-10">
+          <Send className={`w-4 h-4 mr-2 ${isSending ? 'animate-pulse' : ''}`} />
+          {isSending ? 'Sending…' : 'Send Branded Email'}
+        </Button>
+        <Button onClick={handleOpenInOutlook} variant="outline" className="h-10">
+          <Mail className="w-4 h-4 mr-2" /> Open in Outlook
+        </Button>
+      </div>
 
       <p className="text-xs text-muted-foreground text-center">
-        You can skip this step if you prefer to send the email manually later.
+        "Send Branded Email" sends directly with the RCM logo &amp; footer. "Open in Outlook" opens your email client to review first.
       </p>
     </div>
   );
