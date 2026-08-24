@@ -57,7 +57,7 @@ function Row({ label, field, value, claim, onFieldChange, type = 'text', options
       {options.map((o) => <option key={o} value={o}>{o}</option>)}
     </select>
   ) : type === 'boolean' ? (
-    <select ref={inputRef} value={val === true ? 'true' : val === false ? 'false' : ''} onChange={(e) => setVal(e.target.value)} onBlur={commit}
+    <select ref={inputRef} value={val === true || val === 'true' ? 'true' : val === false || val === 'false' ? 'false' : ''} onChange={(e) => setVal(e.target.value)} onBlur={commit}
       className="w-full bg-transparent border-0 p-0 text-sm font-medium text-foreground focus:outline-none">
       <option value="">—</option>
       <option value="true">Yes</option>
