@@ -1262,13 +1262,6 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                 </div>
               </div>
             )}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
-              <DetailRow label="Bodyshop" value={claim.bodyshop} />
-              <DetailRow label="Bodyshop Email" value={claim.bodyshop_email} />
-              <DetailRow label="Repairer Referral Fee (%)" value={claim.referral_fee_repairer} />
-              <DetailRow label="Repairer Referral Fee (£)" value={claim.referral_fee_repairer_gbp} />
-            </div>
-
             {/* Extended bodyshop information when allocated */}
             {claim.bodyshop_id && (
               <>
