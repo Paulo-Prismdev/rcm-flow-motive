@@ -22,6 +22,8 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
@@ -305,7 +307,7 @@ function TemplateFormModal({ isOpen, onClose, template, onSubmit, isLoading }) {
     }
   };
 
-  const availablePlaceholders = PLACEHOLDERS[formData.item_type] || PLACEHOLDERS.General;
+  const placeholderGroups = Object.entries(PLACEHOLDERS).map(([type, items]) => ({ type, items }));
 
   const bodyIsEmpty = !formData.body || (formData.body.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, '').trim() === '' && !/<img/i.test(formData.body));
 
@@ -367,18 +369,24 @@ function TemplateFormModal({ isOpen, onClose, template, onSubmit, isLoading }) {
                     + Placeholder
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="max-h-48 overflow-y-auto text-xs">
-                  {availablePlaceholders.map(({ tag, label }) => (
-                    <DropdownMenuItem
-                      key={tag}
-                      onSelect={(e) => {
-                        e.preventDefault();
-                        insertPlaceholder(tag, 'subject');
-                      }}
-                    >
-                      <span className="font-mono text-[10px] mr-1">{tag}</span>
-                      <span className="text-gray-500 dark:text-gray-400">{label}</span>
-                    </DropdownMenuItem>
+                <DropdownMenuContent className="max-h-64 overflow-y-auto text-xs w-64">
+                  {placeholderGroups.map(({ type, items }) => (
+                    <React.Fragment key={type}>
+                      <DropdownMenuLabel className="text-[10px] font-semibold uppercase tracking-wide text-gray-400 px-2 py-1">{type}</DropdownMenuLabel>
+                      {items.map(({ tag, label }) => (
+                        <DropdownMenuItem
+                          key={tag}
+                          onSelect={(e) => {
+                            e.preventDefault();
+                            insertPlaceholder(tag, 'subject');
+                          }}
+                        >
+                          <span className="font-mono text-[10px] mr-1">{tag}</span>
+                          <span className="text-gray-500 dark:text-gray-400">{label}</span>
+                        </DropdownMenuItem>
+                      ))}
+                      <DropdownMenuSeparator />
+                    </React.Fragment>
                   ))}
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -402,18 +410,24 @@ function TemplateFormModal({ isOpen, onClose, template, onSubmit, isLoading }) {
                     + Placeholder
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="max-h-48 overflow-y-auto text-xs">
-                  {availablePlaceholders.map(({ tag, label }) => (
-                    <DropdownMenuItem
-                      key={tag}
-                      onSelect={(e) => {
-                        e.preventDefault();
-                        insertPlaceholder(tag, 'body');
-                      }}
-                    >
-                      <span className="font-mono text-[10px] mr-1">{tag}</span>
-                      <span className="text-gray-500 dark:text-gray-400">{label}</span>
-                    </DropdownMenuItem>
+                <DropdownMenuContent className="max-h-64 overflow-y-auto text-xs w-64">
+                  {placeholderGroups.map(({ type, items }) => (
+                    <React.Fragment key={type}>
+                      <DropdownMenuLabel className="text-[10px] font-semibold uppercase tracking-wide text-gray-400 px-2 py-1">{type}</DropdownMenuLabel>
+                      {items.map(({ tag, label }) => (
+                        <DropdownMenuItem
+                          key={tag}
+                          onSelect={(e) => {
+                            e.preventDefault();
+                            insertPlaceholder(tag, 'body');
+                          }}
+                        >
+                          <span className="font-mono text-[10px] mr-1">{tag}</span>
+                          <span className="text-gray-500 dark:text-gray-400">{label}</span>
+                        </DropdownMenuItem>
+                      ))}
+                      <DropdownMenuSeparator />
+                    </React.Fragment>
                   ))}
                 </DropdownMenuContent>
               </DropdownMenu>
