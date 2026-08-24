@@ -3,7 +3,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { X, Clock, User, Calendar, Plus, Heart, Reply, AtSign, Pencil, Trash2, Star, ChevronUp, ChevronDown } from 'lucide-react';
+import { X, Clock, User, Calendar, Plus, Heart, Reply, AtSign, Pencil, Trash2, Star, ChevronUp, ChevronDown, FileDown } from 'lucide-react';
+import { exportUpdatesToDoc } from '@/components/shared/exportUpdatesToDoc';
 import { format } from 'date-fns';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
@@ -361,7 +362,20 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
 
           <div>
             <div className="sticky top-0 z-20 flex items-center justify-between gap-2 mb-3 flex-wrap bg-background/95 backdrop-blur-sm py-1 -mx-1 px-1 rounded">
-              <h3 className="font-semibold text-sm text-foreground">Update History</h3>
+              <div className="flex items-center gap-2">
+                <h3 className="font-semibold text-sm text-foreground">Update History</h3>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => exportUpdatesToDoc({ claim, updates })}
+                  disabled={!updates || updates.length === 0}
+                  className="h-7 px-2 text-xs gap-1"
+                  title="Export updates timeline to Word"
+                >
+                  <FileDown className="w-3.5 h-3.5" />Export
+                </Button>
+              </div>
               <div className="relative flex-1 min-w-[200px] max-w-xs">
                 <input
                   type="text"
