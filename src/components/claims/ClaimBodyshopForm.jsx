@@ -135,19 +135,19 @@ export default function ClaimBodyshopForm({ claim, onSave, onCancel }) {
             </Dialog>
             
             <div className="space-y-4 pt-4">
-                {/* Change or allocate repairer */}
-                <div>
-                    <label className="text-sm text-gray-500 mb-2 block">
-                        {formData.bodyshop_id ? 'Change Repairer' : 'Allocate Repairer'}
-                    </label>
-                    <ClaimBodyshopAllocateButton
-                        claim={claim}
-                        onAllocated={(data) => {
-                            setFormData(prev => ({ ...prev, ...data }));
-                            onSave({ ...formData, ...data });
-                        }}
-                    />
-                </div>
+                {/* Allocate repairer — hidden once one is allocated (use Unallocate to change) */}
+                {!formData.bodyshop_id && (
+                    <div>
+                        <label className="text-sm text-gray-500 mb-2 block">Allocate Repairer</label>
+                        <ClaimBodyshopAllocateButton
+                            claim={claim}
+                            onAllocated={(data) => {
+                                setFormData(prev => ({ ...prev, ...data }));
+                                onSave({ ...formData, ...data });
+                            }}
+                        />
+                    </div>
+                )}
 
                 {/* Unallocate Button - only show if bodyshop is allocated */}
                 {formData.bodyshop_id && (
