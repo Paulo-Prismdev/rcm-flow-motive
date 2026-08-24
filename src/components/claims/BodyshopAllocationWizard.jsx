@@ -38,6 +38,7 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
   const [instructionSavedToDocs, setInstructionSavedToDocs] = useState(false);
 
   const [emailTo, setEmailTo] = useState('');
+  const [emailCc, setEmailCc] = useState('');
   const [emailSubject, setEmailSubject] = useState('');
   const [emailBody, setEmailBody] = useState('');
   const [selectedEmailTemplateId, setSelectedEmailTemplateId] = useState('');
@@ -101,7 +102,7 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
         setClientLocation(null);
         setGeocodeMessage(null);
         setGeneratedPdfUrl(null);
-        setEmailTo(''); setEmailSubject(''); setEmailBody('');
+        setEmailTo(''); setEmailCc(''); setEmailSubject(''); setEmailBody('');
         setSelectedEmailTemplateId('');
         setSelectedPdfTemplate(deriveTemplate(claim.authorised_by));
       }
@@ -445,11 +446,13 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
               selectedBodyshop={selectedBodyshop}
               emailTemplates={emailTemplates}
               emailTo={emailTo}
+              emailCc={emailCc}
               emailSubject={emailSubject}
               emailBody={emailBody}
               selectedEmailTemplateId={selectedEmailTemplateId}
               claim={claim}
               onEmailToChange={setEmailTo}
+              onEmailCcChange={setEmailCc}
               onEmailSubjectChange={setEmailSubject}
               onEmailBodyChange={setEmailBody}
               onTemplateSelect={setSelectedEmailTemplateId}

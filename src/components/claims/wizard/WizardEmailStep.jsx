@@ -11,9 +11,9 @@ import { sendInstructionEmail } from '@/functions/sendInstructionEmail';
 import { useToast } from '@/components/ui/use-toast';
 
 export default function WizardEmailStep({
-  selectedBodyshop, emailTemplates, emailTo, emailSubject, emailBody,
+  selectedBodyshop, emailTemplates, emailTo, emailCc, emailSubject, emailBody,
   selectedEmailTemplateId, claim,
-  onEmailToChange, onEmailSubjectChange, onEmailBodyChange, onTemplateSelect
+  onEmailToChange, onEmailCcChange, onEmailSubjectChange, onEmailBodyChange, onTemplateSelect
 }) {
   const [isSending, setIsSending] = useState(false);
   const { toast } = useToast();
@@ -41,7 +41,8 @@ export default function WizardEmailStep({
       alert('Please enter a recipient email');
       return;
     }
-    const mailtoUrl = `mailto:${encodeURIComponent(emailTo)}?subject=${encodeURIComponent(emailSubject || '')}&body=${encodeURIComponent(emailBody || '')}`;
+    const ccParam = emailCc ? `&cc=${encodeURIComponent(emailCc)}` : '';
+    const mailtoUrl = `mailto:${encodeURIComponent(emailTo)}?subject=${encodeURIComponent(emailSubject || '')}${ccParam}&body=${encodeURIComponent(emailBody || '')}`;
     window.location.href = mailtoUrl;
   };
 
@@ -58,6 +59,7 @@ export default function WizardEmailStep({
     try {
       const res = await sendInstructionEmail({
         to: emailTo,
+        cc: emailCc,
         subject: emailSubject,
         email_body: emailBody,
         claim_id: claim?.id,
@@ -111,6 +113,11 @@ export default function WizardEmailStep({
         </div>
 
         <div>
+          <label className="block text-xs font-medium mb-1">CC</label>
+          <Input type="email" value={emailCc} onChange={(e) => onEmailCcChange(e.target.value)} placeholder="cc@example.com (comma-separated)" />
+        </div>
+
+        <div className="md:col-span-2">
           <label className="block text-xs font-medium mb-1">Subject</label>
           <Input value={emailSubject} onChange={(e) => onEmailSubjectChange(e.target.value)} placeholder="Email subject" />
         </div>
