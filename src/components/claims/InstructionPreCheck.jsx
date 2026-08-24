@@ -3,7 +3,6 @@ import { AlertTriangle, Pencil, Check } from 'lucide-react';
 
 const CLAIM_TYPES = ['Fault Claim', '3rd Party Insurer Direct', '3rd Party Paying Privately', 'Credit Repair', 'Glass Claim', 'Paying Privately'];
 const VAT_STATUSES = ['VAT Registered', 'Non-VAT', 'Unknown'];
-const AUTHORISED_BY = ['Client Insurer', 'Third Party Insurer', 'Third Party', 'Uninsured'];
 
 function resolveContactSource(claim) {
   const nameField = claim.instruction_contact_name ? 'instruction_contact_name' : claim.driver_contact_name ? 'driver_contact_name' : 'client_name';
@@ -12,12 +11,20 @@ function resolveContactSource(claim) {
   return { nameField, phoneField, emailField };
 }
 
-function resolveInsurer(claim) {
-  const ab = claim.authorised_by || 'Client Insurer';
-  if (ab === 'Third Party Insurer') return { label: 'Third Party Insurer', insurer: 'tp_insurer', ref: 'tp_claim_ref', pol: 'tp_policy_number', showExcess: false };
-  if (ab === 'Third Party') return { label: 'Third Party', isThirdPartyPaying: true };
-  if (ab === 'Uninsured') return { label: 'Uninsured', isUninsured: true };
-  return { label: 'Insured (Client)', insurer: 'insurer', ref: 'claim_ref', pol: 'policy_number', showExcess: true };
+const INSTRUCTION_TYPES = [
+  { value: 'standard', label: 'Standard (Client Insurer)' },
+  { value: 'tp_insurer', label: 'Third Party Insurer' },
+  { value: 'third_party', label: 'Third Party Paying' },
+  { value: 'private', label: 'Paying Privately' },
+  { value: 'orkin', label: 'Orkin (Branded)' },
+];
+
+function deriveInstructionType(claim) {
+  const ab = claim.authorised_by;
+  if (claim.claim_type === 'Paying Privately' || ab === 'Uninsured') return 'private';
+  if (claim.claim_type === '3rd Party Paying Privately' || ab === 'Third Party') return 'third_party';
+  if (ab === 'Third Party Insurer') return 'tp_insurer';
+  return 'standard';
 }
 
 function Row({ label, field, value, claim, onFieldChange, type = 'text', options, sourceLabel }) {
@@ -31,7 +38,7 @@ function Row({ label, field, value, claim, onFieldChange, type = 'text', options
   const dirty = String(val ?? '') !== String(value ?? '');
 
   const commit = () => {
-    if (!dirty) return;
+    if (!dirty) { setEditing(false); return; }
     let out = val;
     if (type === 'number') out = out === '' ? null : Number(out);
     if (type === 'boolean') out = out === '' ? null : out === 'true';
@@ -98,26 +105,59 @@ function Group({ title, children }) {
   );
 }
 
-const INSTRUCTION_TYPES = [
-  { value: 'standard', label: 'Standard' },
-  { value: 'orkin', label: 'Orkin (Branded)' },
-  { value: 'private', label: 'Paying Privately' },
-  { value: 'third_party', label: 'Third Party Paying' },
-];
-
-function deriveInstructionType(claim) {
-  if (claim.claim_type === 'Paying Privately') return 'private';
-  if (claim.claim_type === '3rd Party Paying Privately') return 'third_party';
-  return 'standard';
+// Insurance field sets per instruction type — mirrors what the PDF renders
+function InsuranceSection({ instructionType, claim, onUpdate }) {
+  if (instructionType === 'private') {
+    return (
+      <Group title="Insurance Details">
+        <div className="px-2 py-1.5 text-[11px] italic text-muted-foreground">Paying Privately — no insurance section on the instruction.</div>
+      </Group>
+    );
+  }
+  if (instructionType === 'third_party') {
+    return (
+      <Group title="Third Party Invoice Details">
+        <Row label="Third Party Name" field="tp_name" value={claim.tp_name} claim={claim} onFieldChange={onUpdate} />
+        <Row label="Third Party Address" field="tp_address_line_1" value={claim.tp_address_line_1} claim={claim} onFieldChange={onUpdate} />
+      </Group>
+    );
+  }
+  if (instructionType === 'tp_insurer') {
+    return (
+      <Group title="Insurance Details — Third Party Insurer">
+        <Row label="TP Insurer" field="tp_insurer" value={claim.tp_insurer} claim={claim} onFieldChange={onUpdate} />
+        <Row label="TP Claim Number" field="tp_claim_ref" value={claim.tp_claim_ref} claim={claim} onFieldChange={onUpdate} />
+        <Row label="TP Policy Number" field="tp_policy_number" value={claim.tp_policy_number} claim={claim} onFieldChange={onUpdate} />
+        <Row label="Email Estimate To" field="send_estimate_email" value={claim.send_estimate_email} claim={claim} onFieldChange={onUpdate} />
+        <Row label="Audatex Code" field="audatex_code" value={claim.audatex_code} claim={claim} onFieldChange={onUpdate} />
+      </Group>
+    );
+  }
+  // standard & orkin — client insurer details
+  return (
+    <Group title={`Insurance Details${instructionType === 'orkin' ? ' (Orkin)' : ''}`}>
+      <Row label="Insurer" field="insurer" value={claim.insurer} claim={claim} onFieldChange={onUpdate} />
+      <Row label="Claim Number" field="claim_ref" value={claim.claim_ref} claim={claim} onFieldChange={onUpdate} />
+      <Row label="Policy Number" field="policy_number" value={claim.policy_number} claim={claim} onFieldChange={onUpdate} />
+      <Row label="Email Estimate To" field="send_estimate_email" value={claim.send_estimate_email} claim={claim} onFieldChange={onUpdate} />
+      <Row label="Audatex Code" field="audatex_code" value={claim.audatex_code} claim={claim} onFieldChange={onUpdate} />
+      <Row label="Excess (£)" field="policy_excess" value={claim.policy_excess} claim={claim} onFieldChange={onUpdate} type="number" />
+    </Group>
+  );
 }
 
 export default function InstructionPreCheck({ claim, onUpdate }) {
   const [instructionType, setInstructionType] = useState(deriveInstructionType(claim));
   const c = resolveContactSource(claim);
-  const ins = resolveInsurer(claim);
   const clientAddress = [claim.client_address_line_1, claim.client_address_line_2, claim.client_town, claim.client_county, claim.client_postcode].filter(Boolean).join(', ');
-  const showInsurance = instructionType === 'standard' || instructionType === 'orkin';
-  const showThirdParty = instructionType === 'third_party';
+
+  // Persist the chosen instruction type onto the claim's authorised_by so the
+  // PDF generator picks the right template/insurer party.
+  const handleTypeChange = (newType) => {
+    setInstructionType(newType);
+    const abMap = { standard: 'Client Insurer', tp_insurer: 'Third Party Insurer', third_party: 'Third Party', private: 'Uninsured', orkin: 'Client Insurer' };
+    onUpdate({ authorised_by: abMap[newType] });
+  };
 
   return (
     <div className="rounded-lg border border-border bg-card p-2">
@@ -132,7 +172,7 @@ export default function InstructionPreCheck({ claim, onUpdate }) {
         <label className="text-[11px] font-semibold text-muted-foreground whitespace-nowrap">Instruction Type:</label>
         <select
           value={instructionType}
-          onChange={(e) => setInstructionType(e.target.value)}
+          onChange={(e) => handleTypeChange(e.target.value)}
           className="flex-1 h-7 text-xs font-medium rounded-md border border-border bg-muted/50 px-2 text-foreground focus:outline-none focus:ring-1 focus:ring-accent/40">
           {INSTRUCTION_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
         </select>
@@ -162,36 +202,7 @@ export default function InstructionPreCheck({ claim, onUpdate }) {
         <Row label="Courtesy Car Required?" field="courtesy_car_required" value={claim.courtesy_car_required} claim={claim} onFieldChange={onUpdate} type="boolean" />
       </Group>
 
-      {showInsurance && (
-        <Group title={`Insurance Details — ${ins.label}`}>
-          <Row label="Authorised By" field="authorised_by" value={claim.authorised_by} claim={claim} onFieldChange={onUpdate} type="select" options={AUTHORISED_BY} />
-          {ins.isUninsured ? (
-            <div className="px-2 py-1 text-[11px] italic text-muted-foreground">Non-insurance / Paying Privately — no insurer details on instruction.</div>
-          ) : (
-            <>
-              <Row label={ins.label === 'Third Party Insurer' ? 'TP Insurer' : 'Insurer'} field={ins.insurer} value={claim[ins.insurer]} claim={claim} onFieldChange={onUpdate} />
-              <Row label={ins.label === 'Third Party Insurer' ? 'TP Claim Number' : 'Claim Number'} field={ins.ref} value={claim[ins.ref]} claim={claim} onFieldChange={onUpdate} />
-              <Row label={ins.label === 'Third Party Insurer' ? 'TP Policy Number' : 'Policy Number'} field={ins.pol} value={claim[ins.pol]} claim={claim} onFieldChange={onUpdate} />
-              {ins.showExcess && <Row label="Excess (£)" field="policy_excess" value={claim.policy_excess} claim={claim} onFieldChange={onUpdate} type="number" />}
-              <Row label="Email Estimate To" field="send_estimate_email" value={claim.send_estimate_email} claim={claim} onFieldChange={onUpdate} />
-              <Row label="Audatex Code" field="audatex_code" value={claim.audatex_code} claim={claim} onFieldChange={onUpdate} />
-            </>
-          )}
-        </Group>
-      )}
-
-      {showThirdParty && (
-        <Group title="Third Party Invoice Details">
-          <Row label="Third Party Name" field="tp_name" value={claim.tp_name} claim={claim} onFieldChange={onUpdate} />
-          <Row label="Third Party Address" field="tp_address_line_1" value={claim.tp_address_line_1} claim={claim} onFieldChange={onUpdate} />
-        </Group>
-      )}
-
-      {instructionType === 'private' && (
-        <Group title="Insurance Details">
-          <div className="px-2 py-1 text-[11px] italic text-muted-foreground">Paying Privately — no insurance section on instruction.</div>
-        </Group>
-      )}
+      <InsuranceSection instructionType={instructionType} claim={claim} onUpdate={onUpdate} />
 
       <Group title="Referral Fee">
         <Row label="Referral Fee (%)" field="referral_fee_repairer" value={claim.referral_fee_repairer} claim={claim} onFieldChange={onUpdate} type="number" />
