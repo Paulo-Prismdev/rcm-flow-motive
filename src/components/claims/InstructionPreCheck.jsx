@@ -98,10 +98,26 @@ function Group({ title, children }) {
   );
 }
 
+const INSTRUCTION_TYPES = [
+  { value: 'standard', label: 'Standard' },
+  { value: 'orkin', label: 'Orkin (Branded)' },
+  { value: 'private', label: 'Paying Privately' },
+  { value: 'third_party', label: 'Third Party Paying' },
+];
+
+function deriveInstructionType(claim) {
+  if (claim.claim_type === 'Paying Privately') return 'private';
+  if (claim.claim_type === '3rd Party Paying Privately') return 'third_party';
+  return 'standard';
+}
+
 export default function InstructionPreCheck({ claim, onUpdate }) {
+  const [instructionType, setInstructionType] = useState(deriveInstructionType(claim));
   const c = resolveContactSource(claim);
   const ins = resolveInsurer(claim);
   const clientAddress = [claim.client_address_line_1, claim.client_address_line_2, claim.client_town, claim.client_county, claim.client_postcode].filter(Boolean).join(', ');
+  const showInsurance = instructionType === 'standard' || instructionType === 'orkin';
+  const showThirdParty = instructionType === 'third_party';
 
   return (
     <div className="rounded-lg border border-border bg-card p-2">
@@ -109,6 +125,17 @@ export default function InstructionPreCheck({ claim, onUpdate }) {
         <AlertTriangle className="w-3.5 h-3.5 text-amber-500" />
         <h3 className="text-xs font-semibold text-foreground">Instruction Pre-Check</h3>
         <span className="text-[10px] text-muted-foreground">— fix any gaps before allocating</span>
+      </div>
+
+      {/* Instruction type selector */}
+      <div className="flex items-center gap-2 px-1 pb-2 mb-1">
+        <label className="text-[11px] font-semibold text-muted-foreground whitespace-nowrap">Instruction Type:</label>
+        <select
+          value={instructionType}
+          onChange={(e) => setInstructionType(e.target.value)}
+          className="flex-1 h-7 text-xs font-medium rounded-md border border-border bg-muted/50 px-2 text-foreground focus:outline-none focus:ring-1 focus:ring-accent/40">
+          {INSTRUCTION_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
+        </select>
       </div>
 
       <Group title="Client & Repairer Details">
@@ -135,26 +162,36 @@ export default function InstructionPreCheck({ claim, onUpdate }) {
         <Row label="Courtesy Car Required?" field="courtesy_car_required" value={claim.courtesy_car_required} claim={claim} onFieldChange={onUpdate} type="boolean" />
       </Group>
 
-      <Group title={`Insurance Details — ${ins.label}`}>
-        <Row label="Authorised By" field="authorised_by" value={claim.authorised_by} claim={claim} onFieldChange={onUpdate} type="select" options={AUTHORISED_BY} />
-        {ins.isThirdPartyPaying ? (
-          <>
-            <Row label="Third Party Name" field="tp_name" value={claim.tp_name} claim={claim} onFieldChange={onUpdate} />
-            <Row label="Third Party Address" field="tp_address_line_1" value={claim.tp_address_line_1} claim={claim} onFieldChange={onUpdate} />
-          </>
-        ) : ins.isUninsured ? (
-          <div className="px-2 py-1 text-[11px] italic text-muted-foreground">Non-insurance / Paying Privately — no insurer details on instruction.</div>
-        ) : (
-          <>
-            <Row label={ins.label === 'Third Party Insurer' ? 'TP Insurer' : 'Insurer'} field={ins.insurer} value={claim[ins.insurer]} claim={claim} onFieldChange={onUpdate} />
-            <Row label={ins.label === 'Third Party Insurer' ? 'TP Claim Number' : 'Claim Number'} field={ins.ref} value={claim[ins.ref]} claim={claim} onFieldChange={onUpdate} />
-            <Row label={ins.label === 'Third Party Insurer' ? 'TP Policy Number' : 'Policy Number'} field={ins.pol} value={claim[ins.pol]} claim={claim} onFieldChange={onUpdate} />
-            {ins.showExcess && <Row label="Excess (£)" field="policy_excess" value={claim.policy_excess} claim={claim} onFieldChange={onUpdate} type="number" />}
-            <Row label="Email Estimate To" field="send_estimate_email" value={claim.send_estimate_email} claim={claim} onFieldChange={onUpdate} />
-            <Row label="Audatex Code" field="audatex_code" value={claim.audatex_code} claim={claim} onFieldChange={onUpdate} />
-          </>
-        )}
-      </Group>
+      {showInsurance && (
+        <Group title={`Insurance Details — ${ins.label}`}>
+          <Row label="Authorised By" field="authorised_by" value={claim.authorised_by} claim={claim} onFieldChange={onUpdate} type="select" options={AUTHORISED_BY} />
+          {ins.isUninsured ? (
+            <div className="px-2 py-1 text-[11px] italic text-muted-foreground">Non-insurance / Paying Privately — no insurer details on instruction.</div>
+          ) : (
+            <>
+              <Row label={ins.label === 'Third Party Insurer' ? 'TP Insurer' : 'Insurer'} field={ins.insurer} value={claim[ins.insurer]} claim={claim} onFieldChange={onUpdate} />
+              <Row label={ins.label === 'Third Party Insurer' ? 'TP Claim Number' : 'Claim Number'} field={ins.ref} value={claim[ins.ref]} claim={claim} onFieldChange={onUpdate} />
+              <Row label={ins.label === 'Third Party Insurer' ? 'TP Policy Number' : 'Policy Number'} field={ins.pol} value={claim[ins.pol]} claim={claim} onFieldChange={onUpdate} />
+              {ins.showExcess && <Row label="Excess (£)" field="policy_excess" value={claim.policy_excess} claim={claim} onFieldChange={onUpdate} type="number" />}
+              <Row label="Email Estimate To" field="send_estimate_email" value={claim.send_estimate_email} claim={claim} onFieldChange={onUpdate} />
+              <Row label="Audatex Code" field="audatex_code" value={claim.audatex_code} claim={claim} onFieldChange={onUpdate} />
+            </>
+          )}
+        </Group>
+      )}
+
+      {showThirdParty && (
+        <Group title="Third Party Invoice Details">
+          <Row label="Third Party Name" field="tp_name" value={claim.tp_name} claim={claim} onFieldChange={onUpdate} />
+          <Row label="Third Party Address" field="tp_address_line_1" value={claim.tp_address_line_1} claim={claim} onFieldChange={onUpdate} />
+        </Group>
+      )}
+
+      {instructionType === 'private' && (
+        <Group title="Insurance Details">
+          <div className="px-2 py-1 text-[11px] italic text-muted-foreground">Paying Privately — no insurance section on instruction.</div>
+        </Group>
+      )}
 
       <Group title="Referral Fee">
         <Row label="Referral Fee (%)" field="referral_fee_repairer" value={claim.referral_fee_repairer} claim={claim} onFieldChange={onUpdate} type="number" />
