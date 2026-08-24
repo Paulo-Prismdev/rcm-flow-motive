@@ -46,6 +46,7 @@ import ClaimFinancialsForm from './ClaimFinancialsForm';
 import ClaimDatesForm from './ClaimDatesForm';
 import ClaimBodyshopForm from './ClaimBodyshopForm';
 import ClaimBodyshopInfo from './ClaimBodyshopInfo.jsx';
+import InstructionPreCheck from './InstructionPreCheck.jsx';
 import ClaimBodyshopAllocateButton from './ClaimBodyshopAllocateButton';
 import ClaimEstimateForm from './ClaimEstimateForm';
 import ClaimStatusForm from './ClaimStatusForm';
@@ -1230,6 +1231,10 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
       case 'bodyshop':
         return (
           <EditableSection title="Bodyshop Details" icon={Wrench} claim={claim} onUpdate={handleUpdate} EditComponent={ClaimBodyshopForm} canEdit={canEdit}>
+            {/* Instruction Pre-Check — review & fix instruction fields before allocating */}
+            <div className="mb-4">
+              <InstructionPreCheck claim={claim} onUpdate={(partial) => handleUpdate({ ...claim, ...partial })} />
+            </div>
             {/* Find Repairer on Map — always visible, no edit mode needed */}
             <div className="mb-4">
               <ClaimBodyshopAllocateButton claim={claim} onAllocated={(data) => handleUpdate({ ...claim, ...data })} />
