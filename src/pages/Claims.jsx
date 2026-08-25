@@ -8,7 +8,6 @@ import ClaimFormWrapper from '../components/claims/ClaimFormWrapper';
 import ImportClaimsModal from '../components/claims/ImportClaimsModal';
 import ClaimCardFieldsModal from '../components/claims/ClaimCardFieldsModal';
 import UpdateStatusBadge from '../components/shared/UpdateStatusBadge';
-import LastUpdateBadge from '../components/shared/LastUpdateBadge';
 import StatusBadge from '../components/shared/StatusBadge';
 import ClaimUpdatesQuickView from '../components/claims/ClaimUpdatesQuickView';
 import ClaimTypeTabs from '../components/shared/ClaimTypeTabs';
@@ -36,7 +35,7 @@ const COL_WIDTHS = {
 const DEFAULT_COL_WIDTH = 130;
 const colWidth = (id) => COL_WIDTHS[id] || DEFAULT_COL_WIDTH;
 const REG_W = 112;
-const CASE_W = 105, LAST_W = 140, CLIENT_W = 105, STATUS_W = 160, UPDATES_W = 80, INFO_W = 52;
+const CASE_W = 105, CLIENT_W = 105, STATUS_W = 160, UPDATES_W = 80, INFO_W = 52;
 
 // Status dot colour map
 const STATUS_COLORS = {
@@ -139,7 +138,7 @@ export default function ClaimsPage() {
   const MANDATORY_FIELDS = ['client_name', 'make_model', 'loss_date', 'referrer'];
   const savedFields = currentUser?.claim_card_fields || [];
   const userCardFields = [...MANDATORY_FIELDS, ...savedFields.filter(f => !MANDATORY_FIELDS.includes(f))];
-  const TABLE_WIDTH = REG_W + userCardFields.reduce((s, id) => s + colWidth(id), 0) + CASE_W + LAST_W + CLIENT_W + STATUS_W + UPDATES_W + INFO_W;
+  const TABLE_WIDTH = REG_W + userCardFields.reduce((s, id) => s + colWidth(id), 0) + CASE_W + CLIENT_W + STATUS_W + UPDATES_W + INFO_W;
 
   const updateUserFieldsMutation = useMutation({
     mutationFn: (fields) => base44.auth.updateMe({ claim_card_fields: fields }),
@@ -455,12 +454,8 @@ export default function ClaimsPage() {
           );
         })}
         {/* Sticky right: Case Update 48hrs badge */}
-        <td style={{ width: `${CASE_W}px`, minWidth: `${CASE_W}px`, maxWidth: `${CASE_W}px` }} className={`sticky right-[537px] z-10 px-2 py-2.5 whitespace-nowrap text-center ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-white dark:bg-gray-900 group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50'}`}>
+        <td style={{ width: `${CASE_W}px`, minWidth: `${CASE_W}px`, maxWidth: `${CASE_W}px` }} className={`sticky right-[397px] z-10 px-2 py-2.5 whitespace-nowrap text-center ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-white dark:bg-gray-900 group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50'}`}>
           <UpdateStatusBadge status={updateStatus} small />
-        </td>
-        {/* Sticky right: Last Update badge */}
-        <td style={{ width: `${LAST_W}px`, minWidth: `${LAST_W}px`, maxWidth: `${LAST_W}px` }} className={`sticky right-[397px] z-10 px-2 py-2.5 whitespace-nowrap text-center ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-white dark:bg-gray-900 group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50'}`}>
-          <LastUpdateBadge claim={claim} small />
         </td>
         {/* Sticky right: Client Update 48hrs badge */}
         <td style={{ width: `${CLIENT_W}px`, minWidth: `${CLIENT_W}px`, maxWidth: `${CLIENT_W}px` }} className={`sticky right-[292px] z-10 px-2 py-2.5 whitespace-nowrap text-center ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-white dark:bg-gray-900 group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50'}`}>
@@ -541,7 +536,6 @@ export default function ClaimsPage() {
             )}
             {!isClosedStatus && <UpdateStatusBadge status={updateStatus} small />}
             {!isClosedStatus && <UpdateStatusBadge status={clientCommStatus} small />}
-            <LastUpdateBadge claim={claim} small />
             {hasBackorder && (
               <span className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-red-100 text-red-700 text-[10px] font-medium">
                 <Package className="w-2.5 h-2.5" />BO
@@ -834,13 +828,12 @@ export default function ClaimsPage() {
                       <th key={fieldId} title={label} style={{ minWidth: `${w}px`, verticalAlign: 'bottom' }} className="px-2 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap overflow-hidden text-ellipsis">{label}</th>
                     );
                   })}
-                  <th title="Case Update 48hrs" style={{ width: `${CASE_W}px`, minWidth: `${CASE_W}px`, maxWidth: `${CASE_W}px`, verticalAlign: 'bottom' }} className="sticky right-[537px] z-20 bg-white dark:bg-gray-900 px-2 py-2 text-center text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-normal leading-[1.15]">
+                  <th title="Case Update 48hrs" style={{ width: `${CASE_W}px`, minWidth: `${CASE_W}px`, maxWidth: `${CASE_W}px`, verticalAlign: 'bottom' }} className="sticky right-[397px] z-20 bg-white dark:bg-gray-900 px-2 py-2 text-center text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-normal leading-[1.15]">
                     <div className="flex flex-col items-center">
                       <span>CASE</span>
                       <span>48HRS</span>
                     </div>
                   </th>
-                  <th title="Last Update" style={{ width: `${LAST_W}px`, minWidth: `${LAST_W}px`, maxWidth: `${LAST_W}px`, verticalAlign: 'bottom' }} className="sticky right-[397px] z-20 bg-white dark:bg-gray-900 px-2 py-2 text-center text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap overflow-hidden text-ellipsis">Last Update</th>
                   <th title="Client Update 48hrs" style={{ width: `${CLIENT_W}px`, minWidth: `${CLIENT_W}px`, maxWidth: `${CLIENT_W}px`, verticalAlign: 'bottom' }} className="sticky right-[292px] z-20 bg-white dark:bg-gray-900 px-2 py-2 text-center text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-normal leading-[1.15]">
                     <div className="flex flex-col items-center">
                       <span>CLIENT</span>
@@ -865,7 +858,7 @@ export default function ClaimsPage() {
                         className="bg-gray-50 dark:bg-gray-800/60 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-800"
                         onClick={() => toggleGroup(statusGroup)}
                       >
-                        <td colSpan={userCardFields.length + 7} className="px-4 py-2">
+                        <td colSpan={userCardFields.length + 6} className="px-4 py-2">
                           <div className="flex items-center gap-2">
                             {isCollapsed ? <ChevronRight className="w-3.5 h-3.5 text-gray-400" /> : <ChevronDown className="w-3.5 h-3.5 text-gray-400" />}
                             <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: dotColor }} />
@@ -884,7 +877,7 @@ export default function ClaimsPage() {
                               className="bg-gray-50/50 dark:bg-gray-800/30 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-800/50"
                               onClick={(e) => { e.stopPropagation(); toggleSubGroup(statusGroup, subKey); }}
                             >
-                              <td colSpan={userCardFields.length + 7} className="px-4 py-1">
+                              <td colSpan={userCardFields.length + 6} className="px-4 py-1">
                                 <div className="flex items-center gap-2 pl-12">
                                   {subCollapsed ? <ChevronRight className="w-3 h-3 text-gray-400" /> : <ChevronDown className="w-3 h-3 text-gray-400" />}
                                   <span className="w-2 h-2 rounded-full" style={{ backgroundColor: getStatusDot(subKey) }} />
@@ -909,7 +902,7 @@ export default function ClaimsPage() {
                   return (
                     <React.Fragment>
                       <tr className="bg-gray-50 dark:bg-gray-800/60 cursor-pointer select-none" onClick={() => toggleGroup('__other__')}>
-                        <td colSpan={userCardFields.length + 7} className="px-4 py-2">
+                        <td colSpan={userCardFields.length + 6} className="px-4 py-2">
                           <div className="flex items-center gap-2">
                             {isCollapsed ? <ChevronRight className="w-3.5 h-3.5 text-gray-400" /> : <ChevronDown className="w-3.5 h-3.5 text-gray-400" />}
                             <span className="w-2 h-2 rounded-full bg-gray-400 flex-shrink-0" />
@@ -928,7 +921,7 @@ export default function ClaimsPage() {
                               className="bg-gray-50/50 dark:bg-gray-800/30 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-800/50"
                               onClick={(e) => { e.stopPropagation(); toggleSubGroup('__other__', subKey); }}
                             >
-                              <td colSpan={userCardFields.length + 7} className="px-4 py-1">
+                              <td colSpan={userCardFields.length + 6} className="px-4 py-1">
                                 <div className="flex items-center gap-2 pl-12">
                                   {subCollapsed ? <ChevronRight className="w-3 h-3 text-gray-400" /> : <ChevronDown className="w-3 h-3 text-gray-400" />}
                                   <span className="w-2 h-2 rounded-full" style={{ backgroundColor: getStatusDot(subKey) }} />

@@ -34,7 +34,6 @@ import {
 import { format } from "date-fns";
 import StatusBadge from "../shared/StatusBadge";
 import UpdateStatusBadge from '../shared/UpdateStatusBadge';
-import LastUpdateBadge from '../shared/LastUpdateBadge';
 import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import ClaimClientForm from './ClaimClientForm';
@@ -1697,7 +1696,6 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                         <UpdateStatusBadge status={computeClientCommStatusFlag(claim)} small labelPrefix="Client" />
                       </button>
                     )}
-                    <LastUpdateBadge claim={claim} small />
                     {claim.archived && <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400">Archived</span>}
                   </div>
                   <ClaimJourneyTimeline claim={claim} updates={claimUpdates} />
