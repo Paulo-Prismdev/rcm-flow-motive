@@ -63,39 +63,54 @@ Deno.serve(async (req) => {
     const MID_GREY = [220, 220, 220];
 
     // ═══════════════════════════════════════════
-    // LOGO
+    // LOGO + HEADER BAR (logo inside navy block)
     // ═══════════════════════════════════════════
     const logoUrl = 'https://media.base44.com/images/public/68ee39fb8915b1b539e13c59/b2cb057e2_RCMAutomotiveLogoGreenAutomotivewithHLights.jpg';
+    let logoDataUrl = null;
+    let logoProps = null;
     try {
       const logoResp = await fetch(logoUrl);
       if (logoResp.ok) {
         const logoBuffer = await logoResp.arrayBuffer();
         const logoBase64 = btoa(String.fromCharCode(...new Uint8Array(logoBuffer)));
-        const logoDataUrl = `data:image/jpeg;base64,${logoBase64}`;
-        const logoW = 40;
-        const logoH = 12;
-        doc.addImage(logoDataUrl, 'JPEG', (PW - logoW) / 2, 5, logoW, logoH);
+        logoDataUrl = `data:image/jpeg;base64,${logoBase64}`;
+        logoProps = doc.getImageProperties(logoDataUrl);
       }
     } catch (_) { /* ignore logo errors */ }
 
-    // ═══════════════════════════════════════════
-    // HEADER BAR
-    // ═══════════════════════════════════════════
+    const headerY = 14;
+    const headerH = 22;
     doc.setFillColor(...NAVY);
-    doc.rect(LM, 20, MW, 16, 'F');
+    doc.rect(LM, headerY, MW, headerH, 'F');
+
+    // Logo inside the navy bar — left side, correct aspect ratio
+    if (logoDataUrl && logoProps) {
+      const maxLogoH = 16;
+      const maxLogoW = 45;
+      const ratio = logoProps.width / logoProps.height;
+      let lh = maxLogoH;
+      let lw = lh * ratio;
+      if (lw > maxLogoW) { lw = maxLogoW; lh = lw / ratio; }
+      const lx = LM + 4;
+      const ly = headerY + (headerH - lh) / 2;
+      doc.addImage(logoDataUrl, 'JPEG', lx, ly, lw, lh);
+    }
+
+    // PURCHASE ORDER title — centred in the bar
     doc.setTextColor(...WHITE);
     doc.setFontSize(16);
     doc.setFont('helvetica', 'bold');
-    doc.text('PURCHASE ORDER', LM + 5, 30);
+    doc.text('PURCHASE ORDER', PW / 2, headerY + 10, { align: 'center' });
+    // Company contact — right side of the bar
     doc.setFontSize(9);
     doc.setFont('helvetica', 'normal');
-    doc.text('RCM Automotive Ltd', PW - LM - 5, 26, { align: 'right' });
-    doc.text('info@rcmautomotive.co.uk', PW - LM - 5, 31, { align: 'right' });
+    doc.text('RCM Automotive Ltd', PW - LM - 5, headerY + 9, { align: 'right' });
+    doc.text('info@rcmautomotive.co.uk', PW - LM - 5, headerY + 15, { align: 'right' });
 
     // ═══════════════════════════════════════════
     // PO META BOX (PO number, date, reference)
     // ═══════════════════════════════════════════
-    let y = 42;
+    let y = headerY + headerH + 6;
     doc.setFillColor(...LIGHT_GREY);
     doc.setDrawColor(...MID_GREY);
     doc.roundedRect(LM, y, MW, 18, 2, 2, 'FD');
@@ -236,7 +251,7 @@ Deno.serve(async (req) => {
     doc.setFontSize(9);
     doc.setFont('helvetica', 'bold');
     doc.text('AUTHORITY & INSTRUCTION', LM + 3, y + 5);
-    y += 9;
+    y += 14;
     doc.setFontSize(9);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(...DARK_TEXT);
@@ -247,8 +262,8 @@ Deno.serve(async (req) => {
     ];
     for (const line of noteLines) {
       const wrapped = doc.splitTextToSize(line, MW - 6);
-      for (const w of wrapped) { doc.text(w, LM + 3, y); y += 6; }
-      y += 3.5;
+      for (const w of wrapped) { doc.text(w, LM + 3, y); y += 12; }
+      y += 6;
     }
     y += 6;
 
