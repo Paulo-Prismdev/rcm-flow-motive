@@ -171,6 +171,7 @@ export default function RepairerDirectory() {
                     ) : null}
                   </div>
                   <div className="flex items-center gap-2 mt-1.5">
+                    {b.map_group && <Badge className="bg-violet-100 text-violet-700 text-[10px] px-1.5 py-0">{b.map_group}</Badge>}
                     {b.acg_signed_up === "Yes" && <Badge className="bg-green-100 text-green-700 text-[10px] px-1.5 py-0">ACG: Yes</Badge>}
                     {b.acg_signed_up === "No" && <Badge className="bg-red-100 text-red-700 text-[10px] px-1.5 py-0">ACG: No</Badge>}
                     {b.bs10125_certified === "Yes" && <Badge className="bg-green-100 text-green-700 text-[10px] px-1.5 py-0">BS10125</Badge>}
@@ -210,14 +211,17 @@ export default function RepairerDirectory() {
                       <div className="text-xs text-muted-foreground">{b.phone || b.email || ""}</div>
                     </td>
                     <td className="p-3">
-                      {b.tier ? (
-                        <Badge className={`text-xs ${
-                          b.tier?.toUpperCase().includes("TIER 1") || b.tier?.toUpperCase() === "TIER1" ? "bg-green-100 text-green-700"
-                          : b.tier?.toUpperCase().includes("TIER 2") || b.tier?.toUpperCase() === "TIER2" ? "bg-amber-100 text-amber-700"
-                          : b.tier?.toLowerCase().includes("previously") ? "bg-red-100 text-red-700"
-                          : "bg-gray-100 text-gray-700"
-                        }`}>{b.tier}</Badge>
-                      ) : <span className="text-muted-foreground text-sm">—</span>}
+                      <div className="flex flex-col gap-1 items-start">
+                        {b.tier ? (
+                          <Badge className={`text-xs ${
+                            b.tier?.toUpperCase().includes("TIER 1") || b.tier?.toUpperCase() === "TIER1" ? "bg-green-100 text-green-700"
+                            : b.tier?.toUpperCase().includes("TIER 2") || b.tier?.toUpperCase() === "TIER2" ? "bg-amber-100 text-amber-700"
+                            : b.tier?.toLowerCase().includes("previously") ? "bg-red-100 text-red-700"
+                            : "bg-gray-100 text-gray-700"
+                          }`}>{b.tier}</Badge>
+                        ) : <span className="text-muted-foreground text-sm">—</span>}
+                        {b.map_group && <Badge className="text-xs bg-violet-100 text-violet-700">{b.map_group}</Badge>}
+                      </div>
                     </td>
                     <td className="p-3 hidden sm:table-cell">
                       {b.acg_signed_up === "Yes" ? (

@@ -14,6 +14,7 @@ import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 
 const TIER_OPTIONS = ["TIER 1", "TIER 2", "Previously on Network", ""];
+const MAP_GROUP_OPTIONS = ["Solution", "QAC", ""];
 const YES_NO_OPTIONS = ["Yes", "No", "TBC", ""];
 const IN_HOUSE_OPTIONS = ["In House", "Outsourced", ""];
 
@@ -129,6 +130,7 @@ export default function RepairerDetailDrawer({ bodyshopId, onClose }) {
           </SheetTitle>
           <div className="flex flex-wrap gap-1.5 mt-1">
           {data?.tier && <Badge variant="outline">{data.tier}</Badge>}
+          {data?.map_group && <Badge className="bg-violet-100 text-violet-700">{data.map_group}</Badge>}
           {data?.acg_signed_up === "Yes" && <Badge className="bg-green-100 text-green-700">ACG</Badge>}
           {data?.bs10125_certified === "Yes" && <Badge className="bg-blue-100 text-blue-700">BS10125</Badge>}
           </div>
@@ -158,6 +160,7 @@ export default function RepairerDetailDrawer({ bodyshopId, onClose }) {
                     <EditField label="Name" value={formData.name} onChange={(v) => updateField("name", v)} />
                     <EditField label="Group" value={formData.group_name} onChange={(v) => updateField("group_name", v)} />
                     <DropdownField label="Tier" value={formData.tier} onChange={(v) => updateField("tier", v)} options={TIER_OPTIONS} />
+                    <DropdownField label="Map Group" value={formData.map_group} onChange={(v) => updateField("map_group", v)} options={MAP_GROUP_OPTIONS} />
                     <EditField label="Company Reg. No." value={formData.company_registration_number} onChange={(v) => updateField("company_registration_number", v)} />
                     <EditField label="VAT Number" value={formData.vat_number} onChange={(v) => updateField("vat_number", v)} />
                     <EditField label="ICO Number" value={formData.ico_number} onChange={(v) => updateField("ico_number", v)} />
@@ -169,6 +172,7 @@ export default function RepairerDetailDrawer({ bodyshopId, onClose }) {
                     <ViewField label="Name" value={bodyshop.name} />
                     <ViewField label="Group" value={bodyshop.group_name} />
                     <ViewField label="Tier" value={bodyshop.tier} />
+                    <ViewField label="Map Group" value={bodyshop.map_group} />
                     <ViewField label="Company Reg. No." value={bodyshop.company_registration_number} />
                     <ViewField label="VAT Number" value={bodyshop.vat_number} />
                     <ViewField label="ICO Number" value={bodyshop.ico_number} />

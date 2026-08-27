@@ -345,9 +345,11 @@ export default function BodyshopMap() {
 
   const tierFilteredBodyshops = useMemo(() =>
     sortedBodyshops.filter(b => {
-      const tierVisible = visibleTiers[getTierKey(b.tier)];
-      const groupVisible = !b.map_group || visibleTiers[b.map_group];
-      return tierVisible && groupVisible;
+      // A bodyshop assigned to a map group (Solution/QAC) is controlled by its
+      // group toggle alone — independent of the tier toggles. Bodyshops without
+      // a group are controlled by their tier toggle.
+      if (b.map_group) return visibleTiers[b.map_group] !== false;
+      return visibleTiers[getTierKey(b.tier)] !== false;
     }),
     [sortedBodyshops, visibleTiers]);
 
