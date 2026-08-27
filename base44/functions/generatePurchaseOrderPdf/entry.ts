@@ -63,23 +63,39 @@ Deno.serve(async (req) => {
     const MID_GREY = [220, 220, 220];
 
     // ═══════════════════════════════════════════
+    // LOGO
+    // ═══════════════════════════════════════════
+    const logoUrl = 'https://media.base44.com/images/public/68ee39fb8915b1b539e13c59/b2cb057e2_RCMAutomotiveLogoGreenAutomotivewithHLights.jpg';
+    try {
+      const logoResp = await fetch(logoUrl);
+      if (logoResp.ok) {
+        const logoBuffer = await logoResp.arrayBuffer();
+        const logoBase64 = btoa(String.fromCharCode(...new Uint8Array(logoBuffer)));
+        const logoDataUrl = `data:image/jpeg;base64,${logoBase64}`;
+        const logoW = 40;
+        const logoH = 12;
+        doc.addImage(logoDataUrl, 'JPEG', (PW - logoW) / 2, 5, logoW, logoH);
+      }
+    } catch (_) { /* ignore logo errors */ }
+
+    // ═══════════════════════════════════════════
     // HEADER BAR
     // ═══════════════════════════════════════════
     doc.setFillColor(...NAVY);
-    doc.rect(LM, 14, MW, 16, 'F');
+    doc.rect(LM, 20, MW, 16, 'F');
     doc.setTextColor(...WHITE);
     doc.setFontSize(16);
     doc.setFont('helvetica', 'bold');
-    doc.text('PURCHASE ORDER', LM + 5, 24);
+    doc.text('PURCHASE ORDER', LM + 5, 30);
     doc.setFontSize(9);
     doc.setFont('helvetica', 'normal');
-    doc.text('RCM Automotive Ltd', PW - LM - 5, 20, { align: 'right' });
-    doc.text('info@rcmautomotive.co.uk', PW - LM - 5, 25, { align: 'right' });
+    doc.text('RCM Automotive Ltd', PW - LM - 5, 26, { align: 'right' });
+    doc.text('info@rcmautomotive.co.uk', PW - LM - 5, 31, { align: 'right' });
 
     // ═══════════════════════════════════════════
     // PO META BOX (PO number, date, reference)
     // ═══════════════════════════════════════════
-    let y = 36;
+    let y = 42;
     doc.setFillColor(...LIGHT_GREY);
     doc.setDrawColor(...MID_GREY);
     doc.roundedRect(LM, y, MW, 18, 2, 2, 'FD');
@@ -231,8 +247,8 @@ Deno.serve(async (req) => {
     ];
     for (const line of noteLines) {
       const wrapped = doc.splitTextToSize(line, MW - 6);
-      for (const w of wrapped) { doc.text(w, LM + 3, y); y += 5; }
-      y += 1.5;
+      for (const w of wrapped) { doc.text(w, LM + 3, y); y += 6; }
+      y += 3.5;
     }
     y += 6;
 
