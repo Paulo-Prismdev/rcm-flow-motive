@@ -260,6 +260,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
   const [regenPdfUrl, setRegenPdfUrl] = useState(null);
   const [savedRegenToDocs, setSavedRegenToDocs] = useState(false);
   const [isSavingRegenToDocs, setIsSavingRegenToDocs] = useState(false);
+  const [isGeneratingPo, setIsGeneratingPo] = useState(false);
 
   const [isBackorderedPartsModalOpen, setIsBackorderedPartsModalOpen] = useState(false);
   const [isDuplicateModalOpen, setIsDuplicateModalOpen] = useState(false);
@@ -759,6 +760,25 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
       alert('Failed to save PDF to claim docs. Please try again.');
     } finally {
       setIsSavingRegenToDocs(false);
+    }
+  };
+
+  const handleGeneratePurchaseOrder = async () => {
+    setIsGeneratingPo(true);
+    try {
+      const response = await base44.functions.invoke('generatePurchaseOrderPdf', {
+        claimId: claim.id,
+      });
+      const { file_url } = response.data;
+      if (!file_url) throw new Error('No file URL returned');
+      window.open(file_url, '_blank');
+      queryClient.invalidateQueries({ queryKey: ['claims'] });
+      queryClient.invalidateQueries({ queryKey: ['claim', claim.id] });
+    } catch (error) {
+      console.error('Error generating Purchase Order PDF:', error);
+      alert('Failed to generate Purchase Order. Please try again.');
+    } finally {
+      setIsGeneratingPo(false);
     }
   };
 
@@ -1397,6 +1417,33 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
             <div className="mt-2 py-3 px-4 rounded-lg glass-inset">
               <div className="text-xs font-semibold text-foreground-muted mb-2">Artura Estimate URL</div>
               <div className="text-sm break-all">{claim.artura_est_url || '-'}</div>
+            </div>
+            {/* Purchase Order generation — uses estimate total as authority figure */}
+            <div className="mt-4 p-3 rounded-lg bg-accent/10 border border-accent/30">
+              <div className="flex items-center justify-between gap-3 flex-wrap">
+                <div className="flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-accent" />
+                  <div>
+                    <span className="text-sm font-medium block">Purchase Order</span>
+                    <span className="text-[11px] text-muted-foreground">
+                      Authority figure: {(() => {
+                        const v = claim.authority_cost_gross ?? claim.estimate_cost_gross ?? claim.authority_cost_net ?? claim.estimate_cost_net;
+                        return v != null && v !== '' ? `£${Number(v).toLocaleString('en-GB', { minimumFractionDigits: 2 })}` : '—';
+                      })()}
+                    </span>
+                  </div>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleGeneratePurchaseOrder}
+                  disabled={isGeneratingPo}
+                  className="gap-2"
+                >
+                  <FileText className={`w-4 h-4 ${isGeneratingPo ? 'animate-pulse' : ''}`} />
+                  {isGeneratingPo ? 'Generating...' : 'Generate PO'}
+                </Button>
+              </div>
             </div>
           </EditableSection>
         );
