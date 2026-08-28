@@ -5,8 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Plus, Edit, Trash2, Play, History, Power, PowerOff, Eye, X, Send } from 'lucide-react';
-import { JOURNEY_STATUSES } from '@/components/shared/claimStatusV2';
 import ChaserTestEmailModal from '@/components/settings/ChaserTestEmailModal';
+import ChaserConditionBuilder, { migrateLegacyConditions, summarizeConditions } from '@/components/settings/ChaserConditionBuilder';
 
 export default function ChaserEmailSettings() {
   const [showForm, setShowForm] = useState(false);
@@ -195,12 +195,13 @@ export default function ChaserEmailSettings() {
 
       <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
         <p className="text-xs text-blue-900 dark:text-blue-300">
-          <strong>How it works:</strong> Each rule is fully configurable — choose which Journey Statuses to chase, which 48-hour
-          update timer (Case 48hrs / Client 48hrs / Either / Both) must be overdue, and how many hours after the timer goes Red to
-          wait before sending. The first chaser sends when the timer is overdue by your chosen threshold; repeat chasers follow the
-          Send Frequency up to the Max Sends limit. Bodyshop chasers include a secure update link and are logged in the claim's
-          update history. Closed/invoiced claims are always skipped. Use <strong>Preview</strong> to see exactly who would be
-          emailed without sending anything.
+          <strong>How it works:</strong> Each rule is fully programmable — set <strong>Fire only if</strong> conditions (all must
+          be true) and <strong>Skip if</strong> conditions (any true skips the claim), choose which 48-hour update timer must be
+          overdue, and how long to wait after it goes Red. Conditions are evaluated against the claim's real state (on-site and
+          total loss are derived from dates, not just status labels), so they stay accurate even when statuses lag behind. Repeat
+          chasers follow the Send Frequency up to the Max Sends limit. Bodyshop chasers include a secure update link and are logged
+          in the claim's update history. Closed/invoiced claims are always skipped. Use <strong>Preview</strong> to see exactly
+          who would be emailed without sending anything.
         </p>
       </div>
 
@@ -248,24 +249,32 @@ export default function ChaserEmailSettings() {
                         <span className="text-gray-500 dark:text-gray-400">Freq:</span> <span className="font-medium text-gray-900 dark:text-white">{rule.send_frequency}</span>
                       </div>
                     </div>
-                    {rule.trigger_journey_statuses && rule.trigger_journey_statuses.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mb-2">
-                        {rule.trigger_journey_statuses.map((s) => (
-                          <span key={s} className="text-[10px] px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300">{s}</span>
-                        ))}
-                      </div>
-                    )}
-                    {rule.total_loss_handling && rule.total_loss_handling !== 'Include' && (
-                      <div className="mb-2">
-                        <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${
-                          rule.total_loss_handling === 'Only'
-                            ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'
-                            : 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300'
-                        }`}>
-                          {rule.total_loss_handling === 'Only' ? 'Total Loss Only' : 'Excludes Total Loss'}
-                        </span>
-                      </div>
-                    )}
+                    {(() => {
+                      const { include_conditions, exclude_conditions } = migrateLegacyConditions(rule);
+                      const incSum = summarizeConditions(include_conditions);
+                      const excSum = summarizeConditions(exclude_conditions);
+                      if (!incSum.length && !excSum.length) return null;
+                      return (
+                        <div className="flex flex-col gap-1 mb-2">
+                          {incSum.length > 0 && (
+                            <div className="flex flex-wrap gap-1 items-center">
+                              <span className="text-[9px] font-semibold uppercase tracking-wide text-gray-400">Fire:</span>
+                              {incSum.map((s, i) => (
+                                <span key={i} className="text-[10px] px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300">{s}</span>
+                              ))}
+                            </div>
+                          )}
+                          {excSum.length > 0 && (
+                            <div className="flex flex-wrap gap-1 items-center">
+                              <span className="text-[9px] font-semibold uppercase tracking-wide text-gray-400">Skip:</span>
+                              {excSum.map((s, i) => (
+                                <span key={i} className="text-[10px] px-1.5 py-0.5 rounded bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300">{s}</span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
 
                     <div className="text-xs text-gray-600 dark:text-gray-400 line-clamp-1">
                       Subject: {rule.email_subject_template}
@@ -390,33 +399,37 @@ export default function ChaserEmailSettings() {
 }
 
 function ChaserEmailRuleForm({ rule, onSubmit, onCancel }) {
-  const [formData, setFormData] = useState(rule || {
-    rule_name: '',
-    is_active: true,
-    recipient_type: 'Bodyshop',
-    custom_email: '',
-    trigger_journey_statuses: [],
-    total_loss_handling: 'Include',
-    trigger_timer: 'Case 48hrs',
-    hours_overdue_before_send: 0,
-    email_subject_template: '',
-    email_body_template: '',
-    send_frequency: 'Daily',
-    max_sends: 3,
-    cc_emails: '',
-    sort_order: 0,
-  });
-
-  const journeyStatuses = JOURNEY_STATUSES.map((s) => s.name);
-
-  const toggleJourneyStatus = (status) => {
-    const current = formData.trigger_journey_statuses || [];
-    if (current.includes(status)) {
-      setFormData({ ...formData, trigger_journey_statuses: current.filter((s) => s !== status) });
-    } else {
-      setFormData({ ...formData, trigger_journey_statuses: [...current, status] });
+  const [formData, setFormData] = useState(() => {
+    if (rule) {
+      // Migrate legacy journey-status / total-loss fields into the new
+      // condition model on first edit, then clear the legacy fields so the
+      // backend doesn't double-apply them.
+      const { include_conditions, exclude_conditions } = migrateLegacyConditions(rule);
+      return {
+        ...rule,
+        include_conditions,
+        exclude_conditions,
+        trigger_journey_statuses: [],
+        total_loss_handling: 'Include',
+      };
     }
-  };
+    return {
+      rule_name: '',
+      is_active: true,
+      recipient_type: 'Bodyshop',
+      custom_email: '',
+      include_conditions: [],
+      exclude_conditions: [],
+      trigger_timer: 'Case 48hrs',
+      hours_overdue_before_send: 0,
+      email_subject_template: '',
+      email_body_template: '',
+      send_frequency: 'Daily',
+      max_sends: 3,
+      cc_emails: '',
+      sort_order: 0,
+    };
+  });
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -462,43 +475,24 @@ function ChaserEmailRuleForm({ rule, onSubmit, onCancel }) {
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium mb-2">Trigger Journey Statuses</label>
-              <p className="text-xs text-gray-500 mb-2">Only chase claims in these Journey Statuses. Leave empty to chase all.</p>
-              <div className="flex flex-wrap gap-2 neomorph-inset p-3">
-                {journeyStatuses.map((status) => {
-                  const selected = (formData.trigger_journey_statuses || []).includes(status);
-                  return (
-                    <button
-                      key={status}
-                      type="button"
-                      onClick={() => toggleJourneyStatus(status)}
-                      className={`px-2.5 py-1 text-xs rounded-full border transition-colors ${
-                        selected
-                          ? 'bg-[#131d47] text-white border-[#131d47]'
-                          : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'
-                      }`}
-                    >
-                      {status}
-                    </button>
-                  );
-                })}
+            <div className="neomorph-inset p-4 rounded-xl space-y-4">
+              <p className="text-xs text-gray-500">
+                Build the eligibility logic for this rule. Conditions are evaluated against the claim's real state
+                (e.g. on-site is derived from dates, not just the status label), so they stay accurate even when
+                statuses lag behind.
+              </p>
+              <ChaserConditionBuilder
+                conditions={formData.include_conditions}
+                onChange={(c) => setFormData({ ...formData, include_conditions: c })}
+                mode="include"
+              />
+              <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+                <ChaserConditionBuilder
+                  conditions={formData.exclude_conditions}
+                  onChange={(c) => setFormData({ ...formData, exclude_conditions: c })}
+                  mode="exclude"
+                />
               </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-2">Total Loss Handling</label>
-              <p className="text-xs text-gray-500 mb-2">Control whether this rule applies to claims marked as total loss.</p>
-              <select
-                value={formData.total_loss_handling || 'Include'}
-                onChange={(e) => setFormData({ ...formData, total_loss_handling: e.target.value })}
-                className="neomorph-inset w-full px-4 py-3 border-0 rounded-xl"
-              >
-                <option value="Include">Include — fire for all matching claims (ignore total loss)</option>
-                <option value="Exclude">Exclude — skip claims marked as total loss</option>
-                <option value="Only">Only — fire only for claims marked as total loss</option>
-              </select>
-              <p className="text-xs text-gray-500 mt-1">Set repair-update chasers to "Exclude" and total-loss-specific chasers to "Only" to avoid overlap.</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

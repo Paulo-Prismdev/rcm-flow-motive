@@ -27,13 +27,55 @@
       "type": "string",
       "description": "If recipient_type is Custom Email, specify the email here"
     },
+    "include_conditions": {
+      "type": "array",
+      "description": "Fire only if ALL of these conditions are true. Empty = every claim is eligible (subject to the timer). Each condition: { field, operator, value }. Enum operators: is_any_of, is_not_any_of, is_empty, is_not_empty. Boolean operator: is (value 'true'/'false').",
+      "items": {
+        "type": "object",
+        "properties": {
+          "field": {
+            "type": "string"
+          },
+          "operator": {
+            "type": "string"
+          },
+          "value": {}
+        },
+        "required": [
+          "field",
+          "operator"
+        ]
+      },
+      "default": []
+    },
+    "exclude_conditions": {
+      "type": "array",
+      "description": "Skip the claim if ANY of these conditions are true. Same condition shape as include_conditions.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "field": {
+            "type": "string"
+          },
+          "operator": {
+            "type": "string"
+          },
+          "value": {}
+        },
+        "required": [
+          "field",
+          "operator"
+        ]
+      },
+      "default": []
+    },
     "trigger_journey_statuses": {
       "type": "array",
       "items": {
         "type": "string"
       },
       "default": [],
-      "description": "Journey Statuses that make a claim eligible. Empty = all journey statuses."
+      "description": "Legacy field \u2014 superseded by include_conditions. Kept for backward compatibility with rules created before the condition builder."
     },
     "total_loss_handling": {
       "type": "string",
@@ -43,7 +85,7 @@
         "Only"
       ],
       "default": "Include",
-      "description": "How this rule treats claims marked as total loss. Include = ignore total loss (fire for any matching claim); Exclude = skip total-loss claims; Only = fire only for total-loss claims."
+      "description": "Legacy field \u2014 superseded by include_conditions / exclude_conditions. Kept for backward compatibility."
     },
     "trigger_timer": {
       "type": "string",

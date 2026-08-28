@@ -51,6 +51,70 @@ function getClientOverdueHours(claim: any): number | null {
   return hours > 0 ? hours : null;
 }
 
+// ── Condition evaluation (flexible chaser eligibility) ──
+// Derives a condition field's value from real claim state. On-site is driven by
+// dates (on_site_date set, no hand_over_date) so it matches the Claims table
+// grouping rather than relying on the stored journey_status label.
+function getConditionValue(claim: any, field: string): any {
+  switch (field) {
+    case 'journey_status':
+      return (claim.on_site_date && !claim.hand_over_date) ? 'On-Site' : (claim.journey_status || '');
+    case 'secondary_status': return claim.secondary_status || '';
+    case 'invoice_status': return claim.invoice_status || '';
+    case 'claim_type': return claim.claim_type || '';
+    case 'is_total_loss': return !!claim.total_loss_date;
+    case 'is_on_site': return !!claim.on_site_date && !claim.hand_over_date;
+    case 'is_returned': return !!claim.hand_over_date;
+    case 'has_bodyshop': return !!claim.bodyshop_id;
+    case 'requires_indemnity': return !!claim.requires_indemnity;
+    default: return claim[field];
+  }
+}
+
+function evaluateCondition(claim: any, cond: any): boolean {
+  const actual = getConditionValue(claim, cond.field);
+  switch (cond.operator) {
+    case 'is_any_of':
+      return Array.isArray(cond.value) && cond.value.map(String).includes(String(actual));
+    case 'is_not_any_of':
+      return !Array.isArray(cond.value) || !cond.value.map(String).includes(String(actual));
+    case 'is_empty':
+      return actual == null || actual === '' || (Array.isArray(actual) && actual.length === 0);
+    case 'is_not_empty':
+      return actual != null && actual !== '' && !(Array.isArray(actual) && actual.length === 0);
+    case 'is':
+      return String(actual) === String(cond.value);
+    default:
+      return false;
+  }
+}
+
+// Normalises a rule into effective include/exclude condition lists, falling
+// back to the legacy trigger_journey_statuses / total_loss_handling fields for
+// rules created before the condition builder.
+function getEffectiveConditions(rule: any): { include: any[]; exclude: any[] } {
+  let include = Array.isArray(rule.include_conditions) ? [...rule.include_conditions] : null;
+  let exclude = Array.isArray(rule.exclude_conditions) ? [...rule.exclude_conditions] : null;
+
+  // Legacy journey-status filter → include "is any of" (only when no new include conditions)
+  if ((!include || include.length === 0) && Array.isArray(rule.trigger_journey_statuses) && rule.trigger_journey_statuses.length > 0) {
+    if (!include) include = [];
+    include.push({ field: 'journey_status', operator: 'is_any_of', value: [...rule.trigger_journey_statuses] });
+  }
+
+  // Legacy total-loss handling → include / exclude conditions
+  const tlh = rule.total_loss_handling || 'Include';
+  if (tlh === 'Exclude') {
+    if (!exclude) exclude = [];
+    exclude.push({ field: 'is_total_loss', operator: 'is', value: 'true' });
+  } else if (tlh === 'Only') {
+    if (!include) include = [];
+    include.push({ field: 'is_total_loss', operator: 'is', value: 'true' });
+  }
+
+  return { include: include || [], exclude: exclude || [] };
+}
+
 // ── Recipient email resolution ──
 function getRecipientEmail(claim: any, rule: any): string | null {
   switch (rule.recipient_type) {
@@ -279,24 +343,13 @@ Deno.serve(async (req) => {
           const recipientEmail = getRecipientEmail(claim, rule);
           if (!recipientEmail) { totalSkipped++; continue; }
 
-          // Journey status filter (empty = all statuses eligible).
-          // Mirror the Claims page grouping (claimGrouping.getGroupKey): a claim
-          // with on_site_date set and no hand_over_date is treated as "On-Site"
-          // regardless of its stored journey_status, so the chaser matches the
-          // same "On Site" group the user sees on the status list.
-          if (rule.trigger_journey_statuses && rule.trigger_journey_statuses.length > 0) {
-            let effectiveJourney = claim.journey_status;
-            if (claim.on_site_date && !claim.hand_over_date) effectiveJourney = 'On-Site';
-            if (!rule.trigger_journey_statuses.includes(effectiveJourney)) { totalSkipped++; continue; }
-          }
-
-          // Total loss handling — prevents repair-update chasers from firing
-          // at on-site total-loss vehicles, and lets a rule target only total
-          // loss claims. A claim is total loss when total_loss_date is set.
-          const isTotalLoss = !!claim.total_loss_date;
-          const totalLossHandling = rule.total_loss_handling || 'Include';
-          if (totalLossHandling === 'Exclude' && isTotalLoss) { totalSkipped++; continue; }
-          if (totalLossHandling === 'Only' && !isTotalLoss) { totalSkipped++; continue; }
+          // ── Flexible eligibility conditions ──
+          // include: ALL must be true (empty = eligible). exclude: ANY true skips.
+          // Falls back to legacy trigger_journey_statuses / total_loss_handling
+          // for rules created before the condition builder.
+          const { include, exclude } = getEffectiveConditions(rule);
+          if (include.length > 0 && !include.every((c) => evaluateCondition(claim, c))) { totalSkipped++; continue; }
+          if (exclude.length > 0 && exclude.some((c) => evaluateCondition(claim, c))) { totalSkipped++; continue; }
 
           // ── Timer check (fully configurable per rule) ──
           const threshold = rule.hours_overdue_before_send || 0;
