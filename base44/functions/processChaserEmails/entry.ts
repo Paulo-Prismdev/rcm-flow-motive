@@ -290,6 +290,14 @@ Deno.serve(async (req) => {
             if (!rule.trigger_journey_statuses.includes(effectiveJourney)) { totalSkipped++; continue; }
           }
 
+          // Total loss handling — prevents repair-update chasers from firing
+          // at on-site total-loss vehicles, and lets a rule target only total
+          // loss claims. A claim is total loss when total_loss_date is set.
+          const isTotalLoss = !!claim.total_loss_date;
+          const totalLossHandling = rule.total_loss_handling || 'Include';
+          if (totalLossHandling === 'Exclude' && isTotalLoss) { totalSkipped++; continue; }
+          if (totalLossHandling === 'Only' && !isTotalLoss) { totalSkipped++; continue; }
+
           // ── Timer check (fully configurable per rule) ──
           const threshold = rule.hours_overdue_before_send || 0;
           const caseHours = getCaseOverdueHours(claim);
@@ -366,6 +374,7 @@ Deno.serve(async (req) => {
               reg: claim.reg,
               client_name: claim.client_name,
               journey_status: claim.journey_status,
+              is_total_loss: !!claim.total_loss_date,
               recipient_type: rule.recipient_type,
               recipient_email: recipientEmail,
               bodyshop: claim.bodyshop,

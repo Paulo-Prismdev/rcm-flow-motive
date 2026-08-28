@@ -35,6 +35,16 @@
       "default": [],
       "description": "Journey Statuses that make a claim eligible. Empty = all journey statuses."
     },
+    "total_loss_handling": {
+      "type": "string",
+      "enum": [
+        "Include",
+        "Exclude",
+        "Only"
+      ],
+      "default": "Include",
+      "description": "How this rule treats claims marked as total loss. Include = ignore total loss (fire for any matching claim); Exclude = skip total-loss claims; Only = fire only for total-loss claims."
+    },
     "trigger_timer": {
       "type": "string",
       "enum": [

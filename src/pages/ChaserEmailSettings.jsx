@@ -255,6 +255,17 @@ export default function ChaserEmailSettings() {
                         ))}
                       </div>
                     )}
+                    {rule.total_loss_handling && rule.total_loss_handling !== 'Include' && (
+                      <div className="mb-2">
+                        <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${
+                          rule.total_loss_handling === 'Only'
+                            ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'
+                            : 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300'
+                        }`}>
+                          {rule.total_loss_handling === 'Only' ? 'Total Loss Only' : 'Excludes Total Loss'}
+                        </span>
+                      </div>
+                    )}
 
                     <div className="text-xs text-gray-600 dark:text-gray-400 line-clamp-1">
                       Subject: {rule.email_subject_template}
@@ -339,9 +350,12 @@ export default function ChaserEmailSettings() {
                   {previewData.preview.map((p, i) => (
                     <div key={i} className="bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-800 p-3">
                       <div className="flex items-start justify-between gap-2 mb-1">
-                        <div className="min-w-0">
+                        <div className="min-w-0 flex items-center gap-2 flex-wrap">
                           <span className="text-sm font-semibold text-gray-900 dark:text-white">{p.job_number}</span>
-                          <span className="text-xs text-gray-500 ml-2">{p.reg}</span>
+                          <span className="text-xs text-gray-500">{p.reg}</span>
+                          {p.is_total_loss && (
+                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300 font-medium">Total Loss</span>
+                          )}
                         </div>
                         <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 flex-shrink-0">{p.journey_status || p.job_status}</span>
                       </div>
@@ -382,6 +396,7 @@ function ChaserEmailRuleForm({ rule, onSubmit, onCancel }) {
     recipient_type: 'Bodyshop',
     custom_email: '',
     trigger_journey_statuses: [],
+    total_loss_handling: 'Include',
     trigger_timer: 'Case 48hrs',
     hours_overdue_before_send: 0,
     email_subject_template: '',
@@ -469,6 +484,21 @@ function ChaserEmailRuleForm({ rule, onSubmit, onCancel }) {
                   );
                 })}
               </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">Total Loss Handling</label>
+              <p className="text-xs text-gray-500 mb-2">Control whether this rule applies to claims marked as total loss.</p>
+              <select
+                value={formData.total_loss_handling || 'Include'}
+                onChange={(e) => setFormData({ ...formData, total_loss_handling: e.target.value })}
+                className="neomorph-inset w-full px-4 py-3 border-0 rounded-xl"
+              >
+                <option value="Include">Include — fire for all matching claims (ignore total loss)</option>
+                <option value="Exclude">Exclude — skip claims marked as total loss</option>
+                <option value="Only">Only — fire only for claims marked as total loss</option>
+              </select>
+              <p className="text-xs text-gray-500 mt-1">Set repair-update chasers to "Exclude" and total-loss-specific chasers to "Only" to avoid overlap.</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
