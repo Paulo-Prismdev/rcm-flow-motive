@@ -75,9 +75,9 @@ function evaluateCondition(claim: any, cond: any): boolean {
   const actual = getConditionValue(claim, cond.field);
   switch (cond.operator) {
     case 'is_any_of':
-      return Array.isArray(cond.value) && cond.value.map(String).includes(String(actual));
+      return String(cond.value || '').split(',').filter(Boolean).map(String).includes(String(actual));
     case 'is_not_any_of':
-      return !Array.isArray(cond.value) || !cond.value.map(String).includes(String(actual));
+      return !String(cond.value || '').split(',').filter(Boolean).map(String).includes(String(actual));
     case 'is_empty':
       return actual == null || actual === '' || (Array.isArray(actual) && actual.length === 0);
     case 'is_not_empty':

@@ -29,7 +29,7 @@
     },
     "include_conditions": {
       "type": "array",
-      "description": "Fire only if ALL of these conditions are true. Empty = every claim is eligible (subject to the timer). Each condition: { field, operator, value }. Enum operators: is_any_of, is_not_any_of, is_empty, is_not_empty. Boolean operator: is (value 'true'/'false').",
+      "description": "Fire only if ALL of these conditions are true. Empty = every claim is eligible (subject to the timer). Each condition: { field, operator, value }. Enum operators: is_any_of, is_not_any_of, is_empty, is_not_empty. Boolean operator: is (value 'true'/'false'). For is_any_of/is_not_any_of, value is a comma-separated string of options.",
       "items": {
         "type": "object",
         "properties": {
@@ -39,7 +39,9 @@
           "operator": {
             "type": "string"
           },
-          "value": {}
+          "value": {
+            "type": "string"
+          }
         },
         "required": [
           "field",
@@ -60,7 +62,9 @@
           "operator": {
             "type": "string"
           },
-          "value": {}
+          "value": {
+            "type": "string"
+          }
         },
         "required": [
           "field",

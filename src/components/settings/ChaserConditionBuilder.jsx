@@ -32,9 +32,9 @@ function getFieldDef(fieldValue) {
 
 function defaultConditionForField(fieldValue) {
   const def = getFieldDef(fieldValue);
-  if (!def) return { field: fieldValue, operator: 'is_any_of', value: [] };
+  if (!def) return { field: fieldValue, operator: 'is_any_of', value: '' };
   if (def.type === 'boolean') return { field: fieldValue, operator: 'is', value: 'true' };
-  return { field: fieldValue, operator: 'is_any_of', value: [] };
+  return { field: fieldValue, operator: 'is_any_of', value: '' };
 }
 
 // ── Migrate legacy rule fields into the new condition model ──
@@ -42,9 +42,9 @@ export function migrateLegacyConditions(rule) {
   const include = Array.isArray(rule.include_conditions) ? [...rule.include_conditions] : [];
   const exclude = Array.isArray(rule.exclude_conditions) ? [...rule.exclude_conditions] : [];
 
-  // Legacy journey-status filter → include "is any of"
+  // Legacy journey-status filter → include "is any of" (comma-separated string)
   if ((!include || include.length === 0) && Array.isArray(rule.trigger_journey_statuses) && rule.trigger_journey_statuses.length > 0) {
-    include.push({ field: 'journey_status', operator: 'is_any_of', value: [...rule.trigger_journey_statuses] });
+    include.push({ field: 'journey_status', operator: 'is_any_of', value: rule.trigger_journey_statuses.join(',') });
   }
 
   // Legacy total-loss handling → include / exclude conditions
@@ -69,8 +69,7 @@ export function summarizeConditions(conditions) {
     if (c.operator === 'is_empty') valLabel = '';
     else if (c.operator === 'is_not_empty') valLabel = '';
     else if (def?.type === 'boolean') valLabel = c.value === 'true' ? 'Yes' : 'No';
-    else if (Array.isArray(c.value)) valLabel = c.value.join(' / ');
-    else valLabel = String(c.value);
+    else valLabel = String(c.value || '').split(',').filter(Boolean).join(' / ');
     return `${label} ${opLabel}${valLabel ? ' ' + valLabel : ''}`;
   });
 }
@@ -128,7 +127,7 @@ export default function ChaserConditionBuilder({ conditions, onChange, mode }) {
               {/* Operator */}
               <select
                 value={cond.operator}
-                onChange={(e) => updateCondition(i, { operator: e.target.value, value: def?.type === 'boolean' ? 'true' : (e.target.value === 'is_any_of' || e.target.value === 'is_not_any_of' ? [] : '') })}
+                onChange={(e) => updateCondition(i, { operator: e.target.value, value: def?.type === 'boolean' ? 'true' : '' })}
                 className="neomorph-inset px-2 py-1.5 text-xs rounded-md border-0"
               >
                 {operators.map((o) => (
@@ -151,15 +150,15 @@ export default function ChaserConditionBuilder({ conditions, onChange, mode }) {
               {needsValue && def?.type === 'enum' && (
                 <div className="flex flex-wrap gap-1 flex-1 min-w-[120px]">
                   {def.options.map((opt) => {
-                    const selected = Array.isArray(cond.value) && cond.value.includes(opt);
+                    const current = String(cond.value || '').split(',').filter(Boolean);
+                    const selected = current.includes(opt);
                     return (
                       <button
                         key={opt}
                         type="button"
                         onClick={() => {
-                          const current = Array.isArray(cond.value) ? cond.value : [];
                           const nextVal = selected ? current.filter((v) => v !== opt) : [...current, opt];
-                          updateCondition(i, { value: nextVal });
+                          updateCondition(i, { value: nextVal.join(',') });
                         }}
                         className={`px-2 py-0.5 text-[11px] rounded-full border transition-colors ${
                           selected
