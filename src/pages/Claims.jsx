@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, Search, Archive, Filter, X, AlertTriangle, Clock, Upload, Package, ChevronDown, ChevronRight, Settings2, ArrowUpDown, MessageSquare, Eye } from 'lucide-react';
@@ -216,17 +216,20 @@ export default function ClaimsPage() {
   const uniqueClaimTypes = [...new Set(claims.map(c => c.claim_type).filter(Boolean))].sort();
 
   const location = useLocation();
+  const navigate = useNavigate();
+  const consumedIdRef = useRef(null);
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search);
     const claimId = urlParams.get('id');
-    if (claimId && claims.length > 0) {
+    if (claimId && claims.length > 0 && consumedIdRef.current !== claimId) {
       const claim = claims.find(c => c.id === claimId);
       if (claim) {
+        consumedIdRef.current = claimId;
         setSelectedClaim(claim);
-        window.history.replaceState({}, '', window.location.pathname);
+        navigate(location.pathname, { replace: true });
       }
     }
-  }, [claims, location.search]);
+  }, [claims, location.search, location.pathname, navigate]);
 
   const [createError, setCreateError] = useState(null);
 
