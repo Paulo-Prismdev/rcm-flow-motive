@@ -69,7 +69,7 @@ const getGroupKey = (c) => {
   const journey = c.journey_status || c.job_status;
   if (journey === 'Cancelled') return 'Cancelled';
   if (c.on_site_date && !c.hand_over_date) return 'On Site';
-  if (c.journey_status) {
+  if (c.journey_status && !isExceptionJourney(c.journey_status)) {
     if (c.journey_status === 'On-Site') return 'On Site';
     return c.journey_status;
   }

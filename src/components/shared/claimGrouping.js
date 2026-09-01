@@ -22,7 +22,7 @@ export function getGroupKey(c) {
   // not yet handed over, it belongs in the "On Site" group regardless of its
   // journey status (e.g. even if journey is still "Awaiting BID").
   if (c.on_site_date && !c.hand_over_date) return 'On Site';
-  if (c.journey_status) {
+  if (c.journey_status && !isExceptionJourney(c.journey_status)) {
     if (c.journey_status === 'On-Site') return 'On Site';
     return c.journey_status;
   }
