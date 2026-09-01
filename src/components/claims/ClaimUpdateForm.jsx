@@ -246,14 +246,12 @@ export default function ClaimUpdateForm({
         <Button type="button" variant="ghost" size="sm" onClick={resetForm}><X className="w-4 h-4" /></Button>
       </div>
       <form onSubmit={handleSubmit} className="space-y-2">
-        {!replyToId && (
-          <div>
-            <label className="block text-xs text-muted-foreground mb-1">Update Type *</label>
-            <select value={newUpdate.update_type} onChange={(e) => setNewUpdate({ ...newUpdate, update_type: e.target.value, direction: '', platform: '' })} className="w-full px-3 py-2 text-sm bg-background border border-border rounded-lg" required>
-              {isReferrer ? (<><option value="Referrer Communication">Referrer Communication</option><option value="Other">Other</option></>) : (UPDATE_TYPES.map(type => <option key={type} value={type}>{type}</option>))}
-            </select>
-          </div>
-        )}
+        <div>
+          <label className="block text-xs text-muted-foreground mb-1">Update Type *</label>
+          <select value={newUpdate.update_type} onChange={(e) => setNewUpdate({ ...newUpdate, update_type: e.target.value, direction: '', platform: '' })} className="w-full px-3 py-2 text-sm bg-background border border-border rounded-lg" required>
+            {isReferrer ? (<><option value="Referrer Communication">Referrer Communication</option><option value="Other">Other</option></>) : (UPDATE_TYPES.map(type => <option key={type} value={type}>{type}</option>))}
+          </select>
+        </div>
 
         {newUpdate.update_type !== 'Status Change' && (
           <div>
