@@ -139,17 +139,20 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
         return await base44.entities.ClaimUpdate.create({ update_type: 'Other', description: updateData.description, next_steps: updateData.next_steps, due_date_for_next_action: updateData.due_date_for_next_action, claim_id: claimId, parent_update_id: updateData.parent_update_id, tagged_user_ids: updateData.tagged_user_ids, ...(currentUser?.company_id && { company_id: currentUser.company_id }) });
       }
       const created = await base44.entities.ClaimUpdate.create({ ...updateData, claim_id: claimId, ...(currentUser?.company_id && { company_id: currentUser.company_id }) });
-      // Client Communication updates reset the dedicated 48-hour client
-      // communication tracker immediately (also handled by entity automation,
-      // but we do it here so the UI reflects the change without waiting).
-      if (updateData.update_type === 'Client Communication') {
-        const now = new Date();
-        const closed = isUpdateTrackingClosed({ job_status: claim?.journey_status || claim?.job_status, invoice_status: claim?.invoice_status });
-        await base44.entities.Claim.update(claimId, {
-          last_client_comm_at: now.toISOString(),
-          next_client_comm_due_at: new Date(now.getTime() + 48 * 60 * 60 * 1000).toISOString(),
-          client_comm_status_flag: closed ? 'Gray' : 'Green',
-        });
+      // Best-effort timer reset — runs AFTER the update is saved, so a slow/
+      // failed timer write must never make a successful update look like it failed.
+      try {
+        if (updateData.update_type === 'Client Communication') {
+          const now = new Date();
+          const closed = isUpdateTrackingClosed({ job_status: claim?.journey_status || claim?.job_status, invoice_status: claim?.invoice_status });
+          await base44.entities.Claim.update(claimId, {
+            last_client_comm_at: now.toISOString(),
+            next_client_comm_due_at: new Date(now.getTime() + 48 * 60 * 60 * 1000).toISOString(),
+            client_comm_status_flag: closed ? 'Gray' : 'Green',
+          });
+        }
+      } catch (timerErr) {
+        console.warn('Client comm timer reset failed (update was still saved):', timerErr);
       }
       // Create in-app notifications for any tagged users
       if (updateData.tagged_user_ids && updateData.tagged_user_ids.length > 0) {

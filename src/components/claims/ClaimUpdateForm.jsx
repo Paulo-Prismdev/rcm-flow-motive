@@ -93,29 +93,30 @@ export default function ClaimUpdateForm({
       } else {
         created = await base44.entities.ClaimUpdate.create({ ...updateData, claim_id: claimId, ...(currentUser?.company_id && { company_id: currentUser.company_id }) });
       }
-      // Incoming updates (any type) reset the general 48-hour case update timer.
-      if (updateData.update_type !== 'Status Change' && updateData.direction === 'Incoming') {
-        const now = new Date();
-        const closed = isUpdateTrackingClosed({ job_status: claim?.journey_status || claim?.job_status, invoice_status: claim?.invoice_status });
-        await base44.entities.Claim.update(claimId, {
-          last_updated_at: now.toISOString(),
-          next_update_due_at: new Date(now.getTime() + 48 * 60 * 60 * 1000).toISOString(),
-          update_status_flag: closed ? 'Gray' : 'Green',
-        });
-      }
-      // Client Communication updates reset the dedicated 48-hour client
-      // communication tracker (separate from the general update timer).
-      // Always set last_client_comm_at so the tracker is correct even if the
-      // claim is later reopened (status changed away from invoiced/cancelled).
-      if (updateData.update_type === 'Client Communication' && updateData.direction === 'Outgoing') {
-        const now = new Date();
-        const closed = isUpdateTrackingClosed({ job_status: claim?.journey_status || claim?.job_status, invoice_status: claim?.invoice_status });
-        const commUpdate = {
-          last_client_comm_at: now.toISOString(),
-          next_client_comm_due_at: new Date(now.getTime() + 48 * 60 * 60 * 1000).toISOString(),
-          client_comm_status_flag: closed ? 'Gray' : 'Green',
-        };
-        await base44.entities.Claim.update(claimId, commUpdate);
+      // Best-effort timer resets — these run AFTER the update is already saved,
+      // so a slow/failed timer write must never make a successful update look
+      // like it failed. We catch and log; the update itself is already stored.
+      try {
+        if (updateData.update_type !== 'Status Change' && updateData.direction === 'Incoming') {
+          const now = new Date();
+          const closed = isUpdateTrackingClosed({ job_status: claim?.journey_status || claim?.job_status, invoice_status: claim?.invoice_status });
+          await base44.entities.Claim.update(claimId, {
+            last_updated_at: now.toISOString(),
+            next_update_due_at: new Date(now.getTime() + 48 * 60 * 60 * 1000).toISOString(),
+            update_status_flag: closed ? 'Gray' : 'Green',
+          });
+        }
+        if (updateData.update_type === 'Client Communication' && updateData.direction === 'Outgoing') {
+          const now = new Date();
+          const closed = isUpdateTrackingClosed({ job_status: claim?.journey_status || claim?.job_status, invoice_status: claim?.invoice_status });
+          await base44.entities.Claim.update(claimId, {
+            last_client_comm_at: now.toISOString(),
+            next_client_comm_due_at: new Date(now.getTime() + 48 * 60 * 60 * 1000).toISOString(),
+            client_comm_status_flag: closed ? 'Gray' : 'Green',
+          });
+        }
+      } catch (timerErr) {
+        console.warn('Timer reset failed (update was still saved):', timerErr);
       }
       // Create in-app notifications for any tagged users
       if (updateData.tagged_user_ids && updateData.tagged_user_ids.length > 0) {
