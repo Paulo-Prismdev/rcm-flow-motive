@@ -58,7 +58,12 @@ function getClientOverdueHours(claim: any): number | null {
 function getConditionValue(claim: any, field: string): any {
   switch (field) {
     case 'journey_status':
-      return (claim.on_site_date && !claim.hand_over_date) ? 'On-Site' : (claim.journey_status || '');
+      // Honour the explicitly stored journey_status when set, so Fire/Skip rules
+      // keyed on statuses like "Total Loss" / "Potential Total Loss" are evaluated
+      // against the real value. Only auto-derive "On-Site" from the on-site date
+      // when no journey_status has been recorded yet.
+      if (claim.journey_status) return claim.journey_status;
+      return (claim.on_site_date && !claim.hand_over_date) ? 'On-Site' : '';
     case 'secondary_status': return claim.secondary_status || '';
     case 'invoice_status': return claim.invoice_status || '';
     case 'claim_type': return claim.claim_type || '';
