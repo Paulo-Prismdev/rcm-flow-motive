@@ -10,7 +10,10 @@ import { Badge } from "@/components/ui/badge";
 import InternalUpdateForm from '@/components/shared/InternalUpdateForm';
 import UpdateDirectionBadges from '../claims/UpdateDirectionBadges';
 import FileViewer from '@/components/shared/FileViewer';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
+
+const isImageUrl = (url) => /\.(jpe?g|png|gif|webp|bmp|svg)(\?|$)/i.test(url);
 
 const UPDATE_TYPE_COLORS = {
   "Client Communication": "bg-blue-500", "Bodyshop Communication": "bg-green-500",
@@ -48,6 +51,7 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [copiedId, setCopiedId] = useState(null);
   const [viewingFile, setViewingFile] = useState(null);
+  const [activeTab, setActiveTab] = useState('updates');
   const replyFormRef = useRef(null);
 
   const queryClient = useQueryClient();
@@ -182,10 +186,20 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
     } catch { return 'Attached file'; }
   };
 
-  if (!parentId) return null;
-
   const mainNotes = notes.filter((n) => !n.parent_note_id).sort((a, b) => new Date(b.created_date) - new Date(a.created_date));
   const getReplies = (noteId) => notes.filter((n) => n.parent_note_id === noteId).sort((a, b) => new Date(a.created_date) - new Date(b.created_date));
+
+  const allFiles = useMemo(() => {
+    const list = [];
+    notes.forEach((n) => {
+      (n.file_urls || []).forEach((url) => {
+        list.push({ url, note: n, noteId: n.id, fileName: getFileName(url), date: n.created_date, author: getDisplayName(n.created_by), isImage: isImageUrl(url) });
+      });
+    });
+    return list.sort((a, b) => new Date(b.date) - new Date(a.date));
+  }, [notes, allUsers]);
+
+  if (!parentId) return null;
 
   const renderFileChips = (note, editable) => (
     note.file_urls && note.file_urls.length > 0 ? (
@@ -218,7 +232,13 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
             <p className="text-xs text-muted-foreground mt-1">Internal team communication only — does NOT affect 48-hour tracking or claim status.</p>
           </DialogHeader>
 
-          <div className="flex-1 overflow-y-auto overflow-x-hidden space-y-4 pr-2">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden min-h-0">
+            <TabsList className="grid w-full grid-cols-2 mb-3 flex-shrink-0">
+              <TabsTrigger value="updates" className="text-sm gap-1.5">Updates {mainNotes.length > 0 && <span className="text-[10px] bg-muted text-muted-foreground rounded-full px-1.5 py-0.5">{mainNotes.length}</span>}</TabsTrigger>
+              <TabsTrigger value="files" className="text-sm gap-1.5">Files {allFiles.length > 0 && <span className="text-[10px] bg-muted text-muted-foreground rounded-full px-1.5 py-0.5">{allFiles.length}</span>}</TabsTrigger>
+            </TabsList>
+
+          <TabsContent value="updates" className="flex-1 overflow-y-auto overflow-x-hidden space-y-4 pr-2 mt-0 min-h-0">
             {!showForm ? (
               <Button onClick={() => setShowForm(true)} className="w-full px-4 py-3 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-lg flex items-center justify-center gap-2">
                 <Plus className="w-4 h-4" />Add New Internal Update
@@ -374,7 +394,43 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
                 </div>
               )}
             </div>
-          </div>
+          </TabsContent>
+
+          <TabsContent value="files" className="flex-1 overflow-y-auto overflow-x-hidden pr-2 mt-0 min-h-0">
+            {allFiles.length === 0 ? (
+              <div className="bg-muted/30 border border-border rounded-lg p-8 text-center text-sm text-muted-foreground flex flex-col items-center gap-2">
+                <FileIcon className="w-8 h-8 opacity-40" />
+                No files attached to internal updates yet.
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                {allFiles.map((file) => (
+                  <div key={file.url} className="group border border-border rounded-lg overflow-hidden bg-card flex flex-col">
+                    <button type="button" onClick={() => setViewingFile(file.url)} className="relative w-full aspect-square bg-muted flex items-center justify-center overflow-hidden">
+                      {file.isImage ? (
+                        <img src={file.url} alt={file.fileName} className="w-full h-full object-cover" loading="lazy" />
+                      ) : (
+                        <FileIcon className="w-10 h-10 text-muted-foreground" />
+                      )}
+                    </button>
+                    <div className="p-2 flex flex-col gap-1 flex-1 min-w-0">
+                      <span className="text-xs font-medium truncate" title={file.fileName}>{file.fileName}</span>
+                      <span className="text-[10px] text-muted-foreground truncate">{file.author}</span>
+                      <span className="text-[10px] text-muted-foreground">{format(new Date(file.date), 'dd/MM/yy HH:mm')}</span>
+                      <div className="flex items-center gap-1 mt-1">
+                        <button type="button" onClick={() => setViewingFile(file.url)} className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground" title="View"><Eye className="w-3.5 h-3.5" /></button>
+                        <a href={file.url} target="_blank" rel="noopener noreferrer" className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground" title="Download"><Download className="w-3.5 h-3.5" /></a>
+                        {canEditDelete(file.note) && (
+                          <button type="button" onClick={() => deleteFileMutation.mutate({ noteId: file.noteId, fileUrl: file.url })} className="p-1 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive ml-auto" title="Remove file"><Trash2 className="w-3.5 h-3.5" /></button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+          </Tabs>
         </DialogContent>
       </Dialog>
 
