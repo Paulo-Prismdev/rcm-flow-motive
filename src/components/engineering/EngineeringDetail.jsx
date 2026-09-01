@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Edit, User, Car, FileText, DollarSign, Calendar, ChevronDown, ChevronUp, Mail, Archive, Trash2, Clock } from "lucide-react";
@@ -323,7 +322,7 @@ export default function EngineeringDetail({ job, onClose, onUpdate, isInternalUs
               <Button 
                 onClick={() => setIsNotesOpen(true)}
                 className="neomorph-flat p-1.5 md:p-3"
-                title="Updates & Notes"
+                title="Internal Updates"
               >
                 <Edit className="w-3.5 h-3.5 md:w-4 md:h-4" />
               </Button>

@@ -491,7 +491,7 @@ const renderSelectedSection = () => {
                     <DropdownMenuContent align="end" className="w-56">
                       <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsNotesOpen(true); }}>
                         <Edit className="w-4 h-4 mr-2" />
-                        Internal Notes
+                        Internal Updates
                       </DropdownMenuItem>
                       <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsAttachmentsOpen(true); }}>
                         <FileText className="w-4 h-4 mr-2" />

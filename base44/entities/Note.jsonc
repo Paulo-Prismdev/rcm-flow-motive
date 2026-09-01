@@ -24,6 +24,50 @@
       "type": "string",
       "description": "If this is a reply, the ID of the parent note"
     },
+    "update_type": {
+      "type": "string",
+      "description": "Category of the internal update (mirrors the Official Updates update types, minus Status Change)."
+    },
+    "direction": {
+      "type": "string",
+      "enum": [
+        "Incoming",
+        "Outgoing"
+      ],
+      "description": "Whether this internal communication was incoming or outgoing"
+    },
+    "platform": {
+      "type": "string",
+      "enum": [
+        "Phone",
+        "E-Mail",
+        "Whatsapp",
+        "Text Message"
+      ],
+      "description": "Communication platform used for this internal update"
+    },
+    "next_steps": {
+      "type": "string",
+      "description": "What needs to happen next (optional, internal follow-up only \u2014 does not affect tracking)."
+    },
+    "due_date_for_next_action": {
+      "type": "string",
+      "format": "date",
+      "description": "When the next internal action is due (optional)."
+    },
+    "starred": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this internal update is flagged as important"
+    },
+    "liked_by": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "User IDs of users who liked this internal update",
+      "default": []
+    },
     "reactions": {
       "type": "object",
       "description": "Object storing reactions with emoji as key and array of user emails as value",

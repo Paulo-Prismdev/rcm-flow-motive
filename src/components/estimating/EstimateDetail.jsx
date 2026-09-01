@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Edit, FileText, DollarSign, Calendar, ChevronDown, ChevronUp, Wrench, Mail, Archive, Trash2, Clock, Package } from "lucide-react";
@@ -351,7 +350,7 @@ export default function EstimateDetail({ estimate, onClose, onUpdate, isInternal
                       <Button
                         onClick={() => setIsNotesOpen(true)}
                         className="neomorph-flat p-1.5 md:p-3"
-                        title="Updates & Notes"
+                        title="Internal Updates"
                       >
                         <Edit className="w-3.5 h-3.5 md:w-4 md:h-4" />
                       </Button>
@@ -424,4 +423,3 @@ export default function EstimateDetail({ estimate, onClose, onUpdate, isInternal
     </DragDropOverlay>
   );
 }
-

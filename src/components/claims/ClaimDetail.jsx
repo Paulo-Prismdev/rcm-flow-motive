@@ -1698,7 +1698,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                         </Button>
                         {isInternalUser && (
                           <Button onClick={() => setIsNotesOpen(true)} variant="outline" className="h-9 px-3 text-sm font-medium rounded-lg gap-1.5 relative">
-                            <Edit className="w-4 h-4" /> Internal Notes
+                            <Edit className="w-4 h-4" /> Internal Updates
                             {notesTotalCount > 0 && (
                               <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-blue-500 text-white text-[10px] font-bold flex items-center justify-center leading-none shadow">
                                 {notesTotalCount}
