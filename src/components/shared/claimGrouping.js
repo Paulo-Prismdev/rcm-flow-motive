@@ -3,7 +3,7 @@
 // same way: Secondary status drives the group, with dedicated "On Site" and
 // "Cancelled" groups, and exception journey statuses shown as badges.
 
-import { SECONDARY_STATUSES, getJourneyColor } from './claimStatusV2';
+import { SECONDARY_STATUSES, getJourneyColor, isExceptionJourney } from './claimStatusV2';
 
 const STATUS_COLORS = {
   blue: '#3b82f6', green: '#22c55e', orange: '#f97316',
