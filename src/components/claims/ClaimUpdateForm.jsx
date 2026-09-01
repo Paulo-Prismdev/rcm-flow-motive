@@ -24,11 +24,12 @@ export default function ClaimUpdateForm({
   onUpdateCreated,
   onCancel,
   onDirtyChange,
+  defaultUpdateType,
 }) {
   const queryClient = useQueryClient();
 
   const [newUpdate, setNewUpdate] = useState({
-    update_type: 'Other', direction: '', platform: '', description: '', next_steps: '', due_date_for_next_action: '',
+    update_type: defaultUpdateType || 'Other', direction: replyToId ? 'Outgoing' : '', platform: '', description: '', next_steps: '', due_date_for_next_action: '',
     new_journey: claim?.journey_status || claim?.job_status || currentStatus || '',
     new_secondary_status: claim?.secondary_status || '',
     new_tertiary_status: claim?.tertiary_status || '',
@@ -149,7 +150,7 @@ export default function ClaimUpdateForm({
   });
 
   const resetForm = () => {
-    setNewUpdate({ update_type: 'Other', direction: '', platform: '', description: '', next_steps: '', due_date_for_next_action: '', new_journey: claim?.journey_status || claim?.job_status || currentStatus || '', new_secondary_status: claim?.secondary_status || '', new_tertiary_status: claim?.tertiary_status || '', new_on_site_date: '', new_completion_date: '', new_claim_complete_date: '', new_hand_over_date: '' });
+    setNewUpdate({ update_type: defaultUpdateType || 'Other', direction: replyToId ? 'Outgoing' : '', platform: '', description: '', next_steps: '', due_date_for_next_action: '', new_journey: claim?.journey_status || claim?.job_status || currentStatus || '', new_secondary_status: claim?.secondary_status || '', new_tertiary_status: claim?.tertiary_status || '', new_on_site_date: '', new_completion_date: '', new_claim_complete_date: '', new_hand_over_date: '' });
     setSendEmail(false); setSelectedEmails([]); setTaggedUsers([]); setSubmitError(''); setShowFollowUp(false);
     if (onCancel) onCancel();
   };

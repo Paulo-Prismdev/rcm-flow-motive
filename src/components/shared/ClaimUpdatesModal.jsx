@@ -464,6 +464,7 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
                             claim={claim}
                             currentStatus={currentStatus}
                             replyToId={replyToId}
+                            defaultUpdateType={update.update_type}
                             onDirtyChange={setFormDirty}
                             onUpdateCreated={(newStatus, newSecondaryStatus, newTertiaryStatus, updateType, direction, dates) => {
                               if (onUpdateCreated) onUpdateCreated(newStatus, newSecondaryStatus, newTertiaryStatus, updateType, direction, dates);
