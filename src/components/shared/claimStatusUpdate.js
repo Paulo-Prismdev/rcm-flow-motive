@@ -16,6 +16,9 @@ export function isClosedJourney(journey) {
 export function isUpdateTrackingClosed(claim) {
   if (!claim) return false;
   if (claim.job_status === 'Cancelled') return true;
+  // Rectification journey: tracking stays active until the vehicle is handed
+  // back after rectification work (rectification_hand_over_date set).
+  if ((claim.journey_status === 'Rectification' || claim.job_status === 'Rectification') && claim.rectification_hand_over_date) return true;
   return ['Invoiced', 'Invoice Paid'].includes(claim.invoice_status);
 }
 
@@ -56,6 +59,10 @@ export function computeClientCommStatusFlag(claim) {
     if (!expiry || expiry > new Date()) return 'Blue';
     // Override expired — fall through to time-based calculation
   }
+
+  // Rectification: once the vehicle is handed back after rectification work,
+  // client communication tracking is complete.
+  if ((claim.journey_status === 'Rectification' || claim.job_status === 'Rectification') && claim.rectification_hand_over_date) return 'Complete';
 
   // Once the vehicle has been handed back to the customer, client 48h
   // communication tracking is complete — show "Complete" (Blue) regardless of timers.
@@ -109,12 +116,23 @@ export function buildStatusChangeClaimUpdate(claim, { journey, secondary, tertia
   }
   // Rectification milestone dates are managed in the Key Dates section of the
   // claim record (greyed out until the Rectification journey is applied), so a
-  // status change to Rectification does not write any dates here.
+  // status change to Rectification does not write any dates here. The 48hr
+  // update & client communication timers are reactivated (the job is back in),
+  // and stay active until a rectification_hand_over_date is entered — handled
+  // by isUpdateTrackingClosed / computeClientCommStatusFlag.
   if (effectiveJourney === 'Rectification') {
     updateData.on_site_date = null;
     updateData.hand_over_date = null;
     updateData.completion_date = null;
     updateData.claim_complete_date = null;
+    const nowMs = Date.now();
+    const due = new Date(nowMs + 48 * 60 * 60 * 1000).toISOString();
+    updateData.last_updated_at = new Date(nowMs).toISOString();
+    updateData.next_update_due_at = due;
+    updateData.update_status_flag = 'Green';
+    updateData.last_client_comm_at = new Date(nowMs).toISOString();
+    updateData.next_client_comm_due_at = due;
+    updateData.client_comm_status_flag = 'Green';
   }
 
   // Note: the general 48hr update timer is no longer reset by a status change.
