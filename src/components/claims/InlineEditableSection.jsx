@@ -1,6 +1,6 @@
 import React, { useState, useEffect, createContext, useContext } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+
 import { Edit, Save, X } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -37,18 +37,21 @@ export function InlineField({ label, name, type = 'text', isCurrency = false, is
 
     const inputVal = isDate ? toInputDate(value) : (value ?? '');
 
+    const valueClass = `text-sm font-medium ${(isCurrency || typeof value === 'number') ? 'tabular-nums' : ''}`;
+
     const content = isEditing ? (
-        <Input
+        <input
             type={inputType}
             step={isCurrency || type === 'number' ? '0.01' : undefined}
             value={inputVal}
             onChange={handleChange}
             placeholder={placeholder}
             readOnly={readOnly}
-            className={`h-9 neomorph-inset bg-white dark:bg-gray-800 ${readOnly ? 'cursor-not-allowed opacity-60' : ''}`}
+            style={{ height: '24px', minHeight: '24px', maxHeight: '24px', padding: '0 8px', lineHeight: '24px' }}
+            className={`w-full ${valueClass} ${isEmpty ? 'text-amber-500' : 'text-foreground'} bg-muted/50 dark:bg-gray-800 border border-border/70 rounded-[5px] outline-none focus:border-ring focus:ring-1 focus:ring-ring/40 ${readOnly ? 'cursor-not-allowed opacity-60' : ''}`}
         />
     ) : (
-        <div className={`text-sm font-medium ${isEmpty ? 'text-amber-500' : 'text-foreground'} ${(isCurrency || typeof value === 'number') ? 'tabular-nums' : ''}`}>
+        <div className={`${valueClass} ${isEmpty ? 'text-amber-500' : 'text-foreground'}`}>
             {display}
         </div>
     );
@@ -57,15 +60,15 @@ export function InlineField({ label, name, type = 'text', isCurrency = false, is
         return (
             <div>
                 <div className="text-xs font-semibold text-foreground-muted mb-1">{label}</div>
-                {content}
+                <div className="flex items-center min-h-[24px]">{content}</div>
             </div>
         );
     }
 
     return (
-        <div className={`py-2 px-3 rounded-[8px] transition-colors ${isEmpty ? 'bg-amber-50 dark:bg-amber-900/20 border border-amber-300 dark:border-amber-700' : 'hover:bg-muted/50'}`}>
+        <div className={`py-2 px-3 rounded-[8px] transition-colors ${isEmpty ? 'bg-amber-50 dark:bg-amber-900/20 border border-amber-300 dark:border-amber-700' : isEditing ? 'bg-muted/30' : 'hover:bg-muted/50'}`}>
             <div className="text-[11px] font-medium text-muted-foreground mb-0.5">{label}</div>
-            {content}
+            <div className="flex items-center min-h-[24px]">{content}</div>
         </div>
     );
 }
