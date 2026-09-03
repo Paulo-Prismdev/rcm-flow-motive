@@ -496,6 +496,21 @@
       "format": "date",
       "description": "Date the vehicle was handed back to the customer (marks the vehicle off site)"
     },
+    "rectification_booking_in_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Rectification stage \u2014 date the vehicle was booked back in for rectification work"
+    },
+    "rectification_completion_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Rectification stage \u2014 date the rectification repairs were completed"
+    },
+    "rectification_hand_over_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Rectification stage \u2014 date the vehicle was handed back to the customer after rectification"
+    },
     "all_parts_on_site": {
       "type": "string",
       "format": "date"
