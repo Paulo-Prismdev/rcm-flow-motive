@@ -17,7 +17,7 @@ export function getPipelineStage(claim) {
   if (isExceptionJourney(journey)) return null;
   if (journey === 'Claim Complete' || secondary === 'File Complete') return 'complete';
   if (journey === 'Returned to Customer' || journey === 'Repairs Complete' || secondary === 'Quality Check' || secondary === 'Completed') return 'handover';
-  if (journey === 'On-Site' || (claim.on_site_date && !claim.hand_over_date) || secondary === 'In Repair') return 'on_site';
+  if (journey === 'On-Site' || journey === 'Rectification' || (claim.on_site_date && !claim.hand_over_date) || secondary === 'In Repair') return 'on_site';
   if (journey === 'Booked In' || secondary === 'Booked In' || secondary === 'Placed With Repairer') return 'instructed';
   if (secondary === 'Authorised' || secondary === 'Awaiting Sup Authority') return 'authority';
   if (['Awaiting Estimate', 'Awaiting Private Estimate', 'Waiting Indemnity Details', 'Awaiting Engineer'].includes(secondary)) return 'estimate';
