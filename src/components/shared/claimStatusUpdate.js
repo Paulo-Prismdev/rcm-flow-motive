@@ -107,10 +107,14 @@ export function buildStatusChangeClaimUpdate(claim, { journey, secondary, tertia
   if (effectiveJourney === 'Claim Complete') {
     updateData.claim_complete_date = claim_complete_date || claim?.claim_complete_date || today;
   }
+  // Rectification milestone dates are managed in the Key Dates section of the
+  // claim record (greyed out until the Rectification journey is applied), so a
+  // status change to Rectification does not write any dates here.
   if (effectiveJourney === 'Rectification') {
-    updateData.rectification_booking_in_date = rectification_booking_in_date || claim?.rectification_booking_in_date || today;
-    if (rectification_completion_date) updateData.rectification_completion_date = rectification_completion_date;
-    if (rectification_hand_over_date) updateData.rectification_hand_over_date = rectification_hand_over_date;
+    updateData.on_site_date = null;
+    updateData.hand_over_date = null;
+    updateData.completion_date = null;
+    updateData.claim_complete_date = null;
   }
 
   // Note: the general 48hr update timer is no longer reset by a status change.

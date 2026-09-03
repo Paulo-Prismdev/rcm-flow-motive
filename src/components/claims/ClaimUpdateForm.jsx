@@ -36,10 +36,7 @@ export default function ClaimUpdateForm({
     new_on_site_date: '',
     new_completion_date: '',
     new_claim_complete_date: '',
-    new_hand_over_date: '',
-    new_rectification_booking_in_date: '',
-    new_rectification_completion_date: '',
-    new_rectification_hand_over_date: ''
+    new_hand_over_date: ''
   });
   const [sendEmail, setSendEmail] = useState(false);
   const [selectedEmails, setSelectedEmails] = useState([]);
@@ -83,8 +80,7 @@ export default function ClaimUpdateForm({
       if (updateData.update_type === 'Status Change') {
         const claimUpdate = buildStatusChangeClaimUpdate(claim, {
           journey: updateData.new_journey, secondary: updateData.new_secondary_status, tertiary: updateData.new_tertiary_status,
-          on_site_date: updateData.new_on_site_date, completion_date: updateData.new_completion_date, claim_complete_date: updateData.new_claim_complete_date, hand_over_date: updateData.new_hand_over_date,
-          rectification_booking_in_date: updateData.new_rectification_booking_in_date, rectification_completion_date: updateData.new_rectification_completion_date, rectification_hand_over_date: updateData.new_rectification_hand_over_date
+          on_site_date: updateData.new_on_site_date, completion_date: updateData.new_completion_date, claim_complete_date: updateData.new_claim_complete_date, hand_over_date: updateData.new_hand_over_date
         }, updateData.update_type);
         if (Object.keys(claimUpdate).length > 0) {
           await base44.entities.Claim.update(claimId, claimUpdate);
@@ -285,8 +281,8 @@ export default function ClaimUpdateForm({
         {!replyToId && newUpdate.update_type === 'Status Change' && canChangeStatus && (
           <StatusChangeFields
             claim={claim}
-            value={{ journey: newUpdate.new_journey, secondary: newUpdate.new_secondary_status, tertiary: newUpdate.new_tertiary_status, on_site_date: newUpdate.new_on_site_date, completion_date: newUpdate.new_completion_date, claim_complete_date: newUpdate.new_claim_complete_date, hand_over_date: newUpdate.new_hand_over_date, rectification_booking_in_date: newUpdate.new_rectification_booking_in_date, rectification_completion_date: newUpdate.new_rectification_completion_date, rectification_hand_over_date: newUpdate.new_rectification_hand_over_date }}
-            onChange={(v) => setNewUpdate({ ...newUpdate, new_journey: v.journey, new_secondary_status: v.secondary, new_tertiary_status: v.tertiary, new_on_site_date: v.on_site_date || '', new_completion_date: v.completion_date || '', new_claim_complete_date: v.claim_complete_date || '', new_hand_over_date: v.hand_over_date || '', new_rectification_booking_in_date: v.rectification_booking_in_date || '', new_rectification_completion_date: v.rectification_completion_date || '', new_rectification_hand_over_date: v.rectification_hand_over_date || '' })}
+            value={{ journey: newUpdate.new_journey, secondary: newUpdate.new_secondary_status, tertiary: newUpdate.new_tertiary_status, on_site_date: newUpdate.new_on_site_date, completion_date: newUpdate.new_completion_date, claim_complete_date: newUpdate.new_claim_complete_date, hand_over_date: newUpdate.new_hand_over_date }}
+            onChange={(v) => setNewUpdate({ ...newUpdate, new_journey: v.journey, new_secondary_status: v.secondary, new_tertiary_status: v.tertiary, new_on_site_date: v.on_site_date || '', new_completion_date: v.completion_date || '', new_claim_complete_date: v.claim_complete_date || '', new_hand_over_date: v.hand_over_date || '' })}
           />
         )}
 

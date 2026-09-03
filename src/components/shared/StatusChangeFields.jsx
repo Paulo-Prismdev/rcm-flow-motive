@@ -23,9 +23,6 @@ export default function StatusChangeFields({ value, onChange, claim }) {
   const completionDate = value?.completion_date || claim?.completion_date || today;
   const claimCompleteDate = value?.claim_complete_date || claim?.claim_complete_date || today;
   const handOverDate = value?.hand_over_date || claim?.hand_over_date || today;
-  const rectBookingInDate = value?.rectification_booking_in_date || claim?.rectification_booking_in_date || today;
-  const rectCompletionDate = value?.rectification_completion_date || claim?.rectification_completion_date || today;
-  const rectHandOverDate = value?.rectification_hand_over_date || claim?.rectification_hand_over_date || today;
 
   const secondaryOptions = React.useMemo(() => {
     const configured = (claimStatuses || [])
@@ -69,7 +66,6 @@ export default function StatusChangeFields({ value, onChange, claim }) {
         next.completion_date = '';
         next.hand_over_date = '';
       } else if (v === 'Rectification') {
-        next.rectification_booking_in_date = rectBookingInDate;
         next.on_site_date = '';
         next.completion_date = '';
         next.hand_over_date = '';
@@ -102,7 +98,6 @@ export default function StatusChangeFields({ value, onChange, claim }) {
   const showCompletionDate = value.journey === 'Repairs Complete';
   const showHandOverDate = value.journey === 'Returned to Customer';
   const showClaimCompleteDate = value.journey === 'Claim Complete';
-  const showRectificationDates = value.journey === 'Rectification';
 
   return (
     <div className="space-y-3">
@@ -140,25 +135,6 @@ export default function StatusChangeFields({ value, onChange, claim }) {
           <input type="date" value={claimCompleteDate} onChange={(e) => onChange({ ...value, claim_complete_date: e.target.value })} className={selectCls} />
           <p className="text-[10px] text-muted-foreground mt-0.5">Claim fully closed — recorded in Key Dates as the claim complete date.</p>
         </div>
-      )}
-      {showRectificationDates && (
-        <>
-          <div>
-            <label className={labelCls}>Rectification Booking In Date</label>
-            <input type="date" value={rectBookingInDate} onChange={(e) => onChange({ ...value, rectification_booking_in_date: e.target.value })} className={selectCls} />
-            <p className="text-[10px] text-muted-foreground mt-0.5">Vehicle booked back in for rectification.</p>
-          </div>
-          <div>
-            <label className={labelCls}>Rectification Completion Date</label>
-            <input type="date" value={rectCompletionDate} onChange={(e) => onChange({ ...value, rectification_completion_date: e.target.value })} className={selectCls} />
-            <p className="text-[10px] text-muted-foreground mt-0.5">Rectification repairs completed.</p>
-          </div>
-          <div>
-            <label className={labelCls}>Rectification Hand-Over Date</label>
-            <input type="date" value={rectHandOverDate} onChange={(e) => onChange({ ...value, rectification_hand_over_date: e.target.value })} className={selectCls} />
-            <p className="text-[10px] text-muted-foreground mt-0.5">Vehicle handed back to customer after rectification.</p>
-          </div>
-        </>
       )}
       <div>
         <label className={labelCls}>Secondary Status (group)</label>

@@ -283,6 +283,10 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
 
   const canEdit = true;
 
+  // Rectification milestone dates in Key Dates are only editable once the claim
+  // has been moved onto the Rectification journey.
+  const isRectification = claim?.journey_status === 'Rectification' || claim?.job_status === 'Rectification';
+
   const ClientEditComponent = useCallback((props) => <ClaimPartiesForm {...props} mode="client" />, []);
   const DriverEditComponent = useCallback((props) => <ClaimPartiesForm {...props} mode="driver" />, []);
   const ThirdPartyEditComponent = useCallback((props) => <ClaimPartiesForm {...props} mode="thirdParty" />, []);
@@ -1259,6 +1263,14 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
               <InlineField label="Est. Completion (ECD)" name="ecd" isDate />
               <InlineField label="Completion Date" name="completion_date" isDate />
               <InlineField label="Claim Complete Date" name="claim_complete_date" isDate />
+            </div>
+            <div className="mt-3 pt-3 border-t border-border">
+              <p className="text-[11px] text-muted-foreground mb-2">Rectification milestones — greyed out until the claim is on the Rectification journey.</p>
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
+                <InlineField label="Rectification Booking In" name="rectification_booking_in_date" isDate readOnly={!isRectification} />
+                <InlineField label="Rectification Completion" name="rectification_completion_date" isDate readOnly={!isRectification} />
+                <InlineField label="Rectification Hand-Over" name="rectification_hand_over_date" isDate readOnly={!isRectification} />
+              </div>
             </div>
           </InlineEditableSection>
         );

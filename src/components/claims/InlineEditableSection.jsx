@@ -51,7 +51,7 @@ export function InlineField({ label, name, type = 'text', isCurrency = false, is
             className={`w-full ${valueClass} ${isEmpty ? 'text-amber-500' : 'text-foreground'} bg-muted/50 dark:bg-gray-800 border border-border/70 rounded-[5px] outline-none focus:border-ring focus:ring-1 focus:ring-ring/40 ${readOnly ? 'cursor-not-allowed opacity-60' : ''}`}
         />
     ) : (
-        <div className={`${valueClass} ${isEmpty ? 'text-amber-500' : 'text-foreground'}`}>
+        <div className={`${valueClass} ${isEmpty ? 'text-amber-500' : 'text-foreground'} ${readOnly ? 'opacity-60' : ''}`}>
             {display}
         </div>
     );
