@@ -43,11 +43,11 @@ import ClaimVehicleForm from './ClaimVehicleForm';
 import ClaimInsuranceForm from './ClaimInsuranceForm';
 import ClaimReferrerForm from './ClaimReferrerForm';
 import ClaimFinancialsForm from './ClaimFinancialsForm';
-import ClaimDatesForm from './ClaimDatesForm';
+import InlineEditableSection, { InlineField, useInlineEdit } from './InlineEditableSection';
 import ClaimBodyshopForm from './ClaimBodyshopForm';
 import ClaimBodyshopInfo from './ClaimBodyshopInfo.jsx';
 import ClaimBodyshopAllocateButton from './ClaimBodyshopAllocateButton';
-import ClaimEstimateForm from './ClaimEstimateForm';
+
 import ClaimStatusForm from './ClaimStatusForm';
 import FinancialCalculator from './FinancialCalculator';
 import FinancialSummary from './FinancialSummary';
@@ -131,6 +131,22 @@ const EditableSection = ({ title, icon: Icon, claim, onUpdate, children, EditCom
                     children
                 )}
             </div>
+        </div>
+    );
+};
+
+const EstimateInlineFields = () => {
+    const { setField } = useInlineEdit();
+    return (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+            <InlineField label="Email Estimate To" name="send_estimate_email" type="email" placeholder="Enter email address" />
+            <InlineField label="Audatex Code" name="audatex_code" placeholder="Enter Audatex code" />
+            <InlineField label="Estimate Fee" name="est_fee" isCurrency />
+            <InlineField label="Authorising Party" name="authorising_party" />
+            <InlineField label="Est. Cost (Net)" name="estimate_cost_net" isCurrency onChange={(v) => setField('estimate_cost_gross', v !== '' && v != null ? +(v * 1.2).toFixed(2) : '')} />
+            <InlineField label="Auth. Cost (Net)" name="authority_cost_net" isCurrency onChange={(v) => setField('authority_cost_gross', v !== '' && v != null ? +(v * 1.2).toFixed(2) : '')} />
+            <InlineField label="Est. Cost (Gross)" name="estimate_cost_gross" isCurrency readOnly />
+            <InlineField label="Auth. Cost (Gross)" name="authority_cost_gross" isCurrency readOnly />
         </div>
     );
 };
@@ -1230,21 +1246,21 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
 
       case 'dates':
         return (
-          <EditableSection title="Key Dates" icon={Calendar} claim={claim} onUpdate={handleUpdate} EditComponent={ClaimDatesForm} canEdit={canEdit}>
+          <InlineEditableSection title="Key Dates" icon={Calendar} claim={claim} onUpdate={handleUpdate} canEdit={canEdit}>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
-              <DetailRow label="Date Received" value={claim.date_received} isDate />
-              <DetailRow label="Loss Date" value={claim.loss_date} isDate />
-              <DetailRow label="Estimate Completed" value={claim.estimate_completed} isDate />
-              <DetailRow label="Authority Received" value={claim.authority_received} isDate />
-              <DetailRow label="Bodyshop Instructed" value={claim.bs_instructed} isDate />
-              <DetailRow label="Booking In Date (BID)" value={claim.booking_in_date} isDate />
-              <DetailRow label="On-Site Date" value={claim.on_site_date} isDate />
-              <DetailRow label="Hand Over Date" value={claim.hand_over_date} isDate />
-              <DetailRow label="Est. Completion (ECD)" value={claim.ecd} isDate />
-              <DetailRow label="Completion Date" value={claim.completion_date} isDate />
-              <DetailRow label="Claim Complete Date" value={claim.claim_complete_date} isDate />
+              <InlineField label="Date Received" name="date_received" isDate />
+              <InlineField label="Loss Date" name="loss_date" isDate />
+              <InlineField label="Estimate Completed" name="estimate_completed" isDate />
+              <InlineField label="Authority Received" name="authority_received" isDate />
+              <InlineField label="Bodyshop Instructed" name="bs_instructed" isDate />
+              <InlineField label="Booking In Date (BID)" name="booking_in_date" isDate />
+              <InlineField label="On-Site Date" name="on_site_date" isDate />
+              <InlineField label="Hand Over Date" name="hand_over_date" isDate />
+              <InlineField label="Est. Completion (ECD)" name="ecd" isDate />
+              <InlineField label="Completion Date" name="completion_date" isDate />
+              <InlineField label="Claim Complete Date" name="claim_complete_date" isDate />
             </div>
-          </EditableSection>
+          </InlineEditableSection>
         );
 
       case 'bodyshop':
@@ -1403,20 +1419,10 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
 
       case 'estimate':
         return (
-          <EditableSection title="Estimate Details" icon={Calculator} claim={claim} onUpdate={handleUpdate} EditComponent={ClaimEstimateForm} canEdit={canEdit}>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
-              <DetailRow label="Email Estimate To" value={claim.send_estimate_email} />
-              <DetailRow label="Audatex Code" value={claim.audatex_code} />
-              <DetailRow label="Estimate Fee" value={claim.est_fee} isCurrency />
-              <DetailRow label="Authorising Party" value={claim.authorising_party} />
-              <DetailRow label="Est. Cost (Net)" value={claim.estimate_cost_net} isCurrency />
-              <DetailRow label="Auth. Cost (Net)" value={claim.authority_cost_net} isCurrency />
-              <DetailRow label="Est. Cost (Gross)" value={claim.estimate_cost_gross} isCurrency />
-              <DetailRow label="Auth. Cost (Gross)" value={claim.authority_cost_gross} isCurrency />
-            </div>
+          <InlineEditableSection title="Estimate Details" icon={Calculator} claim={claim} onUpdate={handleUpdate} canEdit={canEdit}>
+            <EstimateInlineFields />
             <div className="mt-2 py-3 px-4 rounded-lg glass-inset">
-              <div className="text-xs font-semibold text-foreground-muted mb-2">Artura Estimate URL</div>
-              <div className="text-sm break-all">{claim.artura_est_url || '-'}</div>
+              <InlineField label="Artura Estimate URL" name="artura_est_url" bare placeholder="Enter URL" />
             </div>
             {/* Purchase Order generation — uses estimate total as authority figure */}
             <div className="mt-4 p-3 rounded-lg bg-accent/10 border border-accent/30">
@@ -1445,7 +1451,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                 </Button>
               </div>
             </div>
-          </EditableSection>
+          </InlineEditableSection>
         );
 
       case 'backorderedParts':
