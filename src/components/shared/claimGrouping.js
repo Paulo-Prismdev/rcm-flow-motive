@@ -15,8 +15,11 @@ const STATUS_COLORS = {
 // fall back to their Secondary status. "On Site" (via the on_site_date marker)
 // and "Cancelled" are special-cased as before.
 export function getGroupKey(c) {
-  if (c.secondary_status === 'New') return 'New';
   const journey = c.journey_status || c.job_status;
+  // Rectification is its own group — claims stay there until the journey changes,
+  // regardless of on-site markers from the original repair.
+  if (journey === 'Rectification') return 'Rectification';
+  if (c.secondary_status === 'New') return 'New';
   if (journey === 'Cancelled') return 'Cancelled';
   // On-site check takes priority: if the vehicle has been marked on site and
   // not yet handed over, it belongs in the "On Site" group regardless of its
@@ -39,6 +42,7 @@ export const GROUP_STATUSES = (() => {
     ...SECONDARY_STATUSES.slice(0, at),
     'On Site',
     ...SECONDARY_STATUSES.slice(at),
+    'Rectification',
     'Cancelled',
   ];
 })();

@@ -65,8 +65,11 @@ const calculateUpdateStatus = (claim) => {
 // journey status fall back to their Secondary status. "On Site" (via the
 // on_site_date marker) and "Cancelled" are special-cased as before.
 const getGroupKey = (c) => {
-  if (c.secondary_status === 'New') return 'New';
   const journey = c.journey_status || c.job_status;
+  // Rectification is its own group — claims stay there until the journey changes,
+  // regardless of on-site markers from the original repair.
+  if (journey === 'Rectification') return 'Rectification';
+  if (c.secondary_status === 'New') return 'New';
   if (journey === 'Cancelled') return 'Cancelled';
   if (c.on_site_date && !c.hand_over_date) return 'On Site';
   if (c.journey_status && !isExceptionJourney(c.journey_status)) {
@@ -189,6 +192,10 @@ export default function ClaimsPage() {
       const idx = result.indexOf('Awaiting BID');
       result.splice(idx >= 0 ? idx + 1 : result.length, 0, 'On Site');
       known.add('On Site');
+    }
+    if (!known.has('Rectification')) {
+      result.push('Rectification');
+      known.add('Rectification');
     }
     endStatuses.forEach(s => {
       if (!known.has(s)) {
