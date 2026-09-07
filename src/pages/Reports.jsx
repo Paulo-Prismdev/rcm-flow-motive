@@ -135,27 +135,27 @@ export default function Reports() {
     .map(([name, value]) => ({ name, value }));
 
   const handleExport = () => {
-    const csv = [
-      ['Job Number', 'Client', 'Reg', 'Status', 'Type', 'Referrer', 'Insurer', 'Value', 'Created Date', 'Completion Date'],
-      ...filteredClaims.map(c => [
-        c.job_number || '',
-        c.client_name || '',
-        c.reg || '',
-        c.job_status || '',
-        c.claim_type || '',
-        c.referrer || '',
-        c.insurer || '',
-        c.final_repair_cost || c.authority_cost_gross || '',
-        c.created_date ? format(new Date(c.created_date), 'dd/MM/yyyy') : '',
-        c.completion_date ? format(new Date(c.completion_date), 'dd/MM/yyyy') : '',
-      ])
-    ].map(row => row.join(',')).join('\n');
-
-    const blob = new Blob([csv], { type: 'text/csv' });
+    const headers = ['Job Number', 'Client', 'Reg', 'Status', 'Type', 'Referrer', 'Insurer', 'Value', 'Created Date', 'Completion Date'];
+    const rows = filteredClaims.map(c => [
+      c.job_number || '',
+      c.client_name || '',
+      c.reg || '',
+      c.job_status || '',
+      c.claim_type || '',
+      c.referrer || '',
+      c.insurer || '',
+      c.final_repair_cost || c.authority_cost_gross || '',
+      c.created_date ? format(new Date(c.created_date), 'dd/MM/yyyy') : '',
+      c.completion_date ? format(new Date(c.completion_date), 'dd/MM/yyyy') : '',
+    ]);
+    const esc = (v) => String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const table = `<table border="1"><thead><tr>${headers.map(h => `<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${rows.map(r => `<tr>${r.map(c => `<td>${esc(c)}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+    const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel"><head><meta charset="utf-8"><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Claims Report</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body>${table}</body></html>`;
+    const blob = new Blob([html], { type: 'application/vnd.ms-excel' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `claims-report-${new Date().toISOString().split('T')[0]}.csv`;
+    a.download = `claims-report-${new Date().toISOString().split('T')[0]}.xls`;
     document.body.appendChild(a);
     a.click();
     window.URL.revokeObjectURL(url);
@@ -195,7 +195,7 @@ export default function Reports() {
             )}
             <Button onClick={handleExport} size="sm" className="glass-button flex items-center gap-1.5 text-xs">
               <Download className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Export CSV</span>
+              <span className="hidden sm:inline">Export Excel</span>
             </Button>
           </div>
         </div>
