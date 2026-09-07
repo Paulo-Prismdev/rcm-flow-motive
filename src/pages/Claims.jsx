@@ -114,6 +114,8 @@ export default function ClaimsPage() {
   const [repairerAcceptanceFilter, setRepairerAcceptanceFilter] = useState('');
   const [repairerFilter, setRepairerFilter] = useState('');
   const [businessDivisionFilter, setBusinessDivisionFilter] = useState('');
+  const [dateReceivedFrom, setDateReceivedFrom] = useState('');
+  const [dateReceivedTo, setDateReceivedTo] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [selectedClaim, setSelectedClaim] = useState(null);
@@ -283,9 +285,10 @@ export default function ClaimsPage() {
     setInsurerFilter(''); setReferrerFilter(''); setRepairerFilter('');
     setUpdateStatusFilter(''); setRepairerAcceptanceFilter(''); setHasBackorderedPartsFilter(false);
     setBusinessDivisionFilter(''); setOverdueOnly(false);
+    setDateReceivedFrom(''); setDateReceivedTo('');
   };
 
-  const activeFiltersCount = [(statusFilter?.length || 0) > 0, claimTypeFilter, insurerFilter, referrerFilter, repairerFilter, businessDivisionFilter, updateStatusFilter, repairerAcceptanceFilter, hasBackorderedPartsFilter, overdueOnly].filter(Boolean).length;
+  const activeFiltersCount = [(statusFilter?.length || 0) > 0, claimTypeFilter, insurerFilter, referrerFilter, repairerFilter, businessDivisionFilter, updateStatusFilter, repairerAcceptanceFilter, hasBackorderedPartsFilter, overdueOnly, dateReceivedFrom, dateReceivedTo].filter(Boolean).length;
 
   const allClaims = showArchived ? claims : claims.filter(c => !c.archived);
   const standardClaims = allClaims.filter(c => c.claim_type !== 'Paying Privately' && c.claim_type !== '3rd Party Paying Privately');
@@ -312,7 +315,9 @@ export default function ClaimsPage() {
     const matchesBackorders = !hasBackorderedPartsFilter || claimIdsWithBackorders.has(c.id);
     const matchesBusinessDivision = !businessDivisionFilter || c.business_division === businessDivisionFilter;
     const matchesOverdue = !overdueOnly || calculateUpdateStatus(c) === 'Red' || computeClientCommStatusFlag(c) === 'Red';
-    return matchesSearch && matchesStatus && matchesClaimType && matchesInsurer && matchesReferrer && matchesRepairer && matchesUpdateStatus && matchesRepairerAcceptance && matchesBackorders && matchesBusinessDivision && matchesOverdue;
+    const dr = c.date_received;
+    const matchesDateReceived = (!dateReceivedFrom || (dr && dr >= dateReceivedFrom)) && (!dateReceivedTo || (dr && dr <= dateReceivedTo));
+    return matchesSearch && matchesStatus && matchesClaimType && matchesInsurer && matchesReferrer && matchesRepairer && matchesUpdateStatus && matchesRepairerAcceptance && matchesBackorders && matchesBusinessDivision && matchesOverdue && matchesDateReceived;
   }).sort((a, b) => {
     if (sortBy === 'created_asc') return new Date(a.created_date) - new Date(b.created_date);
     if (sortBy === 'created_desc') return new Date(b.created_date) - new Date(a.created_date);
@@ -724,6 +729,16 @@ export default function ClaimsPage() {
                 <option value="">All</option>
                 <option value="true">Has Backorders</option>
               </select>
+            </div>
+            <div className="sm:col-span-2 lg:col-span-2">
+              <label className="block text-[10px] font-medium text-gray-400 dark:text-gray-500 mb-0.5">Date Received</label>
+              <div className="flex items-center gap-1.5">
+                <input type="date" value={dateReceivedFrom} onChange={e => setDateReceivedFrom(e.target.value)}
+                  className="w-full px-2 py-1 text-[11px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-700 dark:text-gray-300 focus:outline-none" />
+                <span className="text-[11px] text-gray-400">to</span>
+                <input type="date" value={dateReceivedTo} onChange={e => setDateReceivedTo(e.target.value)}
+                  className="w-full px-2 py-1 text-[11px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-700 dark:text-gray-300 focus:outline-none" />
+              </div>
             </div>
           </div>
         </div>
