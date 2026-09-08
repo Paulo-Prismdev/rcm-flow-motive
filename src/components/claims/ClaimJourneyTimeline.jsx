@@ -92,6 +92,9 @@ export default function ClaimJourneyTimeline({ claim, updates = [] }) {
 
   const currentRank = getJourneyRank(journeyStatus);
   const onSiteSet = !!claim.on_site_date;
+  // The "In Repair" secondary status signals the vehicle is actively being repaired,
+  // even when journey_status hasn't advanced past On-Site.
+  const secondaryInRepair = onSiteSet && claim.secondary_status === 'In Repair';
 
   const getMilestoneInfo = (id) => {
     const statusNames = MILESTONE_STATUS_MAP[id] || [];
@@ -105,13 +108,13 @@ export default function ClaimJourneyTimeline({ claim, updates = [] }) {
       case 'on_site':
         // Dictated by the on-site marker (on_site_date), not the journey status.
         return {
-          isCompleted: onSiteSet && currentRank >= 3,
-          isActive: onSiteSet && currentRank < 3,
+          isCompleted: onSiteSet && (currentRank >= 3 || secondaryInRepair),
+          isActive: onSiteSet && currentRank < 3 && !secondaryInRepair,
           date: claim.on_site_date,
           user: null,
         };
       case 'in_repair':
-        return { isCompleted: currentRank >= 5, isActive: currentRank === 3 || currentRank === 4, date: update?.created_date, user: update?.created_by };
+        return { isCompleted: currentRank >= 5, isActive: secondaryInRepair || currentRank === 3 || currentRank === 4, date: update?.created_date, user: update?.created_by };
       case 'repairs_complete':
         return { isCompleted: currentRank >= 6, isActive: currentRank === 5, date: claim.completion_date || update?.created_date, user: update?.created_by };
       case 'returned':
