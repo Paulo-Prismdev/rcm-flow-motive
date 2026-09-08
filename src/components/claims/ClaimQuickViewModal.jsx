@@ -80,6 +80,20 @@ export default function ClaimQuickViewModal({ claim, isOpen, onClose }) {
     staleTime: 5 * 60 * 1000,
   });
 
+  const { data: linkedClient } = useQuery({
+    queryKey: ['client', claim?.client_id || claim?.client_name],
+    queryFn: async () => {
+      if (claim?.client_id) return base44.entities.Client.get(claim.client_id);
+      if (claim?.client_name) {
+        const results = await base44.entities.Client.filter({ name: claim.client_name });
+        return results?.[0] || null;
+      }
+      return null;
+    },
+    enabled: isOpen && !!(claim?.client_id || claim?.client_name),
+    staleTime: 5 * 60 * 1000,
+  });
+
   if (!claim) return null;
 
   const bodyshopPhone = bodyshop?.phone || bodyshop?.mobile_phone || '';
@@ -113,6 +127,9 @@ export default function ClaimQuickViewModal({ claim, isOpen, onClose }) {
           {/* Client */}
           <Section icon={User} title="Client" color="bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
             <InfoRow label="Name" value={claim.client_name} />
+            {linkedClient?.company_contact_name && <InfoRow label="Company Contact Name" value={linkedClient.company_contact_name} />}
+            {linkedClient?.company_contact_phone && <InfoRow label="Company Contact Phone" value={linkedClient.company_contact_phone} href={`tel:${linkedClient.company_contact_phone}`} />}
+            {linkedClient?.company_contact_email && <InfoRow label="Company Contact Email" value={linkedClient.company_contact_email} href={`mailto:${linkedClient.company_contact_email}`} />}
             <InfoRow label="Phone" value={claim.client_phone} href={claim.client_phone ? `tel:${claim.client_phone}` : null} />
             <InfoRow label="Email" value={claim.client_email} href={claim.client_email ? `mailto:${claim.client_email}` : null} />
             <InfoRow label="Business Division" value={claim.business_division} />
