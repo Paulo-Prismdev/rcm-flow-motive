@@ -138,6 +138,22 @@ export default function ClaimQuickViewModal({ claim, isOpen, onClose }) {
             )}
           </Section>
 
+          {/* Driver */}
+          {(!claim.driver_same_as_client || claim.driver_name || claim.driver_phone || claim.driver_email || claim.driver_contact_name || claim.driver_contact_phone || claim.driver_contact_email) && (
+            <Section icon={User} title="Driver" color="bg-cyan-50 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-300">
+              <InfoRow label="Same as Client" value={claim.driver_same_as_client === false ? 'No' : 'Yes'} />
+              <InfoRow label="Driver Name" value={claim.driver_name} />
+              <InfoRow label="Driver Phone" value={claim.driver_phone} href={claim.driver_phone ? `tel:${claim.driver_phone}` : null} />
+              <InfoRow label="Driver Email" value={claim.driver_email} href={claim.driver_email ? `mailto:${claim.driver_email}` : null} />
+              <InfoRow label="Contact Name" value={claim.driver_contact_name} />
+              <InfoRow label="Contact Phone" value={claim.driver_contact_phone} href={claim.driver_contact_phone ? `tel:${claim.driver_contact_phone}` : null} />
+              <InfoRow label="Contact Email" value={claim.driver_contact_email} href={claim.driver_contact_email ? `mailto:${claim.driver_contact_email}` : null} />
+              {(claim.driver_contact_address_line_1 || claim.driver_contact_town || claim.driver_contact_postcode) && (
+                <InfoRow label="Contact Address" value={[claim.driver_contact_address_line_1, claim.driver_contact_address_line_2, claim.driver_contact_town, claim.driver_contact_county, claim.driver_contact_postcode].filter(Boolean).join(', ')} fullWidth />
+              )}
+            </Section>
+          )}
+
           {/* Referrer */}
           {(claim.referrer || claim.referrer_ref || claim.referrer_email || claim.percent_to_referrer || claim.file_handler) && (
             <Section icon={Building2} title="Referrer" color="bg-teal-50 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300">
