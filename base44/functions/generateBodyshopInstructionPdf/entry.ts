@@ -146,7 +146,7 @@ Deno.serve(async (req) => {
         claim.tp_county,
         claim.tp_postcode
       ].filter(Boolean).join(', ') || 'N/A',
-      referral_fee: (claim.referral_fee_repairer != null && claim.referral_fee_repairer !== '' && claim.referral_fee_repairer !== 0)
+      referral_fee: (claim.referral_fee_repairer != null && claim.referral_fee_repairer !== '')
         ? `${claim.referral_fee_repairer}%`
         : (claim.referral_fee_repairer_gbp ? '0%' : '20%'),
       referral_fee_gbp: claim.referral_fee_repairer_gbp != null && claim.referral_fee_repairer_gbp !== '' ? `GBP ${Number(claim.referral_fee_repairer_gbp).toFixed(2)}` : null,
