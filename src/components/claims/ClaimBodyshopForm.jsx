@@ -18,7 +18,10 @@ export default function ClaimBodyshopForm({ claim, onSave, onCancel }) {
         if (!claim) return {};
         // Default the % referral fee to 20 when neither the % nor the £
         // amount has been set (referrer schemes / manual edits win otherwise).
-        const feeUnset = !claim.referral_fee_repairer && !claim.referral_fee_repairer_gbp;
+        // NOTE: 0 is a valid, deliberate value — only null/undefined/"" count as unset.
+        const hasPct = claim.referral_fee_repairer !== null && claim.referral_fee_repairer !== undefined && claim.referral_fee_repairer !== '';
+        const hasGbp = claim.referral_fee_repairer_gbp !== null && claim.referral_fee_repairer_gbp !== undefined && claim.referral_fee_repairer_gbp !== '';
+        const feeUnset = !hasPct && !hasGbp;
         return { ...claim, ...(feeUnset && { referral_fee_repairer: 20 }) };
     });
     const [isUnallocateOpen, setIsUnallocateOpen] = useState(false);
