@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { Clock, Calendar, User, MessageSquare, Plus, Star, Copy, Check } from 'lucide-react';
+import { Clock, Calendar, User, MessageSquare, Plus, Star, Copy, Check, AtSign } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import ClaimUpdateForm from './ClaimUpdateForm';
@@ -211,12 +211,10 @@ export default function ClaimUpdatesQuickView({ claim, isOpen, onClose }) {
                         (update.update_type === 'Referrer Communication' && claim?.referrer) ||
                         '';
                       if (!partyName) return null;
-                      const partyDetail = update.contacted_party_detail || '';
                       return (
                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-muted text-muted-foreground border border-border">
                           <User className="w-3 h-3" />
                           {partyName}
-                          {partyDetail && <span className="opacity-70 font-normal">· {partyDetail}</span>}
                         </span>
                       );
                     })()}
@@ -232,6 +230,12 @@ export default function ClaimUpdatesQuickView({ claim, isOpen, onClose }) {
                     </span>
                   </div>
 
+                  {update.contacted_party_detail && (
+                    <div className="text-[11px] text-muted-foreground flex items-center gap-1 mb-1.5">
+                      <AtSign className="w-3 h-3 flex-shrink-0" />
+                      <span className="truncate">{update.contacted_party_detail}</span>
+                    </div>
+                  )}
                   {update.description && (
                     <div className="flex items-start gap-1.5 mb-2">
                       <p className="text-sm text-foreground whitespace-pre-wrap flex-1">{update.description}</p>
