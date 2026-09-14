@@ -217,10 +217,8 @@ export default function ClaimUpdateForm({
     }
 
     let finalDescription = newUpdate.description;
-    if (selectedContact) {
-      const contactPrefix = `[Contacted: ${selectedContact.label}${selectedContact.detail ? ` — ${selectedContact.detail}` : ''}]`;
-      finalDescription = finalDescription ? `${contactPrefix}\n${finalDescription}` : contactPrefix;
-    }
+    const contactedPartyName = selectedContact?.label || '';
+    const contactedPartyDetail = selectedContact?.detail || '';
     if (newUpdate.update_type === 'Status Change' && !finalDescription.trim()) {
       const parts = [];
       if (newUpdate.new_journey) parts.push(`Journey → ${newUpdate.new_journey}`);
@@ -235,7 +233,7 @@ export default function ClaimUpdateForm({
     }
 
     const { new_journey, new_secondary_status, new_tertiary_status, new_on_site_date, new_completion_date, new_claim_complete_date, new_hand_over_date, ...updateDataToSave } = newUpdate;
-    createUpdateMutation.mutate({ ...updateDataToSave, description: finalDescription, tagged_user_ids: taggedUsers, new_journey, new_secondary_status, new_tertiary_status, new_on_site_date, new_completion_date, new_claim_complete_date, new_hand_over_date, ...(replyToId && { parent_update_id: replyToId }) });
+    createUpdateMutation.mutate({ ...updateDataToSave, description: finalDescription, contacted_party_name: contactedPartyName, contacted_party_detail: contactedPartyDetail, tagged_user_ids: taggedUsers, new_journey, new_secondary_status, new_tertiary_status, new_on_site_date, new_completion_date, new_claim_complete_date, new_hand_over_date, ...(replyToId && { parent_update_id: replyToId }) });
   };
 
   const getAvailableEmails = () => {

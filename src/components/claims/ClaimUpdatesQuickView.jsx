@@ -203,6 +203,12 @@ export default function ClaimUpdatesQuickView({ claim, isOpen, onClose }) {
                     <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium text-white ${UPDATE_TYPE_COLORS[update.update_type] || 'bg-gray-500'}`}>
                       {update.update_type}
                     </span>
+                    {update.contacted_party_name && (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-muted text-muted-foreground border border-border">
+                        <User className="w-3 h-3" />
+                        {update.contacted_party_name}
+                      </span>
+                    )}
                     <UpdateDirectionBadges update={update} />
                     {update.starred && (
                       <span className="inline-flex items-center gap-1 text-amber-500 text-[10px] font-semibold">
