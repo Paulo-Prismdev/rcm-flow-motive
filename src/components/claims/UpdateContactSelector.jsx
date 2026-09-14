@@ -6,63 +6,64 @@ import { User, Mail, Phone, Building2, Shield, Users } from 'lucide-react';
 /**
  * Builds a list of relevant contacts for a given communication update type,
  * pulling from the claim itself and its linked Bodyshop / Insurer / Referrer
- * entities. Returns [{ id, label, detail, sublabel }]
+ * entities. Each contact is tagged with a `kind` of 'email' or 'phone' so the
+ * selector can filter by the chosen platform.
+ * Returns [{ id, label, detail, sublabel, kind }]
  */
 function buildContacts(updateType, claim, bodyshop, insurer, referrer) {
   const contacts = [];
   if (!claim) return contacts;
 
-  const push = (id, label, detail, sublabel) => {
+  const push = (id, label, detail, sublabel, kind) => {
     if (!detail) return;
-    contacts.push({ id, label, detail, sublabel: sublabel || '' });
+    contacts.push({ id, label, detail, sublabel: sublabel || '', kind });
   };
 
   if (updateType === 'Client Communication') {
-    // Client
     if (claim.client_name) {
-      push('client-email', claim.client_name, claim.client_email, 'Client · Email');
-      push('client-phone', claim.client_name, claim.client_phone, 'Client · Phone');
+      push('client-email', claim.client_name, claim.client_email, 'Client · Email', 'email');
+      push('client-phone', claim.client_name, claim.client_phone, 'Client · Phone', 'phone');
     }
-    // Driver (when different from client)
     if (!claim.driver_same_as_client) {
       const dName = claim.driver_name || claim.driver_contact_name;
       if (dName) {
-        push('driver-email', dName, claim.driver_email || claim.driver_contact_email, 'Driver · Email');
-        push('driver-phone', dName, claim.driver_phone || claim.driver_contact_phone, 'Driver · Phone');
+        push('driver-email', dName, claim.driver_email || claim.driver_contact_email, 'Driver · Email', 'email');
+        push('driver-phone', dName, claim.driver_phone || claim.driver_contact_phone, 'Driver · Phone', 'phone');
       }
     }
   } else if (updateType === 'Bodyshop Communication') {
     const bsName = bodyshop?.name || claim.bodyshop;
     if (bsName) {
-      push('bs-main', bsName, bodyshop?.email || claim.bodyshop_email, 'Main Email');
-      push('bs-referral', bsName, bodyshop?.referral_email, 'Referral Email');
-      push('bs-manager', bodyshop?.bodyshop_manager || bsName, bodyshop?.bs_manager_email, 'Bodyshop Manager');
-      push('bs-accounts', bodyshop?.accounts_contact || bsName, bodyshop?.accounts_email, 'Accounts');
-      push('bs-contact', bodyshop?.contact_name || bsName, bodyshop?.email, 'Main Contact');
-      push('bs-phone', bsName, bodyshop?.phone, 'Landline');
-      push('bs-mobile', bsName, bodyshop?.mobile_phone, 'Mobile');
+      push('bs-main', bsName, bodyshop?.email || claim.bodyshop_email, 'Main Email', 'email');
+      push('bs-referral', bsName, bodyshop?.referral_email, 'Referral Email', 'email');
+      push('bs-manager', bodyshop?.bodyshop_manager || bsName, bodyshop?.bs_manager_email, 'Bodyshop Manager', 'email');
+      push('bs-accounts', bodyshop?.accounts_contact || bsName, bodyshop?.accounts_email, 'Accounts', 'email');
+      push('bs-contact', bodyshop?.contact_name || bsName, bodyshop?.email, 'Main Contact', 'email');
+      push('bs-phone', bsName, bodyshop?.phone, 'Landline', 'phone');
+      push('bs-mobile', bsName, bodyshop?.mobile_phone, 'Mobile', 'phone');
     } else if (claim.bodyshop_email) {
-      push('bs-claim', claim.bodyshop, claim.bodyshop_email, 'Main Email');
+      push('bs-claim', claim.bodyshop, claim.bodyshop_email, 'Main Email', 'email');
     }
   } else if (updateType === 'Insurer Communication') {
     const insName = insurer?.name || claim.insurer;
     if (insName) {
-      push('ins-email', insName, insurer?.email, 'Main Email');
-      push('ins-claims', insName, insurer?.claims_line, 'Claims Line');
-      push('ins-phone', insName, insurer?.phone, 'Phone');
+      push('ins-email', insName, insurer?.email, 'Main Email', 'email');
+      push('ins-claims', insName, insurer?.claims_line, 'Claims Line', 'phone');
+      push('ins-phone', insName, insurer?.phone, 'Phone', 'phone');
       if (insurer?.useful_contacts?.length) {
         insurer.useful_contacts.forEach((c, i) => {
-          push(`ins-uc-${i}`, c.name || insName, c.email || c.phone, c.email ? 'Useful Contact · Email' : 'Useful Contact · Phone');
+          if (c.email) push(`ins-uc-${i}`, c.name || insName, c.email, 'Useful Contact · Email', 'email');
+          if (c.phone) push(`ins-uc-p-${i}`, c.name || insName, c.phone, 'Useful Contact · Phone', 'phone');
         });
       }
     }
   } else if (updateType === 'Referrer Communication') {
     const refName = referrer?.name || claim.referrer;
     if (refName) {
-      push('ref-email', referrer?.contact_name || refName, referrer?.email || claim.referrer_email, 'Main Email');
-      push('ref-phone', referrer?.contact_name || refName, referrer?.phone, 'Phone');
+      push('ref-email', referrer?.contact_name || refName, referrer?.email || claim.referrer_email, 'Main Email', 'email');
+      push('ref-phone', referrer?.contact_name || refName, referrer?.phone, 'Phone', 'phone');
     } else if (claim.referrer_email) {
-      push('ref-claim', claim.referrer, claim.referrer_email, 'Main Email');
+      push('ref-claim', claim.referrer, claim.referrer_email, 'Main Email', 'email');
     }
   }
 
@@ -83,7 +84,15 @@ const TYPE_ICON = {
   'Referrer Communication': Users,
 };
 
-export default function UpdateContactSelector({ claim, updateType, value, onChange }) {
+// Map platform → which contact kinds to show.
+const PLATFORM_KINDS = {
+  'E-Mail': ['email'],
+  'Phone': ['phone'],
+  'Whatsapp': ['phone'],
+  'Text Message': ['phone'],
+};
+
+export default function UpdateContactSelector({ claim, updateType, platform, value, onChange }) {
   const isCommType = ['Client Communication', 'Bodyshop Communication', 'Insurer Communication', 'Referrer Communication'].includes(updateType);
 
   const { data: bodyshop } = useQuery({
@@ -115,12 +124,19 @@ export default function UpdateContactSelector({ claim, updateType, value, onChan
     return insurers.find((i) => i.name?.toLowerCase() === claim.insurer.toLowerCase()) || null;
   }, [insurers, claim?.insurer]);
 
-  const contacts = useMemo(
+  const allContacts = useMemo(
     () => buildContacts(updateType, claim, bodyshop, insurer, referrer),
     [updateType, claim, bodyshop, insurer, referrer]
   );
 
-  if (!isCommType || contacts.length === 0) return null;
+  // Filter to only the kinds relevant to the chosen platform.
+  const allowedKinds = platform ? (PLATFORM_KINDS[platform] || null) : null;
+  const contacts = allowedKinds
+    ? allContacts.filter((c) => allowedKinds.includes(c.kind))
+    : allContacts;
+
+  // Don't render until a platform is picked, and only if there are matching contacts.
+  if (!isCommType || !platform || contacts.length === 0) return null;
 
   const Icon = TYPE_ICON[updateType] || User;
 

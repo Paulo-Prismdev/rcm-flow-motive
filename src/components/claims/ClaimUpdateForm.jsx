@@ -275,7 +275,7 @@ export default function ClaimUpdateForm({
         {newUpdate.update_type !== 'Status Change' && newUpdate.direction && (
           <div>
             <label className="block text-xs text-muted-foreground mb-1">Platform *</label>
-            <select value={newUpdate.platform} onChange={(e) => setNewUpdate({ ...newUpdate, platform: e.target.value })} className="w-full px-3 py-2 text-sm bg-background border border-border rounded-lg" required>
+            <select value={newUpdate.platform} onChange={(e) => { setNewUpdate({ ...newUpdate, platform: e.target.value }); setSelectedContact(null); }} className="w-full px-3 py-2 text-sm bg-background border border-border rounded-lg" required>
               <option value="">Select platform...</option>
               <option value="Phone">Phone</option>
               <option value="E-Mail">E-Mail</option>
@@ -289,6 +289,7 @@ export default function ClaimUpdateForm({
           <UpdateContactSelector
             claim={claim}
             updateType={newUpdate.update_type}
+            platform={newUpdate.platform}
             value={selectedContact?.id || ''}
             onChange={setSelectedContact}
           />
