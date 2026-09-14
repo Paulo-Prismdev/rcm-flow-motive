@@ -15,7 +15,7 @@ import ClaimQuickViewModal from '../components/claims/ClaimQuickViewModal';
 import { formatUKRegistration } from '../components/shared/formatRegistration';
 import { format } from 'date-fns';
 import { useStatusConfigs } from '../components/shared/StatusConfigContext';
-import { getJourneyColor, isExceptionJourney } from '@/components/shared/claimStatusV2';
+import { getJourneyColor, isExceptionJourney, SECONDARY_STATUSES, JOURNEY_STATUSES } from '@/components/shared/claimStatusV2';
 import { isClosedJourney, isUpdateTrackingClosed, computeClientCommStatusFlag } from '@/components/shared/claimStatusUpdate';
 import { useToast } from "@/components/ui/use-toast";
 import { sanitizeClaimData } from '@/components/shared/sanitizeClaimData';
@@ -172,17 +172,18 @@ export default function ClaimsPage() {
   }, [backorderedParts]);
 
   // Group order mirrors the order of statuses configured in Settings
-  // (ClaimStatusConfig, sorted by sort_order). Special groups ('Awaiting BID',
-  // 'On Site') that aren't in the config are inserted at sensible positions.
-  // "Claim Complete" and "Cancelled" are relegated to the "Closed" bucket at
-  // the bottom; all other statuses appear in the main list.
+  // (ClaimStatusConfig, sorted by sort_order). The full known secondary +
+  // journey status sets are merged in so every status appears in the main
+  // table even if not explicitly configured. Only "Claim Complete" and
+  // "Cancelled" are excluded — they sit in the "Closed" bucket at the bottom.
   const availableStatuses = useMemo(() => {
     const configured = (claimStatuses || [])
       .filter(s => s.is_active !== false)
       .map(s => s.status_name);
-    const otherStatuses = new Set(['Claim Complete', 'Cancelled']);
-    const endStatuses = ['Awaiting Sup Authority', 'Awaiting BLD Invoice', 'Invoice Pending'];
-    let result = configured.filter(s => !otherStatuses.has(s) && !endStatuses.includes(s));
+    const closedStatuses = new Set(['Claim Complete', 'Cancelled']);
+    const journeyNames = JOURNEY_STATUSES.map(s => s.name);
+    const merged = [...new Set([...configured, ...SECONDARY_STATUSES, ...journeyNames])];
+    let result = merged.filter(s => !closedStatuses.has(s));
     const known = new Set(result);
     if (!known.has('Awaiting BID')) {
       const idx = result.indexOf('New');
@@ -198,12 +199,6 @@ export default function ClaimsPage() {
       result.push('Rectification');
       known.add('Rectification');
     }
-    endStatuses.forEach(s => {
-      if (!known.has(s)) {
-        result.push(s);
-        known.add(s);
-      }
-    });
     return result;
   }, [claimStatuses]);
 
