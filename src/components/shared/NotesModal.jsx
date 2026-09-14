@@ -21,6 +21,7 @@ const UPDATE_TYPE_COLORS = {
   "Action Taken": "bg-indigo-500", "Awaiting Information": "bg-yellow-500",
   "Documentation Received": "bg-teal-500", "Parts Update": "bg-pink-500",
   "Repair Progress": "bg-cyan-500", "Quality Check": "bg-emerald-500",
+  "Accounts": "bg-violet-500",
   "Other": "bg-gray-500"
 };
 
