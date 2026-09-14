@@ -19,6 +19,7 @@
         "Insurer Communication",
         "Referrer Communication",
         "Parts",
+        "General Update",
         "Other"
       ],
       "default": "Other",

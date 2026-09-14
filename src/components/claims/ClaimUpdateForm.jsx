@@ -14,7 +14,7 @@ import UpdateContactSelector from "@/components/claims/UpdateContactSelector";
 
 const UPDATE_TYPES = [
   "Status Change", "Client Communication", "Bodyshop Communication", "Insurer Communication",
-  "Referrer Communication", "Parts", "Other"
+  "Referrer Communication", "Parts", "General Update", "Other"
 ];
 
 export default function ClaimUpdateForm({
@@ -101,7 +101,7 @@ export default function ClaimUpdateForm({
       // so a slow/failed timer write must never make a successful update look
       // like it failed. We catch and log; the update itself is already stored.
       try {
-        if (updateData.update_type !== 'Status Change' && updateData.direction === 'Incoming') {
+        if (updateData.update_type === 'General Update' || (updateData.update_type !== 'Status Change' && updateData.direction === 'Incoming')) {
           const now = new Date();
           const closed = isUpdateTrackingClosed({ job_status: claim?.journey_status || claim?.job_status, invoice_status: claim?.invoice_status });
           await base44.entities.Claim.update(claimId, {
@@ -195,8 +195,8 @@ export default function ClaimUpdateForm({
     setSubmitError('');
     if (isReferrer && newUpdate.update_type === 'Status Change') { setSubmitError('Referrers cannot change status'); return; }
     if (isReferrer && (newUpdate.next_steps || newUpdate.due_date_for_next_action)) { setSubmitError('Referrers cannot set follow-ups'); return; }
-    if (newUpdate.update_type !== 'Status Change' && !newUpdate.direction) { setSubmitError('Please select a direction (Incoming or Outgoing)'); return; }
-    if (newUpdate.update_type !== 'Status Change' && newUpdate.direction && !newUpdate.platform) { setSubmitError('Please select a platform'); return; }
+    if (newUpdate.update_type !== 'Status Change' && newUpdate.update_type !== 'General Update' && !newUpdate.direction) { setSubmitError('Please select a direction (Incoming or Outgoing)'); return; }
+    if (newUpdate.update_type !== 'Status Change' && newUpdate.update_type !== 'General Update' && newUpdate.direction && !newUpdate.platform) { setSubmitError('Please select a platform'); return; }
     if (newUpdate.update_type !== 'Status Change' && !newUpdate.description.trim()) { setSubmitError('Please enter a description'); return; }
 
     // Block true completion (cancelled or invoiced) while a starred/flagged
@@ -259,7 +259,7 @@ export default function ClaimUpdateForm({
           </select>
         </div>
 
-        {newUpdate.update_type !== 'Status Change' && (
+        {newUpdate.update_type !== 'Status Change' && newUpdate.update_type !== 'General Update' && (
           <div>
             <label className="block text-xs text-muted-foreground mb-1">Direction *</label>
             <select value={newUpdate.direction} onChange={(e) => setNewUpdate({ ...newUpdate, direction: e.target.value, platform: '' })} className="w-full px-3 py-2 text-sm bg-background border border-border rounded-lg" required>
@@ -270,7 +270,7 @@ export default function ClaimUpdateForm({
           </div>
         )}
 
-        {newUpdate.update_type !== 'Status Change' && newUpdate.direction && (
+        {newUpdate.update_type !== 'Status Change' && newUpdate.update_type !== 'General Update' && newUpdate.direction && (
           <div>
             <label className="block text-xs text-muted-foreground mb-1">Platform *</label>
             <select value={newUpdate.platform} onChange={(e) => { setNewUpdate({ ...newUpdate, platform: e.target.value }); setSelectedContacts([]); }} className="w-full px-3 py-2 text-sm bg-background border border-border rounded-lg" required>
@@ -283,7 +283,7 @@ export default function ClaimUpdateForm({
           </div>
         )}
 
-        {newUpdate.update_type !== 'Status Change' && (
+        {newUpdate.update_type !== 'Status Change' && newUpdate.update_type !== 'General Update' && (
           <UpdateContactSelector
             claim={claim}
             updateType={newUpdate.update_type}
