@@ -174,14 +174,13 @@ export default function ClaimsPage() {
   // Group order mirrors the order of statuses configured in Settings
   // (ClaimStatusConfig, sorted by sort_order). Special groups ('Awaiting BID',
   // 'On Site') that aren't in the config are inserted at sensible positions.
-  // "Cancelled" and "Invoiced" are relegated to the "Other" bucket at the
-  // bottom; "Awaiting Sup Authority", "Awaiting BLD Invoice" and "Invoice
-  // Pending" are positioned just above "Other".
+  // "Claim Complete" and "Cancelled" are relegated to the "Closed" bucket at
+  // the bottom; all other statuses appear in the main list.
   const availableStatuses = useMemo(() => {
     const configured = (claimStatuses || [])
       .filter(s => s.is_active !== false)
       .map(s => s.status_name);
-    const otherStatuses = new Set(['Cancelled', 'Invoiced']);
+    const otherStatuses = new Set(['Claim Complete', 'Cancelled']);
     const endStatuses = ['Awaiting Sup Authority', 'Awaiting BLD Invoice', 'Invoice Pending'];
     let result = configured.filter(s => !otherStatuses.has(s) && !endStatuses.includes(s));
     const known = new Set(result);
@@ -813,7 +812,7 @@ export default function ClaimsPage() {
                     <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 dark:bg-gray-800/60 cursor-pointer select-none border-b border-gray-100 dark:border-gray-800" onClick={() => toggleGroup('__other__')}>
                       {isCollapsed ? <ChevronRight className="w-3.5 h-3.5 text-gray-400" /> : <ChevronDown className="w-3.5 h-3.5 text-gray-400" />}
                       <span className="w-2 h-2 rounded-full bg-gray-400 flex-shrink-0" />
-                      <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Other</span>
+                      <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Closed</span>
                       <span className="text-xs text-gray-400 ml-1">{ungrouped.length}</span>
                     </div>
                     {!isCollapsed && groupBySub(ungrouped, availableStatuses).map(([subKey, subClaims]) => {
@@ -931,7 +930,7 @@ export default function ClaimsPage() {
                           <div className="flex items-center gap-2">
                             {isCollapsed ? <ChevronRight className="w-3.5 h-3.5 text-gray-400" /> : <ChevronDown className="w-3.5 h-3.5 text-gray-400" />}
                             <span className="w-2 h-2 rounded-full bg-gray-400 flex-shrink-0" />
-                            <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Other</span>
+                            <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Closed</span>
                             <span className="text-xs text-gray-400 ml-1">{ungrouped.length}</span>
                           </div>
                         </td>
