@@ -27,6 +27,9 @@ export function getGroupKey(c) {
   if (c.on_site_date && !c.hand_over_date) return 'On Site';
   if (c.journey_status && !isExceptionJourney(c.journey_status)) {
     if (c.journey_status === 'On-Site') return 'On Site';
+    // "Returned to Customer" claims group by their secondary status directly
+    // in the main list rather than nesting under a journey group.
+    if (c.journey_status === 'Returned to Customer') return c.secondary_status || 'Returned to Customer';
     return c.journey_status;
   }
   return c.secondary_status || journey || 'New';
