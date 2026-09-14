@@ -14,56 +14,57 @@ function buildContacts(updateType, claim, bodyshop, insurer, referrer) {
   const contacts = [];
   if (!claim) return contacts;
 
-  const push = (id, label, detail, sublabel, kind) => {
+  const push = (id, label, detail, sublabel, kind, orgName) => {
     if (!detail) return;
-    contacts.push({ id, label, detail, sublabel: sublabel || '', kind });
+    contacts.push({ id, label, detail, sublabel: sublabel || '', kind, orgName: orgName || label });
   };
 
   if (updateType === 'Client Communication') {
+    const orgName = claim.client_name;
     if (claim.client_name) {
-      push('client-email', claim.client_name, claim.client_email, 'Client · Email', 'email');
-      push('client-phone', claim.client_name, claim.client_phone, 'Client · Phone', 'phone');
+      push('client-email', claim.client_name, claim.client_email, 'Client · Email', 'email', orgName);
+      push('client-phone', claim.client_name, claim.client_phone, 'Client · Phone', 'phone', orgName);
     }
     if (!claim.driver_same_as_client) {
       const dName = claim.driver_name || claim.driver_contact_name;
       if (dName) {
-        push('driver-email', dName, claim.driver_email || claim.driver_contact_email, 'Driver · Email', 'email');
-        push('driver-phone', dName, claim.driver_phone || claim.driver_contact_phone, 'Driver · Phone', 'phone');
+        push('driver-email', dName, claim.driver_email || claim.driver_contact_email, 'Driver · Email', 'email', orgName);
+        push('driver-phone', dName, claim.driver_phone || claim.driver_contact_phone, 'Driver · Phone', 'phone', orgName);
       }
     }
   } else if (updateType === 'Bodyshop Communication') {
     const bsName = bodyshop?.name || claim.bodyshop;
     if (bsName) {
-      push('bs-main', bsName, bodyshop?.email || claim.bodyshop_email, 'Main Email', 'email');
-      push('bs-referral', bsName, bodyshop?.referral_email, 'Referral Email', 'email');
-      push('bs-manager', bodyshop?.bodyshop_manager || bsName, bodyshop?.bs_manager_email, 'Bodyshop Manager', 'email');
-      push('bs-accounts', bodyshop?.accounts_contact || bsName, bodyshop?.accounts_email, 'Accounts', 'email');
-      push('bs-contact', bodyshop?.contact_name || bsName, bodyshop?.email, 'Main Contact', 'email');
-      push('bs-phone', bsName, bodyshop?.phone, 'Landline', 'phone');
-      push('bs-mobile', bsName, bodyshop?.mobile_phone, 'Mobile', 'phone');
+      push('bs-main', bsName, bodyshop?.email || claim.bodyshop_email, 'Main Email', 'email', bsName);
+      push('bs-referral', bsName, bodyshop?.referral_email, 'Referral Email', 'email', bsName);
+      push('bs-manager', bodyshop?.bodyshop_manager || bsName, bodyshop?.bs_manager_email, 'Bodyshop Manager', 'email', bsName);
+      push('bs-accounts', bodyshop?.accounts_contact || bsName, bodyshop?.accounts_email, 'Accounts', 'email', bsName);
+      push('bs-contact', bodyshop?.contact_name || bsName, bodyshop?.email, 'Main Contact', 'email', bsName);
+      push('bs-phone', bsName, bodyshop?.phone, 'Landline', 'phone', bsName);
+      push('bs-mobile', bsName, bodyshop?.mobile_phone, 'Mobile', 'phone', bsName);
     } else if (claim.bodyshop_email) {
-      push('bs-claim', claim.bodyshop, claim.bodyshop_email, 'Main Email', 'email');
+      push('bs-claim', claim.bodyshop, claim.bodyshop_email, 'Main Email', 'email', claim.bodyshop);
     }
   } else if (updateType === 'Insurer Communication') {
     const insName = insurer?.name || claim.insurer;
     if (insName) {
-      push('ins-email', insName, insurer?.email, 'Main Email', 'email');
-      push('ins-claims', insName, insurer?.claims_line, 'Claims Line', 'phone');
-      push('ins-phone', insName, insurer?.phone, 'Phone', 'phone');
+      push('ins-email', insName, insurer?.email, 'Main Email', 'email', insName);
+      push('ins-claims', insName, insurer?.claims_line, 'Claims Line', 'phone', insName);
+      push('ins-phone', insName, insurer?.phone, 'Phone', 'phone', insName);
       if (insurer?.useful_contacts?.length) {
         insurer.useful_contacts.forEach((c, i) => {
-          if (c.email) push(`ins-uc-${i}`, c.name || insName, c.email, 'Useful Contact · Email', 'email');
-          if (c.phone) push(`ins-uc-p-${i}`, c.name || insName, c.phone, 'Useful Contact · Phone', 'phone');
+          if (c.email) push(`ins-uc-${i}`, c.name || insName, c.email, 'Useful Contact · Email', 'email', insName);
+          if (c.phone) push(`ins-uc-p-${i}`, c.name || insName, c.phone, 'Useful Contact · Phone', 'phone', insName);
         });
       }
     }
   } else if (updateType === 'Referrer Communication') {
     const refName = referrer?.name || claim.referrer;
     if (refName) {
-      push('ref-email', referrer?.contact_name || refName, referrer?.email || claim.referrer_email, 'Main Email', 'email');
-      push('ref-phone', referrer?.contact_name || refName, referrer?.phone, 'Phone', 'phone');
+      push('ref-email', referrer?.contact_name || refName, referrer?.email || claim.referrer_email, 'Main Email', 'email', refName);
+      push('ref-phone', referrer?.contact_name || refName, referrer?.phone, 'Phone', 'phone', refName);
     } else if (claim.referrer_email) {
-      push('ref-claim', claim.referrer, claim.referrer_email, 'Main Email', 'email');
+      push('ref-claim', claim.referrer, claim.referrer_email, 'Main Email', 'email', claim.referrer);
     }
   }
 

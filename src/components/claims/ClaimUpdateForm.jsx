@@ -217,7 +217,7 @@ export default function ClaimUpdateForm({
     }
 
     let finalDescription = newUpdate.description;
-    const contactedPartyName = selectedContacts.map((c) => c.label).join(', ');
+    const contactedPartyName = [...new Set(selectedContacts.map((c) => c.orgName).filter(Boolean))].join(', ');
     const contactedPartyDetail = selectedContacts.map((c) => c.detail).join(', ');
     if (newUpdate.update_type === 'Status Change' && !finalDescription.trim()) {
       const parts = [];
