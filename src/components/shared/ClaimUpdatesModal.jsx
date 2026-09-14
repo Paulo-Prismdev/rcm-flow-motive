@@ -421,12 +421,21 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
                       <div className="flex items-start justify-between mb-2">
                         <div className="flex items-center gap-2 flex-wrap">
                           <Badge className={`${UPDATE_TYPE_COLORS[update.update_type] || 'bg-gray-500'} rounded-full`}>{update.update_type}</Badge>
-                          {update.contacted_party_name && (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-muted text-muted-foreground border border-border">
-                              <User className="w-3 h-3" />
-                              {update.contacted_party_name}
-                            </span>
-                          )}
+                          {(() => {
+                            const partyName = update.contacted_party_name ||
+                              (update.update_type === 'Bodyshop Communication' && claim?.bodyshop) ||
+                              (update.update_type === 'Client Communication' && claim?.client_name) ||
+                              (update.update_type === 'Insurer Communication' && claim?.insurer) ||
+                              (update.update_type === 'Referrer Communication' && claim?.referrer) ||
+                              '';
+                            if (!partyName) return null;
+                            return (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-muted text-muted-foreground border border-border">
+                                <User className="w-3 h-3" />
+                                {partyName}
+                              </span>
+                            );
+                          })()}
                           <UpdateDirectionBadges update={update} />
                           {update.starred && <span className="inline-flex items-center gap-1 text-amber-500 text-[10px] font-semibold"><Star className="w-3 h-3 fill-amber-400" />Flagged</span>}
                           <span className="text-[10px] text-muted-foreground flex items-center gap-1"><Calendar className="w-3 h-3" />{format(new Date(update.created_date), 'dd/MM/yyyy HH:mm')}</span>
