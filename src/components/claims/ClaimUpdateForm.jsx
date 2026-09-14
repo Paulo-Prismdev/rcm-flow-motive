@@ -10,6 +10,7 @@ import { Command, CommandItem, CommandList } from "@/components/ui/command";
 import StatusChangeFields from "@/components/shared/StatusChangeFields";
 import { buildStatusChangeClaimUpdate, isUpdateTrackingClosed } from "@/components/shared/claimStatusUpdate";
 import { createTagNotifications } from "@/components/shared/createTagNotifications";
+import UpdateContactSelector from "@/components/claims/UpdateContactSelector";
 
 const UPDATE_TYPES = [
   "Status Change", "Client Communication", "Bodyshop Communication", "Insurer Communication",
@@ -40,6 +41,7 @@ export default function ClaimUpdateForm({
   });
   const [sendEmail, setSendEmail] = useState(false);
   const [selectedEmails, setSelectedEmails] = useState([]);
+  const [selectedContact, setSelectedContact] = useState(null);
   const [submitError, setSubmitError] = useState('');
   const [taggedUsers, setTaggedUsers] = useState([]);
   const [mentionQuery, setMentionQuery] = useState('');
@@ -55,6 +57,7 @@ export default function ClaimUpdateForm({
     !!newUpdate.platform ||
     taggedUsers.length > 0 ||
     selectedEmails.length > 0 ||
+    !!selectedContact ||
     sendEmail ||
     (newUpdate.update_type === 'Status Change' &&
       (newUpdate.new_journey !== (claim?.journey_status || claim?.job_status || currentStatus || '') ||
@@ -151,7 +154,7 @@ export default function ClaimUpdateForm({
 
   const resetForm = () => {
     setNewUpdate({ update_type: defaultUpdateType || 'Other', direction: replyToId ? 'Outgoing' : '', platform: '', description: '', next_steps: '', due_date_for_next_action: '', new_journey: claim?.journey_status || claim?.job_status || currentStatus || '', new_secondary_status: claim?.secondary_status || '', new_tertiary_status: claim?.tertiary_status || '', new_on_site_date: '', new_completion_date: '', new_claim_complete_date: '', new_hand_over_date: '' });
-    setSendEmail(false); setSelectedEmails([]); setTaggedUsers([]); setSubmitError(''); setShowFollowUp(false);
+    setSendEmail(false); setSelectedEmails([]); setTaggedUsers([]); setSubmitError(''); setShowFollowUp(false); setSelectedContact(null);
     if (onCancel) onCancel();
   };
 
@@ -214,6 +217,10 @@ export default function ClaimUpdateForm({
     }
 
     let finalDescription = newUpdate.description;
+    if (selectedContact) {
+      const contactPrefix = `[Contacted: ${selectedContact.label}${selectedContact.detail ? ` — ${selectedContact.detail}` : ''}]`;
+      finalDescription = finalDescription ? `${contactPrefix}\n${finalDescription}` : contactPrefix;
+    }
     if (newUpdate.update_type === 'Status Change' && !finalDescription.trim()) {
       const parts = [];
       if (newUpdate.new_journey) parts.push(`Journey → ${newUpdate.new_journey}`);
@@ -249,7 +256,7 @@ export default function ClaimUpdateForm({
       <form onSubmit={handleSubmit} className="space-y-2">
         <div>
           <label className="block text-xs text-muted-foreground mb-1">Update Type *</label>
-          <select value={newUpdate.update_type} onChange={(e) => setNewUpdate({ ...newUpdate, update_type: e.target.value, direction: '', platform: '' })} className="w-full px-3 py-2 text-sm bg-background border border-border rounded-lg" required>
+          <select value={newUpdate.update_type} onChange={(e) => { setNewUpdate({ ...newUpdate, update_type: e.target.value, direction: '', platform: '' }); setSelectedContact(null); }} className="w-full px-3 py-2 text-sm bg-background border border-border rounded-lg" required>
             {isReferrer ? (<><option value="Referrer Communication">Referrer Communication</option><option value="Other">Other</option></>) : (UPDATE_TYPES.map(type => <option key={type} value={type}>{type}</option>))}
           </select>
         </div>
@@ -276,6 +283,15 @@ export default function ClaimUpdateForm({
               <option value="Text Message">Text Message</option>
             </select>
           </div>
+        )}
+
+        {newUpdate.update_type !== 'Status Change' && (
+          <UpdateContactSelector
+            claim={claim}
+            updateType={newUpdate.update_type}
+            value={selectedContact?.id || ''}
+            onChange={setSelectedContact}
+          />
         )}
 
         {!replyToId && newUpdate.update_type === 'Status Change' && canChangeStatus && (
