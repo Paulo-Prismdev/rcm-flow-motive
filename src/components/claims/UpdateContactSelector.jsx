@@ -58,7 +58,7 @@ function buildContacts(updateType, claim, bodyshop, insurer, referrer) {
         });
       }
     }
-  } else if (updateType === 'Referrer Communication') {
+  } else if (updateType === 'Referrer Communication' || updateType === 'Referrer Response') {
     const refName = referrer?.name || claim.referrer;
     if (refName) {
       push('ref-email', referrer?.contact_name || refName, referrer?.email || claim.referrer_email, 'Main Email', 'email', refName);
@@ -83,6 +83,7 @@ const TYPE_ICON = {
   'Bodyshop Communication': Building2,
   'Insurer Communication': Shield,
   'Referrer Communication': Users,
+  'Referrer Response': Users,
 };
 
 // Map platform → which contact kinds to show.
@@ -94,7 +95,7 @@ const PLATFORM_KINDS = {
 };
 
 export default function UpdateContactSelector({ claim, updateType, platform, value = [], onChange }) {
-  const isCommType = ['Client Communication', 'Bodyshop Communication', 'Insurer Communication', 'Referrer Communication'].includes(updateType);
+  const isCommType = ['Client Communication', 'Bodyshop Communication', 'Insurer Communication', 'Referrer Communication', 'Referrer Response'].includes(updateType);
 
   const { data: bodyshop } = useQuery({
     queryKey: ['bodyshop', claim?.bodyshop_id],

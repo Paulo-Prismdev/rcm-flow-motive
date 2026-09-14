@@ -292,6 +292,12 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
                         <div className="flex items-start justify-between mb-2">
                           <div className="flex items-center gap-2 flex-wrap">
                             {note.update_type && <Badge className={`${UPDATE_TYPE_COLORS[note.update_type] || 'bg-gray-500'} rounded-full`}>{note.update_type}</Badge>}
+                            {note.contacted_party_name && (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-muted text-muted-foreground border border-border">
+                                <User className="w-3 h-3" />
+                                {note.contacted_party_name}
+                              </span>
+                            )}
                             <UpdateDirectionBadges update={note} />
                             {note.starred && <span className="inline-flex items-center gap-1 text-amber-500 text-[10px] font-semibold"><Star className="w-3 h-3 fill-amber-400" />Flagged</span>}
                             <span className="text-[10px] text-muted-foreground flex items-center gap-1"><Calendar className="w-3 h-3" />{format(new Date(note.created_date), 'dd/MM/yyyy HH:mm')}</span>
@@ -309,6 +315,12 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
                           </div>
                         ) : (
                           <>
+                            {note.contacted_party_detail && (
+                              <div className="text-[11px] text-muted-foreground flex items-center gap-1 mb-1.5">
+                                <AtSign className="w-3 h-3 flex-shrink-0" />
+                                <span className="truncate">{note.contacted_party_detail}</span>
+                              </div>
+                            )}
                             {note.content && <div className="text-sm mb-2"><p className="text-foreground whitespace-pre-wrap"><Highlight text={note.content} query={q} /></p></div>}
                             {note.next_steps && <div className="text-sm mb-2 mt-2 bg-muted/50 rounded p-2"><p className="font-medium mb-1 text-foreground text-xs uppercase tracking-wide">Next Steps:</p><p className="text-muted-foreground whitespace-pre-wrap"><Highlight text={note.next_steps} query={q} /></p></div>}
                             {note.due_date_for_next_action && <div className="text-xs text-muted-foreground flex items-center gap-1 mt-2"><Clock className="w-3 h-3" />Due: {format(new Date(note.due_date_for_next_action), 'dd/MM/yyyy')}</div>}
@@ -367,6 +379,11 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
                                         <div className="flex items-center gap-2">
                                           <span className="text-[10px] text-muted-foreground flex items-center gap-1"><User className="w-3 h-3" />{getDisplayName(reply.created_by)}</span>
                                           <span className="text-[10px] text-muted-foreground flex items-center gap-1"><Calendar className="w-3 h-3" />{format(new Date(reply.created_date), 'dd/MM/yyyy HH:mm')}</span>
+                                          {reply.contacted_party_name && (
+                                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-muted text-muted-foreground border border-border">
+                                              <User className="w-3 h-3" />{reply.contacted_party_name}
+                                            </span>
+                                          )}
                                         </div>
                                         <div className="flex items-center gap-1">
                                           <Button type="button" variant="ghost" size="sm" onClick={() => handleCopy(reply)} className="h-5 px-1 text-xs text-muted-foreground" title="Copy">{copiedId === reply.id ? <Check className="w-3 h-3 text-green-500" /> : <Copy className="w-3 h-3" />}</Button>
@@ -379,6 +396,12 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
                                           <Button type="button" variant="ghost" size="sm" onClick={() => toggleLikeMutation.mutate({ noteId: reply.id, isLiked: replyIsLiked })} className={`h-5 px-1 text-xs ${replyIsLiked ? 'text-red-500' : 'text-muted-foreground'}`}><Heart className={`w-3 h-3 ${replyIsLiked ? 'fill-current' : ''}`} />{replyLikeCount > 0 && replyLikeCount}</Button>
                                         </div>
                                       </div>
+                                      {reply.contacted_party_detail && (
+                                        <div className="text-[11px] text-muted-foreground flex items-center gap-1 mb-1.5">
+                                          <AtSign className="w-3 h-3 flex-shrink-0" />
+                                          <span className="truncate">{reply.contacted_party_detail}</span>
+                                        </div>
+                                      )}
                                       {reply.content && <p className="text-sm text-foreground whitespace-pre-wrap"><Highlight text={reply.content} query={q} /></p>}
                                       {renderFileChips(reply, true)}
                                     </>

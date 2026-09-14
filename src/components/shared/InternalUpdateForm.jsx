@@ -11,6 +11,7 @@ import VoiceInput from '@/components/shared/VoiceInput';
 import { useFileUpload } from '@/hooks/useFileUpload';
 import { useToast } from "@/components/ui/use-toast";
 import { createNoteTagNotifications } from '@/components/shared/createNoteTagNotifications';
+import UpdateContactSelector from '@/components/claims/UpdateContactSelector';
 
 const UPDATE_TYPES = [
   "Client Communication", "Bodyshop Communication", "Insurer Communication",
@@ -41,6 +42,7 @@ export default function InternalUpdateForm({
   const [mentionQuery, setMentionQuery] = useState('');
   const [mentionPosition, setMentionPosition] = useState(null);
   const [showMentionPopup, setShowMentionPopup] = useState(false);
+  const [selectedContacts, setSelectedContacts] = useState([]);
 
   const { uploadFiles, uploads, isUploading, retryUpload } = useFileUpload({
     onComplete: (urls) => setAttachedFiles((prev) => [...prev, ...urls]),
@@ -48,6 +50,26 @@ export default function InternalUpdateForm({
 
   const { data: currentUser } = useQuery({ queryKey: ['currentUser'], queryFn: () => base44.auth.me(), staleTime: 5 * 60 * 1000 });
   const { data: allUsers = [] } = useQuery({ queryKey: ['allUsers'], queryFn: () => base44.entities.User.list(), staleTime: 5 * 60 * 1000 });
+
+  const isCommType = ['Client Communication', 'Bodyshop Communication', 'Insurer Communication', 'Referrer Response'].includes(newUpdate.update_type);
+
+  const { data: claim } = useQuery({
+    queryKey: ['internal-update-claim', parentId, parentType],
+    queryFn: async () => {
+      if (parentType === 'Claim') return await base44.entities.Claim.get(parentId);
+      const entityMap = { Estimate: 'Estimate', Engineering: 'Engineering', Part: 'Part' };
+      const entityName = entityMap[parentType];
+      if (!entityName) return null;
+      try {
+        const parent = await base44.entities[entityName].get(parentId);
+        if (parent?.linked_claim_id) return await base44.entities.Claim.get(parent.linked_claim_id);
+      } catch { return null; }
+      return null;
+    },
+    enabled: isCommType && !!parentId && !!parentType,
+    staleTime: 2 * 60 * 1000,
+    retry: 1,
+  });
 
   const getDisplayName = (user) => user?.display_name || user?.full_name || user?.email || 'Unknown';
 
@@ -59,6 +81,7 @@ export default function InternalUpdateForm({
     !!newUpdate.platform ||
     taggedEmails.length > 0 ||
     attachedFiles.length > 0 ||
+    selectedContacts.length > 0 ||
     (newUpdate.update_type !== 'Other');
 
   useEffect(() => {
@@ -76,6 +99,8 @@ export default function InternalUpdateForm({
         update_type: data.update_type,
         direction: data.direction || null,
         platform: data.platform || null,
+        contacted_party_name: data.contacted_party_name || null,
+        contacted_party_detail: data.contacted_party_detail || null,
         next_steps: data.next_steps || null,
         due_date_for_next_action: data.due_date_for_next_action || null,
         tagged_users: data.tagged_users,
@@ -106,7 +131,7 @@ export default function InternalUpdateForm({
 
   const resetForm = () => {
     setNewUpdate({ update_type: 'Other', direction: '', platform: '', description: '', next_steps: '', due_date_for_next_action: '' });
-    setTaggedEmails([]); setAttachedFiles([]); setSubmitError(''); setShowFollowUp(false);
+    setTaggedEmails([]); setAttachedFiles([]); setSubmitError(''); setShowFollowUp(false); setSelectedContacts([]);
     if (onCancel) onCancel();
   };
 
@@ -170,6 +195,8 @@ export default function InternalUpdateForm({
       parent_note_id: replyToId || null,
       tagged_users: taggedEmails,
       file_urls: attachedFiles,
+      contacted_party_name: [...new Set(selectedContacts.map((c) => c.orgName).filter(Boolean))].join(', '),
+      contacted_party_detail: selectedContacts.map((c) => c.detail).join(', '),
     });
   };
 
@@ -189,7 +216,7 @@ export default function InternalUpdateForm({
             <label className="block text-xs text-muted-foreground mb-1">Update Type</label>
             <select
               value={newUpdate.update_type}
-              onChange={(e) => setNewUpdate({ ...newUpdate, update_type: e.target.value, direction: '', platform: '' })}
+              onChange={(e) => { setNewUpdate({ ...newUpdate, update_type: e.target.value, direction: '', platform: '' }); setSelectedContacts([]); }}
               className="w-full px-3 py-2 text-sm bg-background border border-border rounded-lg"
             >
               {UPDATE_TYPES.map((type) => <option key={type} value={type}>{type}</option>)}
@@ -215,7 +242,7 @@ export default function InternalUpdateForm({
             <label className="block text-xs text-muted-foreground mb-1">Platform</label>
             <select
               value={newUpdate.platform}
-              onChange={(e) => setNewUpdate({ ...newUpdate, platform: e.target.value })}
+              onChange={(e) => { setNewUpdate({ ...newUpdate, platform: e.target.value }); setSelectedContacts([]); }}
               className="w-full px-3 py-2 text-sm bg-background border border-border rounded-lg"
             >
               <option value="">Select platform...</option>
@@ -226,6 +253,14 @@ export default function InternalUpdateForm({
             </select>
           </div>
         )}
+
+        <UpdateContactSelector
+          claim={claim}
+          updateType={newUpdate.update_type}
+          platform={newUpdate.platform}
+          value={selectedContacts.map((c) => c.id)}
+          onChange={setSelectedContacts}
+        />
 
         <div className="relative">
           <label className="block text-xs text-muted-foreground mb-1">{replyToId ? 'Your reply' : 'What was done?'} <span className="text-destructive">*</span></label>

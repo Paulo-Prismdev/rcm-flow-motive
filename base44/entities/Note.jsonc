@@ -46,6 +46,14 @@
       ],
       "description": "Communication platform used for this internal update"
     },
+    "contacted_party_name": {
+      "type": "string",
+      "description": "Name of the organisation contacted for this internal communication (shown next to the update type in the header)"
+    },
+    "contacted_party_detail": {
+      "type": "string",
+      "description": "Email or phone number(s) of the contacted party (shown above the update body)"
+    },
     "next_steps": {
       "type": "string",
       "description": "What needs to happen next (optional, internal follow-up only \u2014 does not affect tracking)."
