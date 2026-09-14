@@ -92,7 +92,7 @@ const PLATFORM_KINDS = {
   'Text Message': ['phone'],
 };
 
-export default function UpdateContactSelector({ claim, updateType, platform, value, onChange }) {
+export default function UpdateContactSelector({ claim, updateType, platform, value = [], onChange }) {
   const isCommType = ['Client Communication', 'Bodyshop Communication', 'Insurer Communication', 'Referrer Communication'].includes(updateType);
 
   const { data: bodyshop } = useQuery({
@@ -140,27 +140,46 @@ export default function UpdateContactSelector({ claim, updateType, platform, val
 
   const Icon = TYPE_ICON[updateType] || User;
 
+  const selectedIds = Array.isArray(value) ? value : (value ? [value] : []);
+  const selected = contacts.filter((c) => selectedIds.includes(c.id));
+
+  const toggle = (c) => {
+    const exists = selected.find((x) => x.id === c.id);
+    const next = exists ? selected.filter((x) => x.id !== c.id) : [...selected, c];
+    onChange(next);
+  };
+
   return (
     <div>
       <label className="block text-xs text-muted-foreground mb-1 flex items-center gap-1.5">
         <Icon className="w-3.5 h-3.5" />
-        Contacted Party
+        Contacted Party {contacts.length > 1 && <span className="font-normal">(select one or more)</span>}
       </label>
-      <select
-        value={value || ''}
-        onChange={(e) => {
-          const c = contacts.find((x) => x.id === e.target.value);
-          onChange(c || null);
-        }}
-        className="w-full px-3 py-2 text-sm bg-background border border-border rounded-lg"
-      >
-        <option value="">Select who was contacted (optional)...</option>
-        {contacts.map((c) => (
-          <option key={c.id} value={c.id}>
-            {c.label} — {c.detail}{c.sublabel ? ` (${c.sublabel})` : ''}
-          </option>
-        ))}
-      </select>
+      <div className="w-full px-3 py-2 text-sm bg-background border border-border rounded-lg space-y-1.5 max-h-44 overflow-y-auto">
+        {contacts.map((c) => {
+          const checked = selectedIds.includes(c.id);
+          return (
+            <label key={c.id} className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={checked}
+                onChange={() => toggle(c)}
+                className="w-4 h-4 flex-shrink-0"
+              />
+              <span className="flex-1 min-w-0">
+                <span className="font-medium">{c.label}</span>
+                {c.sublabel && <span className="text-muted-foreground"> · {c.sublabel}</span>}
+                <span className="text-muted-foreground"> — {c.detail}</span>
+              </span>
+            </label>
+          );
+        })}
+      </div>
+      {selected.length > 0 && (
+        <p className="text-[10px] text-muted-foreground mt-1">
+          {selected.length} selected: {selected.map((c) => c.detail).join(', ')}
+        </p>
+      )}
     </div>
   );
 }

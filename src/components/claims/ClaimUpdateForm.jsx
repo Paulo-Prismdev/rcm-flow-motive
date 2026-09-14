@@ -41,7 +41,7 @@ export default function ClaimUpdateForm({
   });
   const [sendEmail, setSendEmail] = useState(false);
   const [selectedEmails, setSelectedEmails] = useState([]);
-  const [selectedContact, setSelectedContact] = useState(null);
+  const [selectedContacts, setSelectedContacts] = useState([]);
   const [submitError, setSubmitError] = useState('');
   const [taggedUsers, setTaggedUsers] = useState([]);
   const [mentionQuery, setMentionQuery] = useState('');
@@ -57,7 +57,7 @@ export default function ClaimUpdateForm({
     !!newUpdate.platform ||
     taggedUsers.length > 0 ||
     selectedEmails.length > 0 ||
-    !!selectedContact ||
+    selectedContacts.length > 0 ||
     sendEmail ||
     (newUpdate.update_type === 'Status Change' &&
       (newUpdate.new_journey !== (claim?.journey_status || claim?.job_status || currentStatus || '') ||
@@ -154,7 +154,7 @@ export default function ClaimUpdateForm({
 
   const resetForm = () => {
     setNewUpdate({ update_type: defaultUpdateType || 'Other', direction: replyToId ? 'Outgoing' : '', platform: '', description: '', next_steps: '', due_date_for_next_action: '', new_journey: claim?.journey_status || claim?.job_status || currentStatus || '', new_secondary_status: claim?.secondary_status || '', new_tertiary_status: claim?.tertiary_status || '', new_on_site_date: '', new_completion_date: '', new_claim_complete_date: '', new_hand_over_date: '' });
-    setSendEmail(false); setSelectedEmails([]); setTaggedUsers([]); setSubmitError(''); setShowFollowUp(false); setSelectedContact(null);
+    setSendEmail(false); setSelectedEmails([]); setTaggedUsers([]); setSubmitError(''); setShowFollowUp(false); setSelectedContacts([]);
     if (onCancel) onCancel();
   };
 
@@ -217,8 +217,8 @@ export default function ClaimUpdateForm({
     }
 
     let finalDescription = newUpdate.description;
-    const contactedPartyName = selectedContact?.label || '';
-    const contactedPartyDetail = selectedContact?.detail || '';
+    const contactedPartyName = selectedContacts.map((c) => c.label).join(', ');
+    const contactedPartyDetail = selectedContacts.map((c) => c.detail).join(', ');
     if (newUpdate.update_type === 'Status Change' && !finalDescription.trim()) {
       const parts = [];
       if (newUpdate.new_journey) parts.push(`Journey → ${newUpdate.new_journey}`);
@@ -254,7 +254,7 @@ export default function ClaimUpdateForm({
       <form onSubmit={handleSubmit} className="space-y-2">
         <div>
           <label className="block text-xs text-muted-foreground mb-1">Update Type *</label>
-          <select value={newUpdate.update_type} onChange={(e) => { setNewUpdate({ ...newUpdate, update_type: e.target.value, direction: '', platform: '' }); setSelectedContact(null); }} className="w-full px-3 py-2 text-sm bg-background border border-border rounded-lg" required>
+          <select value={newUpdate.update_type} onChange={(e) => { setNewUpdate({ ...newUpdate, update_type: e.target.value, direction: '', platform: '' }); setSelectedContacts([]); }} className="w-full px-3 py-2 text-sm bg-background border border-border rounded-lg" required>
             {isReferrer ? (<><option value="Referrer Communication">Referrer Communication</option><option value="Other">Other</option></>) : (UPDATE_TYPES.map(type => <option key={type} value={type}>{type}</option>))}
           </select>
         </div>
@@ -273,7 +273,7 @@ export default function ClaimUpdateForm({
         {newUpdate.update_type !== 'Status Change' && newUpdate.direction && (
           <div>
             <label className="block text-xs text-muted-foreground mb-1">Platform *</label>
-            <select value={newUpdate.platform} onChange={(e) => { setNewUpdate({ ...newUpdate, platform: e.target.value }); setSelectedContact(null); }} className="w-full px-3 py-2 text-sm bg-background border border-border rounded-lg" required>
+            <select value={newUpdate.platform} onChange={(e) => { setNewUpdate({ ...newUpdate, platform: e.target.value }); setSelectedContacts([]); }} className="w-full px-3 py-2 text-sm bg-background border border-border rounded-lg" required>
               <option value="">Select platform...</option>
               <option value="Phone">Phone</option>
               <option value="E-Mail">E-Mail</option>
@@ -288,8 +288,8 @@ export default function ClaimUpdateForm({
             claim={claim}
             updateType={newUpdate.update_type}
             platform={newUpdate.platform}
-            value={selectedContact?.id || ''}
-            onChange={setSelectedContact}
+            value={selectedContacts.map((c) => c.id)}
+            onChange={setSelectedContacts}
           />
         )}
 

@@ -211,10 +211,12 @@ export default function ClaimUpdatesQuickView({ claim, isOpen, onClose }) {
                         (update.update_type === 'Referrer Communication' && claim?.referrer) ||
                         '';
                       if (!partyName) return null;
+                      const partyDetail = update.contacted_party_detail || '';
                       return (
                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-muted text-muted-foreground border border-border">
                           <User className="w-3 h-3" />
                           {partyName}
+                          {partyDetail && <span className="opacity-70 font-normal">· {partyDetail}</span>}
                         </span>
                       );
                     })()}
