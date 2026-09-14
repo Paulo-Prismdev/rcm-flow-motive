@@ -118,7 +118,7 @@ export default function ClaimJourneyTimeline({ claim, updates = [] }) {
       case 'repairs_complete':
         return { isCompleted: currentRank >= 5, isActive: currentRank === 4, date: claim.completion_date || update?.created_date, user: update?.created_by };
       case 'returned':
-        return { isCompleted: currentRank >= 6, isActive: currentRank === 5, date: claim.hand_over_date || update?.created_date, user: update?.created_by };
+        return { isCompleted: currentRank >= 5, isActive: false, date: claim.hand_over_date || update?.created_date, user: update?.created_by };
       default:
         return { isCompleted: false, isActive: false, date: null, user: null };
     }
