@@ -129,17 +129,7 @@ export function generateClaimOverviewPdf(claim, linkedClient) {
 
   // ── Key Dates ──
   sectionHeader("Key Dates");
-  twoColRow("Date Received", fmtDate(claim.date_received));
   twoColRow("Loss Date", fmtDate(claim.loss_date));
-  twoColRow("Estimate Completed", fmtDate(claim.estimate_completed));
-  twoColRow("Authority Received", fmtDate(claim.authority_received));
-  twoColRow("Bodyshop Instructed", fmtDate(claim.bs_instructed));
-  twoColRow("Booking In Date", fmtDate(claim.booking_in_date));
-  twoColRow("On-Site Date", fmtDate(claim.on_site_date));
-  twoColRow("Hand Over Date", fmtDate(claim.hand_over_date));
-  twoColRow("Completion Date", fmtDate(claim.completion_date));
-  twoColRow("Claim Complete Date", fmtDate(claim.claim_complete_date));
-  twoColRow("Cancellation Date", fmtDate(claim.cancellation_date));
 
   // ── Client ──
   sectionHeader("Client Details");
@@ -164,8 +154,8 @@ export function generateClaimOverviewPdf(claim, linkedClient) {
   twoColRow("Policy Number", fmtVal(claim.policy_number));
   twoColRow("Policy Excess", fmtCurrency(claim.policy_excess));
 
-  // ── Repair Contact (Driver) ──
-  sectionHeader("Repair Contact (Driver)");
+  // ── Driver Details ──
+  sectionHeader("Driver Details");
   twoColRow("Name", fmtVal(claim.driver_contact_name));
   twoColRow("Phone", fmtVal(claim.driver_contact_phone));
   twoColRow("Email", fmtVal(claim.driver_contact_email));
@@ -200,21 +190,6 @@ export function generateClaimOverviewPdf(claim, linkedClient) {
     twoColRow("Claim Ref", fmtVal(claim.tp_claim_ref));
     twoColRow("Make / Model", fmtVal(claim.tp_make_model));
   }
-
-  // ── Bodyshop ──
-  sectionHeader("Bodyshop");
-  twoColRow("Bodyshop", fmtVal(claim.bodyshop));
-  twoColRow("Bodyshop Email", fmtVal(claim.bodyshop_email));
-  twoColRow("Repairer Accepted", fmtBool(claim.repairer_accepted));
-  twoColRow("Accepted Date", fmtDate(claim.repairer_accepted_date));
-  twoColRow("Authorised By", fmtVal(claim.authorised_by));
-
-  // ── Referrer ──
-  sectionHeader("Referrer");
-  twoColRow("Referrer", fmtVal(claim.referrer));
-  twoColRow("Referrer Email", fmtVal(claim.referrer_email));
-  twoColRow("Referrer Ref", fmtVal(claim.referrer_ref));
-  twoColRow("File Handler", fmtVal(claim.file_handler));
 
   // ── Footer page numbers ──
   const pageCount = doc.internal.getNumberOfPages();
