@@ -42,14 +42,14 @@ export function generateClaimOverviewPdf(claim, linkedClient) {
   };
 
   const sectionHeader = (title) => {
-    ensureSpace(10);
+    ensureSpace(14);
     doc.setFillColor(...NAVY);
     doc.rect(margin, y, contentW, 7, "F");
     doc.setTextColor(255, 255, 255);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(9);
     doc.text(title.toUpperCase(), margin + 2, y + 5);
-    y += 9;
+    y += 7 + 5;
     doc.setTextColor(30, 41, 59);
   };
 
@@ -215,38 +215,6 @@ export function generateClaimOverviewPdf(claim, linkedClient) {
   twoColRow("Referrer Email", fmtVal(claim.referrer_email));
   twoColRow("Referrer Ref", fmtVal(claim.referrer_ref));
   twoColRow("File Handler", fmtVal(claim.file_handler));
-  twoColRow("% to Referrer", claim.percent_to_referrer != null ? `${claim.percent_to_referrer}%` : "-");
-
-  // ── Estimate ──
-  sectionHeader("Estimate Details");
-  twoColRow("Estimate Email To", fmtVal(claim.send_estimate_email));
-  twoColRow("Audatex Code", fmtVal(claim.audatex_code));
-  twoColRow("Estimate Fee", fmtCurrency(claim.est_fee));
-  twoColRow("Authorising Party", fmtVal(claim.authorising_party));
-  twoColRow("Est. Cost (Net)", fmtCurrency(claim.estimate_cost_net));
-  twoColRow("Auth. Cost (Net)", fmtCurrency(claim.authority_cost_net));
-  twoColRow("Est. Cost (Gross)", fmtCurrency(claim.estimate_cost_gross));
-  twoColRow("Auth. Cost (Gross)", fmtCurrency(claim.authority_cost_gross));
-
-  // ── Financials ──
-  sectionHeader("Financials");
-  twoColRow("Final Repair Cost", fmtCurrency(claim.final_repair_cost));
-  twoColRow("Total Invoice (Repairer)", fmtCurrency(claim.total_invoice_repairer));
-  twoColRow("Referral Fee (Repairer) %", claim.referral_fee_repairer != null ? `${claim.referral_fee_repairer}%` : "-");
-  twoColRow("Referral Fee (Repairer) GBP", fmtCurrency(claim.referral_fee_repairer_gbp));
-  twoColRow("Invoice Amount", fmtCurrency(claim.invoice_amount));
-  twoColRow("Invoice Status", fmtVal(claim.invoice_status));
-  twoColRow("Invoice Sent Date", fmtDate(claim.invoice_sent_date));
-  twoColRow("Invoice Payment Received", fmtDate(claim.invoice_payment_received));
-
-  // ── Excess Contribution ──
-  if (claim.excess_contribution_method && claim.excess_contribution_method !== "None") {
-    sectionHeader("Excess Contribution");
-    twoColRow("Amount", fmtCurrency(claim.excess_contribution_amount));
-    twoColRow("Method", fmtVal(claim.excess_contribution_method));
-    twoColRow("Paid", fmtBool(claim.excess_contribution_paid));
-    twoColRow("Date Paid", fmtDate(claim.excess_contribution_paid_date));
-  }
 
   // ── Footer page numbers ──
   const pageCount = doc.internal.getNumberOfPages();
