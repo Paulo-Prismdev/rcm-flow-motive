@@ -177,6 +177,7 @@ export default function ClaimDetailMobileHeader({
             <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onAction('email'); }}><Mail className="w-4 h-4 mr-2" />Send Email</DropdownMenuItem>
             <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onAction('tasks'); }}><ListTodo className="w-4 h-4 mr-2" />Manage Tasks</DropdownMenuItem>
             {claim.instruction_pdf_url && <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onAction('download_pdf'); }}><Download className="w-4 h-4 mr-2" />Download Instruction PDF</DropdownMenuItem>}
+            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onAction('download_overview'); }}><FileText className="w-4 h-4 mr-2" />Download File Overview</DropdownMenuItem>
             <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onAction('estimate'); }}><Calculator className="w-4 h-4 mr-2" />Request Estimate</DropdownMenuItem>
             <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onAction('parts'); }}><Package className="w-4 h-4 mr-2" />Log Parts Issue</DropdownMenuItem>
             <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onAction('backorders'); }}><Package className="w-4 h-4 mr-2" />Backordered Parts</DropdownMenuItem>

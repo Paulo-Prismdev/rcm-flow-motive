@@ -91,6 +91,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import ClaimDetailMobileHeader from './ClaimDetailMobileHeader';
 import ClaimJourneyTimeline from './ClaimJourneyTimeline';
+import { generateClaimOverviewPdf } from './claimOverviewPdf';
 import ClaimStatusEditForm from './ClaimStatusEditForm';
 import { isUpdateTrackingClosed, computeUpdateStatusFlag, computeClientCommStatusFlag } from '../shared/claimStatusUpdate';
 
@@ -781,6 +782,10 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
     } finally {
       setIsSavingRegenToDocs(false);
     }
+  };
+
+  const handleDownloadOverviewPdf = () => {
+    generateClaimOverviewPdf(claim, linkedClient);
   };
 
   const handleGeneratePurchaseOrder = async () => {
@@ -1642,6 +1647,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
               else if (val === 'email') setIsEmailModalOpen(true);
               else if (val === 'tasks') setIsTasksModalOpen(true);
               else if (val === 'download_pdf') window.open(claim.instruction_pdf_url, '_blank');
+              else if (val === 'download_overview') handleDownloadOverviewPdf();
               else if (val === 'estimate') setIsEstimateModalOpen(true);
               else if (val === 'parts') setIsPartsModalOpen(true);
               else if (val === 'backorders') setIsBackorderedPartsModalOpen(true);
@@ -1737,6 +1743,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                               <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsEmailModalOpen(true); }}><Mail className="w-4 h-4 mr-2" />Send Email</DropdownMenuItem>
                               <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsTasksModalOpen(true); }}><ListTodo className="w-4 h-4 mr-2" />Manage Tasks</DropdownMenuItem>
                               {claim.instruction_pdf_url && <DropdownMenuItem onSelect={(e) => { e.preventDefault(); window.open(claim.instruction_pdf_url, '_blank'); }}><Download className="w-4 h-4 mr-2" />Download Instruction PDF</DropdownMenuItem>}
+                              <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleDownloadOverviewPdf(); }}><FileText className="w-4 h-4 mr-2" />Download File Overview</DropdownMenuItem>
                               <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsEstimateModalOpen(true); }}><Calculator className="w-4 h-4 mr-2" />Request Estimate</DropdownMenuItem>
                               <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsPartsModalOpen(true); }}><Package className="w-4 h-4 mr-2" />Log Parts Issue</DropdownMenuItem>
                               <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsBackorderedPartsModalOpen(true); }}><Package className="w-4 h-4 mr-2" />Backordered Parts</DropdownMenuItem>
