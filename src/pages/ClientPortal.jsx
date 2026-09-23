@@ -347,7 +347,7 @@ export default function ClientPortal() {
                               {claim.reg ? formatUKRegistration(claim.reg) : '—'}
                             </span>
                             <div className="flex items-center gap-1 flex-shrink-0">
-                              <ClaimStatusBadges claim={claim} />
+                              <ClaimStatusBadges claim={claim} journeyOnly />
                               <ChevronRight className="w-4 h-4 text-gray-400 ml-1" />
                             </div>
                           </div>
@@ -381,7 +381,7 @@ export default function ClientPortal() {
                               {claim.reg ? formatUKRegistration(claim.reg) : '—'}
                             </span>
                             <div className="flex items-center gap-1 flex-shrink-0">
-                              <ClaimStatusBadges claim={claim} />
+                              <ClaimStatusBadges claim={claim} journeyOnly />
                               <ChevronRight className="w-4 h-4 text-gray-400 ml-1" />
                             </div>
                           </div>
@@ -452,7 +452,7 @@ export default function ClientPortal() {
                             ))}
                             <td className="sticky right-0 z-10 px-3 py-2.5 whitespace-nowrap bg-white dark:bg-gray-900 group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50">
                               <div className="flex items-center gap-1.5 justify-end flex-wrap">
-                                <ClaimStatusBadges claim={claim} />
+                                <ClaimStatusBadges claim={claim} journeyOnly />
                               </div>
                             </td>
                           </tr>
@@ -492,7 +492,7 @@ export default function ClientPortal() {
                             ))}
                             <td className="sticky right-0 z-10 px-3 py-2.5 whitespace-nowrap bg-white dark:bg-gray-900 group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50">
                               <div className="flex items-center gap-1.5 justify-end flex-wrap">
-                                <ClaimStatusBadges claim={claim} />
+                                <ClaimStatusBadges claim={claim} journeyOnly />
                               </div>
                             </td>
                           </tr>
