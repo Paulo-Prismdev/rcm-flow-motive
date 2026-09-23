@@ -13,7 +13,7 @@ import {
 import { format } from 'date-fns';
 import StatusBadge from '../components/shared/StatusBadge';
 import { formatUKRegistration } from '../components/shared/formatRegistration';
-import { getGroupKey, buildGroupStatuses, getStatusDot as getSharedStatusDot } from '../components/shared/claimGrouping';
+import { getJourneyGroupKey, JOURNEY_GROUP_STATUSES, getJourneyStatusDot } from '../components/shared/claimGrouping';
 import ClaimStatusBadges from '../components/shared/ClaimStatusBadges';
 import ReferrerLayout from '../components/referrer/ReferrerLayout';
 import ReferrerClaimDetail from '../components/referrer/ReferrerClaimDetail';
@@ -88,13 +88,7 @@ export default function ReferrerPortal() {
     staleTime: 0,
   });
 
-  const { data: customStatuses = [] } = useQuery({
-    queryKey: ['ClaimStatusConfig'],
-    queryFn: () => base44.entities.ClaimStatusConfig.list('sort_order'),
-    staleTime: 5 * 60 * 1000,
-  });
-
-  const availableStatuses = useMemo(() => buildGroupStatuses(customStatuses), [customStatuses]);
+  const availableStatuses = useMemo(() => JOURNEY_GROUP_STATUSES, []);
 
   useEffect(() => {
     if (availableStatuses.length > 0) {
@@ -133,7 +127,7 @@ export default function ReferrerPortal() {
       c.insurer?.toLowerCase().includes(q) ||
       c.business_division?.toLowerCase().includes(q) ||
       c.driver_contact_name?.toLowerCase().includes(q);
-    const matchesStatus = statusFilter === 'all' || getGroupKey(c) === statusFilter;
+    const matchesStatus = statusFilter === 'all' || getJourneyGroupKey(c) === statusFilter;
     const matchesInsurer = !insurerFilter || c.insurer === insurerFilter;
     const matchesClaimType = !claimTypeFilter || c.claim_type === claimTypeFilter;
     const matchesBusinessDivision = !businessDivisionFilter || c.business_division === businessDivisionFilter;
@@ -189,7 +183,7 @@ export default function ReferrerPortal() {
 
   // Claims list view
 
-  const getStatusDot = (statusName) => getSharedStatusDot(statusName, customStatuses);
+  const getStatusDot = (statusName) => getJourneyStatusDot(statusName);
 
   const toggleGroup = (status) => setCollapsedGroups(p => ({ ...p, [status]: !p[status] }));
 
@@ -361,7 +355,7 @@ export default function ReferrerPortal() {
                   {/* Mobile card view with grouping */}
                   <div className="lg:hidden">
                     {availableStatuses.map(statusGroup => {
-                      const claimsInGroup = filteredClaims.filter(c => getGroupKey(c) === statusGroup);
+                      const claimsInGroup = filteredClaims.filter(c => getJourneyGroupKey(c) === statusGroup);
                       if (claimsInGroup.length === 0) return null;
                       const isCollapsed = collapsedGroups[statusGroup];
                       const dotColor = getStatusDot(statusGroup);
@@ -410,7 +404,7 @@ export default function ReferrerPortal() {
                     {(() => {
                       const known = new Set(availableStatuses);
                       const ungrouped = filteredClaims.filter(c => {
-                        const st = getGroupKey(c);
+                        const st = getJourneyGroupKey(c);
                         return !known.has(st);
                       });
                       if (ungrouped.length === 0) return null;
@@ -461,7 +455,7 @@ export default function ReferrerPortal() {
                     </thead>
                     <tbody>
                       {availableStatuses.map(statusGroup => {
-                        const claimsInGroup = filteredClaims.filter(c => getGroupKey(c) === statusGroup);
+                        const claimsInGroup = filteredClaims.filter(c => getJourneyGroupKey(c) === statusGroup);
                         if (claimsInGroup.length === 0) return null;
                         const isCollapsed = collapsedGroups[statusGroup];
                         const dotColor = getStatusDot(statusGroup);
@@ -514,7 +508,7 @@ export default function ReferrerPortal() {
                       })}
                       {(() => {
                         const known = new Set(availableStatuses);
-                        const ungrouped = filteredClaims.filter(c => !known.has(getGroupKey(c)));
+                        const ungrouped = filteredClaims.filter(c => !known.has(getJourneyGroupKey(c)));
                         if (ungrouped.length === 0) return null;
                         const isCollapsed = collapsedGroups['__other__'];
                         const colSpan = displayFields.length + 2;

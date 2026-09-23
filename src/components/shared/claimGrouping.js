@@ -3,7 +3,7 @@
 // same way: Secondary status drives the group, with dedicated "On Site" and
 // "Cancelled" groups, and exception journey statuses shown as badges.
 
-import { SECONDARY_STATUSES, getJourneyColor, isExceptionJourney } from './claimStatusV2';
+import { SECONDARY_STATUSES, JOURNEY_STATUSES, getJourneyColor, isExceptionJourney } from './claimStatusV2';
 
 const STATUS_COLORS = {
   blue: '#3b82f6', green: '#22c55e', orange: '#f97316',
@@ -76,4 +76,21 @@ export function getStatusDot(statusName, statusConfigs) {
   if (statusName === 'Cancelled') return STATUS_COLORS.red;
   const cfg = statusConfigs?.find((s) => s.status_name === statusName);
   return STATUS_COLORS[cfg?.color] || STATUS_COLORS[getJourneyColor(statusName)] || '#6b7280';
+}
+
+// ── Journey-status grouping (simplified for external portals) ──
+// External users (Referrer / Client) only need to see which Journey Status a
+// claim is in — no secondary-status or on-site special-casing.
+
+// Ordered list of journey status names (from JOURNEY_STATUSES).
+export const JOURNEY_GROUP_STATUSES = JOURNEY_STATUSES.map((s) => s.name);
+
+// Group key = journey status only, with a sensible fallback.
+export function getJourneyGroupKey(c) {
+  return c.journey_status || c.job_status || 'New';
+}
+
+// Dot colour for a journey-status group header.
+export function getJourneyStatusDot(statusName) {
+  return STATUS_COLORS[getJourneyColor(statusName)] || '#6b7280';
 }
