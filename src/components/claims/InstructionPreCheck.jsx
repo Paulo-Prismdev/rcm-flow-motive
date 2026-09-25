@@ -238,17 +238,6 @@ export default function InstructionPreCheck({ claim, onUpdate }) {
         <span className="text-[10px] text-muted-foreground">— fix any gaps before allocating</span>
       </div>
 
-      {/* Instruction type selector */}
-      <div className="flex items-center gap-2 px-1 pb-2 mb-1">
-        <label className="text-[11px] font-semibold text-muted-foreground whitespace-nowrap">Instruction Type:</label>
-        <select
-          value={instructionType}
-          onChange={(e) => handleTypeChange(e.target.value)}
-          className="flex-1 h-7 text-xs font-medium rounded-md border border-border bg-muted/50 px-2 text-foreground focus:outline-none focus:ring-1 focus:ring-accent/40">
-          {INSTRUCTION_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
-        </select>
-      </div>
-
       {/* Instruction Contact selector */}
       <Group title="Instruction Contact">
         <div className="flex gap-1.5 px-1 pb-1.5">
