@@ -19,7 +19,7 @@ function deriveInstructionType(claim) {
   if (claim.claim_type === 'Credit Repair' || ab === 'Credit Repair') return 'credit_repair';
   if (claim.claim_type === 'Paying Privately' || ab === 'Uninsured') return 'private';
   if (claim.claim_type === '3rd Party Paying Privately' || ab === 'Third Party') return 'third_party';
-  if (ab === 'Third Party Insurer') return 'tp_insurer';
+  if (claim.claim_type === '3rd Party Insurer Direct' || ab === 'Third Party Insurer') return 'tp_insurer';
   return 'standard';
 }
 
@@ -192,6 +192,18 @@ function InsuranceSection({ instructionType, claim, onUpdate }) {
 export default function InstructionPreCheck({ claim, onUpdate }) {
   const [instructionType, setInstructionType] = useState(deriveInstructionType(claim));
   const [contactSource, setContactSource] = useState((claim.last_contact_source || 'Client').toLowerCase());
+
+  // Sync authorised_by with the derived instruction type on mount so the
+  // PDF generator knows whose insurance details to show, even if the user
+  // never touches the instruction-type dropdown.
+  useEffect(() => {
+    const abMap = { standard: 'Client Insurer', tp_insurer: 'Third Party Insurer', third_party: 'Third Party', private: 'Uninsured', credit_repair: 'Credit Repair', orkin: 'Client Insurer' };
+    const expectedAb = abMap[instructionType];
+    if (expectedAb && claim.authorised_by !== expectedAb) {
+      onUpdate({ authorised_by: expectedAb });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const clientAddress = [claim.client_address_line_1, claim.client_address_line_2, claim.client_town, claim.client_county, claim.client_postcode].filter(Boolean).join(', ');
 
