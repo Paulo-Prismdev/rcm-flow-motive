@@ -307,7 +307,7 @@ Deno.serve(async (req) => {
     // Upload PDF
     const pdfBytes = doc.output('arraybuffer');
     const pdfBlob = new Blob([pdfBytes], { type: 'application/pdf' });
-    const filename = `${claim.job_number || 'claim'}-declaration-of-need-${new Date().toISOString().replace(/[:.]/g, '-')}.pdf`;
+    const filename = `${(claim.reg || claim.job_number || 'claim').toUpperCase()} - Declaration of Need.pdf`;
     const pdfFile = new File([pdfBlob], filename, { type: 'application/pdf' });
 
     const uploadResult = await base44.asServiceRole.integrations.Core.UploadFile({ file: pdfFile });
