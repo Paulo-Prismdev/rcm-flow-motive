@@ -12,7 +12,16 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import ConfirmDialog from "@/components/shared/ConfirmDialog";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
 
 const TIER_OPTIONS = ["TIER 1", "TIER 2", "Previously on Network", ""];
 const MAP_GROUP_OPTIONS = ["Solution", "QAC", ""];
@@ -331,15 +340,26 @@ export default function RepairerDetailDrawer({ bodyshopId, onClose }) {
         ) : null}
       </SheetContent>
 
-      <ConfirmDialog
-        isOpen={showDeleteConfirm}
-        onClose={() => setShowDeleteConfirm(false)}
-        onConfirm={() => deleteMutation.mutate()}
-        title="Delete Repairer"
-        message={`Are you sure you want to permanently delete "${bodyshop?.name}"? This cannot be undone.`}
-        confirmText={deleteMutation.isPending ? "Deleting..." : "Delete"}
-        variant="danger"
-      />
+      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <AlertDialogContent className="max-w-sm">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Repairer</AlertDialogTitle>
+            <AlertDialogDescription>
+              {`Are you sure you want to permanently delete "${bodyshop?.name}"? This cannot be undone.`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteMutation.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => deleteMutation.mutate()}
+              disabled={deleteMutation.isPending}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              {deleteMutation.isPending ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Sheet>
   );
 }
