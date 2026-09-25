@@ -13,7 +13,7 @@ export default function ConfirmDialog({ isOpen, onClose, onConfirm, title, messa
   };
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={onClose}>
+    <div className="fixed inset-0 z-[10050] flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={onClose}>
       <div 
         className="glass-elevated w-full max-w-md mx-4 p-6"
         onClick={(e) => e.stopPropagation()}
