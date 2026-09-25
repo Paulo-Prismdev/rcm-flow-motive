@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Search, Plus, Trash2, Phone, Mail, Building2, Pencil, X } from "lucide-react";
+import { Search, Plus, Trash2, Phone, Mail, Building2, Pencil, X, Star } from "lucide-react";
 import { createPortal } from "react-dom";
 import AddCreditRepairCompanyModal from "../shared/AddCreditRepairCompanyModal";
 
@@ -23,6 +23,28 @@ function CreditRepairDetailModal({ company, onClose, onUpdated }) {
   });
 
   const set = (field, value) => setFormData(prev => ({ ...prev, [field]: value }));
+
+  const addContact = () => {
+    setFormData(prev => ({
+      ...prev,
+      contacts: [...(prev.contacts || []), { name: '', position: '', email: '', phone: '', is_primary: false }],
+    }));
+  };
+  const updateContact = (idx, field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      contacts: (prev.contacts || []).map((c, i) => i === idx ? { ...c, [field]: value } : c),
+    }));
+  };
+  const removeContact = (idx) => {
+    setFormData(prev => ({ ...prev, contacts: (prev.contacts || []).filter((_, i) => i !== idx) }));
+  };
+  const setPrimaryContact = (idx) => {
+    setFormData(prev => ({
+      ...prev,
+      contacts: (prev.contacts || []).map((c, i) => ({ ...c, is_primary: i === idx })),
+    }));
+  };
 
   return createPortal(
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[10002] p-4" onClick={onClose}>
@@ -43,19 +65,66 @@ function CreditRepairDetailModal({ company, onClose, onUpdated }) {
               <label className="block text-sm text-muted-foreground mb-1">Company Name *</label>
               <Input value={formData.name || ''} onChange={(e) => set('name', e.target.value)} className="neomorph-inset" required />
             </div>
-            <div>
-              <label className="block text-sm text-muted-foreground mb-1">Contact Name</label>
-              <Input value={formData.contact_name || ''} onChange={(e) => set('contact_name', e.target.value)} className="neomorph-inset" />
+            <div className="border-t pt-4 space-y-3">
+              <h3 className="text-sm font-semibold">Main Contact</h3>
+              <div>
+                <label className="block text-sm text-muted-foreground mb-1">Contact Name</label>
+                <Input value={formData.contact_name || ''} onChange={(e) => set('contact_name', e.target.value)} className="neomorph-inset" />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm text-muted-foreground mb-1">Phone</label>
+                  <Input value={formData.phone || ''} onChange={(e) => set('phone', e.target.value)} className="neomorph-inset" />
+                </div>
+                <div>
+                  <label className="block text-sm text-muted-foreground mb-1">Email</label>
+                  <Input type="email" value={formData.email || ''} onChange={(e) => set('email', e.target.value)} className="neomorph-inset" />
+                </div>
+              </div>
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-sm text-muted-foreground mb-1">Phone</label>
-                <Input value={formData.phone || ''} onChange={(e) => set('phone', e.target.value)} className="neomorph-inset" />
+
+            <div className="border-t pt-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-semibold">Additional Contacts</h3>
+                <Button type="button" variant="outline" size="sm" onClick={addContact}>
+                  <Plus className="w-3.5 h-3.5 mr-1" />
+                  Add Contact
+                </Button>
               </div>
-              <div>
-                <label className="block text-sm text-muted-foreground mb-1">Email</label>
-                <Input type="email" value={formData.email || ''} onChange={(e) => set('email', e.target.value)} className="neomorph-inset" />
-              </div>
+              {(formData.contacts || []).length === 0 ? (
+                <p className="text-xs text-muted-foreground">No additional contacts added.</p>
+              ) : (
+                <div className="space-y-3">
+                  {(formData.contacts || []).map((contact, idx) => (
+                    <div key={idx} className="rounded-lg border border-border p-3 space-y-2 bg-muted/50">
+                      <div className="flex items-center justify-between">
+                        <button
+                          type="button"
+                          onClick={() => setPrimaryContact(idx)}
+                          className={`flex items-center gap-1 text-xs font-medium ${contact.is_primary ? 'text-amber-600' : 'text-muted-foreground hover:text-amber-500'}`}
+                          title={contact.is_primary ? 'Primary contact' : 'Set as primary'}
+                        >
+                          <Star className={`w-3.5 h-3.5 ${contact.is_primary ? 'fill-amber-500 text-amber-500' : ''}`} />
+                          {contact.is_primary ? 'Primary' : 'Set primary'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => removeContact(idx)}
+                          className="p-1 text-muted-foreground hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <Input placeholder="Name" value={contact.name || ''} onChange={(e) => updateContact(idx, 'name', e.target.value)} className="neomorph-inset" />
+                        <Input placeholder="Position / Role" value={contact.position || ''} onChange={(e) => updateContact(idx, 'position', e.target.value)} className="neomorph-inset" />
+                        <Input placeholder="Email" type="email" value={contact.email || ''} onChange={(e) => updateContact(idx, 'email', e.target.value)} className="neomorph-inset" />
+                        <Input placeholder="Phone" value={contact.phone || ''} onChange={(e) => updateContact(idx, 'phone', e.target.value)} className="neomorph-inset" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
             <div>
               <label className="block text-sm text-muted-foreground mb-1">Address</label>
@@ -114,6 +183,30 @@ function CreditRepairDetailModal({ company, onClose, onUpdated }) {
               <div>
                 <p className="text-xs text-muted-foreground">Notes</p>
                 <p className="text-sm font-medium whitespace-pre-wrap">{company.notes}</p>
+              </div>
+            )}
+            {company.contacts?.length > 0 && (
+              <div className="border-t pt-3">
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Additional Contacts</p>
+                <div className="space-y-2">
+                  {company.contacts.map((c, i) => (
+                    <div key={i} className="rounded-lg border border-border p-2.5 bg-muted/30">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium">{c.name || '—'}</span>
+                        {c.position && <span className="text-xs text-muted-foreground">· {c.position}</span>}
+                        {c.is_primary && (
+                          <span className="inline-flex items-center gap-0.5 text-xs text-amber-600 font-medium">
+                            <Star className="w-3 h-3 fill-amber-500 text-amber-500" /> Primary
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex flex-wrap gap-3 mt-1 text-xs text-muted-foreground">
+                        {c.phone && <span className="flex items-center gap-1"><Phone className="w-3 h-3" /> {c.phone}</span>}
+                        {c.email && <span className="flex items-center gap-1"><Mail className="w-3 h-3" /> {c.email}</span>}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </div>

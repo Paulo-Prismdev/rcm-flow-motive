@@ -16,6 +16,33 @@
     "email": {
       "type": "string"
     },
+    "contacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "position": {
+            "type": "string",
+            "description": "Job title / role"
+          },
+          "email": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "is_primary": {
+            "type": "boolean",
+            "default": false
+          }
+        }
+      },
+      "description": "Additional contacts at this company",
+      "default": []
+    },
     "address_line_1": {
       "type": "string",
       "description": "Street address"
