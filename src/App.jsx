@@ -11,6 +11,7 @@ import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import LoadingScreen from '@/components/LoadingScreen';
 import { lazy, Suspense } from 'react';
+import ErrorBoundary from '@/components/ErrorBoundary';
 const PublicPartsRequest = lazy(() => import('@/pages/PublicPartsRequest'));
 const BackorderForm = lazy(() => import('@/pages/BackorderForm'));
 const ClientClaimForm = lazy(() => import('@/pages/ClientClaimForm'));
@@ -173,10 +174,12 @@ function App() {
   return (
     <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>
-        <Router>
-          <NavigationTracker />
-          <AuthenticatedApp />
-        </Router>
+        <ErrorBoundary>
+          <Router>
+            <NavigationTracker />
+            <AuthenticatedApp />
+          </Router>
+        </ErrorBoundary>
         <Toaster />
         <VisualEditAgent />
       </QueryClientProvider>
