@@ -94,13 +94,15 @@ export default function ClaimPartiesForm({ claim, onSave, onCancel, mode }) {
 
   const handleClientSelect = (client) => {
     if (!client) { set('client_id', ''); set('client_name', ''); return; }
+    const contacts = client.contacts || [];
+    const primaryContact = contacts.find(c => c.is_primary) || contacts[0] || null;
     setData(prev => ({
       ...prev,
       // Overwrite client fields from the database record — never fall back to old values
       client_id: client.id,
       client_name: client.name,
-      client_phone: client.phone || '',
-      client_email: client.email || '',
+      client_phone: client.phone || primaryContact?.phone || client.company_contact_phone || '',
+      client_email: client.email || primaryContact?.email || client.company_contact_email || '',
       client_address_line_1: client.address_line_1 || '',
       client_address_line_2: client.address_line_2 || '',
       client_town: client.town || '',

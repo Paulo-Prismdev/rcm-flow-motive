@@ -17,15 +17,42 @@
     },
     "company_contact_name": {
       "type": "string",
-      "description": "Primary contact name (Company clients only)"
+      "description": "Primary contact name (Company clients only) \u2014 legacy field, superseded by contacts array"
     },
     "company_contact_phone": {
       "type": "string",
-      "description": "Primary contact phone (Company clients only)"
+      "description": "Primary contact phone (Company clients only) \u2014 legacy field, superseded by contacts array"
     },
     "company_contact_email": {
       "type": "string",
-      "description": "Primary contact email (Company clients only)"
+      "description": "Primary contact email (Company clients only) \u2014 legacy field, superseded by contacts array"
+    },
+    "contacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "position": {
+            "type": "string",
+            "description": "Job title / role"
+          },
+          "email": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "is_primary": {
+            "type": "boolean",
+            "default": false
+          }
+        }
+      },
+      "description": "Additional contacts at this client (Company clients)",
+      "default": []
     },
     "phone": {
       "type": "string"

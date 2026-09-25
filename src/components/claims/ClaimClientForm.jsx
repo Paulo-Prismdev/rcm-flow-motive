@@ -19,10 +19,12 @@ export default function ClaimClientForm({ claim, onSave, onCancel }) {
           client = results?.[0] || null;
         }
         if (client) {
+          const contacts = client.contacts || [];
+          const primaryContact = contacts.find(c => c.is_primary) || contacts[0] || null;
           setFormData(prev => ({
             ...prev,
-            client_phone: prev.client_phone || client.company_contact_phone || client.phone || '',
-            client_email: prev.client_email || client.company_contact_email || client.email || '',
+            client_phone: prev.client_phone || primaryContact?.phone || client.company_contact_phone || client.phone || '',
+            client_email: prev.client_email || primaryContact?.email || client.company_contact_email || client.email || '',
           }));
         }
       };
@@ -48,11 +50,13 @@ export default function ClaimClientForm({ claim, onSave, onCancel }) {
     // from the update until geocoding logic is explicitly provided.
     // The `client_id` field has been added as requested.
     // For Company clients, phone/email may be stored on company_contact_* fields
+    const contacts = client.contacts || [];
+    const primaryContact = contacts.find(c => c.is_primary) || contacts[0] || null;
     const newClientData = {
       client_name: client.name,
       client_id: client.id,
-      client_phone: client.phone || client.company_contact_phone || '',
-      client_email: client.email || client.company_contact_email || '',
+      client_phone: client.phone || primaryContact?.phone || client.company_contact_phone || '',
+      client_email: client.email || primaryContact?.email || client.company_contact_email || '',
       client_address_line_1: client.address_line_1 || '',
       client_address_line_2: client.address_line_2 || '',
       client_town: client.town || '',

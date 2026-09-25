@@ -238,8 +238,16 @@ export default function ReferrerClaimDetail({ claim, onClose, initialSection }) 
             <div className="flex items-center gap-3 mb-4"><User className="w-5 h-5 text-gold" /><h3 className="font-bold">Client Details</h3></div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
               <DetailRow label="Client Name" value={claim.client_name} missing={m('client_name')} />
-              <DetailRow label="Client Phone" value={claim.client_phone || linkedClient?.company_contact_phone || linkedClient?.phone} missing={!claim.client_phone && !linkedClient?.company_contact_phone && !linkedClient?.phone} />
-              <DetailRow label="Client Email" value={claim.client_email || linkedClient?.company_contact_email || linkedClient?.email} missing={!claim.client_email && !linkedClient?.company_contact_email && !linkedClient?.email} />
+              {(() => {
+                const contacts = linkedClient?.contacts || [];
+                const primary = contacts.find(c => c.is_primary) || contacts[0] || null;
+                const cPhone = primary?.phone || linkedClient?.company_contact_phone || linkedClient?.phone;
+                const cEmail = primary?.email || linkedClient?.company_contact_email || linkedClient?.email;
+                return <>
+                  <DetailRow label="Client Phone" value={claim.client_phone || cPhone} missing={!claim.client_phone && !cPhone} />
+                  <DetailRow label="Client Email" value={claim.client_email || cEmail} missing={!claim.client_email && !cEmail} />
+                </>;
+              })()}
               <DetailRow label="VAT Status" value={claim.client_vat_status} />
               <DetailRow label="Business Division" value={claim.business_division} />
               {/* Client Ref — inline editable */}

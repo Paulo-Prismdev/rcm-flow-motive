@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { X, User, Building2 } from "lucide-react";
+import { X, User, Building2, Plus, Trash2, Star } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useMutation } from '@tanstack/react-query';
+import { useToast } from "@/components/ui/use-toast";
 import AddressLookupInput from './AddressLookupInput';
 
 const EMPTY_FORM = {
@@ -12,9 +14,7 @@ const EMPTY_FORM = {
   client_type: 'Individual',
   phone: '',
   email: '',
-  company_contact_name: '',
-  company_contact_phone: '',
-  company_contact_email: '',
+  contacts: [],
   address_line_1: '',
   address_line_2: '',
   town: '',
@@ -28,6 +28,7 @@ const EMPTY_FORM = {
 
 export default function AddClientModal({ isOpen, onClose, onSuccess }) {
   const [formData, setFormData] = useState(EMPTY_FORM);
+  const { toast } = useToast();
 
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.Client.create(data),
@@ -36,9 +37,11 @@ export default function AddClientModal({ isOpen, onClose, onSuccess }) {
       handleClose();
     },
     onError: (error) => {
-      const msg = error?.response?.data?.message || error?.response?.data?.error || error?.message || 'Failed to create client';
-      alert(`Failed to create client: ${msg}`);
-      console.error('Client creation error:', error);
+      toast({
+        title: "Failed to create client",
+        description: error?.message || "Please try again.",
+        variant: "destructive",
+      });
     },
   });
 
@@ -62,8 +65,31 @@ export default function AddClientModal({ isOpen, onClose, onSuccess }) {
     }));
   };
 
+  const addContact = () => {
+    setFormData(prev => ({
+      ...prev,
+      contacts: [...prev.contacts, { name: '', position: '', email: '', phone: '', is_primary: prev.contacts.length === 0 }],
+    }));
+  };
+  const updateContact = (idx, field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      contacts: prev.contacts.map((c, i) => i === idx ? { ...c, [field]: value } : c),
+    }));
+  };
+  const removeContact = (idx) => {
+    setFormData(prev => ({ ...prev, contacts: prev.contacts.filter((_, i) => i !== idx) }));
+  };
+  const setPrimaryContact = (idx) => {
+    setFormData(prev => ({
+      ...prev,
+      contacts: prev.contacts.map((c, i) => ({ ...c, is_primary: i === idx })),
+    }));
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
+    e.stopPropagation();
     createMutation.mutate(formData);
   };
 
@@ -71,8 +97,8 @@ export default function AddClientModal({ isOpen, onClose, onSuccess }) {
 
   const isCompany = formData.client_type === 'Company';
 
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+  return createPortal(
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[10002] p-4 pointer-events-auto" data-custom-portal-modal="true">
       <div className="bg-card border border-border rounded-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-xl">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-bold">Add New Client</h2>
@@ -128,27 +154,6 @@ export default function AddClientModal({ isOpen, onClose, onSuccess }) {
             </div>
           </div>
 
-          {/* Company Contact Fields — only visible for Company type */}
-          {isCompany && (
-            <div className="border border-border rounded-lg p-4 space-y-3 bg-muted/30">
-              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Primary Contact Person</p>
-              <div>
-                <label className="block text-sm text-muted-foreground mb-1">Contact Name</label>
-                <Input value={formData.company_contact_name} onChange={(e) => set('company_contact_name', e.target.value)} className="neomorph-inset" />
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-sm text-muted-foreground mb-1">Contact Phone</label>
-                  <Input value={formData.company_contact_phone} onChange={(e) => set('company_contact_phone', e.target.value)} className="neomorph-inset" />
-                </div>
-                <div>
-                  <label className="block text-sm text-muted-foreground mb-1">Contact Email</label>
-                  <Input type="email" value={formData.company_contact_email} onChange={(e) => set('company_contact_email', e.target.value)} className="neomorph-inset" />
-                </div>
-              </div>
-            </div>
-          )}
-
           <div>
             <label className="block text-sm text-muted-foreground mb-1">Address Lookup</label>
             <AddressLookupInput value={formData.address_line_1} onChange={handleAddressChange} placeholder="Start typing address or postcode..." />
@@ -186,6 +191,53 @@ export default function AddClientModal({ isOpen, onClose, onSuccess }) {
             </select>
           </div>
 
+          {/* Contacts — only for Company type */}
+          {isCompany && (
+            <div className="border-t pt-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-semibold">Contacts</h3>
+                <Button type="button" variant="outline" size="sm" onClick={addContact}>
+                  <Plus className="w-3.5 h-3.5 mr-1" />
+                  Add Contact
+                </Button>
+              </div>
+              {formData.contacts.length === 0 ? (
+                <p className="text-xs text-muted-foreground">No contacts added yet. Add a contact for this company.</p>
+              ) : (
+                <div className="space-y-3">
+                  {formData.contacts.map((contact, idx) => (
+                    <div key={idx} className="rounded-lg border border-border p-3 space-y-2 bg-muted/50">
+                      <div className="flex items-center justify-between">
+                        <button
+                          type="button"
+                          onClick={() => setPrimaryContact(idx)}
+                          className={`flex items-center gap-1 text-xs font-medium ${contact.is_primary ? 'text-amber-600' : 'text-muted-foreground hover:text-amber-500'}`}
+                          title={contact.is_primary ? 'Primary contact' : 'Set as primary'}
+                        >
+                          <Star className={`w-3.5 h-3.5 ${contact.is_primary ? 'fill-amber-500 text-amber-500' : ''}`} />
+                          {contact.is_primary ? 'Primary' : 'Set primary'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => removeContact(idx)}
+                          className="p-1 text-muted-foreground hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <Input placeholder="Name" value={contact.name} onChange={(e) => updateContact(idx, 'name', e.target.value)} className="neomorph-inset" />
+                        <Input placeholder="Position / Role" value={contact.position} onChange={(e) => updateContact(idx, 'position', e.target.value)} className="neomorph-inset" />
+                        <Input placeholder="Email" type="email" value={contact.email} onChange={(e) => updateContact(idx, 'email', e.target.value)} className="neomorph-inset" />
+                        <Input placeholder="Phone" value={contact.phone} onChange={(e) => updateContact(idx, 'phone', e.target.value)} className="neomorph-inset" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
           <div>
             <label className="block text-sm text-muted-foreground mb-1">Notes</label>
             <Textarea value={formData.notes} onChange={(e) => set('notes', e.target.value)} className="neomorph-inset" rows={3} />
@@ -199,6 +251,7 @@ export default function AddClientModal({ isOpen, onClose, onSuccess }) {
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

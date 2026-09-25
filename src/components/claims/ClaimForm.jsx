@@ -301,10 +301,12 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
     if (fullAddress) {
       try { const c = await geocodeAddress(fullAddress); if (c) { geocodedLat = c.lat; geocodedLng = c.lng; } } catch {}
     }
+    const contacts = client.contacts || [];
+    const primaryContact = contacts.find(c => c.is_primary) || contacts[0] || null;
     setFormData(prev => ({
       ...prev, client_name: client.name, client_id: client.id,
-      client_phone: client.phone || client.company_contact_phone || '',
-      client_email: client.email || client.company_contact_email || '',
+      client_phone: client.phone || primaryContact?.phone || client.company_contact_phone || '',
+      client_email: client.email || primaryContact?.email || client.company_contact_email || '',
       client_address_line_1: client.address_line_1 || '',
       client_address_line_2: client.address_line_2 || '', client_town: client.town || '',
       client_county: client.county || '', client_postcode: client.postcode || '',

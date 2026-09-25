@@ -46,16 +46,18 @@ Deno.serve(async (req) => {
     ].filter(Boolean);
     const clientAddress = addressParts.join(', ');
 
-    // Prefer company contact details from linked Client (Company type), fall back to claim
+    // Prefer primary contact details from linked Client (Company type), fall back to claim
     const isCompanyClient = linkedClient?.client_type === 'Company';
+    const clientContacts = linkedClient?.contacts || [];
+    const primaryContact = clientContacts.find(c => c.is_primary) || clientContacts[0] || null;
     const contactName = isCompanyClient
-      ? (linkedClient.company_contact_name || claim.driver_name || claim.client_name || '')
+      ? (primaryContact?.name || linkedClient?.company_contact_name || claim.driver_name || claim.client_name || '')
       : (claim.driver_name || claim.client_name || '');
     const contactEmail = isCompanyClient
-      ? (linkedClient.company_contact_email || claim.client_email || claim.driver_email || '')
+      ? (primaryContact?.email || linkedClient?.company_contact_email || claim.client_email || claim.driver_email || '')
       : (claim.driver_email || claim.client_email || '');
     const contactPhone = isCompanyClient
-      ? (linkedClient.company_contact_phone || claim.client_phone || claim.driver_phone || '')
+      ? (primaryContact?.phone || linkedClient?.company_contact_phone || claim.client_phone || claim.driver_phone || '')
       : (claim.driver_phone || claim.client_phone || '');
 
     // Map claim vehicle_type to form vehicle_type

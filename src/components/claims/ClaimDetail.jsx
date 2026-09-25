@@ -861,9 +861,11 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
 
       case 'client': {
         const clientName = claim.client_name || linkedClient?.name;
-        const companyContactName = linkedClient?.company_contact_name;
-        const companyContactPhone = linkedClient?.company_contact_phone;
-        const companyContactEmail = linkedClient?.company_contact_email;
+        const clientContacts = linkedClient?.contacts || [];
+        const primaryContact = clientContacts.find(c => c.is_primary) || clientContacts[0] || null;
+        const companyContactName = primaryContact?.name || linkedClient?.company_contact_name;
+        const companyContactPhone = primaryContact?.phone || linkedClient?.company_contact_phone;
+        const companyContactEmail = primaryContact?.email || linkedClient?.company_contact_email;
         const clientPhone = claim.client_phone || linkedClient?.phone;
         const clientEmail = claim.client_email || linkedClient?.email;
         const vatStatus = claim.client_vat_status || linkedClient?.vat_status || 'Unknown';
