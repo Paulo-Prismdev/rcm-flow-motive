@@ -354,7 +354,7 @@ export default function ClientDirectoryTab() {
                       </div>
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{c.client_type || 'Individual'}</td>
-                    <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{primary?.name || c.company_contact_name || "—"}</td>
+                    <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{primary?.name || "—"}</td>
                     <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{c.phone || primary?.phone || "—"}</td>
                     <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400 truncate max-w-[200px]">{c.email || primary?.email || "—"}</td>
                     <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{c.postcode || "—"}</td>
@@ -393,7 +393,7 @@ export default function ClientDirectoryTab() {
                       {c.client_type === 'Company' ? <Building2 className="w-3.5 h-3.5 text-gray-400" /> : <User className="w-3.5 h-3.5 text-gray-400" />}
                       <p className="font-semibold text-gray-900 dark:text-white truncate">{c.name}</p>
                     </div>
-                    {(primary?.name || c.company_contact_name) && <p className="text-xs text-gray-500 truncate mt-0.5">{primary?.name || c.company_contact_name}</p>}
+                    {primary?.name && <p className="text-xs text-gray-500 truncate mt-0.5">{primary?.name}</p>}
                   </div>
                   <button
                     onClick={(e) => { e.stopPropagation(); handleDelete(c); }}
