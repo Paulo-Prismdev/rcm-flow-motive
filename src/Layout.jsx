@@ -243,6 +243,7 @@ export default function Layout({ children, currentPageName }) {
                 { name: "Repairers", url: createPageUrl("RepairerDirectory"), icon: Building2, overlayPage: "RepairerDirectory" },
                 { name: "Insurers", url: createPageUrl("InsurerDirectory"), icon: Shield, overlayPage: "InsurerDirectory" },
                 { name: "Credit Repair", url: createPageUrl("CreditRepairDirectory"), icon: Building2, overlayPage: "CreditRepairDirectory" },
+                { name: "Clients", url: createPageUrl("ClientDirectory"), icon: Users, overlayPage: "ClientDirectory" },
                 { name: "Suppliers", url: createPageUrl("SupplierManagement"), icon: Package, overlayPage: "SupplierManagement" },
                 { name: "Companies", url: "/admin/companies", icon: Building2, overlayPage: "CompanyManagement" },
               ];

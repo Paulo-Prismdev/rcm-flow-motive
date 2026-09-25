@@ -22,6 +22,7 @@ const ClientPortal = lazy(() => import('@/pages/ClientPortal'));
 const RepairerDirectory = lazy(() => import('@/pages/RepairerDirectory'));
 const InsurerDirectory = lazy(() => import('@/pages/InsurerDirectory'));
 const CreditRepairDirectory = lazy(() => import('@/pages/CreditRepairDirectory'));
+const ClientDirectory = lazy(() => import('@/pages/ClientDirectory'));
 const IndemnityForm = lazy(() => import('@/pages/IndemnityForm'));
 const RepairPreferenceForm = lazy(() => import('@/pages/RepairPreferenceForm'));
 const DeclarationOfNeedForm = lazy(() => import('@/pages/DeclarationOfNeedForm'));
@@ -137,6 +138,11 @@ const AuthenticatedApp = () => {
       <Route path="/CreditRepairDirectory" element={
         <LayoutWrapper currentPageName="CreditRepairDirectory">
           <CreditRepairDirectory />
+        </LayoutWrapper>
+      } />
+      <Route path="/ClientDirectory" element={
+        <LayoutWrapper currentPageName="ClientDirectory">
+          <ClientDirectory />
         </LayoutWrapper>
       } />
       <Route path="*" element={<PageNotFound />} />
