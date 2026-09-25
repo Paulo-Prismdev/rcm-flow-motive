@@ -6,6 +6,7 @@ import PageLoader from '@/components/PageLoader';
 const PAGE_MAP = {
   RepairerDirectory: { title: 'Repairer Directory', component: lazy(() => import('@/pages/RepairerDirectory')) },
   InsurerDirectory: { title: 'Insurer Directory', component: lazy(() => import('@/pages/InsurerDirectory')) },
+  CreditRepairDirectory: { title: 'Credit Repair Companies', component: lazy(() => import('@/pages/CreditRepairDirectory')) },
   SupplierManagement: { title: 'Suppliers', component: lazy(() => import('@/pages/SupplierManagement')) },
   CompanyManagement: { title: 'Companies', component: lazy(() => import('@/pages/CompanyManagement')) },
   Settings: { title: 'Settings', component: lazy(() => import('@/pages/Settings')) },

@@ -31,6 +31,7 @@ Deno.serve(async (req) => {
     const isOrkin = templateType === 'orkin';
     const isPrivate = templateType === 'private';
     const isThirdParty = templateType === 'third_party';
+    const isCreditRepair = templateType === 'credit_repair' || claim.claim_type === 'Credit Repair';
 
     const doc = new jsPDF();
 
@@ -159,7 +160,9 @@ Deno.serve(async (req) => {
         ? 'Third Party'
         : authorisedBy === 'Uninsured'
           ? 'Uninsured'
-          : 'Insured (Client)';
+          : authorisedBy === 'Credit Repair'
+            ? 'Credit Repair'
+            : 'Insured (Client)';
 
     let yPos = TOP;
 
@@ -328,6 +331,30 @@ Deno.serve(async (req) => {
     if (isPrivate) {
       // No insurance section for private repairs — just add spacing.
       yPos += SECTION_GAP;
+    } else if (isCreditRepair) {
+      // Credit Repair — show the credit repair company in place of the insurer
+      const crRows = [
+        ['Credit Repair Company', claim.credit_repair_company_name || 'N/A'],
+        ['Contact Name', claim.credit_repair_company_contact_name || 'N/A'],
+        ['Phone', claim.credit_repair_company_phone || 'N/A'],
+        ['Email', claim.credit_repair_company_email || 'N/A'],
+        ['Account Reference', claim.credit_repair_company_account_ref || 'N/A'],
+      ];
+      ensureSpace(estimateSection(crRows));
+      drawHeader('Credit Repair Company');
+      // Badge
+      const badgeW = 42;
+      const badgeH = 5;
+      const badgeX = LM + MW - PAD_X - badgeW;
+      const badgeY = yPos - HEADER_H - PAD_TOP + (HEADER_H - badgeH) / 2;
+      doc.setFillColor(80, 80, 200);
+      doc.roundedRect(badgeX, badgeY, badgeW, badgeH, 1.5, 1.5, 'F');
+      doc.setTextColor(...WHITE);
+      doc.setFontSize(6.5);
+      doc.setFont('helvetica', 'bold');
+      doc.text('CREDIT REPAIR', badgeX + badgeW / 2, badgeY + 3.5, { align: 'center' });
+      for (const [label, value] of crRows) drawRow(label, value);
+      finishSection();
     } else if (authorisedBy === 'Third Party') {
       // Third Party paying directly — show invoice details in place of insurer
       const tpRows = [
@@ -607,6 +634,72 @@ Deno.serve(async (req) => {
         for (const line of discW) { doc.text(line, PW / 2, yPos + 3.2, { align: 'center' }); yPos += LH; }
       }
 
+    } else if (isCreditRepair) {
+
+      // ═══════════════════════════════════════════
+      // CREDIT REPAIR — Invoicing
+      // ═══════════════════════════════════════════
+      {
+        const FS = 9;
+        const LH = 5.5;
+        const textW = MW - PAD_X * 2;
+
+        drawHeader('Invoicing');
+
+        // Deductions bar
+        doc.setFillColor(...MID_GREY);
+        doc.setDrawColor(150, 150, 150);
+        doc.rect(LM, yPos, MW, 6, 'FD');
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(9);
+        doc.setTextColor(...DARK_TEXT);
+        doc.text('Invoice Deductions', TX, yPos + 4.2);
+        yPos += 6;
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(13);
+        doc.setTextColor(...NAVY);
+        doc.text(`Repairer Referral Fee ${fields.referral_fee}`, TX, yPos + 6);
+        if (fields.referral_fee_gbp) {
+          doc.text(`Repairer Referral Fee ${fields.referral_fee_gbp}`, PW - LM - PAD_X, yPos + 6, { align: 'right' });
+        }
+        yPos += 9;
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(FS);
+        doc.setTextColor(...DARK_TEXT);
+        yPos += 2;
+
+        // Body text
+        const invoicingParas = [
+          'This repair is being handled via a Credit Repair company. RCM Automotive has outsourced management of this claim to the credit repair company named on this instruction.',
+          'Your invoice should be addressed and sent to the credit repair company as per their instructions and your usual practice with them.',
+          'A copy of the final invoice, authority and collection note must also be emailed to invoices@rcmautomotive.co.uk',
+          `You will receive an invoice from RCM for ${fields.referral_fee} of the final repair figure and this will be payable within 7 DAYS of invoice.`,
+        ];
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(FS);
+        doc.setTextColor(...DARK_TEXT);
+        for (const p of invoicingParas) {
+          const wrapped = doc.splitTextToSize(p, textW);
+          for (const line of wrapped) { doc.text(line, TX, yPos + 4); yPos += LH; }
+          yPos += 2;
+        }
+
+        yPos += 2;
+
+        drawWarningBox('IMPORTANT', 'Failure to submit your invoice pack within 48 hours will result in delays to your payment, and an admin charge of GBP 150 will be added to your referral fee invoice.', FS, LH);
+        drawWarningBox('IMPORTANT', 'Failure to pay your referral fee within 7 days will result in an additional admin charge of GBP 150 and removal from the RCM Automotive network.', FS, LH);
+
+        yPos += 4;
+
+        // Disclaimer
+        doc.setFont('helvetica', 'italic');
+        doc.setFontSize(8);
+        doc.setTextColor(80, 80, 80);
+        const discW = doc.splitTextToSize('*By accepting this instruction, you agree to the T&Cs within the supplied SLA provided with this instruction.', MW);
+        for (const line of discW) { doc.text(line, PW / 2, yPos + 3.2, { align: 'center' }); yPos += LH; }
+      }
+
     } else if (isPrivate) {
 
       // ═══════════════════════════════════════════
@@ -748,7 +841,7 @@ Deno.serve(async (req) => {
     drawAllFooters();
 
     const pdfBytes = doc.output('arraybuffer');
-    const filename = `${claim.job_number || 'instruction'}-${isOrkin ? 'orkin' : isPrivate ? 'private' : isThirdParty ? 'third-party' : 'standard'}.pdf`;
+    const filename = `${claim.job_number || 'instruction'}-${isOrkin ? 'orkin' : isCreditRepair ? 'credit-repair' : isPrivate ? 'private' : isThirdParty ? 'third-party' : 'standard'}.pdf`;
 
     // Upload the PDF. Only persist it to the claim's docs when saveToClaim is
     // true — the allocation wizard generates with saveToClaim=false so that

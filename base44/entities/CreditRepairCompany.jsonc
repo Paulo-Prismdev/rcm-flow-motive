@@ -1,0 +1,73 @@
+{
+  "name": "CreditRepairCompany",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Credit repair company name"
+    },
+    "contact_name": {
+      "type": "string",
+      "description": "Main contact person"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "address_line_1": {
+      "type": "string",
+      "description": "Street address"
+    },
+    "address_line_2": {
+      "type": "string",
+      "description": "Additional address line (optional)"
+    },
+    "town": {
+      "type": "string",
+      "description": "Town or City"
+    },
+    "county": {
+      "type": "string",
+      "description": "County or State"
+    },
+    "postcode": {
+      "type": "string",
+      "description": "Postal code"
+    },
+    "account_reference": {
+      "type": "string",
+      "description": "Account or reference number used with this credit repair company"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Additional notes about this credit repair company"
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "user_type": "internal"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "user_type": "internal"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "user_type": "internal"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "user_type": "internal"
+      }
+    }
+  }
+}

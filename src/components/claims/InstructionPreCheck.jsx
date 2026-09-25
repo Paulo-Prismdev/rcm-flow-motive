@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { AlertTriangle, Pencil, Check, User, Car, Phone } from 'lucide-react';
+import CreditRepairCombobox from '../shared/CreditRepairCombobox';
 
 const CLAIM_TYPES = ['Fault Claim', '3rd Party Insurer Direct', '3rd Party Paying Privately', 'Credit Repair', 'Glass Claim', 'Paying Privately'];
 const VAT_STATUSES = ['VAT Registered', 'Non-VAT', 'Unknown'];
@@ -9,11 +10,13 @@ const INSTRUCTION_TYPES = [
   { value: 'tp_insurer', label: 'Third Party Insurer' },
   { value: 'third_party', label: 'Third Party Paying' },
   { value: 'private', label: 'Paying Privately' },
+  { value: 'credit_repair', label: 'Credit Repair' },
   { value: 'orkin', label: 'Orkin (Branded)' },
 ];
 
 function deriveInstructionType(claim) {
   const ab = claim.authorised_by;
+  if (claim.claim_type === 'Credit Repair' || ab === 'Credit Repair') return 'credit_repair';
   if (claim.claim_type === 'Paying Privately' || ab === 'Uninsured') return 'private';
   if (claim.claim_type === '3rd Party Paying Privately' || ab === 'Third Party') return 'third_party';
   if (ab === 'Third Party Insurer') return 'tp_insurer';
@@ -104,7 +107,50 @@ function Group({ title, children }) {
   );
 }
 
+function CreditRepairSection({ claim, onUpdate }) {
+  const handleCompanySelect = (company) => {
+    if (!company) {
+      onUpdate({
+        credit_repair_company_id: '',
+        credit_repair_company_name: '',
+        credit_repair_company_contact_name: '',
+        credit_repair_company_phone: '',
+        credit_repair_company_email: '',
+        credit_repair_company_account_ref: '',
+      });
+      return;
+    }
+    onUpdate({
+      credit_repair_company_id: company.id,
+      credit_repair_company_name: company.name,
+      credit_repair_company_contact_name: company.contact_name || '',
+      credit_repair_company_phone: company.phone || '',
+      credit_repair_company_email: company.email || '',
+      credit_repair_company_account_ref: company.account_reference || '',
+    });
+  };
+
+  return (
+    <Group title="Credit Repair Company">
+      <div className="px-1 py-1.5">
+        <CreditRepairCombobox
+          value={claim.credit_repair_company_name || ''}
+          onChange={handleCompanySelect}
+          placeholder="Select credit repair company..."
+        />
+      </div>
+      <Row label="Contact Name" field="credit_repair_company_contact_name" value={claim.credit_repair_company_contact_name} claim={claim} onFieldChange={onUpdate} />
+      <Row label="Phone" field="credit_repair_company_phone" value={claim.credit_repair_company_phone} claim={claim} onFieldChange={onUpdate} />
+      <Row label="Email" field="credit_repair_company_email" value={claim.credit_repair_company_email} claim={claim} onFieldChange={onUpdate} />
+      <Row label="Account Ref" field="credit_repair_company_account_ref" value={claim.credit_repair_company_account_ref} claim={claim} onFieldChange={onUpdate} />
+    </Group>
+  );
+}
+
 function InsuranceSection({ instructionType, claim, onUpdate }) {
+  if (instructionType === 'credit_repair') {
+    return <CreditRepairSection claim={claim} onUpdate={onUpdate} />;
+  }
   if (instructionType === 'private') {
     return (
       <Group title="Insurance Details">
@@ -151,7 +197,7 @@ export default function InstructionPreCheck({ claim, onUpdate }) {
 
   const handleTypeChange = (newType) => {
     setInstructionType(newType);
-    const abMap = { standard: 'Client Insurer', tp_insurer: 'Third Party Insurer', third_party: 'Third Party', private: 'Uninsured', orkin: 'Client Insurer' };
+    const abMap = { standard: 'Client Insurer', tp_insurer: 'Third Party Insurer', third_party: 'Third Party', private: 'Uninsured', credit_repair: 'Credit Repair', orkin: 'Client Insurer' };
     onUpdate({ authorised_by: abMap[newType] });
   };
 

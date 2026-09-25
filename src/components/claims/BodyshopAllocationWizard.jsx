@@ -16,7 +16,8 @@ import { sanitizeClaimData } from '@/components/shared/sanitizeClaimData';
 // Derive the PDF template from the instruction type captured in the Pre-Check
 // (authorised_by). Orkin is a branded variant the user can still pick on the
 // Generate Instruction step.
-const deriveTemplate = (ab) => {
+const deriveTemplate = (ab, claimType) => {
+  if (ab === 'Credit Repair' || claimType === 'Credit Repair') return 'credit_repair';
   if (ab === 'Third Party') return 'third_party';
   if (ab === 'Uninsured') return 'private';
   return 'standard';
@@ -104,7 +105,7 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
         setGeneratedPdfUrl(null);
         setEmailTo(''); setEmailCc(''); setEmailSubject(''); setEmailBody('');
         setSelectedEmailTemplateId('');
-        setSelectedPdfTemplate(deriveTemplate(claim.authorised_by));
+        setSelectedPdfTemplate(deriveTemplate(claim.authorised_by, claim.claim_type));
       }
     } else {
       wasOpen.current = false;
@@ -135,6 +136,7 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
     const ab = claim.authorised_by || 'Client Insurer';
     const isInsurer = ab === 'Client Insurer' || ab === 'Third Party Insurer';
     const isTp = ab === 'Third Party';
+    const isCr = ab === 'Credit Repair' || claim.claim_type === 'Credit Repair';
     const list = [];
     const has = (key, fallback = '') => {
       const v = claim[key] ?? fallback;
@@ -144,7 +146,9 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
     if (!has('client_name')) list.push({ key: 'client_name', label: 'Client Name' });
     if (!has('instruction_contact_email', claim.client_email)) list.push({ key: 'instruction_contact_email', label: 'Contact Email' });
     if (!has('instruction_contact_phone', claim.client_phone)) list.push({ key: 'instruction_contact_phone', label: 'Contact Phone' });
-    if (isInsurer) {
+    if (isCr) {
+      if (!has('credit_repair_company_name')) list.push({ key: 'credit_repair_company_name', label: 'Credit Repair Company' });
+    } else if (isInsurer) {
       const insKey = ab === 'Client Insurer' ? 'insurer' : 'tp_insurer';
       const refKey = ab === 'Client Insurer' ? 'claim_ref' : 'tp_claim_ref';
       if (!has(insKey)) list.push({ key: insKey, label: 'Insurer Name' });
@@ -169,7 +173,7 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
   // Re-derive the PDF template when the instruction type (authorised_by)
   // changes in the Pre-Check, unless the user manually picked Orkin.
   useEffect(() => {
-    setSelectedPdfTemplate(prev => prev === 'orkin' ? prev : deriveTemplate(claim?.authorised_by));
+    setSelectedPdfTemplate(prev => prev === 'orkin' ? prev : deriveTemplate(claim?.authorised_by, claim?.claim_type));
   }, [claim?.authorised_by]);
 
   const handleContinueFromPreCheck = () => {

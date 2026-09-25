@@ -1,4 +1,4 @@
-import { ClipboardCheck, MapPin, FileText, Mail, CheckCircle, Wrench, PoundSterling } from 'lucide-react';
+import { ClipboardCheck, MapPin, FileText, Mail, CheckCircle, Wrench, PoundSterling, CreditCard } from 'lucide-react';
 
 export const STEPS = [
   { id: 'map', title: 'Find Repairer', icon: MapPin },
@@ -20,6 +20,7 @@ export const BUILT_IN_PDF_TEMPLATES = [
   { id: 'orkin', name: 'Orkin Instructions', icon: Wrench },
   { id: 'private', name: 'Paying Privately', icon: PoundSterling },
   { id: 'third_party', name: 'Third-Party Paying', icon: PoundSterling },
+  { id: 'credit_repair', name: 'Credit Repair', icon: CreditCard },
 ];
 
 export const replacePlaceholders = (text, itemData) => {

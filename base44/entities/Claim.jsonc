@@ -832,7 +832,8 @@
         "Client Insurer",
         "Third Party Insurer",
         "Third Party",
-        "Uninsured"
+        "Uninsured",
+        "Credit Repair"
       ],
       "description": "Authorising party selection from last allocation"
     },
@@ -881,7 +882,7 @@
     },
     "declaration_of_need_token": {
       "type": "string",
-      "description": "Secure token for the external Declaration of Need – Replacement Vehicle form link"
+      "description": "Secure token for the external Declaration of Need \u2013 Replacement Vehicle form link"
     },
     "declaration_of_need_link_sent_at": {
       "type": "string",
@@ -891,7 +892,7 @@
     "declaration_of_need_signed": {
       "type": "boolean",
       "default": false,
-      "description": "Whether the client has signed the Declaration of Need – Replacement Vehicle"
+      "description": "Whether the client has signed the Declaration of Need \u2013 Replacement Vehicle"
     },
     "declaration_of_need_signed_at": {
       "type": "string",
@@ -914,6 +915,30 @@
       "type": "boolean",
       "default": false,
       "description": "True when a bodyshop has submitted an update via the Repair Update Form that has not yet been viewed by an internal user"
+    },
+    "credit_repair_company_id": {
+      "type": "string",
+      "description": "ID of the CreditRepairCompany handling this claim"
+    },
+    "credit_repair_company_name": {
+      "type": "string",
+      "description": "Name of the credit repair company (captured at selection time)"
+    },
+    "credit_repair_company_contact_name": {
+      "type": "string",
+      "description": "Contact name at the credit repair company"
+    },
+    "credit_repair_company_phone": {
+      "type": "string",
+      "description": "Phone number for the credit repair company"
+    },
+    "credit_repair_company_email": {
+      "type": "string",
+      "description": "Email for the credit repair company"
+    },
+    "credit_repair_company_account_ref": {
+      "type": "string",
+      "description": "Account reference with the credit repair company"
     }
   },
   "required": [],

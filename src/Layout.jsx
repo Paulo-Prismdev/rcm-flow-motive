@@ -242,6 +242,7 @@ export default function Layout({ children, currentPageName }) {
               const dirLinks = [
                 { name: "Repairers", url: createPageUrl("RepairerDirectory"), icon: Building2, overlayPage: "RepairerDirectory" },
                 { name: "Insurers", url: createPageUrl("InsurerDirectory"), icon: Shield, overlayPage: "InsurerDirectory" },
+                { name: "Credit Repair", url: createPageUrl("CreditRepairDirectory"), icon: Building2, overlayPage: "CreditRepairDirectory" },
                 { name: "Suppliers", url: createPageUrl("SupplierManagement"), icon: Package, overlayPage: "SupplierManagement" },
                 { name: "Companies", url: "/admin/companies", icon: Building2, overlayPage: "CompanyManagement" },
               ];
