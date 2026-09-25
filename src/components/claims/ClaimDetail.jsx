@@ -1247,6 +1247,34 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
           </div>
         );
 
+      case 'declarationOfNeed':
+        return (
+          <div className="bg-card border border-border rounded-[10px] p-4 md:p-5 shadow-sm">
+            <div className="flex items-center gap-2.5 pb-3 mb-4 border-b border-border">
+              <FileText className="w-4 h-4 text-muted-foreground" />
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Declaration of Need – Replacement Vehicle</h3>
+            </div>
+            <DeclarationOfNeedLinkManager claim={claim} onUpdate={handleUpdate} />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 mt-4">
+              <DetailRow label="Signed" value={claim.declaration_of_need_signed ? 'Yes' : 'No'} />
+              <DetailRow label="Signed At" value={claim.declaration_of_need_signed_at} isDate />
+              <DetailRow label="Signed By" value={claim.declaration_of_need_client_name} />
+              <DetailRow label="Form Version" value={claim.declaration_of_need_form_version} />
+            </div>
+            {claim.declaration_of_need_pdf_url && (
+              <div className="mt-3 p-3 rounded-lg bg-accent/10 border border-accent/30 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-accent" />
+                  <span className="text-sm font-medium">Signed PDF</span>
+                </div>
+                <Button variant="outline" size="sm" onClick={() => window.open(claim.declaration_of_need_pdf_url, '_blank')} className="gap-2">
+                  <Download className="w-4 h-4" /> View / Download
+                </Button>
+              </div>
+            )}
+          </div>
+        );
+
 
 
       case 'financials':
@@ -1750,6 +1778,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                               <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsEstimateModalOpen(true); }}><Calculator className="w-4 h-4 mr-2" />Request Estimate</DropdownMenuItem>
                               <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsPartsModalOpen(true); }}><Package className="w-4 h-4 mr-2" />Log Parts Issue</DropdownMenuItem>
                               <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsBackorderedPartsModalOpen(true); }}><Package className="w-4 h-4 mr-2" />Backordered Parts</DropdownMenuItem>
+                              <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setSelectedSection('declarationOfNeed'); }}><FileText className="w-4 h-4 mr-2" />Declaration of Need</DropdownMenuItem>
                               <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsDuplicateModalOpen(true); }}><Copy className="w-4 h-4 mr-2" />Duplicate Claim</DropdownMenuItem>
                               <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleArchive(); }} disabled={archiveMutation.isLoading}><Archive className="w-4 h-4 mr-2" />{claim.archived ? 'Unarchive' : 'Archive'}</DropdownMenuItem>
                               <DropdownMenuItem onSelect={() => handleDelete()} disabled={deleteMutation.isLoading} className="text-red-600"><Trash2 className="w-4 h-4 mr-2" />Delete</DropdownMenuItem>
