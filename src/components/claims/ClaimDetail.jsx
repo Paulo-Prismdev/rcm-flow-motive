@@ -56,6 +56,7 @@ import ClaimVehicleDamageForm from './ClaimVehicleDamageForm';
 import ClaimIndemnityForm from './ClaimIndemnityForm';
 import IndemnityLinkManager from './IndemnityLinkManager';
 import RepairPreferenceLinkManager from './RepairPreferenceLinkManager';
+import DeclarationOfNeedLinkManager from './DeclarationOfNeedLinkManager';
 import ClaimExcessContributionForm from './ClaimExcessContributionForm';
 import InstructionDefaultsForm from './InstructionDefaultsForm';
 import ThirdPartyPursuitSection from './ThirdPartyPursuitSection';
@@ -204,6 +205,7 @@ const SECTION_FIELDS = {
   excessContribution: ['excess_contribution_amount', 'excess_contribution_method'],
   indemnity: ['indemnity_driver_dob', 'indemnity_registered_owner'],
   repairPreference: ['repair_preference_signed', 'repair_preference_pdf_url'],
+  declarationOfNeed: ['declaration_of_need_signed', 'declaration_of_need_pdf_url'],
 };
 
 const isSectionEmpty = (sectionId, claim) => {
@@ -237,6 +239,7 @@ const DETAIL_SECTIONS = [
   { id: 'thirdpartyPursuit', label: 'Third Party Pursuit', icon: Users },
   { id: 'indemnity', label: 'Indemnity Details', icon: Shield },
   { id: 'repairPreference', label: 'Repair Preference', icon: FileText },
+  { id: 'declarationOfNeed', label: 'Declaration of Need', icon: FileText },
   { id: 'backorderedParts', label: 'Backordered Parts', icon: Package },
 ];
 

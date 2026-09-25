@@ -879,6 +879,37 @@
       "type": "string",
       "description": "Name of the client who signed the repair preference statement"
     },
+    "declaration_of_need_token": {
+      "type": "string",
+      "description": "Secure token for the external Declaration of Need – Replacement Vehicle form link"
+    },
+    "declaration_of_need_link_sent_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the Declaration of Need form link was generated/sent"
+    },
+    "declaration_of_need_signed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the client has signed the Declaration of Need – Replacement Vehicle"
+    },
+    "declaration_of_need_signed_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the customer signed the Declaration of Need form"
+    },
+    "declaration_of_need_pdf_url": {
+      "type": "string",
+      "description": "URL of the signed Declaration of Need PDF"
+    },
+    "declaration_of_need_client_name": {
+      "type": "string",
+      "description": "Name of the person who signed the Declaration of Need form"
+    },
+    "declaration_of_need_form_version": {
+      "type": "string",
+      "description": "Form version number the customer agreed to at signing time"
+    },
     "unread_bodyshop_update": {
       "type": "boolean",
       "default": false,
