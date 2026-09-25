@@ -475,7 +475,7 @@ export default function DeclarationOfNeedForm() {
 
         {/* Navigation */}
         <div className="flex items-center justify-between gap-3">
-          <Button onClick={handleBack} disabled={step === 0} variant="outline" className="flex items-center gap-2">
+          <Button onClick={handleBack} disabled={step === 0} variant="outline" className="flex items-center gap-2 text-gray-600">
             <ArrowLeft className="w-4 h-4" /> Back
           </Button>
           {step < STEPS.length - 1 ? (
