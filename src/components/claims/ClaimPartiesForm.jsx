@@ -204,8 +204,12 @@ export default function ClaimPartiesForm({ claim, onSave, onCancel, mode }) {
     return (
       <div className="space-y-4 pt-2">
         <div>
-          <label className="block text-xs text-muted-foreground mb-1">Client</label>
+          <label className="block text-xs text-muted-foreground mb-1">Link to Client Record</label>
           <ClientCombobox value={data.client_name} onChange={handleClientSelect} allowClear />
+        </div>
+        <div>
+          <label className="block text-xs text-muted-foreground mb-1">Client / Contact Name</label>
+          <Input value={data.client_name} onChange={(e) => set('client_name', e.target.value)} className="neomorph-inset" placeholder="Enter client or contact name" />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div>
