@@ -1,5 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 import { jsPDF } from 'npm:jspdf@2.5.1';
+import { createPdfHelpers } from '../../shared/instructionPdfHelpers.ts';
 
 Deno.serve(async (req) => {
   try {
@@ -172,91 +173,14 @@ Deno.serve(async (req) => {
 
     let yPos = TOP;
 
+    const _pdf = createPdfHelpers(doc, { get: () => yPos, set: (v) => { yPos = v; } });
+    const { drawHeader, drawRow, drawWarningBox, ensureSpace, estimateSection, finishSection, drawAllFooters } = _pdf;
+
     // ═══════════════════════════════════════════
     // HELPERS
     // ═══════════════════════════════════════════
 
-    const valWidth = () => MW - PAD_X * 2 - LABEL_W - VAL_GAP;
 
-    function estimateRow(value) {
-      doc.setFontSize(9);
-      const lines = doc.splitTextToSize(String(value), valWidth());
-      return Math.max(ROW_H, lines.length * ROW_H);
-    }
-
-    function estimateSection(rows) {
-      let h = HEADER_H + PAD_TOP + PAD_BOTTOM;
-      if (rows) { for (const [, value] of rows) h += estimateRow(value); }
-      return h;
-    }
-
-    function ensureSpace(neededH) {
-      if (yPos + neededH > BL) { doc.addPage(); yPos = TOP; return true; }
-      return false;
-    }
-
-    function drawHeader(title) {
-      doc.setFillColor(...NAVY);
-      doc.rect(LM, yPos, MW, HEADER_H, 'F');
-      doc.setTextColor(...WHITE);
-      doc.setFontSize(11);
-      doc.setFont('helvetica', 'bold');
-      doc.text(title, TX, yPos + 5.5);
-      yPos += HEADER_H + PAD_TOP;
-    }
-
-    function drawRow(label, value) {
-      const vw = valWidth();
-      doc.setFontSize(9);
-      const lines = doc.splitTextToSize(String(value), vw);
-      const rh = Math.max(ROW_H, lines.length * ROW_H);
-      if (yPos + rh > BL) { doc.addPage(); yPos = TOP; }
-      doc.setFont('helvetica', 'bold');
-      doc.setTextColor(...DARK_TEXT);
-      doc.text(label, TX, yPos + 4.2);
-      doc.setFont('helvetica', 'normal');
-      doc.setTextColor(...DARK_TEXT);
-      lines.forEach((line, i) => { doc.text(line, VX, yPos + 4.2 + ROW_H * i); });
-      yPos += rh;
-    }
-
-    function finishSection() {
-      yPos += PAD_BOTTOM + SECTION_GAP;
-    }
-
-    function drawWarningBox(label, text, fontSize, lineHeight) {
-      const textW = MW - PAD_X * 2;
-      doc.setFontSize(fontSize);
-      const lines = doc.splitTextToSize(text, textW - 8);
-      const boxH = 9 + lines.length * lineHeight;
-      doc.setFillColor(...AMBER_BG);
-      doc.setDrawColor(...AMBER_BD);
-      doc.setLineWidth(0.5);
-      doc.roundedRect(TX, yPos, textW, boxH, 2, 2, 'FD');
-      doc.setFont('helvetica', 'bold');
-      doc.setTextColor(...RED);
-      doc.text(`${label}:`, TX + 3, yPos + 5);
-      doc.setFont('helvetica', 'normal');
-      doc.setTextColor(...DARK_TEXT);
-      for (let i = 0; i < lines.length; i++) {
-        doc.text(lines[i], TX + 3, yPos + 5 + lineHeight * (i + 1));
-      }
-      yPos += boxH + 2.5;
-    }
-
-    function drawAllFooters() {
-      const totalPages = doc.internal.getNumberOfPages();
-      for (let p = 1; p <= totalPages; p++) {
-        doc.setPage(p);
-        doc.setDrawColor(...NAVY);
-        doc.setLineWidth(0.3);
-        doc.line(LM, FOOTER_Y - 2, PW - LM, FOOTER_Y - 2);
-        doc.setTextColor(...NAVY);
-        doc.setFontSize(7.5);
-        doc.setFont('helvetica', 'normal');
-        doc.text('RCM Automotive Ltd | www.rcmautomotive.co.uk | info@rcmautomotive.co.uk', PW / 2, FOOTER_Y, { align: 'center' });
-      }
-    }
 
     // ═══════════════════════════════════════════
     // DOCUMENT HEADER

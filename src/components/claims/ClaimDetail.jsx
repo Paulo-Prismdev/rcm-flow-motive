@@ -41,6 +41,7 @@ import ClaimPartiesForm from './ClaimPartiesForm';
 import PartyDisplayCard from '../shared/PartyDisplayCard';
 import ClaimVehicleForm from './ClaimVehicleForm';
 import ClaimCreditRepairForm from './ClaimCreditRepairForm';
+import CreditRepairInstructionModal from './CreditRepairInstructionModal';
 import ClaimReferrerForm from './ClaimReferrerForm';
 import ClaimFinancialsForm from './ClaimFinancialsForm';
 import InlineEditableSection, { InlineField, useInlineEdit } from './InlineEditableSection';
@@ -281,6 +282,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
   const [savedRegenToDocs, setSavedRegenToDocs] = useState(false);
   const [isSavingRegenToDocs, setIsSavingRegenToDocs] = useState(false);
   const [isGeneratingPo, setIsGeneratingPo] = useState(false);
+  const [isCreditRepairInstructionOpen, setIsCreditRepairInstructionOpen] = useState(false);
 
   const [isBackorderedPartsModalOpen, setIsBackorderedPartsModalOpen] = useState(false);
   const [isDuplicateModalOpen, setIsDuplicateModalOpen] = useState(false);
@@ -916,6 +918,22 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
               <DetailRow label="Email" value={claim.credit_repair_company_email} />
               <DetailRow label="Account Ref" value={claim.credit_repair_company_account_ref} />
             </div>
+            {claim.credit_repair_company_name && (
+              <div className="mt-4 p-3 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800">
+                <div className="flex items-center justify-between gap-3 flex-wrap">
+                  <div className="flex items-center gap-2">
+                    <Mail className="w-4 h-4 text-indigo-600 flex-shrink-0" />
+                    <div>
+                      <span className="text-sm font-medium block">Credit Repair Instruction</span>
+                      <span className="text-[11px] text-muted-foreground">Generate a PDF instruction and email it to {claim.credit_repair_company_name}.</span>
+                    </div>
+                  </div>
+                  <Button size="sm" onClick={() => setIsCreditRepairInstructionOpen(true)} className="gap-2">
+                    <FileText className="w-4 h-4" /> Send Instruction
+                  </Button>
+                </div>
+              </div>
+            )}
           </EditableSection>
         );
 
@@ -1652,6 +1670,12 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                   setIsDuplicateModalOpen(false);
                   navigate(`/Claims?id=${newClaim.id}`);
                 }}
+              />
+
+              <CreditRepairInstructionModal
+                claim={claim}
+                isOpen={isCreditRepairInstructionOpen}
+                onClose={() => setIsCreditRepairInstructionOpen(false)}
               />
 
       <div className="flex flex-col gap-2 md:gap-3" style={{height: '100%', touchAction: 'auto', isolation: 'isolate'}}>
