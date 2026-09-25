@@ -125,6 +125,16 @@
 }
 
 /* ═══════════════════════════════════════════
+   FULL-HEIGHT LAYOUT — 100vh fallback for older
+   mobile browsers that don't support dvh units
+═══════════════════════════════════════════ */
+
+.app-height {
+  height: 100vh;
+  height: 100dvh;
+}
+
+/* ═══════════════════════════════════════════
    TYPOGRAPHY SYSTEM
 ═══════════════════════════════════════════ */
 

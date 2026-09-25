@@ -37,7 +37,7 @@ export default function ReferrerLayout({ children }) {
   return (
     <StatusConfigProvider>
     <GlobalSearch open={searchOpen} onOpenChange={setSearchOpen} />
-    <div className="flex overflow-hidden bg-gray-100 dark:bg-gray-950" style={{ height: '100dvh' }}>
+    <div className="flex overflow-hidden bg-gray-100 dark:bg-gray-950 app-height">
       {/* SIDEBAR */}
       <aside className={`
         fixed inset-y-0 left-0 z-[9999] flex flex-col
