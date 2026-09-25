@@ -139,10 +139,8 @@ function CreditRepairSection({ claim, onUpdate }) {
           placeholder="Select credit repair company..."
         />
       </div>
-      <Row label="Contact Name" field="credit_repair_company_contact_name" value={claim.credit_repair_company_contact_name} claim={claim} onFieldChange={onUpdate} />
       <Row label="Phone" field="credit_repair_company_phone" value={claim.credit_repair_company_phone} claim={claim} onFieldChange={onUpdate} />
       <Row label="Email" field="credit_repair_company_email" value={claim.credit_repair_company_email} claim={claim} onFieldChange={onUpdate} />
-      <Row label="Account Ref" field="credit_repair_company_account_ref" value={claim.credit_repair_company_account_ref} claim={claim} onFieldChange={onUpdate} />
     </Group>
   );
 }

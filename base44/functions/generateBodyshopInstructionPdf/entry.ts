@@ -335,10 +335,8 @@ Deno.serve(async (req) => {
       // Credit Repair — show the credit repair company in place of the insurer
       const crRows = [
         ['Credit Repair Company', claim.credit_repair_company_name || 'N/A'],
-        ['Contact Name', claim.credit_repair_company_contact_name || 'N/A'],
         ['Phone', claim.credit_repair_company_phone || 'N/A'],
         ['Email', claim.credit_repair_company_email || 'N/A'],
-        ['Account Reference', claim.credit_repair_company_account_ref || 'N/A'],
       ];
       ensureSpace(estimateSection(crRows));
       drawHeader('Credit Repair Company');
