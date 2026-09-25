@@ -8,10 +8,11 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import {
   Building2, MapPin, Globe, Users, Wrench,
-  Shield, Save, Loader2, Pencil, X, ExternalLink, Map as MapIcon
+  Shield, Save, Loader2, Pencil, X, ExternalLink, Map as MapIcon, Trash2
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
+import ConfirmDialog from "@/components/shared/ConfirmDialog";
 
 const TIER_OPTIONS = ["TIER 1", "TIER 2", "Previously on Network", ""];
 const MAP_GROUP_OPTIONS = ["Solution", "QAC", ""];
@@ -77,6 +78,7 @@ export default function RepairerDetailDrawer({ bodyshopId, onClose }) {
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({});
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const { data: bodyshop, isLoading } = useQuery({
     queryKey: ["bodyshop-detail", bodyshopId],
@@ -116,6 +118,21 @@ export default function RepairerDetailDrawer({ bodyshopId, onClose }) {
     setFormData({ ...bodyshop });
     setIsEditing(false);
   };
+
+  const deleteMutation = useMutation({
+    mutationFn: () => base44.entities.Bodyshop.delete(bodyshopId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["repairer-directory"] });
+      queryClient.removeQueries({ queryKey: ["bodyshop-detail", bodyshopId] });
+      toast({ title: "Deleted", description: "Repairer removed from the directory." });
+      setShowDeleteConfirm(false);
+      onClose();
+    },
+    onError: (err) => {
+      toast({ title: "Delete failed", description: err.message || "Unknown error", variant: "destructive" });
+      setShowDeleteConfirm(false);
+    },
+  });
 
   const open = !!bodyshopId;
   const data = isEditing ? formData : bodyshop;
@@ -295,14 +312,34 @@ export default function RepairerDetailDrawer({ bodyshopId, onClose }) {
                   </Button>
                 </div>
               ) : (
-                <Button onClick={() => setIsEditing(true)} className="w-full">
-                  <Pencil className="w-4 h-4" /> Edit Details
-                </Button>
+                <div className="flex gap-2">
+                  <Button onClick={() => setIsEditing(true)} className="flex-1">
+                    <Pencil className="w-4 h-4" /> Edit Details
+                  </Button>
+                  <Button
+                    onClick={() => setShowDeleteConfirm(true)}
+                    variant="destructive"
+                    size="icon"
+                    title="Delete repairer"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
               )}
             </div>
           </>
         ) : null}
       </SheetContent>
+
+      <ConfirmDialog
+        isOpen={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        onConfirm={() => deleteMutation.mutate()}
+        title="Delete Repairer"
+        message={`Are you sure you want to permanently delete "${bodyshop?.name}"? This cannot be undone.`}
+        confirmText={deleteMutation.isPending ? "Deleting..." : "Delete"}
+        variant="danger"
+      />
     </Sheet>
   );
 }

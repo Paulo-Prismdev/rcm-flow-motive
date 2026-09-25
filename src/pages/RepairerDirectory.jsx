@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Search, Building2, Loader2, Upload, Filter } from "lucide-react";
 import RepairerDetailDrawer from "@/components/repairer/RepairerDetailDrawer";
+import AddBodyshopModal from "@/components/shared/AddBodyshopModal";
+import { Plus } from "lucide-react";
 
 export default function RepairerDirectory() {
   const [search, setSearch] = useState("");
@@ -13,6 +15,7 @@ export default function RepairerDirectory() {
   const [acgFilter, setAcgFilter] = useState("all");
   const [selectedId, setSelectedId] = useState(null);
   const [importing, setImporting] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
   const fileInputRef = useRef(null);
   const queryClient = useQueryClient();
 
@@ -84,10 +87,16 @@ export default function RepairerDirectory() {
             {filtered.length} of {bodyshops.length} repairers
           </p>
         </div>
-        <Button onClick={handleImportClick} disabled={importing} variant="outline" size="sm" className="flex-shrink-0">
-          {importing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-          <span className="hidden sm:inline">{importing ? "Importing..." : "Import Excel"}</span>
-        </Button>
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <Button onClick={() => setShowAddModal(true)} size="sm">
+            <Plus className="w-4 h-4" />
+            <span className="hidden sm:inline">Add Repairer</span>
+          </Button>
+          <Button onClick={handleImportClick} disabled={importing} variant="outline" size="sm">
+            {importing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+            <span className="hidden sm:inline">{importing ? "Importing..." : "Import Excel"}</span>
+          </Button>
+        </div>
         <input
           ref={fileInputRef}
           type="file"
@@ -250,6 +259,15 @@ export default function RepairerDirectory() {
       </div>
 
       <RepairerDetailDrawer bodyshopId={selectedId} onClose={() => setSelectedId(null)} />
+
+      <AddBodyshopModal
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        onSuccess={async (newBodyshop) => {
+          await queryClient.invalidateQueries({ queryKey: ["repairer-directory"] });
+          setSelectedId(newBodyshop.id);
+        }}
+      />
     </div>
   );
 }
