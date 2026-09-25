@@ -13,7 +13,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Plus, Pencil, Trash2, Building2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Building2, Users, Star } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -145,6 +145,12 @@ export default function CompanyManagement() {
                 {company.contact_name && (
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{company.contact_name} · {company.contact_email}</p>
                 )}
+                {company.contacts?.length > 0 && (
+                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5 flex items-center gap-1">
+                    <Users className="w-3 h-3" />
+                    {company.contacts.length} additional contact{company.contacts.length !== 1 ? 's' : ''}
+                  </p>
+                )}
               </div>
               <div className="flex items-center gap-1 flex-shrink-0">
                 <button
@@ -187,7 +193,36 @@ function CompanyForm({ company, onSubmit, onCancel }) {
     portal_sections: company?.portal_sections || ['Claims'],
     default_percent_to_referrer: company?.default_percent_to_referrer ?? '',
     default_repairer_referral_fee: company?.default_repairer_referral_fee ?? '',
+    contacts: company?.contacts || [],
   });
+
+  const addContact = () => {
+    setFormData(prev => ({
+      ...prev,
+      contacts: [...prev.contacts, { name: '', position: '', email: '', phone: '', is_primary: false }],
+    }));
+  };
+
+  const updateContact = (idx, field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      contacts: prev.contacts.map((c, i) => i === idx ? { ...c, [field]: value } : c),
+    }));
+  };
+
+  const removeContact = (idx) => {
+    setFormData(prev => ({
+      ...prev,
+      contacts: prev.contacts.filter((_, i) => i !== idx),
+    }));
+  };
+
+  const setPrimaryContact = (idx) => {
+    setFormData(prev => ({
+      ...prev,
+      contacts: prev.contacts.map((c, i) => ({ ...c, is_primary: i === idx })),
+    }));
+  };
 
   const toggleSection = (section) => {
     setFormData(prev => ({
@@ -240,7 +275,7 @@ function CompanyForm({ company, onSubmit, onCancel }) {
       </div>
 
       <div className="border-t pt-4 space-y-3">
-        <h3 className="text-sm font-semibold">Contact</h3>
+        <h3 className="text-sm font-semibold">Main Contact</h3>
         <div className="grid grid-cols-2 gap-3">
           <div>
             <Label>Contact Name</Label>
@@ -255,6 +290,50 @@ function CompanyForm({ company, onSubmit, onCancel }) {
             <Input value={formData.contact_phone} onChange={(e) => setFormData({ ...formData, contact_phone: e.target.value })} />
           </div>
         </div>
+      </div>
+
+      <div className="border-t pt-4 space-y-3">
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-semibold">Additional Contacts</h3>
+          <Button type="button" variant="outline" size="sm" onClick={addContact}>
+            <Plus className="w-3.5 h-3.5 mr-1" />
+            Add Contact
+          </Button>
+        </div>
+        {formData.contacts.length === 0 ? (
+          <p className="text-xs text-gray-400">No additional contacts added.</p>
+        ) : (
+          <div className="space-y-3">
+            {formData.contacts.map((contact, idx) => (
+              <div key={idx} className="rounded-lg border border-gray-200 dark:border-gray-700 p-3 space-y-2 bg-gray-50 dark:bg-gray-800/50">
+                <div className="flex items-center justify-between">
+                  <button
+                    type="button"
+                    onClick={() => setPrimaryContact(idx)}
+                    className={`flex items-center gap-1 text-xs font-medium ${contact.is_primary ? 'text-amber-600' : 'text-gray-400 hover:text-amber-500'}`}
+                    title={contact.is_primary ? 'Primary contact' : 'Set as primary'}
+                  >
+                    <Star className={`w-3.5 h-3.5 ${contact.is_primary ? 'fill-amber-500 text-amber-500' : ''}`} />
+                    {contact.is_primary ? 'Primary' : 'Set primary'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => removeContact(idx)}
+                    className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <Input placeholder="Name" value={contact.name} onChange={(e) => updateContact(idx, 'name', e.target.value)} />
+                  <Input placeholder="Position / Role" value={contact.position} onChange={(e) => updateContact(idx, 'position', e.target.value)} />
+                  <Input placeholder="Email" type="email" value={contact.email} onChange={(e) => updateContact(idx, 'email', e.target.value)} />
+                  <Input placeholder="Phone" value={contact.phone} onChange={(e) => updateContact(idx, 'phone', e.target.value)} />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="border-t pt-4 space-y-3">
