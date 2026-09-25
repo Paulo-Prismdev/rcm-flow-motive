@@ -6,17 +6,26 @@ import { Textarea } from "@/components/ui/textarea";
 import { X, Plus, Trash2, Star } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useMutation } from '@tanstack/react-query';
+import { useToast } from "@/components/ui/use-toast";
 
 const EMPTY_FORM = { name: '', contact_name: '', phone: '', email: '', contacts: [], address_line_1: '', address_line_2: '', town: '', county: '', postcode: '', account_reference: '', notes: '' };
 
 export default function AddCreditRepairCompanyModal({ isOpen, onClose, onSuccess }) {
   const [formData, setFormData] = useState(EMPTY_FORM);
+  const { toast } = useToast();
 
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.CreditRepairCompany.create(data),
     onSuccess: (newCompany) => {
       if (onSuccess) onSuccess(newCompany);
       handleClose();
+    },
+    onError: (error) => {
+      toast({
+        title: "Failed to create company",
+        description: error?.message || "Please try again.",
+        variant: "destructive",
+      });
     },
   });
 
