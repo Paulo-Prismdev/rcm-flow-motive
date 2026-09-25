@@ -14,8 +14,8 @@ import {
 
 const SECTION_FIELDS = {
   status: ['claim_type', 'loss_date', 'vehicle_use', 'incident_location', 'circumstances'],
-  client: ['client_name', 'client_phone', 'client_email', 'client_address_line_1', 'client_town', 'client_postcode', 'business_division'],
-  insurance: ['insurer', 'claim_ref', 'policy_number', 'policy_excess'],
+  client: ['client_name', 'client_phone', 'client_email', 'client_address_line_1', 'client_town', 'client_postcode', 'business_division', 'broker_name', 'insurer', 'claim_ref', 'policy_number', 'policy_excess'],
+  creditRepair: ['credit_repair_company_name', 'credit_repair_company_contact_name', 'credit_repair_company_phone', 'credit_repair_company_email', 'credit_repair_company_account_ref'],
   driver: ['driver_contact_name', 'driver_contact_phone', 'driver_contact_email'],
   estimate: ['audatex_code', 'est_fee', 'authorising_party', 'estimate_cost_net', 'authority_cost_net', 'estimate_cost_gross', 'authority_cost_gross'],
   thirdParty: ['tp_name', 'tp_phone', 'tp_reg', 'tp_insurer'],
@@ -46,6 +46,7 @@ const SECTIONS = [
   { value: 'status', label: 'Status & Overview' },
   { value: 'thirdpartyPursuit', label: 'Third Party Pursuit' },
   { value: 'client', label: 'Client Details' },
+  { value: 'creditRepair', label: 'Credit Repair' },
   { value: 'driver', label: 'Driver Details' },
   { value: 'thirdParty', label: 'Third Party Details' },
   { value: 'vehicle', label: 'Vehicle Details' },
@@ -159,7 +160,7 @@ export default function ClaimDetailMobileHeader({
               <span>Current Section:</span>
               <span className="ml-2 text-muted-foreground">{currentSection.label}</span>
             </DropdownMenuItem>
-            {SECTIONS.map(section => (
+            {SECTIONS.filter(s => s.value !== 'creditRepair' || claim.claim_type === 'Credit Repair').map(section => (
               <DropdownMenuItem
                 key={section.value}
                 onSelect={() => { onAction('section:' + section.value); }}

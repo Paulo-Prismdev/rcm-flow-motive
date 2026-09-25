@@ -249,6 +249,29 @@ export default function ClaimPartiesForm({ claim, onSave, onCancel, mode }) {
           <label className="block text-xs text-muted-foreground mb-1">VAT Status</label>
           <CustomSelect value={data.client_vat_status} onChange={(v) => set('client_vat_status', v)} options={VAT_OPTIONS} />
         </div>
+        <SectionDivider label="Insurance Details" />
+        <div>
+          <label className="block text-xs text-muted-foreground mb-1">Broker</label>
+          <BrokerCombobox value={data.broker_name} onChange={handleBrokerSelect} />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div>
+            <label className="block text-xs text-muted-foreground mb-1">Insurer</label>
+            <InsurerCombobox value={data.insurer} onChange={(v) => set('insurer', v)} />
+          </div>
+          <div>
+            <label className="block text-xs text-muted-foreground mb-1">Claim Reference</label>
+            <Input value={data.claim_ref} onChange={(e) => set('claim_ref', e.target.value)} className="neomorph-inset" />
+          </div>
+          <div>
+            <label className="block text-xs text-muted-foreground mb-1">Policy Number</label>
+            <Input value={data.policy_number} onChange={(e) => set('policy_number', e.target.value)} className="neomorph-inset" />
+          </div>
+          <div>
+            <label className="block text-xs text-muted-foreground mb-1">Policy Excess (£)</label>
+            <Input type="text" inputMode="decimal" value={data.policy_excess || ''} onChange={(e) => { const v = e.target.value; if (v === '' || /^\d*\.?\d*$/.test(v)) set('policy_excess', v === '' ? 0 : parseFloat(v) || 0); }} className="neomorph-inset" placeholder="0.00" />
+          </div>
+        </div>
         <div className="flex justify-end gap-3 pt-2">
           <Button onClick={onCancel} variant="outline">Cancel</Button>
           <Button onClick={handleSave} className="bg-primary text-primary-foreground">Save Changes</Button>

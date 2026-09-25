@@ -40,7 +40,7 @@ import ClaimClientForm from './ClaimClientForm';
 import ClaimPartiesForm from './ClaimPartiesForm';
 import PartyDisplayCard from '../shared/PartyDisplayCard';
 import ClaimVehicleForm from './ClaimVehicleForm';
-import ClaimInsuranceForm from './ClaimInsuranceForm';
+import ClaimCreditRepairForm from './ClaimCreditRepairForm';
 import ClaimReferrerForm from './ClaimReferrerForm';
 import ClaimFinancialsForm from './ClaimFinancialsForm';
 import InlineEditableSection, { InlineField, useInlineEdit } from './InlineEditableSection';
@@ -190,8 +190,8 @@ import { logActivity, logChanges } from '../shared/useActivityLogger';
 
 const SECTION_FIELDS = {
   status: ['reg', 'claim_type', 'loss_date', 'vehicle_use', 'incident_location', 'circumstances'],
-  client: ['client_name', 'client_phone', 'client_email', 'client_address_line_1', 'client_town', 'client_postcode', 'business_division', 'client_ref'],
-  insurance: ['insurer', 'claim_ref', 'policy_number', 'policy_excess'],
+  client: ['client_name', 'client_phone', 'client_email', 'client_address_line_1', 'client_town', 'client_postcode', 'business_division', 'client_ref', 'broker_name', 'insurer', 'claim_ref', 'policy_number', 'policy_excess'],
+  creditRepair: ['credit_repair_company_name', 'credit_repair_company_contact_name', 'credit_repair_company_phone', 'credit_repair_company_email', 'credit_repair_company_account_ref'],
   driver: ['driver_contact_name', 'driver_contact_phone', 'driver_contact_email'],
   estimate: ['send_estimate_email', 'audatex_code', 'est_fee', 'authorising_party', 'estimate_cost_net', 'authority_cost_net', 'estimate_cost_gross', 'authority_cost_gross'],
   thirdParty: ['tp_name', 'tp_phone', 'tp_reg', 'tp_insurer'],
@@ -225,7 +225,7 @@ const DETAIL_SECTIONS = [
   { id: 'dates', label: 'Key Dates', icon: Calendar },
   { id: 'estimate', label: 'Estimate Details', icon: Calculator },
   { id: 'client', label: 'Client Details', icon: Users },
-  { id: 'insurance', label: 'Insurance & Broker', icon: Shield },
+  { id: 'creditRepair', label: 'Credit Repair', icon: Shield },
   { id: 'driver', label: 'Repair Contact (Driver)', icon: Users },
   { id: 'vehicle', label: 'Vehicle Details', icon: Car },
   { id: 'vehicleDamage', label: 'Vehicle Damage', icon: AlertTriangle },
@@ -880,6 +880,16 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
               { claim.client_ref && <div className="py-2 px-3 rounded-[8px] hover:bg-muted/50"><div className="text-[11px] font-medium text-muted-foreground mb-0.5">Client Ref</div><div className="text-sm font-medium">{claim.client_ref}</div></div>}
               {claim.business_division && <div className="py-2 px-3 rounded-[8px] hover:bg-muted/50"><div className="text-[11px] font-medium text-muted-foreground mb-0.5">Business Division</div><div className="text-sm font-medium">{claim.business_division}</div></div>}
             </div>
+            <div className="mt-3 pt-3 border-t border-border">
+              <p className="text-[11px] font-semibold text-muted-foreground mb-2">Insurance Details</p>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+                <DetailRow label="Broker" value={claim.broker_name} />
+                <DetailRow label="Insurer" value={claim.insurer} />
+                <DetailRow label="Claim Reference" value={claim.claim_ref} />
+                <DetailRow label="Policy Number" value={claim.policy_number} />
+                <DetailRow label="Policy Excess" value={claim.policy_excess} isCurrency />
+              </div>
+            </div>
             {(claim.client_address_line_1 || claim.client_town || claim.client_postcode) && (
               <div className="mt-2 py-3 px-4 rounded-lg bg-muted/40">
                 <div className="text-xs font-semibold text-muted-foreground mb-2">Address</div>
@@ -894,15 +904,15 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
         );
       }
 
-      case 'insurance':
+      case 'creditRepair':
         return (
-          <EditableSection title="Insurance & Broker" icon={Shield} claim={claim} onUpdate={handleUpdate} EditComponent={ClaimInsuranceForm} canEdit={canEdit}>
+          <EditableSection title="Credit Repair" icon={Shield} claim={claim} onUpdate={handleUpdate} EditComponent={ClaimCreditRepairForm} canEdit={canEdit}>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
-              <DetailRow label="Broker" value={claim.broker_name} />
-              <DetailRow label="Insurer" value={claim.insurer} />
-              <DetailRow label="Claim Reference" value={claim.claim_ref} />
-              <DetailRow label="Policy Number" value={claim.policy_number} />
-              <DetailRow label="Policy Excess" value={claim.policy_excess} isCurrency />
+              <DetailRow label="Company" value={claim.credit_repair_company_name} />
+              <DetailRow label="Contact Name" value={claim.credit_repair_company_contact_name} />
+              <DetailRow label="Phone" value={claim.credit_repair_company_phone} />
+              <DetailRow label="Email" value={claim.credit_repair_company_email} />
+              <DetailRow label="Account Ref" value={claim.credit_repair_company_account_ref} />
             </div>
           </EditableSection>
         );
@@ -1880,7 +1890,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-full max-h-80 overflow-y-auto" align="start" side="bottom">
-              {DETAIL_SECTIONS.map(section => (
+              {DETAIL_SECTIONS.filter(s => s.id !== 'creditRepair' || claim.claim_type === 'Credit Repair').map(section => (
                 <DropdownMenuItem
                   key={section.id}
                   onSelect={() => setSelectedSection(section.id)}
