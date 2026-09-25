@@ -106,12 +106,14 @@ Deno.serve(async (req) => {
       doc.setFontSize(9);
       doc.setFont('helvetica', 'bold');
       doc.setTextColor(60, 60, 60);
-      doc.text(`${label}:`, LM, y);
+      const labelText = `${label}:`;
+      doc.text(labelText, LM, y);
+      const valueX = LM + Math.max(45, doc.getTextWidth(labelText) + 3);
       doc.setFont('helvetica', 'normal');
       doc.setTextColor(0, 0, 0);
       const valStr = String(value || '—');
-      const lines = doc.splitTextToSize(valStr, MW - 40);
-      doc.text(lines, LM + 40, y);
+      const lines = doc.splitTextToSize(valStr, RM - valueX);
+      doc.text(lines, valueX, y);
       y += Math.max(6, lines.length * 5 + 1);
     };
 
