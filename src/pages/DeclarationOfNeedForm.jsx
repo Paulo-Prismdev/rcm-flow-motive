@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { getPublicFormToken } from '@/functions/getPublicFormToken';
 import { Button } from '@/components/ui/button';
-import { Check, AlertTriangle, Loader, PenLine, Trash2, FileCheck2, Plus, X, ArrowLeft, ArrowRight } from 'lucide-react';
+import { Check, AlertTriangle, Loader, PenLine, Trash2, FileCheck2, ArrowLeft, ArrowRight } from 'lucide-react';
 
 const VEHICLE_TYPES = ['Panel Van', 'Pickup', '4x4', 'Car-Derived Van', 'Car', 'HGV', 'Other'];
 
@@ -175,23 +175,6 @@ export default function DeclarationOfNeedForm() {
       obj[keys[keys.length - 1]] = arr.includes(item) ? arr.filter(x => x !== item) : [...arr, item];
       return { ...prev };
     });
-  };
-
-  const addFleetVehicle = () => {
-    setFormData(prev => ({
-      ...prev,
-      fleet: { ...prev.fleet, vehicles: [...prev.fleet.vehicles, { registration: '', make_model: '', type: '', assigned_to: '', available: '' }] },
-    }));
-  };
-  const updateFleetVehicle = (idx, field, value) => {
-    setFormData(prev => {
-      const vehicles = [...prev.fleet.vehicles];
-      vehicles[idx] = { ...vehicles[idx], [field]: value };
-      return { ...prev, fleet: { ...prev.fleet, vehicles } };
-    });
-  };
-  const removeFleetVehicle = (idx) => {
-    setFormData(prev => ({ ...prev, fleet: { ...prev.fleet, vehicles: prev.fleet.vehicles.filter((_, i) => i !== idx) } }));
   };
 
   const validateStep = (s) => {
@@ -381,51 +364,9 @@ export default function DeclarationOfNeedForm() {
           <div className={sectionCls}>
             <h3 className="text-base font-semibold text-gray-800 mb-4">Section 3 – Fleet Availability</h3>
             <div className="space-y-3">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-3">
                 <div><label className={labelCls}>Total Vehicles Operated</label><input type="number" value={formData.fleet.total_vehicles} onChange={e => update('fleet.total_vehicles', e.target.value)} className={inputCls} placeholder="e.g. 12" /></div>
                 <div><label className={labelCls}>Vehicles Currently Off Road (other than damaged vehicle)</label><input type="number" value={formData.fleet.off_road_count} onChange={e => update('fleet.off_road_count', e.target.value)} className={inputCls} placeholder="e.g. 2" /></div>
-              </div>
-
-              {/* Fleet list */}
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <label className={labelCls + ' mb-0'}>Fleet List</label>
-                  <button onClick={addFleetVehicle} className="flex items-center gap-1 text-xs text-amber-600 font-medium hover:text-amber-700">
-                    <Plus className="w-4 h-4" /> Add Vehicle
-                  </button>
-                </div>
-                <p className="text-xs text-gray-400 mb-2">Add each vehicle in your fleet. Mark whether it was available at the date of the incident.</p>
-                {formData.fleet.vehicles.length === 0 && (
-                  <div className="text-center py-4 text-sm text-gray-400 border-2 border-dashed border-gray-200 rounded-xl">No fleet vehicles added yet. Click "Add Vehicle" to begin.</div>
-                )}
-                {formData.fleet.vehicles.map((v, idx) => (
-                  <div key={idx} className="border border-gray-200 rounded-xl p-3 mb-2 bg-gray-50">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs font-semibold text-gray-500">Vehicle {idx + 1}</span>
-                      <button onClick={() => removeFleetVehicle(idx)} className="text-gray-400 hover:text-red-500"><X className="w-4 h-4" /></button>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                      <input value={v.registration} onChange={e => updateFleetVehicle(idx, 'registration', e.target.value)} className={inputCls} placeholder="Registration" />
-                      <input value={v.make_model} onChange={e => updateFleetVehicle(idx, 'make_model', e.target.value)} className={inputCls} placeholder="Make / Model" />
-                      <select value={v.type} onChange={e => updateFleetVehicle(idx, 'type', e.target.value)} className={inputCls}>
-                        <option value="">Type...</option>
-                        {VEHICLE_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
-                      </select>
-                      <input value={v.assigned_to} onChange={e => updateFleetVehicle(idx, 'assigned_to', e.target.value)} className={inputCls} placeholder="Assigned staff member / role" />
-                      <div>
-                        <label className="text-xs text-gray-500 mb-1 block">Available at date of incident?</label>
-                        <div className="flex gap-2">
-                          {[['Y', 'Yes'], ['N', 'No']].map(([val, label]) => (
-                            <label key={val} className="flex items-center gap-1.5 cursor-pointer">
-                              <input type="radio" name={`avail-${idx}`} checked={v.available === val} onChange={() => updateFleetVehicle(idx, 'available', val)} className="w-4 h-4 text-amber-500 focus:ring-amber-400" />
-                              <span className="text-sm text-gray-700">{label}</span>
-                            </label>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
               </div>
 
               {/* Confirmations */}
@@ -437,7 +378,7 @@ export default function DeclarationOfNeedForm() {
                 <Checkbox checked={formData.fleet.confirmations.no_replacement} onChange={v => update('fleet.confirmations.no_replacement', v)} label="The company's lease, contract hire, maintenance or insurance arrangements do not include a replacement or courtesy vehicle for this incident." />
                 <Checkbox checked={formData.fleet.confirmations.no_other_source} onChange={v => update('fleet.confirmations.no_other_source', v)} label="No suitable replacement vehicle was available from any other source at no cost to the company." />
                 <div className="mt-2">
-                  <label className={labelCls}>If any of the above can't be ticked, or any fleet vehicle is marked as available, please explain why:</label>
+                  <label className={labelCls}>If any of the above can't be ticked, please explain why:</label>
                   <textarea value={formData.fleet.exception_explanation} onChange={e => update('fleet.exception_explanation', e.target.value)} className={inputCls} rows={3} placeholder="Explanation (if applicable)" />
                 </div>
               </div>
