@@ -27,18 +27,68 @@ Deno.serve(async (req) => {
     }
     const claim = claims[0];
 
-    // Only expose the minimal pre-fill / display fields — never the full claim record.
+    // Try to load the linked Client entity for richer company details
+    let linkedClient = null;
+    if (claim.client_id) {
+      try {
+        const clients = await base44.asServiceRole.entities.Client.filter({ id: claim.client_id });
+        if (clients && clients.length > 0) linkedClient = clients[0];
+      } catch { /* ignore — fall back to claim fields */ }
+    }
+
+    // Build a full address string from available components
+    const addressParts = [
+      claim.client_address_line_1,
+      claim.client_address_line_2,
+      claim.client_town,
+      claim.client_county,
+      claim.client_postcode,
+    ].filter(Boolean);
+    const clientAddress = addressParts.join(', ');
+
+    // Prefer company contact details from linked Client (Company type), fall back to claim
+    const isCompanyClient = linkedClient?.client_type === 'Company';
+    const contactName = isCompanyClient
+      ? (linkedClient.company_contact_name || claim.driver_name || claim.client_name || '')
+      : (claim.driver_name || claim.client_name || '');
+    const contactEmail = isCompanyClient
+      ? (linkedClient.company_contact_email || claim.client_email || claim.driver_email || '')
+      : (claim.driver_email || claim.client_email || '');
+    const contactPhone = isCompanyClient
+      ? (linkedClient.company_contact_phone || claim.client_phone || claim.driver_phone || '')
+      : (claim.driver_phone || claim.client_phone || '');
+
+    // Map claim vehicle_type to form vehicle_type
+    const vehicleTypeMap = {
+      'Car': 'Car',
+      'Van': 'Panel Van',
+      'HGV': 'HGV',
+      'Other': 'Other',
+      'Motorcycle': 'Other',
+    };
+    const mappedVehicleType = vehicleTypeMap[claim.vehicle_type] || '';
+
     return Response.json({
       valid: true,
       signed: !!claim.declaration_of_need_signed,
-      // Pre-fill fields
-      client_name: claim.client_name || '',
+      // Display fields
+      job_number: claim.job_number || '',
+      claim_ref: claim.claim_ref || '',
+      loss_date: claim.loss_date || '',
+      // Company pre-fill
+      client_name: claim.client_name || (linkedClient?.name || ''),
+      client_address: clientAddress,
+      contact_name: contactName,
+      contact_email: contactEmail,
+      contact_phone: contactPhone,
+      // Vehicle pre-fill
       reg: claim.reg || '',
       vehicle_make: claim.vehicle_make || claim.make_model || '',
       vehicle_model: claim.vehicle_model || '',
-      loss_date: claim.loss_date || '',
-      claim_ref: claim.claim_ref || '',
-      job_number: claim.job_number || '',
+      vehicle_type: mappedVehicleType,
+      driver_name: claim.driver_name || '',
+      unroadworthy: claim.unroadworthy,
+      vehicle_use: claim.vehicle_use || '',
     });
   } catch (error) {
     console.error('getDeclarationOfNeedClaim error:', error.message, error.stack);

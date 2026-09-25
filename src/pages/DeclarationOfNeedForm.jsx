@@ -79,16 +79,31 @@ export default function DeclarationOfNeedForm() {
         if (data?.valid) {
           setClaim(data);
           if (data.signed) setSubmitted(true);
-          // Pre-fill
+          // Pre-fill all possible fields from the claim
           setFormData(prev => ({
             ...prev,
-            company: { ...prev.company, registered_name: data.client_name || '' },
+            company: {
+              ...prev.company,
+              registered_name: data.client_name || '',
+              registered_address: data.client_address || '',
+              person_name: data.contact_name || '',
+              email: data.contact_email || '',
+              telephone: data.contact_phone || '',
+            },
             vehicle: {
               ...prev.vehicle,
               registration: data.reg || '',
               make_model: [data.vehicle_make, data.vehicle_model].filter(Boolean).join(' ') || '',
+              vehicle_type: data.vehicle_type || '',
+              driver_assigned: data.driver_name || '',
+              roadworthy: data.unroadworthy === true ? 'No' : (data.unroadworthy === false ? 'Yes' : ''),
+              main_business_use: data.vehicle_use || '',
             },
-            declaration: { ...prev.declaration, date: new Date().toLocaleDateString('en-GB') },
+            declaration: {
+              ...prev.declaration,
+              full_name: data.contact_name || '',
+              date: new Date().toLocaleDateString('en-GB'),
+            },
           }));
         } else {
           setLinkValid(false);
