@@ -81,15 +81,30 @@ export function useBrowserNotifications(notifications, currentUser) {
         shownIdsRef.current.add(n.id);
         saveShownId(n.id);
 
-        const notification = new Notification(n.title, {
-          body: n.message,
-          icon: '/favicon.ico',
-          tag: n.id, // prevents duplicates if hook runs twice
-          silent: false,
-        });
-
-        // Auto-close after 6 seconds
-        setTimeout(() => notification.close(), 6000);
+        const fireNotification = async () => {
+          const options = {
+            body: n.message,
+            icon: '/favicon.ico',
+            tag: n.id,
+            silent: false,
+          };
+          // Installed PWA on Android: must use the service worker API
+          if ('serviceWorker' in navigator && 'showNotification' in ServiceWorkerRegistration.prototype) {
+            try {
+              const reg = await navigator.serviceWorker.getRegistration();
+              if (reg) {
+                await reg.showNotification(n.title, options);
+                return;
+              }
+            } catch { /* fall through to constructor */ }
+          }
+          // Desktop / non-PWA: use the Notification constructor
+          try {
+            const notification = new Notification(n.title, options);
+            setTimeout(() => notification.close(), 6000);
+          } catch { /* illegal constructor — silently skip */ }
+        };
+        fireNotification();
       }
     });
   }, [notifications, currentUser]);
