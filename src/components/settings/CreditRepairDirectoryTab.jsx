@@ -65,34 +65,42 @@ function CreditRepairDetailModal({ company, onClose, onUpdated }) {
               <label className="block text-sm text-muted-foreground mb-1">Company Name *</label>
               <Input value={formData.name || ''} onChange={(e) => set('name', e.target.value)} className="neomorph-inset" required />
             </div>
-            <div className="border-t pt-4 space-y-3">
-              <h3 className="text-sm font-semibold">Main Contact</h3>
+            <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-sm text-muted-foreground mb-1">Contact Name</label>
-                <Input value={formData.contact_name || ''} onChange={(e) => set('contact_name', e.target.value)} className="neomorph-inset" />
+                <label className="block text-sm text-muted-foreground mb-1">Phone</label>
+                <Input value={formData.phone || ''} onChange={(e) => set('phone', e.target.value)} className="neomorph-inset" />
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-sm text-muted-foreground mb-1">Phone</label>
-                  <Input value={formData.phone || ''} onChange={(e) => set('phone', e.target.value)} className="neomorph-inset" />
-                </div>
-                <div>
-                  <label className="block text-sm text-muted-foreground mb-1">Email</label>
-                  <Input type="email" value={formData.email || ''} onChange={(e) => set('email', e.target.value)} className="neomorph-inset" />
-                </div>
+              <div>
+                <label className="block text-sm text-muted-foreground mb-1">Email</label>
+                <Input type="email" value={formData.email || ''} onChange={(e) => set('email', e.target.value)} className="neomorph-inset" />
               </div>
             </div>
-
+            <div>
+              <label className="block text-sm text-muted-foreground mb-1">Address</label>
+              <Input value={formData.address_line_1 || ''} onChange={(e) => set('address_line_1', e.target.value)} className="neomorph-inset" placeholder="Address line 1" />
+            </div>
+            <div>
+              <Input value={formData.address_line_2 || ''} onChange={(e) => set('address_line_2', e.target.value)} className="neomorph-inset" placeholder="Address line 2" />
+            </div>
+            <div className="grid grid-cols-3 gap-3">
+              <Input value={formData.town || ''} onChange={(e) => set('town', e.target.value)} className="neomorph-inset" placeholder="Town" />
+              <Input value={formData.county || ''} onChange={(e) => set('county', e.target.value)} className="neomorph-inset" placeholder="County" />
+              <Input value={formData.postcode || ''} onChange={(e) => set('postcode', e.target.value)} className="neomorph-inset" placeholder="Postcode" />
+            </div>
+            <div>
+              <label className="block text-sm text-muted-foreground mb-1">Account Reference</label>
+              <Input value={formData.account_reference || ''} onChange={(e) => set('account_reference', e.target.value)} className="neomorph-inset" />
+            </div>
             <div className="border-t pt-4 space-y-3">
               <div className="flex items-center justify-between">
-                <h3 className="text-sm font-semibold">Additional Contacts</h3>
+                <h3 className="text-sm font-semibold">Contacts</h3>
                 <Button type="button" variant="outline" size="sm" onClick={addContact}>
                   <Plus className="w-3.5 h-3.5 mr-1" />
                   Add Contact
                 </Button>
               </div>
               {(formData.contacts || []).length === 0 ? (
-                <p className="text-xs text-muted-foreground">No additional contacts added.</p>
+                <p className="text-xs text-muted-foreground">No contacts added yet.</p>
               ) : (
                 <div className="space-y-3">
                   {(formData.contacts || []).map((contact, idx) => (
@@ -127,22 +135,6 @@ function CreditRepairDetailModal({ company, onClose, onUpdated }) {
               )}
             </div>
             <div>
-              <label className="block text-sm text-muted-foreground mb-1">Address</label>
-              <Input value={formData.address_line_1 || ''} onChange={(e) => set('address_line_1', e.target.value)} className="neomorph-inset" placeholder="Address line 1" />
-            </div>
-            <div>
-              <Input value={formData.address_line_2 || ''} onChange={(e) => set('address_line_2', e.target.value)} className="neomorph-inset" placeholder="Address line 2" />
-            </div>
-            <div className="grid grid-cols-3 gap-3">
-              <Input value={formData.town || ''} onChange={(e) => set('town', e.target.value)} className="neomorph-inset" placeholder="Town" />
-              <Input value={formData.county || ''} onChange={(e) => set('county', e.target.value)} className="neomorph-inset" placeholder="County" />
-              <Input value={formData.postcode || ''} onChange={(e) => set('postcode', e.target.value)} className="neomorph-inset" placeholder="Postcode" />
-            </div>
-            <div>
-              <label className="block text-sm text-muted-foreground mb-1">Account Reference</label>
-              <Input value={formData.account_reference || ''} onChange={(e) => set('account_reference', e.target.value)} className="neomorph-inset" />
-            </div>
-            <div>
               <label className="block text-sm text-muted-foreground mb-1">Notes</label>
               <Textarea value={formData.notes || ''} onChange={(e) => set('notes', e.target.value)} className="neomorph-inset" rows={2} />
             </div>
@@ -155,10 +147,6 @@ function CreditRepairDetailModal({ company, onClose, onUpdated }) {
           </form>
         ) : (
           <div className="space-y-3">
-            <div>
-              <p className="text-xs text-muted-foreground">Contact Name</p>
-              <p className="text-sm font-medium">{company.contact_name || '—'}</p>
-            </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <p className="text-xs text-muted-foreground">Phone</p>
@@ -187,7 +175,7 @@ function CreditRepairDetailModal({ company, onClose, onUpdated }) {
             )}
             {company.contacts?.length > 0 && (
               <div className="border-t pt-3">
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Additional Contacts</p>
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Contacts</p>
                 <div className="space-y-2">
                   {company.contacts.map((c, i) => (
                     <div key={i} className="rounded-lg border border-border p-2.5 bg-muted/30">

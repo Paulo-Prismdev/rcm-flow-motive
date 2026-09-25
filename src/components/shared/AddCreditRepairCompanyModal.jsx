@@ -59,34 +59,52 @@ export default function AddCreditRepairCompanyModal({ isOpen, onClose, onSuccess
             <label className="block text-sm text-muted-foreground mb-1">Company Name *</label>
             <Input value={formData.name} onChange={(e) => set('name', e.target.value)} className="neomorph-inset" required autoFocus />
           </div>
-          <div className="border-t pt-4 space-y-3">
-            <h3 className="text-sm font-semibold">Main Contact</h3>
+          <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm text-muted-foreground mb-1">Contact Name</label>
-              <Input value={formData.contact_name} onChange={(e) => set('contact_name', e.target.value)} className="neomorph-inset" />
+              <label className="block text-sm text-muted-foreground mb-1">Phone</label>
+              <Input value={formData.phone} onChange={(e) => set('phone', e.target.value)} className="neomorph-inset" />
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-sm text-muted-foreground mb-1">Phone</label>
-                <Input value={formData.phone} onChange={(e) => set('phone', e.target.value)} className="neomorph-inset" />
-              </div>
-              <div>
-                <label className="block text-sm text-muted-foreground mb-1">Email</label>
-                <Input type="email" value={formData.email} onChange={(e) => set('email', e.target.value)} className="neomorph-inset" />
-              </div>
+            <div>
+              <label className="block text-sm text-muted-foreground mb-1">Email</label>
+              <Input type="email" value={formData.email} onChange={(e) => set('email', e.target.value)} className="neomorph-inset" />
             </div>
           </div>
-
+          <div>
+            <label className="block text-sm text-muted-foreground mb-1">Address Line 1</label>
+            <Input value={formData.address_line_1} onChange={(e) => set('address_line_1', e.target.value)} className="neomorph-inset" />
+          </div>
+          <div>
+            <label className="block text-sm text-muted-foreground mb-1">Address Line 2</label>
+            <Input value={formData.address_line_2} onChange={(e) => set('address_line_2', e.target.value)} className="neomorph-inset" />
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+            <div>
+              <label className="block text-sm text-muted-foreground mb-1">Town</label>
+              <Input value={formData.town} onChange={(e) => set('town', e.target.value)} className="neomorph-inset" />
+            </div>
+            <div>
+              <label className="block text-sm text-muted-foreground mb-1">County</label>
+              <Input value={formData.county} onChange={(e) => set('county', e.target.value)} className="neomorph-inset" />
+            </div>
+            <div>
+              <label className="block text-sm text-muted-foreground mb-1">Postcode</label>
+              <Input value={formData.postcode} onChange={(e) => set('postcode', e.target.value)} className="neomorph-inset" />
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm text-muted-foreground mb-1">Account Reference</label>
+            <Input value={formData.account_reference} onChange={(e) => set('account_reference', e.target.value)} className="neomorph-inset" placeholder="Account or reference number" />
+          </div>
           <div className="border-t pt-4 space-y-3">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold">Additional Contacts</h3>
+              <h3 className="text-sm font-semibold">Contacts</h3>
               <Button type="button" variant="outline" size="sm" onClick={addContact}>
                 <Plus className="w-3.5 h-3.5 mr-1" />
                 Add Contact
               </Button>
             </div>
             {formData.contacts.length === 0 ? (
-              <p className="text-xs text-muted-foreground">No additional contacts added.</p>
+              <p className="text-xs text-muted-foreground">No contacts added yet.</p>
             ) : (
               <div className="space-y-3">
                 {formData.contacts.map((contact, idx) => (
@@ -119,32 +137,6 @@ export default function AddCreditRepairCompanyModal({ isOpen, onClose, onSuccess
                 ))}
               </div>
             )}
-          </div>
-          <div>
-            <label className="block text-sm text-muted-foreground mb-1">Address Line 1</label>
-            <Input value={formData.address_line_1} onChange={(e) => set('address_line_1', e.target.value)} className="neomorph-inset" />
-          </div>
-          <div>
-            <label className="block text-sm text-muted-foreground mb-1">Address Line 2</label>
-            <Input value={formData.address_line_2} onChange={(e) => set('address_line_2', e.target.value)} className="neomorph-inset" />
-          </div>
-          <div className="grid grid-cols-3 gap-3">
-            <div>
-              <label className="block text-sm text-muted-foreground mb-1">Town</label>
-              <Input value={formData.town} onChange={(e) => set('town', e.target.value)} className="neomorph-inset" />
-            </div>
-            <div>
-              <label className="block text-sm text-muted-foreground mb-1">County</label>
-              <Input value={formData.county} onChange={(e) => set('county', e.target.value)} className="neomorph-inset" />
-            </div>
-            <div>
-              <label className="block text-sm text-muted-foreground mb-1">Postcode</label>
-              <Input value={formData.postcode} onChange={(e) => set('postcode', e.target.value)} className="neomorph-inset" />
-            </div>
-          </div>
-          <div>
-            <label className="block text-sm text-muted-foreground mb-1">Account Reference</label>
-            <Input value={formData.account_reference} onChange={(e) => set('account_reference', e.target.value)} className="neomorph-inset" placeholder="Account or reference number" />
           </div>
           <div>
             <label className="block text-sm text-muted-foreground mb-1">Notes</label>
