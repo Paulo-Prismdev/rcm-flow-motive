@@ -218,7 +218,7 @@ export default function ReferrerClaimDetail({ claim, onClose, initialSection }) 
               <DetailRow label="Date of Loss" value={claim.loss_date} isDate missing={m('loss_date')} />
               <DetailRow label="Time of Loss" value={claim.loss_time} />
               <DetailRow label="Use of Vehicle" value={claim.vehicle_use} />
-              <DetailRow label="Courtesy Car Required" value={claim.courtesy_car_required ? 'Yes' : 'No'} />
+              <DetailRow label="Courtesy Car Required" value={claim.courtesy_car_required === true ? 'Yes' : (claim.courtesy_car_required || 'No')} />
             </div>
             <div className={`mt-2 py-3 px-4 rounded-lg ${m('circumstances') ? 'bg-amber-50 dark:bg-amber-900/15 border border-amber-200 dark:border-amber-700/50' : 'glass-inset'}`}>
               <div className="text-xs font-semibold text-foreground-muted mb-2">Incident Location</div>
@@ -329,7 +329,7 @@ export default function ReferrerClaimDetail({ claim, onClose, initialSection }) 
           <div className="neomorph-flat p-4 md:p-6">
             <div className="flex items-center gap-3 mb-4"><AlertTriangle className="w-5 h-5 text-gold" /><h3 className="font-bold">Vehicle Damage</h3></div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
-              <DetailRow label="Courtesy Car Needed" value={claim.courtesy_car_required ? 'Yes' : 'No'} />
+              <DetailRow label="Courtesy Car Needed" value={claim.courtesy_car_required === true ? 'Yes' : (claim.courtesy_car_required || 'No')} />
               <DetailRow label="Undriveable / Drivable" value={claim.unroadworthy ? 'Undriveable' : 'Drivable'} />
             </div>
             <div className={`mt-2 py-3 px-4 rounded-lg ${m('vehicle_damage') ? 'bg-amber-50 dark:bg-amber-900/15 border border-amber-200 dark:border-amber-700/50' : 'glass-inset'}`}>

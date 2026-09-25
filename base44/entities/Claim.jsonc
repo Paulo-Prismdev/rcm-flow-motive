@@ -72,7 +72,16 @@
       ]
     },
     "courtesy_car_required": {
-      "type": "boolean"
+      "type": "string",
+      "enum": [
+        "Yes",
+        "No",
+        "No - Insurer Providing",
+        "No - Credit Hire Provided",
+        "No - Client Hiring Own"
+      ],
+      "default": "No",
+      "description": "Courtesy car arrangement: Yes (repairer to supply), No, or who is providing it"
     },
     "linked_estimate_id": {
       "type": "string"

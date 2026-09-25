@@ -27,7 +27,7 @@ const CLAIM_FIELDS = [
   { key: 'authorising_party', label: 'Authorising Party' },
   { key: 'vehicle_damage', label: 'Vehicle Damage Description' },
   { key: 'vehicle_location', label: 'Vehicle Location' },
-  { key: 'courtesy_car_required', label: 'Courtesy Car Required (yes/no)' },
+  { key: 'courtesy_car_required', label: 'Courtesy Car Required (Yes / No / No - Insurer Providing / No - Credit Hire Provided / No - Client Hiring Own)' },
   { key: 'unroadworthy', label: 'Unroadworthy (yes/no)' },
   { key: 'recovery_required', label: 'Recovery Required (yes/no)' },
   { key: 'bodyshop', label: 'Bodyshop/Repairer Name' },
@@ -81,7 +81,7 @@ const DATE_FIELDS = new Set(['date_received','loss_date','bs_instructed','estima
 const NUMBER_FIELDS = new Set(['policy_excess','estimate_cost_net','estimate_cost_gross',
   'authority_cost_net','authority_cost_gross','final_repair_cost','storage_amount_net',
   'storage_amount_vat','percent_bld_instruction','percent_to_referrer']);
-const BOOL_FIELDS = new Set(['courtesy_car_required','unroadworthy','recovery_required','factored']);
+const BOOL_FIELDS = new Set(['unroadworthy','recovery_required','factored']);
 
 const CLAIM_TYPE_MAP = {
   'credit repair': 'Credit Repair', 'credit': 'Credit Repair',
@@ -115,6 +115,15 @@ const applyMapping = (row, mapping) => {
     } else if (NUMBER_FIELDS.has(claimField)) {
       const n = parseNumber(rawVal);
       if (n !== undefined) claim[claimField] = n;
+    } else if (claimField === 'courtesy_car_required') {
+      const s = String(rawVal).trim();
+      const lower = s.toLowerCase();
+      if (lower === 'yes' || lower === 'true' || lower === '1' || lower === 'y') claim[claimField] = 'Yes';
+      else if (lower === 'no' || lower === 'false' || lower === '0' || lower === 'n') claim[claimField] = 'No';
+      else if (lower.includes('insurer')) claim[claimField] = 'No - Insurer Providing';
+      else if (lower.includes('credit')) claim[claimField] = 'No - Credit Hire Provided';
+      else if (lower.includes('client') || lower.includes('own')) claim[claimField] = 'No - Client Hiring Own';
+      else claim[claimField] = s;
     } else if (BOOL_FIELDS.has(claimField)) {
       const b = parseBool(rawVal);
       if (b !== undefined) claim[claimField] = b;

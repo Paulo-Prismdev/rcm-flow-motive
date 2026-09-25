@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { AlertTriangle, Pencil, Check, User, Car, Phone } from 'lucide-react';
 import CreditRepairCombobox from '../shared/CreditRepairCombobox';
+import { COURTESY_CAR_OPTIONS } from '../shared/courtesyCarOptions';
 
 const CLAIM_TYPES = ['Fault Claim', '3rd Party Insurer Direct', '3rd Party Paying Privately', 'Credit Repair', 'Glass Claim', 'Paying Privately'];
 const VAT_STATUSES = ['VAT Registered', 'Non-VAT', 'Unknown'];
@@ -273,7 +274,7 @@ export default function InstructionPreCheck({ claim, onUpdate }) {
       <Group title="Recovery & Courtesy">
         <Row label="Recovery Required?" field="recovery_required" value={claim.recovery_required} claim={claim} onFieldChange={onUpdate} type="boolean" />
         <Row label="Vehicle Unroadworthy?" field="unroadworthy" value={claim.unroadworthy} claim={claim} onFieldChange={onUpdate} type="boolean" />
-        <Row label="Courtesy Car Required?" field="courtesy_car_required" value={claim.courtesy_car_required} claim={claim} onFieldChange={onUpdate} type="boolean" />
+        <Row label="Courtesy Car Required?" field="courtesy_car_required" value={claim.courtesy_car_required} claim={claim} onFieldChange={onUpdate} type="select" options={COURTESY_CAR_OPTIONS} />
       </Group>
 
       <InsuranceSection instructionType={instructionType} claim={claim} onUpdate={onUpdate} />

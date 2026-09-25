@@ -18,6 +18,7 @@ import { base44 } from '@/api/base44Client';
 import AddressLookupInput from '../shared/AddressLookupInput';
 import AIExtractConfirmDialog from '../shared/AIExtractConfirmDialog';
 import AIEntityLinker from '../shared/AIEntityLinker';
+import { COURTESY_CAR_OPTIONS } from '../shared/courtesyCarOptions';
 
 // ── Helpers ──
 
@@ -118,7 +119,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
   const [formData, setFormData] = useState(claim || {
     job_number: '', reg: '', job_statuses: ['New'], secondary_status: 'New', claim_type: defaultClaimType || '',
     circumstances: '', loss_date: '', loss_time: '', incident_location: '',
-    vehicle_use: '', courtesy_car_required: false, has_third_party: false,
+    vehicle_use: '', courtesy_car_required: 'No', has_third_party: false,
     requires_indemnity: false, file_urls: [], insurer: '', claim_ref: '',
     policy_number: '', policy_excess: 0, referrer: '', referrer_id: null,
     referrer_ref: '', file_handler: '', referrer_email: '', percent_to_referrer: 0,
@@ -554,7 +555,12 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
 
         {/* Toggle options */}
         <div className="border rounded-lg p-3 divide-y space-y-0">
-          <div className="py-2"><BoolToggle label="Courtesy car required" value={formData.courtesy_car_required} onChange={v => handleCheckboxChange('courtesy_car_required', v)} /></div>
+          <div className="py-2 flex items-center justify-between gap-3">
+            <span className="text-sm font-medium">Courtesy car required</span>
+            <select value={formData.courtesy_car_required || 'No'} onChange={e => handleChange('courtesy_car_required', e.target.value)} className="px-3 py-1.5 text-sm rounded-lg border border-input bg-card text-foreground">
+              {COURTESY_CAR_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
+            </select>
+          </div>
           <div className="py-2"><BoolToggle label="Third party involved" value={formData.has_third_party} onChange={v => handleCheckboxChange('has_third_party', v)} /></div>
           <div className="py-2"><BoolToggle label="Indemnity details required" value={formData.requires_indemnity} onChange={v => handleCheckboxChange('requires_indemnity', v)} /></div>
         </div>
@@ -790,7 +796,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
               <ReviewRow label="Date of Loss" value={formData.loss_date} />
               <ReviewRow label="Time of Loss" value={formData.loss_time} />
               <ReviewRow label="Vehicle Use" value={formData.vehicle_use} />
-              <ReviewRow label="Courtesy Car" value={formData.courtesy_car_required ? 'Yes' : 'No'} />
+              <ReviewRow label="Courtesy Car" value={formData.courtesy_car_required || 'No'} />
               <ReviewRow label="Third Party" value={formData.has_third_party ? 'Yes' : 'No'} />
               <ReviewRow label="Indemnity" value={formData.requires_indemnity ? 'Yes' : 'No'} />
             </div>

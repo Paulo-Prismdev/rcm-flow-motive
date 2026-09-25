@@ -47,7 +47,7 @@ Deno.serve(async (req) => {
       loss_time: formData.loss_time || '',
       incident_location: formData.incident_location || '',
       vehicle_use: formData.vehicle_use || '',
-      courtesy_car_required: !!formData.courtesy_car_required,
+      courtesy_car_required: formData.courtesy_car_required ? 'Yes' : 'No',
       client_name: formData.client_name || '',
       client_phone: formData.client_phone || '',
       client_email: formData.client_email || '',
@@ -179,7 +179,7 @@ Deno.serve(async (req) => {
     addRow('Damage Description', claimRecord.vehicle_damage || 'N/A');
     addRow('Unroadworthy', claimRecord.unroadworthy ? 'Yes' : 'No');
     addRow('Recovery Required', claimRecord.recovery_required ? 'Yes' : 'No');
-    addRow('Courtesy Car Required', claimRecord.courtesy_car_required ? 'Yes' : 'No');
+    addRow('Courtesy Car Required', claimRecord.courtesy_car_required || 'No');
     yPos += 3;
 
     // Insurance

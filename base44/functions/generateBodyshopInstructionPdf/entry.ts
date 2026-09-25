@@ -130,7 +130,13 @@ Deno.serve(async (req) => {
       vehicle_damage: claim.vehicle_damage || 'N/A',
       recovery_required: formatBool(claim.recovery_required),
       unroadworthy: formatBool(claim.unroadworthy),
-      courtesy_car_required: formatBool(claim.courtesy_car_required),
+      courtesy_car_required: (() => {
+        const v = claim.courtesy_car_required;
+        if (v === true) return 'Yes';
+        if (v === false || v == null) return 'No';
+        const s = String(v);
+        return ['Yes', 'No', 'No - Insurer Providing', 'No - Credit Hire Provided', 'No - Client Hiring Own'].includes(s) ? s : 'No';
+      })(),
       insurer: displayInsurer,
       claim_ref: displayClaimRef,
       policy_number: displayPolicyNumber,

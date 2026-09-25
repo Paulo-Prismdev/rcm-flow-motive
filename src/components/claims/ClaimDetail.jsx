@@ -846,7 +846,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
               <DetailRow label="Date of Loss" value={claim.loss_date} isDate />
               <DetailRow label="Time of Loss" value={claim.loss_time} />
               <DetailRow label="Use of Vehicle" value={claim.vehicle_use} />
-              <DetailRow label="Courtesy Car Required" value={claim.courtesy_car_required ? 'Yes' : 'No'} />
+              <DetailRow label="Courtesy Car Required" value={claim.courtesy_car_required === true ? 'Yes' : (claim.courtesy_car_required || 'No')} />
             </div>
             <div className="mt-2 py-3 px-4 rounded-lg glass-inset">
               <div className="text-xs font-semibold text-foreground-muted mb-2">Incident Location</div>
@@ -1068,7 +1068,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
             canEdit={canEdit}
           >
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
-              <DetailRow label="Courtesy Car (CC) Needed" value={claim.courtesy_car_required ? 'Yes' : 'No'} />
+              <DetailRow label="Courtesy Car (CC) Needed" value={claim.courtesy_car_required === true ? 'Yes' : (claim.courtesy_car_required || 'No')} />
               <DetailRow label="Undriveable / Drivable" value={claim.unroadworthy ? 'Undriveable' : 'Drivable'} />
             </div>
             <div className="mt-2 py-3 px-4 rounded-lg glass-inset">

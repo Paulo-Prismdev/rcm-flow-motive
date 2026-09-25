@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import AddressLookupInput from '../shared/AddressLookupInput';
 import StatusMultiSelect from '../shared/StatusMultiSelect';
+import { COURTESY_CAR_OPTIONS } from '../shared/courtesyCarOptions';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 
@@ -16,7 +17,7 @@ export default function ClaimStatusForm({ claim, onSave, onCancel }) {
         incident_location: claim.incident_location || '',
         vehicle_use: claim.vehicle_use || '',
         circumstances: claim.circumstances || '',
-        courtesy_car_required: claim.courtesy_car_required || false,
+        courtesy_car_required: claim.courtesy_car_required === true ? 'Yes' : (claim.courtesy_car_required || 'No'),
     });
 
     const { data: customStatuses = [] } = useQuery({
@@ -130,15 +131,15 @@ export default function ClaimStatusForm({ claim, onSave, onCancel }) {
                     className="neomorph-inset px-4 py-3 text-gray-700 border-0 h-24" 
                 />
             </div>
-            <div className="flex items-center gap-3">
-                <input 
-                    type="checkbox" 
-                    id="courtesy_car_required_edit" 
-                    checked={formData.courtesy_car_required} 
-                    onChange={e => handleChange('courtesy_car_required', e.target.checked)} 
-                    className="neomorph-inset" 
-                />
-                <label htmlFor="courtesy_car_required_edit" className="text-sm text-gray-600">Courtesy Car Required</label>
+            <div>
+                <label className="text-sm text-gray-500">Courtesy Car Required</label>
+                <select
+                    value={formData.courtesy_car_required || 'No'}
+                    onChange={e => handleChange('courtesy_car_required', e.target.value)}
+                    className="neomorph-inset w-full px-4 py-3 text-gray-700 border-0 rounded-xl"
+                >
+                    {COURTESY_CAR_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
+                </select>
             </div>
             <div className="flex justify-end gap-3 pt-4">
                 <Button onClick={onCancel} className="neomorph-flat">Cancel</Button>

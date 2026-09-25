@@ -117,7 +117,7 @@ export default function FileAttachmentModal({ fileUrls = [], onAdd, onRemove, is
             circumstances: { type: "string", description: "Description of incident circumstances" },
             incident_location: { type: "string", description: "Where the incident occurred" },
             vehicle_use: { type: "string", description: "Use of vehicle (Business, Social, Commuting)" },
-            courtesy_car_required: { type: "boolean", description: "Whether a courtesy car is required" },
+            courtesy_car_required: { type: "string", enum: ["Yes", "No", "No - Insurer Providing", "No - Credit Hire Provided", "No - Client Hiring Own"], description: "Courtesy car arrangement: Yes (repairer to supply), No, or who is providing it" },
             _source_snippets: {
               type: "object",
               additionalProperties: { type: "string" },

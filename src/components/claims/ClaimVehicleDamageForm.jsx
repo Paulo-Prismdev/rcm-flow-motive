@@ -3,13 +3,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import AddressLookupInput from '../shared/AddressLookupInput';
+import { COURTESY_CAR_OPTIONS } from '../shared/courtesyCarOptions';
 
 export default function ClaimVehicleDamageForm({ claim, onSave, onCancel, mode = 'damage' }) {
   const isLocationOnly = mode === 'location';
 
   const [formData, setFormData] = useState({
     vehicle_damage: claim.vehicle_damage || '',
-    courtesy_car_required: claim.courtesy_car_required || false,
+    courtesy_car_required: claim.courtesy_car_required === true ? 'Yes' : (claim.courtesy_car_required || 'No'),
     unroadworthy: claim.unroadworthy || false,
     vehicle_location: claim.vehicle_location || ''
   });
@@ -53,14 +54,15 @@ export default function ClaimVehicleDamageForm({ claim, onSave, onCancel, mode =
       {!isLocationOnly &&
       <>
           <div className="flex items-center gap-4">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-              type="checkbox"
-              checked={formData.courtesy_car_required}
-              onChange={(e) => setFormData({ ...formData, courtesy_car_required: e.target.checked })}
-              className="w-4 h-4 rounded border-gray-300" />
-            
+            <label className="flex items-center gap-2">
               <span className="text-sm font-medium">Courtesy Car (CC) Required</span>
+              <select
+                value={formData.courtesy_car_required || 'No'}
+                onChange={(e) => setFormData({ ...formData, courtesy_car_required: e.target.value })}
+                className="px-3 py-1.5 text-sm rounded-lg border border-input bg-card text-foreground"
+              >
+                {COURTESY_CAR_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
+              </select>
             </label>
           </div>
 

@@ -123,7 +123,7 @@ export function generateClaimOverviewPdf(claim, linkedClient) {
   twoColRow("Date of Loss", fmtDate(claim.loss_date));
   twoColRow("Time of Loss", fmtVal(claim.loss_time));
   twoColRow("Use of Vehicle", fmtVal(claim.vehicle_use));
-  twoColRow("Courtesy Car Required", fmtBool(claim.courtesy_car_required));
+  twoColRow("Courtesy Car Required", claim.courtesy_car_required === true ? 'Yes' : (claim.courtesy_car_required || 'No'));
   fullWidthRow("Incident Location", fmtVal(claim.incident_location));
   fullWidthRow("Circumstances", fmtVal(claim.circumstances));
 

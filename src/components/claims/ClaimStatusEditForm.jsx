@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import CustomSelect from '../shared/CustomSelect';
+import { COURTESY_CAR_OPTIONS } from '../shared/courtesyCarOptions';
 
 export default function ClaimStatusEditForm({ claim: editClaim, onSave, onCancel }) {
   const [form, setForm] = useState({
@@ -10,7 +11,7 @@ export default function ClaimStatusEditForm({ claim: editClaim, onSave, onCancel
     loss_date: editClaim.loss_date || '',
     loss_time: editClaim.loss_time || '',
     vehicle_use: editClaim.vehicle_use || '',
-    courtesy_car_required: editClaim.courtesy_car_required ? 'true' : 'false',
+    courtesy_car_required: editClaim.courtesy_car_required === true ? 'Yes' : (editClaim.courtesy_car_required || 'No'),
     incident_location: editClaim.incident_location || '',
     circumstances: editClaim.circumstances || '',
   });
@@ -24,7 +25,7 @@ export default function ClaimStatusEditForm({ claim: editClaim, onSave, onCancel
       loss_date: form.loss_date,
       loss_time: form.loss_time,
       vehicle_use: form.vehicle_use,
-      courtesy_car_required: form.courtesy_car_required === 'true',
+      courtesy_car_required: form.courtesy_car_required,
       incident_location: form.incident_location,
       circumstances: form.circumstances,
     });
@@ -100,10 +101,7 @@ export default function ClaimStatusEditForm({ claim: editClaim, onSave, onCancel
           <CustomSelect
             value={form.courtesy_car_required}
             onChange={(v) => set('courtesy_car_required', v)}
-            options={[
-              { value: 'false', label: 'No' },
-              { value: 'true', label: 'Yes' },
-            ]}
+            options={COURTESY_CAR_OPTIONS.map(o => ({ value: o, label: o }))}
             className="glass-inset w-full px-3 py-2 text-sm"
           />
         </div>

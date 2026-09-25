@@ -12,6 +12,7 @@ import StatusMultiSelect from '../shared/StatusMultiSelect';
 import ClaimIndemnityFields from './ClaimIndemnityFields';
 import AddressLookupInput from '../shared/AddressLookupInput';
 import AIExtractConfirmDialog from '../shared/AIExtractConfirmDialog';
+import { COURTESY_CAR_OPTIONS } from '../shared/courtesyCarOptions';
 
 export default function ClaimEditForm({
   formData, handleChange, handleCheckboxChange,
@@ -78,9 +79,14 @@ export default function ClaimEditForm({
             <div><label className="block text-sm text-gray-600 mb-2">Incident Location</label><AddressLookupInput value={formData.incident_location} onChange={handleIncidentLocationChange} placeholder="Start typing address or postcode..." className="neomorph-inset" /></div>
             <div><label className="block text-sm text-gray-600 mb-2">Circumstances</label><Textarea value={formData.circumstances} onChange={(e) => handleChange('circumstances', e.target.value)} className="neomorph-inset px-4 py-3 text-gray-700 border-0 h-24" /></div>
             <div className="flex flex-col gap-2">
-              {[['courtesy_car_required','Courtesy Car Required'],['has_third_party','Third Party Involved'],['requires_indemnity','Indemnity Details Required']].map(([key, label]) => (
-                <label key={key} className="flex items-center gap-3 cursor-pointer"><input type="checkbox" checked={!!formData[key]} onChange={(e) => handleCheckboxChange(key, e.target.checked)} className="neomorph-inset" /><span className="text-sm text-gray-600">{label}</span></label>
-              ))}
+              <label className="flex items-center gap-3 cursor-pointer">
+                <span className="text-sm text-gray-600 flex-1">Courtesy Car Required</span>
+                <select value={formData.courtesy_car_required || 'No'} onChange={(e) => handleChange('courtesy_car_required', e.target.value)} className="neomorph-inset px-3 py-2 text-sm text-gray-700 border-0 rounded-xl">
+                  {COURTESY_CAR_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
+                </select>
+              </label>
+              <label className="flex items-center gap-3 cursor-pointer"><input type="checkbox" checked={!!formData.has_third_party} onChange={(e) => handleCheckboxChange('has_third_party', e.target.checked)} className="neomorph-inset" /><span className="text-sm text-gray-600">Third Party Involved</span></label>
+              <label className="flex items-center gap-3 cursor-pointer"><input type="checkbox" checked={!!formData.requires_indemnity} onChange={(e) => handleCheckboxChange('requires_indemnity', e.target.checked)} className="neomorph-inset" /><span className="text-sm text-gray-600">Indemnity Details Required</span></label>
             </div>
           </div>
 
