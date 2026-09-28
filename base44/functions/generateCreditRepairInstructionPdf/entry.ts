@@ -109,7 +109,30 @@ export default async function(req: Request): Promise<Response> {
       finishSection();
     }
 
-    // ═══ Section 3 — Vehicle Details ═══
+    // ═══ Section 3 — Driver Details ═══
+    {
+      const driverAddress = claim.driver_same_as_client
+        ? clientAddress
+        : [claim.driver_contact_address_line_1, claim.driver_contact_address_line_2,
+            claim.driver_contact_town, claim.driver_contact_county, claim.driver_contact_postcode]
+            .filter(Boolean).join(', ') || 'N/A';
+      const driverName = claim.driver_same_as_client ? claim.client_name : (claim.driver_contact_name || claim.driver_name);
+      const driverPhone = claim.driver_same_as_client ? claim.client_phone : (claim.driver_contact_phone || claim.driver_phone);
+      const driverEmail = claim.driver_same_as_client ? claim.client_email : (claim.driver_contact_email || claim.driver_email);
+      const driverRows = [
+        ['Same as Client', claim.driver_same_as_client ? 'Yes' : 'No'],
+        ['Driver Name', fmt(driverName)],
+        ['Phone', fmt(driverPhone)],
+        ['Email', fmt(driverEmail)],
+        ['Address', driverAddress],
+      ];
+      ensureSpace(estimateSection(driverRows));
+      drawHeader('Driver Details');
+      for (const [label, value] of driverRows) drawRow(label, value);
+      finishSection();
+    }
+
+    // ═══ Section 4 — Vehicle Details ═══
     {
       const rows = [
         ['Make & Model', fmt(claim.make_model)],
@@ -125,7 +148,7 @@ export default async function(req: Request): Promise<Response> {
       finishSection();
     }
 
-    // ═══ Section 4 — Incident Details ═══
+    // ═══ Section 5 — Incident Details ═══
     {
       const rows = [
         ['Date of Loss', fmtDate(claim.loss_date)],
@@ -143,7 +166,7 @@ export default async function(req: Request): Promise<Response> {
       }
     }
 
-    // ═══ Section 5 — Instruction ═══
+    // ═══ Section 6 — Instruction ═══
     {
       ensureSpace(34);
       drawHeader('Instruction');
