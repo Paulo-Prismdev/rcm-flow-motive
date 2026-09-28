@@ -38,6 +38,30 @@ export default async function(req: Request): Promise<Response> {
       } catch (_) { /* ignore — fall back to N/A */ }
     }
 
+    // ── Resolve bodyshop (repairer) details: prefer claim fields, then lookup ──
+    let bs = {
+      name: claim.bodyshop || '',
+      contact_name: '',
+      phone: '',
+      email: claim.bodyshop_email || '',
+      address: '',
+    };
+    if (claim.bodyshop_id) {
+      try {
+        const bodyshop = await base44.asServiceRole.entities.Bodyshop.get(claim.bodyshop_id);
+        if (bodyshop) {
+          bs.name = bs.name || bodyshop.name || '';
+          bs.contact_name = bodyshop.contact_name || '';
+          bs.phone = bodyshop.phone || bodyshop.mobile_phone || '';
+          bs.email = bs.email || bodyshop.email || '';
+          bs.address = [
+            bodyshop.address_line_1, bodyshop.address_line_2,
+            bodyshop.town, bodyshop.county, bodyshop.postcode
+          ].filter(Boolean).join(', ') || '';
+        }
+      } catch (_) { /* ignore — fall back to N/A */ }
+    }
+
     const doc = new jsPDF();
     const { LM, MW, PAD_X, TX, PW, TOP } = PDF_CONST;
     const { NAVY, WHITE, DARK_TEXT } = PDF_COLORS;
@@ -144,6 +168,21 @@ export default async function(req: Request): Promise<Response> {
       ];
       ensureSpace(estimateSection(rows));
       drawHeader('Vehicle Details');
+      for (const [label, value] of rows) drawRow(label, value);
+      finishSection();
+    }
+
+    // ═══ Section — Bodyshop Details ═══
+    {
+      const rows = [
+        ['Bodyshop Name', fmt(bs.name)],
+        ['Contact Name', fmt(bs.contact_name)],
+        ['Phone', fmt(bs.phone)],
+        ['Email', fmt(bs.email)],
+        ['Address', fmt(bs.address)],
+      ];
+      ensureSpace(estimateSection(rows));
+      drawHeader('Bodyshop Details');
       for (const [label, value] of rows) drawRow(label, value);
       finishSection();
     }
