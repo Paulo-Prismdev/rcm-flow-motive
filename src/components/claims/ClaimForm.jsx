@@ -18,7 +18,7 @@ import { base44 } from '@/api/base44Client';
 import AddressLookupInput from '../shared/AddressLookupInput';
 import AIExtractConfirmDialog from '../shared/AIExtractConfirmDialog';
 import AIEntityLinker from '../shared/AIEntityLinker';
-import { COURTESY_CAR_OPTIONS } from '../shared/courtesyCarOptions';
+import { COURTESY_CAR_OPTIONS, normalizeCourtesyCar } from '../shared/courtesyCarOptions';
 
 // ── Helpers ──
 
@@ -242,6 +242,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
     if (isCreating) return;
     setIsCreating(true);
     const { id: _id, created_date: _cd, updated_date: _ud, created_by: _cb, ...submitData } = formData;
+    submitData.courtesy_car_required = normalizeCourtesyCar(submitData.courtesy_car_required);
     if (!claim) {
       try {
         const response = await base44.functions.invoke('generateJobNumber', { entityType: 'Claim' });
@@ -261,6 +262,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
     try {
       if (!formData.reg) { alert('Please enter at least the vehicle registration to save as draft.'); setIsSavingDraft(false); return; }
       const { id: _id, created_date: _cd, updated_date: _ud, created_by: _cb, ...submitData } = formData;
+      submitData.courtesy_car_required = normalizeCourtesyCar(submitData.courtesy_car_required);
       let draftData = submitData;
       if (!claim) {
         try {
