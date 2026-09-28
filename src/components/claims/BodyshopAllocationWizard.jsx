@@ -17,7 +17,15 @@ import { sanitizeClaimData } from '@/components/shared/sanitizeClaimData';
 // (authorised_by). Orkin is a branded variant the user can still pick on the
 // Generate Instruction step.
 const deriveTemplate = (ab, claimType) => {
-  if (ab === 'Credit Repair' || claimType === 'Credit Repair') return 'credit_repair';
+  // Claim type is authoritative; authorised_by is only a fallback for older
+  // claims where the type wasn't captured. This prevents a stale authorised_by
+  // (e.g. 'Credit Repair' from before the type was changed) from forcing the
+  // wrong instruction template.
+  if (claimType === 'Credit Repair') return 'credit_repair';
+  if (claimType === 'Paying Privately') return 'private';
+  if (claimType === '3rd Party Paying Privately') return 'third_party';
+  if (claimType) return 'standard';
+  if (ab === 'Credit Repair') return 'credit_repair';
   if (ab === 'Third Party') return 'third_party';
   if (ab === 'Uninsured') return 'private';
   return 'standard';
@@ -174,7 +182,7 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
   // changes in the Pre-Check, unless the user manually picked Orkin.
   useEffect(() => {
     setSelectedPdfTemplate(prev => prev === 'orkin' ? prev : deriveTemplate(claim?.authorised_by, claim?.claim_type));
-  }, [claim?.authorised_by]);
+  }, [claim?.authorised_by, claim?.claim_type]);
 
   const handleContinueFromPreCheck = () => {
     // Pre-Check persists on every edit, so just advance to Generate Instruction.

@@ -16,11 +16,21 @@ const INSTRUCTION_TYPES = [
 ];
 
 function deriveInstructionType(claim) {
+  // Claim type is authoritative; authorised_by is only a fallback for older
+  // claims where the type wasn't captured. This prevents a stale authorised_by
+  // (e.g. 'Credit Repair' from before the type was changed) from forcing the
+  // wrong instruction.
+  const ct = claim.claim_type;
+  if (ct === 'Credit Repair') return 'credit_repair';
+  if (ct === 'Paying Privately') return 'private';
+  if (ct === '3rd Party Paying Privately') return 'third_party';
+  if (ct === '3rd Party Insurer Direct') return 'tp_insurer';
+  if (ct) return 'standard';
   const ab = claim.authorised_by;
-  if (claim.claim_type === 'Credit Repair' || ab === 'Credit Repair') return 'credit_repair';
-  if (claim.claim_type === 'Paying Privately' || ab === 'Uninsured') return 'private';
-  if (claim.claim_type === '3rd Party Paying Privately' || ab === 'Third Party') return 'third_party';
-  if (claim.claim_type === '3rd Party Insurer Direct' || ab === 'Third Party Insurer') return 'tp_insurer';
+  if (ab === 'Credit Repair') return 'credit_repair';
+  if (ab === 'Uninsured') return 'private';
+  if (ab === 'Third Party') return 'third_party';
+  if (ab === 'Third Party Insurer') return 'tp_insurer';
   return 'standard';
 }
 
@@ -192,17 +202,20 @@ export default function InstructionPreCheck({ claim, onUpdate }) {
   const [instructionType, setInstructionType] = useState(deriveInstructionType(claim));
   const [contactSource, setContactSource] = useState((claim.last_contact_source || 'Client').toLowerCase());
 
-  // Sync authorised_by with the derived instruction type on mount so the
-  // PDF generator knows whose insurance details to show, even if the user
-  // never touches the instruction-type dropdown.
+  // Re-derive the instruction type whenever the claim type changes (and on
+  // mount) so a claim that was previously Credit Repair but later switched to
+  // another type no longer renders the credit-repair instruction. Keep
+  // authorised_by in sync so the PDF generator shows the correct insurer.
   useEffect(() => {
+    const newType = deriveInstructionType(claim);
+    setInstructionType(newType);
     const abMap = { standard: 'Client Insurer', tp_insurer: 'Third Party Insurer', third_party: 'Third Party', private: 'Uninsured', credit_repair: 'Credit Repair', orkin: 'Client Insurer' };
-    const expectedAb = abMap[instructionType];
+    const expectedAb = abMap[newType];
     if (expectedAb && claim.authorised_by !== expectedAb) {
       onUpdate({ authorised_by: expectedAb });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [claim.claim_type]);
 
   const clientAddress = [claim.client_address_line_1, claim.client_address_line_2, claim.client_town, claim.client_county, claim.client_postcode].filter(Boolean).join(', ');
 
