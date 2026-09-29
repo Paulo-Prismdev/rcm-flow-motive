@@ -32,6 +32,7 @@ import StatusBadge from "../shared/StatusBadge";
 import { formatUKRegistration } from '../shared/formatRegistration';
 import ClaimJourneyTimeline from '../claims/ClaimJourneyTimeline';
 import ClaimUpdatesModal from '../shared/ClaimUpdatesModal';
+import RepairerDetailsSection from './RepairerDetailsSection';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -85,7 +86,7 @@ const DETAIL_SECTIONS = [
   { id: 'vehicle',         label: 'Vehicle Details',    icon: Car },
   { id: 'vehicleDamage',   label: 'Vehicle Damage',     icon: AlertTriangle },
   { id: 'thirdParty',      label: 'Third Party Details',icon: Users },
-  { id: 'bodyshop',        label: 'Bodyshop Details',   icon: Wrench },
+  { id: 'bodyshop',        label: 'Repairer Details',   icon: Wrench },
   { id: 'backorderedParts',label: 'Backordered Parts',  icon: Package },
   { id: 'documents',       label: 'Documents',          icon: FileText },
   { id: 'images',          label: 'Images',             icon: Image },
@@ -415,14 +416,12 @@ export default function ReferrerClaimDetail({ claim, onClose, initialSection }) 
 
       case 'bodyshop':
         return (
-          <div className="neomorph-flat p-4 md:p-6">
-            <div className="flex items-center gap-3 mb-4"><Wrench className="w-5 h-5 text-gold" /><h3 className="font-bold">Bodyshop Details</h3></div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
-              <DetailRow label="Bodyshop" value={claim.bodyshop} missing={m('bodyshop')} />
-              <DetailRow label="Bodyshop Email" value={claim.bodyshop_email} />
-              <DetailRow label="Authorising Party" value={claim.authorising_party} />
-            </div>
-          </div>
+          <RepairerDetailsSection
+            bodyshopId={claim.bodyshop_id}
+            fallbackName={claim.bodyshop}
+            fallbackEmail={claim.bodyshop_email}
+            authorisingParty={claim.authorising_party}
+          />
         );
 
       case 'documents':
