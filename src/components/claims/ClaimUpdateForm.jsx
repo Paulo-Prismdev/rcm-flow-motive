@@ -75,6 +75,18 @@ export default function ClaimUpdateForm({
   const isReferrer = currentUser?.user_type === 'referrer' || currentUser?.user_type === 'client' || (currentUser?.linked_referrer_id && !currentUser?.user_type?.includes('internal'));
   const canChangeStatus = !isReferrer;
 
+  // External users (referrers/clients) don't pick a type — their update is
+  // automatically logged as an Incoming communication from their party type.
+  const externalUpdateType = currentUser?.user_type === 'client' ? 'Client Communication' : 'Referrer Communication';
+
+  useEffect(() => {
+    if (isReferrer) {
+      setNewUpdate(prev => (prev.update_type === externalUpdateType && prev.direction === 'Incoming')
+        ? prev
+        : { ...prev, update_type: externalUpdateType, direction: 'Incoming' });
+    }
+  }, [isReferrer, externalUpdateType]);
+
   const getDisplayName = (user) => user?.display_name || user?.full_name || user?.email || 'Unknown';
 
   const createUpdateMutation = useMutation({
@@ -195,8 +207,8 @@ export default function ClaimUpdateForm({
     setSubmitError('');
     if (isReferrer && newUpdate.update_type === 'Status Change') { setSubmitError('Referrers cannot change status'); return; }
     if (isReferrer && (newUpdate.next_steps || newUpdate.due_date_for_next_action)) { setSubmitError('Referrers cannot set follow-ups'); return; }
-    if (newUpdate.update_type !== 'Status Change' && newUpdate.update_type !== 'General Update' && !newUpdate.direction) { setSubmitError('Please select a direction (Incoming or Outgoing)'); return; }
-    if (newUpdate.update_type !== 'Status Change' && newUpdate.update_type !== 'General Update' && newUpdate.direction && !newUpdate.platform) { setSubmitError('Please select a platform'); return; }
+    if (!isReferrer && newUpdate.update_type !== 'Status Change' && newUpdate.update_type !== 'General Update' && !newUpdate.direction) { setSubmitError('Please select a direction (Incoming or Outgoing)'); return; }
+    if (!isReferrer && newUpdate.update_type !== 'Status Change' && newUpdate.update_type !== 'General Update' && newUpdate.direction && !newUpdate.platform) { setSubmitError('Please select a platform'); return; }
     if (newUpdate.update_type !== 'Status Change' && !newUpdate.description.trim()) { setSubmitError('Please enter a description'); return; }
 
     // Block true completion (cancelled or invoiced) while a starred/flagged
@@ -217,8 +229,12 @@ export default function ClaimUpdateForm({
     }
 
     let finalDescription = newUpdate.description;
-    const contactedPartyName = [...new Set(selectedContacts.map((c) => c.orgName).filter(Boolean))].join(', ');
-    const contactedPartyDetail = selectedContacts.map((c) => c.detail).join(', ');
+    const contactedPartyName = isReferrer
+      ? (currentUser?.user_type === 'client' ? claim?.client_name : claim?.referrer) || ''
+      : [...new Set(selectedContacts.map((c) => c.orgName).filter(Boolean))].join(', ');
+    const contactedPartyDetail = isReferrer
+      ? (currentUser?.user_type === 'client' ? claim?.client_email : claim?.referrer_email) || ''
+      : selectedContacts.map((c) => c.detail).join(', ');
     if (newUpdate.update_type === 'Status Change' && !finalDescription.trim()) {
       const parts = [];
       if (newUpdate.new_journey) parts.push(`Journey → ${newUpdate.new_journey}`);
@@ -252,14 +268,21 @@ export default function ClaimUpdateForm({
         <Button type="button" variant="ghost" size="sm" onClick={resetForm}><X className="w-4 h-4" /></Button>
       </div>
       <form onSubmit={handleSubmit} className="space-y-2">
-        <div>
-          <label className="block text-xs text-muted-foreground mb-1">Update Type *</label>
-          <select value={newUpdate.update_type} onChange={(e) => { setNewUpdate({ ...newUpdate, update_type: e.target.value, direction: '', platform: '' }); setSelectedContacts([]); }} className="w-full px-3 py-2 text-sm bg-background border border-border rounded-lg" required>
-            {isReferrer ? (<><option value="Referrer Communication">Referrer Communication</option><option value="Other">Other</option></>) : (UPDATE_TYPES.map(type => <option key={type} value={type}>{type}</option>))}
-          </select>
-        </div>
+        {isReferrer ? (
+          <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/40 border border-border rounded-lg px-3 py-2">
+            <Badge className="bg-amber-500 rounded-full">{externalUpdateType}</Badge>
+            <span>· Incoming from you</span>
+          </div>
+        ) : (
+          <div>
+            <label className="block text-xs text-muted-foreground mb-1">Update Type *</label>
+            <select value={newUpdate.update_type} onChange={(e) => { setNewUpdate({ ...newUpdate, update_type: e.target.value, direction: '', platform: '' }); setSelectedContacts([]); }} className="w-full px-3 py-2 text-sm bg-background border border-border rounded-lg" required>
+              {UPDATE_TYPES.map(type => <option key={type} value={type}>{type}</option>)}
+            </select>
+          </div>
+        )}
 
-        {newUpdate.update_type !== 'Status Change' && newUpdate.update_type !== 'General Update' && (
+        {!isReferrer && newUpdate.update_type !== 'Status Change' && newUpdate.update_type !== 'General Update' && (
           <div>
             <label className="block text-xs text-muted-foreground mb-1">Direction *</label>
             <select value={newUpdate.direction} onChange={(e) => setNewUpdate({ ...newUpdate, direction: e.target.value, platform: '' })} className="w-full px-3 py-2 text-sm bg-background border border-border rounded-lg" required>
@@ -270,7 +293,7 @@ export default function ClaimUpdateForm({
           </div>
         )}
 
-        {newUpdate.update_type !== 'Status Change' && newUpdate.update_type !== 'General Update' && newUpdate.direction && (
+        {!isReferrer && newUpdate.update_type !== 'Status Change' && newUpdate.update_type !== 'General Update' && newUpdate.direction && (
           <div>
             <label className="block text-xs text-muted-foreground mb-1">Platform *</label>
             <select value={newUpdate.platform} onChange={(e) => { setNewUpdate({ ...newUpdate, platform: e.target.value }); setSelectedContacts([]); }} className="w-full px-3 py-2 text-sm bg-background border border-border rounded-lg" required>
@@ -283,7 +306,7 @@ export default function ClaimUpdateForm({
           </div>
         )}
 
-        {newUpdate.update_type !== 'Status Change' && newUpdate.update_type !== 'General Update' && (
+        {!isReferrer && newUpdate.update_type !== 'Status Change' && newUpdate.update_type !== 'General Update' && (
           <UpdateContactSelector
             claim={claim}
             updateType={newUpdate.update_type}
