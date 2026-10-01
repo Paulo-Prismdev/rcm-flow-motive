@@ -9,6 +9,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Check, ChevronsUpDown, Plus, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import AddInsurerModal from "./AddInsurerModal";
+import { sortAlphaNumeric } from "./sortAlphaNumeric";
 
 export default function InsurerCombobox({ value, onChange, placeholder = "Select insurer...", onAddNew }) {
   const [open, setOpen] = useState(false);
@@ -19,6 +20,7 @@ export default function InsurerCombobox({ value, onChange, placeholder = "Select
     queryKey: ["insurers"],
     queryFn: () => base44.entities.Insurer.list('-created_date', 500),
   });
+  const sortedInsurers = sortAlphaNumeric(insurers, 'name');
 
   // value can be a string (name) or object with .name
   const selectedName = typeof value === 'string' ? value : (value?.name || "");
@@ -73,7 +75,7 @@ export default function InsurerCombobox({ value, onChange, placeholder = "Select
                     </CommandItem>
                   </CommandGroup>
                   <CommandGroup heading="Existing Insurers">
-                    {insurers.map((insurer) => (
+                    {sortedInsurers.map((insurer) => (
                       <CommandItem key={insurer.id} value={insurer.name} onSelect={handleSelect}>
                         <Check className={cn("mr-2 h-4 w-4", selectedName === insurer.name ? "opacity-100" : "opacity-0")} />
                         {insurer.name}

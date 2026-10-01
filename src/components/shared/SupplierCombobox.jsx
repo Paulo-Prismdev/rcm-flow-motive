@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
@@ -18,6 +17,7 @@ import {
 } from "@/components/ui/popover";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { sortAlphaNumeric } from "./sortAlphaNumeric";
 
 export default function SupplierCombobox({ value, onChange }) {
   const [open, setOpen] = useState(false);
@@ -26,6 +26,7 @@ export default function SupplierCombobox({ value, onChange }) {
     queryKey: ["suppliers"],
     queryFn: () => base44.entities.Supplier.list(),
   });
+  const sortedSuppliers = sortAlphaNumeric(suppliers, 'name');
 
   const handleSelect = (supplierName) => {
     const selectedSupplier = suppliers.find(s => s.name === supplierName);
@@ -60,7 +61,7 @@ export default function SupplierCombobox({ value, onChange }) {
               <CommandEmpty>No supplier found.</CommandEmpty>
             )}
             <CommandGroup>
-              {suppliers.map((supplier) => (
+              {sortedSuppliers.map((supplier) => (
                 <CommandItem
                   key={supplier.id}
                   value={supplier.name}

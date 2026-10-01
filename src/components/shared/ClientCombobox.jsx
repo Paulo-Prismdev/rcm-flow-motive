@@ -9,6 +9,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Check, ChevronsUpDown, Plus, X, Building2, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import AddClientModal from "./AddClientModal";
+import { sortAlphaNumeric } from "./sortAlphaNumeric";
 
 export default function ClientCombobox({ value, onChange, placeholder = "Select client...", allowClear = false, onAddNew }) {
   const [open, setOpen] = useState(false);
@@ -19,6 +20,7 @@ export default function ClientCombobox({ value, onChange, placeholder = "Select 
     queryKey: ["clients"],
     queryFn: () => base44.entities.Client.list('-created_date', 500),
   });
+  const sortedClients = sortAlphaNumeric(clients, 'name');
 
   const selectedClientName = typeof value === 'string' ? value : (value?.name || "");
 
@@ -76,7 +78,7 @@ export default function ClientCombobox({ value, onChange, placeholder = "Select 
                     </CommandItem>
                   </CommandGroup>
                   <CommandGroup heading="Existing Clients">
-                    {clients.map((client) => (
+                    {sortedClients.map((client) => (
                       <CommandItem
                         key={client.id}
                         value={client.name}

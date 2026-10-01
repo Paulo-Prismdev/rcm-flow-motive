@@ -18,6 +18,7 @@ import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { VEHICLE_MANUFACTURERS } from "./vehicleManufacturers";
 import { VEHICLE_MODELS } from "./vehicleModels";
+import { sortAlphaNumeric } from "./sortAlphaNumeric";
 
 export default function ManufacturerModelCombobox({ value, onChange, placeholder = "Select make & model..." }) {
   const [openManufacturer, setOpenManufacturer] = useState(false);
@@ -121,9 +122,11 @@ export default function ManufacturerModelCombobox({ value, onChange, placeholder
     return placeholder;
   };
 
-  const availableModels = selectedManufacturer && VEHICLE_MODELS[selectedManufacturer] 
-    ? VEHICLE_MODELS[selectedManufacturer] 
-    : [];
+  const availableModels = sortAlphaNumeric(
+    selectedManufacturer && VEHICLE_MODELS[selectedManufacturer]
+      ? VEHICLE_MODELS[selectedManufacturer]
+      : []
+  );
 
   return (
     <div className="space-y-2">
@@ -176,7 +179,7 @@ export default function ManufacturerModelCombobox({ value, onChange, placeholder
               <CommandList>
                 <CommandEmpty>No manufacturer found.</CommandEmpty>
                 <CommandGroup>
-                  {VEHICLE_MANUFACTURERS.map((manufacturer) => (
+                  {sortAlphaNumeric(VEHICLE_MANUFACTURERS).map((manufacturer) => (
                     <CommandItem
                       key={manufacturer}
                       value={manufacturer}

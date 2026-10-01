@@ -9,6 +9,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Check, ChevronsUpDown, Plus, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import AddCreditRepairCompanyModal from "./AddCreditRepairCompanyModal";
+import { sortAlphaNumeric } from "./sortAlphaNumeric";
 
 export default function CreditRepairCombobox({ value, onChange, placeholder = "Select credit repair company...", onAddNew }) {
   const [open, setOpen] = useState(false);
@@ -19,6 +20,7 @@ export default function CreditRepairCombobox({ value, onChange, placeholder = "S
     queryKey: ["creditRepairCompanies"],
     queryFn: () => base44.entities.CreditRepairCompany.list('-created_date', 500),
   });
+  const sortedCompanies = sortAlphaNumeric(companies, 'name');
 
   const selectedName = typeof value === 'string' ? value : (value?.name || "");
 
@@ -72,7 +74,7 @@ export default function CreditRepairCombobox({ value, onChange, placeholder = "S
                     </CommandItem>
                   </CommandGroup>
                   <CommandGroup heading="Existing Companies">
-                    {companies.map((company) => (
+                    {sortedCompanies.map((company) => (
                       <CommandItem key={company.id} value={company.name} onSelect={() => handleSelect(company)}>
                         <Check className={cn("mr-2 h-4 w-4", selectedName === company.name ? "opacity-100" : "opacity-0")} />
                         {company.name}

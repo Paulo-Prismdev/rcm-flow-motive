@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery } from "@tanstack/react-query";
@@ -18,6 +17,7 @@ import {
 } from "@/components/ui/popover";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { sortAlphaNumeric } from "./sortAlphaNumeric";
 
 export default function BodyshopCombobox({ value, onChange }) {
   const [open, setOpen] = useState(false);
@@ -26,6 +26,7 @@ export default function BodyshopCombobox({ value, onChange }) {
     queryKey: ["bodyshops"],
     queryFn: () => base44.entities.Bodyshop.list(),
   });
+  const sortedBodyshops = sortAlphaNumeric(bodyshops, 'name');
 
   const handleSelect = (bodyshopName) => {
     const selectedBodyshop = bodyshops.find(b => b.name === bodyshopName);
@@ -60,7 +61,7 @@ export default function BodyshopCombobox({ value, onChange }) {
               <CommandEmpty>No bodyshop found.</CommandEmpty>
             )}
             <CommandGroup>
-              {bodyshops.map((bodyshop) => (
+              {sortedBodyshops.map((bodyshop) => (
                 <CommandItem
                   key={bodyshop.id}
                   value={bodyshop.name}

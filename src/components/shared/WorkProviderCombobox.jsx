@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/popover";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { sortAlphaNumeric } from "./sortAlphaNumeric";
 
 export default function WorkProviderCombobox({ value, onChange }) {
   const [open, setOpen] = useState(false);
@@ -25,6 +26,7 @@ export default function WorkProviderCombobox({ value, onChange }) {
     queryKey: ["workProviders"],
     queryFn: () => base44.entities.WorkProvider.list(),
   });
+  const sortedWorkProviders = sortAlphaNumeric(workProviders, 'name');
 
   const handleSelect = (currentValue) => {
     const selected = workProviders.find(wp => wp.name.toLowerCase() === currentValue.toLowerCase());
@@ -59,7 +61,7 @@ export default function WorkProviderCombobox({ value, onChange }) {
               <CommandEmpty>No work provider found.</CommandEmpty>
             )}
             <CommandGroup>
-              {workProviders.map((wp) => (
+              {sortedWorkProviders.map((wp) => (
                 <CommandItem
                   key={wp.id}
                   value={wp.name}

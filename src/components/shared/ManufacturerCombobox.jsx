@@ -16,9 +16,11 @@ import {
 import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { VEHICLE_MANUFACTURERS } from "./vehicleManufacturers";
+import { sortAlphaNumeric } from "./sortAlphaNumeric";
 
 export default function ManufacturerCombobox({ value, onChange, placeholder = "Select manufacturer..." }) {
   const [open, setOpen] = useState(false);
+  const sortedManufacturers = sortAlphaNumeric(VEHICLE_MANUFACTURERS);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -39,7 +41,7 @@ export default function ManufacturerCombobox({ value, onChange, placeholder = "S
           <CommandList>
             <CommandEmpty>No manufacturer found.</CommandEmpty>
             <CommandGroup>
-              {VEHICLE_MANUFACTURERS.map((manufacturer) => (
+              {sortedManufacturers.map((manufacturer) => (
                 <CommandItem
                   key={manufacturer}
                   value={manufacturer}

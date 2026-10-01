@@ -9,6 +9,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Check, ChevronsUpDown, Plus, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import AddBrokerModal from "./AddBrokerModal";
+import { sortAlphaNumeric } from "./sortAlphaNumeric";
 
 export default function BrokerCombobox({ value, onChange, placeholder = "Select broker..." }) {
   const [open, setOpen] = useState(false);
@@ -19,6 +20,7 @@ export default function BrokerCombobox({ value, onChange, placeholder = "Select 
     queryKey: ["brokers"],
     queryFn: () => base44.entities.Broker.list('-created_date', 500),
   });
+  const sortedBrokers = sortAlphaNumeric(brokers, 'name');
 
   const selectedName = typeof value === 'string' ? value : (value?.name || "");
 
@@ -71,7 +73,7 @@ export default function BrokerCombobox({ value, onChange, placeholder = "Select 
                   </CommandItem>
                 </CommandGroup>
                 <CommandGroup heading="Existing Brokers">
-                  {brokers.map((broker) => (
+                  {sortedBrokers.map((broker) => (
                     <CommandItem key={broker.id} value={broker.name} onSelect={handleSelect}>
                       <Check className={cn("mr-2 h-4 w-4", selectedName === broker.name ? "opacity-100" : "opacity-0")} />
                       {broker.name}

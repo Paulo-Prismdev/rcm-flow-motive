@@ -11,6 +11,7 @@ import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { geocodeAddress } from '@/functions/geocodeAddress';
 import { haversineDistance, formatHaversineDistance } from '@/components/shared/haversine';
+import { sortAlphaNumeric } from '@/components/shared/sortAlphaNumeric';
 
 // ── Leaflet icon setup ──
 delete L.Icon.Default.prototype._getIconUrl;
@@ -232,7 +233,7 @@ export default function WizardFindRepairerStep({
         return aDist - bDist;
       });
     } else {
-      list.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+      list = sortAlphaNumeric(list, 'name');
     }
 
     return list;

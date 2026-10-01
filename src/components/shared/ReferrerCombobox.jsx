@@ -18,6 +18,7 @@ import {
 import { Check, ChevronsUpDown, Plus, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import AddReferrerModal from "./AddReferrerModal";
+import { sortAlphaNumeric } from "./sortAlphaNumeric";
 
 export default function ReferrerCombobox({ value, onChange, onAddNew }) {
   const [open, setOpen] = useState(false);
@@ -28,6 +29,7 @@ export default function ReferrerCombobox({ value, onChange, onAddNew }) {
     queryKey: ["companies", "referrer"],
     queryFn: () => base44.entities.Company.filter({ company_type: "referrer", is_active: true }),
   });
+  const sortedCompanies = sortAlphaNumeric(companies, 'name');
 
   const handleSelect = (companyName) => {
     const selected = companies.find(c => c.name === companyName);
@@ -109,7 +111,7 @@ export default function ReferrerCombobox({ value, onChange, onAddNew }) {
                   </CommandItem>
                 </CommandGroup>
                 <CommandGroup>
-                  {companies.map((company) => (
+                  {sortedCompanies.map((company) => (
                     <CommandItem
                       key={company.id}
                       value={company.name}
