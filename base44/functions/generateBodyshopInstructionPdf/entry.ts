@@ -12,8 +12,17 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const { claimId, contactOverrides, templateType, saveToClaim = true, repairerName: repairerOverride } = await req.json();
+    const { claimId, contactOverrides, templateType, saveToClaim = true, repairerName: repairerOverride, includeSections } = await req.json();
     if (!claimId) return Response.json({ error: 'Missing claimId' }, { status: 400 });
+
+    // Section toggles — default all true so omitting the param preserves the
+    // original behaviour (every section rendered).
+    const sections = {
+      client_repairer: includeSections?.client_repairer !== false,
+      vehicle: includeSections?.vehicle !== false,
+      recovery: includeSections?.recovery !== false,
+      insurance: includeSections?.insurance !== false,
+    };
 
     const claim = await base44.asServiceRole.entities.Claim.get(claimId);
     if (!claim) return Response.json({ error: 'Claim not found' }, { status: 404 });
@@ -205,7 +214,7 @@ Deno.serve(async (req) => {
     // ═══════════════════════════════════════════
     // SECTION 1 — Client & Repairer Details
     // ═══════════════════════════════════════════
-    {
+    if (sections.client_repairer) {
       const rows = [
         ['Instruction Date', fields.instruction_date],
         ['Claim Type', fields.claim_type],
@@ -226,7 +235,7 @@ Deno.serve(async (req) => {
     // ═══════════════════════════════════════════
     // SECTION 2 — Vehicle Details
     // ═══════════════════════════════════════════
-    {
+    if (sections.vehicle) {
       const rows = [
         ['Vehicle Make & Model', fields.make_model],
         ['Vehicle Registration', fields.reg],
@@ -242,7 +251,7 @@ Deno.serve(async (req) => {
     // ═══════════════════════════════════════════
     // SECTION 3 — Recovery & Courtesy Details
     // ═══════════════════════════════════════════
-    {
+    if (sections.recovery) {
       const rows = [
         ['Urgent Recovery Required?', fields.recovery_required],
         ['Vehicle Unroadworthy', fields.unroadworthy],
@@ -258,6 +267,7 @@ Deno.serve(async (req) => {
     // SECTION 4 — Insurance Details (or Non-Insurance notice)
     // ═══════════════════════════════════════════
     // "Paying Privately" template skips the insurance section entirely.
+    if (sections.insurance) {
     if (isPrivate) {
       // No insurance section for private repairs — just add spacing.
       yPos += SECTION_GAP;
@@ -351,6 +361,7 @@ Deno.serve(async (req) => {
       for (const [label, value] of rows) drawRow(label, value);
       finishSection();
     }
+    } // end insurance section
 
     // ═══════════════════════════════════════════
     // PAGE 2

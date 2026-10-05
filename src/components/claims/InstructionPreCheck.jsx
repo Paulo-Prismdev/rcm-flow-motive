@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { AlertTriangle, Pencil, Check, User, Car, Phone } from 'lucide-react';
+import { AlertTriangle, Pencil, Check } from 'lucide-react';
 import CreditRepairCombobox from '../shared/CreditRepairCombobox';
 import { COURTESY_CAR_OPTIONS } from '../shared/courtesyCarOptions';
 
@@ -33,12 +33,6 @@ function deriveInstructionType(claim) {
   if (ab === 'Third Party Insurer') return 'tp_insurer';
   return 'standard';
 }
-
-const CONTACT_SOURCES = [
-  { value: 'client', label: 'Client', icon: User },
-  { value: 'driver', label: 'Driver', icon: Car },
-  { value: 'custom', label: 'Custom', icon: Phone },
-];
 
 function Row({ label, field, value, claim, onFieldChange, type = 'text', options, sourceLabel }) {
   const [val, setVal] = useState(value ?? '');
@@ -200,7 +194,6 @@ function InsuranceSection({ instructionType, claim, onUpdate }) {
 
 export default function InstructionPreCheck({ claim, onUpdate }) {
   const [instructionType, setInstructionType] = useState(deriveInstructionType(claim));
-  const [contactSource, setContactSource] = useState((claim.last_contact_source || 'Client').toLowerCase());
 
   // Re-derive the instruction type whenever the claim type changes (and on
   // mount) so a claim that was previously Credit Repair but later switched to
@@ -225,23 +218,6 @@ export default function InstructionPreCheck({ claim, onUpdate }) {
     onUpdate({ authorised_by: abMap[newType] });
   };
 
-  const handleContactSourceChange = (source) => {
-    setContactSource(source);
-    let name = '', email = '', phone = '';
-    if (source === 'client') {
-      name = claim.client_name || ''; email = claim.client_email || ''; phone = claim.client_phone || '';
-    } else if (source === 'driver') {
-      name = claim.driver_contact_name || ''; email = claim.driver_contact_email || ''; phone = claim.driver_contact_phone || '';
-    }
-    onUpdate({
-      last_contact_source: source.charAt(0).toUpperCase() + source.slice(1),
-      instruction_contact_type: source,
-      instruction_contact_name: name,
-      instruction_contact_email: email,
-      instruction_contact_phone: phone,
-    });
-  };
-
   return (
     <div className="rounded-lg border border-border bg-card p-2">
       <div className="flex items-center gap-2 px-1 pb-2 mb-1 border-b border-border">
@@ -249,25 +225,6 @@ export default function InstructionPreCheck({ claim, onUpdate }) {
         <h3 className="text-xs font-semibold text-foreground">Instruction Pre-Check</h3>
         <span className="text-[10px] text-muted-foreground">— fix any gaps before allocating</span>
       </div>
-
-      {/* Instruction Contact selector */}
-      <Group title="Instruction Contact">
-        <div className="flex gap-1.5 px-1 pb-1.5">
-          {CONTACT_SOURCES.map((s) => {
-            const Icon = s.icon;
-            const active = contactSource === s.value;
-            return (
-              <button key={s.value} type="button" onClick={() => handleContactSourceChange(s.value)}
-                className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md border text-[11px] font-medium transition-colors ${active ? 'border-accent bg-accent/10 text-accent' : 'border-border text-muted-foreground hover:bg-muted/60'}`}>
-                <Icon className="w-3 h-3" /> {s.label}
-              </button>
-            );
-          })}
-        </div>
-        <Row label="Contact Name" field="instruction_contact_name" value={claim.instruction_contact_name} claim={claim} onFieldChange={onUpdate} sourceLabel={contactSource} />
-        <Row label="Email Address" field="instruction_contact_email" value={claim.instruction_contact_email} claim={claim} onFieldChange={onUpdate} sourceLabel={contactSource} />
-        <Row label="Contact Number" field="instruction_contact_phone" value={claim.instruction_contact_phone} claim={claim} onFieldChange={onUpdate} sourceLabel={contactSource} />
-      </Group>
 
       <Group title="Client & Repairer Details">
         <Row label="Claim Type" field="claim_type" value={claim.claim_type} claim={claim} onFieldChange={onUpdate} type="select" options={CLAIM_TYPES} />

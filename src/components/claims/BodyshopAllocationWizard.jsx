@@ -7,8 +7,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { STEPS } from './wizard/WizardConstants';
 import InstructionPreCheck from './InstructionPreCheck';
 import WizardFindRepairerStep from './wizard/WizardFindRepairerStep';
-import WizardInstructionStep from './wizard/WizardInstructionStep';
-import WizardEmailStep from './wizard/WizardEmailStep';
+import WizardInstructionEmailStep from './wizard/WizardInstructionEmailStep';
 import WizardConfirmStep from './wizard/WizardConfirmStep';
 import { geocodeAddress } from '@/functions/geocodeAddress';
 import { sanitizeClaimData } from '@/components/shared/sanitizeClaimData';
@@ -51,6 +50,10 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
   const [emailSubject, setEmailSubject] = useState('');
   const [emailBody, setEmailBody] = useState('');
   const [selectedEmailTemplateId, setSelectedEmailTemplateId] = useState('');
+
+  const [includeSections, setIncludeSections] = useState({
+    client_repairer: true, vehicle: true, recovery: true, insurance: true,
+  });
 
   const [isAllocating, setIsAllocating] = useState(false);
 
@@ -268,6 +271,7 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
         templateType: selectedPdfTemplate,
         saveToClaim: false,
         repairerName: selectedBodyshop?.name || '',
+        includeSections,
       });
 
       const { file_url } = response.data;
@@ -440,7 +444,8 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
             <InstructionPreCheck claim={claim} onUpdate={handlePreCheckUpdate} />
           )}
           {currentStep === 2 && (
-            <WizardInstructionStep
+            <WizardInstructionEmailStep
+              claim={claim}
               selectedBodyshop={selectedBodyshop}
               pdfTemplates={pdfTemplates}
               selectedPdfTemplate={selectedPdfTemplate}
@@ -451,26 +456,23 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
               onSelectTemplate={setSelectedPdfTemplate}
               onGeneratePdf={handleGeneratePdf}
               onSaveToDocs={handleSaveInstructionToDocs}
-            />
-          )}
-          {currentStep === 3 && (
-            <WizardEmailStep
-              selectedBodyshop={selectedBodyshop}
               emailTemplates={emailTemplates}
               emailTo={emailTo}
               emailCc={emailCc}
               emailSubject={emailSubject}
               emailBody={emailBody}
               selectedEmailTemplateId={selectedEmailTemplateId}
-              claim={claim}
               onEmailToChange={setEmailTo}
               onEmailCcChange={setEmailCc}
               onEmailSubjectChange={setEmailSubject}
               onEmailBodyChange={setEmailBody}
-              onTemplateSelect={setSelectedEmailTemplateId}
+              onEmailTemplateSelect={setSelectedEmailTemplateId}
+              onContactChange={handlePreCheckUpdate}
+              includeSections={includeSections}
+              onToggleSection={(key, val) => setIncludeSections((prev) => ({ ...prev, [key]: val }))}
             />
           )}
-          {currentStep === 4 && (
+          {currentStep === 3 && (
             <WizardConfirmStep
               claim={claim}
               selectedBodyshop={selectedBodyshop}
