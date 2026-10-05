@@ -34,7 +34,7 @@ function deriveInstructionType(claim) {
   return 'standard';
 }
 
-function Row({ label, field, value, claim, onFieldChange, type = 'text', options, sourceLabel }) {
+function Row({ label, field, value, claim, onFieldChange, type = 'text', options, sourceLabel, readOnly = false }) {
   const [val, setVal] = useState(value ?? '');
   const [editing, setEditing] = useState(false);
   const inputRef = useRef(null);
@@ -92,13 +92,15 @@ function Row({ label, field, value, claim, onFieldChange, type = 'text', options
         </div>
         {isEmpty && !editing && <AlertTriangle className="w-3 h-3 text-amber-500 flex-shrink-0 ml-1" />}
       </div>
-      <button
-        type="button"
-        onClick={() => editing ? commit() : setEditing(true)}
-        className="flex-shrink-0 p-1 rounded text-muted-foreground hover:text-accent hover:bg-accent/10 transition-colors"
-        title={editing ? 'Save' : 'Edit'}>
-        {editing ? <Check className="w-3.5 h-3.5 text-green-600" /> : <Pencil className="w-3 h-3" />}
-      </button>
+      {!readOnly && (
+        <button
+          type="button"
+          onClick={() => editing ? commit() : setEditing(true)}
+          className="flex-shrink-0 p-1 rounded text-muted-foreground hover:text-accent hover:bg-accent/10 transition-colors"
+          title={editing ? 'Save' : 'Edit'}>
+          {editing ? <Check className="w-3.5 h-3.5 text-green-600" /> : <Pencil className="w-3 h-3" />}
+        </button>
+      )}
     </div>
   );
 }
@@ -192,7 +194,7 @@ function InsuranceSection({ instructionType, claim, onUpdate }) {
   );
 }
 
-export default function InstructionPreCheck({ claim, onUpdate }) {
+export default function InstructionPreCheck({ claim, onUpdate, selectedBodyshop }) {
   const [instructionType, setInstructionType] = useState(deriveInstructionType(claim));
 
   // Re-derive the instruction type whenever the claim type changes (and on
@@ -228,7 +230,7 @@ export default function InstructionPreCheck({ claim, onUpdate }) {
 
       <Group title="Client & Repairer Details">
         <Row label="Claim Type" field="claim_type" value={claim.claim_type} claim={claim} onFieldChange={onUpdate} type="select" options={CLAIM_TYPES} />
-        <Row label="Repairer" field="bodyshop" value={claim.bodyshop} claim={claim} onFieldChange={onUpdate} />
+        <Row label="Repairer" field="bodyshop" value={selectedBodyshop?.name || claim.bodyshop} claim={claim} onFieldChange={onUpdate} readOnly={!!selectedBodyshop} sourceLabel={selectedBodyshop ? 'Find Repairer step' : undefined} />
         <Row label="Client" field="client_name" value={claim.client_name} claim={claim} onFieldChange={onUpdate} />
         <Row label="Client Address" field="client_address_line_1" value={clientAddress || claim.client_address_line_1} claim={claim} onFieldChange={onUpdate} />
         <Row label="Client VAT Status" field="client_vat_status" value={claim.client_vat_status} claim={claim} onFieldChange={onUpdate} type="select" options={VAT_STATUSES} />

@@ -443,7 +443,7 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
           )}
           {currentStep === 1 && (
             <div className="space-y-3">
-              <InstructionPreCheck claim={claim} onUpdate={handlePreCheckUpdate} />
+              <InstructionPreCheck claim={claim} onUpdate={handlePreCheckUpdate} selectedBodyshop={selectedBodyshop} />
               <WizardInstructionContentPanel
                 claim={claim}
                 onContactChange={handlePreCheckUpdate}
