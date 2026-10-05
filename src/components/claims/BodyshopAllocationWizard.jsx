@@ -8,6 +8,7 @@ import { STEPS } from './wizard/WizardConstants';
 import InstructionPreCheck from './InstructionPreCheck';
 import WizardFindRepairerStep from './wizard/WizardFindRepairerStep';
 import WizardInstructionEmailStep from './wizard/WizardInstructionEmailStep';
+import WizardInstructionContentPanel from './wizard/WizardInstructionContentPanel';
 import WizardConfirmStep from './wizard/WizardConfirmStep';
 import { geocodeAddress } from '@/functions/geocodeAddress';
 import { sanitizeClaimData } from '@/components/shared/sanitizeClaimData';
@@ -441,7 +442,15 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
             />
           )}
           {currentStep === 1 && (
-            <InstructionPreCheck claim={claim} onUpdate={handlePreCheckUpdate} />
+            <div className="space-y-3">
+              <InstructionPreCheck claim={claim} onUpdate={handlePreCheckUpdate} />
+              <WizardInstructionContentPanel
+                claim={claim}
+                onContactChange={handlePreCheckUpdate}
+                includeSections={includeSections}
+                onToggleSection={(key, val) => setIncludeSections((prev) => ({ ...prev, [key]: val }))}
+              />
+            </div>
           )}
           {currentStep === 2 && (
             <WizardInstructionEmailStep
@@ -467,9 +476,6 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
               onEmailSubjectChange={setEmailSubject}
               onEmailBodyChange={setEmailBody}
               onEmailTemplateSelect={setSelectedEmailTemplateId}
-              onContactChange={handlePreCheckUpdate}
-              includeSections={includeSections}
-              onToggleSection={(key, val) => setIncludeSections((prev) => ({ ...prev, [key]: val }))}
             />
           )}
           {currentStep === 3 && (
