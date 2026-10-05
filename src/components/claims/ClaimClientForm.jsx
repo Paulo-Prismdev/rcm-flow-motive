@@ -3,33 +3,37 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import ClientCombobox from '../shared/ClientCombobox';
 import { base44 } from '@/api/base44Client';
+import { Phone, Mail, Star, Users } from 'lucide-react';
 
 export default function ClaimClientForm({ claim, onSave, onCancel }) {
   const [formData, setFormData] = useState(claim || {});
+  const [linkedContacts, setLinkedContacts] = useState([]);
+
+  const loadClientContacts = async (client) => {
+    if (!client) { setLinkedContacts([]); return; }
+    const contacts = client.contacts || [];
+    setLinkedContacts(contacts);
+    const primaryContact = contacts.find(c => c.is_primary) || contacts[0] || null;
+    setFormData(prev => ({
+      ...prev,
+      client_phone: prev.client_phone || primaryContact?.phone || client.company_contact_phone || client.phone || '',
+      client_email: prev.client_email || primaryContact?.email || client.company_contact_email || client.email || '',
+    }));
+  };
 
   // On mount, fetch from Client entity to fill in any missing contact details
   useEffect(() => {
-    if (true) {
-      const fetchClient = async () => {
-        let client = null;
-        if (claim?.client_id) {
-          client = await base44.entities.Client.get(claim.client_id).catch(() => null);
-        } else if (claim?.client_name) {
-          const results = await base44.entities.Client.filter({ name: claim.client_name }).catch(() => []);
-          client = results?.[0] || null;
-        }
-        if (client) {
-          const contacts = client.contacts || [];
-          const primaryContact = contacts.find(c => c.is_primary) || contacts[0] || null;
-          setFormData(prev => ({
-            ...prev,
-            client_phone: prev.client_phone || primaryContact?.phone || client.company_contact_phone || client.phone || '',
-            client_email: prev.client_email || primaryContact?.email || client.company_contact_email || client.email || '',
-          }));
-        }
-      };
-      fetchClient();
-    }
+    const fetchClient = async () => {
+      let client = null;
+      if (claim?.client_id) {
+        client = await base44.entities.Client.get(claim.client_id).catch(() => null);
+      } else if (claim?.client_name) {
+        const results = await base44.entities.Client.filter({ name: claim.client_name }).catch(() => []);
+        client = results?.[0] || null;
+      }
+      loadClientContacts(client);
+    };
+    fetchClient();
   }, []);
 
   const isRequiredEmpty = (value) => {
@@ -71,6 +75,7 @@ export default function ClaimClientForm({ claim, onSave, onCancel }) {
       // client_lat: geocodedLat, // Removed as geocoding logic not present
       // client_lng: geocodedLng  // Removed as geocoding logic not present
     }));
+    loadClientContacts(client);
   };
 
   const handleSubmit = (e) => {
@@ -90,6 +95,33 @@ export default function ClaimClientForm({ claim, onSave, onCancel }) {
           onChange={handleClientChange}
         />
       </div>
+
+      {linkedContacts.length > 0 && (
+        <div className="rounded-xl border border-border bg-muted/30 p-3 space-y-2">
+          <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            <Users className="w-3.5 h-3.5" /> Contacts at this business
+          </div>
+          <div className="space-y-1.5">
+            {linkedContacts.map((c, i) => (
+              <div key={i} className="rounded-lg border border-border bg-card p-2.5">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-sm font-medium">{c.name || '—'}</span>
+                  {c.position && <span className="text-xs text-muted-foreground">· {c.position}</span>}
+                  {c.is_primary && (
+                    <span className="inline-flex items-center gap-0.5 text-xs text-amber-600 font-medium">
+                      <Star className="w-3 h-3 fill-amber-500 text-amber-500" /> Primary
+                    </span>
+                  )}
+                </div>
+                <div className="flex flex-wrap gap-3 mt-1 text-xs text-muted-foreground">
+                  {c.phone && <span className="flex items-center gap-1"><Phone className="w-3 h-3" /> {c.phone}</span>}
+                  {c.email && <span className="flex items-center gap-1"><Mail className="w-3 h-3" /> {c.email}</span>}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
