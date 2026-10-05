@@ -51,6 +51,7 @@ export default function CreditRepairInstructionModal({ claim, isOpen, onClose })
     vehicle: true,
     bodyshop: true,
     incident: true,
+    third_party: false,
   });
 
   // Fetch the linked Client entity to access its saved contacts (e.g. fleet manager)
@@ -120,7 +121,7 @@ export default function CreditRepairInstructionModal({ claim, isOpen, onClose })
       setGeneratedPdfUrl(null);
       setSavedToDocs(false);
       setSelectedContactId('client');
-      setIncludeSections({ client: true, driver: true, vehicle: true, bodyshop: true, incident: true });
+      setIncludeSections({ client: true, driver: true, vehicle: true, bodyshop: true, incident: true, third_party: false });
     }
   }, [isOpen, claim?.id]);
 
@@ -292,6 +293,7 @@ export default function CreditRepairInstructionModal({ claim, isOpen, onClose })
                   { key: 'vehicle', label: 'Vehicle' },
                   { key: 'bodyshop', label: 'Repairer' },
                   { key: 'incident', label: 'Incident' },
+                  { key: 'third_party', label: 'Third Party' },
                 ].map((s) => (
                   <label
                     key={s.key}

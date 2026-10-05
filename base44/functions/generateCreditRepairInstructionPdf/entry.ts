@@ -21,6 +21,7 @@ export default async function(req: Request): Promise<Response> {
       vehicle: includeSections?.vehicle !== false,
       bodyshop: includeSections?.bodyshop !== false,
       incident: includeSections?.incident !== false,
+      third_party: includeSections?.third_party === true,
     };
 
     const claim = await base44.asServiceRole.entities.Claim.get(claimId);
@@ -227,6 +228,35 @@ export default async function(req: Request): Promise<Response> {
       if (claim.circumstances) {
         drawParagraph('Circumstances: ' + claim.circumstances);
       }
+    }
+
+    // ═══ Section — Third Party Details ═══
+    if (sections.third_party) {
+      const tpAddress = [
+        claim.tp_address_line_1, claim.tp_address_line_2,
+        claim.tp_town, claim.tp_county, claim.tp_postcode
+      ].filter(Boolean).join(', ') || 'N/A';
+      const tpRows = [
+        ['TP Name', fmt(claim.tp_name)],
+        ['TP Driver Contact', fmt(claim.tp_driver_contact)],
+        ['Phone', fmt(claim.tp_phone)],
+        ['Email', fmt(claim.tp_email)],
+        ['Address', tpAddress],
+        ['TP Insurer', fmt(claim.tp_insurer)],
+        ['TP Policy Number', fmt(claim.tp_policy_number)],
+        ['TP Claim Ref', fmt(claim.tp_claim_ref)],
+        ['TP Vehicle', fmt(claim.tp_make_model)],
+        ['TP Registration', fmt(claim.tp_reg)],
+        ['TP Vehicle Type', fmt(claim.tp_vehicle_type)],
+        ['TP Vehicle Location', fmt(claim.tp_vehicle_location)],
+        ['TP Vehicle Damage', fmt(claim.tp_vehicle_damage)],
+        ['TP Unroadworthy', claim.tp_unroadworthy ? 'Yes' : 'No'],
+        ['TP Recovery Required', claim.tp_recovery_required ? 'Yes' : 'No'],
+      ];
+      ensureSpace(estimateSection(tpRows));
+      drawHeader('Third Party Details');
+      for (const [label, value] of tpRows) drawRow(label, value);
+      finishSection();
     }
 
     // ═══ Section 6 — Instruction ═══
