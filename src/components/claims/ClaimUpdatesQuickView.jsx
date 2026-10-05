@@ -33,7 +33,7 @@ const CopyTextButton = ({ text }) => {
 const UPDATE_TYPE_COLORS = {
   "Status Change": "bg-purple-500", "Client Communication": "bg-blue-500",
   "Bodyshop Communication": "bg-green-500", "Insurer Communication": "bg-orange-500",
-  "Referrer Response": "bg-amber-500", "Action Taken": "bg-indigo-500",
+  "Referrer Response": "bg-amber-500", "Credit Repair Communication": "bg-rose-500", "Action Taken": "bg-indigo-500",
   "Awaiting Information": "bg-yellow-500", "Documentation Received": "bg-teal-500",
   "Parts Update": "bg-pink-500", "Repair Progress": "bg-cyan-500",
   "Quality Check": "bg-emerald-500", "Other": "bg-gray-500"
@@ -209,6 +209,7 @@ export default function ClaimUpdatesQuickView({ claim, isOpen, onClose }) {
                         (update.update_type === 'Client Communication' && claim?.client_name) ||
                         (update.update_type === 'Insurer Communication' && claim?.insurer) ||
                         (update.update_type === 'Referrer Communication' && claim?.referrer) ||
+                        (update.update_type === 'Credit Repair Communication' && claim?.credit_repair_company_name) ||
                         '';
                       if (!partyName) return null;
                       return (

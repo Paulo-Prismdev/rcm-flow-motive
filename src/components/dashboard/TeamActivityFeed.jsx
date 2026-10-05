@@ -9,6 +9,7 @@ const TYPE_COLORS = {
   'Bodyshop Communication': 'bg-cyan-50 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-300',
   'Insurer Communication': 'bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300',
   'Referrer Communication': 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
+  'Credit Repair Communication': 'bg-rose-50 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300',
   'Parts': 'bg-orange-50 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300',
   'Other': 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
 };

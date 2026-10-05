@@ -15,7 +15,7 @@ import UpdateContactSelector from '@/components/claims/UpdateContactSelector';
 
 const UPDATE_TYPES = [
   "Client Communication", "Bodyshop Communication", "Insurer Communication",
-  "Referrer Response", "Action Taken", "Awaiting Information", "Documentation Received",
+  "Referrer Response", "Credit Repair Communication", "Action Taken", "Awaiting Information", "Documentation Received",
   "Parts Update", "Repair Progress", "Quality Check", "Accounts", "Other"
 ];
 
@@ -51,7 +51,7 @@ export default function InternalUpdateForm({
   const { data: currentUser } = useQuery({ queryKey: ['currentUser'], queryFn: () => base44.auth.me(), staleTime: 5 * 60 * 1000 });
   const { data: allUsers = [] } = useQuery({ queryKey: ['allUsers'], queryFn: () => base44.entities.User.list(), staleTime: 5 * 60 * 1000 });
 
-  const isCommType = ['Client Communication', 'Bodyshop Communication', 'Insurer Communication', 'Referrer Response'].includes(newUpdate.update_type);
+  const isCommType = ['Client Communication', 'Bodyshop Communication', 'Insurer Communication', 'Referrer Response', 'Credit Repair Communication'].includes(newUpdate.update_type);
 
   const { data: claim } = useQuery({
     queryKey: ['internal-update-claim', parentId, parentType],

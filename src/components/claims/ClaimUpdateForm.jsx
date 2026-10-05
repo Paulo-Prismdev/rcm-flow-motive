@@ -14,7 +14,7 @@ import UpdateContactSelector from "@/components/claims/UpdateContactSelector";
 
 const UPDATE_TYPES = [
   "Status Change", "Client Communication", "Bodyshop Communication", "Insurer Communication",
-  "Referrer Communication", "Parts", "General Update", "Other"
+  "Referrer Communication", "Credit Repair Communication", "Parts", "General Update", "Other"
 ];
 
 export default function ClaimUpdateForm({

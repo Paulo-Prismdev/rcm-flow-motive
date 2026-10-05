@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
-import { User, Mail, Phone, Building2, Shield, Users } from 'lucide-react';
+import { User, Mail, Phone, Building2, Shield, Users, CreditCard } from 'lucide-react';
 
 /**
  * Builds a list of relevant contacts for a given communication update type,
@@ -10,7 +10,7 @@ import { User, Mail, Phone, Building2, Shield, Users } from 'lucide-react';
  * selector can filter by the chosen platform.
  * Returns [{ id, label, detail, sublabel, kind }]
  */
-function buildContacts(updateType, claim, bodyshop, insurer, referrer, client) {
+function buildContacts(updateType, claim, bodyshop, insurer, referrer, client, creditRepair) {
   const contacts = [];
   if (!claim) return contacts;
 
@@ -74,6 +74,20 @@ function buildContacts(updateType, claim, bodyshop, insurer, referrer, client) {
     } else if (claim.referrer_email) {
       push('ref-claim', claim.referrer, claim.referrer_email, 'Main Email', 'email', claim.referrer);
     }
+  } else if (updateType === 'Credit Repair Communication') {
+    const crName = creditRepair?.name || claim.credit_repair_company_name;
+    if (crName) {
+      push('cr-email', creditRepair?.contact_name || crName, creditRepair?.email || claim.credit_repair_company_email, 'Main Email', 'email', crName);
+      push('cr-phone', creditRepair?.contact_name || crName, creditRepair?.phone || claim.credit_repair_company_phone, 'Phone', 'phone', crName);
+      if (creditRepair?.contacts?.length) {
+        creditRepair.contacts.forEach((c, i) => {
+          if (c.email) push(`cr-contact-email-${i}`, c.name || crName, c.email, c.position || 'Contact · Email', 'email', crName);
+          if (c.phone) push(`cr-contact-phone-${i}`, c.name || crName, c.phone, c.position || 'Contact · Phone', 'phone', crName);
+        });
+      }
+    } else if (claim.credit_repair_company_email) {
+      push('cr-claim', claim.credit_repair_company_name, claim.credit_repair_company_email, 'Main Email', 'email', claim.credit_repair_company_name);
+    }
   }
 
   // de-dupe by detail+label
@@ -92,6 +106,7 @@ const TYPE_ICON = {
   'Insurer Communication': Shield,
   'Referrer Communication': Users,
   'Referrer Response': Users,
+  'Credit Repair Communication': CreditCard,
 };
 
 // Map platform → which contact kinds to show.
@@ -103,7 +118,7 @@ const PLATFORM_KINDS = {
 };
 
 export default function UpdateContactSelector({ claim, updateType, platform, value = [], onChange }) {
-  const isCommType = ['Client Communication', 'Bodyshop Communication', 'Insurer Communication', 'Referrer Communication', 'Referrer Response'].includes(updateType);
+  const isCommType = ['Client Communication', 'Bodyshop Communication', 'Insurer Communication', 'Referrer Communication', 'Referrer Response', 'Credit Repair Communication'].includes(updateType);
 
   const { data: bodyshop } = useQuery({
     queryKey: ['bodyshop', claim?.bodyshop_id],
@@ -137,14 +152,22 @@ export default function UpdateContactSelector({ claim, updateType, platform, val
     retry: 1,
   });
 
+  const { data: creditRepair } = useQuery({
+    queryKey: ['creditRepairCompany', claim?.credit_repair_company_id],
+    queryFn: () => base44.entities.CreditRepairCompany.get(claim.credit_repair_company_id),
+    enabled: isCommType && updateType === 'Credit Repair Communication' && !!claim?.credit_repair_company_id,
+    staleTime: 2 * 60 * 1000,
+    retry: 1,
+  });
+
   const insurer = useMemo(() => {
     if (!claim?.insurer) return null;
     return insurers.find((i) => i.name?.toLowerCase() === claim.insurer.toLowerCase()) || null;
   }, [insurers, claim?.insurer]);
 
   const allContacts = useMemo(
-    () => buildContacts(updateType, claim, bodyshop, insurer, referrer, client),
-    [updateType, claim, bodyshop, insurer, referrer, client]
+    () => buildContacts(updateType, claim, bodyshop, insurer, referrer, client, creditRepair),
+    [updateType, claim, bodyshop, insurer, referrer, client, creditRepair]
   );
 
   // Filter to only the kinds relevant to the chosen platform.

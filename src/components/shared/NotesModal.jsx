@@ -17,7 +17,7 @@ const isImageUrl = (url) => /\.(jpe?g|png|gif|webp|bmp|svg)(\?|$)/i.test(url);
 
 const UPDATE_TYPE_COLORS = {
   "Client Communication": "bg-blue-500", "Bodyshop Communication": "bg-green-500",
-  "Insurer Communication": "bg-orange-500", "Referrer Response": "bg-amber-500",
+  "Insurer Communication": "bg-orange-500", "Referrer Response": "bg-amber-500", "Credit Repair Communication": "bg-rose-500",
   "Action Taken": "bg-indigo-500", "Awaiting Information": "bg-yellow-500",
   "Documentation Received": "bg-teal-500", "Parts Update": "bg-pink-500",
   "Repair Progress": "bg-cyan-500", "Quality Check": "bg-emerald-500",
