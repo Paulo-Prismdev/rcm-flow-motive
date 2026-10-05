@@ -10,7 +10,6 @@ import { useToast } from '@/components/ui/use-toast';
 import { replacePlaceholders } from './WizardConstants';
 import { sendInstructionEmail } from '@/functions/sendInstructionEmail';
 import WizardGeneratePdfBar from './WizardGeneratePdfBar';
-import WizardTemplatePicker from './WizardTemplatePicker';
 
 export default function WizardInstructionEmailStep({
   claim, selectedBodyshop,
@@ -70,14 +69,6 @@ export default function WizardInstructionEmailStep({
         <p className="font-medium text-sm">Selected Repairer: {selectedBodyshop?.name}</p>
         <p className="text-xs text-muted-foreground">{selectedBodyshop?.email}</p>
       </div>
-
-      {/* ── Template (read-only — chosen on Review Details) ── */}
-      <WizardTemplatePicker
-        pdfTemplates={pdfTemplates}
-        selectedPdfTemplate={selectedPdfTemplate}
-        onSelectTemplate={onSelectTemplate}
-        readOnly
-      />
 
       {/* ── Generate PDF + save to docs ── */}
       <WizardGeneratePdfBar
