@@ -156,8 +156,10 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
     };
     if (!has('claim_type')) list.push({ key: 'claim_type', label: 'Claim Type' });
     if (!has('client_name')) list.push({ key: 'client_name', label: 'Client Name' });
-    if (!has('instruction_contact_email', claim.client_email)) list.push({ key: 'instruction_contact_email', label: 'Contact Email' });
-    if (!has('instruction_contact_phone', claim.client_phone)) list.push({ key: 'instruction_contact_phone', label: 'Contact Phone' });
+    // Contact only needs one reachable method (phone OR email), not both.
+    const contactEmail = claim.instruction_contact_email ?? claim.client_email ?? '';
+    const contactPhone = claim.instruction_contact_phone ?? claim.client_phone ?? '';
+    if (!contactEmail && !contactPhone) list.push({ key: 'instruction_contact', label: 'Contact (phone or email)' });
     if (isCr) {
       if (!has('credit_repair_company_name')) list.push({ key: 'credit_repair_company_name', label: 'Credit Repair Company' });
     } else if (isInsurer) {
