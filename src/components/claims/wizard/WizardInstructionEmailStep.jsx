@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { FileText, Send, Mail } from 'lucide-react';
+import { Send, Mail } from 'lucide-react';
 import RichTextEditor from '@/components/shared/RichTextEditor';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { useToast } from '@/components/ui/use-toast';
-import { BUILT_IN_PDF_TEMPLATES, replacePlaceholders } from './WizardConstants';
+import { replacePlaceholders } from './WizardConstants';
 import { sendInstructionEmail } from '@/functions/sendInstructionEmail';
 import WizardGeneratePdfBar from './WizardGeneratePdfBar';
+import WizardTemplatePicker from './WizardTemplatePicker';
 
 export default function WizardInstructionEmailStep({
   claim, selectedBodyshop,
@@ -63,8 +64,6 @@ export default function WizardInstructionEmailStep({
     }
   };
 
-  const activeCustomTemplates = pdfTemplates.filter(t => t.is_active);
-
   return (
     <div className="space-y-3">
       <div className="p-3 rounded-lg bg-primary/10 border border-primary/20">
@@ -72,32 +71,13 @@ export default function WizardInstructionEmailStep({
         <p className="text-xs text-muted-foreground">{selectedBodyshop?.email}</p>
       </div>
 
-      {/* ── Template picker ── */}
-      <div>
-        <h3 className="font-bold text-sm mb-1">Instruction Template</h3>
-        <p className="text-xs text-muted-foreground mb-2">Pre-selected from your instruction type. Switch only if you need a different layout.</p>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-          {BUILT_IN_PDF_TEMPLATES.map((template) => {
-            const IconComponent = template.icon;
-            return (
-              <div key={template.id} className={`p-2.5 rounded-lg border-2 cursor-pointer transition-all text-center ${selectedPdfTemplate === template.id ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'}`} onClick={() => onSelectTemplate(template.id)}>
-                <IconComponent className="w-5 h-5 mx-auto mb-1 text-primary" />
-                <p className="font-medium text-xs">{template.name}</p>
-              </div>
-            );
-          })}
-        </div>
-        {activeCustomTemplates.length > 0 && (
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-2">
-            {activeCustomTemplates.map((template) => (
-              <div key={template.id} className={`p-2.5 rounded-lg border-2 cursor-pointer transition-all flex items-center gap-2 ${selectedPdfTemplate === template.id ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'}`} onClick={() => onSelectTemplate(template.id)}>
-                <FileText className="w-4 h-4 text-primary" />
-                <p className="font-medium text-xs">{template.template_name}</p>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+      {/* ── Template (read-only — chosen on Review Details) ── */}
+      <WizardTemplatePicker
+        pdfTemplates={pdfTemplates}
+        selectedPdfTemplate={selectedPdfTemplate}
+        onSelectTemplate={onSelectTemplate}
+        readOnly
+      />
 
       {/* ── Generate PDF + save to docs ── */}
       <WizardGeneratePdfBar
