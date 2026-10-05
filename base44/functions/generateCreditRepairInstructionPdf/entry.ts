@@ -1,6 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.49';
 import { jsPDF } from 'npm:jspdf@2.5.1';
-import { PDF_CONST, PDF_COLORS, createPdfHelpers } from '../../shared/instructionPdfHelpers.ts';
+import { PDF_CONST, PDF_COLORS, createPdfHelpers, drawBrandedHeader } from '../../shared/instructionPdfHelpers.ts';
 
 export default async function(req: Request): Promise<Response> {
   try {
@@ -91,26 +91,12 @@ export default async function(req: Request): Promise<Response> {
       claim.client_town, claim.client_county, claim.client_postcode
     ].filter(Boolean).join(', ') || 'N/A';
 
-    // ═══ Document header ═══
-    doc.setFillColor(...NAVY);
-    doc.rect(LM, 12, MW, 12, 'F');
-    doc.setTextColor(...WHITE);
-    doc.setFontSize(14);
-    doc.setFont('helvetica', 'bold');
-    doc.text('RCM Automotive', TX, 20.5);
-    doc.setFontSize(9);
-    doc.setFont('helvetica', 'normal');
-    doc.text('Credit Repair Instruction', PW - LM - PAD_X, 20.5, { align: 'right' });
-    doc.setFillColor(240, 240, 240);
-    doc.rect(LM, 25, MW, 7, 'F');
-    doc.setTextColor(...DARK_TEXT);
-    doc.setFontSize(9);
-    doc.setFont('helvetica', 'bold');
-    doc.text(`RCM Claim Reference: ${claim.job_number || 'N/A'}`, TX, 29.5);
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(8);
-    doc.text(`Instruction Date: ${today}`, PW - LM - PAD_X, 29.5, { align: 'right' });
-    yPos = 37;
+    // ═══ Document header — branded, spans top of first page ═══
+    yPos = await drawBrandedHeader(doc, {
+      subtitle: 'Credit Repair Instruction',
+      claimRef: claim.job_number || 'N/A',
+      instructionDate: today,
+    });
 
     // ═══ Section 1 — Credit Repair Company ═══
     {

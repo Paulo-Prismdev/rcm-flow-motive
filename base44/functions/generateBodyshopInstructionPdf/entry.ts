@@ -1,6 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 import { jsPDF } from 'npm:jspdf@2.5.1';
-import { createPdfHelpers } from '../../shared/instructionPdfHelpers.ts';
+import { createPdfHelpers, drawBrandedHeader } from '../../shared/instructionPdfHelpers.ts';
 
 Deno.serve(async (req) => {
   try {
@@ -192,24 +192,12 @@ Deno.serve(async (req) => {
 
 
     // ═══════════════════════════════════════════
-    // DOCUMENT HEADER
+    // DOCUMENT HEADER — branded, spans top of first page
     // ═══════════════════════════════════════════
-    doc.setFillColor(...NAVY);
-    doc.rect(LM, 12, MW, 12, 'F');
-    doc.setTextColor(...WHITE);
-    doc.setFontSize(14);
-    doc.setFont('helvetica', 'bold');
-    doc.text('RCM Automotive', TX, 20.5);
-    doc.setFontSize(9);
-    doc.setFont('helvetica', 'normal');
-    doc.text('Repairer Instruction', PW - LM - PAD_X, 20.5, { align: 'right' });
-    doc.setFillColor(240, 240, 240);
-    doc.rect(LM, 25, MW, 7, 'F');
-    doc.setTextColor(...DARK_TEXT);
-    doc.setFontSize(9);
-    doc.setFont('helvetica', 'bold');
-    doc.text(`RCM Claim Reference: ${claim.job_number || 'N/A'}`, TX, 29.5);
-    yPos = 37;
+    yPos = await drawBrandedHeader(doc, {
+      subtitle: 'Repairer Instruction',
+      claimRef: claim.job_number || 'N/A',
+    });
 
     // ═══════════════════════════════════════════
     // SECTION 1 — Client & Repairer Details
