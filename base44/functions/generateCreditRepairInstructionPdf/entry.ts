@@ -11,8 +11,17 @@ export default async function(req: Request): Promise<Response> {
       return Response.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const { claimId, saveToClaim = false } = await req.json();
+    const { claimId, saveToClaim = false, contact = null, includeSections = null } = await req.json();
     if (!claimId) return Response.json({ error: 'Missing claimId' }, { status: 400 });
+
+    // Default all sections to included unless explicitly toggled off
+    const sections = {
+      client: includeSections?.client !== false,
+      driver: includeSections?.driver !== false,
+      vehicle: includeSections?.vehicle !== false,
+      bodyshop: includeSections?.bodyshop !== false,
+      incident: includeSections?.incident !== false,
+    };
 
     const claim = await base44.asServiceRole.entities.Claim.get(claimId);
     if (!claim) return Response.json({ error: 'Claim not found' }, { status: 404 });
@@ -117,24 +126,39 @@ export default async function(req: Request): Promise<Response> {
       finishSection();
     }
 
-    // ═══ Section 2 — Client Details ═══
-    {
+    // ═══ Section 2 — Client (Business) Details ═══
+    if (sections.client) {
       const rows = [
         ['Client Name', fmt(claim.client_name)],
         ['Client Address', clientAddress],
-        ['Contact Name', fmt(claim.driver_contact_name || claim.client_name)],
-        ['Phone', fmt(claim.client_phone)],
-        ['Email', fmt(claim.client_email)],
         ['VAT Status', fmt(claim.client_vat_status)],
       ];
       ensureSpace(estimateSection(rows));
-      drawHeader('Client Details');
+      drawHeader('Client (Business)');
+      for (const [label, value] of rows) drawRow(label, value);
+      finishSection();
+    }
+
+    // ═══ Section — Contact (person dealing with the claim) ═══
+    {
+      const cName = contact?.name || claim.client_name || '';
+      const cPosition = contact?.position || '';
+      const cPhone = contact?.phone || claim.client_phone || '';
+      const cEmail = contact?.email || claim.client_email || '';
+      const rows = [
+        ['Contact Name', fmt(cName)],
+        ['Position', fmt(cPosition)],
+        ['Phone', fmt(cPhone)],
+        ['Email', fmt(cEmail)],
+      ];
+      ensureSpace(estimateSection(rows));
+      drawHeader('Contact for this Claim');
       for (const [label, value] of rows) drawRow(label, value);
       finishSection();
     }
 
     // ═══ Section 3 — Driver Details ═══
-    {
+    if (sections.driver) {
       const driverAddress = claim.driver_same_as_client
         ? clientAddress
         : [claim.driver_contact_address_line_1, claim.driver_contact_address_line_2,
@@ -157,7 +181,7 @@ export default async function(req: Request): Promise<Response> {
     }
 
     // ═══ Section 4 — Vehicle Details ═══
-    {
+    if (sections.vehicle) {
       const rows = [
         ['Make & Model', fmt(claim.make_model)],
         ['Registration', fmt(claim.reg)],
@@ -173,7 +197,7 @@ export default async function(req: Request): Promise<Response> {
     }
 
     // ═══ Section — Bodyshop Details ═══
-    {
+    if (sections.bodyshop) {
       const rows = [
         ['Bodyshop Name', fmt(bs.name)],
         ['Contact Name', fmt(bs.contact_name)],
@@ -188,7 +212,7 @@ export default async function(req: Request): Promise<Response> {
     }
 
     // ═══ Section 5 — Incident Details ═══
-    {
+    if (sections.incident) {
       const rows = [
         ['Date of Loss', fmtDate(claim.loss_date)],
         ['Time of Loss', fmt(claim.loss_time)],
