@@ -9,6 +9,7 @@ import InstructionPreCheck from './InstructionPreCheck';
 import WizardFindRepairerStep from './wizard/WizardFindRepairerStep';
 import WizardInstructionEmailStep from './wizard/WizardInstructionEmailStep';
 import WizardInstructionContentPanel from './wizard/WizardInstructionContentPanel';
+import WizardGeneratePdfBar from './wizard/WizardGeneratePdfBar';
 import WizardConfirmStep from './wizard/WizardConfirmStep';
 import { geocodeAddress } from '@/functions/geocodeAddress';
 import { sanitizeClaimData } from '@/components/shared/sanitizeClaimData';
@@ -451,6 +452,14 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
                 onContactChange={handlePreCheckUpdate}
                 includeSections={includeSections}
                 onToggleSection={(key, val) => setIncludeSections((prev) => ({ ...prev, [key]: val }))}
+              />
+              <WizardGeneratePdfBar
+                isGeneratingPdf={isGeneratingPdf}
+                generatedPdfUrl={generatedPdfUrl}
+                onGeneratePdf={handleGeneratePdf}
+                isSavingToDocs={isSavingInstructionToDocs}
+                savedToDocs={instructionSavedToDocs}
+                onSaveToDocs={handleSaveInstructionToDocs}
               />
             </div>
           )}

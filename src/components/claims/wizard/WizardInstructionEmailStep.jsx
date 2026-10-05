@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { FileText, Loader, CheckCircle, Save, Download, RefreshCw, Send, Mail } from 'lucide-react';
+import { FileText, Send, Mail } from 'lucide-react';
 import RichTextEditor from '@/components/shared/RichTextEditor';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
@@ -9,6 +9,7 @@ import {
 import { useToast } from '@/components/ui/use-toast';
 import { BUILT_IN_PDF_TEMPLATES, replacePlaceholders } from './WizardConstants';
 import { sendInstructionEmail } from '@/functions/sendInstructionEmail';
+import WizardGeneratePdfBar from './WizardGeneratePdfBar';
 
 export default function WizardInstructionEmailStep({
   claim, selectedBodyshop,
@@ -98,31 +99,15 @@ export default function WizardInstructionEmailStep({
         )}
       </div>
 
-      {/* ── Generate PDF ── */}
-      <div className="flex items-center gap-2 flex-wrap">
-        {generatedPdfUrl && (
-          <Button variant="outline" size="sm" onClick={() => window.open(generatedPdfUrl, '_blank')} className="gap-2">
-            <Download className="w-4 h-4" /> View PDF
-          </Button>
-        )}
-        <Button variant="outline" size="sm" onClick={onGeneratePdf} disabled={isGeneratingPdf} className="gap-2">
-          <RefreshCw className={`w-4 h-4 ${isGeneratingPdf ? 'animate-spin' : ''}`} />
-          {isGeneratingPdf ? 'Generating...' : generatedPdfUrl ? 'Regenerate PDF' : 'Generate PDF'}
-        </Button>
-      </div>
-      {generatedPdfUrl && !isGeneratingPdf && (
-        <div className="rounded-lg border border-green-200 bg-green-50 p-2.5 space-y-2">
-          <div className="flex items-center gap-2 text-green-700">
-            <CheckCircle className="w-4 h-4 flex-shrink-0" />
-            <span className="text-sm">{savedToDocs ? 'Saved to claim docs.' : 'PDF generated — save it now or it saves at allocation.'}</span>
-          </div>
-          {!savedToDocs && (
-            <Button variant="outline" size="sm" onClick={onSaveToDocs} disabled={isSavingToDocs} className="w-full gap-2 border-green-300 text-green-700 hover:bg-green-100">
-              {isSavingToDocs ? <><Loader className="w-4 h-4 animate-spin" /> Saving...</> : <><Save className="w-4 h-4" /> Save to Claim Docs Now</>}
-            </Button>
-          )}
-        </div>
-      )}
+      {/* ── Generate PDF + save to docs ── */}
+      <WizardGeneratePdfBar
+        isGeneratingPdf={isGeneratingPdf}
+        generatedPdfUrl={generatedPdfUrl}
+        onGeneratePdf={onGeneratePdf}
+        isSavingToDocs={isSavingToDocs}
+        savedToDocs={savedToDocs}
+        onSaveToDocs={onSaveToDocs}
+      />
 
       {/* ── Email compose ── */}
       <div className="pt-2 border-t border-border space-y-3">
