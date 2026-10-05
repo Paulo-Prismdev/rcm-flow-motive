@@ -10,7 +10,7 @@ import { User, Mail, Phone, Building2, Shield, Users } from 'lucide-react';
  * selector can filter by the chosen platform.
  * Returns [{ id, label, detail, sublabel, kind }]
  */
-function buildContacts(updateType, claim, bodyshop, insurer, referrer) {
+function buildContacts(updateType, claim, bodyshop, insurer, referrer, client) {
   const contacts = [];
   if (!claim) return contacts;
 
@@ -24,6 +24,14 @@ function buildContacts(updateType, claim, bodyshop, insurer, referrer) {
     if (claim.client_name) {
       push('client-email', claim.client_name, claim.client_email, 'Client · Email', 'email', orgName);
       push('client-phone', claim.client_name, claim.client_phone, 'Client · Phone', 'phone', orgName);
+    }
+    // Contacts saved on the linked Client entity (Company clients)
+    if (client?.contacts?.length) {
+      client.contacts.forEach((c, i) => {
+        const cName = c.name || orgName;
+        if (c.email) push(`client-contact-email-${i}`, cName, c.email, c.position || 'Contact · Email', 'email', orgName);
+        if (c.phone) push(`client-contact-phone-${i}`, cName, c.phone, c.position || 'Contact · Phone', 'phone', orgName);
+      });
     }
     if (!claim.driver_same_as_client) {
       const dName = claim.driver_name || claim.driver_contact_name;
@@ -105,6 +113,14 @@ export default function UpdateContactSelector({ claim, updateType, platform, val
     retry: 1,
   });
 
+  const { data: client } = useQuery({
+    queryKey: ['client', claim?.client_id],
+    queryFn: () => base44.entities.Client.get(claim.client_id),
+    enabled: isCommType && updateType === 'Client Communication' && !!claim?.client_id,
+    staleTime: 2 * 60 * 1000,
+    retry: 1,
+  });
+
   const { data: referrer } = useQuery({
     queryKey: ['referrer', claim?.referrer_id],
     queryFn: () => base44.entities.Referrer.get(claim.referrer_id),
@@ -127,8 +143,8 @@ export default function UpdateContactSelector({ claim, updateType, platform, val
   }, [insurers, claim?.insurer]);
 
   const allContacts = useMemo(
-    () => buildContacts(updateType, claim, bodyshop, insurer, referrer),
-    [updateType, claim, bodyshop, insurer, referrer]
+    () => buildContacts(updateType, claim, bodyshop, insurer, referrer, client),
+    [updateType, claim, bodyshop, insurer, referrer, client]
   );
 
   // Filter to only the kinds relevant to the chosen platform.
