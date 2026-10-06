@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import useLinkedClientSync from '@/hooks/useLinkedClientSync';
 import { ArrowLeft, ArrowRight, Check, Plus, Search, Loader, AlertCircle, Sparkles, Send, Copy, Users, Phone, Mail, Star } from "lucide-react";
 import ClientFormLink from './ClientFormLink';
 import ClaimEditForm from './ClaimEditForm';
@@ -158,6 +159,8 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
     indemnity_full_license_12_months: '', indemnity_convictions_last_5_years: '',
     indemnity_vehicle_use_at_incident: '', indemnity_vehicle_modifications: ''
   });
+
+  useLinkedClientSync(formData.client_id, setFormData, setLinkedContacts);
 
   const isEditing = !!claim;
   const [choiceStep, setChoiceStep] = useState(!isEditing);
