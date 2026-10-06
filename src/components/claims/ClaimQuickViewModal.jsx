@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { FileText, User, Shield, Wrench, Users, Car, Calendar, Building2, Copy, Check } from 'lucide-react';
+import { FileText, User, Shield, Wrench, Users, Car, Calendar, Building2, Copy, Check, Phone, Mail, Star } from 'lucide-react';
 import { format } from 'date-fns';
 import { formatUKRegistration } from '../shared/formatRegistration';
 import StatusBadge from '../shared/StatusBadge';
@@ -127,24 +127,60 @@ export default function ClaimQuickViewModal({ claim, isOpen, onClose }) {
           {/* Client */}
           <Section icon={User} title="Client" color="bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
             <InfoRow label="Name" value={claim.client_name} />
-            {(() => {
-              const contacts = linkedClient?.contacts || [];
-              const primary = contacts.find(c => c.is_primary) || contacts[0] || null;
-              const contactName = primary?.name || linkedClient?.company_contact_name;
-              const contactPhone = primary?.phone || linkedClient?.company_contact_phone;
-              const contactEmail = primary?.email || linkedClient?.company_contact_email;
-              return <>
-                {contactName && <InfoRow label="Company Contact Name" value={contactName} />}
-                {contactPhone && <InfoRow label="Company Contact Phone" value={contactPhone} href={`tel:${contactPhone}`} />}
-                {contactEmail && <InfoRow label="Company Contact Email" value={contactEmail} href={`mailto:${contactEmail}`} />}
-              </>;
-            })()}
             <InfoRow label="Phone" value={claim.client_phone} href={claim.client_phone ? `tel:${claim.client_phone}` : null} />
             <InfoRow label="Email" value={claim.client_email} href={claim.client_email ? `mailto:${claim.client_email}` : null} />
             <InfoRow label="Business Division" value={claim.business_division} />
             {(claim.client_address_line_1 || claim.client_town || claim.client_postcode) && (
               <InfoRow label="Address" value={[claim.client_address_line_1, claim.client_address_line_2, claim.client_town, claim.client_county, claim.client_postcode].filter(Boolean).join(', ')} fullWidth />
             )}
+            {(() => {
+              const contacts = linkedClient?.contacts || [];
+              if (contacts.length === 0) {
+                const legacyName = linkedClient?.company_contact_name;
+                const legacyPhone = linkedClient?.company_contact_phone;
+                const legacyEmail = linkedClient?.company_contact_email;
+                if (!legacyName && !legacyPhone && !legacyEmail) return null;
+                return (
+                  <div className="col-span-2 mt-1 rounded-lg border border-border bg-muted/30 p-2.5 space-y-1.5">
+                    <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                      <Users className="w-3 h-3" /> Contacts at this business
+                    </div>
+                    <div className="rounded-md border border-border bg-card p-2">
+                      {legacyName && <div className="text-sm font-medium">{legacyName}</div>}
+                      <div className="flex flex-wrap gap-3 mt-0.5 text-xs text-muted-foreground">
+                        {legacyPhone && <span className="flex items-center gap-1"><Phone className="w-3 h-3" /> {legacyPhone}</span>}
+                        {legacyEmail && <span className="flex items-center gap-1"><Mail className="w-3 h-3" /> {legacyEmail}</span>}
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
+              return (
+                <div className="col-span-2 mt-1 rounded-lg border border-border bg-muted/30 p-2.5 space-y-1.5">
+                  <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                    <Users className="w-3 h-3" /> Contacts at this business
+                  </div>
+                  <div className="space-y-1.5">
+                    {contacts.map((c, i) => {
+                      const primary = c.is_primary || (i === 0 && !contacts.some(x => x.is_primary));
+                      return (
+                        <div key={i} className="rounded-md border border-border bg-card p-2">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-sm font-medium">{c.name || '—'}</span>
+                            {c.position && <span className="text-xs text-muted-foreground">· {c.position}</span>}
+                            {primary && <span className="inline-flex items-center gap-0.5 text-xs text-amber-600 font-medium"><Star className="w-3 h-3 fill-amber-500 text-amber-500" /> Primary</span>}
+                          </div>
+                          <div className="flex flex-wrap gap-3 mt-0.5 text-xs text-muted-foreground">
+                            {c.phone && <span className="flex items-center gap-1"><Phone className="w-3 h-3" /> {c.phone}</span>}
+                            {c.email && <span className="flex items-center gap-1"><Mail className="w-3 h-3" /> {c.email}</span>}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })()}
           </Section>
 
           {/* Driver */}
