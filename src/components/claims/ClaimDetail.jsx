@@ -14,6 +14,7 @@ import {
     Package,
     Calculator,
     Mail,
+    Phone,
     Briefcase,
     FileText,
     Archive,
@@ -870,7 +871,9 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
         const companyContactEmail = primaryContact?.email || linkedClient?.company_contact_email;
         const clientPhone = claim.client_phone || linkedClient?.phone;
         const clientEmail = claim.client_email || linkedClient?.email;
-        const vatStatus = claim.client_vat_status || linkedClient?.vat_status || 'Unknown';
+        // Prefer the linked client's VAT status when the claim snapshot is empty/Unknown
+        const claimVat = claim.client_vat_status && claim.client_vat_status !== 'Unknown' ? claim.client_vat_status : null;
+        const vatStatus = claimVat || linkedClient?.vat_status || 'Unknown';
         return (
           <EditableSection title="Billing Party — Client" icon={Users} claim={claim} onUpdate={handleUpdate} EditComponent={ClientEditComponent} canEdit={canEdit}>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
@@ -884,6 +887,31 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
               { claim.client_ref && <div className="py-2 px-3 rounded-[8px] hover:bg-muted/50"><div className="text-[11px] font-medium text-muted-foreground mb-0.5">Client Ref</div><div className="text-sm font-medium">{claim.client_ref}</div></div>}
               {claim.business_division && <div className="py-2 px-3 rounded-[8px] hover:bg-muted/50"><div className="text-[11px] font-medium text-muted-foreground mb-0.5">Business Division</div><div className="text-sm font-medium">{claim.business_division}</div></div>}
             </div>
+            {clientContacts.length > 0 && (
+              <div className="mt-3 rounded-lg border border-border bg-muted/30 p-3 space-y-2">
+                <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  <Users className="w-3.5 h-3.5" /> Contacts at this business
+                </div>
+                <div className="space-y-1.5">
+                  {clientContacts.map((c, i) => {
+                    const primary = c.is_primary || (i === 0 && !clientContacts.some(x => x.is_primary));
+                    return (
+                      <div key={i} className="rounded-lg border border-border bg-card p-2.5">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-sm font-medium">{c.name || '—'}</span>
+                          {c.position && <span className="text-xs text-muted-foreground">· {c.position}</span>}
+                          {primary && <span className="inline-flex items-center gap-0.5 text-xs text-amber-600 font-medium"><Star className="w-3 h-3 fill-amber-500 text-amber-500" /> Primary</span>}
+                        </div>
+                        <div className="flex flex-wrap gap-3 mt-1 text-xs text-muted-foreground">
+                          {c.phone && <span className="flex items-center gap-1"><Phone className="w-3 h-3" /> {c.phone}</span>}
+                          {c.email && <span className="flex items-center gap-1"><Mail className="w-3 h-3" /> {c.email}</span>}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
             <div className="mt-3 pt-3 border-t border-border">
               <p className="text-[11px] font-semibold text-muted-foreground mb-2">Insurance Details</p>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">

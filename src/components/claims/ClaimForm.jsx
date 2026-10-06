@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, ArrowRight, Check, Plus, Search, Loader, AlertCircle, Sparkles, Send, Copy } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Plus, Search, Loader, AlertCircle, Sparkles, Send, Copy, Users, Phone, Mail, Star } from "lucide-react";
 import ClientFormLink from './ClientFormLink';
 import ClaimEditForm from './ClaimEditForm';
 import InsurerCombobox from "../shared/InsurerCombobox";
@@ -105,6 +105,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
   const [tpVehicleLookupError, setTpVehicleLookupError] = useState(null);
   const [aiExtractDialog, setAiExtractDialog] = useState({ isOpen: false, data: null, linkedEntityTypes: [] });
   const [aiEntityLinker, setAiEntityLinker] = useState({ isOpen: false, data: null });
+  const [linkedContacts, setLinkedContacts] = useState([]);
   const queryClient = useQueryClient();
 
   const { data: currentUser, isLoading: isLoadingUser } = useQuery({
@@ -299,21 +300,28 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
   const handleBodyshopChange = (b) => setFormData(prev => ({ ...prev, bodyshop: b.name, bodyshop_id: b.id, bodyshop_email: b.email || '' }));
 
   const handleClientChange = async (client) => {
-    const fullAddress = [client.address_line_1, client.address_line_2, client.town, client.county, client.postcode].filter(Boolean).join(', ');
+    // Fetch the freshest client record by ID so VAT status and contacts are current
+    // (the combobox list can be stale if the directory was edited elsewhere).
+    let fresh = client;
+    if (client?.id) {
+      try { fresh = await base44.entities.Client.get(client.id) || client; } catch {}
+    }
+    const fullAddress = [fresh.address_line_1, fresh.address_line_2, fresh.town, fresh.county, fresh.postcode].filter(Boolean).join(', ');
     let geocodedLat = null, geocodedLng = null;
     if (fullAddress) {
       try { const c = await geocodeAddress(fullAddress); if (c) { geocodedLat = c.lat; geocodedLng = c.lng; } } catch {}
     }
-    const contacts = client.contacts || [];
+    const contacts = fresh.contacts || [];
     const primaryContact = contacts.find(c => c.is_primary) || contacts[0] || null;
+    setLinkedContacts(contacts);
     setFormData(prev => ({
-      ...prev, client_name: client.name, client_id: client.id,
-      client_phone: client.phone || primaryContact?.phone || client.company_contact_phone || '',
-      client_email: client.email || primaryContact?.email || client.company_contact_email || '',
-      client_address_line_1: client.address_line_1 || '',
-      client_address_line_2: client.address_line_2 || '', client_town: client.town || '',
-      client_county: client.county || '', client_postcode: client.postcode || '',
-      client_vat_status: client.vat_status || 'Unknown', business_division: '', client_lat: geocodedLat, client_lng: geocodedLng,
+      ...prev, client_name: fresh.name, client_id: fresh.id,
+      client_phone: fresh.phone || primaryContact?.phone || fresh.company_contact_phone || '',
+      client_email: fresh.email || primaryContact?.email || fresh.company_contact_email || '',
+      client_address_line_1: fresh.address_line_1 || '',
+      client_address_line_2: fresh.address_line_2 || '', client_town: fresh.town || '',
+      client_county: fresh.county || '', client_postcode: fresh.postcode || '',
+      client_vat_status: fresh.vat_status || 'Unknown', business_division: '', client_lat: geocodedLat, client_lng: geocodedLng,
       driver_same_as_client: true, driver_contact_name: '', driver_contact_phone: '',
       driver_contact_email: '', driver_contact_address_line_1: '', driver_contact_address_line_2: '',
       driver_contact_town: '', driver_contact_county: '', driver_contact_postcode: ''
@@ -582,6 +590,36 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
             <p className="text-xs text-muted-foreground">Client not found — save as draft, add in Clients section, then return.</p>
           )}
         </div>
+
+        {linkedContacts.length > 0 && (
+          <div className="rounded-xl border border-border bg-muted/30 p-3 space-y-2">
+            <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              <Users className="w-3.5 h-3.5" /> Contacts at this business
+            </div>
+            <div className="space-y-1.5">
+              {linkedContacts.map((c, i) => {
+                const primary = c.is_primary || (i === 0 && !linkedContacts.some(x => x.is_primary));
+                return (
+                  <div key={i} className="rounded-lg border border-border bg-card p-2.5">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-sm font-medium">{c.name || '—'}</span>
+                      {c.position && <span className="text-xs text-muted-foreground">· {c.position}</span>}
+                      {primary && (
+                        <span className="inline-flex items-center gap-0.5 text-xs text-amber-600 font-medium">
+                          <Star className="w-3 h-3 fill-amber-500 text-amber-500" /> Primary
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex flex-wrap gap-3 mt-1 text-xs text-muted-foreground">
+                      {c.phone && <span className="flex items-center gap-1"><Phone className="w-3 h-3" /> {c.phone}</span>}
+                      {c.email && <span className="flex items-center gap-1"><Mail className="w-3 h-3" /> {c.email}</span>}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         <div className="p-4 rounded-lg bg-muted/50 space-y-3">
           {formData.client_id && <span className="text-xs px-2 py-1 rounded-full bg-green-100 text-green-700 font-medium inline-block mb-2">✓ Linked to Database</span>}
