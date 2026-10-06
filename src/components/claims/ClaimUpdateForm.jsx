@@ -11,11 +11,18 @@ import StatusChangeFields from "@/components/shared/StatusChangeFields";
 import { buildStatusChangeClaimUpdate, isUpdateTrackingClosed } from "@/components/shared/claimStatusUpdate";
 import { createTagNotifications } from "@/components/shared/createTagNotifications";
 import UpdateContactSelector from "@/components/claims/UpdateContactSelector";
+import { getAvailableUpdateTypes } from "@/components/shared/claimTypeLogic";
 
 const UPDATE_TYPES = [
   "Status Change", "Client Communication", "Bodyshop Communication", "Insurer Communication",
   "Referrer Communication", "Credit Repair Communication", "Parts", "General Update", "Other"
 ];
+
+// Claim-type-aware list; falls back to the full list if claim is unavailable.
+const availableUpdateTypes = (claim) => {
+  const list = getAvailableUpdateTypes(claim);
+  return list.length ? list : UPDATE_TYPES;
+};
 
 export default function ClaimUpdateForm({
   claimId,
@@ -277,7 +284,7 @@ export default function ClaimUpdateForm({
           <div>
             <label className="block text-xs text-muted-foreground mb-1">Update Type *</label>
             <select value={newUpdate.update_type} onChange={(e) => { setNewUpdate({ ...newUpdate, update_type: e.target.value, direction: '', platform: '' }); setSelectedContacts([]); }} className="w-full px-3 py-2 text-sm bg-background border border-border rounded-lg" required>
-              {UPDATE_TYPES.map(type => <option key={type} value={type}>{type}</option>)}
+              {availableUpdateTypes(claim).map(type => <option key={type} value={type}>{type}</option>)}
             </select>
           </div>
         )}
