@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -168,11 +168,17 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
   const [isCreating, setIsCreating] = React.useState(false);
   const [referrerCompanyId, setReferrerCompanyId] = useState(claim?.referrer_id || null);
 
-  const { data: referrerUsers = [] } = useQuery({
-    queryKey: ['users', 'company', referrerCompanyId],
-    queryFn: () => base44.entities.User.filter({ company_id: referrerCompanyId }),
-    enabled: !!referrerCompanyId
+  const { data: referrerCompany } = useQuery({
+    queryKey: ['company', referrerCompanyId],
+    queryFn: () => base44.entities.Company.get(referrerCompanyId),
+    enabled: !!referrerCompanyId,
+    staleTime: 2 * 60 * 1000,
+    retry: 1,
   });
+  const handlerContacts = useMemo(
+    () => (referrerCompany?.contacts || []).filter(c => c.is_handler && c.name),
+    [referrerCompany]
+  );
 
   const filledCount = TRACKED_FIELDS.filter(k => {
     const v = formData[k];
@@ -713,12 +719,12 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
           <div className="space-y-2"><label className="text-sm font-medium">Referrer Reference</label><Input value={formData.referrer_ref} onChange={e => handleChange('referrer_ref', e.target.value)} /></div>
           <div className="space-y-2">
             <label className="text-sm font-medium">File Handler</label>
-            {referrerUsers.length > 0 ? (
+            {handlerContacts.length > 0 ? (
               <select value={formData.file_handler} onChange={e => handleChange('file_handler', e.target.value)}
                 style={{ WebkitAppearance: 'menulist', appearance: 'menulist' }}
                 className="w-full px-3 py-2 text-sm rounded-[10px] border border-input bg-card text-foreground">
                 <option value="">Select file handler...</option>
-                {referrerUsers.map(u => <option key={u.id} value={u.display_name || u.full_name}>{u.display_name || u.full_name}</option>)}
+                {handlerContacts.map((c, i) => <option key={c.id || i} value={c.name}>{c.name}{c.position ? ` — ${c.position}` : ''}</option>)}
               </select>
             ) : <Input value={formData.file_handler} onChange={e => handleChange('file_handler', e.target.value)} placeholder="Enter file handler name" />}
           </div>

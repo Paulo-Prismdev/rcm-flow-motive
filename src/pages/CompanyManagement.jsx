@@ -13,7 +13,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Plus, Pencil, Trash2, Building2, Users, Star } from "lucide-react";
+import { Plus, Pencil, Trash2, Building2, Users, Star, UserCog } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -149,6 +149,12 @@ export default function CompanyManagement() {
                   <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5 flex items-center gap-1">
                     <Users className="w-3 h-3" />
                     {company.contacts.length} additional contact{company.contacts.length !== 1 ? 's' : ''}
+                    {company.contacts.filter(c => c.is_handler).length > 0 && (
+                      <span className="inline-flex items-center gap-0.5 ml-1 text-blue-500">
+                        <UserCog className="w-3 h-3" />
+                        {company.contacts.filter(c => c.is_handler).length} handler{company.contacts.filter(c => c.is_handler).length !== 1 ? 's' : ''}
+                      </span>
+                    )}
                   </p>
                 )}
               </div>
@@ -199,7 +205,7 @@ function CompanyForm({ company, onSubmit, onCancel }) {
   const addContact = () => {
     setFormData(prev => ({
       ...prev,
-      contacts: [...prev.contacts, { name: '', position: '', email: '', phone: '', is_primary: false }],
+      contacts: [...prev.contacts, { name: '', position: '', email: '', phone: '', is_primary: false, is_handler: false }],
     }));
   };
 
@@ -307,15 +313,26 @@ function CompanyForm({ company, onSubmit, onCancel }) {
             {formData.contacts.map((contact, idx) => (
               <div key={idx} className="rounded-lg border border-gray-200 dark:border-gray-700 p-3 space-y-2 bg-gray-50 dark:bg-gray-800/50">
                 <div className="flex items-center justify-between">
-                  <button
-                    type="button"
-                    onClick={() => setPrimaryContact(idx)}
-                    className={`flex items-center gap-1 text-xs font-medium ${contact.is_primary ? 'text-amber-600' : 'text-gray-400 hover:text-amber-500'}`}
-                    title={contact.is_primary ? 'Primary contact' : 'Set as primary'}
-                  >
-                    <Star className={`w-3.5 h-3.5 ${contact.is_primary ? 'fill-amber-500 text-amber-500' : ''}`} />
-                    {contact.is_primary ? 'Primary' : 'Set primary'}
-                  </button>
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setPrimaryContact(idx)}
+                      className={`flex items-center gap-1 text-xs font-medium ${contact.is_primary ? 'text-amber-600' : 'text-gray-400 hover:text-amber-500'}`}
+                      title={contact.is_primary ? 'Primary contact' : 'Set as primary'}
+                    >
+                      <Star className={`w-3.5 h-3.5 ${contact.is_primary ? 'fill-amber-500 text-amber-500' : ''}`} />
+                      {contact.is_primary ? 'Primary' : 'Set primary'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => updateContact(idx, 'is_handler', !contact.is_handler)}
+                      className={`flex items-center gap-1 text-xs font-medium ${contact.is_handler ? 'text-blue-600' : 'text-gray-400 hover:text-blue-500'}`}
+                      title={contact.is_handler ? 'File handler — selectable on claims and updates' : 'Mark as file handler'}
+                    >
+                      <UserCog className={`w-3.5 h-3.5 ${contact.is_handler ? 'fill-blue-500 text-blue-500' : ''}`} />
+                      {contact.is_handler ? 'Handler' : 'Set handler'}
+                    </button>
+                  </div>
                   <button
                     type="button"
                     onClick={() => removeContact(idx)}

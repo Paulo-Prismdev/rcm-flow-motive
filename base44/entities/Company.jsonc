@@ -53,6 +53,11 @@
           "is_primary": {
             "type": "boolean",
             "default": false
+          },
+          "is_handler": {
+            "type": "boolean",
+            "default": false,
+            "description": "Whether this contact is a file handler selectable on claims and updates"
           }
         }
       },

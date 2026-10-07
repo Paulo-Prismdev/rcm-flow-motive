@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import ReferrerCombobox from '../shared/ReferrerCombobox';
@@ -6,6 +7,15 @@ import { base44 } from '@/api/base44Client';
 
 export default function ClaimReferrerForm({ claim, onSave, onCancel }) {
     const [formData, setFormData] = useState(claim || {});
+
+    const { data: referrerCompany } = useQuery({
+        queryKey: ['company', claim?.referrer_id],
+        queryFn: () => base44.entities.Company.get(claim.referrer_id),
+        enabled: !!claim?.referrer_id,
+        staleTime: 2 * 60 * 1000,
+        retry: 1,
+    });
+    const handlerContacts = (referrerCompany?.contacts || []).filter(c => c.is_handler && c.name);
 
     // On mount: if referrer_id is set but rates are 0/empty, pull defaults from Company record
     useEffect(() => {
@@ -91,11 +101,25 @@ export default function ClaimReferrerForm({ claim, onSave, onCancel }) {
                 </div>
                 <div>
                     <label className="text-sm text-gray-500">File Handler</label>
-                    <Input 
-                        value={formData.file_handler} 
-                        onChange={e => handleChange('file_handler', e.target.value)} 
-                        className="neomorph-inset" 
-                    />
+                    {handlerContacts.length > 0 ? (
+                        <select
+                            value={formData.file_handler}
+                            onChange={e => handleChange('file_handler', e.target.value)}
+                            className="neomorph-inset w-full px-3 py-2 text-sm rounded-xl border-0"
+                        >
+                            <option value="">Select file handler...</option>
+                            {handlerContacts.map((c, i) => (
+                                <option key={c.id || i} value={c.name}>{c.name}{c.position ? ` — ${c.position}` : ''}</option>
+                            ))}
+                        </select>
+                    ) : (
+                        <Input
+                            value={formData.file_handler}
+                            onChange={e => handleChange('file_handler', e.target.value)}
+                            className="neomorph-inset"
+                            placeholder="Enter file handler name"
+                        />
+                    )}
                 </div>
                 <div>
                     <label className="text-sm text-gray-500">Percentage to Referrer (%)</label>

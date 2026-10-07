@@ -102,8 +102,16 @@ function buildContacts(updateType, claim, bodyshop, insurer, referrer, client, c
   } else if (updateType === 'Referrer Communication' || updateType === 'Referrer Response') {
     const refName = referrer?.name || claim.referrer;
     if (refName) {
-      push('ref-email', referrer?.contact_name || refName, referrer?.email || claim.referrer_email, 'Main Email', 'email', refName);
-      push('ref-phone', referrer?.contact_name || refName, referrer?.phone, 'Phone', 'phone', refName);
+      push('ref-email', referrer?.contact_name || refName, referrer?.contact_email || claim.referrer_email, 'Main Email', 'email', refName);
+      push('ref-phone', referrer?.contact_name || refName, referrer?.contact_phone, 'Phone', 'phone', refName);
+      if (referrer?.contacts?.length) {
+        referrer.contacts.forEach((c, i) => {
+          const cName = c.name || refName;
+          const sub = c.is_handler ? `Handler${c.position ? ' · ' + c.position : ''}` : (c.position || 'Contact');
+          if (c.email) push(`ref-contact-email-${i}`, cName, c.email, `${sub} · Email`, 'email', refName);
+          if (c.phone) push(`ref-contact-phone-${i}`, cName, c.phone, `${sub} · Phone`, 'phone', refName);
+        });
+      }
     } else if (claim.referrer_email) {
       push('ref-claim', claim.referrer, claim.referrer_email, 'Main Email', 'email', claim.referrer);
     }
@@ -177,9 +185,9 @@ export default function UpdateContactSelector({ claim, updateType, platform, val
   });
 
   const { data: referrer } = useQuery({
-    queryKey: ['referrer', claim?.referrer_id],
-    queryFn: () => base44.entities.Referrer.get(claim.referrer_id),
-    enabled: isCommType && updateType === 'Referrer Communication' && !!claim?.referrer_id,
+    queryKey: ['company', claim?.referrer_id],
+    queryFn: () => base44.entities.Company.get(claim.referrer_id),
+    enabled: isCommType && (updateType === 'Referrer Communication' || updateType === 'Referrer Response') && !!claim?.referrer_id,
     staleTime: 2 * 60 * 1000,
     retry: 1,
   });
