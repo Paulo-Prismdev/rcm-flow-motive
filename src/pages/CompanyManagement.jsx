@@ -228,7 +228,7 @@ function ReferrerDetailModal({ company, onClose, onUpdated }) {
                 </div>
               </div>
             )}
-            <ReferrerLinkedUsers companyId={company.id} contacts={company.contacts} />
+            <ReferrerLinkedUsers companyId={company.id} contacts={company.contacts} companyName={company.name} />
           </div>
         )}
       </div>
