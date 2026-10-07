@@ -245,7 +245,7 @@ export default function Layout({ children, currentPageName }) {
                 { name: "Credit Repair", url: createPageUrl("CreditRepairDirectory"), icon: Building2, overlayPage: "CreditRepairDirectory" },
                 { name: "Clients", url: createPageUrl("ClientDirectory"), icon: Users, overlayPage: "ClientDirectory" },
                 { name: "Suppliers", url: createPageUrl("SupplierManagement"), icon: Package, overlayPage: "SupplierManagement" },
-                { name: "Companies", url: "/admin/companies", icon: Building2, overlayPage: "CompanyManagement" },
+                { name: "Referrers", url: "/admin/companies", icon: Building2, overlayPage: "CompanyManagement" },
               ];
               const anyActive = dirLinks.some((d) => location.pathname === d.url);
               const open = directoriesOpen || anyActive;

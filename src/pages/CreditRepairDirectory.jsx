@@ -3,7 +3,7 @@ import CreditRepairDirectoryTab from "@/components/settings/CreditRepairDirector
 
 export default function CreditRepairDirectory() {
   return (
-    <div className="h-full overflow-y-auto p-4">
+    <div className="h-full">
       <CreditRepairDirectoryTab />
     </div>
   );
