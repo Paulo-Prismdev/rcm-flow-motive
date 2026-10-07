@@ -116,6 +116,10 @@
       "type": "string",
       "description": "ID of linked Referrer entity"
     },
+    "linked_contact_email": {
+      "type": "string",
+      "description": "Email of the specific contact this user represents within their linked referrer company"
+    },
     "linked_bodyshop_id": {
       "type": "string",
       "description": "ID of linked Bodyshop entity"

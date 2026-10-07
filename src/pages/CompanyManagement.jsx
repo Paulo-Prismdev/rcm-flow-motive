@@ -13,6 +13,7 @@ import {
   Trash2, Phone, Mail, Building2, Users, Star, UserCog, Pencil, X, Plus, Loader2,
 } from "lucide-react";
 import DirectoryShell from "@/components/shared/DirectoryShell";
+import ReferrerLinkedUsers from "@/components/settings/ReferrerLinkedUsers";
 
 const ALL_PORTAL_SECTIONS = ["Claims", "Parts"];
 
@@ -227,6 +228,7 @@ function ReferrerDetailModal({ company, onClose, onUpdated }) {
                 </div>
               </div>
             )}
+            <ReferrerLinkedUsers companyId={company.id} contacts={company.contacts} />
           </div>
         )}
       </div>
