@@ -313,6 +313,7 @@ export default function ClientClaimForm() {
                 <select value={formData.claim_type} onChange={e => field('claim_type', e.target.value)} className={inputCls}>
                   <option value="Credit Repair">Credit Repair</option>
                   <option value="Fault Claim">Fault Claim</option>
+                  <option value="Non-Fault - Own Insurer">Non-Fault - Own Insurer</option>
                   <option value="Non-Fault Claim">Non-Fault Claim</option>
                   <option value="Total Loss">Total Loss</option>
                   <option value="Glass Claim">Glass Claim</option>

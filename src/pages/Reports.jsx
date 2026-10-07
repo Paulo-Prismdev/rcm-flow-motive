@@ -231,6 +231,7 @@ export default function Reports() {
               <option value="Own Damage">Own Damage</option>
               <option value="Third Party">Third Party</option>
               <option value="Fault Claim">Fault Claim</option>
+              <option value="Non-Fault - Own Insurer">Non-Fault - Own Insurer</option>
               <option value="Non-Fault Claim">Non-Fault Claim</option>
               <option value="Total Loss">Total Loss</option>
               <option value="Glass Claim">Glass Claim</option>

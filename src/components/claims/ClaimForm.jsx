@@ -256,7 +256,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
         alert(`Failed to generate job number: ${error.response?.data?.error || error.message}. Please try again.`);
         setIsCreating(false); return;
       }
-      if (submitData.claim_type === 'Fault Claim') submitData.third_party_pursuit_status = 'Awaiting Details';
+      if (submitData.claim_type === 'Fault Claim' || submitData.claim_type === 'Non-Fault - Own Insurer') submitData.third_party_pursuit_status = 'Awaiting Details';
     }
     onSubmit(submitData);
   };
@@ -544,7 +544,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
             <select value={formData.claim_type} onChange={e => handleChange('claim_type', e.target.value)}
               className="w-full px-3 py-2 text-sm rounded-[10px] border border-input bg-card text-foreground">
               <option value="">Select claim type...</option>
-              <option>Fault Claim</option><option>3rd Party Insurer Direct</option><option>3rd Party Paying Privately</option><option>Credit Repair</option><option>Glass Claim</option><option>Paying Privately</option>
+              <option>Fault Claim</option><option>Non-Fault - Own Insurer</option><option>3rd Party Insurer Direct</option><option>3rd Party Paying Privately</option><option>Credit Repair</option><option>Glass Claim</option><option>Paying Privately</option>
             </select>
           </div>
           <div className="space-y-2"><label className="text-sm font-medium">Date of Loss</label><Input type="date" value={formData.loss_date} onChange={e => handleChange('loss_date', e.target.value)} /></div>

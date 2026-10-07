@@ -12,6 +12,7 @@
 
 export const CLAIM_TYPES = [
   "Fault Claim",
+  "Non-Fault - Own Insurer",
   "3rd Party Insurer Direct",
   "3rd Party Paying Privately",
   "Credit Repair",
@@ -78,6 +79,7 @@ export function getLiaiseTarget(claim) {
         hasContacts: !!claim.client_name,
       };
     case "Fault Claim":
+    case "Non-Fault - Own Insurer":
     case "Glass Claim":
     default:
       return {

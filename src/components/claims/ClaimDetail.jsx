@@ -817,7 +817,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
         switch (selectedSection) {
           case 'thirdpartyPursuit':
         // Only show for fault claims
-        if (claim.claim_type !== 'Fault Claim') {
+        if (claim.claim_type !== 'Fault Claim' && claim.claim_type !== 'Non-Fault - Own Insurer') {
           return (
             <div className="neomorph-flat p-3 md:p-5">
               <div className="flex items-center gap-3 mb-4">

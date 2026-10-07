@@ -3,7 +3,7 @@ import { AlertTriangle, Pencil, Check } from 'lucide-react';
 import CreditRepairCombobox from '../shared/CreditRepairCombobox';
 import { COURTESY_CAR_OPTIONS } from '../shared/courtesyCarOptions';
 
-const CLAIM_TYPES = ['Fault Claim', '3rd Party Insurer Direct', '3rd Party Paying Privately', 'Credit Repair', 'Glass Claim', 'Paying Privately'];
+const CLAIM_TYPES = ['Fault Claim', 'Non-Fault - Own Insurer', '3rd Party Insurer Direct', '3rd Party Paying Privately', 'Credit Repair', 'Glass Claim', 'Paying Privately'];
 const VAT_STATUSES = ['VAT Registered', 'Non-VAT', 'Unknown'];
 
 const INSTRUCTION_TYPES = [

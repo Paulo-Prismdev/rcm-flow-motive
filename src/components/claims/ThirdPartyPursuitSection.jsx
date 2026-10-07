@@ -290,7 +290,7 @@ export default function ThirdPartyPursuitSection({ claim, onUpdate }) {
   };
 
   // Don't show for non-fault claims
-  if (claim.claim_type !== 'Fault Claim') {
+  if (claim.claim_type !== 'Fault Claim' && claim.claim_type !== 'Non-Fault - Own Insurer') {
     return null;
   }
 

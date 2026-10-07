@@ -86,6 +86,7 @@ const BOOL_FIELDS = new Set(['unroadworthy','recovery_required','factored']);
 const CLAIM_TYPE_MAP = {
   'credit repair': 'Credit Repair', 'credit': 'Credit Repair',
   'fault': 'Fault Claim',
+  'non-fault own insurer': 'Non-Fault - Own Insurer', 'non fault own insurer': 'Non-Fault - Own Insurer', 'own insurer': 'Non-Fault - Own Insurer',
   'non fault': 'Non-Fault Claim', 'non-fault': 'Non-Fault Claim',
   'third party': 'Non-Fault Claim', '3rd party': 'Non-Fault Claim',
   'total loss': 'Total Loss',
