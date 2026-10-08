@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 
 export default function ClaimEstimateForm({ claim, onSave, onCancel }) {
     const [formData, setFormData] = useState({
-        send_estimate_email: claim.send_estimate_email || '',
+        send_estimate_email: claim.send_estimate_email || 'claims@rcmautomotive.co.uk',
         audatex_code: claim.audatex_code || '',
         artura_est_url: claim.artura_est_url || '',
         est_fee: claim.est_fee ?? '',

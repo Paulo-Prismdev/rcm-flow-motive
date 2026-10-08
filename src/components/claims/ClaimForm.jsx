@@ -146,7 +146,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
     tp_insurer: '', tp_policy_number: '', tp_claim_ref: '', tp_vehicle_location: '',
     tp_vehicle_damage: '', tp_vehicle_type: 'Car', tp_unroadworthy: false,
     tp_recovery_required: false, bodyshop: '', bodyshop_id: null, bodyshop_email: '',
-    authorising_party: '', audatex_code: '', send_estimate_email: '', artura_est_url: '',
+    authorising_party: '', audatex_code: '', send_estimate_email: 'claims@rcmautomotive.co.uk', artura_est_url: '',
     est_fee: 0, referral_fee_repairer: 20, percent_bld_instruction: 0,
     date_received: new Date().toISOString().split('T')[0],
     estimate_completed: '', authority_received: '', bs_instructed: '',
