@@ -45,7 +45,8 @@ export default function RepairerDirectory() {
         b.town?.toLowerCase().includes(q) ||
         b.postcode?.toLowerCase().includes(q) ||
         b.email?.toLowerCase().includes(q) ||
-        b.bodyshop_manager?.toLowerCase().includes(q);
+        b.bodyshop_manager?.toLowerCase().includes(q) ||
+        b.largest_vehicle_repairable?.toLowerCase().includes(q);
       const matchesTier = tierFilter === "all" || b.tier === tierFilter;
       const matchesAcg = acgFilter === "all" || b.acg_signed_up === acgFilter;
       return matchesSearch && matchesTier && matchesAcg;
