@@ -881,7 +881,7 @@ export default function ClaimsPage() {
                         onClick={() => toggleGroup(statusGroup)}
                       >
                         <td colSpan={userCardFields.length + 6} className="p-0">
-                          <div className="sticky left-0 z-10 flex items-center gap-2 px-4 py-2 bg-gray-50 dark:bg-gray-800">
+                          <div className="sticky left-0 z-10 flex w-fit items-center gap-2 px-4 py-2">
                             {isCollapsed ? <ChevronRight className="w-3.5 h-3.5 text-gray-400" /> : <ChevronDown className="w-3.5 h-3.5 text-gray-400" />}
                             <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: dotColor }} />
                             <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">{statusGroup}</span>
@@ -900,7 +900,7 @@ export default function ClaimsPage() {
                               onClick={(e) => { e.stopPropagation(); toggleSubGroup(statusGroup, subKey); }}
                             >
                               <td colSpan={userCardFields.length + 6} className="p-0">
-                                <div className="sticky left-0 z-10 flex items-center gap-2 pl-12 px-4 py-1 bg-gray-50/50 dark:bg-gray-800/30">
+                                <div className="sticky left-0 z-10 flex w-fit items-center gap-2 pl-12 px-4 py-1">
                                   {subCollapsed ? <ChevronRight className="w-3 h-3 text-gray-400" /> : <ChevronDown className="w-3 h-3 text-gray-400" />}
                                   <span className="w-2 h-2 rounded-full" style={{ backgroundColor: getStatusDot(subKey) }} />
                                   <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">{subKey}</span>
@@ -925,7 +925,7 @@ export default function ClaimsPage() {
                     <React.Fragment>
                       <tr className="bg-gray-50 dark:bg-gray-800/60 cursor-pointer select-none" onClick={() => toggleGroup('__other__')}>
                         <td colSpan={userCardFields.length + 6} className="p-0">
-                          <div className="sticky left-0 z-10 flex items-center gap-2 px-4 py-2 bg-gray-50 dark:bg-gray-800">
+                          <div className="sticky left-0 z-10 flex w-fit items-center gap-2 px-4 py-2">
                             {isCollapsed ? <ChevronRight className="w-3.5 h-3.5 text-gray-400" /> : <ChevronDown className="w-3.5 h-3.5 text-gray-400" />}
                             <span className="w-2 h-2 rounded-full bg-gray-400 flex-shrink-0" />
                             <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Closed</span>
@@ -944,7 +944,7 @@ export default function ClaimsPage() {
                               onClick={(e) => { e.stopPropagation(); toggleSubGroup('__other__', subKey); }}
                             >
                               <td colSpan={userCardFields.length + 6} className="p-0">
-                                <div className="sticky left-0 z-10 flex items-center gap-2 pl-12 px-4 py-1 bg-gray-50/50 dark:bg-gray-800/30">
+                                <div className="sticky left-0 z-10 flex w-fit items-center gap-2 pl-12 px-4 py-1">
                                   {subCollapsed ? <ChevronRight className="w-3 h-3 text-gray-400" /> : <ChevronDown className="w-3 h-3 text-gray-400" />}
                                   <span className="w-2 h-2 rounded-full" style={{ backgroundColor: getStatusDot(subKey) }} />
                                   <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">{subKey}</span>
