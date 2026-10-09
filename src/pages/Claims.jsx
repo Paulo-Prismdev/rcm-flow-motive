@@ -880,7 +880,7 @@ export default function ClaimsPage() {
                         className="bg-gray-50 dark:bg-gray-800/60 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-800"
                         onClick={() => toggleGroup(statusGroup)}
                       >
-                        <td colSpan={userCardFields.length + 6} className="px-4 py-2">
+                        <td colSpan={userCardFields.length + 6} className="px-4 py-2 sticky left-0 z-10 bg-gray-50 dark:bg-gray-800">
                           <div className="flex items-center gap-2">
                             {isCollapsed ? <ChevronRight className="w-3.5 h-3.5 text-gray-400" /> : <ChevronDown className="w-3.5 h-3.5 text-gray-400" />}
                             <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: dotColor }} />
