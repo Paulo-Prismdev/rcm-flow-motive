@@ -105,6 +105,7 @@ export default function ClaimBodyshopMapModal({ claim, isOpen, onClose, onSelect
   const [routePoints, setRoutePoints] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('distance');
+  const [vehicleFilter, setVehicleFilter] = useState('all');
 
   const hasAttemptedGeocode = useRef(false);
 
@@ -258,15 +259,25 @@ export default function ClaimBodyshopMapModal({ claim, isOpen, onClose, onSelect
     }
   };
 
+  const vehicleOptions = useMemo(() => {
+    const set = new Set(validBodyshops.map((b) => b.largest_vehicle_repairable).filter(Boolean));
+    return Array.from(set).sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+  }, [validBodyshops]);
+
   const sortedBodyshops = useMemo(() => {
     let list = [...validBodyshops];
+
+    if (vehicleFilter !== 'all') {
+      list = list.filter((b) => b.largest_vehicle_repairable === vehicleFilter);
+    }
 
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       list = list.filter(b =>
         b.name?.toLowerCase().includes(q) ||
         b.postcode?.toLowerCase().includes(q) ||
-        b.town?.toLowerCase().includes(q)
+        b.town?.toLowerCase().includes(q) ||
+        b.largest_vehicle_repairable?.toLowerCase().includes(q)
       );
     }
 
@@ -281,7 +292,7 @@ export default function ClaimBodyshopMapModal({ claim, isOpen, onClose, onSelect
     }
 
     return list;
-  }, [validBodyshops, sortBy, searchQuery, clientLocation]);
+  }, [validBodyshops, sortBy, searchQuery, clientLocation, vehicleFilter]);
 
   const radiusInMeters = 30 * 1609.34;
 
@@ -330,6 +341,14 @@ export default function ClaimBodyshopMapModal({ claim, isOpen, onClose, onSelect
               <Input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search by name, town, or postcode..." />
             </div>
             <div className="flex gap-2">
+              <select
+                value={vehicleFilter}
+                onChange={(e) => setVehicleFilter(e.target.value)}
+                className="h-9 rounded-md border border-input bg-transparent px-2 text-sm"
+              >
+                <option value="all">All Vehicles</option>
+                {vehicleOptions.map((v) => (<option key={v} value={v}>{v}</option>))}
+              </select>
               <Button variant={sortBy === 'distance' ? 'default' : 'outline'} size="sm" onClick={() => setSortBy('distance')} disabled={!clientLocation} className="h-9">
                 <Navigation className="w-3.5 h-3.5 mr-1" /> Distance
               </Button>
