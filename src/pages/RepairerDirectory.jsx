@@ -12,6 +12,7 @@ export default function RepairerDirectory() {
   const [search, setSearch] = useState("");
   const [tierFilter, setTierFilter] = useState("all");
   const [acgFilter, setAcgFilter] = useState("all");
+  const [vehicleFilter, setVehicleFilter] = useState("all");
   const [selectedId, setSelectedId] = useState(null);
   const [importing, setImporting] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -27,6 +28,11 @@ export default function RepairerDirectory() {
   const tiers = useMemo(() => {
     const set = new Set(bodyshops.map((b) => b.tier).filter(Boolean));
     return Array.from(set).sort();
+  }, [bodyshops]);
+
+  const vehicleOptions = useMemo(() => {
+    const set = new Set(bodyshops.map((b) => b.largest_vehicle_repairable).filter(Boolean));
+    return Array.from(set).sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }));
   }, [bodyshops]);
 
   const sortedBodyshops = useMemo(() => {
@@ -49,7 +55,8 @@ export default function RepairerDirectory() {
         b.largest_vehicle_repairable?.toLowerCase().includes(q);
       const matchesTier = tierFilter === "all" || b.tier === tierFilter;
       const matchesAcg = acgFilter === "all" || b.acg_signed_up === acgFilter;
-      return matchesSearch && matchesTier && matchesAcg;
+      const matchesVehicle = vehicleFilter === "all" || b.largest_vehicle_repairable === vehicleFilter;
+      return matchesSearch && matchesTier && matchesAcg && matchesVehicle;
     });
   }, [sortedBodyshops, search, tierFilter, acgFilter]);
 
@@ -93,6 +100,14 @@ export default function RepairerDirectory() {
         <option value="Yes">ACG: Yes</option>
         <option value="No">ACG: No</option>
         <option value="TBC">ACG: TBC</option>
+      </select>
+      <select
+        value={vehicleFilter}
+        onChange={(e) => setVehicleFilter(e.target.value)}
+        className="h-9 rounded-md border border-input bg-transparent px-3 text-sm flex-1 sm:flex-none"
+      >
+        <option value="all">All Vehicles</option>
+        {vehicleOptions.map((v) => (<option key={v} value={v}>{v}</option>))}
       </select>
     </div>
   );
