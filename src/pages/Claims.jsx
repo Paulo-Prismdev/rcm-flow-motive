@@ -899,7 +899,7 @@ export default function ClaimsPage() {
                               className="bg-gray-50/50 dark:bg-gray-800/30 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-800/50"
                               onClick={(e) => { e.stopPropagation(); toggleSubGroup(statusGroup, subKey); }}
                             >
-                              <td colSpan={userCardFields.length + 6} className="px-4 py-1">
+                              <td colSpan={userCardFields.length + 6} className="px-4 py-1 sticky left-0 z-10 bg-gray-50 dark:bg-gray-800">
                                 <div className="flex items-center gap-2 pl-12">
                                   {subCollapsed ? <ChevronRight className="w-3 h-3 text-gray-400" /> : <ChevronDown className="w-3 h-3 text-gray-400" />}
                                   <span className="w-2 h-2 rounded-full" style={{ backgroundColor: getStatusDot(subKey) }} />
@@ -924,7 +924,7 @@ export default function ClaimsPage() {
                   return (
                     <React.Fragment>
                       <tr className="bg-gray-50 dark:bg-gray-800/60 cursor-pointer select-none" onClick={() => toggleGroup('__other__')}>
-                        <td colSpan={userCardFields.length + 6} className="px-4 py-2">
+                        <td colSpan={userCardFields.length + 6} className="px-4 py-2 sticky left-0 z-10 bg-gray-50 dark:bg-gray-800">
                           <div className="flex items-center gap-2">
                             {isCollapsed ? <ChevronRight className="w-3.5 h-3.5 text-gray-400" /> : <ChevronDown className="w-3.5 h-3.5 text-gray-400" />}
                             <span className="w-2 h-2 rounded-full bg-gray-400 flex-shrink-0" />
@@ -943,7 +943,7 @@ export default function ClaimsPage() {
                               className="bg-gray-50/50 dark:bg-gray-800/30 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-800/50"
                               onClick={(e) => { e.stopPropagation(); toggleSubGroup('__other__', subKey); }}
                             >
-                              <td colSpan={userCardFields.length + 6} className="px-4 py-1">
+                              <td colSpan={userCardFields.length + 6} className="px-4 py-1 sticky left-0 z-10 bg-gray-50 dark:bg-gray-800">
                                 <div className="flex items-center gap-2 pl-12">
                                   {subCollapsed ? <ChevronRight className="w-3 h-3 text-gray-400" /> : <ChevronDown className="w-3 h-3 text-gray-400" />}
                                   <span className="w-2 h-2 rounded-full" style={{ backgroundColor: getStatusDot(subKey) }} />
