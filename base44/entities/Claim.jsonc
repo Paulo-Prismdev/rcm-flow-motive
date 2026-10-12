@@ -949,6 +949,20 @@
     "credit_repair_company_account_ref": {
       "type": "string",
       "description": "Account reference with the credit repair company"
+    },
+    "credit_repair_referral_fee_gbp": {
+      "type": "number",
+      "description": "Referral fee amount (GBP) we expect to receive from the credit repair company for this claim"
+    },
+    "credit_repair_referral_fee_received": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the credit repair referral fee has been received"
+    },
+    "credit_repair_referral_fee_received_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date the credit repair referral fee was received"
     }
   },
   "required": [],
