@@ -19,6 +19,16 @@ const WHITE = [255, 255, 255];
 export const PDF_CONST = { LM, PW, MW, PH, TOP, BL, FOOTER_Y, PAD_X, PAD_TOP, PAD_BOTTOM, SECTION_GAP, HEADER_H, ROW_H, LABEL_W, VAL_GAP, TX, VX };
 export const PDF_COLORS = { NAVY, AMBER_BG, AMBER_BD, RED, DARK_TEXT, WHITE };
 
+// Maps internal claim type values to clean, repairer-facing labels for the
+// instruction PDF. "Non-Fault - Own Insurer" must not read as "Fault Claim".
+export function formatClaimTypeForInstruction(raw: string | null | undefined): string {
+  if (!raw) return 'N/A';
+  const map: Record<string, string> = {
+    'Non-Fault - Own Insurer': 'Non-Fault Claim (Own Insurer)',
+  };
+  return map[raw] || raw;
+}
+
 // ═══════════════════════════════════════════
 // BRANDED HEADER — RCM logo + full-width navy band
 // ═══════════════════════════════════════════

@@ -1,6 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 import { jsPDF } from 'npm:jspdf@2.5.1';
-import { createPdfHelpers, drawBrandedHeader } from '../../shared/instructionPdfHelpers.ts';
+import { createPdfHelpers, drawBrandedHeader, formatClaimTypeForInstruction } from '../../shared/instructionPdfHelpers.ts';
 
 Deno.serve(async (req) => {
   try {
@@ -126,7 +126,7 @@ Deno.serve(async (req) => {
 
     const fields = {
       instruction_date: today,
-      claim_type: claim.claim_type || 'N/A',
+      claim_type: formatClaimTypeForInstruction(claim.claim_type),
       repairer: repairerName || 'N/A',
       client_name: claim.client_name || 'N/A',
       client_address: clientAddress,
