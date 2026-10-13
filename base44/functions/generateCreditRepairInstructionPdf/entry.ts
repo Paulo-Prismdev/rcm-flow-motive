@@ -273,6 +273,7 @@ export default async function(req: Request): Promise<Response> {
         await base44.asServiceRole.entities.Claim.update(claim.id, {
           file_urls: [...currentFileUrls, file_url],
         });
+        await fileInstructionDocument(base44, claim.id, file_url, filename, user);
       }
     } catch (uploadError) {
       console.error('Failed to upload PDF:', uploadError);

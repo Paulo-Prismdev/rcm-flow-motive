@@ -1,6 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 import { jsPDF } from 'npm:jspdf@2.5.1';
 import { createPdfHelpers, drawBrandedHeader, formatClaimTypeForInstruction } from '../../shared/instructionPdfHelpers.ts';
+import { fileInstructionDocument } from '../../shared/docChecklist.ts';
 
 Deno.serve(async (req) => {
   try {
@@ -786,6 +787,7 @@ Deno.serve(async (req) => {
           file_urls: [...currentFileUrls, file_url],
           instruction_pdf_url: file_url
         });
+        await fileInstructionDocument(base44, claim.id, file_url, filename, user);
       }
     } catch (uploadError) {
       console.error('Failed to upload PDF:', uploadError);

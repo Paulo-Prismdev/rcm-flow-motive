@@ -1,0 +1,68 @@
+{
+  "name": "ClaimDocument",
+  "type": "object",
+  "properties": {
+    "claim_id": {
+      "type": "string",
+      "description": "ID of the claim this document belongs to"
+    },
+    "item_key": {
+      "type": "string",
+      "enum": [
+        "instruction_from_referrer",
+        "instruction_to_repairer",
+        "initial_estimate",
+        "initial_authority",
+        "supplementary_estimate",
+        "supplementary_authority"
+      ],
+      "description": "Which checklist item this file is filed against"
+    },
+    "file_url": {
+      "type": "string",
+      "description": "Public URL of the uploaded file"
+    },
+    "file_name": {
+      "type": "string",
+      "description": "Display name for the file (renameable)"
+    },
+    "file_uri": {
+      "type": "string",
+      "description": "Private storage URI of the uploaded file (when available)"
+    },
+    "uploaded_by_email": {
+      "type": "string",
+      "description": "Email of the user who uploaded the file"
+    },
+    "uploaded_by_name": {
+      "type": "string",
+      "description": "Name of the user who uploaded the file"
+    },
+    "uploaded_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the file was uploaded"
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "manual",
+        "instruction_pdf",
+        "backfill"
+      ],
+      "default": "manual",
+      "description": "How this document record was created"
+    }
+  },
+  "required": [
+    "claim_id",
+    "item_key",
+    "file_url"
+  ],
+  "rls": {
+    "create": null,
+    "read": null,
+    "update": null,
+    "delete": null
+  }
+}

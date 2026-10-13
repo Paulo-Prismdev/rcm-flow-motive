@@ -963,6 +963,29 @@
       "type": "string",
       "format": "date",
       "description": "Date the credit repair referral fee was received"
+    },
+    "doc_checklist_status": {
+      "type": "object",
+      "description": "Per-item checklist status overrides. Map of item_key -> 'outstanding' (expected), 'not_applicable', or 'not_required'. 'received' is derived from uploaded files.",
+      "default": {},
+      "additionalProperties": {
+        "type": "string",
+        "enum": [
+          "outstanding",
+          "not_applicable",
+          "not_required"
+        ]
+      }
+    },
+    "doc_checklist_received": {
+      "type": "number",
+      "description": "Count of required checklist items received (denormalized for list display).",
+      "default": 0
+    },
+    "doc_checklist_total": {
+      "type": "number",
+      "description": "Total count of required/expected checklist items (denormalized for list display).",
+      "default": 4
     }
   },
   "required": [],

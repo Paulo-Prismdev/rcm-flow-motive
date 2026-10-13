@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Search, Archive, Filter, X, AlertTriangle, Clock, Upload, Package, ChevronDown, ChevronRight, Settings2, ArrowUpDown, MessageSquare, Eye } from 'lucide-react';
+import { Plus, Search, Archive, Filter, X, AlertTriangle, Clock, Upload, Package, ChevronDown, ChevronRight, Settings2, ArrowUpDown, MessageSquare, Eye, FileText } from 'lucide-react';
 import ClaimDetail from '../components/claims/ClaimDetail';
 import ClaimFormWrapper from '../components/claims/ClaimFormWrapper';
 import ImportClaimsModal from '../components/claims/ImportClaimsModal';
@@ -489,6 +489,20 @@ export default function ClaimsPage() {
                 <Package className="w-2.5 h-2.5" />BO
               </span>
             )}
+            {(() => {
+              const rc = claim.doc_checklist_received ?? 0;
+              const tot = claim.doc_checklist_total ?? 4;
+              const outstanding = tot - rc;
+              if (outstanding <= 0) return null;
+              return (
+                <span
+                  className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300 text-[10px] font-semibold leading-none"
+                  title={`${outstanding} required document${outstanding === 1 ? '' : 's'} outstanding`}
+                >
+                  <FileText className="w-2.5 h-2.5" />{outstanding}
+                </span>
+              );
+            })()}
           </div>
         </td>
         {/* Sticky right: Updates quick view */}
