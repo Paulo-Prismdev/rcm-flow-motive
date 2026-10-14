@@ -769,8 +769,8 @@ export default function ClaimsPage() {
           </div>
         ) : (
           <>
-            {/* ── MOBILE / TABLET card list (< lg) ── */}
-            <div className="lg:hidden">
+            {/* ── MOBILE / TABLET card list (< xl) ── */}
+            <div className="xl:hidden">
               {availableStatuses.map(statusGroup => {
                 const claimsInGroup = filteredClaims.filter(c => getGroupKey(c) === statusGroup);
                  if (claimsInGroup.length === 0) return null;
@@ -852,8 +852,8 @@ export default function ClaimsPage() {
                     })()}
             </div>
 
-            {/* ── DESKTOP table (≥ lg) ── */}
-            <table className="hidden lg:table w-full" style={{ minWidth: `${TABLE_WIDTH}px` }}>
+            {/* ── DESKTOP table (≥ xl) ── */}
+            <table className="hidden xl:table w-full" style={{ minWidth: `${TABLE_WIDTH}px` }}>
               <thead className="sticky top-0 bg-white dark:bg-gray-900 z-10">
                 <tr className="border-b border-gray-200 dark:border-gray-700">
                   <th title="Reg" style={{ width: `${REG_W}px`, minWidth: `${REG_W}px`, maxWidth: `${REG_W}px`, verticalAlign: 'bottom' }} className="sticky left-0 z-20 bg-white dark:bg-gray-900 px-2 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap overflow-hidden text-ellipsis">Reg</th>
