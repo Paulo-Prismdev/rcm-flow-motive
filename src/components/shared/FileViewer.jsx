@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -35,7 +36,7 @@ export default function FileViewer({ fileUrl, onClose }) {
   const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(extension);
   const isPDF = extension === 'pdf';
 
-  return (
+  return createPortal(
     <div 
       className="fixed inset-0 z-[2147483647] flex items-center justify-center bg-black/90 backdrop-blur-sm"
       onClick={onClose}
@@ -86,6 +87,7 @@ export default function FileViewer({ fileUrl, onClose }) {
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
