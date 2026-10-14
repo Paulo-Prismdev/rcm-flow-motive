@@ -29,7 +29,10 @@ export default function ConfirmDialog({ isOpen, onClose, onConfirm, title, messa
 
   return (
     <AlertDialog open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
-      <AlertDialogContent className="max-w-sm">
+      <AlertDialogContent
+        className="max-w-sm left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+        style={{ left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }}
+      >
         <AlertDialogHeader>
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center flex-shrink-0">
