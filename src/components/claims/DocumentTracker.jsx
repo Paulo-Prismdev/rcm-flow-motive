@@ -332,7 +332,7 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
                 </button>
                 <button
                   onClick={() => handleRemoveGeneralRecord(doc)}
-                  className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-opacity"
+                  className="opacity-100 lg:opacity-0 lg:group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-opacity"
                   title="Remove"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
@@ -348,7 +348,7 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
                 <span className="text-[10px] text-muted-foreground flex-shrink-0">legacy</span>
                 <button
                   onClick={() => handleRemoveLegacyGeneral(url)}
-                  className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-opacity"
+                  className="opacity-100 lg:opacity-0 lg:group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-opacity"
                   title="Remove"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
@@ -473,7 +473,7 @@ function FileRow({ doc, renaming, renameValue, onRenameStart, onRenameChange, on
         </button>
       )}
       {!renaming && (
-        <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="flex items-center gap-0.5 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">
           <button onClick={onRenameStart} className="p-1 text-gray-400 hover:text-primary rounded" title="Rename"><Pencil className="w-3.5 h-3.5" /></button>
           <button onClick={onRemove} className="p-1 text-gray-400 hover:text-red-500 rounded" title="Remove"><Trash2 className="w-3.5 h-3.5" /></button>
         </div>
