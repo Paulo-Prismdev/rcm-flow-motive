@@ -23,7 +23,10 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
 
   const { data: docs = [], isLoading } = useQuery({
     queryKey: STATUS_QUERY_KEY(claim.id),
-    queryFn: () => base44.entities.ClaimDocument.filter({ claim_id: claim.id }, { sort: 'created_date' }),
+    queryFn: async () => {
+      const page = await base44.entities.ClaimDocument.filter({ claim_id: claim.id }, { sort: 'created_date' });
+      return page.items || [];
+    },
     enabled: !!claim.id,
   });
 
@@ -102,7 +105,7 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
     });
     queryClient.invalidateQueries({ queryKey: STATUS_QUERY_KEY(claim.id) });
     const refreshed = await base44.entities.ClaimDocument.filter({ claim_id: claim.id }, { sort: 'created_date' });
-    persistClaimCounts(refreshed, statusMap);
+    persistClaimCounts(refreshed.items || [], statusMap);
   };
 
   const handleRename = async (doc) => {
@@ -131,7 +134,7 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
       });
       queryClient.invalidateQueries({ queryKey: STATUS_QUERY_KEY(claim.id) });
       const refreshed = await base44.entities.ClaimDocument.filter({ claim_id: claim.id }, { sort: 'created_date' });
-      persistClaimCounts(refreshed, statusMap);
+      persistClaimCounts(refreshed.items || [], statusMap);
     } catch (e) {
       toast({ title: 'Remove failed', variant: 'destructive' });
     }
@@ -148,7 +151,7 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
       setMovingId(null);
       queryClient.invalidateQueries({ queryKey: STATUS_QUERY_KEY(claim.id) });
       const refreshed = await base44.entities.ClaimDocument.filter({ claim_id: claim.id }, { sort: 'created_date' });
-      persistClaimCounts(refreshed, statusMap);
+      persistClaimCounts(refreshed.items || [], statusMap);
     } catch (e) {
       toast({ title: 'Move failed', variant: 'destructive' });
     }
