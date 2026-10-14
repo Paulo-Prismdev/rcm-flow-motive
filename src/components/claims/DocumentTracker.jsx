@@ -10,6 +10,7 @@ import { useFileUpload } from '@/hooks/useFileUpload';
 import { toast } from '@/components/ui/use-toast';
 import { logActivity } from '@/components/shared/useActivityLogger';
 import FileViewer from '@/components/shared/FileViewer';
+import ConfirmDialog from '@/components/shared/ConfirmDialog';
 import {
   DOC_ITEMS, DOC_STATUS_META, computeChecklistSummary,
 } from '@/components/shared/docChecklist';
@@ -24,6 +25,7 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
   const [generalDialogOpen, setGeneralDialogOpen] = useState(false);
   const [generalTitle, setGeneralTitle] = useState('');
   const [pendingGeneralFiles, setPendingGeneralFiles] = useState(null);
+  const [pendingDelete, setPendingDelete] = useState(null);
 
   const { data: docs = [], isLoading } = useQuery({
     queryKey: STATUS_QUERY_KEY(claim.id),
@@ -128,20 +130,22 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
     setRenamingId(null);
   };
 
-  const handleRemove = async (doc) => {
-    try {
-      await base44.entities.ClaimDocument.delete(doc.id);
-      await logActivity({
-        parentId: claim.id, parentType: 'Claim', action: 'Document Removed',
-        description: `Removed "${doc.file_name || 'a file'}" from "${DOC_ITEMS.find((i) => i.key === doc.item_key)?.label}"`,
-        user: currentUser,
-      });
-      queryClient.invalidateQueries({ queryKey: STATUS_QUERY_KEY(claim.id) });
-      const refreshed = await base44.entities.ClaimDocument.filter({ claim_id: claim.id }, { sort: 'created_date' });
-      persistClaimCounts(refreshed.items || [], statusMap);
-    } catch (e) {
-      toast({ title: 'Remove failed', variant: 'destructive' });
-    }
+  const handleRemove = (doc) => {
+    setPendingDelete({
+      label: DOC_ITEMS.find((i) => i.key === doc.item_key)?.label || 'document',
+      fileName: doc.file_name || 'this file',
+      action: async () => {
+        await base44.entities.ClaimDocument.delete(doc.id);
+        await logActivity({
+          parentId: claim.id, parentType: 'Claim', action: 'Document Removed',
+          description: `Removed "${doc.file_name || 'a file'}" from "${DOC_ITEMS.find((i) => i.key === doc.item_key)?.label}"`,
+          user: currentUser,
+        });
+        queryClient.invalidateQueries({ queryKey: STATUS_QUERY_KEY(claim.id) });
+        const refreshed = await base44.entities.ClaimDocument.filter({ claim_id: claim.id }, { sort: 'created_date' });
+        persistClaimCounts(refreshed.items || [], statusMap);
+      },
+    });
   };
 
   const handleStatusToggle = async (item, newStatus) => {
@@ -206,27 +210,36 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
     setGeneralTitle('');
   };
 
-  const handleRemoveGeneralRecord = async (doc) => {
-    try {
-      await base44.entities.ClaimDocument.delete(doc.id);
-      await logActivity({
-        parentId: claim.id, parentType: 'Claim', action: 'Document Removed',
-        description: `Removed "${doc.file_name || 'a file'}" from General Documents`,
-        user: currentUser,
-      });
-      queryClient.invalidateQueries({ queryKey: STATUS_QUERY_KEY(claim.id) });
-    } catch (e) {
-      toast({ title: 'Remove failed', variant: 'destructive' });
-    }
+  const handleRemoveGeneralRecord = (doc) => {
+    setPendingDelete({
+      label: 'General Documents',
+      fileName: doc.file_name || 'this file',
+      action: async () => {
+        await base44.entities.ClaimDocument.delete(doc.id);
+        await logActivity({
+          parentId: claim.id, parentType: 'Claim', action: 'Document Removed',
+          description: `Removed "${doc.file_name || 'a file'}" from General Documents`,
+          user: currentUser,
+        });
+        queryClient.invalidateQueries({ queryKey: STATUS_QUERY_KEY(claim.id) });
+      },
+    });
   };
 
-  const handleRemoveLegacyGeneral = async (url) => {
-    const current = Array.isArray(claim.file_urls) ? claim.file_urls : [];
-    onUpdate({ ...claim, file_urls: current.filter((u) => u !== url) });
-    await logActivity({
-      parentId: claim.id, parentType: 'Claim', action: 'Document Removed',
-      description: 'Removed a file from General Documents',
-      user: currentUser,
+  const handleRemoveLegacyGeneral = (url) => {
+    const fileName = url.split('/').pop() || 'this file';
+    setPendingDelete({
+      label: 'General Documents',
+      fileName,
+      action: async () => {
+        const current = Array.isArray(claim.file_urls) ? claim.file_urls : [];
+        onUpdate({ ...claim, file_urls: current.filter((u) => u !== url) });
+        await logActivity({
+          parentId: claim.id, parentType: 'Claim', action: 'Document Removed',
+          description: 'Removed a file from General Documents',
+          user: currentUser,
+        });
+      },
     });
   };
 
@@ -376,6 +389,23 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
       {viewingFile && (
         <FileViewer fileUrl={viewingFile} onClose={() => setViewingFile(null)} />
       )}
+
+      <ConfirmDialog
+        isOpen={!!pendingDelete}
+        onClose={() => setPendingDelete(null)}
+        onConfirm={async () => {
+          try {
+            await pendingDelete?.action();
+          } catch (e) {
+            toast({ title: 'Remove failed', variant: 'destructive' });
+          }
+          setPendingDelete(null);
+        }}
+        title="Delete document"
+        message={`Are you sure you want to delete "${pendingDelete?.fileName}" from ${pendingDelete?.label || 'this claim'}? This cannot be undone.`}
+        confirmText="Delete"
+        variant="danger"
+      />
     </div>
   );
 }
