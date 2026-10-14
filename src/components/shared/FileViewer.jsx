@@ -1,21 +1,22 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export default function FileViewer({ fileUrl, onClose }) {
+  const rootRef = useRef(null);
+
+  // Block pointer, focus, and key events originating inside the FileViewer from
+  // reaching the parent Radix Dialog's outside-interaction detection, so closing
+  // the viewer never also closes the underlying modal.
   useEffect(() => {
     if (!fileUrl) return;
-    const handleKeyDown = (e) => {
-      if (e.key === 'Escape') {
-        e.preventDefault();
-        e.stopPropagation();
-        onClose();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown, true);
-    return () => window.removeEventListener('keydown', handleKeyDown, true);
-  }, [fileUrl, onClose]);
+    const isInside = (e) => rootRef.current && rootRef.current.contains(e.target);
+    const stop = (e) => { if (isInside(e)) e.stopPropagation(); };
+    const types = ['pointerdown', 'mousedown', 'pointerup', 'mouseup', 'click', 'focusin', 'focusout', 'keydown', 'keyup'];
+    types.forEach((t) => document.addEventListener(t, stop, true));
+    return () => types.forEach((t) => document.removeEventListener(t, stop, true));
+  }, [fileUrl]);
 
   if (!fileUrl) return null;
 
@@ -37,17 +38,14 @@ export default function FileViewer({ fileUrl, onClose }) {
   const isPDF = extension === 'pdf';
 
   return createPortal(
-    <div 
+    <div
+      ref={rootRef}
       className="fixed inset-0 z-[2147483647] flex items-center justify-center bg-black/90 backdrop-blur-sm"
       onClick={onClose}
-      onPointerDown={(e) => e.stopPropagation()}
-      onMouseDown={(e) => e.stopPropagation()}
     >
-      <div 
+      <div
         className="relative w-screen h-screen bg-white dark:bg-gray-900 shadow-2xl overflow-hidden flex flex-col"
         onClick={(e) => e.stopPropagation()}
-        onPointerDown={(e) => e.stopPropagation()}
-        onMouseDown={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
@@ -65,14 +63,14 @@ export default function FileViewer({ fileUrl, onClose }) {
         {/* Content */}
         <div className="flex-1 overflow-auto bg-gray-100 dark:bg-gray-950 flex items-center justify-center">
           {isImage ? (
-            <img 
-              src={fileUrl} 
-              alt="Preview" 
+            <img
+              src={fileUrl}
+              alt="Preview"
               className="max-w-full max-h-full object-contain"
             />
           ) : isPDF ? (
-            <iframe 
-              src={fileUrl} 
+            <iframe
+              src={fileUrl}
               className="w-full h-full border-0"
               title="PDF Preview"
             />
