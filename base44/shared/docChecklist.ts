@@ -2,7 +2,7 @@
 // Mirrors the frontend logic in src/components/shared/docChecklist.js.
 
 export const DOC_ITEMS = [
-  { key: 'instruction_from_referrer', label: 'Instruction from referrer', required: true },
+  { key: 'instruction_from_referrer', label: 'Claim form', required: true },
   { key: 'instruction_to_repairer', label: 'Instruction to repairer', required: true },
   { key: 'initial_estimate', label: 'Initial estimate', required: true },
   { key: 'initial_authority', label: 'Initial authority', required: true },

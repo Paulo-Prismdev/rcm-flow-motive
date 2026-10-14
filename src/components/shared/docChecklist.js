@@ -2,7 +2,7 @@
 // Shared between the DocumentTracker UI and (mirrored in) backend functions.
 
 export const DOC_ITEMS = [
-  { key: 'instruction_from_referrer', label: 'Instruction From Referrer', required: true },
+  { key: 'instruction_from_referrer', label: 'Claim Form', required: true },
   { key: 'instruction_to_repairer', label: 'Instruction To Repairer', required: true },
   { key: 'initial_estimate', label: 'Initial Estimate', required: true },
   { key: 'initial_authority', label: 'Initial Authority', required: true },
