@@ -4,11 +4,12 @@ import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
-  FileText, Upload, Trash2, Pencil, Check, X, FolderInput, MoreVertical, FileCheck2, FilePlus2,
+  FileText, Upload, Trash2, Pencil, Check, X, MoreVertical, FileCheck2, FilePlus2,
 } from 'lucide-react';
 import { useFileUpload } from '@/hooks/useFileUpload';
 import { toast } from '@/components/ui/use-toast';
 import { logActivity } from '@/components/shared/useActivityLogger';
+import FileViewer from '@/components/shared/FileViewer';
 import {
   DOC_ITEMS, DOC_STATUS_META, computeChecklistSummary,
 } from '@/components/shared/docChecklist';
@@ -19,7 +20,7 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
   const queryClient = useQueryClient();
   const [renamingId, setRenamingId] = useState(null);
   const [renameValue, setRenameValue] = useState('');
-  const [movingId, setMovingId] = useState(null);
+  const [viewingFile, setViewingFile] = useState(null);
   const [generalDialogOpen, setGeneralDialogOpen] = useState(false);
   const [generalTitle, setGeneralTitle] = useState('');
   const [pendingGeneralFiles, setPendingGeneralFiles] = useState(null);
@@ -140,23 +141,6 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
       persistClaimCounts(refreshed.items || [], statusMap);
     } catch (e) {
       toast({ title: 'Remove failed', variant: 'destructive' });
-    }
-  };
-
-  const handleMove = async (doc, newItemKey) => {
-    try {
-      await base44.entities.ClaimDocument.update(doc.id, { item_key: newItemKey });
-      await logActivity({
-        parentId: claim.id, parentType: 'Claim', action: 'Document Moved',
-        description: `Moved "${doc.file_name || 'a file'}" to "${DOC_ITEMS.find((i) => i.key === newItemKey)?.label}"`,
-        user: currentUser,
-      });
-      setMovingId(null);
-      queryClient.invalidateQueries({ queryKey: STATUS_QUERY_KEY(claim.id) });
-      const refreshed = await base44.entities.ClaimDocument.filter({ claim_id: claim.id }, { sort: 'created_date' });
-      persistClaimCounts(refreshed.items || [], statusMap);
-    } catch (e) {
-      toast({ title: 'Move failed', variant: 'destructive' });
     }
   };
 
@@ -305,9 +289,7 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
                       onRenameSubmit={() => handleRename(doc)}
                       onRenameCancel={() => setRenamingId(null)}
                       onRemove={() => handleRemove(doc)}
-                      onMove={(key) => handleMove(doc, key)}
-                      moving={movingId === doc.id}
-                      onMoveToggle={() => setMovingId(movingId === doc.id ? null : doc.id)}
+                      onView={() => setViewingFile(doc.file_url)}
                     />
                   ))}
                 </div>
@@ -320,7 +302,7 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
       {/* General documents area */}
       <div className="rounded-[10px] border border-dashed border-border bg-card">
         <div className="flex items-center gap-2 px-3 py-2 border-b border-border/60">
-          <FolderInput className="w-4 h-4 text-muted-foreground" />
+          <FileText className="w-4 h-4 text-muted-foreground" />
           <span className="text-sm font-medium">General Documents</span>
           <span className="text-xs text-muted-foreground">({generalDocRecords.length + legacyGeneralFiles.length})</span>
           <div className="ml-auto">
@@ -332,9 +314,9 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
             {generalDocRecords.map((doc) => (
               <div key={doc.id} className="flex items-center gap-2 group rounded-md px-2 py-1 hover:bg-muted/50">
                 <FileText className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                <a href={doc.file_url} target="_blank" rel="noreferrer" className="text-sm text-primary hover:underline truncate flex-1">
+                <button onClick={() => setViewingFile(doc.file_url)} className="text-sm text-primary hover:underline truncate flex-1 text-left">
                   {doc.file_name || doc.file_url.split('/').pop()}
-                </a>
+                </button>
                 <button
                   onClick={() => handleRemoveGeneralRecord(doc)}
                   className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-opacity"
@@ -347,9 +329,9 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
             {legacyGeneralFiles.map((url) => (
               <div key={url} className="flex items-center gap-2 group rounded-md px-2 py-1 hover:bg-muted/50">
                 <FileText className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                <a href={url} target="_blank" rel="noreferrer" className="text-sm text-primary hover:underline truncate flex-1">
+                <button onClick={() => setViewingFile(url)} className="text-sm text-primary hover:underline truncate flex-1 text-left">
                   {url.split('/').pop()}
-                </a>
+                </button>
                 <span className="text-[10px] text-muted-foreground flex-shrink-0">legacy</span>
                 <button
                   onClick={() => handleRemoveLegacyGeneral(url)}
@@ -389,6 +371,10 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
             </div>
           </div>
         </div>
+      )}
+
+      {viewingFile && (
+        <FileViewer fileUrl={viewingFile} onClose={() => setViewingFile(null)} />
       )}
     </div>
   );
@@ -435,8 +421,7 @@ function StatusMenu({ item, status, onToggle }) {
   );
 }
 
-function FileRow({ doc, renaming, renameValue, onRenameStart, onRenameChange, onRenameSubmit, onRenameCancel, onRemove, onMove, moving, onMoveToggle }) {
-  const moveOptions = DOC_ITEMS.filter((i) => i.key !== doc.item_key);
+function FileRow({ doc, renaming, renameValue, onRenameStart, onRenameChange, onRenameSubmit, onRenameCancel, onRemove, onView }) {
   return (
     <div className="flex items-center gap-2 group rounded-md px-2 py-1.5 hover:bg-muted/50">
       <FileText className="w-4 h-4 text-muted-foreground flex-shrink-0" />
@@ -453,28 +438,14 @@ function FileRow({ doc, renaming, renameValue, onRenameStart, onRenameChange, on
           <button onClick={onRenameCancel} className="p-1 text-gray-400 hover:bg-muted rounded"><X className="w-3.5 h-3.5" /></button>
         </div>
       ) : (
-        <a href={doc.file_url} target="_blank" rel="noreferrer" className="text-sm text-primary hover:underline truncate flex-1">
+        <button onClick={onView} className="text-sm text-primary hover:underline truncate flex-1 text-left">
           {doc.file_name || doc.file_url.split('/').pop()}
-        </a>
+        </button>
       )}
       {!renaming && (
-        <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity relative">
+        <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
           <button onClick={onRenameStart} className="p-1 text-gray-400 hover:text-primary rounded" title="Rename"><Pencil className="w-3.5 h-3.5" /></button>
-          <button onClick={onMoveToggle} className="p-1 text-gray-400 hover:text-primary rounded" title="Move to…"><FolderInput className="w-3.5 h-3.5" /></button>
           <button onClick={onRemove} className="p-1 text-gray-400 hover:text-red-500 rounded" title="Remove"><Trash2 className="w-3.5 h-3.5" /></button>
-          {moving && (
-            <div className="absolute right-0 top-7 z-50 w-44 rounded-md border border-border bg-popover shadow-lg py-1">
-              {moveOptions.map((i) => (
-                <button
-                  key={i.key}
-                  onClick={() => onMove(i.key)}
-                  className="w-full text-left px-3 py-1.5 text-sm hover:bg-muted truncate"
-                >
-                  {i.label}
-                </button>
-              ))}
-            </div>
-          )}
         </div>
       )}
     </div>
