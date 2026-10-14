@@ -402,7 +402,7 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
           setPendingDelete(null);
         }}
         title="Delete document"
-        message={`Are you sure you want to delete "${pendingDelete?.fileName}" from ${pendingDelete?.label || 'this claim'}? This cannot be undone.`}
+        message="Are you sure you want to delete this document?"
         confirmText="Delete"
         variant="danger"
       />
