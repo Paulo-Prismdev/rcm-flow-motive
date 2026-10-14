@@ -223,7 +223,7 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
       </div>
 
       {/* Checklist items */}
-      <div className="space-y-1.5">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-1.5">
         {summary.items.map(({ item, status }) => {
           const meta = DOC_STATUS_META[status];
           const itemFiles = docs.filter((d) => d.item_key === item.key);
