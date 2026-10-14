@@ -204,42 +204,41 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
   return (
     <div className="space-y-4">
       {/* Progress indicator */}
-      <div className="flex items-center gap-3 p-3 rounded-[10px] border border-border bg-muted/40">
-        <FileCheck2 className="w-5 h-5 text-primary flex-shrink-0" />
-        <div className="flex-1">
-          <p className="text-sm font-semibold">
-            {summary.received} of {summary.total} required document{summary.total === 1 ? '' : 's'} received
-          </p>
-          <div className="mt-1.5 h-2 rounded-full bg-border overflow-hidden">
-            <div
-              className={`h-full transition-all ${summary.complete ? 'bg-green-500' : 'bg-primary'}`}
-              style={{ width: `${summary.total ? (summary.received / summary.total) * 100 : 0}%` }}
-            />
-          </div>
+      <div className="flex items-center gap-2.5 px-3 py-2 rounded-[10px] border border-border bg-muted/40">
+        <FileCheck2 className="w-4 h-4 text-primary flex-shrink-0" />
+        <p className="text-xs font-semibold flex-shrink-0">
+          {summary.received} of {summary.total} received
+        </p>
+        <div className="flex-1 h-1.5 rounded-full bg-border overflow-hidden">
+          <div
+            className={`h-full transition-all ${summary.complete ? 'bg-green-500' : 'bg-primary'}`}
+            style={{ width: `${summary.total ? (summary.received / summary.total) * 100 : 0}%` }}
+          />
         </div>
         {summary.complete && (
-          <span className="inline-flex items-center gap-1 text-xs font-semibold text-green-600 dark:text-green-400">
-            <Check className="w-3.5 h-3.5" /> Complete
+          <span className="inline-flex items-center gap-0.5 text-[11px] font-semibold text-green-600 dark:text-green-400 flex-shrink-0">
+            <Check className="w-3 h-3" /> Complete
           </span>
         )}
       </div>
 
       {/* Checklist items */}
-      <div className="space-y-2.5">
+      <div className="space-y-1.5">
         {summary.items.map(({ item, status }) => {
           const meta = DOC_STATUS_META[status];
           const itemFiles = docs.filter((d) => d.item_key === item.key);
           return (
             <div key={item.key} className="rounded-[10px] border border-border bg-card overflow-hidden">
-              <div className="flex items-center justify-between gap-2 px-3 py-2.5">
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${meta.dot}`} />
+              <div className="flex items-center justify-between gap-2 px-3 py-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className={`w-2 h-2 rounded-full flex-shrink-0 ${meta.dot}`} />
                   <span className="text-sm font-medium truncate">{item.label}</span>
                   {!item.required && (
                     <span className="text-[10px] uppercase tracking-wider text-muted-foreground">optional</span>
                   )}
                 </div>
-                <div className="flex items-center gap-2 flex-shrink-0">
+                <div className="flex items-center gap-1.5 flex-shrink-0">
+                  <UploadButton onFiles={(files) => handleUpload(item.key, files)} disabled={isUploading} compact />
                   <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${meta.bg} ${meta.text}`}>
                     {meta.label}
                   </span>
@@ -249,7 +248,7 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
 
               {/* Files within item */}
               {itemFiles.length > 0 && (
-                <div className="px-3 pb-2.5 space-y-1.5 border-t border-border/60">
+                <div className="px-3 pb-2 space-y-1 border-t border-border/60">
                   {itemFiles.map((doc) => (
                     <FileRow
                       key={doc.id}
@@ -268,11 +267,6 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
                   ))}
                 </div>
               )}
-
-              {/* Upload button */}
-              <div className="px-3 pb-3 pt-1">
-                <UploadButton onFiles={(files) => handleUpload(item.key, files)} disabled={isUploading} />
-              </div>
             </div>
           );
         })}
@@ -280,15 +274,18 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
 
       {/* General documents area */}
       <div className="rounded-[10px] border border-dashed border-border bg-card">
-        <div className="flex items-center gap-2 px-3 py-2.5 border-b border-border/60">
+        <div className="flex items-center gap-2 px-3 py-2 border-b border-border/60">
           <FolderInput className="w-4 h-4 text-muted-foreground" />
           <span className="text-sm font-medium">General Documents</span>
           <span className="text-xs text-muted-foreground">({generalFiles.length})</span>
+          <div className="ml-auto">
+            <UploadButton onFiles={handleAddGeneral} disabled={isUploading} label="Add to General Documents" compact />
+          </div>
         </div>
         {generalFiles.length > 0 && (
-          <div className="px-3 py-2.5 space-y-1.5">
+          <div className="px-3 py-1.5 space-y-1">
             {generalFiles.map((url) => (
-              <div key={url} className="flex items-center gap-2 group rounded-md px-2 py-1.5 hover:bg-muted/50">
+              <div key={url} className="flex items-center gap-2 group rounded-md px-2 py-1 hover:bg-muted/50">
                 <FileText className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                 <a href={url} target="_blank" rel="noreferrer" className="text-sm text-primary hover:underline truncate flex-1">
                   {url.split('/').pop()}
@@ -304,9 +301,6 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
             ))}
           </div>
         )}
-        <div className="px-3 pb-3 pt-1">
-          <UploadButton onFiles={handleAddGeneral} disabled={isUploading} label="Add to General Documents" />
-        </div>
       </div>
     </div>
   );
@@ -399,7 +393,7 @@ function FileRow({ doc, renaming, renameValue, onRenameStart, onRenameChange, on
   );
 }
 
-function UploadButton({ onFiles, disabled, label = 'Upload file' }) {
+function UploadButton({ onFiles, disabled, label = 'Upload file', compact = false }) {
   const inputRef = React.useRef(null);
   return (
     <>
@@ -410,16 +404,29 @@ function UploadButton({ onFiles, disabled, label = 'Upload file' }) {
         className="hidden"
         onChange={(e) => { if (e.target.files?.length) onFiles(e.target.files); e.target.value = ''; }}
       />
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => inputRef.current?.click()}
-        disabled={disabled}
-        className="gap-2 w-full border-dashed"
-      >
-        <FilePlus2 className="w-3.5 h-3.5" />
-        {label}
-      </Button>
+      {compact ? (
+        <button
+          type="button"
+          onClick={() => inputRef.current?.click()}
+          disabled={disabled}
+          className="inline-flex items-center gap-1 h-7 px-2 rounded-md text-xs font-medium border border-dashed border-border text-muted-foreground hover:text-primary hover:border-primary transition-colors disabled:opacity-50"
+          title={label}
+        >
+          <Upload className="w-3 h-3" />
+          Upload
+        </button>
+      ) : (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => inputRef.current?.click()}
+          disabled={disabled}
+          className="gap-2 w-full border-dashed"
+        >
+          <FilePlus2 className="w-3.5 h-3.5" />
+          {label}
+        </Button>
+      )}
     </>
   );
 }
