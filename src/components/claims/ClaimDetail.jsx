@@ -64,6 +64,7 @@ import InstructionDefaultsForm from './InstructionDefaultsForm';
 import ThirdPartyPursuitSection from './ThirdPartyPursuitSection';
 import BackorderedPartsSection from './BackorderedPartsSection';
 import DocumentTracker from './DocumentTracker';
+import DocumentTrackerModal from './DocumentTrackerModal';
 import NotesSection from '../shared/NotesSection';
 import PartsRequestModal from './PartsRequestModal';
 import EstimateRequestModal from './EstimateRequestModal';
@@ -1605,19 +1606,12 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
         itemType="Claim"
         itemData={claim}
       />
-      <FileAttachmentModal
-        fileUrls={claim.file_urls || []}
-        onAdd={(newUrls) => {
-          const current = Array.isArray(claim.file_urls) ? claim.file_urls : [];
-          handleUpdate({ ...claim, file_urls: [...current, ...newUrls] });
-        }}
-        onRemove={handleFileRemove}
+      <DocumentTrackerModal
         isOpen={isAttachmentsOpen}
         onClose={() => setIsAttachmentsOpen(false)}
-        enableAI={true}
-        analysisType="claim"
-        onAIExtract={handleAIExtract}
-        existingData={claim}
+        claim={claim}
+        currentUser={currentUser}
+        onUpdate={handleUpdate}
       />
       <ImageAttachmentModal
         imageUrls={claim.image_urls || []}

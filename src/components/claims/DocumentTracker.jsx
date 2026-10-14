@@ -20,6 +20,9 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
   const [renamingId, setRenamingId] = useState(null);
   const [renameValue, setRenameValue] = useState('');
   const [movingId, setMovingId] = useState(null);
+  const [generalDialogOpen, setGeneralDialogOpen] = useState(false);
+  const [generalTitle, setGeneralTitle] = useState('');
+  const [pendingGeneralFiles, setPendingGeneralFiles] = useState(null);
 
   const { data: docs = [], isLoading } = useQuery({
     queryKey: STATUS_QUERY_KEY(claim.id),
@@ -176,30 +179,72 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
     persistClaimCounts(docs, newMap);
   };
 
-  // General documents (legacy file_urls) handlers
-  const handleAddGeneral = async (fileList) => {
-    const urls = await uploadFiles(fileList);
-    if (!urls?.length) return;
-    const current = Array.isArray(claim.file_urls) ? claim.file_urls : [];
-    onUpdate({ ...claim, file_urls: [...current, ...urls] });
-    await logActivity({
-      parentId: claim.id, parentType: 'Claim', action: 'Document Uploaded',
-      description: `Uploaded ${urls.length} file(s) to General Documents`,
-      user: currentUser,
-    });
+  // General documents — new uploads are stored as ClaimDocument records (item_key='general')
+  // with a user-provided title. Legacy claim.file_urls are preserved and shown alongside.
+  const generalDocRecords = docs.filter((d) => d.item_key === 'general');
+  const legacyGeneralFiles = Array.isArray(claim.file_urls) ? claim.file_urls : [];
+
+  const openGeneralDialog = (fileList) => {
+    setPendingGeneralFiles(fileList);
+    setGeneralTitle('');
+    setGeneralDialogOpen(true);
   };
 
-  const handleRemoveGeneral = async (url) => {
+  const confirmAddGeneral = async () => {
+    if (!pendingGeneralFiles?.length) { setGeneralDialogOpen(false); return; }
+    const urls = await uploadFiles(pendingGeneralFiles);
+    if (!urls?.length) { setGeneralDialogOpen(false); return; }
+    const title = generalTitle.trim();
+    for (const url of urls) {
+      try {
+        await base44.entities.ClaimDocument.create({
+          claim_id: claim.id,
+          item_key: 'general',
+          file_url: url,
+          file_name: title || pendingGeneralFiles[0]?.name || url.split('/').pop(),
+          uploaded_by_email: currentUser?.email || '',
+          uploaded_by_name: currentUser?.full_name || '',
+          uploaded_at: new Date().toISOString(),
+          source: 'manual',
+        });
+      } catch (e) {
+        console.error('Create general doc record failed', e);
+      }
+    }
+    await logActivity({
+      parentId: claim.id, parentType: 'Claim', action: 'Document Uploaded',
+      description: `Uploaded ${urls.length} file(s) to General Documents${title ? ` ("${title}")` : ''}`,
+      user: currentUser,
+    });
+    queryClient.invalidateQueries({ queryKey: STATUS_QUERY_KEY(claim.id) });
+    setGeneralDialogOpen(false);
+    setPendingGeneralFiles(null);
+    setGeneralTitle('');
+  };
+
+  const handleRemoveGeneralRecord = async (doc) => {
+    try {
+      await base44.entities.ClaimDocument.delete(doc.id);
+      await logActivity({
+        parentId: claim.id, parentType: 'Claim', action: 'Document Removed',
+        description: `Removed "${doc.file_name || 'a file'}" from General Documents`,
+        user: currentUser,
+      });
+      queryClient.invalidateQueries({ queryKey: STATUS_QUERY_KEY(claim.id) });
+    } catch (e) {
+      toast({ title: 'Remove failed', variant: 'destructive' });
+    }
+  };
+
+  const handleRemoveLegacyGeneral = async (url) => {
     const current = Array.isArray(claim.file_urls) ? claim.file_urls : [];
     onUpdate({ ...claim, file_urls: current.filter((u) => u !== url) });
     await logActivity({
       parentId: claim.id, parentType: 'Claim', action: 'Document Removed',
-      description: `Removed a file from General Documents`,
+      description: 'Removed a file from General Documents',
       user: currentUser,
     });
   };
-
-  const generalFiles = Array.isArray(claim.file_urls) ? claim.file_urls : [];
 
   return (
     <div className="space-y-4">
@@ -277,21 +322,37 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
         <div className="flex items-center gap-2 px-3 py-2 border-b border-border/60">
           <FolderInput className="w-4 h-4 text-muted-foreground" />
           <span className="text-sm font-medium">General Documents</span>
-          <span className="text-xs text-muted-foreground">({generalFiles.length})</span>
+          <span className="text-xs text-muted-foreground">({generalDocRecords.length + legacyGeneralFiles.length})</span>
           <div className="ml-auto">
-            <UploadButton onFiles={handleAddGeneral} disabled={isUploading} label="Add to General Documents" compact />
+            <UploadButton onFiles={openGeneralDialog} disabled={isUploading} label="Add to General Documents" compact />
           </div>
         </div>
-        {generalFiles.length > 0 && (
+        {(generalDocRecords.length > 0 || legacyGeneralFiles.length > 0) && (
           <div className="px-3 py-1.5 space-y-1">
-            {generalFiles.map((url) => (
+            {generalDocRecords.map((doc) => (
+              <div key={doc.id} className="flex items-center gap-2 group rounded-md px-2 py-1 hover:bg-muted/50">
+                <FileText className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                <a href={doc.file_url} target="_blank" rel="noreferrer" className="text-sm text-primary hover:underline truncate flex-1">
+                  {doc.file_name || doc.file_url.split('/').pop()}
+                </a>
+                <button
+                  onClick={() => handleRemoveGeneralRecord(doc)}
+                  className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-opacity"
+                  title="Remove"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ))}
+            {legacyGeneralFiles.map((url) => (
               <div key={url} className="flex items-center gap-2 group rounded-md px-2 py-1 hover:bg-muted/50">
                 <FileText className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                 <a href={url} target="_blank" rel="noreferrer" className="text-sm text-primary hover:underline truncate flex-1">
                   {url.split('/').pop()}
                 </a>
+                <span className="text-[10px] text-muted-foreground flex-shrink-0">legacy</span>
                 <button
-                  onClick={() => handleRemoveGeneral(url)}
+                  onClick={() => handleRemoveLegacyGeneral(url)}
                   className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-opacity"
                   title="Remove"
                 >
@@ -302,6 +363,33 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
           </div>
         )}
       </div>
+
+      {/* Add general document dialog (title prompt) */}
+      {generalDialogOpen && (
+        <div className="fixed inset-0 z-[10002] flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-sm rounded-lg border border-border bg-background p-5 shadow-lg">
+            <h3 className="text-sm font-semibold mb-3">Add General Document</h3>
+            <label className="text-xs font-medium text-muted-foreground">Title</label>
+            <Input
+              value={generalTitle}
+              onChange={(e) => setGeneralTitle(e.target.value)}
+              placeholder="e.g. Hire Agreement, Police Report…"
+              autoFocus
+              className="mt-1 mb-3"
+              onKeyDown={(e) => { if (e.key === 'Enter') confirmAddGeneral(); }}
+            />
+            <p className="text-xs text-muted-foreground mb-4">
+              {pendingGeneralFiles?.length || 0} file(s) ready to upload.
+            </p>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" size="sm" onClick={() => { setGeneralDialogOpen(false); setPendingGeneralFiles(null); }}>Cancel</Button>
+              <Button size="sm" onClick={confirmAddGeneral} disabled={isUploading}>
+                {isUploading ? 'Uploading…' : 'Upload'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

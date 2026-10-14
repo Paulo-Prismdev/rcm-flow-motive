@@ -14,7 +14,8 @@
         "initial_estimate",
         "initial_authority",
         "supplementary_estimate",
-        "supplementary_authority"
+        "supplementary_authority",
+        "general"
       ],
       "description": "Which checklist item this file is filed against"
     },
