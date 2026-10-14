@@ -2,12 +2,12 @@
 // Shared between the DocumentTracker UI and (mirrored in) backend functions.
 
 export const DOC_ITEMS = [
-  { key: 'instruction_from_referrer', label: 'Instruction from referrer', required: true },
-  { key: 'instruction_to_repairer', label: 'Instruction to repairer', required: true },
-  { key: 'initial_estimate', label: 'Initial estimate', required: true },
-  { key: 'initial_authority', label: 'Initial authority', required: true },
-  { key: 'supplementary_estimate', label: 'Supplementary estimate', required: false },
-  { key: 'supplementary_authority', label: 'Supplementary authority', required: false },
+  { key: 'instruction_from_referrer', label: 'Instruction From Referrer', required: true },
+  { key: 'instruction_to_repairer', label: 'Instruction To Repairer', required: true },
+  { key: 'initial_estimate', label: 'Initial Estimate', required: true },
+  { key: 'initial_authority', label: 'Initial Authority', required: true },
+  { key: 'supplementary_estimate', label: 'Supplementary Estimate', required: false },
+  { key: 'supplementary_authority', label: 'Supplementary Authority', required: false },
 ];
 
 export const DOC_ITEM_KEYS = DOC_ITEMS.map((i) => i.key);
