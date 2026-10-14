@@ -276,7 +276,7 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
                   <span className={`w-2 h-2 rounded-full flex-shrink-0 mt-1.5 ${meta.dot}`} />
                   <span className="text-sm font-medium leading-snug break-words min-w-0">{item.label}</span>
                   {!item.required && (
-                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground mt-1 flex-shrink-0">optional</span>
+                    <span className="text-[10px] tracking-wider text-muted-foreground mt-1 flex-shrink-0">optional</span>
                   )}
                   <StatusMenu item={item} status={status} onToggle={handleStatusToggle} />
                 </div>

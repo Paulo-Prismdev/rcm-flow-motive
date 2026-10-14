@@ -13,10 +13,10 @@ export const DOC_ITEMS = [
 export const DOC_ITEM_KEYS = DOC_ITEMS.map((i) => i.key);
 
 export const DOC_STATUS_META = {
-  received: { label: 'Received', color: 'green', bg: 'bg-green-100 dark:bg-green-900/30', text: 'text-green-700 dark:text-green-300', dot: 'bg-green-500' },
-  outstanding: { label: 'Outstanding', color: 'amber', bg: 'bg-amber-100 dark:bg-amber-900/30', text: 'text-amber-700 dark:text-amber-300', dot: 'bg-amber-500' },
-  not_applicable: { label: 'N/A', color: 'gray', bg: 'bg-gray-100 dark:bg-gray-800', text: 'text-gray-500 dark:text-gray-400', dot: 'bg-gray-400' },
-  not_required: { label: 'Optional', color: 'blue', bg: 'bg-blue-50 dark:bg-blue-900/20', text: 'text-blue-600 dark:text-blue-300', dot: 'bg-blue-400' },
+  received: { label: 'received', color: 'green', bg: 'bg-green-100 dark:bg-green-900/30', text: 'text-green-700 dark:text-green-300', dot: 'bg-green-500' },
+  outstanding: { label: 'outstanding', color: 'amber', bg: 'bg-amber-100 dark:bg-amber-900/30', text: 'text-amber-700 dark:text-amber-300', dot: 'bg-amber-500' },
+  not_applicable: { label: 'n/a', color: 'gray', bg: 'bg-gray-100 dark:bg-gray-800', text: 'text-gray-500 dark:text-gray-400', dot: 'bg-gray-400' },
+  not_required: { label: 'optional', color: 'blue', bg: 'bg-blue-50 dark:bg-blue-900/20', text: 'text-blue-600 dark:text-blue-300', dot: 'bg-blue-400' },
 };
 
 /**
