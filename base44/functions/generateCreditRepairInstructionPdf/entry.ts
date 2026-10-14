@@ -1,6 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.49';
 import { jsPDF } from 'npm:jspdf@2.5.1';
 import { PDF_CONST, PDF_COLORS, createPdfHelpers, drawBrandedHeader, formatClaimTypeForInstruction } from '../../shared/instructionPdfHelpers.ts';
+import { fileInstructionDocument } from '../../shared/docChecklist.ts';
 
 export default async function(req: Request): Promise<Response> {
   try {
