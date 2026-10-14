@@ -274,20 +274,20 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
           const itemFiles = docs.filter((d) => d.item_key === item.key);
           return (
             <div key={item.key} className="rounded-[10px] border border-border bg-card overflow-hidden">
-              <div className="flex items-center justify-between gap-2 px-3 py-2">
-                <div className="flex items-center gap-2 min-w-0">
-                  <span className={`w-2 h-2 rounded-full flex-shrink-0 ${meta.dot}`} />
-                  <span className="text-sm font-medium truncate">{item.label}</span>
+              <div className="px-3 pt-2 pb-1.5">
+                <div className="flex items-start gap-2 min-w-0">
+                  <span className={`w-2 h-2 rounded-full flex-shrink-0 mt-1.5 ${meta.dot}`} />
+                  <span className="text-sm font-medium leading-snug break-words min-w-0">{item.label}</span>
                   {!item.required && (
-                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground">optional</span>
+                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground mt-1 flex-shrink-0">optional</span>
                   )}
+                  <StatusMenu item={item} status={status} onToggle={handleStatusToggle} />
                 </div>
-                <div className="flex items-center gap-1.5 flex-shrink-0">
+                <div className="flex items-center gap-1.5 mt-1.5">
                   <UploadButton onFiles={(files) => handleUpload(item.key, files)} disabled={isUploading} compact />
                   <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${meta.bg} ${meta.text}`}>
                     {meta.label}
                   </span>
-                  <StatusMenu item={item} status={status} onToggle={handleStatusToggle} />
                 </div>
               </div>
 
