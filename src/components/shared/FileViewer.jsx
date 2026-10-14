@@ -1,95 +1,39 @@
-import React, { useEffect, useRef } from 'react';
-import { createPortal } from 'react-dom';
+import React, { useRef } from 'react';
+import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import FilePreviewContent from '@/components/shared/FilePreviewContent';
 
 export default function FileViewer({ fileUrl, onClose }) {
-  const rootRef = useRef(null);
+  const returnFocusRef = useRef(null);
 
-  // Block pointer, focus, and key events originating inside the FileViewer from
-  // reaching the parent Radix Dialog's outside-interaction detection, so closing
-  // the viewer never also closes the underlying modal.
-  useEffect(() => {
-    if (!fileUrl) return;
-    const isInside = (e) => rootRef.current && rootRef.current.contains(e.target);
-    const stop = (e) => { if (isInside(e)) e.stopPropagation(); };
-    const types = ['pointerdown', 'mousedown', 'pointerup', 'mouseup', 'click', 'focusin', 'focusout', 'keydown', 'keyup'];
-    types.forEach((t) => document.addEventListener(t, stop, true));
-    return () => types.forEach((t) => document.removeEventListener(t, stop, true));
-  }, [fileUrl]);
-
-  if (!fileUrl) return null;
-
-  const getFileExtension = (url) => {
-    try {
-      const urlObj = new URL(url);
-      const pathname = urlObj.pathname;
-      const fileName = pathname.split('/').pop();
-      const extension = fileName.split('.').pop()?.toLowerCase();
-      return extension || '';
-    } catch (e) {
-      const extension = url.split('.').pop()?.toLowerCase();
-      return extension || '';
-    }
-  };
-
-  const extension = getFileExtension(fileUrl);
-  const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(extension);
-  const isPDF = extension === 'pdf';
-
-  return createPortal(
-    <div
-      ref={rootRef}
-      className="fixed inset-0 z-[2147483647] flex items-center justify-center bg-black/90 backdrop-blur-sm"
-      onClick={onClose}
-    >
-      <div
-        className="relative w-screen h-screen bg-white dark:bg-gray-900 shadow-2xl overflow-hidden flex flex-col"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">File Preview</h3>
-          <Button
-            onClick={(e) => { e.stopPropagation(); onClose(); }}
-            variant="ghost"
-            size="icon"
-            className="hover:bg-gray-200 dark:hover:bg-gray-700"
-          >
-            <X className="w-5 h-5" />
-          </Button>
-        </div>
-
-        {/* Content */}
-        <div className="flex-1 overflow-auto bg-gray-100 dark:bg-gray-950 flex items-center justify-center">
-          {isImage ? (
-            <img
-              src={fileUrl}
-              alt="Preview"
-              className="max-w-full max-h-full object-contain"
-            />
-          ) : isPDF ? (
-            <iframe
-              src={fileUrl}
-              className="w-full h-full border-0"
-              title="PDF Preview"
-            />
-          ) : (
-            <div className="text-center p-8">
-              <p className="text-gray-600 dark:text-gray-400 mb-4">
-                Preview not available for this file type
-              </p>
-              <Button
-                onClick={() => window.open(fileUrl, '_blank')}
-                className="bg-blue-600 hover:bg-blue-700 text-white"
-              >
-                Open in New Tab
+  return (
+    <DialogPrimitive.Root open={!!fileUrl} onOpenChange={(open) => { if (!open) onClose(); }}>
+      <DialogPrimitive.Portal>
+        <DialogPrimitive.Overlay className="fixed inset-0 z-[2147483646] bg-background/90 backdrop-blur-sm" />
+        <DialogPrimitive.Content
+          aria-describedby={undefined}
+          className="fixed inset-0 z-[2147483647] flex flex-col overflow-hidden bg-card text-card-foreground shadow-2xl outline-none"
+          onOpenAutoFocus={() => { returnFocusRef.current = document.activeElement; }}
+          onCloseAutoFocus={(event) => {
+            event.preventDefault();
+            if (returnFocusRef.current?.isConnected) returnFocusRef.current.focus();
+          }}
+          onPointerDownOutside={(event) => event.preventDefault()}
+          onEscapeKeyDown={(event) => event.stopPropagation()}
+          onClick={(event) => event.stopPropagation()}
+        >
+          <div className="flex flex-shrink-0 items-center justify-between p-4 border-b border-border bg-muted">
+            <DialogPrimitive.Title className="text-lg font-semibold">File Preview</DialogPrimitive.Title>
+            <DialogPrimitive.Close asChild>
+              <Button type="button" variant="ghost" size="icon" aria-label="Close file preview">
+                <X className="w-5 h-5" />
               </Button>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>,
-    document.body
+            </DialogPrimitive.Close>
+          </div>
+          {fileUrl && <FilePreviewContent fileUrl={fileUrl} />}
+        </DialogPrimitive.Content>
+      </DialogPrimitive.Portal>
+    </DialogPrimitive.Root>
   );
 }
