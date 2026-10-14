@@ -156,7 +156,7 @@ export default function ClaimDetailMobileHeader({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56 max-h-72 overflow-y-auto">
-            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onAction('section:' + currentSection.value); }} className="font-medium bg-muted/50">
+            <DropdownMenuItem onSelect={() => { onAction('section:' + currentSection.value); }} className="font-medium bg-muted/50">
               <span>Current Section:</span>
               <span className="ml-2 text-muted-foreground">{currentSection.label}</span>
             </DropdownMenuItem>
@@ -172,19 +172,19 @@ export default function ClaimDetailMobileHeader({
                 )}
               </DropdownMenuItem>
             ))}
-            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onAction('notes'); }}><FileText className="w-4 h-4 mr-2" />Internal Updates</DropdownMenuItem>
-            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onAction('timelogs'); }}><Timer className="w-4 h-4 mr-2" />Time Logs</DropdownMenuItem>
-            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onAction('activity'); }}><History className="w-4 h-4 mr-2" />Activity Log</DropdownMenuItem>
-            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onAction('email'); }}><Mail className="w-4 h-4 mr-2" />Send Email</DropdownMenuItem>
-            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onAction('tasks'); }}><ListTodo className="w-4 h-4 mr-2" />Manage Tasks</DropdownMenuItem>
-            {claim.instruction_pdf_url && <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onAction('download_pdf'); }}><Download className="w-4 h-4 mr-2" />Download Instruction PDF</DropdownMenuItem>}
-            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onAction('download_overview'); }}><FileText className="w-4 h-4 mr-2" />Download File Overview</DropdownMenuItem>
-            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onAction('estimate'); }}><Calculator className="w-4 h-4 mr-2" />Request Estimate</DropdownMenuItem>
-            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onAction('parts'); }}><Package className="w-4 h-4 mr-2" />Log Parts Issue</DropdownMenuItem>
-            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onAction('backorders'); }}><Package className="w-4 h-4 mr-2" />Backordered Parts</DropdownMenuItem>
-            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onAction('duplicate'); }}><Copy className="w-4 h-4 mr-2" />Duplicate Claim</DropdownMenuItem>
-            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onAction('archive'); }}><Archive className="w-4 h-4 mr-2" />{claim.archived ? 'Unarchive' : 'Archive'}</DropdownMenuItem>
-            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); onAction('delete'); }} className="text-red-600"><Trash2 className="w-4 h-4 mr-2" />Delete</DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => { onAction('notes'); }}><FileText className="w-4 h-4 mr-2" />Internal Updates</DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => { onAction('timelogs'); }}><Timer className="w-4 h-4 mr-2" />Time Logs</DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => { onAction('activity'); }}><History className="w-4 h-4 mr-2" />Activity Log</DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => { onAction('email'); }}><Mail className="w-4 h-4 mr-2" />Send Email</DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => { onAction('tasks'); }}><ListTodo className="w-4 h-4 mr-2" />Manage Tasks</DropdownMenuItem>
+            {claim.instruction_pdf_url && <DropdownMenuItem onSelect={() => { onAction('download_pdf'); }}><Download className="w-4 h-4 mr-2" />Download Instruction PDF</DropdownMenuItem>}
+            <DropdownMenuItem onSelect={() => { onAction('download_overview'); }}><FileText className="w-4 h-4 mr-2" />Download File Overview</DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => { onAction('estimate'); }}><Calculator className="w-4 h-4 mr-2" />Request Estimate</DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => { onAction('parts'); }}><Package className="w-4 h-4 mr-2" />Log Parts Issue</DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => { onAction('backorders'); }}><Package className="w-4 h-4 mr-2" />Backordered Parts</DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => { onAction('duplicate'); }}><Copy className="w-4 h-4 mr-2" />Duplicate Claim</DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => { onAction('archive'); }}><Archive className="w-4 h-4 mr-2" />{claim.archived ? 'Unarchive' : 'Archive'}</DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => { onAction('delete'); }} className="text-red-600"><Trash2 className="w-4 h-4 mr-2" />Delete</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
