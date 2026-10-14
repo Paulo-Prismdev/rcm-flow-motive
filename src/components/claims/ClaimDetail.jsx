@@ -63,7 +63,6 @@ import ClaimExcessContributionForm from './ClaimExcessContributionForm';
 import InstructionDefaultsForm from './InstructionDefaultsForm';
 import ThirdPartyPursuitSection from './ThirdPartyPursuitSection';
 import BackorderedPartsSection from './BackorderedPartsSection';
-import DocumentTracker from './DocumentTracker';
 import DocumentTrackerModal from './DocumentTrackerModal';
 import NotesSection from '../shared/NotesSection';
 import PartsRequestModal from './PartsRequestModal';
@@ -245,8 +244,7 @@ const DETAIL_SECTIONS = [
   { id: 'repairPreference', label: 'Repair Preference', icon: FileText },
   { id: 'declarationOfNeed', label: 'Declaration of Need', icon: FileText },
   { id: 'backorderedParts', label: 'Backordered Parts', icon: Package },
-  { id: 'documents', label: 'Document Tracker', icon: FileText },
-];
+  ];
 
 export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInternalUser = true }) {
   const [claim, setClaim] = useState(claimProp);
@@ -1569,15 +1567,6 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
             claim={claim}
             currentUser={currentUser}
             onSendEmail={() => setIsEmailModalOpen(true)}
-          />
-        );
-
-      case 'documents':
-        return (
-          <DocumentTracker
-            claim={claim}
-            currentUser={currentUser}
-            onUpdate={handleUpdate}
           />
         );
 
