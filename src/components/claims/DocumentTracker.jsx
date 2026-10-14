@@ -185,7 +185,7 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
   const legacyGeneralFiles = Array.isArray(claim.file_urls) ? claim.file_urls : [];
 
   const openGeneralDialog = (fileList) => {
-    setPendingGeneralFiles(fileList);
+    setPendingGeneralFiles(Array.from(fileList || []));
     setGeneralTitle('');
     setGeneralDialogOpen(true);
   };
