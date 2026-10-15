@@ -22,7 +22,7 @@ export default async function(req: Request): Promise<Response> {
           'id', 'claim_type', 'insurer', 'tp_insurer', 'tp_name',
           'client_name', 'credit_repair_company_name',
           'authorised_by', 'authorising_party_name', 'authorising_party_overridden',
-          'reg', 'job_number',
+          'reg', 'job_number', 'job_status', 'secondary_status',
         ],
       });
       allClaims.push(...(page.items || []));
@@ -33,7 +33,13 @@ export default async function(req: Request): Promise<Response> {
     let skipped = 0;
     const unresolved = [];
 
+    let cancelled = 0;
     for (const claim of allClaims) {
+      // Skip cancelled claims — they don't need an authorising party
+      if (claim.job_status === 'Cancelled' || claim.secondary_status === 'Cancelled') {
+        cancelled++;
+        continue;
+      }
       // For overridden claims: keep the chosen role, but refresh the org name
       // from the matching field (mirrors sanitizeClaimData).
       if (claim.authorising_party_overridden) {
@@ -98,6 +104,7 @@ export default async function(req: Request): Promise<Response> {
       total: allClaims.length,
       updated,
       skipped,
+      cancelled,
       unresolvedCount: unresolved.length,
       unresolved: unresolved.slice(0, 200),
     });
