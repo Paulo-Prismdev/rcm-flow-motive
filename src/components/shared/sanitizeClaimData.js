@@ -1,3 +1,5 @@
+import { deriveAuthorisingParty } from './authorisingParty';
+
 // Hardcoded set of numeric fields on the Claim entity (from base44/entities/Claim.jsonc).
 // The server rejects string values (e.g. "" or "0") for these fields with a 422,
 // so any save payload must coerce them to real numbers (or null).
@@ -58,6 +60,13 @@ export function sanitizeClaimData(data) {
     if (key in out) {
       out[key] = toNumberOrNull(out[key]);
     }
+  }
+  // Auto-derive the authorising party (role + org name) from claim type unless
+  // the claim has been manually overridden.
+  if (!out.authorising_party_overridden) {
+    const derived = deriveAuthorisingParty(out);
+    out.authorised_by = derived.authorised_by;
+    out.authorising_party_name = derived.authorising_party_name;
   }
   return out;
 }

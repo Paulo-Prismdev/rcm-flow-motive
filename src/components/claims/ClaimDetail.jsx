@@ -94,6 +94,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import ClaimDetailMobileHeader from './ClaimDetailMobileHeader';
+import AuthorisingPartyBanner from './AuthorisingPartyBanner';
 import ClaimJourneyTimeline from './ClaimJourneyTimeline';
 import { generateClaimOverviewPdf } from './claimOverviewPdf';
 import ClaimStatusEditForm from './ClaimStatusEditForm';
@@ -1715,6 +1716,9 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
               </div>
             </div>
           )}
+
+          {/* ── Authorising Party banner ── */}
+          <AuthorisingPartyBanner claim={claim} onUpdate={handleUpdate} />
 
           {/* ── MOBILE header (< lg) ── */}
           <ClaimDetailMobileHeader

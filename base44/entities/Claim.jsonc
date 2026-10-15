@@ -845,7 +845,16 @@
         "Uninsured",
         "Credit Repair"
       ],
-      "description": "Authorising party selection from last allocation"
+      "description": "Authorising party role \u2014 single source of truth for who the job is for and who pays. Auto-derived from claim type; overridden via authorising_party_overridden."
+    },
+    "authorising_party_name": {
+      "type": "string",
+      "description": "Organisation name for the authorising party (e.g. insurer name, credit repair company name, or client/TP name for private jobs). Auto-derived from claim type."
+    },
+    "authorising_party_overridden": {
+      "type": "boolean",
+      "default": false,
+      "description": "True when a staff member has manually overridden the auto-derived authorising party."
     },
     "instruction_contact_type": {
       "type": "string",

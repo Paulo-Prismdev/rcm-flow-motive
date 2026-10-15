@@ -19,6 +19,7 @@ import { getJourneyColor, isExceptionJourney, SECONDARY_STATUSES, JOURNEY_STATUS
 import { isClosedJourney, isUpdateTrackingClosed, computeClientCommStatusFlag } from '@/components/shared/claimStatusUpdate';
 import { useToast } from "@/components/ui/use-toast";
 import { sanitizeClaimData } from '@/components/shared/sanitizeClaimData';
+import { formatAuthorisingParty, AUTHORISING_PARTY_LABELS } from '@/components/shared/authorisingParty';
 
 // ── Repairs table — fixed column widths (global config) ──
 // Every column has a fixed width (min = max) so the table never recomputes
@@ -31,6 +32,7 @@ const COL_WIDTHS = {
   claim_ref: 120, policy_number: 120, client_phone: 120, business_division: 120,
   vehicle_location: 150, documents: 90, vehicle_damage: 160, referrer_ref: 120,
   client_ref: 120,
+  authorising_party: 160,
 };
 const DEFAULT_COL_WIDTH = 130;
 const colWidth = (id) => COL_WIDTHS[id] || DEFAULT_COL_WIDTH;
@@ -112,6 +114,7 @@ export default function ClaimsPage() {
   const [statusFilter, setStatusFilter] = useState([]);
   const [claimTypeFilter, setClaimTypeFilter] = useState('');
   const [insurerFilter, setInsurerFilter] = useState('');
+  const [authorisingPartyFilter, setAuthorisingPartyFilter] = useState('');
   const [referrerFilter, setReferrerFilter] = useState('');
   const [updateStatusFilter, setUpdateStatusFilter] = useState('');
   const [repairerAcceptanceFilter, setRepairerAcceptanceFilter] = useState('');
@@ -216,6 +219,9 @@ export default function ClaimsPage() {
   }, [availableStatuses.length]);
 
   const uniqueInsurers = [...new Set(claims.map(c => c.insurer).filter(Boolean))].sort();
+  const uniqueAuthorisingParties = [...new Set(
+    claims.map(c => formatAuthorisingParty(c)).filter(Boolean)
+  )].sort();
   const uniqueReferrers = [...new Set(claims.map(c => c.referrer).filter(Boolean))].sort();
   const uniqueRepairers = [...new Set(claims.map(c => c.bodyshop).filter(Boolean))].sort();
   const uniqueBusinessDivisions = [...new Set(claims.map(c => c.business_division).filter(Boolean))].sort();
@@ -279,13 +285,13 @@ export default function ClaimsPage() {
 
   const clearAllFilters = () => {
     setSearchTerm(''); setStatusFilter([]); setClaimTypeFilter('');
-    setInsurerFilter(''); setReferrerFilter(''); setRepairerFilter('');
+    setInsurerFilter(''); setAuthorisingPartyFilter(''); setReferrerFilter(''); setRepairerFilter('');
     setUpdateStatusFilter(''); setRepairerAcceptanceFilter(''); setHasBackorderedPartsFilter(false);
     setBusinessDivisionFilter(''); setOverdueOnly(false);
     setDateReceivedFrom(''); setDateReceivedTo('');
   };
 
-  const activeFiltersCount = [(statusFilter?.length || 0) > 0, claimTypeFilter, insurerFilter, referrerFilter, repairerFilter, businessDivisionFilter, updateStatusFilter, repairerAcceptanceFilter, hasBackorderedPartsFilter, overdueOnly, dateReceivedFrom, dateReceivedTo].filter(Boolean).length;
+  const activeFiltersCount = [(statusFilter?.length || 0) > 0, claimTypeFilter, insurerFilter, authorisingPartyFilter, referrerFilter, repairerFilter, businessDivisionFilter, updateStatusFilter, repairerAcceptanceFilter, hasBackorderedPartsFilter, overdueOnly, dateReceivedFrom, dateReceivedTo].filter(Boolean).length;
 
   const allClaims = showArchived ? claims : claims.filter(c => !c.archived);
   const standardClaims = allClaims.filter(c => c.claim_type !== 'Paying Privately' && c.claim_type !== '3rd Party Paying Privately');
@@ -303,6 +309,7 @@ export default function ClaimsPage() {
     const matchesStatus = !statusFilter.length || (c.job_statuses || []).some(st => statusFilter.includes(st));
     const matchesClaimType = !claimTypeFilter || c.claim_type === claimTypeFilter;
     const matchesInsurer = !insurerFilter || c.insurer === insurerFilter;
+    const matchesAuthorisingParty = !authorisingPartyFilter || formatAuthorisingParty(c) === authorisingPartyFilter;
     const matchesReferrer = !referrerFilter || c.referrer === referrerFilter;
     const matchesRepairer = !repairerFilter || c.bodyshop === repairerFilter;
     const matchesUpdateStatus = !updateStatusFilter || calculateUpdateStatus(c) === updateStatusFilter;
@@ -314,7 +321,7 @@ export default function ClaimsPage() {
     const matchesOverdue = !overdueOnly || calculateUpdateStatus(c) === 'Red' || computeClientCommStatusFlag(c) === 'Red';
     const dr = c.date_received;
     const matchesDateReceived = (!dateReceivedFrom || (dr && dr >= dateReceivedFrom)) && (!dateReceivedTo || (dr && dr <= dateReceivedTo));
-    return matchesSearch && matchesStatus && matchesClaimType && matchesInsurer && matchesReferrer && matchesRepairer && matchesUpdateStatus && matchesRepairerAcceptance && matchesBackorders && matchesBusinessDivision && matchesOverdue && matchesDateReceived;
+    return matchesSearch && matchesStatus && matchesClaimType && matchesInsurer && matchesAuthorisingParty && matchesReferrer && matchesRepairer && matchesUpdateStatus && matchesRepairerAcceptance && matchesBackorders && matchesBusinessDivision && matchesOverdue && matchesDateReceived;
   }).sort((a, b) => {
     if (sortBy === 'created_asc') return new Date(a.created_date) - new Date(b.created_date);
     if (sortBy === 'created_desc') return new Date(b.created_date) - new Date(a.created_date);
@@ -402,6 +409,7 @@ export default function ClaimsPage() {
     vehicle_damage: { label: 'Damage', render: (c) => c.vehicle_damage || '—' },
     referrer_ref: { label: 'Referrer Ref', render: (c) => c.referrer_ref || '—' },
     client_ref: { label: 'Client Ref', render: (c) => c.client_ref || '—' },
+    authorising_party: { label: 'Authorising Party', render: (c) => formatAuthorisingParty(c) || '—' },
   };
 
 
@@ -415,7 +423,7 @@ export default function ClaimsPage() {
           </div>
         )}
         <ClaimFormWrapper
-          onSubmit={(d) => { setCreateError(null); createMutation.mutate(d); }}
+          onSubmit={(d) => { setCreateError(null); createMutation.mutate(sanitizeClaimData(d)); }}
           onCancel={() => { setShowForm(false); setCreateError(null); }}
           isSubmitting={createMutation.isPending}
           defaultClaimType={claimTab === 'private' ? 'Paying Privately' : ''}
@@ -699,6 +707,7 @@ export default function ClaimsPage() {
             {[
               { label: 'Claim Type', value: claimTypeFilter, onChange: setClaimTypeFilter, options: uniqueClaimTypes },
               { label: 'Insurer', value: insurerFilter, onChange: setInsurerFilter, options: uniqueInsurers },
+              { label: 'Authorising Party', value: authorisingPartyFilter, onChange: setAuthorisingPartyFilter, options: uniqueAuthorisingParties },
               { label: 'Referrer', value: referrerFilter, onChange: setReferrerFilter, options: uniqueReferrers },
               { label: 'Repairer', value: repairerFilter, onChange: setRepairerFilter, options: uniqueRepairers },
               { label: 'Business Division', value: businessDivisionFilter, onChange: setBusinessDivisionFilter, options: uniqueBusinessDivisions },

@@ -11,6 +11,7 @@ const AVAILABLE_FIELDS = [
   { id: 'loss_date', label: 'Loss Date' },
   { id: 'referrer', label: 'Referrer' },
   { id: 'insurer', label: 'Insurer' },
+  { id: 'authorising_party', label: 'Authorising Party' },
   { id: 'bodyshop', label: 'Bodyshop' },
   { id: 'driver_contact_name', label: 'Driver Name' },
   { id: 'claim_type', label: 'Claim Type' },
