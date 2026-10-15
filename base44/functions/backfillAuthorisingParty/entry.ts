@@ -1,5 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.52';
-import { deriveAuthorisingParty } from '../../shared/authorisingParty.ts';
+import { deriveAuthorisingParty, authorisingPartyNameForRole } from '../../shared/authorisingParty.ts';
 
 export default async function(req: Request): Promise<Response> {
   try {
@@ -34,11 +34,24 @@ export default async function(req: Request): Promise<Response> {
     const unresolved = [];
 
     for (const claim of allClaims) {
-      // Skip claims that have been manually overridden
+      // For overridden claims: keep the chosen role, but refresh the org name
+      // from the matching field (mirrors sanitizeClaimData).
       if (claim.authorising_party_overridden) {
-        skipped++;
-        // Still check if it's unresolved for reporting
-        if (!claim.authorised_by || !claim.authorising_party_name) {
+        const role = claim.authorised_by || '';
+        if (role) {
+          const refreshedName = authorisingPartyNameForRole(role, claim);
+          if (refreshedName !== (claim.authorising_party_name || '')) {
+            await base44.asServiceRole.entities.Claim.update(claim.id, {
+              authorising_party_name: refreshedName,
+            });
+            updated++;
+          } else {
+            skipped++;
+          }
+        } else {
+          skipped++;
+        }
+        if (!role || !claim.authorising_party_name) {
           unresolved.push({
             id: claim.id,
             job_number: claim.job_number,

@@ -55,6 +55,24 @@ export function deriveAuthorisingParty(claim) {
 }
 
 /**
+ * Returns the organisation name for a given authorising party role, pulling
+ * from the matching claim field. Used to refresh the name on overridden claims
+ * when the underlying field changes (e.g. TP insurer name filled in after the
+ * role was manually set to Third Party Insurer).
+ */
+export function authorisingPartyNameForRole(role, claim) {
+  if (!claim || !role) return '';
+  switch (role) {
+    case 'Client Insurer': return claim.insurer || '';
+    case 'Third Party Insurer': return claim.tp_insurer || '';
+    case 'Credit Repair': return claim.credit_repair_company_name || '';
+    case 'Third Party': return claim.tp_name || '';
+    case 'Uninsured': return claim.client_name || '';
+    default: return claim.authorising_party_name || '';
+  }
+}
+
+/**
  * Returns true when the authorising party can't be resolved (role or name missing).
  */
 export function isAuthorisingPartyUnresolved(claim) {

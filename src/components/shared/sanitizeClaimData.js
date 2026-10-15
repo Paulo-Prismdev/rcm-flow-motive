@@ -1,4 +1,4 @@
-import { deriveAuthorisingParty } from './authorisingParty';
+import { deriveAuthorisingParty, authorisingPartyNameForRole } from './authorisingParty';
 
 // Hardcoded set of numeric fields on the Claim entity (from base44/entities/Claim.jsonc).
 // The server rejects string values (e.g. "" or "0") for these fields with a 422,
@@ -65,10 +65,18 @@ export function sanitizeClaimData(data, existingClaim) {
   // context — the existing claim merged with the incoming change. A partial
   // save (e.g. a single field from the instruction pre-check) never carries
   // enough context on its own, so without the merge it would blank the
-  // authorising party. A manually overridden party is never recalculated.
-  if (!out.authorising_party_overridden) {
-    const merged = existingClaim ? { ...existingClaim, ...out } : out;
-    if (merged.claim_type) {
+  // authorising party. The override flag is checked on the MERGED claim so a
+  // field-only save right after an override doesn't revert it.
+  const merged = existingClaim ? { ...existingClaim, ...out } : out;
+  if (merged.claim_type) {
+    if (merged.authorising_party_overridden) {
+      // Keep the chosen role, but refresh the org name from the matching field
+      // so e.g. filling in the TP insurer name updates the authorising party name.
+      const role = merged.authorised_by || '';
+      if (role) {
+        out.authorising_party_name = authorisingPartyNameForRole(role, merged);
+      }
+    } else {
       const derived = deriveAuthorisingParty(merged);
       out.authorised_by = derived.authorised_by;
       out.authorising_party_name = derived.authorising_party_name;

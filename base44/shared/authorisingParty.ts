@@ -1,6 +1,18 @@
 // Backend authorising-party derivation — mirrors src/components/shared/authorisingParty.js.
 // Used by the backfill function so both frontend and backend share the same rules.
 
+export function authorisingPartyNameForRole(role: string, claim: any): string {
+  if (!claim || !role) return '';
+  switch (role) {
+    case 'Client Insurer': return claim.insurer || '';
+    case 'Third Party Insurer': return claim.tp_insurer || '';
+    case 'Credit Repair': return claim.credit_repair_company_name || '';
+    case 'Third Party': return claim.tp_name || '';
+    case 'Uninsured': return claim.client_name || '';
+    default: return claim.authorising_party_name || '';
+  }
+}
+
 export function deriveAuthorisingParty(claim: any): { authorised_by: string; authorising_party_name: string } {
   if (!claim) return { authorised_by: '', authorising_party_name: '' };
   const ct = claim.claim_type;
