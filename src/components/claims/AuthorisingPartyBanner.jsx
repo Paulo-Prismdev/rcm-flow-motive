@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Shield, Pencil, AlertTriangle, Check, X, Lock } from 'lucide-react';
+import { Shield, Pencil, AlertTriangle, Check, X, Lock, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   AUTHORISING_PARTY_LABELS,
@@ -25,6 +25,8 @@ export default function AuthorisingPartyBanner({ claim, onUpdate }) {
   const currentName = claim?.authorising_party_name || '';
   const overridden = claim?.authorising_party_overridden === true;
   const unresolved = isAuthorisingPartyUnresolved(claim);
+  const jobNumber = claim?.job_number || '';
+  const missingJobNumber = !jobNumber;
   const style = AUTHORISING_PARTY_STYLES[currentRole] || AUTHORISING_PARTY_STYLES['Uninsured'];
   const label = AUTHORISING_PARTY_LABELS[currentRole] || currentRole || 'Not set';
 
@@ -107,6 +109,12 @@ export default function AuthorisingPartyBanner({ claim, onUpdate }) {
       <div className="flex items-center gap-2 flex-shrink-0">
         <Shield className={`w-4 h-4 ${style.text}`} />
         <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Authorising Party</span>
+      </div>
+      <div className={`flex items-center gap-1.5 flex-shrink-0 px-2 py-0.5 rounded-md ${missingJobNumber ? 'bg-red-100 dark:bg-red-900/30' : ''}`}>
+        <FileText className={`w-3.5 h-3.5 ${missingJobNumber ? 'text-red-600 dark:text-red-400' : 'text-muted-foreground'}`} />
+        <span className={`text-xs font-semibold ${missingJobNumber ? 'text-red-600 dark:text-red-400' : 'text-foreground'}`}>
+          {jobNumber || 'No Claim No.'}
+        </span>
       </div>
       <div className="flex items-center gap-2 min-w-0 flex-1">
         <span className={`w-2 h-2 rounded-full flex-shrink-0 ${style.dot}`} />
