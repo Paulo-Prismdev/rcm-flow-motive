@@ -64,6 +64,27 @@ export function isAuthorisingPartyUnresolved(claim) {
 }
 
 /**
+ * The organisation name behind the authorising party, for grouping/filtering.
+ * Insurer jobs return the insurer name (e.g. "Admiral") so picking "Admiral"
+ * shows every job Admiral pays for — whether as client insurer or third party
+ * insurer. Private jobs are grouped under fixed labels instead of the
+ * individual's name.
+ */
+export function authorisingPartyOrganisation(claim) {
+  if (!claim) return '';
+  const role = claim.authorised_by;
+  if (!role) return '';
+  switch (role) {
+    case 'Client Insurer': return claim.insurer || '';
+    case 'Third Party Insurer': return claim.tp_insurer || '';
+    case 'Credit Repair': return claim.credit_repair_company_name || '';
+    case 'Third Party': return 'Private – third party paying';
+    case 'Uninsured': return 'Private – client paying';
+    default: return claim.authorising_party_name || '';
+  }
+}
+
+/**
  * Human-readable string: "Third Party Insurer: Admiral" or "Client: John Smith".
  * Returns '' if no role is set.
  */

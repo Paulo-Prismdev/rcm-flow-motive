@@ -19,7 +19,7 @@ import { getJourneyColor, isExceptionJourney, SECONDARY_STATUSES, JOURNEY_STATUS
 import { isClosedJourney, isUpdateTrackingClosed, computeClientCommStatusFlag } from '@/components/shared/claimStatusUpdate';
 import { useToast } from "@/components/ui/use-toast";
 import { sanitizeClaimData } from '@/components/shared/sanitizeClaimData';
-import { formatAuthorisingParty, AUTHORISING_PARTY_LABELS } from '@/components/shared/authorisingParty';
+import { formatAuthorisingParty, authorisingPartyOrganisation, AUTHORISING_PARTY_LABELS } from '@/components/shared/authorisingParty';
 
 // ── Repairs table — fixed column widths (global config) ──
 // Every column has a fixed width (min = max) so the table never recomputes
@@ -220,7 +220,7 @@ export default function ClaimsPage() {
 
   const uniqueInsurers = [...new Set(claims.map(c => c.insurer).filter(Boolean))].sort();
   const uniqueAuthorisingParties = [...new Set(
-    claims.map(c => formatAuthorisingParty(c)).filter(Boolean)
+    claims.map(c => authorisingPartyOrganisation(c)).filter(Boolean)
   )].sort();
   const uniqueReferrers = [...new Set(claims.map(c => c.referrer).filter(Boolean))].sort();
   const uniqueRepairers = [...new Set(claims.map(c => c.bodyshop).filter(Boolean))].sort();
@@ -279,7 +279,7 @@ export default function ClaimsPage() {
   // localClaim  = optional full object for immediate UI state before the
   // refetch lands; defaults to updatedClaim for backward compatibility.
   const handleUpdate = (updatedClaim, localClaim) => {
-    updateMutation.mutate({ id: updatedClaim.id, data: sanitizeClaimData(updatedClaim) });
+    updateMutation.mutate({ id: updatedClaim.id, data: sanitizeClaimData(updatedClaim, selectedClaim) });
     setSelectedClaim(localClaim || updatedClaim);
   };
 
@@ -309,7 +309,7 @@ export default function ClaimsPage() {
     const matchesStatus = !statusFilter.length || (c.job_statuses || []).some(st => statusFilter.includes(st));
     const matchesClaimType = !claimTypeFilter || c.claim_type === claimTypeFilter;
     const matchesInsurer = !insurerFilter || c.insurer === insurerFilter;
-    const matchesAuthorisingParty = !authorisingPartyFilter || formatAuthorisingParty(c) === authorisingPartyFilter;
+    const matchesAuthorisingParty = !authorisingPartyFilter || authorisingPartyOrganisation(c) === authorisingPartyFilter;
     const matchesReferrer = !referrerFilter || c.referrer === referrerFilter;
     const matchesRepairer = !repairerFilter || c.bodyshop === repairerFilter;
     const matchesUpdateStatus = !updateStatusFilter || calculateUpdateStatus(c) === updateStatusFilter;

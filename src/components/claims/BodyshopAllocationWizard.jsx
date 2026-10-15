@@ -177,7 +177,7 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
   // InstructionPreCheck persists each field edit immediately.
   const handlePreCheckUpdate = async (partial) => {
     try {
-      await base44.entities.Claim.update(claim.id, sanitizeClaimData(partial));
+      await base44.entities.Claim.update(claim.id, sanitizeClaimData(partial, claim));
       queryClient.invalidateQueries({ queryKey: ['claims'] });
       queryClient.invalidateQueries({ queryKey: ['claim', claim.id] });
     } catch (error) {

@@ -15,11 +15,48 @@ const INSTRUCTION_TYPES = [
   { value: 'orkin', label: 'Orkin (Branded)' },
 ];
 
-function deriveInstructionType(claim) {
-  // Claim type is authoritative; authorised_by is only a fallback for older
-  // claims where the type wasn't captured. This prevents a stale authorised_by
-  // (e.g. 'Credit Repair' from before the type was changed) from forcing the
-  // wrong instruction.
+// The role + organisation name that corresponds to a chosen instruction type.
+// orkin is a branded variant of "standard" (same role: Client Insurer).
+function authorisingPartyForInstructionType(type, claim) {
+  switch (type) {
+    case 'standard':
+    case 'orkin':
+      return { authorised_by: 'Client Insurer', authorising_party_name: claim.insurer || '' };
+    case 'tp_insurer':
+      return { authorised_by: 'Third Party Insurer', authorising_party_name: claim.tp_insurer || '' };
+    case 'third_party':
+      return { authorised_by: 'Third Party', authorising_party_name: claim.tp_name || '' };
+    case 'private':
+      return { authorised_by: 'Uninsured', authorising_party_name: claim.client_name || '' };
+    case 'credit_repair':
+      return { authorised_by: 'Credit Repair', authorising_party_name: claim.credit_repair_company_name || '' };
+    default:
+      return { authorised_by: '', authorising_party_name: '' };
+  }
+}
+
+// The role the claim type auto-implies, ignoring any manual override.
+function autoDerivedRole(claim) {
+  const ct = claim.claim_type;
+  switch (ct) {
+    case 'Fault Claim':
+    case 'Non-Fault - Own Insurer':
+    case 'Glass Claim':
+      return 'Client Insurer';
+    case '3rd Party Insurer Direct':
+      return 'Third Party Insurer';
+    case '3rd Party Paying Privately':
+      return 'Third Party';
+    case 'Credit Repair':
+      return 'Credit Repair';
+    case 'Paying Privately':
+      return 'Uninsured';
+    default:
+      return claim.authorised_by || '';
+  }
+}
+
+function instructionTypeFromClaimType(claim) {
   const ct = claim.claim_type;
   if (ct === 'Credit Repair') return 'credit_repair';
   if (ct === 'Paying Privately') return 'private';
@@ -32,6 +69,21 @@ function deriveInstructionType(claim) {
   if (ab === 'Third Party') return 'third_party';
   if (ab === 'Third Party Insurer') return 'tp_insurer';
   return 'standard';
+}
+
+function instructionTypeFromRole(role) {
+  if (role === 'Credit Repair') return 'credit_repair';
+  if (role === 'Uninsured') return 'private';
+  if (role === 'Third Party') return 'third_party';
+  if (role === 'Third Party Insurer') return 'tp_insurer';
+  return 'standard';
+}
+
+function deriveInstructionType(claim) {
+  // Respect a manual override so the pre-check opens on the staff-chosen
+  // type; otherwise derive from the claim type.
+  if (claim.authorising_party_overridden) return instructionTypeFromRole(claim.authorised_by);
+  return instructionTypeFromClaimType(claim);
 }
 
 function Row({ label, field, value, claim, onFieldChange, type = 'text', options, sourceLabel, readOnly = false }) {
@@ -195,19 +247,24 @@ function InsuranceSection({ instructionType, claim, onUpdate }) {
 }
 
 export default function InstructionPreCheck({ claim, onUpdate, selectedBodyshop }) {
-  const [instructionType, setInstructionType] = useState(deriveInstructionType(claim));
+  const [instructionType, setInstructionType] = useState(() => deriveInstructionType(claim));
+  const prevClaimTypeRef = useRef(claim.claim_type);
 
-  // Re-derive the instruction type whenever the claim type changes (and on
-  // mount) so a claim that was previously Credit Repair but later switched to
-  // another type no longer renders the credit-repair instruction. Keep
-  // authorised_by in sync so the PDF generator shows the correct insurer.
+  // Re-derive the instruction type when the claim type changes. When it does,
+  // re-align the authorising party to the new auto-derived role and clear any
+  // manual override (the instruction type now follows the claim type again).
+  // On mount we only set the dropdown — we never overwrite a staff override.
   useEffect(() => {
-    const newType = deriveInstructionType(claim);
-    setInstructionType(newType);
-    const abMap = { standard: 'Client Insurer', tp_insurer: 'Third Party Insurer', third_party: 'Third Party', private: 'Uninsured', credit_repair: 'Credit Repair', orkin: 'Client Insurer' };
-    const expectedAb = abMap[newType];
-    if (expectedAb && claim.authorised_by !== expectedAb) {
-      onUpdate({ authorised_by: expectedAb });
+    setInstructionType(deriveInstructionType(claim));
+    if (prevClaimTypeRef.current !== claim.claim_type) {
+      prevClaimTypeRef.current = claim.claim_type;
+      const autoType = instructionTypeFromClaimType(claim);
+      const auto = authorisingPartyForInstructionType(autoType, claim);
+      onUpdate({
+        authorised_by: auto.authorised_by,
+        authorising_party_name: auto.authorising_party_name,
+        authorising_party_overridden: false,
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [claim.claim_type]);
@@ -216,8 +273,13 @@ export default function InstructionPreCheck({ claim, onUpdate, selectedBodyshop 
 
   const handleTypeChange = (newType) => {
     setInstructionType(newType);
-    const abMap = { standard: 'Client Insurer', tp_insurer: 'Third Party Insurer', third_party: 'Third Party', private: 'Uninsured', credit_repair: 'Credit Repair', orkin: 'Client Insurer' };
-    onUpdate({ authorised_by: abMap[newType] });
+    const chosen = authorisingPartyForInstructionType(newType, claim);
+    const isOverride = chosen.authorised_by !== autoDerivedRole(claim);
+    onUpdate({
+      authorised_by: chosen.authorised_by,
+      authorising_party_name: chosen.authorising_party_name,
+      authorising_party_overridden: isOverride,
+    });
   };
 
   return (

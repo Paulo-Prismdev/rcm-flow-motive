@@ -53,7 +53,7 @@ function toNumberOrNull(v) {
  * Returns a shallow copy of `data` where every known Claim number field
  * is coerced to a real number (or null). Non-number fields are passed through.
  */
-export function sanitizeClaimData(data) {
+export function sanitizeClaimData(data, existingClaim) {
   if (!data || typeof data !== "object") return data;
   const out = { ...data };
   for (const key of CLAIM_NUMBER_FIELDS) {
@@ -61,12 +61,18 @@ export function sanitizeClaimData(data) {
       out[key] = toNumberOrNull(out[key]);
     }
   }
-  // Auto-derive the authorising party (role + org name) from claim type unless
-  // the claim has been manually overridden.
+  // Auto-derive the authorising party (role + org name) from the FULL claim
+  // context — the existing claim merged with the incoming change. A partial
+  // save (e.g. a single field from the instruction pre-check) never carries
+  // enough context on its own, so without the merge it would blank the
+  // authorising party. A manually overridden party is never recalculated.
   if (!out.authorising_party_overridden) {
-    const derived = deriveAuthorisingParty(out);
-    out.authorised_by = derived.authorised_by;
-    out.authorising_party_name = derived.authorising_party_name;
+    const merged = existingClaim ? { ...existingClaim, ...out } : out;
+    if (merged.claim_type) {
+      const derived = deriveAuthorisingParty(merged);
+      out.authorised_by = derived.authorised_by;
+      out.authorising_party_name = derived.authorising_party_name;
+    }
   }
   return out;
 }
