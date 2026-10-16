@@ -73,6 +73,22 @@ export function authorisingPartyNameForRole(role, claim) {
 }
 
 /**
+ * Returns the claim reference number belonging to the authorising party,
+ * based on the role (insurer ref, TP insurer ref, etc.).
+ */
+export function authorisingPartyClaimRef(role, claim) {
+  if (!claim || !role) return '';
+  switch (role) {
+    case 'Client Insurer': return claim.claim_ref || '';
+    case 'Third Party Insurer': return claim.tp_claim_ref || '';
+    case 'Credit Repair': return claim.claim_ref || '';
+    case 'Third Party': return claim.tp_claim_ref || '';
+    case 'Uninsured': return claim.claim_ref || '';
+    default: return '';
+  }
+}
+
+/**
  * Returns true when the authorising party can't be resolved (role or name missing).
  */
 export function isAuthorisingPartyUnresolved(claim) {
