@@ -9,20 +9,28 @@ const VAT_STATUSES = ['VAT Registered', 'Non-VAT', 'Unknown'];
 const num = (v) => (v === '' || v === null || v === undefined ? null : Number(v));
 
 /**
- * The figures that drive a standard claim's invoices, entered and edited in
- * place. Only the figures this claim's type and set-up actually needs appear,
- * and only those are flagged when they are missing. The second referrer toggle
- * sits with the referrer fee it belongs to.
+ * The figures that drive a standard claim's invoices. Each is read-only until
+ * its pencil is clicked, and only one can be edited at a time. Only the figures
+ * this claim's type and set-up actually needs appear, and only those are flagged
+ * when they are missing. The second referrer toggle sits with the referrer fee
+ * it belongs to.
  */
-export default function StandardJobFigures({ claim, ctx, missing, onChange, onTrackerChange }) {
+export default function StandardJobFigures({ claim, ctx, missing, onChange, onTrackerChange, editingKey, setEditingKey }) {
   const missingKeys = missing.map((m) => m.key);
   const isMissing = (key) => missingKeys.includes(key);
   const net = repairNet(claim);
   const vat = repairVat(claim);
 
+  const fieldEdit = (key) => ({
+    editing: editingKey === key,
+    onEdit: () => setEditingKey(key),
+    onDone: () => setEditingKey(null),
+  });
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 items-start">
       <FigureField
+        {...fieldEdit('final_repair_cost')}
         label="Final Repair Cost (£ inc VAT)"
         type="number"
         value={claim.final_repair_cost}
@@ -39,6 +47,7 @@ export default function StandardJobFigures({ claim, ctx, missing, onChange, onTr
 
       {!ctx.creditRepair && (
         <FigureField
+          {...fieldEdit('client_vat_status')}
           label="Customer VAT Status"
           options={VAT_STATUSES}
           value={claim.client_vat_status || ''}
@@ -50,6 +59,7 @@ export default function StandardJobFigures({ claim, ctx, missing, onChange, onTr
 
       {ctx.vatExcess && (
         <FigureField
+          {...fieldEdit('policy_excess')}
           label="Policy Excess (£)"
           type="number"
           value={claim.policy_excess}
@@ -61,6 +71,7 @@ export default function StandardJobFigures({ claim, ctx, missing, onChange, onTr
       {ctx.hasReferrer && (
         <div className="space-y-1">
           <FigureField
+            {...fieldEdit('percent_to_referrer')}
             label={`Referrer Fee % — ${claim.referrer}`}
             type="number"
             value={claim.percent_to_referrer}
@@ -68,13 +79,20 @@ export default function StandardJobFigures({ claim, ctx, missing, onChange, onTr
             hint="Charged on the repair cost ex VAT"
             onCommit={(v) => onChange({ percent_to_referrer: num(v) }, `Referrer fee set to ${num(v) || 0}%`)}
           />
-          <SecondReferrerToggle claim={claim} onTrackerChange={onTrackerChange} />
+          <SecondReferrerToggle
+            claim={claim}
+            onTrackerChange={onTrackerChange}
+            editing={editingKey === 'second_referrer'}
+            onEdit={() => setEditingKey('second_referrer')}
+            onDone={() => setEditingKey(null)}
+          />
         </div>
       )}
 
       {repairerReferralApplies(claim, ctx) && (
         <>
           <FigureField
+            {...fieldEdit('referral_fee_repairer')}
             label={`Repairer Referral Fee % — ${claim.bodyshop || 'repairer'}`}
             type="number"
             value={claim.referral_fee_repairer}
@@ -83,6 +101,7 @@ export default function StandardJobFigures({ claim, ctx, missing, onChange, onTr
             onCommit={(v) => onChange({ referral_fee_repairer: num(v) }, `Repairer referral fee set to ${num(v) || 0}%`)}
           />
           <FigureField
+            {...fieldEdit('referral_fee_repairer_gbp')}
             label="Repairer Referral Fee (£ fixed)"
             type="number"
             value={claim.referral_fee_repairer_gbp}

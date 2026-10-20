@@ -18,6 +18,7 @@ import {
   invoiceContext,
   repairNet,
   repairVat,
+  resolveInvoiceAmount,
   today,
 } from '@/components/shared/invoiceChecklist';
 import FinancialHeaderStrip from './FinancialHeaderStrip';
@@ -28,6 +29,20 @@ import CloseOutItem from './CloseOutItem';
 import RequestInvoiceModal from './RequestInvoiceModal';
 import { resolveInvoiceParty } from './invoiceParty';
 import useClaimInvoiceDocs from './useClaimInvoiceDocs';
+import { fmtGBP } from '@/components/shared/creditRepairRates';
+
+/** Readable names for the financial fields in the claim's activity history. */
+const FIELD_LABELS = {
+  final_repair_cost: 'Final repair cost',
+  client_vat_status: 'Customer VAT status',
+  policy_excess: 'Policy excess',
+  percent_to_referrer: 'Referrer fee %',
+  referral_fee_repairer: 'Repairer referral fee %',
+  referral_fee_repairer_gbp: 'Repairer referral fee (£)',
+  hire_category: 'Hire category',
+  external_invoice_ref: 'External invoice ref',
+  invoice_notes: 'Invoice notes',
+};
 
 /**
  * The claim's Financials — one flow: the totals and overall status, the job
@@ -41,6 +56,7 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
 
   const [request, setRequest] = useState(null);
   const [preparingRequest, setPreparingRequest] = useState(false);
+  const [pendingFigureChange, setPendingFigureChange] = useState(null);
 
   const { data: appConfigs = [] } = useQuery({
     queryKey: ['AppConfig'],
@@ -58,17 +74,91 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
   const summary = useMemo(() => computeInvoiceSummary(claim, ctx, hasFile), [claim, ctx, docs.files]);
   const status = useMemo(() => deriveInvoiceStatus(claim, hasFile), [claim, docs.files]);
 
-  const commit = (patch, description) => {
-    onUpdate({ ...claim, ...patch });
-    if (description) {
+  // Every change is recorded in the claim's activity history with the field, the
+  // old value and the new value, alongside who made it and when. Changes that
+  // land inside a stored object (the invoicing tracker, the locked credit repair
+  // rates) describe themselves in words instead.
+  const logFigureChanges = (patch, description) => {
+    const entries = Object.entries(patch).filter(([key, value]) =>
+      !['id', 'created_date', 'updated_date', 'created_by_id'].includes(key)
+      && (value === null || typeof value !== 'object')
+    );
+
+    if (entries.length === 0) {
+      if (description) {
+        logActivity({
+          parentId: claim.id,
+          parentType: 'Claim',
+          action: 'Financials Updated',
+          description,
+          user: currentUser,
+        });
+      }
+      return;
+    }
+
+    for (const [key, value] of entries) {
+      const label = FIELD_LABELS[key] || key.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
       logActivity({
         parentId: claim.id,
         parentType: 'Claim',
         action: 'Financials Updated',
-        description,
+        fieldName: label,
+        oldValue: claim[key] ?? '',
+        newValue: value ?? '',
+        description: description || `${label} updated`,
         user: currentUser,
       });
     }
+  };
+
+  const applyCommit = (patch, description) => {
+    onUpdate({ ...claim, ...patch });
+    logFigureChanges(patch, description);
+  };
+
+  // Invoices that have already gone out, been requested from accounts or been
+  // paid, whose calculated amount this change would move.
+  const invoicesAffectedByChange = (patch) => {
+    const next = { ...claim, ...patch };
+    const affected = [];
+
+    for (const { item, state } of summary.rows) {
+      if (state.notApplicable) continue;
+      if (!state.paid && !state.date && !state.requested) continue;
+      const before = resolveInvoiceAmount(item, claim);
+      const after = resolveInvoiceAmount(item, next);
+      if (!before || !after || before.awaiting || after.awaiting) continue;
+      if (Math.abs((before.amount || 0) - (after.amount || 0)) < 0.01) continue;
+      const word = state.paid ? 'paid' : state.date ? (item.direction === 'out' ? 'sent' : 'received') : 'requested from accounts';
+      affected.push({ label: item.label, word, amount: state.amount || before.amount });
+    }
+
+    return affected;
+  };
+
+  const describeAffected = (affected) => {
+    const parts = affected.map((a) => `${a.label} (already ${a.word} for ${fmtGBP(a.amount)})`);
+    const joined = parts.length === 1 ? parts[0] : `${parts.slice(0, -1).join(', ')} and ${parts[parts.length - 1]}`;
+    return `This will change the calculated ${joined}. Continue?`;
+  };
+
+  const commit = (patch, description, options = {}) => {
+    if (options.checkInvoiceImpact) {
+      const affected = invoicesAffectedByChange(patch);
+      if (affected.length > 0) {
+        setPendingFigureChange({ patch, description, affected });
+        return;
+      }
+    }
+    applyCommit(patch, description);
+  };
+
+  const handleConfirmFigureChange = () => {
+    const pending = pendingFigureChange;
+    if (!pending) return;
+    applyCommit(pending.patch, pending.description);
+    setPendingFigureChange(null);
   };
 
   const handleItemChange = (item, changes, description) => {
@@ -194,8 +284,8 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
           claim={claim}
           ctx={ctx}
           missing={summary.missing}
-          onChange={(fields, description) => commit(fields, description)}
-          onTrackerChange={(patch, description) => commit(patch, description)}
+          onChange={(fields, description) => commit(fields, description, { checkInvoiceImpact: true })}
+          onTrackerChange={(patch, description) => commit(patch, description, { checkInvoiceImpact: true })}
         />
 
         {showInvoicing && (
@@ -249,6 +339,15 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
           message="Are you sure you want to delete this document?"
           confirmText="Delete"
           variant="danger"
+        />
+
+        <ConfirmDialog
+          isOpen={!!pendingFigureChange}
+          onClose={() => setPendingFigureChange(null)}
+          onConfirm={handleConfirmFigureChange}
+          title="Change an invoiced figure?"
+          message={pendingFigureChange ? describeAffected(pendingFigureChange.affected) : ''}
+          confirmText="Continue"
         />
 
         <RequestInvoiceModal

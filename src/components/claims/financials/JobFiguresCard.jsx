@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Check } from 'lucide-react';
 import StandardJobFigures from './StandardJobFigures';
 import CreditRepairFigures from './CreditRepairFigures';
@@ -6,12 +6,14 @@ import SecondReferrerToggle from './SecondReferrerToggle';
 import NotesReferences from './NotesReferences';
 
 /**
- * The one card where the figures that drive this claim's invoices are entered
- * and edited in place. Missing figures are flagged here — and only the ones this
- * claim actually needs. The reference and notes fields stay folded away unless
- * they already hold something.
+ * The one card where the figures that drive this claim's invoices live. Every
+ * figure, the notes and the second referrer details are read-only until their
+ * own pencil is clicked, and only one of them can be edited at a time. Missing
+ * figures are flagged here — and only the ones this claim actually needs.
  */
 export default function JobFiguresCard({ claim, ctx, missing, onChange, onTrackerChange }) {
+  const [editingKey, setEditingKey] = useState(null);
+
   return (
     <div className="rounded-[10px] border border-border bg-card p-2.5 space-y-2">
       <div className="flex items-center gap-2 flex-wrap">
@@ -28,7 +30,13 @@ export default function JobFiguresCard({ claim, ctx, missing, onChange, onTracke
       </div>
 
       {ctx.creditRepair ? (
-        <CreditRepairFigures claim={claim} missing={missing} onChange={onChange} />
+        <CreditRepairFigures
+          claim={claim}
+          missing={missing}
+          onChange={onChange}
+          editingKey={editingKey}
+          setEditingKey={setEditingKey}
+        />
       ) : (
         <StandardJobFigures
           claim={claim}
@@ -36,14 +44,27 @@ export default function JobFiguresCard({ claim, ctx, missing, onChange, onTracke
           missing={missing}
           onChange={onChange}
           onTrackerChange={onTrackerChange}
+          editingKey={editingKey}
+          setEditingKey={setEditingKey}
         />
       )}
 
       {ctx.creditRepair && ctx.hasReferrer && (
-        <SecondReferrerToggle claim={claim} onTrackerChange={onTrackerChange} />
+        <SecondReferrerToggle
+          claim={claim}
+          onTrackerChange={onTrackerChange}
+          editing={editingKey === 'second_referrer'}
+          onEdit={() => setEditingKey('second_referrer')}
+          onDone={() => setEditingKey(null)}
+        />
       )}
 
-      <NotesReferences claim={claim} onChange={onChange} />
+      <NotesReferences
+        claim={claim}
+        onChange={onChange}
+        editingKey={editingKey}
+        setEditingKey={setEditingKey}
+      />
     </div>
   );
 }

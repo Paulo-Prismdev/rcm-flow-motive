@@ -15,12 +15,26 @@ import {
 
 const num = (v) => (v === '' || v === null || v === undefined ? null : Number(v));
 
+const RATE_LABELS = {
+  hire_fee: 'Hire fee',
+  commission_percent: 'Commission %',
+  commission_basis: 'Commission basis',
+};
+
+const fmtRate = (field, v) => {
+  if (v === null || v === undefined || v === '') return 'not set';
+  if (field === 'hire_fee') return fmtGBP(Number(v));
+  if (field === 'commission_percent') return `${v}%`;
+  return String(v);
+};
+
 /**
  * A credit repair claim's job figures: the hire category (which locks the
  * partner's agreed rates onto the claim) and, where they have been adjusted, the
  * hire fee, commission % and commission basis the invoices are worked out from.
+ * Each is read-only until its pencil is clicked.
  */
-export default function CreditRepairFigures({ claim, missing, onChange }) {
+export default function CreditRepairFigures({ claim, missing, onChange, editingKey, setEditingKey }) {
   const [company, setCompany] = useState(null);
   const missingKeys = missing.map((m) => m.key);
   const isMissing = (key) => missingKeys.includes(key);
@@ -40,11 +54,17 @@ export default function CreditRepairFigures({ claim, missing, onChange }) {
   const commission = creditRepairCommission(claim);
   const partnerMissing = company ? missingPartnerRates(company) : [];
 
+  const fieldEdit = (key) => ({
+    editing: editingKey === key,
+    onEdit: () => setEditingKey(key),
+    onDone: () => setEditingKey(null),
+  });
+
   const setCategory = (category) => {
     if (!category) {
       onChange(
         { hire_category: '', credit_repair_rates_locked: null, credit_repair_rates_overridden: false },
-        'Hire category cleared'
+        `Hire category changed from ${claim.hire_category || 'not set'} to not set`
       );
       return;
     }
@@ -54,7 +74,7 @@ export default function CreditRepairFigures({ claim, missing, onChange }) {
         hire_category: category,
         ...(next ? { credit_repair_rates_locked: next, credit_repair_rates_overridden: false } : {}),
       },
-      `Hire category set to ${category}${next ? " — partner's rates locked onto this claim" : ''}`
+      `Hire category changed from ${claim.hire_category || 'not set'} to ${category}${next ? " — partner's rates locked onto this claim" : ''}`
     );
   };
 
@@ -66,7 +86,7 @@ export default function CreditRepairFigures({ claim, missing, onChange }) {
     };
     onChange(
       { credit_repair_rates_locked: next, credit_repair_rates_overridden: true },
-      `Credit repair ${field.replace(/_/g, ' ')} adjusted on this claim`
+      `Credit repair ${RATE_LABELS[field].toLowerCase()} changed from ${fmtRate(field, locked[field])} to ${fmtRate(field, num(raw))}`
     );
   };
 
@@ -74,6 +94,7 @@ export default function CreditRepairFigures({ claim, missing, onChange }) {
     <div className="space-y-2">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 items-start">
         <FigureField
+          {...fieldEdit('hire_category')}
           label="Hire Category"
           options={HIRE_CATEGORIES}
           value={claim.hire_category || ''}
@@ -82,6 +103,7 @@ export default function CreditRepairFigures({ claim, missing, onChange }) {
           onCommit={setCategory}
         />
         <FigureField
+          {...fieldEdit('hire_fee')}
           label="Hire Fee (£)"
           type="number"
           value={locked.hire_fee}
@@ -90,6 +112,7 @@ export default function CreditRepairFigures({ claim, missing, onChange }) {
           onCommit={(v) => setRate('hire_fee', v)}
         />
         <FigureField
+          {...fieldEdit('commission_percent')}
           label="Commission %"
           type="number"
           value={locked.commission_percent}
@@ -97,6 +120,7 @@ export default function CreditRepairFigures({ claim, missing, onChange }) {
           onCommit={(v) => setRate('commission_percent', v)}
         />
         <FigureField
+          {...fieldEdit('commission_basis')}
           label="Commission Calculated On"
           options={COMMISSION_BASES}
           value={locked.commission_basis || ''}
