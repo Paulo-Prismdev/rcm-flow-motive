@@ -392,11 +392,14 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
     const acceptTotal = acceptInvoiceTotal && comparison?.status === 'under' ? comparison.invoiceTotal : null;
 
     const excess = excessCheck(figures, claim);
-    const excessText = excess.fills
-      ? `; the ${fmtGBP(excess.shown)} excess ${excess.tbc ? 'confirmed from the authority (TBC cleared)' : 'filled in'}`
-      : excess.differs
-        ? `; excess kept at ${fmtGBP(excessChoice === 'authority' ? excess.shown : excess.stored)}`
-        : '';
+    const excessWaived = (excess.tbc && excessChoice === 'waived') || (excess.fills && excess.shown === 0);
+    const excessText = excessWaived
+      ? '; the excess marked as Waived (the authority shows none)'
+      : excess.fills
+        ? `; the ${fmtGBP(excess.shown)} excess ${excess.tbc ? 'confirmed from the authority (TBC cleared)' : 'filled in'}`
+        : excess.differs
+          ? `; excess kept at ${excessChoice === 'authority' ? fmtGBP(excess.shown) : excess.storedLabel}`
+          : '';
     const decisionText = `${acceptTotal ? `; the invoice total of ${fmtGBP(acceptTotal)} accepted as the final repair cost` : ''}${reinvoice ? `; a corrected invoice requested from the repairer (invoiced ${fmtGBP(reinvoice.invoice_total)} against ${fmtGBP(reinvoice.authority)})` : ''}`;
 
     try {
