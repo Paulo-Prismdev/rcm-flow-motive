@@ -54,7 +54,7 @@ export function invoiceStatusLabel(item, state) {
 export default function InvoiceItemCard({
   item, state, files, isUploading,
   onChange, onUpload, onDeleteFile, onRenameFile, onViewFile,
-  onToggleDetails, detailsOpen, onUndoRequest,
+  onToggleDetails, detailsOpen, onUndoRequest, amountText,
 }) {
   const fileInputRef = useRef(null);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -66,12 +66,9 @@ export default function InvoiceItemCard({
   const toneKey = invoiceToneKey(item, state);
   const tone = TRACKER_TONES[toneKey];
   const statusLabel = invoiceStatusLabel(item, state);
-  // The quick paid action only belongs on an invoice that has gone out or come
-  // in but is still waiting to be paid.
-  const showMarkPaid = toneKey === 'warning' && !state.paid && !!state.date;
 
   const subline = state.notApplicable ? 'Not applicable'
-    : state.awaiting ? (state.hint || 'Awaiting figures')
+    : state.awaiting ? ''
       : isDocument ? (state.date ? `${dateLabel} ${formatDay(state.date)}` : '')
         : state.paid ? (state.paidDate ? `Paid ${formatDay(state.paidDate)}` : 'Paid')
           : state.requested && !state.date ? `Requested ${formatDay(state.requestedAt)}`
@@ -153,15 +150,10 @@ export default function InvoiceItemCard({
         </Tooltip>
 
         <div className="flex items-center gap-0.5 pr-1.5">
-          {showMarkPaid && (
-            <button
-              type="button"
-              onClick={() => togglePaid(true)}
-              title="Mark paid"
-              className="inline-flex items-center gap-1 h-6 px-1.5 rounded-md text-[10px] font-semibold bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 hover:bg-amber-200/70 dark:hover:bg-amber-900/60 transition-colors flex-shrink-0"
-            >
-              <Check className="w-3 h-3" strokeWidth={3} /> Mark paid
-            </button>
+          {amountText && (
+            <span className="self-center pr-0.5 text-[10px] font-semibold tabular-nums text-muted-foreground whitespace-nowrap">
+              {amountText}
+            </span>
           )}
 
           <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>

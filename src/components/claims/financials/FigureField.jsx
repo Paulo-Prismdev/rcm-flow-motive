@@ -23,14 +23,14 @@ export default function FigureField({ label, value, onCommit, type = 'text', mis
 
   return (
     <div className={className}>
-      <label className={`block text-[10px] font-semibold uppercase tracking-wider mb-1 ${missing ? 'text-amber-600 dark:text-amber-400' : 'text-muted-foreground'}`}>
+      <label className={`block text-[10px] font-semibold uppercase tracking-wider mb-0.5 ${missing ? 'text-amber-600 dark:text-amber-400' : 'text-muted-foreground'}`}>
         {label}
       </label>
       {options ? (
         <select
           value={draft}
           onChange={(e) => { setDraft(e.target.value); onCommit(e.target.value); }}
-          className={`w-full h-9 px-2 rounded-md border bg-transparent text-sm ${ring}`}
+          className={`w-full h-8 px-2 rounded-md border bg-transparent text-sm ${ring}`}
         >
           <option value="">Not set</option>
           {options.map((o) => <option key={o} value={o}>{o}</option>)}
@@ -45,7 +45,7 @@ export default function FigureField({ label, value, onCommit, type = 'text', mis
           onChange={(e) => setDraft(e.target.value)}
           onBlur={commit}
           onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }}
-          className={`h-9 text-sm ${ring}`}
+          className={`h-8 text-sm ${ring}`}
         />
       )}
       {hint && <p className="text-[10px] text-muted-foreground mt-0.5">{hint}</p>}

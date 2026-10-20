@@ -32,8 +32,8 @@ export default function FinancialHeaderStrip({ status, summary, finalCost, final
   const pct = summary.total ? Math.round((summary.complete / summary.total) * 100) : 0;
 
   return (
-    <div className="rounded-[10px] border border-border bg-card px-3 py-2.5 space-y-2">
-      <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
+    <div className="rounded-[10px] border border-border bg-card px-3 py-2 space-y-1.5">
+      <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
         <div className={`inline-flex items-center gap-1.5 rounded-lg border border-l-4 px-2.5 py-1.5 ${tone.card}`}>
           <span className={`w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0 ${tone.iconWrap}`}>
             {GLYPHS[meta.tone] || GLYPHS.neutral}

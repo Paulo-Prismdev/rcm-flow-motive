@@ -24,6 +24,7 @@ import FinancialHeaderStrip from './FinancialHeaderStrip';
 import JobFiguresCard from './JobFiguresCard';
 import InvoiceGroup from './InvoiceGroup';
 import InvoiceRow from './InvoiceRow';
+import CloseOutItem from './CloseOutItem';
 import RequestInvoiceModal from './RequestInvoiceModal';
 import { resolveInvoiceParty } from './invoiceParty';
 import useClaimInvoiceDocs from './useClaimInvoiceDocs';
@@ -161,11 +162,26 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
     />
   );
 
+  const renderCloseOut = ({ item, state }) => (
+    <CloseOutItem
+      key={item.key}
+      item={item}
+      state={state}
+      files={docs.filesFor(item.key)}
+      isUploading={docs.isUploading}
+      onChange={(changes, description) => handleItemChange(item, changes, description)}
+      onUpload={handleUpload}
+      onDeleteFile={(doc) => docs.deleteFile(item, doc)}
+      onRenameFile={docs.renameFile}
+      onViewFile={docs.setViewingFile}
+    />
+  );
+
   const rowsFor = (section) => summary.rows.filter((r) => r.item.section === section);
 
   return (
     <TooltipProvider delayDuration={250}>
-      <div className="space-y-4">
+      <div className="space-y-3">
         <FinancialHeaderStrip
           status={status}
           summary={summary}
@@ -183,12 +199,12 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
         />
 
         {showInvoicing && (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {preparingRequest && (
               <p className="text-[11px] text-muted-foreground">Preparing the accounts request…</p>
             )}
 
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 items-start">
               <InvoiceGroup
                 label="Invoices In"
                 hint="Invoices we receive and pay"
@@ -214,7 +230,9 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
               isEmpty={rowsFor('closeout').length === 0}
               emptyText="No close-out paperwork applies to this claim."
             >
-              {rowsFor('closeout').map(renderRow)}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                {rowsFor('closeout').map(renderCloseOut)}
+              </div>
             </InvoiceGroup>
           </div>
         )}
