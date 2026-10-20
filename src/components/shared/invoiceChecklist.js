@@ -28,6 +28,7 @@ import {
   fmtGBP,
   VAT_RATE,
 } from './creditRepairRates';
+import { excessMode } from './excessState';
 
 export const INVOICE_FILE_PREFIX = 'inv_';
 
@@ -404,20 +405,25 @@ const AMOUNT_RESOLVERS = {
     if (claim.excess_tbc === true) return awaiting('The policy excess is TBC on authority — this invoice waits for the figure');
     const vatReg = claim.client_vat_status === 'VAT Registered';
     const vatContent = repairVat(claim);
+    // A waived excess is £0 — nothing payable — so the item bills the VAT content
+    // alone and says so, rather than reading as a figure of nothing.
+    const waived = excessMode(claim) === 'waived';
     const excess = isStored(claim.policy_excess) ? round2(toNum(claim.policy_excess)) : 0;
     const vat = vatReg ? vatContent : 0;
     const total = round2(excess + vat);
     return {
       amount: total, ex: excess, vat, total, derived: true, awaiting: false,
-      hint: vatReg
-        ? 'Customer excess plus the VAT content of the repair'
-        : 'Customer excess only — non-VAT customer',
+      hint: waived
+        ? (vatReg ? 'Excess waived — the VAT content of the repair only' : 'Excess waived — nothing payable')
+        : vatReg
+          ? 'Customer excess plus the VAT content of the repair'
+          : 'Customer excess only — non-VAT customer',
       workings: [
         { label: 'Repair cost inc VAT', value: fmtGBP(gross) },
         { label: 'VAT content of the repair', value: fmtGBP(vatContent) },
         { label: 'Customer VAT status', value: claim.client_vat_status || 'Not set' },
         ...(vatReg ? [] : [{ label: 'Non-VAT — no VAT recoverable', value: '—' }]),
-        { label: 'Policy excess', value: fmtGBP(excess) },
+        { label: 'Policy excess', value: waived ? 'Waived — nothing payable' : fmtGBP(excess) },
         { label: 'Total', value: fmtGBP(total), total: true },
       ],
     };

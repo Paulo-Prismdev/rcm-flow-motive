@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import ExcessModeField from "@/components/shared/ExcessModeField";
 import ClientCombobox from '../shared/ClientCombobox';
 import BrokerCombobox from '../shared/BrokerCombobox';
 import InsurerCombobox from '../shared/InsurerCombobox';
@@ -58,7 +59,7 @@ export default function ClaimPartiesForm({ claim, onSave, onCancel, mode }) {
     insurer: claim.insurer || '',
     claim_ref: claim.claim_ref || '',
     policy_number: claim.policy_number || '',
-    policy_excess: claim.policy_excess || 0,
+    policy_excess: claim.policy_excess ?? '',
     excess_tbc: claim.excess_tbc === true,
     // Driver fields
     driver_same_as_client: claim.driver_same_as_client !== false,
@@ -275,29 +276,12 @@ export default function ClaimPartiesForm({ claim, onSave, onCancel, mode }) {
             <label className="block text-xs text-muted-foreground mb-1">Policy Number</label>
             <Input value={data.policy_number} onChange={(e) => set('policy_number', e.target.value)} className="neomorph-inset" />
           </div>
-          <div>
+          <div className="md:col-span-2">
             <label className="block text-xs text-muted-foreground mb-1">Policy Excess (£)</label>
-            <Input
-              type="text"
-              inputMode="decimal"
-              disabled={data.excess_tbc}
-              value={data.excess_tbc ? '' : (data.policy_excess || '')}
-              onChange={(e) => { const v = e.target.value; if (v === '' || /^\d*\.?\d*$/.test(v)) set('policy_excess', v === '' ? 0 : parseFloat(v) || 0); }}
-              className="neomorph-inset"
-              placeholder={data.excess_tbc ? 'TBC on authority' : '0.00'}
+            <ExcessModeField
+              claim={{ policy_excess: data.policy_excess, excess_tbc: data.excess_tbc }}
+              onChange={(patch) => setData(prev => ({ ...prev, ...patch }))}
             />
-            <label className="mt-1.5 flex items-center gap-1.5 cursor-pointer select-none">
-              <input
-                type="checkbox"
-                checked={data.excess_tbc}
-                onChange={(e) => {
-                  const checked = e.target.checked;
-                  setData(prev => ({ ...prev, excess_tbc: checked, policy_excess: checked ? null : (prev.policy_excess || 0) }));
-                }}
-                className="w-3.5 h-3.5 accent-primary"
-              />
-              <span className="text-[11px] text-muted-foreground">TBC on authority</span>
-            </label>
           </div>
         </div>
         <div className="flex justify-end gap-3 pt-2">
@@ -508,7 +492,13 @@ export default function ClaimPartiesForm({ claim, onSave, onCancel, mode }) {
           <div><label className="block text-xs text-muted-foreground mb-1">Insurer</label><InsurerCombobox value={data.insurer} onChange={(v) => set('insurer', v)} /></div>
           <div><label className="block text-xs text-muted-foreground mb-1">Claim Reference</label><Input value={data.claim_ref} onChange={(e) => set('claim_ref', e.target.value)} className="neomorph-inset" /></div>
           <div><label className="block text-xs text-muted-foreground mb-1">Policy Number</label><Input value={data.policy_number} onChange={(e) => set('policy_number', e.target.value)} className="neomorph-inset" /></div>
-          <div><label className="block text-xs text-muted-foreground mb-1">Policy Excess (£)</label><Input type="text" inputMode="decimal" value={data.policy_excess || ''} onChange={(e) => { const v = e.target.value; if (v === '' || /^\d*\.?\d*$/.test(v)) set('policy_excess', v === '' ? 0 : parseFloat(v) || 0); }} className="neomorph-inset" placeholder="0.00" /></div>
+          <div className="md:col-span-2">
+            <label className="block text-xs text-muted-foreground mb-1">Policy Excess (£)</label>
+            <ExcessModeField
+              claim={{ policy_excess: data.policy_excess, excess_tbc: data.excess_tbc }}
+              onChange={(patch) => setData(prev => ({ ...prev, ...patch }))}
+            />
+          </div>
         </div>
       </div>
       <div className="border border-border rounded-xl p-4 space-y-4 bg-muted/20">

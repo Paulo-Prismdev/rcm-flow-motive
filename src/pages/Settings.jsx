@@ -11,6 +11,7 @@ import {
   CalendarDays,
   ChevronRight,
   Receipt,
+  ClipboardCheck,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -23,6 +24,7 @@ import EmailTemplates from "./EmailTemplates";
 import UserManagement from "./UserManagement";
 import ChaserEmailSettings from "./ChaserEmailSettings";
 import InvoicingSettingsTab from "../components/settings/InvoicingSettingsTab";
+import ExcessReviewTab from "../components/settings/ExcessReviewTab";
 import CompanyIdLookup from "./CompanyIdLookup";
 import EmployeeManagement from "./EmployeeManagement";
 
@@ -41,6 +43,7 @@ const SETTINGS_SECTIONS = [
       { id: "portals", label: "Portal Management", icon: Globe, adminOnly: true },
       { id: "chasers", label: "Chaser Emails", icon: Send, adminOnly: true },
       { id: "invoicing", label: "Invoicing", icon: Receipt, adminOnly: true },
+      { id: "excess-review", label: "Excess Review", icon: ClipboardCheck, adminOnly: true },
       { id: "users", label: "User Management", icon: Users, permission: "canManage" },
 
     ],
@@ -112,6 +115,7 @@ export default function Settings() {
       case "email":       return <EmailTemplates />;
       case "chasers":     return <ChaserEmailSettings />;
       case "invoicing":   return <InvoicingSettingsTab />;
+      case "excess-review": return <ExcessReviewTab />;
       case "users":       return <UserManagement />;
       case "companyids":  return <CompanyIdLookup />;
       case "employees":   return <EmployeeManagement />;

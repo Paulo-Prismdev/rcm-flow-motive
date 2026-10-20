@@ -134,22 +134,26 @@ export default function AuthorityReviewModal({
     if (comparison?.status === 'over') {
       accepted.push(`the invoice total ${fmtGBP(comparison.invoiceTotal)} is ${fmtGBP(Math.abs(comparison.difference))} over the authorised ${fmtGBP(comparison.authority)} — a repairer can't invoice more than the authority, so the Final Invoice is flagged on the claim`);
     }
-    if (excess.fills) {
-      accepted.push(excess.tbc
-        ? `the policy excess was TBC on authority — the ${fmtGBP(excess.shown)} this authority shows was filled in and the TBC cleared`
-        : `the claim had no policy excess — the ${fmtGBP(excess.shown)} this authority shows filled in as the policy excess`);
+    if (excess.tbc && excessChoice === 'waived') {
+      accepted.push('the policy excess was TBC on authority and this authority shows no excess, so it was marked as Waived');
+    } else if (excess.fills) {
+      accepted.push(!excess.tbc
+        ? `the claim had no policy excess — the ${fmtGBP(excess.shown)} this authority shows filled in as the policy excess`
+        : excess.shown === 0
+          ? 'the policy excess was TBC on authority — the authority shows no excess, so it was marked as Waived'
+          : `the policy excess was TBC on authority — the ${fmtGBP(excess.shown)} this authority shows was filled in and the TBC cleared`);
     }
     if (excess.differs) {
       accepted.push(excessChoice === 'authority'
-        ? `the policy excess replaced with the authority's ${fmtGBP(excess.shown)} (the claim held ${fmtGBP(excess.stored)})`
-        : `the claim's policy excess of ${fmtGBP(excess.stored)} kept against the authority's ${fmtGBP(excess.shown)}`);
+        ? `the policy excess replaced with the authority's ${fmtGBP(excess.shown)} (the claim held ${excess.storedLabel})`
+        : `the claim's policy excess of ${excess.storedLabel} kept against the authority's ${fmtGBP(excess.shown)}`);
     }
 
     onConfirm({
       figures,
       corrections: authorityCorrections(figures, raw),
       accepted,
-      excessChoice: excess.differs ? excessChoice : null,
+      excessChoice: excess.differs || (excess.tbc && excessChoice === 'waived') ? excessChoice : null,
       acceptInvoiceTotal: authorityChoice === 'accept',
       requestReinvoice: authorityChoice === 'reinvoice',
     });

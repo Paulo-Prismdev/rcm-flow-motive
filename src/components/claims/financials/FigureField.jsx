@@ -10,7 +10,7 @@ import FieldEditActions from './FieldEditActions';
  * still flagged in amber when the claim needs it before invoicing.
  */
 export default function FigureField({
-  label, value, onCommit, type = 'text', missing, options, hint,
+  label, value, display, onCommit, type = 'text', missing, options, hint,
   className = '', editing, onEdit, onDone,
 }) {
   const toDraft = (v) => (v === null || v === undefined ? '' : String(v));
@@ -99,7 +99,7 @@ export default function FigureField({
       ) : (
         <div className={`flex gap-1.5 rounded-md border px-2 ${multiline ? 'min-h-8 py-1 items-start' : 'min-h-8 md:h-8 items-center'} ${missing ? amber : 'border-border bg-muted/30'}`}>
           <span className={`flex-1 min-w-0 text-sm font-medium text-foreground ${multiline ? 'whitespace-pre-wrap break-words' : 'truncate'}`}>
-            {value}
+            {display ?? value}
           </span>
           <button
             type="button"

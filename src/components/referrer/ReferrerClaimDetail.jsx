@@ -4,6 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
+import { excessLabel } from '../shared/excessState';
 import {
   ArrowLeft,
   User,
@@ -354,7 +355,7 @@ export default function ReferrerClaimDetail({ claim, onClose, initialSection }) 
               <DetailRow label="Insurer" value={claim.insurer} missing={m('insurer')} />
               <DetailRow label="Claim Reference" value={claim.claim_ref} missing={m('claim_ref')} />
               <DetailRow label="Policy Number" value={claim.policy_number} missing={m('policy_number')} />
-              <DetailRow label="Policy Excess" value={claim.policy_excess ? `£${claim.policy_excess}` : null} />
+              <DetailRow label="Policy Excess" value={excessLabel(claim, (n) => `£${n}`) || null} />
             </div>
           </div>
         );

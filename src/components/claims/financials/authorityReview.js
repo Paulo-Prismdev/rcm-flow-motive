@@ -1,4 +1,5 @@
 import { fmtGBP } from '@/components/shared/creditRepairRates';
+import { excessMode } from '@/components/shared/excessState';
 import {
   VAT_RATE,
   confidenceFromExtraction,
@@ -106,18 +107,23 @@ export function storedExcess(claim) {
 }
 
 /**
- * What the authority says about the excess, set against the claim: the claim's
- * own figure is never moved without being asked, so a difference is put to the
- * user to choose, and an excess the claim hasn't got is simply filled in.
+ * What the authority says about the excess, set against the three-way choice the
+ * claim holds: the claim's own choice is never moved without being asked, so a
+ * difference is put to the user to choose, and an excess the claim hasn't got is
+ * filled in — with a claim waiting on the figure whose authority shows none
+ * offered as Waived.
  */
 export function excessCheck(figures, claim) {
   const read = toNum(figures?.excess);
+  const mode = excessMode(claim);
   const stored = storedExcess(claim);
-  const tbc = claim?.excess_tbc === true;
-  if (read === null) return { shown: null, stored, differs: false, fills: false, tbc };
+  const tbc = mode === 'tbc';
+  // Waived is held as £0, so it reads as such wherever the two are compared.
+  const storedLabel = tbc ? 'TBC on authority' : stored === null ? 'no excess' : stored === 0 ? 'Waived' : fmtGBP(stored);
+  if (read === null) return { shown: null, stored, storedLabel, mode, tbc, differs: false, fills: false, offersWaive: tbc };
   const shown = round2(read);
-  if (stored === null) return { shown, stored: null, differs: false, fills: true, tbc };
-  return { shown, stored, differs: Math.abs(stored - shown) >= 0.01, fills: false, tbc };
+  if (stored === null) return { shown, stored: null, storedLabel, mode, tbc, differs: false, fills: true, offersWaive: false };
+  return { shown, stored, storedLabel, mode, tbc, differs: Math.abs(stored - shown) >= 0.01, fills: false, offersWaive: false };
 }
 
 /**
@@ -169,7 +175,11 @@ export function buildAuthorityReviewPatch(claim, figures, options = {}) {
   }
 
   const excess = excessCheck(figures, claim);
-  if (excess.fills || (excess.differs && excessChoice === 'authority')) {
+  if (excess.tbc && excessChoice === 'waived') {
+    // The authority shows no excess, so the TBC resolves to nothing payable.
+    patch.policy_excess = 0;
+    patch.excess_tbc = false;
+  } else if (excess.fills || (excess.differs && excessChoice === 'authority')) {
     patch.policy_excess = excess.shown;
     // The authority has supplied the figure, so it is nothing left to confirm.
     if (excess.tbc) patch.excess_tbc = false;
@@ -214,7 +224,7 @@ export function buildAuthorityLog({ item, figures, corrections, accepted }) {
 
   const entries = [{
     action: 'Authority Read',
-    description: `${label}: ${total !== null ? `${fmtGBP(total)} authorised` : 'amount not read'}, vehicle ${figures.reg || 'registration not read'}${excess !== null ? `, excess ${fmtGBP(excess)}` : ''}. Figures read from the uploaded document and checked before saving.`,
+    description: `${label}: ${total !== null ? `${fmtGBP(total)} authorised` : 'amount not read'}, vehicle ${figures.reg || 'registration not read'}${excess !== null ? `, excess ${excess === 0 ? 'none shown' : fmtGBP(excess)}` : ''}. Figures read from the uploaded document and checked before saving.`,
   }];
 
   corrections

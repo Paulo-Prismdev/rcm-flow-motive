@@ -2,6 +2,7 @@ import React from 'react';
 import { Clock } from 'lucide-react';
 import { fmtGBP } from '@/components/shared/creditRepairRates';
 import { repairNet, repairVat, repairerReferralApplies } from '@/components/shared/invoiceChecklist';
+import { excessMode } from '@/components/shared/excessState';
 import FigureField from './FigureField';
 import SecondReferrerToggle from './SecondReferrerToggle';
 
@@ -59,7 +60,7 @@ export default function StandardJobFigures({ claim, ctx, missing, onChange, onTr
       )}
 
       {ctx.vatExcess && (
-        claim.excess_tbc === true ? (
+        excessMode(claim) === 'tbc' ? (
           <div>
             <label className="block text-[10px] font-semibold uppercase tracking-wider mb-0.5 text-muted-foreground">
               Policy Excess (£)
@@ -69,7 +70,7 @@ export default function StandardJobFigures({ claim, ctx, missing, onChange, onTr
               <span className="text-sm font-medium text-foreground">TBC on authority</span>
             </div>
             <p className="text-[10px] text-muted-foreground mt-0.5">
-              Still to be confirmed — not £0. The VAT &amp; excess invoices wait for it, and the Final Authority fills it in.
+              Still to be confirmed — not £0. The VAT &amp; excess invoices wait for the Final Authority, which fills the figure in.
             </p>
           </div>
         ) : (
@@ -78,7 +79,9 @@ export default function StandardJobFigures({ claim, ctx, missing, onChange, onTr
             label="Policy Excess (£)"
             type="number"
             value={claim.policy_excess}
+            display={excessMode(claim) === 'waived' ? 'Waived' : undefined}
             missing={isMissing('policy_excess')}
+            hint={excessMode(claim) === 'waived' ? 'No excess payable — treated as £0' : undefined}
             onCommit={(v) => onChange({ policy_excess: num(v) }, `Policy excess set to ${fmtGBP(num(v) || 0)}`)}
           />
         )

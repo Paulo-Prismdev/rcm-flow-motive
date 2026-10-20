@@ -6,6 +6,7 @@ import { FileText, User, Shield, Wrench, Users, Car, Calendar, Building2, Copy, 
 import { format } from 'date-fns';
 import { formatUKRegistration } from '../shared/formatRegistration';
 import StatusBadge from '../shared/StatusBadge';
+import { excessLabel } from '../shared/excessState';
 
 const formatDate = (val) => {
   if (!val) return '—';
@@ -215,7 +216,7 @@ export default function ClaimQuickViewModal({ claim, isOpen, onClose }) {
             <InfoRow label="Insurer" value={claim.insurer} />
             <InfoRow label="Claim Reference" value={claim.claim_ref} />
             <InfoRow label="Policy Number" value={claim.policy_number} />
-            <InfoRow label="Policy Excess" value={claim.excess_tbc ? 'TBC on authority' : formatCurrency(claim.policy_excess)} />
+            <InfoRow label="Policy Excess" value={excessLabel(claim, formatCurrency) || '—'} />
             <InfoRow label="Broker" value={claim.broker_name} />
           </Section>
 

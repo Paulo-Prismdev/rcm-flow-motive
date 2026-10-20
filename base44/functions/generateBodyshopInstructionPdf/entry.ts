@@ -97,13 +97,19 @@ Deno.serve(async (req) => {
     // The wizard sets `authorised_by`: "Client Insurer", "Third Party Insurer", or "Uninsured"
     const authorisedBy = claim.authorised_by || 'Client Insurer';
     let displayInsurer, displayClaimRef, displayPolicyNumber, displayPolicyExcess;
+    // The excess reads as one of its three choices: a figure, Waived (nothing
+    // payable — held as £0), or TBC on authority (no figure at all yet).
+    const excessText = (value: unknown) => {
+      if (value === null || value === undefined || value === '') return 'N/A';
+      const n = Number(value);
+      if (isNaN(n)) return String(value);
+      return n === 0 ? 'Waived' : n.toFixed(2);
+    };
     if (authorisedBy === 'Third Party Insurer') {
       displayInsurer = claim.tp_insurer || 'N/A';
       displayClaimRef = claim.tp_claim_ref || 'N/A';
       displayPolicyNumber = claim.tp_policy_number || 'N/A';
-      displayPolicyExcess = claim.tp_policy_excess != null && claim.tp_policy_excess !== ''
-        ? (isNaN(Number(claim.tp_policy_excess)) ? String(claim.tp_policy_excess) : Number(claim.tp_policy_excess).toFixed(2))
-        : 'N/A';
+      displayPolicyExcess = excessText(claim.tp_policy_excess);
     } else if (authorisedBy === 'Third Party') {
       displayInsurer = 'N/A';
       displayClaimRef = 'N/A';
@@ -113,22 +119,14 @@ Deno.serve(async (req) => {
       displayInsurer = 'N/A';
       displayClaimRef = 'N/A';
       displayPolicyNumber = 'N/A';
-      displayPolicyExcess = claim.excess_tbc === true
-        ? 'TBC on authority'
-        : claim.policy_excess != null && claim.policy_excess !== ''
-          ? (isNaN(Number(claim.policy_excess)) ? String(claim.policy_excess) : Number(claim.policy_excess).toFixed(2))
-          : 'N/A';
+      displayPolicyExcess = claim.excess_tbc === true ? 'TBC on authority' : excessText(claim.policy_excess);
     } else {
       displayInsurer = claim.insurer || 'N/A';
       displayClaimRef = claim.claim_ref || 'N/A';
       displayPolicyNumber = claim.policy_number || 'N/A';
       // The excess isn't known yet on a job allocated with it to be confirmed on
       // the authority — the repairer is told to wait for it rather than shown £0.
-      displayPolicyExcess = claim.excess_tbc === true
-        ? 'TBC on authority'
-        : claim.policy_excess != null && claim.policy_excess !== ''
-          ? (isNaN(Number(claim.policy_excess)) ? String(claim.policy_excess) : Number(claim.policy_excess).toFixed(2))
-          : 'N/A';
+      displayPolicyExcess = claim.excess_tbc === true ? 'TBC on authority' : excessText(claim.policy_excess);
     }
 
     const fields = {
