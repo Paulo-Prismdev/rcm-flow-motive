@@ -28,6 +28,23 @@ const findCreditRepairCompany = async (id) => {
   }
 };
 
+const findReferrerCompany = async (id, name) => {
+  if (id) {
+    try {
+      return await base44.entities.Company.get(id);
+    } catch {
+      // Falls through to the name the claim holds.
+    }
+  }
+  if (!name) return null;
+  try {
+    const page = await base44.entities.Company.filter({ company_type: 'referrer', name });
+    return (page.items || [])[0] || null;
+  } catch {
+    return null;
+  }
+};
+
 /**
  * The party an invoice is written to, with the address and contact details we
  * hold for them, ready to pre-fill an accounts request.
@@ -56,6 +73,19 @@ export async function resolveInvoiceParty(claim, item) {
       name,
       addressLines: addressOf(claim),
       contact: clean([claim.client_name, claim.client_email, claim.client_phone]).join(' · '),
+    };
+  }
+
+  // The second referrer is picked from the referrers list, so their invoice is
+  // written to the contact details their own record holds.
+  if (item.party === 'second_referrer') {
+    const tracker = claim?.invoice_tracker || {};
+    const company = await findReferrerCompany(tracker.second_referrer_id, tracker.second_referrer_name);
+    return {
+      kind: 'second_referrer',
+      name: name || company?.name || '',
+      addressLines: addressOf(company),
+      contact: clean([company?.contact_name, company?.contact_email, company?.contact_phone]).join(' · '),
     };
   }
 

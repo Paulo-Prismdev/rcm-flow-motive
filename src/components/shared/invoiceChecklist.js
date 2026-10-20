@@ -135,6 +135,8 @@ export const INVOICE_ITEMS = [
     dateLabel: 'Received',
     requires: 'second_referrer',
     party: 'second_referrer',
+    amountSource: 'second_referrer_fee',
+    varianceReason: 'Second referrer fee or repair cost changed',
   },
   {
     key: 'vat_excess_invoice_in',
@@ -256,6 +258,9 @@ export const repairNet = (claim) => round2(toNum(claim?.final_repair_cost) / (1 
 /** The VAT content of the final repair cost. */
 export const repairVat = (claim) => round2(toNum(claim?.final_repair_cost) - repairNet(claim));
 
+/** The second referrer's agreed share of the repair, set on this claim. */
+export const secondReferrerPercent = (claim) => toNum(claim?.invoice_tracker?.second_referrer_percent);
+
 const PRIVATE_TYPES = ['Paying Privately', '3rd Party Paying Privately'];
 
 export const isPrivatePayingClaim = (claim) => PRIVATE_TYPES.includes(claim?.claim_type);
@@ -326,7 +331,9 @@ export function invoicePartyName(claim, item) {
   const tracker = claim?.invoice_tracker || {};
   switch (item?.party) {
     case 'referrer': return claim?.referrer || '';
-    case 'second_referrer': return tracker.second_referrer_name || 'Second referrer';
+    // Their own record's name, so the invoice's party, and the check that the
+    // invoice came from the company we asked, both read off the referrer.
+    case 'second_referrer': return tracker.second_referrer_name || '';
     case 'repairer': return claim?.bodyshop || '';
     case 'client': return claim?.client_name || '';
     case 'credit_repair': return claim?.credit_repair_company_name || '';
@@ -367,6 +374,22 @@ const AMOUNT_RESOLVERS = {
     return withVat(fee, [
       { label: 'Repair cost ex VAT', value: fmtGBP(net) },
       { label: `Referrer fee (${pct}%)`, value: fmtGBP(fee) },
+      { label: 'VAT (20%)', value: fmtGBP(vat) },
+      { label: 'Total', value: fmtGBP(round2(fee + vat)), total: true },
+    ], `${pct}% of the repair cost ex VAT`);
+  },
+  // A second referrer invoices us their own share, worked out exactly as the
+  // main referrer's is: their % of the repair cost ex VAT, plus VAT.
+  second_referrer_fee: (claim) => {
+    if (toNum(claim.final_repair_cost) <= 0) return awaiting('Enter the final repair cost');
+    const pct = secondReferrerPercent(claim);
+    if (pct <= 0) return awaiting('Set the second referrer fee %');
+    const net = repairNet(claim);
+    const fee = round2(net * pct / 100);
+    const vat = round2(fee * VAT_RATE);
+    return withVat(fee, [
+      { label: 'Repair cost ex VAT', value: fmtGBP(net) },
+      { label: `Second referrer fee (${pct}%)`, value: fmtGBP(fee) },
       { label: 'VAT (20%)', value: fmtGBP(vat) },
       { label: 'Total', value: fmtGBP(round2(fee + vat)), total: true },
     ], `${pct}% of the repair cost ex VAT`);
@@ -705,6 +728,13 @@ export function missingJobFigures(claim, ctx) {
   const missing = [];
   if (toNum(claim?.final_repair_cost) <= 0) {
     missing.push({ key: 'final_repair_cost', label: 'Final repair cost' });
+  }
+
+  // A second referrer's fee is needed wherever a second referrer is paying —
+  // credit repair included — and is asked for like any other figure the invoices
+  // are worked out from.
+  if (ctx.secondReferrerEnabled && secondReferrerPercent(claim) <= 0) {
+    missing.push({ key: 'second_referrer_percent', label: 'Second referrer fee %' });
   }
 
   if (ctx.creditRepair) {

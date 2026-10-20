@@ -20,7 +20,7 @@ import { cn } from "@/lib/utils";
 import AddReferrerModal from "./AddReferrerModal";
 import { sortAlphaNumeric } from "./sortAlphaNumeric";
 
-export default function ReferrerCombobox({ value, onChange, onAddNew }) {
+export default function ReferrerCombobox({ value, onChange, compact = false }) {
   const [open, setOpen] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const queryClient = useQueryClient();
@@ -55,7 +55,7 @@ export default function ReferrerCombobox({ value, onChange, onAddNew }) {
   };
 
   const handleAddSuccess = (newReferrer) => {
-    queryClient.invalidateQueries({ queryKey: ["companies", "referrer"] });
+    queryClient.invalidateQueries({ queryKey: ["companies"] });
     onChange({
       id: newReferrer.id,
       name: newReferrer.name,
@@ -144,11 +144,16 @@ export default function ReferrerCombobox({ value, onChange, onAddNew }) {
           </Button>
         )}
       </div>
-      {onAddNew && (
-        <Button type="button" onClick={onAddNew} variant="outline" size="sm" className="whitespace-nowrap">
-          <Plus className="w-4 h-4" /> Add New
-        </Button>
-      )}
+      <Button
+        type="button"
+        onClick={() => setShowAddModal(true)}
+        variant="outline"
+        size="sm"
+        title="Add a referrer who isn't in the list yet"
+        className="whitespace-nowrap"
+      >
+        <Plus className="w-4 h-4" />{!compact && ' Add New'}
+      </Button>
       </div>
     </>
   );
