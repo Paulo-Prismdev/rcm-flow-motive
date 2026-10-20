@@ -78,17 +78,18 @@ export default function InvoiceItemCard({
   const hint = state.notApplicable
     ? 'Not applicable — use ⋮ to change'
     : state.awaiting ? (state.hint || 'No amount can be worked out yet')
-      : toneKey === 'negative' ? `Click to upload this ${isDocument ? 'document' : 'invoice'}`
-        : files.length === 0 ? 'Click to set the amount and dates'
-          : files.length === 1 ? 'Click to open the document' : 'Click to choose a document';
+      : files.length === 0
+        ? (isDocument ? 'Click to upload this document' : "Click to upload it — we'll read the figures off it")
+        : files.length === 1 ? 'Click to open the document' : 'Click to choose a document';
 
+  // Nothing filed yet: the click uploads it. Once a file is there, the click
+  // opens the document — the figures are corrected from the ⋮ menu.
   const handleCardClick = () => {
     if (isUploading) return;
     if (state.notApplicable) { setMenuOpen(true); return; }
-    if (toneKey === 'negative') { fileInputRef.current?.click(); return; }
     if (files.length === 1) { onViewFile(files[0].file_url); return; }
     if (files.length > 1) { setMenuOpen(true); return; }
-    onToggleDetails?.();
+    fileInputRef.current?.click();
   };
 
   const submitRename = (doc) => {
@@ -229,7 +230,7 @@ export default function InvoiceItemCard({
                 <Upload className="w-3.5 h-3.5" /> Add file
               </DropdownMenuItem>
               <DropdownMenuItem onSelect={() => onToggleDetails?.()} className="text-xs">
-                <SlidersHorizontal className="w-3.5 h-3.5" /> {detailsOpen ? 'Hide details' : 'Amount, dates & paid'}
+                <SlidersHorizontal className="w-3.5 h-3.5" /> {detailsOpen ? 'Hide the figures' : 'Figures, dates & paid'}
               </DropdownMenuItem>
 
               {!isDocument && (
@@ -285,7 +286,7 @@ export default function InvoiceItemCard({
         <input
           ref={fileInputRef}
           type="file"
-          multiple
+          multiple={isDocument}
           className="hidden"
           onChange={(e) => { if (e.target.files?.length) onUpload(item, e.target.files); e.target.value = ''; }}
         />

@@ -66,7 +66,7 @@ export default function FigureField({
             ) : (
               <Input
                 ref={inputRef}
-                type={type === 'number' ? 'number' : 'text'}
+                type={type === 'date' ? 'date' : type === 'number' ? 'number' : 'text'}
                 step={type === 'number' ? '0.01' : undefined}
                 inputMode={type === 'number' ? 'decimal' : undefined}
                 value={draft}

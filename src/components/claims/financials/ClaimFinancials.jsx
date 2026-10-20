@@ -12,10 +12,13 @@ import {
   DEFAULT_ACCOUNTS_EMAIL,
   buildInvoiceItemPatch,
   buildInvoiceRequestPatch,
+  buildInvoiceReviewPatch,
   claimHandlesVatExcess,
   computeInvoiceSummary,
   deriveInvoiceStatus,
   invoiceContext,
+  invoicePartyName,
+  isInvoiceDocument,
   repairNet,
   repairVat,
   resolveInvoiceAmount,
@@ -27,8 +30,10 @@ import InvoiceGroup from './InvoiceGroup';
 import InvoiceRow from './InvoiceRow';
 import CloseOutItem from './CloseOutItem';
 import RequestInvoiceModal from './RequestInvoiceModal';
+import InvoiceReviewModal from './InvoiceReviewModal';
 import { resolveInvoiceParty } from './invoiceParty';
 import useClaimInvoiceDocs from './useClaimInvoiceDocs';
+import { buildReviewLog } from './invoiceReview';
 import { fmtGBP } from '@/components/shared/creditRepairRates';
 
 /** Readable names for the financial fields in the claim's activity history. */
@@ -57,6 +62,7 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
   const [request, setRequest] = useState(null);
   const [preparingRequest, setPreparingRequest] = useState(false);
   const [pendingFigureChange, setPendingFigureChange] = useState(null);
+  const [review, setReview] = useState(null);
 
   const { data: appConfigs = [] } = useQuery({
     queryKey: ['AppConfig'],
@@ -167,23 +173,61 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
   };
 
   const handleUpload = async (item, fileList) => {
-    const created = await docs.uploadToItem(item, fileList);
-    if (!created?.length) return;
+    const [file] = Array.from(fileList || []);
+    if (!file) return;
 
-    await logActivity({
-      parentId: claim.id,
-      parentType: 'Claim',
-      action: 'Invoice Document Uploaded',
-      description: `Uploaded ${created.length} file(s) to "${item.label}"`,
-      user: currentUser,
-    });
+    // An invoice is read off the document first and only saved once its figures
+    // have been checked. Documents are filed as they are.
+    if (!isInvoiceDocument(item)) {
+      const created = await docs.uploadToItem(item, fileList);
+      if (!created?.length) return;
 
-    // The upload IS the received/sent signal: stamp today's date when the item
-    // hasn't been dated yet, so the totals and the claims list agree.
-    const row = summary.rows.find((r) => r.item.key === item.key);
-    if (row && !row.state.date) {
-      const { patch } = buildInvoiceItemPatch(item, claim, { date: today() }, ctx);
-      commit(patch, `${item.label} ${(item.dateLabel || 'date').toLowerCase()} date set to ${today()}`);
+      await logActivity({
+        parentId: claim.id,
+        parentType: 'Claim',
+        action: 'Invoice Document Uploaded',
+        description: `Uploaded ${created.length} file(s) to "${item.label}"`,
+        user: currentUser,
+      });
+
+      // The upload IS the received/sent signal: stamp today's date when the item
+      // hasn't been dated yet, so the totals and the claims list agree.
+      const row = summary.rows.find((r) => r.item.key === item.key);
+      if (row && !row.state.date) {
+        const { patch } = buildInvoiceItemPatch(item, claim, { date: today() }, ctx);
+        commit(patch, `${item.label} ${(item.dateLabel || 'date').toLowerCase()} date set to ${today()}`);
+      }
+      return;
+    }
+
+    try {
+      const uploaded = await docs.uploadFile(file);
+      if (!uploaded) return;
+      setReview({ item, fileUrl: uploaded.file_url, fileName: uploaded.file_name });
+    } catch (e) {
+      toast({ title: 'Upload failed', description: e?.message, variant: 'destructive' });
+    }
+  };
+
+  // Nothing has touched the claim until this runs: the file is filed against the
+  // invoice, its figures and number are recorded, the date marks it received or
+  // sent — which locks the amount — and the history says what was read, changed
+  // and accepted.
+  const handleReviewConfirm = async ({ figures, corrections, accepted }) => {
+    if (!review) return;
+    const { item } = review;
+    try {
+      await docs.attachFile(item, { file_url: review.fileUrl, file_name: review.fileName });
+      applyCommit(
+        buildInvoiceReviewPatch(item, claim, figures),
+        `${item.label} recorded — invoice ${figures.invoice_number}, dated ${figures.invoice_date}, ${fmtGBP(Number(figures.amount_total) || 0)}`
+      );
+      buildReviewLog({ item, figures, corrections, accepted }).forEach((entry) => {
+        logActivity({ parentId: claim.id, parentType: 'Claim', user: currentUser, ...entry });
+      });
+      setReview(null);
+    } catch (e) {
+      toast({ title: 'Could not save the invoice', description: e?.message, variant: 'destructive' });
     }
   };
 
@@ -339,6 +383,17 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
           message="Are you sure you want to delete this document?"
           confirmText="Delete"
           variant="danger"
+        />
+
+        <InvoiceReviewModal
+          isOpen={!!review}
+          onClose={() => setReview(null)}
+          claim={claim}
+          item={review?.item}
+          party={review ? invoicePartyName(claim, review.item) : ''}
+          fileUrl={review?.fileUrl}
+          fileName={review?.fileName}
+          onConfirm={handleReviewConfirm}
         />
 
         <ConfirmDialog

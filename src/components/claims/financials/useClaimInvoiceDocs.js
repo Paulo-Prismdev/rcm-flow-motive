@@ -31,7 +31,48 @@ export default function useClaimInvoiceDocs(claim, currentUser) {
     queryClient.invalidateQueries({ queryKey: ['notes', claim.id, 'Claim'] });
   };
 
-  /** Files the uploads against an invoice and returns the created file URLs. */
+  /** Uploads a file and hands back its URL, without filing it yet. */
+  const uploadFile = async (file) => {
+    if (!file) return null;
+    const urls = await uploadFiles([file]);
+    if (!urls?.length) return null;
+    return { file_url: urls[0], file_name: file.name || urls[0].split('/').pop() };
+  };
+
+  /** Records the update note that points at what was filed. */
+  const addUploadNote = async (item, urls) => {
+    try {
+      await base44.entities.Note.create({
+        content: `Invoice document uploaded — ${item.label}`,
+        parent_id: claim.id,
+        parent_type: 'Claim',
+        update_type: 'Accounts',
+        file_urls: urls,
+        liked_by: [],
+        starred: false,
+      });
+    } catch (e) {
+      console.error('Create invoice update note failed', e);
+    }
+  };
+
+  /** Files an uploaded file against an invoice, with its update note. */
+  const attachFile = async (item, { file_url, file_name }) => {
+    await base44.entities.ClaimDocument.create({
+      claim_id: claim.id,
+      item_key: invoiceDocKey(item.key),
+      file_url,
+      file_name,
+      uploaded_by_email: currentUser?.email || '',
+      uploaded_by_name: currentUser?.full_name || '',
+      uploaded_at: new Date().toISOString(),
+      source: 'manual',
+    });
+    await addUploadNote(item, [file_url]);
+    refresh();
+  };
+
+  /** Files one or more uploads against an invoice in a single step. */
   const uploadToItem = async (item, fileList) => {
     const files = Array.from(fileList || []);
     if (!files.length) return [];
@@ -58,20 +99,7 @@ export default function useClaimInvoiceDocs(claim, currentUser) {
     }
     if (!created.length) return [];
 
-    try {
-      await base44.entities.Note.create({
-        content: `Invoice document uploaded — ${item.label}`,
-        parent_id: claim.id,
-        parent_type: 'Claim',
-        update_type: 'Accounts',
-        file_urls: created,
-        liked_by: [],
-        starred: false,
-      });
-    } catch (e) {
-      console.error('Create invoice update note failed', e);
-    }
-
+    await addUploadNote(item, created);
     refresh();
     return created;
   };
@@ -98,6 +126,8 @@ export default function useClaimInvoiceDocs(claim, currentUser) {
   return {
     files: docs,
     filesFor,
+    uploadFile,
+    attachFile,
     uploadToItem,
     renameFile,
     deleteFile,

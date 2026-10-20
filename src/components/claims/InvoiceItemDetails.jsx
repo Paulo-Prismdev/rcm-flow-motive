@@ -1,94 +1,76 @@
-import React, { useEffect, useState } from 'react';
-import { AlertTriangle, Lock } from 'lucide-react';
+import React, { useState } from 'react';
+import { Lock } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { fmtGBP } from '@/components/shared/creditRepairRates';
 import { isInvoiceDocument } from '@/components/shared/invoiceChecklist';
+import FigureField from './financials/FigureField';
 
 /**
- * The fields behind an invoice: the amount (following the calculated figure
- * unless it has been overridden), the date it went out or came in, and whether
- * it has been paid. Kept out of the row itself so the list stays readable.
+ * The figures behind an invoice — its number, amount and the date it went out or
+ * came in — read-only until their own pencil is clicked, so an amount recorded
+ * against an invoice can never be changed by accident. Kept behind the row's ⋮
+ * menu so the list itself stays readable. Paid status works as it always has.
  */
 export default function InvoiceItemDetails({ item, state, onChange }) {
+  const [editingKey, setEditingKey] = useState(null);
   const isDocument = isInvoiceDocument(item);
   const dateLabel = item.dateLabel || (item.direction === 'in' ? 'Received' : 'Sent');
   const followsCalculation = state.derived && !state.adjusted && !state.locked;
 
-  const [amountDraft, setAmountDraft] = useState('');
-  const [dateDraft, setDateDraft] = useState(state.date || '');
+  const fieldEdit = (key) => ({
+    editing: editingKey === key,
+    onEdit: () => setEditingKey(key),
+    onDone: () => setEditingKey(null),
+  });
 
-  useEffect(() => {
-    setAmountDraft(followsCalculation ? '' : (state.amount ? String(state.amount) : ''));
-  }, [state.amount, followsCalculation]);
-  useEffect(() => { setDateDraft(state.date || ''); }, [state.date]);
-
-  const commitAmount = () => {
-    const current = followsCalculation ? '' : (state.amount ? String(state.amount) : '');
-    if (amountDraft === current) return;
-    onChange(
-      { amount: amountDraft === '' ? null : amountDraft },
-      `${item.label} amount ${amountDraft === '' ? 'set back to the calculated figure' : `overridden to £${amountDraft}`}`
-    );
-  };
-
-  const commitDate = () => {
-    if (dateDraft === (state.date || '')) return;
-    onChange(
-      { date: dateDraft },
-      `${item.label} ${dateLabel.toLowerCase()} date ${dateDraft ? `set to ${dateDraft}` : 'cleared'}`
-    );
-  };
-
-  const dateField = (
-    <div>
-      <label className="block text-[10px] font-medium text-muted-foreground mb-0.5">{dateLabel}</label>
-      <Input
-        type="date"
-        value={dateDraft}
-        onChange={(e) => setDateDraft(e.target.value)}
-        onBlur={commitDate}
-        className="h-8 text-sm"
-      />
-    </div>
-  );
+  const amountHint = state.locked
+    ? `Locked at the figure it was ${item.direction === 'in' ? 'received' : 'sent'} at.`
+    : followsCalculation && state.amount > 0
+      ? 'Following the calculated figure — set a figure here to override it.'
+      : undefined;
 
   return (
     <div className="rounded-[10px] border border-border bg-muted/30 px-3 py-2.5 space-y-2">
-      {isDocument ? dateField : (
-        <>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-            <div>
-              <label className="block text-[10px] font-medium text-muted-foreground mb-0.5">Amount (£ total inc VAT)</label>
-              <Input
-                type="number"
-                step="0.01"
-                inputMode="decimal"
-                placeholder={state.amount > 0 ? fmtGBP(state.amount) : '0.00'}
-                value={amountDraft}
-                onChange={(e) => setAmountDraft(e.target.value)}
-                onBlur={commitAmount}
-                onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }}
-                className="h-8 text-sm"
-              />
-              {followsCalculation && state.amount > 0 && (
-                <p className="text-[10px] text-muted-foreground mt-0.5">Following the calculated figure — type a figure to override it.</p>
-              )}
-              {state.locked && (
-                <p className="flex items-center gap-1 text-[10px] text-muted-foreground mt-0.5">
-                  <Lock className="w-3 h-3" /> Locked at the figure it was sent at.
-                </p>
-              )}
-            </div>
-            {dateField}
-            <div>
-              <label className="block text-[10px] font-medium text-muted-foreground mb-0.5">Split</label>
-              <div className="h-8 flex items-center gap-2 px-2 rounded-md border border-border bg-card text-xs tabular-nums">
-                <span className="text-muted-foreground">Ex</span> <span className="font-medium">{fmtGBP(state.ex)}</span>
-                <span className="text-muted-foreground">VAT</span> <span className="font-medium">{fmtGBP(state.vat)}</span>
-              </div>
-            </div>
-          </div>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 items-start">
+        {!isDocument && (
+          <FigureField
+            {...fieldEdit('amount')}
+            label="Amount (£ total inc VAT)"
+            type="number"
+            value={state.adjusted || state.locked ? state.amount : undefined}
+            hint={amountHint}
+            onCommit={(v) => onChange(
+              { amount: v === '' ? null : v },
+              v === ''
+                ? `${item.label} amount set back to the calculated figure`
+                : `${item.label} amount overridden to ${fmtGBP(Number(v) || 0)}`
+            )}
+          />
+        )}
 
+        <FigureField
+          {...fieldEdit('date')}
+          label={dateLabel}
+          type="date"
+          value={state.date}
+          onCommit={(v) => onChange(
+            { date: v },
+            `${item.label} ${dateLabel.toLowerCase()} date ${v ? `set to ${v}` : 'cleared'}`
+          )}
+        />
+
+        {!isDocument && (
+          <FigureField
+            {...fieldEdit('invoice_number')}
+            label="Invoice number"
+            value={state.invoiceNumber}
+            onCommit={(v) => onChange({ invoice_number: v }, `${item.label} invoice number set to ${v || 'not set'}`)}
+          />
+        )}
+      </div>
+
+      {!isDocument && (
+        <>
           <div className="flex items-center gap-2 flex-wrap">
             <label className="inline-flex items-center gap-1.5 text-xs font-medium cursor-pointer">
               <input
@@ -115,15 +97,24 @@ export default function InvoiceItemDetails({ item, state, onChange }) {
               <span className="text-[10px] text-amber-600 dark:text-amber-400">Requested from accounts</span>
             )}
           </div>
+
+          {state.amount > 0 && (
+            <p className="text-[10px] text-muted-foreground tabular-nums">
+              Ex VAT {fmtGBP(state.ex)} + VAT {fmtGBP(state.vat)}
+            </p>
+          )}
         </>
       )}
 
+      {isDocument && state.received && (
+        <p className="flex items-center gap-1 text-[10px] text-muted-foreground">
+          <Lock className="w-3 h-3" /> Filed against the close-out.
+        </p>
+      )}
+
       {state.variance && (
-        <p className="flex items-start gap-1.5 text-[10px] leading-tight text-amber-700 dark:text-amber-300 font-medium">
-          <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0" />
-          <span>
-            {state.variance.reason} — calculated {fmtGBP(state.variance.calculated)}, invoiced {fmtGBP(state.variance.invoiced)}. Raise a supplementary invoice or credit note, or unlock the amount.
-          </span>
+        <p className="text-[10px] leading-tight text-amber-700 dark:text-amber-300 font-medium">
+          {state.variance.reason} — calculated {fmtGBP(state.variance.calculated)}, invoiced {fmtGBP(state.variance.invoiced)}. Raise a supplementary invoice or credit note, or unlock the amount.
         </p>
       )}
     </div>

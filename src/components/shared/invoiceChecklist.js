@@ -486,6 +486,7 @@ export function getInvoiceItemState(item, claim, hasFiles = false) {
     paidDate,
     received: asDocument ? (!!date || !!hasFiles) : false,
     notApplicable: entry.not_applicable === true,
+    invoiceNumber: entry.invoice_number || '',
     locked,
     adjusted,
     variance,
@@ -673,6 +674,21 @@ export function buildInvoiceItemPatch(item, claim, changes, ctx) {
     entry.vat = null;
   }
 
+  // The split read off an invoice itself, kept alongside that invoice's total.
+  if (!asDocument && has('ex')) {
+    const n = changes.ex === '' || changes.ex === null || changes.ex === undefined ? null : Number(changes.ex);
+    entry.ex = n === null || Number.isNaN(n) ? null : n;
+  }
+  if (!asDocument && has('vat')) {
+    const n = changes.vat === '' || changes.vat === null || changes.vat === undefined ? null : Number(changes.vat);
+    entry.vat = n === null || Number.isNaN(n) ? null : n;
+  }
+
+  // The invoice's own number, recorded against the item it belongs to.
+  if (has('invoice_number')) {
+    entry.invoice_number = changes.invoice_number || '';
+  }
+
   if (has('date')) {
     write('date', changes.date || null);
     // Marking a calculated invoice as sent or received locks it to the figure it
@@ -714,6 +730,32 @@ export function buildInvoiceItemPatch(item, claim, changes, ctx) {
 
   items[item.key] = entry;
   return { patch: { ...patch, invoice_tracker: { ...source, items } } };
+}
+
+/**
+ * Patch that records an invoice read off an uploaded document: its number and
+ * figures, and the date that marks it received or sent — which locks the amount,
+ * as it always has. The amount is written first, so the date locks the invoice's
+ * own figure rather than the calculated one.
+ */
+export function buildInvoiceReviewPatch(item, claim, figures) {
+  const amountPatch = buildInvoiceItemPatch(item, claim, {
+    amount: figures.amount_total,
+    ex: figures.amount_ex_vat,
+    vat: figures.vat_amount,
+  }).patch;
+
+  const withAmount = { ...claim, ...amountPatch };
+  const date = figures.invoice_date || '';
+  const datePatch = date ? buildInvoiceItemPatch(item, withAmount, { date }).patch : {};
+
+  const source = datePatch.invoice_tracker || amountPatch.invoice_tracker || claim.invoice_tracker || {};
+  const items = { ...(source.items || {}) };
+  const entry = { ...(items[item.key] || {}) };
+  entry.invoice_number = figures.invoice_number || '';
+  items[item.key] = entry;
+
+  return { ...amountPatch, ...datePatch, invoice_tracker: { ...source, items } };
 }
 
 /** Patch for tracker-level settings (the second-referrer switch and its name). */
