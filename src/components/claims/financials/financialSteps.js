@@ -60,9 +60,12 @@ export function buildFinancialFlow(summary, ctx) {
   // Final Invoice and Final Authority alone, the note is never the step's own
   // next action, and while it is missing it is offered as a suggestion instead.
   const closeRequired = closeApplies.filter((r) => !isRecommendedItem(r.item));
-  const closeIn = closeRequired.filter((r) => r.state.received).length;
+  // A copy that is waiting to be replaced by a corrected one doesn't finish the
+  // step: the item stays amber until the corrected copy is uploaded.
+  const closeSettled = (r) => r.state.received && !r.state.awaitingCorrected;
+  const closeIn = closeRequired.filter(closeSettled).length;
   const closeEmpty = closeApplies.length === 0 ? emptySectionMessage('closeout', ctx) : null;
-  const closePending = closeRequired.find((r) => !r.state.received);
+  const closePending = closeRequired.find((r) => !closeSettled(r));
   const closeSuggested = closeApplies.find((r) => isRecommendedItem(r.item) && !r.state.received);
 
   const closeout = {
@@ -74,7 +77,10 @@ export function buildFinancialFlow(summary, ctx) {
       : closeRequired.length === 0 ? 'nothing required'
         : closeIn === closeRequired.length ? `all ${closeRequired.length} received`
           : `${closeIn} of ${closeRequired.length} received`,
-    action: closeEmpty || !closePending ? null : upload(closePending, `upload the ${closePending.item.label}`),
+    action: closeEmpty || !closePending ? null
+      : upload(closePending, closePending.state.awaitingCorrected
+        ? `upload the corrected ${closePending.item.label}`
+        : `upload the ${closePending.item.label}`),
     suggestion: closeSuggested ? upload(closeSuggested, `upload the ${closeSuggested.item.label}`) : null,
   };
 

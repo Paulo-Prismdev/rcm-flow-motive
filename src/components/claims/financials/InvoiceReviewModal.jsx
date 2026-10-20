@@ -25,6 +25,8 @@ import {
 } from './invoiceReview';
 import { isInvoiceDocument } from '@/components/shared/invoiceChecklist';
 import RepairCostFromInvoice, { repairCostOffer } from './RepairCostFromInvoice';
+import InvoiceVsAuthority from './InvoiceVsAuthority';
+import { authorityAmount, compareToAuthority } from './invoiceAuthorityCheck';
 
 /**
  * The check before an invoice is recorded: the document on the left, the figures
@@ -32,7 +34,7 @@ import RepairCostFromInvoice, { repairCostOffer } from './RepairCostFromInvoice'
  * Nothing is saved to the claim until the user confirms here.
  */
 export default function InvoiceReviewModal({
-  isOpen, onClose, claim, item, party, fileUrl, fileName, onConfirm,
+  isOpen, onClose, claim, item, party, fileUrl, fileName, onConfirm, onReinvoiceEmail,
 }) {
   const [status, setStatus] = useState('reading');
   const [figures, setFigures] = useState(emptyFigures);
@@ -48,6 +50,7 @@ export default function InvoiceReviewModal({
   const [reason, setReason] = useState('');
   const [duplicate, setDuplicate] = useState(null);
   const [repairCostChoice, setRepairCostChoice] = useState(null);
+  const [authorityChoice, setAuthorityChoice] = useState(null);
 
   // Read the document once each time the screen opens.
   useEffect(() => {
@@ -66,6 +69,7 @@ export default function InvoiceReviewModal({
     setReason('');
     setDuplicate(null);
     setRepairCostChoice(null);
+    setAuthorityChoice(null);
     setFocused('invoice_number');
 
     (async () => {
@@ -154,24 +158,49 @@ export default function InvoiceReviewModal({
   // it fills the figure in where there is none, and is flagged where it differs.
   const costOffer = repairCostOffer(item, claim, figures);
   const useRepairCost = repairCostChoice ?? costOffer?.defaultUse ?? false;
+
+  // The Final Invoice is set against the amount the job was authorised at, and an
+  // invoice over that amount can never be saved as the Final Invoice at all.
+  const authority = item?.setsRepairCost ? authorityAmount(claim) : null;
+  const comparison = item?.setsRepairCost ? compareToAuthority(invoiceTotal, authority) : null;
+  const overAuthority = comparison?.status === 'over';
+  const reinvoiceRequested = authorityChoice === 'reinvoice';
+  const choiceNeeded = comparison?.status === 'under' && !authorityChoice;
+
   const softBlockers = [
     ...arithmetic.map((text, i) => ({ id: `arith-${i}`, text })),
     ...matchIssues.map((text, i) => ({ id: `match-${i}`, text })),
     ...(duplicate?.length ? [{ id: 'duplicate', text: `Invoice ${figures.invoice_number} is already recorded on ${duplicate.map((d) => d.job_number || 'another claim').join(', ')}` }] : []),
   ];
-  const canConfirm = status !== 'reading' && missingRequired.length === 0 && unreviewed.length === 0 && mismatchAccepted;
+  const canConfirm = status !== 'reading'
+    && missingRequired.length === 0
+    && unreviewed.length === 0
+    && mismatchAccepted
+    && !overAuthority
+    && !choiceNeeded;
 
   const handleConfirm = () => {
     const accepted = [];
     if (mismatch && acceptedMismatch) {
       accepted.push(`the invoice total ${fmtGBP(mismatch.invoiceTotal)} differs from our calculated ${fmtGBP(mismatch.expected.amount)}${mismatch.expected.note ? ` (${mismatch.expected.note})` : ''} — accepted with the reason: ${reason.trim()}`);
     }
+    if (comparison?.status === 'under') {
+      accepted.push(`the invoice total ${fmtGBP(comparison.invoiceTotal)} is ${fmtGBP(Math.abs(comparison.difference))} under the authorised ${fmtGBP(comparison.authority)} — ${reinvoiceRequested ? 'a corrected invoice requested from the repairer' : "accepted as the claim's final repair cost"}`);
+    }
+    if (comparison?.status === 'match') {
+      accepted.push(`the invoice total ${fmtGBP(comparison.invoiceTotal)} matches the authorised ${fmtGBP(comparison.authority)}`);
+    }
     softBlockers.filter((b) => acked[b.id]).forEach((b) => accepted.push(`${b.text} — accepted`));
     onConfirm({
       figures,
       corrections: correctionsFromReview(figures, raw, derived),
       accepted,
-      useAsRepairCost: !!costOffer && useRepairCost,
+      // An invoice waiting on a corrected copy doesn't set the repair cost: the
+      // final repair cost comes from an invoice that is within the authority and
+      // accepted.
+      useAsRepairCost: !!costOffer && useRepairCost && !reinvoiceRequested,
+      acceptInvoiceTotal: authorityChoice === 'accept',
+      requestReinvoice: reinvoiceRequested,
     });
   };
 
@@ -255,6 +284,19 @@ export default function InvoiceReviewModal({
             </div>
 
             <RepairCostFromInvoice offer={costOffer} useIt={useRepairCost} onUse={setRepairCostChoice} />
+
+            {item?.setsRepairCost && (
+              <InvoiceVsAuthority
+                comparison={comparison}
+                mode="invoice"
+                choice={authorityChoice}
+                onChoice={setAuthorityChoice}
+                onReinvoiceEmail={onReinvoiceEmail}
+                emptyNote={authority === null
+                  ? 'No final authority is on the claim yet — the invoice total is set against it as soon as one arrives.'
+                  : 'Enter the invoice total and it is set against the authorised amount.'}
+              />
+            )}
 
             <InvoiceReviewChecks
               arithmetic={arithmetic}

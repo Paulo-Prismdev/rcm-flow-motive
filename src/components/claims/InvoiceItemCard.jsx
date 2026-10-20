@@ -35,6 +35,8 @@ export function invoiceToneKey(item, state) {
   // A close-out document only goes green once its copy is on file: a date
   // recorded on its own is amber.
   if (isInvoiceDocument(item)) {
+    // A copy waiting to be replaced by a corrected one stays amber.
+    if (state.awaitingCorrected) return 'warning';
     if (state.received) return 'positive';
     // A recommended document is nudged in amber, never red: nothing is late,
     // there is simply something else worth collecting.
@@ -50,6 +52,7 @@ export function invoiceStatusLabel(item, state) {
   if (state.notApplicable) return 'not applicable';
   if (state.awaiting) return 'awaiting figures';
   if (isInvoiceDocument(item)) {
+    if (state.awaitingCorrected) return 'awaiting corrected invoice';
     if (state.received) return item.direction === 'in' ? 'received' : 'sent';
     if (isRecommendedItem(item)) return 'recommended';
     return state.dateRecordedNoCopy ? 'date recorded, copy not attached' : 'outstanding';
@@ -85,7 +88,9 @@ export default function InvoiceItemCard({
 
   const subline = state.notApplicable ? offText
     : state.awaiting ? ''
-      : isDocument ? (state.received && state.date ? `${dateLabel} ${formatDay(state.date)}` : '')
+      : isDocument ? (state.awaitingCorrected
+        ? `Awaiting a corrected invoice — invoiced ${fmtGBP(state.reinvoice?.invoice_total || 0)} against ${fmtGBP(state.reinvoice?.authority_amount || 0)}`
+        : (state.received && state.date ? `${dateLabel} ${formatDay(state.date)}` : ''))
         : state.paid ? (state.paidDate ? `Paid ${formatDay(state.paidDate)}` : 'Paid')
           : state.requested && !state.date ? `Requested ${formatDay(state.requestedAt)}`
             : state.date ? `${dateLabel} ${formatDay(state.date)}`

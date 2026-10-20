@@ -20,6 +20,7 @@ import {
   deriveInvoiceStatus,
   formatInvoiceDay,
   invoiceContext,
+  invoiceDocumentKind,
   invoicePartyName,
   repairNet,
   repairVat,
@@ -41,10 +42,15 @@ import RemoveFileDialog from '@/components/shared/RemoveFileDialog';
 import { removeFileFromUpdates } from '@/components/shared/removeFileFromUpdates';
 import RequestInvoiceModal from './RequestInvoiceModal';
 import InvoiceReviewModal from './InvoiceReviewModal';
+import AuthorityReviewModal from './AuthorityReviewModal';
+import ReinvoiceRequestModal from './ReinvoiceRequestModal';
+import FinalInvoiceAuthorityNote from './FinalInvoiceAuthorityNote';
 import { buildFinancialFlow } from './financialSteps';
 import { resolveInvoiceParty } from './invoiceParty';
 import useClaimInvoiceDocs from './useClaimInvoiceDocs';
-import { buildReviewLog } from './invoiceReview';
+import { buildReviewLog, toNum } from './invoiceReview';
+import { buildAuthorityLog, buildAuthorityReviewPatch, excessCheck } from './authorityReview';
+import { authorityAmount, compareToAuthority, finalInvoiceTotal } from './invoiceAuthorityCheck';
 import { fmtGBP } from '@/components/shared/creditRepairRates';
 
 /** Readable names for the financial fields in the claim's activity history. */
@@ -75,6 +81,8 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
   const [preparingRequest, setPreparingRequest] = useState(false);
   const [pendingFigureChange, setPendingFigureChange] = useState(null);
   const [review, setReview] = useState(null);
+  const [authorityReview, setAuthorityReview] = useState(null);
+  const [reinvoice, setReinvoice] = useState(null);
   const [quickItem, setQuickItem] = useState(null);
   const [paidPrompt, setPaidPrompt] = useState(null);
   const quickUploadRef = useRef(null);
@@ -269,16 +277,37 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
     );
   };
 
-  // Every upload is read off the document before anything is recorded: the
-  // figures are checked against the job, and the date that lands is the one
-  // printed on the document itself — never today's date, and never another
-  // item's date.
+  // Every upload is read off the document before anything is recorded, and what
+  // is read depends on the document: an invoice in full, an authority for its
+  // own three figures, and a Collection Note not at all — that one is simply
+  // stored, and its card goes green.
   const handleUpload = async (item, fileList) => {
     const [file] = Array.from(fileList || []);
     if (!file) return;
     try {
       const uploaded = await docs.uploadFile(file);
       if (!uploaded) return;
+
+      const kind = invoiceDocumentKind(item);
+
+      if (kind === 'store') {
+        await docs.attachFile(item, uploaded);
+        await logActivity({
+          parentId: claim.id,
+          parentType: 'Claim',
+          action: 'Invoice Document Filed',
+          description: `${item.label} stored against the claim — nothing is read off it.`,
+          user: currentUser,
+        });
+        toast({ title: `${item.label} filed`, description: 'The copy is stored against the claim.' });
+        return;
+      }
+
+      if (kind === 'authority') {
+        setAuthorityReview({ item, fileUrl: uploaded.file_url, fileName: uploaded.file_name });
+        return;
+      }
+
       setReview({ item, fileUrl: uploaded.file_url, fileName: uploaded.file_name });
     } catch (e) {
       toast({ title: 'Upload failed', description: e?.message, variant: 'destructive' });
@@ -289,11 +318,33 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
   // invoice, its figures and number are recorded, the date marks it received or
   // sent — which locks the amount — and the history says what was read, changed
   // and accepted. The Final Invoice's total can become the final repair cost.
-  const handleReviewConfirm = async ({ figures, corrections, accepted, useAsRepairCost }) => {
+  const handleReviewConfirm = async ({
+    figures, corrections, accepted, useAsRepairCost, acceptInvoiceTotal, requestReinvoice,
+  }) => {
     if (!review) return;
     const { item } = review;
     const total = Number(figures.amount_total) || 0;
-    const repairCost = useAsRepairCost && item.setsRepairCost ? total : null;
+
+    // The Final Invoice is settled against the amount the job was authorised at:
+    // within the authority its total can become the final repair cost, and where
+    // the repairer is asked to re-invoice, the invoice is left waiting on a
+    // corrected copy instead.
+    const authority = item.setsRepairCost ? authorityAmount(claim) : null;
+    const comparison = item.setsRepairCost ? compareToAuthority(total, authority) : null;
+    const reinvoice = requestReinvoice && comparison?.status === 'under'
+      ? { invoice_total: comparison.invoiceTotal, authority: comparison.authority, by: paidBy }
+      : null;
+    const repairCost = item.setsRepairCost && !reinvoice
+      ? (acceptInvoiceTotal ? total : (useAsRepairCost ? total : null))
+      : null;
+
+    const description = reinvoice
+      ? `${item.label} recorded — invoice ${figures.invoice_number}, dated ${figures.invoice_date}, ${fmtGBP(total)} is ${fmtGBP(Math.abs(comparison.difference))} under the authorised ${fmtGBP(authority)}; a corrected invoice has been requested from the repairer`
+      : acceptInvoiceTotal
+        ? `${item.label} recorded — invoice ${figures.invoice_number}, dated ${figures.invoice_date}, ${fmtGBP(total)}; accepted as the final repair cost against the authorised ${fmtGBP(authority)}`
+        : repairCost
+          ? `${item.label} recorded — invoice ${figures.invoice_number}, dated ${figures.invoice_date}, ${fmtGBP(total)}; final repair cost set to ${fmtGBP(repairCost)} from the invoice`
+          : `${item.label} recorded — invoice ${figures.invoice_number}, dated ${figures.invoice_date}, ${fmtGBP(total)}`;
 
     try {
       await docs.attachFile(item, { file_url: review.fileUrl, file_name: review.fileName });
@@ -303,20 +354,74 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
             file_url: review.fileUrl,
             file_name: review.fileName,
             repair_cost: repairCost,
+            reinvoice,
           }),
           ...(repairCost ? { final_repair_cost: repairCost } : {}),
         },
-        repairCost
-          ? `${item.label} recorded — invoice ${figures.invoice_number}, dated ${figures.invoice_date}, ${fmtGBP(total)}; final repair cost set to ${fmtGBP(repairCost)} from the invoice`
-          : `${item.label} recorded — invoice ${figures.invoice_number}, dated ${figures.invoice_date}, ${fmtGBP(total)}`
+        description
       );
       buildReviewLog({ item, figures, corrections, accepted }).forEach((entry) => {
         logActivity({ parentId: claim.id, parentType: 'Claim', user: currentUser, ...entry });
       });
       setReview(null);
+      if (reinvoice) setReinvoice({ comparison });
     } catch (e) {
       toast({ title: 'Could not save the invoice', description: e?.message, variant: 'destructive' });
     }
+  };
+
+  /**
+   * Saving the authority: its authorised amount and its excess land on the
+   * claim's own figures, and where the authority is the one that arrived second,
+   * the comparison with the Final Invoice that is already on file is settled
+   * here — including the choice to have the repairer re-invoice.
+   */
+  const handleAuthorityConfirm = async ({
+    figures, corrections, accepted, excessChoice, acceptInvoiceTotal, requestReinvoice,
+  }) => {
+    if (!authorityReview) return;
+    const { item } = authorityReview;
+    const total = toNum(figures.amount_total) || 0;
+    const comparison = compareToAuthority(finalInvoiceTotal(claim), total);
+    const reinvoice = requestReinvoice && comparison?.status === 'under'
+      ? { invoice_total: comparison.invoiceTotal, authority: comparison.authority, by: paidBy }
+      : null;
+    const acceptTotal = acceptInvoiceTotal && comparison?.status === 'under' ? comparison.invoiceTotal : null;
+
+    const excess = excessCheck(figures, claim);
+    const excessText = excess.fills
+      ? `; the ${fmtGBP(excess.shown)} excess filled in`
+      : excess.differs
+        ? `; excess kept at ${fmtGBP(excessChoice === 'authority' ? excess.shown : excess.stored)}`
+        : '';
+    const decisionText = `${acceptTotal ? `; the invoice total of ${fmtGBP(acceptTotal)} accepted as the final repair cost` : ''}${reinvoice ? `; a corrected invoice requested from the repairer (invoiced ${fmtGBP(reinvoice.invoice_total)} against ${fmtGBP(reinvoice.authority)})` : ''}`;
+
+    try {
+      await docs.attachFile(item, { file_url: authorityReview.fileUrl, file_name: authorityReview.fileName });
+      applyCommit(
+        buildAuthorityReviewPatch(claim, figures, {
+          file_url: authorityReview.fileUrl,
+          file_name: authorityReview.fileName,
+          excessChoice,
+          acceptTotal,
+          reinvoice,
+        }),
+        `Final Authority recorded — authorised ${fmtGBP(total)}${excessText}${decisionText}`
+      );
+      buildAuthorityLog({ item, figures, corrections, accepted }).forEach((entry) => {
+        logActivity({ parentId: claim.id, parentType: 'Claim', user: currentUser, ...entry });
+      });
+      setAuthorityReview(null);
+      if (reinvoice) setReinvoice({ comparison });
+    } catch (e) {
+      toast({ title: 'Could not save the authority', description: e?.message, variant: 'destructive' });
+    }
+  };
+
+  /** Rejecting an over-authority invoice and asking the repairer for a corrected one. */
+  const handleReinvoiceFromReview = ({ comparison }) => {
+    setReview(null);
+    if (comparison) setReinvoice({ comparison });
   };
 
   // Removing a file asks which way it goes: the details read off it can go with

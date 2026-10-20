@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, Check, Loader2, ShieldCheck, Sparkles, X } from 'lucide-react';
+import { AlertTriangle, Check, Loader2, ShieldAlert, ShieldCheck, X } from 'lucide-react';
 import { fmtGBP } from '@/components/shared/creditRepairRates';
 import HighlightableDocumentViewer from '@/components/shared/HighlightableDocumentViewer';
 import ExtractedFigureRow from './ExtractedFigureRow';
