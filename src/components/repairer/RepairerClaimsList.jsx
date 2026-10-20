@@ -65,7 +65,7 @@ export default function RepairerClaimsList({ claims, onViewClaim }) {
       if (!val) return '—';
       return (
         <span className="relative group cursor-default">
-          <span className="truncate max-w-[120px] inline-block">{val}</span>
+          <span className="md:truncate md:max-w-[120px] md:inline-block">{val}</span>
           <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 hidden group-hover:block z-50 bg-gray-900 text-white text-xs rounded-lg px-3 py-2 max-w-xs break-words shadow-lg">
             {val}
           </span>
@@ -267,31 +267,40 @@ export default function RepairerClaimsList({ claims, onViewClaim }) {
         </table>
       </div>
 
-      {/* Mobile card view */}
-      <div className="lg:hidden space-y-3">
+      {/* Phone / tablet card view */}
+      <div className="lg:hidden space-y-2">
         {filteredClaims.map(claim => (
-          <div key={claim.id} onClick={() => onViewClaim?.(claim, null)} className="neomorph-flat p-4 cursor-pointer active:bg-gray-50">
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-2 flex-wrap">
-                  <h4 className="font-bold">{formatUKRegistration(claim.reg)}</h4>
-                  {claim.job_number && (
-                    <span className="text-xs font-mono px-2 py-0.5 rounded bg-accent/20 text-accent">
-                      {claim.job_number}
-                    </span>
-                  )}
-                  <ClaimStatusBadges claim={claim} />
-                </div>
-                <div className="grid grid-cols-2 gap-2 text-sm">
-                  {displayFields.map(fieldId => (
-                    <div key={fieldId}>
-                      <span className="text-foreground-muted">{FIELD_LABELS[fieldId] || fieldId}:</span>{' '}
-                      <span className="font-medium">{renderFieldValue(claim, fieldId)}</span>
-                    </div>
-                  ))}
-                </div>
+          <div
+            key={claim.id}
+            onClick={() => onViewClaim?.(claim, null)}
+            className="neomorph-flat p-3 cursor-pointer active:bg-gray-50"
+          >
+            <div className="flex items-center justify-between gap-2">
+              <span
+                className="inline-flex items-center justify-center rounded-md bg-[#1e2d4a] text-white font-semibold uppercase flex-shrink-0"
+                style={{ fontSize: '13px', width: '96px', height: '28px', letterSpacing: '0.05em' }}
+              >
+                {claim.reg ? formatUKRegistration(claim.reg) : '—'}
+              </span>
+              <div className="flex items-center gap-1 flex-wrap justify-end min-w-0">
+                {claim.job_number && (
+                  <span className="text-[11px] font-mono px-1.5 py-0.5 rounded bg-accent/20 text-accent">
+                    {claim.job_number}
+                  </span>
+                )}
+                <ClaimStatusBadges claim={claim} />
               </div>
             </div>
+            {displayFields.length > 0 && (
+              <div className="mt-2 grid grid-cols-2 m-keep-2 gap-x-3 gap-y-1 text-xs">
+                {displayFields.map(fieldId => (
+                  <div key={fieldId} className="min-w-0">
+                    <span className="text-foreground-muted">{FIELD_LABELS[fieldId] || fieldId}:</span>{' '}
+                    <span className="font-medium">{renderFieldValue(claim, fieldId)}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         ))}
         {filteredClaims.length === 0 && (

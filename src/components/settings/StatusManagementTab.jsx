@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Trash2, Edit, Check, X, Plus, GripVertical, Lock } from 'lucide-react';
+import { Trash2, Edit, Check, X, Plus, GripVertical, Lock, ChevronUp, ChevronDown } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 
 const colorOptions = [
@@ -24,7 +24,7 @@ const colorOptions = [
   { name: "slate", bg: "#64748b", label: "Slate" },
 ];
 
-function StatusItem({ status, onUpdate, onDelete, onEditToggle, editingStatusId, editingData, setEditingData, provided, snapshot, isProtected, isInUse }) {
+function StatusItem({ status, onUpdate, onDelete, onEditToggle, editingStatusId, editingData, setEditingData, provided, snapshot, isProtected, isInUse, onMove, canMoveUp, canMoveDown }) {
   const isEditing = editingStatusId === status.id;
   
   // Get the color object for display
@@ -37,7 +37,7 @@ function StatusItem({ status, onUpdate, onDelete, onEditToggle, editingStatusId,
       className={`neomorph-flat p-3 mb-2 flex items-center justify-between transition-shadow ${snapshot.isDragging ? 'shadow-lg' : ''} ${isProtected ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800' : ''}`}
     >
       <div className="flex items-center gap-3 flex-grow">
-        <button {...provided.dragHandleProps} className="cursor-grab p-1">
+        <button {...provided.dragHandleProps} className="cursor-grab p-1 hidden md:block">
           <GripVertical className="w-4 h-4 text-foreground-subtle" />
         </button>
         {isEditing ? (
@@ -106,6 +106,29 @@ function StatusItem({ status, onUpdate, onDelete, onEditToggle, editingStatusId,
           </>
         ) : (
           <>
+            {/* Phones reorder with these two buttons instead of dragging */}
+            <div className="flex flex-col md:hidden">
+              <Button
+                size="icon"
+                variant="ghost"
+                disabled={!canMoveUp}
+                onClick={() => onMove(-1)}
+                className="h-5 w-7 text-gray-500 disabled:opacity-25"
+                title="Move up"
+              >
+                <ChevronUp className="w-4 h-4" />
+              </Button>
+              <Button
+                size="icon"
+                variant="ghost"
+                disabled={!canMoveDown}
+                onClick={() => onMove(1)}
+                className="h-5 w-7 text-gray-500 disabled:opacity-25"
+                title="Move down"
+              >
+                <ChevronDown className="w-4 h-4" />
+              </Button>
+            </div>
             <Button size="icon" variant="ghost" onClick={() => onEditToggle(status)} className="text-blue-500 hover:text-blue-600">
               <Edit className="w-4 h-4" />
             </Button>
@@ -321,6 +344,19 @@ export default function StatusManagementTab({ department }) {
     bulkReorderMutation.mutate(updates);
   }
 
+  function moveStatus(id, direction) {
+    const index = displayStatuses.findIndex(s => s.id === id);
+    const target = index + direction;
+    if (index < 0 || target < 0 || target >= displayStatuses.length) return;
+
+    const newOrder = Array.from(displayStatuses);
+    const [movedItem] = newOrder.splice(index, 1);
+    newOrder.splice(target, 0, movedItem);
+
+    setOptimisticOrder(newOrder);
+    bulkReorderMutation.mutate(newOrder.map((status, i) => ({ id: status.id, sort_order: i })));
+  }
+
   return (
     <div className="space-y-4">
       <h2 className="text-lg font-bold">{department} Statuses</h2>
@@ -392,6 +428,9 @@ export default function StatusManagementTab({ department }) {
                           snapshot={snapshot}
                           isProtected={status.status_name === 'New'}
                           isInUse={usedStatusNames.has(status.status_name)}
+                          onMove={(direction) => moveStatus(status.id, direction)}
+                          canMoveUp={index > 0}
+                          canMoveDown={index < displayStatuses.length - 1}
                         />
                       )}
                     </Draggable>

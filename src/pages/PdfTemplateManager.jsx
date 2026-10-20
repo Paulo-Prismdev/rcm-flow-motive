@@ -494,7 +494,7 @@ function TemplateEditor({ template, onSave, onCancel }) {
             </div>
 
             {formData.header_config.show_logo && (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 ml-10">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 ml-0 md:ml-10">
                 <div className="md:col-span-2">
                   <label className="block text-sm mb-2">Logo URL</label>
                   <Input

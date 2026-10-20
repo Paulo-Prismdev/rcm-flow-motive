@@ -16,6 +16,7 @@ import AddressLookupInput from '@/components/shared/AddressLookupInput';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { geocodeAddress } from '@/functions/geocodeAddress';
 import { SUPPLIER_COVERAGE_AREAS, milesToMeters } from '@/components/map/supplierCoverageData';
+import SheetDragHandle from '@/components/map/SheetDragHandle';
 import { GREAT_BRITAIN_GEOJSON } from '@/components/map/greatBritainOutline';
 import { haversineDistance, formatHaversineDistance } from '@/components/shared/haversine';
 
@@ -155,6 +156,10 @@ export default function BodyshopMap() {
   const [geocodedCoords, setGeocodedCoords] = useState({});
   const [isGeocoding, setIsGeocoding] = useState(false);
   const [showSupplierPanel, setShowSupplierPanel] = useState(false);
+  const supplierSheetRef = useRef(null);
+  const settingsSheetRef = useRef(null);
+  const listSheetRef = useRef(null);
+  const selectedSheetRef = useRef(null);
   // Phones show one panel at a time, as a sheet over the map, so the map keeps
   // the whole screen when nothing is open.
   const isMobile = useIsMobile();
@@ -605,12 +610,15 @@ export default function BodyshopMap() {
       {showSupplierPanel && (
         <>
           {isMobile && <div className="absolute inset-0 z-[1098] bg-black/20" onClick={() => setShowSupplierPanel(false)} />}
-          <div className={isMobile
+          <div
+            ref={supplierSheetRef}
+            className={isMobile
             ? 'absolute left-0 right-0 bottom-0 z-[1099] max-h-[75vh] overflow-y-auto rounded-t-2xl border-t border-border bg-white dark:bg-gray-800 px-3 pt-2 pb-[calc(1.25rem+env(safe-area-inset-bottom))] shadow-2xl space-y-2'
             : 'absolute top-16 right-3 z-[999] bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-border p-2.5 space-y-2 w-[210px]'}>
             {isMobile && (
-              <div className="flex justify-end -mb-1">
-                <button onClick={() => setShowSupplierPanel(false)} className="p-1 text-gray-400" title="Close">
+              <div className="sticky top-0 z-10 flex items-center justify-center bg-white dark:bg-gray-800">
+                <SheetDragHandle onClose={() => setShowSupplierPanel(false)} targetRef={supplierSheetRef} />
+                <button onClick={() => setShowSupplierPanel(false)} className="absolute right-0 top-1.5 p-1 text-gray-400" title="Close">
                   <X className="w-4 h-4" />
                 </button>
               </div>
@@ -640,12 +648,15 @@ export default function BodyshopMap() {
       {showSettings && (
         <>
           {isMobile && <div className="absolute inset-0 z-[1098] bg-black/20" onClick={() => setShowSettings(false)} />}
-          <div className={isMobile
+          <div
+            ref={settingsSheetRef}
+            className={isMobile
             ? 'absolute left-0 right-0 bottom-0 z-[1099] max-h-[75vh] overflow-y-auto rounded-t-2xl border-t border-border bg-white dark:bg-gray-800 px-3 pt-2 pb-[calc(1.25rem+env(safe-area-inset-bottom))] shadow-2xl space-y-2'
             : 'absolute top-16 left-3 z-[999] bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-border p-3 space-y-2 w-[220px]'}>
             {isMobile && (
-              <div className="flex justify-end -mb-1">
-                <button onClick={() => setShowSettings(false)} className="p-1 text-gray-400" title="Close">
+              <div className="sticky top-0 z-10 flex items-center justify-center bg-white dark:bg-gray-800">
+                <SheetDragHandle onClose={() => setShowSettings(false)} targetRef={settingsSheetRef} />
+                <button onClick={() => setShowSettings(false)} className="absolute right-0 top-1.5 p-1 text-gray-400" title="Close">
                   <X className="w-4 h-4" />
                 </button>
               </div>
@@ -709,15 +720,26 @@ export default function BodyshopMap() {
 
       {/* ── BOTTOM LIST SHEET (drag up to expand) ── */}
       {!isLoading && resolvedBodyshops.length > 0 && !(isMobile && (showSettings || showSupplierPanel)) && (
-        <div className={`absolute left-0 right-0 bottom-0 z-[997] bg-white dark:bg-gray-900 rounded-t-2xl shadow-2xl border-t border-border transition-all duration-300 overflow-hidden ${
-          listExpanded ? (isMobile ? 'h-[85vh]' : 'h-[50vh]') : 'h-[52px]'
-        }`}>
+        <div
+          ref={listSheetRef}
+          style={!listExpanded && isMobile ? { bottom: 'calc(0.75rem + env(safe-area-inset-bottom))' } : undefined}
+          className={`absolute z-[997] bg-white dark:bg-gray-900 shadow-2xl overflow-hidden ${
+            listExpanded
+              ? `left-0 right-0 bottom-0 rounded-t-2xl border-t border-border transition-all duration-300 ${isMobile ? 'h-[85vh]' : 'h-[50vh]'}`
+              : isMobile
+                ? 'left-1/2 -translate-x-1/2 rounded-full border border-border transition-all duration-300'
+                : 'left-0 right-0 bottom-0 h-[52px] rounded-t-2xl border-t border-border transition-all duration-300'
+          }`}
+        >
+          {isMobile && listExpanded && (
+            <SheetDragHandle onClose={() => setListExpanded(false)} targetRef={listSheetRef} />
+          )}
           <button
             onClick={() => {
               setListExpanded(!listExpanded);
               if (isMobile && !listExpanded) { setShowSettings(false); setShowSupplierPanel(false); }
             }}
-            className="w-full flex items-center justify-center gap-2 pt-2 pb-1.5 touch-manipulation"
+            className={`w-full flex items-center justify-center gap-2 touch-manipulation ${!listExpanded && isMobile ? 'px-4 py-3 whitespace-nowrap' : 'pt-2 pb-1.5'}`}
           >
             <ChevronUp className={`w-5 h-5 text-gray-400 transition-transform ${listExpanded ? '' : 'rotate-180'}`} />
             <span className="text-xs font-medium text-muted-foreground">
@@ -779,13 +801,17 @@ export default function BodyshopMap() {
         <div className="absolute inset-0 z-[1100] flex items-end" onClick={() => setSelectedBodyshop(null)}>
           <div className="absolute inset-0 bg-black/30" />
           <div
+            ref={selectedSheetRef}
             className="relative w-full bg-white dark:bg-gray-900 rounded-t-2xl shadow-2xl max-h-[30vh] overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Drag handle */}
-            <div className="bg-white dark:bg-gray-900 pt-1.5 pb-0.5 flex justify-center">
-              <div className="w-8 h-1 rounded-full bg-gray-300 dark:bg-gray-700"></div>
-            </div>
+            {/* Drag handle — swipe down or tap to close */}
+            <SheetDragHandle
+              onClose={() => setSelectedBodyshop(null)}
+              targetRef={selectedSheetRef}
+              className="bg-white dark:bg-gray-900 pt-1.5 pb-0.5"
+              barClassName="w-8 h-1 rounded-full bg-gray-300 dark:bg-gray-700"
+            />
             {/* Close button */}
             <button
               onClick={() => setSelectedBodyshop(null)}
