@@ -25,6 +25,8 @@ import {
   snippetsFromExtraction,
   toNum,
 } from './invoiceReview';
+import { isInvoiceDocument } from '@/components/shared/invoiceChecklist';
+import RepairCostFromInvoice, { repairCostOffer } from './RepairCostFromInvoice';
 
 /**
  * The check before an invoice is recorded: the document on the left, the figures
@@ -46,6 +48,7 @@ export default function InvoiceReviewModal({
   const [acceptedMismatch, setAcceptedMismatch] = useState(false);
   const [reason, setReason] = useState('');
   const [duplicate, setDuplicate] = useState(null);
+  const [repairCostChoice, setRepairCostChoice] = useState(null);
 
   // Read the document once each time the screen opens.
   useEffect(() => {
@@ -62,6 +65,7 @@ export default function InvoiceReviewModal({
     setAcceptedMismatch(false);
     setReason('');
     setDuplicate(null);
+    setRepairCostChoice(null);
     setFocused('invoice_number');
 
     (async () => {
@@ -121,9 +125,15 @@ export default function InvoiceReviewModal({
     setTouched((prev) => ({ ...prev, [key]: true }));
   };
 
-  const missingRequired = Object.entries(REQUIRED_FIGURES)
-    .filter(([key]) => !String(figures[key] ?? '').trim())
-    .map(([, message]) => message);
+  // A close-out document is filed for the date printed on it: the figures on it
+  // are read and logged, but only the Final Invoice's total is needed, because
+  // the claim's final repair cost comes from it.
+  const requiredKeys = isInvoiceDocument(item) && !item?.setsRepairCost
+    ? ['invoice_date']
+    : Object.keys(REQUIRED_FIGURES);
+  const missingRequired = requiredKeys
+    .filter((key) => !String(figures[key] ?? '').trim())
+    .map((key) => REQUIRED_FIGURES[key]);
 
   const needsReviewKeys = useMemo(() => figuresNeedingReview(figures, confidence), [figures, confidence]);
   const unreviewed = needsReviewKeys.filter((key) => !reviewed[key] && !touched[key]);
@@ -138,6 +148,11 @@ export default function InvoiceReviewModal({
     : null;
 
   const mismatchAccepted = !mismatch || (acceptedMismatch && reason.trim().length > 0);
+
+  // The Final Invoice's total, set against the repair cost already on the claim:
+  // it fills the figure in where there is none, and is flagged where it differs.
+  const costOffer = repairCostOffer(item, claim, figures);
+  const useRepairCost = repairCostChoice ?? costOffer?.defaultUse ?? false;
   const softBlockers = [
     ...arithmetic.map((text, i) => ({ id: `arith-${i}`, text })),
     ...matchIssues.map((text, i) => ({ id: `match-${i}`, text })),
@@ -151,7 +166,12 @@ export default function InvoiceReviewModal({
       accepted.push(`the invoice total ${fmtGBP(mismatch.invoiceTotal)} differs from our calculated ${fmtGBP(mismatch.expected.amount)}${mismatch.expected.note ? ` (${mismatch.expected.note})` : ''} — accepted with the reason: ${reason.trim()}`);
     }
     softBlockers.filter((b) => acked[b.id]).forEach((b) => accepted.push(`${b.text} — accepted`));
-    onConfirm({ figures, corrections: correctionsFromReview(figures, raw), accepted });
+    onConfirm({
+      figures,
+      corrections: correctionsFromReview(figures, raw),
+      accepted,
+      useAsRepairCost: !!costOffer && useRepairCost,
+    });
   };
 
   if (!isOpen) return null;
@@ -232,6 +252,8 @@ export default function InvoiceReviewModal({
                 />
               ))}
             </div>
+
+            <RepairCostFromInvoice offer={costOffer} useIt={useRepairCost} onUse={setRepairCostChoice} />
 
             <InvoiceReviewChecks
               arithmetic={arithmetic}

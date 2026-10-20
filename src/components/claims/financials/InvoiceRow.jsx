@@ -12,7 +12,7 @@ import InvoiceCalculation from './InvoiceCalculation';
  * same box rather than floating underneath it.
  */
 export default function InvoiceRow({
-  item, state, files, isUploading, claim,
+  item, state, files, isUploading, claim, focus,
   onChange, onUpload, onDeleteFile, onRenameFile, onViewFile, onRequest, onUndoRequest,
 }) {
   const [showCalc, setShowCalc] = useState(false);
@@ -20,12 +20,17 @@ export default function InvoiceRow({
 
   const isDocument = isInvoiceDocument(item);
   const partyName = invoicePartyName(claim, item);
+  // The guided flow keeps each action with the step it belongs to: raising and
+  // collecting an invoice are the send steps' work, marking it paid is the
+  // payments step's.
+  const sendFocus = focus === 'send';
+  const payFocus = focus === 'pay';
   // Accounts are asked for the invoices we raise, never for the final invoice or
   // the close-out paperwork.
-  const canAsk = canRequestInvoice(item) && !!onRequest && !state.paid && !state.date;
+  const canAsk = canRequestInvoice(item) && !!onRequest && !state.paid && !state.date && !payFocus;
   // The quick paid action belongs on an invoice that has gone out or come in but
   // is still waiting to be paid.
-  const canMarkPaid = invoiceToneKey(item, state) === 'warning' && !state.paid && !!state.date;
+  const canMarkPaid = invoiceToneKey(item, state) === 'warning' && !state.paid && !!state.date && !sendFocus;
   const hasAmount = !state.awaiting && state.amount > 0;
 
   return (

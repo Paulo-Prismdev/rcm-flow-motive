@@ -52,6 +52,8 @@ export const INVOICE_SECTIONS = [
  * The invoice items that can appear on a claim.
  * - kind 'document' → close-out paperwork. It is only ever received/sent (with a
  *   date and a file): no amount, no paid tick, and nothing in the owed totals.
+ * - setsRepairCost → the total read off this document is offered as the claim's
+ *   final repair cost.
  * - direction 'in'  → an invoice we receive and pay (money we owe)
  * - direction 'out' → an invoice we send and get paid for (money owed to us)
  * - requires       → visibility gate on the claim / client
@@ -65,20 +67,21 @@ export const INVOICE_ITEMS = [
     key: 'final_invoice',
     label: 'Final Invoice',
     section: 'closeout',
+    // The repairer's final invoice to the insurer: we keep a copy of it on file
+    // and the repair cost is read off it, but we are not paid on it ourselves —
+    // so it is close-out paperwork like the Final Authority, green on a copy,
+    // with no paid step.
+    kind: 'document',
     direction: 'out',
     dateLabel: 'Sent',
     requires: 'not_credit_repair',
     party: 'authorising_party',
-    bindings: {
-      amount: 'invoice_amount',
-      date: 'invoice_sent_date',
-      paid_date: 'invoice_payment_received',
-    },
-    status_field: 'invoice_status',
-    paid_status: 'Invoice Paid',
-    unpaid_status: 'Invoiced',
+    // Its date is the date printed on the invoice itself, never the upload date.
+    bindings: { date: 'invoice_sent_date' },
+    // The job is invoiced once the final invoice itself is on file.
     date_status_field: 'invoice_status',
     date_status_value: 'Invoiced',
+    setsRepairCost: true,
   },
   {
     key: 'final_authority',
@@ -643,8 +646,12 @@ export function deriveInvoiceStatus(claim, hasFile = claimHasFiledCopy(claim)) {
   if (!invoices.some(({ item, state }) => isItemHandled(item, state))) return 'Ready to Invoice';
   if (invoices.some(({ item, state }) => !isItemHandled(item, state))) return 'Invoice Required - Pending';
 
-  const finalUnpaid = claim?.invoice_sent_date && !claim?.invoice_payment_received;
-  const overdue = finalUnpaid && claim?.invoice_due_date && claim.invoice_due_date < today();
+  // Overdue means one of our own invoices has gone out and is still unpaid past
+  // the due date. The Final Invoice is the repairer's, not ours, so it takes no
+  // part in this.
+  const unpaidOut = rows.some(({ item, state }) =>
+    !isInvoiceDocument(item) && item.direction === 'out' && !!state.date && !state.paid);
+  const overdue = unpaidOut && !!claim?.invoice_due_date && claim.invoice_due_date < today();
   return overdue ? 'Invoice Overdue' : 'Invoiced';
 }
 

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { useToast } from '@/components/ui/use-toast';
@@ -18,20 +18,21 @@ import {
   deriveInvoiceStatus,
   invoiceContext,
   invoicePartyName,
-  isInvoiceDocument,
   repairNet,
   repairVat,
   resolveInvoiceAmount,
-  today,
 } from '@/components/shared/invoiceChecklist';
 import FinancialHeaderStrip from './FinancialHeaderStrip';
+import NextStepCard from './NextStepCard';
+import StepIndicator from './StepIndicator';
+import FinancialStep from './FinancialStep';
 import JobFiguresCard from './JobFiguresCard';
-import InvoiceGroup from './InvoiceGroup';
 import InvoiceRow from './InvoiceRow';
 import CloseOutItem from './CloseOutItem';
+import InvoiceSectionEmpty from './InvoiceSectionEmpty';
 import RequestInvoiceModal from './RequestInvoiceModal';
 import InvoiceReviewModal from './InvoiceReviewModal';
-import { emptySectionMessage, invoiceCountLabel, invoiceSectionSummary } from './invoiceSectionMeta';
+import { buildFinancialFlow } from './financialSteps';
 import { resolveInvoiceParty } from './invoiceParty';
 import useClaimInvoiceDocs from './useClaimInvoiceDocs';
 import { buildReviewLog } from './invoiceReview';
@@ -51,9 +52,10 @@ const FIELD_LABELS = {
 };
 
 /**
- * The claim's Financials — one flow: the totals and overall status, the job
- * figures the invoices are worked out from, the invoices themselves, and the
- * close-out step. Internal only.
+ * The claim's Financials, as the five steps the work happens in: the totals and
+ * the overall status always at the top, the one thing to do next, then the steps
+ * themselves — close-out documents, job figures, our invoices, invoices in and
+ * payments. Internal only.
  */
 export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvoicing = true }) {
   const { toast } = useToast();
@@ -64,6 +66,8 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
   const [preparingRequest, setPreparingRequest] = useState(false);
   const [pendingFigureChange, setPendingFigureChange] = useState(null);
   const [review, setReview] = useState(null);
+  const [quickItem, setQuickItem] = useState(null);
+  const quickUploadRef = useRef(null);
 
   const { data: appConfigs = [] } = useQuery({
     queryKey: ['AppConfig'],
@@ -80,6 +84,25 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
   const hasFile = (itemKey) => docs.filesFor(itemKey).length > 0;
   const summary = useMemo(() => computeInvoiceSummary(claim, ctx, hasFile), [claim, ctx, docs.files]);
   const status = useMemo(() => deriveInvoiceStatus(claim, hasFile), [claim, docs.files]);
+  const flow = useMemo(() => buildFinancialFlow(summary, ctx), [summary, ctx]);
+
+  // The step the job is on is open; a step opened by hand stays open, and when
+  // the work moves on the next step opens by itself.
+  const [openSteps, setOpenSteps] = useState(() => new Set(flow.current ? [flow.current] : []));
+  const lastCurrent = useRef(flow.current);
+  useEffect(() => {
+    if (lastCurrent.current === flow.current) return;
+    lastCurrent.current = flow.current;
+    if (flow.current) setOpenSteps((prev) => new Set(prev).add(flow.current));
+  }, [flow.current]);
+
+  const openStep = (key) => setOpenSteps((prev) => new Set(prev).add(key));
+  const toggleStep = (key) => setOpenSteps((prev) => {
+    const next = new Set(prev);
+    if (next.has(key)) next.delete(key);
+    else next.add(key);
+    return next;
+  });
 
   // Every change is recorded in the claim's activity history with the field, the
   // old value and the new value, alongside who made it and when. Changes that
@@ -170,37 +193,26 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
 
   const handleItemChange = (item, changes, description) => {
     const { patch } = buildInvoiceItemPatch(item, claim, changes, ctx);
+
+    // The claim's own invoicing flag follows the invoices themselves: the job is
+    // invoiced once everything applicable is paid, and back to invoiced where a
+    // payment is undone.
+    if (changes.paid !== undefined) {
+      const complete = computeInvoiceSummary({ ...claim, ...patch }, ctx, hasFile).allComplete;
+      if (changes.paid && complete) patch.invoice_status = 'Invoice Paid';
+      else if (!changes.paid && claim.invoice_status === 'Invoice Paid') patch.invoice_status = 'Invoiced';
+    }
+
     commit(patch, description);
   };
 
+  // Every upload is read off the document before anything is recorded: the
+  // figures are checked against the job, and the date that lands is the one
+  // printed on the document itself — never today's date, and never another
+  // item's date.
   const handleUpload = async (item, fileList) => {
     const [file] = Array.from(fileList || []);
     if (!file) return;
-
-    // An invoice is read off the document first and only saved once its figures
-    // have been checked. Documents are filed as they are.
-    if (!isInvoiceDocument(item)) {
-      const created = await docs.uploadToItem(item, fileList);
-      if (!created?.length) return;
-
-      await logActivity({
-        parentId: claim.id,
-        parentType: 'Claim',
-        action: 'Invoice Document Uploaded',
-        description: `Uploaded ${created.length} file(s) to "${item.label}"`,
-        user: currentUser,
-      });
-
-      // The upload IS the received/sent signal: stamp today's date when the item
-      // hasn't been dated yet, so the totals and the claims list agree.
-      const row = summary.rows.find((r) => r.item.key === item.key);
-      if (row && !row.state.date) {
-        const { patch } = buildInvoiceItemPatch(item, claim, { date: today() }, ctx);
-        commit(patch, `${item.label} ${(item.dateLabel || 'date').toLowerCase()} date set to ${today()}`);
-      }
-      return;
-    }
-
     try {
       const uploaded = await docs.uploadFile(file);
       if (!uploaded) return;
@@ -213,15 +225,23 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
   // Nothing has touched the claim until this runs: the file is filed against the
   // invoice, its figures and number are recorded, the date marks it received or
   // sent — which locks the amount — and the history says what was read, changed
-  // and accepted.
-  const handleReviewConfirm = async ({ figures, corrections, accepted }) => {
+  // and accepted. The Final Invoice's total can become the final repair cost.
+  const handleReviewConfirm = async ({ figures, corrections, accepted, useAsRepairCost }) => {
     if (!review) return;
     const { item } = review;
+    const total = Number(figures.amount_total) || 0;
+    const repairCost = useAsRepairCost && item.setsRepairCost ? total : null;
+
     try {
       await docs.attachFile(item, { file_url: review.fileUrl, file_name: review.fileName });
       applyCommit(
-        buildInvoiceReviewPatch(item, claim, figures),
-        `${item.label} recorded — invoice ${figures.invoice_number}, dated ${figures.invoice_date}, ${fmtGBP(Number(figures.amount_total) || 0)}`
+        {
+          ...buildInvoiceReviewPatch(item, claim, figures),
+          ...(repairCost ? { final_repair_cost: repairCost } : {}),
+        },
+        repairCost
+          ? `${item.label} recorded — invoice ${figures.invoice_number}, dated ${figures.invoice_date}, ${fmtGBP(total)}; final repair cost set to ${fmtGBP(repairCost)} from the invoice`
+          : `${item.label} recorded — invoice ${figures.invoice_number}, dated ${figures.invoice_date}, ${fmtGBP(total)}`
       );
       buildReviewLog({ item, figures, corrections, accepted }).forEach((entry) => {
         logActivity({ parentId: claim.id, parentType: 'Claim', user: currentUser, ...entry });
@@ -279,11 +299,32 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
     onUpdate({ ...claim, ...patch });
   };
 
-  const renderRow = ({ item, state }) => (
+  // The "Next step" card's button does the thing it names: the file picker for an
+  // upload, the accounts request, the paid tick, or the figures the amount needs.
+  const runAction = (action) => {
+    if (!action) return;
+    if (action.kind === 'upload') {
+      setQuickItem(action.item);
+      quickUploadRef.current?.click();
+      return;
+    }
+    if (action.kind === 'request') {
+      openRequest(action.item, action.state);
+      return;
+    }
+    if (action.kind === 'pay') {
+      handleItemChange(action.item, { paid: true }, `${action.item.label} marked as paid`);
+      return;
+    }
+    openStep('figures');
+  };
+
+  const renderRow = ({ item, state }, focus) => (
     <InvoiceRow
       key={item.key}
       item={item}
       state={state}
+      focus={focus}
       files={docs.filesFor(item.key)}
       isUploading={docs.isUploading}
       claim={claim}
@@ -312,23 +353,43 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
     />
   );
 
-  const rowsFor = (section) => summary.rows.filter((r) => r.item.section === section);
+  const [closeout, figuresStep, raise, collect, payments] = flow.steps;
 
-  // Each panel's header line and, where it holds nothing, the checked empty
-  // state that says why — both read off the claim, so nothing new is stored.
-  const sectionMeta = (key) => {
-    const rows = rowsFor(key);
-    return {
-      rows,
-      countLabel: invoiceCountLabel(key, rows),
-      summary: invoiceSectionSummary(key, rows),
-      empty: rows.length === 0 ? emptySectionMessage(key, ctx) : null,
-    };
-  };
+  const figuresCard = (
+    <JobFiguresCard
+      claim={claim}
+      ctx={ctx}
+      missing={summary.missing}
+      onChange={(fields, description) => commit(fields, description, { checkInvoiceImpact: true })}
+      onTrackerChange={(patch, description) => commit(patch, description, { checkInvoiceImpact: true })}
+    />
+  );
 
-  const invoicesIn = sectionMeta('in');
-  const invoicesOut = sectionMeta('out');
-  const closeOut = sectionMeta('closeout');
+  /** One of the steps: its header and line, then its own rows. */
+  const step = (config, children) => (
+    <FinancialStep
+      n={config.n}
+      title={config.title}
+      hint={config.hint}
+      line={config.line}
+      status={config.done ? 'done' : config.key === flow.current ? 'current' : 'later'}
+      open={openSteps.has(config.key)}
+      onToggle={() => toggleStep(config.key)}
+    >
+      {children}
+    </FinancialStep>
+  );
+
+  /** A step's rows — or, where none apply, the checked reason it holds nothing. */
+  const rowsBlock = (config, focus, columns) => (
+    config.empty
+      ? <InvoiceSectionEmpty title={config.empty.title} reasons={config.empty.reasons} />
+      : (
+        <div className={`grid grid-cols-1 items-stretch gap-2 ${columns}`}>
+          {config.rows.map((row) => (focus === 'closeout' ? renderCloseOut(row) : renderRow(row, focus)))}
+        </div>
+      )
+  );
 
   return (
     <TooltipProvider delayDuration={250}>
@@ -341,54 +402,38 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
           finalCostVat={repairVat(claim)}
         />
 
-        <JobFiguresCard
-          claim={claim}
-          ctx={ctx}
-          missing={summary.missing}
-          onChange={(fields, description) => commit(fields, description, { checkInvoiceImpact: true })}
-          onTrackerChange={(patch, description) => commit(patch, description, { checkInvoiceImpact: true })}
-        />
+        {!showInvoicing && figuresCard}
 
         {showInvoicing && (
-          <div className="space-y-3">
+          <>
+            <NextStepCard action={flow.nextAction} allDone={flow.allDone} onDo={runAction} />
+            <StepIndicator steps={flow.steps} current={flow.current} onSelect={openStep} />
+
+            <div className="space-y-2.5">
+              {step(closeout, rowsBlock(closeout, 'closeout', 'sm:grid-cols-3'))}
+              {step(figuresStep, figuresCard)}
+              {step(raise, rowsBlock(raise, 'send', 'sm:grid-cols-2'))}
+              {step(collect, rowsBlock(collect, 'send', 'sm:grid-cols-2'))}
+              {step(payments, rowsBlock(payments, 'pay', 'sm:grid-cols-2'))}
+            </div>
+
             {preparingRequest && (
               <p className="text-[11px] text-muted-foreground">Preparing the accounts request…</p>
             )}
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 items-stretch">
-              <InvoiceGroup
-                label="Invoices In"
-                hint="Invoices we receive and pay"
-                countLabel={invoicesIn.countLabel}
-                summary={invoicesIn.summary}
-                empty={invoicesIn.empty}
-              >
-                {invoicesIn.rows.map(renderRow)}
-              </InvoiceGroup>
-
-              <InvoiceGroup
-                label="Invoices Out"
-                hint="Invoices we send and get paid for"
-                countLabel={invoicesOut.countLabel}
-                summary={invoicesOut.summary}
-                empty={invoicesOut.empty}
-              >
-                {invoicesOut.rows.map(renderRow)}
-              </InvoiceGroup>
-            </div>
-
-            <InvoiceGroup
-              label="Close-out"
-              hint="The job's final step"
-              countLabel={closeOut.countLabel}
-              summary={closeOut.summary}
-              empty={closeOut.empty}
-            >
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 items-stretch">
-                {closeOut.rows.map(renderCloseOut)}
-              </div>
-            </InvoiceGroup>
-          </div>
+            <input
+              ref={quickUploadRef}
+              type="file"
+              multiple
+              className="hidden"
+              onChange={(e) => {
+                const files = e.target.files;
+                const item = quickItem;
+                e.target.value = '';
+                if (files?.length && item) handleUpload(item, files);
+              }}
+            />
+          </>
         )}
 
         {docs.viewingFile && (
