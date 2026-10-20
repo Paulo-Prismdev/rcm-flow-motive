@@ -84,20 +84,22 @@ export default function ClaimDetailMobileHeader({
 }) {
   const currentSection = SECTIONS.find(s => s.value === claim._selectedSection) || SECTIONS[0];
 
-  const actionBase = 'relative flex-1 min-w-0 flex flex-col items-center justify-center rounded-lg transition-colors';
+  const actionBase = 'tap-44-y flex-1 min-w-0 flex flex-col items-center justify-center rounded-lg transition-colors';
   const actionSize = collapsed ? 'h-9' : 'h-12';
 
   return (
     <div
+      data-claim-header
       className="lg:hidden sticky top-0 flex-shrink-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800"
-      style={{ zIndex: 20, isolation: 'isolate' }}
+      style={{ isolation: 'isolate' }}
     >
       {/* Row 1: back arrow, registration and claim number */}
-      <div className="flex items-center gap-2 px-3 pt-2 pb-1.5">
+      <div className="flex items-center gap-2 px-3 pb-1.5">
         <button
           type="button"
           onClick={onClose}
-          className="flex-shrink-0 flex items-center justify-center w-9 h-9 rounded-lg bg-gray-100 dark:bg-gray-800"
+          aria-label="Back"
+          className="tap-44 flex-shrink-0 flex items-center justify-center w-9 h-9 rounded-lg bg-gray-100 dark:bg-gray-800 transition-all active:scale-95 active:bg-gray-300 dark:active:bg-gray-700"
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
@@ -134,12 +136,12 @@ export default function ClaimDetailMobileHeader({
             {!isClosedStatus && (claim.update_status_flag || claim.client_comm_status_flag) && (
               <div className="flex flex-wrap items-center gap-1.5">
                 {claim.update_status_flag && (
-                  <button type="button" onClick={onUpdateTracking}>
+                  <button type="button" onClick={onUpdateTracking} className="tap-44-up">
                     <UpdateStatusBadge status={computeUpdateStatusFlag(claim)} small labelPrefix="Updates" />
                   </button>
                 )}
                 {claim.client_comm_status_flag && (
-                  <button type="button" onClick={onUpdateTracking}>
+                  <button type="button" onClick={onUpdateTracking} className="tap-44-up">
                     <UpdateStatusBadge status={computeClientCommStatusFlag(claim)} small labelPrefix="Client" />
                   </button>
                 )}

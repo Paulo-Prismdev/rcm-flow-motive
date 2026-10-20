@@ -634,6 +634,21 @@ button:not(.btn-sm):not(.btn-icon),
     padding-bottom: max(env(safe-area-inset-bottom), 0.5rem);
   }
 
+  /* ── 1d. Phone claim header ──
+     The claim fills the screen on phones, so its header clears the status bar /
+     notch, sits above everything that scrolls under it, and gives the small
+     controls a ≥44px tap area (invisible, so nothing changes visually). */
+  [data-claim-header] {
+    padding-top: max(env(safe-area-inset-top), 0.5rem);
+    z-index: 50;
+  }
+  .tap-44 { position: relative; }
+  .tap-44::before { content: ''; position: absolute; inset: -4px; }
+  .tap-44-y { position: relative; }
+  .tap-44-y::before { content: ''; position: absolute; inset: -4px 0; }
+  .tap-44-up { position: relative; }
+  .tap-44-up::before { content: ''; position: absolute; left: 0; right: 0; top: -18px; bottom: -8px; }
+
   /* Two short label/value fields per row, with tighter cells */
   .grid.m-fields-2 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
