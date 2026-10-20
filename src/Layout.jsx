@@ -24,7 +24,8 @@ import {
   Shield,
   Building2,
   PanelLeftClose,
-  PanelLeftOpen } from
+  PanelLeftOpen,
+  Receipt } from
 "lucide-react";
 import GlobalSearch from "./components/layout/GlobalSearch";
 import Notifications from "./components/layout/Notifications";
@@ -57,6 +58,7 @@ const allDepartments = [
 { name: "Parts", url: createPageUrl("Parts"), icon: Package, permission: "Parts" },
 { name: "Tyre Requests", url: createPageUrl("TyreRequests"), icon: Package, permission: "Parts" },
 
+{ name: "Invoicing", url: createPageUrl("Invoicing"), icon: Receipt, permission: "Invoicing" },
 { name: "Reports", url: createPageUrl("Reports"), icon: BarChart3, permission: "Reports", overlayPage: "Reports" },
 { name: "Map", url: createPageUrl("BodyshopMap"), icon: Search, permission: "Map", overlayPage: "BodyshopMap" }];
 

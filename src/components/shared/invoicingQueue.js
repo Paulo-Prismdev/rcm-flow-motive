@@ -230,7 +230,7 @@ export function buildInvoicingQueues(claims = [], thresholds = DEFAULT_QUEUE_DAY
           buckets.accounts_overdue.push(queueRow(claim, item, {
             section: 'accounts_overdue',
             amount: state.amount,
-            note: `Requested from accounts ${formatInvoiceDay(state.requestedAt)}${state.requestedBy ? ` by ${state.requestedBy}` : ''}`,
+            note: `Requested from accounts ${formatInvoiceDay(state.requestedAt)}`,
             waitingSince: state.requestedAt,
             days: waited,
             daysAreWorking: true,
@@ -253,15 +253,19 @@ export function buildInvoicingQueues(claims = [], thresholds = DEFAULT_QUEUE_DAY
         }));
       }
 
-      // Paid, with nothing filed behind the payment.
-      if (!isInvoiceDocument(item) && state.paid && !state.copyAttached) {
-        const paidOn = state.paidDate || state.date;
+      // Dealt with, with nothing filed behind it: paid, or a date recorded for
+      // an invoice whose copy never landed. An invoice merely asked for is not
+      // flagged here — that belongs to the accounts section above.
+      if (!isInvoiceDocument(item) && (state.paid || state.date) && !state.copyAttached) {
+        const paidOn = state.paidDate || (state.paid ? state.date : '');
         buckets.paid_no_copy.push(queueRow(claim, item, {
           section: 'paid_no_copy',
           amount: state.amount,
-          note: paidOn ? `Paid ${formatInvoiceDay(paidOn)}` : 'Paid with no date recorded',
-          waitingSince: paidOn,
-          days: daysSince(paidOn, now),
+          note: state.paid
+            ? (paidOn ? `Paid ${formatInvoiceDay(paidOn)}` : 'Paid with no date recorded')
+            : `${item.direction === 'in' ? 'Received' : 'Sent'} ${formatInvoiceDay(state.date)} — no copy filed`,
+          waitingSince: paidOn || state.date,
+          days: daysSince(paidOn || state.date, now),
           party: invoicePartyName(claim, item),
         }));
       }
@@ -360,9 +364,9 @@ export function buildInvoicingQueues(claims = [], thresholds = DEFAULT_QUEUE_DAY
     },
     {
       key: 'paid_no_copy',
-      label: 'Paid but no copy on file',
+      label: 'Dealt with, no copy on file',
       tone: 'warning',
-      hint: 'Payment recorded with no copy of the invoice behind it.',
+      hint: 'Payment recorded, or a date entered, with no copy of the invoice behind it.',
     },
     {
       key: 'warnings',

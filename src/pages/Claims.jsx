@@ -268,6 +268,7 @@ export default function ClaimsPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const consumedIdRef = useRef(null);
+  const [openSection, setOpenSection] = useState('status');
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search);
     const claimId = urlParams.get('id');
@@ -275,6 +276,8 @@ export default function ClaimsPage() {
       const claim = claims.find(c => c.id === claimId);
       if (claim) {
         consumedIdRef.current = claimId;
+        // A link from the Invoicing page opens the claim on its Financials.
+        if (urlParams.get('section') === 'financials') setOpenSection('financials');
         setSelectedClaim(claim);
         navigate(location.pathname, { replace: true });
       }
@@ -1127,7 +1130,11 @@ export default function ClaimsPage() {
             <ClaimDetail
               key={selectedClaim.id}
               claim={selectedClaim}
-              onClose={() => setSelectedClaim(null)}
+              initialSection={openSection}
+              onClose={() => {
+                setSelectedClaim(null);
+                setOpenSection('status');
+              }}
               onUpdate={handleUpdate}
               isInternalUser={isInternalUser}
             />

@@ -251,7 +251,7 @@ const DETAIL_SECTIONS = [
   { id: 'backorderedParts', label: 'Backordered Parts', icon: Package },
   ];
 
-export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInternalUser = true }) {
+export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInternalUser = true, initialSection = 'status' }) {
   const [claim, setClaim] = useState(claimProp);
   
   // Sync local state when parent passes a newer version (e.g. after refetch)
@@ -270,7 +270,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
   const [startTime] = useState(new Date());
   const [currentDuration, setCurrentDuration] = useState(0);
-  const [selectedSection, setSelectedSection] = useState('status');
+  const [selectedSection, setSelectedSection] = useState(initialSection);
   const durationRef = React.useRef(0);
   const hasSavedRef = React.useRef(false);
   const queryClient = useQueryClient();

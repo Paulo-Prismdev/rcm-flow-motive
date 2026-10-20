@@ -28,6 +28,7 @@ const RepairPreferenceForm = lazy(() => import('@/pages/RepairPreferenceForm'));
 const DeclarationOfNeedForm = lazy(() => import('@/pages/DeclarationOfNeedForm'));
 const BodyshopUpdateForm = lazy(() => import('@/pages/BodyshopUpdateForm'));
 const StatusMigrationReview = lazy(() => import('@/pages/StatusMigrationReview'));
+const Invoicing = lazy(() => import('@/pages/Invoicing'));
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -100,6 +101,11 @@ const AuthenticatedApp = () => {
       <Route path="/parts-request" element={<PublicPartsRequest />} />
       <Route path="/backorder-form" element={<BackorderForm />} />
       <Route path="/client-claim-form" element={<ClientClaimForm />} />
+      <Route path="/invoicing" element={
+        <LayoutWrapper currentPageName="Invoicing">
+          <Invoicing />
+        </LayoutWrapper>
+      } />
       <Route path="/TyreRequests" element={
         <LayoutWrapper currentPageName="TyreRequests">
           <TyreRequests />
