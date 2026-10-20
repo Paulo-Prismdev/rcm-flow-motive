@@ -67,6 +67,30 @@
       "type": "string",
       "description": "Account or reference number used with this credit repair company"
     },
+    "hire_fee_standard": {
+      "type": "number",
+      "description": "Upfront hire fee (\u00a3) we invoice this partner for a Standard hire"
+    },
+    "hire_fee_prestige": {
+      "type": "number",
+      "description": "Upfront hire fee (\u00a3) we invoice this partner for a Prestige hire"
+    },
+    "hire_fee_super_prestige": {
+      "type": "number",
+      "description": "Upfront hire fee (\u00a3) we invoice this partner for a Super Prestige hire"
+    },
+    "commission_percent": {
+      "type": "number",
+      "description": "Percentage of the final repair cost we invoice this partner for"
+    },
+    "commission_basis": {
+      "type": "string",
+      "enum": [
+        "Net (ex VAT)",
+        "Gross (inc VAT)"
+      ],
+      "description": "Whether the commission percentage is calculated on the net (ex VAT) or gross (inc VAT) final repair cost. Varies by partner."
+    },
     "notes": {
       "type": "string",
       "description": "Additional notes about this credit repair company"

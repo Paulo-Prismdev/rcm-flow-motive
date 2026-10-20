@@ -23,7 +23,9 @@
         "inv_second_referrer_invoice_in",
         "inv_vat_excess_invoice_in",
         "inv_referral_invoice_out",
-        "inv_vat_excess_invoice_out"
+        "inv_vat_excess_invoice_out",
+        "inv_cr_hire_fee",
+        "inv_cr_repair_commission"
       ],
       "description": "Which checklist item this file is filed against. Keys prefixed 'inv_' belong to the internal-only Invoicing Tracker in Financials and are ignored by the Docs checklist and all portals."
     },

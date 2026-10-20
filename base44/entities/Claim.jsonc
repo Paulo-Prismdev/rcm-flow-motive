@@ -959,19 +959,41 @@
       "type": "string",
       "description": "Account reference with the credit repair company"
     },
-    "credit_repair_referral_fee_gbp": {
-      "type": "number",
-      "description": "Referral fee amount (GBP) we expect to receive from the credit repair company for this claim"
+    "hire_category": {
+      "type": "string",
+      "enum": [
+        "Standard",
+        "Prestige",
+        "Super Prestige"
+      ],
+      "description": "Credit repair hire category. Sets the upfront hire fee we invoice the credit repair company for."
     },
-    "credit_repair_referral_fee_received": {
+    "credit_repair_rates_locked": {
+      "type": "object",
+      "description": "Snapshot of the credit repair partner's agreed rates as they stood when this claim's partner and hire category were set. Locked so later changes to the partner's rates do not move a claim already under way. Holds { category, hire_fee, commission_percent, commission_basis, locked_at }.",
+      "properties": {
+        "category": {
+          "type": "string"
+        },
+        "hire_fee": {
+          "type": "number"
+        },
+        "commission_percent": {
+          "type": "number"
+        },
+        "commission_basis": {
+          "type": "string"
+        },
+        "locked_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "credit_repair_rates_overridden": {
       "type": "boolean",
       "default": false,
-      "description": "Whether the credit repair referral fee has been received"
-    },
-    "credit_repair_referral_fee_received_date": {
-      "type": "string",
-      "format": "date",
-      "description": "Date the credit repair referral fee was received"
+      "description": "True when staff have adjusted the locked credit repair rates on this individual claim."
     },
     "doc_checklist_status": {
       "type": "object",
