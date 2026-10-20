@@ -27,6 +27,8 @@ export const INVOICE_SECTIONS = [
 
 /**
  * The invoice items that can appear on a claim.
+ * - kind 'document' → close-out paperwork. It is only ever received/sent (with a
+ *   date and a file): no amount, no paid tick, and nothing in the owed totals.
  * - direction 'in'  → an invoice we receive and pay (money we owe)
  * - direction 'out' → an invoice we send and get paid for (money owed to us)
  * - requires       → visibility gate on the claim / client
@@ -55,6 +57,7 @@ export const INVOICE_ITEMS = [
     key: 'final_authority',
     label: 'Final Authority',
     section: 'closeout',
+    kind: 'document',
     direction: 'in',
     dateLabel: 'Received',
     bindings: { date: 'authority_received' },
@@ -63,6 +66,7 @@ export const INVOICE_ITEMS = [
     key: 'collection_note',
     label: 'Collection Note',
     section: 'closeout',
+    kind: 'document',
     direction: 'out',
     dateLabel: 'Sent',
   },
@@ -114,6 +118,8 @@ export const INVOICE_ITEMS = [
   },
 ];
 
+export const isInvoiceDocument = (item) => item?.kind === 'document';
+
 export const INVOICE_STATUS_META = {
   paid: { label: 'paid', bg: 'bg-green-100 dark:bg-green-900/30', text: 'text-green-700 dark:text-green-300', dot: 'bg-green-500' },
   received: { label: 'received', bg: 'bg-blue-100 dark:bg-blue-900/30', text: 'text-blue-700 dark:text-blue-300', dot: 'bg-blue-500' },
@@ -131,8 +137,9 @@ const toNum = (v) => {
 export const today = () => new Date().toISOString().split('T')[0];
 
 /**
- * Visibility context for a claim. `vatExcess` comes from the linked client's
- * "we handle their VAT and excess" flag.
+ * Visibility context for a claim. `vatExcess` comes from the claim's stored
+ * snapshot of the linked client's "we handle their VAT and excess" flag, falling
+ * back to the client record where one is loaded.
  */
 export function invoiceContext(claim, vatExcess) {
   const tracker = claim?.invoice_tracker || {};
@@ -142,6 +149,16 @@ export function invoiceContext(claim, vatExcess) {
     vatExcess: !!vatExcess,
     hasReferralFee: toNum(claim?.referral_fee_repairer) > 0 || toNum(claim?.referral_fee_repairer_gbp) > 0,
   };
+}
+
+/**
+ * The claim's VAT/excess applicability, preferring the snapshot held on the
+ * claim itself and falling back to the loaded client record.
+ */
+export function claimHandlesVatExcess(claim, client) {
+  const stored = claim?.client_vat_excess_handled;
+  if (stored === true || stored === false) return stored;
+  return client?.handles_vat_excess === true;
 }
 
 export function isInvoiceItemVisible(item, ctx = {}) {
@@ -154,34 +171,54 @@ export function isInvoiceItemVisible(item, ctx = {}) {
   }
 }
 
-/** Resolve an item's tracked values, reading bound claim fields where they exist. */
-export function getInvoiceItemState(item, claim) {
+/**
+ * Resolve an item's tracked values, reading bound claim fields where they exist.
+ * `hasFiles` marks whether the item already has an uploaded file, which is what
+ * makes a close-out document "received" even before a date is recorded.
+ */
+export function getInvoiceItemState(item, claim, hasFiles = false) {
   const source = claim?.invoice_tracker || {};
   const entry = (source.items || {})[item.key] || {};
   const b = item.bindings || {};
+  const asDocument = isInvoiceDocument(item);
 
-  const amount = b.amount ? toNum(claim?.[b.amount]) : toNum(entry.amount);
+  const amount = asDocument ? 0 : (b.amount ? toNum(claim?.[b.amount]) : toNum(entry.amount));
   const date = (b.date ? claim?.[b.date] : entry.date) || '';
-  const paidDate = (b.paid_date ? claim?.[b.paid_date] : entry.paid_date) || '';
-  let paid = b.paid ? claim?.[b.paid] === true : entry.paid === true;
-  if (!b.paid && b.paid_date) paid = !!paidDate;
-  if (item.status_field && claim?.[item.status_field] === item.paid_status) paid = true;
+  const paidDate = asDocument ? '' : ((b.paid_date ? claim?.[b.paid_date] : entry.paid_date) || '');
 
-  return { amount, date, paid, paidDate, notApplicable: entry.not_applicable === true };
+  let paid = false;
+  if (!asDocument) {
+    paid = b.paid ? claim?.[b.paid] === true : entry.paid === true;
+    if (!b.paid && b.paid_date) paid = !!paidDate;
+    if (item.status_field && claim?.[item.status_field] === item.paid_status) paid = true;
+  }
+
+  const received = asDocument ? (!!date || !!hasFiles) : false;
+
+  return { amount, date, paid, paidDate, received, notApplicable: entry.not_applicable === true };
 }
 
 export function invoiceItemStatus(item, state) {
   if (state.notApplicable) return 'not_applicable';
+  if (isInvoiceDocument(item)) {
+    if (!state.received) return 'outstanding';
+    return item.direction === 'in' ? 'received' : 'sent';
+  }
   if (state.paid) return 'paid';
   if (state.amount > 0 || state.date) return item.direction === 'in' ? 'received' : 'sent';
   return 'outstanding';
 }
 
-/** Summary across the items visible on this claim. */
-export function computeInvoiceSummary(claim, ctx) {
+/**
+ * Summary across the items visible on this claim.
+ * `hasFile(itemKey)` reports whether an invoice item already holds a file — the
+ * claims list has no documents loaded, so there an item counts as outstanding
+ * until its date is recorded (uploading sets that date automatically).
+ */
+export function computeInvoiceSummary(claim, ctx, hasFile = () => false) {
   const rows = INVOICE_ITEMS
     .filter((item) => isInvoiceItemVisible(item, ctx))
-    .map((item) => ({ item, state: getInvoiceItemState(item, claim) }));
+    .map((item) => ({ item, state: getInvoiceItemState(item, claim, hasFile(item.key)) }));
 
   let complete = 0;
   let total = 0;
@@ -192,6 +229,14 @@ export function computeInvoiceSummary(claim, ctx) {
   for (const { item, state } of rows) {
     if (state.notApplicable) continue;
     total += 1;
+
+    if (isInvoiceDocument(item)) {
+      // Close-out paperwork is complete once it is received — there is nothing to pay.
+      if (state.received) complete += 1;
+      else outstanding += 1;
+      continue;
+    }
+
     if (state.paid) { complete += 1; continue; }
     outstanding += 1;
     if (item.direction === 'out') owedToUs += state.amount;
@@ -202,15 +247,14 @@ export function computeInvoiceSummary(claim, ctx) {
 }
 
 /**
- * Summary for the claims list, where the linked client (and therefore the
- * VAT/excess flag) isn't loaded. VAT/excess items are always considered — the
- * amounts behind them only exist when they were really used.
+ * Summary for the claims list, where the linked client isn't loaded. The
+ * VAT/excess items are gated on the snapshot stored on the claim itself.
  */
 export function claimInvoiceSummary(claim) {
   return computeInvoiceSummary(claim, {
     hasReferrer: !!claim?.referrer,
     secondReferrerEnabled: claim?.invoice_tracker?.second_referrer_enabled === true,
-    vatExcess: true,
+    vatExcess: claim?.client_vat_excess_handled === true,
     hasReferralFee: toNum(claim?.referral_fee_repairer) > 0 || toNum(claim?.referral_fee_repairer_gbp) > 0,
   });
 }
@@ -219,8 +263,10 @@ export function claimInvoiceSummary(claim) {
  * Build the claim patch for a single change to one invoice item.
  * Bound values are written to their claim field; everything else is stored in
  * invoice_tracker.items so there is still only one place per value.
+ * Amount and paid changes are ignored for close-out documents.
  */
 export function buildInvoiceItemPatch(item, claim, changes, ctx) {
+  const asDocument = isInvoiceDocument(item);
   const b = item.bindings || {};
   const source = claim.invoice_tracker || {};
   const items = { ...(source.items || {}) };
@@ -232,13 +278,15 @@ export function buildInvoiceItemPatch(item, claim, changes, ctx) {
     else entry[slot] = value;
   };
 
-  if (Object.prototype.hasOwnProperty.call(changes, 'amount')) {
+  const has = (key) => Object.prototype.hasOwnProperty.call(changes, key);
+
+  if (!asDocument && has('amount')) {
     const raw = changes.amount;
     const n = raw === '' || raw === null || raw === undefined ? null : Number(raw);
     write('amount', n === null || Number.isNaN(n) ? null : n);
   }
 
-  if (Object.prototype.hasOwnProperty.call(changes, 'date')) {
+  if (has('date')) {
     write('date', changes.date || null);
     // Keep the existing flags that mean the same thing in step with the date,
     // so the tracker and the Financials fields never disagree.
@@ -250,7 +298,7 @@ export function buildInvoiceItemPatch(item, claim, changes, ctx) {
     }
   }
 
-  if (Object.prototype.hasOwnProperty.call(changes, 'paid')) {
+  if (!asDocument && has('paid')) {
     const paid = !!changes.paid;
     const current = getInvoiceItemState(item, claim);
     write('paid', paid);
@@ -258,11 +306,11 @@ export function buildInvoiceItemPatch(item, claim, changes, ctx) {
     if (item.status_field) patch[item.status_field] = paid ? item.paid_status : item.unpaid_status;
   }
 
-  if (Object.prototype.hasOwnProperty.call(changes, 'paid_date')) {
+  if (!asDocument && has('paid_date')) {
     write('paid_date', changes.paid_date || null);
   }
 
-  if (Object.prototype.hasOwnProperty.call(changes, 'not_applicable')) {
+  if (has('not_applicable')) {
     entry.not_applicable = !!changes.not_applicable;
   }
 

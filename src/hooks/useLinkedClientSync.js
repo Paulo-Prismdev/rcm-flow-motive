@@ -44,6 +44,8 @@ export default function useLinkedClientSync(clientId, setFormData, setLinkedCont
             client_vat_status: (isBlank(prev.client_vat_status) || prev.client_vat_status === 'Unknown')
               ? (fresh.vat_status || 'Unknown')
               : prev.client_vat_status,
+            // Always derived from the client, never left blank.
+            client_vat_excess_handled: fresh.handles_vat_excess === true,
           };
         });
       })

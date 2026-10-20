@@ -996,6 +996,11 @@
       "description": "Total count of required/expected checklist items (denormalized for list display).",
       "default": 4
     },
+    "client_vat_excess_handled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Snapshot of the linked client's \"we handle their VAT and excess\" setting. Kept on the claim so list views and the Financials invoicing tracker can gate the VAT & Excess invoice items without loading the client record. Synced from the client directory."
+    },
     "invoice_tracker": {
       "type": "object",
       "description": "Internal invoicing tracker state. Holds { second_referrer_enabled, second_referrer_name, items: { <item_key>: { amount, date, paid, paid_date, not_applicable } } }. Values that duplicate an existing financial field (invoice_amount, invoice_sent_date, invoice_payment_received, authority_received, excess_contribution_*) are read from and written to that field instead, so each date and paid status is recorded in exactly one place.",

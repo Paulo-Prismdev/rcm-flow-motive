@@ -8,6 +8,7 @@ import { Trash2, Phone, Mail, User, Building2, Pencil, X, Star, Plus, Loader2, R
 import { createPortal } from "react-dom";
 import DirectoryShell from "../shared/DirectoryShell";
 import AddClientModal from "../shared/AddClientModal";
+import { syncClaimVatExcess } from "../shared/syncClaimVatExcess";
 
 function ClientDetailModal({ client, onClose, onUpdated }) {
   const [formData, setFormData] = useState(client);
@@ -16,10 +17,16 @@ function ClientDetailModal({ client, onClose, onUpdated }) {
 
   const updateMutation = useMutation({
     mutationFn: (data) => base44.entities.Client.update(client.id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["clients"] });
+    onSuccess: async () => {
       onUpdated();
       setIsEditing(false);
+      // Their claims carry a snapshot of this setting, so refresh it when it changes.
+      const nextHandled = formData.handles_vat_excess === true;
+      if (nextHandled !== (client.handles_vat_excess === true)) {
+        await syncClaimVatExcess({ id: client.id, name: client.name, handles_vat_excess: nextHandled });
+      }
+      queryClient.invalidateQueries({ queryKey: ["clients"] });
+      queryClient.invalidateQueries({ queryKey: ["claims"] });
     },
   });
 

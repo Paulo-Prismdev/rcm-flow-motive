@@ -326,7 +326,9 @@ export default function ClaimsPage() {
       const s = claimInvoiceSummary(c);
       if (invoiceFilter === 'owed_to_us') matchesInvoice = s.owedToUs > 0;
       else if (invoiceFilter === 'we_owe') matchesInvoice = s.weOwe > 0;
-      else matchesInvoice = s.owedToUs > 0 || s.weOwe > 0;
+      // Outstanding = any applicable item not yet paid (or, for close-out
+      // documents, not yet received) — an amount is not required.
+      else matchesInvoice = s.outstanding > 0;
     }
     const matchesOverdue = !overdueOnly || calculateUpdateStatus(c) === 'Red' || computeClientCommStatusFlag(c) === 'Red';
     const dr = c.date_received;

@@ -4,8 +4,9 @@ import { Input } from '@/components/ui/input';
 import { INVOICE_STATUS_META, invoiceItemStatus } from '@/components/shared/invoiceChecklist';
 
 /**
- * A single invoice line in the Invoicing Tracker — amount, received/sent date,
- * paid state and file uploads for that invoice.
+ * A single line in the Invoicing Tracker — an invoice (amount, received/sent
+ * date, paid state and its files) or a close-out document, which only ever has a
+ * date and a file.
  */
 export default function InvoiceItemCard({
   item, state, files, isUploading,
@@ -25,6 +26,8 @@ export default function InvoiceItemCard({
   const meta = INVOICE_STATUS_META[status];
   const isOutstanding = status === 'outstanding';
   const dateLabel = item.dateLabel || (item.direction === 'in' ? 'Received' : 'Sent');
+  // Close-out paperwork is a document, not an invoice: no amount, no paid tick.
+  const isDocument = item.kind === 'document';
 
   const commitAmount = () => {
     const current = state.amount ? String(state.amount) : '';
@@ -42,6 +45,26 @@ export default function InvoiceItemCard({
       `${item.label} ${dateLabel.toLowerCase()} date ${dateDraft ? `set to ${dateDraft}` : 'cleared'}`
     );
   };
+
+  const uploadButton = (
+    <div className={isDocument ? 'pb-0.5' : 'ml-auto'}>
+      <input
+        ref={fileInputRef}
+        type="file"
+        multiple
+        className="hidden"
+        onChange={(e) => { if (e.target.files?.length) onUpload(item, e.target.files); e.target.value = ''; }}
+      />
+      <button
+        type="button"
+        onClick={() => fileInputRef.current?.click()}
+        disabled={isUploading}
+        className="inline-flex items-center gap-1 h-7 px-2 rounded-md text-xs font-medium border border-dashed border-border text-muted-foreground hover:text-primary hover:border-primary transition-colors disabled:opacity-50"
+      >
+        <Upload className="w-3 h-3" /> Upload
+      </button>
+    </div>
+  );
 
   return (
     <div className={`rounded-[10px] border bg-card overflow-hidden ${state.notApplicable
@@ -88,73 +111,75 @@ export default function InvoiceItemCard({
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-2">
-          <div>
-            <label className="block text-[10px] font-medium text-muted-foreground mb-0.5">Amount (£)</label>
-            <Input
-              type="number"
-              step="0.01"
-              inputMode="decimal"
-              placeholder="0.00"
-              value={amountDraft}
-              onChange={(e) => setAmountDraft(e.target.value)}
-              onBlur={commitAmount}
-              onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }}
-              className="h-8 text-sm"
-            />
+        {isDocument ? (
+          <div className="flex items-end gap-2">
+            <div className="flex-1">
+              <label className="block text-[10px] font-medium text-muted-foreground mb-0.5">{dateLabel}</label>
+              <Input
+                type="date"
+                value={dateDraft}
+                onChange={(e) => setDateDraft(e.target.value)}
+                onBlur={commitDate}
+                className="h-8 text-sm"
+              />
+            </div>
+            {uploadButton}
           </div>
-          <div>
-            <label className="block text-[10px] font-medium text-muted-foreground mb-0.5">{dateLabel}</label>
-            <Input
-              type="date"
-              value={dateDraft}
-              onChange={(e) => setDateDraft(e.target.value)}
-              onBlur={commitDate}
-              className="h-8 text-sm"
-            />
-          </div>
-        </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="block text-[10px] font-medium text-muted-foreground mb-0.5">Amount (£)</label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  inputMode="decimal"
+                  placeholder="0.00"
+                  value={amountDraft}
+                  onChange={(e) => setAmountDraft(e.target.value)}
+                  onBlur={commitAmount}
+                  onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }}
+                  className="h-8 text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-medium text-muted-foreground mb-0.5">{dateLabel}</label>
+                <Input
+                  type="date"
+                  value={dateDraft}
+                  onChange={(e) => setDateDraft(e.target.value)}
+                  onBlur={commitDate}
+                  className="h-8 text-sm"
+                />
+              </div>
+            </div>
 
-        <div className="flex items-center gap-2 flex-wrap">
-          <label className="inline-flex items-center gap-1.5 text-xs font-medium cursor-pointer">
-            <input
-              type="checkbox"
-              checked={state.paid}
-              onChange={(e) => onChange(
-                { paid: e.target.checked },
-                `${item.label} marked as ${e.target.checked ? 'paid' : 'unpaid'}`
+            <div className="flex items-center gap-2 flex-wrap">
+              <label className="inline-flex items-center gap-1.5 text-xs font-medium cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={state.paid}
+                  onChange={(e) => onChange(
+                    { paid: e.target.checked },
+                    `${item.label} marked as ${e.target.checked ? 'paid' : 'unpaid'}`
+                  )}
+                  className="rounded border-border"
+                />
+                Paid
+              </label>
+              {state.paid && (
+                <Input
+                  type="date"
+                  value={state.paidDate || ''}
+                  onChange={(e) => onChange({ paid: true, paid_date: e.target.value }, `${item.label} paid date set`)}
+                  className="h-7 text-xs w-[132px]"
+                  title="Paid date"
+                />
               )}
-              className="rounded border-border"
-            />
-            Paid
-          </label>
-          {state.paid && (
-            <Input
-              type="date"
-              value={state.paidDate || ''}
-              onChange={(e) => onChange({ paid: true, paid_date: e.target.value }, `${item.label} paid date set`)}
-              className="h-7 text-xs w-[132px]"
-              title="Paid date"
-            />
-          )}
-          <div className="ml-auto">
-            <input
-              ref={fileInputRef}
-              type="file"
-              multiple
-              className="hidden"
-              onChange={(e) => { if (e.target.files?.length) onUpload(item, e.target.files); e.target.value = ''; }}
-            />
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              disabled={isUploading}
-              className="inline-flex items-center gap-1 h-7 px-2 rounded-md text-xs font-medium border border-dashed border-border text-muted-foreground hover:text-primary hover:border-primary transition-colors disabled:opacity-50"
-            >
-              <Upload className="w-3 h-3" /> Upload
-            </button>
-          </div>
-        </div>
+              {uploadButton}
+            </div>
+          </>
+        )}
       </div>
 
       {files.length > 0 && (

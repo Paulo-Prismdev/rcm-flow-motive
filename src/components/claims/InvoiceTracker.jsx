@@ -12,7 +12,7 @@ import useClaimClient from '@/hooks/useClaimClient';
 import InvoiceItemCard from './InvoiceItemCard';
 import {
   invoiceContext, computeInvoiceSummary, buildInvoiceItemPatch,
-  buildTrackerMetaPatch, invoiceDocKey,
+  buildTrackerMetaPatch, invoiceDocKey, today, claimHandlesVatExcess,
 } from '@/components/shared/invoiceChecklist';
 
 const fmtGBP = (n) => `£${(n || 0).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -33,12 +33,6 @@ export default function InvoiceTracker({ claim, currentUser, onUpdate }) {
   const [pendingDelete, setPendingDelete] = useState(null);
   const [secondRefName, setSecondRefName] = useState('');
 
-  const ctx = useMemo(
-    () => invoiceContext(claim, client?.handles_vat_excess === true),
-    [claim, client]
-  );
-  const summary = useMemo(() => computeInvoiceSummary(claim, ctx), [claim, ctx]);
-
   const { data: docs = [] } = useQuery({
     queryKey: ['claim-documents', claim.id],
     queryFn: async () => {
@@ -55,6 +49,15 @@ export default function InvoiceTracker({ claim, currentUser, onUpdate }) {
   }, [tracker.second_referrer_name]);
 
   const filesFor = (itemKey) => docs.filter((d) => d.item_key === invoiceDocKey(itemKey));
+
+  const ctx = useMemo(
+    () => invoiceContext(claim, claimHandlesVatExcess(claim, client)),
+    [claim, client]
+  );
+  const summary = useMemo(
+    () => computeInvoiceSummary(claim, ctx, (itemKey) => filesFor(itemKey).length > 0),
+    [claim, ctx, docs]
+  );
 
   const commit = (patch, description) => {
     onUpdate({ ...claim, ...patch });
@@ -117,6 +120,14 @@ export default function InvoiceTracker({ claim, currentUser, onUpdate }) {
       description: `Uploaded ${created.length} file(s) to "${item.label}"`,
       user: currentUser,
     });
+
+    // The upload IS the received/sent signal: stamp today's date when the item
+    // hasn't been dated yet, so the tracker and the claims list agree.
+    const row = summary.rows.find((r) => r.item.key === item.key);
+    if (row && !row.state.date) {
+      const { patch } = buildInvoiceItemPatch(item, claim, { date: today() }, ctx);
+      commit(patch, `${item.label} ${(item.dateLabel || 'date').toLowerCase()} date set to ${today()}`);
+    }
 
     queryClient.invalidateQueries({ queryKey: ['claim-documents', claim.id] });
     queryClient.invalidateQueries({ queryKey: ['notes', claim.id, 'Claim'] });
