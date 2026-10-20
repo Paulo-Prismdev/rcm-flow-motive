@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Upload, Trash2, Pencil, Check, X, MoreVertical, FileText } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { INVOICE_STATUS_META, invoiceItemStatus } from '@/components/shared/invoiceChecklist';
+import { fmtGBP } from '@/components/shared/creditRepairRates';
 
 /**
  * A single line in the Invoicing Tracker — an invoice (amount, received/sent
@@ -28,6 +29,9 @@ export default function InvoiceItemCard({
   const dateLabel = item.dateLabel || (item.direction === 'in' ? 'Received' : 'Sent');
   // Close-out paperwork is a document, not an invoice: no amount, no paid tick.
   const isDocument = item.kind === 'document';
+  // Credit repair invoices have their amount worked out from the claim's locked
+  // rates, so it is shown rather than typed in.
+  const isDerived = !!item.amountSource;
 
   const commitAmount = () => {
     const current = state.amount ? String(state.amount) : '';
@@ -130,17 +134,23 @@ export default function InvoiceItemCard({
             <div className="grid grid-cols-2 gap-2">
               <div>
                 <label className="block text-[10px] font-medium text-muted-foreground mb-0.5">Amount (£)</label>
-                <Input
-                  type="number"
-                  step="0.01"
-                  inputMode="decimal"
-                  placeholder="0.00"
-                  value={amountDraft}
-                  onChange={(e) => setAmountDraft(e.target.value)}
-                  onBlur={commitAmount}
-                  onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }}
-                  className="h-8 text-sm"
-                />
+                {isDerived ? (
+                  <div className={`h-8 flex items-center px-2 rounded-md border border-dashed text-sm tabular-nums ${state.awaiting ? 'border-amber-300 dark:border-amber-800 text-muted-foreground' : 'border-border bg-muted/40 font-medium'}`}>
+                    {state.awaiting ? '—' : fmtGBP(state.amount)}
+                  </div>
+                ) : (
+                  <Input
+                    type="number"
+                    step="0.01"
+                    inputMode="decimal"
+                    placeholder="0.00"
+                    value={amountDraft}
+                    onChange={(e) => setAmountDraft(e.target.value)}
+                    onBlur={commitAmount}
+                    onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }}
+                    className="h-8 text-sm"
+                  />
+                )}
               </div>
               <div>
                 <label className="block text-[10px] font-medium text-muted-foreground mb-0.5">{dateLabel}</label>
@@ -153,6 +163,11 @@ export default function InvoiceItemCard({
                 />
               </div>
             </div>
+            {isDerived && state.hint && (
+              <p className={`text-[10px] leading-tight ${state.awaiting ? 'text-amber-600 dark:text-amber-400 font-medium' : 'text-muted-foreground'}`}>
+                {state.hint}
+              </p>
+            )}
 
             <div className="flex items-center gap-2 flex-wrap">
               <label className="inline-flex items-center gap-1.5 text-xs font-medium cursor-pointer">

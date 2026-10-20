@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { CheckCircle2, AlertTriangle, ChevronDown, ChevronUp, Mail, Building2 } from 'lucide-react';
+import { CheckCircle2, AlertTriangle, ChevronDown, ChevronUp, Mail } from 'lucide-react';
 import FinancialCalculator from './FinancialCalculator';
 import { Button } from '@/components/ui/button';
 import { base44 } from '@/api/base44Client';
@@ -108,10 +108,8 @@ export default function FinancialSummary({ claim, onClaimUpdated }) {
         const repairerVat = repairerEx * VAT_RATE;
         const repairerGross = repairerEx + repairerVat;
 
-        const creditRepairReferralGbp = parseFloat(claim.credit_repair_referral_fee_gbp) || 0;
-
-        return { totalInc, totalEx, vatContent, clientLiability, clientEx, clientVat, referrerEx, referrerVat, referrerGross, repairerEx, repairerVat, repairerGross, creditRepairReferralGbp };
-    }, [claim.final_repair_cost, claim.policy_excess, claim.client_vat_status, claim.percent_to_referrer, claim.referral_fee_repairer, claim.credit_repair_referral_fee_gbp]);
+        return { totalInc, totalEx, vatContent, clientLiability, clientEx, clientVat, referrerEx, referrerVat, referrerGross, repairerEx, repairerVat, repairerGross };
+    }, [claim.final_repair_cost, claim.policy_excess, claim.client_vat_status, claim.percent_to_referrer, claim.referral_fee_repairer]);
 
     const checks = [
         { label: 'Final repair cost entered', value: claim.final_repair_cost > 0 ? fmt(claim.final_repair_cost) : null, ok: !!claim.final_repair_cost && claim.final_repair_cost > 0 },
@@ -296,42 +294,6 @@ export default function FinancialSummary({ claim, onClaimUpdated }) {
                     color="purple"
                 />
             </div>
-
-            {/* Credit Repair Referral Fee — shown only for Credit Repair claims */}
-            {claim.claim_type === 'Credit Repair' && (
-                <div className="rounded-[10px] border border-purple-200 dark:border-purple-800/60 bg-purple-50/50 dark:bg-purple-900/10 p-3">
-                    <div className="flex items-center justify-between gap-3">
-                        <div className="flex items-center gap-2">
-                            <Building2 className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-                            <div>
-                                <p className="text-[11px] font-semibold uppercase tracking-wider text-purple-600 dark:text-purple-400">
-                                    Credit Repair Referral Fee
-                                </p>
-                                {claim.credit_repair_company_name && (
-                                    <p className="text-xs text-purple-500 dark:text-purple-400 truncate">
-                                        {claim.credit_repair_company_name}
-                                    </p>
-                                )}
-                            </div>
-                        </div>
-                        <div className="text-right">
-                            <p className="text-lg font-bold tabular-nums text-purple-800 dark:text-purple-200">
-                                {fmt(calc.creditRepairReferralGbp)}
-                            </p>
-                            {claim.credit_repair_referral_fee_received ? (
-                                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-green-600 dark:text-green-400">
-                                    <CheckCircle2 className="w-3 h-3" /> Received
-                                    {claim.credit_repair_referral_fee_received_date && ` ${claim.credit_repair_referral_fee_received_date}`}
-                                </span>
-                            ) : (
-                                <span className="text-[11px] font-semibold text-amber-600 dark:text-amber-400">
-                                    {calc.creditRepairReferralGbp > 0 ? 'Awaiting payment' : 'Not set'}
-                                </span>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            )}
 
             {/* Collapsible breakdown */}
             <div>

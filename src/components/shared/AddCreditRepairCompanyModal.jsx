@@ -7,15 +7,17 @@ import { X, Plus, Trash2, Star } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useMutation } from '@tanstack/react-query';
 import { useToast } from "@/components/ui/use-toast";
+import CreditRepairRateFields from "@/components/settings/CreditRepairRateFields";
+import { normaliseRates } from "./creditRepairRates";
 
-const EMPTY_FORM = { name: '', contact_name: '', phone: '', email: '', contacts: [], address_line_1: '', address_line_2: '', town: '', county: '', postcode: '', account_reference: '', notes: '' };
+const EMPTY_FORM = { name: '', contact_name: '', phone: '', email: '', contacts: [], address_line_1: '', address_line_2: '', town: '', county: '', postcode: '', account_reference: '', hire_fee_standard: '', hire_fee_prestige: '', hire_fee_super_prestige: '', commission_percent: '', commission_basis: '', notes: '' };
 
 export default function AddCreditRepairCompanyModal({ isOpen, onClose, onSuccess }) {
   const [formData, setFormData] = useState(EMPTY_FORM);
   const { toast } = useToast();
 
   const createMutation = useMutation({
-    mutationFn: (data) => base44.entities.CreditRepairCompany.create(data),
+    mutationFn: (data) => base44.entities.CreditRepairCompany.create(normaliseRates(data)),
     onSuccess: (newCompany) => {
       if (onSuccess) onSuccess(newCompany);
       handleClose();
@@ -147,6 +149,7 @@ export default function AddCreditRepairCompanyModal({ isOpen, onClose, onSuccess
               </div>
             )}
           </div>
+          <CreditRepairRateFields formData={formData} set={set} />
           <div>
             <label className="block text-sm text-muted-foreground mb-1">Notes</label>
             <Textarea value={formData.notes} onChange={(e) => set('notes', e.target.value)} className="neomorph-inset" rows={2} />

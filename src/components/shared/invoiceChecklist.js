@@ -12,6 +12,12 @@
  * copy, so each date and each paid status is recorded in exactly one place.
  */
 
+import {
+  isCreditRepairClaim,
+  creditRepairHireFee,
+  creditRepairCommission,
+} from './creditRepairRates';
+
 export const INVOICE_FILE_PREFIX = 'inv_';
 
 export const invoiceDocKey = (itemKey) => `${INVOICE_FILE_PREFIX}${itemKey}`;
@@ -42,6 +48,7 @@ export const INVOICE_ITEMS = [
     section: 'closeout',
     direction: 'out',
     dateLabel: 'Sent',
+    requires: 'not_credit_repair',
     bindings: {
       amount: 'invoice_amount',
       date: 'invoice_sent_date',
@@ -60,6 +67,7 @@ export const INVOICE_ITEMS = [
     kind: 'document',
     direction: 'in',
     dateLabel: 'Received',
+    requires: 'not_credit_repair',
     bindings: { date: 'authority_received' },
   },
   {
@@ -69,6 +77,7 @@ export const INVOICE_ITEMS = [
     kind: 'document',
     direction: 'out',
     dateLabel: 'Sent',
+    requires: 'not_credit_repair',
   },
   {
     key: 'referrer_invoice_in',
@@ -106,7 +115,7 @@ export const INVOICE_ITEMS = [
     section: 'out',
     direction: 'out',
     dateLabel: 'Sent',
-    requires: 'referral_fee',
+    requires: ['referral_fee', 'not_credit_repair'],
   },
   {
     key: 'vat_excess_invoice_out',
@@ -116,7 +125,34 @@ export const INVOICE_ITEMS = [
     dateLabel: 'Sent',
     requires: 'vat_excess',
   },
+  // Credit repair claims: we invoice the credit repair company for our cut, from
+  // two separate invoices. Both amounts are derived (hire category rate and
+  // commission on the final repair cost), so they are never hand-entered here.
+  {
+    key: 'cr_hire_fee',
+    label: 'Upfront Hire Fee',
+    section: 'out',
+    direction: 'out',
+    dateLabel: 'Sent',
+    requires: 'credit_repair',
+    amountSource: 'credit_repair_hire_fee',
+  },
+  {
+    key: 'cr_repair_commission',
+    label: 'Repair Commission',
+    section: 'out',
+    direction: 'out',
+    dateLabel: 'Sent',
+    requires: 'credit_repair',
+    amountSource: 'credit_repair_commission',
+  },
 ];
+
+/** Items whose amount is worked out from elsewhere on the claim, not typed in. */
+const AMOUNT_RESOLVERS = {
+  credit_repair_hire_fee: creditRepairHireFee,
+  credit_repair_commission: creditRepairCommission,
+};
 
 export const isInvoiceDocument = (item) => item?.kind === 'document';
 
@@ -148,6 +184,7 @@ export function invoiceContext(claim, vatExcess) {
     secondReferrerEnabled: tracker.second_referrer_enabled === true,
     vatExcess: !!vatExcess,
     hasReferralFee: toNum(claim?.referral_fee_repairer) > 0 || toNum(claim?.referral_fee_repairer_gbp) > 0,
+    creditRepair: isCreditRepairClaim(claim),
   };
 }
 
@@ -161,14 +198,21 @@ export function claimHandlesVatExcess(claim, client) {
   return client?.handles_vat_excess === true;
 }
 
-export function isInvoiceItemVisible(item, ctx = {}) {
-  switch (item.requires) {
+function matchesRequirement(requirement, ctx) {
+  switch (requirement) {
     case 'referrer': return !!ctx.hasReferrer;
     case 'second_referrer': return !!ctx.secondReferrerEnabled;
     case 'vat_excess': return !!ctx.vatExcess;
     case 'referral_fee': return !!ctx.hasReferralFee;
+    case 'credit_repair': return !!ctx.creditRepair;
+    case 'not_credit_repair': return !ctx.creditRepair;
     default: return true;
   }
+}
+
+export function isInvoiceItemVisible(item, ctx = {}) {
+  const requirements = Array.isArray(item.requires) ? item.requires : [item.requires];
+  return requirements.every((requirement) => matchesRequirement(requirement, ctx));
 }
 
 /**
@@ -181,8 +225,11 @@ export function getInvoiceItemState(item, claim, hasFiles = false) {
   const entry = (source.items || {})[item.key] || {};
   const b = item.bindings || {};
   const asDocument = isInvoiceDocument(item);
+  // Derived amounts (the credit repair hire fee and commission) are worked out
+  // from the claim's locked rates and final repair cost, never stored.
+  const derived = item.amountSource ? AMOUNT_RESOLVERS[item.amountSource]?.(claim) : null;
 
-  const amount = asDocument ? 0 : (b.amount ? toNum(claim?.[b.amount]) : toNum(entry.amount));
+  const amount = asDocument ? 0 : (derived ? derived.amount : (b.amount ? toNum(claim?.[b.amount]) : toNum(entry.amount)));
   const date = (b.date ? claim?.[b.date] : entry.date) || '';
   const paidDate = asDocument ? '' : ((b.paid_date ? claim?.[b.paid_date] : entry.paid_date) || '');
 
@@ -195,7 +242,16 @@ export function getInvoiceItemState(item, claim, hasFiles = false) {
 
   const received = asDocument ? (!!date || !!hasFiles) : false;
 
-  return { amount, date, paid, paidDate, received, notApplicable: entry.not_applicable === true };
+  return {
+    amount,
+    date,
+    paid,
+    paidDate,
+    received,
+    notApplicable: entry.not_applicable === true,
+    awaiting: derived?.awaiting === true,
+    hint: derived?.hint || null,
+  };
 }
 
 export function invoiceItemStatus(item, state) {
@@ -256,6 +312,7 @@ export function claimInvoiceSummary(claim) {
     secondReferrerEnabled: claim?.invoice_tracker?.second_referrer_enabled === true,
     vatExcess: claim?.client_vat_excess_handled === true,
     hasReferralFee: toNum(claim?.referral_fee_repairer) > 0 || toNum(claim?.referral_fee_repairer_gbp) > 0,
+    creditRepair: isCreditRepairClaim(claim),
   });
 }
 
@@ -280,7 +337,7 @@ export function buildInvoiceItemPatch(item, claim, changes, ctx) {
 
   const has = (key) => Object.prototype.hasOwnProperty.call(changes, key);
 
-  if (!asDocument && has('amount')) {
+  if (!asDocument && !item.amountSource && has('amount')) {
     const raw = changes.amount;
     const n = raw === '' || raw === null || raw === undefined ? null : Number(raw);
     write('amount', n === null || Number.isNaN(n) ? null : n);

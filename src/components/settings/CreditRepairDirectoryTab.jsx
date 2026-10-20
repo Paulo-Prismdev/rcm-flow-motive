@@ -4,10 +4,12 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Trash2, Phone, Mail, Building2, Pencil, X, Star, Plus, Loader2 } from "lucide-react";
+import { Trash2, Phone, Mail, Building2, Pencil, X, Star, Plus, Loader2, AlertTriangle } from "lucide-react";
 import { createPortal } from "react-dom";
 import DirectoryShell from "../shared/DirectoryShell";
 import AddCreditRepairCompanyModal from "../shared/AddCreditRepairCompanyModal";
+import CreditRepairRateFields from "./CreditRepairRateFields";
+import { HIRE_CATEGORIES, basisShort, fmtGBP, hasValue, hireFeeField, missingPartnerRates, normaliseRates } from "../shared/creditRepairRates";
 
 function CreditRepairDetailModal({ company, onClose, onUpdated }) {
   const [formData, setFormData] = useState(company);
@@ -15,7 +17,7 @@ function CreditRepairDetailModal({ company, onClose, onUpdated }) {
   const queryClient = useQueryClient();
 
   const updateMutation = useMutation({
-    mutationFn: (data) => base44.entities.CreditRepairCompany.update(company.id, data),
+    mutationFn: (data) => base44.entities.CreditRepairCompany.update(company.id, normaliseRates(data)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["creditRepairCompanies"] });
       onUpdated();
@@ -24,6 +26,7 @@ function CreditRepairDetailModal({ company, onClose, onUpdated }) {
   });
 
   const set = (field, value) => setFormData(prev => ({ ...prev, [field]: value }));
+  const missingRates = missingPartnerRates(company);
 
   const addContact = () => {
     setFormData(prev => ({ ...prev, contacts: [...(prev.contacts || []), { name: '', position: '', email: '', phone: '', is_primary: false }] }));
@@ -95,6 +98,7 @@ function CreditRepairDetailModal({ company, onClose, onUpdated }) {
                 </div>
               )}
             </div>
+            <CreditRepairRateFields formData={formData} set={set} />
             <div><label className="block text-sm text-muted-foreground mb-1">Notes</label><Textarea value={formData.notes || ''} onChange={(e) => set('notes', e.target.value)} className="neomorph-inset" rows={2} /></div>
             <div className="flex justify-end gap-3 pt-2">
               <Button type="button" onClick={() => { setIsEditing(false); setFormData(company); }} variant="outline">Cancel</Button>
@@ -109,6 +113,40 @@ function CreditRepairDetailModal({ company, onClose, onUpdated }) {
             </div>
             <div><p className="text-xs text-muted-foreground">Address</p><p className="text-sm font-medium">{[company.address_line_1, company.address_line_2, company.town, company.county, company.postcode].filter(Boolean).join(', ') || '—'}</p></div>
             <div><p className="text-xs text-muted-foreground">Account Reference</p><p className="text-sm font-medium">{company.account_reference || '—'}</p></div>
+            <div className="border-t pt-3">
+              <div className="flex items-center justify-between gap-2 mb-2">
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Our Agreed Rates</p>
+                {missingRates.length > 0 && (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 text-[10px] font-semibold">
+                    <AlertTriangle className="w-3 h-3" /> Rates not set
+                  </span>
+                )}
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                {HIRE_CATEGORIES.map((category) => {
+                  const field = hireFeeField(category);
+                  return (
+                    <div key={category} className="rounded-lg border border-border bg-muted/30 p-2">
+                      <p className="text-[10px] text-muted-foreground">{category}</p>
+                      <p className="text-sm font-medium tabular-nums">{hasValue(company[field]) ? fmtGBP(company[field]) : '—'}</p>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="grid grid-cols-2 gap-2 mt-2">
+                <div>
+                  <p className="text-[10px] text-muted-foreground">Commission</p>
+                  <p className="text-sm font-medium">{hasValue(company.commission_percent) ? `${company.commission_percent}%` : '—'}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] text-muted-foreground">Calculated on</p>
+                  <p className="text-sm font-medium">{company.commission_basis || '—'}</p>
+                </div>
+              </div>
+              {missingRates.length > 0 && (
+                <p className="text-[11px] text-amber-600 dark:text-amber-400 mt-2">Still to fill in: {missingRates.join(', ')}.</p>
+              )}
+            </div>
             {company.notes && <div><p className="text-xs text-muted-foreground">Notes</p><p className="text-sm font-medium whitespace-pre-wrap">{company.notes}</p></div>}
             {company.contacts?.length > 0 && (
               <div className="border-t pt-3">
@@ -211,6 +249,11 @@ export default function CreditRepairDirectoryTab() {
                     {c.phone && <span className="flex items-center gap-1.5"><Phone className="w-3.5 h-3.5" /> {c.phone}</span>}
                     {c.email && <span className="flex items-center gap-1.5 truncate"><Mail className="w-3.5 h-3.5" /> {c.email}</span>}
                     {c.account_reference && <span>Ref: {c.account_reference}</span>}
+                    {missingPartnerRates(c).length > 0 && (
+                      <span className="inline-flex items-center gap-1 text-amber-600 dark:text-amber-400 font-medium">
+                        <AlertTriangle className="w-3.5 h-3.5" /> Rates not set
+                      </span>
+                    )}
                   </div>
                 </div>
               ))}
@@ -225,6 +268,7 @@ export default function CreditRepairDirectoryTab() {
                   <th className="text-left p-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground hidden lg:table-cell">Phone</th>
                   <th className="text-left p-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground hidden md:table-cell">Email</th>
                   <th className="text-left p-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Account Ref</th>
+                  <th className="text-left p-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground hidden md:table-cell">Our Rates</th>
                   <th className="text-right p-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Actions</th>
                 </tr>
               </thead>
@@ -236,6 +280,15 @@ export default function CreditRepairDirectoryTab() {
                     <td className="p-3 text-sm text-muted-foreground hidden lg:table-cell">{c.phone || "—"}</td>
                     <td className="p-3 text-sm text-muted-foreground hidden md:table-cell truncate max-w-[200px]">{c.email || "—"}</td>
                     <td className="p-3 text-sm text-muted-foreground">{c.account_reference || "—"}</td>
+                    <td className="p-3 hidden md:table-cell">
+                      {missingPartnerRates(c).length > 0 ? (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 text-[10px] font-semibold whitespace-nowrap">
+                          <AlertTriangle className="w-3 h-3" /> Rates not set
+                        </span>
+                      ) : (
+                        <span className="text-sm text-muted-foreground whitespace-nowrap">{c.commission_percent}% on {basisShort(c.commission_basis)}</span>
+                      )}
+                    </td>
                     <td className="p-3 text-right" onClick={(e) => e.stopPropagation()}>
                       <button onClick={() => handleDelete(c)} className="p-1.5 rounded-md text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20" title="Remove"><Trash2 className="w-4 h-4" /></button>
                     </td>

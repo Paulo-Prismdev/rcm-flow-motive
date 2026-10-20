@@ -123,3 +123,18 @@ export function creditRepairCommission(claim) {
     hint: `${rates.commissionPercent}% of ${rates.commissionBasis} repair cost`,
   };
 }
+
+/** Short form of a commission basis, for tight table cells. */
+export const basisShort = (basis) => (basis === COMMISSION_BASES[0] ? 'net' : 'gross');
+
+/** Coerce a partner rate form's values into what the entity expects. */
+export function normaliseRates(data) {
+  const out = { ...data };
+  for (const category of HIRE_CATEGORIES) {
+    const field = hireFeeField(category);
+    out[field] = hasValue(out[field]) ? toNum(out[field]) : null;
+  }
+  out.commission_percent = hasValue(out.commission_percent) ? toNum(out.commission_percent) : null;
+  out.commission_basis = out.commission_basis || null;
+  return out;
+}

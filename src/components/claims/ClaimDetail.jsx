@@ -42,6 +42,7 @@ import ClaimPartiesForm from './ClaimPartiesForm';
 import PartyDisplayCard from '../shared/PartyDisplayCard';
 import ClaimVehicleForm from './ClaimVehicleForm';
 import ClaimCreditRepairForm from './ClaimCreditRepairForm';
+import CreditRepairRatesCard from './CreditRepairRatesCard';
 import CreditRepairInstructionModal from './CreditRepairInstructionModal';
 import ClaimReferrerForm from './ClaimReferrerForm';
 import ClaimFinancialsForm from './ClaimFinancialsForm';
@@ -948,7 +949,9 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
               <DetailRow label="Phone" value={claim.credit_repair_company_phone} />
               <DetailRow label="Email" value={claim.credit_repair_company_email} />
               <DetailRow label="Account Ref" value={claim.credit_repair_company_account_ref} />
+              <DetailRow label="Hire Category" value={claim.hire_category} />
             </div>
+            <CreditRepairRatesCard claim={claim} />
             {claim.credit_repair_company_name && (
               <div className="mt-4 p-3 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800">
                 <div className="flex items-center justify-between gap-3 flex-wrap">
