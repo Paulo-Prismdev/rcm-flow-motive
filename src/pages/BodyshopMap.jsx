@@ -599,7 +599,7 @@ export default function BodyshopMap() {
 
       {/* ── SUPPLIER COVERAGE PANEL ── */}
       {showSupplierPanel && (
-        <div className="absolute top-16 right-3 z-[999] bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-border p-2.5 space-y-2 w-[210px]">
+        <div className="absolute top-16 right-3 z-[999] bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-border p-2.5 space-y-2 w-[210px] max-md:w-[calc(50vw-16px)] max-md:max-h-[calc(100vh-8rem)] max-md:overflow-y-auto">
           <p className="text-xs font-semibold text-muted-foreground">Supplier Coverage</p>
           {SUPPLIER_COVERAGE_AREAS.map(supplier => (
             <div key={supplier.supplier_name} className="flex items-center gap-2">
@@ -622,7 +622,7 @@ export default function BodyshopMap() {
 
       {/* ── SETTINGS PANEL (tier filters) ── */}
       {showSettings && (
-        <div className="absolute top-16 left-3 z-[999] bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-border p-3 space-y-2 w-[220px]">
+        <div className="absolute top-16 left-3 z-[999] bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-border p-3 space-y-2 w-[220px] max-md:w-[calc(50vw-16px)] max-md:max-h-[calc(100vh-8rem)] max-md:overflow-y-auto">
           <p className="text-xs font-medium text-muted-foreground">Filter by tier</p>
           <div className="flex flex-col gap-1.5">
             {[...tierDots.filter(t => t.key !== 'Solution' && t.key !== 'QAC'), { key: 'None', label: 'No Tier', color: '#9ca3af' }].map(t => (

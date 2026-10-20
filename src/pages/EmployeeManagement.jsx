@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -183,7 +182,7 @@ export default function EmployeeManagement() {
             return (
               <div
                 key={idx}
-                className={`glass-inset p-2 min-h-[80px] ${isToday ? 'border-2 border-accent' : ''} ${
+                className={`glass-inset p-2 min-h-[80px] max-md:p-1 max-md:min-h-[68px] ${isToday ? 'border-2 border-accent' : ''} ${
                   isWeekendDay ? 'bg-opacity-50' : ''
                 } ${!isCurrentMonth ? 'opacity-40' : ''}`}
               >
@@ -691,7 +690,7 @@ function HolidayRequestCard({ request, canManage, calculateWorkingDays, isOwnReq
               {request.status}
             </span>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm m-keep-2">
             <div>
               <p className="text-foreground-muted">Start Date</p>
               <p className="font-medium">{format(new Date(request.start_date), 'dd/MM/yyyy')}</p>
@@ -756,7 +755,7 @@ function SicknessRecordCard({ record }) {
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <h4 className="font-bold mb-2">{record.employee_name}</h4>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm m-keep-2">
             <div>
               <p className="text-foreground-muted">Start Date</p>
               <p className="font-medium">{format(new Date(record.start_date), 'dd/MM/yyyy')}</p>

@@ -77,7 +77,7 @@ const DOBPicker = ({ value, onChange }) => {
 
   const selCls = 'w-full px-3 py-3 rounded-xl border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-amber-400 text-sm';
   return (
-    <div className="grid grid-cols-3 gap-2">
+    <div className="grid grid-cols-3 gap-2 m-keep-3">
       <select value={parts.day} onChange={e => update(e.target.value === '' ? '' : parseInt(e.target.value), undefined, undefined)} className={selCls}>
         <option value="">Day</option>
         {Array.from({ length: maxDay }, (_, i) => i + 1).map(n => <option key={n} value={n}>{n}</option>)}
@@ -202,7 +202,7 @@ export default function IndemnityForm() {
     const yesColor = yesGood ? 'bg-green-500 border-green-500' : 'bg-red-500 border-red-500';
     const noColor = yesGood ? 'bg-red-500 border-red-500' : 'bg-green-500 border-green-500';
     return (
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-2 gap-2 m-keep-2">
         <button type="button" onClick={() => onChange('Yes')} className={`px-4 py-3 rounded-xl border text-sm font-medium transition-colors ${value === 'Yes' ? `${yesColor} text-white` : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'}`}>Yes</button>
         <button type="button" onClick={() => onChange('No')} className={`px-4 py-3 rounded-xl border text-sm font-medium transition-colors ${value === 'No' ? `${noColor} text-white` : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'}`}>No</button>
       </div>

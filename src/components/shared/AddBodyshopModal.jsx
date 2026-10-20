@@ -136,6 +136,7 @@ export default function AddBodyshopModal({ isOpen, onClose, onSuccess, initialNa
   return (
     <div 
       className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" // z-index changed
+      data-mobile-full-modal="true"
       onClick={(e) => {
         e.stopPropagation();
         if (e.target === e.currentTarget) {

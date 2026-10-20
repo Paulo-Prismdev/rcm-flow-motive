@@ -394,7 +394,7 @@ export default function ClientClaimForm() {
               <p className="text-sm text-gray-500">Please add any photos of the damage or incident scene. You can take a photo now or upload from your device.</p>
 
               {/* Upload buttons */}
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-3 m-keep-2">
                 <button
                   type="button"
                   onClick={() => cameraInputRef.current?.click()}
@@ -441,7 +441,7 @@ export default function ClientClaimForm() {
 
               {/* Photo grid */}
               {photos.length > 0 && (
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-3 gap-2 m-keep-3">
                   {photos.map((photo, i) => (
                     <div key={i} className="relative aspect-square rounded-xl overflow-hidden border border-gray-200 group">
                       <img src={photo.preview} alt={`Photo ${i + 1}`} className="w-full h-full object-cover" />

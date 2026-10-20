@@ -164,7 +164,7 @@ export default function TasksPage() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 lg:gap-3 mt-3 lg:mt-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 lg:gap-3 mt-3 lg:mt-4 m-keep-2">
           <div className="neomorph-flat p-3 rounded-xl">
             <div className="text-2xl font-bold">{stats.total}</div>
             <div className="text-xs text-foreground-muted">Active Tasks</div>
@@ -196,7 +196,7 @@ export default function TasksPage() {
               className="pl-10 neomorph-inset"
             />
           </div>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 m-keep-2">
             <select
               value={viewFilter}
               onChange={(e) => setViewFilter(e.target.value)}
