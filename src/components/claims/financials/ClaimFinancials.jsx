@@ -412,7 +412,12 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
 
         {showInvoicing && (
           <>
-            <NextStepCard action={flow.nextAction} allDone={flow.allDone} onDo={runAction} />
+            <NextStepCard
+              action={flow.nextAction}
+              allDone={flow.allDone}
+              suggestion={flow.suggestion}
+              onDo={runAction}
+            />
             <StepIndicator steps={flow.steps} current={flow.current} onSelect={openStep} />
 
             <div className="space-y-2.5">

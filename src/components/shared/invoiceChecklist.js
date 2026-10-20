@@ -103,6 +103,10 @@ export const INVOICE_ITEMS = [
     direction: 'out',
     dateLabel: 'Sent',
     requires: 'not_credit_repair',
+    // Recommended, not required: a copy is encouraged and nudged in amber until
+    // it is filed, but the job's invoicing finishes without one. "Not available"
+    // records why there won't be one, and stops the nudge.
+    recommended: true,
   },
   {
     key: 'referrer_invoice_in',
@@ -190,6 +194,13 @@ export const INVOICE_ITEMS = [
 ];
 
 export const isInvoiceDocument = (item) => item?.kind === 'document';
+
+/**
+ * Recommended items are encouraged but never required: while one is missing its
+ * card is amber rather than red, it is left out of the job's progress, and it
+ * never leaves the job looking incomplete.
+ */
+export const isRecommendedItem = (item) => item?.recommended === true;
 
 /** The invoices we raise, which "Request from accounts" applies to. */
 export const canRequestInvoice = (item) =>
@@ -494,6 +505,7 @@ export function getInvoiceItemState(item, claim, hasFiles = false) {
     received: asDocument ? !!hasFiles : false,
     dateRecordedNoCopy: asDocument && !hasFiles && !!date,
     notApplicable: entry.not_applicable === true,
+    notApplicableReason: entry.not_applicable_reason || '',
     invoiceNumber: entry.invoice_number || '',
     locked,
     adjusted,
@@ -561,7 +573,10 @@ export function computeInvoiceSummary(claim, ctx, hasFile = claimHasFiledCopy(cl
   let weOwe = 0;
 
   for (const { item, state } of rows) {
-    if (state.notApplicable) continue;
+    // Recommended items are encouraged separately: they are left out of the
+    // progress, of what is still outstanding and of what is owed or to pay, so a
+    // missing Collection Note can never leave the job looking unfinished.
+    if (state.notApplicable || isRecommendedItem(item)) continue;
     total += 1;
 
     if (isItemComplete(item, state)) { complete += 1; continue; }
@@ -751,6 +766,9 @@ export function buildInvoiceItemPatch(item, claim, changes, ctx) {
 
   if (has('not_applicable')) {
     entry.not_applicable = !!changes.not_applicable;
+    // A recommended item that won't be coming records why, so the reason sits on
+    // its card and in the history; needing it again clears it.
+    entry.not_applicable_reason = changes.not_applicable ? (changes.not_applicable_reason || null) : null;
   }
 
   items[item.key] = entry;

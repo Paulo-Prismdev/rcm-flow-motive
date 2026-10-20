@@ -1,7 +1,7 @@
 import React from 'react';
 import { AlertTriangle, Ban, Check, Clock, Hourglass } from 'lucide-react';
 import { fmtGBP } from '@/components/shared/creditRepairRates';
-import { INVOICE_STATUS_META } from '@/components/shared/invoiceChecklist';
+import { INVOICE_STATUS_META, isRecommendedItem } from '@/components/shared/invoiceChecklist';
 import { TRACKER_TONES } from '../trackerTones';
 
 const GLYPHS = {
@@ -42,8 +42,8 @@ export default function FinancialHeaderStrip({ status, summary, finalCost, final
         </div>
 
         <Stat label="Final repair cost" value={finalCost > 0 ? fmtGBP(finalCost) : '—'} sub={finalCost > 0 ? `ex VAT ${fmtGBP(finalCostEx)} · VAT ${fmtGBP(finalCostVat)}` : 'inc VAT'} />
-        <Stat label="Owed to us" value={fmtGBP(summary.owedToUs)} sub={`${summary.rows.filter((r) => r.item.direction === 'out' && !r.state.paid && !r.state.notApplicable).length} to collect`} />
-        <Stat label="We owe" value={fmtGBP(summary.weOwe)} sub={`${summary.rows.filter((r) => r.item.direction === 'in' && !r.state.paid && !r.state.notApplicable).length} to pay`} />
+        <Stat label="Owed to us" value={fmtGBP(summary.owedToUs)} sub={`${summary.rows.filter((r) => r.item.direction === 'out' && !r.state.paid && !r.state.notApplicable && !isRecommendedItem(r.item)).length} to collect`} />
+        <Stat label="We owe" value={fmtGBP(summary.weOwe)} sub={`${summary.rows.filter((r) => r.item.direction === 'in' && !r.state.paid && !r.state.notApplicable && !isRecommendedItem(r.item)).length} to pay`} />
 
         <div className="flex-1 min-w-[140px]">
           <div className="flex items-center justify-between gap-2">

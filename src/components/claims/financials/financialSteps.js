@@ -1,3 +1,4 @@
+import { isRecommendedItem } from '@/components/shared/invoiceChecklist';
 import { emptySectionMessage } from './invoiceSectionMeta';
 
 /**
@@ -12,7 +13,7 @@ export const FINANCIAL_STEPS = [
     key: 'closeout',
     n: 1,
     title: 'Collect close-out documents',
-    hint: 'Final Invoice, Final Authority and Collection Note. The final repair cost comes from the Final Invoice.',
+    hint: 'Final Invoice and Final Authority, plus the Collection Note where there is one. The final repair cost comes from the Final Invoice.',
   },
   {
     key: 'figures',
@@ -55,19 +56,26 @@ export function buildFinancialFlow(summary, ctx) {
   /* Step 1 — the close-out paperwork: a copy of each, on file. */
   const closeRows = rowsFor(summary, 'closeout');
   const closeApplies = applying(closeRows);
-  const closeIn = closeApplies.filter((r) => r.state.received).length;
+  // The Collection Note is recommended, never required: the step is done on the
+  // Final Invoice and Final Authority alone, the note is never the step's own
+  // next action, and while it is missing it is offered as a suggestion instead.
+  const closeRequired = closeApplies.filter((r) => !isRecommendedItem(r.item));
+  const closeIn = closeRequired.filter((r) => r.state.received).length;
   const closeEmpty = closeApplies.length === 0 ? emptySectionMessage('closeout', ctx) : null;
-  const closePending = closeApplies.find((r) => !r.state.received);
+  const closePending = closeRequired.find((r) => !r.state.received);
+  const closeSuggested = closeApplies.find((r) => isRecommendedItem(r.item) && !r.state.received);
 
   const closeout = {
     ...STEP.closeout,
     rows: closeRows,
     empty: closeEmpty,
-    done: closeApplies.length === 0 || closeIn === closeApplies.length,
+    done: closeRequired.length === 0 || closeIn === closeRequired.length,
     line: closeEmpty ? closeEmpty.title
-      : closeIn === closeApplies.length ? `all ${closeApplies.length} received`
-        : `${closeIn} of ${closeApplies.length} received`,
+      : closeRequired.length === 0 ? 'nothing required'
+        : closeIn === closeRequired.length ? `all ${closeRequired.length} received`
+          : `${closeIn} of ${closeRequired.length} received`,
     action: closeEmpty || !closePending ? null : upload(closePending, `upload the ${closePending.item.label}`),
+    suggestion: closeSuggested ? upload(closeSuggested, `upload the ${closeSuggested.item.label}`) : null,
   };
 
   /* Step 2 — the figures the invoices are worked out from. */
@@ -154,11 +162,14 @@ export function buildFinancialFlow(summary, ctx) {
   // Where the current step holds nothing to do yet, the next step's action is
   // still the most useful thing to offer.
   const pending = steps.find((s) => !s.done && s.action) || null;
+  // Anything merely recommended is offered underneath the next step, never as it.
+  const recommended = steps.find((s) => s.suggestion)?.suggestion || null;
 
   return {
     steps,
     current: current?.key || null,
     allDone: !current,
     nextAction: pending ? { ...pending.action, n: pending.n, title: pending.title } : null,
+    suggestion: recommended,
   };
 }

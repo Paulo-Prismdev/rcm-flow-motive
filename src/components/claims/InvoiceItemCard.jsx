@@ -11,7 +11,7 @@ import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip
 import { Input } from '@/components/ui/input';
 import { fmtGBP } from '@/components/shared/creditRepairRates';
 import { TRACKER_TONES } from './trackerTones';
-import { isInvoiceDocument } from '@/components/shared/invoiceChecklist';
+import { isInvoiceDocument, isRecommendedItem } from '@/components/shared/invoiceChecklist';
 
 // The status button of one invoice: a light button edged in its status colour —
 // red until it has been raised or received, amber while it waits to be paid or
@@ -39,6 +39,9 @@ export function invoiceToneKey(item, state) {
   // recorded on its own is amber.
   if (isInvoiceDocument(item)) {
     if (state.received) return 'positive';
+    // A recommended document is nudged in amber, never red: nothing is late,
+    // there is simply something else worth collecting.
+    if (isRecommendedItem(item)) return 'warning';
     return state.dateRecordedNoCopy ? 'warning' : 'negative';
   }
   if (state.paid) return 'positive';
@@ -51,6 +54,7 @@ export function invoiceStatusLabel(item, state) {
   if (state.awaiting) return 'awaiting figures';
   if (isInvoiceDocument(item)) {
     if (state.received) return item.direction === 'in' ? 'received' : 'sent';
+    if (isRecommendedItem(item)) return 'recommended';
     return state.dateRecordedNoCopy ? 'date recorded, copy not attached' : 'outstanding';
   }
   if (state.paid) return 'paid';
@@ -68,6 +72,8 @@ export default function InvoiceItemCard({
   const [menuOpen, setMenuOpen] = useState(false);
   const [renamingId, setRenamingId] = useState(null);
   const [renameValue, setRenameValue] = useState('');
+  const [naReasonOpen, setNaReasonOpen] = useState(false);
+  const [naReason, setNaReason] = useState('');
 
   const isDocument = isInvoiceDocument(item);
   const dateLabel = item.dateLabel || (item.direction === 'in' ? 'Received' : 'Sent');
@@ -75,7 +81,14 @@ export default function InvoiceItemCard({
   const tone = TRACKER_TONES[toneKey];
   const statusLabel = invoiceStatusLabel(item, state);
 
-  const subline = state.notApplicable ? 'Not applicable'
+  // What an item reads as once it has been switched off: a recommended one is
+  // "not available", with the reason it was given; a required one "not applicable".
+  const offText = !state.notApplicable ? ''
+    : isRecommendedItem(item)
+      ? `Not available${state.notApplicableReason ? ` — ${state.notApplicableReason}` : ''}`
+      : 'Not applicable';
+
+  const subline = state.notApplicable ? offText
     : state.awaiting ? ''
       : isDocument ? (state.received && state.date ? `${dateLabel} ${formatDay(state.date)}` : '')
         : state.paid ? (state.paidDate ? `Paid ${formatDay(state.paidDate)}` : 'Paid')
@@ -84,7 +97,7 @@ export default function InvoiceItemCard({
               : '';
 
   const hint = state.notApplicable
-    ? 'Not applicable — use ⋮ to change'
+    ? `${offText} — use ⋮ to change`
     : state.awaiting ? (state.hint || 'No amount can be worked out yet')
       : files.length === 0
         ? (isDocument ? 'Click to upload this document' : "Click to upload it — we'll read the figures off it")
@@ -104,6 +117,21 @@ export default function InvoiceItemCard({
     const name = renameValue.trim();
     setRenamingId(null);
     if (name && name !== doc.file_name) onRenameFile(doc, name);
+  };
+
+  /**
+   * Stops the nudge on a recommended item that won't be coming, recording the
+   * short reason against it — which also goes into the claim's activity history.
+   */
+  const saveNotAvailable = () => {
+    const reason = naReason.trim();
+    setNaReasonOpen(false);
+    setNaReason('');
+    if (!reason) return;
+    onChange(
+      { not_applicable: true, not_applicable_reason: reason },
+      `${item.label} not available — ${reason}`
+    );
   };
 
   const togglePaid = (paid) => onChange(
@@ -259,16 +287,75 @@ export default function InvoiceItemCard({
               )}
 
               <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onSelect={() => onChange(
-                  { not_applicable: !state.notApplicable },
-                  `${item.label} marked as ${state.notApplicable ? 'applicable again' : 'not applicable'}`
-                )}
-                className="text-xs"
-              >
-                {state.notApplicable ? <Check className="w-3.5 h-3.5" /> : <Ban className="w-3.5 h-3.5" />}
-                {state.notApplicable ? 'Mark as applicable' : 'Mark not applicable'}
-              </DropdownMenuItem>
+              {isRecommendedItem(item) ? (
+                naReasonOpen ? (
+                  <div className="space-y-1 px-1.5 py-1">
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                      Why is there no {item.label}?
+                    </p>
+                    <div className="flex items-center gap-1">
+                      <Input
+                        value={naReason}
+                        onChange={(e) => setNaReason(e.target.value)}
+                        onKeyDown={(e) => {
+                          e.stopPropagation();
+                          if (e.key === 'Enter') saveNotAvailable();
+                          if (e.key === 'Escape') setNaReasonOpen(false);
+                        }}
+                        placeholder="Short reason"
+                        autoFocus
+                        className="h-7 text-xs"
+                      />
+                      <button
+                        onClick={saveNotAvailable}
+                        disabled={!naReason.trim()}
+                        className="p-1 text-green-600 hover:bg-green-50 rounded disabled:opacity-40 disabled:cursor-not-allowed"
+                        title="Save"
+                      >
+                        <Check className="w-3.5 h-3.5" />
+                      </button>
+                      <button onClick={() => setNaReasonOpen(false)} className="p-1 text-gray-400 hover:bg-muted rounded" title="Cancel">
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <DropdownMenuItem
+                      onSelect={(e) => {
+                        e.preventDefault();
+                        setNaReason(state.notApplicableReason || '');
+                        setNaReasonOpen(true);
+                      }}
+                      className="text-xs"
+                    >
+                      <Ban className="w-3.5 h-3.5" /> Not available
+                    </DropdownMenuItem>
+                    {state.notApplicable && (
+                      <DropdownMenuItem
+                        onSelect={() => onChange(
+                          { not_applicable: false, not_applicable_reason: '' },
+                          `${item.label} needed again`
+                        )}
+                        className="text-xs"
+                      >
+                        <Check className="w-3.5 h-3.5" /> Mark as needed
+                      </DropdownMenuItem>
+                    )}
+                  </>
+                )
+              ) : (
+                <DropdownMenuItem
+                  onSelect={() => onChange(
+                    { not_applicable: !state.notApplicable },
+                    `${item.label} marked as ${state.notApplicable ? 'applicable again' : 'not applicable'}`
+                  )}
+                  className="text-xs"
+                >
+                  {state.notApplicable ? <Check className="w-3.5 h-3.5" /> : <Ban className="w-3.5 h-3.5" />}
+                  {state.notApplicable ? 'Mark as applicable' : 'Mark not applicable'}
+                </DropdownMenuItem>
+              )}
 
               {state.locked && (
                 <DropdownMenuItem
