@@ -58,13 +58,24 @@ const attached = (row) => !!row.state.copyAttached;
 
 const upload = (row, label) => ({ kind: 'upload', item: row.item, state: row.state, label });
 
+/**
+ * What a folded step is still waiting on, named after its own line — so a step
+ * the job has not opened yet says which invoices are still to be raised or
+ * received rather than only how many. Capped at three names so a step always
+ * reads as a header.
+ */
+const waitingOn = (labels = []) => labels.length === 0 ? ''
+  : ` — waiting on ${labels.slice(0, 3).join(', ')}${labels.length > 3 ? ` +${labels.length - 3} more` : ''}`;
+
 export function buildFinancialFlow(summary, ctx, claim) {
   /* Step 1 — the close-out paperwork: a copy of each, on file. */
   const closeRows = rowsFor(summary, 'closeout');
   const closeApplies = applying(closeRows);
   // The Collection Note is recommended, never required: the step is done on the
-  // Final Invoice and Final Authority alone, the note is never the step's own
-  // next action, and while it is missing it is offered as a suggestion instead.
+  // other close-out items alone — the Final Invoice, the Final Authority and,
+  // where we handle the client's VAT and excess, the repairer's VAT & excess
+  // invoice — the note is never the step's own next action, and while it is
+  // missing it is offered as a suggestion instead.
   const closeRequired = closeApplies.filter((r) => !isRecommendedItem(r.item));
   // A copy that is waiting to be replaced by a corrected one doesn't finish the
   // step: the item stays amber until the corrected copy is uploaded.
@@ -79,6 +90,7 @@ export function buildFinancialFlow(summary, ctx, claim) {
     rows: closeRows,
     empty: closeEmpty,
     done: closeRequired.length === 0 || closeIn === closeRequired.length,
+    pendingLabels: closeRequired.filter((r) => !closeSettled(r)).map((r) => r.item.label),
     // Whether anything in the step can be done yet: a step still to come is
     // dimmed only while it holds nothing doable at all.
     workable: !!closePending || !!closeSuggested,
@@ -100,6 +112,7 @@ export function buildFinancialFlow(summary, ctx, claim) {
     empty: null,
     done: missing.length === 0,
     workable: missing.length > 0,
+    pendingLabels: missing.map((m) => m.label),
     line: missing.length === 0 ? 'all set' : `${missing.length} still to set`,
     action: missing.length === 0
       ? null
@@ -154,7 +167,10 @@ export function buildFinancialFlow(summary, ctx, claim) {
   };
 
   /* Step 5 — everything paid, in and out. */
-  const payRows = summary.rows.filter((r) => r.item.section !== 'closeout');
+  // The close-out step's own invoice — the repairer's VAT & excess — is still one
+  // of the invoices we pay, so it is paid here with the rest. The documents filed
+  // beside it carry no money and are left to the close-out step alone.
+  const payRows = summary.rows.filter((r) => r.item.section !== 'closeout' || !isInvoiceDocument(r.item));
   const payApplies = applying(payRows);
   const paidCount = payApplies.filter((r) => r.state.paid).length;
   const payEmpty = payApplies.length === 0
@@ -176,6 +192,7 @@ export function buildFinancialFlow(summary, ctx, claim) {
     rows: payRows,
     empty: payEmpty,
     done: payApplies.length === 0 || paidCount === payApplies.length,
+    pendingLabels: payApplies.filter((r) => !r.state.paid).map((r) => r.item.label),
     // A payment can be recorded as soon as an invoice has gone out or come in, or
     // has at least been asked for from accounts — so the step is live from the
     // moment there is anything to pay, wherever the job has got to.
@@ -201,7 +218,7 @@ export function buildFinancialFlow(summary, ctx, claim) {
       canContinue: (s.key === 'raise' || s.key === 'collect') && !s.done && labels.length > 0,
       line: movedPast
         ? `Pending — ${labels.length} invoice${labels.length === 1 ? '' : 's'} still to attach: ${labels.join(', ')}`
-        : s.line,
+        : `${s.line}${waitingOn(labels)}`,
     };
   });
 

@@ -59,6 +59,35 @@ export function describeDifference(comparison) {
   return `${fmtGBP(Math.abs(comparison.difference))} ${comparison.status}`;
 }
 
+/** The key the repairer's VAT & excess invoice is filed under. */
+export const VAT_EXCESS_INVOICE_KEY = 'vat_excess_invoice_in';
+
+/**
+ * The repairer's two invoices on a job where we handle the client's VAT and
+ * excess: the part the insurer pays, and the VAT & excess invoice beside it —
+ * the VAT content of their repair plus the excess they collected. The two
+ * together ARE the final repair cost, so they are added up against it, within
+ * the same 5p as everywhere else. Nothing is stored: the comparison is the
+ * figures recorded off the two invoices against the claim's own repair cost.
+ */
+export function compareRepairCostSplit({ insurerPart, vatExcessPart, repairCost }) {
+  const insurer = toNum(insurerPart);
+  const vatExcess = toNum(vatExcessPart);
+  const repair = toNum(repairCost);
+  if (insurer === null || vatExcess === null || repair === null || repair <= 0) return null;
+
+  const total = round2(insurer + vatExcess);
+  const difference = round2(total - repair);
+  return {
+    status: Math.abs(difference) <= AUTHORITY_TOLERANCE ? 'match' : 'differs',
+    insurerPart: insurer,
+    vatExcessPart: vatExcess,
+    total,
+    repairCost: repair,
+    difference,
+  };
+}
+
 /**
  * The pre-filled email asking the repairer for a corrected invoice: what was
  * invoiced, what the job was authorised at, and what to send instead.

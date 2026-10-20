@@ -45,6 +45,7 @@ import InvoiceReviewModal from './InvoiceReviewModal';
 import AuthorityReviewModal from './AuthorityReviewModal';
 import ReinvoiceRequestModal from './ReinvoiceRequestModal';
 import FinalInvoiceAuthorityNote from './FinalInvoiceAuthorityNote';
+import RepairCostSplitNote from './RepairCostSplitNote';
 import { buildFinancialFlow } from './financialSteps';
 import { buildStepMovedPastPatch, buildStepReopenPatch } from './financialStepSkip';
 import PendingStepBanner from './PendingStepBanner';
@@ -52,7 +53,7 @@ import { resolveInvoiceParty } from './invoiceParty';
 import useClaimInvoiceDocs from './useClaimInvoiceDocs';
 import { buildReviewLog, toNum } from './invoiceReview';
 import { buildAuthorityLog, buildAuthorityReviewPatch, excessCheck } from './authorityReview';
-import { authorityAmount, compareToAuthority, finalInvoiceTotal } from './invoiceAuthorityCheck';
+import { authorityAmount, compareRepairCostSplit, compareToAuthority, finalInvoiceTotal } from './invoiceAuthorityCheck';
 import { fmtGBP } from '@/components/shared/creditRepairRates';
 
 /** Readable names for the financial fields in the claim's activity history. */
@@ -591,6 +592,7 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
       isUploading={docs.isUploading}
       onChange={(changes, description) => handleItemChange(item, changes, description)}
       onUpload={handleUpload}
+      onAskPaid={(mode) => askPaidDate(item, state, mode)}
       onDeleteFile={(doc) => docs.deleteFile(item, doc, state)}
       onRenameFile={docs.renameFile}
       onViewFile={docs.setViewingFile}
@@ -613,6 +615,18 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
   // file over it flags itself, with no stored state to go stale.
   const finalInvoiceState = summary.rows.find((r) => r.item.key === 'final_invoice')?.state || null;
   const finalInvoiceComparison = compareToAuthority(finalInvoiceTotal(claim), authorityAmount(claim));
+
+  // The repairer's two invoices where we handle the client's VAT and excess: the
+  // part the insurer pays, and the VAT & excess invoice beside it, which together
+  // are the final repair cost. Compared once both copies are on file.
+  const vatExcessInState = summary.rows.find((r) => r.item.key === 'vat_excess_invoice_in')?.state || null;
+  const repairCostSplit = ctx.vatExcess && finalInvoiceState?.copyAttached && vatExcessInState?.copyAttached
+    ? compareRepairCostSplit({
+      insurerPart: finalInvoiceState.amount,
+      vatExcessPart: vatExcessInState.amount,
+      repairCost: claim.final_repair_cost,
+    })
+    : null;
   const askRepairerForCorrectedInvoice = () => {
     if (finalInvoiceComparison) setReinvoice({ comparison: finalInvoiceComparison });
   };
@@ -732,6 +746,7 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
                 <>
                   {finalInvoiceNote}
                   {rowsBlock(closeout, 'closeout', 'sm:grid-cols-3', suggestion)}
+                  <RepairCostSplitNote comparison={repairCostSplit} />
                 </>,
                 suggestion ? <RecommendedNudge action={suggestion} onDo={runAction} /> : null
               )}

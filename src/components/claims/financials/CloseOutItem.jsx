@@ -11,7 +11,7 @@ import InvoiceItemDetails from '../InvoiceItemDetails';
  */
 export default function CloseOutItem({
   item, state, files, isUploading,
-  onChange, onUpload, onDeleteFile, onRenameFile, onViewFile,
+  onChange, onUpload, onDeleteFile, onRenameFile, onViewFile, onAskPaid,
 }) {
   const [detailsOpen, setDetailsOpen] = useState(false);
 
@@ -26,10 +26,13 @@ export default function CloseOutItem({
       onDeleteFile={onDeleteFile}
       onRenameFile={onRenameFile}
       onViewFile={onViewFile}
+      onAskPaid={onAskPaid}
       onToggleDetails={() => setDetailsOpen((v) => !v)}
       detailsOpen={detailsOpen}
     >
-      {detailsOpen && <InvoiceItemDetails item={item} state={state} onChange={onChange} />}
+      {detailsOpen && (
+        <InvoiceItemDetails item={item} state={state} onChange={onChange} onAskPaid={onAskPaid} />
+      )}
     </InvoiceItemCard>
   );
 }
