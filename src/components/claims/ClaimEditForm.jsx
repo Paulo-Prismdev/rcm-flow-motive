@@ -11,6 +11,7 @@ import ReferrerCombobox from '../shared/ReferrerCombobox';
 import StatusMultiSelect from '../shared/StatusMultiSelect';
 import ClaimIndemnityFields from './ClaimIndemnityFields';
 import ClaimAuthorisingPartyFields from './ClaimAuthorisingPartyFields';
+import ExcessModeField from '../shared/ExcessModeField';
 import AddressLookupInput from '../shared/AddressLookupInput';
 import AIExtractConfirmDialog from '../shared/AIExtractConfirmDialog';
 import { COURTESY_CAR_OPTIONS } from '../shared/courtesyCarOptions';
@@ -27,6 +28,10 @@ export default function ClaimEditForm({
   aiExtractDialog, setAiExtractDialog, handleAIExtractConfirm, handleAIExtract,
 }) {
   console.log('[ClaimEditForm] Form submit handler:', handleSubmit?.toString?.().substring(0, 100));
+  // The three-way excess choice hands back a claim patch; each field goes through
+  // the same change handler as the rest of the form.
+  const applyExcess = (patch) => Object.entries(patch).forEach(([field, value]) => handleChange(field, value));
+
   const Plus = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>;
 
   return (
@@ -148,7 +153,9 @@ export default function ClaimEditForm({
               <div><label className="block text-sm text-gray-600 mb-2">Insurer</label><InsurerCombobox value={formData.insurer} onChange={(v) => handleChange('insurer', v)} /></div>
               <div><label className="block text-sm text-gray-600 mb-2">Claim Reference</label><Input value={formData.claim_ref} onChange={(e) => handleChange('claim_ref', e.target.value)} className="neomorph-inset px-4 py-3 text-gray-700 border-0" /></div>
               <div><label className="block text-sm text-gray-600 mb-2">Policy Number</label><Input value={formData.policy_number} onChange={(e) => handleChange('policy_number', e.target.value)} className="neomorph-inset px-4 py-3 text-gray-700 border-0" /></div>
-              <div><label className="block text-sm text-gray-600 mb-2">Policy Excess (£)</label><Input type="text" inputMode="decimal" value={formData.policy_excess || ''} onChange={(e) => { const v = e.target.value; if (v === '' || /^\d*\.?\d*$/.test(v)) handleChange('policy_excess', v === '' ? 0 : parseFloat(v) || 0); }} className="neomorph-inset px-4 py-3 text-gray-700 border-0" placeholder="0.00" /></div>
+              <div className="md:col-span-2"><label className="block text-sm text-gray-600 mb-2">Policy Excess</label>
+                <ExcessModeField claim={formData} onChange={applyExcess} />
+              </div>
             </div>
           </div>
 

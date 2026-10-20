@@ -14,6 +14,8 @@ import AddClientModal from '../shared/AddClientModal';
 import AddInsurerModal from '../shared/AddInsurerModal';
 import StatusMultiSelect from '../shared/StatusMultiSelect';
 import ClaimIndemnityFields from './ClaimIndemnityFields';
+import ExcessModeField from '../shared/ExcessModeField';
+import { excessLabel } from '../shared/excessState';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import AddressLookupInput from '../shared/AddressLookupInput';
@@ -123,7 +125,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
     circumstances: '', loss_date: '', loss_time: '', incident_location: '',
     vehicle_use: '', courtesy_car_required: 'No', has_third_party: false,
     requires_indemnity: false, file_urls: [], insurer: '', claim_ref: '',
-    policy_number: '', policy_excess: 0, referrer: '', referrer_id: null,
+    policy_number: '', policy_excess: null, excess_tbc: false, referrer: '', referrer_id: null,
     referrer_ref: '', file_handler: '', referrer_email: '', percent_to_referrer: 0,
     client_name: '', client_id: null, client_phone: '', driver_contact_name: '',
     driver_contact_phone: '', driver_contact_email: '', driver_contact_address_line_1: '',
@@ -702,8 +704,10 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
           </div>
           <div className="space-y-2"><label className="text-sm font-medium">Claim Reference</label><Input value={formData.claim_ref} onChange={e => handleChange('claim_ref', e.target.value)} /></div>
           <div className="space-y-2"><label className="text-sm font-medium">Policy Number</label><Input value={formData.policy_number} onChange={e => handleChange('policy_number', e.target.value)} /></div>
-          <div className="space-y-2"><label className="text-sm font-medium">Policy Excess (£)</label><Input type="text" inputMode="decimal" value={formData.policy_excess || ''}
-            onChange={e => { const v = e.target.value; if (v === '' || /^\d*\.?\d*$/.test(v)) handleChange('policy_excess', v === '' ? 0 : parseFloat(v) || 0); }} placeholder="0.00" /></div>
+          <div className="space-y-2 md:col-span-2">
+            <label className="text-sm font-medium">Policy Excess</label>
+            <ExcessModeField claim={formData} onChange={patch => setFormData(prev => ({ ...prev, ...patch }))} />
+          </div>
         </div>
       </div>
     );
@@ -874,7 +878,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
               <ReviewRow label="Insurer" value={formData.insurer} />
               <ReviewRow label="Claim Ref" value={formData.claim_ref} />
               <ReviewRow label="Policy Number" value={formData.policy_number} />
-              <ReviewRow label="Excess" value={formData.policy_excess ? `£${formData.policy_excess}` : ''} />
+              <ReviewRow label="Excess" value={excessLabel(formData)} />
             </div>
           </SectionCard>
 
