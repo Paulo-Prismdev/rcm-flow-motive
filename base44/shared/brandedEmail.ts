@@ -1,10 +1,9 @@
 /**
- * The branded RCM email wrapper and SendGrid send used by the app's backend
- * functions, so the markup and the send live in one place.
+ * The branded RCM email wrapper and the send behind it, so the markup and the
+ * delivery live in one place. Delivery goes through Base44's own email service.
  */
 
 export const LOGO_URL = 'https://media.base44.com/images/public/68ee39fb8915b1b539e13c59/b2cb057e2_RCMAutomotiveLogoGreenAutomotivewithHLights.jpg';
-export const FROM_EMAIL = 'info@rcmautomotive.co.uk';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -37,7 +36,7 @@ export function htmlToPlain(html: string): string {
     .trim();
 }
 
-export function buildBrandedHtml(content: string): string {
+export function buildBrandedHtml(content: string, footerNote?: string): string {
   const isHtmlBody = isHtml(content);
   const innerHtml = isHtmlBody
     ? content
@@ -70,6 +69,7 @@ export function buildBrandedHtml(content: string): string {
             <p style="margin:0;color:#9aa7c7;font-size:12px;line-height:1.5;">
               info@rcmautomotive.co.uk &nbsp;|&nbsp; www.rcmautomotive.co.uk
             </p>
+            ${footerNote ? `<p style="margin:8px 0 0;color:#5d6b8c;font-size:11px;">${footerNote}</p>` : ''}
           </td>
         </tr>
       </table>
@@ -79,41 +79,32 @@ export function buildBrandedHtml(content: string): string {
 }
 
 /**
- * Send one branded email through SendGrid. Returns { ok, error } rather than
- * throwing, so the caller decides how to report a failure.
+ * Send one branded email through Base44's own email service. Base44 mails a
+ * single recipient per email, so the primary address is sent the message and
+ * every CC address then receives its own copy of it. Returns { ok, error }
+ * rather than throwing, so the caller decides how to report a failure.
  */
-export async function sendBrandedEmail({ apiKey, to, cc, subject, content, fromName }): Promise<{ ok: boolean; error?: string }> {
-  const personalization: any = { to: [{ email: to }] };
-  if (cc) {
-    const ccList = String(cc)
-      .split(',')
-      .map((e: string) => e.trim())
-      .filter(Boolean)
-      .map((e: string) => ({ email: e }));
-    if (ccList.length) personalization.cc = ccList;
+export async function sendBrandedEmail({ base44, to, cc, subject, content, footerNote, fromName }): Promise<{ ok: boolean; error?: string }> {
+  const recipients = [...new Set([...parseEmails(to), ...parseEmails(cc || '')])];
+  if (recipients.length === 0) return { ok: false, error: 'No valid recipient email address' };
+
+  const plain = String(content);
+  const html = buildBrandedHtml(plain, footerNote);
+  const text = isHtml(plain) ? htmlToPlain(plain) : plain;
+
+  for (const recipient of recipients) {
+    try {
+      await base44.asServiceRole.integrations.Core.SendEmail({
+        to: recipient,
+        subject,
+        html,
+        text,
+        from_name: fromName || 'RCM Automotive',
+      });
+    } catch (error) {
+      return { ok: false, error: `Base44 email error: ${error?.message || error}` };
+    }
   }
 
-  const res = await fetch('https://api.sendgrid.com/v3/mail/send', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      personalizations: [personalization],
-      from: { email: FROM_EMAIL, name: fromName || 'RCM Automotive' },
-      subject,
-      content: [
-        { type: 'text/plain', value: isHtml(content) ? htmlToPlain(content) : String(content) },
-        { type: 'text/html', value: buildBrandedHtml(String(content)) },
-      ],
-    }),
-    signal: AbortSignal.timeout(20000),
-  });
-
-  if (!res.ok) {
-    const errText = await res.text();
-    return { ok: false, error: `SendGrid API error (${res.status}): ${errText}` };
-  }
   return { ok: true };
 }

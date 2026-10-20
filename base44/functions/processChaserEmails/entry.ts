@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
+import { sendBrandedEmail } from '../../shared/brandedEmail.ts';
 
 // ── Token helpers (stateless, HMAC-style) ──
 async function generateBodyshopToken(claimId: string, secret: string): Promise<string> {
@@ -138,78 +139,18 @@ const FREQUENCY_HOURS: Record<string, number> = {
   'Weekly': 168,
 };
 
-// ── Send email via SendGrid API ──
-async function sendViaSendGrid(to: string, cc: string, subject: string, textBody: string): Promise<void> {
-  const apiKey = Deno.env.get('SENDGRID_API_KEY');
-  const fromEmail = 'info@rcmautomotive.co.uk';
-  if (!apiKey) throw new Error('SENDGRID_API_KEY secret is not set');
-
-  const logoUrl = 'https://media.base44.com/images/public/68ee39fb8915b1b539e13c59/b2cb057e2_RCMAutomotiveLogoGreenAutomotivewithHLights.jpg';
-  const innerHtml = textBody
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    // Linkify bare URLs (after HTML-escaping so the href stays safe)
-    .replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" style="color:#2563eb;text-decoration:underline;">click here</a>')
-    .replace(/\n/g, '<br>');
-
-  const htmlBody = `<!DOCTYPE html>
-<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="margin:0;padding:0;background-color:#f4f5fa;font-family:Inter,Arial,sans-serif;">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f5fa;padding:32px 16px;">
-    <tr><td align="center">
-      <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background-color:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
-        <!-- Header -->
-        <tr>
-          <td style="background-color:#131d47;padding:24px 32px;text-align:center;">
-            <img src="${logoUrl}" alt="RCM Automotive" style="max-height:48px;width:auto;display:inline-block;" />
-          </td>
-        </tr>
-        <!-- Body -->
-        <tr>
-          <td style="padding:32px;color:#1B2A3B;font-size:15px;line-height:1.6;">
-            ${innerHtml}
-          </td>
-        </tr>
-        <!-- Footer -->
-        <tr>
-          <td style="background-color:#131d47;padding:20px 32px;text-align:center;">
-            <p style="margin:0 0 4px;color:#ffffff;font-size:14px;font-weight:600;">RCM Automotive</p>
-            <p style="margin:0;color:#9aa7c7;font-size:12px;line-height:1.5;">
-              info@rcmautomotive.co.uk &nbsp;|&nbsp; www.rcmautomotive.co.uk
-            </p>
-            <p style="margin:8px 0 0;color:#5d6b8c;font-size:11px;">This is an automated message — please do not reply directly.</p>
-          </td>
-        </tr>
-      </table>
-    </td></tr>
-  </table>
-</body></html>`;
-
-  const personalization: any = { to: [{ email: to }] };
-  if (cc) {
-    const ccList = cc.split(',').map((e) => e.trim()).filter(Boolean).map((e) => ({ email: e }));
-    if (ccList.length) personalization.cc = ccList;
-  }
-
-  const res = await fetch('https://api.sendgrid.com/v3/mail/send', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${apiKey}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      personalizations: [personalization],
-      from: { email: fromEmail, name: 'RCM Flow-motive' },
-      subject,
-      content: [{ type: 'text/plain', value: textBody }, { type: 'text/html', value: htmlBody }]
-    })
+// ── Send one chaser email through Base44's own email service ──
+async function sendChaserEmail(base44: any, to: string, cc: string, subject: string, textBody: string): Promise<void> {
+  const sent = await sendBrandedEmail({
+    base44,
+    to,
+    cc,
+    subject,
+    content: textBody,
+    footerNote: 'This is an automated message — please do not reply directly.',
+    fromName: 'RCM Flow-motive'
   });
-
-  if (!res.ok) {
-    const errText = await res.text();
-    throw new Error(`SendGrid API error (${res.status}): ${errText}`);
-  }
+  if (!sent.ok) throw new Error(sent.error);
 }
 
 Deno.serve(async (req) => {
@@ -315,7 +256,7 @@ Deno.serve(async (req) => {
       const emailBody = replacePlaceholders(rule.email_body_template, claimForTemplate);
 
       try {
-        await sendViaSendGrid(testEmail!, rule.cc_emails || '', emailSubject, emailBody);
+        await sendChaserEmail(base44, testEmail!, rule.cc_emails || '', emailSubject, emailBody);
         return Response.json({
           success: true,
           message: `Test email sent to ${testEmail}`,
@@ -444,9 +385,9 @@ Deno.serve(async (req) => {
             continue;
           }
 
-          // ── Send the email via SendGrid ──
+          // ── Send the email through Base44's own email service ──
           try {
-            await sendViaSendGrid(recipientEmail, rule.cc_emails || '', emailSubject, emailBody);
+            await sendChaserEmail(base44, recipientEmail, rule.cc_emails || '', emailSubject, emailBody);
             console.log(`✅ Sent chaser "${rule.rule_name}" for claim ${claim.job_number} to ${recipientEmail}`);
 
             await base44.asServiceRole.entities.ChaserEmailLog.create({

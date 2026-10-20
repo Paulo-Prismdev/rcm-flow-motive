@@ -1,5 +1,4 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
-import { secrets } from 'base44:runtime';
 import { parseEmails, sendBrandedEmail } from '../../shared/brandedEmail.ts';
 
 /**
@@ -29,15 +28,12 @@ export default async function (req: Request): Promise<Response> {
       return Response.json({ error: 'A valid accounts email address is required' }, { status: 400 });
     }
 
-    const apiKey = secrets.get('SENDGRID_API_KEY');
-    if (!apiKey) return Response.json({ error: 'SENDGRID_API_KEY secret is not set' }, { status: 500 });
-
     const claim = await base44.asServiceRole.entities.Claim.get(claim_id);
     if (!claim) return Response.json({ error: 'Claim not found' }, { status: 404 });
 
     const fromName = user.full_name ? `${user.full_name} — RCM Automotive` : 'RCM Automotive';
     const sent = await sendBrandedEmail({
-      apiKey,
+      base44,
       to: recipients[0],
       cc: parseEmails(cc).join(', '),
       subject,
