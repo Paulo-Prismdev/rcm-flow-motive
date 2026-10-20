@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import MarkPaidDialog from './financials/MarkPaidDialog';
+import { today } from '@/components/shared/invoiceChecklist';
 
 export default function ClaimExcessContributionForm({ claim, onSave, onCancel }) {
   const isApplicable = claim.excess_contribution_method && claim.excess_contribution_method !== 'None';
@@ -16,6 +18,7 @@ export default function ClaimExcessContributionForm({ claim, onSave, onCancel })
   });
 
   const [applicable, setApplicable] = useState(isApplicable);
+  const [paidPrompt, setPaidPrompt] = useState(null);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -36,16 +39,27 @@ export default function ClaimExcessContributionForm({ claim, onSave, onCancel })
     });
   };
 
-  const handlePaidCheckboxChange = (checked) => {
-    setFormData({ 
-      ...formData, 
-      excess_contribution_paid: checked,
-      excess_contribution_paid_date: checked ? new Date().toISOString().split('T')[0] : formData.excess_contribution_paid_date
-    });
+  // The date the contribution was paid is asked for, never assumed, and undoing
+  // the payment clears it — so the claim never holds a paid flag without its date.
+  const handlePaidConfirm = (date) => {
+    const paid = paidPrompt?.mode === 'paid';
+    setPaidPrompt(null);
+    setFormData((prev) => ({
+      ...prev,
+      excess_contribution_paid: paid,
+      excess_contribution_paid_date: paid ? date : '',
+    }));
+  };
+
+  const paidPromptState = {
+    paidDate: formData.excess_contribution_paid_date,
+    date: '',
+    amount: Number(formData.excess_contribution_amount) || 0,
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <>
+      <form onSubmit={handleSubmit} className="space-y-4">
       {/* Applicable toggle */}
       <div className="p-4 rounded-xl bg-muted/50 border border-border">
         <label className="block text-sm font-medium text-foreground mb-3">Is excess contribution applicable?</label>
@@ -96,7 +110,7 @@ export default function ClaimExcessContributionForm({ claim, onSave, onCancel })
                 type="checkbox"
                 id="excess_contribution_paid"
                 checked={formData.excess_contribution_paid}
-                onChange={(e) => handlePaidCheckboxChange(e.target.checked)}
+                onChange={(e) => setPaidPrompt({ mode: e.target.checked ? 'paid' : 'unpaid' })}
                 className="w-5 h-5"
               />
               <label htmlFor="excess_contribution_paid" className="text-sm text-gray-600">
@@ -110,6 +124,7 @@ export default function ClaimExcessContributionForm({ claim, onSave, onCancel })
                 <Input
                   type="date"
                   value={formData.excess_contribution_paid_date}
+                  max={today()}
                   onChange={(e) => setFormData({ ...formData, excess_contribution_paid_date: e.target.value })}
                   className="neomorph-inset px-4 py-3 text-gray-700 border-0"
                 />
@@ -152,6 +167,19 @@ export default function ClaimExcessContributionForm({ claim, onSave, onCancel })
           Save Changes
         </Button>
       </div>
-    </form>
+      </form>
+
+      {paidPrompt && (
+        <MarkPaidDialog
+          prompt={{
+            mode: paidPrompt.mode,
+            item: { label: 'VAT & excess contribution' },
+            state: paidPromptState,
+          }}
+          onClose={() => setPaidPrompt(null)}
+          onConfirm={handlePaidConfirm}
+        />
+      )}
+    </>
   );
 }

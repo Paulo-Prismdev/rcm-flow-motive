@@ -13,7 +13,7 @@ import InvoiceCalculation from './InvoiceCalculation';
  */
 export default function InvoiceRow({
   item, state, files, isUploading, claim, focus,
-  onChange, onUpload, onDeleteFile, onRenameFile, onViewFile, onRequest, onUndoRequest,
+  onChange, onUpload, onDeleteFile, onRenameFile, onViewFile, onRequest, onUndoRequest, onAskPaid,
 }) {
   const [showCalc, setShowCalc] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
@@ -47,6 +47,7 @@ export default function InvoiceRow({
       onToggleDetails={() => setDetailsOpen((v) => !v)}
       detailsOpen={detailsOpen}
       onUndoRequest={onUndoRequest}
+      onAskPaid={onAskPaid}
     >
       {partyName && (
         <p className="text-[11px] text-muted-foreground truncate">
@@ -77,7 +78,7 @@ export default function InvoiceRow({
         {canMarkPaid && (
           <button
             type="button"
-            onClick={() => onChange({ paid: true }, `${item.label} marked as paid`)}
+            onClick={() => onAskPaid?.('paid')}
             className="font-semibold text-amber-700 dark:text-amber-300 hover:underline"
           >
             Mark paid
@@ -129,7 +130,7 @@ export default function InvoiceRow({
 
       {showCalc && <InvoiceCalculation state={state} />}
 
-      {detailsOpen && <InvoiceItemDetails item={item} state={state} onChange={onChange} />}
+      {detailsOpen && <InvoiceItemDetails item={item} state={state} onChange={onChange} onAskPaid={onAskPaid} />}
     </InvoiceItemCard>
   );
 }

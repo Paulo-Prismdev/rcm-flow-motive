@@ -16,6 +16,7 @@ import {
   claimHandlesVatExcess,
   computeInvoiceSummary,
   deriveInvoiceStatus,
+  formatInvoiceDay,
   invoiceContext,
   invoicePartyName,
   repairNet,
@@ -30,6 +31,7 @@ import JobFiguresCard from './JobFiguresCard';
 import InvoiceRow from './InvoiceRow';
 import CloseOutItem from './CloseOutItem';
 import InvoiceSectionEmpty from './InvoiceSectionEmpty';
+import MarkPaidDialog from './MarkPaidDialog';
 import RequestInvoiceModal from './RequestInvoiceModal';
 import InvoiceReviewModal from './InvoiceReviewModal';
 import { buildFinancialFlow } from './financialSteps';
@@ -67,6 +69,7 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
   const [pendingFigureChange, setPendingFigureChange] = useState(null);
   const [review, setReview] = useState(null);
   const [quickItem, setQuickItem] = useState(null);
+  const [paidPrompt, setPaidPrompt] = useState(null);
   const quickUploadRef = useRef(null);
 
   const { data: appConfigs = [] } = useQuery({
@@ -208,6 +211,41 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
     commit(patch, description);
   };
 
+  // Who is recording the payment, kept with it so the tracker and the history
+  // both say who marked it paid.
+  const paidBy = currentUser?.full_name || currentUser?.email || '';
+
+  // Nothing is marked paid silently, wherever it is marked from: the date the
+  // money landed is asked for first — defaulting to today — and only then saved.
+  const askPaidDate = (item, state, mode = 'paid') => setPaidPrompt({ mode, item, state });
+
+  const handlePaidConfirm = (date) => {
+    const prompt = paidPrompt;
+    if (!prompt) return;
+    const { mode, item, state } = prompt;
+    setPaidPrompt(null);
+
+    if (mode === 'unpaid') {
+      handleItemChange(
+        item,
+        { paid: false },
+        `${item.label} marked as unpaid${state.paidDate ? ` — its paid date (${formatInvoiceDay(state.paidDate)}) cleared` : ''}`
+      );
+      return;
+    }
+
+    if (mode === 'correct') {
+      handleItemChange(item, { paid_date: date }, `${item.label} paid date corrected to ${formatInvoiceDay(date)}`);
+      return;
+    }
+
+    handleItemChange(
+      item,
+      { paid: true, paid_date: date, paid_by: paidBy },
+      `${item.label} marked as paid on ${formatInvoiceDay(date)}`
+    );
+  };
+
   // Every upload is read off the document before anything is recorded: the
   // figures are checked against the job, and the date that lands is the one
   // printed on the document itself — never today's date, and never another
@@ -319,7 +357,7 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
       return;
     }
     if (action.kind === 'pay') {
-      handleItemChange(action.item, { paid: true }, `${action.item.label} marked as paid`);
+      askPaidDate(action.item, action.state, 'paid');
       return;
     }
     openStep('figures');
@@ -341,6 +379,7 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
       onViewFile={docs.setViewingFile}
       onRequest={openRequest}
       onUndoRequest={() => handleUndoRequest(item)}
+      onAskPaid={(mode) => askPaidDate(item, state, mode)}
     />
   );
 
@@ -480,6 +519,15 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
           message={pendingFigureChange ? describeAffected(pendingFigureChange.affected) : ''}
           confirmText="Continue"
         />
+
+        {paidPrompt && (
+          <MarkPaidDialog
+            prompt={paidPrompt}
+            byName={paidBy}
+            onClose={() => setPaidPrompt(null)}
+            onConfirm={handlePaidConfirm}
+          />
+        )}
 
         <RequestInvoiceModal
           isOpen={!!request}

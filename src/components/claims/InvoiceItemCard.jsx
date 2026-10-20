@@ -66,7 +66,7 @@ export function invoiceStatusLabel(item, state) {
 export default function InvoiceItemCard({
   item, state, files, isUploading,
   onChange, onUpload, onDeleteFile, onRenameFile, onViewFile,
-  onToggleDetails, detailsOpen, onUndoRequest, amountText, children,
+  onToggleDetails, detailsOpen, onUndoRequest, amountText, onAskPaid, children,
 }) {
   const fileInputRef = useRef(null);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -134,10 +134,8 @@ export default function InvoiceItemCard({
     );
   };
 
-  const togglePaid = (paid) => onChange(
-    { paid },
-    `${item.label} marked as ${paid ? 'paid' : 'unpaid'}`
-  );
+  /** Marking paid, changing the paid date and marking unpaid all ask for the date first. */
+  const askPaid = (mode) => onAskPaid?.(mode);
 
   return (
     <div className="group h-full">
@@ -166,7 +164,11 @@ export default function InvoiceItemCard({
             <p className="text-[10px] opacity-80 capitalize">{statusLabel}</p>
             {state.date && <p className="text-[10px] opacity-80">{dateLabel} {formatDay(state.date)}</p>}
             {state.requested && <p className="text-[10px] opacity-80">Requested {formatDay(state.requestedAt)}</p>}
-            {state.paid && state.paidDate && <p className="text-[10px] opacity-80">Paid {formatDay(state.paidDate)}</p>}
+            {state.paid && state.paidDate && (
+              <p className="text-[10px] opacity-80">
+                Paid {formatDay(state.paidDate)}{state.paidBy ? ` by ${state.paidBy}` : ''}
+              </p>
+            )}
             {state.variance && (
               <p className="text-[10px] opacity-90 pt-1 mt-1 border-t border-white/20">
                 {state.variance.reason}: calculated {fmtGBP(state.variance.calculated)}, invoiced {fmtGBP(state.variance.invoiced)}
@@ -273,7 +275,13 @@ export default function InvoiceItemCard({
               {!isDocument && (
                 <>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onSelect={() => togglePaid(!state.paid)} className="text-xs">
+                  {state.paid && (
+                    <DropdownMenuItem onSelect={() => askPaid('correct')} className="text-xs">
+                      <Pencil className="w-3.5 h-3.5" />
+                      {state.paidDate ? 'Change paid date' : 'Set paid date'}
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuItem onSelect={() => askPaid(state.paid ? 'unpaid' : 'paid')} className="text-xs">
                     {state.paid ? <Undo2 className="w-3.5 h-3.5" /> : <Check className="w-3.5 h-3.5" />}
                     {state.paid ? 'Mark unpaid' : 'Mark paid'}
                   </DropdownMenuItem>

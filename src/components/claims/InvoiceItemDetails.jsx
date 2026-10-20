@@ -1,17 +1,17 @@
 import React, { useState } from 'react';
-import { Lock } from 'lucide-react';
-import { Input } from '@/components/ui/input';
+import { Check, Lock, Pencil } from 'lucide-react';
 import { fmtGBP } from '@/components/shared/creditRepairRates';
-import { isInvoiceDocument } from '@/components/shared/invoiceChecklist';
+import { formatInvoiceDay, isInvoiceDocument } from '@/components/shared/invoiceChecklist';
 import FigureField from './financials/FigureField';
 
 /**
  * The figures behind an invoice — its number, amount and the date it went out or
  * came in — read-only until their own pencil is clicked, so an amount recorded
  * against an invoice can never be changed by accident. Kept behind the row's ⋮
- * menu so the list itself stays readable. Paid status works as it always has.
+ * menu so the list itself stays readable. A payment is recorded with the date the
+ * money landed, which is asked for rather than assumed.
  */
-export default function InvoiceItemDetails({ item, state, onChange }) {
+export default function InvoiceItemDetails({ item, state, onChange, onAskPaid }) {
   const [editingKey, setEditingKey] = useState(null);
   const isDocument = isInvoiceDocument(item);
   const dateLabel = item.dateLabel || (item.direction === 'in' ? 'Received' : 'Sent');
@@ -72,26 +72,37 @@ export default function InvoiceItemDetails({ item, state, onChange }) {
       {!isDocument && (
         <>
           <div className="flex items-center gap-2 flex-wrap">
-            <label className="inline-flex items-center gap-1.5 text-xs font-medium cursor-pointer">
-              <input
-                type="checkbox"
-                checked={state.paid}
-                onChange={(e) => onChange(
-                  { paid: e.target.checked },
-                  `${item.label} marked as ${e.target.checked ? 'paid' : 'unpaid'}`
-                )}
-                className="rounded border-border"
-              />
-              Paid
-            </label>
-            {state.paid && (
-              <Input
-                type="date"
-                value={state.paidDate || ''}
-                onChange={(e) => onChange({ paid: true, paid_date: e.target.value }, `${item.label} paid date set`)}
-                className="h-7 text-xs w-[132px]"
-                title="Paid date"
-              />
+            {state.paid ? (
+              <>
+                <span className="inline-flex items-center gap-1 text-xs font-medium text-green-700 dark:text-green-300">
+                  <Check className="w-3.5 h-3.5" strokeWidth={3} />
+                  {state.paidDate ? `Paid ${formatInvoiceDay(state.paidDate)}` : 'Paid'}
+                  {state.paidBy ? ` by ${state.paidBy}` : ''}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => onAskPaid?.('correct')}
+                  className="p-1 rounded text-muted-foreground hover:text-primary"
+                  title={state.paidDate ? 'Change the paid date' : 'Set the paid date'}
+                >
+                  <Pencil className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onAskPaid?.('unpaid')}
+                  className="text-[11px] font-semibold text-muted-foreground hover:text-red-500"
+                >
+                  Mark as unpaid
+                </button>
+              </>
+            ) : (
+              <button
+                type="button"
+                onClick={() => onAskPaid?.('paid')}
+                className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary hover:underline"
+              >
+                <Check className="w-3.5 h-3.5" /> Mark as paid
+              </button>
             )}
             {state.requested && (
               <span className="text-[10px] text-amber-600 dark:text-amber-400">Requested from accounts</span>

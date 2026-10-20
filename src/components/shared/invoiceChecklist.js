@@ -227,6 +227,13 @@ const round2 = (n) => Math.round((Number(n) || 0) * 100) / 100;
 
 export const today = () => new Date().toISOString().split('T')[0];
 
+/** A date the way the tracker shows and writes it: 14 Oct 2026. */
+export const formatInvoiceDay = (value) => {
+  if (!value) return '';
+  const d = new Date(value);
+  return isNaN(d.getTime()) ? '' : d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+};
+
 /** The repair cost with VAT taken out of it. */
 export const repairNet = (claim) => round2(toNum(claim?.final_repair_cost) / (1 + VAT_RATE));
 /** The VAT content of the final repair cost. */
@@ -500,6 +507,7 @@ export function getInvoiceItemState(item, claim, hasFiles = false) {
     date,
     paid,
     paidDate,
+    paidBy: entry.paid_by || '',
     // A close-out document is only received/sent once a copy is actually filed:
     // its date on its own is not enough.
     received: asDocument ? !!hasFiles : false,
@@ -752,11 +760,14 @@ export function buildInvoiceItemPatch(item, claim, changes, ctx) {
     }
   }
 
+  // The paid date is asked for, never assumed: a payment is only recorded with
+  // the date the money landed, and marking it unpaid clears that date again.
   if (!asDocument && has('paid')) {
     const paid = !!changes.paid;
     const current = getInvoiceItemState(item, claim);
     write('paid', paid);
-    write('paid_date', paid ? (current.paidDate || today()) : null);
+    write('paid_date', paid ? (changes.paid_date || current.paidDate || null) : null);
+    write('paid_by', paid ? (changes.paid_by || current.paidBy || '') : null);
     if (item.status_field) patch[item.status_field] = paid ? item.paid_status : item.unpaid_status;
   }
 
