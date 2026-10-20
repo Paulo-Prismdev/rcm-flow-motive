@@ -739,27 +739,37 @@ export function missingJobFigures(claim, ctx) {
 
 /**
  * The claim's overall invoicing status, worked out from the invoices themselves:
- * it can never read "Invoiced" while invoices are still to be raised or figures
- * are still missing.
+ * it can never read "Invoiced" while invoices are still to be raised, copies are
+ * still to be filed or figures are still missing.
  */
-export function deriveInvoiceStatus(claim, hasFile = claimHasFiledCopy(claim), options = {}) {
+export function deriveInvoiceStatus(claim, hasFile = claimCopyOnFile(claim), { financialsView = false, ignoreCopies = false } = {}) {
   const ctx = claimInvoiceContext(claim);
-  const summary = computeInvoiceSummary(claim, ctx, hasFile, options);
+  const summary = computeInvoiceSummary(claim, ctx, hasFile, { ignoreCopies });
   const rows = summary.rows.filter((r) => !r.state.notApplicable);
 
   if (rows.length === 0) return 'Not Applicable';
   if (summary.missing.length > 0) return 'Not Ready for Invoicing';
 
-  // Where the filed copies are known (the Financials screen), the job's invoicing
-  // is only finished once every applicable invoice is attached and paid — the
-  // Collection Note aside, which is recommended rather than required. Short of
-  // that the status reads "Pending invoices", with what is missing listed beside
-  // it; an overdue invoice keeps its own, more specific warning.
-  if (options?.copiesKnown) {
+  // Overdue means one of our own invoices has gone out and is still unpaid past
+  // the due date. The Final Invoice is the repairer's, not ours, so it takes no
+  // part in this.
+  const unpaidOut = rows.some(({ item, state }) =>
+    !isInvoiceDocument(item) && item.direction === 'out' && !!state.date && !state.paid);
+  const overdue = unpaidOut && !!claim?.invoice_due_date && claim.invoice_due_date < today();
+
+  // An invoice that has been paid while its copy is still missing is not finished
+  // work: the claim reads as pending, exactly as it does on its own Financials
+  // screen, until the copy is filed.
+  const paidWaitingCopy = !ignoreCopies && rows.some(({ item, state }) =>
+    !isInvoiceDocument(item) && state.paid && !state.copyAttached);
+
+  // The Financials screen reads the job's invoicing as one line of progress, so it
+  // is never "Ready to invoice" or "Invoiced": it is finished only once every
+  // applicable invoice is attached and paid — the Collection Note aside, which is
+  // recommended rather than required. Short of that it reads "Pending invoices",
+  // with what is missing listed beside it.
+  if (financialsView) {
     if (summary.complete === summary.total) return 'Invoice Paid';
-    const unpaidOut = rows.some(({ item, state }) =>
-      !isInvoiceDocument(item) && item.direction === 'out' && !!state.date && !state.paid);
-    const overdue = unpaidOut && !!claim?.invoice_due_date && claim.invoice_due_date < today();
     return overdue ? 'Invoice Overdue' : 'Invoice Required - Pending';
   }
 
@@ -769,14 +779,10 @@ export function deriveInvoiceStatus(claim, hasFile = claimHasFiledCopy(claim), o
   // the close-out paperwork is tracked by the progress count.
   const invoices = rows.filter(({ item }) => !isInvoiceDocument(item));
   if (!invoices.some(({ item, state }) => isItemHandled(item, state))) return 'Ready to Invoice';
-  if (invoices.some(({ item, state }) => !isItemHandled(item, state))) return 'Invoice Required - Pending';
+  if (invoices.some(({ item, state }) => !isItemHandled(item, state)) || paidWaitingCopy) {
+    return 'Invoice Required - Pending';
+  }
 
-  // Overdue means one of our own invoices has gone out and is still unpaid past
-  // the due date. The Final Invoice is the repairer's, not ours, so it takes no
-  // part in this.
-  const unpaidOut = rows.some(({ item, state }) =>
-    !isInvoiceDocument(item) && item.direction === 'out' && !!state.date && !state.paid);
-  const overdue = unpaidOut && !!claim?.invoice_due_date && claim.invoice_due_date < today();
   return overdue ? 'Invoice Overdue' : 'Invoiced';
 }
 
@@ -788,9 +794,18 @@ export function deriveInvoiceStatus(claim, hasFile = claimHasFiledCopy(claim), o
 export function invoiceStatusNeedsReview(claim) {
   const stored = claim?.invoice_status;
   if (stored !== 'Invoiced' && stored !== 'Invoice Paid') return null;
-  const derived = deriveInvoiceStatus(claim);
+  // Judged on the invoices' own money and dates, with the copies left out: this
+  // review is about a status set before the claim mirrored its copies, and an
+  // invoice that has been paid is invoiced, copy or no copy.
+  const ctx = claimInvoiceContext(claim);
+  const copies = claimCopyOnFile(claim);
+  const derived = deriveInvoiceStatus(claim, copies, { ignoreCopies: true });
   if (derived === 'Invoiced' || derived === 'Invoice Paid') return null;
-  return { stored, derived, outstanding: claimInvoiceSummary(claim).outstanding };
+  return {
+    stored,
+    derived,
+    outstanding: computeInvoiceSummary(claim, ctx, copies, { ignoreCopies: true }).outstanding,
+  };
 }
 
 /**

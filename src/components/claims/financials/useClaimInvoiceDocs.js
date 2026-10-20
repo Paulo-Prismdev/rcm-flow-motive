@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { useFileUpload } from '@/hooks/useFileUpload';
-import { invoiceDocKey } from '@/components/shared/invoiceChecklist';
+import { invoiceCopyMap, invoiceDocKey, sameInvoiceCopies } from '@/components/shared/invoiceChecklist';
 
 /**
  * The files filed against a claim's invoices. They are stored as ClaimDocument
@@ -15,7 +15,7 @@ export default function useClaimInvoiceDocs(claim, currentUser) {
   const [viewingFile, setViewingFile] = useState(null);
   const [pendingDelete, setPendingDelete] = useState(null);
 
-  const { data: docs = [] } = useQuery({
+  const { data: docs = [], isLoading, isError } = useQuery({
     queryKey: ['claim-documents', claim.id],
     queryFn: async () => {
       const page = await base44.entities.ClaimDocument.filter({ claim_id: claim.id }, { sort: 'created_date' });
@@ -25,6 +25,21 @@ export default function useClaimInvoiceDocs(claim, currentUser) {
   });
 
   const filesFor = (itemKey) => docs.filter((d) => d.item_key === invoiceDocKey(itemKey));
+
+  // The claim carries a mirror of which invoices hold a copy, because the claims
+  // list runs off the claim record alone and has to judge a missing copy the same
+  // way this screen judges it by the files themselves. It is rebuilt from the
+  // filed documents every time they change — after an upload or a removal — so the
+  // mirror can never drift from what is on file; nothing is written until the
+  // documents have loaded, so an empty list on the way in never wipes it.
+  const copyMirror = useMemo(() => invoiceCopyMap(docs), [docs]);
+  useEffect(() => {
+    if (!claim.id || isLoading || isError) return;
+    if (sameInvoiceCopies(claim.invoice_copies, copyMirror)) return;
+    base44.entities.Claim.update(claim.id, { invoice_copies: copyMirror })
+      .then(() => queryClient.invalidateQueries({ queryKey: ['claims'] }))
+      .catch((e) => console.error('Could not mirror the invoice copies onto the claim', e));
+  }, [claim.id, claim.invoice_copies, copyMirror, isLoading, isError, queryClient]);
 
   const refresh = () => {
     queryClient.invalidateQueries({ queryKey: ['claim-documents', claim.id] });

@@ -73,7 +73,7 @@ const INVOICE_STATUS_ATTENTION = {
     chip: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
   },
   'Invoice Required - Pending': {
-    short: 'Invoices', title: 'invoices still to be raised',
+    short: 'Invoices', title: 'invoices still outstanding',
     chip: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
   },
   'Invoice Overdue': {

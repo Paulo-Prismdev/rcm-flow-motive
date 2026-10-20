@@ -109,11 +109,11 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
   // once its copy is attached — and the job's invoicing only once everything that
   // applies is attached and paid.
   const summary = useMemo(
-    () => computeInvoiceSummary(claim, ctx, hasFile, { copiesKnown: true }),
+    () => computeInvoiceSummary(claim, ctx, hasFile),
     [claim, ctx, docs.files]
   );
   const status = useMemo(
-    () => deriveInvoiceStatus(claim, hasFile, { copiesKnown: true }),
+    () => deriveInvoiceStatus(claim, hasFile, { financialsView: true }),
     [claim, docs.files]
   );
   const flow = useMemo(() => buildFinancialFlow(summary, ctx, claim), [summary, ctx, claim]);
@@ -248,7 +248,7 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
     // invoiced once everything applicable is paid, and back to invoiced where a
     // payment is undone.
     if (changes.paid !== undefined) {
-      const complete = computeInvoiceSummary({ ...claim, ...patch }, ctx, hasFile, { copiesKnown: true }).allComplete;
+      const complete = computeInvoiceSummary({ ...claim, ...patch }, ctx, hasFile).allComplete;
       if (changes.paid && complete) patch.invoice_status = 'Invoice Paid';
       else if (!changes.paid && claim.invoice_status === 'Invoice Paid') patch.invoice_status = 'Invoiced';
     }

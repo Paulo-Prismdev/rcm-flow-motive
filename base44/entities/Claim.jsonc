@@ -1038,6 +1038,11 @@
       "type": "object",
       "description": "Internal invoicing tracker state. Holds { second_referrer_enabled, second_referrer_name, items: { <item_key>: { amount, date, paid, paid_date, not_applicable } } }. Values that duplicate an existing financial field (invoice_amount, invoice_sent_date, invoice_payment_received, final_authority_received, excess_contribution_*) are read from and written to that field instead, so each date and paid status is recorded in exactly one place.",
       "default": {}
+    },
+    "invoice_copies": {
+      "type": "object",
+      "description": "Mirror of which invoice items have their copy filed: map of item_key -> true. Rebuilt from the claim's own ClaimDocument rows whenever an invoice copy is uploaded or removed, so the claims list can judge a missing copy \u2014 and read the same 'Pending invoices' status as the claim's Financials screen \u2014 without loading a claim's documents. Items with no copy on file are simply absent.",
+      "default": {}
     }
   },
   "required": [],
