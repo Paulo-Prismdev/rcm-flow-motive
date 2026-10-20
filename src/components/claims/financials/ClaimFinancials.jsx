@@ -85,6 +85,8 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
   const [reinvoice, setReinvoice] = useState(null);
   const [quickItem, setQuickItem] = useState(null);
   const [paidPrompt, setPaidPrompt] = useState(null);
+  // The figure the next-step button has asked for, so the card can open it.
+  const [figuresFocus, setFiguresFocus] = useState(null);
   const quickUploadRef = useRef(null);
 
   const { data: appConfigs = [] } = useQuery({
@@ -515,7 +517,12 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
       askPaidDate(action.item, action.state, 'paid');
       return;
     }
-    openStep('figures');
+    if (action.kind === 'figures') {
+      // The step the button sits in is the step that is already open, so the
+      // move is to open the figure that still has to be set.
+      openStep('figures');
+      setFiguresFocus((prev) => ({ key: action.key, n: (prev?.n || 0) + 1 }));
+    }
   };
 
   const renderRow = ({ item, state }, focus) => (
@@ -588,6 +595,7 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
         claim={claim}
         ctx={ctx}
         missing={summary.missing}
+        focus={figuresFocus}
         onChange={(fields, description) => commit(fields, description, { checkInvoiceImpact: true })}
         onTrackerChange={(patch, description) => commit(patch, description, { checkInvoiceImpact: true })}
       />

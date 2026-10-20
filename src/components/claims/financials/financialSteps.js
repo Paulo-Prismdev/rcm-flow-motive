@@ -93,7 +93,7 @@ export function buildFinancialFlow(summary, ctx) {
     line: missing.length === 0 ? 'all set' : `${missing.length} still to set`,
     action: missing.length === 0
       ? null
-      : { kind: 'figures', label: `set the ${missing[0].label.toLowerCase()}` },
+      : { kind: 'figures', key: missing[0].key, label: `set the ${missing[0].label.toLowerCase()}` },
   };
 
   /* Step 3 — our invoices, raised and their copies filed. */

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Check } from 'lucide-react';
 import StandardJobFigures from './StandardJobFigures';
 import CreditRepairFigures from './CreditRepairFigures';
@@ -11,11 +11,20 @@ import NotesReferences from './NotesReferences';
  * own pencil is clicked, and only one of them can be edited at a time. Missing
  * figures are flagged here — and only the ones this claim actually needs.
  */
-export default function JobFiguresCard({ claim, ctx, missing, onChange, onTrackerChange }) {
+export default function JobFiguresCard({ claim, ctx, missing, focus, onChange, onTrackerChange }) {
   const [editingKey, setEditingKey] = useState(null);
+  const cardRef = useRef(null);
+
+  // "Go to job figures" opens the figure that still has to be set, and pulls the
+  // card into view where it is off screen.
+  useEffect(() => {
+    if (!focus?.key) return;
+    setEditingKey(focus.key);
+    cardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, [focus?.key, focus?.n]);
 
   return (
-    <div className="rounded-[10px] border border-border bg-card p-2.5 space-y-2">
+    <div ref={cardRef} className="rounded-[10px] border border-border bg-card p-2.5 space-y-2">
       <div className="flex items-center gap-2 flex-wrap">
         <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Job figures</h4>
         {missing.length > 0 ? (
