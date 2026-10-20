@@ -1,12 +1,14 @@
 import { isRecommendedItem } from '@/components/shared/invoiceChecklist';
 import { emptySectionMessage } from './invoiceSectionMeta';
+import { isStepMovedPast } from './financialStepSkip';
 
 /**
  * The Financials section as the five steps the work happens in, worked out from
- * the claim's own invoice rows — nothing here is stored. Each step reports
- * whether it is done, the one-line summary it collapses to, and the single next
- * thing to do inside it, so the prompt at the top of the step and the step
- * headers can never disagree with the rows underneath them.
+ * the claim's own invoice rows: the only thing read from the claim besides is
+ * which steps the job has been taken past with invoices still to attach. Each
+ * step reports whether it is done, the one-line summary it collapses to, and the
+ * single next thing to do inside it, so the prompt at the top of the step and the
+ * step headers can never disagree with the rows underneath them.
  */
 export const FINANCIAL_STEPS = [
   {
@@ -47,12 +49,16 @@ const STEP = Object.fromEntries(FINANCIAL_STEPS.map((s) => [s.key, s]));
 const rowsFor = (summary, section) => summary.rows.filter((r) => r.item.section === section);
 const applying = (rows) => rows.filter((r) => !r.state.notApplicable);
 
-/** An invoice has gone out or come in once it carries a date, or has been paid. */
-const handled = (row) => !!row.state.date || row.state.paid;
+/**
+ * The copy itself, on file. The raise and collect steps finish on this and
+ * nothing else: an invoice's own date is not a copy, and where the copy is not to
+ * hand yet the job is taken past the step by hand instead.
+ */
+const attached = (row) => !!row.state.copyAttached;
 
 const upload = (row, label) => ({ kind: 'upload', item: row.item, state: row.state, label });
 
-export function buildFinancialFlow(summary, ctx) {
+export function buildFinancialFlow(summary, ctx, claim) {
   /* Step 1 — the close-out paperwork: a copy of each, on file. */
   const closeRows = rowsFor(summary, 'closeout');
   const closeApplies = applying(closeRows);
@@ -99,17 +105,19 @@ export function buildFinancialFlow(summary, ctx) {
   /* Step 3 — our invoices, raised and their copies filed. */
   const outRows = rowsFor(summary, 'out');
   const outApplies = applying(outRows);
-  const outDone = outApplies.filter(handled).length;
+  const outPendingRows = outApplies.filter((r) => !attached(r));
+  const outDone = outApplies.length - outPendingRows.length;
   const outEmpty = outApplies.length === 0 ? emptySectionMessage('out', ctx) : null;
-  const outPending = outApplies.find((r) => !handled(r));
+  const outPending = outPendingRows[0];
 
   const raise = {
     ...STEP.raise,
     rows: outRows,
     empty: outEmpty,
-    done: outApplies.length === 0 || outDone === outApplies.length,
+    done: outApplies.length === 0 || outPendingRows.length === 0,
+    pendingLabels: outPendingRows.map((r) => r.item.label),
     line: outEmpty ? outEmpty.title
-      : outDone === outApplies.length ? `${outApplies.length} raised`
+      : outPendingRows.length === 0 ? `${outApplies.length} raised`
         : `${outDone} of ${outApplies.length} raised`,
     action: !outPending ? null
       : outPending.state.requested ? upload(outPending, `upload the copy of the ${outPending.item.label}`)
@@ -120,17 +128,19 @@ export function buildFinancialFlow(summary, ctx) {
   /* Step 4 — invoices in, as they arrive. */
   const inRows = rowsFor(summary, 'in');
   const inApplies = applying(inRows);
-  const inDone = inApplies.filter(handled).length;
+  const inPendingRows = inApplies.filter((r) => !attached(r));
+  const inDone = inApplies.length - inPendingRows.length;
   const inEmpty = inApplies.length === 0 ? emptySectionMessage('in', ctx) : null;
-  const inPending = inApplies.find((r) => !handled(r));
+  const inPending = inPendingRows[0];
 
   const collect = {
     ...STEP.collect,
     rows: inRows,
     empty: inEmpty,
-    done: inApplies.length === 0 || inDone === inApplies.length,
+    done: inApplies.length === 0 || inPendingRows.length === 0,
+    pendingLabels: inPendingRows.map((r) => r.item.label),
     line: inEmpty ? inEmpty.title
-      : inDone === inApplies.length ? `${inApplies.length} received`
+      : inPendingRows.length === 0 ? `${inApplies.length} received`
         : `${inDone} of ${inApplies.length} received`,
     action: !inPending ? null : upload(inPending, `upload the ${inPending.item.label}`),
   };
@@ -148,7 +158,10 @@ export function buildFinancialFlow(summary, ctx) {
       ])],
     }
     : null;
-  const payPending = payApplies.find((r) => !!r.state.date && !r.state.paid);
+  // A payment can be recorded on an invoice that has gone out or come in, or one
+  // that has only been asked for from accounts so far, even where its copy is not
+  // attached yet — a payment is never held up by a missing piece of paper.
+  const payPending = payApplies.find((r) => !r.state.paid && (!!r.state.date || r.state.requested));
 
   const payments = {
     ...STEP.payments,
@@ -163,8 +176,26 @@ export function buildFinancialFlow(summary, ctx) {
       : null,
   };
 
-  const steps = [closeout, figures, raise, collect, payments];
-  const current = steps.find((s) => !s.done) || null;
+  const steps = [closeout, figures, raise, collect, payments].map((s) => {
+    const labels = s.pendingLabels || [];
+    // A step the job has been taken past stays amber and says what it is still
+    // waiting on, rather than folding away as if it were finished.
+    const movedPast = !s.done && isStepMovedPast(claim, s.key);
+    return {
+      ...s,
+      movedPast,
+      // Only the two invoice steps can be moved past, and only while they still
+      // have something to attach.
+      canContinue: (s.key === 'raise' || s.key === 'collect') && !s.done && labels.length > 0,
+      line: movedPast
+        ? `Pending — ${labels.length} invoice${labels.length === 1 ? '' : 's'} still to attach: ${labels.join(', ')}`
+        : s.line,
+    };
+  });
+
+  // The step the job is on is the first one that is neither finished nor held
+  // over; anything held over is carried as a reminder instead.
+  const current = steps.find((s) => !s.done && !s.movedPast) || null;
   // Anything merely recommended is offered with its own item inside its step,
   // never as the work itself, so it is handed over separately from the steps'
   // own next actions.
@@ -173,7 +204,13 @@ export function buildFinancialFlow(summary, ctx) {
   return {
     steps,
     current: current?.key || null,
-    allDone: !current,
+    // The job's invoicing is finished once every step is — the raise and collect
+    // steps included, which only finish on the copies themselves.
+    allDone: steps.every((s) => s.done),
     suggestion: recommended,
+    // What the steps held over are still waiting on, and what is still to be paid:
+    // the reminder line and the status line's "what's missing".
+    stillWaitingOn: [...new Set(steps.filter((s) => s.movedPast).flatMap((s) => s.pendingLabels || []))],
+    toPay: payApplies.filter((r) => !r.state.paid).map((r) => r.item.label),
   };
 }

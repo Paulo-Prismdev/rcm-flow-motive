@@ -46,6 +46,8 @@ import AuthorityReviewModal from './AuthorityReviewModal';
 import ReinvoiceRequestModal from './ReinvoiceRequestModal';
 import FinalInvoiceAuthorityNote from './FinalInvoiceAuthorityNote';
 import { buildFinancialFlow } from './financialSteps';
+import { buildStepMovedPastPatch, buildStepReopenPatch } from './financialStepSkip';
+import PendingStepBanner from './PendingStepBanner';
 import { resolveInvoiceParty } from './invoiceParty';
 import useClaimInvoiceDocs from './useClaimInvoiceDocs';
 import { buildReviewLog, toNum } from './invoiceReview';
@@ -103,9 +105,18 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
     [claim, client]
   );
   const hasFile = (itemKey) => docs.filesFor(itemKey).length > 0;
-  const summary = useMemo(() => computeInvoiceSummary(claim, ctx, hasFile), [claim, ctx, docs.files]);
-  const status = useMemo(() => deriveInvoiceStatus(claim, hasFile), [claim, docs.files]);
-  const flow = useMemo(() => buildFinancialFlow(summary, ctx), [summary, ctx]);
+  // The filed copies are the real ones here, so an invoice counts as done only
+  // once its copy is attached — and the job's invoicing only once everything that
+  // applies is attached and paid.
+  const summary = useMemo(
+    () => computeInvoiceSummary(claim, ctx, hasFile, { copiesKnown: true }),
+    [claim, ctx, docs.files]
+  );
+  const status = useMemo(
+    () => deriveInvoiceStatus(claim, hasFile, { copiesKnown: true }),
+    [claim, docs.files]
+  );
+  const flow = useMemo(() => buildFinancialFlow(summary, ctx, claim), [summary, ctx, claim]);
 
   // What clearing a removed file's details would take with it, worked out for the
   // confirmation before anything is removed — together with the payment notice,
@@ -237,7 +248,7 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
     // invoiced once everything applicable is paid, and back to invoiced where a
     // payment is undone.
     if (changes.paid !== undefined) {
-      const complete = computeInvoiceSummary({ ...claim, ...patch }, ctx, hasFile).allComplete;
+      const complete = computeInvoiceSummary({ ...claim, ...patch }, ctx, hasFile, { copiesKnown: true }).allComplete;
       if (changes.paid && complete) patch.invoice_status = 'Invoice Paid';
       else if (!changes.paid && claim.invoice_status === 'Invoice Paid') patch.invoice_status = 'Invoiced';
     }
@@ -529,6 +540,28 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
     }
   };
 
+  /**
+   * Taking the job past a step that still has invoices to attach. Nothing about
+   * the invoices changes: they stay outstanding, the step stays amber with what it
+   * is waiting on, and the choice is remembered on the claim so it is still held
+   * over the next time the claim is opened — and recorded in its history.
+   */
+  const movePastStep = (config) => {
+    const labels = config.pendingLabels;
+    commit(
+      buildStepMovedPastPatch(claim, config.key, { outstanding: labels, by: paidBy }),
+      `Step ${config.n} (${config.title}) moved past with ${labels.length} invoice${labels.length === 1 ? '' : 's'} still to attach: ${labels.join(', ')}`
+    );
+  };
+
+  /** Putting a step the job was taken past back as the job's own next work. */
+  const reopenStep = (config) => {
+    commit(
+      buildStepReopenPatch(claim, config.key),
+      `Step ${config.n} (${config.title}) reopened — its invoices are the job's next work again`
+    );
+  };
+
   const renderRow = ({ item, state }, focus) => (
     <InvoiceRow
       key={item.key}
@@ -613,24 +646,44 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
     </>
   );
 
-  /** One of the steps: its header and line, then its own rows. */
-  const step = (config, children, nudge) => (
-    <FinancialStep
-      n={config.n}
-      title={config.title}
-      hint={config.hint}
-      line={config.line}
-      status={config.done ? 'done' : config.key === flow.current ? 'current' : 'later'}
-      open={openSteps.has(config.key)}
-      onToggle={() => toggleStep(config.key)}
-      banner={config.key === flow.current
-        ? <NextStepPrompt action={config.action} onDo={runAction} />
-        : null}
-      nudge={nudge}
-    >
-      {children}
-    </FinancialStep>
-  );
+  /**
+   * One of the steps: its header and line, then its own rows. The step the job is
+   * on carries the next-step prompt — with the reminder of anything the steps it
+   * has been taken past are still waiting on, and the way to move past this one
+   * where its invoices are not to hand yet. A step already moved past carries its
+   * own amber banner instead, with the way back into it.
+   */
+  const step = (config, children, nudge) => {
+    const isCurrent = config.key === flow.current;
+    const banner = isCurrent
+      ? (
+        <NextStepPrompt
+          action={config.action}
+          onDo={runAction}
+          pending={flow.stillWaitingOn}
+          onContinue={config.canContinue ? () => movePastStep(config) : null}
+        />
+      )
+      : config.movedPast
+        ? <PendingStepBanner outstanding={config.pendingLabels} onReopen={() => reopenStep(config)} />
+        : null;
+
+    return (
+      <FinancialStep
+        n={config.n}
+        title={config.title}
+        hint={config.hint}
+        line={config.line}
+        status={config.done ? 'done' : config.movedPast ? 'pending' : isCurrent ? 'current' : 'later'}
+        open={openSteps.has(config.key)}
+        onToggle={() => toggleStep(config.key)}
+        banner={banner}
+        nudge={nudge}
+      >
+        {children}
+      </FinancialStep>
+    );
+  };
 
   /**
    * A step's rows — or, where none apply, the checked reason it holds nothing.
@@ -662,6 +715,8 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
           currentStep={currentStep}
           stepCount={flow.steps.length}
           missing={summary.missing}
+          copies={summary.copiesMissing.map((c) => c.label)}
+          payments={flow.toPay}
         />
 
         {!showInvoicing && figuresCard}

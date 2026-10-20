@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { AlertTriangle, Calculator, Send, Unlock } from 'lucide-react';
 import { fmtGBP } from '@/components/shared/creditRepairRates';
 import { canRequestInvoice, invoicePartyName, isInvoiceDocument } from '@/components/shared/invoiceChecklist';
-import InvoiceItemCard, { invoiceToneKey } from '../InvoiceItemCard';
+import InvoiceItemCard from '../InvoiceItemCard';
 import InvoiceItemDetails from '../InvoiceItemDetails';
 import InvoiceCalculation from './InvoiceCalculation';
 
@@ -28,9 +28,11 @@ export default function InvoiceRow({
   // Accounts are asked for the invoices we raise, never for the final invoice or
   // the close-out paperwork.
   const canAsk = canRequestInvoice(item) && !!onRequest && !state.paid && !state.date && !payFocus;
-  // The quick paid action belongs on an invoice that has gone out or come in but
-  // is still waiting to be paid.
-  const canMarkPaid = invoiceToneKey(item, state) === 'warning' && !state.paid && !!state.date && !sendFocus;
+  // The quick paid action belongs on an invoice that has gone out or come in, or
+  // has at least been asked for from accounts, and is still waiting to be paid.
+  // Its copy being on file is not what decides: a payment is tracked either way.
+  const canMarkPaid = !state.paid && !state.notApplicable && !state.awaiting
+    && (!!state.date || state.requested) && !sendFocus;
   const hasAmount = !state.awaiting && state.amount > 0;
 
   return (

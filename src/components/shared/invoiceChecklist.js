@@ -226,7 +226,7 @@ export const canRequestInvoice = (item) =>
 export const INVOICE_STATUS_META = {
   'Not Ready for Invoicing': { label: 'Figures missing', tone: 'warning' },
   'Ready to Invoice': { label: 'Ready to invoice', tone: 'neutral' },
-  'Invoice Required - Pending': { label: 'Invoices outstanding', tone: 'warning' },
+  'Invoice Required - Pending': { label: 'Pending invoices', tone: 'warning' },
   Invoiced: { label: 'Invoiced', tone: 'positive' },
   'Invoice Paid': { label: 'Paid', tone: 'positive' },
   'Invoice Overdue': { label: 'Overdue', tone: 'negative' },
@@ -542,6 +542,9 @@ export function getInvoiceItemState(item, claim, hasFiles = false) {
     // A close-out document is only received/sent once a copy is actually filed:
     // its date on its own is not enough.
     received: asDocument ? !!hasFiles : false,
+    // The copy itself, on file. A raise or collect step finishes on this and
+    // nothing else, and a paid invoice that is still missing it says so.
+    copyAttached: !!hasFiles,
     dateRecordedNoCopy: asDocument && !hasFiles && !!date,
     // A copy is on file but is waiting to be replaced by a corrected one: the
     // item stays amber until the corrected copy lands.
@@ -607,8 +610,12 @@ export function claimHasFiledCopy(claim) {
 /**
  * Summary across the items visible on this claim.
  * `hasFile(itemKey)` reports whether an invoice item already holds a file.
+ * `copiesKnown` says whether those files are the real ones: where they are (the
+ * Financials screen) an invoice is only finished once its copy is attached and it
+ * is paid, and anything still missing its copy is listed in `copiesMissing`. The
+ * claims list runs off the claim record alone, so it never judges a copy.
  */
-export function computeInvoiceSummary(claim, ctx, hasFile = claimHasFiledCopy(claim)) {
+export function computeInvoiceSummary(claim, ctx, hasFile = claimHasFiledCopy(claim), { copiesKnown = false } = {}) {
   const rows = INVOICE_ITEMS
     .filter((item) => isInvoiceItemVisible(item, ctx))
     .map((item) => ({ item, state: getInvoiceItemState(item, claim, hasFile(item.key)) }));
@@ -620,6 +627,7 @@ export function computeInvoiceSummary(claim, ctx, hasFile = claimHasFiledCopy(cl
   let weOwe = 0;
   let toCollect = 0;
   let toPay = 0;
+  const copiesMissing = [];
 
   for (const { item, state } of rows) {
     // Recommended items are encouraged separately: they are left out of the
@@ -628,9 +636,18 @@ export function computeInvoiceSummary(claim, ctx, hasFile = claimHasFiledCopy(cl
     if (state.notApplicable || isRecommendedItem(item)) continue;
     total += 1;
 
-    if (isItemComplete(item, state)) { complete += 1; continue; }
+    // A copy on file: for a close-out document that is the whole of it, for an
+    // invoice it is what the raise and collect steps finish on.
+    const attached = isInvoiceDocument(item) ? state.received : state.copyAttached;
+    if (copiesKnown && !attached) copiesMissing.push({ key: item.key, label: item.label });
+
+    // Paid (or, for a document, received). Where the copies are known this is not
+    // the whole of being done: an invoice without its copy is still outstanding.
+    const settled = isItemComplete(item, state);
+    if (settled && (!copiesKnown || attached)) { complete += 1; continue; }
+
     outstanding += 1;
-    if (isInvoiceDocument(item)) continue;
+    if (isInvoiceDocument(item) || settled) continue;
     if (item.direction === 'out') {
       owedToUs += state.amount;
       toCollect += 1;
@@ -645,6 +662,7 @@ export function computeInvoiceSummary(claim, ctx, hasFile = claimHasFiledCopy(cl
     complete,
     total,
     outstanding,
+    copiesMissing,
     owedToUs: round2(owedToUs),
     weOwe: round2(weOwe),
     // How many invoices the two totals above are still waiting on, counted off
@@ -708,13 +726,27 @@ export function missingJobFigures(claim, ctx) {
  * it can never read "Invoiced" while invoices are still to be raised or figures
  * are still missing.
  */
-export function deriveInvoiceStatus(claim, hasFile = claimHasFiledCopy(claim)) {
+export function deriveInvoiceStatus(claim, hasFile = claimHasFiledCopy(claim), options = {}) {
   const ctx = claimInvoiceContext(claim);
-  const summary = computeInvoiceSummary(claim, ctx, hasFile);
+  const summary = computeInvoiceSummary(claim, ctx, hasFile, options);
   const rows = summary.rows.filter((r) => !r.state.notApplicable);
 
   if (rows.length === 0) return 'Not Applicable';
   if (summary.missing.length > 0) return 'Not Ready for Invoicing';
+
+  // Where the filed copies are known (the Financials screen), the job's invoicing
+  // is only finished once every applicable invoice is attached and paid — the
+  // Collection Note aside, which is recommended rather than required. Short of
+  // that the status reads "Pending invoices", with what is missing listed beside
+  // it; an overdue invoice keeps its own, more specific warning.
+  if (options?.copiesKnown) {
+    if (summary.complete === summary.total) return 'Invoice Paid';
+    const unpaidOut = rows.some(({ item, state }) =>
+      !isInvoiceDocument(item) && item.direction === 'out' && !!state.date && !state.paid);
+    const overdue = unpaidOut && !!claim?.invoice_due_date && claim.invoice_due_date < today();
+    return overdue ? 'Invoice Overdue' : 'Invoice Required - Pending';
+  }
+
   if (summary.complete === summary.total) return 'Invoice Paid';
 
   // Only the invoices themselves decide whether the claim has been invoiced;

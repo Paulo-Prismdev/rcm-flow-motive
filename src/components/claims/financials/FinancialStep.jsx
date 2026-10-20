@@ -12,18 +12,25 @@ import { Check, ChevronDown, ChevronUp } from 'lucide-react';
 export default function FinancialStep({ n, title, hint, line, status, open, onToggle, banner, nudge, children }) {
   const done = status === 'done';
   const current = status === 'current';
+  // A step the job has been taken past is amber, never green: there is still
+  // something outstanding in it, and its line says what.
+  const movedPast = status === 'pending';
 
   const frame = done
     ? 'border-green-200 dark:border-green-900 bg-green-50/60 dark:bg-green-900/10'
-    : current
-      ? 'border-primary/50 bg-card ring-1 ring-primary/20'
-      : 'border-border bg-card opacity-60';
+    : movedPast
+      ? 'border-amber-200 dark:border-amber-900 bg-amber-50/60 dark:bg-amber-900/10'
+      : current
+        ? 'border-primary/50 bg-card ring-1 ring-primary/20'
+        : 'border-border bg-card opacity-60';
 
   const number = done
     ? 'bg-green-500/20 text-green-700 dark:text-green-300'
-    : current
-      ? 'bg-primary/15 text-primary'
-      : 'bg-muted text-muted-foreground';
+    : movedPast
+      ? 'bg-amber-500/20 text-amber-700 dark:text-amber-300'
+      : current
+        ? 'bg-primary/15 text-primary'
+        : 'bg-muted text-muted-foreground';
 
   return (
     <section className={`rounded-xl border shadow-sm transition-all ${frame}`}>
@@ -40,7 +47,9 @@ export default function FinancialStep({ n, title, hint, line, status, open, onTo
           <span className="block text-xs font-semibold text-foreground">
             Step {n} · {title}
           </span>
-          <span className={`block text-[11px] ${done ? 'font-medium text-green-700 dark:text-green-300' : 'text-muted-foreground'}`}>
+          <span className={`block text-[11px] ${done
+            ? 'font-medium text-green-700 dark:text-green-300'
+            : movedPast ? 'font-medium text-amber-700 dark:text-amber-300' : 'text-muted-foreground'}`}>
             {done ? `✓ ${line}` : line}
           </span>
         </span>

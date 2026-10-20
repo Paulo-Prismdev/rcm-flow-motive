@@ -57,7 +57,7 @@ export function invoiceStatusLabel(item, state) {
     if (isRecommendedItem(item)) return 'recommended';
     return state.dateRecordedNoCopy ? 'date recorded, copy not attached' : 'outstanding';
   }
-  if (state.paid) return 'paid';
+  if (state.paid) return state.copyAttached ? 'paid' : 'paid · copy still needed';
   if (state.requested && !state.date) return 'requested';
   if (state.date) return item.direction === 'in' ? 'received' : 'sent';
   return 'outstanding';
@@ -91,7 +91,11 @@ export default function InvoiceItemCard({
       : isDocument ? (state.awaitingCorrected
         ? `Awaiting a corrected invoice — invoiced ${fmtGBP(state.reinvoice?.invoice_total || 0)} against ${fmtGBP(state.reinvoice?.authority_amount || 0)}`
         : (state.received && state.date ? `${dateLabel} ${formatDay(state.date)}` : ''))
-        : state.paid ? (state.paidDate ? `Paid ${formatDay(state.paidDate)}` : 'Paid')
+        : state.paid ? (state.copyAttached
+          // A payment is tracked whether or not the copy has landed: where it has
+          // not, the card says so rather than hiding the missing piece of paper.
+          ? (state.paidDate ? `Paid ${formatDay(state.paidDate)}` : 'Paid')
+          : 'Paid · copy still needed')
           : state.requested && !state.date ? `Requested ${formatDay(state.requestedAt)}`
             : state.date ? `${dateLabel} ${formatDay(state.date)}`
               : '';
@@ -141,7 +145,7 @@ export default function InvoiceItemCard({
       <span className="min-w-0 flex-1">
         <span className="block text-xs font-semibold text-foreground truncate">{item.label}</span>
         <span className="block text-[10px] text-muted-foreground truncate">{subline || statusLabel}</span>
-        {state.keptDetailsWithoutCopy && (
+        {state.keptDetailsWithoutCopy && !state.paid && (
           <span className="block text-[10px] font-normal text-amber-700 dark:text-amber-300 truncate">
             Details recorded, copy not attached
           </span>
@@ -156,7 +160,7 @@ export default function InvoiceItemCard({
         {item.label}{state.amount > 0 ? ` · ${fmtGBP(state.amount)}` : ''}
       </p>
       <p className="text-[10px] opacity-80 capitalize">{statusLabel}</p>
-      {state.keptDetailsWithoutCopy && (
+      {state.keptDetailsWithoutCopy && !state.paid && (
         <p className="text-[10px] opacity-90">Details recorded, copy not attached</p>
       )}
       {state.date && <p className="text-[10px] opacity-80">{dateLabel} {formatDay(state.date)}</p>}
