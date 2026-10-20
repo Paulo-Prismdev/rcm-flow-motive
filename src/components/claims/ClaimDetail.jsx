@@ -99,6 +99,7 @@ import ClaimJourneyTimeline from './ClaimJourneyTimeline';
 import { generateClaimOverviewPdf } from './claimOverviewPdf';
 import ClaimStatusEditForm from './ClaimStatusEditForm';
 import { isUpdateTrackingClosed, computeUpdateStatusFlag, computeClientCommStatusFlag } from '../shared/claimStatusUpdate';
+import { saveTimeLogInBackground } from '../shared/saveTimeLogInBackground';
 
 const EditableSection = ({ title, icon: Icon, claim, onUpdate, children, EditComponent, canEdit = true }) => {
     const [isEditing, setIsEditing] = useState(false);
@@ -490,23 +491,28 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
     },
   });
 
-  React.useEffect(() => {
-    return () => {
-      const duration = durationRef.current;
-      if (duration > 0 && !hasSavedRef.current) {
-        hasSavedRef.current = true;
-        base44.entities.TimeLog.create({
-          parent_id: claim.id,
-          parent_type: 'Claim',
-          duration_seconds: duration,
-          started_at: startTime.toISOString(),
-          ended_at: new Date().toISOString()
-        }).catch(error => {
-          console.error('Failed to save time log on unmount:', error);
-        });
-      }
-    };
-  }, []);
+  // The time spent on the claim is logged once, in the background, however the
+  // screen is left — the back button, the browser's own back gesture, or
+  // switching to another claim. Nothing here waits for the write, and the key
+  // makes a second save update the same log instead of adding another one.
+  const saveTimeLog = React.useCallback(() => {
+    if (hasSavedRef.current) return;
+    const duration = durationRef.current;
+    if (!(duration > 0)) return;
+    hasSavedRef.current = true;
+    saveTimeLogInBackground({
+      parent_id: claim.id,
+      parent_type: 'Claim',
+      duration_seconds: duration,
+      started_at: startTime.toISOString(),
+      ended_at: new Date().toISOString(),
+      log_key: `Claim:${claim.id}:${startTime.toISOString()}`
+    });
+  }, [claim.id, startTime]);
+
+  // Leaving the claim any other way (browser back gesture, switching claim)
+  // unmounts this screen — the log is written then.
+  React.useEffect(() => saveTimeLog, [saveTimeLog]);
 
   const handleOverrideSave = (overrideData) => {
     if (overrideTrackerType === 'client_comm') {
@@ -611,22 +617,10 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
     return () => clearInterval(interval);
   }, [claim, queryClient]);
 
-  const handleClose = async () => {
-    const duration = durationRef.current;
-    if (duration > 0 && !hasSavedRef.current) {
-      hasSavedRef.current = true;
-      try {
-        await base44.entities.TimeLog.create({
-          parent_id: claim.id,
-          parent_type: 'Claim',
-          duration_seconds: duration,
-          started_at: startTime.toISOString(),
-          ended_at: new Date().toISOString()
-        });
-      } catch (error) {
-        console.error('Failed to save time log on close:', error);
-      }
-    }
+  // Closing never waits for the time log: it is handed to the background save
+  // and the screen closes on the same tap.
+  const handleClose = () => {
+    saveTimeLog();
     onClose();
   };
 

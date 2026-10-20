@@ -4,7 +4,7 @@
   "properties": {
     "parent_id": {
       "type": "string",
-      "description": "The ID of the parent record (Claim, Estimate, etc.)"
+      "description": "The ID of the parent record (Claim, Estimate, Engineering, Part)"
     },
     "parent_type": {
       "type": "string",
@@ -29,6 +29,10 @@
       "type": "string",
       "format": "date-time",
       "description": "When the timer ended"
+    },
+    "log_key": {
+      "type": "string",
+      "description": "Stable key for one timer run (parent + start time). A repeated save updates this log instead of adding a second one, so a log is never duplicated."
     }
   },
   "required": [
