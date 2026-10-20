@@ -143,7 +143,9 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
   };
 
   const applyCommit = (patch, description) => {
-    onUpdate({ ...claim, ...patch });
+    // Financials records the change itself — field, old value, new value, who and
+    // when — so the claim page is told not to log the same fields again.
+    onUpdate({ ...claim, ...patch }, { skipFieldLog: true });
     logFigureChanges(patch, description);
   };
 
@@ -291,12 +293,16 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
 
   const handleRequested = (requestedAt) => {
     if (!request) return;
-    const patch = buildInvoiceRequestPatch(claim, request.item.key, {
-      requested: true,
-      requested_at: requestedAt,
-      requested_by: currentUser?.email,
-    });
-    onUpdate({ ...claim, ...patch });
+    // Recorded the same way the request is undone, so the history has the whole
+    // of it: who asked accounts for the invoice, and when.
+    commit(
+      buildInvoiceRequestPatch(claim, request.item.key, {
+        requested: true,
+        requested_at: requestedAt,
+        requested_by: currentUser?.email,
+      }),
+      `${request.item.label} requested from accounts`
+    );
   };
 
   // The "Next step" card's button does the thing it names: the file picker for an

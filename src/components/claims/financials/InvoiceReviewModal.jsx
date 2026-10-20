@@ -13,15 +13,13 @@ import {
   buildExtractionPrompt,
   checkArithmetic,
   checkRightInvoice,
-  confidenceFromExtraction,
   correctionsFromReview,
   emptyFigures,
   expectedInvoice,
-  figuresFromExtraction,
+  figuresForReview,
   findInvoiceNumberElsewhere,
   figuresNeedingReview,
   fetchSourceSnippets,
-  rawFromExtraction,
   snippetsFromExtraction,
   toNum,
 } from './invoiceReview';
@@ -41,6 +39,7 @@ export default function InvoiceReviewModal({
   const [raw, setRaw] = useState({});
   const [confidence, setConfidence] = useState({});
   const [snippets, setSnippets] = useState({});
+  const [derived, setDerived] = useState([]);
   const [touched, setTouched] = useState({});
   const [reviewed, setReviewed] = useState({});
   const [focused, setFocused] = useState('invoice_number');
@@ -59,6 +58,7 @@ export default function InvoiceReviewModal({
     setRaw({});
     setConfidence({});
     setSnippets({});
+    setDerived([]);
     setTouched({});
     setReviewed({});
     setAcked({});
@@ -78,23 +78,24 @@ export default function InvoiceReviewModal({
         if (cancelled) return;
         const readable = result?.readable !== false;
         const extracted = readable ? result : {};
-        const readFigures = figuresFromExtraction(extracted);
+        const read = figuresForReview(extracted);
 
         // Where each figure sits on the document. If the reading pass didn't say,
         // ask once more — the review is only useful with those pointers.
         let found = snippetsFromExtraction(extracted);
         if (readable && !Object.values(found).some(Boolean)) {
           try {
-            found = await fetchSourceSnippets(base44, fileUrl, readFigures);
+            found = await fetchSourceSnippets(base44, fileUrl, read.figures);
           } catch (e) {
             console.error('Snippet lookup failed', e);
           }
         }
         if (cancelled) return;
 
-        setFigures(readFigures);
-        setRaw(rawFromExtraction(extracted));
-        setConfidence(confidenceFromExtraction(extracted));
+        setFigures(read.figures);
+        setRaw(read.raw);
+        setConfidence(read.confidence);
+        setDerived(read.derived);
         setSnippets(found);
         setStatus(readable ? 'ready' : 'failed');
       } catch (e) {
@@ -168,7 +169,7 @@ export default function InvoiceReviewModal({
     softBlockers.filter((b) => acked[b.id]).forEach((b) => accepted.push(`${b.text} — accepted`));
     onConfirm({
       figures,
-      corrections: correctionsFromReview(figures, raw),
+      corrections: correctionsFromReview(figures, raw, derived),
       accepted,
       useAsRepairCost: !!costOffer && useRepairCost,
     });

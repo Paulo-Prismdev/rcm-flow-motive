@@ -401,14 +401,17 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
     const primaryChanged = !!(newStatus && newStatus !== oldStatus);
     const secondaryChanged = updatedData.secondary_status !== undefined && newSec !== oldSec;
     
-    // Log all changes to activity log
-    await logChanges({
-      parentId: claim.id,
-      parentType: 'Claim',
-      oldData: claim,
-      newData: updatedData,
-      user: currentUser,
-    });
+    // Log all changes to activity log. A section that records its own history for
+    // the fields it writes (Financials) asks us not to log them a second time.
+    if (!options.skipFieldLog) {
+      await logChanges({
+        parentId: claim.id,
+        parentType: 'Claim',
+        oldData: claim,
+        newData: updatedData,
+        user: currentUser,
+      });
+    }
     
     if ((primaryChanged || secondaryChanged) && !options.skipClaimUpdateLog) {
         const parts = [];
