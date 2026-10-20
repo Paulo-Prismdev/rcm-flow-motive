@@ -22,6 +22,13 @@ import { sanitizeClaimData } from '@/components/shared/sanitizeClaimData';
 import { formatAuthorisingParty, authorisingPartyOrganisation, AUTHORISING_PARTY_LABELS } from '@/components/shared/authorisingParty';
 import { claimInvoiceSummary, deriveInvoiceStatus } from '@/components/shared/invoiceChecklist';
 import InvoiceStatusReviewBanner from '../components/claims/InvoiceStatusReviewBanner';
+import PullToRefresh from '../components/shared/PullToRefresh';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger } from
+"@/components/ui/dropdown-menu";
 
 // ── Repairs table — fixed column widths (global config) ──
 // Every column has a fixed width (min = max) so the table never recomputes
@@ -40,6 +47,16 @@ const DEFAULT_COL_WIDTH = 130;
 const colWidth = (id) => COL_WIDTHS[id] || DEFAULT_COL_WIDTH;
 const REG_W = 112;
 const CASE_W = 105, CLIENT_W = 105, STATUS_W = 160, UPDATES_W = 80, INFO_W = 52;
+
+// Sort options — shared by the desktop select and the phone sort menu
+const SORT_OPTIONS = [
+{ value: 'priority', label: 'Sort: Priority', short: 'Priority' },
+{ value: 'created_desc', label: 'Sort: Created (Newest)', short: 'Newest' },
+{ value: 'created_asc', label: 'Sort: Created (Oldest)', short: 'Oldest' },
+{ value: 'loss_desc', label: 'Sort: Accident Date (Newest)', short: 'Accident ↓' },
+{ value: 'loss_asc', label: 'Sort: Accident Date (Oldest)', short: 'Accident ↑' },
+{ value: 'updated_desc', label: 'Sort: Last Updated', short: 'Updated' }];
+
 
 // Status dot colour map
 const STATUS_COLORS = {
@@ -166,6 +183,7 @@ export default function ClaimsPage() {
 
   const { data: currentUser } = useQuery({ queryKey: ['currentUser'], queryFn: () => base44.auth.me() });
   const isInternalUser = currentUser?.user_type === 'internal' || currentUser?.role === 'admin';
+  const isAdminUser = ['admin', 'super_admin', 'company_admin'].includes(currentUser?.role);
   const MANDATORY_FIELDS = ['client_name', 'make_model', 'loss_date', 'referrer'];
   const savedFields = currentUser?.claim_card_fields || [];
   const userCardFields = [...MANDATORY_FIELDS, ...savedFields.filter(f => !MANDATORY_FIELDS.includes(f))];
@@ -666,7 +684,7 @@ export default function ClaimsPage() {
   };
 
   const claimsListView = (
-    <div className="flex flex-col h-full min-h-0 bg-white dark:bg-gray-900 lg:rounded-[10px] lg:border lg:border-gray-100 dark:lg:border-gray-800 overflow-hidden lg:shadow-sm">
+    <div className="flex flex-col h-full min-h-0 bg-white dark:bg-gray-900 lg:rounded-[10px] lg:border lg:border-gray-100 dark:lg:border-gray-800 overflow-hidden lg:shadow-sm" data-list-shell>
       <ImportClaimsModal isOpen={showImportModal} onClose={() => setShowImportModal(false)}
         onImportComplete={() => { queryClient.invalidateQueries({ queryKey: ['claims'] }); setShowImportModal(false); }} />
       <ClaimCardFieldsModal isOpen={showFieldsModal} onClose={() => setShowFieldsModal(false)}
@@ -715,11 +733,11 @@ export default function ClaimsPage() {
           />
         </div>
 
-        <div className="flex items-center gap-3 w-full lg:w-auto">
+        <div className="flex items-center gap-2 lg:gap-3 w-full lg:w-auto flex-nowrap">
           {/* Overdue-only toggle */}
           <button
             onClick={() => setOverdueOnly(!overdueOnly)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-[10px] text-xs font-medium border transition-all ${
+            className={`flex items-center gap-1 lg:gap-1.5 px-2 lg:px-3 py-1.5 rounded-[10px] text-[11px] lg:text-xs font-medium border transition-all flex-shrink-0 ${
               overdueOnly
                 ? 'bg-red-50 border-red-200 text-red-700 dark:bg-red-900/20 dark:border-red-700 dark:text-red-300'
                 : 'border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-800 hover:border-gray-300'
@@ -730,25 +748,40 @@ export default function ClaimsPage() {
             <span className="hidden sm:inline">Overdue Only</span>
             <span className="sm:hidden">Overdue</span>
           </button>
-          {/* Sort dropdown */}
+          {/* Sort — select on desktop, compact icon menu on phones */}
           <select value={sortBy} onChange={e => setSortBy(e.target.value)}
-            className="px-2 py-1.5 text-[11px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-[10px] text-gray-700 dark:text-gray-300 focus:outline-none focus:border-blue-400 cursor-pointer">
-            <option value="priority">Sort: Priority</option>
-            <option value="created_desc">Sort: Created (Newest)</option>
-            <option value="created_asc">Sort: Created (Oldest)</option>
-            <option value="loss_desc">Sort: Accident Date (Newest)</option>
-            <option value="loss_asc">Sort: Accident Date (Oldest)</option>
-            <option value="updated_desc">Sort: Last Updated</option>
+            className="hidden lg:block px-2 py-1.5 text-[11px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-[10px] text-gray-700 dark:text-gray-300 focus:outline-none focus:border-blue-400 cursor-pointer">
+            {SORT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
           </select>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                title="Sort claims"
+                className="lg:hidden flex items-center gap-1 px-2 py-1.5 rounded-[10px] text-[11px] font-medium border border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 flex-shrink-0">
+                <ArrowUpDown className="w-3.5 h-3.5" />
+                <span>{(SORT_OPTIONS.find(o => o.value === sortBy) || SORT_OPTIONS[0]).short}</span>
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              {SORT_OPTIONS.map(o =>
+                <DropdownMenuItem
+                  key={o.value}
+                  onSelect={() => setSortBy(o.value)}
+                  className={sortBy === o.value ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : ''}>
+                  {o.label.replace('Sort: ', '')}
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
 
           {/* Quick filter dropdowns */}
           <button onClick={() => setShowFilters(!showFilters)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-[10px] text-xs font-medium border transition-all ${activeFiltersCount > 0 ? 'bg-blue-50 border-blue-200 text-blue-700 dark:bg-blue-900/20 dark:border-blue-700 dark:text-blue-300' : 'border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-800 hover:border-gray-300'}`}>
+            className={`flex items-center gap-1 lg:gap-1.5 px-2 lg:px-3 py-1.5 rounded-[10px] text-[11px] lg:text-xs font-medium border transition-all flex-shrink-0 ${activeFiltersCount > 0 ? 'bg-blue-50 border-blue-200 text-blue-700 dark:bg-blue-900/20 dark:border-blue-700 dark:text-blue-300' : 'border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-800 hover:border-gray-300'}`}>
             <Filter className="w-3.5 h-3.5" />
             Filters{activeFiltersCount > 0 ? ` (${activeFiltersCount})` : ''}
           </button>
           {activeFiltersCount > 0 && (
-            <button onClick={clearAllFilters} className="p-1.5 text-gray-400 hover:text-gray-600 transition-colors"><X className="w-3.5 h-3.5" /></button>
+            <button onClick={clearAllFilters} title="Clear filters" className="p-1.5 text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0"><X className="w-3.5 h-3.5" /></button>
           )}
         </div>
       </div>
@@ -827,11 +860,13 @@ export default function ClaimsPage() {
         </div>
       )}
 
-      {/* Claims the old accounts email marked invoiced while invoices are outstanding */}
-      <InvoiceStatusReviewBanner claims={allClaims} onOpenClaim={(claim) => setSelectedClaim(claim)} />
+      {/* Claims the old accounts email marked invoiced while invoices are outstanding — admins only */}
+      {isAdminUser &&
+        <InvoiceStatusReviewBanner claims={allClaims} onOpenClaim={(claim) => setSelectedClaim(claim)} />
+      }
 
       {/* List / Table */}
-      <div ref={scrollRef} className="flex-1 overflow-auto min-h-0" style={{WebkitOverflowScrolling: 'touch'}}>
+      <div ref={scrollRef} className="flex-1 overflow-auto min-h-0" data-list-body style={{WebkitOverflowScrolling: 'touch'}}>
         {isLoading ? (
           <div className="flex items-center justify-center h-32 text-sm text-gray-400">Loading claims...</div>
         ) : filteredClaims.length === 0 ? (
@@ -1055,8 +1090,8 @@ export default function ClaimsPage() {
         )}
       </div>
 
-      {/* Footer count */}
-      <div className="px-5 py-2 border-t border-gray-100 dark:border-gray-800 text-xs text-gray-400 flex-shrink-0">
+      {/* Footer count — sits at the end of the list, not in a fixed bar */}
+      <div className="px-5 py-2 border-t border-gray-100 dark:border-gray-800 text-xs text-gray-400 flex-shrink-0 m-list-foot">
         {filteredClaims.length} of {tabClaims.length} {claimTab === 'private' ? 'repairs' : 'claims'}
       </div>
     </div>
@@ -1077,9 +1112,12 @@ export default function ClaimsPage() {
 
       {/* Claims list — hidden when a claim is selected */}
       {!selectedClaim && (
-        <div className="flex flex-col min-h-0 w-full">
+        <PullToRefresh
+          onRefresh={() => queryClient.invalidateQueries({ queryKey: ['claims'] })}
+          className="flex flex-col min-h-0 w-full"
+          data-list-scroll>
           {claimsListView}
-        </div>
+        </PullToRefresh>
       )}
 
       {/* Detail panel — full width, replacing the list */}

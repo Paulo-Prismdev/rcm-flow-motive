@@ -645,6 +645,29 @@ button:not(.btn-sm):not(.btn-icon),
     margin-bottom: 1rem;
   }
 
+  /* ── 1c. Repairs list on phones ──
+     The list page scrolls as one page rather than the list scrolling inside its
+     own box, so the count sits at the end of the list instead of a fixed bar. */
+  [data-list-scroll] {
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+  }
+  [data-list-scroll] [data-list-inner],
+  [data-list-scroll] [data-list-shell] {
+    height: auto;
+  }
+  [data-list-scroll] [data-list-shell],
+  [data-list-scroll] [data-list-body] {
+    overflow: visible;
+  }
+  [data-list-scroll] [data-list-body] {
+    flex: none;
+  }
+  .m-list-foot {
+    padding: 0.875rem 1rem 1.25rem;
+    text-align: center;
+  }
+
   /* ── 2. Nothing may be wider than the screen ──
      A row that deliberately sets its own min-width (a money stat, a fixed
      label) keeps it, so those groups stay side by side. */

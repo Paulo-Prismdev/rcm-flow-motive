@@ -202,6 +202,22 @@ export default function Layout({ children, currentPageName }) {
 
           {/* Nav links */}
           <nav className="flex-1 overflow-y-auto py-4 px-2 space-y-0.5" style={{ WebkitOverflowScrolling: 'touch' }}>
+            {/* Phone-only shortcuts that used to sit in the bottom bar */}
+            <div className="md:hidden pb-2 mb-2 border-b border-white/10 space-y-0.5">
+              <button
+                onClick={() => { setMobileMenuOpen(false); setSearchOpen(true); }}
+                className="w-full flex items-center gap-3 px-3 py-2 rounded-[10px] text-sm font-medium text-white/60 hover:bg-white/8 hover:text-white/90 transition-all">
+                <Search className="w-4 h-4 flex-shrink-0" /><span>Search</span>
+              </button>
+              <button
+                onClick={() => window.location.reload()}
+                className="w-full flex items-center gap-3 px-3 py-2 rounded-[10px] text-sm font-medium text-white/60 hover:bg-white/8 hover:text-white/90 transition-all">
+                <RefreshCw className="w-4 h-4 flex-shrink-0" /><span>Refresh</span>
+              </button>
+              <div className="flex items-center gap-3 px-3 py-2 rounded-[10px] text-sm font-medium text-white/60">
+                <ThemeToggle /><span>Theme</span>
+              </div>
+            </div>
             {departments.map((dept) => {
               const isActive = location.pathname === dept.url;
               const cls = `flex items-center gap-3 px-3 py-2 rounded-[10px] text-sm font-medium transition-all md:justify-center md:px-2 lg:justify-start lg:px-3 ${
@@ -367,14 +383,18 @@ export default function Layout({ children, currentPageName }) {
           {/* ── MOBILE bottom tab bar (< lg) ── */}
           {!claimDetailOpen &&
           <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 flex items-center justify-around px-2 safe-area-inset-bottom" style={{ height: '60px', zIndex: 1000 }}>
-              <button onClick={() => setMobileMenuOpen((prev) => !prev)} className="flex flex-col items-center justify-center gap-0.5 p-3 text-gray-500 dark:text-gray-400 touch-manipulation min-w-[44px] min-h-[44px]">
-                <Menu className="w-5 h-5" />
-                <span className="text-[9px]">Menu</span>
-              </button>
-              <button onClick={() => setSearchOpen(true)} className="flex flex-col items-center justify-center gap-0.5 p-3 text-gray-500 dark:text-gray-400 touch-manipulation min-w-[44px] min-h-[44px]">
-                <Search className="w-5 h-5" />
-                <span className="text-[9px]">Search</span>
-              </button>
+              {[
+            { name: 'Repairs', url: createPageUrl('Claims'), icon: FileText },
+            { name: 'Tasks', url: createPageUrl('Tasks'), icon: CheckSquare }].
+            map((tab) =>
+            <Link
+              key={tab.name}
+              to={tab.url}
+              className={`flex flex-col items-center justify-center gap-0.5 p-3 touch-manipulation min-w-[44px] min-h-[44px] ${location.pathname === tab.url ? 'text-primary' : 'text-gray-500 dark:text-gray-400'}`}>
+                  <tab.icon className="w-5 h-5" />
+                  <span className="text-[9px]">{tab.name}</span>
+                </Link>
+            )}
               {isInternalUser &&
             <button onClick={() => setMessagesOpen((prev) => !prev)} className="relative flex flex-col items-center justify-center gap-0.5 p-3 text-gray-500 dark:text-gray-400 touch-manipulation min-w-[44px] min-h-[44px]">
                   <MessageSquare className="w-5 h-5" />
@@ -386,18 +406,14 @@ export default function Layout({ children, currentPageName }) {
               }
                 </button>
             }
-              <button onClick={() => window.location.reload()} className="flex flex-col items-center justify-center gap-0.5 p-3 text-gray-500 dark:text-gray-400 touch-manipulation min-w-[44px] min-h-[44px]">
-                <RefreshCw className="w-5 h-5" />
-                <span className="text-[9px]">Refresh</span>
-              </button>
-              <div className="flex flex-col items-center justify-center gap-0.5 touch-manipulation min-w-[44px] min-h-[44px]">
-                <ThemeToggle />
-                <span className="text-[9px] text-gray-500">Theme</span>
-              </div>
               <div className="flex flex-col items-center justify-center gap-0.5 touch-manipulation min-w-[44px] min-h-[44px]">
                 <Notifications />
                 <span className="text-[9px] text-gray-500">Alerts</span>
               </div>
+              <button onClick={() => setMobileMenuOpen((prev) => !prev)} className={`flex flex-col items-center justify-center gap-0.5 p-3 touch-manipulation min-w-[44px] min-h-[44px] ${mobileMenuOpen ? 'text-primary' : 'text-gray-500 dark:text-gray-400'}`}>
+                <Menu className="w-5 h-5" />
+                <span className="text-[9px]">Menu</span>
+              </button>
               </div>
           }
 
