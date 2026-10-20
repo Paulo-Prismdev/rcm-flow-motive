@@ -593,29 +593,45 @@ const isItemHandled = (item, state) =>
     : state.paid || !!state.date || state.requested || (!state.derived && state.amount > 0);
 
 /**
- * Stand-in for "a copy is filed" where the documents aren't loaded: the claims
- * list runs off the claim record alone, so a recorded date is the closest it can
- * get. Only the list's filters and overall status use this — every status shown
- * on screen is worked out from the real files.
+ * The copy mirror for a claim, built from its filed Invoice Documents: the items
+ * holding a copy, and nothing for those that don't.
  */
-export function claimHasFiledCopy(claim) {
-  return (itemKey) => {
-    const item = INVOICE_ITEMS.find((i) => i.key === itemKey);
-    if (!isInvoiceDocument(item)) return false;
-    const bound = item.bindings?.date ? claim?.[item.bindings.date] : null;
-    return isStored(bound) || isStored(claim?.invoice_tracker?.items?.[itemKey]?.date);
-  };
+export function invoiceCopyMap(files = []) {
+  const map = {};
+  for (const file of files) {
+    if (isInvoiceDocKey(file?.item_key)) map[file.item_key.slice(INVOICE_FILE_PREFIX.length)] = true;
+  }
+  return map;
+}
+
+/** Whether two copy mirrors list the same invoices. */
+export function sameInvoiceCopies(a, b) {
+  const held = (map) => Object.keys(map || {}).filter((key) => map[key]).sort();
+  const ours = held(a);
+  const theirs = held(b);
+  return ours.length === theirs.length && ours.every((key, i) => key === theirs[i]);
+}
+
+/**
+ * "A copy is filed" for a claim whose documents aren't loaded, read from the mirror
+ * the claim carries of them (invoice_copies). The claims list judges an invoice by
+ * it exactly as the Financials screen judges it by the files themselves.
+ */
+export function claimCopyOnFile(claim) {
+  const copies = claim?.invoice_copies || {};
+  return (itemKey) => copies[itemKey] === true;
 }
 
 /**
  * Summary across the items visible on this claim.
- * `hasFile(itemKey)` reports whether an invoice item already holds a file.
- * `copiesKnown` says whether those files are the real ones: where they are (the
- * Financials screen) an invoice is only finished once its copy is attached and it
- * is paid, and anything still missing its copy is listed in `copiesMissing`. The
- * claims list runs off the claim record alone, so it never judges a copy.
+ * `hasFile(itemKey)` reports whether an invoice item already holds a copy: the
+ * claim's filed documents on the Financials screen, or the copy mirror recorded on
+ * the claim itself everywhere else. Either way an invoice is only finished once its
+ * copy is attached and it is paid, and anything still missing its copy is listed in
+ * `copiesMissing`. `ignoreCopies` judges the invoices on their money and dates
+ * alone, for readings that predate the mirror.
  */
-export function computeInvoiceSummary(claim, ctx, hasFile = claimHasFiledCopy(claim), { copiesKnown = false } = {}) {
+export function computeInvoiceSummary(claim, ctx, hasFile = claimCopyOnFile(claim), { ignoreCopies = false } = {}) {
   const rows = INVOICE_ITEMS
     .filter((item) => isInvoiceItemVisible(item, ctx))
     .map((item) => ({ item, state: getInvoiceItemState(item, claim, hasFile(item.key)) }));
@@ -639,12 +655,12 @@ export function computeInvoiceSummary(claim, ctx, hasFile = claimHasFiledCopy(cl
     // A copy on file: for a close-out document that is the whole of it, for an
     // invoice it is what the raise and collect steps finish on.
     const attached = isInvoiceDocument(item) ? state.received : state.copyAttached;
-    if (copiesKnown && !attached) copiesMissing.push({ key: item.key, label: item.label });
+    if (!ignoreCopies && !attached) copiesMissing.push({ key: item.key, label: item.label });
 
-    // Paid (or, for a document, received). Where the copies are known this is not
-    // the whole of being done: an invoice without its copy is still outstanding.
+    // Paid (or, for a document, received). A copy is part of being done: an invoice
+    // without its copy is still outstanding, whichever screen is asking.
     const settled = isItemComplete(item, state);
-    if (settled && (!copiesKnown || attached)) { complete += 1; continue; }
+    if (settled && (ignoreCopies || attached)) { complete += 1; continue; }
 
     outstanding += 1;
     if (isInvoiceDocument(item) || settled) continue;
