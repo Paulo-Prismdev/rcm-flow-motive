@@ -1,16 +1,13 @@
-import React, { useRef, useState } from 'react';
-import { Check, X, Ban, Clock, MoreVertical, Upload, Pencil, Trash2, CalendarDays } from 'lucide-react';
-import {
-  DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem,
-  DropdownMenuLabel, DropdownMenuSeparator,
-} from '@/components/ui/dropdown-menu';
-import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
+import React, { useRef } from 'react';
+import { Check, X, Ban, Clock, CalendarDays } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import ItemActionMenu, { ActionRow, ActionDivider } from '@/components/shared/ItemActionMenu';
 import { TRACKER_TONES } from './trackerTones';
 
-// One checklist item, shown as a light card edged in its status colour. Every
-// action the item carries lives behind the discreet menu, so the card itself
-// only ever shows the document name.
+// One checklist item, shown as a light card edged in its status colour. Clicking
+// the card opens its action menu: the copy on file to open at the top, and every
+// other action the item carries underneath, so the card itself only ever shows
+// the document's name.
 const TONE_KEYS = {
   received: 'positive',
   outstanding: 'negative',
@@ -39,11 +36,9 @@ export default function DocumentChecklistCard({
   onUpload, onView, onRename, onRemove, onStatusChange,
 }) {
   const fileInputRef = useRef(null);
-  const [renamingId, setRenamingId] = useState(null);
-  const [renameValue, setRenameValue] = useState('');
 
   // A Key Dates date recorded on its own never marks the document received: with
-  // nothing filed it shows amber and the click opens the upload.
+  // nothing filed it shows amber.
   const dateOnly = status === 'outstanding' && !!dateRecorded;
   const tone = TRACKER_TONES[dateOnly ? 'warning' : TONE_KEYS[status]] || TRACKER_TONES.neutral;
   const statusOptions = item.required
@@ -57,31 +52,73 @@ export default function DocumentChecklistCard({
         { key: 'not_applicable', label: 'Not applicable' },
       ];
 
-  const handleCardClick = () => {
-    if (uploading) return;
-    if (status === 'received') {
-      if (files.length === 1) onView(files[0].file_url);
-      else onMenuOpenChange(true);
-      return;
-    }
-    if (status === 'not_applicable') {
-      onMenuOpenChange(true);
-      return;
-    }
-    fileInputRef.current?.click();
-  };
+  const pickFile = () => fileInputRef.current?.click();
+  const fileName = (doc) => doc.file_name || doc.file_url.split('/').pop();
 
-  const submitRename = (doc) => {
-    const name = renameValue.trim();
-    setRenamingId(null);
-    if (name && name !== doc.file_name) onRename(doc, name);
-  };
+  const menuFiles = files.map((doc) => ({
+    id: doc.id,
+    name: fileName(doc),
+    onOpen: () => onView(doc.file_url),
+    onRename: (name) => onRename(doc, name),
+    onRemove: () => onRemove(doc),
+  }));
 
-  const hint = status === 'received'
-    ? (files.length === 1 ? 'Click to open the document' : 'Click to choose a document')
-    : status === 'not_applicable'
-      ? 'Not applicable — use ⋮ to change'
-      : 'Click to upload this document';
+  const hint = status === 'not_applicable'
+    ? 'Not applicable — open the menu to change it'
+    : 'No copy attached yet';
+
+  const button = (
+    <button
+      type="button"
+      className={`w-full flex items-center gap-2 rounded-[10px] border border-l-4 px-2.5 py-2 text-left transition-all ${uploading ? 'opacity-60' : ''} ${tone.card}`}
+    >
+      {(GLYPHS[status] || dateOnly) && (
+        <span className={`w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0 ${tone.iconWrap}`}>
+          {dateOnly ? <Clock className="w-3 h-3" strokeWidth={3} /> : GLYPHS[status]}
+        </span>
+      )}
+      <span className="min-w-0 flex-1">
+        <span className="block truncate text-xs font-semibold text-foreground">{item.label}</span>
+        {dateOnly && (
+          <span className="block truncate text-[10px] font-normal text-amber-700 dark:text-amber-300">
+            Date recorded, copy not attached
+          </span>
+        )}
+      </span>
+      {status === 'not_required' && (
+        <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground flex-shrink-0">optional</span>
+      )}
+      {status === 'not_applicable' && (
+        <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground flex-shrink-0">n/a</span>
+      )}
+      {dateRecorded && (
+        <span className="text-[10px] tabular-nums text-muted-foreground flex-shrink-0">{formatDay(dateRecorded)}</span>
+      )}
+    </button>
+  );
+
+  const tooltip = (
+    <>
+      <p className="text-[11px] font-semibold mb-1">{item.label}</p>
+      {files.length > 0 ? (
+        <div className="space-y-1">
+          {files.map((doc) => (
+            <div key={doc.id}>
+              <p className="text-[11px] break-all leading-snug">{fileName(doc)}</p>
+              {doc.uploaded_at && <p className="text-[10px] opacity-70">Uploaded {formatDay(doc.uploaded_at)}</p>}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="text-[11px] opacity-80">{hint}</p>
+      )}
+      {keyDateLabel && keyDateValue && (
+        <p className="text-[10px] opacity-80 pt-1 mt-1 border-t border-white/20">
+          {keyDateLabel}: {formatDay(keyDateValue)}
+        </p>
+      )}
+    </>
+  );
 
   return (
     <div
@@ -91,162 +128,51 @@ export default function DocumentChecklistCard({
       onDragLeave={(e) => { if (!e.currentTarget.contains(e.relatedTarget)) onDropTargetLeave(); }}
       onDrop={(e) => { e.preventDefault(); onDrop(); }}
     >
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <button
-            type="button"
-            onClick={handleCardClick}
-            className={`w-full flex items-center gap-2 rounded-[10px] border border-l-4 px-2.5 py-2 pr-9 text-left transition-all ${uploading ? 'opacity-60' : ''} ${tone.card}`}
-          >
-            {(GLYPHS[status] || dateOnly) && (
-              <span className={`w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0 ${tone.iconWrap}`}>
-                {dateOnly ? <Clock className="w-3 h-3" strokeWidth={3} /> : GLYPHS[status]}
-              </span>
-            )}
-            <span className="min-w-0 flex-1">
-              <span className="block truncate text-xs font-semibold text-foreground">{item.label}</span>
-              {dateOnly && (
-                <span className="block truncate text-[10px] font-normal text-amber-700 dark:text-amber-300">
-                  Date recorded, copy not attached
-                </span>
-              )}
-            </span>
-            {status === 'not_required' && (
-              <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground flex-shrink-0">optional</span>
-            )}
-            {status === 'not_applicable' && (
-              <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground flex-shrink-0">n/a</span>
-            )}
-            {dateRecorded && (
-              <span className="text-[10px] tabular-nums text-muted-foreground flex-shrink-0">{formatDay(dateRecorded)}</span>
-            )}
-          </button>
-        </TooltipTrigger>
-        <TooltipContent side="top" align="start" className="max-w-[280px] p-2.5">
-          <p className="text-[11px] font-semibold mb-1">{item.label}</p>
-          {files.length > 0 ? (
-            <div className="space-y-1">
-              {files.map((doc) => (
-                <div key={doc.id}>
-                  <p className="text-[11px] break-all leading-snug">{doc.file_name || doc.file_url.split('/').pop()}</p>
-                  {doc.uploaded_at && <p className="text-[10px] opacity-70">Uploaded {formatDay(doc.uploaded_at)}</p>}
+      <ItemActionMenu
+        open={menuOpen}
+        onOpenChange={onMenuOpenChange}
+        button={button}
+        tooltip={tooltip}
+        title={item.label}
+        files={menuFiles}
+        onUpload={pickFile}
+        onAddFile={pickFile}
+      >
+        {(close) => (
+          <>
+            <ActionDivider />
+            {statusOptions.map((opt) => (
+              <ActionRow
+                key={opt.key}
+                label={opt.label}
+                trailing={status === opt.key ? <Check className="w-3.5 h-3.5" /> : null}
+                onClick={() => { close(); onStatusChange(opt.key); }}
+              />
+            ))}
+
+            {keyDateLabel && (
+              <>
+                <ActionDivider />
+                <div className="px-2 py-1.5">
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <CalendarDays className="w-3 h-3 text-muted-foreground" />
+                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{keyDateLabel}</span>
+                  </div>
+                  <Input
+                    type="date"
+                    value={keyDateValue}
+                    onChange={(e) => onKeyDateChange(e.target.value)}
+                    onKeyDown={(e) => e.stopPropagation()}
+                    autoFocus={autoFocusKeyDate}
+                    className="h-7 text-xs"
+                  />
+                  <p className="text-[10px] text-muted-foreground mt-1">Sets this date on the Key Dates screen.</p>
                 </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-[11px] opacity-80">{hint}</p>
-          )}
-          {keyDateLabel && keyDateValue && (
-            <p className="text-[10px] opacity-80 pt-1 mt-1 border-t border-white/20">
-              {keyDateLabel}: {formatDay(keyDateValue)}
-            </p>
-          )}
-        </TooltipContent>
-      </Tooltip>
-
-      <DropdownMenu open={menuOpen} onOpenChange={onMenuOpenChange}>
-        <DropdownMenuTrigger asChild>
-          <button
-            type="button"
-            title="More actions"
-            className={`absolute right-1.5 top-1/2 -translate-y-1/2 p-1.5 rounded-md transition-opacity ${tone.menu} ${menuOpen ? 'opacity-100' : 'opacity-100 lg:opacity-0 lg:group-hover:opacity-100'}`}
-          >
-            <MoreVertical className="w-3.5 h-3.5" />
-          </button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-64">
-          {files.length > 0 && (
-            <>
-              <DropdownMenuLabel className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                {files.length} file{files.length === 1 ? '' : 's'}
-              </DropdownMenuLabel>
-              {files.map((doc) => (
-                <div key={doc.id} className="rounded-md hover:bg-muted">
-                  {renamingId === doc.id ? (
-                    <div className="flex items-center gap-1 px-1.5 py-1">
-                      <Input
-                        value={renameValue}
-                        onChange={(e) => setRenameValue(e.target.value)}
-                        onKeyDown={(e) => {
-                          e.stopPropagation();
-                          if (e.key === 'Enter') submitRename(doc);
-                          if (e.key === 'Escape') setRenamingId(null);
-                        }}
-                        autoFocus
-                        className="h-7 text-xs"
-                      />
-                      <button onClick={() => submitRename(doc)} className="p-1 text-green-600 hover:bg-green-50 rounded" title="Save">
-                        <Check className="w-3.5 h-3.5" />
-                      </button>
-                      <button onClick={() => setRenamingId(null)} className="p-1 text-gray-400 hover:bg-muted rounded" title="Cancel">
-                        <X className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-1 pl-2">
-                      <button
-                        onClick={() => { onMenuOpenChange(false); onView(doc.file_url); }}
-                        title={doc.file_name || doc.file_url.split('/').pop()}
-                        className="flex-1 min-w-0 text-left text-xs py-1.5 truncate hover:text-primary"
-                      >
-                        {doc.file_name || doc.file_url.split('/').pop()}
-                      </button>
-                      <button
-                        onClick={() => { setRenamingId(doc.id); setRenameValue(doc.file_name || ''); }}
-                        className="p-1 text-gray-400 hover:text-primary rounded flex-shrink-0"
-                        title="Rename"
-                      >
-                        <Pencil className="w-3 h-3" />
-                      </button>
-                      <button
-                        onClick={() => { onMenuOpenChange(false); onRemove(doc); }}
-                        className="p-1 text-gray-400 hover:text-red-500 rounded flex-shrink-0"
-                        title="Remove"
-                      >
-                        <Trash2 className="w-3 h-3" />
-                      </button>
-                    </div>
-                  )}
-                </div>
-              ))}
-              <DropdownMenuSeparator />
-            </>
-          )}
-
-          <DropdownMenuItem onSelect={() => fileInputRef.current?.click()} className="text-xs">
-            <Upload className="w-3.5 h-3.5" /> Add file
-          </DropdownMenuItem>
-
-          <DropdownMenuSeparator />
-          {statusOptions.map((opt) => (
-            <DropdownMenuItem key={opt.key} onSelect={() => onStatusChange(opt.key)} className="text-xs">
-              {status === opt.key ? <Check className="w-3.5 h-3.5" /> : <span className="w-3.5" />}
-              {opt.label}
-            </DropdownMenuItem>
-          ))}
-
-          {keyDateLabel && (
-            <>
-              <DropdownMenuSeparator />
-              <div className="px-2 py-1.5">
-                <div className="flex items-center gap-1.5 mb-1">
-                  <CalendarDays className="w-3 h-3 text-muted-foreground" />
-                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{keyDateLabel}</span>
-                </div>
-                <Input
-                  type="date"
-                  value={keyDateValue}
-                  onChange={(e) => onKeyDateChange(e.target.value)}
-                  onKeyDown={(e) => e.stopPropagation()}
-                  autoFocus={autoFocusKeyDate}
-                  className="h-7 text-xs"
-                />
-                <p className="text-[10px] text-muted-foreground mt-1">Sets this date on the Key Dates screen.</p>
-              </div>
-            </>
-          )}
-        </DropdownMenuContent>
-      </DropdownMenu>
+              </>
+            )}
+          </>
+        )}
+      </ItemActionMenu>
 
       <input
         ref={fileInputRef}
