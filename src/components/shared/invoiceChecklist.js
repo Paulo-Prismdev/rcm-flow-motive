@@ -515,6 +515,10 @@ export function getInvoiceItemState(item, claim, hasFiles = false) {
     notApplicable: entry.not_applicable === true,
     notApplicableReason: entry.not_applicable_reason || '',
     invoiceNumber: entry.invoice_number || '',
+    // The file the details were read from, and whether those details are still
+    // recorded with no copy left behind them.
+    detailsSource: entry.details_source || null,
+    keptDetailsWithoutCopy: !asDocument && !!entry.details_source && !hasFiles,
     locked,
     adjusted,
     variance,
@@ -791,8 +795,14 @@ export function buildInvoiceItemPatch(item, claim, changes, ctx) {
  * figures, and the date that marks it received or sent — which locks the amount,
  * as it always has. The amount is written first, so the date locks the invoice's
  * own figure rather than the calculated one.
+ *
+ * `origin` is the file the details were read from, remembered against the item so
+ * the copy behind a recorded invoice can always be pointed at later — and so
+ * removing that copy can take the details with it. Where the invoice's total also
+ * became the claim's final repair cost, the file that supplied it is remembered
+ * the same way.
  */
-export function buildInvoiceReviewPatch(item, claim, figures) {
+export function buildInvoiceReviewPatch(item, claim, figures, origin) {
   const amountPatch = buildInvoiceItemPatch(item, claim, {
     amount: figures.amount_total,
     ex: figures.amount_ex_vat,
@@ -807,9 +817,106 @@ export function buildInvoiceReviewPatch(item, claim, figures) {
   const items = { ...(source.items || {}) };
   const entry = { ...(items[item.key] || {}) };
   entry.invoice_number = figures.invoice_number || '';
+  if (origin?.file_url) {
+    const at = new Date().toISOString();
+    entry.details_source = {
+      file_url: origin.file_url,
+      file_name: origin.file_name || '',
+      at,
+    };
+    if (origin.repair_cost) {
+      entry.repair_cost_source = {
+        file_url: origin.file_url,
+        file_name: origin.file_name || '',
+        amount: origin.repair_cost,
+        at,
+      };
+    }
+  }
   items[item.key] = entry;
 
   return { ...amountPatch, ...datePatch, invoice_tracker: { ...source, items } };
+}
+
+/**
+ * Clear everything an item's details were read off the file being removed: the
+ * amounts read from it and their split, its invoice number, the date it set and
+ * the status that date drives, the reminder of where the details came from and
+ * the amount lock the date created.
+ *
+ * What was never read off the invoice deliberately stays: a payment and an
+ * accounts request are separate decisions, so undoing a payment still takes the
+ * paid action. A final repair cost that came from this invoice is never moved
+ * behind anyone's back either — it is left standing and flagged for checking, and
+ * the claim's own invoicing status is worked out from the invoices as usual.
+ */
+export function buildInvoiceDetailsClearPatch(item, claim, { fileUrl, clearedBy } = {}) {
+  const asDocument = isInvoiceDocument(item);
+  const b = item.bindings || {};
+  const source = claim.invoice_tracker || {};
+  const items = { ...(source.items || {}) };
+  const entry = { ...(items[item.key] || {}) };
+  const state = getInvoiceItemState(item, claim);
+  const calc = resolveInvoiceAmount(item, claim);
+  const patch = {};
+  const clearPoints = [];
+
+  if (!asDocument && (entry.amount != null || entry.ex != null || entry.vat != null)) {
+    entry.amount = null;
+    entry.ex = null;
+    entry.vat = null;
+    clearPoints.push(calc && !calc.awaiting
+      ? `the amount read from it, back to the calculated ${fmtGBP(calc.amount)}`
+      : 'the amount read from it');
+  }
+  if (state.invoiceNumber) {
+    entry.invoice_number = '';
+    clearPoints.push(`the invoice number it recorded (${state.invoiceNumber})`);
+  }
+  if (state.locked) clearPoints.push('the amount lock, so the calculated figure shows again');
+
+  if (state.date) {
+    if (b.date) patch[b.date] = null;
+    else entry.date = null;
+    if (item.date_flag) patch[item.date_flag] = false;
+    const dateWord = (item.dateLabel || (item.direction === 'in' ? 'Received' : 'Sent')).toLowerCase();
+    clearPoints.push(`the ${dateWord} date it set (${formatInvoiceDay(state.date)})`);
+  }
+
+  // A final repair cost read off this invoice stands, flagged rather than moved.
+  const repairSource = entry.repair_cost_source || null;
+  const repairCostFlagged = !!repairSource && (!fileUrl || repairSource.file_url === fileUrl);
+  if (repairCostFlagged) {
+    entry.repair_cost_source = null;
+    entry.repair_cost_check = {
+      reason: `Read from the ${item.label} copy that was removed`,
+      amount: repairSource.amount,
+      at: new Date().toISOString(),
+      by: clearedBy || '',
+    };
+    clearPoints.push(`the final repair cost of ${fmtGBP(repairSource.amount)} left as it is and flagged for checking`);
+  }
+
+  // The record of where the details came from goes with them.
+  entry.details_source = null;
+
+  items[item.key] = entry;
+  patch.invoice_tracker = { ...source, items };
+
+  // The claim is invoiced once the final invoice is on file, so reverting that
+  // date reverts the status it set — worked out from the invoices themselves.
+  if (item.date_status_field && claim[item.date_status_field] === item.date_status_value) {
+    patch[item.date_status_field] = deriveInvoiceStatus({ ...claim, ...patch });
+    clearPoints.push('the invoiced status it set');
+  }
+
+  if (!state.paid) {
+    clearPoints.push(state.requested
+      ? 'put the item back to Requested, as it was'
+      : 'put the item back to outstanding');
+  }
+
+  return { patch, clearPoints, repairCostFlagged };
 }
 
 /** Patch for tracker-level settings (the second-referrer switch and its name). */

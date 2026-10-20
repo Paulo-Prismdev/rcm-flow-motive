@@ -63,6 +63,14 @@
       ],
       "default": "manual",
       "description": "How this document record was created"
+    },
+    "date_set_field": {
+      "type": "string",
+      "description": "Claim Key Dates field this file filled in when it landed (e.g. 'authority_received', 'date_received'). Lets a removal clear the date this file supplied, and nothing else."
+    },
+    "date_set_value": {
+      "type": "string",
+      "description": "The Key Dates value this file set, so the date is only cleared while it is still the one this file supplied."
     }
   },
   "required": [

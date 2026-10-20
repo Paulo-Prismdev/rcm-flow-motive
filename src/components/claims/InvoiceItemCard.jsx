@@ -154,6 +154,11 @@ export default function InvoiceItemCard({
               <span className="min-w-0 flex-1">
                 <span className="block text-xs font-semibold text-foreground truncate">{item.label}</span>
                 <span className="block text-[10px] text-muted-foreground truncate">{subline || statusLabel}</span>
+                {state.keptDetailsWithoutCopy && (
+                  <span className="block text-[10px] font-normal text-amber-700 dark:text-amber-300 truncate">
+                    Details recorded, copy not attached
+                  </span>
+                )}
               </span>
             </button>
           </TooltipTrigger>
@@ -162,6 +167,9 @@ export default function InvoiceItemCard({
               {item.label}{state.amount > 0 ? ` · ${fmtGBP(state.amount)}` : ''}
             </p>
             <p className="text-[10px] opacity-80 capitalize">{statusLabel}</p>
+            {state.keptDetailsWithoutCopy && (
+              <p className="text-[10px] opacity-90">Details recorded, copy not attached</p>
+            )}
             {state.date && <p className="text-[10px] opacity-80">{dateLabel} {formatDay(state.date)}</p>}
             {state.requested && <p className="text-[10px] opacity-80">Requested {formatDay(state.requestedAt)}</p>}
             {state.paid && state.paidDate && (

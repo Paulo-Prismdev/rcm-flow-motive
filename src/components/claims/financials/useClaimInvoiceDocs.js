@@ -111,16 +111,31 @@ export default function useClaimInvoiceDocs(claim, currentUser) {
     refresh();
   };
 
-  /** Queues a file for deletion, confirmed by the container's dialog. */
-  const deleteFile = (item, doc) => {
+  /**
+   * Queues a file for removal. Whether the item's details were read off this very
+   * file is worked out here, because that is what decides whether the removal can
+   * offer to take the details with it. The item's state travels with the request
+   * so the confirmation can report a payment without touching the claim.
+   */
+  const deleteFile = (item, doc, state) => {
+    const entry = (claim?.invoice_tracker?.items || {})[item.key] || {};
+    const detailsSource = entry.details_source || null;
     setPendingDelete({
+      kind: 'invoice',
+      item,
+      state,
+      docId: doc.id,
+      fileUrl: doc.file_url,
       fileName: doc.file_name || 'this file',
       label: item.label,
-      action: async () => {
-        await base44.entities.ClaimDocument.delete(doc.id);
-        refresh();
-      },
+      fromThisFile: !!detailsSource?.file_url && detailsSource.file_url === doc.file_url,
     });
+  };
+
+  /** Removes one filed file and refreshes what the claim shows. */
+  const removeFile = async (docId) => {
+    await base44.entities.ClaimDocument.delete(docId);
+    refresh();
   };
 
   return {
@@ -131,6 +146,7 @@ export default function useClaimInvoiceDocs(claim, currentUser) {
     uploadToItem,
     renameFile,
     deleteFile,
+    removeFile,
     isUploading,
     viewingFile,
     setViewingFile,

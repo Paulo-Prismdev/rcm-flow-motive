@@ -15,6 +15,9 @@ import {
   DOC_ITEMS, computeChecklistSummary, itemKeyDate,
 } from '@/components/shared/docChecklist';
 import DocumentChecklistCard from '@/components/claims/DocumentChecklistCard';
+import RemoveFileDialog from '@/components/shared/RemoveFileDialog';
+import { removeFileFromUpdates } from '@/components/shared/removeFileFromUpdates';
+import { formatInvoiceDay } from '@/components/shared/invoiceChecklist';
 import { TooltipProvider } from '@/components/ui/tooltip';
 
 const STATUS_QUERY_KEY = (id) => ['claim-documents', id];
@@ -111,8 +114,16 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
     if (!fileList?.length) return;
     const urls = await uploadFiles(fileList);
     if (!urls?.length) return;
+    // The Key Dates date an upload fills in is remembered as coming from the first
+    // file that landed, so removing that file can clear the date it set — and
+    // nothing else.
+    const item = DOC_ITEMS.find((i) => i.key === itemKey);
+    const dateMissing = !!item?.dateField && !claim[item.dateField.field];
+    let dateSet = false;
+
     for (const url of urls) {
       const name = (fileList[Array.from(fileList).findIndex((f) => f.name) === 0]?.name) || url.split('/').pop();
+      const marksDate = dateMissing && !dateSet;
       try {
         await base44.entities.ClaimDocument.create({
           claim_id: claim.id,
@@ -123,7 +134,11 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
           uploaded_by_name: currentUser?.full_name || '',
           uploaded_at: new Date().toISOString(),
           source: 'manual',
+          ...(marksDate
+            ? { date_set_field: item.dateField.field, date_set_value: todayISO() }
+            : {}),
         });
+        if (marksDate) dateSet = true;
       } catch (e) {
         console.error('Create doc record failed', e);
       }
@@ -138,8 +153,6 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
 
     // The file is in: the Key Dates date it supplies is filled in when it is
     // still empty, and its field is opened straight away so it can be put right.
-    const item = DOC_ITEMS.find((i) => i.key === itemKey);
-    const dateMissing = !!item?.dateField && !claim[item.dateField.field];
     persistClaimCounts(
       refreshed.items || [],
       statusMap,
@@ -167,22 +180,70 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
     }
   };
 
+  /**
+   * Removing a file. Where that file is the one that set the item's Key Dates
+   * date, the choice is offered: take the date with the file, or keep it while a
+   * replacement copy is found. Any other file — a second copy — just goes.
+   */
   const handleRemove = (doc) => {
+    const item = DOC_ITEMS.find((i) => i.key === doc.item_key);
+    const label = item?.label || 'document';
+    const fileName = doc.file_name || 'this file';
+    const dateField = doc.date_set_field || null;
+    // Only the date this very file set, still standing, is its to clear.
+    const dateSetByFile = !!dateField && claim[dateField] === doc.date_set_value;
+    const dateLabel = item?.dateField?.field === dateField ? item.dateField.label : '';
+
+    const removeDoc = async (clearDate) => {
+      await base44.entities.ClaimDocument.delete(doc.id);
+      await removeFileFromUpdates(claim.id, doc.file_url);
+      queryClient.invalidateQueries({ queryKey: STATUS_QUERY_KEY(claim.id) });
+      queryClient.invalidateQueries({ queryKey: ['notes', claim.id, 'Claim'] });
+      const refreshed = await base44.entities.ClaimDocument.filter({ claim_id: claim.id }, { sort: 'created_date' });
+      persistClaimCounts(
+        refreshed.items || [],
+        statusMap,
+        clearDate ? { [dateField]: null } : {}
+      );
+      await logActivity({
+        parentId: claim.id, parentType: 'Claim', action: 'Document Removed',
+        description: clearDate
+          ? `Removed "${fileName}" from "${label}" and cleared the date it set (${dateLabel || 'Key Dates'}: ${formatInvoiceDay(claim[dateField])})`
+          : dateSetByFile
+            ? `Removed "${fileName}" from "${label}" — the date it set was kept, so a replacement copy is expected`
+            : `Removed "${fileName}" from "${label}"`,
+        user: currentUser,
+      });
+    };
+
+    if (!dateSetByFile) {
+      setPendingDelete({ label, fileName, action: () => removeDoc(false) });
+      return;
+    }
+
     setPendingDelete({
-      label: DOC_ITEMS.find((i) => i.key === doc.item_key)?.label || 'document',
-      fileName: doc.file_name || 'this file',
-      action: async () => {
-        await base44.entities.ClaimDocument.delete(doc.id);
-        await logActivity({
-          parentId: claim.id, parentType: 'Claim', action: 'Document Removed',
-          description: `Removed "${doc.file_name || 'a file'}" from "${DOC_ITEMS.find((i) => i.key === doc.item_key)?.label}"`,
-          user: currentUser,
-        });
-        queryClient.invalidateQueries({ queryKey: STATUS_QUERY_KEY(claim.id) });
-        const refreshed = await base44.entities.ClaimDocument.filter({ claim_id: claim.id }, { sort: 'created_date' });
-        persistClaimCounts(refreshed.items || [], statusMap);
-      },
+      kind: 'date',
+      label,
+      fileName,
+      description: `This is the copy the ${dateLabel || 'Key Dates'} date was recorded from.`,
+      clearPoints: [
+        `clear the ${dateLabel || 'Key Dates'} date it set (${formatInvoiceDay(claim[dateField])})`,
+        'leave the item outstanding until a replacement copy is added',
+      ],
+      clearDate: () => removeDoc(true),
+      keepDate: () => removeDoc(false),
     });
+  };
+
+  /** Runs whatever the open confirmation chose, closing it either way. */
+  const runPending = async (which) => {
+    const pending = pendingDelete;
+    setPendingDelete(null);
+    try {
+      await pending?.[which]?.();
+    } catch (e) {
+      toast({ title: 'Remove failed', variant: 'destructive' });
+    }
   };
 
   const handleStatusToggle = async (item, newStatus) => {
@@ -228,10 +289,20 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
   };
 
   const fileIntoChecklist = async (item, payload) => {
+    // Filing a document is what fills in its Key Dates date, so the file that does
+    // it is remembered as the one that set that date.
+    const dateMissing = !!item.dateField && !claim[item.dateField.field];
+    const dateSet = dateMissing
+      ? { date_set_field: item.dateField.field, date_set_value: todayISO() }
+      : {};
+
     try {
       if (payload.record) {
         if (payload.record.item_key === item.key) return;
-        await base44.entities.ClaimDocument.update(payload.record.id, { item_key: item.key });
+        await base44.entities.ClaimDocument.update(payload.record.id, {
+          item_key: item.key,
+          ...dateSet,
+        });
       } else {
         // A legacy general file becomes a proper document record, so it can be
         // filed like any other.
@@ -244,6 +315,7 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
           uploaded_by_name: currentUser?.full_name || '',
           uploaded_at: new Date().toISOString(),
           source: 'manual',
+          ...dateSet,
         });
       }
       await logActivity({
@@ -252,9 +324,7 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
         user: currentUser,
       });
       // A moved legacy file leaves the claim's general file list, so the same
-      // document never sits in two places. Filing it also fills in the Key Dates
-      // date it supplies, when that is still empty.
-      const dateMissing = !!item.dateField && !claim[item.dateField.field];
+      // document never sits in two places.
       const extra = {
         ...(payload.legacyUrl
           ? { file_urls: (Array.isArray(claim.file_urls) ? claim.file_urls : []).filter((u) => u !== payload.legacyUrl) }
@@ -515,21 +585,27 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
       )}
 
       <ConfirmDialog
-        isOpen={!!pendingDelete}
+        isOpen={!!pendingDelete && pendingDelete.kind !== 'date'}
         onClose={() => setPendingDelete(null)}
-        onConfirm={async () => {
-          try {
-            await pendingDelete?.action();
-          } catch (e) {
-            toast({ title: 'Remove failed', variant: 'destructive' });
-          }
-          setPendingDelete(null);
-        }}
+        onConfirm={() => runPending('action')}
         title="Delete document"
         message="Are you sure you want to delete this document?"
         confirmText="Delete"
         variant="danger"
       />
+
+      {pendingDelete?.kind === 'date' && (
+        <RemoveFileDialog
+          isOpen
+          fileName={pendingDelete.fileName}
+          description={pendingDelete.description}
+          clearPoints={pendingDelete.clearPoints}
+          keepHint="Date recorded, copy not attached"
+          onClose={() => setPendingDelete(null)}
+          onClear={() => runPending('clearDate')}
+          onKeep={() => runPending('keepDate')}
+        />
+      )}
     </div>
   );
 }

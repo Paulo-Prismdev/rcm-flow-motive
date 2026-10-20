@@ -10,9 +10,11 @@ import useClaimClient from '@/hooks/useClaimClient';
 import {
   ACCOUNTS_EMAIL_CONFIG_KEY,
   DEFAULT_ACCOUNTS_EMAIL,
+  buildInvoiceDetailsClearPatch,
   buildInvoiceItemPatch,
   buildInvoiceRequestPatch,
   buildInvoiceReviewPatch,
+  buildTrackerMetaPatch,
   claimHandlesVatExcess,
   computeInvoiceSummary,
   deriveInvoiceStatus,
@@ -32,6 +34,9 @@ import InvoiceRow from './InvoiceRow';
 import CloseOutItem from './CloseOutItem';
 import InvoiceSectionEmpty from './InvoiceSectionEmpty';
 import MarkPaidDialog from './MarkPaidDialog';
+import RepairCostCheckNote from './RepairCostCheckNote';
+import RemoveFileDialog from '@/components/shared/RemoveFileDialog';
+import { removeFileFromUpdates } from '@/components/shared/removeFileFromUpdates';
 import RequestInvoiceModal from './RequestInvoiceModal';
 import InvoiceReviewModal from './InvoiceReviewModal';
 import { buildFinancialFlow } from './financialSteps';
@@ -88,6 +93,20 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
   const summary = useMemo(() => computeInvoiceSummary(claim, ctx, hasFile), [claim, ctx, docs.files]);
   const status = useMemo(() => deriveInvoiceStatus(claim, hasFile), [claim, docs.files]);
   const flow = useMemo(() => buildFinancialFlow(summary, ctx), [summary, ctx]);
+
+  // What clearing a removed file's details would take with it, worked out for the
+  // confirmation before anything is removed — together with the payment notice,
+  // which only ever reports what is already recorded against the item.
+  const pendingInvoiceRemoval = useMemo(() => {
+    const pending = docs.pendingDelete;
+    if (!pending?.fromThisFile) return null;
+    const { clearPoints } = buildInvoiceDetailsClearPatch(pending.item, claim, { fileUrl: pending.fileUrl });
+    const state = pending.state || {};
+    const paidText = state.paid
+      ? `This item is already marked as paid${state.paidDate ? ` on ${formatInvoiceDay(state.paidDate)}` : ''}${state.paidBy ? ` by ${state.paidBy}` : ''}. Clearing the details keeps the payment record — mark it unpaid separately if that payment is being undone.`
+      : '';
+    return { clearPoints, paidText };
+  }, [docs.pendingDelete, claim]);
 
   // The step the job is on is open; a step opened by hand stays open, and when
   // the work moves on the next step opens by itself.
@@ -276,7 +295,11 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
       await docs.attachFile(item, { file_url: review.fileUrl, file_name: review.fileName });
       applyCommit(
         {
-          ...buildInvoiceReviewPatch(item, claim, figures),
+          ...buildInvoiceReviewPatch(item, claim, figures, {
+            file_url: review.fileUrl,
+            file_name: review.fileName,
+            repair_cost: repairCost,
+          }),
           ...(repairCost ? { final_repair_cost: repairCost } : {}),
         },
         repairCost
@@ -292,21 +315,44 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
     }
   };
 
-  const handleConfirmDelete = async () => {
+  // Removing a file asks which way it goes: the details read off it can go with
+  // it, or stay while a replacement copy is found. Nothing is cleared unless that
+  // was chosen, and neither a payment nor an accounts request is ever cleared by
+  // either — undoing a payment stays its own decision.
+  const handleRemoveFile = async (mode) => {
     const pending = docs.pendingDelete;
+    if (!pending) return;
+    docs.setPendingDelete(null);
     try {
-      await pending?.action();
+      const clearing = mode === 'clear' && pending.fromThisFile
+        ? buildInvoiceDetailsClearPatch(pending.item, claim, {
+          fileUrl: pending.fileUrl,
+          clearedBy: paidBy,
+        })
+        : null;
+
+      await docs.removeFile(pending.docId);
+      await removeFileFromUpdates(claim.id, pending.fileUrl);
+
+      if (clearing) {
+        applyCommit(
+          clearing.patch,
+          `${pending.item.label}: "${pending.fileName}" removed and the details read from it cleared (${clearing.clearPoints.join('; ')})`
+        );
+        return;
+      }
+
       await logActivity({
         parentId: claim.id,
         parentType: 'Claim',
         action: 'Invoice Document Removed',
-        description: `Removed "${pending?.fileName}" from "${pending?.label}"`,
+        description: pending.fromThisFile
+          ? `${pending.item.label}: "${pending.fileName}" removed — the details read from it were kept, so a replacement copy is expected`
+          : `Removed "${pending.fileName}" from "${pending.item.label}"`,
         user: currentUser,
       });
-      docs.setPendingDelete(null);
     } catch (e) {
       toast({ title: 'Remove failed', variant: 'destructive' });
-      docs.setPendingDelete(null);
     }
   };
 
@@ -374,7 +420,7 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
       claim={claim}
       onChange={(changes, description) => handleItemChange(item, changes, description)}
       onUpload={handleUpload}
-      onDeleteFile={(doc) => docs.deleteFile(item, doc)}
+      onDeleteFile={(doc) => docs.deleteFile(item, doc, state)}
       onRenameFile={docs.renameFile}
       onViewFile={docs.setViewingFile}
       onRequest={openRequest}
@@ -392,7 +438,7 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
       isUploading={docs.isUploading}
       onChange={(changes, description) => handleItemChange(item, changes, description)}
       onUpload={handleUpload}
-      onDeleteFile={(doc) => docs.deleteFile(item, doc)}
+      onDeleteFile={(doc) => docs.deleteFile(item, doc, state)}
       onRenameFile={docs.renameFile}
       onViewFile={docs.setViewingFile}
     />
@@ -400,14 +446,27 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
 
   const [closeout, figuresStep, raise, collect, payments] = flow.steps;
 
+  // A final repair cost read off an invoice copy that has since been removed is
+  // flagged here: the figure itself is left exactly as it was.
+  const repairCostCheck = claim.invoice_tracker?.repair_cost_check || null;
+
   const figuresCard = (
-    <JobFiguresCard
-      claim={claim}
-      ctx={ctx}
-      missing={summary.missing}
-      onChange={(fields, description) => commit(fields, description, { checkInvoiceImpact: true })}
-      onTrackerChange={(patch, description) => commit(patch, description, { checkInvoiceImpact: true })}
-    />
+    <>
+      <JobFiguresCard
+        claim={claim}
+        ctx={ctx}
+        missing={summary.missing}
+        onChange={(fields, description) => commit(fields, description, { checkInvoiceImpact: true })}
+        onTrackerChange={(patch, description) => commit(patch, description, { checkInvoiceImpact: true })}
+      />
+      <RepairCostCheckNote
+        check={repairCostCheck}
+        onChecked={() => commit(
+          buildTrackerMetaPatch(claim, { repair_cost_check: null }),
+          `Final repair cost ${fmtGBP(repairCostCheck?.amount || 0)} checked after the invoice copy was removed`
+        )}
+      />
+    </>
   );
 
   /** One of the steps: its header and line, then its own rows. */
@@ -491,14 +550,28 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
         )}
 
         <ConfirmDialog
-          isOpen={!!docs.pendingDelete}
+          isOpen={!!docs.pendingDelete && !docs.pendingDelete.fromThisFile}
           onClose={() => docs.setPendingDelete(null)}
-          onConfirm={handleConfirmDelete}
+          onConfirm={() => handleRemoveFile('plain')}
           title="Delete document"
           message="Are you sure you want to delete this document?"
           confirmText="Delete"
           variant="danger"
         />
+
+        {pendingInvoiceRemoval && (
+          <RemoveFileDialog
+            isOpen
+            fileName={docs.pendingDelete.fileName}
+            description={`This is the copy the ${docs.pendingDelete.label} details were read from.`}
+            clearPoints={pendingInvoiceRemoval.clearPoints}
+            keepHint="Details recorded, copy not attached"
+            paidText={pendingInvoiceRemoval.paidText}
+            onClose={() => docs.setPendingDelete(null)}
+            onClear={() => handleRemoveFile('clear')}
+            onKeep={() => handleRemoveFile('keep')}
+          />
+        )}
 
         <InvoiceReviewModal
           isOpen={!!review}
