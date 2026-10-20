@@ -19,6 +19,11 @@ export default function QueueRow({ row, onOpen }) {
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
           <span className="text-sm font-semibold flex-1 min-w-0 truncate">{row.invoice}</span>
+          {row.overdue && (
+            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-400 shrink-0">
+              Overdue
+            </span>
+          )}
           {row.archived && <ArchivedTag />}
           {row.amount > 0 && (
             <span className="text-sm font-semibold tabular-nums shrink-0">{fmtGBP(row.amount)}</span>

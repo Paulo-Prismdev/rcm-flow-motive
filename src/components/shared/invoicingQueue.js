@@ -17,6 +17,15 @@
  * outstanding, so filing a claim away never hides what it still owes; drafts and
  * cancelled claims are left out, and so is any job that was invoiced before the
  * tracking start date set in Settings (see `isBeforeTracking`).
+ *
+ * A job's invoicing is worked on from the day the vehicle went back to the
+ * customer: the final invoice pack, its close-out paperwork and the invoices still
+ * to come in are chased from that date, and nothing on a job still with us is
+ * chased before it — except a credit repair hire fee, which is invoiced at the
+ * start of the hire. An invoice that has already gone out, come in or been paid is
+ * chased whenever that happened, and counts in the aged invoices whatever stage its
+ * claim is at. A job whose return was never recorded is caught by the warning that
+ * asks for the date, rather than sitting outside the queue for good.
  */
 
 import {
@@ -107,6 +116,24 @@ export const returnedDate = (claim) =>
  */
 export const jobAnchorDate = (claim) =>
   returnedDate(claim) || claim?.completion_date || claim?.authority_received || claim?.date_received || '';
+
+/**
+ * The credit repair hire fee is invoiced at the start of the hire, so it is the one
+ * invoice worked on before the vehicle is back — from the day the hire category is
+ * set, which is what makes its amount resolvable.
+ */
+export const isEarlyHireFee = (item) => item?.key === 'cr_hire_fee';
+
+/**
+ * Whether a claim's invoicing is under way: the vehicle is back with the customer,
+ * the point the final invoice pack is chased from, or an invoice on it has already
+ * gone out, come in or been paid, which is worked on whatever stage the claim is at.
+ * What the day's queue chases, and what the claims list calls outstanding invoices.
+ */
+export const claimInvoicesChased = (claim, summary) =>
+  !!returnedDate(claim) ||
+  (summary?.rows || []).some(({ item, state }) =>
+    !isInvoiceDocument(item) && !state.notApplicable && (!!state.date || state.paid === true));
 
 /**
  * A claim neither book looks at: still a draft, or cancelled. Archived claims are
@@ -224,6 +251,7 @@ const queueRow = (claim, item, fields) => ({
   waitingSince: fields.waitingSince || '',
   days: fields.days ?? null,
   daysAreWorking: fields.daysAreWorking === true,
+  overdue: fields.overdue === true,
 });
 
 /** Oldest first — the longest wait is the one to pick up first. */
@@ -265,9 +293,14 @@ export function buildInvoicingQueues(claims = [], thresholds = DEFAULT_QUEUE_DAY
       // the claim's own progress leaves them out.
       if (state.notApplicable || isRecommendedItem(item)) continue;
 
+      // A job's invoices are worked on from the day the vehicle went back to the
+      // customer, except the credit repair hire fee, which is invoiced at the start
+      // of the hire.
+      const chased = returnedDays !== null || isEarlyHireFee(item);
+
       // Ready to request from accounts: figures complete, nothing asked for yet
       // and no copy raised — the same line the claim's raise step offers.
-      if (canRequestInvoice(item) && !state.paid && !state.requested && !state.copyAttached && !state.awaiting) {
+      if (chased && canRequestInvoice(item) && !state.paid && !state.requested && !state.copyAttached && !state.awaiting) {
         buckets.accounts_ready.push(queueRow(claim, item, {
           section: 'accounts_ready',
           amount: state.amount,
@@ -279,7 +312,7 @@ export function buildInvoicingQueues(claims = [], thresholds = DEFAULT_QUEUE_DAY
       }
 
       // Requested but not raised: asked for, past the threshold, still no copy.
-      if (state.requested && !state.copyAttached) {
+      if (chased && state.requested && !state.copyAttached) {
         const waited = workingDaysSince(state.requestedAt, now);
         if (waited !== null && waited > accountsDays) {
           buckets.accounts_overdue.push(queueRow(claim, item, {
@@ -310,7 +343,9 @@ export function buildInvoicingQueues(claims = [], thresholds = DEFAULT_QUEUE_DAY
 
       // Dealt with, with nothing filed behind it: paid, or a date recorded for
       // an invoice whose copy never landed. An invoice merely asked for is not
-      // flagged here — that belongs to the accounts section above.
+      // flagged here — that belongs to the accounts section above. This one is not
+      // held back until the vehicle is back either: the invoice itself has already
+      // been raised, so its copy is chased whenever that happened.
       if (!isInvoiceDocument(item) && (state.paid || state.date) && !state.copyAttached) {
         const paidOn = state.paidDate || (state.paid ? state.date : '');
         buckets.paid_no_copy.push(queueRow(claim, item, {
@@ -338,9 +373,9 @@ export function buildInvoicingQueues(claims = [], thresholds = DEFAULT_QUEUE_DAY
       }
     }
 
-    // Close-out documents missing: the car has been back past the threshold and
-    // the paperwork has not followed it.
-    if (returnedDays !== null && returnedDays > closeoutDays) {
+    // Close-out documents missing: chased from the day the vehicle went back, and
+    // flagged overdue once the paperwork has sat past the threshold.
+    if (returnedDays !== null) {
       for (const key of CLOSE_OUT_KEYS) {
         const row = summary.rows.find((r) => r.item.key === key);
         if (!row || row.state.notApplicable || row.state.copyAttached) continue;
@@ -352,6 +387,7 @@ export function buildInvoicingQueues(claims = [], thresholds = DEFAULT_QUEUE_DAY
             : `Vehicle returned ${formatInvoiceDay(returned)}`,
           waitingSince: returned,
           days: returnedDays,
+          overdue: returnedDays > closeoutDays,
           party: invoicePartyName(claim, row.item),
         }));
       }
@@ -390,6 +426,21 @@ export function buildInvoicingQueues(claims = [], thresholds = DEFAULT_QUEUE_DAY
         party: invoicePartyName(claim, { party: 'client' }),
       }));
     }
+
+    // Safety net: the repairs were finished a while back and the vehicle's return
+    // was never recorded, so the job would sit outside the day's queue for good and
+    // its invoice pack never chased. Asking for the date is the fix.
+    const completedDays = daysSince(claim.completion_date, now);
+    if (returnedDays === null && completedDays !== null && completedDays > closeoutDays) {
+      buckets.warnings.push(queueRow(claim, { key: 'return_date_missing', label: 'Return date missing' }, {
+        section: 'warnings',
+        amount: null,
+        note: `Repairs complete ${formatInvoiceDay(claim.completion_date)} — no return date recorded`,
+        waitingSince: claim.completion_date,
+        days: completedDays,
+        party: invoicePartyName(claim, { party: 'client' }),
+      }));
+    }
   }
 
   /** The order the tiles are worked in, most urgent first. */
@@ -412,7 +463,7 @@ export function buildInvoicingQueues(claims = [], thresholds = DEFAULT_QUEUE_DAY
       key: 'closeout_missing',
       label: 'Close-out documents missing',
       tone: 'warning',
-      hint: `Returned to the customer more than ${closeoutDays} day${closeoutDays === 1 ? '' : 's'} ago, still missing the Final Insurer Invoice, the VAT & Excess Invoice or the Final Authority.`,
+      hint: `Missing the Final Insurer Invoice, the VAT & Excess Invoice or the Final Authority since the vehicle went back, overdue past ${closeoutDays} day${closeoutDays === 1 ? '' : 's'}.`,
     },
     {
       key: 'in_expected',
@@ -430,7 +481,7 @@ export function buildInvoicingQueues(claims = [], thresholds = DEFAULT_QUEUE_DAY
       key: 'warnings',
       label: 'Warnings',
       tone: 'negative',
-      hint: 'Over-authority invoices, amounts that differ from what was expected, and excesses still TBC on authority.',
+      hint: 'Over-authority invoices, amounts that differ from what was expected, excesses still TBC on authority, and jobs whose return date was never recorded.',
     },
   ];
 

@@ -21,6 +21,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { sanitizeClaimData } from '@/components/shared/sanitizeClaimData';
 import { formatAuthorisingParty, authorisingPartyOrganisation, AUTHORISING_PARTY_LABELS } from '@/components/shared/authorisingParty';
 import { claimInvoiceSummary, deriveInvoiceStatus } from '@/components/shared/invoiceChecklist';
+import { claimInvoicesChased } from '@/components/shared/invoicingQueue';
 import InvoiceStatusReviewBanner from '../components/claims/InvoiceStatusReviewBanner';
 import PullToRefresh from '../components/shared/PullToRefresh';
 import {
@@ -366,8 +367,10 @@ export default function ClaimsPage() {
       if (invoiceFilter === 'owed_to_us') matchesInvoice = s.owedToUs > 0;
       else if (invoiceFilter === 'we_owe') matchesInvoice = s.weOwe > 0;
       // Outstanding = any applicable item not yet paid (or, for close-out
-      // documents, not yet received) — an amount is not required.
-      else matchesInvoice = s.outstanding > 0;
+      // documents, not yet received) — an amount is not required. Only a job whose
+      // invoicing has started counts: the vehicle is back, or an invoice on it has
+      // already gone out, come in or been paid.
+      else matchesInvoice = s.outstanding > 0 && claimInvoicesChased(c, s);
     }
     const matchesOverdue = !overdueOnly || calculateUpdateStatus(c) === 'Red' || computeClientCommStatusFlag(c) === 'Red';
     const dr = c.date_received;

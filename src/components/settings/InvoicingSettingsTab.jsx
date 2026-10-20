@@ -155,7 +155,7 @@ export default function InvoicingSettingsTab() {
         <div>
           <h2 className="text-sm font-semibold text-gray-900 dark:text-white">Invoicing Timings</h2>
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-            How long the Invoicing page waits before it flags an invoice on today's actions list. Working days count Monday to Friday only.
+            A job's invoices and close-out paperwork are worked on from the day the vehicle goes back to the customer; these are the waits after which a request or a document reads as overdue on today's actions list. Working days count Monday to Friday only.
           </p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-lg">
@@ -170,7 +170,7 @@ export default function InvoicingSettingsTab() {
             />
           </label>
           <label className="space-y-1">
-            <span className="text-xs font-medium text-gray-700 dark:text-gray-300">Close-out paperwork — days</span>
+            <span className="text-xs font-medium text-gray-700 dark:text-gray-300">Close-out paperwork — overdue after (days)</span>
             <Input
               type="number"
               min="0"
