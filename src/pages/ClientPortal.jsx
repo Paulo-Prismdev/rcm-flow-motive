@@ -222,7 +222,7 @@ export default function ClientPortal() {
 
   return (
     <ClientLayout>
-      <div className="h-full flex flex-col min-h-0 bg-white dark:bg-gray-900 rounded-[10px] border border-gray-100 dark:border-gray-800 overflow-hidden shadow-sm m-4 mt-0">
+      <div className="h-full flex flex-col min-h-0 bg-white dark:bg-gray-900 rounded-[10px] border border-gray-100 dark:border-gray-800 overflow-hidden shadow-sm m-4 mt-0 max-md:m-0">
         {/* Repairs / Paying Privately tabs */}
         <div className="flex items-center px-5 py-2 border-b border-gray-100 dark:border-gray-800 flex-shrink-0">
           <ClaimTypeTabs activeTab={claimTypeTab} onChange={setClaimTypeTab} claimsCount={standardClaims.length} privateCount={privateClaims.length} />

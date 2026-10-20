@@ -462,7 +462,7 @@ export default function ReferrerClaimDetail({ claim, onClose, initialSection }) 
             {images.length === 0 ? (
               <p className="text-center text-muted-foreground py-8 text-sm">No images attached to this claim.</p>
             ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 m-keep-2">
                 {images.map((url, idx) => (
                   <button
                     key={idx}
@@ -513,7 +513,7 @@ export default function ReferrerClaimDetail({ claim, onClose, initialSection }) 
 
       {/* Combined Header + Section Selector */}
       <div className="neomorph p-3 flex-shrink-0 sticky top-0 z-10 bg-background">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 max-md:flex-wrap">
           <Button onClick={onClose} variant="outline" className="p-2 flex-shrink-0">
             <ArrowLeft className="w-4 h-4" />
           </Button>
@@ -527,7 +527,7 @@ export default function ReferrerClaimDetail({ claim, onClose, initialSection }) 
             <StatusBadge status={claim.job_status || 'New'} />
             {claim.secondary_status && <StatusBadge status={claim.secondary_status} variant="secondary" />}
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 max-md:w-full max-md:flex-wrap">
             <Button 
               onClick={() => setIsClaimUpdatesOpen(true)} 
               className="h-9 px-4 text-sm font-medium rounded-lg bg-green-600 hover:bg-green-700 text-white relative"

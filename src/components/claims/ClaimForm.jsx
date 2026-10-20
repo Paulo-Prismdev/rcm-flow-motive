@@ -495,27 +495,27 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
       </div>
 
       {/* Navigation — fixed at bottom */}
-      <div className="flex justify-between items-center pt-2 pb-2 flex-shrink-0 gap-3">
+      <div className="flex justify-between items-center pt-2 pb-2 flex-shrink-0 gap-3 max-md:flex-wrap">
         {currentStep > 1 ? (
-          <Button type="button" variant="outline" onClick={prevStep} className="flex-1 max-w-[130px] h-10 gap-2">
+          <Button type="button" variant="outline" onClick={prevStep} className="flex-1 max-w-[130px] max-md:max-w-none h-10 gap-2">
             <ArrowLeft className="w-4 h-4" /> Previous
           </Button>
-        ) : <div className="flex-1 max-w-[130px]" />}
+        ) : <div className="flex-1 max-w-[130px] max-md:max-w-none" />}
 
         <Button type="button" onClick={handleSaveDraft} disabled={isSavingDraft || !formData.reg}
-          variant="outline" className="gap-2 h-10 flex-1 max-w-[140px]">
+          variant="outline" className="gap-2 h-10 flex-1 max-w-[140px] max-md:max-w-none">
           {isSavingDraft ? <><Loader className="w-4 h-4 animate-spin" /> Saving...</> : '💾 Save Draft'}
         </Button>
 
-        <div className="flex-1" />
+        <div className="flex-1 max-md:hidden" />
 
         {currentStep < steps.length ? (
-          <Button type="button" onClick={nextStep} className="flex-1 max-w-[130px] h-10 gap-2">
+          <Button type="button" onClick={nextStep} className="flex-1 max-w-[130px] max-md:max-w-none h-10 gap-2">
             Next <ArrowRight className="w-4 h-4" />
           </Button>
         ) : (
           <Button type="button" onClick={handleSubmit} disabled={isSubmitting || isCreating}
-            className="flex-1 max-w-[170px] h-10 gap-2 bg-accent text-accent-foreground">
+            className="flex-1 max-w-[170px] max-md:max-w-none h-10 gap-2 bg-accent text-accent-foreground">
             {isSubmitting || isCreating ? <><Loader className="w-4 h-4 animate-spin" /> Creating...</> : <><Check className="w-5 h-5" /> Create Claim</>}
           </Button>
         )}

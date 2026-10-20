@@ -38,7 +38,7 @@ export default function UnifiedModal({
           )}
         </DialogHeader>
 
-        <div className="flex-1 overflow-y-auto max-h-[60vh] py-4">
+        <div className="flex-1 overflow-y-auto max-h-[60vh] max-md:max-h-[70dvh] py-4">
           {children}
         </div>
 
