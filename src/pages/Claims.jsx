@@ -1084,8 +1084,8 @@ export default function ClaimsPage() {
 
       {/* Detail panel — full width, replacing the list */}
       {selectedClaim && (
-        <div className="flex-1 min-w-0 min-h-0 flex flex-col w-full">
-          <div className="h-full lg:rounded-xl lg:border lg:border-gray-200 dark:lg:border-gray-800 bg-white dark:bg-gray-900 overflow-hidden">
+        <div className="flex-1 min-w-0 min-h-0 flex flex-col w-full" data-claim-scroll>
+          <div className="h-full lg:rounded-xl lg:border lg:border-gray-200 dark:lg:border-gray-800 bg-white dark:bg-gray-900 overflow-hidden" data-claim-shell>
             <ClaimDetail
               key={selectedClaim.id}
               claim={selectedClaim}

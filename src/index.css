@@ -603,6 +603,48 @@ button:not(.btn-sm):not(.btn-icon),
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
+  /* ── 1b. Claim detail on phones ──
+     The claim page scrolls as one page: the column, its shell and the section
+     body stop being fixed-height scroll boxes, so nothing scrolls inside a box
+     of its own and no empty space is left at the bottom. */
+  [data-claim-scroll] {
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+  }
+  [data-claim-scroll] [data-claim-shell],
+  [data-claim-scroll] [data-claim-root] {
+    height: auto;
+  }
+  [data-claim-scroll] [data-claim-shell],
+  [data-claim-scroll] [data-claim-body] {
+    overflow: visible;
+  }
+  [data-claim-scroll] [data-claim-body] {
+    padding-right: 0;
+    padding-bottom: 0.25rem;
+  }
+
+  /* Two short label/value fields per row, with tighter cells */
+  .grid.m-fields-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.375rem;
+  }
+  .grid.m-fields-2 > * {
+    padding: 0.375rem 0.5rem;
+  }
+
+  /* Content cards sit tighter on phones */
+  .m-card-tight {
+    padding: 0.75rem;
+  }
+  .m-card-head {
+    padding-bottom: 0.5rem;
+    margin-bottom: 0.625rem;
+  }
+  .m-block-tight {
+    margin-bottom: 1rem;
+  }
+
   /* ── 2. Nothing may be wider than the screen ──
      A row that deliberately sets its own min-width (a money stat, a fixed
      label) keeps it, so those groups stay side by side. */

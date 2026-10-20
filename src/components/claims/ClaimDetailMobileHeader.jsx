@@ -1,10 +1,10 @@
 import React from 'react';
-import { ArrowLeft, ChevronDown, FileText, Image, Mail, ListTodo, Timer, History, Package, Download, Archive, Trash2, Calculator, Copy } from 'lucide-react';
-import { formatUKRegistration } from '../shared/formatRegistration';
+import { ArrowLeft, ChevronDown, FileText, Image, MessageSquare, MoreHorizontal, Mail, ListTodo, Timer, History, Package, Download, Archive, Trash2, Calculator, Copy } from 'lucide-react';
 import StatusBadge from '../shared/StatusBadge';
 import UpdateStatusBadge from '../shared/UpdateStatusBadge';
+import AuthorisingPartyBanner from './AuthorisingPartyBanner';
 import { computeUpdateStatusFlag, computeClientCommStatusFlag } from '../shared/claimStatusUpdate';
-import { Button } from "@/components/ui/button";
+import { AUTHORISING_PARTY_LABELS, authorisingPartyClaimRef } from '../shared/authorisingParty';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -62,98 +62,133 @@ const SECTIONS = [
   { value: 'backorderedParts', label: 'Backordered Parts' },
 ];
 
+const CountBadge = ({ count, className }) => {
+  if (!count) return null;
+  return (
+    <span className={`absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full text-[10px] font-bold flex items-center justify-center leading-none shadow ${className}`}>
+      {count}
+    </span>
+  );
+};
+
 export default function ClaimDetailMobileHeader({
   claim,
   isClosedStatus,
   onClose,
   onUpdates,
-  onChangeStatus,
   onUpdateTracking,
   onAction,
+  onUpdate,
   updatesCount = 0,
   imagesCount = 0,
   docsCount = 0,
+  collapsed = false,
 }) {
+  const [bannerOpen, setBannerOpen] = React.useState(false);
   const currentSection = SECTIONS.find(s => s.value === claim._selectedSection) || SECTIONS[0];
+
+  const partyRef = authorisingPartyClaimRef(claim.authorised_by, claim);
+  const partyName = claim.authorising_party_name || AUTHORISING_PARTY_LABELS[claim.authorised_by] || '';
+  const summary = [
+    claim.claim_type || 'No claim type',
+    partyName || 'Authorising party missing',
+    partyRef ? `Claim no. ${partyRef}` : '⚠ No claim no.',
+  ].join(' · ');
+
+  const actionBase = 'relative flex-1 min-w-0 flex flex-col items-center justify-center rounded-lg transition-colors';
+  const actionSize = collapsed ? 'h-9' : 'h-12';
 
   return (
     <div
-      className="lg:hidden flex-shrink-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800"
-      style={{ position: 'relative', zIndex: 20, isolation: 'isolate' }}
+      className="lg:hidden sticky top-0 flex-shrink-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800"
+      style={{ zIndex: 20, isolation: 'isolate' }}
     >
-      {/* Row 1: back + title + status badges */}
-      <div className="flex items-center gap-2 px-3 pt-2 pb-1">
+      {/* Row 1: back arrow, registration and claim number */}
+      <div className="flex items-center gap-2 px-3 pt-2 pb-1.5">
         <button
           type="button"
           onClick={onClose}
-          style={{ minWidth: 44, minHeight: 44 }}
-          className="flex-shrink-0 flex items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800"
+          className="flex-shrink-0 flex items-center justify-center w-9 h-9 rounded-lg bg-gray-100 dark:bg-gray-800"
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
-
-        <div className="flex-1 min-w-0">
-          <p className="font-bold text-sm truncate">
+        <div className="flex-1 min-w-0 flex items-center gap-1.5">
+          <p className="font-bold text-[15px] leading-tight truncate m-ellipsis">
             {claim.reg || 'Claim Details'}
           </p>
           {claim.job_number && (
-            <p className="text-xs text-yellow-700 dark:text-yellow-400 font-mono font-semibold truncate">
+            <span className="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 whitespace-nowrap flex-shrink-0">
               {claim.job_number}
-            </p>
+            </span>
           )}
         </div>
       </div>
 
-      {/* Row 2: status badges */}
-      <div className="flex items-center gap-2 px-3 py-1 flex-wrap">
-        {claim.secondary_status && <StatusBadge status={claim.secondary_status} />}
-        {claim.tertiary_status && <StatusBadge status={claim.tertiary_status} variant="secondary" />}
-        {!isClosedStatus && claim.update_status_flag && (
-          <button type="button" onClick={onUpdateTracking}>
-            <UpdateStatusBadge status={computeUpdateStatusFlag(claim)} small labelPrefix="Updates" />
+      {!collapsed && (
+        <>
+          {/* Authorising party summary — tap to open the full banner */}
+          <button
+            type="button"
+            onClick={() => setBannerOpen(v => !v)}
+            className="w-full flex items-center gap-1.5 px-3 pb-1.5 text-left"
+          >
+            <span className="flex-1 min-w-0 text-xs text-foreground truncate m-ellipsis">{summary}</span>
+            <ChevronDown className={`w-3.5 h-3.5 text-muted-foreground flex-shrink-0 transition-transform ${bannerOpen ? 'rotate-180' : ''}`} />
           </button>
-        )}
-        {!isClosedStatus && claim.client_comm_status_flag && (
-          <button type="button" onClick={onUpdateTracking}>
-            <UpdateStatusBadge status={computeClientCommStatusFlag(claim)} small labelPrefix="Client" />
-          </button>
-        )}
-        {claim.archived && (
-          <span className="px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-800 text-xs text-gray-600">Archived</span>
-        )}
-      </div>
 
-      {/* Row 3: Updates & Status + Images + Docs + More dropdown */}
-      <div className="flex items-center gap-2 px-3 pb-3 pt-1 flex-wrap">
-        <Button onClick={onUpdates} className="h-9 px-3 text-sm font-medium rounded-lg bg-green-600 hover:bg-green-700 text-white flex-shrink-0 relative">
-          Updates & Status
-          {updatesCount > 0 && (
-            <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-white text-green-700 text-[10px] font-bold flex items-center justify-center leading-none shadow">
-              {updatesCount}
-            </span>
+          {bannerOpen && (
+            <div className="px-2.5 pb-2">
+              <AuthorisingPartyBanner claim={claim} onUpdate={onUpdate} />
+            </div>
           )}
-        </Button>
-        <Button onClick={() => onAction('images')} variant="outline" className="h-9 px-3 text-sm font-medium rounded-lg gap-1.5 flex-shrink-0 relative">
-          <Image className="w-4 h-4" /> Images
-          {imagesCount > 0 && (
-            <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-blue-500 text-white text-[10px] font-bold flex items-center justify-center leading-none shadow">
-              {imagesCount}
-            </span>
-          )}
-        </Button>
-        <Button onClick={() => onAction('docs')} variant="outline" className="h-9 px-3 text-sm font-medium rounded-lg gap-1.5 flex-shrink-0 relative">
-          <FileText className="w-4 h-4" /> Docs
-          {docsCount > 0 && (
-            <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-blue-500 text-white text-[10px] font-bold flex items-center justify-center leading-none shadow">
-              {docsCount}
-            </span>
-          )}
-        </Button>
+
+          {/* Status pills — one line, scrolls sideways when there are more than fit */}
+          <div
+            className="flex items-center gap-1.5 flex-nowrap overflow-x-auto px-3 pb-2 [&::-webkit-scrollbar]:hidden"
+            style={{ scrollbarWidth: 'none' }}
+          >
+            {claim.secondary_status && <StatusBadge status={claim.secondary_status} compact />}
+            {claim.tertiary_status && <StatusBadge status={claim.tertiary_status} variant="secondary" compact />}
+            {!isClosedStatus && claim.update_status_flag && (
+              <button type="button" onClick={onUpdateTracking} className="flex-shrink-0">
+                <UpdateStatusBadge status={computeUpdateStatusFlag(claim)} small labelPrefix="Updates" />
+              </button>
+            )}
+            {!isClosedStatus && claim.client_comm_status_flag && (
+              <button type="button" onClick={onUpdateTracking} className="flex-shrink-0">
+                <UpdateStatusBadge status={computeClientCommStatusFlag(claim)} small labelPrefix="Client" />
+              </button>
+            )}
+            {claim.archived && (
+              <span className="flex-shrink-0 px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-800 text-xs text-gray-600">Archived</span>
+            )}
+          </div>
+        </>
+      )}
+
+      {/* Action row — four equal buttons, one line only */}
+      <div className={`flex items-stretch gap-1.5 flex-nowrap px-3 ${collapsed ? 'pb-1.5' : 'pb-2'}`}>
+        <button type="button" onClick={onUpdates} className={`${actionBase} ${actionSize} bg-green-600 hover:bg-green-700 text-white`}>
+          <MessageSquare className="w-4 h-4" />
+          {!collapsed && <span className="text-[10px] font-medium leading-none">Updates</span>}
+          <CountBadge count={updatesCount} className="bg-white text-green-700" />
+        </button>
+        <button type="button" onClick={() => onAction('images')} className={`${actionBase} ${actionSize} border border-border bg-card text-foreground`}>
+          <Image className="w-4 h-4" />
+          {!collapsed && <span className="text-[10px] font-medium leading-none">Images</span>}
+          <CountBadge count={imagesCount} className="bg-blue-500 text-white" />
+        </button>
+        <button type="button" onClick={() => onAction('docs')} className={`${actionBase} ${actionSize} border border-border bg-card text-foreground`}>
+          <FileText className="w-4 h-4" />
+          {!collapsed && <span className="text-[10px] font-medium leading-none">Docs</span>}
+          <CountBadge count={docsCount} className="bg-blue-500 text-white" />
+        </button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="h-9 w-9 p-0 flex-shrink-0">
-              <ChevronDown className="w-4 h-4" />
-            </Button>
+            <button type="button" className={`${actionBase} ${actionSize} border border-border bg-card text-foreground`}>
+              <MoreHorizontal className="w-4 h-4" />
+              {!collapsed && <span className="text-[10px] font-medium leading-none">More</span>}
+            </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56 max-h-72 overflow-y-auto">
             <DropdownMenuItem onSelect={() => { onAction('section:' + currentSection.value); }} className="font-medium bg-muted/50">

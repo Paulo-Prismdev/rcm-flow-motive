@@ -114,8 +114,8 @@ const EditableSection = ({ title, icon: Icon, claim, onUpdate, children, EditCom
     };
 
     return (
-        <div className="bg-card border border-border rounded-[10px] p-4 md:p-5 shadow-sm">
-            <div className="flex justify-between items-center pb-3 mb-4 border-b border-border">
+        <div className="bg-card border border-border rounded-[10px] p-4 md:p-5 m-card-tight shadow-sm">
+            <div className="flex justify-between items-center pb-3 mb-4 border-b border-border m-card-head">
                 <div
                     className="flex items-center gap-2.5 text-left flex-grow"
                 >
@@ -144,7 +144,7 @@ const EditableSection = ({ title, icon: Icon, claim, onUpdate, children, EditCom
 const EstimateInlineFields = () => {
     const { setField } = useInlineEdit();
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+        <div className="grid grid-cols-1 lg:grid-cols-2 m-fields-2 gap-2">
             <InlineField label="Email Estimate To" name="send_estimate_email" type="email" placeholder="Enter email address" />
             <InlineField label="Audatex Code" name="audatex_code" placeholder="Enter Audatex code" />
             <InlineField label="Estimate Fee" name="est_fee" isCurrency />
@@ -291,6 +291,31 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
   const [isDuplicateModalOpen, setIsDuplicateModalOpen] = useState(false);
 
   const canEdit = true;
+
+  // Phones: the claim header shrinks to a slim bar as the page scrolls down,
+  // and expands again once the page is back at the top.
+  const rootRef = React.useRef(null);
+  const [headerCollapsed, setHeaderCollapsed] = useState(false);
+
+  React.useEffect(() => {
+    const onScroll = (e) => {
+      const el = e.target;
+      const top = (el === document || el === document.documentElement || el === document.body)
+        ? (window.scrollY || document.documentElement.scrollTop || 0)
+        : (el?.scrollTop || 0);
+      const next = top > 40;
+      setHeaderCollapsed(prev => (prev === next ? prev : next));
+    };
+    window.addEventListener('scroll', onScroll, true);
+    return () => window.removeEventListener('scroll', onScroll, true);
+  }, []);
+
+  // Opening a different section starts at the top of the page again.
+  React.useEffect(() => {
+    const scroller = rootRef.current?.closest('[data-claim-scroll]');
+    if (scroller) scroller.scrollTop = 0;
+    setHeaderCollapsed(false);
+  }, [selectedSection]);
 
   // Rectification milestone dates in Key Dates are only editable once the claim
   // has been moved onto the Rectification journey.
@@ -847,7 +872,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
             EditComponent={ClaimStatusEditForm}
             canEdit={canEdit}
           >
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 lg:grid-cols-2 m-fields-2 gap-2">
               <DetailRow label="Registration" value={claim.reg} />
               <DetailRow label="Claim Type" value={claim.claim_type} />
               <DetailRow label="Date Created (System)" value={claim.created_date} isDate />
@@ -881,7 +906,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
         const vatStatus = claimVat || linkedClient?.vat_status || 'Unknown';
         return (
           <EditableSection title="Billing Party — Client" icon={Users} claim={claim} onUpdate={handleUpdate} EditComponent={ClientEditComponent} canEdit={canEdit}>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 lg:grid-cols-2 m-fields-2 gap-2">
               <div className="py-2 px-3 rounded-[8px] hover:bg-muted/50"><div className="text-[11px] font-medium text-muted-foreground mb-0.5">Name</div><div className="text-sm font-medium">{clientName || '-'}</div></div>
               {companyContactName && <div className="py-2 px-3 rounded-[8px] hover:bg-muted/50"><div className="text-[11px] font-medium text-muted-foreground mb-0.5">Company Contact Name</div><div className="text-sm font-medium">{companyContactName}</div></div>}
               {companyContactPhone && <div className="py-2 px-3 rounded-[8px] hover:bg-muted/50"><div className="text-[11px] font-medium text-muted-foreground mb-0.5">Company Contact Phone</div><div className="text-sm font-medium">{companyContactPhone}</div></div>}
@@ -919,7 +944,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
             )}
             <div className="mt-3 pt-3 border-t border-border">
               <p className="text-[11px] font-semibold text-muted-foreground mb-2">Insurance Details</p>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 lg:grid-cols-2 m-fields-2 gap-2">
                 <DetailRow label="Broker" value={claim.broker_name} />
                 <DetailRow label="Insurer" value={claim.insurer} />
                 <DetailRow label="Claim Reference" value={claim.claim_ref} />
@@ -944,7 +969,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
       case 'creditRepair':
         return (
           <EditableSection title="Credit Repair" icon={Shield} claim={claim} onUpdate={handleUpdate} EditComponent={ClaimCreditRepairForm} canEdit={canEdit}>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 lg:grid-cols-2 m-fields-2 gap-2">
               <DetailRow label="Company" value={claim.credit_repair_company_name} />
               <DetailRow label="Contact Name" value={claim.credit_repair_company_contact_name} />
               <DetailRow label="Phone" value={claim.credit_repair_company_phone} />
@@ -1060,9 +1085,9 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
               </div>
             )}
             
-            <div className="mb-6">
+            <div className="mb-6 m-block-tight">
               <h4 className="text-sm font-semibold text-gray-600 mb-3">Basic Information</h4>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 lg:grid-cols-2 m-fields-2 gap-2">
                 <DetailRow label="Make (DVLA)" value={claim.vehicle_make} />
                 <DetailRow label="Model (DVLA)" value={claim.vehicle_model} />
                 <DetailRow label="Colour" value={claim.vehicle_colour} />
@@ -1072,9 +1097,9 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
               </div>
             </div>
 
-            <div className="mb-6">
+            <div className="mb-6 m-block-tight">
               <h4 className="text-sm font-semibold text-gray-600 mb-3">Technical Details</h4>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 lg:grid-cols-2 m-fields-2 gap-2">
                 <DetailRow label="Engine Capacity (CC)" value={claim.vehicle_engine_capacity} />
                 <DetailRow label="CO2 Emissions (g/km)" value={claim.vehicle_co2_emissions} />
                 <DetailRow label="Euro Status" value={claim.vehicle_euro_status} />
@@ -1083,9 +1108,9 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
               </div>
             </div>
 
-            <div className="mb-6">
+            <div className="mb-6 m-block-tight">
               <h4 className="text-sm font-semibold text-gray-600 mb-3">MOT & Tax Status</h4>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 lg:grid-cols-2 m-fields-2 gap-2">
                 <DetailRow label="MOT Status" value={claim.vehicle_mot_status} />
                 <DetailRow label="MOT Expiry Date" value={claim.vehicle_mot_expiry_date} isDate />
                 <DetailRow label="Tax Status" value={claim.vehicle_tax_status} />
@@ -1120,7 +1145,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
             EditComponent={VehicleDamageEditComponent} 
             canEdit={canEdit}
           >
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 lg:grid-cols-2 m-fields-2 gap-2">
               <DetailRow label="Courtesy Car (CC) Needed" value={claim.courtesy_car_required === true ? 'Yes' : (claim.courtesy_car_required || 'No')} />
               <DetailRow label="Undriveable / Drivable" value={claim.unroadworthy ? 'Undriveable' : 'Drivable'} />
             </div>
@@ -1150,7 +1175,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 lg:grid-cols-2 m-fields-2 gap-2">
                   <DetailRow label="Contribution Amount" value={claim.excess_contribution_amount} isCurrency />
                   <DetailRow label="Payment Method" value={claim.excess_contribution_method || 'None'} />
                   <DetailRow label="Contribution Paid" value={claim.excess_contribution_paid ? 'Yes' : 'No'} />
@@ -1183,7 +1208,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
             EditComponent={InstructionDefaultsForm}
             canEdit={canEdit}
           >
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 lg:grid-cols-2 m-fields-2 gap-2">
               <DetailRow label="Default Contact Source" value={claim.last_contact_source || 'Not set'} />
               <DetailRow label="Authorised By" value={claim.authorised_by || 'Not set'} />
             </div>
@@ -1194,7 +1219,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
         return (
           <EditableSection title="Referrer Details" icon={Briefcase} claim={claim} onUpdate={handleUpdate} EditComponent={ClaimReferrerForm} canEdit={canEdit}>
             {claim.referrer ? (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 lg:grid-cols-2 m-fields-2 gap-2">
                 <DetailRow label="Referrer" value={claim.referrer} />
                 <DetailRow label="Referrer Email" value={claim.referrer_email} />
                 <DetailRow label="Referrer Ref" value={claim.referrer_ref} />
@@ -1240,7 +1265,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
             canEdit={canEdit}
           >
             <IndemnityLinkManager claim={claim} onUpdate={handleUpdate} />
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 lg:grid-cols-2 m-fields-2 gap-2">
               <DetailRow label="Driver's Age" value={(() => {
                 const dob = claim.indemnity_driver_dob;
                 if (!dob) return claim.indemnity_driver_age;
@@ -1287,13 +1312,13 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
 
       case 'repairPreference':
         return (
-          <div className="bg-card border border-border rounded-[10px] p-4 md:p-5 shadow-sm">
-            <div className="flex items-center gap-2.5 pb-3 mb-4 border-b border-border">
+          <div className="bg-card border border-border rounded-[10px] p-4 md:p-5 m-card-tight shadow-sm">
+            <div className="flex items-center gap-2.5 pb-3 mb-4 border-b border-border m-card-head">
               <FileText className="w-4 h-4 text-muted-foreground" />
               <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Statement of Repair Preference</h3>
             </div>
             <RepairPreferenceLinkManager claim={claim} onUpdate={handleUpdate} />
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 mt-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 m-fields-2 gap-2 mt-4">
               <DetailRow label="Signed" value={claim.repair_preference_signed ? 'Yes' : 'No'} />
               <DetailRow label="Signed At" value={claim.repair_preference_signed_at} isDate />
               <DetailRow label="Signed By" value={claim.repair_preference_client_name} />
@@ -1314,13 +1339,13 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
 
       case 'declarationOfNeed':
         return (
-          <div className="bg-card border border-border rounded-[10px] p-4 md:p-5 shadow-sm">
-            <div className="flex items-center gap-2.5 pb-3 mb-4 border-b border-border">
+          <div className="bg-card border border-border rounded-[10px] p-4 md:p-5 m-card-tight shadow-sm">
+            <div className="flex items-center gap-2.5 pb-3 mb-4 border-b border-border m-card-head">
               <FileText className="w-4 h-4 text-muted-foreground" />
               <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Declaration of Need – Replacement Vehicle</h3>
             </div>
             <DeclarationOfNeedLinkManager claim={claim} onUpdate={handleUpdate} />
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 mt-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 m-fields-2 gap-2 mt-4">
               <DetailRow label="Signed" value={claim.declaration_of_need_signed ? 'Yes' : 'No'} />
               <DetailRow label="Signed At" value={claim.declaration_of_need_signed_at} isDate />
               <DetailRow label="Signed By" value={claim.declaration_of_need_client_name} />
@@ -1344,8 +1369,8 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
 
       case 'financials':
         return (
-          <div className="bg-card border border-border rounded-[10px] p-4 md:p-5 shadow-sm">
-            <div className="flex items-center gap-2.5 pb-3 mb-4 border-b border-border">
+          <div className="bg-card border border-border rounded-[10px] p-4 md:p-5 m-card-tight shadow-sm">
+            <div className="flex items-center gap-2.5 pb-3 mb-4 border-b border-border m-card-head">
               <DollarSign className="w-4 h-4 text-muted-foreground" />
               <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Financials</h3>
               {isInternalUser && (
@@ -1366,7 +1391,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
       case 'dates':
         return (
           <InlineEditableSection title="Key Dates" icon={Calendar} claim={claim} onUpdate={handleUpdate} canEdit={canEdit}>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 lg:grid-cols-2 m-fields-2 gap-2">
               <InlineField label="Date Received" name="date_received" isDate />
               <InlineField label="Loss Date" name="loss_date" isDate />
               <InlineField label="Estimate Completed" name="estimate_completed" isDate />
@@ -1721,7 +1746,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                 onClose={() => setIsCreditRepairInstructionOpen(false)}
               />
 
-      <div className="flex flex-col gap-2 md:gap-3" style={{height: '100%', touchAction: 'auto', isolation: 'isolate'}}>
+      <div className="flex flex-col gap-2 md:gap-3 h-full" data-claim-root style={{touchAction: 'auto', isolation: 'isolate'}}>
 
           {/* ── Starred update notice ── */}
           {starredUpdates.length > 0 && (
@@ -1737,13 +1762,17 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
             </div>
           )}
 
-          {/* ── Authorising Party banner ── */}
-          <AuthorisingPartyBanner claim={claim} onUpdate={handleUpdate} />
+          {/* ── Authorising Party banner (desktop; phones open it from the header summary line) ── */}
+          <div className="hidden lg:block">
+            <AuthorisingPartyBanner claim={claim} onUpdate={handleUpdate} />
+          </div>
 
           {/* ── MOBILE header (< lg) ── */}
           <ClaimDetailMobileHeader
             claim={{...claim, _selectedSection: selectedSection}}
             isClosedStatus={isClosedStatus}
+            collapsed={headerCollapsed}
+            onUpdate={handleUpdate}
             onClose={handleClose}
             onUpdates={() => setIsClaimUpdatesOpen(true)}
             onUpdateTracking={() => setIsUpdateTrackingOpen(true)}
@@ -1979,7 +2008,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
           </DropdownMenu>
         </div>
 
-        <div className="flex-1 overflow-y-auto min-h-0 pr-1 pb-4" style={{WebkitOverflowScrolling: 'touch', overflowY: 'auto'}}>
+        <div className="flex-1 overflow-y-auto min-h-0 pr-1 pb-4" data-claim-body style={{WebkitOverflowScrolling: 'touch'}}>
           <div>
             {renderSelectedSection()}
           </div>
