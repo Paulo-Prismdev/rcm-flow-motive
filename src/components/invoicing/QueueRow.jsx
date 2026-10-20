@@ -1,5 +1,6 @@
 import React from 'react';
 import { ChevronRight } from 'lucide-react';
+import ArchivedTag from './ArchivedTag';
 import { formatInvoiceDay } from '@/components/shared/invoiceChecklist';
 import { waitingLabel } from '@/components/shared/invoicingQueue';
 import { fmtGBP } from '@/components/shared/creditRepairRates';
@@ -16,8 +17,9 @@ export default function QueueRow({ row, onOpen }) {
       className="w-full text-left flex items-start gap-2 px-3 py-3 border-t border-border first:border-t-0 hover:bg-muted/40 transition-colors"
     >
       <div className="flex-1 min-w-0">
-        <div className="flex items-start gap-2">
+        <div className="flex items-center gap-2">
           <span className="text-sm font-semibold flex-1 min-w-0 truncate">{row.invoice}</span>
+          {row.archived && <ArchivedTag />}
           {row.amount > 0 && (
             <span className="text-sm font-semibold tabular-nums shrink-0">{fmtGBP(row.amount)}</span>
           )}

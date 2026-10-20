@@ -48,6 +48,8 @@ import CreditRepairRatesCard from './CreditRepairRatesCard';
 import CreditRepairInstructionModal from './CreditRepairInstructionModal';
 import ClaimReferrerForm from './ClaimReferrerForm';
 import ClaimFinancials from './financials/ClaimFinancials';
+import ArchiveClaimDialog from './ArchiveClaimDialog';
+import { claimOutstandingItems } from '@/components/shared/claimOutstandingItems';
 import InlineEditableSection, { InlineField, useInlineEdit } from './InlineEditableSection';
 import ClaimBodyshopForm from './ClaimBodyshopForm';
 import ClaimBodyshopInfo from './ClaimBodyshopInfo.jsx';
@@ -280,6 +282,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
   const [isTasksModalOpen, setIsTasksModalOpen] = useState(false);
   const [isTimeLogsOpen, setIsTimeLogsOpen] = useState(false);
   const [isActivityLogOpen, setIsActivityLogOpen] = useState(false);
+  const [archiveWarning, setArchiveWarning] = useState(null);
   const [isFetchingVehicle, setIsFetchingVehicle] = useState(false);
   const [vehicleFetchError, setVehicleFetchError] = useState('');
   const [isRegeneratingPdf, setIsRegeneratingPdf] = useState(false);
@@ -632,8 +635,18 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
   };
 
   const handleArchive = () => {
-    const action = claim.archived ? 'restore' : 'archive';
-    if (window.confirm(`Are you sure you want to ${action} this claim?`)) {
+    if (claim.archived) {
+      if (window.confirm('Are you sure you want to restore this claim?')) archiveMutation.mutate();
+      return;
+    }
+    // Anything still outstanding is listed before the claim is filed away, so
+    // archiving a claim with money still on it stays a deliberate choice.
+    const outstanding = claimOutstandingItems(claim);
+    if (outstanding.length > 0) {
+      setArchiveWarning(outstanding);
+      return;
+    }
+    if (window.confirm('Are you sure you want to archive this claim?')) {
       archiveMutation.mutate();
     }
   };
@@ -1745,6 +1758,17 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                 claim={claim}
                 isOpen={isCreditRepairInstructionOpen}
                 onClose={() => setIsCreditRepairInstructionOpen(false)}
+              />
+
+              <ArchiveClaimDialog
+                isOpen={!!archiveWarning}
+                claim={claim}
+                items={archiveWarning || []}
+                onClose={() => setArchiveWarning(null)}
+                onConfirm={() => {
+                  setArchiveWarning(null);
+                  archiveMutation.mutate();
+                }}
               />
 
       <div className="flex flex-col gap-2 md:gap-3 h-full" data-claim-root style={{touchAction: 'auto', isolation: 'isolate'}}>

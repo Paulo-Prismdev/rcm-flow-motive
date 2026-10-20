@@ -13,7 +13,9 @@
  *
  * Every line is one invoice item on one claim, with the wait that line has been
  * on — counted from the date the job moved, the request went, or the invoice
- * itself was dated.
+ * itself was dated. Archived claims are kept while they still have something
+ * outstanding, so filing a claim away never hides what it still owes; drafts and
+ * cancelled claims are left out.
  */
 
 import {
@@ -105,9 +107,13 @@ export const returnedDate = (claim) =>
 export const jobAnchorDate = (claim) =>
   returnedDate(claim) || claim?.completion_date || claim?.authority_received || claim?.date_received || '';
 
-/** A claim the queue ignores: filed away, still a draft, or cancelled. */
+/**
+ * A claim neither book looks at: still a draft, or cancelled. Archived claims are
+ * kept — every line either book shows is an unsettled one, so money on a claim
+ * that has been filed away is still chased until it is settled.
+ */
 const ignoredClaim = (claim) =>
-  !claim || claim.archived === true || claim.draft === true || claim.secondary_status === 'Cancelled';
+  !claim || claim.draft === true || claim.secondary_status === 'Cancelled';
 
 /** The close-out paperwork a finished job is expected to hold a copy of. */
 const CLOSE_OUT_KEYS = ['final_invoice', 'vat_excess_invoice_in', 'final_authority'];
@@ -155,6 +161,7 @@ export const queueDaysConfigValue = (thresholds) => JSON.stringify({
 const queueRow = (claim, item, fields) => ({
   id: `${claim.id}:${item.key}:${fields.section}`,
   section: fields.section,
+  archived: claim.archived === true,
   claimId: claim.id,
   reg: claim.reg || '',
   jobNumber: claim.job_number || '',
@@ -427,6 +434,7 @@ export function buildAgedInvoices(claims = [], now = new Date()) {
       const days = daysSince(state.date, now) ?? 0;
       const row = {
         id: `${claim.id}:${item.key}`,
+        archived: claim.archived === true,
         direction: item.direction,
         itemKey: item.key,
         party: invoicePartyName(claim, item) || 'Unnamed party',
@@ -507,7 +515,7 @@ export function groupAgedRows(rows = []) {
 /** The current view as a spreadsheet, for chasing and for accounts. */
 export function buildAgedCsv(rows = []) {
   const head = ['Owed to us / We owe', 'Party', 'Invoice', 'Job number', 'Vehicle reg', 'Client',
-    'Claim type', 'Business division', 'Invoice date', 'Age (days)', 'Age band', 'Amount'];
+    'Claim type', 'Business division', 'Invoice date', 'Age (days)', 'Age band', 'Archived', 'Amount'];
   const line = (row) => [
     row.direction === 'out' ? 'Owed to us' : 'We owe',
     row.party,
@@ -520,6 +528,7 @@ export function buildAgedCsv(rows = []) {
     formatInvoiceDay(row.date),
     String(row.days),
     bandFor(row.days).label,
+    row.archived ? 'Yes' : '',
     row.amount.toFixed(2),
   ];
   const escape = (value) => {

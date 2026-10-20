@@ -1,5 +1,6 @@
 import React from 'react';
 import { ChevronRight } from 'lucide-react';
+import ArchivedTag from './ArchivedTag';
 import { formatInvoiceDay } from '@/components/shared/invoiceChecklist';
 import { isOverdue, waitingLabel } from '@/components/shared/invoicingQueue';
 import { fmtGBP } from '@/components/shared/creditRepairRates';
@@ -15,8 +16,9 @@ export default function AgedInvoiceRow({ row, onOpen }) {
       className="w-full text-left flex items-start gap-2 pl-7 pr-3 py-2.5 border-t border-border hover:bg-muted/40 transition-colors"
     >
       <div className="flex-1 min-w-0">
-        <div className="flex items-start gap-2">
+        <div className="flex items-center gap-2">
           <span className="text-xs font-semibold flex-1 min-w-0 truncate">{row.invoice}</span>
+          {row.archived && <ArchivedTag />}
           <span className={`text-xs font-semibold tabular-nums shrink-0 ${late ? 'text-red-600 dark:text-red-400' : ''}`}>
             {fmtGBP(row.amount)}
           </span>
