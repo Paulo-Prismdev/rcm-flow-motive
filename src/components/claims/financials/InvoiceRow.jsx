@@ -7,9 +7,9 @@ import InvoiceItemDetails from '../InvoiceItemDetails';
 import InvoiceCalculation from './InvoiceCalculation';
 
 /**
- * One invoice, laid out vertically so nothing can pile up on anything else: the
- * status button with the invoice name, who it is to or from, the amount split
- * out on one line, and the invoice's own actions along the bottom.
+ * One invoice, kept inside a single card: the status button, who it is to or
+ * from, the amount split on one line and the invoice's own actions, all in the
+ * same box rather than floating underneath it.
  */
 export default function InvoiceRow({
   item, state, files, isUploading, claim,
@@ -29,31 +29,29 @@ export default function InvoiceRow({
   const hasAmount = !state.awaiting && state.amount > 0;
 
   return (
-    <div className="space-y-1">
-      <InvoiceItemCard
-        item={item}
-        state={state}
-        files={files}
-        isUploading={isUploading}
-        onChange={onChange}
-        onUpload={onUpload}
-        onDeleteFile={onDeleteFile}
-        onRenameFile={onRenameFile}
-        onViewFile={onViewFile}
-        onToggleDetails={() => setDetailsOpen((v) => !v)}
-        detailsOpen={detailsOpen}
-        onUndoRequest={onUndoRequest}
-      />
-
+    <InvoiceItemCard
+      item={item}
+      state={state}
+      files={files}
+      isUploading={isUploading}
+      onChange={onChange}
+      onUpload={onUpload}
+      onDeleteFile={onDeleteFile}
+      onRenameFile={onRenameFile}
+      onViewFile={onViewFile}
+      onToggleDetails={() => setDetailsOpen((v) => !v)}
+      detailsOpen={detailsOpen}
+      onUndoRequest={onUndoRequest}
+    >
       {partyName && (
-        <p className="px-2.5 text-[11px] text-muted-foreground truncate">
+        <p className="text-[11px] text-muted-foreground truncate">
           {item.direction === 'out' ? 'To' : 'From'}{' '}
           <span className="font-semibold text-foreground">{partyName}</span>
         </p>
       )}
 
       {!isDocument && (
-        <p className="px-2.5 text-[11px] text-muted-foreground tabular-nums">
+        <p className="text-[11px] text-muted-foreground tabular-nums">
           {hasAmount ? (
             <>
               {fmtGBP(state.ex)} + {fmtGBP(state.vat)} VAT ={' '}
@@ -70,7 +68,7 @@ export default function InvoiceRow({
         </p>
       )}
 
-      <div className="flex items-center gap-x-3 gap-y-1 flex-wrap px-2.5 text-[11px]">
+      <div className="flex items-center gap-x-3 gap-y-1 flex-wrap text-[11px]">
         {canMarkPaid && (
           <button
             type="button"
@@ -103,7 +101,7 @@ export default function InvoiceRow({
       </div>
 
       {state.variance && (
-        <p className="mx-2.5 flex items-start gap-1.5 text-[11px] text-amber-700 dark:text-amber-300">
+        <p className="flex items-start gap-1.5 text-[11px] text-amber-700 dark:text-amber-300">
           <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0 mt-px" />
           <span className="flex-1">
             {state.variance.reason} — calculated {fmtGBP(state.variance.calculated)}, invoiced {fmtGBP(state.variance.invoiced)}. Raise a supplementary invoice or credit note, or unlock the amount.
@@ -119,7 +117,7 @@ export default function InvoiceRow({
       )}
 
       {state.locked && !state.variance && (
-        <p className="px-2.5 text-[10px] text-muted-foreground">
+        <p className="text-[10px] text-muted-foreground">
           Amount locked at {fmtGBP(state.amount)} — the figure this invoice went out at.
         </p>
       )}
@@ -127,6 +125,6 @@ export default function InvoiceRow({
       {showCalc && <InvoiceCalculation state={state} />}
 
       {detailsOpen && <InvoiceItemDetails item={item} state={state} onChange={onChange} />}
-    </div>
+    </InvoiceItemCard>
   );
 }

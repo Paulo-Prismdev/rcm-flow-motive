@@ -6,34 +6,32 @@ import InvoiceItemDetails from '../InvoiceItemDetails';
 
 /**
  * One of the close-out items — the Final Invoice, Final Authority or Collection
- * Note — as a single compact button, so the three sit side by side across the
- * panel. The Final Invoice shows its amount small on the button; everything else
- * is behind the button's own ⋮ menu.
+ * Note — as a single card matching the invoice cards: the status button with
+ * everything else in the same box behind its own ⋮ menu. The Final Invoice shows
+ * its amount small on the button once there is one.
  */
 export default function CloseOutItem({
   item, state, files, isUploading,
   onChange, onUpload, onDeleteFile, onRenameFile, onViewFile,
 }) {
   const [detailsOpen, setDetailsOpen] = useState(false);
-  const showAmount = item.key === 'final_invoice';
+  const showAmount = item.key === 'final_invoice' && state.amount > 0;
 
   return (
-    <div className="space-y-1">
-      <InvoiceItemCard
-        item={item}
-        state={state}
-        files={files}
-        isUploading={isUploading}
-        onChange={onChange}
-        onUpload={onUpload}
-        onDeleteFile={onDeleteFile}
-        onRenameFile={onRenameFile}
-        onViewFile={onViewFile}
-        onToggleDetails={() => setDetailsOpen((v) => !v)}
-        detailsOpen={detailsOpen}
-        amountText={showAmount ? (state.amount > 0 ? fmtGBP(state.amount) : '—') : undefined}
-      />
-
+    <InvoiceItemCard
+      item={item}
+      state={state}
+      files={files}
+      isUploading={isUploading}
+      onChange={onChange}
+      onUpload={onUpload}
+      onDeleteFile={onDeleteFile}
+      onRenameFile={onRenameFile}
+      onViewFile={onViewFile}
+      onToggleDetails={() => setDetailsOpen((v) => !v)}
+      detailsOpen={detailsOpen}
+      amountText={showAmount ? fmtGBP(state.amount) : undefined}
+    >
       {state.variance && (
         <p className="flex items-start gap-1.5 text-[11px] text-amber-700 dark:text-amber-300">
           <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0 mt-px" />
@@ -51,6 +49,6 @@ export default function CloseOutItem({
       )}
 
       {detailsOpen && <InvoiceItemDetails item={item} state={state} onChange={onChange} />}
-    </div>
+    </InvoiceItemCard>
   );
 }

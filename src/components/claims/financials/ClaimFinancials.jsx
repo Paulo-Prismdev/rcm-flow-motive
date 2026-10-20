@@ -31,6 +31,7 @@ import InvoiceRow from './InvoiceRow';
 import CloseOutItem from './CloseOutItem';
 import RequestInvoiceModal from './RequestInvoiceModal';
 import InvoiceReviewModal from './InvoiceReviewModal';
+import { emptySectionMessage, invoiceCountLabel, invoiceSectionSummary } from './invoiceSectionMeta';
 import { resolveInvoiceParty } from './invoiceParty';
 import useClaimInvoiceDocs from './useClaimInvoiceDocs';
 import { buildReviewLog } from './invoiceReview';
@@ -313,6 +314,22 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
 
   const rowsFor = (section) => summary.rows.filter((r) => r.item.section === section);
 
+  // Each panel's header line and, where it holds nothing, the checked empty
+  // state that says why — both read off the claim, so nothing new is stored.
+  const sectionMeta = (key) => {
+    const rows = rowsFor(key);
+    return {
+      rows,
+      countLabel: invoiceCountLabel(key, rows),
+      summary: invoiceSectionSummary(key, rows),
+      empty: rows.length === 0 ? emptySectionMessage(key, ctx) : null,
+    };
+  };
+
+  const invoicesIn = sectionMeta('in');
+  const invoicesOut = sectionMeta('out');
+  const closeOut = sectionMeta('closeout');
+
   return (
     <TooltipProvider delayDuration={250}>
       <div className="space-y-3">
@@ -338,34 +355,37 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
               <p className="text-[11px] text-muted-foreground">Preparing the accounts request…</p>
             )}
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 items-start">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 items-stretch">
               <InvoiceGroup
                 label="Invoices In"
                 hint="Invoices we receive and pay"
-                isEmpty={rowsFor('in').length === 0}
-                emptyText="No incoming invoices apply to this claim."
+                countLabel={invoicesIn.countLabel}
+                summary={invoicesIn.summary}
+                empty={invoicesIn.empty}
               >
-                {rowsFor('in').map(renderRow)}
+                {invoicesIn.rows.map(renderRow)}
               </InvoiceGroup>
 
               <InvoiceGroup
                 label="Invoices Out"
                 hint="Invoices we send and get paid for"
-                isEmpty={rowsFor('out').length === 0}
-                emptyText="No outgoing invoices apply to this claim."
+                countLabel={invoicesOut.countLabel}
+                summary={invoicesOut.summary}
+                empty={invoicesOut.empty}
               >
-                {rowsFor('out').map(renderRow)}
+                {invoicesOut.rows.map(renderRow)}
               </InvoiceGroup>
             </div>
 
             <InvoiceGroup
               label="Close-out"
               hint="The job's final step"
-              isEmpty={rowsFor('closeout').length === 0}
-              emptyText="No close-out paperwork applies to this claim."
+              countLabel={closeOut.countLabel}
+              summary={closeOut.summary}
+              empty={closeOut.empty}
             >
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                {rowsFor('closeout').map(renderCloseOut)}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 items-stretch">
+                {closeOut.rows.map(renderCloseOut)}
               </div>
             </InvoiceGroup>
           </div>

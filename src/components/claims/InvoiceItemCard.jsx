@@ -16,8 +16,8 @@ import { isInvoiceDocument } from '@/components/shared/invoiceChecklist';
 // The status button of one invoice: a light button edged in its status colour —
 // red until it has been raised or received, amber while it waits to be paid or
 // has just been requested from accounts, green once it is paid, grey while a
-// credit repair amount cannot be worked out. Everything else about the invoice
-// lives in the row beside it and behind the discreet ⋮ menu.
+// credit repair amount cannot be worked out. Each invoice keeps everything else
+// inside this same card, with the figures behind the discreet ⋮ menu.
 const GLYPHS = {
   positive: <Check className="w-3 h-3" strokeWidth={3} />,
   warning: <Clock className="w-3 h-3" strokeWidth={3} />,
@@ -54,7 +54,7 @@ export function invoiceStatusLabel(item, state) {
 export default function InvoiceItemCard({
   item, state, files, isUploading,
   onChange, onUpload, onDeleteFile, onRenameFile, onViewFile,
-  onToggleDetails, detailsOpen, onUndoRequest, amountText,
+  onToggleDetails, detailsOpen, onUndoRequest, amountText, children,
 }) {
   const fileInputRef = useRef(null);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -104,8 +104,9 @@ export default function InvoiceItemCard({
   );
 
   return (
-    <div className="group">
-      <div className={`flex items-stretch rounded-[10px] border border-l-4 transition-all ${isUploading ? 'opacity-60' : ''} ${tone.card}`}>
+    <div className="group h-full">
+      <div className={`h-full rounded-[10px] border border-l-4 transition-all ${isUploading ? 'opacity-60' : ''} ${tone.card}`}>
+        <div className="flex items-stretch min-h-[44px]">
         <Tooltip>
           <TooltipTrigger asChild>
             <button
@@ -282,6 +283,14 @@ export default function InvoiceItemCard({
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
+
+        </div>
+
+        {children && (
+          <div className="space-y-1.5 border-t border-border/60 px-2.5 py-2">
+            {children}
+          </div>
+        )}
 
         <input
           ref={fileInputRef}
