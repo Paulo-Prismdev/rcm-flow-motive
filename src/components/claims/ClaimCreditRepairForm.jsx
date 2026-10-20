@@ -198,7 +198,7 @@ export default function ClaimCreditRepairForm({ claim, onSave, onCancel }) {
                 {locked && !adjusting && (
                     <div className="flex items-center justify-between gap-2 flex-wrap">
                         <p className="text-xs text-muted-foreground">
-                            {locked.category} — {locked.hire_fee === null || locked.hire_fee === undefined ? 'no' : fmtGBP(locked.hire_fee)} hire fee, {locked.commission_percent ?? 0}% of the {locked.commission_basis} final repair cost.
+                            {locked.category} — {locked.hire_fee === null || locked.hire_fee === undefined ? 'no' : fmtGBP(locked.hire_fee)} hire fee, {locked.commission_percent ?? 0}% commission{locked.commission_basis ? ` on the ${locked.commission_basis} repair cost` : ''}.
                         </p>
                         <Button type="button" variant="outline" size="sm" onClick={() => setAdjusting(true)} className="gap-1.5">
                             <Pencil className="w-3.5 h-3.5" /> Adjust for this claim
@@ -233,9 +233,10 @@ export default function ClaimCreditRepairForm({ claim, onSave, onCancel }) {
                                 <label className="text-xs text-muted-foreground">Commission calculated on</label>
                                 <select
                                     className={SELECT_CLASS}
-                                    value={locked.commission_basis || COMMISSION_BASES[1]}
+                                    value={locked.commission_basis || ''}
                                     onChange={e => setLockedRate('commission_basis', e.target.value)}
                                 >
+                                    <option value="">Not set</option>
                                     {COMMISSION_BASES.map(basis => (
                                         <option key={basis} value={basis}>{basis}</option>
                                     ))}

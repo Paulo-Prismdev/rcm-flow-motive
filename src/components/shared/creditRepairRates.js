@@ -73,7 +73,7 @@ export function buildLockedRates(company, category) {
     category,
     hire_fee: rates.hire_fee,
     commission_percent: rates.commission_percent,
-    commission_basis: rates.commission_basis || COMMISSION_BASES[1],
+    commission_basis: rates.commission_basis || null,
     locked_at: new Date().toISOString(),
   };
 }
@@ -86,7 +86,7 @@ export function claimLockedRates(claim) {
     category: locked.category || '',
     hireFee: hasValue(locked.hire_fee) ? toNum(locked.hire_fee) : null,
     commissionPercent: hasValue(locked.commission_percent) ? toNum(locked.commission_percent) : null,
-    commissionBasis: locked.commission_basis || COMMISSION_BASES[1],
+    commissionBasis: hasValue(locked.commission_basis) ? locked.commission_basis : null,
     overridden: claim?.credit_repair_rates_overridden === true,
   };
 }
@@ -96,7 +96,7 @@ export function creditRepairHireFee(claim) {
   const rates = claimLockedRates(claim);
   if (!rates) return { amount: 0, awaiting: true, hint: 'Set the hire category on this claim' };
   if (rates.hireFee === null) {
-    return { amount: 0, awaiting: true, hint: `No ${rates.category || 'hire category'} rate set for this partner` };
+    return { amount: 0, awaiting: true, hint: `Awaiting partner rates — no ${rates.category || 'hire category'} hire fee set` };
   }
   return { amount: rates.hireFee, awaiting: false, hint: `${rates.category} hire fee` };
 }
@@ -113,7 +113,12 @@ export function creditRepairCommission(claim) {
   const rates = claimLockedRates(claim);
   if (!rates) return { amount: 0, awaiting: true, hint: 'Set the hire category on this claim' };
   if (rates.commissionPercent === null) {
-    return { amount: 0, awaiting: true, hint: 'No commission rate set for this partner' };
+    return { amount: 0, awaiting: true, hint: 'Awaiting partner rates — no commission % set' };
+  }
+  // Without a net/gross basis the commission is unknowable, so it waits for the
+  // partner's rate rather than assuming gross.
+  if (!rates.commissionBasis) {
+    return { amount: 0, awaiting: true, hint: 'Awaiting partner rates — commission basis not set' };
   }
   const base = commissionBase(claim, rates.commissionBasis);
   if (base <= 0) return { amount: 0, awaiting: true, hint: 'Awaiting final repair cost' };

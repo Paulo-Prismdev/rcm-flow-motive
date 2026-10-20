@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Upload, Trash2, Pencil, Check, X, MoreVertical, FileText } from 'lucide-react';
+import { Upload, Trash2, Pencil, Check, X, MoreVertical, FileText, Lock, Unlock, AlertTriangle } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { INVOICE_STATUS_META, invoiceItemStatus } from '@/components/shared/invoiceChecklist';
 import { fmtGBP } from '@/components/shared/creditRepairRates';
@@ -96,6 +96,21 @@ export default function InvoiceItemCard({
               <>
                 <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(false)} />
                 <div className="absolute right-0 top-6 z-50 w-44 rounded-md border border-border bg-popover shadow-lg py-1">
+                  {isDerived && state.invoicedLocked && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMenuOpen(false);
+                        onChange(
+                          { amount: null },
+                          `${item.label} amount unlocked — follows the calculated figure again`
+                        );
+                      }}
+                      className="w-full text-left px-3 py-1.5 text-sm hover:bg-muted inline-flex items-center gap-1.5"
+                    >
+                      <Unlock className="w-3 h-3" /> Unlock amount
+                    </button>
+                  )}
                   <button
                     type="button"
                     onClick={() => {
@@ -135,7 +150,8 @@ export default function InvoiceItemCard({
               <div>
                 <label className="block text-[10px] font-medium text-muted-foreground mb-0.5">Amount (£)</label>
                 {isDerived ? (
-                  <div className={`h-8 flex items-center px-2 rounded-md border border-dashed text-sm tabular-nums ${state.awaiting ? 'border-amber-300 dark:border-amber-800 text-muted-foreground' : 'border-border bg-muted/40 font-medium'}`}>
+                  <div className={`h-8 flex items-center gap-1 px-2 rounded-md border border-dashed text-sm tabular-nums ${state.awaiting ? 'border-amber-300 dark:border-amber-800 text-muted-foreground' : 'border-border bg-muted/40 font-medium'}`}>
+                    {state.invoicedLocked && <Lock className="w-3 h-3 flex-shrink-0 text-muted-foreground" title="Locked at the figure this invoice went out at" />}
                     {state.awaiting ? '—' : fmtGBP(state.amount)}
                   </div>
                 ) : (
@@ -166,6 +182,14 @@ export default function InvoiceItemCard({
             {isDerived && state.hint && (
               <p className={`text-[10px] leading-tight ${state.awaiting ? 'text-amber-600 dark:text-amber-400 font-medium' : 'text-muted-foreground'}`}>
                 {state.hint}
+              </p>
+            )}
+            {isDerived && state.variance && (
+              <p className="flex items-start gap-1.5 text-[10px] leading-tight text-amber-700 dark:text-amber-300 font-medium">
+                <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0" />
+                <span>
+                  {state.variance.reason} — calculated {fmtGBP(state.variance.calculated)}, invoiced {fmtGBP(state.variance.invoiced)}. Raise a supplementary invoice or credit note, or unlock the amount.
+                </span>
               </p>
             )}
 

@@ -136,6 +136,7 @@ export const INVOICE_ITEMS = [
     dateLabel: 'Sent',
     requires: 'credit_repair',
     amountSource: 'credit_repair_hire_fee',
+    varianceReason: 'Hire category or hire fee changed',
   },
   {
     key: 'cr_repair_commission',
@@ -145,6 +146,7 @@ export const INVOICE_ITEMS = [
     dateLabel: 'Sent',
     requires: 'credit_repair',
     amountSource: 'credit_repair_commission',
+    varianceReason: 'Final repair cost or commission rate changed',
   },
 ];
 
@@ -169,6 +171,8 @@ const toNum = (v) => {
   const n = Number(v);
   return Number.isNaN(n) ? 0 : n;
 };
+
+const isStored = (v) => v !== null && v !== undefined && v !== '';
 
 export const today = () => new Date().toISOString().split('T')[0];
 
@@ -228,8 +232,16 @@ export function getInvoiceItemState(item, claim, hasFiles = false) {
   // Derived amounts (the credit repair hire fee and commission) are worked out
   // from the claim's locked rates and final repair cost, never stored.
   const derived = item.amountSource ? AMOUNT_RESOLVERS[item.amountSource]?.(claim) : null;
+  // A derived invoice is LOCKED to the figure it was sent at: the amount is
+  // snapshotted into the tracker entry when the item is dated (i.e. sent), so a
+  // later change to the repair cost, hire category or rates cannot move an
+  // invoice that has already gone out.
+  const invoiced = !!derived && isStored(entry.amount);
+  const invoicedAmount = invoiced ? toNum(entry.amount) : 0;
 
-  const amount = asDocument ? 0 : (derived ? derived.amount : (b.amount ? toNum(claim?.[b.amount]) : toNum(entry.amount)));
+  const amount = asDocument ? 0
+    : derived ? (invoiced ? invoicedAmount : derived.amount)
+      : (b.amount ? toNum(claim?.[b.amount]) : toNum(entry.amount));
   const date = (b.date ? claim?.[b.date] : entry.date) || '';
   const paidDate = asDocument ? '' : ((b.paid_date ? claim?.[b.paid_date] : entry.paid_date) || '');
 
@@ -249,8 +261,14 @@ export function getInvoiceItemState(item, claim, hasFiles = false) {
     paidDate,
     received,
     notApplicable: entry.not_applicable === true,
-    awaiting: derived?.awaiting === true,
+    awaiting: !invoiced && derived?.awaiting === true,
     hint: derived?.hint || null,
+    invoicedLocked: invoiced,
+    // The figure already invoiced no longer matches what the claim now works out
+    // to — a supplementary invoice or credit note is needed.
+    variance: invoiced && derived && !derived.awaiting && Math.abs(derived.amount - invoicedAmount) >= 0.01
+      ? { invoiced: invoicedAmount, calculated: derived.amount, reason: item.varianceReason }
+      : null,
   };
 }
 
@@ -343,8 +361,19 @@ export function buildInvoiceItemPatch(item, claim, changes, ctx) {
     write('amount', n === null || Number.isNaN(n) ? null : n);
   }
 
+  // A derived invoice (the credit repair pair) locks to the figure it is sent
+  // at. Clearing its amount is the deliberate unlock that releases the lock.
+  if (item.amountSource && has('amount') && !isStored(changes.amount)) {
+    entry.amount = null;
+  }
+
   if (has('date')) {
     write('date', changes.date || null);
+    // Marking a derived invoice as sent locks it to the figure it goes out at.
+    if (item.amountSource && changes.date && !isStored(entry.amount)) {
+      const sentAt = AMOUNT_RESOLVERS[item.amountSource]?.(claim);
+      if (sentAt && !sentAt.awaiting) entry.amount = sentAt.amount;
+    }
     // Keep the existing flags that mean the same thing in step with the date,
     // so the tracker and the Financials fields never disagree.
     if (!getInvoiceItemState(item, claim).paid) {
