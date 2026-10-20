@@ -60,7 +60,7 @@ export default function WidgetInvoiceTracking({ config, isEditMode }) {
         </div>
         <TrendingUp className="w-4 h-4 text-muted-foreground" />
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 m-keep-2">
         {metrics.map(m => (
           <div key={m.label} className="bg-muted rounded-xl p-4">
             <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">{m.label}</p>

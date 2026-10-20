@@ -31,7 +31,7 @@ export default function InvoiceItemDetails({ item, state, onChange, onAskPaid })
 
   return (
     <div className="rounded-[10px] border border-border bg-muted/30 px-3 py-2.5 space-y-2">
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 items-start">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 items-start m-keep-2">
         {!isDocument && (
           <FigureField
             {...fieldEdit('amount')}

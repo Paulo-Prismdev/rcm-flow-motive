@@ -13,6 +13,7 @@ import {
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import AddressLookupInput from '@/components/shared/AddressLookupInput';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { geocodeAddress } from '@/functions/geocodeAddress';
 import { SUPPLIER_COVERAGE_AREAS, milesToMeters } from '@/components/map/supplierCoverageData';
 import { GREAT_BRITAIN_GEOJSON } from '@/components/map/greatBritainOutline';
@@ -154,6 +155,9 @@ export default function BodyshopMap() {
   const [geocodedCoords, setGeocodedCoords] = useState({});
   const [isGeocoding, setIsGeocoding] = useState(false);
   const [showSupplierPanel, setShowSupplierPanel] = useState(false);
+  // Phones show one panel at a time, as a sheet over the map, so the map keeps
+  // the whole screen when nothing is open.
+  const isMobile = useIsMobile();
   const [enabledSuppliers, setEnabledSuppliers] = useState(
     () => Object.fromEntries(SUPPLIER_COVERAGE_AREAS.map(s => [s.supplier_name, false]))
   );
@@ -575,7 +579,7 @@ export default function BodyshopMap() {
           />
         </div>
         <button
-          onClick={() => setShowSupplierPanel(s => !s)}
+          onClick={() => { setShowSupplierPanel(s => !s); if (isMobile) setShowSettings(false); }}
           className={`relative z-[1001] flex-shrink-0 w-10 h-10 rounded-full shadow-lg border flex items-center justify-center transition-colors ${
             showSupplierPanel || Object.values(enabledSuppliers).some(Boolean)
               ? 'bg-blue-500 text-white border-blue-500'
@@ -586,7 +590,7 @@ export default function BodyshopMap() {
           <Package className="w-4 h-4" />
         </button>
         <button
-          onClick={() => setShowSettings(s => !s)}
+          onClick={() => { setShowSettings(s => !s); if (isMobile) setShowSupplierPanel(false); }}
           className={`relative z-[1001] flex-shrink-0 w-10 h-10 rounded-full shadow-lg border flex items-center justify-center transition-colors ${
             showSettings
               ? 'bg-primary text-primary-foreground border-primary'
@@ -599,8 +603,19 @@ export default function BodyshopMap() {
 
       {/* ── SUPPLIER COVERAGE PANEL ── */}
       {showSupplierPanel && (
-        <div className="absolute top-16 right-3 z-[999] bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-border p-2.5 space-y-2 w-[210px] max-md:w-[calc(50vw-16px)] max-md:max-h-[calc(100vh-8rem)] max-md:overflow-y-auto">
-          <p className="text-xs font-semibold text-muted-foreground">Supplier Coverage</p>
+        <>
+          {isMobile && <div className="absolute inset-0 z-[1098] bg-black/20" onClick={() => setShowSupplierPanel(false)} />}
+          <div className={isMobile
+            ? 'absolute left-0 right-0 bottom-0 z-[1099] max-h-[75vh] overflow-y-auto rounded-t-2xl border-t border-border bg-white dark:bg-gray-800 px-3 pt-2 pb-[calc(1.25rem+env(safe-area-inset-bottom))] shadow-2xl space-y-2'
+            : 'absolute top-16 right-3 z-[999] bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-border p-2.5 space-y-2 w-[210px]'}>
+            {isMobile && (
+              <div className="flex justify-end -mb-1">
+                <button onClick={() => setShowSupplierPanel(false)} className="p-1 text-gray-400" title="Close">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            )}
+            <p className="text-xs font-semibold text-muted-foreground">Supplier Coverage</p>
           {SUPPLIER_COVERAGE_AREAS.map(supplier => (
             <div key={supplier.supplier_name} className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full border-2 border-white shadow flex-shrink-0" style={{ backgroundColor: supplier.color }} />
@@ -617,13 +632,25 @@ export default function BodyshopMap() {
           <p className="text-[10px] text-muted-foreground pt-1 border-t border-border">
             Toggle suppliers on/off to show their coverage areas on the map.
           </p>
-        </div>
+          </div>
+        </>
       )}
 
       {/* ── SETTINGS PANEL (tier filters) ── */}
       {showSettings && (
-        <div className="absolute top-16 left-3 z-[999] bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-border p-3 space-y-2 w-[220px] max-md:w-[calc(50vw-16px)] max-md:max-h-[calc(100vh-8rem)] max-md:overflow-y-auto">
-          <p className="text-xs font-medium text-muted-foreground">Filter by tier</p>
+        <>
+          {isMobile && <div className="absolute inset-0 z-[1098] bg-black/20" onClick={() => setShowSettings(false)} />}
+          <div className={isMobile
+            ? 'absolute left-0 right-0 bottom-0 z-[1099] max-h-[75vh] overflow-y-auto rounded-t-2xl border-t border-border bg-white dark:bg-gray-800 px-3 pt-2 pb-[calc(1.25rem+env(safe-area-inset-bottom))] shadow-2xl space-y-2'
+            : 'absolute top-16 left-3 z-[999] bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-border p-3 space-y-2 w-[220px]'}>
+            {isMobile && (
+              <div className="flex justify-end -mb-1">
+                <button onClick={() => setShowSettings(false)} className="p-1 text-gray-400" title="Close">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            )}
+            <p className="text-xs font-medium text-muted-foreground">Filter by tier</p>
           <div className="flex flex-col gap-1.5">
             {[...tierDots.filter(t => t.key !== 'Solution' && t.key !== 'QAC'), { key: 'None', label: 'No Tier', color: '#9ca3af' }].map(t => (
               <button
@@ -655,7 +682,8 @@ export default function BodyshopMap() {
               ))}
             </div>
           </div>
-        </div>
+          </div>
+        </>
       )}
 
       {/* ── STATUS INDICATORS (below search pill) ── */}
@@ -680,12 +708,15 @@ export default function BodyshopMap() {
 
 
       {/* ── BOTTOM LIST SHEET (drag up to expand) ── */}
-      {!isLoading && resolvedBodyshops.length > 0 && (
+      {!isLoading && resolvedBodyshops.length > 0 && !(isMobile && (showSettings || showSupplierPanel)) && (
         <div className={`absolute left-0 right-0 bottom-0 z-[997] bg-white dark:bg-gray-900 rounded-t-2xl shadow-2xl border-t border-border transition-all duration-300 overflow-hidden ${
-          listExpanded ? 'h-[50vh]' : 'h-[52px]'
+          listExpanded ? (isMobile ? 'h-[85vh]' : 'h-[50vh]') : 'h-[52px]'
         }`}>
           <button
-            onClick={() => setListExpanded(!listExpanded)}
+            onClick={() => {
+              setListExpanded(!listExpanded);
+              if (isMobile && !listExpanded) { setShowSettings(false); setShowSupplierPanel(false); }
+            }}
             className="w-full flex items-center justify-center gap-2 pt-2 pb-1.5 touch-manipulation"
           >
             <ChevronUp className={`w-5 h-5 text-gray-400 transition-transform ${listExpanded ? '' : 'rotate-180'}`} />
@@ -695,7 +726,7 @@ export default function BodyshopMap() {
             <span className="text-[8px] text-gray-300 dark:text-gray-500">© Google Maps</span>
           </button>
           {listExpanded && (
-            <div className="overflow-y-auto px-3 pb-4" style={{ height: 'calc(50vh - 52px)' }}>
+            <div className="overflow-y-auto px-3 pb-4" style={{ height: isMobile ? 'calc(85vh - 52px)' : 'calc(50vh - 52px)' }}>
               <div className="space-y-2">
                 {tierFilteredBodyshops.length === 0 ? (
                   <div className="text-center text-sm text-muted-foreground p-4">

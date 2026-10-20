@@ -220,7 +220,7 @@ export default function Parts() {
                       <h3 className="text-base font-bold text-gray-700">{part.vehicle_ref || 'No Reference'}</h3>
                       <StatusBadge status={part.sourcing_status || 'New Request'} />
                     </div>
-                    <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div className="grid grid-cols-2 gap-2 text-xs m-keep-2">
                       <div>
                         <p className="text-gray-500">Part Description</p>
                         <p className="font-medium text-gray-700">{part.part_description?.substring(0, 50) || '-'}</p>

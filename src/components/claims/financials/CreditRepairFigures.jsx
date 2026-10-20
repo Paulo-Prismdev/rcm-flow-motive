@@ -92,7 +92,7 @@ export default function CreditRepairFigures({ claim, missing, onChange, editingK
 
   return (
     <div className="space-y-2">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 items-start">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 items-start m-keep-2">
         <FigureField
           {...fieldEdit('hire_category')}
           label="Hire Category"

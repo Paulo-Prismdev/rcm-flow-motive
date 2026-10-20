@@ -39,7 +39,7 @@ export default function WidgetUpdateTracking({ config, isEditMode }) {
         <div className="text-center py-8 text-foreground-muted text-sm">Loading...</div>
       ) : (
         <div className="space-y-3">
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-3 m-keep-2">
             <Link 
               to={createPageUrl('Claims?updateStatus=Red')}
               className="glass-elevated p-4 hover:scale-105 transition-transform"

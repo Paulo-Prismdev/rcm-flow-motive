@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { format, differenceInDays, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isWeekend, addMonths, subMonths, startOfWeek, endOfWeek, getDay } from "date-fns";
 import { Link } from "react-router-dom";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { createPageUrl } from "@/utils";
 import {
   Dialog,
@@ -34,6 +35,8 @@ export default function EmployeeManagement() {
   const [showAllowanceModal, setShowAllowanceModal] = useState(false);
   const [editingRole, setEditingRole] = useState(null);
   const [selectedMonth, setSelectedMonth] = useState(new Date());
+  // Phones get a day-by-day agenda: a seven-column month grid is unreadable there.
+  const isMobile = useIsMobile();
   const queryClient = useQueryClient();
 
   const { data: currentUser } = useQuery({
@@ -99,6 +102,90 @@ export default function EmployeeManagement() {
     return count;
   };
 
+  // Events on a given day — shared by the month grid and the phone agenda.
+  const getEventsForDay = (day) => {
+    const events = [];
+    const dateStr = format(day, 'yyyy-MM-dd');
+
+    // Check for bank holidays
+    const bankHoliday = UK_BANK_HOLIDAYS_2025.find(h => h.date === dateStr);
+    if (bankHoliday) {
+      events.push({ type: 'bank-holiday', name: bankHoliday.name });
+    }
+
+    // Check holiday requests
+    holidayRequests.forEach(req => {
+      if (req.status === 'Approved') {
+        const start = new Date(req.start_date);
+        const end = new Date(req.end_date);
+        if (day >= start && day <= end) { // Simplified date range check
+          events.push({ type: 'holiday', name: req.employee_name, data: req });
+        }
+      }
+    });
+
+    // Check sickness records
+    sicknessRecords.forEach(rec => {
+      const start = new Date(rec.start_date);
+      const end = rec.end_date ? new Date(rec.end_date) : new Date(); // If ongoing, assume today is end
+      if (day >= start && day <= end) { // Simplified date range check
+        events.push({ type: 'sickness', name: rec.employee_name, data: rec });
+      }
+    });
+
+    return events;
+  };
+
+  // Phone agenda: the month's records listed day by day, each entry easy to tap.
+  const renderAgenda = () => {
+    const days = eachDayOfInterval({ start: startOfMonth(selectedMonth), end: endOfMonth(selectedMonth) });
+    const dayRows = days
+      .map((day) => ({ day, events: getEventsForDay(day) }))
+      .filter(({ events }) => events.length > 0);
+
+    return (
+      <div className="glass p-4">
+        <div className="flex items-center justify-between mb-4 gap-2">
+          <h2 className="text-lg font-bold">{format(selectedMonth, 'MMMM yyyy')}</h2>
+          <div className="flex gap-1.5">
+            <Button onClick={() => setSelectedMonth(subMonths(selectedMonth, 1))} className="glass-button p-2">←</Button>
+            <Button onClick={() => setSelectedMonth(new Date())} className="glass-button px-3 py-2 text-sm">Today</Button>
+            <Button onClick={() => setSelectedMonth(addMonths(selectedMonth, 1))} className="glass-button p-2">→</Button>
+          </div>
+        </div>
+
+        {dayRows.length === 0 ? (
+          <p className="text-sm text-foreground-muted text-center py-8">Nothing recorded this month.</p>
+        ) : (
+          <div className="space-y-2">
+            {dayRows.map(({ day, events }) => (
+              <div
+                key={format(day, 'yyyy-MM-dd')}
+                className={`glass-inset p-3 ${isSameDay(day, new Date()) ? 'border-2 border-accent' : ''}`}
+              >
+                <p className="text-xs font-semibold text-foreground-muted">
+                  {format(day, 'EEE d MMM')}{isSameDay(day, new Date()) ? ' · Today' : ''}
+                </p>
+                <div className="mt-1.5 space-y-1">
+                  {events.map((event, i) => (
+                    <div key={i} className="flex items-center gap-2 min-h-[38px]">
+                      <span className={`text-[10px] font-semibold px-2 py-1 rounded-full text-white flex-shrink-0 ${
+                        event.type === 'bank-holiday' ? 'bg-purple-500' : event.type === 'holiday' ? 'bg-blue-500' : 'bg-red-500'
+                      }`}>
+                        {event.type === 'bank-holiday' ? 'Bank Holiday' : event.type === 'holiday' ? 'Holiday' : 'Sickness'}
+                      </span>
+                      <span className="text-sm truncate">{event.name}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   // Calendar view
   const renderCalendar = () => {
     const monthStart = startOfMonth(selectedMonth);
@@ -113,39 +200,6 @@ export default function EmployeeManagement() {
       start: calendarStart, 
       end: calendarEnd
     });
-
-    const getEventsForDay = (day) => {
-      const events = [];
-      const dateStr = format(day, 'yyyy-MM-dd');
-      
-      // Check for bank holidays
-      const bankHoliday = UK_BANK_HOLIDAYS_2025.find(h => h.date === dateStr);
-      if (bankHoliday) {
-        events.push({ type: 'bank-holiday', name: bankHoliday.name });
-      }
-      
-      // Check holiday requests
-      holidayRequests.forEach(req => {
-        if (req.status === 'Approved') {
-          const start = new Date(req.start_date);
-          const end = new Date(req.end_date);
-          if (day >= start && day <= end) { // Simplified date range check
-            events.push({ type: 'holiday', name: req.employee_name, data: req });
-          }
-        }
-      });
-
-      // Check sickness records
-      sicknessRecords.forEach(rec => {
-        const start = new Date(rec.start_date);
-        const end = rec.end_date ? new Date(rec.end_date) : new Date(); // If ongoing, assume today is end
-        if (day >= start && day <= end) { // Simplified date range check
-          events.push({ type: 'sickness', name: rec.employee_name, data: rec });
-        }
-      });
-
-      return events;
-    };
 
     return (
       <div className="glass p-4 md:p-6">
@@ -451,7 +505,7 @@ export default function EmployeeManagement() {
         </div>
       </div>
 
-      {activeTab === 'calendar' && renderCalendar()}
+      {activeTab === 'calendar' && (isMobile ? renderAgenda() : renderCalendar())}
       {activeTab === 'holidays' && renderHolidays()}
       {activeTab === 'sickness' && renderSickness()}
       {activeTab === 'roles' && renderRoles()}

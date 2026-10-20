@@ -603,21 +603,35 @@ button:not(.btn-sm):not(.btn-icon),
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  /* ── 2. Nothing may be wider than the screen ── */
-  .flex > *,
-  .grid > * {
+  /* ── 2. Nothing may be wider than the screen ──
+     A row that deliberately sets its own min-width (a money stat, a fixed
+     label) keeps it, so those groups stay side by side. */
+  .flex > *:not([class*="min-w-"]),
+  .grid > *:not([class*="min-w-"]) {
     min-width: 0;
   }
   img, video, canvas, iframe, embed, pre {
     max-width: 100%;
   }
 
-  /* ── 3. Long names, references and registrations wrap, never clip ── */
-  .truncate {
+  /* ── 3. Long names, references and registrations wrap, never clip ──
+     File names, status pills and table cells are the exception: they keep
+     "…" so a single long value cannot make a row very tall. Mark such a line
+     with .m-ellipsis (a long file name still opens in full on tap). */
+  .truncate:not(.m-ellipsis) {
     overflow: visible;
     text-overflow: clip;
     white-space: normal;
     overflow-wrap: anywhere;
+  }
+  td.truncate,
+  th.truncate,
+  td .truncate,
+  th .truncate,
+  .m-ellipsis {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   /* ── 4. Popovers, menus and dropdowns stay on screen ── */

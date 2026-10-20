@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { X, Calculator, DollarSign, TrendingUp, Activity, Zap, PieChart, Clock } from 'lucide-react';
@@ -108,7 +107,7 @@ export default function WidgetGallery({ onClose, onAddWidget, department }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 backdrop-blur-sm" data-mobile-full-modal="true">
       <div className="glass-elevated max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-4 md:p-6 border-b border-glass-border">

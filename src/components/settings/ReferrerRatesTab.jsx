@@ -63,7 +63,7 @@ export default function ReferrerRatesTab() {
       ) : (
         <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden">
           {/* Header row */}
-          <div className="grid grid-cols-[1fr_120px_120px_40px] gap-2 px-4 py-2 bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700">
+          <div className="grid grid-cols-[1fr_64px_64px_28px] md:grid-cols-[1fr_120px_120px_40px] gap-2 px-4 py-2 bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700">
             <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Referrer</span>
             <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide text-center">% to Referrer</span>
             <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide text-center">Repairer Fee %</span>
@@ -71,7 +71,7 @@ export default function ReferrerRatesTab() {
           </div>
           <div className="divide-y divide-gray-100 dark:divide-gray-800">
             {referrers.map((referrer) => (
-              <div key={referrer.id} className="grid grid-cols-[1fr_120px_120px_40px] gap-2 px-4 py-3 items-center hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors">
+              <div key={referrer.id} className="grid grid-cols-[1fr_64px_64px_28px] md:grid-cols-[1fr_120px_120px_40px] gap-2 px-4 py-3 items-center hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors">
                 <div>
                   <div className="text-sm font-medium text-gray-900 dark:text-white">{referrer.name}</div>
                   {referrer.email && <div className="text-xs text-gray-400">{referrer.email}</div>}

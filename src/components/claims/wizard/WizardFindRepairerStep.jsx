@@ -12,6 +12,7 @@ import L from 'leaflet';
 import { geocodeAddress } from '@/functions/geocodeAddress';
 import { haversineDistance, formatHaversineDistance } from '@/components/shared/haversine';
 import { sortAlphaNumeric } from '@/components/shared/sortAlphaNumeric';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 // ── Leaflet icon setup ──
 delete L.Icon.Default.prototype._getIconUrl;
@@ -96,6 +97,10 @@ export default function WizardFindRepairerStep({
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('distance');
   const [routePoints, setRoutePoints] = useState([]);
+  // On phones the list and the map are shown one at a time, so the map is not
+  // reduced to a thin strip underneath a long list.
+  const isMobile = useIsMobile();
+  const [phonePane, setPhonePane] = useState('list');
   const [geocodedCoords, setGeocodedCoords] = useState({});
   const [isGeocodingBodyshops, setIsGeocodingBodyshops] = useState(false);
 
@@ -290,10 +295,27 @@ export default function WizardFindRepairerStep({
         </div>
       </div>
 
+      {/* Phones: pick list or map, so whichever is open gets the room */}
+      {isMobile && (
+        <div className="flex gap-1 p-1 rounded-lg bg-muted">
+          {[['list', 'List'], ['map', 'Map']].map(([key, label]) => (
+            <button
+              key={key}
+              onClick={() => setPhonePane(key)}
+              className={`flex-1 h-9 rounded-md text-xs font-semibold transition-colors ${
+                phonePane === key ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground'
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* Main content: List + Map */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-3">
         {/* Bodyshop list */}
-        <div className="lg:col-span-2 space-y-1.5 max-h-[350px] lg:max-h-[450px] overflow-y-auto pr-1">
+        <div className={`lg:col-span-2 space-y-1.5 max-h-[350px] max-md:max-h-[440px] lg:max-h-[450px] overflow-y-auto pr-1 ${isMobile && phonePane !== 'list' ? 'hidden' : ''}`}>
           {sortedBodyshops.length === 0 ? (
             <div className="text-center text-sm text-muted-foreground p-4">No repairers match your filters.</div>
           ) : (
@@ -331,8 +353,8 @@ export default function WizardFindRepairerStep({
         </div>
 
         {/* Map */}
-        <div className="lg:col-span-3">
-          <div className="rounded-xl overflow-hidden border" style={{ height: '350px', minHeight: '250px' }}>
+        <div className={`lg:col-span-3 ${isMobile && phonePane !== 'map' ? 'hidden' : ''}`}>
+          <div className="rounded-xl overflow-hidden border h-[350px] max-md:h-[440px]" style={{ minHeight: '250px' }}>
             <MapContainer center={mapCenter} zoom={mapZoom} style={{ height: '100%', width: '100%' }} scrollWheelZoom={false}>
               <TileLayer
                 attribution='&copy; Google Maps'

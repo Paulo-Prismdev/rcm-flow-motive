@@ -72,7 +72,7 @@ export default function ClaimCardFieldsModal({ isOpen, onClose, selectedFields, 
   const unselectedFields = AVAILABLE_FIELDS.filter(f => !fields.includes(f.id) && !isMandatory(f.id));
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" data-mobile-full-modal="true">
       <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-2xl p-6 max-w-lg w-full max-h-[80vh] overflow-hidden flex flex-col">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-bold text-gray-900 dark:text-white">Customise Claim Card Fields</h2>

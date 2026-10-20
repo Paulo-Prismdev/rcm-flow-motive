@@ -132,7 +132,7 @@ export default function Archive() {
                       </div>
                       <StatusBadge status={item.job_status || item.status || item.sourcing_status || 'N/A'} />
                     </div>
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 lg:gap-4 text-sm mt-2 lg:mt-4">
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 lg:gap-4 text-sm mt-2 lg:mt-4 m-keep-2">
                       {item.client_name && (
                         <div>
                           <p className="text-gray-500">Client</p>

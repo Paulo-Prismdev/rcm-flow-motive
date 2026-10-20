@@ -39,7 +39,7 @@ export default function TeamActivityFeed({ updates, claimsById, usersById }) {
         <h2 className="text-[15px] font-semibold text-gray-900 dark:text-white">Recent Team Activity</h2>
       </div>
       <div className="overflow-x-auto">
-        <div className="min-w-[700px]">
+        <div className="min-w-[700px] max-md:min-w-0">
           {rows.length === 0 ? (
             <div className="py-10 text-center">
               <p className="text-[13px] text-gray-400">No recent activity</p>

@@ -208,7 +208,7 @@ export default function Engineering() {
                         </span>
                       )}
                     </div>
-                    <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div className="grid grid-cols-2 gap-2 text-xs m-keep-2">
                       <div>
                         <p className="text-gray-500">Vehicle</p>
                         <p className="font-medium text-gray-700">{job.make_model || '-'}</p>

@@ -204,7 +204,7 @@ export default function Estimating() {
                         </span>
                       )}
                     </div>
-                    <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div className="grid grid-cols-2 gap-2 text-xs m-keep-2">
                       <div>
                         <p className="text-gray-500">Repairer</p>
                         <p className="font-medium text-gray-700">{estimate.repairer || '-'}</p>

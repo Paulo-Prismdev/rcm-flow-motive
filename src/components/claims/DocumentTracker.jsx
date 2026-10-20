@@ -4,7 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
-  FileText, Upload, Trash2, Check, FileCheck2,
+  FileText, Upload, Trash2, Check, FileCheck2, ChevronDown, ChevronUp,
 } from 'lucide-react';
 import { useFileUpload } from '@/hooks/useFileUpload';
 import { toast } from '@/components/ui/use-toast';
@@ -50,6 +50,9 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
   const [focusDateKey, setFocusDateKey] = useState(null);
   // Item whose actions menu is open (one at a time).
   const [openMenuKey, setOpenMenuKey] = useState(null);
+  // A file name stays on one line (with "…") on phones; tapping the chevron
+  // beside it shows the whole name instead.
+  const [revealedNames, setRevealedNames] = useState({});
 
   const { data: docs = [], isLoading } = useQuery({
     queryKey: STATUS_QUERY_KEY(claim.id),
@@ -510,8 +513,19 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
                 className={`flex items-center gap-2 px-3 py-1.5 group hover:bg-muted/40 cursor-grab active:cursor-grabbing ${dragDoc?.record?.id === doc.id ? 'opacity-40' : ''}`}
               >
                 <FileText className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
-                <button onClick={() => setViewingFile(doc.file_url)} className="text-xs text-foreground hover:text-primary hover:underline truncate flex-1 text-left">
+                <button
+                  onClick={() => setViewingFile(doc.file_url)}
+                  title={doc.file_name || doc.file_url.split('/').pop()}
+                  className={`text-xs text-foreground hover:text-primary hover:underline flex-1 text-left ${revealedNames[doc.id] ? 'break-all' : 'truncate m-ellipsis'}`}
+                >
                   {doc.file_name || doc.file_url.split('/').pop()}
+                </button>
+                <button
+                  onClick={() => setRevealedNames((p) => ({ ...p, [doc.id]: !p[doc.id] }))}
+                  className="md:hidden flex-shrink-0 text-gray-400 hover:text-primary transition-colors"
+                  title={revealedNames[doc.id] ? 'Shorten name' : 'Show full name'}
+                >
+                  {revealedNames[doc.id] ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
                 </button>
                 <button
                   onClick={() => handleRemoveGeneralRecord(doc)}
@@ -532,8 +546,19 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
                 className={`flex items-center gap-2 px-3 py-1.5 group hover:bg-muted/40 cursor-grab active:cursor-grabbing ${dragDoc?.legacyUrl === url ? 'opacity-40' : ''}`}
               >
                 <FileText className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
-                <button onClick={() => setViewingFile(url)} className="text-xs text-foreground hover:text-primary hover:underline truncate flex-1 text-left">
+                <button
+                  onClick={() => setViewingFile(url)}
+                  title={url.split('/').pop()}
+                  className={`text-xs text-foreground hover:text-primary hover:underline flex-1 text-left ${revealedNames[url] ? 'break-all' : 'truncate m-ellipsis'}`}
+                >
                   {url.split('/').pop()}
+                </button>
+                <button
+                  onClick={() => setRevealedNames((p) => ({ ...p, [url]: !p[url] }))}
+                  className="md:hidden flex-shrink-0 text-gray-400 hover:text-primary transition-colors"
+                  title={revealedNames[url] ? 'Shorten name' : 'Show full name'}
+                >
+                  {revealedNames[url] ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
                 </button>
                 <span className="text-[10px] text-muted-foreground flex-shrink-0">legacy</span>
                 <button

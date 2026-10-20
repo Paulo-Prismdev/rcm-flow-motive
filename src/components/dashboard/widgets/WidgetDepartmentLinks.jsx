@@ -14,7 +14,7 @@ export default function WidgetDepartmentLinks({ config, isEditMode }) {
   return (
     <div className="glass p-4 md:p-6 col-span-1 md:col-span-2 lg:col-span-4">
       <h2 className="text-lg md:text-xl font-bold mb-4 md:mb-6">Quick Access</h2>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 m-keep-2">
         {DEPARTMENTS.map((dept) => {
           const Icon = dept.icon;
           return (
