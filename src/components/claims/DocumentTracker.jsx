@@ -26,6 +26,9 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
   const [generalTitle, setGeneralTitle] = useState('');
   const [pendingGeneralFiles, setPendingGeneralFiles] = useState(null);
   const [pendingDelete, setPendingDelete] = useState(null);
+  // A document being dragged out of General Documents onto a checklist placeholder.
+  const [dragDoc, setDragDoc] = useState(null);
+  const [dropTarget, setDropTarget] = useState(null);
 
   const { data: docs = [], isLoading } = useQuery({
     queryKey: STATUS_QUERY_KEY(claim.id),
@@ -42,11 +45,14 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
     [docs, statusMap]
   );
 
+  // `extra` lets an action change something else on the claim in the same save,
+  // so two writes can never overwrite each other.
   const persistClaimCounts = useCallback(
-    (files, newStatusMap) => {
+    (files, newStatusMap, extra = {}) => {
       const s = computeChecklistSummary(files, newStatusMap);
       onUpdate({
         ...claim,
+        ...extra,
         doc_checklist_status: newStatusMap,
         doc_checklist_received: s.received,
         doc_checklist_total: s.total,
@@ -167,6 +173,68 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
     persistClaimCounts(docs, newMap);
   };
 
+  // Drag a document out of General Documents and drop it on a placeholder to file
+  // it as that document.
+  const startDragDoc = (e, payload) => {
+    setDragDoc(payload);
+    e.dataTransfer.effectAllowed = 'move';
+    try {
+      e.dataTransfer.setData('text/plain', payload.name || 'document');
+    } catch (err) {
+      // Some browsers block writes to dataTransfer; the drag state carries it.
+    }
+  };
+
+  const endDragDoc = () => {
+    setDragDoc(null);
+    setDropTarget(null);
+  };
+
+  const fileIntoChecklist = async (item, payload) => {
+    try {
+      if (payload.record) {
+        if (payload.record.item_key === item.key) return;
+        await base44.entities.ClaimDocument.update(payload.record.id, { item_key: item.key });
+      } else {
+        // A legacy general file becomes a proper document record, so it can be
+        // filed like any other.
+        await base44.entities.ClaimDocument.create({
+          claim_id: claim.id,
+          item_key: item.key,
+          file_url: payload.url,
+          file_name: payload.name,
+          uploaded_by_email: currentUser?.email || '',
+          uploaded_by_name: currentUser?.full_name || '',
+          uploaded_at: new Date().toISOString(),
+          source: 'manual',
+        });
+      }
+      await logActivity({
+        parentId: claim.id, parentType: 'Claim', action: 'Document Filed',
+        description: `Filed "${payload.name}" as "${item.label}"`,
+        user: currentUser,
+      });
+      // A moved legacy file leaves the claim's general file list, so the same
+      // document never sits in two places.
+      const extra = payload.legacyUrl
+        ? { file_urls: (Array.isArray(claim.file_urls) ? claim.file_urls : []).filter((u) => u !== payload.legacyUrl) }
+        : {};
+      queryClient.invalidateQueries({ queryKey: STATUS_QUERY_KEY(claim.id) });
+      const refreshed = await base44.entities.ClaimDocument.filter({ claim_id: claim.id }, { sort: 'created_date' });
+      persistClaimCounts(refreshed.items || [], statusMap, extra);
+      toast({ title: `Filed as ${item.label}` });
+    } catch (e) {
+      toast({ title: 'Could not file that document', variant: 'destructive' });
+    }
+  };
+
+  const handleDropOnItem = (item) => {
+    const payload = dragDoc;
+    setDragDoc(null);
+    setDropTarget(null);
+    if (payload) fileIntoChecklist(item, payload);
+  };
+
   // General documents — new uploads are stored as ClaimDocument records (item_key='general')
   // with a user-provided title. Legacy claim.file_urls are preserved and shown alongside.
   const generalDocRecords = docs.filter((d) => d.item_key === 'general');
@@ -270,7 +338,27 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
           const meta = DOC_STATUS_META[status];
           const itemFiles = docs.filter((d) => d.item_key === item.key);
           return (
-            <div key={item.key} className="rounded-[10px] border border-border bg-card overflow-hidden">
+            <div
+              key={item.key}
+              onDragOver={(e) => {
+                if (!dragDoc) return;
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+                if (dropTarget !== item.key) setDropTarget(item.key);
+              }}
+              onDragLeave={(e) => {
+                if (!e.currentTarget.contains(e.relatedTarget)) setDropTarget((t) => (t === item.key ? null : t));
+              }}
+              onDrop={(e) => { e.preventDefault(); handleDropOnItem(item); }}
+              className={`rounded-[10px] border bg-card overflow-hidden transition-colors ${dropTarget === item.key
+                ? 'border-primary border-dashed bg-primary/5 ring-1 ring-primary/30'
+                : dragDoc
+                  ? 'border-dashed border-primary/50'
+                  : 'border-border'}`}
+            >
+              {dropTarget === item.key && (
+                <div className="px-3 pt-1.5 text-[11px] font-semibold text-primary">Drop to file here</div>
+              )}
               <div className="px-3 pt-2 pb-1.5">
                 <div className="flex items-start gap-2 min-w-0">
                   <span className={`w-2 h-2 rounded-full flex-shrink-0 mt-1.5 ${meta.dot}`} />
@@ -318,6 +406,7 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
           <FileText className="w-4 h-4 text-muted-foreground" />
           <span className="text-sm font-medium">General Documents</span>
           <span className="text-xs text-muted-foreground">({generalDocRecords.length + legacyGeneralFiles.length})</span>
+          <span className="hidden md:inline text-[10px] text-muted-foreground">— drag a file onto a placeholder to file it</span>
           <div className="ml-auto">
             <UploadButton onFiles={openGeneralDialog} disabled={isUploading} label="Add to General Documents" compact />
           </div>
@@ -325,7 +414,14 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
         {(generalDocRecords.length > 0 || legacyGeneralFiles.length > 0) && (
           <div className="px-3 py-1.5 space-y-1">
             {generalDocRecords.map((doc) => (
-              <div key={doc.id} className="flex items-center gap-2 group rounded-md px-2 py-1 hover:bg-muted/50">
+              <div
+                key={doc.id}
+                draggable
+                onDragStart={(e) => startDragDoc(e, { record: doc, name: doc.file_name || doc.file_url.split('/').pop() })}
+                onDragEnd={endDragDoc}
+                title="Drag onto a placeholder above to file this document"
+                className={`flex items-center gap-2 group rounded-md px-2 py-1 hover:bg-muted/50 cursor-grab active:cursor-grabbing ${dragDoc?.record?.id === doc.id ? 'opacity-40' : ''}`}
+              >
                 <FileText className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                 <button onClick={() => setViewingFile(doc.file_url)} className="text-sm text-primary hover:underline truncate flex-1 text-left">
                   {doc.file_name || doc.file_url.split('/').pop()}
@@ -340,7 +436,14 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
               </div>
             ))}
             {legacyGeneralFiles.map((url) => (
-              <div key={url} className="flex items-center gap-2 group rounded-md px-2 py-1 hover:bg-muted/50">
+              <div
+                key={url}
+                draggable
+                onDragStart={(e) => startDragDoc(e, { legacyUrl: url, url, name: url.split('/').pop() })}
+                onDragEnd={endDragDoc}
+                title="Drag onto a placeholder above to file this document"
+                className={`flex items-center gap-2 group rounded-md px-2 py-1 hover:bg-muted/50 cursor-grab active:cursor-grabbing ${dragDoc?.legacyUrl === url ? 'opacity-40' : ''}`}
+              >
                 <FileText className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                 <button onClick={() => setViewingFile(url)} className="text-sm text-primary hover:underline truncate flex-1 text-left">
                   {url.split('/').pop()}
