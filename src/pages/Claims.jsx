@@ -464,7 +464,7 @@ export default function ClaimsPage() {
 
   if (showForm) {
     return (
-      <div className="h-full overflow-y-auto bg-background p-4">
+      <div className="h-full overflow-y-auto bg-background p-4" data-wizard>
         {createError && (
           <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700 flex items-start gap-2">
             <span className="font-semibold">Error:</span> {createError}

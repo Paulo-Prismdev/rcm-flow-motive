@@ -668,6 +668,18 @@ button:not(.btn-sm):not(.btn-icon),
     text-align: center;
   }
 
+  /* ── 1d. No browser pull-to-refresh on phones ──
+     A downward drag never reloads the page. Only the Repairs list runs its
+     own pull-to-refresh, and the new claim wizard opts out completely. */
+  html,
+  body {
+    overscroll-behavior-y: none;
+  }
+  [data-wizard],
+  [data-wizard] * {
+    overscroll-behavior-y: contain;
+  }
+
   /* ── 2. Nothing may be wider than the screen ──
      A row that deliberately sets its own min-width (a money stat, a fixed
      label) keeps it, so those groups stay side by side. */
