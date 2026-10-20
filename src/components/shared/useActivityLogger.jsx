@@ -35,8 +35,9 @@ export async function logChanges({ parentId, parentType, oldData, newData, user,
     if (oldVal === '' && newVal == null) continue;
     if (oldVal == null && newVal === '') continue;
     
-    // Skip internal fields
-    if (['id', 'created_date', 'updated_date', 'created_by'].includes(key)) continue;
+    // Skip internal fields. The invoicing tracker logs its own, more meaningful
+    // activity lines, so the raw state object is skipped here.
+    if (['id', 'created_date', 'updated_date', 'created_by', 'invoice_tracker'].includes(key)) continue;
     
     const label = fieldLabels[key] || key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
     

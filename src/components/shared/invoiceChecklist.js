@@ -48,6 +48,8 @@ export const INVOICE_ITEMS = [
     status_field: 'invoice_status',
     paid_status: 'Invoice Paid',
     unpaid_status: 'Invoiced',
+    date_status_field: 'invoice_status',
+    date_status_value: 'Invoiced',
   },
   {
     key: 'final_authority',
@@ -92,6 +94,7 @@ export const INVOICE_ITEMS = [
       paid: 'excess_contribution_paid',
       paid_date: 'excess_contribution_paid_date',
     },
+    date_flag: 'excess_contribution_invoice_received',
   },
   {
     key: 'referral_invoice_out',
@@ -237,6 +240,14 @@ export function buildInvoiceItemPatch(item, claim, changes, ctx) {
 
   if (Object.prototype.hasOwnProperty.call(changes, 'date')) {
     write('date', changes.date || null);
+    // Keep the existing flags that mean the same thing in step with the date,
+    // so the tracker and the Financials fields never disagree.
+    if (!getInvoiceItemState(item, claim).paid) {
+      if (item.date_flag) patch[item.date_flag] = !!changes.date;
+      if (item.date_status_field && changes.date) {
+        patch[item.date_status_field] = item.date_status_value;
+      }
+    }
   }
 
   if (Object.prototype.hasOwnProperty.call(changes, 'paid')) {
