@@ -56,7 +56,7 @@ export default function InvoiceVsAuthority({
           <div className="pl-5">
             <button
               type="button"
-              onClick={onReinvoiceEmail}
+              onClick={() => onReinvoiceEmail(comparison)}
               className="inline-flex items-center gap-1 text-[10px] font-semibold text-red-700 dark:text-red-400 hover:underline"
             >
               <Mail className="w-3 h-3" />

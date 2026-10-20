@@ -564,6 +564,24 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
   // flagged here: the figure itself is left exactly as it was.
   const repairCostCheck = claim.invoice_tracker?.repair_cost_check || null;
 
+  // The Final Invoice against the authority, worked out from the two figures the
+  // claim already holds — so a change to the authority that leaves an invoice on
+  // file over it flags itself, with no stored state to go stale.
+  const finalInvoiceState = summary.rows.find((r) => r.item.key === 'final_invoice')?.state || null;
+  const finalInvoiceComparison = compareToAuthority(finalInvoiceTotal(claim), authorityAmount(claim));
+  const askRepairerForCorrectedInvoice = () => {
+    if (finalInvoiceComparison) setReinvoice({ comparison: finalInvoiceComparison });
+  };
+  const finalInvoiceNote = finalInvoiceState && (finalInvoiceState.reinvoice || finalInvoiceComparison)
+    ? (
+      <FinalInvoiceAuthorityNote
+        comparison={finalInvoiceComparison}
+        awaitingCorrected={!!finalInvoiceState.reinvoice}
+        onReinvoice={finalInvoiceComparison ? askRepairerForCorrectedInvoice : null}
+      />
+    )
+    : null;
+
   const figuresCard = (
     <>
       <JobFiguresCard
@@ -641,7 +659,10 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
             <div className="space-y-2.5">
               {step(
                 closeout,
-                rowsBlock(closeout, 'closeout', 'sm:grid-cols-3', suggestion),
+                <>
+                  {finalInvoiceNote}
+                  {rowsBlock(closeout, 'closeout', 'sm:grid-cols-3', suggestion)}
+                </>,
                 suggestion ? <RecommendedNudge action={suggestion} onDo={runAction} /> : null
               )}
               {step(figuresStep, figuresCard)}
@@ -717,6 +738,25 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
           fileUrl={review?.fileUrl}
           fileName={review?.fileName}
           onConfirm={handleReviewConfirm}
+          onReinvoiceEmail={handleReinvoiceFromReview}
+        />
+
+        <AuthorityReviewModal
+          isOpen={!!authorityReview}
+          onClose={() => setAuthorityReview(null)}
+          claim={claim}
+          item={authorityReview?.item}
+          fileUrl={authorityReview?.fileUrl}
+          fileName={authorityReview?.fileName}
+          onConfirm={handleAuthorityConfirm}
+        />
+
+        <ReinvoiceRequestModal
+          isOpen={!!reinvoice}
+          onClose={() => setReinvoice(null)}
+          claim={claim}
+          comparison={reinvoice?.comparison}
+          currentUser={currentUser}
         />
 
         <ConfirmDialog

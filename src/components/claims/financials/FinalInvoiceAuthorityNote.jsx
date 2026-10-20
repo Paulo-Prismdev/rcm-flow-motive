@@ -11,13 +11,13 @@ import { fmtGBP } from '@/components/shared/creditRepairRates';
  */
 export default function FinalInvoiceAuthorityNote({ comparison, awaitingCorrected, onReinvoice }) {
   if (awaitingCorrected) {
-    const { invoiceTotal, authority } = awaitingCorrected;
     return (
       <div className="flex flex-wrap items-center gap-2 rounded-[10px] border border-amber-300 bg-amber-50 px-3 py-2 dark:border-amber-700 dark:bg-amber-900/20">
         <AlertTriangle className="h-3.5 w-3.5 flex-shrink-0 text-amber-600 dark:text-amber-400" />
         <p className="min-w-[200px] flex-1 text-[11px] text-amber-800 dark:text-amber-200">
-          Awaiting a corrected Final Invoice — invoiced {fmtGBP(invoiceTotal)} against the authorised {fmtGBP(authority)}.
-          A corrected copy at the authorised amount clears this.
+          {comparison
+            ? `Awaiting a corrected Final Invoice — invoiced ${fmtGBP(comparison.invoiceTotal)} against the authorised ${fmtGBP(comparison.authority)}. A corrected copy at the authorised amount clears this.`
+            : 'Awaiting a corrected Final Invoice from the repairer. A corrected copy clears this.'}
         </p>
         {onReinvoice && (
           <button
