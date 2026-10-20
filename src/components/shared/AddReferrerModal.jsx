@@ -1,8 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from '@/api/base44Client';
 import { Loader, X } from 'lucide-react';
@@ -25,9 +23,25 @@ export default function AddReferrerModal({ isOpen, onClose, onSuccess }) {
 
   // Removed useEffect for initialName as initialName prop is no longer passed
 
+  // Referrers live in the company directory, which is the list the claim's
+  // referrer picker searches and where their fee rates are held — so a referrer
+  // added here can be picked on the claim straight away.
   const createMutation = useMutation({
-    mutationFn: (data) => base44.entities.Referrer.create(data),
+    mutationFn: (data) => base44.entities.Company.create({
+      name: data.name,
+      company_type: 'referrer',
+      is_active: true,
+      contact_name: data.contact_name,
+      contact_phone: data.phone,
+      contact_email: data.email,
+      address_line_1: data.address_line_1,
+      address_line_2: data.address_line_2,
+      town: data.town,
+      county: data.county,
+      postcode: data.postcode,
+    }),
     onSuccess: (newReferrer) => {
+      queryClient.invalidateQueries({ queryKey: ['companies'] });
       queryClient.invalidateQueries({ queryKey: ['referrers'] });
       onSuccess(newReferrer);
       handleClose();
@@ -189,15 +203,6 @@ export default function AddReferrerModal({ isOpen, onClose, onSuccess }) {
                 placeholder="Postal Code"
               />
             </div>
-          </div>
-          <div>
-            <label className="block text-sm text-gray-600 mb-2">Notes</label>
-            <Textarea
-              value={formData.notes}
-              onChange={(e) => setFormData({...formData, notes: e.target.value})}
-              className="neomorph-inset h-24"
-              placeholder="Additional notes about this referrer..."
-            />
           </div>
           <div className="flex justify-end gap-4 pt-4">
             <Button

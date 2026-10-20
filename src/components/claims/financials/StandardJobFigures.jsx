@@ -100,10 +100,10 @@ export default function StandardJobFigures({ claim, ctx, missing, onChange, onTr
           />
           <SecondReferrerToggle
             claim={claim}
+            missing={missing}
             onTrackerChange={onTrackerChange}
-            editing={editingKey === 'second_referrer'}
-            onEdit={() => setEditingKey('second_referrer')}
-            onDone={() => setEditingKey(null)}
+            editingKey={editingKey}
+            setEditingKey={setEditingKey}
           />
         </div>
       )}
