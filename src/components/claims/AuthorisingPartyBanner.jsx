@@ -17,7 +17,7 @@ const ROLE_OPTIONS = [
   { value: 'Uninsured', label: 'Client (Private)' },
 ];
 
-export default function AuthorisingPartyBanner({ claim, onUpdate }) {
+export default function AuthorisingPartyBanner({ claim, onUpdate, compact = false }) {
   const [editing, setEditing] = useState(false);
   const [role, setRole] = useState(claim?.authorised_by || '');
   const [name, setName] = useState(claim?.authorising_party_name || '');
@@ -102,6 +102,47 @@ export default function AuthorisingPartyBanner({ claim, onUpdate }) {
             Reset to auto-derived value
           </button>
         )}
+      </div>
+    );
+  }
+
+  if (compact) {
+    return (
+      <div className="flex flex-col gap-1">
+        {/* Line 1 — claim type, pencil to override at the right */}
+        <div className="flex items-center gap-2">
+          <span className="text-[11px] font-semibold text-foreground">{claimType || 'No claim type'}</span>
+          <button
+            onClick={startEdit}
+            className="-mr-1 ml-auto flex-shrink-0 p-1 rounded text-muted-foreground hover:text-foreground active:bg-foreground/5 transition-colors"
+            title="Override authorising party"
+          >
+            <Pencil className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
+        {/* Line 2 — role and name, wrapping in whole words */}
+        <p className="text-[11px] leading-snug break-words">
+          <span className={`font-semibold ${style.text}`}>{label}</span>
+          {currentName && <span className="text-muted-foreground">: {currentName}</span>}
+          {overridden && (
+            <span className="ml-1 inline-flex items-center gap-0.5 px-1 py-0.5 rounded bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300 text-[9px] font-semibold align-middle">
+              <Lock className="w-2 h-2" /> Override
+            </span>
+          )}
+          {unresolved && (
+            <span className="ml-1 inline-flex items-center gap-0.5 px-1 py-0.5 rounded bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300 text-[9px] font-semibold align-middle">
+              <AlertTriangle className="w-2 h-2" /> {!currentRole ? 'No claim type' : 'Name missing'}
+            </span>
+          )}
+        </p>
+
+        {/* Line 3 — claim number, highlighted red when missing */}
+        <p className="text-[11px] font-semibold">
+          <span className={missingClaimRef ? 'inline-block px-1 py-0.5 rounded bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400' : 'text-foreground'}>
+            {partyClaimRef ? `Claim no. ${partyClaimRef}` : 'Claim no. missing'}
+          </span>
+        </p>
       </div>
     );
   }

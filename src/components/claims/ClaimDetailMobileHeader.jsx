@@ -1,10 +1,9 @@
 import React from 'react';
-import { ArrowLeft, ChevronDown, FileText, Image, MessageSquare, MoreHorizontal, Mail, ListTodo, Timer, History, Package, Download, Archive, Trash2, Calculator, Copy } from 'lucide-react';
+import { ArrowLeft, FileText, Image, MessageSquare, MoreHorizontal, Mail, ListTodo, Timer, History, Package, Download, Archive, Trash2, Calculator, Copy } from 'lucide-react';
 import StatusBadge from '../shared/StatusBadge';
 import UpdateStatusBadge from '../shared/UpdateStatusBadge';
 import AuthorisingPartyBanner from './AuthorisingPartyBanner';
 import { computeUpdateStatusFlag, computeClientCommStatusFlag } from '../shared/claimStatusUpdate';
-import { AUTHORISING_PARTY_LABELS, authorisingPartyClaimRef } from '../shared/authorisingParty';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -84,16 +83,7 @@ export default function ClaimDetailMobileHeader({
   docsCount = 0,
   collapsed = false,
 }) {
-  const [bannerOpen, setBannerOpen] = React.useState(false);
   const currentSection = SECTIONS.find(s => s.value === claim._selectedSection) || SECTIONS[0];
-
-  const partyRef = authorisingPartyClaimRef(claim.authorised_by, claim);
-  const partyName = claim.authorising_party_name || AUTHORISING_PARTY_LABELS[claim.authorised_by] || '';
-  const summary = [
-    claim.claim_type || 'No claim type',
-    partyName || 'Authorising party missing',
-    partyRef ? `Claim no. ${partyRef}` : '⚠ No claim no.',
-  ].join(' · ');
 
   const actionBase = 'relative flex-1 min-w-0 flex flex-col items-center justify-center rounded-lg transition-colors';
   const actionSize = collapsed ? 'h-9' : 'h-12';
@@ -126,41 +116,35 @@ export default function ClaimDetailMobileHeader({
 
       {!collapsed && (
         <>
-          {/* Authorising party summary — tap to open the full banner */}
-          <button
-            type="button"
-            onClick={() => setBannerOpen(v => !v)}
-            className="w-full flex items-center gap-1.5 px-3 pb-1.5 text-left"
-          >
-            <span className="flex-1 min-w-0 text-xs text-foreground truncate m-ellipsis">{summary}</span>
-            <ChevronDown className={`w-3.5 h-3.5 text-muted-foreground flex-shrink-0 transition-transform ${bannerOpen ? 'rotate-180' : ''}`} />
-          </button>
+          {/* Authorising party — always shown in full, three tight lines */}
+          <div className="px-3 pb-1.5">
+            <AuthorisingPartyBanner claim={claim} onUpdate={onUpdate} compact />
+          </div>
 
-          {bannerOpen && (
-            <div className="px-2.5 pb-2">
-              <AuthorisingPartyBanner claim={claim} onUpdate={onUpdate} />
-            </div>
-          )}
-
-          {/* Status pills — one line, scrolls sideways when there are more than fit */}
-          <div
-            className="flex items-center gap-1.5 flex-nowrap overflow-x-auto px-3 pb-2 [&::-webkit-scrollbar]:hidden"
-            style={{ scrollbarWidth: 'none' }}
-          >
-            {claim.secondary_status && <StatusBadge status={claim.secondary_status} compact />}
-            {claim.tertiary_status && <StatusBadge status={claim.tertiary_status} variant="secondary" compact />}
-            {!isClosedStatus && claim.update_status_flag && (
-              <button type="button" onClick={onUpdateTracking} className="flex-shrink-0">
-                <UpdateStatusBadge status={computeUpdateStatusFlag(claim)} small labelPrefix="Updates" />
-              </button>
+          {/* Status pills — job statuses on their own line(s), tracking on the line below */}
+          <div className="px-3 pb-2 space-y-1">
+            {(claim.secondary_status || claim.tertiary_status || claim.archived) && (
+              <div className="flex flex-wrap items-center gap-1">
+                {claim.secondary_status && <StatusBadge status={claim.secondary_status} />}
+                {claim.tertiary_status && <StatusBadge status={claim.tertiary_status} variant="secondary" />}
+                {claim.archived && (
+                  <span className="px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-800 text-xs text-gray-600">Archived</span>
+                )}
+              </div>
             )}
-            {!isClosedStatus && claim.client_comm_status_flag && (
-              <button type="button" onClick={onUpdateTracking} className="flex-shrink-0">
-                <UpdateStatusBadge status={computeClientCommStatusFlag(claim)} small labelPrefix="Client" />
-              </button>
-            )}
-            {claim.archived && (
-              <span className="flex-shrink-0 px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-800 text-xs text-gray-600">Archived</span>
+            {!isClosedStatus && (claim.update_status_flag || claim.client_comm_status_flag) && (
+              <div className="flex flex-wrap items-center gap-1.5">
+                {claim.update_status_flag && (
+                  <button type="button" onClick={onUpdateTracking}>
+                    <UpdateStatusBadge status={computeUpdateStatusFlag(claim)} small labelPrefix="Updates" />
+                  </button>
+                )}
+                {claim.client_comm_status_flag && (
+                  <button type="button" onClick={onUpdateTracking}>
+                    <UpdateStatusBadge status={computeClientCommStatusFlag(claim)} small labelPrefix="Client" />
+                  </button>
+                )}
+              </div>
             )}
           </div>
         </>

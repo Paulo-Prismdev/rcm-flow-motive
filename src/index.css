@@ -624,6 +624,16 @@ button:not(.btn-sm):not(.btn-icon),
     padding-bottom: 0.25rem;
   }
 
+  /* ── 1c. An open claim fills the screen ──
+     The bottom tab bar is hidden while a claim is open, so the space it
+     reserved goes back to the claim: only the home-indicator inset is left. */
+  body.claim-detail-open main {
+    padding-bottom: 0;
+  }
+  body.claim-detail-open [data-claim-shell] {
+    padding-bottom: max(env(safe-area-inset-bottom), 0.5rem);
+  }
+
   /* Two short label/value fields per row, with tighter cells */
   .grid.m-fields-2 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
