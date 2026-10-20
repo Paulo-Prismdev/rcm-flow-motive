@@ -58,6 +58,7 @@ const FIELD_LABELS = {
   final_repair_cost: 'Final repair cost',
   client_vat_status: 'Customer VAT status',
   policy_excess: 'Policy excess',
+  excess_tbc: 'Excess on authority (TBC)',
   percent_to_referrer: 'Referrer fee %',
   referral_fee_repairer: 'Repairer referral fee %',
   referral_fee_repairer_gbp: 'Repairer referral fee (£)',
@@ -392,7 +393,7 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
 
     const excess = excessCheck(figures, claim);
     const excessText = excess.fills
-      ? `; the ${fmtGBP(excess.shown)} excess filled in`
+      ? `; the ${fmtGBP(excess.shown)} excess ${excess.tbc ? 'confirmed from the authority (TBC cleared)' : 'filled in'}`
       : excess.differs
         ? `; excess kept at ${fmtGBP(excessChoice === 'authority' ? excess.shown : excess.stored)}`
         : '';

@@ -152,7 +152,7 @@ export function generateClaimOverviewPdf(claim, linkedClient) {
   twoColRow("Insurer", fmtVal(claim.insurer));
   twoColRow("Claim Reference", fmtVal(claim.claim_ref));
   twoColRow("Policy Number", fmtVal(claim.policy_number));
-  twoColRow("Policy Excess", fmtCurrency(claim.policy_excess));
+  twoColRow("Policy Excess", claim.excess_tbc ? "TBC on authority" : fmtCurrency(claim.policy_excess));
 
   // ── Driver Details ──
   sectionHeader("Driver Details");

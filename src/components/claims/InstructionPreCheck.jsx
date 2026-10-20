@@ -157,6 +157,70 @@ function Row({ label, field, value, claim, onFieldChange, type = 'text', options
   );
 }
 
+/**
+ * The policy excess, plus the "TBC on authority" option for a job allocated
+ * before the excess is known. Ticking it clears the amount and locks the field;
+ * unticking opens the amount again. TBC is a valid answer, so the row is never
+ * flagged as a gap.
+ */
+function ExcessRow({ claim, onFieldChange }) {
+  const tbc = claim.excess_tbc === true;
+  const [val, setVal] = useState(claim.policy_excess ?? '');
+  const [editing, setEditing] = useState(false);
+  const inputRef = useRef(null);
+
+  useEffect(() => { setVal(claim.policy_excess ?? ''); }, [claim.policy_excess]);
+  useEffect(() => { if (editing && inputRef.current) inputRef.current.focus(); }, [editing]);
+
+  const isEmpty = claim.policy_excess === null || claim.policy_excess === undefined || claim.policy_excess === '';
+  const dirty = String(val ?? '') !== String(claim.policy_excess ?? '');
+
+  const commit = () => {
+    if (!dirty) { setEditing(false); return; }
+    onFieldChange({ policy_excess: val === '' ? null : Number(val) });
+    setEditing(false);
+  };
+
+  const toggleTbc = () => {
+    setEditing(false);
+    onFieldChange(tbc ? { excess_tbc: false } : { excess_tbc: true, policy_excess: null });
+  };
+
+  return (
+    <div className="flex items-center gap-1.5 py-0.5 px-1">
+      <div className="w-36 flex-shrink-0">
+        <div className="text-[11px] font-semibold text-muted-foreground leading-tight">Excess (£)</div>
+        <label className="mt-0.5 flex items-center gap-1 cursor-pointer select-none">
+          <input type="checkbox" checked={tbc} onChange={toggleTbc} className="w-3 h-3 accent-primary" />
+          <span className="text-[9px] font-semibold uppercase tracking-wide text-muted-foreground">TBC on authority</span>
+        </label>
+      </div>
+      <div className={`flex-1 min-w-0 flex items-center rounded-md border px-2 py-1 ${!tbc && isEmpty ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-300 dark:border-amber-700' : 'bg-muted/50 border-border'} ${editing ? 'ring-1 ring-accent/40 border-accent/50' : ''}`}>
+        <div className="flex-1 min-w-0">
+          {tbc ? (
+            <div className="text-sm font-medium truncate text-foreground">TBC on authority</div>
+          ) : editing ? (
+            <input ref={inputRef} type="number" value={val} onChange={(e) => setVal(e.target.value)} onBlur={commit} onKeyDown={(e) => { if (e.key === 'Enter') commit(); }}
+              className="w-full bg-transparent border-0 p-0 text-sm font-medium text-foreground focus:outline-none" />
+          ) : (
+            <div className={`text-sm font-medium truncate ${isEmpty ? 'text-amber-500' : 'text-foreground'}`}>{isEmpty ? '—' : claim.policy_excess}</div>
+          )}
+        </div>
+        {!tbc && isEmpty && !editing && <AlertTriangle className="w-3 h-3 text-amber-500 flex-shrink-0 ml-1" />}
+      </div>
+      {!tbc && (
+        <button
+          type="button"
+          onClick={() => editing ? commit() : setEditing(true)}
+          className="flex-shrink-0 p-1 rounded text-muted-foreground hover:text-accent hover:bg-accent/10 transition-colors"
+          title={editing ? 'Save' : 'Edit'}>
+          {editing ? <Check className="w-3.5 h-3.5 text-green-600" /> : <Pencil className="w-3 h-3" />}
+        </button>
+      )}
+    </div>
+  );
+}
+
 function Group({ title, children }) {
   return (
     <div className="mb-1.5">
@@ -241,7 +305,7 @@ function InsuranceSection({ instructionType, claim, onUpdate }) {
       <Row label="Policy Number" field="policy_number" value={claim.policy_number} claim={claim} onFieldChange={onUpdate} />
       <Row label="Email Estimate To" field="send_estimate_email" value={claim.send_estimate_email} claim={claim} onFieldChange={onUpdate} />
       <Row label="Audatex Code" field="audatex_code" value={claim.audatex_code} claim={claim} onFieldChange={onUpdate} />
-      <Row label="Excess (£)" field="policy_excess" value={claim.policy_excess} claim={claim} onFieldChange={onUpdate} type="number" />
+      <ExcessRow claim={claim} onFieldChange={onUpdate} />
     </Group>
   );
 }

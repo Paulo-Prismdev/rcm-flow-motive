@@ -16,8 +16,9 @@ export default function AuthorityExcessChoice({ check, choice, onChoice }) {
       <div className="flex items-start gap-2 rounded-lg border border-border bg-muted/30 px-2.5 py-2">
         <Check className="mt-px w-3.5 h-3.5 flex-shrink-0 text-muted-foreground" />
         <p className="text-[11px] text-muted-foreground">
-          The claim has no policy excess. The {fmtGBP(check.shown)} this authority shows will be filled in as the policy
-          excess.
+          {check.tbc
+            ? `The claim's excess is TBC on authority. The ${fmtGBP(check.shown)} this authority shows will be filled in as the policy excess and the TBC cleared.`
+            : `The claim has no policy excess. The ${fmtGBP(check.shown)} this authority shows will be filled in as the policy excess.`}
         </p>
       </div>
     );

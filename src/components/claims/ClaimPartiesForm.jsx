@@ -59,6 +59,7 @@ export default function ClaimPartiesForm({ claim, onSave, onCancel, mode }) {
     claim_ref: claim.claim_ref || '',
     policy_number: claim.policy_number || '',
     policy_excess: claim.policy_excess || 0,
+    excess_tbc: claim.excess_tbc === true,
     // Driver fields
     driver_same_as_client: claim.driver_same_as_client !== false,
     driver_contact_name: claim.driver_contact_name || '',
@@ -162,6 +163,7 @@ export default function ClaimPartiesForm({ claim, onSave, onCancel, mode }) {
         claim_ref: data.claim_ref,
         policy_number: data.policy_number,
         policy_excess: data.policy_excess,
+        excess_tbc: data.excess_tbc === true,
       });
     } else if (mode === 'driver') {
       onSave({
@@ -275,7 +277,27 @@ export default function ClaimPartiesForm({ claim, onSave, onCancel, mode }) {
           </div>
           <div>
             <label className="block text-xs text-muted-foreground mb-1">Policy Excess (£)</label>
-            <Input type="text" inputMode="decimal" value={data.policy_excess || ''} onChange={(e) => { const v = e.target.value; if (v === '' || /^\d*\.?\d*$/.test(v)) set('policy_excess', v === '' ? 0 : parseFloat(v) || 0); }} className="neomorph-inset" placeholder="0.00" />
+            <Input
+              type="text"
+              inputMode="decimal"
+              disabled={data.excess_tbc}
+              value={data.excess_tbc ? '' : (data.policy_excess || '')}
+              onChange={(e) => { const v = e.target.value; if (v === '' || /^\d*\.?\d*$/.test(v)) set('policy_excess', v === '' ? 0 : parseFloat(v) || 0); }}
+              className="neomorph-inset"
+              placeholder={data.excess_tbc ? 'TBC on authority' : '0.00'}
+            />
+            <label className="mt-1.5 flex items-center gap-1.5 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={data.excess_tbc}
+                onChange={(e) => {
+                  const checked = e.target.checked;
+                  setData(prev => ({ ...prev, excess_tbc: checked, policy_excess: checked ? null : (prev.policy_excess || 0) }));
+                }}
+                className="w-3.5 h-3.5 accent-primary"
+              />
+              <span className="text-[11px] text-muted-foreground">TBC on authority</span>
+            </label>
           </div>
         </div>
         <div className="flex justify-end gap-3 pt-2">

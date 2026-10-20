@@ -1,4 +1,5 @@
 import React from 'react';
+import { Clock } from 'lucide-react';
 import { fmtGBP } from '@/components/shared/creditRepairRates';
 import { repairNet, repairVat, repairerReferralApplies } from '@/components/shared/invoiceChecklist';
 import FigureField from './FigureField';
@@ -58,14 +59,29 @@ export default function StandardJobFigures({ claim, ctx, missing, onChange, onTr
       )}
 
       {ctx.vatExcess && (
-        <FigureField
-          {...fieldEdit('policy_excess')}
-          label="Policy Excess (£)"
-          type="number"
-          value={claim.policy_excess}
-          missing={isMissing('policy_excess')}
-          onCommit={(v) => onChange({ policy_excess: num(v) }, `Policy excess set to ${fmtGBP(num(v) || 0)}`)}
-        />
+        claim.excess_tbc === true ? (
+          <div>
+            <label className="block text-[10px] font-semibold uppercase tracking-wider mb-0.5 text-muted-foreground">
+              Policy Excess (£)
+            </label>
+            <div className="flex items-center gap-1.5 min-h-8 md:h-8 rounded-md border border-dashed border-border bg-muted/30 px-2">
+              <Clock className="w-3 h-3 flex-shrink-0 text-muted-foreground" />
+              <span className="text-sm font-medium text-foreground">TBC on authority</span>
+            </div>
+            <p className="text-[10px] text-muted-foreground mt-0.5">
+              Still to be confirmed — not £0. The VAT &amp; excess invoices wait for it, and the Final Authority fills it in.
+            </p>
+          </div>
+        ) : (
+          <FigureField
+            {...fieldEdit('policy_excess')}
+            label="Policy Excess (£)"
+            type="number"
+            value={claim.policy_excess}
+            missing={isMissing('policy_excess')}
+            onCommit={(v) => onChange({ policy_excess: num(v) }, `Policy excess set to ${fmtGBP(num(v) || 0)}`)}
+          />
+        )
       )}
 
       {ctx.hasReferrer && (

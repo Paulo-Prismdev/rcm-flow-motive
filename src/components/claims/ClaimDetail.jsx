@@ -218,7 +218,9 @@ const isSectionEmpty = (sectionId, claim) => {
   if (sectionId === 'referrer' && !claim.referrer_id) return false;
   // "None" excess contribution method means not applicable — not missing data
   if (sectionId === 'excessContribution' && (!claim.excess_contribution_method || claim.excess_contribution_method === 'None')) return false;
-  const fields = SECTION_FIELDS[sectionId] || [];
+  // An excess marked TBC on authority is a valid answer, not a gap.
+  const fields = (SECTION_FIELDS[sectionId] || [])
+    .filter(f => !(f === 'policy_excess' && claim.excess_tbc === true));
   return fields.some(f => {
     const val = claim[f];
     return val === null || val === undefined || val === '' || val === 0;
@@ -436,6 +438,10 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
         oldData: claim,
         newData: updatedData,
         user: currentUser,
+        fieldLabels: {
+          policy_excess: 'Policy excess',
+          excess_tbc: 'Excess on authority (TBC)',
+        },
       });
     }
     
@@ -943,7 +949,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                 <DetailRow label="Insurer" value={claim.insurer} />
                 <DetailRow label="Claim Reference" value={claim.claim_ref} />
                 <DetailRow label="Policy Number" value={claim.policy_number} />
-                <DetailRow label="Policy Excess" value={claim.policy_excess} isCurrency />
+                <DetailRow label="Policy Excess" value={claim.excess_tbc ? 'TBC on authority' : claim.policy_excess} isCurrency />
               </div>
             </div>
             {(claim.client_address_line_1 || claim.client_town || claim.client_postcode) && (

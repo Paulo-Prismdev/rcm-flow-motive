@@ -94,8 +94,13 @@ export const authorityNeedsReview = (figures, confidence) =>
 export const authorityCorrections = (figures, raw) =>
   correctionsFromReview(figures, raw, [], AUTHORITY_FIGURES);
 
-/** The policy excess the claim already holds, or null where it holds none. */
+/**
+ * The policy excess the claim already holds, or null where it holds none. An
+ * excess marked TBC on authority counts as none: the figure isn't known yet, so
+ * the authority that arrives supplies it.
+ */
 export function storedExcess(claim) {
+  if (claim?.excess_tbc === true) return null;
   const value = claim?.policy_excess;
   return value === null || value === undefined || value === '' ? null : round2(toNum(value));
 }
@@ -108,10 +113,11 @@ export function storedExcess(claim) {
 export function excessCheck(figures, claim) {
   const read = toNum(figures?.excess);
   const stored = storedExcess(claim);
-  if (read === null) return { shown: null, stored, differs: false, fills: false };
+  const tbc = claim?.excess_tbc === true;
+  if (read === null) return { shown: null, stored, differs: false, fills: false, tbc };
   const shown = round2(read);
-  if (stored === null) return { shown, stored: null, differs: false, fills: true };
-  return { shown, stored, differs: Math.abs(stored - shown) >= 0.01, fills: false };
+  if (stored === null) return { shown, stored: null, differs: false, fills: true, tbc };
+  return { shown, stored, differs: Math.abs(stored - shown) >= 0.01, fills: false, tbc };
 }
 
 /**
@@ -163,8 +169,11 @@ export function buildAuthorityReviewPatch(claim, figures, options = {}) {
   }
 
   const excess = excessCheck(figures, claim);
-  if (excess.fills) patch.policy_excess = excess.shown;
-  else if (excess.differs && excessChoice === 'authority') patch.policy_excess = excess.shown;
+  if (excess.fills || (excess.differs && excessChoice === 'authority')) {
+    patch.policy_excess = excess.shown;
+    // The authority has supplied the figure, so it is nothing left to confirm.
+    if (excess.tbc) patch.excess_tbc = false;
+  }
 
   if (file_url) {
     entry.details_source = { file_url, file_name: file_name || '', at: new Date().toISOString() };

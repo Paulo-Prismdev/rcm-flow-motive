@@ -125,7 +125,12 @@
     },
     "policy_excess": {
       "type": "number",
-      "description": "Policy excess amount in pounds. Use 0 for waived."
+      "description": "Policy excess amount in pounds. Use 0 for waived. Empty while excess_tbc is true \u2014 a TBC excess is never a figure."
+    },
+    "excess_tbc": {
+      "type": "boolean",
+      "default": false,
+      "description": "Excess to be confirmed on authority \u2014 the excess isn't known at allocation. Never read as \u00a30 (0 means waived): displays and calculations wait for the Final Authority, which fills the excess in and clears this."
     },
     "broker_id": {
       "type": "string"

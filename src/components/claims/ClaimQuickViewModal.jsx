@@ -215,7 +215,7 @@ export default function ClaimQuickViewModal({ claim, isOpen, onClose }) {
             <InfoRow label="Insurer" value={claim.insurer} />
             <InfoRow label="Claim Reference" value={claim.claim_ref} />
             <InfoRow label="Policy Number" value={claim.policy_number} />
-            <InfoRow label="Policy Excess" value={formatCurrency(claim.policy_excess)} />
+            <InfoRow label="Policy Excess" value={claim.excess_tbc ? 'TBC on authority' : formatCurrency(claim.policy_excess)} />
             <InfoRow label="Broker" value={claim.broker_name} />
           </Section>
 

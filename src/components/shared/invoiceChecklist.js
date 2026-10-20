@@ -399,6 +399,9 @@ const AMOUNT_RESOLVERS = {
   vat_excess: (claim) => {
     const gross = toNum(claim.final_repair_cost);
     if (gross <= 0) return awaiting('Enter the final repair cost');
+    // An excess marked TBC on authority is not £0 (0 means waived): the invoice
+    // waits for the figure rather than billing the VAT content on its own.
+    if (claim.excess_tbc === true) return awaiting('The policy excess is TBC on authority — this invoice waits for the figure');
     const vatReg = claim.client_vat_status === 'VAT Registered';
     const vatContent = repairVat(claim);
     const excess = isStored(claim.policy_excess) ? round2(toNum(claim.policy_excess)) : 0;
@@ -685,7 +688,9 @@ export function missingJobFigures(claim, ctx) {
     if (!claim?.client_vat_status || claim.client_vat_status === 'Unknown') {
       missing.push({ key: 'client_vat_status', label: 'Customer VAT status' });
     }
-    if (!ctx.privatePaying && !isStored(claim?.policy_excess)) {
+    if (!ctx.privatePaying && claim?.excess_tbc === true) {
+      missing.push({ key: 'policy_excess', label: 'Policy excess (TBC on authority)' });
+    } else if (!ctx.privatePaying && !isStored(claim?.policy_excess)) {
       missing.push({ key: 'policy_excess', label: 'Policy excess' });
     }
   }

@@ -113,16 +113,22 @@ Deno.serve(async (req) => {
       displayInsurer = 'N/A';
       displayClaimRef = 'N/A';
       displayPolicyNumber = 'N/A';
-      displayPolicyExcess = claim.policy_excess != null && claim.policy_excess !== ''
-        ? (isNaN(Number(claim.policy_excess)) ? String(claim.policy_excess) : Number(claim.policy_excess).toFixed(2))
-        : 'N/A';
+      displayPolicyExcess = claim.excess_tbc === true
+        ? 'TBC on authority'
+        : claim.policy_excess != null && claim.policy_excess !== ''
+          ? (isNaN(Number(claim.policy_excess)) ? String(claim.policy_excess) : Number(claim.policy_excess).toFixed(2))
+          : 'N/A';
     } else {
       displayInsurer = claim.insurer || 'N/A';
       displayClaimRef = claim.claim_ref || 'N/A';
       displayPolicyNumber = claim.policy_number || 'N/A';
-      displayPolicyExcess = claim.policy_excess != null && claim.policy_excess !== ''
-        ? (isNaN(Number(claim.policy_excess)) ? String(claim.policy_excess) : Number(claim.policy_excess).toFixed(2))
-        : 'N/A';
+      // The excess isn't known yet on a job allocated with it to be confirmed on
+      // the authority — the repairer is told to wait for it rather than shown £0.
+      displayPolicyExcess = claim.excess_tbc === true
+        ? 'TBC on authority'
+        : claim.policy_excess != null && claim.policy_excess !== ''
+          ? (isNaN(Number(claim.policy_excess)) ? String(claim.policy_excess) : Number(claim.policy_excess).toFixed(2))
+          : 'N/A';
     }
 
     const fields = {
