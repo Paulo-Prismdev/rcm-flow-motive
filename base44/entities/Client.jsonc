@@ -90,6 +90,11 @@
       "default": "Unknown",
       "description": "VAT registration status"
     },
+    "handles_vat_excess": {
+      "type": "boolean",
+      "default": false,
+      "description": "We handle this client's VAT and excess. When set, their claims automatically show the VAT & Excess invoice items in the Financials invoicing tracker."
+    },
     "notes": {
       "type": "string",
       "description": "Additional notes about this client"

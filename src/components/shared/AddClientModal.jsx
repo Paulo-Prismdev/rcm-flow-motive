@@ -21,6 +21,7 @@ const EMPTY_FORM = {
   county: '',
   postcode: '',
   vat_status: 'Unknown',
+  handles_vat_excess: false,
   notes: '',
   latitude: null,
   longitude: null
@@ -190,6 +191,14 @@ export default function AddClientModal({ isOpen, onClose, onSuccess }) {
               <option>Unknown</option><option>VAT Registered</option><option>Non-VAT</option>
             </select>
           </div>
+
+          <label className="flex items-start gap-2.5 rounded-[10px] border border-border bg-muted/30 p-3 cursor-pointer">
+            <input type="checkbox" checked={formData.handles_vat_excess === true} onChange={e => set('handles_vat_excess', e.target.checked)} className="mt-0.5 rounded border-border" />
+            <span>
+              <span className="block text-sm font-medium">We handle their VAT and excess</span>
+              <span className="block text-xs text-muted-foreground">Their claims automatically show the VAT &amp; Excess invoice items in the Financials tracker.</span>
+            </span>
+          </label>
 
           {/* Contacts — only for Company type */}
           {isCompany && (

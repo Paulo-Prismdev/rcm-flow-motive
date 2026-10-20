@@ -20,6 +20,7 @@ import { isClosedJourney, isUpdateTrackingClosed, computeClientCommStatusFlag } 
 import { useToast } from "@/components/ui/use-toast";
 import { sanitizeClaimData } from '@/components/shared/sanitizeClaimData';
 import { formatAuthorisingParty, authorisingPartyOrganisation, AUTHORISING_PARTY_LABELS } from '@/components/shared/authorisingParty';
+import { claimInvoiceSummary } from '@/components/shared/invoiceChecklist';
 
 // ── Repairs table — fixed column widths (global config) ──
 // Every column has a fixed width (min = max) so the table never recomputes
@@ -120,6 +121,7 @@ export default function ClaimsPage() {
   const [repairerAcceptanceFilter, setRepairerAcceptanceFilter] = useState('');
   const [repairerFilter, setRepairerFilter] = useState('');
   const [businessDivisionFilter, setBusinessDivisionFilter] = useState('');
+  const [invoiceFilter, setInvoiceFilter] = useState('');
   const [dateReceivedFrom, setDateReceivedFrom] = useState('');
   const [dateReceivedTo, setDateReceivedTo] = useState('');
   const [showFilters, setShowFilters] = useState(false);
@@ -289,9 +291,10 @@ export default function ClaimsPage() {
     setUpdateStatusFilter(''); setRepairerAcceptanceFilter(''); setHasBackorderedPartsFilter(false);
     setBusinessDivisionFilter(''); setOverdueOnly(false);
     setDateReceivedFrom(''); setDateReceivedTo('');
+    setInvoiceFilter('');
   };
 
-  const activeFiltersCount = [(statusFilter?.length || 0) > 0, claimTypeFilter, insurerFilter, authorisingPartyFilter, referrerFilter, repairerFilter, businessDivisionFilter, updateStatusFilter, repairerAcceptanceFilter, hasBackorderedPartsFilter, overdueOnly, dateReceivedFrom, dateReceivedTo].filter(Boolean).length;
+  const activeFiltersCount = [(statusFilter?.length || 0) > 0, claimTypeFilter, insurerFilter, authorisingPartyFilter, referrerFilter, repairerFilter, businessDivisionFilter, updateStatusFilter, repairerAcceptanceFilter, hasBackorderedPartsFilter, overdueOnly, dateReceivedFrom, dateReceivedTo, invoiceFilter].filter(Boolean).length;
 
   const allClaims = showArchived ? claims : claims.filter(c => !c.archived);
   const standardClaims = allClaims.filter(c => c.claim_type !== 'Paying Privately' && c.claim_type !== '3rd Party Paying Privately');
@@ -318,10 +321,17 @@ export default function ClaimsPage() {
     else if (repairerAcceptanceFilter === 'accepted') matchesRepairerAcceptance = c.repairer_accepted === true;
     const matchesBackorders = !hasBackorderedPartsFilter || claimIdsWithBackorders.has(c.id);
     const matchesBusinessDivision = !businessDivisionFilter || c.business_division === businessDivisionFilter;
+    let matchesInvoice = true;
+    if (invoiceFilter) {
+      const s = claimInvoiceSummary(c);
+      if (invoiceFilter === 'owed_to_us') matchesInvoice = s.owedToUs > 0;
+      else if (invoiceFilter === 'we_owe') matchesInvoice = s.weOwe > 0;
+      else matchesInvoice = s.owedToUs > 0 || s.weOwe > 0;
+    }
     const matchesOverdue = !overdueOnly || calculateUpdateStatus(c) === 'Red' || computeClientCommStatusFlag(c) === 'Red';
     const dr = c.date_received;
     const matchesDateReceived = (!dateReceivedFrom || (dr && dr >= dateReceivedFrom)) && (!dateReceivedTo || (dr && dr <= dateReceivedTo));
-    return matchesSearch && matchesStatus && matchesClaimType && matchesInsurer && matchesAuthorisingParty && matchesReferrer && matchesRepairer && matchesUpdateStatus && matchesRepairerAcceptance && matchesBackorders && matchesBusinessDivision && matchesOverdue && matchesDateReceived;
+    return matchesSearch && matchesStatus && matchesClaimType && matchesInsurer && matchesAuthorisingParty && matchesReferrer && matchesRepairer && matchesUpdateStatus && matchesRepairerAcceptance && matchesBackorders && matchesBusinessDivision && matchesInvoice && matchesOverdue && matchesDateReceived;
   }).sort((a, b) => {
     if (sortBy === 'created_asc') return new Date(a.created_date) - new Date(b.created_date);
     if (sortBy === 'created_desc') return new Date(b.created_date) - new Date(a.created_date);
@@ -748,6 +758,16 @@ export default function ClaimsPage() {
                 className="w-full px-2 py-1 text-[11px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-700 dark:text-gray-300 focus:outline-none">
                 <option value="">All</option>
                 <option value="true">Has Backorders</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-[10px] font-medium text-gray-400 dark:text-gray-500 mb-0.5">Invoicing</label>
+              <select value={invoiceFilter} onChange={e => setInvoiceFilter(e.target.value)}
+                className="w-full px-2 py-1 text-[11px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-700 dark:text-gray-300 focus:outline-none">
+                <option value="">All</option>
+                <option value="outstanding">Outstanding invoices</option>
+                <option value="owed_to_us">Owed to us</option>
+                <option value="we_owe">We owe</option>
               </select>
             </div>
             <div className="sm:col-span-2 lg:col-span-2">

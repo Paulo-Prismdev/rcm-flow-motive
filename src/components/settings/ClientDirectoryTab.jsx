@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Trash2, Phone, Mail, User, Building2, Pencil, X, Star, Plus, Loader2 } from "lucide-react";
+import { Trash2, Phone, Mail, User, Building2, Pencil, X, Star, Plus, Loader2, Receipt } from "lucide-react";
 import { createPortal } from "react-dom";
 import DirectoryShell from "../shared/DirectoryShell";
 import AddClientModal from "../shared/AddClientModal";
@@ -81,6 +81,13 @@ function ClientDetailModal({ client, onClose, onUpdated }) {
                 <option>Unknown</option><option>VAT Registered</option><option>Non-VAT</option>
               </select>
             </div>
+            <label className="flex items-start gap-2.5 rounded-[10px] border border-border bg-muted/30 p-3 cursor-pointer">
+              <input type="checkbox" checked={formData.handles_vat_excess === true} onChange={e => set('handles_vat_excess', e.target.checked)} className="mt-0.5 rounded border-border" />
+              <span>
+                <span className="block text-sm font-medium">We handle their VAT and excess</span>
+                <span className="block text-xs text-muted-foreground">Their claims automatically show the VAT &amp; Excess invoice items in the Financials tracker.</span>
+              </span>
+            </label>
             {isCompany && (
               <div className="border-t pt-4 space-y-3">
                 <div className="flex items-center justify-between">
@@ -123,6 +130,11 @@ function ClientDetailModal({ client, onClose, onUpdated }) {
               {client.client_type === 'Company' ? <Building2 className="w-4 h-4 text-muted-foreground" /> : <User className="w-4 h-4 text-muted-foreground" />}
               <span className="text-xs text-muted-foreground">{client.client_type || 'Individual'}</span>
               {client.vat_status && client.vat_status !== 'Unknown' && <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">{client.vat_status}</span>}
+              {client.handles_vat_excess === true && (
+                <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 font-medium">
+                  <Receipt className="w-3 h-3" /> VAT &amp; Excess handled
+                </span>
+              )}
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div><p className="text-xs text-muted-foreground">Phone</p><p className="text-sm font-medium">{client.phone || '—'}</p></div>
@@ -237,6 +249,11 @@ export default function ClientDirectoryTab() {
                           <span className="font-medium text-sm truncate">{c.name}</span>
                         </div>
                         {primary?.name && <div className="text-xs text-muted-foreground truncate mt-0.5">{primary.name}</div>}
+                        {c.handles_vat_excess === true && (
+                          <span className="inline-flex items-center gap-0.5 mt-1 px-1.5 py-0.5 rounded-full bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 text-[10px] font-semibold">
+                            <Receipt className="w-2.5 h-2.5" /> VAT &amp; Excess handled
+                          </span>
+                        )}
                       </div>
                       <button onClick={(e) => { e.stopPropagation(); handleDelete(c); }} className="p-1.5 rounded-md text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 flex-shrink-0">
                         <Trash2 className="w-4 h-4" />
@@ -274,6 +291,11 @@ export default function ClientDirectoryTab() {
                         <div className="flex items-center gap-2">
                           {c.client_type === 'Company' ? <Building2 className="w-3.5 h-3.5 text-gray-400" /> : <User className="w-3.5 h-3.5 text-gray-400" />}
                           {c.name}
+                          {c.handles_vat_excess === true && (
+                            <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 text-[10px] font-semibold whitespace-nowrap">
+                              <Receipt className="w-2.5 h-2.5" /> VAT&amp;Excess
+                            </span>
+                          )}
                         </div>
                       </td>
                       <td className="p-3 text-sm text-muted-foreground hidden md:table-cell">{c.client_type || 'Individual'}</td>

@@ -53,6 +53,7 @@ import ClaimBodyshopAllocateButton from './ClaimBodyshopAllocateButton';
 import ClaimStatusForm from './ClaimStatusForm';
 import FinancialCalculator from './FinancialCalculator';
 import FinancialSummary from './FinancialSummary';
+import InvoiceTracker from './InvoiceTracker';
 
 import ClaimVehicleDamageForm from './ClaimVehicleDamageForm';
 import ClaimIndemnityForm from './ClaimIndemnityForm';
@@ -1341,6 +1342,11 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
         return (
           <EditableSection title="Financials" icon={DollarSign} claim={claim} onUpdate={handleUpdate} EditComponent={ClaimFinancialsForm} canEdit={canEdit}>
             <FinancialSummary claim={claim} onClaimUpdated={(updated) => handleUpdate(updated)} />
+            {isInternalUser && (
+              <div className="mt-5 pt-5 border-t border-border">
+                <InvoiceTracker claim={claim} currentUser={currentUser} onUpdate={handleUpdate} />
+              </div>
+            )}
           </EditableSection>
         );
 
