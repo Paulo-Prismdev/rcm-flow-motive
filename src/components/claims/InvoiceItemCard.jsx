@@ -10,49 +10,20 @@ import {
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { Input } from '@/components/ui/input';
 import { fmtGBP } from '@/components/shared/creditRepairRates';
+import { TRACKER_TONES } from './trackerTones';
 import InvoiceItemDetails from './InvoiceItemDetails';
 
-// One line of the invoicing tracker, shown as a solid status button: red until it
-// has been raised or received, amber while it waits to be paid, green once it is
-// paid, and neutral grey while a credit repair amount cannot be worked out yet.
-// The button carries the invoice name, its amount and the date that matters;
+// One line of the invoicing tracker: a light card edged in its status colour —
+// red until it has been raised or received, amber while it waits to be paid,
+// green once it is paid, grey while a credit repair amount cannot be worked out.
+// The card carries the invoice name, its amount and the date that matters;
 // everything else lives behind the ⋮ menu and the details panel.
-const TONES = {
-  green: {
-    btn: 'bg-green-600 text-white ring-1 ring-green-500/40 shadow-[0_0_18px_-4px_rgba(34,197,94,0.75)] hover:bg-green-700',
-    iconWrap: 'bg-white/20 text-white',
-    icon: <Check className="w-3.5 h-3.5" strokeWidth={3} />,
-    menu: 'text-white/70 hover:text-white hover:bg-white/15',
-    marker: 'bg-white/25 text-white',
-  },
-  amber: {
-    btn: 'bg-amber-500 text-white ring-1 ring-amber-400/40 shadow-[0_0_18px_-4px_rgba(245,158,11,0.75)] hover:bg-amber-600',
-    iconWrap: 'bg-white/20 text-white',
-    icon: <Clock className="w-3.5 h-3.5" strokeWidth={3} />,
-    menu: 'text-white/70 hover:text-white hover:bg-white/15',
-    marker: 'bg-white/25 text-white',
-  },
-  red: {
-    btn: 'bg-red-500 text-white ring-1 ring-red-400/40 shadow-[0_0_18px_-4px_rgba(239,68,68,0.7)] hover:bg-red-600',
-    iconWrap: 'bg-white/20 text-white',
-    icon: <X className="w-3.5 h-3.5" strokeWidth={3} />,
-    menu: 'text-white/70 hover:text-white hover:bg-white/15',
-    marker: 'bg-white/25 text-white',
-  },
-  waiting: {
-    btn: 'bg-muted/40 text-muted-foreground border border-dashed border-border hover:bg-muted/70',
-    iconWrap: 'bg-muted-foreground/15 text-muted-foreground',
-    icon: <Hourglass className="w-3.5 h-3.5" />,
-    menu: 'text-muted-foreground hover:text-foreground hover:bg-muted',
-    marker: 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300',
-  },
-  na: {
-    btn: 'bg-muted/30 text-muted-foreground/70 border border-border opacity-70 hover:opacity-90',
-    iconWrap: 'bg-muted-foreground/15 text-muted-foreground',
-    icon: <Ban className="w-3.5 h-3.5" />,
-    menu: 'text-muted-foreground hover:text-foreground hover:bg-muted',
-    marker: 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300',
-  },
+const GLYPHS = {
+  positive: <Check className="w-3 h-3" strokeWidth={3} />,
+  warning: <Clock className="w-3 h-3" strokeWidth={3} />,
+  negative: <X className="w-3 h-3" strokeWidth={3} />,
+  neutral: <Hourglass className="w-3 h-3" />,
+  faded: <Ban className="w-3 h-3" />,
 };
 
 const formatDay = (value) => {
@@ -80,35 +51,35 @@ export default function InvoiceItemCard({
   const isAwaiting = !isDocument && !state.notApplicable && state.awaiting === true;
   const raised = state.amount > 0 || !!state.date;
 
-  const toneKey = state.notApplicable ? 'na'
-    : isAwaiting ? 'waiting'
-      : isDocument ? (state.received ? 'green' : 'red')
-        : state.paid ? 'green'
-          : raised ? 'amber'
-            : 'red';
-  const tone = TONES[toneKey];
-  const canTogglePaid = !isDocument && !state.notApplicable && !isAwaiting;
+  const toneKey = state.notApplicable ? 'faded'
+    : isAwaiting ? 'neutral'
+      : isDocument ? (state.received ? 'positive' : 'negative')
+        : state.paid ? 'positive'
+          : raised ? 'warning'
+            : 'negative';
+  const tone = TRACKER_TONES[toneKey];
+  // The quick paid action only belongs on an invoice that has gone out or come
+  // in but is still waiting to be paid.
+  const showMarkPaid = toneKey === 'warning';
 
-  const subline = state.notApplicable ? 'Not applicable'
-    : isAwaiting
-      ? [state.date ? `${dateLabel} ${formatDay(state.date)}` : '', state.hint || 'Awaiting amount'].filter(Boolean).join(' · ')
-      : isDocument
-        ? (state.received ? (state.date ? `${dateLabel} ${formatDay(state.date)}` : 'Received') : 'Click to upload')
-        : state.paid ? `Paid${state.paidDate ? ` ${formatDay(state.paidDate)}` : ''}`
-          : raised ? (state.date ? `${dateLabel} ${formatDay(state.date)}` : 'Awaiting payment')
-            : 'Click to upload';
+  const subline = state.notApplicable ? ''
+    : isAwaiting ? (state.hint || 'Awaiting amount')
+    : isDocument ? (state.date ? `${dateLabel} ${formatDay(state.date)}` : '')
+      : state.paid ? (state.paidDate ? `Paid ${formatDay(state.paidDate)}` : 'Paid')
+        : raised && state.date ? `${dateLabel} ${formatDay(state.date)}`
+          : '';
 
   const hint = state.notApplicable
     ? 'Not applicable — use ⋮ to change'
     : isAwaiting ? 'No invoice can be raised yet'
-      : toneKey === 'red' ? `Click to upload this ${isDocument ? 'document' : 'invoice'}`
+      : toneKey === 'negative' ? `Click to upload this ${isDocument ? 'document' : 'invoice'}`
         : files.length === 0 ? 'Click to add the amount and dates'
           : files.length === 1 ? 'Click to open the document' : 'Click to choose a document';
 
   const handleCardClick = () => {
     if (isUploading) return;
     if (state.notApplicable) { setMenuOpen(true); return; }
-    if (toneKey === 'red') { fileInputRef.current?.click(); return; }
+    if (toneKey === 'negative') { fileInputRef.current?.click(); return; }
     if (files.length === 1) { onViewFile(files[0].file_url); return; }
     if (files.length > 1) { setMenuOpen(true); return; }
     setDetailsOpen(true);
@@ -127,30 +98,35 @@ export default function InvoiceItemCard({
 
   return (
     <div className="group">
-      <div className="relative">
+      <div className={`flex items-stretch rounded-[10px] border border-l-4 transition-all ${isUploading ? 'opacity-60' : ''} ${tone.card}`}>
         <Tooltip>
           <TooltipTrigger asChild>
             <button
               type="button"
               onClick={handleCardClick}
-              className={`w-full flex items-center gap-2.5 rounded-[10px] px-3 py-2.5 text-left transition-all ${canTogglePaid ? 'pr-16' : 'pr-10'} ${isUploading ? 'opacity-60' : ''} ${tone.btn}`}
+              className="flex items-start gap-2 flex-1 min-w-0 px-2.5 py-2 text-left"
             >
-              <span className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 ${tone.iconWrap}`}>
-                {tone.icon}
+              <span className={`mt-0.5 w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0 ${tone.iconWrap}`}>
+                {GLYPHS[toneKey]}
               </span>
               <span className="min-w-0 flex-1">
-                <span className="flex items-center gap-1.5">
-                  <span className="text-sm font-semibold truncate">{item.label}</span>
+                <span className="flex items-baseline gap-1.5">
+                  <span className="text-xs font-semibold text-foreground truncate">{item.label}</span>
                   {state.amount > 0 && (
-                    <span className="text-sm font-bold tabular-nums flex-shrink-0">{fmtGBP(state.amount)}</span>
+                    <span className="text-xs font-bold tabular-nums text-foreground flex-shrink-0">{fmtGBP(state.amount)}</span>
                   )}
                   {variance && (
-                    <span className={`inline-flex items-center justify-center w-4 h-4 rounded-full flex-shrink-0 ${tone.marker}`}>
+                    <span className="inline-flex items-center justify-center w-4 h-4 rounded-full flex-shrink-0 bg-amber-500 text-white ring-1 ring-amber-600/30">
                       <AlertTriangle className="w-2.5 h-2.5" />
                     </span>
                   )}
+                  {state.notApplicable && (
+                    <span className="text-[9px] font-medium uppercase tracking-wider text-muted-foreground flex-shrink-0">n/a</span>
+                  )}
                 </span>
-                <span className="block text-[10px] leading-tight opacity-85 truncate">{subline}</span>
+                {subline && (
+                  <span className="block text-[10px] text-muted-foreground truncate">{subline}</span>
+                )}
               </span>
             </button>
           </TooltipTrigger>
@@ -180,15 +156,15 @@ export default function InvoiceItemCard({
           </TooltipContent>
         </Tooltip>
 
-        <div className="absolute right-1.5 top-1/2 -translate-y-1/2 flex items-center gap-0.5">
-          {canTogglePaid && (
+        <div className="flex items-center gap-0.5 pr-1.5">
+          {showMarkPaid && (
             <button
               type="button"
-              onClick={() => togglePaid(!state.paid)}
-              title={state.paid ? 'Mark unpaid' : 'Mark paid'}
-              className={`p-1.5 rounded-md ${tone.menu}`}
+              onClick={() => togglePaid(true)}
+              title="Mark paid"
+              className="inline-flex items-center gap-1 h-6 px-1.5 rounded-md text-[10px] font-semibold bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 hover:bg-amber-200/70 dark:hover:bg-amber-900/60 transition-colors flex-shrink-0"
             >
-              {state.paid ? <Undo2 className="w-3.5 h-3.5" /> : <Check className="w-3.5 h-3.5" strokeWidth={3} />}
+              <Check className="w-3 h-3" strokeWidth={3} /> Mark paid
             </button>
           )}
 

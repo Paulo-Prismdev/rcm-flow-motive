@@ -184,7 +184,7 @@ export default function InvoiceTracker({ claim, currentUser, onUpdate }) {
     if (rows.length === 0) return null;
     return (
       <TooltipProvider delayDuration={250}>
-        <div className={`grid grid-cols-1 gap-2.5 ${sectionKey === 'closeout' ? 'md:grid-cols-2' : ''}`}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {rows.map(({ item, state }) => (
             <InvoiceItemCard
               key={item.key}
@@ -289,7 +289,7 @@ export default function InvoiceTracker({ claim, currentUser, onUpdate }) {
             <p className="text-[10px] text-muted-foreground">Invoices we receive and pay</p>
           </div>
           {renderItems('in') || (
-            <p className="text-xs text-muted-foreground">No incoming invoices apply to this claim.</p>
+            <p className="text-[11px] text-muted-foreground/70">No incoming invoices apply to this claim.</p>
           )}
         </div>
         <div className="space-y-1.5">
@@ -298,7 +298,7 @@ export default function InvoiceTracker({ claim, currentUser, onUpdate }) {
             <p className="text-[10px] text-muted-foreground">Invoices we send and get paid for</p>
           </div>
           {renderItems('out') || (
-            <p className="text-xs text-muted-foreground">No outgoing invoices apply to this claim.</p>
+            <p className="text-[11px] text-muted-foreground/70">No outgoing invoices apply to this claim.</p>
           )}
         </div>
       </div>

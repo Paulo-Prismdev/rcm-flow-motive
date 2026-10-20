@@ -6,35 +6,23 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { Input } from '@/components/ui/input';
+import { TRACKER_TONES } from './trackerTones';
 
-// One checklist item, shown as a solid button with a soft status glow. Every
-// action the item carries lives behind the discreet menu, so the button itself
+// One checklist item, shown as a light card edged in its status colour. Every
+// action the item carries lives behind the discreet menu, so the card itself
 // only ever shows the document name.
-const TONES = {
-  received: {
-    btn: 'bg-green-600 text-white ring-1 ring-green-500/40 shadow-[0_0_18px_-4px_rgba(34,197,94,0.75)] hover:bg-green-700',
-    iconWrap: 'bg-white/20 text-white',
-    icon: <Check className="w-3.5 h-3.5" strokeWidth={3} />,
-    menu: 'text-white/70 hover:text-white hover:bg-white/15',
-  },
-  outstanding: {
-    btn: 'bg-red-500 text-white ring-1 ring-red-400/40 shadow-[0_0_18px_-4px_rgba(239,68,68,0.7)] hover:bg-red-600',
-    iconWrap: 'bg-white/20 text-white',
-    icon: <X className="w-3.5 h-3.5" strokeWidth={3} />,
-    menu: 'text-white/70 hover:text-white hover:bg-white/15',
-  },
-  not_required: {
-    btn: 'bg-muted/40 text-muted-foreground border border-dashed border-border hover:bg-muted/70',
-    iconWrap: 'bg-muted-foreground/15 text-muted-foreground',
-    icon: null,
-    menu: 'text-muted-foreground hover:text-foreground hover:bg-muted',
-  },
-  not_applicable: {
-    btn: 'bg-muted/30 text-muted-foreground/70 border border-border opacity-70 hover:opacity-90',
-    iconWrap: 'bg-muted-foreground/15 text-muted-foreground',
-    icon: <Ban className="w-3.5 h-3.5" />,
-    menu: 'text-muted-foreground hover:text-foreground hover:bg-muted',
-  },
+const TONE_KEYS = {
+  received: 'positive',
+  outstanding: 'negative',
+  not_required: 'neutral',
+  not_applicable: 'faded',
+};
+
+const GLYPHS = {
+  received: <Check className="w-3 h-3" strokeWidth={3} />,
+  outstanding: <X className="w-3 h-3" strokeWidth={3} />,
+  not_required: null,
+  not_applicable: <Ban className="w-3 h-3" />,
 };
 
 const formatDay = (value) => {
@@ -54,7 +42,7 @@ export default function DocumentChecklistCard({
   const [renamingId, setRenamingId] = useState(null);
   const [renameValue, setRenameValue] = useState('');
 
-  const tone = TONES[status] || TONES.not_required;
+  const tone = TRACKER_TONES[TONE_KEYS[status]] || TRACKER_TONES.neutral;
   const statusOptions = item.required
     ? [
         { key: 'outstanding', label: 'Expected (missing)' },
@@ -105,19 +93,19 @@ export default function DocumentChecklistCard({
           <button
             type="button"
             onClick={handleCardClick}
-            className={`w-full flex items-center gap-2.5 rounded-[10px] px-3 py-2.5 pr-10 text-sm font-semibold text-left transition-all ${uploading ? 'opacity-60' : ''} ${tone.btn}`}
+            className={`w-full flex items-center gap-2 rounded-[10px] border border-l-4 px-2.5 py-2 pr-9 text-left transition-all ${uploading ? 'opacity-60' : ''} ${tone.card}`}
           >
-            {tone.icon && (
-              <span className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 ${tone.iconWrap}`}>
-                {tone.icon}
+            {GLYPHS[status] && (
+              <span className={`w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0 ${tone.iconWrap}`}>
+                {GLYPHS[status]}
               </span>
             )}
-            <span className="truncate min-w-0 flex-1">{item.label}</span>
+            <span className="truncate min-w-0 flex-1 text-xs font-semibold text-foreground">{item.label}</span>
             {status === 'not_required' && (
-              <span className="text-[10px] font-medium uppercase tracking-wider opacity-70 flex-shrink-0">optional</span>
+              <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground flex-shrink-0">optional</span>
             )}
             {status === 'not_applicable' && (
-              <span className="text-[10px] font-medium uppercase tracking-wider opacity-70 flex-shrink-0">n/a</span>
+              <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground flex-shrink-0">n/a</span>
             )}
           </button>
         </TooltipTrigger>
