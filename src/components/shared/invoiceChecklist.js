@@ -139,13 +139,16 @@ export const INVOICE_ITEMS = [
     varianceReason: 'Second referrer fee or repair cost changed',
   },
   {
+    // Where we handle a client's VAT and excess, the repairer bills us for the
+    // VAT content of their repair plus the excess they collected — so this
+    // invoice comes in from the repairer, and it is their invoice we check.
     key: 'vat_excess_invoice_in',
     label: 'VAT & Excess Invoice In',
     section: 'in',
     direction: 'in',
     dateLabel: 'Received',
     requires: 'vat_excess',
-    party: 'client',
+    party: 'repairer',
     amountSource: 'vat_excess',
     bindings: {
       paid: 'excess_contribution_paid',

@@ -72,7 +72,9 @@ export async function resolveInvoiceParty(claim, item) {
       kind: 'client',
       name,
       addressLines: addressOf(claim),
-      contact: clean([claim.client_name, claim.client_email, claim.client_phone]).join(' · '),
+      // The name is already the invoice's party line and the address above it,
+      // so the contact line carries only how to reach them.
+      contact: clean([claim.client_email, claim.client_phone]).join(' · '),
     };
   }
 
