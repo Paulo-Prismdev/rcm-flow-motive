@@ -77,7 +77,6 @@ export default function ClaimDetailMobileHeader({
   onUpdates,
   onUpdateTracking,
   onAction,
-  onUpdate,
   updatesCount = 0,
   imagesCount = 0,
   docsCount = 0,
@@ -118,7 +117,7 @@ export default function ClaimDetailMobileHeader({
         <>
           {/* Authorising party — always shown in full, three tight lines */}
           <div className="px-3 pb-1.5">
-            <AuthorisingPartyBanner claim={claim} onUpdate={onUpdate} compact />
+            <AuthorisingPartyBanner claim={claim} compact />
           </div>
 
           {/* Status pills — job statuses on their own line(s), tracking on the line below */}

@@ -1762,9 +1762,9 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
             </div>
           )}
 
-          {/* ── Authorising Party banner (desktop; phones open it from the header summary line) ── */}
+          {/* ── Authorising Party banner (desktop; phones show it in the header) ── */}
           <div className="hidden lg:block">
-            <AuthorisingPartyBanner claim={claim} onUpdate={handleUpdate} />
+            <AuthorisingPartyBanner claim={claim} />
           </div>
 
           {/* ── MOBILE header (< lg) ── */}
@@ -1772,7 +1772,6 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
             claim={{...claim, _selectedSection: selectedSection}}
             isClosedStatus={isClosedStatus}
             collapsed={headerCollapsed}
-            onUpdate={handleUpdate}
             onClose={handleClose}
             onUpdates={() => setIsClaimUpdatesOpen(true)}
             onUpdateTracking={() => setIsUpdateTrackingOpen(true)}

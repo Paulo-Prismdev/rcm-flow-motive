@@ -10,6 +10,7 @@ import ClientCombobox from '../shared/ClientCombobox';
 import ReferrerCombobox from '../shared/ReferrerCombobox';
 import StatusMultiSelect from '../shared/StatusMultiSelect';
 import ClaimIndemnityFields from './ClaimIndemnityFields';
+import ClaimAuthorisingPartyFields from './ClaimAuthorisingPartyFields';
 import AddressLookupInput from '../shared/AddressLookupInput';
 import AIExtractConfirmDialog from '../shared/AIExtractConfirmDialog';
 import { COURTESY_CAR_OPTIONS } from '../shared/courtesyCarOptions';
@@ -72,6 +73,9 @@ export default function ClaimEditForm({
               </div>
               <div><label className="block text-sm text-gray-600 mb-2">Job Statuses</label><StatusMultiSelect selectedStatuses={formData.job_statuses || []} onStatusesChange={(s) => handleChange('job_statuses', s)} availableStatuses={['New','In Progress','Awaiting Authority','Placed','In Repair','Completed','Cancelled','Total Loss']} placeholder="Select statuses..." /></div>
               <div><label className="block text-sm text-gray-600 mb-2">Claim Type</label><select value={formData.claim_type} onChange={(e) => handleChange('claim_type', e.target.value)} className="neomorph-inset w-full px-4 py-3 text-gray-700 border-0 rounded-xl"><option>Credit Repair</option><option>Fault Claim</option><option>Non-Fault - Own Insurer</option><option>Non-Fault Claim</option><option>Total Loss</option><option>Glass Claim</option><option>Paying Privately</option></select></div>
+              <div className="md:col-span-2 lg:col-span-3">
+                <ClaimAuthorisingPartyFields formData={formData} handleChange={handleChange} />
+              </div>
               <div><label className="block text-sm text-gray-600 mb-2">Date of Loss</label><Input type="date" value={formData.loss_date} onChange={(e) => handleChange('loss_date', e.target.value)} className="neomorph-inset px-4 py-3 text-gray-700 border-0" /></div>
               <div><label className="block text-sm text-gray-600 mb-2">Time of Loss</label><Input type="time" value={formData.loss_time} onChange={(e) => handleChange('loss_time', e.target.value)} className="neomorph-inset px-4 py-3 text-gray-700 border-0" /></div>
               <div><label className="block text-sm text-gray-600 mb-2">Use of Vehicle</label><select value={formData.vehicle_use} onChange={(e) => handleChange('vehicle_use', e.target.value)} className="neomorph-inset w-full px-4 py-3 text-gray-700 border-0 rounded-xl"><option value="">Not specified</option><option>Business</option><option>Social</option><option>Commuting</option></select></div>
