@@ -94,6 +94,10 @@ export const INVOICE_ITEMS = [
     // Its own date: "Authority Received" is the initial authority, which belongs
     // to the Initial Authority document, not to this one.
     bindings: { date: 'final_authority_received' },
+    // Its own short read: the registration it covers, the amount the repair was
+    // authorised at and the excess it shows. None of the invoice's own checks
+    // apply to it.
+    readsAuthority: true,
   },
   {
     key: 'collection_note',
@@ -107,6 +111,9 @@ export const INVOICE_ITEMS = [
     // it is filed, but the job's invoicing finishes without one. "Not available"
     // records why there won't be one, and stops the nudge.
     recommended: true,
+    // Nothing is read off it and it carries no figures: uploading it stores the
+    // copy, and that is the whole of it.
+    storeOnly: true,
   },
   {
     key: 'referrer_invoice_in',
@@ -194,6 +201,15 @@ export const INVOICE_ITEMS = [
 ];
 
 export const isInvoiceDocument = (item) => item?.kind === 'document';
+
+/**
+ * What happens when a document is uploaded:
+ * - 'store'     → the copy is stored and nothing is read off it (Collection Note)
+ * - 'authority' → its own short read: registration, authorised amount, excess
+ * - 'invoice'   → the full invoice read
+ */
+export const invoiceDocumentKind = (item) =>
+  item?.storeOnly ? 'store' : item?.readsAuthority ? 'authority' : 'invoice';
 
 /**
  * Recommended items are encouraged but never required: while one is missing its
@@ -454,7 +470,9 @@ export function getInvoiceItemState(item, claim, hasFiles = false) {
   const b = item.bindings || {};
   const asDocument = isInvoiceDocument(item);
   const calc = resolveInvoiceAmount(item, claim);
-  const stored = asDocument ? null : storedAmount(item, claim);
+  // A close-out document records the total read off it, which never counts as
+  // money owed, but is what the authority is checked against.
+  const stored = storedAmount(item, claim);
 
   const date = (b.date ? claim?.[b.date] : entry.date) || '';
   const paidDate = asDocument ? '' : ((b.paid_date ? claim?.[b.paid_date] : entry.paid_date) || '');
@@ -475,12 +493,16 @@ export function getInvoiceItemState(item, claim, hasFiles = false) {
     ? { invoiced: stored, calculated: calc.amount, reason: item.varianceReason }
     : null;
 
-  const amount = asDocument ? 0 : (stored !== null ? stored : (calc?.amount ?? 0));
-  const ex = asDocument ? 0
+  const amount = asDocument
+    ? (stored !== null ? stored : 0)
+    : (stored !== null ? stored : (calc?.amount ?? 0));
+  const ex = asDocument
+    ? (stored !== null ? (entry.ex != null ? toNum(entry.ex) : splitGross(stored).ex) : 0)
     : awaiting ? 0
       : stored !== null ? (entry.ex != null ? toNum(entry.ex) : splitGross(stored).ex)
         : calc?.ex ?? 0;
-  const vat = asDocument ? 0
+  const vat = asDocument
+    ? (stored !== null ? (entry.vat != null ? toNum(entry.vat) : splitGross(stored).vat) : 0)
     : awaiting ? 0
       : stored !== null ? (entry.vat != null ? toNum(entry.vat) : splitGross(stored).vat)
         : calc?.vat ?? 0;
@@ -512,6 +534,10 @@ export function getInvoiceItemState(item, claim, hasFiles = false) {
     // its date on its own is not enough.
     received: asDocument ? !!hasFiles : false,
     dateRecordedNoCopy: asDocument && !hasFiles && !!date,
+    // A copy is on file but is waiting to be replaced by a corrected one: the
+    // item stays amber until the corrected copy lands.
+    reinvoice: entry.reinvoice_requested || null,
+    awaitingCorrected: !!entry.reinvoice_requested,
     notApplicable: entry.not_applicable === true,
     notApplicableReason: entry.not_applicable_reason || '',
     invoiceNumber: entry.invoice_number || '',
@@ -813,7 +839,8 @@ export function buildInvoiceItemPatch(item, claim, changes, ctx) {
  * the copy behind a recorded invoice can always be pointed at later — and so
  * removing that copy can take the details with it. Where the invoice's total also
  * became the claim's final repair cost, the file that supplied it is remembered
- * the same way.
+ * the same way. Where the invoice total was left waiting on a corrected copy, the
+ * re-invoice request is recorded against the item here too.
  */
 export function buildInvoiceReviewPatch(item, claim, figures, origin) {
   const amountPatch = buildInvoiceItemPatch(item, claim, {
@@ -830,6 +857,16 @@ export function buildInvoiceReviewPatch(item, claim, figures, origin) {
   const items = { ...(source.items || {}) };
   const entry = { ...(items[item.key] || {}) };
   entry.invoice_number = figures.invoice_number || '';
+  // A close-out document's own figures are kept on its entry: they never count
+  // as money owed, but the Final Invoice's total is what the authority is
+  // checked against — and a corrected copy clears the request for one.
+  if (isInvoiceDocument(item)) {
+    const total = toNum(figures.amount_total);
+    entry.amount = total === null ? null : round2(total);
+    entry.ex = toNum(figures.amount_ex_vat);
+    entry.vat = toNum(figures.vat_amount);
+    entry.reinvoice_requested = origin?.reinvoice || null;
+  }
   if (origin?.file_url) {
     const at = new Date().toISOString();
     entry.details_source = {
@@ -882,6 +919,25 @@ export function buildInvoiceDetailsClearPatch(item, claim, { fileUrl, clearedBy 
       ? `the amount read from it, back to the calculated ${fmtGBP(calc.amount)}`
       : 'the amount read from it');
   }
+
+  // A close-out document's own figures go with the details read off its copy,
+  // and the authorised cost it recorded goes with them too.
+  if (asDocument && (entry.amount != null || entry.ex != null || entry.vat != null)) {
+    entry.amount = null;
+    entry.ex = null;
+    entry.vat = null;
+    clearPoints.push('the figures read from it');
+  }
+  if (asDocument && item.readsAuthority && isStored(claim.authority_cost_gross)) {
+    patch.authority_cost_gross = null;
+    patch.authority_cost_net = null;
+    clearPoints.push(`the authorised cost it recorded (${fmtGBP(toNum(claim.authority_cost_gross))})`);
+  }
+  if (entry.reinvoice_requested) {
+    entry.reinvoice_requested = null;
+    clearPoints.push('the re-invoice request left against it');
+  }
+
   if (state.invoiceNumber) {
     entry.invoice_number = '';
     clearPoints.push(`the invoice number it recorded (${state.invoiceNumber})`);

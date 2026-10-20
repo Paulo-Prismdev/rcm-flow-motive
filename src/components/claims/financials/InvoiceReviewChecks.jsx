@@ -2,7 +2,7 @@ import React from 'react';
 import { AlertTriangle, Check, X, ShieldAlert } from 'lucide-react';
 import { fmtGBP } from '@/components/shared/creditRepairRates';
 
-function AckRow({ title, detail, acked, onAck, onReject }) {
+export function AckRow({ title, detail, acked, onAck, onReject }) {
   return (
     <div className="rounded-lg border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20 p-2.5">
       <p className="flex items-start gap-1.5 text-[11px] font-semibold text-amber-800 dark:text-amber-300">

@@ -90,8 +90,8 @@ export const EXTRACTION_SCHEMA = {
  * Second pass, used only when the reading pass came back without the snippets:
  * asks the AI where each figure it did find appears on the document.
  */
-export async function fetchSourceSnippets(base44, fileUrl, figures) {
-  const found = INVOICE_FIGURES
+export async function fetchSourceSnippets(base44, fileUrl, figures, fields = INVOICE_FIGURES) {
+  const found = fields
     .filter((f) => !isEmpty(figures[f.key]))
     .map((f) => `${f.key}: ${figures[f.key]}`)
     .join('\n');
@@ -151,9 +151,9 @@ export function normaliseDate(value) {
 }
 
 /** The AI's answer, tidied into the values the review screen starts with. */
-function figuresFromExtraction(extracted = {}) {
+export function figuresFromExtraction(extracted = {}, fields = INVOICE_FIGURES) {
   const figures = {};
-  for (const field of INVOICE_FIGURES) {
+  for (const field of fields) {
     const value = extracted[field.key];
     if (field.type === 'number') {
       const n = toNum(value);
@@ -168,18 +168,18 @@ function figuresFromExtraction(extracted = {}) {
 }
 
 /** The raw strings as printed, used to highlight them on the document. */
-function rawFromExtraction(extracted = {}) {
+export function rawFromExtraction(extracted = {}, fields = INVOICE_FIGURES) {
   const raw = {};
-  for (const field of INVOICE_FIGURES) {
+  for (const field of fields) {
     raw[field.key] = isEmpty(extracted[field.key]) ? '' : String(extracted[field.key]).trim();
   }
   return raw;
 }
 
-const confidenceFromExtraction = (extracted = {}) => {
+export const confidenceFromExtraction = (extracted = {}, fields = INVOICE_FIGURES) => {
   const map = extracted._confidence || {};
   const out = {};
-  for (const field of INVOICE_FIGURES) {
+  for (const field of fields) {
     const value = map[field.key];
     out[field.key] = isEmpty(value) ? 'missing' : String(value).toLowerCase();
   }
@@ -194,9 +194,10 @@ export const snippetsFromExtraction = (extracted = {}) => extracted._source_snip
  *
  * VAT is taken as the document shows it. Where the invoice mentions no VAT at
  * all it is not a VAT invoice, so the total is the amount excluding VAT and the
- * VAT is nil — nothing is worked out from the total. Where VAT is included but
- * the split isn't printed, both figures stay blank for the user. Figures filled
- * in by that rule are reported separately so they aren't mistaken for
+ * VAT is nil. Where VAT is included but not printed on its own line while the
+ * amount excluding VAT and the total both are, the VAT is the difference between
+ * them: it is filled in and flagged for checking, never read as nil. Figures
+ * filled in by those rules are reported separately so they aren't mistaken for
  * corrections.
  */
 export function figuresForReview(extracted = {}) {
@@ -221,12 +222,22 @@ export function figuresForReview(extracted = {}) {
     }
   }
 
+  // VAT said to be included but not printed on its own line, with the amount
+  // excluding VAT and the total both printed: the difference between them is the
+  // VAT. It is filled in and left for someone to check, never read as nil.
+  const exVat = toNum(figures.amount_ex_vat);
+  if (isEmpty(figures.vat_amount) && total !== null && exVat !== null && round2(total - exVat) > 0) {
+    figures.vat_amount = String(round2(total - exVat));
+    confidence.vat_amount = 'low';
+    derived.push('vat_amount');
+  }
+
   return { figures, raw, confidence, derived };
 }
 
 /** Figures the AI read but was not certain about: these must be checked or corrected. */
-export function figuresNeedingReview(figures, confidence) {
-  return INVOICE_FIGURES
+export function figuresNeedingReview(figures, confidence, fields = INVOICE_FIGURES) {
+  return fields
     .filter((f) => !isEmpty(figures[f.key]) && confidence[f.key] !== 'high')
     .map((f) => f.key);
 }
@@ -246,8 +257,8 @@ const sameFigure = (field, a, b) => {
 };
 
 /** What the user changed after the AI read it. */
-export function correctionsFromReview(figures, raw, derived = []) {
-  return INVOICE_FIGURES
+export function correctionsFromReview(figures, raw, derived = [], fields = INVOICE_FIGURES) {
+  return fields
     // Figures that came from a rule rather than from the page (the nil VAT on a
     // non-VAT invoice) were not corrected by anyone, so they aren't logged.
     .filter((field) => !derived.includes(field.key))
@@ -260,7 +271,11 @@ export function correctionsFromReview(figures, raw, derived = []) {
     .filter(Boolean);
 }
 
-/** Fail-safe 1: the figures have to add up. */
+/**
+ * Fail-safe 1: the figures have to add up. Each problem is reported once — a VAT
+ * that is missing or nil shows up as the one thing it really is, the figures not
+ * adding up, rather than as that and a second remark about the VAT.
+ */
 export function checkArithmetic(figures) {
   const issues = [];
   const ex = toNum(figures.amount_ex_vat);
@@ -271,13 +286,14 @@ export function checkArithmetic(figures) {
   if (Math.abs(round2(ex + vat) - round2(total)) > 0.01) {
     issues.push(`The figures don't add up: ${fmtGBP(ex)} ex VAT + ${fmtGBP(vat)} VAT = ${fmtGBP(round2(ex + vat))}, but the invoice total reads ${fmtGBP(total)}.`);
   }
+  // The rate is a separate thing from the sum: a VAT that is not 20% of the
+  // amount ex VAT is worth saying on its own, but a VAT of nil with a total that
+  // doesn't match is already the first message above.
   if (vat > 0) {
     const expectedVat = round2(ex * VAT_RATE);
     if (Math.abs(expectedVat - vat) > 0.02) {
       issues.push(`The VAT of ${fmtGBP(vat)} is not 20% of ${fmtGBP(ex)} ex VAT, which would be ${fmtGBP(expectedVat)}.`);
     }
-  } else if (total > 0 && Math.abs(round2(total - ex)) > 0.01) {
-    issues.push(`No VAT was read, but the total ${fmtGBP(total)} is not the same as the amount ex VAT ${fmtGBP(ex)}.`);
   }
   return issues;
 }
