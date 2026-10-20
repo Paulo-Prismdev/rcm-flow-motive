@@ -51,10 +51,14 @@ export default function SecondReferrerToggle({ claim, missing = [], onTrackerCha
   const nextPercent = !draftOn ? null
     : (referrerChanged || percent <= 0) ? num(draftRef?.default_percent_to_referrer)
       : storedPercent;
+  // Their VAT status comes from their own record every time the step is saved, so
+  // a referrer's VAT setting can be corrected in the directory and picked up here.
+  const storedVat = tracker.second_referrer_vat_registered ?? null;
+  const nextVat = draftOn ? (draftRef?.vat_registered !== false) : null;
 
   const save = () => {
     setEditingKey(null);
-    if (draftOn === enabled && !referrerChanged && nextPercent === storedPercent) return;
+    if (draftOn === enabled && !referrerChanged && nextPercent === storedPercent && nextVat === storedVat) return;
     const before = enabled ? `On (${storedName || 'no referrer'})` : 'Off';
     const after = draftOn ? `On (${nextName || 'no referrer'})` : 'Off';
     const feeText = nextPercent === storedPercent ? ''
@@ -67,6 +71,7 @@ export default function SecondReferrerToggle({ claim, missing = [], onTrackerCha
         second_referrer_id: nextId,
         second_referrer_name: nextName,
         second_referrer_percent: nextPercent,
+        second_referrer_vat_registered: nextVat,
       }),
       `Second referrer to pay changed from ${before} to ${after}${feeText}`
     );

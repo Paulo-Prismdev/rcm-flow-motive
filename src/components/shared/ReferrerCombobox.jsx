@@ -39,6 +39,7 @@ export default function ReferrerCombobox({ value, onChange, compact = false }) {
         id: selected.id,
         name: selected.name,
         email: selected.contact_email || '',
+        vat_registered: selected.vat_registered !== false,
         default_percent_to_referrer: selected.default_percent_to_referrer,
         default_repairer_referral_fee: selected.default_repairer_referral_fee,
       });
@@ -60,6 +61,7 @@ export default function ReferrerCombobox({ value, onChange, compact = false }) {
       id: newReferrer.id,
       name: newReferrer.name,
       email: newReferrer.contact_email || '',
+      vat_registered: newReferrer.vat_registered !== false,
       default_percent_to_referrer: newReferrer.default_percent_to_referrer,
       default_repairer_referral_fee: newReferrer.default_repairer_referral_fee,
     });

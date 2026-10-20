@@ -125,7 +125,8 @@ export default function InvoiceItemDetails({ item, state, onChange, onAskPaid })
 
       {state.variance && (
         <p className="text-[10px] leading-tight text-amber-700 dark:text-amber-300 font-medium">
-          {state.variance.reason} — calculated {fmtGBP(state.variance.calculated)}, invoiced {fmtGBP(state.variance.invoiced)}. Raise a supplementary invoice or credit note, or unlock the amount.
+          {state.variance.text}
+          {item.direction !== 'in' && '. Raise a supplementary invoice or credit note, or unlock the amount.'}
         </p>
       )}
     </div>

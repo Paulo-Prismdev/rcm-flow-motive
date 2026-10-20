@@ -29,7 +29,7 @@ const formatDay = (value) => {
   return isNaN(d.getTime()) ? '' : d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
 };
 
-export function invoiceToneKey(item, state) {
+export function invoiceToneKey(item, state, step) {
   if (state.notApplicable) return 'faded';
   if (state.awaiting) return 'neutral';
   // A close-out document only goes green once its copy is on file: a date
@@ -42,6 +42,13 @@ export function invoiceToneKey(item, state) {
     // there is simply something else worth collecting.
     if (isRecommendedItem(item)) return 'warning';
     return state.dateRecordedNoCopy ? 'warning' : 'negative';
+  }
+  // An invoice's colour follows the step it is shown in: in the raise and collect
+  // steps it is green once its copy is attached — sent or received — and amber
+  // only while it is still to be raised or received; in the payments step it
+  // stays amber until it is marked paid, then green.
+  if (step === 'send' || step === 'pay') {
+    return (step === 'pay' ? state.paid : state.copyAttached) ? 'positive' : 'warning';
   }
   if (state.paid) return 'positive';
   if (state.date || state.requested || state.amount > 0) return 'warning';
@@ -64,7 +71,7 @@ export function invoiceStatusLabel(item, state) {
 }
 
 export default function InvoiceItemCard({
-  item, state, files, isUploading,
+  item, state, step, files, isUploading,
   onChange, onUpload, onDeleteFile, onRenameFile, onViewFile,
   onToggleDetails, detailsOpen, onUndoRequest, amountText, onAskPaid, children,
 }) {
@@ -75,7 +82,7 @@ export default function InvoiceItemCard({
 
   const isDocument = isInvoiceDocument(item);
   const dateLabel = item.dateLabel || (item.direction === 'in' ? 'Received' : 'Sent');
-  const toneKey = invoiceToneKey(item, state);
+  const toneKey = invoiceToneKey(item, state, step);
   const tone = TRACKER_TONES[toneKey];
   const statusLabel = invoiceStatusLabel(item, state);
 
@@ -172,7 +179,7 @@ export default function InvoiceItemCard({
       )}
       {state.variance && (
         <p className="text-[10px] opacity-90 pt-1 mt-1 border-t border-white/20">
-          {state.variance.reason}: calculated {fmtGBP(state.variance.calculated)}, invoiced {fmtGBP(state.variance.invoiced)}
+          {state.variance.text}
         </p>
       )}
       {files.length > 0 ? (
@@ -334,7 +341,7 @@ export default function InvoiceItemCard({
                 {state.variance && (
                   <p className="flex items-start gap-1.5 px-2 py-1.5 text-[10px] text-amber-600 dark:text-amber-400">
                     <AlertTriangle className="w-3 h-3 flex-shrink-0 mt-px" />
-                    <span>{state.variance.reason}.</span>
+                    <span>{state.variance.text}.</span>
                   </p>
                 )}
               </>

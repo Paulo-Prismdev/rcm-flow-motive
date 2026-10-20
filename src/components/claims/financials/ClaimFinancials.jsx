@@ -674,7 +674,10 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
         title={config.title}
         hint={config.hint}
         line={config.line}
-        status={config.done ? 'done' : config.movedPast ? 'pending' : isCurrent ? 'current' : 'later'}
+        status={config.done ? 'done'
+          : config.movedPast ? 'pending'
+            : isCurrent ? 'current'
+              : config.workable ? 'later' : 'dimmed'}
         open={openSteps.has(config.key)}
         onToggle={() => toggleStep(config.key)}
         banner={banner}

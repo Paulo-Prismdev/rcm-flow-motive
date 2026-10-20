@@ -261,6 +261,16 @@ export const repairVat = (claim) => round2(toNum(claim?.final_repair_cost) - rep
 /** The second referrer's agreed share of the repair, set on this claim. */
 export const secondReferrerPercent = (claim) => toNum(claim?.invoice_tracker?.second_referrer_percent);
 
+/**
+ * A referrer's VAT status, which decides whether VAT goes on their invoice: a
+ * non-VAT referrer invoices their fee alone, so the expected amount matches what
+ * they actually bill. The status sits on the referrer's own record, is carried
+ * onto the claim when they are picked, and is synced from the referrer directory.
+ * Until it is set otherwise, a referrer reads as VAT registered.
+ */
+export const referrerVatRegistered = (claim) => claim?.referrer_vat_registered !== false;
+export const secondReferrerVatRegistered = (claim) => claim?.invoice_tracker?.second_referrer_vat_registered !== false;
+
 const PRIVATE_TYPES = ['Paying Privately', '3rd Party Paying Privately'];
 
 export const isPrivatePayingClaim = (claim) => PRIVATE_TYPES.includes(claim?.claim_type);
@@ -362,18 +372,40 @@ const withVat = (ex, workings, hint) => {
   };
 };
 
+/** The same amount with no VAT on it, for a party that isn't VAT registered. */
+const withoutVat = (ex, workings, hint) => {
+  const net = round2(ex);
+  return {
+    amount: net, ex: net, vat: 0, total: net,
+    derived: true, awaiting: false, hint, workings,
+  };
+};
+
 const AMOUNT_RESOLVERS = {
-  // The referrer invoices us their agreed share of the repair cost (ex VAT).
+  // The referrer invoices us their agreed share of the repair cost (ex VAT) — with
+  // VAT on it only where the referrer is VAT registered.
   referrer_fee: (claim) => {
     if (toNum(claim.final_repair_cost) <= 0) return awaiting('Enter the final repair cost');
     const pct = toNum(claim.percent_to_referrer);
     if (pct <= 0) return awaiting('Set the referrer fee %');
     const net = repairNet(claim);
     const fee = round2(net * pct / 100);
-    const vat = round2(fee * VAT_RATE);
-    return withVat(fee, [
+    const vatReg = referrerVatRegistered(claim);
+    const workings = [
       { label: 'Repair cost ex VAT', value: fmtGBP(net) },
       { label: `Referrer fee (${pct}%)`, value: fmtGBP(fee) },
+      { label: 'Referrer VAT status', value: vatReg ? 'VAT registered' : 'Not VAT registered' },
+    ];
+    if (!vatReg) {
+      return withoutVat(fee, [
+        ...workings,
+        { label: 'Non-VAT referrer — no VAT charged', value: '—' },
+        { label: 'Total', value: fmtGBP(fee), total: true },
+      ], `${pct}% of the repair cost ex VAT — no VAT on it, the referrer isn't VAT registered`);
+    }
+    const vat = round2(fee * VAT_RATE);
+    return withVat(fee, [
+      ...workings,
       { label: 'VAT (20%)', value: fmtGBP(vat) },
       { label: 'Total', value: fmtGBP(round2(fee + vat)), total: true },
     ], `${pct}% of the repair cost ex VAT`);
@@ -386,10 +418,22 @@ const AMOUNT_RESOLVERS = {
     if (pct <= 0) return awaiting('Set the second referrer fee %');
     const net = repairNet(claim);
     const fee = round2(net * pct / 100);
-    const vat = round2(fee * VAT_RATE);
-    return withVat(fee, [
+    const vatReg = secondReferrerVatRegistered(claim);
+    const workings = [
       { label: 'Repair cost ex VAT', value: fmtGBP(net) },
       { label: `Second referrer fee (${pct}%)`, value: fmtGBP(fee) },
+      { label: 'Referrer VAT status', value: vatReg ? 'VAT registered' : 'Not VAT registered' },
+    ];
+    if (!vatReg) {
+      return withoutVat(fee, [
+        ...workings,
+        { label: 'Non-VAT referrer — no VAT charged', value: '—' },
+        { label: 'Total', value: fmtGBP(fee), total: true },
+      ], `${pct}% of the repair cost ex VAT — no VAT on it, the referrer isn't VAT registered`);
+    }
+    const vat = round2(fee * VAT_RATE);
+    return withVat(fee, [
+      ...workings,
       { label: 'VAT (20%)', value: fmtGBP(vat) },
       { label: 'Total', value: fmtGBP(round2(fee + vat)), total: true },
     ], `${pct}% of the repair cost ex VAT`);
@@ -522,7 +566,18 @@ export function getInvoiceItemState(item, claim, hasFiles = false) {
   const locked = !!calc && stored !== null && (!!date || paid);
   const adjusted = !!calc && stored !== null && !locked;
   const variance = locked && !calc.awaiting && Math.abs(calc.amount - stored) >= 0.01
-    ? { invoiced: stored, calculated: calc.amount, reason: item.varianceReason }
+    ? {
+      invoiced: stored,
+      calculated: calc.amount,
+      reason: item.varianceReason,
+      // Our own invoices are locked at the figure they went out at, so their
+      // warning says what moved underneath them. An invoice we received is simply
+      // what the other party billed, so it reads as the amount it came in at
+      // against the amount that was expected.
+      text: item.direction === 'in'
+        ? `Invoice is ${fmtGBP(round2(Math.abs(stored - calc.amount)))} ${stored < calc.amount ? 'less' : 'more'} than expected (calculated ${fmtGBP(calc.amount)}, invoiced ${fmtGBP(stored)})`
+        : `${item.varianceReason} — calculated ${fmtGBP(calc.amount)}, invoiced ${fmtGBP(stored)}`,
+    }
     : null;
 
   const amount = asDocument

@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import DirectoryShell from "@/components/shared/DirectoryShell";
 import ReferrerLinkedUsers from "@/components/settings/ReferrerLinkedUsers";
+import { syncReferrerVat } from "@/components/shared/syncReferrerVat";
 
 const ALL_PORTAL_SECTIONS = ["Claims", "Parts"];
 
@@ -30,11 +31,18 @@ function ReferrerDetailModal({ company, onClose, onUpdated }) {
 
   const updateMutation = useMutation({
     mutationFn: (data) => base44.entities.Company.update(company.id, data),
-    onSuccess: () => {
+    onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ["companies"] });
       onUpdated();
       setIsEditing(false);
       toast.success("Referrer updated");
+      // Their claims carry a snapshot of this setting, so refresh it when it
+      // changes: their invoices are worked out from it.
+      const nextVat = formData.vat_registered !== false;
+      if ((formData.company_type || "referrer") === "referrer" && nextVat !== (company.vat_registered !== false)) {
+        await syncReferrerVat({ id: company.id, name: company.name, vat_registered: nextVat });
+        queryClient.invalidateQueries({ queryKey: ["claims"] });
+      }
     },
   });
 
@@ -165,6 +173,11 @@ function ReferrerDetailModal({ company, onClose, onUpdated }) {
                   <div><Label>% to Referrer</Label><Input type="number" min="0" max="100" step="0.5" value={formData.default_percent_to_referrer ?? ""} onChange={(e) => set("default_percent_to_referrer", e.target.value)} placeholder="e.g. 5" className="neomorph-inset" /></div>
                   <div><Label>Repairer Referral Fee %</Label><Input type="number" min="0" max="100" step="0.5" value={formData.default_repairer_referral_fee ?? ""} onChange={(e) => set("default_repairer_referral_fee", e.target.value)} placeholder="e.g. 20" className="neomorph-inset" /></div>
                 </div>
+                <div className="flex items-center gap-2">
+                  <Checkbox id="referrer-vat" checked={formData.vat_registered !== false} onCheckedChange={(v) => set("vat_registered", v === true)} />
+                  <Label htmlFor="referrer-vat">VAT registered</Label>
+                </div>
+                <p className="text-xs text-muted-foreground">A non-VAT referrer's invoices carry no VAT — their fee alone is expected.</p>
               </div>
             )}
 
@@ -203,6 +216,9 @@ function ReferrerDetailModal({ company, onClose, onUpdated }) {
                 <div><p className="text-xs text-muted-foreground">% to Referrer</p><p className="text-sm font-medium">{company.default_percent_to_referrer ?? "—"}</p></div>
                 <div><p className="text-xs text-muted-foreground">Repairer Referral Fee %</p><p className="text-sm font-medium">{company.default_repairer_referral_fee ?? "—"}</p></div>
               </div>
+            )}
+            {(company.company_type || "referrer") === "referrer" && (
+              <div><p className="text-xs text-muted-foreground">VAT status</p><p className="text-sm font-medium">{company.vat_registered === false ? "Not VAT registered — invoices carry no VAT" : "VAT registered"}</p></div>
             )}
             {company.portal_sections?.length > 0 && (
               <div><p className="text-xs text-muted-foreground">Portal Access</p><div className="flex flex-wrap gap-1 mt-1">{company.portal_sections.map(s => <span key={s} className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">{s}</span>)}</div></div>
@@ -243,6 +259,7 @@ function AddReferrerModal({ onClose, onSuccess }) {
     contact_name: "", contact_email: "", contact_phone: "",
     address_line_1: "", address_line_2: "", town: "", county: "", postcode: "",
     portal_sections: ["Claims"], default_percent_to_referrer: "", default_repairer_referral_fee: "",
+    vat_registered: true,
     contacts: [],
   });
   const createMutation = useMutation({
@@ -340,6 +357,10 @@ function AddReferrerModal({ onClose, onSuccess }) {
               <div className="grid grid-cols-2 gap-3">
                 <div><Label>% to Referrer</Label><Input type="number" min="0" max="100" step="0.5" value={formData.default_percent_to_referrer} onChange={(e) => set("default_percent_to_referrer", e.target.value)} placeholder="e.g. 5" className="neomorph-inset" /></div>
                 <div><Label>Repairer Referral Fee %</Label><Input type="number" min="0" max="100" step="0.5" value={formData.default_repairer_referral_fee} onChange={(e) => set("default_repairer_referral_fee", e.target.value)} placeholder="e.g. 20" className="neomorph-inset" /></div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Checkbox id="new-referrer-vat" checked={formData.vat_registered !== false} onCheckedChange={(v) => set("vat_registered", v === true)} />
+                <Label htmlFor="new-referrer-vat">VAT registered</Label>
               </div>
             </div>
           )}

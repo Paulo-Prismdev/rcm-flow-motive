@@ -342,7 +342,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
   const handleReferrerChange = (referrer) => {
     setReferrerCompanyId(referrer.id);
     if (!referrer) {
-      setFormData(prev => ({ ...prev, referrer: '', referrer_id: null, referrer_email: '', file_handler: '', percent_to_referrer: 0, referral_fee_repairer: 20 }));
+      setFormData(prev => ({ ...prev, referrer: '', referrer_id: null, referrer_email: '', file_handler: '', percent_to_referrer: 0, referral_fee_repairer: 20, referrer_vat_registered: true }));
       return;
     }
     setFormData(prev => ({
@@ -350,6 +350,9 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
       referrer: referrer.name,
       referrer_id: referrer.id,
       referrer_email: referrer.email || '',
+      // Their VAT status comes with them: a non-VAT referrer invoices us their fee
+      // alone, so no VAT is expected on their invoice.
+      referrer_vat_registered: referrer.vat_registered !== false,
       file_handler: '',
       ...(referrer.default_percent_to_referrer != null && { percent_to_referrer: referrer.default_percent_to_referrer }),
       ...(referrer.default_repairer_referral_fee != null && { referral_fee_repairer: referrer.default_repairer_referral_fee }),

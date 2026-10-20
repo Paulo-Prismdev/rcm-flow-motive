@@ -190,6 +190,11 @@
     "percent_to_referrer": {
       "type": "number"
     },
+    "referrer_vat_registered": {
+      "type": "boolean",
+      "default": true,
+      "description": "Snapshot of the referrer's \"VAT registered\" setting. Only a VAT registered referrer's invoice to us carries VAT; a non-VAT referrer invoices their fee alone. Kept on the claim so the Financials tracker and the claims list work the invoice out without loading the referrer's record. Synced from the referrer directory."
+    },
     "client_name": {
       "type": "string"
     },

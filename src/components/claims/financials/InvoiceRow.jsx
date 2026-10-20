@@ -39,6 +39,7 @@ export default function InvoiceRow({
     <InvoiceItemCard
       item={item}
       state={state}
+      step={focus}
       files={files}
       isUploading={isUploading}
       onChange={onChange}
@@ -112,7 +113,11 @@ export default function InvoiceRow({
         <p className="flex items-start gap-1.5 text-[11px] text-amber-700 dark:text-amber-300">
           <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0 mt-px" />
           <span className="flex-1">
-            {state.variance.reason} — calculated {fmtGBP(state.variance.calculated)}, invoiced {fmtGBP(state.variance.invoiced)}. Raise a supplementary invoice or credit note, or unlock the amount.
+            {state.variance.text}
+            {/* The advice belongs to our own invoices, whose figures moved after
+                they went out; an invoice we received is simply what the other
+                party billed, so it only reports the difference. */}
+            {item.direction !== 'in' && '. Raise a supplementary invoice or credit note, or unlock the amount.'}
           </span>
           <button
             type="button"

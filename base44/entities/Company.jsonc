@@ -96,6 +96,11 @@
     "default_repairer_referral_fee": {
       "type": "number",
       "description": "Default repairer referral fee % for jobs from this referrer (referrer type only)"
+    },
+    "vat_registered": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this referrer is VAT registered. Only a VAT registered referrer's invoice to us carries VAT \u2014 a non-VAT referrer invoices their fee alone, so no VAT is expected on it."
     }
   },
   "required": [

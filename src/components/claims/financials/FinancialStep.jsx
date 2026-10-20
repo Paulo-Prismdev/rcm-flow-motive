@@ -15,6 +15,9 @@ export default function FinancialStep({ n, title, hint, line, status, open, onTo
   // A step the job has been taken past is amber, never green: there is still
   // something outstanding in it, and its line says what.
   const movedPast = status === 'pending';
+  // A step still to come is dimmed only while nothing in it can be done yet:
+  // where its own work is possible now, it reads as an ordinary step.
+  const dimmed = status === 'dimmed';
 
   const frame = done
     ? 'border-green-200 dark:border-green-900 bg-green-50/60 dark:bg-green-900/10'
@@ -22,7 +25,7 @@ export default function FinancialStep({ n, title, hint, line, status, open, onTo
       ? 'border-amber-200 dark:border-amber-900 bg-amber-50/60 dark:bg-amber-900/10'
       : current
         ? 'border-primary/50 bg-card ring-1 ring-primary/20'
-        : 'border-border bg-card opacity-60';
+        : dimmed ? 'border-border bg-card opacity-60' : 'border-border bg-card';
 
   const number = done
     ? 'bg-green-500/20 text-green-700 dark:text-green-300'

@@ -49,7 +49,8 @@ export default function ClaimReferrerForm({ claim, onSave, onCancel }) {
                 referrer_ref: '',
                 file_handler: '',
                 percent_to_referrer: 0,
-                referral_fee_repairer: 20
+                referral_fee_repairer: 20,
+                referrer_vat_registered: true
             }));
         } else {
             setFormData(prev => ({
@@ -57,6 +58,9 @@ export default function ClaimReferrerForm({ claim, onSave, onCancel }) {
                 referrer: referrer.name,
                 referrer_id: referrer.id,
                 referrer_email: referrer.email || referrer.contact_email || '',
+                // Their VAT status comes with them: a non-VAT referrer invoices us
+                // their fee alone, so no VAT is expected on their invoice.
+                referrer_vat_registered: referrer.vat_registered !== false,
                 // Auto-populate rates from referrer defaults if set
                 ...(referrer.default_percent_to_referrer != null && {
                     percent_to_referrer: referrer.default_percent_to_referrer

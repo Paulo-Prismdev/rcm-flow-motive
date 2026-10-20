@@ -79,6 +79,9 @@ export function buildFinancialFlow(summary, ctx, claim) {
     rows: closeRows,
     empty: closeEmpty,
     done: closeRequired.length === 0 || closeIn === closeRequired.length,
+    // Whether anything in the step can be done yet: a step still to come is
+    // dimmed only while it holds nothing doable at all.
+    workable: !!closePending || !!closeSuggested,
     line: closeEmpty ? closeEmpty.title
       : closeRequired.length === 0 ? 'nothing required'
         : closeIn === closeRequired.length ? `all ${closeRequired.length} received`
@@ -96,6 +99,7 @@ export function buildFinancialFlow(summary, ctx, claim) {
     ...STEP.figures,
     empty: null,
     done: missing.length === 0,
+    workable: missing.length > 0,
     line: missing.length === 0 ? 'all set' : `${missing.length} still to set`,
     action: missing.length === 0
       ? null
@@ -115,6 +119,9 @@ export function buildFinancialFlow(summary, ctx, claim) {
     rows: outRows,
     empty: outEmpty,
     done: outApplies.length === 0 || outPendingRows.length === 0,
+    // Nothing can be raised while every invoice still waiting is waiting on its
+    // figures, which is the figures step's work rather than this one's.
+    workable: outPendingRows.some((r) => !r.state.awaiting),
     pendingLabels: outPendingRows.map((r) => r.item.label),
     line: outEmpty ? outEmpty.title
       : outPendingRows.length === 0 ? `${outApplies.length} raised`
@@ -138,6 +145,7 @@ export function buildFinancialFlow(summary, ctx, claim) {
     rows: inRows,
     empty: inEmpty,
     done: inApplies.length === 0 || inPendingRows.length === 0,
+    workable: inPendingRows.length > 0,
     pendingLabels: inPendingRows.map((r) => r.item.label),
     line: inEmpty ? inEmpty.title
       : inPendingRows.length === 0 ? `${inApplies.length} received`
@@ -168,6 +176,10 @@ export function buildFinancialFlow(summary, ctx, claim) {
     rows: payRows,
     empty: payEmpty,
     done: payApplies.length === 0 || paidCount === payApplies.length,
+    // A payment can be recorded as soon as an invoice has gone out or come in, or
+    // has at least been asked for from accounts — so the step is live from the
+    // moment there is anything to pay, wherever the job has got to.
+    workable: !!payPending,
     line: payEmpty ? payEmpty.title
       : paidCount === payApplies.length ? 'everything paid'
         : `${paidCount} of ${payApplies.length} paid`,
