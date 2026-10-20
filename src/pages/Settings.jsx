@@ -10,6 +10,7 @@ import {
   Users,
   CalendarDays,
   ChevronRight,
+  Receipt,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -21,6 +22,7 @@ import { base44 } from "@/api/base44Client";
 import EmailTemplates from "./EmailTemplates";
 import UserManagement from "./UserManagement";
 import ChaserEmailSettings from "./ChaserEmailSettings";
+import InvoicingSettingsTab from "../components/settings/InvoicingSettingsTab";
 import CompanyIdLookup from "./CompanyIdLookup";
 import EmployeeManagement from "./EmployeeManagement";
 
@@ -38,6 +40,7 @@ const SETTINGS_SECTIONS = [
     items: [
       { id: "portals", label: "Portal Management", icon: Globe, adminOnly: true },
       { id: "chasers", label: "Chaser Emails", icon: Send, adminOnly: true },
+      { id: "invoicing", label: "Invoicing", icon: Receipt, adminOnly: true },
       { id: "users", label: "User Management", icon: Users, permission: "canManage" },
 
     ],
@@ -108,6 +111,7 @@ export default function Settings() {
       case "portals":     return <PortalManagementTab />;
       case "email":       return <EmailTemplates />;
       case "chasers":     return <ChaserEmailSettings />;
+      case "invoicing":   return <InvoicingSettingsTab />;
       case "users":       return <UserManagement />;
       case "companyids":  return <CompanyIdLookup />;
       case "employees":   return <EmployeeManagement />;

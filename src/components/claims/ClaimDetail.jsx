@@ -30,7 +30,8 @@ import {
     Star,
     CheckCircle,
     Save,
-    Copy
+    Copy,
+    Lock
 } from "lucide-react";
 import { format } from "date-fns";
 import StatusBadge from "../shared/StatusBadge";
@@ -45,16 +46,13 @@ import ClaimCreditRepairForm from './ClaimCreditRepairForm';
 import CreditRepairRatesCard from './CreditRepairRatesCard';
 import CreditRepairInstructionModal from './CreditRepairInstructionModal';
 import ClaimReferrerForm from './ClaimReferrerForm';
-import ClaimFinancialsForm from './ClaimFinancialsForm';
+import ClaimFinancials from './financials/ClaimFinancials';
 import InlineEditableSection, { InlineField, useInlineEdit } from './InlineEditableSection';
 import ClaimBodyshopForm from './ClaimBodyshopForm';
 import ClaimBodyshopInfo from './ClaimBodyshopInfo.jsx';
 import ClaimBodyshopAllocateButton from './ClaimBodyshopAllocateButton';
 
 import ClaimStatusForm from './ClaimStatusForm';
-import FinancialCalculator from './FinancialCalculator';
-import FinancialSummary from './FinancialSummary';
-import InvoiceTracker from './InvoiceTracker';
 
 import ClaimVehicleDamageForm from './ClaimVehicleDamageForm';
 import ClaimIndemnityForm from './ClaimIndemnityForm';
@@ -1343,14 +1341,23 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
 
       case 'financials':
         return (
-          <EditableSection title="Financials" icon={DollarSign} claim={claim} onUpdate={handleUpdate} EditComponent={ClaimFinancialsForm} canEdit={canEdit}>
-            <FinancialSummary claim={claim} onClaimUpdated={(updated) => handleUpdate(updated)} />
-            {isInternalUser && (
-              <div className="mt-5 pt-5 border-t border-border">
-                <InvoiceTracker claim={claim} currentUser={currentUser} onUpdate={handleUpdate} />
-              </div>
-            )}
-          </EditableSection>
+          <div className="bg-card border border-border rounded-[10px] p-4 md:p-5 shadow-sm">
+            <div className="flex items-center gap-2.5 pb-3 mb-4 border-b border-border">
+              <DollarSign className="w-4 h-4 text-muted-foreground" />
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Financials</h3>
+              {isInternalUser && (
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground text-[10px] font-semibold">
+                  <Lock className="w-2.5 h-2.5" /> Internal only
+                </span>
+              )}
+            </div>
+            <ClaimFinancials
+              claim={claim}
+              currentUser={currentUser}
+              onUpdate={handleUpdate}
+              showInvoicing={isInternalUser}
+            />
+          </div>
         );
 
       case 'dates':

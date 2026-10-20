@@ -1,0 +1,110 @@
+import { useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { base44 } from '@/api/base44Client';
+import { useFileUpload } from '@/hooks/useFileUpload';
+import { invoiceDocKey } from '@/components/shared/invoiceChecklist';
+
+/**
+ * The files filed against a claim's invoices. They are stored as ClaimDocument
+ * rows under an `inv_` item key and mirrored into the claim's Internal Updates
+ * file storage so the team can find them there too.
+ */
+export default function useClaimInvoiceDocs(claim, currentUser) {
+  const queryClient = useQueryClient();
+  const { uploadFiles, isUploading } = useFileUpload();
+  const [viewingFile, setViewingFile] = useState(null);
+  const [pendingDelete, setPendingDelete] = useState(null);
+
+  const { data: docs = [] } = useQuery({
+    queryKey: ['claim-documents', claim.id],
+    queryFn: async () => {
+      const page = await base44.entities.ClaimDocument.filter({ claim_id: claim.id }, { sort: 'created_date' });
+      return page.items || [];
+    },
+    enabled: !!claim.id,
+  });
+
+  const filesFor = (itemKey) => docs.filter((d) => d.item_key === invoiceDocKey(itemKey));
+
+  const refresh = () => {
+    queryClient.invalidateQueries({ queryKey: ['claim-documents', claim.id] });
+    queryClient.invalidateQueries({ queryKey: ['notes', claim.id, 'Claim'] });
+  };
+
+  /** Files the uploads against an invoice and returns the created file URLs. */
+  const uploadToItem = async (item, fileList) => {
+    const files = Array.from(fileList || []);
+    if (!files.length) return [];
+    const urls = await uploadFiles(files);
+    if (!urls?.length) return [];
+
+    const created = [];
+    for (let i = 0; i < urls.length; i++) {
+      try {
+        await base44.entities.ClaimDocument.create({
+          claim_id: claim.id,
+          item_key: invoiceDocKey(item.key),
+          file_url: urls[i],
+          file_name: files[i]?.name || urls[i].split('/').pop(),
+          uploaded_by_email: currentUser?.email || '',
+          uploaded_by_name: currentUser?.full_name || '',
+          uploaded_at: new Date().toISOString(),
+          source: 'manual',
+        });
+        created.push(urls[i]);
+      } catch (e) {
+        console.error('Create invoice document record failed', e);
+      }
+    }
+    if (!created.length) return [];
+
+    try {
+      await base44.entities.Note.create({
+        content: `Invoice document uploaded — ${item.label}`,
+        parent_id: claim.id,
+        parent_type: 'Claim',
+        update_type: 'Accounts',
+        file_urls: created,
+        liked_by: [],
+        starred: false,
+      });
+    } catch (e) {
+      console.error('Create invoice update note failed', e);
+    }
+
+    refresh();
+    return created;
+  };
+
+  const renameFile = async (doc, newName) => {
+    const name = (newName || '').trim();
+    if (!name) return;
+    await base44.entities.ClaimDocument.update(doc.id, { file_name: name });
+    refresh();
+  };
+
+  /** Queues a file for deletion, confirmed by the container's dialog. */
+  const deleteFile = (item, doc) => {
+    setPendingDelete({
+      fileName: doc.file_name || 'this file',
+      label: item.label,
+      action: async () => {
+        await base44.entities.ClaimDocument.delete(doc.id);
+        refresh();
+      },
+    });
+  };
+
+  return {
+    files: docs,
+    filesFor,
+    uploadToItem,
+    renameFile,
+    deleteFile,
+    isUploading,
+    viewingFile,
+    setViewingFile,
+    pendingDelete,
+    setPendingDelete,
+  };
+}

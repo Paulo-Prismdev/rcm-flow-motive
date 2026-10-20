@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 import {
-  Check, X, Ban, Clock, Hourglass, MoreVertical, Upload, Pencil, Trash2,
-  AlertTriangle, Undo2, Unlock, SlidersHorizontal,
+  Check, X, Ban, Clock, MoreVertical, Upload, Pencil, Trash2,
+  AlertTriangle, Undo2, Unlock, SlidersHorizontal, Hourglass,
 } from 'lucide-react';
 import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem,
@@ -11,13 +11,13 @@ import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip
 import { Input } from '@/components/ui/input';
 import { fmtGBP } from '@/components/shared/creditRepairRates';
 import { TRACKER_TONES } from './trackerTones';
-import InvoiceItemDetails from './InvoiceItemDetails';
+import { isInvoiceDocument } from '@/components/shared/invoiceChecklist';
 
-// One line of the invoicing tracker: a light card edged in its status colour —
-// red until it has been raised or received, amber while it waits to be paid,
-// green once it is paid, grey while a credit repair amount cannot be worked out.
-// The card carries the invoice name, its amount and the date that matters;
-// everything else lives behind the ⋮ menu and the details panel.
+// The status button of one invoice: a light button edged in its status colour —
+// red until it has been raised or received, amber while it waits to be paid or
+// has just been requested from accounts, green once it is paid, grey while a
+// credit repair amount cannot be worked out. Everything else about the invoice
+// lives in the row beside it and behind the discreet ⋮ menu.
 const GLYPHS = {
   positive: <Check className="w-3 h-3" strokeWidth={3} />,
   warning: <Clock className="w-3 h-3" strokeWidth={3} />,
@@ -32,48 +32,57 @@ const formatDay = (value) => {
   return isNaN(d.getTime()) ? '' : d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
 };
 
+export function invoiceToneKey(item, state) {
+  if (state.notApplicable) return 'faded';
+  if (state.awaiting) return 'neutral';
+  if (isInvoiceDocument(item)) return state.received ? 'positive' : 'negative';
+  if (state.paid) return 'positive';
+  if (state.date || state.requested || state.amount > 0) return 'warning';
+  return 'negative';
+}
+
+export function invoiceStatusLabel(item, state) {
+  if (state.notApplicable) return 'not applicable';
+  if (state.awaiting) return 'awaiting figures';
+  if (isInvoiceDocument(item)) return state.received ? (item.direction === 'in' ? 'received' : 'sent') : 'outstanding';
+  if (state.paid) return 'paid';
+  if (state.requested && !state.date) return 'requested';
+  if (state.date) return item.direction === 'in' ? 'received' : 'sent';
+  return 'outstanding';
+}
+
 export default function InvoiceItemCard({
   item, state, files, isUploading,
   onChange, onUpload, onDeleteFile, onRenameFile, onViewFile,
+  onToggleDetails, detailsOpen, onUndoRequest,
 }) {
   const fileInputRef = useRef(null);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [detailsOpen, setDetailsOpen] = useState(false);
   const [renamingId, setRenamingId] = useState(null);
   const [renameValue, setRenameValue] = useState('');
 
-  const isDocument = item.kind === 'document';
-  const isDerived = !!item.amountSource;
+  const isDocument = isInvoiceDocument(item);
   const dateLabel = item.dateLabel || (item.direction === 'in' ? 'Received' : 'Sent');
-  const variance = state.variance;
-  // Credit repair invoices sit neutral until the rates or the final repair cost
-  // let us work the amount out — there is nothing to pay or chase yet.
-  const isAwaiting = !isDocument && !state.notApplicable && state.awaiting === true;
-  const raised = state.amount > 0 || !!state.date;
-
-  const toneKey = state.notApplicable ? 'faded'
-    : isAwaiting ? 'neutral'
-      : isDocument ? (state.received ? 'positive' : 'negative')
-        : state.paid ? 'positive'
-          : raised ? 'warning'
-            : 'negative';
+  const toneKey = invoiceToneKey(item, state);
   const tone = TRACKER_TONES[toneKey];
+  const statusLabel = invoiceStatusLabel(item, state);
   // The quick paid action only belongs on an invoice that has gone out or come
   // in but is still waiting to be paid.
-  const showMarkPaid = toneKey === 'warning';
+  const showMarkPaid = toneKey === 'warning' && !state.paid && !!state.date;
 
-  const subline = state.notApplicable ? ''
-    : isAwaiting ? (state.hint || 'Awaiting amount')
-    : isDocument ? (state.date ? `${dateLabel} ${formatDay(state.date)}` : '')
-      : state.paid ? (state.paidDate ? `Paid ${formatDay(state.paidDate)}` : 'Paid')
-        : raised && state.date ? `${dateLabel} ${formatDay(state.date)}`
-          : '';
+  const subline = state.notApplicable ? 'Not applicable'
+    : state.awaiting ? (state.hint || 'Awaiting figures')
+      : isDocument ? (state.date ? `${dateLabel} ${formatDay(state.date)}` : '')
+        : state.paid ? (state.paidDate ? `Paid ${formatDay(state.paidDate)}` : 'Paid')
+          : state.requested && !state.date ? `Requested ${formatDay(state.requestedAt)}`
+            : state.date ? `${dateLabel} ${formatDay(state.date)}`
+              : '';
 
   const hint = state.notApplicable
     ? 'Not applicable — use ⋮ to change'
-    : isAwaiting ? 'No invoice can be raised yet'
+    : state.awaiting ? (state.hint || 'No amount can be worked out yet')
       : toneKey === 'negative' ? `Click to upload this ${isDocument ? 'document' : 'invoice'}`
-        : files.length === 0 ? 'Click to add the amount and dates'
+        : files.length === 0 ? 'Click to set the amount and dates'
           : files.length === 1 ? 'Click to open the document' : 'Click to choose a document';
 
   const handleCardClick = () => {
@@ -82,7 +91,7 @@ export default function InvoiceItemCard({
     if (toneKey === 'negative') { fileInputRef.current?.click(); return; }
     if (files.length === 1) { onViewFile(files[0].file_url); return; }
     if (files.length > 1) { setMenuOpen(true); return; }
-    setDetailsOpen(true);
+    onToggleDetails?.();
   };
 
   const submitRename = (doc) => {
@@ -110,23 +119,8 @@ export default function InvoiceItemCard({
                 {GLYPHS[toneKey]}
               </span>
               <span className="min-w-0 flex-1">
-                <span className="flex items-baseline gap-1.5">
-                  <span className="text-xs font-semibold text-foreground truncate">{item.label}</span>
-                  {state.amount > 0 && (
-                    <span className="text-xs font-bold tabular-nums text-foreground flex-shrink-0">{fmtGBP(state.amount)}</span>
-                  )}
-                  {variance && (
-                    <span className="inline-flex items-center justify-center w-4 h-4 rounded-full flex-shrink-0 bg-amber-500 text-white ring-1 ring-amber-600/30">
-                      <AlertTriangle className="w-2.5 h-2.5" />
-                    </span>
-                  )}
-                  {state.notApplicable && (
-                    <span className="text-[9px] font-medium uppercase tracking-wider text-muted-foreground flex-shrink-0">n/a</span>
-                  )}
-                </span>
-                {subline && (
-                  <span className="block text-[10px] text-muted-foreground truncate">{subline}</span>
-                )}
+                <span className="block text-xs font-semibold text-foreground truncate">{item.label}</span>
+                <span className="block text-[10px] text-muted-foreground truncate">{subline || statusLabel}</span>
               </span>
             </button>
           </TooltipTrigger>
@@ -134,11 +128,13 @@ export default function InvoiceItemCard({
             <p className="text-[11px] font-semibold mb-1">
               {item.label}{state.amount > 0 ? ` · ${fmtGBP(state.amount)}` : ''}
             </p>
+            <p className="text-[10px] opacity-80 capitalize">{statusLabel}</p>
             {state.date && <p className="text-[10px] opacity-80">{dateLabel} {formatDay(state.date)}</p>}
+            {state.requested && <p className="text-[10px] opacity-80">Requested {formatDay(state.requestedAt)}</p>}
             {state.paid && state.paidDate && <p className="text-[10px] opacity-80">Paid {formatDay(state.paidDate)}</p>}
-            {variance && (
+            {state.variance && (
               <p className="text-[10px] opacity-90 pt-1 mt-1 border-t border-white/20">
-                {variance.reason}: calculated {fmtGBP(variance.calculated)}, invoiced {fmtGBP(variance.invoiced)}
+                {state.variance.reason}: calculated {fmtGBP(state.variance.calculated)}, invoiced {fmtGBP(state.variance.invoiced)}
               </p>
             )}
             {files.length > 0 ? (
@@ -240,8 +236,8 @@ export default function InvoiceItemCard({
               <DropdownMenuItem onSelect={() => fileInputRef.current?.click()} className="text-xs">
                 <Upload className="w-3.5 h-3.5" /> Add file
               </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => setDetailsOpen((v) => !v)} className="text-xs">
-                <SlidersHorizontal className="w-3.5 h-3.5" /> {detailsOpen ? 'Hide details' : 'Edit details'}
+              <DropdownMenuItem onSelect={() => onToggleDetails?.()} className="text-xs">
+                <SlidersHorizontal className="w-3.5 h-3.5" /> {detailsOpen ? 'Hide details' : 'Amount, dates & paid'}
               </DropdownMenuItem>
 
               {!isDocument && (
@@ -252,6 +248,12 @@ export default function InvoiceItemCard({
                     {state.paid ? 'Mark unpaid' : 'Mark paid'}
                   </DropdownMenuItem>
                 </>
+              )}
+
+              {state.requested && onUndoRequest && (
+                <DropdownMenuItem onSelect={() => onUndoRequest()} className="text-xs">
+                  <Undo2 className="w-3.5 h-3.5" /> Undo accounts request
+                </DropdownMenuItem>
               )}
 
               <DropdownMenuSeparator />
@@ -266,7 +268,7 @@ export default function InvoiceItemCard({
                 {state.notApplicable ? 'Mark as applicable' : 'Mark not applicable'}
               </DropdownMenuItem>
 
-              {isDerived && state.invoicedLocked && (
+              {state.locked && (
                 <DropdownMenuItem
                   onSelect={() => onChange(
                     { amount: null },
@@ -276,6 +278,13 @@ export default function InvoiceItemCard({
                 >
                   <Unlock className="w-3.5 h-3.5" /> Unlock amount
                 </DropdownMenuItem>
+              )}
+
+              {state.variance && (
+                <p className="flex items-start gap-1.5 px-2 py-1.5 text-[10px] text-amber-600 dark:text-amber-400">
+                  <AlertTriangle className="w-3 h-3 flex-shrink-0 mt-px" />
+                  <span>{state.variance.reason}.</span>
+                </p>
               )}
             </DropdownMenuContent>
           </DropdownMenu>
@@ -289,8 +298,6 @@ export default function InvoiceItemCard({
           onChange={(e) => { if (e.target.files?.length) onUpload(item, e.target.files); e.target.value = ''; }}
         />
       </div>
-
-      {detailsOpen && <InvoiceItemDetails item={item} state={state} onChange={onChange} />}
     </div>
   );
 }

@@ -20,7 +20,8 @@ import { isClosedJourney, isUpdateTrackingClosed, computeClientCommStatusFlag } 
 import { useToast } from "@/components/ui/use-toast";
 import { sanitizeClaimData } from '@/components/shared/sanitizeClaimData';
 import { formatAuthorisingParty, authorisingPartyOrganisation, AUTHORISING_PARTY_LABELS } from '@/components/shared/authorisingParty';
-import { claimInvoiceSummary } from '@/components/shared/invoiceChecklist';
+import { claimInvoiceSummary, deriveInvoiceStatus } from '@/components/shared/invoiceChecklist';
+import InvoiceStatusReviewBanner from '../components/claims/InvoiceStatusReviewBanner';
 
 // ── Repairs table — fixed column widths (global config) ──
 // Every column has a fixed width (min = max) so the table never recomputes
@@ -45,6 +46,23 @@ const STATUS_COLORS = {
   blue: '#3b82f6', green: '#22c55e', orange: '#f97316',
   red: '#ef4444', purple: '#a855f7', yellow: '#eab308', gray: '#6b7280',
   cyan: '#06b6d4', indigo: '#6366f1', amber: '#f59e0b',
+};
+
+// Invoicing statuses worth flagging on a claim card — derived from the invoices
+// themselves rather than the stored invoice_status field.
+const INVOICE_STATUS_ATTENTION = {
+  'Not Ready for Invoicing': {
+    short: 'Figures', title: 'figures missing',
+    chip: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
+  },
+  'Invoice Required - Pending': {
+    short: 'Invoices', title: 'invoices still to be raised',
+    chip: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
+  },
+  'Invoice Overdue': {
+    short: 'Overdue', title: 'invoice overdue',
+    chip: 'bg-red-500 text-white',
+  },
 };
 
 const calculateUpdateStatus = (claim) => {
@@ -523,6 +541,20 @@ export default function ClaimsPage() {
                 </span>
               );
             })()}
+            {(() => {
+              // Worked out from the invoices themselves, so it can never say
+              // invoiced while invoices are still to be raised.
+              const inv = deriveInvoiceStatus(claim);
+              if (!INVOICE_STATUS_ATTENTION[inv]) return null;
+              return (
+                <span
+                  className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md text-[10px] font-semibold leading-none ${INVOICE_STATUS_ATTENTION[inv].chip}`}
+                  title={`Invoicing: ${INVOICE_STATUS_ATTENTION[inv].title}`}
+                >
+                  <FileText className="w-2.5 h-2.5" />{INVOICE_STATUS_ATTENTION[inv].short}
+                </span>
+              );
+            })()}
           </div>
         </td>
         {/* Sticky right: Updates quick view */}
@@ -612,11 +644,20 @@ export default function ClaimsPage() {
           <span className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate">{claim.client_name || '—'}</span>
           <span className="text-xs text-gray-500 dark:text-gray-400 truncate">{claim.make_model || '—'} · {formatDate(claim.loss_date)}</span>
           {claim.referrer && <span className="text-xs text-gray-400 dark:text-gray-500 truncate">{claim.referrer}</span>}
-          {(isException || claim.secondary_status || claim.tertiary_status) && (
-            <div className="mt-1 flex flex-wrap gap-1">
+          {(isException || claim.secondary_status || claim.tertiary_status || INVOICE_STATUS_ATTENTION[deriveInvoiceStatus(claim)]) && (
+            <div className="mt-1 flex flex-wrap gap-1 items-center">
               {isException && <StatusBadge status={journeyStatus} />}
               {claim.secondary_status && <StatusBadge status={claim.secondary_status} />}
               {claim.tertiary_status && <StatusBadge status={claim.tertiary_status} variant="secondary" />}
+              {(() => {
+                const inv = INVOICE_STATUS_ATTENTION[deriveInvoiceStatus(claim)];
+                if (!inv) return null;
+                return (
+                  <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-medium leading-none ${inv.chip}`} title={`Invoicing: ${inv.title}`}>
+                    {inv.title}
+                  </span>
+                );
+              })()}
             </div>
           )}
         </div>
@@ -785,6 +826,9 @@ export default function ClaimsPage() {
           </div>
         </div>
       )}
+
+      {/* Claims the old accounts email marked invoiced while invoices are outstanding */}
+      <InvoiceStatusReviewBanner claims={allClaims} onOpenClaim={(claim) => setSelectedClaim(claim)} />
 
       {/* List / Table */}
       <div ref={scrollRef} className="flex-1 overflow-auto min-h-0" style={{WebkitOverflowScrolling: 'touch'}}>
