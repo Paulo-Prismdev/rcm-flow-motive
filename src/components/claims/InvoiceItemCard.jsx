@@ -35,7 +35,12 @@ const formatDay = (value) => {
 export function invoiceToneKey(item, state) {
   if (state.notApplicable) return 'faded';
   if (state.awaiting) return 'neutral';
-  if (isInvoiceDocument(item)) return state.received ? 'positive' : 'negative';
+  // A close-out document only goes green once its copy is on file: a date
+  // recorded on its own is amber.
+  if (isInvoiceDocument(item)) {
+    if (state.received) return 'positive';
+    return state.dateRecordedNoCopy ? 'warning' : 'negative';
+  }
   if (state.paid) return 'positive';
   if (state.date || state.requested || state.amount > 0) return 'warning';
   return 'negative';
@@ -44,7 +49,10 @@ export function invoiceToneKey(item, state) {
 export function invoiceStatusLabel(item, state) {
   if (state.notApplicable) return 'not applicable';
   if (state.awaiting) return 'awaiting figures';
-  if (isInvoiceDocument(item)) return state.received ? (item.direction === 'in' ? 'received' : 'sent') : 'outstanding';
+  if (isInvoiceDocument(item)) {
+    if (state.received) return item.direction === 'in' ? 'received' : 'sent';
+    return state.dateRecordedNoCopy ? 'date recorded, copy not attached' : 'outstanding';
+  }
   if (state.paid) return 'paid';
   if (state.requested && !state.date) return 'requested';
   if (state.date) return item.direction === 'in' ? 'received' : 'sent';
@@ -69,7 +77,7 @@ export default function InvoiceItemCard({
 
   const subline = state.notApplicable ? 'Not applicable'
     : state.awaiting ? ''
-      : isDocument ? (state.date ? `${dateLabel} ${formatDay(state.date)}` : '')
+      : isDocument ? (state.received && state.date ? `${dateLabel} ${formatDay(state.date)}` : '')
         : state.paid ? (state.paidDate ? `Paid ${formatDay(state.paidDate)}` : 'Paid')
           : state.requested && !state.date ? `Requested ${formatDay(state.requestedAt)}`
             : state.date ? `${dateLabel} ${formatDay(state.date)}`

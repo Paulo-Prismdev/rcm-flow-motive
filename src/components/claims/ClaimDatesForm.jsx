@@ -17,6 +17,7 @@ export default function ClaimDatesForm({ claim, onSave, onCancel }) {
         loss_date: toInputDate(claim.loss_date),
         estimate_completed: toInputDate(claim.estimate_completed),
         authority_received: toInputDate(claim.authority_received),
+        final_authority_received: toInputDate(claim.final_authority_received),
         bs_instructed: toInputDate(claim.bs_instructed),
         booking_in_date: toInputDate(claim.booking_in_date),
         on_site_date: toInputDate(claim.on_site_date),
@@ -76,6 +77,10 @@ export default function ClaimDatesForm({ claim, onSave, onCancel }) {
                 <div>
                     <label className="text-sm text-gray-500">Completion Date</label>
                     <Input type="date" value={formData.completion_date} onChange={e => handleChange('completion_date', e.target.value)} className="neomorph-inset" />
+                </div>
+                <div>
+                    <label className="text-sm text-gray-500">Final Authority Received</label>
+                    <Input type="date" value={formData.final_authority_received} onChange={e => handleChange('final_authority_received', e.target.value)} className="neomorph-inset" />
                 </div>
                 <div>
                     <label className="text-sm text-gray-500">Claim Complete Date</label>

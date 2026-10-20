@@ -88,7 +88,9 @@ export const INVOICE_ITEMS = [
     direction: 'in',
     dateLabel: 'Received',
     requires: 'not_credit_repair',
-    bindings: { date: 'authority_received' },
+    // Its own date: "Authority Received" is the initial authority, which belongs
+    // to the Initial Authority document, not to this one.
+    bindings: { date: 'final_authority_received' },
   },
   {
     key: 'collection_note',
@@ -484,7 +486,10 @@ export function getInvoiceItemState(item, claim, hasFiles = false) {
     date,
     paid,
     paidDate,
-    received: asDocument ? (!!date || !!hasFiles) : false,
+    // A close-out document is only received/sent once a copy is actually filed:
+    // its date on its own is not enough.
+    received: asDocument ? !!hasFiles : false,
+    dateRecordedNoCopy: asDocument && !hasFiles && !!date,
     notApplicable: entry.not_applicable === true,
     invoiceNumber: entry.invoice_number || '',
     locked,
@@ -523,12 +528,25 @@ const isItemHandled = (item, state) =>
     : state.paid || !!state.date || state.requested || (!state.derived && state.amount > 0);
 
 /**
- * Summary across the items visible on this claim.
- * `hasFile(itemKey)` reports whether an invoice item already holds a file — the
- * claims list has no documents loaded, so there an item counts as outstanding
- * until its date is recorded (uploading sets that date automatically).
+ * Stand-in for "a copy is filed" where the documents aren't loaded: the claims
+ * list runs off the claim record alone, so a recorded date is the closest it can
+ * get. Only the list's filters and overall status use this — every status shown
+ * on screen is worked out from the real files.
  */
-export function computeInvoiceSummary(claim, ctx, hasFile = () => false) {
+export function claimHasFiledCopy(claim) {
+  return (itemKey) => {
+    const item = INVOICE_ITEMS.find((i) => i.key === itemKey);
+    if (!isInvoiceDocument(item)) return false;
+    const bound = item.bindings?.date ? claim?.[item.bindings.date] : null;
+    return isStored(bound) || isStored(claim?.invoice_tracker?.items?.[itemKey]?.date);
+  };
+}
+
+/**
+ * Summary across the items visible on this claim.
+ * `hasFile(itemKey)` reports whether an invoice item already holds a file.
+ */
+export function computeInvoiceSummary(claim, ctx, hasFile = claimHasFiledCopy(claim)) {
   const rows = INVOICE_ITEMS
     .filter((item) => isInvoiceItemVisible(item, ctx))
     .map((item) => ({ item, state: getInvoiceItemState(item, claim, hasFile(item.key)) }));
@@ -610,7 +628,7 @@ export function missingJobFigures(claim, ctx) {
  * it can never read "Invoiced" while invoices are still to be raised or figures
  * are still missing.
  */
-export function deriveInvoiceStatus(claim, hasFile = () => false) {
+export function deriveInvoiceStatus(claim, hasFile = claimHasFiledCopy(claim)) {
   const ctx = claimInvoiceContext(claim);
   const summary = computeInvoiceSummary(claim, ctx, hasFile);
   const rows = summary.rows.filter((r) => !r.state.notApplicable);

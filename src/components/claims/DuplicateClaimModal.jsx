@@ -30,7 +30,7 @@ const EXCLUDED_FIELDS = new Set([
   'linked_estimate_id', 'linked_engineering_id', 'linked_parts_id',
   'linked_third_party_claim_id', 'linked_original_claim_id',
   // Progress / milestone dates (keep loss_date only)
-  'date_received', 'estimate_completed', 'authority_received',
+  'date_received', 'estimate_completed', 'authority_received', 'final_authority_received',
   'bs_instructed', 'booking_in_date', 'on_site_date', 'hand_over_date',
   'all_parts_on_site', 'ecd', 'completion_date',
   'invoice_received_repairer', 'invoice_sent_referrer', 'total_loss_date',

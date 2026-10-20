@@ -1374,6 +1374,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
               <InlineField label="Hand Over Date" name="hand_over_date" isDate />
               <InlineField label="Est. Completion (ECD)" name="ecd" isDate />
               <InlineField label="Completion Date" name="completion_date" isDate />
+              <InlineField label="Final Authority Received" name="final_authority_received" isDate />
               <InlineField label="Claim Complete Date" name="claim_complete_date" isDate />
             </div>
             <div className="mt-3 pt-3 border-t border-border">

@@ -487,7 +487,13 @@
     },
     "authority_received": {
       "type": "string",
-      "format": "date"
+      "format": "date",
+      "description": "Initial authority received \u2014 the date the initial authority came back, supplying the Initial Authority document. The final authority has its own date."
+    },
+    "final_authority_received": {
+      "type": "string",
+      "format": "date",
+      "description": "Final Authority Received \u2014 the date the final authority came back, supplying the Final Authority close-out document in Financials. Kept separate from authority_received, which is the initial authority."
     },
     "bs_instructed": {
       "type": "string",
@@ -1025,7 +1031,7 @@
     },
     "invoice_tracker": {
       "type": "object",
-      "description": "Internal invoicing tracker state. Holds { second_referrer_enabled, second_referrer_name, items: { <item_key>: { amount, date, paid, paid_date, not_applicable } } }. Values that duplicate an existing financial field (invoice_amount, invoice_sent_date, invoice_payment_received, authority_received, excess_contribution_*) are read from and written to that field instead, so each date and paid status is recorded in exactly one place.",
+      "description": "Internal invoicing tracker state. Holds { second_referrer_enabled, second_referrer_name, items: { <item_key>: { amount, date, paid, paid_date, not_applicable } } }. Values that duplicate an existing financial field (invoice_amount, invoice_sent_date, invoice_payment_received, final_authority_received, excess_contribution_*) are read from and written to that field instead, so each date and paid status is recorded in exactly one place.",
       "default": {}
     }
   },

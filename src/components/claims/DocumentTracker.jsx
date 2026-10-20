@@ -12,12 +12,16 @@ import { logActivity } from '@/components/shared/useActivityLogger';
 import FileViewer from '@/components/shared/FileViewer';
 import ConfirmDialog from '@/components/shared/ConfirmDialog';
 import {
-  DOC_ITEMS, computeChecklistSummary,
+  DOC_ITEMS, computeChecklistSummary, itemKeyDate,
 } from '@/components/shared/docChecklist';
 import DocumentChecklistCard from '@/components/claims/DocumentChecklistCard';
 import { TooltipProvider } from '@/components/ui/tooltip';
 
 const STATUS_QUERY_KEY = (id) => ['claim-documents', id];
+
+// A document arriving today is what an empty Key Dates date is set from, and it
+// stays editable right there on the item.
+const todayISO = () => new Date().toISOString().split('T')[0];
 
 // Key Dates are stored as YYYY-MM-DD; the date inputs need the same shape.
 const toInputDate = (value) => {
@@ -131,11 +135,18 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
     });
     queryClient.invalidateQueries({ queryKey: STATUS_QUERY_KEY(claim.id) });
     const refreshed = await base44.entities.ClaimDocument.filter({ claim_id: claim.id }, { sort: 'created_date' });
-    persistClaimCounts(refreshed.items || [], statusMap);
 
-    // The file is in — offer the Key Dates field it supplies.
+    // The file is in: the Key Dates date it supplies is filled in when it is
+    // still empty, and its field is opened straight away so it can be put right.
     const item = DOC_ITEMS.find((i) => i.key === itemKey);
-    if (item?.dateField && !claim[item.dateField.field]) {
+    const dateMissing = !!item?.dateField && !claim[item.dateField.field];
+    persistClaimCounts(
+      refreshed.items || [],
+      statusMap,
+      dateMissing ? { [item.dateField.field]: todayISO() } : {}
+    );
+
+    if (dateMissing) {
       setFocusDateKey(item.key);
       setOpenMenuKey(item.key);
     }
@@ -241,14 +252,19 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
         user: currentUser,
       });
       // A moved legacy file leaves the claim's general file list, so the same
-      // document never sits in two places.
-      const extra = payload.legacyUrl
-        ? { file_urls: (Array.isArray(claim.file_urls) ? claim.file_urls : []).filter((u) => u !== payload.legacyUrl) }
-        : {};
+      // document never sits in two places. Filing it also fills in the Key Dates
+      // date it supplies, when that is still empty.
+      const dateMissing = !!item.dateField && !claim[item.dateField.field];
+      const extra = {
+        ...(payload.legacyUrl
+          ? { file_urls: (Array.isArray(claim.file_urls) ? claim.file_urls : []).filter((u) => u !== payload.legacyUrl) }
+          : {}),
+        ...(dateMissing ? { [item.dateField.field]: todayISO() } : {}),
+      };
       queryClient.invalidateQueries({ queryKey: STATUS_QUERY_KEY(claim.id) });
       const refreshed = await base44.entities.ClaimDocument.filter({ claim_id: claim.id }, { sort: 'created_date' });
       persistClaimCounts(refreshed.items || [], statusMap, extra);
-      if (item.dateField && !claim[item.dateField.field]) {
+      if (dateMissing) {
         setFocusDateKey(item.key);
         setOpenMenuKey(item.key);
       }
@@ -375,6 +391,7 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
                 status={status}
                 files={itemFiles}
                 uploading={isUploading}
+                dateRecorded={itemKeyDate(item, claim)}
                 keyDateLabel={item.dateField?.label}
                 keyDateValue={item.dateField ? toInputDate(claim[item.dateField.field]) : ''}
                 autoFocusKeyDate={focusDateKey === item.key}

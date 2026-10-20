@@ -16,6 +16,13 @@ export const DOC_ITEMS = [
 
 export const DOC_ITEM_KEYS = DOC_ITEMS.map((i) => i.key);
 
+/**
+ * The Key Dates value an item supplies, if it supplies one. It lives on the
+ * claim field, so this is the same value the Key Dates screen shows.
+ */
+export const itemKeyDate = (item, claim) =>
+  (item?.dateField ? claim?.[item.dateField.field] : null);
+
 export const DOC_STATUS_META = {
   received: { label: 'received', color: 'green', bg: 'bg-green-100 dark:bg-green-900/30', text: 'text-green-700 dark:text-green-300', dot: 'bg-green-500' },
   outstanding: { label: 'outstanding', color: 'amber', bg: 'bg-amber-100 dark:bg-amber-900/30', text: 'text-amber-700 dark:text-amber-300', dot: 'bg-amber-500' },
