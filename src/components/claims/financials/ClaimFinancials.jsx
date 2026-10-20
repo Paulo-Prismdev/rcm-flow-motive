@@ -557,10 +557,12 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
               multiple
               className="hidden"
               onChange={(e) => {
-                const files = e.target.files;
+                // The chosen files are read before the field is cleared: clearing
+                // it first empties the list the browser just handed over, and the
+                // upload would be dropped without a word.
                 const item = quickItem;
+                if (e.target.files?.length && item) handleUpload(item, e.target.files);
                 e.target.value = '';
-                if (files?.length && item) handleUpload(item, files);
               }}
             />
           </>
