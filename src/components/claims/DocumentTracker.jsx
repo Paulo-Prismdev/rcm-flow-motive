@@ -4,7 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
-  FileText, Upload, Trash2, Pencil, Check, X, MoreVertical, FileCheck2, FilePlus2,
+  FileText, Upload, Trash2, Pencil, Check, X, MoreVertical, FileCheck2, FilePlus2, CalendarDays,
 } from 'lucide-react';
 import { useFileUpload } from '@/hooks/useFileUpload';
 import { toast } from '@/components/ui/use-toast';
@@ -16,6 +16,16 @@ import {
 } from '@/components/shared/docChecklist';
 
 const STATUS_QUERY_KEY = (id) => ['claim-documents', id];
+
+// Key Dates are stored as YYYY-MM-DD; the date inputs need the same shape.
+const toInputDate = (value) => {
+  if (!value) return '';
+  try {
+    return new Date(value).toISOString().split('T')[0];
+  } catch {
+    return '';
+  }
+};
 
 export default function DocumentTracker({ claim, currentUser, onUpdate }) {
   const queryClient = useQueryClient();
@@ -29,6 +39,8 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
   // A document being dragged out of General Documents onto a checklist placeholder.
   const [dragDoc, setDragDoc] = useState(null);
   const [dropTarget, setDropTarget] = useState(null);
+  // Item whose Key Dates field we should focus, straight after a file lands in it.
+  const [focusDateKey, setFocusDateKey] = useState(null);
 
   const { data: docs = [], isLoading } = useQuery({
     queryKey: STATUS_QUERY_KEY(claim.id),
@@ -118,6 +130,10 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
     queryClient.invalidateQueries({ queryKey: STATUS_QUERY_KEY(claim.id) });
     const refreshed = await base44.entities.ClaimDocument.filter({ claim_id: claim.id }, { sort: 'created_date' });
     persistClaimCounts(refreshed.items || [], statusMap);
+
+    // The file is in — offer the Key Dates field it supplies.
+    const item = DOC_ITEMS.find((i) => i.key === itemKey);
+    if (item?.dateField && !claim[item.dateField.field]) setFocusDateKey(item.key);
   };
 
   const handleRename = async (doc) => {
@@ -173,6 +189,12 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
     persistClaimCounts(docs, newMap);
   };
 
+  // The date entered against a checklist item IS the claim's Key Dates field —
+  // one value in one place, editable from either screen.
+  const handleItemDateChange = (item, value) => {
+    onUpdate({ ...claim, [item.dateField.field]: value || null });
+  };
+
   // Drag a document out of General Documents and drop it on a placeholder to file
   // it as that document.
   const startDragDoc = (e, payload) => {
@@ -222,6 +244,7 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
       queryClient.invalidateQueries({ queryKey: STATUS_QUERY_KEY(claim.id) });
       const refreshed = await base44.entities.ClaimDocument.filter({ claim_id: claim.id }, { sort: 'created_date' });
       persistClaimCounts(refreshed.items || [], statusMap, extra);
+      if (item.dateField && !claim[item.dateField.field]) setFocusDateKey(item.key);
       toast({ title: `Filed as ${item.label}` });
     } catch (e) {
       toast({ title: 'Could not file that document', variant: 'destructive' });
@@ -374,6 +397,31 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
                     {meta.label}
                   </span>
                 </div>
+                {item.dateField && (itemFiles.length > 0 || claim[item.dateField.field]) && (
+                  <div
+                    className="flex items-center gap-1.5 mt-1.5"
+                    title={`Sets the "${item.dateField.label}" field on Key Dates`}
+                  >
+                    <CalendarDays className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+                    <span className="text-[11px] text-muted-foreground truncate min-w-0">{item.dateField.label}</span>
+                    <Input
+                      type="date"
+                      value={toInputDate(claim[item.dateField.field])}
+                      onChange={(e) => handleItemDateChange(item, e.target.value)}
+                      autoFocus={focusDateKey === item.key}
+                      className="h-7 text-xs ml-auto w-[124px] flex-shrink-0"
+                    />
+                    {claim[item.dateField.field] && (
+                      <button
+                        onClick={() => handleItemDateChange(item, '')}
+                        className="p-0.5 rounded text-gray-400 hover:text-red-500 flex-shrink-0"
+                        title="Clear this key date"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Files within item */}

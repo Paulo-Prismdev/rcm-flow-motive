@@ -1,11 +1,15 @@
 // Central definition of the claim document checklist and status logic.
 // Shared between the DocumentTracker UI and (mirrored in) backend functions.
 
+// `dateField` links a checklist item to the Key Dates field it supplies, so the
+// date entered against a document is written straight to that claim field (and
+// is the same value shown on the Key Dates screen). Items without a matching
+// Key Dates field carry no dateField.
 export const DOC_ITEMS = [
-  { key: 'instruction_from_referrer', label: 'Claim Form', required: true },
-  { key: 'instruction_to_repairer', label: 'Instruction To Repairer', required: true },
-  { key: 'initial_estimate', label: 'Initial Estimate', required: true },
-  { key: 'initial_authority', label: 'Initial Authority', required: true },
+  { key: 'instruction_from_referrer', label: 'Claim Form', required: true, dateField: { field: 'date_received', label: 'Date Received' } },
+  { key: 'instruction_to_repairer', label: 'Instruction To Repairer', required: true, dateField: { field: 'bs_instructed', label: 'Bodyshop Instructed' } },
+  { key: 'initial_estimate', label: 'Initial Estimate', required: true, dateField: { field: 'estimate_completed', label: 'Estimate Completed' } },
+  { key: 'initial_authority', label: 'Initial Authority', required: true, dateField: { field: 'authority_received', label: 'Authority Received' } },
   { key: 'supplementary_estimate', label: 'Supplementary Estimate', required: false },
   { key: 'supplementary_authority', label: 'Supplementary Authority', required: false },
 ];
