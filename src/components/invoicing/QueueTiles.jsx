@@ -10,19 +10,38 @@ import QueueTile from './QueueTile';
 export default function QueueTiles({ sections = [], onOpen }) {
   const [openKey, setOpenKey] = useState(null);
   const openSection = sections.find((section) => section.key === openKey) || null;
+  // Queues with work to do come first, in the order they were built (Warnings first);
+  // the clear ones drop to the end as chips.
+  const waiting = sections.filter((section) => section.count > 0);
+  const clear = sections.filter((section) => section.count === 0);
 
   return (
     <div className="space-y-2">
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-        {sections.map((section) => (
-          <QueueTile
-            key={section.key}
-            section={section}
-            open={openKey === section.key}
-            onToggle={() => setOpenKey((key) => (key === section.key ? null : section.key))}
-          />
-        ))}
-      </div>
+      {waiting.length > 0 && (
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+          {waiting.map((section) => (
+            <QueueTile
+              key={section.key}
+              section={section}
+              open={openKey === section.key}
+              onToggle={() => setOpenKey((key) => (key === section.key ? null : section.key))}
+            />
+          ))}
+        </div>
+      )}
+
+      {clear.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {clear.map((section) => (
+            <QueueTile
+              key={section.key}
+              section={section}
+              open={openKey === section.key}
+              onToggle={() => setOpenKey((key) => (key === section.key ? null : section.key))}
+            />
+          ))}
+        </div>
+      )}
 
       {openSection && (
         <div className="bg-card border border-border rounded-[10px] overflow-hidden">
