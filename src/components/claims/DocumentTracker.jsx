@@ -4,7 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
-  FileText, Upload, Trash2, Pencil, Check, X, MoreVertical, FileCheck2, FilePlus2, CalendarDays,
+  FileText, Upload, Trash2, Check, FileCheck2,
 } from 'lucide-react';
 import { useFileUpload } from '@/hooks/useFileUpload';
 import { toast } from '@/components/ui/use-toast';
@@ -12,8 +12,10 @@ import { logActivity } from '@/components/shared/useActivityLogger';
 import FileViewer from '@/components/shared/FileViewer';
 import ConfirmDialog from '@/components/shared/ConfirmDialog';
 import {
-  DOC_ITEMS, DOC_STATUS_META, computeChecklistSummary,
+  DOC_ITEMS, computeChecklistSummary,
 } from '@/components/shared/docChecklist';
+import DocumentChecklistCard from '@/components/claims/DocumentChecklistCard';
+import { TooltipProvider } from '@/components/ui/tooltip';
 
 const STATUS_QUERY_KEY = (id) => ['claim-documents', id];
 
@@ -29,8 +31,6 @@ const toInputDate = (value) => {
 
 export default function DocumentTracker({ claim, currentUser, onUpdate }) {
   const queryClient = useQueryClient();
-  const [renamingId, setRenamingId] = useState(null);
-  const [renameValue, setRenameValue] = useState('');
   const [viewingFile, setViewingFile] = useState(null);
   const [generalDialogOpen, setGeneralDialogOpen] = useState(false);
   const [generalTitle, setGeneralTitle] = useState('');
@@ -41,6 +41,8 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
   const [dropTarget, setDropTarget] = useState(null);
   // Item whose Key Dates field we should focus, straight after a file lands in it.
   const [focusDateKey, setFocusDateKey] = useState(null);
+  // Item whose actions menu is open (one at a time).
+  const [openMenuKey, setOpenMenuKey] = useState(null);
 
   const { data: docs = [], isLoading } = useQuery({
     queryKey: STATUS_QUERY_KEY(claim.id),
@@ -133,23 +135,25 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
 
     // The file is in — offer the Key Dates field it supplies.
     const item = DOC_ITEMS.find((i) => i.key === itemKey);
-    if (item?.dateField && !claim[item.dateField.field]) setFocusDateKey(item.key);
+    if (item?.dateField && !claim[item.dateField.field]) {
+      setFocusDateKey(item.key);
+      setOpenMenuKey(item.key);
+    }
   };
 
-  const handleRename = async (doc) => {
-    if (!renameValue.trim()) { setRenamingId(null); return; }
+  const handleRename = async (doc, newName) => {
+    if (!newName) return;
     try {
-      await base44.entities.ClaimDocument.update(doc.id, { file_name: renameValue.trim() });
+      await base44.entities.ClaimDocument.update(doc.id, { file_name: newName });
       await logActivity({
         parentId: claim.id, parentType: 'Claim', action: 'Document Renamed',
-        description: `Renamed file to "${renameValue.trim()}"`,
+        description: `Renamed file to "${newName}"`,
         user: currentUser,
       });
       queryClient.invalidateQueries({ queryKey: STATUS_QUERY_KEY(claim.id) });
     } catch (e) {
       toast({ title: 'Rename failed', variant: 'destructive' });
     }
-    setRenamingId(null);
   };
 
   const handleRemove = (doc) => {
@@ -244,7 +248,10 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
       queryClient.invalidateQueries({ queryKey: STATUS_QUERY_KEY(claim.id) });
       const refreshed = await base44.entities.ClaimDocument.filter({ claim_id: claim.id }, { sort: 'created_date' });
       persistClaimCounts(refreshed.items || [], statusMap, extra);
-      if (item.dateField && !claim[item.dateField.field]) setFocusDateKey(item.key);
+      if (item.dateField && !claim[item.dateField.field]) {
+        setFocusDateKey(item.key);
+        setOpenMenuKey(item.key);
+      }
       toast({ title: `Filed as ${item.label}` });
     } catch (e) {
       toast({ title: 'Could not file that document', variant: 'destructive' });
@@ -355,128 +362,73 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
         )}
       </div>
 
-      {/* Checklist items */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-1.5">
-        {summary.items.map(({ item, status }) => {
-          const meta = DOC_STATUS_META[status];
-          const itemFiles = docs.filter((d) => d.item_key === item.key);
-          return (
-            <div
-              key={item.key}
-              onDragOver={(e) => {
-                if (!dragDoc) return;
-                e.preventDefault();
-                e.dataTransfer.dropEffect = 'move';
-                if (dropTarget !== item.key) setDropTarget(item.key);
-              }}
-              onDragLeave={(e) => {
-                if (!e.currentTarget.contains(e.relatedTarget)) setDropTarget((t) => (t === item.key ? null : t));
-              }}
-              onDrop={(e) => { e.preventDefault(); handleDropOnItem(item); }}
-              className={`rounded-[10px] border bg-card overflow-hidden transition-colors ${dropTarget === item.key
-                ? 'border-primary border-dashed bg-primary/5 ring-1 ring-primary/30'
-                : dragDoc
-                  ? 'border-dashed border-primary/50'
-                  : 'border-border'}`}
-            >
-              {dropTarget === item.key && (
-                <div className="px-3 pt-1.5 text-[11px] font-semibold text-primary">Drop to file here</div>
-              )}
-              <div className="px-3 pt-2 pb-1.5">
-                <div className="flex items-start gap-2 min-w-0">
-                  <span className={`w-2 h-2 rounded-full flex-shrink-0 mt-1.5 ${meta.dot}`} />
-                  <span className="text-sm font-medium leading-snug break-words min-w-0">{item.label}</span>
-                  {!item.required && (
-                    <span className="text-[10px] tracking-wider text-muted-foreground mt-1 flex-shrink-0">optional</span>
-                  )}
-                  <StatusMenu item={item} status={status} onToggle={handleStatusToggle} />
-                </div>
-                <div className="flex items-center gap-1.5 mt-1.5">
-                  <UploadButton onFiles={(files) => handleUpload(item.key, files)} disabled={isUploading} compact />
-                  <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${meta.bg} ${meta.text}`}>
-                    {meta.label}
-                  </span>
-                </div>
-                {item.dateField && (itemFiles.length > 0 || claim[item.dateField.field]) && (
-                  <div
-                    className="flex items-center gap-1.5 mt-1.5"
-                    title={`Sets the "${item.dateField.label}" field on Key Dates`}
-                  >
-                    <CalendarDays className="w-3 h-3 text-muted-foreground flex-shrink-0" />
-                    <span className="text-[11px] text-muted-foreground truncate min-w-0">{item.dateField.label}</span>
-                    <Input
-                      type="date"
-                      value={toInputDate(claim[item.dateField.field])}
-                      onChange={(e) => handleItemDateChange(item, e.target.value)}
-                      autoFocus={focusDateKey === item.key}
-                      className="h-7 text-xs ml-auto w-[124px] flex-shrink-0"
-                    />
-                    {claim[item.dateField.field] && (
-                      <button
-                        onClick={() => handleItemDateChange(item, '')}
-                        className="p-0.5 rounded text-gray-400 hover:text-red-500 flex-shrink-0"
-                        title="Clear this key date"
-                      >
-                        <X className="w-3 h-3" />
-                      </button>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              {/* Files within item */}
-              {itemFiles.length > 0 && (
-                <div className="px-3 pb-2 space-y-1 border-t border-border/60">
-                  {itemFiles.map((doc) => (
-                    <FileRow
-                      key={doc.id}
-                      doc={doc}
-                      renaming={renamingId === doc.id}
-                      renameValue={renameValue}
-                      onRenameStart={() => { setRenamingId(doc.id); setRenameValue(doc.file_name || ''); }}
-                      onRenameChange={setRenameValue}
-                      onRenameSubmit={() => handleRename(doc)}
-                      onRenameCancel={() => setRenamingId(null)}
-                      onRemove={() => handleRemove(doc)}
-                      onView={() => setViewingFile(doc.file_url)}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
+      {/* Checklist items — each document is a solid status button and every
+          other action lives behind its ⋮ menu. */}
+      <TooltipProvider delayDuration={250}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+          {summary.items.map(({ item, status }) => {
+            const itemFiles = docs.filter((d) => d.item_key === item.key);
+            return (
+              <DocumentChecklistCard
+                key={item.key}
+                item={item}
+                status={status}
+                files={itemFiles}
+                uploading={isUploading}
+                keyDateLabel={item.dateField?.label}
+                keyDateValue={item.dateField ? toInputDate(claim[item.dateField.field]) : ''}
+                autoFocusKeyDate={focusDateKey === item.key}
+                onKeyDateChange={(value) => handleItemDateChange(item, value)}
+                menuOpen={openMenuKey === item.key}
+                onMenuOpenChange={(open) => {
+                  setOpenMenuKey(open ? item.key : null);
+                  if (!open) setFocusDateKey(null);
+                }}
+                dragActive={!!dragDoc}
+                isDropTarget={dropTarget === item.key}
+                onDropTargetEnter={() => { if (dragDoc && dropTarget !== item.key) setDropTarget(item.key); }}
+                onDropTargetLeave={() => setDropTarget((t) => (t === item.key ? null : t))}
+                onDrop={() => handleDropOnItem(item)}
+                onUpload={(files) => handleUpload(item.key, files)}
+                onView={(url) => setViewingFile(url)}
+                onRename={handleRename}
+                onRemove={handleRemove}
+                onStatusChange={(newStatus) => handleStatusToggle(item, newStatus)}
+              />
+            );
+          })}
+        </div>
+      </TooltipProvider>
 
       {/* General documents area */}
-      <div className="rounded-[10px] border border-dashed border-border bg-card">
-        <div className="flex items-center gap-2 px-3 py-2 border-b border-border/60">
-          <FileText className="w-4 h-4 text-muted-foreground" />
-          <span className="text-sm font-medium">General Documents</span>
-          <span className="text-xs text-muted-foreground">({generalDocRecords.length + legacyGeneralFiles.length})</span>
-          <span className="hidden md:inline text-[10px] text-muted-foreground">— drag a file onto a placeholder to file it</span>
+      <div className="rounded-[10px] border border-border bg-card overflow-hidden">
+        <div className="flex items-center gap-2 px-3 py-2 border-b border-border bg-muted/30">
+          <FileText className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
+          <span className="text-xs font-semibold">General Documents</span>
+          <span className="text-[11px] text-muted-foreground">({generalDocRecords.length + legacyGeneralFiles.length})</span>
+          <span className="hidden md:inline text-[10px] text-muted-foreground">— drag a file onto a document above to file it</span>
           <div className="ml-auto">
-            <UploadButton onFiles={openGeneralDialog} disabled={isUploading} label="Add to General Documents" compact />
+            <UploadButton onFiles={openGeneralDialog} disabled={isUploading} label="Add to General Documents" />
           </div>
         </div>
-        {(generalDocRecords.length > 0 || legacyGeneralFiles.length > 0) && (
-          <div className="px-3 py-1.5 space-y-1">
+        {(generalDocRecords.length > 0 || legacyGeneralFiles.length > 0) ? (
+          <div className="divide-y divide-border/60">
             {generalDocRecords.map((doc) => (
               <div
                 key={doc.id}
                 draggable
                 onDragStart={(e) => startDragDoc(e, { record: doc, name: doc.file_name || doc.file_url.split('/').pop() })}
                 onDragEnd={endDragDoc}
-                title="Drag onto a placeholder above to file this document"
-                className={`flex items-center gap-2 group rounded-md px-2 py-1 hover:bg-muted/50 cursor-grab active:cursor-grabbing ${dragDoc?.record?.id === doc.id ? 'opacity-40' : ''}`}
+                title="Drag onto a document above to file it"
+                className={`flex items-center gap-2 px-3 py-1.5 group hover:bg-muted/40 cursor-grab active:cursor-grabbing ${dragDoc?.record?.id === doc.id ? 'opacity-40' : ''}`}
               >
-                <FileText className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                <button onClick={() => setViewingFile(doc.file_url)} className="text-sm text-primary hover:underline truncate flex-1 text-left">
+                <FileText className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
+                <button onClick={() => setViewingFile(doc.file_url)} className="text-xs text-foreground hover:text-primary hover:underline truncate flex-1 text-left">
                   {doc.file_name || doc.file_url.split('/').pop()}
                 </button>
                 <button
                   onClick={() => handleRemoveGeneralRecord(doc)}
-                  className="opacity-100 lg:opacity-0 lg:group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-opacity"
+                  className="opacity-100 lg:opacity-0 lg:group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-opacity flex-shrink-0"
                   title="Remove"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
@@ -489,17 +441,17 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
                 draggable
                 onDragStart={(e) => startDragDoc(e, { legacyUrl: url, url, name: url.split('/').pop() })}
                 onDragEnd={endDragDoc}
-                title="Drag onto a placeholder above to file this document"
-                className={`flex items-center gap-2 group rounded-md px-2 py-1 hover:bg-muted/50 cursor-grab active:cursor-grabbing ${dragDoc?.legacyUrl === url ? 'opacity-40' : ''}`}
+                title="Drag onto a document above to file it"
+                className={`flex items-center gap-2 px-3 py-1.5 group hover:bg-muted/40 cursor-grab active:cursor-grabbing ${dragDoc?.legacyUrl === url ? 'opacity-40' : ''}`}
               >
-                <FileText className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                <button onClick={() => setViewingFile(url)} className="text-sm text-primary hover:underline truncate flex-1 text-left">
+                <FileText className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
+                <button onClick={() => setViewingFile(url)} className="text-xs text-foreground hover:text-primary hover:underline truncate flex-1 text-left">
                   {url.split('/').pop()}
                 </button>
                 <span className="text-[10px] text-muted-foreground flex-shrink-0">legacy</span>
                 <button
                   onClick={() => handleRemoveLegacyGeneral(url)}
-                  className="opacity-100 lg:opacity-0 lg:group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-opacity"
+                  className="opacity-100 lg:opacity-0 lg:group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-opacity flex-shrink-0"
                   title="Remove"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
@@ -507,6 +459,10 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
               </div>
             ))}
           </div>
+        ) : (
+          <p className="px-3 py-3 text-xs text-muted-foreground">
+            No general documents yet — upload one, or drag a file from here onto a document above.
+          </p>
         )}
       </div>
 
@@ -561,79 +517,7 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
   );
 }
 
-function StatusMenu({ item, status, onToggle }) {
-  const [open, setOpen] = useState(false);
-  const options = item.required
-    ? [
-        { key: 'outstanding', label: 'Outstanding' },
-        { key: 'not_applicable', label: 'Not applicable' },
-      ]
-    : [
-        { key: 'not_required', label: 'Optional (default)' },
-        { key: 'outstanding', label: 'Expected' },
-        { key: 'not_applicable', label: 'Not applicable' },
-      ];
-  return (
-    <div className="relative">
-      <button
-        onClick={(e) => { e.stopPropagation(); setOpen((v) => !v); }}
-        className="p-1 rounded-md text-gray-400 hover:text-foreground hover:bg-muted"
-        title="Change status"
-      >
-        <MoreVertical className="w-3.5 h-3.5" />
-      </button>
-      {open && (
-        <>
-          <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 top-7 z-50 w-44 rounded-md border border-border bg-popover shadow-lg py-1">
-            {options.map((opt) => (
-              <button
-                key={opt.key}
-                onClick={(e) => { e.stopPropagation(); onToggle(item, opt.key); setOpen(false); }}
-                className={`w-full text-left px-3 py-1.5 text-sm hover:bg-muted ${status === opt.key ? 'font-semibold text-primary' : ''}`}
-              >
-                {opt.label}
-              </button>
-            ))}
-          </div>
-        </>
-      )}
-    </div>
-  );
-}
-
-function FileRow({ doc, renaming, renameValue, onRenameStart, onRenameChange, onRenameSubmit, onRenameCancel, onRemove, onView }) {
-  return (
-    <div className="flex items-center gap-2 group rounded-md px-2 py-1.5 hover:bg-muted/50">
-      <FileText className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-      {renaming ? (
-        <div className="flex items-center gap-1 flex-1">
-          <Input
-            value={renameValue}
-            onChange={(e) => onRenameChange(e.target.value)}
-            onKeyDown={(e) => { if (e.key === 'Enter') onRenameSubmit(); if (e.key === 'Escape') onRenameCancel(); }}
-            autoFocus
-            className="h-7 text-sm"
-          />
-          <button onClick={onRenameSubmit} className="p-1 text-green-600 hover:bg-green-50 rounded"><Check className="w-3.5 h-3.5" /></button>
-          <button onClick={onRenameCancel} className="p-1 text-gray-400 hover:bg-muted rounded"><X className="w-3.5 h-3.5" /></button>
-        </div>
-      ) : (
-        <button onClick={onView} className="text-sm text-primary hover:underline truncate flex-1 text-left">
-          {doc.file_name || doc.file_url.split('/').pop()}
-        </button>
-      )}
-      {!renaming && (
-        <div className="flex items-center gap-0.5 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">
-          <button onClick={onRenameStart} className="p-1 text-gray-400 hover:text-primary rounded" title="Rename"><Pencil className="w-3.5 h-3.5" /></button>
-          <button onClick={onRemove} className="p-1 text-gray-400 hover:text-red-500 rounded" title="Remove"><Trash2 className="w-3.5 h-3.5" /></button>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function UploadButton({ onFiles, disabled, label = 'Upload file', compact = false }) {
+function UploadButton({ onFiles, disabled, label = 'Upload file' }) {
   const inputRef = React.useRef(null);
   return (
     <>
@@ -644,29 +528,16 @@ function UploadButton({ onFiles, disabled, label = 'Upload file', compact = fals
         className="hidden"
         onChange={(e) => { if (e.target.files?.length) onFiles(e.target.files); e.target.value = ''; }}
       />
-      {compact ? (
-        <button
-          type="button"
-          onClick={() => inputRef.current?.click()}
-          disabled={disabled}
-          className="inline-flex items-center gap-1 h-7 px-2 rounded-md text-xs font-medium border border-dashed border-border text-muted-foreground hover:text-primary hover:border-primary transition-colors disabled:opacity-50"
-          title={label}
-        >
-          <Upload className="w-3 h-3" />
-          Upload
-        </button>
-      ) : (
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => inputRef.current?.click()}
-          disabled={disabled}
-          className="gap-2 w-full border-dashed"
-        >
-          <FilePlus2 className="w-3.5 h-3.5" />
-          {label}
-        </Button>
-      )}
+      <button
+        type="button"
+        onClick={() => inputRef.current?.click()}
+        disabled={disabled}
+        className="inline-flex items-center gap-1 h-7 px-2.5 rounded-md text-[11px] font-medium border border-dashed border-border text-muted-foreground hover:text-primary hover:border-primary transition-colors disabled:opacity-50"
+        title={label}
+      >
+        <Upload className="w-3 h-3" />
+        Upload
+      </button>
     </>
   );
 }
