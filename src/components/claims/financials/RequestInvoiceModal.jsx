@@ -71,9 +71,11 @@ export default function RequestInvoiceModal({ isOpen, onClose, claim, item, stat
       toast({ title: 'Request sent', description: `${item.label} marked as requested from accounts.` });
       onClose();
     } catch (e) {
+      // The function answers a refused send with the email service's own wording,
+      // which says far more than the bare status the SDK reports.
       toast({
         title: 'Could not send the request',
-        description: e?.message || 'Please try again.',
+        description: e?.response?.data?.error || e?.message || 'Please try again.',
         variant: 'destructive',
       });
     } finally {
