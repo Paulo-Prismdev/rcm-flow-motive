@@ -10,6 +10,7 @@ import ConfirmDialog from '@/components/shared/ConfirmDialog';
 import { useFileUpload } from '@/hooks/useFileUpload';
 import useClaimClient from '@/hooks/useClaimClient';
 import InvoiceItemCard from './InvoiceItemCard';
+import { TooltipProvider } from '@/components/ui/tooltip';
 import {
   invoiceContext, computeInvoiceSummary, buildInvoiceItemPatch,
   buildTrackerMetaPatch, invoiceDocKey, today, claimHandlesVatExcess,
@@ -182,22 +183,24 @@ export default function InvoiceTracker({ claim, currentUser, onUpdate }) {
     const rows = summary.rows.filter((r) => r.item.section === sectionKey);
     if (rows.length === 0) return null;
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-        {rows.map(({ item, state }) => (
-          <InvoiceItemCard
-            key={item.key}
-            item={item}
-            state={state}
-            files={filesFor(item.key)}
-            isUploading={isUploading}
-            onChange={(changes, description) => handleChange(item, changes, description)}
-            onUpload={handleUpload}
-            onDeleteFile={(doc) => handleDeleteFile(item, doc)}
-            onRenameFile={handleRenameFile}
-            onViewFile={setViewingFile}
-          />
-        ))}
-      </div>
+      <TooltipProvider delayDuration={250}>
+        <div className={`grid grid-cols-1 gap-2.5 ${sectionKey === 'closeout' ? 'md:grid-cols-2' : ''}`}>
+          {rows.map(({ item, state }) => (
+            <InvoiceItemCard
+              key={item.key}
+              item={item}
+              state={state}
+              files={filesFor(item.key)}
+              isUploading={isUploading}
+              onChange={(changes, description) => handleChange(item, changes, description)}
+              onUpload={handleUpload}
+              onDeleteFile={(doc) => handleDeleteFile(item, doc)}
+              onRenameFile={handleRenameFile}
+              onViewFile={setViewingFile}
+            />
+          ))}
+        </div>
+      </TooltipProvider>
     );
   };
 

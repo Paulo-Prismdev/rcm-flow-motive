@@ -1,265 +1,320 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Upload, Trash2, Pencil, Check, X, MoreVertical, FileText, Lock, Unlock, AlertTriangle } from 'lucide-react';
+import React, { useRef, useState } from 'react';
+import {
+  Check, X, Ban, Clock, Hourglass, MoreVertical, Upload, Pencil, Trash2,
+  AlertTriangle, Undo2, Unlock, SlidersHorizontal,
+} from 'lucide-react';
+import {
+  DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem,
+  DropdownMenuLabel, DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu';
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { Input } from '@/components/ui/input';
-import { INVOICE_STATUS_META, invoiceItemStatus } from '@/components/shared/invoiceChecklist';
 import { fmtGBP } from '@/components/shared/creditRepairRates';
+import InvoiceItemDetails from './InvoiceItemDetails';
 
-/**
- * A single line in the Invoicing Tracker — an invoice (amount, received/sent
- * date, paid state and its files) or a close-out document, which only ever has a
- * date and a file.
- */
+// One line of the invoicing tracker, shown as a solid status button: red until it
+// has been raised or received, amber while it waits to be paid, green once it is
+// paid, and neutral grey while a credit repair amount cannot be worked out yet.
+// The button carries the invoice name, its amount and the date that matters;
+// everything else lives behind the ⋮ menu and the details panel.
+const TONES = {
+  green: {
+    btn: 'bg-green-600 text-white ring-1 ring-green-500/40 shadow-[0_0_18px_-4px_rgba(34,197,94,0.75)] hover:bg-green-700',
+    iconWrap: 'bg-white/20 text-white',
+    icon: <Check className="w-3.5 h-3.5" strokeWidth={3} />,
+    menu: 'text-white/70 hover:text-white hover:bg-white/15',
+    marker: 'bg-white/25 text-white',
+  },
+  amber: {
+    btn: 'bg-amber-500 text-white ring-1 ring-amber-400/40 shadow-[0_0_18px_-4px_rgba(245,158,11,0.75)] hover:bg-amber-600',
+    iconWrap: 'bg-white/20 text-white',
+    icon: <Clock className="w-3.5 h-3.5" strokeWidth={3} />,
+    menu: 'text-white/70 hover:text-white hover:bg-white/15',
+    marker: 'bg-white/25 text-white',
+  },
+  red: {
+    btn: 'bg-red-500 text-white ring-1 ring-red-400/40 shadow-[0_0_18px_-4px_rgba(239,68,68,0.7)] hover:bg-red-600',
+    iconWrap: 'bg-white/20 text-white',
+    icon: <X className="w-3.5 h-3.5" strokeWidth={3} />,
+    menu: 'text-white/70 hover:text-white hover:bg-white/15',
+    marker: 'bg-white/25 text-white',
+  },
+  waiting: {
+    btn: 'bg-muted/40 text-muted-foreground border border-dashed border-border hover:bg-muted/70',
+    iconWrap: 'bg-muted-foreground/15 text-muted-foreground',
+    icon: <Hourglass className="w-3.5 h-3.5" />,
+    menu: 'text-muted-foreground hover:text-foreground hover:bg-muted',
+    marker: 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300',
+  },
+  na: {
+    btn: 'bg-muted/30 text-muted-foreground/70 border border-border opacity-70 hover:opacity-90',
+    iconWrap: 'bg-muted-foreground/15 text-muted-foreground',
+    icon: <Ban className="w-3.5 h-3.5" />,
+    menu: 'text-muted-foreground hover:text-foreground hover:bg-muted',
+    marker: 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300',
+  },
+};
+
+const formatDay = (value) => {
+  if (!value) return '';
+  const d = new Date(value);
+  return isNaN(d.getTime()) ? '' : d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+};
+
 export default function InvoiceItemCard({
   item, state, files, isUploading,
   onChange, onUpload, onDeleteFile, onRenameFile, onViewFile,
 }) {
-  const [amountDraft, setAmountDraft] = useState(state.amount ? String(state.amount) : '');
-  const [dateDraft, setDateDraft] = useState(state.date || '');
+  const fileInputRef = useRef(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [detailsOpen, setDetailsOpen] = useState(false);
   const [renamingId, setRenamingId] = useState(null);
   const [renameValue, setRenameValue] = useState('');
-  const [menuOpen, setMenuOpen] = useState(false);
-  const fileInputRef = useRef(null);
 
-  useEffect(() => { setAmountDraft(state.amount ? String(state.amount) : ''); }, [state.amount]);
-  useEffect(() => { setDateDraft(state.date || ''); }, [state.date]);
-
-  const status = invoiceItemStatus(item, state);
-  const meta = INVOICE_STATUS_META[status];
-  const isOutstanding = status === 'outstanding';
-  const dateLabel = item.dateLabel || (item.direction === 'in' ? 'Received' : 'Sent');
-  // Close-out paperwork is a document, not an invoice: no amount, no paid tick.
   const isDocument = item.kind === 'document';
-  // Credit repair invoices have their amount worked out from the claim's locked
-  // rates, so it is shown rather than typed in.
   const isDerived = !!item.amountSource;
+  const dateLabel = item.dateLabel || (item.direction === 'in' ? 'Received' : 'Sent');
+  const variance = state.variance;
+  // Credit repair invoices sit neutral until the rates or the final repair cost
+  // let us work the amount out — there is nothing to pay or chase yet.
+  const isAwaiting = !isDocument && !state.notApplicable && state.awaiting === true;
+  const raised = state.amount > 0 || !!state.date;
 
-  const commitAmount = () => {
-    const current = state.amount ? String(state.amount) : '';
-    if (amountDraft === current) return;
-    onChange(
-      { amount: amountDraft === '' ? null : amountDraft },
-      `${item.label} amount ${amountDraft === '' ? 'cleared' : `set to £${amountDraft}`}`
-    );
+  const toneKey = state.notApplicable ? 'na'
+    : isAwaiting ? 'waiting'
+      : isDocument ? (state.received ? 'green' : 'red')
+        : state.paid ? 'green'
+          : raised ? 'amber'
+            : 'red';
+  const tone = TONES[toneKey];
+  const canTogglePaid = !isDocument && !state.notApplicable && !isAwaiting;
+
+  const subline = state.notApplicable ? 'Not applicable'
+    : isAwaiting
+      ? [state.date ? `${dateLabel} ${formatDay(state.date)}` : '', state.hint || 'Awaiting amount'].filter(Boolean).join(' · ')
+      : isDocument
+        ? (state.received ? (state.date ? `${dateLabel} ${formatDay(state.date)}` : 'Received') : 'Click to upload')
+        : state.paid ? `Paid${state.paidDate ? ` ${formatDay(state.paidDate)}` : ''}`
+          : raised ? (state.date ? `${dateLabel} ${formatDay(state.date)}` : 'Awaiting payment')
+            : 'Click to upload';
+
+  const hint = state.notApplicable
+    ? 'Not applicable — use ⋮ to change'
+    : isAwaiting ? 'No invoice can be raised yet'
+      : toneKey === 'red' ? `Click to upload this ${isDocument ? 'document' : 'invoice'}`
+        : files.length === 0 ? 'Click to add the amount and dates'
+          : files.length === 1 ? 'Click to open the document' : 'Click to choose a document';
+
+  const handleCardClick = () => {
+    if (isUploading) return;
+    if (state.notApplicable) { setMenuOpen(true); return; }
+    if (toneKey === 'red') { fileInputRef.current?.click(); return; }
+    if (files.length === 1) { onViewFile(files[0].file_url); return; }
+    if (files.length > 1) { setMenuOpen(true); return; }
+    setDetailsOpen(true);
   };
 
-  const commitDate = () => {
-    if (dateDraft === (state.date || '')) return;
-    onChange(
-      { date: dateDraft },
-      `${item.label} ${dateLabel.toLowerCase()} date ${dateDraft ? `set to ${dateDraft}` : 'cleared'}`
-    );
+  const submitRename = (doc) => {
+    const name = renameValue.trim();
+    setRenamingId(null);
+    if (name && name !== doc.file_name) onRenameFile(doc, name);
   };
 
-  const uploadButton = (
-    <div className={isDocument ? 'pb-0.5' : 'ml-auto'}>
-      <input
-        ref={fileInputRef}
-        type="file"
-        multiple
-        className="hidden"
-        onChange={(e) => { if (e.target.files?.length) onUpload(item, e.target.files); e.target.value = ''; }}
-      />
-      <button
-        type="button"
-        onClick={() => fileInputRef.current?.click()}
-        disabled={isUploading}
-        className="inline-flex items-center gap-1 h-7 px-2 rounded-md text-xs font-medium border border-dashed border-border text-muted-foreground hover:text-primary hover:border-primary transition-colors disabled:opacity-50"
-      >
-        <Upload className="w-3 h-3" /> Upload
-      </button>
-    </div>
+  const togglePaid = (paid) => onChange(
+    { paid },
+    `${item.label} marked as ${paid ? 'paid' : 'unpaid'}`
   );
 
   return (
-    <div className={`rounded-[10px] border bg-card overflow-hidden ${state.notApplicable
-      ? 'border-border opacity-60'
-      : isOutstanding
-        ? 'border-amber-300 dark:border-amber-800'
-        : 'border-border'}`}>
-      <div className="px-3 pt-2 pb-2 space-y-2">
-        <div className="flex items-start gap-2 min-w-0">
-          <span className={`w-2 h-2 rounded-full flex-shrink-0 mt-1.5 ${meta.dot}`} />
-          <span className="text-sm font-medium leading-snug break-words min-w-0 flex-1">{item.label}</span>
-          <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${meta.bg} ${meta.text}`}>
-            {meta.label}
-          </span>
-          <div className="relative flex-shrink-0">
+    <div className="group">
+      <div className="relative">
+        <Tooltip>
+          <TooltipTrigger asChild>
             <button
               type="button"
-              onClick={() => setMenuOpen((v) => !v)}
-              className="p-0.5 rounded text-muted-foreground hover:text-foreground hover:bg-muted"
-              title="Options"
+              onClick={handleCardClick}
+              className={`w-full flex items-center gap-2.5 rounded-[10px] px-3 py-2.5 text-left transition-all ${canTogglePaid ? 'pr-16' : 'pr-10'} ${isUploading ? 'opacity-60' : ''} ${tone.btn}`}
             >
-              <MoreVertical className="w-3.5 h-3.5" />
-            </button>
-            {menuOpen && (
-              <>
-                <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(false)} />
-                <div className="absolute right-0 top-6 z-50 w-44 rounded-md border border-border bg-popover shadow-lg py-1">
-                  {isDerived && state.invoicedLocked && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setMenuOpen(false);
-                        onChange(
-                          { amount: null },
-                          `${item.label} amount unlocked — follows the calculated figure again`
-                        );
-                      }}
-                      className="w-full text-left px-3 py-1.5 text-sm hover:bg-muted inline-flex items-center gap-1.5"
-                    >
-                      <Unlock className="w-3 h-3" /> Unlock amount
-                    </button>
+              <span className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 ${tone.iconWrap}`}>
+                {tone.icon}
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="flex items-center gap-1.5">
+                  <span className="text-sm font-semibold truncate">{item.label}</span>
+                  {state.amount > 0 && (
+                    <span className="text-sm font-bold tabular-nums flex-shrink-0">{fmtGBP(state.amount)}</span>
                   )}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setMenuOpen(false);
-                      onChange(
-                        { not_applicable: !state.notApplicable },
-                        `${item.label} marked as ${state.notApplicable ? 'applicable again' : 'not applicable'}`
-                      );
-                    }}
-                    className="w-full text-left px-3 py-1.5 text-sm hover:bg-muted"
-                  >
-                    {state.notApplicable ? 'Mark as applicable' : 'Mark not applicable'}
-                  </button>
-                </div>
-              </>
+                  {variance && (
+                    <span className={`inline-flex items-center justify-center w-4 h-4 rounded-full flex-shrink-0 ${tone.marker}`}>
+                      <AlertTriangle className="w-2.5 h-2.5" />
+                    </span>
+                  )}
+                </span>
+                <span className="block text-[10px] leading-tight opacity-85 truncate">{subline}</span>
+              </span>
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="top" align="start" className="max-w-[300px] p-2.5">
+            <p className="text-[11px] font-semibold mb-1">
+              {item.label}{state.amount > 0 ? ` · ${fmtGBP(state.amount)}` : ''}
+            </p>
+            {state.date && <p className="text-[10px] opacity-80">{dateLabel} {formatDay(state.date)}</p>}
+            {state.paid && state.paidDate && <p className="text-[10px] opacity-80">Paid {formatDay(state.paidDate)}</p>}
+            {variance && (
+              <p className="text-[10px] opacity-90 pt-1 mt-1 border-t border-white/20">
+                {variance.reason}: calculated {fmtGBP(variance.calculated)}, invoiced {fmtGBP(variance.invoiced)}
+              </p>
             )}
-          </div>
+            {files.length > 0 ? (
+              <div className="space-y-1 pt-1 mt-1 border-t border-white/20">
+                {files.map((doc) => (
+                  <div key={doc.id}>
+                    <p className="text-[11px] break-all leading-snug">{doc.file_name || doc.file_url.split('/').pop()}</p>
+                    {doc.uploaded_at && <p className="text-[10px] opacity-70">Uploaded {formatDay(doc.uploaded_at)}</p>}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-[11px] opacity-80 pt-1 mt-1 border-t border-white/20">{hint}</p>
+            )}
+          </TooltipContent>
+        </Tooltip>
+
+        <div className="absolute right-1.5 top-1/2 -translate-y-1/2 flex items-center gap-0.5">
+          {canTogglePaid && (
+            <button
+              type="button"
+              onClick={() => togglePaid(!state.paid)}
+              title={state.paid ? 'Mark unpaid' : 'Mark paid'}
+              className={`p-1.5 rounded-md ${tone.menu}`}
+            >
+              {state.paid ? <Undo2 className="w-3.5 h-3.5" /> : <Check className="w-3.5 h-3.5" strokeWidth={3} />}
+            </button>
+          )}
+
+          <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                title="More actions"
+                className={`p-1.5 rounded-md transition-opacity ${tone.menu} ${menuOpen ? 'opacity-100' : 'opacity-100 lg:opacity-0 lg:group-hover:opacity-100'}`}
+              >
+                <MoreVertical className="w-3.5 h-3.5" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-64">
+              {files.length > 0 && (
+                <>
+                  <DropdownMenuLabel className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                    {files.length} file{files.length === 1 ? '' : 's'}
+                  </DropdownMenuLabel>
+                  {files.map((doc) => (
+                    <div key={doc.id} className="rounded-md hover:bg-muted">
+                      {renamingId === doc.id ? (
+                        <div className="flex items-center gap-1 px-1.5 py-1">
+                          <Input
+                            value={renameValue}
+                            onChange={(e) => setRenameValue(e.target.value)}
+                            onKeyDown={(e) => {
+                              e.stopPropagation();
+                              if (e.key === 'Enter') submitRename(doc);
+                              if (e.key === 'Escape') setRenamingId(null);
+                            }}
+                            autoFocus
+                            className="h-7 text-xs"
+                          />
+                          <button onClick={() => submitRename(doc)} className="p-1 text-green-600 hover:bg-green-50 rounded" title="Save">
+                            <Check className="w-3.5 h-3.5" />
+                          </button>
+                          <button onClick={() => setRenamingId(null)} className="p-1 text-gray-400 hover:bg-muted rounded" title="Cancel">
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-1 pl-2">
+                          <button
+                            onClick={() => { setMenuOpen(false); onViewFile(doc.file_url); }}
+                            title={doc.file_name || doc.file_url.split('/').pop()}
+                            className="flex-1 min-w-0 text-left text-xs py-1.5 truncate hover:text-primary"
+                          >
+                            {doc.file_name || doc.file_url.split('/').pop()}
+                          </button>
+                          <button
+                            onClick={() => { setRenamingId(doc.id); setRenameValue(doc.file_name || ''); }}
+                            className="p-1 text-gray-400 hover:text-primary rounded flex-shrink-0"
+                            title="Rename"
+                          >
+                            <Pencil className="w-3 h-3" />
+                          </button>
+                          <button
+                            onClick={() => { setMenuOpen(false); onDeleteFile(doc); }}
+                            className="p-1 text-gray-400 hover:text-red-500 rounded flex-shrink-0"
+                            title="Remove"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                  <DropdownMenuSeparator />
+                </>
+              )}
+
+              <DropdownMenuItem onSelect={() => fileInputRef.current?.click()} className="text-xs">
+                <Upload className="w-3.5 h-3.5" /> Add file
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => setDetailsOpen((v) => !v)} className="text-xs">
+                <SlidersHorizontal className="w-3.5 h-3.5" /> {detailsOpen ? 'Hide details' : 'Edit details'}
+              </DropdownMenuItem>
+
+              {!isDocument && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onSelect={() => togglePaid(!state.paid)} className="text-xs">
+                    {state.paid ? <Undo2 className="w-3.5 h-3.5" /> : <Check className="w-3.5 h-3.5" />}
+                    {state.paid ? 'Mark unpaid' : 'Mark paid'}
+                  </DropdownMenuItem>
+                </>
+              )}
+
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onSelect={() => onChange(
+                  { not_applicable: !state.notApplicable },
+                  `${item.label} marked as ${state.notApplicable ? 'applicable again' : 'not applicable'}`
+                )}
+                className="text-xs"
+              >
+                {state.notApplicable ? <Check className="w-3.5 h-3.5" /> : <Ban className="w-3.5 h-3.5" />}
+                {state.notApplicable ? 'Mark as applicable' : 'Mark not applicable'}
+              </DropdownMenuItem>
+
+              {isDerived && state.invoicedLocked && (
+                <DropdownMenuItem
+                  onSelect={() => onChange(
+                    { amount: null },
+                    `${item.label} amount unlocked — follows the calculated figure again`
+                  )}
+                  className="text-xs"
+                >
+                  <Unlock className="w-3.5 h-3.5" /> Unlock amount
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
-        {isDocument ? (
-          <div className="flex items-end gap-2">
-            <div className="flex-1">
-              <label className="block text-[10px] font-medium text-muted-foreground mb-0.5">{dateLabel}</label>
-              <Input
-                type="date"
-                value={dateDraft}
-                onChange={(e) => setDateDraft(e.target.value)}
-                onBlur={commitDate}
-                className="h-8 text-sm"
-              />
-            </div>
-            {uploadButton}
-          </div>
-        ) : (
-          <>
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-                <label className="block text-[10px] font-medium text-muted-foreground mb-0.5">Amount (£)</label>
-                {isDerived ? (
-                  <div className={`h-8 flex items-center gap-1 px-2 rounded-md border border-dashed text-sm tabular-nums ${state.awaiting ? 'border-amber-300 dark:border-amber-800 text-muted-foreground' : 'border-border bg-muted/40 font-medium'}`}>
-                    {state.invoicedLocked && <Lock className="w-3 h-3 flex-shrink-0 text-muted-foreground" title="Locked at the figure this invoice went out at" />}
-                    {state.awaiting ? '—' : fmtGBP(state.amount)}
-                  </div>
-                ) : (
-                  <Input
-                    type="number"
-                    step="0.01"
-                    inputMode="decimal"
-                    placeholder="0.00"
-                    value={amountDraft}
-                    onChange={(e) => setAmountDraft(e.target.value)}
-                    onBlur={commitAmount}
-                    onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }}
-                    className="h-8 text-sm"
-                  />
-                )}
-              </div>
-              <div>
-                <label className="block text-[10px] font-medium text-muted-foreground mb-0.5">{dateLabel}</label>
-                <Input
-                  type="date"
-                  value={dateDraft}
-                  onChange={(e) => setDateDraft(e.target.value)}
-                  onBlur={commitDate}
-                  className="h-8 text-sm"
-                />
-              </div>
-            </div>
-            {isDerived && state.hint && (
-              <p className={`text-[10px] leading-tight ${state.awaiting ? 'text-amber-600 dark:text-amber-400 font-medium' : 'text-muted-foreground'}`}>
-                {state.hint}
-              </p>
-            )}
-            {isDerived && state.variance && (
-              <p className="flex items-start gap-1.5 text-[10px] leading-tight text-amber-700 dark:text-amber-300 font-medium">
-                <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0" />
-                <span>
-                  {state.variance.reason} — calculated {fmtGBP(state.variance.calculated)}, invoiced {fmtGBP(state.variance.invoiced)}. Raise a supplementary invoice or credit note, or unlock the amount.
-                </span>
-              </p>
-            )}
-
-            <div className="flex items-center gap-2 flex-wrap">
-              <label className="inline-flex items-center gap-1.5 text-xs font-medium cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={state.paid}
-                  onChange={(e) => onChange(
-                    { paid: e.target.checked },
-                    `${item.label} marked as ${e.target.checked ? 'paid' : 'unpaid'}`
-                  )}
-                  className="rounded border-border"
-                />
-                Paid
-              </label>
-              {state.paid && (
-                <Input
-                  type="date"
-                  value={state.paidDate || ''}
-                  onChange={(e) => onChange({ paid: true, paid_date: e.target.value }, `${item.label} paid date set`)}
-                  className="h-7 text-xs w-[132px]"
-                  title="Paid date"
-                />
-              )}
-              {uploadButton}
-            </div>
-          </>
-        )}
+        <input
+          ref={fileInputRef}
+          type="file"
+          multiple
+          className="hidden"
+          onChange={(e) => { if (e.target.files?.length) onUpload(item, e.target.files); e.target.value = ''; }}
+        />
       </div>
 
-      {files.length > 0 && (
-        <div className="px-3 pb-2 pt-1.5 space-y-1 border-t border-border/60">
-          {files.map((doc) => (
-            <div key={doc.id} className="flex items-center gap-2 group rounded-md px-1.5 py-1 hover:bg-muted/50">
-              <FileText className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
-              {renamingId === doc.id ? (
-                <div className="flex items-center gap-1 flex-1">
-                  <Input
-                    value={renameValue}
-                    onChange={(e) => setRenameValue(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') { onRenameFile(doc, renameValue); setRenamingId(null); }
-                      if (e.key === 'Escape') setRenamingId(null);
-                    }}
-                    autoFocus
-                    className="h-6 text-xs"
-                  />
-                  <button type="button" onClick={() => { onRenameFile(doc, renameValue); setRenamingId(null); }} className="p-0.5 text-green-600"><Check className="w-3 h-3" /></button>
-                  <button type="button" onClick={() => setRenamingId(null)} className="p-0.5 text-gray-400"><X className="w-3 h-3" /></button>
-                </div>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => onViewFile(doc.file_url)}
-                  className="text-xs text-primary hover:underline truncate flex-1 text-left"
-                >
-                  {doc.file_name || doc.file_url.split('/').pop()}
-                </button>
-              )}
-              {renamingId !== doc.id && (
-                <div className="flex items-center gap-0.5 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">
-                  <button type="button" onClick={() => { setRenamingId(doc.id); setRenameValue(doc.file_name || ''); }} className="p-0.5 text-gray-400 hover:text-primary" title="Rename"><Pencil className="w-3 h-3" /></button>
-                  <button type="button" onClick={() => onDeleteFile(doc)} className="p-0.5 text-gray-400 hover:text-red-500" title="Remove"><Trash2 className="w-3 h-3" /></button>
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
+      {detailsOpen && <InvoiceItemDetails item={item} state={state} onChange={onChange} />}
     </div>
   );
 }
