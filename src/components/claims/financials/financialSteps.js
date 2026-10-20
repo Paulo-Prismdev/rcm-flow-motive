@@ -5,8 +5,8 @@ import { emptySectionMessage } from './invoiceSectionMeta';
  * The Financials section as the five steps the work happens in, worked out from
  * the claim's own invoice rows — nothing here is stored. Each step reports
  * whether it is done, the one-line summary it collapses to, and the single next
- * thing to do inside it, so the "Next step" card and the step headers can never
- * disagree with the rows underneath them.
+ * thing to do inside it, so the prompt at the top of the step and the step
+ * headers can never disagree with the rows underneath them.
  */
 export const FINANCIAL_STEPS = [
   {
@@ -159,17 +159,15 @@ export function buildFinancialFlow(summary, ctx) {
 
   const steps = [closeout, figures, raise, collect, payments];
   const current = steps.find((s) => !s.done) || null;
-  // Where the current step holds nothing to do yet, the next step's action is
-  // still the most useful thing to offer.
-  const pending = steps.find((s) => !s.done && s.action) || null;
-  // Anything merely recommended is offered underneath the next step, never as it.
+  // Anything merely recommended is offered with its own item inside its step,
+  // never as the work itself, so it is handed over separately from the steps'
+  // own next actions.
   const recommended = steps.find((s) => s.suggestion)?.suggestion || null;
 
   return {
     steps,
     current: current?.key || null,
     allDone: !current,
-    nextAction: pending ? { ...pending.action, n: pending.n, title: pending.title } : null,
     suggestion: recommended,
   };
 }

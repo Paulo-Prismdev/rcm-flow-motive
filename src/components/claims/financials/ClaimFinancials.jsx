@@ -25,10 +25,12 @@ import {
   repairVat,
   resolveInvoiceAmount,
 } from '@/components/shared/invoiceChecklist';
-import FinancialHeaderStrip from './FinancialHeaderStrip';
-import NextStepCard from './NextStepCard';
-import StepIndicator from './StepIndicator';
+import FinancialStatusLine from './FinancialStatusLine';
+import FinancialTotalsPanel from './FinancialTotalsPanel';
 import FinancialStep from './FinancialStep';
+import NextStepPrompt from './NextStepPrompt';
+import RecommendedNudge from './RecommendedNudge';
+import AllDoneLine from './AllDoneLine';
 import JobFiguresCard from './JobFiguresCard';
 import InvoiceRow from './InvoiceRow';
 import CloseOutItem from './CloseOutItem';
@@ -59,10 +61,10 @@ const FIELD_LABELS = {
 };
 
 /**
- * The claim's Financials, as the five steps the work happens in: the totals and
- * the overall status always at the top, the one thing to do next, then the steps
- * themselves — close-out documents, job figures, our invoices, invoices in and
- * payments. Internal only.
+ * The claim's Financials, as the five steps the work happens in: where the job
+ * stands in one line at the top, then the steps in order — close-out documents,
+ * job figures, our invoices, invoices in and payments — each one carrying the
+ * thing to do next inside it, with the job's money at the foot. Internal only.
  */
 export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvoicing = true }) {
   const { toast } = useToast();
@@ -108,14 +110,16 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
     return { clearPoints, paidText };
   }, [docs.pendingDelete, claim]);
 
-  // The step the job is on is open; a step opened by hand stays open, and when
-  // the work moves on the next step opens by itself.
+  // Only the step the job is on is open: when the work moves on, the step that
+  // finished folds down to its one-line summary above it, and once nothing is
+  // left every step is folded away behind the closing line. Any step can still be
+  // opened by hand from its own header.
   const [openSteps, setOpenSteps] = useState(() => new Set(flow.current ? [flow.current] : []));
   const lastCurrent = useRef(flow.current);
   useEffect(() => {
     if (lastCurrent.current === flow.current) return;
     lastCurrent.current = flow.current;
-    if (flow.current) setOpenSteps((prev) => new Set(prev).add(flow.current));
+    setOpenSteps(new Set(flow.current ? [flow.current] : []));
   }, [flow.current]);
 
   const openStep = (key) => setOpenSteps((prev) => new Set(prev).add(key));
@@ -389,7 +393,7 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
     );
   };
 
-  // The "Next step" card's button does the thing it names: the file picker for an
+  // The next-step prompt's button does the thing it names: the file picker for an
   // upload, the accounts request, the paid tick, or the figures the amount needs.
   const runAction = (action) => {
     if (!action) return;
@@ -446,6 +450,11 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
 
   const [closeout, figuresStep, raise, collect, payments] = flow.steps;
 
+  // The step the job is on carries the next-step prompt inside it, and anything
+  // merely recommended is nudged with the item it belongs to.
+  const currentStep = flow.steps.find((s) => s.key === flow.current) || null;
+  const suggestion = flow.suggestion;
+
   // A final repair cost read off an invoice copy that has since been removed is
   // flagged here: the figure itself is left exactly as it was.
   const repairCostCheck = claim.invoice_tracker?.repair_cost_check || null;
@@ -470,7 +479,7 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
   );
 
   /** One of the steps: its header and line, then its own rows. */
-  const step = (config, children) => (
+  const step = (config, children, nudge) => (
     <FinancialStep
       n={config.n}
       title={config.title}
@@ -479,18 +488,33 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
       status={config.done ? 'done' : config.key === flow.current ? 'current' : 'later'}
       open={openSteps.has(config.key)}
       onToggle={() => toggleStep(config.key)}
+      banner={config.key === flow.current
+        ? <NextStepPrompt action={config.action} onDo={runAction} />
+        : null}
+      nudge={nudge}
     >
       {children}
     </FinancialStep>
   );
 
-  /** A step's rows — or, where none apply, the checked reason it holds nothing. */
-  const rowsBlock = (config, focus, columns) => (
+  /**
+   * A step's rows — or, where none apply, the checked reason it holds nothing.
+   * `nudge`, where given, is the recommended item's prompt: it goes in the same
+   * cell as the item it belongs to, right above its card.
+   */
+  const rowsBlock = (config, focus, columns, nudge) => (
     config.empty
       ? <InvoiceSectionEmpty title={config.empty.title} reasons={config.empty.reasons} />
       : (
         <div className={`grid grid-cols-1 items-stretch gap-2 ${columns}`}>
-          {config.rows.map((row) => (focus === 'closeout' ? renderCloseOut(row) : renderRow(row, focus)))}
+          {config.rows.map((row) => (
+            <div key={row.item.key} className="flex flex-col gap-2 [&>*:last-child]:flex-1">
+              {nudge && nudge.item.key === row.item.key && (
+                <RecommendedNudge action={nudge} onDo={runAction} />
+              )}
+              {focus === 'closeout' ? renderCloseOut(row) : renderRow(row, focus)}
+            </div>
+          ))}
         </div>
       )
   );
@@ -498,33 +522,30 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
   return (
     <TooltipProvider delayDuration={250}>
       <div className="space-y-3">
-        <FinancialHeaderStrip
+        <FinancialStatusLine
           status={status}
-          summary={summary}
-          finalCost={Number(claim.final_repair_cost) || 0}
-          finalCostEx={repairNet(claim)}
-          finalCostVat={repairVat(claim)}
+          currentStep={currentStep}
+          stepCount={flow.steps.length}
+          missing={summary.missing}
         />
 
         {!showInvoicing && figuresCard}
 
         {showInvoicing && (
           <>
-            <NextStepCard
-              action={flow.nextAction}
-              allDone={flow.allDone}
-              suggestion={flow.suggestion}
-              onDo={runAction}
-            />
-            <StepIndicator steps={flow.steps} current={flow.current} onSelect={openStep} />
-
             <div className="space-y-2.5">
-              {step(closeout, rowsBlock(closeout, 'closeout', 'sm:grid-cols-3'))}
+              {step(
+                closeout,
+                rowsBlock(closeout, 'closeout', 'sm:grid-cols-3', suggestion),
+                suggestion ? <RecommendedNudge action={suggestion} onDo={runAction} /> : null
+              )}
               {step(figuresStep, figuresCard)}
               {step(raise, rowsBlock(raise, 'send', 'sm:grid-cols-2'))}
               {step(collect, rowsBlock(collect, 'send', 'sm:grid-cols-2'))}
               {step(payments, rowsBlock(payments, 'pay', 'sm:grid-cols-2'))}
             </div>
+
+            {flow.allDone && <AllDoneLine />}
 
             {preparingRequest && (
               <p className="text-[11px] text-muted-foreground">Preparing the accounts request…</p>
@@ -544,6 +565,13 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
             />
           </>
         )}
+
+        <FinancialTotalsPanel
+          summary={summary}
+          finalCost={Number(claim.final_repair_cost) || 0}
+          finalCostEx={repairNet(claim)}
+          finalCostVat={repairVat(claim)}
+        />
 
         {docs.viewingFile && (
           <FileViewer fileUrl={docs.viewingFile} onClose={() => docs.setViewingFile(null)} />

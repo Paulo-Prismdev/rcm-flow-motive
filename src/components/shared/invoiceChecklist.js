@@ -583,6 +583,8 @@ export function computeInvoiceSummary(claim, ctx, hasFile = claimHasFiledCopy(cl
   let outstanding = 0;
   let owedToUs = 0;
   let weOwe = 0;
+  let toCollect = 0;
+  let toPay = 0;
 
   for (const { item, state } of rows) {
     // Recommended items are encouraged separately: they are left out of the
@@ -594,8 +596,13 @@ export function computeInvoiceSummary(claim, ctx, hasFile = claimHasFiledCopy(cl
     if (isItemComplete(item, state)) { complete += 1; continue; }
     outstanding += 1;
     if (isInvoiceDocument(item)) continue;
-    if (item.direction === 'out') owedToUs += state.amount;
-    else weOwe += state.amount;
+    if (item.direction === 'out') {
+      owedToUs += state.amount;
+      toCollect += 1;
+    } else {
+      weOwe += state.amount;
+      toPay += 1;
+    }
   }
 
   return {
@@ -605,6 +612,12 @@ export function computeInvoiceSummary(claim, ctx, hasFile = claimHasFiledCopy(cl
     outstanding,
     owedToUs: round2(owedToUs),
     weOwe: round2(weOwe),
+    // How many invoices the two totals above are still waiting on, counted off
+    // the very rows those totals are made of — so the count and the money can
+    // never disagree: every invoice paid reads 0, and the close-out paperwork
+    // (never money) counts as neither.
+    toCollect,
+    toPay,
     allComplete: total > 0 && complete === total,
     missing: missingJobFigures(claim, ctx),
   };

@@ -2,12 +2,14 @@ import React from 'react';
 import { Check, ChevronDown, ChevronUp } from 'lucide-react';
 
 /**
- * One numbered step of the invoicing flow. The step being worked on is open and
- * highlighted, a finished step collapses to its one-line green summary, and the
- * steps still to come stay visible but dimmed — every one of them can be opened
- * and worked on in any order.
+ * One numbered step of the invoicing flow. The step being worked on is open,
+ * highlighted and carries the next-step prompt at its top; a finished step
+ * collapses to its one-line green summary; and the steps still to come stay
+ * visible but dimmed — every one of them can be opened and worked on in any
+ * order. A recommended item's nudge stays with its own step: beside the item
+ * while the step is open, and on the folded step when it is not.
  */
-export default function FinancialStep({ n, title, hint, line, status, open, onToggle, children }) {
+export default function FinancialStep({ n, title, hint, line, status, open, onToggle, banner, nudge, children }) {
   const done = status === 'done';
   const current = status === 'current';
 
@@ -48,8 +50,11 @@ export default function FinancialStep({ n, title, hint, line, status, open, onTo
         </span>
       </button>
 
+      {!open && nudge && <div className="px-3 pb-2.5">{nudge}</div>}
+
       {open && (
         <div className="space-y-2.5 border-t border-border/60 px-3 py-3">
+          {banner}
           <p className="text-[11px] leading-snug text-muted-foreground">{hint}</p>
           {children}
         </div>
