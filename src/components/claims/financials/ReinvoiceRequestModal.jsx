@@ -12,8 +12,8 @@ import { buildReinvoiceEmail } from './invoiceAuthorityCheck';
 /**
  * The pre-filled email asking the repairer for a corrected invoice at the amount
  * the job was authorised at. Everything is editable, and sending it records the
- * request against the Final Invoice — which is what leaves that invoice amber
- * until the corrected copy is uploaded.
+ * request against the Final Insurer Invoice — which is what leaves that invoice
+ * amber until the corrected copy is uploaded.
  */
 export default function ReinvoiceRequestModal({ isOpen, onClose, claim, comparison, currentUser }) {
   const { toast } = useToast();
@@ -30,7 +30,7 @@ export default function ReinvoiceRequestModal({ isOpen, onClose, claim, comparis
     setCc('');
     setSubject(built.subject);
     setBody(built.body);
-  }, [isOpen, comparison?.invoiceTotal, comparison?.authority]);
+  }, [isOpen, comparison?.measured, comparison?.authority]);
 
   const handleSend = async () => {
     if (!to.trim()) {
@@ -45,14 +45,14 @@ export default function ReinvoiceRequestModal({ isOpen, onClose, claim, comparis
         cc: cc.trim(),
         subject,
         body,
-        invoice_total: comparison?.invoiceTotal,
+        invoice_total: comparison?.measured,
         authority_amount: comparison?.authority,
       });
       const data = res?.data || {};
       if (data.error) throw new Error(data.error);
       toast({
         title: 'Request sent',
-        description: 'The repairer has been asked for a corrected invoice — the Final Invoice stays amber until it arrives.',
+        description: 'The repairer has been asked for a corrected invoice — the Final Insurer Invoice stays amber until it arrives.',
       });
       onClose();
     } catch (e) {
@@ -75,7 +75,7 @@ export default function ReinvoiceRequestModal({ isOpen, onClose, claim, comparis
           <DialogTitle>Ask the repairer for a corrected invoice</DialogTitle>
           <DialogDescription>
             {claim?.bodyshop || 'The repairer'} — Job {claim?.job_number || '—'} · {claim?.reg || '—'}. Sending this
-            records the request against the Final Invoice.
+            records the request against the Final Insurer Invoice.
           </DialogDescription>
         </DialogHeader>
 

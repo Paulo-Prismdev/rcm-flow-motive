@@ -52,8 +52,9 @@ export function finalInvoiceTotal(claim) {
  */
 export function vatExcessAuthorityPart(applies, filed) {
   if (!applies) return null;
-  const amount = filed?.attached ? toNum(filed.amount) : null;
-  return { part: amount !== null && amount > 0 ? amount : null };
+  // A figure on that invoice — even a nil one on a job with nothing to collect —
+  // is what it counts at; nothing recorded at all leaves the check waiting.
+  return { part: filed?.attached ? toNum(filed.amount) : null };
 }
 
 /**

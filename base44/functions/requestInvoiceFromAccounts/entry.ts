@@ -5,8 +5,8 @@ import { parseEmails, sendBrandedEmail } from '../../shared/brandedEmail.ts';
  * Ask accounts to raise ONE invoice on the claim.
  *
  * Only that invoice is touched: it is flagged as requested in the claim's
- * invoice_tracker. The claim's own invoice status, the final invoice and every
- * other item are left exactly as they were.
+ * invoice_tracker. The claim's own invoice status, the Final Insurer Invoice and
+ * every other item are left exactly as they were.
  */
 export default async function (req: Request): Promise<Response> {
   try {

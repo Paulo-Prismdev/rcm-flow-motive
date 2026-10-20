@@ -2,13 +2,14 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
 import { parseEmails, sendBrandedEmail } from '../../shared/brandedEmail.ts';
 
 /**
- * Ask the repairer for a corrected final invoice.
+ * Ask the repairer for a corrected invoice.
  *
- * The invoice can't stand as it is: either it asks for more than the job was
- * authorised at, which a repairer may never do, or it asks for less than the
- * authority and the team has chosen to have it re-invoiced. The request is
- * recorded against the Final Invoice — which is what leaves that invoice amber
- * on the claim until a corrected copy is uploaded — and the email is sent.
+ * The repairer's invoices can't stand as they are: either they ask for more than
+ * the job was authorised at, which a repairer may never do, or they ask for less
+ * than the authority and the team has chosen to have them re-invoiced. The request
+ * is recorded against the Final Insurer Invoice — which is what leaves that
+ * invoice amber on the claim until a corrected copy is uploaded — and the email is
+ * sent.
  */
 export default async function (req: Request): Promise<Response> {
   try {
@@ -65,7 +66,7 @@ export default async function (req: Request): Promise<Response> {
         parent_id: claim_id,
         parent_type: 'Claim',
         action: 'Re-invoice Requested',
-        description: `Asked ${claim.bodyshop || 'the repairer'} (${recipients.join(', ')}) to send a corrected Final Invoice for job ${claim.job_number || '—'} — invoiced ${invoice_total ?? '—'} against the authorised ${authority_amount ?? '—'}: ${subject}`,
+        description: `Asked ${claim.bodyshop || 'the repairer'} (${recipients.join(', ')}) to send a corrected invoice for job ${claim.job_number || '—'} — invoiced ${invoice_total ?? '—'} against the authorised ${authority_amount ?? '—'}: ${subject}`,
         user_email: user.email || '',
         user_name: user.full_name || '',
       });

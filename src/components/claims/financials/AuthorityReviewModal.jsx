@@ -27,8 +27,8 @@ import { authorityWorkings, compareToAuthority, finalInvoiceTotal } from './invo
  * The check before an authority is recorded: the document on the left, the three
  * things read off it on the right. Its amount lands on the claim's authorised
  * cost, its registration has to be this vehicle's, its excess is filled in or put
- * to the user — and the amount is set against the Final Invoice, whichever of the
- * two was uploaded second. Nothing is saved until the user confirms here.
+ * to the user — and the amount is set against the repairer's invoices, whichever
+ * of them was uploaded second. Nothing is saved until the user confirms here.
  */
 export default function AuthorityReviewModal({
   isOpen, onClose, claim, vatExcess, item, fileUrl, fileName, onConfirm,

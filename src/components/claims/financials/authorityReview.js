@@ -155,7 +155,8 @@ const FINAL_INVOICE_KEY = 'final_invoice';
  * The patch that records an authority: the authorised amount against the claim's
  * authorised cost, the customer's excess where the authority supplies or
  * corrects it, the file the figures were read from — and, where the comparison
- * with the Final Invoice was settled here, the re-invoice request left against
+ * with the Final Insurer Invoice was settled here, the re-invoice request left
+ * against
  * that invoice and the repair cost an accepted invoice total becomes.
  */
 export function buildAuthorityReviewPatch(claim, figures, options = {}) {

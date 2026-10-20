@@ -72,7 +72,8 @@ export function buildFinancialFlow(summary, ctx, claim) {
   const closeRows = rowsFor(summary, 'closeout');
   const closeApplies = applying(closeRows);
   // The Collection Note is recommended, never required: the step is done on the
-  // other close-out items alone — the Final Invoice, the Final Authority and,
+  // other close-out items alone — the Final Insurer Invoice, the Final Authority
+  // and,
   // where we handle the client's VAT and excess, the repairer's VAT & excess
   // invoice — the note is never the step's own next action, and while it is
   // missing it is offered as a suggestion instead.

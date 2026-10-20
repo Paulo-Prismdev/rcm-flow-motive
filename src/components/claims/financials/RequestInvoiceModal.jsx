@@ -14,7 +14,8 @@ import { createAccountsRequestNote } from './accountsRequestNote';
 
 /**
  * The pre-filled email asking accounts to raise one invoice. Everything is
- * editable, and sending it touches that invoice only — never the final invoice.
+ * editable, and sending it touches that invoice only — never the Final Insurer
+ * Invoice.
  */
 export default function RequestInvoiceModal({ isOpen, onClose, claim, item, state, party, accountsEmail, currentUser, onRequested }) {
   const { toast } = useToast();

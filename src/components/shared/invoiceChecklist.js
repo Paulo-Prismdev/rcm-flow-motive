@@ -68,7 +68,7 @@ export const INVOICE_ITEMS = [
     key: 'final_invoice',
     label: 'Final Insurer Invoice',
     section: 'closeout',
-    // The repairer's final invoice to the insurer: we keep a copy of it on file
+    // The repairer's Final Insurer Invoice to the insurer: we keep a copy on file
     // and the repair cost is read off it — the whole of it on a job where the
     // client's VAT and excess are not handled by us, otherwise the part the
     // insurer pays, with the VAT & excess invoice beside it — but we are not
@@ -81,7 +81,7 @@ export const INVOICE_ITEMS = [
     party: 'authorising_party',
     // Its date is the date printed on the invoice itself, never the upload date.
     bindings: { date: 'invoice_sent_date' },
-    // The job is invoiced once the final invoice itself is on file.
+    // The job is invoiced once the Final Insurer Invoice itself is on file.
     date_status_field: 'invoice_status',
     date_status_value: 'Invoiced',
     setsRepairCost: true,
@@ -89,7 +89,7 @@ export const INVOICE_ITEMS = [
   {
     // Where we handle a client's VAT and excess, the repairer bills us for the
     // VAT content of their repair plus the excess they collected. That invoice
-    // arrives with their final invoice, so it is filed on the close-out step
+    // arrives with their Final Insurer Invoice, so it is filed on the close-out step
     // beside it — named from the repairer, and checked the same way as any other
     // invoice that comes in. It is still an invoice we pay: it keeps its own
     // received date and its paid step alongside the rest of them.
@@ -844,7 +844,7 @@ export function deriveInvoiceStatus(claim, hasFile = claimCopyOnFile(claim), { f
   if (summary.missing.length > 0) return 'Not Ready for Invoicing';
 
   // Overdue means one of our own invoices has gone out and is still unpaid past
-  // the due date. The Final Invoice is the repairer's, not ours, so it takes no
+  // the due date. The Final Insurer Invoice is the repairer's, not ours, so it takes no
   // part in this.
   const unpaidOut = rows.some(({ item, state }) =>
     !isInvoiceDocument(item) && item.direction === 'out' && !!state.date && !state.paid);
@@ -1025,7 +1025,7 @@ export function buildInvoiceReviewPatch(item, claim, figures, origin) {
   const entry = { ...(items[item.key] || {}) };
   entry.invoice_number = figures.invoice_number || '';
   // A close-out document's own figures are kept on its entry: they never count
-  // as money owed, but the Final Invoice's total is what the authority is
+  // as money owed, but the Final Insurer Invoice's total is what the authority is
   // checked against — and a corrected copy clears the request for one.
   if (isInvoiceDocument(item)) {
     const total = toNum(figures.amount_total);
@@ -1139,7 +1139,7 @@ export function buildInvoiceDetailsClearPatch(item, claim, { fileUrl, clearedBy 
   items[item.key] = entry;
   patch.invoice_tracker = { ...source, items };
 
-  // The claim is invoiced once the final invoice is on file, so reverting that
+  // The claim is invoiced once the Final Insurer Invoice is on file, so reverting that
   // date reverts the status it set — worked out from the invoices themselves.
   if (item.date_status_field && claim[item.date_status_field] === item.date_status_value) {
     patch[item.date_status_field] = deriveInvoiceStatus({ ...claim, ...patch });

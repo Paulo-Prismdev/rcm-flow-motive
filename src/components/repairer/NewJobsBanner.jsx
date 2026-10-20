@@ -318,7 +318,7 @@ export default function NewJobsBanner({ bodyshopId }) {
                         <li className="flex items-start gap-2">
                           <span className="font-bold">•</span>
                           <span>
-                            <strong>Invoice Submission:</strong> The final invoice must be submitted directly to RCM Automotive. 
+                            <strong>Invoice Submission:</strong> The Final Insurer Invoice must be submitted directly to RCM Automotive. 
                             Failure to do so will result in further charges as per SLA.
                           </span>
                         </li>

@@ -25,7 +25,8 @@ export default function InvoiceRow({
   // payments step's.
   const sendFocus = focus === 'send';
   const payFocus = focus === 'pay';
-  // Accounts are asked for the invoices we raise, never for the final invoice or
+  // Accounts are asked for the invoices we raise, never for the Final Insurer
+  // Invoice or
   // the close-out paperwork.
   const canAsk = canRequestInvoice(item) && !!onRequest && !state.paid && !state.date && !payFocus;
   // The quick paid action belongs on an invoice that has gone out or come in, or

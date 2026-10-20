@@ -3,7 +3,8 @@ import InvoiceItemCard from '../InvoiceItemCard';
 import InvoiceItemDetails from '../InvoiceItemDetails';
 
 /**
- * One of the close-out items — the Final Invoice, Final Authority or Collection
+ * One of the close-out items — the Final Insurer Invoice, Final Authority or
+ * Collection
  * Note — as a single card matching the invoice cards: the status button with
  * everything else in the same box behind its own ⋮ menu. All three are documents
  * we collect: a copy on file is what marks them done, and the dates and the file

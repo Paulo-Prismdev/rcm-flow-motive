@@ -604,7 +604,7 @@ Deno.serve(async (req) => {
         const invoicingParas = [
           'This repair is being handled via a Credit Repair company. RCM Automotive has outsourced management of this claim to the credit repair company named on this instruction.',
           'Your invoice should be addressed and sent to the credit repair company as per their instructions and your usual practice with them.',
-          'A copy of the final invoice, authority and collection note must also be emailed to invoices@rcmautomotive.co.uk',
+          'A copy of the Final Insurer Invoice, authority and collection note must also be emailed to invoices@rcmautomotive.co.uk',
           `You will receive an invoice from RCM for ${fields.referral_fee} of the final repair figure and this will be payable within 7 DAYS of invoice.`,
         ];
 
@@ -738,7 +738,7 @@ Deno.serve(async (req) => {
         // Body text
         const invoicingParas = [
           'Your invoice should be addressed and sent to the authorising party, as instructed on the authority and as per your usual practice.',
-          'A copy of the final invoice, authority and collection note must be emailed to invoices@rcmautomotive.co.uk',
+          'A copy of the Final Insurer Invoice, authority and collection note must be emailed to invoices@rcmautomotive.co.uk',
           `You will receive an invoice from RCM for ${fields.referral_fee} of the final repair figure and will be payable within 7 DAYS of invoice.`,
         ];
 
