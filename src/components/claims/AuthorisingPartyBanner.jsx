@@ -24,6 +24,7 @@ export default function AuthorisingPartyBanner({ claim, onUpdate }) {
 
   const currentRole = claim?.authorised_by || '';
   const currentName = claim?.authorising_party_name || '';
+  const claimType = claim?.claim_type || '';
   const overridden = claim?.authorising_party_overridden === true;
   const unresolved = isAuthorisingPartyUnresolved(claim);
   const partyClaimRef = authorisingPartyClaimRef(currentRole, claim);
@@ -107,11 +108,13 @@ export default function AuthorisingPartyBanner({ claim, onUpdate }) {
 
   return (
     <div className={`flex flex-wrap gap-1.5 rounded-[10px] border p-2.5 flex-shrink-0 md:flex-nowrap md:items-center md:gap-3 md:p-3 ${style.bg} ${style.border}`}>
-      {/* Phones: label on its own line, pencil at the right. Desktop: one row. */}
+      {/* Phones: claim type on the first line, pencil at the right. Desktop: one row. */}
       <div className="flex items-center gap-2 min-w-0 md:flex-shrink-0">
         <Shield className={`w-4 h-4 flex-shrink-0 ${style.text}`} />
-        <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Authorising Party</span>
+        <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground whitespace-nowrap flex-shrink-0">Claim type</span>
+        <span className="text-sm font-semibold text-foreground min-w-0">{claimType || 'Not set'}</span>
       </div>
+      <span className="hidden md:inline-block w-px h-4 flex-shrink-0 bg-border order-1" />
       <button
         onClick={startEdit}
         className="flex-shrink-0 p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-foreground/5 transition-colors ml-auto order-2 md:order-3 md:ml-0"
@@ -119,14 +122,8 @@ export default function AuthorisingPartyBanner({ claim, onUpdate }) {
       >
         <Pencil className="w-3.5 h-3.5" />
       </button>
-      {/* Second line on phones: claim reference, then the role and name */}
+      {/* Second line on phones: authorising party, then its claim number */}
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 min-w-0 w-full order-3 md:order-2 md:w-auto md:flex-1 md:flex-nowrap">
-        <div className={`flex items-center gap-1.5 flex-shrink-0 px-2 py-0.5 rounded-md ${missingClaimRef ? 'bg-red-100 dark:bg-red-900/30' : ''}`}>
-          <FileText className={`w-3.5 h-3.5 ${missingClaimRef ? 'text-red-600 dark:text-red-400' : 'text-muted-foreground'}`} />
-          <span className={`text-xs font-semibold ${missingClaimRef ? 'text-red-600 dark:text-red-400' : 'text-foreground'}`}>
-            {partyClaimRef || 'No Claim Ref'}
-          </span>
-        </div>
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1 min-w-0 md:flex-1 md:flex-nowrap">
           <span className={`w-2 h-2 rounded-full flex-shrink-0 ${style.dot}`} />
           <span className={`text-sm font-semibold min-w-0 md:truncate ${style.text}`}>
@@ -143,6 +140,13 @@ export default function AuthorisingPartyBanner({ claim, onUpdate }) {
               <AlertTriangle className="w-2.5 h-2.5" /> {!currentRole ? 'No claim type' : 'Name missing'}
             </span>
           )}
+        </div>
+        <span className="hidden md:inline-block w-px h-4 flex-shrink-0 bg-border" />
+        <div className={`flex items-center gap-1.5 flex-shrink-0 px-2 py-0.5 rounded-md ${missingClaimRef ? 'bg-red-100 dark:bg-red-900/30' : ''}`}>
+          <FileText className={`w-3.5 h-3.5 ${missingClaimRef ? 'text-red-600 dark:text-red-400' : 'text-muted-foreground'}`} />
+          <span className={`text-xs font-semibold whitespace-nowrap ${missingClaimRef ? 'text-red-600 dark:text-red-400' : 'text-foreground'}`}>
+            {partyClaimRef ? `Claim no. ${partyClaimRef}` : 'Claim no. missing'}
+          </span>
         </div>
       </div>
     </div>
