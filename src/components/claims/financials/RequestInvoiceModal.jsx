@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Send } from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,6 +10,7 @@ import {
 } from '@/components/ui/dialog';
 import { DEFAULT_ACCOUNTS_EMAIL } from '@/components/shared/invoiceChecklist';
 import { buildInvoiceRequestEmail } from './requestEmail';
+import { createAccountsRequestNote } from './accountsRequestNote';
 
 /**
  * The pre-filled email asking accounts to raise one invoice. Everything is
@@ -16,6 +18,7 @@ import { buildInvoiceRequestEmail } from './requestEmail';
  */
 export default function RequestInvoiceModal({ isOpen, onClose, claim, item, state, party, accountsEmail, currentUser, onRequested }) {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [to, setTo] = useState('');
   const [cc, setCc] = useState('');
   const [subject, setSubject] = useState('');
@@ -49,6 +52,21 @@ export default function RequestInvoiceModal({ isOpen, onClose, claim, item, stat
       });
       const data = res?.data || {};
       if (data.error) throw new Error(data.error);
+      // The request is away, so it belongs in the claim's Internal Updates as an
+      // outgoing communication to accounts. A failure to log it never hides the
+      // send that did happen.
+      try {
+        await createAccountsRequestNote({
+          claim,
+          item,
+          to: to.trim(),
+          cc: cc.trim(),
+          total: state?.total,
+        });
+        queryClient.invalidateQueries({ queryKey: ['notes', claim.id, 'Claim'] });
+      } catch (noteErr) {
+        console.error('Create accounts request update failed', noteErr);
+      }
       onRequested(data.requested_at);
       toast({ title: 'Request sent', description: `${item.label} marked as requested from accounts.` });
       onClose();
