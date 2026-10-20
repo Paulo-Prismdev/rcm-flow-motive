@@ -412,7 +412,7 @@ export default function WizardFindRepairerStep({
       {/* Selected bodyshop detail card */}
       {selectedBodyshop ? (
         <div className="p-2.5 rounded-xl border-2 border-primary bg-primary/5">
-          <div className="flex items-start justify-between gap-2">
+          <div className="flex flex-wrap items-start justify-between gap-2 md:flex-nowrap">
             <div className="flex-1 min-w-0">
               <h4 className="font-bold text-sm flex items-center gap-1.5 text-primary mb-1.5">
                 <CheckCircle className="w-4 h-4" /> Selected Repairer

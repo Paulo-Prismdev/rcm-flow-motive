@@ -106,41 +106,45 @@ export default function AuthorisingPartyBanner({ claim, onUpdate }) {
   }
 
   return (
-    <div className={`flex rounded-[10px] border p-3 flex-shrink-0 items-center gap-3 ${style.bg} ${style.border}`}>
-      <div className="flex items-center gap-2 flex-shrink-0">
-        <Shield className={`w-4 h-4 ${style.text}`} />
+    <div className={`flex flex-wrap gap-1.5 rounded-[10px] border p-2.5 flex-shrink-0 md:flex-nowrap md:items-center md:gap-3 md:p-3 ${style.bg} ${style.border}`}>
+      {/* Phones: label on its own line, pencil at the right. Desktop: one row. */}
+      <div className="flex items-center gap-2 min-w-0 md:flex-shrink-0">
+        <Shield className={`w-4 h-4 flex-shrink-0 ${style.text}`} />
         <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Authorising Party</span>
-      </div>
-      <div className={`flex items-center gap-1.5 flex-shrink-0 px-2 py-0.5 rounded-md ${missingClaimRef ? 'bg-red-100 dark:bg-red-900/30' : ''}`}>
-        <FileText className={`w-3.5 h-3.5 ${missingClaimRef ? 'text-red-600 dark:text-red-400' : 'text-muted-foreground'}`} />
-        <span className={`text-xs font-semibold ${missingClaimRef ? 'text-red-600 dark:text-red-400' : 'text-foreground'}`}>
-          {partyClaimRef || 'No Claim Ref'}
-        </span>
-      </div>
-      <div className="flex items-center gap-2 min-w-0 flex-1">
-        <span className={`w-2 h-2 rounded-full flex-shrink-0 ${style.dot}`} />
-        <span className={`text-sm font-semibold truncate ${style.text}`}>
-          {label}
-          {currentName && <span className="font-normal text-muted-foreground">: {currentName}</span>}
-        </span>
-        {overridden && (
-          <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300 text-[10px] font-semibold flex-shrink-0">
-            <Lock className="w-2.5 h-2.5" /> Override
-          </span>
-        )}
-        {unresolved && (
-          <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300 text-[10px] font-semibold flex-shrink-0">
-            <AlertTriangle className="w-2.5 h-2.5" /> {!currentRole ? 'No claim type' : 'Name missing'}
-          </span>
-        )}
       </div>
       <button
         onClick={startEdit}
-        className="flex-shrink-0 p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-foreground/5 transition-colors"
+        className="flex-shrink-0 p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-foreground/5 transition-colors ml-auto order-2 md:order-3 md:ml-0"
         title="Override authorising party"
       >
         <Pencil className="w-3.5 h-3.5" />
       </button>
+      {/* Second line on phones: claim reference, then the role and name */}
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 min-w-0 w-full order-3 md:order-2 md:w-auto md:flex-1 md:flex-nowrap">
+        <div className={`flex items-center gap-1.5 flex-shrink-0 px-2 py-0.5 rounded-md ${missingClaimRef ? 'bg-red-100 dark:bg-red-900/30' : ''}`}>
+          <FileText className={`w-3.5 h-3.5 ${missingClaimRef ? 'text-red-600 dark:text-red-400' : 'text-muted-foreground'}`} />
+          <span className={`text-xs font-semibold ${missingClaimRef ? 'text-red-600 dark:text-red-400' : 'text-foreground'}`}>
+            {partyClaimRef || 'No Claim Ref'}
+          </span>
+        </div>
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 min-w-0 md:flex-1 md:flex-nowrap">
+          <span className={`w-2 h-2 rounded-full flex-shrink-0 ${style.dot}`} />
+          <span className={`text-sm font-semibold min-w-0 md:truncate ${style.text}`}>
+            {label}
+            {currentName && <span className="font-normal text-muted-foreground">: {currentName}</span>}
+          </span>
+          {overridden && (
+            <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300 text-[10px] font-semibold flex-shrink-0">
+              <Lock className="w-2.5 h-2.5" /> Override
+            </span>
+          )}
+          {unresolved && (
+            <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300 text-[10px] font-semibold flex-shrink-0">
+              <AlertTriangle className="w-2.5 h-2.5" /> {!currentRole ? 'No claim type' : 'Name missing'}
+            </span>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

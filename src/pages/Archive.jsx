@@ -120,7 +120,7 @@ export default function Archive() {
             const Icon = item.icon;
             return (
               <div key={`${item.department}-${item.id}`} className="neomorph card-hover p-4 lg:p-6">
-                <div className="flex items-start justify-between gap-2">
+                <div className="flex flex-wrap items-start justify-between gap-2 md:flex-nowrap">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 lg:gap-4 mb-2 lg:mb-3 flex-wrap">
                       <div className="neomorph-flat p-2 flex-shrink-0">

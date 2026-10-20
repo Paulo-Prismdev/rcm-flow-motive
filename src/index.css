@@ -634,6 +634,21 @@ button:not(.btn-sm):not(.btn-icon),
     white-space: nowrap;
   }
 
+  /* ── 3b. A line of text keeps a readable width ──
+     A row never squeezes text into a sliver beside its neighbours: the text
+     keeps a sensible minimum and, when it cannot share the line, the row
+     wraps so the text carries on over the next line instead. Column stacks
+     are left untouched, and rows that already set their own row gap keep it. */
+  .flex:not([class*="flex-col"]):not([class*="flex-wrap"]):not([class*="gap-y-"]):has(> .truncate:not(.m-ellipsis)),
+  .flex:not([class*="flex-col"]):not([class*="flex-wrap"]):not([class*="gap-y-"]):has(> * > .truncate:not(.m-ellipsis)),
+  .flex:not([class*="flex-col"]):not([class*="flex-wrap"]):not([class*="gap-y-"]):has(> * > * > .truncate:not(.m-ellipsis)) {
+    flex-wrap: wrap;
+    row-gap: 0.375rem;
+  }
+  .flex:not([class*="flex-col"]) > .truncate:not(.m-ellipsis):not(td):not(th) {
+    min-width: min(100%, 6rem);
+  }
+
   /* ── 4. Popovers, menus and dropdowns stay on screen ── */
   [data-radix-popper-content-wrapper] {
     max-width: calc(100vw - 8px);
