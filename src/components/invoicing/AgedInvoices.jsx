@@ -10,7 +10,7 @@ import {
   filterAgedRows,
   groupAgedRows,
 } from '@/components/shared/invoicingQueue';
-import AgedTotals from './AgedTotals';
+import AgedSummary from './AgedSummary';
 import AgedPartyRow from './AgedPartyRow';
 import InvoicingFilters from './InvoicingFilters';
 
@@ -20,8 +20,8 @@ const TAB_LABELS = { out: 'Owed to us', in: 'We owe' };
 
 /**
  * The two books of outstanding money — what parties owe us and what we owe them —
- * each aged from its own invoice date, grouped by party, with the totals above
- * and the current view exportable.
+ * each aged from its own invoice date, grouped by party, with the tab's own summary
+ * above, the filters on one line, and the current view exportable.
  */
 export default function AgedInvoices({ owedToUs = [], weOwe = [], onOpen }) {
   const { toast } = useToast();
@@ -52,7 +52,7 @@ export default function AgedInvoices({ owedToUs = [], weOwe = [], onOpen }) {
 
   return (
     <div className="space-y-2">
-      <div className="flex items-center gap-1 bg-muted rounded-full p-1 w-fit">
+      <div className="grid grid-cols-2 gap-1 rounded-[10px] border border-border bg-muted p-1">
         {['out', 'in'].map((key) => {
           const count = key === 'out' ? owedToUs.length : weOwe.length;
           const active = tab === key;
@@ -61,25 +61,26 @@ export default function AgedInvoices({ owedToUs = [], weOwe = [], onOpen }) {
               key={key}
               type="button"
               onClick={() => switchTab(key)}
-              className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${active ? 'bg-card shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+              className={`flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold transition-colors ${active ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
             >
-              {TAB_LABELS[key]} <span className="tabular-nums text-muted-foreground">{count}</span>
+              {TAB_LABELS[key]}
+              <span className="rounded-full bg-muted px-1.5 text-[11px] font-semibold tabular-nums text-muted-foreground">{count}</span>
             </button>
           );
         })}
       </div>
 
-      <AgedTotals rows={rows} />
+      <AgedSummary rows={rows} />
 
-      <div className="flex flex-wrap items-end justify-between gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <InvoicingFilters
           filters={filters}
           onChange={setFilters}
           onClear={() => setFilters(NO_FILTERS)}
           options={options}
         />
-        <Button variant="outline" size="sm" onClick={exportCsv} className="h-9">
-          <Download className="w-4 h-4 mr-1.5" />
+        <Button variant="outline" size="sm" onClick={exportCsv} className="h-8 ml-auto">
+          <Download className="w-3.5 h-3.5 mr-1.5" />
           Export CSV
         </Button>
       </div>

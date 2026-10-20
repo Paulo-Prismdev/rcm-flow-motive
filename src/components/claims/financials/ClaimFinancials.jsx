@@ -26,6 +26,8 @@ import {
   repairVat,
   resolveInvoiceAmount,
 } from '@/components/shared/invoiceChecklist';
+import { readTrackingStart } from '@/components/shared/invoicingQueue';
+import BeforeTrackingNotice from './BeforeTrackingNotice';
 import FinancialStatusLine from './FinancialStatusLine';
 import FinancialTotalsPanel from './FinancialTotalsPanel';
 import FinancialStep from './FinancialStep';
@@ -106,6 +108,9 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
   });
   const accountsEmail = appConfigs.find((c) => c.config_key === ACCOUNTS_EMAIL_CONFIG_KEY)?.config_value
     || DEFAULT_ACCOUNTS_EMAIL;
+  // Where invoicing tracking started: a job older than this is left out of the
+  // Invoicing page unless someone pulls it back in with the notice below.
+  const trackingStart = readTrackingStart(appConfigs);
 
   const ctx = useMemo(
     () => invoiceContext(claim, claimHandlesVatExcess(claim, client)),
@@ -767,6 +772,12 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
 
         {showInvoicing && (
           <>
+            <BeforeTrackingNotice
+              claim={claim}
+              trackingStart={trackingStart}
+              onTrackerChange={(patch, description) => commit(patch, description)}
+            />
+
             <div className="space-y-2.5">
               {step(
                 closeout,

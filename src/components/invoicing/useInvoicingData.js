@@ -1,12 +1,13 @@
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
-import { readQueueDays } from '@/components/shared/invoicingQueue';
+import { readQueueDays, readTrackingStart } from '@/components/shared/invoicingQueue';
 
 /**
- * The claims and the day thresholds the Invoicing page works from: every live
- * (non-archived) claim, each carrying the state its own Financials reads, plus
- * the two thresholds held in Settings.
+ * The claims and the settings the Invoicing page works from: every claim, each
+ * carrying the state its own Financials reads, plus the two day thresholds and the
+ * date tracking started — both held in Settings so they can be changed without
+ * touching the app's code.
  */
 export default function useInvoicingData() {
   const { data: claims = [], isLoading: claimsLoading } = useQuery({
@@ -20,6 +21,7 @@ export default function useInvoicingData() {
   });
 
   const thresholds = useMemo(() => readQueueDays(configs), [configs]);
+  const trackingStart = useMemo(() => readTrackingStart(configs), [configs]);
 
-  return { claims, thresholds, isLoading: claimsLoading || configLoading };
+  return { claims, thresholds, trackingStart, isLoading: claimsLoading || configLoading };
 }

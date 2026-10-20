@@ -15,7 +15,8 @@
  * on — counted from the date the job moved, the request went, or the invoice
  * itself was dated. Archived claims are kept while they still have something
  * outstanding, so filing a claim away never hides what it still owes; drafts and
- * cancelled claims are left out.
+ * cancelled claims are left out, and so is any job that was invoiced before the
+ * tracking start date set in Settings (see `isBeforeTracking`).
  */
 
 import {
@@ -154,6 +155,53 @@ export const queueDaysConfigValue = (thresholds) => JSON.stringify({
   accounts_working_days: wholeNumber(thresholds?.accountsWorkingDays, DEFAULT_QUEUE_DAYS.accountsWorkingDays),
   closeout_days: wholeNumber(thresholds?.closeoutDays, DEFAULT_QUEUE_DAYS.closeoutDays),
 });
+
+/* ── Tracking start (set in Settings) ────────────────────────────────────── */
+
+/** Where the date the Invoicing page starts tracking claims from is stored. */
+export const TRACKING_START_CONFIG_KEY = 'invoicing_tracking_start';
+
+/** The date tracking starts, as held in AppConfig. Empty while it is not set. */
+export function readTrackingStart(configs = []) {
+  const raw = configs.find((c) => c.config_key === TRACKING_START_CONFIG_KEY)?.config_value;
+  const date = parseDay(raw);
+  return date ? String(raw).slice(0, 10) : '';
+}
+
+/**
+ * Whether the vehicle went back to the customer before tracking started. Only a
+ * claim that has been returned counts: it is a finished job, invoiced in the old
+ * system, and would only swamp the queue. A job still with us is never left out,
+ * however long it has been running — only the claim's own returned date is read,
+ * and a claim with no returned date is always tracked.
+ */
+export const returnedBeforeTracking = (claim, trackingStart) => {
+  const start = parseDay(trackingStart);
+  if (!start) return false;
+  const returned = parseDay(returnedDate(claim));
+  return !!returned && startOfDay(returned) < startOfDay(start);
+};
+
+/** Before tracking, unless someone has pulled this claim back in from its Financials. */
+export const isBeforeTracking = (claim, trackingStart) =>
+  returnedBeforeTracking(claim, trackingStart) && claim?.invoice_tracker?.tracking_override !== true;
+
+/**
+ * How many claims a start date leaves out, and how many of those have been pulled
+ * back in — the check that the date set in Settings is the right one.
+ */
+export function countBeforeTracking(claims = [], trackingStart = '') {
+  let before = 0;
+  let pulledIn = 0;
+  if (!trackingStart) return { before, pulledIn };
+
+  for (const claim of claims) {
+    if (ignoredClaim(claim) || !returnedBeforeTracking(claim, trackingStart)) continue;
+    if (claim?.invoice_tracker?.tracking_override === true) pulledIn += 1;
+    else before += 1;
+  }
+  return { before, pulledIn };
+}
 
 /* ── The day's work queue ────────────────────────────────────────────────── */
 
@@ -344,6 +392,9 @@ export function buildInvoicingQueues(claims = [], thresholds = DEFAULT_QUEUE_DAY
     }
   }
 
+  /** The order the tiles are worked in, most urgent first. */
+  const SECTION_ORDER = ['warnings', 'accounts_overdue', 'closeout_missing', 'paid_no_copy', 'accounts_ready', 'in_expected'];
+
   const sections = [
     {
       key: 'accounts_ready',
@@ -383,15 +434,19 @@ export function buildInvoicingQueues(claims = [], thresholds = DEFAULT_QUEUE_DAY
     },
   ];
 
-  return sections.map((section) => {
-    const rows = oldestFirst(buckets[section.key] || []);
-    return {
-      ...section,
-      rows,
-      count: rows.length,
-      total: round2(rows.reduce((sum, row) => sum + (row.amount || 0), 0)),
-    };
-  });
+  // What is wrong comes first, then what is being chased, then the paperwork, with
+  // the queues waiting on someone else last.
+  return [...sections]
+    .sort((a, b) => SECTION_ORDER.indexOf(a.key) - SECTION_ORDER.indexOf(b.key))
+    .map((section) => {
+      const rows = oldestFirst(buckets[section.key] || []);
+      return {
+        ...section,
+        rows,
+        count: rows.length,
+        total: round2(rows.reduce((sum, row) => sum + (row.amount || 0), 0)),
+      };
+    });
 }
 
 /* ── Aged invoices ───────────────────────────────────────────────────────── */
