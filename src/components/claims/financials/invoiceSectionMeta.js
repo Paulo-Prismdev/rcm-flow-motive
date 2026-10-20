@@ -34,8 +34,6 @@ export function emptySectionMessage(section, ctx) {
     if (!ctx.secondReferrerEnabled) reasons.push('no second referrer');
   }
 
-  if (!ctx.vatExcess) reasons.push("client isn't set up for VAT & excess");
-
   return {
     title: collect ? 'Nothing to collect on this job' : 'Nothing to pay on this job',
     reasons: [capitalise(reasons[0] || 'nothing applies to this job'), ...reasons.slice(1)],

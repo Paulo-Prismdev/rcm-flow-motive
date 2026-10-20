@@ -66,12 +66,14 @@ export const INVOICE_SECTIONS = [
 export const INVOICE_ITEMS = [
   {
     key: 'final_invoice',
-    label: 'Final Invoice',
+    label: 'Final Insurer Invoice',
     section: 'closeout',
     // The repairer's final invoice to the insurer: we keep a copy of it on file
-    // and the repair cost is read off it, but we are not paid on it ourselves —
-    // so it is close-out paperwork like the Final Authority, green on a copy,
-    // with no paid step.
+    // and the repair cost is read off it — the whole of it on a job where the
+    // client's VAT and excess are not handled by us, otherwise the part the
+    // insurer pays, with the VAT & excess invoice beside it — but we are not
+    // paid on it ourselves, so it is close-out paperwork like the Final
+    // Authority: green on a copy, with no paid step.
     kind: 'document',
     direction: 'out',
     dateLabel: 'Sent',
@@ -83,6 +85,28 @@ export const INVOICE_ITEMS = [
     date_status_field: 'invoice_status',
     date_status_value: 'Invoiced',
     setsRepairCost: true,
+  },
+  {
+    // Where we handle a client's VAT and excess, the repairer bills us for the
+    // VAT content of their repair plus the excess they collected. That invoice
+    // arrives with their final invoice, so it is filed on the close-out step
+    // beside it — named from the repairer, and checked the same way as any other
+    // invoice that comes in. It is still an invoice we pay: it keeps its own
+    // received date and its paid step alongside the rest of them.
+    key: 'vat_excess_invoice_in',
+    label: 'VAT & Excess Invoice In',
+    section: 'closeout',
+    direction: 'in',
+    dateLabel: 'Received',
+    requires: 'vat_excess',
+    party: 'repairer',
+    amountSource: 'vat_excess',
+    bindings: {
+      paid: 'excess_contribution_paid',
+      paid_date: 'excess_contribution_paid_date',
+    },
+    date_flag: 'excess_contribution_invoice_received',
+    varianceReason: 'Repair cost, excess or VAT status changed',
   },
   {
     key: 'final_authority',
@@ -137,25 +161,6 @@ export const INVOICE_ITEMS = [
     party: 'second_referrer',
     amountSource: 'second_referrer_fee',
     varianceReason: 'Second referrer fee or repair cost changed',
-  },
-  {
-    // Where we handle a client's VAT and excess, the repairer bills us for the
-    // VAT content of their repair plus the excess they collected — so this
-    // invoice comes in from the repairer, and it is their invoice we check.
-    key: 'vat_excess_invoice_in',
-    label: 'VAT & Excess Invoice In',
-    section: 'in',
-    direction: 'in',
-    dateLabel: 'Received',
-    requires: 'vat_excess',
-    party: 'repairer',
-    amountSource: 'vat_excess',
-    bindings: {
-      paid: 'excess_contribution_paid',
-      paid_date: 'excess_contribution_paid_date',
-    },
-    date_flag: 'excess_contribution_invoice_received',
-    varianceReason: 'Repair cost, excess or VAT status changed',
   },
   {
     key: 'referral_invoice_out',

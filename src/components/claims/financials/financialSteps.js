@@ -1,4 +1,4 @@
-import { isRecommendedItem } from '@/components/shared/invoiceChecklist';
+import { isInvoiceDocument, isRecommendedItem } from '@/components/shared/invoiceChecklist';
 import { emptySectionMessage } from './invoiceSectionMeta';
 import { isStepMovedPast } from './financialStepSkip';
 
@@ -15,7 +15,7 @@ export const FINANCIAL_STEPS = [
     key: 'closeout',
     n: 1,
     title: 'Collect close-out documents',
-    hint: 'Final Invoice and Final Authority, plus the Collection Note where there is one. The final repair cost comes from the Final Invoice.',
+    hint: 'Final Insurer Invoice and Final Authority, plus the Collection Note where there is one — and the repairer\'s VAT & excess invoice where we handle the client\'s VAT and excess. The repairer\'s invoices together account for the final repair cost.',
   },
   {
     key: 'figures',
