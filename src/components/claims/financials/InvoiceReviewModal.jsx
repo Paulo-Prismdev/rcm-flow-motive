@@ -26,7 +26,7 @@ import {
 import { isInvoiceDocument } from '@/components/shared/invoiceChecklist';
 import RepairCostFromInvoice, { repairCostOffer } from './RepairCostFromInvoice';
 import InvoiceVsAuthority from './InvoiceVsAuthority';
-import { authorityAmount, compareToAuthority } from './invoiceAuthorityCheck';
+import { authorityAmount, authorityWorkings, compareToAuthority } from './invoiceAuthorityCheck';
 
 /**
  * The check before an invoice is recorded: the document on the left, the figures
@@ -34,7 +34,7 @@ import { authorityAmount, compareToAuthority } from './invoiceAuthorityCheck';
  * Nothing is saved to the claim until the user confirms here.
  */
 export default function InvoiceReviewModal({
-  isOpen, onClose, claim, item, party, fileUrl, fileName, onConfirm, onReinvoiceEmail,
+  isOpen, onClose, claim, vatExcess, item, party, fileUrl, fileName, onConfirm, onReinvoiceEmail,
 }) {
   const [status, setStatus] = useState('reading');
   const [figures, setFigures] = useState(emptyFigures);
@@ -131,8 +131,8 @@ export default function InvoiceReviewModal({
   };
 
   // A close-out document is filed for the date printed on it: the figures on it
-  // are read and logged, but only the Final Invoice's total is needed, because
-  // the claim's final repair cost comes from it.
+  // are read and logged, but only the Final Insurer Invoice's total is needed,
+  // because the claim's final repair cost comes from it.
   const requiredKeys = isInvoiceDocument(item) && !item?.setsRepairCost
     ? ['invoice_date']
     : Object.keys(REQUIRED_FIGURES);
@@ -154,15 +154,22 @@ export default function InvoiceReviewModal({
 
   const mismatchAccepted = !mismatch || (acceptedMismatch && reason.trim().length > 0);
 
-  // The Final Invoice's total, set against the repair cost already on the claim:
-  // it fills the figure in where there is none, and is flagged where it differs.
-  const costOffer = repairCostOffer(item, claim, figures);
+  // The Final Insurer Invoice's total — the repairer's two invoices added up where
+  // the VAT and excess are on their own invoice — set against the repair cost
+  // already on the claim: it fills the figure in where there is none, and is
+  // flagged where it differs.
+  const costOffer = repairCostOffer(item, claim, figures, vatExcess);
   const useRepairCost = repairCostChoice ?? costOffer?.defaultUse ?? false;
 
-  // The Final Invoice is set against the amount the job was authorised at, and an
-  // invoice over that amount can never be saved as the Final Invoice at all.
+  // The repairer's invoices are set against the amount the job was authorised at,
+  // and a total over it can never be saved as the Final Insurer Invoice at all.
+  // Where the VAT and excess are on their own invoice the two are added up — and
+  // until that invoice is on file the check waits for it rather than reading the
+  // insurer's invoice as short.
   const authority = item?.setsRepairCost ? authorityAmount(claim) : null;
-  const comparison = item?.setsRepairCost ? compareToAuthority(invoiceTotal, authority) : null;
+  const comparison = item?.setsRepairCost
+    ? compareToAuthority(invoiceTotal, authority, vatExcess)
+    : null;
   const overAuthority = comparison?.status === 'over';
   const reinvoiceRequested = authorityChoice === 'reinvoice';
   const choiceNeeded = comparison?.status === 'under' && !authorityChoice;
@@ -185,10 +192,10 @@ export default function InvoiceReviewModal({
       accepted.push(`the invoice total ${fmtGBP(mismatch.invoiceTotal)} differs from our calculated ${fmtGBP(mismatch.expected.amount)}${mismatch.expected.note ? ` (${mismatch.expected.note})` : ''} — accepted with the reason: ${reason.trim()}`);
     }
     if (comparison?.status === 'under') {
-      accepted.push(`the invoice total ${fmtGBP(comparison.invoiceTotal)} is ${fmtGBP(Math.abs(comparison.difference))} under the authorised ${fmtGBP(comparison.authority)} — ${reinvoiceRequested ? 'a corrected invoice requested from the repairer' : "accepted as the claim's final repair cost"}`);
+      accepted.push(`${authorityWorkings(comparison)} is ${fmtGBP(Math.abs(comparison.difference))} under the authorised ${fmtGBP(comparison.authority)} — ${reinvoiceRequested ? 'a corrected invoice requested from the repairer' : "accepted as the claim's final repair cost"}`);
     }
     if (comparison?.status === 'match') {
-      accepted.push(`the invoice total ${fmtGBP(comparison.invoiceTotal)} matches the authorised ${fmtGBP(comparison.authority)}`);
+      accepted.push(`${authorityWorkings(comparison)} matches the authorised ${fmtGBP(comparison.authority)}`);
     }
     softBlockers.filter((b) => acked[b.id]).forEach((b) => accepted.push(`${b.text} — accepted`));
     onConfirm({

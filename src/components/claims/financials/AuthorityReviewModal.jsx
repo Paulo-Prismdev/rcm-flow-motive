@@ -21,7 +21,7 @@ import {
   excessCheck,
 } from './authorityReview';
 import { fetchSourceSnippets, snippetsFromExtraction, toNum } from './invoiceReview';
-import { compareToAuthority, finalInvoiceTotal } from './invoiceAuthorityCheck';
+import { authorityWorkings, compareToAuthority, finalInvoiceTotal } from './invoiceAuthorityCheck';
 
 /**
  * The check before an authority is recorded: the document on the left, the three
@@ -31,7 +31,7 @@ import { compareToAuthority, finalInvoiceTotal } from './invoiceAuthorityCheck';
  * two was uploaded second. Nothing is saved until the user confirms here.
  */
 export default function AuthorityReviewModal({
-  isOpen, onClose, claim, item, fileUrl, fileName, onConfirm,
+  isOpen, onClose, claim, vatExcess, item, fileUrl, fileName, onConfirm,
 }) {
   const [status, setStatus] = useState('reading');
   const [figures, setFigures] = useState(emptyAuthorityFigures);
@@ -116,7 +116,7 @@ export default function AuthorityReviewModal({
   const regAcked = !regIssue || !!acked.reg;
 
   const excess = excessCheck(figures, claim);
-  const comparison = compareToAuthority(finalInvoiceTotal(claim), toNum(figures.amount_total));
+  const comparison = compareToAuthority(finalInvoiceTotal(claim), toNum(figures.amount_total), vatExcess);
   const choiceNeeded = comparison?.status === 'under' && !authorityChoice;
 
   const canConfirm = status !== 'reading'
@@ -129,10 +129,10 @@ export default function AuthorityReviewModal({
     const accepted = [];
     if (regIssue) accepted.push(`${regIssue.text} — accepted`);
     if (comparison?.status === 'under') {
-      accepted.push(`the invoice total ${fmtGBP(comparison.invoiceTotal)} is ${fmtGBP(Math.abs(comparison.difference))} under the authorised ${fmtGBP(comparison.authority)} — ${authorityChoice === 'reinvoice' ? 'a corrected invoice requested from the repairer' : `accepted as the claim's final repair cost`}`);
+      accepted.push(`${authorityWorkings(comparison)} is ${fmtGBP(Math.abs(comparison.difference))} under the authorised ${fmtGBP(comparison.authority)} — ${authorityChoice === 'reinvoice' ? 'a corrected invoice requested from the repairer' : `accepted as the claim's final repair cost`}`);
     }
     if (comparison?.status === 'over') {
-      accepted.push(`the invoice total ${fmtGBP(comparison.invoiceTotal)} is ${fmtGBP(Math.abs(comparison.difference))} over the authorised ${fmtGBP(comparison.authority)} — a repairer can't invoice more than the authority, so the Final Invoice is flagged on the claim`);
+      accepted.push(`${authorityWorkings(comparison)} is ${fmtGBP(Math.abs(comparison.difference))} over the authorised ${fmtGBP(comparison.authority)} — a repairer can't invoice more than the authority, so the Final Insurer Invoice is flagged on the claim`);
     }
     if (excess.tbc && excessChoice === 'waived') {
       accepted.push('the policy excess was TBC on authority and this authority shows no excess, so it was marked as Waived');
@@ -276,7 +276,7 @@ export default function AuthorityReviewModal({
                 mode="authority"
                 choice={authorityChoice}
                 onChoice={setAuthorityChoice}
-                emptyNote={comparison ? undefined : 'No final invoice has been read off a copy yet — the two are set against each other as soon as one arrives.'}
+                emptyNote={comparison ? undefined : 'No Final Insurer Invoice has been read off a copy yet — the two are set against each other as soon as one arrives.'}
               />
             )}
           </div>
