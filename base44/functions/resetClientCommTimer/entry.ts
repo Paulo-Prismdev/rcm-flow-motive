@@ -18,7 +18,8 @@ export default async function(req: Request): Promise<Response> {
     const base44 = createClientFromRequest(req);
 
     // Internal-only: the scheduled workflows run as the app's admin, so they pass
-    // alongside manual internal runs. Nobody else may move a claim's timers.
+    // alongside manual internal runs. Nobody else may move a claim's timers, and
+    // nothing else runs before this check passes.
     const gate = await requireInternalUser(base44);
     if (gate.response) return gate.response;
 

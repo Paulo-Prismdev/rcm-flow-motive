@@ -42,7 +42,8 @@ function parseGoogleComponents(components, formattedAddress, lat, lng) {
 
 Deno.serve(async (req) => {
   try {
-    // Internal-only: address lookup and distance/directions for the app's own screens.
+    // Internal-only: address lookup and distance/directions for the app's own
+    // screens. Nothing else runs before this check passes.
     const base44 = createClientFromRequest(req);
     const gate = await requireInternalUser(base44);
     if (gate.response) return gate.response;

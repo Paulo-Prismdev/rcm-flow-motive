@@ -163,10 +163,14 @@ async function sendChaserEmail(base44: any, to: string, cc: string, subject: str
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
+
+    // Internal-only: manual runs from the chaser screens, plus the scheduled
+    // workflow run, which runs as the app's admin. Nothing else runs before this
+    // check passes.
+    const gate = await requireInternalUser(base44);
+    if (gate.response) return gate.response;
+
     const url = new URL(req.url);
-    // App public URL for building external form links. Prefer the configured
-    // APP_PUBLIC_URL secret, then the request Origin header (frontend-triggered
-    // runs), then the request's own host as a last resort.
     // App public URL for building external form links. Prefer the configured
     // APP_PUBLIC_URL secret, then the request Origin header (frontend-triggered
     // runs), then the known production app domain. We must NOT fall back to the
@@ -192,11 +196,6 @@ Deno.serve(async (req) => {
     } catch { /* no body or invalid JSON — not a dry run */ }
     const isTestMode = !!testEmail;
     const preview: any[] = [];
-
-    // Internal-only: manual runs from the chaser screens, plus the scheduled
-    // workflow run, which runs as the app's admin.
-    const gate = await requireInternalUser(base44);
-    if (gate.response) return gate.response;
 
     // Fetch rules — a specific rule when rule_id is supplied (per-rule run/preview),
     // otherwise all active rules (automated / global run).
