@@ -18,14 +18,16 @@
  * cancelled claims are left out, and so is any job that was invoiced before the
  * tracking start date set in Settings (see `isBeforeTracking`).
  *
- * A job's invoicing is worked on from the day the vehicle went back to the
- * customer: the final invoice pack, its close-out paperwork and the invoices still
- * to come in are chased from that date, and nothing on a job still with us is
- * chased before it — except a credit repair hire fee, which is invoiced at the
- * start of the hire. An invoice that has already gone out, come in or been paid is
- * chased whenever that happened, and counts in the aged invoices whatever stage its
- * claim is at. A job whose return was never recorded is caught by the warning that
- * asks for the date, rather than sitting outside the queue for good.
+ * A job's invoicing is worked on from the day it left our hands: the vehicle back
+ * with the customer, or — on a total loss, where the vehicle never goes back — the
+ * day the salvage was collected. The final invoice pack, the close-out paperwork
+ * and the invoices still to come in are chased from that date, and nothing on a job
+ * still with us is chased before it — except a credit repair hire fee, which is
+ * invoiced at the start of the hire. An invoice that has already gone out, come in
+ * or been paid is chased whenever that happened, and counts in the aged invoices
+ * whatever stage its claim is at. A job whose own date was never recorded is caught
+ * by the warning that asks for it — the return, or the salvage collection — rather
+ * than sitting outside the queue for good.
  */
 
 import {
@@ -38,6 +40,7 @@ import {
   isInvoiceDocument,
   isRecommendedItem,
 } from './invoiceChecklist';
+import { isTotalLossClaim } from './totalLoss';
 import {
   authorityAmount,
   compareToAuthority,
@@ -102,20 +105,28 @@ const laterOf = (a, b) => {
 };
 
 /**
- * The date the vehicle went back to the customer — the point a job is done with
- * us and its paperwork is expected to follow. A rectification hand-over is the
- * later of the two, and is the one that counts once it has happened.
+ * The date the job left our hands — the point it is done with us and its paperwork
+ * is expected to follow. On a repaired job that is the day the vehicle went back to
+ * the customer, a rectification hand-over counting as the later of the two; on a
+ * total loss the vehicle never goes back, so it is the day the salvage was
+ * collected. It is the trigger a job's invoice pack is chased from either way.
  */
-export const returnedDate = (claim) =>
-  laterOf(claim?.hand_over_date, claim?.rectification_hand_over_date);
+export const releaseDate = (claim) =>
+  isTotalLossClaim(claim)
+    ? (claim?.salvage_collected_date || '')
+    : laterOf(claim?.hand_over_date, claim?.rectification_hand_over_date);
+
+/** That same date in the job's own terms, for the note a queue line carries. */
+export const releaseWording = (claim) =>
+  (isTotalLossClaim(claim) ? 'Salvage collected' : 'Vehicle returned');
 
 /**
- * When a job became ours to invoice: the day the vehicle went back, or failing
- * that the day the repair was completed or the job first came in. Only used to
- * say how long an invoice has been waiting to be raised.
+ * When a job became ours to invoice: the day it left our hands, or failing that the
+ * day the repair was completed or the job first came in. Only used to say how long
+ * an invoice has been waiting to be raised.
  */
 export const jobAnchorDate = (claim) =>
-  returnedDate(claim) || claim?.completion_date || claim?.authority_received || claim?.date_received || '';
+  releaseDate(claim) || claim?.completion_date || claim?.authority_received || claim?.date_received || '';
 
 /**
  * The credit repair hire fee is invoiced at the start of the hire, so it is the one
@@ -131,7 +142,7 @@ export const isEarlyHireFee = (item) => item?.key === 'cr_hire_fee';
  * What the day's queue chases, and what the claims list calls outstanding invoices.
  */
 export const claimInvoicesChased = (claim, summary) =>
-  !!returnedDate(claim) ||
+  !!releaseDate(claim) ||
   (summary?.rows || []).some(({ item, state }) =>
     !isInvoiceDocument(item) && !state.notApplicable && (!!state.date || state.paid === true));
 
@@ -143,8 +154,15 @@ export const claimInvoicesChased = (claim, summary) =>
 const ignoredClaim = (claim) =>
   !claim || claim.draft === true || claim.secondary_status === 'Cancelled';
 
-/** The close-out paperwork a finished job is expected to hold a copy of. */
-const CLOSE_OUT_KEYS = ['final_invoice', 'vat_excess_invoice_in', 'final_authority'];
+/**
+ * The close-out paperwork a finished job is expected to hold a copy of. Both jobs'
+ * sets are listed: which of them apply is decided by the claim itself, so the ones
+ * that don't simply aren't among its rows.
+ */
+const CLOSE_OUT_KEYS = [
+  'final_invoice', 'vat_excess_invoice_in', 'final_authority',
+  'salvage_invoice_in', 'total_loss_confirmation',
+];
 
 /** Invoices we are waiting to come in from a party, once the car is back. */
 const EXPECTED_IN_KEYS = ['referrer_invoice_in', 'second_referrer_invoice_in'];
@@ -196,22 +214,23 @@ export function readTrackingStart(configs = []) {
 }
 
 /**
- * Whether the vehicle went back to the customer before tracking started. Only a
- * claim that has been returned counts: it is a finished job, invoiced in the old
- * system, and would only swamp the queue. A job still with us is never left out,
- * however long it has been running — only the claim's own returned date is read,
- * and a claim with no returned date is always tracked.
+ * Whether the job left our hands before tracking started. Only a job that has left
+ * us counts — the vehicle back with the customer, or the salvage collected on a
+ * total loss: it is a finished job, invoiced in the old system, and would only
+ * swamp the queue. A job still with us is never left out, however long it has been
+ * running — only the claim's own date is read, and a claim with no such date at all
+ * is always tracked.
  */
-export const returnedBeforeTracking = (claim, trackingStart) => {
+export const releasedBeforeTracking = (claim, trackingStart) => {
   const start = parseDay(trackingStart);
   if (!start) return false;
-  const returned = parseDay(returnedDate(claim));
-  return !!returned && startOfDay(returned) < startOfDay(start);
+  const released = parseDay(releaseDate(claim));
+  return !!released && startOfDay(released) < startOfDay(start);
 };
 
 /** Before tracking, unless someone has pulled this claim back in from its Financials. */
 export const isBeforeTracking = (claim, trackingStart) =>
-  returnedBeforeTracking(claim, trackingStart) && claim?.invoice_tracker?.tracking_override !== true;
+  releasedBeforeTracking(claim, trackingStart) && claim?.invoice_tracker?.tracking_override !== true;
 
 /**
  * How many claims a start date leaves out, and how many of those have been pulled
@@ -223,7 +242,7 @@ export function countBeforeTracking(claims = [], trackingStart = '') {
   if (!trackingStart) return { before, pulledIn };
 
   for (const claim of claims) {
-    if (ignoredClaim(claim) || !returnedBeforeTracking(claim, trackingStart)) continue;
+    if (ignoredClaim(claim) || !releasedBeforeTracking(claim, trackingStart)) continue;
     if (claim?.invoice_tracker?.tracking_override === true) pulledIn += 1;
     else before += 1;
   }
@@ -283,8 +302,8 @@ export function buildInvoicingQueues(claims = [], thresholds = DEFAULT_QUEUE_DAY
 
     const ctx = claimInvoiceContext(claim);
     const summary = computeInvoiceSummary(claim, ctx, claimCopyOnFile(claim));
-    const returned = returnedDate(claim);
-    const returnedDays = daysSince(returned, now);
+    const released = releaseDate(claim);
+    const releasedDays = daysSince(released, now);
     const anchor = jobAnchorDate(claim);
     const anchorDays = daysSince(anchor, now);
 
@@ -293,10 +312,9 @@ export function buildInvoicingQueues(claims = [], thresholds = DEFAULT_QUEUE_DAY
       // the claim's own progress leaves them out.
       if (state.notApplicable || isRecommendedItem(item)) continue;
 
-      // A job's invoices are worked on from the day the vehicle went back to the
-      // customer, except the credit repair hire fee, which is invoiced at the start
-      // of the hire.
-      const chased = returnedDays !== null || isEarlyHireFee(item);
+      // A job's invoices are worked on from the day it left our hands, except the
+      // credit repair hire fee, which is invoiced at the start of the hire.
+      const chased = releasedDays !== null || isEarlyHireFee(item);
 
       // Ready to request from accounts: figures complete, nothing asked for yet
       // and no copy raised — the same line the claim's raise step offers.
@@ -327,16 +345,16 @@ export function buildInvoicingQueues(claims = [], thresholds = DEFAULT_QUEUE_DAY
         }
       }
 
-      // Invoices in still to arrive: a referrer's own invoice, expected once the
-      // vehicle is back with the customer.
-      if (EXPECTED_IN_KEYS.includes(item.key) && returnedDays !== null
+      // Invoices in still to arrive: a referrer's own invoice, expected once the job
+      // has left our hands.
+      if (EXPECTED_IN_KEYS.includes(item.key) && releasedDays !== null
         && !state.paid && !state.date && !state.copyAttached && !state.awaiting && state.amount > 0) {
         buckets.in_expected.push(queueRow(claim, item, {
           section: 'in_expected',
           amount: state.amount,
           note: state.hint || '',
-          waitingSince: returned,
-          days: returnedDays,
+          waitingSince: released,
+          days: releasedDays,
           party: invoicePartyName(claim, item),
         }));
       }
@@ -344,8 +362,8 @@ export function buildInvoicingQueues(claims = [], thresholds = DEFAULT_QUEUE_DAY
       // Dealt with, with nothing filed behind it: paid, or a date recorded for
       // an invoice whose copy never landed. An invoice merely asked for is not
       // flagged here — that belongs to the accounts section above. This one is not
-      // held back until the vehicle is back either: the invoice itself has already
-      // been raised, so its copy is chased whenever that happened.
+      // held back until the job has left our hands either: the invoice itself has
+      // already been raised, so its copy is chased whenever that happened.
       if (!isInvoiceDocument(item) && (state.paid || state.date) && !state.copyAttached) {
         const paidOn = state.paidDate || (state.paid ? state.date : '');
         buckets.paid_no_copy.push(queueRow(claim, item, {
@@ -373,9 +391,9 @@ export function buildInvoicingQueues(claims = [], thresholds = DEFAULT_QUEUE_DAY
       }
     }
 
-    // Close-out documents missing: chased from the day the vehicle went back, and
+    // Close-out documents missing: chased from the day the job left our hands, and
     // flagged overdue once the paperwork has sat past the threshold.
-    if (returnedDays !== null) {
+    if (releasedDays !== null) {
       for (const key of CLOSE_OUT_KEYS) {
         const row = summary.rows.find((r) => r.item.key === key);
         if (!row || row.state.notApplicable || row.state.copyAttached) continue;
@@ -384,10 +402,10 @@ export function buildInvoicingQueues(claims = [], thresholds = DEFAULT_QUEUE_DAY
           amount: null,
           note: row.state.awaitingCorrected
             ? 'A corrected copy is awaited'
-            : `Vehicle returned ${formatInvoiceDay(returned)}`,
-          waitingSince: returned,
-          days: returnedDays,
-          overdue: returnedDays > closeoutDays,
+            : `${releaseWording(claim)} ${formatInvoiceDay(released)}`,
+          waitingSince: released,
+          days: releasedDays,
+          overdue: releasedDays > closeoutDays,
           party: invoicePartyName(claim, row.item),
         }));
       }
@@ -415,31 +433,57 @@ export function buildInvoicingQueues(claims = [], thresholds = DEFAULT_QUEUE_DAY
       }
     }
 
-    // An excess still to be confirmed long after the vehicle went back.
-    if (claim.excess_tbc === true && returnedDays !== null) {
+    // An excess still to be confirmed long after the job left our hands. A total
+    // loss has no excess to confirm: no VAT & excess invoice applies to it.
+    if (claim.excess_tbc === true && releasedDays !== null && !ctx.totalLoss) {
       buckets.warnings.push(queueRow(claim, { key: 'excess_tbc', label: 'Policy excess' }, {
         section: 'warnings',
         amount: null,
-        note: `Still TBC on authority — vehicle returned ${formatInvoiceDay(returned)}`,
-        waitingSince: returned,
-        days: returnedDays,
+        note: `Still TBC on authority — ${releaseWording(claim).toLowerCase()} ${formatInvoiceDay(released)}`,
+        waitingSince: released,
+        days: releasedDays,
         party: invoicePartyName(claim, { party: 'client' }),
       }));
     }
 
-    // Safety net: the repairs were finished a while back and the vehicle's return
-    // was never recorded, so the job would sit outside the day's queue for good and
-    // its invoice pack never chased. Asking for the date is the fix.
-    const completedDays = daysSince(claim.completion_date, now);
-    if (returnedDays === null && completedDays !== null && completedDays > closeoutDays) {
-      buckets.warnings.push(queueRow(claim, { key: 'return_date_missing', label: 'Return date missing' }, {
-        section: 'warnings',
-        amount: null,
-        note: `Repairs complete ${formatInvoiceDay(claim.completion_date)} — no return date recorded`,
-        waitingSince: claim.completion_date,
-        days: completedDays,
-        party: invoicePartyName(claim, { party: 'client' }),
-      }));
+    // Safety nets, one per kind of job: the date that puts a job on the radar was
+    // never recorded, so it would sit outside the day's queue for good and its
+    // invoice pack never chased. Asking for the date is the fix.
+    if (ctx.totalLoss) {
+      // A total loss is chased from the day its salvage was collected, so a total
+      // loss with no collection date is asked for it — dated from the day it was
+      // marked where that is known, and from the job's own last milestone where it
+      // was marked before this was recorded.
+      const markedOn = claim.total_loss_marked_date || claim.total_loss_date || '';
+      const since = markedOn || claim.completion_date || claim.hand_over_date || '';
+      const sinceDays = daysSince(since, now);
+      if (releasedDays === null && sinceDays !== null && sinceDays > closeoutDays) {
+        const why = markedOn
+          ? `Marked Total Loss ${formatInvoiceDay(markedOn)}`
+          : claim.completion_date
+            ? `Repairs complete ${formatInvoiceDay(claim.completion_date)}`
+            : `Vehicle handed over ${formatInvoiceDay(claim.hand_over_date)}`;
+        buckets.warnings.push(queueRow(claim, { key: 'salvage_date_missing', label: 'Salvage collection date missing' }, {
+          section: 'warnings',
+          amount: null,
+          note: `${why} — no salvage collection date recorded`,
+          waitingSince: since,
+          days: sinceDays,
+          party: invoicePartyName(claim, { party: 'client' }),
+        }));
+      }
+    } else {
+      const completedDays = daysSince(claim.completion_date, now);
+      if (releasedDays === null && completedDays !== null && completedDays > closeoutDays) {
+        buckets.warnings.push(queueRow(claim, { key: 'return_date_missing', label: 'Return date missing' }, {
+          section: 'warnings',
+          amount: null,
+          note: `Repairs complete ${formatInvoiceDay(claim.completion_date)} — no return date recorded`,
+          waitingSince: claim.completion_date,
+          days: completedDays,
+          party: invoicePartyName(claim, { party: 'client' }),
+        }));
+      }
     }
   }
 
@@ -463,7 +507,7 @@ export function buildInvoicingQueues(claims = [], thresholds = DEFAULT_QUEUE_DAY
       key: 'closeout_missing',
       label: 'Close-out documents missing',
       tone: 'warning',
-      hint: `Missing the Final Insurer Invoice, the VAT & Excess Invoice or the Final Authority since the vehicle went back, overdue past ${closeoutDays} day${closeoutDays === 1 ? '' : 's'}.`,
+      hint: `Close-out documents still missing since the job left our hands — the Final Insurer Invoice, the Final Authority, or a total loss job's Salvage Agent Invoice and Total Loss Confirmation — overdue past ${closeoutDays} day${closeoutDays === 1 ? '' : 's'}.`,
     },
     {
       key: 'in_expected',
@@ -481,7 +525,7 @@ export function buildInvoicingQueues(claims = [], thresholds = DEFAULT_QUEUE_DAY
       key: 'warnings',
       label: 'Warnings',
       tone: 'negative',
-      hint: 'Over-authority invoices, amounts that differ from what was expected, excesses still TBC on authority, and jobs whose return date was never recorded.',
+      hint: 'Over-authority invoices, amounts that differ from what was expected, excesses still TBC on authority, and jobs whose return or salvage collection date was never recorded.',
     },
   ];
 

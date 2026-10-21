@@ -34,6 +34,19 @@ export const INVOICE_FIGURES = [
   { key: 'job_number', label: 'Job number' },
 ];
 
+/**
+ * The figures read off one invoice, in the order they are reviewed: the standard
+ * set, narrowed to the few a document carries where it names them (a Total Loss
+ * Confirmation's registration and date), plus any figures of its own read beside
+ * them (a salvage invoice's storage charge and admin charges).
+ */
+export function invoiceFigures(item) {
+  const base = item?.readFigures?.length
+    ? INVOICE_FIGURES.filter((f) => item.readFigures.includes(f.key))
+    : INVOICE_FIGURES;
+  return [...base, ...(item?.extraFigures || [])];
+}
+
 /** Figures we cannot record an invoice without. */
 export const REQUIRED_FIGURES = {
   invoice_number: 'Enter the invoice number',
@@ -54,37 +67,61 @@ const FIGURE_DESCRIPTIONS = {
   job_number: 'Job, claim or reference number printed on the invoice, if any',
 };
 
+/** What the AI is asked for each figure, in its own words, for the prompt. */
+const FIGURE_PROMPTS = {
+  invoice_number: 'the invoice or credit note number, exactly as printed',
+  invoice_date: 'the invoice date, exactly as printed on the document',
+  party_from: 'who the invoice is from',
+  party_to: 'who the invoice is addressed to',
+  amount_ex_vat: 'the amount excluding VAT, as a number with no currency symbols. Leave it empty where the invoice does not print it separately',
+  vat_amount: 'the VAT amount, as a number with no currency symbols. Leave it empty where the invoice does not print it separately; use 0 only where the invoice mentions no VAT at all',
+  amount_total: 'the total including VAT, as a number',
+  reg: 'any vehicle registration printed on the document',
+  job_number: 'any job, claim or reference number printed on the document',
+};
+
+const wantsMoney = (fields) =>
+  fields.some((f) => ['amount_ex_vat', 'vat_amount', 'amount_total'].includes(f.key));
+
 // Named properties rather than a free-form map: the figures are only flagged for
 // checking when the AI actually reports how sure it was of each one.
-const FIGURE_MAP_PROPERTIES = Object.fromEntries(INVOICE_FIGURES.map((f) => [f.key, { type: 'string' }]));
+const figureMapProperties = (fields = INVOICE_FIGURES) =>
+  Object.fromEntries(fields.map((f) => [f.key, { type: 'string' }]));
 
-export const EXTRACTION_SCHEMA = {
+/**
+ * The schema the AI is asked for, for the figures this particular invoice carries:
+ * the standard set, narrowed where the document names its own few, plus any it
+ * reads besides them.
+ */
+export const extractionSchema = (fields = INVOICE_FIGURES) => ({
   type: 'object',
   properties: {
     readable: {
       type: 'boolean',
       description: 'True if this is a legible invoice or credit note. False if the file cannot be read at all.',
     },
-    ...Object.fromEntries(INVOICE_FIGURES.map((f) => [f.key, {
+    ...Object.fromEntries(fields.map((f) => [f.key, {
       type: f.type === 'number' ? 'number' : 'string',
-      description: FIGURE_DESCRIPTIONS[f.key],
+      description: f.prompt || FIGURE_DESCRIPTIONS[f.key] || f.label,
     }])),
-    _vat_basis: {
-      type: 'string',
-      description: 'How VAT appears on the document: "none" where VAT is not mentioned at all, "split" where the amount excluding VAT and the VAT amount are both printed, "included" where it says VAT is included but those two amounts are not printed separately.',
-    },
+    ...(wantsMoney(fields) ? {
+      _vat_basis: {
+        type: 'string',
+        description: 'How VAT appears on the document: "none" where VAT is not mentioned at all, "split" where the amount excluding VAT and the VAT amount are both printed, "included" where it says VAT is included but those two amounts are not printed separately.',
+      },
+    } : {}),
     _confidence: {
       type: 'object',
       description: 'How certain you are of each figure: "high", "medium" or "low". Use "low" for anything blurred, cut off, ambiguous or worked out rather than read.',
-      properties: FIGURE_MAP_PROPERTIES,
+      properties: figureMapProperties(fields),
     },
     _source_snippets: {
       type: 'object',
       description: 'For each figure, the text from the document where you found it, a few words either side. Empty string for figures you could not find.',
-      properties: FIGURE_MAP_PROPERTIES,
+      properties: figureMapProperties(fields),
     },
   },
-};
+});
 
 /**
  * Second pass, used only when the reading pass came back without the snippets:
@@ -102,31 +139,28 @@ export async function fetchSourceSnippets(base44, fileUrl, figures, fields = INV
     file_urls: [fileUrl],
     response_json_schema: {
       type: 'object',
-      properties: FIGURE_MAP_PROPERTIES,
+      properties: figureMapProperties(fields),
     },
   });
   return result || {};
 }
 
-export function buildExtractionPrompt({ item, claim, party }) {
+export function buildExtractionPrompt({ item, claim, party, fields = INVOICE_FIGURES }) {
   const direction = item?.direction === 'in'
     ? `an invoice we have received (from ${party || 'the other party'})`
     : `an invoice we have sent (to ${party || 'the other party'})`;
+  const money = wantsMoney(fields);
 
   return `Read this document and extract the figures from it. It is filed against "${item?.label}" on claim ${claim?.job_number || ''} for vehicle ${claim?.reg || ''} — ${direction}.
 
 Return:
-- the invoice or credit note number, exactly as printed
-- the invoice date, exactly as printed on the document
-- who the invoice is from and who it is addressed to
-- the amount excluding VAT, the VAT amount, and the total including VAT, as numbers with no currency symbols
-- how VAT appears on the document: not mentioned at all, or the ex-VAT amount and the VAT amount both printed, or VAT included without those two amounts being shown separately
-- any vehicle registration printed on the document
-- any job, claim or reference number printed on the document
+${fields.map((f) => `- ${f.prompt || FIGURE_PROMPTS[f.key] || f.label}`).join('\n')}${money ? `
+- how VAT appears on the document: not mentioned at all, or the ex-VAT amount and the VAT amount both printed, or VAT included without those two amounts being shown separately` : ''}
 
 Rules:
-- Only return what is actually printed. Use an empty string for anything that is not there, apart from the VAT cases below.
-- VAT: return only what the document shows. Where no VAT is mentioned on it at all, the invoice is not a VAT invoice — the amount excluding VAT is the total and the VAT amount is 0. Where it says VAT is included but the ex-VAT amount and the VAT amount are not printed separately, leave both of those figures empty for the user to fill in. Never work VAT out from the total yourself.
+- Only return what is actually printed. Use an empty string for anything that is not there.${money ? `
+- VAT: return only what the document shows. Where no VAT is mentioned on it at all, the invoice is not a VAT invoice — the amount excluding VAT is the total and the VAT amount is 0. Where it says VAT is included but the ex-VAT amount and the VAT amount are not printed separately, leave both of those figures empty for the user to fill in. Never work VAT out from the total yourself.` : ''}
+- Keep every figure separate, exactly as the document shows it: never add two of them together, and never split one figure between two of them.
 - For every figure, give a confidence of "high", "medium" or "low" ("low" for anything blurred, cut off, ambiguous or worked out).
 - For every figure, give the snippet of text from the document where you found it.
 - Set readable to false only if the document cannot be read at all.`;
@@ -134,7 +168,8 @@ Rules:
 
 const isEmpty = (v) => v === null || v === undefined || v === '';
 
-export const emptyFigures = () => Object.fromEntries(INVOICE_FIGURES.map((f) => [f.key, '']));
+export const emptyFigures = (fields = INVOICE_FIGURES) =>
+  Object.fromEntries(fields.map((f) => [f.key, '']));
 
 /** Day-first dates, because the documents are UK invoices. */
 export function normaliseDate(value) {
@@ -200,10 +235,10 @@ export const snippetsFromExtraction = (extracted = {}) => extracted._source_snip
  * filled in by those rules are reported separately so they aren't mistaken for
  * corrections.
  */
-export function figuresForReview(extracted = {}) {
-  const figures = figuresFromExtraction(extracted);
-  const raw = rawFromExtraction(extracted);
-  const confidence = confidenceFromExtraction(extracted);
+export function figuresForReview(extracted = {}, fields = INVOICE_FIGURES) {
+  const figures = figuresFromExtraction(extracted, fields);
+  const raw = rawFromExtraction(extracted, fields);
+  const confidence = confidenceFromExtraction(extracted, fields);
   const derived = [];
 
   const total = toNum(figures.amount_total);

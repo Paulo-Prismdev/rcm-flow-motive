@@ -86,6 +86,31 @@ export default function ClaimJourneyTimeline({ claim, updates = [] }) {
             )}
           </div>
         </div>
+
+        {/* A total loss never goes back to the customer, so the day its salvage was
+            collected is the date that matters: it is what puts the job on the
+            invoicing radar in place of the hand-over. */}
+        {journeyStatus === 'Total Loss' && (
+          <div className="mt-2 pt-2 border-t border-gray-300 dark:border-gray-700 flex items-center gap-3">
+            <div className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 border-2 ${
+              claim.salvage_collected_date
+                ? 'bg-green-500 border-green-500 text-white'
+                : 'bg-white dark:bg-card border-border text-muted-foreground'
+            }`}>
+              {claim.salvage_collected_date
+                ? <Check className="w-4 h-4 stroke-[3]" />
+                : <div className="w-3 h-3 rounded-full bg-primary" />}
+            </div>
+            <div>
+              <p className="text-[11px] font-semibold text-foreground">Salvage Collected</p>
+              <p className="text-[10px] text-muted-foreground mt-0.5">
+                {claim.salvage_collected_date
+                  ? `${formatDate(claim.salvage_collected_date)} · the job's invoicing is chased from here`
+                  : 'Not recorded yet — this is the date that puts the job on the invoicing radar'}
+              </p>
+            </div>
+          </div>
+        )}
       </div>
     );
   }

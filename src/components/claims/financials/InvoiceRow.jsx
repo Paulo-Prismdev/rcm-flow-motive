@@ -78,6 +78,13 @@ export default function InvoiceRow({
         </p>
       )}
 
+      {/* Where the amount is a share of a figure read off another document — our
+          part of a total loss storage charge — the sum is shown as it was worked
+          out, rather than left behind the calculator. */}
+      {!isDocument && state.calculation && (
+        <p className="text-[10px] text-muted-foreground tabular-nums">{state.calculation}</p>
+      )}
+
       <div className="flex items-center gap-x-3 gap-y-1 flex-wrap text-[11px]">
         {canMarkPaid && (
           <button

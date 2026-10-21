@@ -1,4 +1,5 @@
 import { EXCEPTION_JOURNEY_STATUSES } from './claimStatusV2';
+import { withTotalLossMarker } from './totalLoss';
 
 // Outcome / closed statuses — journey values that stop the 48hr update timer.
 // 'Returned to Customer' is the v2 equivalent of the legacy 'Completed'.
@@ -138,5 +139,8 @@ export function buildStatusChangeClaimUpdate(claim, { journey, secondary, tertia
   // Note: the general 48hr update timer is no longer reset by a status change.
   // It only resets when an Incoming update is logged (any type) — see
   // handleClaimUpdateCreated / handleUpdateCreated in the update UI.
-  return updateData;
+  // Marking a claim a total loss stamps the day it happened (and taking it off
+  // Total Loss clears it again), so a salvage collection date that is still
+  // missing can be chased from the job's own marker.
+  return withTotalLossMarker(claim, updateData);
 }

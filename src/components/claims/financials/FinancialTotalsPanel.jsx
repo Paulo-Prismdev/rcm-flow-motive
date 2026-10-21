@@ -12,23 +12,25 @@ function Stat({ label, value, sub }) {
 }
 
 /**
- * The job's money, at the foot of Financials: the final repair cost with its VAT
- * split, what we are still owed, what we still owe, and how far the invoices have
- * got. The "to collect" and "to pay" counts are counted by the summary itself,
- * off exactly the rows its two totals are made of — only invoices not yet paid,
- * so a settled job reads 0, and close-out paperwork (never money) counts as
- * neither.
+ * The job's money, at the foot of Financials: the figure the job stands on — the
+ * final repair cost with its VAT split, or a total loss job's storage charge — what
+ * we are still owed, what we still owe, and how far the invoices have got. The "to
+ * collect" and "to pay" counts are counted by the summary itself, off exactly the
+ * rows its two totals are made of — only invoices not yet paid, so a settled job
+ * reads 0, and close-out paperwork (never money) counts as neither.
  */
-export default function FinancialTotalsPanel({ summary, finalCost, finalCostEx, finalCostVat }) {
+export default function FinancialTotalsPanel({
+  summary, finalCost, finalCostEx, finalCostVat, costLabel = 'Final repair cost', costSub,
+}) {
   const pct = summary.total ? Math.round((summary.complete / summary.total) * 100) : 0;
 
   return (
     <div className="rounded-[10px] border border-border bg-card px-3 py-2">
       <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
         <Stat
-          label="Final repair cost"
+          label={costLabel}
           value={finalCost > 0 ? fmtGBP(finalCost) : '—'}
-          sub={finalCost > 0 ? `ex VAT ${fmtGBP(finalCostEx)} · VAT ${fmtGBP(finalCostVat)}` : 'inc VAT'}
+          sub={costSub || (finalCost > 0 ? `ex VAT ${fmtGBP(finalCostEx)} · VAT ${fmtGBP(finalCostVat)}` : 'inc VAT')}
         />
         <Stat label="Owed to us" value={fmtGBP(summary.owedToUs)} sub={`${summary.toCollect} to collect`} />
         <Stat label="We owe" value={fmtGBP(summary.weOwe)} sub={`${summary.toPay} to pay`} />

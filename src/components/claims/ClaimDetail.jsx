@@ -48,6 +48,7 @@ import CreditRepairRatesCard from './CreditRepairRatesCard';
 import CreditRepairInstructionModal from './CreditRepairInstructionModal';
 import ClaimReferrerForm from './ClaimReferrerForm';
 import ClaimFinancials from './financials/ClaimFinancials';
+import { isTotalLossClaim } from '@/components/shared/totalLoss';
 import ArchiveClaimDialog from './ArchiveClaimDialog';
 import { claimOutstandingItems } from '@/components/shared/claimOutstandingItems';
 import InlineEditableSection, { InlineField, useInlineEdit } from './InlineEditableSection';
@@ -327,6 +328,9 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
   // Rectification milestone dates in Key Dates are only editable once the claim
   // has been moved onto the Rectification journey.
   const isRectification = claim?.journey_status === 'Rectification' || claim?.job_status === 'Rectification';
+  // A total loss job carries its own two dates: the day the salvage was collected,
+  // which is what puts it on the invoicing radar, and the day it was marked.
+  const totalLoss = isTotalLossClaim(claim);
 
   const ClientEditComponent = useCallback((props) => <ClaimPartiesForm {...props} mode="client" />, []);
   const DriverEditComponent = useCallback((props) => <ClaimPartiesForm {...props} mode="driver" />, []);
@@ -1414,9 +1418,11 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
               <InlineField label="Booking In Date (BID)" name="booking_in_date" isDate />
               <InlineField label="On-Site Date" name="on_site_date" isDate />
               <InlineField label="Hand Over Date" name="hand_over_date" isDate />
+              {totalLoss && <InlineField label="Salvage Collected" name="salvage_collected_date" isDate />}
               <InlineField label="Est. Completion (ECD)" name="ecd" isDate />
               <InlineField label="Completion Date" name="completion_date" isDate />
               <InlineField label="Final Authority Received" name="final_authority_received" isDate />
+              {totalLoss && <InlineField label="Total Loss Marked" name="total_loss_marked_date" isDate />}
               <InlineField label="Claim Complete Date" name="claim_complete_date" isDate />
             </div>
             <div className="mt-3 pt-3 border-t border-border">

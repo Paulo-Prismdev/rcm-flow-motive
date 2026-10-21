@@ -3,6 +3,7 @@ import { Check } from 'lucide-react';
 import StandardJobFigures from './StandardJobFigures';
 import CreditRepairFigures from './CreditRepairFigures';
 import SecondReferrerToggle from './SecondReferrerToggle';
+import StorageFigures from './StorageFigures';
 import NotesReferences from './NotesReferences';
 
 /**
@@ -11,7 +12,7 @@ import NotesReferences from './NotesReferences';
  * own pencil is clicked, and only one of them can be edited at a time. Missing
  * figures are flagged here — and only the ones this claim actually needs.
  */
-export default function JobFiguresCard({ claim, ctx, missing, focus, onChange, onTrackerChange }) {
+export default function JobFiguresCard({ claim, ctx, missing, focus, onChange, onTrackerChange, storagePercentDefault }) {
   const [editingKey, setEditingKey] = useState(null);
   const cardRef = useRef(null);
 
@@ -62,6 +63,19 @@ export default function JobFiguresCard({ claim, ctx, missing, focus, onChange, o
         <SecondReferrerToggle
           claim={claim}
           missing={missing}
+          onTrackerChange={onTrackerChange}
+          editingKey={editingKey}
+          setEditingKey={setEditingKey}
+        />
+      )}
+
+      {/* A total loss job has no repair cost: the storage run up with the repairer
+          is the figure its invoicing stands on, and our share of it is the one
+          figure the job adds of its own. */}
+      {ctx.totalLoss && (
+        <StorageFigures
+          claim={claim}
+          defaultPercent={storagePercentDefault}
           onTrackerChange={onTrackerChange}
           editingKey={editingKey}
           setEditingKey={setEditingKey}

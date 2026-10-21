@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import ClaimUpdateForm from '../claims/ClaimUpdateForm';
 import UpdateDirectionBadges from '../claims/UpdateDirectionBadges';
 import { isUpdateTrackingClosed } from "@/components/shared/claimStatusUpdate";
+import { withTotalLossMarker } from "@/components/shared/totalLoss";
 import { recomputeUpdateTimers } from "@/components/shared/recomputeUpdateTimers";
 import { createTagNotifications } from "@/components/shared/createTagNotifications";
 
@@ -136,7 +137,10 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
   const createUpdateMutation = useMutation({
     mutationFn: async (updateData) => {
       if (updateData.update_type === 'Status Change' && updateData.description?.trim()) {
-        await base44.entities.Claim.update(claimId, { job_status: updateData.new_status, secondary_status: updateData.new_secondary_status || null });
+        await base44.entities.Claim.update(claimId, withTotalLossMarker(claim, {
+          job_status: updateData.new_status,
+          secondary_status: updateData.new_secondary_status || null,
+        }));
         return await base44.entities.ClaimUpdate.create({ update_type: 'Other', description: updateData.description, next_steps: updateData.next_steps, due_date_for_next_action: updateData.due_date_for_next_action, claim_id: claimId, parent_update_id: updateData.parent_update_id, tagged_user_ids: updateData.tagged_user_ids, ...(currentUser?.company_id && { company_id: currentUser.company_id }) });
       }
       const created = await base44.entities.ClaimUpdate.create({ ...updateData, claim_id: claimId, ...(currentUser?.company_id && { company_id: currentUser.company_id }) });

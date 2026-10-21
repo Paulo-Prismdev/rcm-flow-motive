@@ -45,6 +45,14 @@ export const FINANCIAL_STEPS = [
 
 const STEP = Object.fromEntries(FINANCIAL_STEPS.map((s) => [s.key, s]));
 
+/**
+ * Steps 1 and 2 in a total loss job's own terms: its close-out papers are the
+ * salvage invoice and the confirmation, and the figure its invoicing is worked out
+ * from is the storage charge read off that invoice, not a repair cost.
+ */
+const TOTAL_LOSS_CLOSE_OUT_HINT = "Salvage Agent Invoice and Total Loss Confirmation — the storage charge and the salvage agent's admin charges are read off the salvage invoice, and the confirmation stands where the Final Authority would.";
+const TOTAL_LOSS_FIGURES_HINT = 'The storage charge read off the Salvage Agent Invoice — storage only, never the admin charges — is what the storage fee invoice we raise is worked out from.';
+
 /** Rows of one section, and those of them that apply to this claim. */
 const rowsFor = (summary, section) => summary.rows.filter((r) => r.item.section === section);
 const applying = (rows) => rows.filter((r) => !r.state.notApplicable);
@@ -88,6 +96,7 @@ export function buildFinancialFlow(summary, ctx, claim) {
 
   const closeout = {
     ...STEP.closeout,
+    hint: ctx.totalLoss ? TOTAL_LOSS_CLOSE_OUT_HINT : STEP.closeout.hint,
     rows: closeRows,
     empty: closeEmpty,
     done: closeRequired.length === 0 || closeIn === closeRequired.length,
@@ -110,6 +119,7 @@ export function buildFinancialFlow(summary, ctx, claim) {
   const { missing } = summary;
   const figures = {
     ...STEP.figures,
+    hint: ctx.totalLoss ? TOTAL_LOSS_FIGURES_HINT : STEP.figures.hint,
     empty: null,
     done: missing.length === 0,
     workable: missing.length > 0,

@@ -13,6 +13,14 @@
  * received its amount is locked at the figure it went out at — with a deliberate
  * unlock and a "calculated vs invoiced" warning if the job figures later move.
  *
+ * A total loss job runs the same flow with its own paperwork: no Final Insurer
+ * Invoice, no Final Authority and no VAT & excess invoices — the Salvage Agent
+ * Invoice and the Total Loss Confirmation stand in their place, and the invoice we
+ * raise is our share of the storage charge the salvage agent billed the repairer
+ * for. The job's type is read through `isTotalLossClaim` (see ./totalLoss), and an
+ * item that no longer applies to a job that changed type keeps everything recorded
+ * against it: the summary hands those back as `dormant` rather than dropping them.
+ *
  * Where an item overlaps an existing Financials field (invoice amount, invoice
  * sent date, payment received, excess contribution paid, authority received…)
  * the item reads from and writes to that same claim field rather than keeping
@@ -29,13 +37,32 @@ import {
   VAT_RATE,
 } from './creditRepairRates';
 import { excessMode } from './excessState';
+import { isTotalLossClaim } from './totalLoss';
+import {
+  INVOICE_FILE_PREFIX,
+  INVOICE_ITEMS,
+  canRequestInvoice,
+  invoiceDocKey,
+  invoiceDocumentKind,
+  isInvoiceDocKey,
+  isInvoiceDocument,
+  isRecommendedItem,
+} from './invoiceItems';
 
-export const INVOICE_FILE_PREFIX = 'inv_';
-
-export const invoiceDocKey = (itemKey) => `${INVOICE_FILE_PREFIX}${itemKey}`;
-
-export const isInvoiceDocKey = (key) =>
-  typeof key === 'string' && key.startsWith(INVOICE_FILE_PREFIX);
+// The items a claim can carry, the keys their files are filed under and the rules
+// that read them live in ./invoiceItems, re-exported here so every part of the
+// invoicing flow imports from one place.
+export {
+  INVOICE_FILE_PREFIX,
+  INVOICE_ITEMS,
+  INVOICE_SECTIONS,
+  canRequestInvoice,
+  invoiceDocKey,
+  invoiceDocumentKind,
+  isInvoiceDocKey,
+  isInvoiceDocument,
+  isRecommendedItem,
+} from './invoiceItems';
 
 /** Recipient of "Request from accounts" when settings hold nothing else. */
 export const DEFAULT_ACCOUNTS_EMAIL = 'accounts@rcmltd.co.uk';
@@ -43,195 +70,7 @@ export const DEFAULT_ACCOUNTS_EMAIL = 'accounts@rcmltd.co.uk';
 /** Accounts email lives in AppConfig under this key, editable in Settings. */
 export const ACCOUNTS_EMAIL_CONFIG_KEY = 'accounts_email';
 
-export const INVOICE_SECTIONS = [
-  { key: 'in', label: 'Invoices In', hint: 'Invoices we receive and pay' },
-  { key: 'out', label: 'Invoices Out', hint: 'Invoices we send and get paid for' },
-  { key: 'closeout', label: 'Close-out', hint: "The job's final step" },
-];
 
-/**
- * The invoice items that can appear on a claim.
- * - kind 'document' → close-out paperwork. It is only ever received/sent (with a
- *   date and a file): no amount, no paid tick, and nothing in the owed totals.
- * - setsRepairCost → the total read off this document is offered as the claim's
- *   final repair cost.
- * - direction 'in'  → an invoice we receive and pay (money we owe)
- * - direction 'out' → an invoice we send and get paid for (money owed to us)
- * - requires       → visibility gate on the claim / client
- * - amountSource   → the amount is worked out from the job figures
- * - party          → who the invoice is to or from
- * - bindings       → claim fields that ARE the single source of truth for that value
- * - status_field   → existing invoice_status-style field kept in sync with "paid"
- */
-export const INVOICE_ITEMS = [
-  {
-    key: 'final_invoice',
-    label: 'Final Insurer Invoice',
-    section: 'closeout',
-    // The repairer's Final Insurer Invoice to the insurer: we keep a copy on file
-    // and the repair cost is read off it — the whole of it on a job where the
-    // client's VAT and excess are not handled by us, otherwise the part the
-    // insurer pays, with the VAT & excess invoice beside it — but we are not
-    // paid on it ourselves, so it is close-out paperwork like the Final
-    // Authority: green on a copy, with no paid step.
-    kind: 'document',
-    direction: 'out',
-    dateLabel: 'Sent',
-    requires: 'not_credit_repair',
-    party: 'authorising_party',
-    // Its date is the date printed on the invoice itself, never the upload date.
-    bindings: { date: 'invoice_sent_date' },
-    // The job is invoiced once the Final Insurer Invoice itself is on file.
-    date_status_field: 'invoice_status',
-    date_status_value: 'Invoiced',
-    setsRepairCost: true,
-  },
-  {
-    // Where we handle a client's VAT and excess, the repairer bills us for the
-    // VAT content of their repair plus the excess they collected. That invoice
-    // arrives with their Final Insurer Invoice, so it is filed on the close-out step
-    // beside it — named from the repairer, and checked the same way as any other
-    // invoice that comes in. It is still an invoice we pay: it keeps its own
-    // received date and its paid step alongside the rest of them.
-    key: 'vat_excess_invoice_in',
-    label: 'VAT & Excess Invoice In',
-    section: 'closeout',
-    direction: 'in',
-    dateLabel: 'Received',
-    requires: 'vat_excess',
-    party: 'repairer',
-    amountSource: 'vat_excess',
-    bindings: {
-      paid: 'excess_contribution_paid',
-      paid_date: 'excess_contribution_paid_date',
-    },
-    date_flag: 'excess_contribution_invoice_received',
-    varianceReason: 'Repair cost, excess or VAT status changed',
-  },
-  {
-    key: 'final_authority',
-    label: 'Final Authority',
-    section: 'closeout',
-    kind: 'document',
-    direction: 'in',
-    dateLabel: 'Received',
-    requires: 'not_credit_repair',
-    // Its own date: "Authority Received" is the initial authority, which belongs
-    // to the Initial Authority document, not to this one.
-    bindings: { date: 'final_authority_received' },
-    // Its own short read: the registration it covers, the amount the repair was
-    // authorised at and the excess it shows. None of the invoice's own checks
-    // apply to it.
-    readsAuthority: true,
-  },
-  {
-    key: 'collection_note',
-    label: 'Collection Note',
-    section: 'closeout',
-    kind: 'document',
-    direction: 'out',
-    dateLabel: 'Sent',
-    requires: 'not_credit_repair',
-    // Recommended, not required: a copy is encouraged and nudged in amber until
-    // it is filed, but the job's invoicing finishes without one. "Not available"
-    // records why there won't be one, and stops the nudge.
-    recommended: true,
-    // Nothing is read off it and it carries no figures: uploading it stores the
-    // copy, and that is the whole of it.
-    storeOnly: true,
-  },
-  {
-    key: 'referrer_invoice_in',
-    label: 'Referrer Invoice In',
-    section: 'in',
-    direction: 'in',
-    dateLabel: 'Received',
-    requires: 'referrer',
-    party: 'referrer',
-    amountSource: 'referrer_fee',
-    varianceReason: 'Referrer fee or repair cost changed',
-  },
-  {
-    key: 'second_referrer_invoice_in',
-    label: 'Second Referrer Invoice In',
-    section: 'in',
-    direction: 'in',
-    dateLabel: 'Received',
-    requires: 'second_referrer',
-    party: 'second_referrer',
-    amountSource: 'second_referrer_fee',
-    varianceReason: 'Second referrer fee or repair cost changed',
-  },
-  {
-    key: 'referral_invoice_out',
-    label: 'Referral Invoice Out',
-    section: 'out',
-    direction: 'out',
-    dateLabel: 'Sent',
-    requires: ['not_credit_repair', 'repairer_referral'],
-    party: 'repairer',
-    amountSource: 'repairer_referral_fee',
-    varianceReason: 'Referral fee or repair cost changed',
-  },
-  {
-    key: 'vat_excess_invoice_out',
-    label: 'VAT & Excess Invoice Out',
-    section: 'out',
-    direction: 'out',
-    dateLabel: 'Sent',
-    requires: 'vat_excess',
-    party: 'client',
-    amountSource: 'vat_excess',
-    varianceReason: 'Repair cost, excess or VAT status changed',
-  },
-  // Credit repair claims: we invoice the credit repair company for our cut, from
-  // two separate invoices. Both amounts are derived (hire category rate and
-  // commission on the final repair cost), so they are never hand-entered here.
-  {
-    key: 'cr_hire_fee',
-    label: 'Upfront Hire Fee',
-    section: 'out',
-    direction: 'out',
-    dateLabel: 'Sent',
-    requires: 'credit_repair',
-    party: 'credit_repair',
-    amountSource: 'credit_repair_hire_fee',
-    varianceReason: 'Hire category or hire fee changed',
-  },
-  {
-    key: 'cr_repair_commission',
-    label: 'Repair Commission',
-    section: 'out',
-    direction: 'out',
-    dateLabel: 'Sent',
-    requires: 'credit_repair',
-    party: 'credit_repair',
-    amountSource: 'credit_repair_commission',
-    varianceReason: 'Final repair cost or commission rate changed',
-  },
-];
-
-export const isInvoiceDocument = (item) => item?.kind === 'document';
-
-/**
- * What happens when a document is uploaded:
- * - 'store'     → the copy is stored and nothing is read off it (Collection Note)
- * - 'authority' → its own short read: registration, authorised amount, excess
- * - 'invoice'   → the full invoice read
- */
-export const invoiceDocumentKind = (item) =>
-  item?.storeOnly ? 'store' : item?.readsAuthority ? 'authority' : 'invoice';
-
-/**
- * Recommended items are encouraged but never required: while one is missing its
- * card is amber rather than red, it is left out of the job's progress, and it
- * never leaves the job looking incomplete.
- */
-export const isRecommendedItem = (item) => item?.recommended === true;
-
-/** The invoices we raise, which "Request from accounts" applies to. */
-export const canRequestInvoice = (item) =>
-  !!item && !isInvoiceDocument(item) && item.direction === 'out' && item.section === 'out';
 
 export const INVOICE_STATUS_META = {
   'Not Ready for Invoicing': { label: 'Figures missing', tone: 'warning' },
@@ -242,6 +81,22 @@ export const INVOICE_STATUS_META = {
   'Invoice Overdue': { label: 'Overdue', tone: 'negative' },
   'Not Applicable': { label: 'Not applicable', tone: 'faded' },
 };
+
+/**
+ * Whether an item that no longer applies to a job still holds anything worth
+ * keeping: a filed copy, a figure, a date, a payment or an accounts request. What
+ * it holds is shown rather than deleted when a claim changes type.
+ */
+function itemHasRecord(claim, item, hasFile) {
+  if (hasFile(item.key)) return true;
+  const entry = (claim?.invoice_tracker?.items || {})[item.key] || {};
+  if (entry.paid === true || entry.requested === true || entry.not_applicable === true) return true;
+  if (isStored(entry.amount) || isStored(entry.date) || isStored(entry.paid_date)) return true;
+  if (entry.figures && Object.keys(entry.figures).length > 0) return true;
+  return item.bindings
+    ? Object.values(item.bindings).some((field) => isStored(claim?.[field]))
+    : false;
+}
 
 const toNum = (v) => {
   if (v === null || v === undefined || v === '') return 0;
@@ -279,6 +134,42 @@ export const secondReferrerPercent = (claim) => toNum(claim?.invoice_tracker?.se
 export const referrerVatRegistered = (claim) => claim?.referrer_vat_registered !== false;
 export const secondReferrerVatRegistered = (claim) => claim?.invoice_tracker?.second_referrer_vat_registered !== false;
 
+/* ── Total loss: the storage charge and our share of it ───────────────────── *
+ * The salvage agent's invoice carries the storage charge and their own admin
+ * charges, read and kept apart. Only the storage drives the invoice we raise,
+ * at the share set in Settings → Invoicing, with VAT on our share of it.
+ */
+
+export const STORAGE_FEE_CONFIG_KEY = 'storage_fee_percent';
+export const DEFAULT_STORAGE_FEE_PERCENT = 50;
+
+const percentValue = (value, fallback) => {
+  if (!isStored(value)) return fallback;
+  const n = Number(value);
+  return Number.isFinite(n) && n >= 0 && n <= 100 ? round2(n) : fallback;
+};
+
+/** The share of the storage charge held in AppConfig, editable in Settings. */
+export function readStorageFeePercent(configs = []) {
+  const raw = configs.find((c) => c.config_key === STORAGE_FEE_CONFIG_KEY)?.config_value;
+  return percentValue(raw, DEFAULT_STORAGE_FEE_PERCENT);
+}
+
+/** The share this claim invoices: its own figure where one is set, otherwise the setting. */
+export const storageFeePercent = (claim) =>
+  percentValue(claim?.invoice_tracker?.storage_fee_percent, DEFAULT_STORAGE_FEE_PERCENT);
+
+/** One figure read off the claim's Salvage Agent Invoice. */
+const salvageFigure = (claim, key) => {
+  const stored = (claim?.invoice_tracker?.items?.salvage_invoice_in?.figures || {})[key];
+  return isStored(stored) ? round2(toNum(stored)) : null;
+};
+
+/** The storage charge ex VAT read off the Salvage Agent Invoice. */
+export const salvageStorageCharge = (claim) => salvageFigure(claim, 'storage_charge_ex_vat');
+/** The salvage agent's admin charges, read separately — never part of our fee. */
+export const salvageAdminCharges = (claim) => salvageFigure(claim, 'admin_charges');
+
 const PRIVATE_TYPES = ['Paying Privately', '3rd Party Paying Privately'];
 
 export const isPrivatePayingClaim = (claim) => PRIVATE_TYPES.includes(claim?.claim_type);
@@ -290,11 +181,20 @@ export const isPrivatePayingClaim = (claim) => PRIVATE_TYPES.includes(claim?.cla
  */
 export function invoiceContext(claim, vatExcess) {
   const tracker = claim?.invoice_tracker || {};
+  const totalLoss = isTotalLossClaim(claim);
   return {
     hasReferrer: !!claim?.referrer,
     secondReferrerEnabled: tracker.second_referrer_enabled === true,
     hasSecondReferrerName: !!tracker.second_referrer_name,
-    vatExcess: !!vatExcess,
+    totalLoss,
+    // A total loss job carries none of the VAT & excess invoices — the salvage
+    // invoice and the Total Loss Confirmation stand in their place — so handling
+    // the client's VAT and excess reads as not applying to it, and neither the
+    // customer's VAT status nor their excess is asked for.
+    vatExcess: !!vatExcess && !totalLoss,
+    // That same handling on its own, before the total-loss gate: what would apply
+    // were the job not a total loss.
+    vatExcessHandled: !!vatExcess,
     hasReferralFee: toNum(claim?.referral_fee_repairer) > 0 || toNum(claim?.referral_fee_repairer_gbp) > 0,
     creditRepair: isCreditRepairClaim(claim),
     hasRepairer: !!claim?.bodyshop || !!claim?.bodyshop_id,
@@ -335,6 +235,9 @@ function matchesRequirement(requirement, ctx) {
       return !!ctx.hasReferralFee || (!ctx.privatePaying && !ctx.creditRepair && !!ctx.hasRepairer);
     case 'credit_repair': return !!ctx.creditRepair;
     case 'not_credit_repair': return !ctx.creditRepair;
+    case 'total_loss': return !!ctx.totalLoss;
+    case 'not_total_loss': return !ctx.totalLoss;
+    case 'has_repairer': return !!ctx.hasRepairer;
     default: return true;
   }
 }
@@ -371,6 +274,14 @@ const awaiting = (hint) => ({
   derived: true, awaiting: true, hint, workings: [],
 });
 
+/**
+ * An invoice worked out from the repair cost, on a job that has no repair cost to
+ * work from: on a total loss the amount is set by hand instead.
+ */
+const awaitingRepairCost = (claim) => awaiting(isTotalLossClaim(claim)
+  ? 'A total loss job has no repair cost — set this amount by hand'
+  : 'Enter the final repair cost');
+
 const withVat = (ex, workings, hint) => {
   const net = round2(ex);
   const vat = round2(net * VAT_RATE);
@@ -393,7 +304,7 @@ const AMOUNT_RESOLVERS = {
   // The referrer invoices us their agreed share of the repair cost (ex VAT) — with
   // VAT on it only where the referrer is VAT registered.
   referrer_fee: (claim) => {
-    if (toNum(claim.final_repair_cost) <= 0) return awaiting('Enter the final repair cost');
+    if (toNum(claim.final_repair_cost) <= 0) return awaitingRepairCost(claim);
     const pct = toNum(claim.percent_to_referrer);
     if (pct <= 0) return awaiting('Set the referrer fee %');
     const net = repairNet(claim);
@@ -421,7 +332,7 @@ const AMOUNT_RESOLVERS = {
   // A second referrer invoices us their own share, worked out exactly as the
   // main referrer's is: their % of the repair cost ex VAT, plus VAT.
   second_referrer_fee: (claim) => {
-    if (toNum(claim.final_repair_cost) <= 0) return awaiting('Enter the final repair cost');
+    if (toNum(claim.final_repair_cost) <= 0) return awaitingRepairCost(claim);
     const pct = secondReferrerPercent(claim);
     if (pct <= 0) return awaiting('Set the second referrer fee %');
     const net = repairNet(claim);
@@ -457,7 +368,7 @@ const AMOUNT_RESOLVERS = {
         { label: 'Total', value: fmtGBP(round2(fixed * (1 + VAT_RATE))), total: true },
       ], 'Fixed referral fee');
     }
-    if (toNum(claim.final_repair_cost) <= 0) return awaiting('Enter the final repair cost');
+    if (toNum(claim.final_repair_cost) <= 0) return awaitingRepairCost(claim);
     const pct = toNum(claim.referral_fee_repairer);
     if (pct <= 0) return awaiting('Set the repairer referral fee');
     const net = repairNet(claim);
@@ -501,6 +412,26 @@ const AMOUNT_RESOLVERS = {
         { label: 'Policy excess', value: waived ? 'Waived — nothing payable' : fmtGBP(excess) },
         { label: 'Total', value: fmtGBP(total), total: true },
       ],
+    };
+  },
+  // Total loss: our share of the storage the vehicle ran up with the repairer —
+  // storage only, never the salvage agent's admin charges — plus VAT. The figure
+  // is read off the Salvage Agent Invoice, so the invoice waits for that copy
+  // rather than for anything typed on the claim.
+  storage_fee: (claim) => {
+    const storage = salvageStorageCharge(claim);
+    if (storage === null) return awaiting('Read the storage charge off the Salvage Agent Invoice');
+    const pct = storageFeePercent(claim);
+    const share = round2(storage * pct / 100);
+    const vat = round2(share * VAT_RATE);
+    return {
+      ...withVat(share, [
+        { label: 'Storage charge ex VAT', value: fmtGBP(storage) },
+        { label: `Our share (${pct}%)`, value: fmtGBP(share) },
+        { label: 'VAT (20%)', value: fmtGBP(vat) },
+        { label: 'Total', value: fmtGBP(round2(share + vat)), total: true },
+      ], `${pct}% of the storage charge ex VAT`),
+      calculation: `Storage ${fmtGBP(storage)} ex VAT × ${pct}% = ${fmtGBP(share)} + ${fmtGBP(vat)} VAT = ${fmtGBP(round2(share + vat))}`,
     };
   },
   // Credit repair: a single agreed fee we invoice the partner for.
@@ -620,6 +551,9 @@ export function getInvoiceItemState(item, claim, hasFiles = false) {
     derived: !!calc,
     awaiting,
     hint: calc?.hint || null,
+    // How the amount adds up, in one line, where a working says more than the
+    // rows do — our share of a total loss storage charge.
+    calculation: calc?.calculation || '',
     workings,
     date,
     paid,
@@ -722,6 +656,18 @@ export function computeInvoiceSummary(claim, ctx, hasFile = claimCopyOnFile(clai
     .filter((item) => isInvoiceItemVisible(item, ctx))
     .map((item) => ({ item, state: getInvoiceItemState(item, claim, hasFile(item.key)) }));
 
+  // Items this job no longer carries but which still hold something — a claim
+  // switched to or from Total Loss keeps its files, figures and payments. What is
+  // looked for is exactly that change: an item that would apply to this job were
+  // its total-loss state the other way round, and which holds something recorded.
+  // They take no part in the progress, the money or the queues.
+  const otherCtx = { ...ctx, totalLoss: !ctx.totalLoss, vatExcess: ctx.vatExcessHandled };
+  const dormant = INVOICE_ITEMS
+    .filter((item) => !isInvoiceItemVisible(item, ctx)
+      && isInvoiceItemVisible(item, otherCtx)
+      && itemHasRecord(claim, item, hasFile))
+    .map((item) => ({ item, state: getInvoiceItemState(item, claim, hasFile(item.key)) }));
+
   let complete = 0;
   let total = 0;
   let outstanding = 0;
@@ -761,6 +707,7 @@ export function computeInvoiceSummary(claim, ctx, hasFile = claimCopyOnFile(clai
 
   return {
     rows,
+    dormant,
     complete,
     total,
     outstanding,
@@ -789,7 +736,10 @@ export function claimInvoiceSummary(claim) {
  */
 export function missingJobFigures(claim, ctx) {
   const missing = [];
-  if (toNum(claim?.final_repair_cost) <= 0) {
+  // A total loss job has no repair cost to set: the storage charge read off its
+  // Salvage Agent Invoice is the figure its invoicing stands on, and the invoice
+  // that waits for it says so on its own card.
+  if (!ctx.totalLoss && toNum(claim?.final_repair_cost) <= 0) {
     missing.push({ key: 'final_repair_cost', label: 'Final repair cost' });
   }
 
@@ -812,7 +762,8 @@ export function missingJobFigures(claim, ctx) {
   if (ctx.hasReferrer && toNum(claim?.percent_to_referrer) <= 0) {
     missing.push({ key: 'percent_to_referrer', label: 'Referrer fee %' });
   }
-  if (repairerReferralApplies(claim, ctx) && !ctx.hasReferralFee) {
+  // The repairer is invoiced for our share of the storage on a total loss instead.
+  if (!ctx.totalLoss && repairerReferralApplies(claim, ctx) && !ctx.hasReferralFee) {
     missing.push({ key: 'referral_fee', label: 'Repairer referral fee (or fixed £ fee)' });
   }
   // Excess and VAT status only matter where we bill the customer's VAT and
@@ -1034,6 +985,15 @@ export function buildInvoiceReviewPatch(item, claim, figures, origin) {
     entry.vat = toNum(figures.vat_amount);
     entry.reinvoice_requested = origin?.reinvoice || null;
   }
+  // The figures read off a copy beyond its own total — a salvage invoice's storage
+  // charge, read separately from the admin charges beside it — are kept on its
+  // entry, so the invoice worked out from them always has them to hand.
+  const extra = {};
+  for (const field of item.extraFigures || []) {
+    const value = figures[field.key];
+    if (isStored(value)) extra[field.key] = round2(toNum(value));
+  }
+  if (Object.keys(extra).length > 0) entry.figures = { ...(entry.figures || {}), ...extra };
   if (origin?.file_url) {
     const at = new Date().toISOString();
     entry.details_source = {
@@ -1089,11 +1049,16 @@ export function buildInvoiceDetailsClearPatch(item, claim, { fileUrl, clearedBy 
 
   // A close-out document's own figures go with the details read off its copy,
   // and the authorised cost it recorded goes with them too.
-  if (asDocument && (entry.amount != null || entry.ex != null || entry.vat != null)) {
+  if (asDocument && (entry.amount != null || entry.ex != null || entry.vat != null || entry.figures)) {
     entry.amount = null;
     entry.ex = null;
     entry.vat = null;
+    entry.figures = null;
     clearPoints.push('the figures read from it');
+  }
+  if (!asDocument && entry.figures) {
+    entry.figures = null;
+    clearPoints.push('the split figures read from it');
   }
   if (asDocument && item.readsAuthority && isStored(claim.authority_cost_gross)) {
     patch.authority_cost_gross = null;

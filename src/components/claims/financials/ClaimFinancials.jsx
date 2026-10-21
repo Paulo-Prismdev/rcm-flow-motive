@@ -22,9 +22,11 @@ import {
   invoiceContext,
   invoiceDocumentKind,
   invoicePartyName,
+  readStorageFeePercent,
   repairNet,
   repairVat,
   resolveInvoiceAmount,
+  salvageStorageCharge,
 } from '@/components/shared/invoiceChecklist';
 import { readTrackingStart } from '@/components/shared/invoicingQueue';
 import BeforeTrackingNotice from './BeforeTrackingNotice';
@@ -35,6 +37,7 @@ import NextStepPrompt from './NextStepPrompt';
 import RecommendedNudge from './RecommendedNudge';
 import AllDoneLine from './AllDoneLine';
 import JobFiguresCard from './JobFiguresCard';
+import NoLongerRequired from './NoLongerRequired';
 import InvoiceRow from './InvoiceRow';
 import CloseOutItem from './CloseOutItem';
 import InvoiceSectionEmpty from './InvoiceSectionEmpty';
@@ -111,6 +114,9 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
   // Where invoicing tracking started: a job older than this is left out of the
   // Invoicing page unless someone pulls it back in with the notice below.
   const trackingStart = readTrackingStart(appConfigs);
+  // The share of a total loss job's storage charge the storage fee invoice is
+  // worked out at, until a claim carries a figure of its own.
+  const storagePercentDefault = readStorageFeePercent(appConfigs);
 
   const ctx = useMemo(
     () => invoiceContext(claim, claimHandlesVatExcess(claim, client)),
@@ -381,16 +387,24 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
 
     try {
       await docs.attachFile(item, { file_url: review.fileUrl, file_name: review.fileName });
+      const patch = buildInvoiceReviewPatch(item, claim, figures, {
+        file_url: review.fileUrl,
+        file_name: review.fileName,
+        repair_cost: repairCost,
+        reinvoice,
+      });
+      // The salvage invoice is where a total loss job's storage share is settled:
+      // the figure set in Settings is stamped on the claim as the invoice is
+      // recorded, so the storage fee invoice — and every other reading of it — is
+      // worked out from the same percentage.
+      if (item.key === 'salvage_invoice_in' && claim?.invoice_tracker?.storage_fee_percent == null) {
+        patch.invoice_tracker = {
+          ...(patch.invoice_tracker || claim.invoice_tracker || {}),
+          storage_fee_percent: storagePercentDefault,
+        };
+      }
       applyCommit(
-        {
-          ...buildInvoiceReviewPatch(item, claim, figures, {
-            file_url: review.fileUrl,
-            file_name: review.fileName,
-            repair_cost: repairCost,
-            reinvoice,
-          }),
-          ...(repairCost ? { final_repair_cost: repairCost } : {}),
-        },
+        { ...patch, ...(repairCost ? { final_repair_cost: repairCost } : {}) },
         description
       );
       buildReviewLog({ item, figures, corrections, accepted }).forEach((entry) => {
@@ -679,6 +693,7 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
         ctx={ctx}
         missing={summary.missing}
         focus={figuresFocus}
+        storagePercentDefault={storagePercentDefault}
         onChange={(fields, description) => commit(fields, description, { checkInvoiceImpact: true })}
         onTrackerChange={(patch, description) => commit(patch, description, { checkInvoiceImpact: true })}
       />
@@ -796,6 +811,14 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
 
             {flow.allDone && <AllDoneLine />}
 
+            {/* Anything the job no longer carries — its paperwork before a change
+                to or from Total Loss — with everything recorded against it kept. */}
+            <NoLongerRequired
+              items={summary.dormant}
+              filesFor={docs.filesFor}
+              onViewFile={docs.setViewingFile}
+            />
+
             {preparingRequest && (
               <p className="text-[11px] text-muted-foreground">Preparing the accounts request…</p>
             )}
@@ -819,9 +842,13 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
 
         <FinancialTotalsPanel
           summary={summary}
-          finalCost={Number(claim.final_repair_cost) || 0}
-          finalCostEx={repairNet(claim)}
-          finalCostVat={repairVat(claim)}
+          // A total loss has no repair cost: the storage charge read off the salvage
+          // invoice is the figure the job stands on.
+          finalCost={ctx.totalLoss ? (salvageStorageCharge(claim) ?? 0) : (Number(claim.final_repair_cost) || 0)}
+          finalCostEx={ctx.totalLoss ? 0 : repairNet(claim)}
+          finalCostVat={ctx.totalLoss ? 0 : repairVat(claim)}
+          costLabel={ctx.totalLoss ? 'Storage charge' : 'Final repair cost'}
+          costSub={ctx.totalLoss ? 'ex VAT, read from the Salvage Agent Invoice' : undefined}
         />
 
         {docs.viewingFile && (

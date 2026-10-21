@@ -4,7 +4,14 @@ import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/use-toast';
-import { ACCOUNTS_EMAIL_CONFIG_KEY, DEFAULT_ACCOUNTS_EMAIL, formatInvoiceDay } from '@/components/shared/invoiceChecklist';
+import {
+  ACCOUNTS_EMAIL_CONFIG_KEY,
+  DEFAULT_ACCOUNTS_EMAIL,
+  DEFAULT_STORAGE_FEE_PERCENT,
+  STORAGE_FEE_CONFIG_KEY,
+  formatInvoiceDay,
+  readStorageFeePercent,
+} from '@/components/shared/invoiceChecklist';
 import {
   DEFAULT_QUEUE_DAYS,
   QUEUE_DAYS_CONFIG_KEY,
@@ -47,6 +54,10 @@ export default function InvoicingSettingsTab() {
   const [start, setStart] = useState('');
   const [isSavingStart, setIsSavingStart] = useState(false);
 
+  const existingShare = configs.find((c) => c.config_key === STORAGE_FEE_CONFIG_KEY);
+  const [share, setShare] = useState(DEFAULT_STORAGE_FEE_PERCENT);
+  const [isSavingShare, setIsSavingShare] = useState(false);
+
   useEffect(() => {
     setEmail(existing?.config_value || DEFAULT_ACCOUNTS_EMAIL);
   }, [existing?.config_value]);
@@ -58,6 +69,10 @@ export default function InvoicingSettingsTab() {
   useEffect(() => {
     setStart(readTrackingStart(configs));
   }, [existingStart?.config_value]);
+
+  useEffect(() => {
+    setShare(readStorageFeePercent(configs));
+  }, [existingShare?.config_value]);
 
   // Counted from the date in the box rather than the saved one, so the figure can
   // be checked before it is committed to.
@@ -100,6 +115,29 @@ export default function InvoicingSettingsTab() {
       toast({ title: 'Could not save the invoicing timings', description: e?.message, variant: 'destructive' });
     } finally {
       setIsSavingDays(false);
+    }
+  };
+
+  const handleSaveShare = async () => {
+    const n = Number(share);
+    if (!Number.isFinite(n) || n < 0 || n > 100) {
+      toast({ title: 'Enter a share between 0 and 100', variant: 'destructive' });
+      return;
+    }
+    setIsSavingShare(true);
+    try {
+      const value = String(n);
+      if (existingShare) {
+        await base44.entities.AppConfig.update(existingShare.id, { config_value: value });
+      } else {
+        await base44.entities.AppConfig.create({ config_key: STORAGE_FEE_CONFIG_KEY, config_value: value });
+      }
+      queryClient.invalidateQueries({ queryKey: ['AppConfig'] });
+      toast({ title: 'Storage share saved', description: `${n}% of the storage charge ex VAT` });
+    } catch (e) {
+      toast({ title: 'Could not save the storage share', description: e?.message, variant: 'destructive' });
+    } finally {
+      setIsSavingShare(false);
     }
   };
 
@@ -155,7 +193,7 @@ export default function InvoicingSettingsTab() {
         <div>
           <h2 className="text-sm font-semibold text-gray-900 dark:text-white">Invoicing Timings</h2>
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-            A job's invoices and close-out paperwork are worked on from the day the vehicle goes back to the customer; these are the waits after which a request or a document reads as overdue on today's actions list. Working days count Monday to Friday only.
+            A job's invoices and close-out paperwork are worked on from the day the vehicle goes back to the customer, or from the day the salvage is collected on a total loss; these are the waits after which a request or a document reads as overdue on today's actions list. Working days count Monday to Friday only.
           </p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-lg">
@@ -187,9 +225,33 @@ export default function InvoicingSettingsTab() {
 
       <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4 space-y-3">
         <div>
+          <h2 className="text-sm font-semibold text-gray-900 dark:text-white">Total Loss — Storage Share</h2>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+            The share of the storage charge we invoice the repairer for on a total loss — storage only, never the salvage agent's admin charges, with VAT added on our share. The figure comes off the Salvage Agent Invoice, so the Storage Fee Invoice Out waits until that copy is uploaded. Any single claim can be set to a different share from its own job figures.
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <Input
+            type="number"
+            min="0"
+            max="100"
+            value={share}
+            onChange={(e) => setShare(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') handleSaveShare(); }}
+            className="h-9 text-sm w-24"
+          />
+          <span className="text-xs text-gray-500 dark:text-gray-400">% of the storage charge ex VAT</span>
+          <Button onClick={handleSaveShare} disabled={isSavingShare}>
+            {isSavingShare ? 'Saving...' : 'Save'}
+          </Button>
+        </div>
+      </div>
+
+      <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4 space-y-3">
+        <div>
           <h2 className="text-sm font-semibold text-gray-900 dark:text-white">Invoicing Tracking Start Date</h2>
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-            Jobs whose vehicle went back to the customer before this date were invoiced in the old system, so they are left out of Today's actions and the aged invoices instead of swamping them. Their own Financials still work, and any single claim can be pulled back in from its Financials if money is still owed on it. A job still with us is never left out, and neither is a job with no hand-over date recorded.
+            Jobs that left us before this date — the vehicle back with the customer, or the salvage collected on a total loss — were invoiced in the old system, so they are left out of Today's actions and the aged invoices instead of swamping them. Their own Financials still work, and any single claim can be pulled back in from its Financials if money is still owed on it. A job still with us is never left out, and neither is a job with no such date recorded.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">

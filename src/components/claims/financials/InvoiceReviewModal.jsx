@@ -7,8 +7,6 @@ import HighlightableDocumentViewer from '@/components/shared/HighlightableDocume
 import ExtractedFigureRow from './ExtractedFigureRow';
 import InvoiceReviewChecks from './InvoiceReviewChecks';
 import {
-  EXTRACTION_SCHEMA,
-  INVOICE_FIGURES,
   REQUIRED_FIGURES,
   buildExtractionPrompt,
   checkArithmetic,
@@ -16,10 +14,12 @@ import {
   correctionsFromReview,
   emptyFigures,
   expectedInvoice,
+  extractionSchema,
   figuresForReview,
   findInvoiceNumberElsewhere,
   figuresNeedingReview,
   fetchSourceSnippets,
+  invoiceFigures,
   snippetsFromExtraction,
   toNum,
 } from './invoiceReview';
@@ -52,12 +52,17 @@ export default function InvoiceReviewModal({
   const [repairCostChoice, setRepairCostChoice] = useState(null);
   const [authorityChoice, setAuthorityChoice] = useState(null);
 
+  // What this particular invoice carries: the standard set, the few a document
+  // names for itself, and any figures read beside them — a salvage invoice's
+  // storage charge and admin charges.
+  const fields = useMemo(() => invoiceFigures(item), [item]);
+
   // Read the document once each time the screen opens.
   useEffect(() => {
     if (!isOpen || !fileUrl) return undefined;
     let cancelled = false;
     setStatus('reading');
-    setFigures(emptyFigures());
+    setFigures(emptyFigures(fields));
     setRaw({});
     setConfidence({});
     setSnippets({});
@@ -75,21 +80,21 @@ export default function InvoiceReviewModal({
     (async () => {
       try {
         const result = await base44.integrations.Core.InvokeLLM({
-          prompt: buildExtractionPrompt({ item, claim, party }),
+          prompt: buildExtractionPrompt({ item, claim, party, fields }),
           file_urls: [fileUrl],
-          response_json_schema: EXTRACTION_SCHEMA,
+          response_json_schema: extractionSchema(fields),
         });
         if (cancelled) return;
         const readable = result?.readable !== false;
         const extracted = readable ? result : {};
-        const read = figuresForReview(extracted);
+        const read = figuresForReview(extracted, fields);
 
         // Where each figure sits on the document. If the reading pass didn't say,
         // ask once more — the review is only useful with those pointers.
         let found = snippetsFromExtraction(extracted);
         if (readable && !Object.values(found).some(Boolean)) {
           try {
-            found = await fetchSourceSnippets(base44, fileUrl, read.figures);
+            found = await fetchSourceSnippets(base44, fileUrl, read.figures, fields);
           } catch (e) {
             console.error('Snippet lookup failed', e);
           }
@@ -109,7 +114,7 @@ export default function InvoiceReviewModal({
     })();
 
     return () => { cancelled = true; };
-  }, [isOpen, fileUrl]);
+  }, [isOpen, fileUrl, fields]);
 
   // Has this invoice number already been recorded on another claim?
   useEffect(() => {
@@ -133,16 +138,21 @@ export default function InvoiceReviewModal({
   // A close-out document is filed for the date printed on it: the figures on it
   // are read and logged, but only the Final Insurer Invoice's total is needed,
   // because the claim's final repair cost comes from it.
+  // A document is filed for the date printed on it. Where it carries figures of its
+  // own that our invoices are worked out from — a salvage invoice's storage charge —
+  // those have to be read before it can be filed, so nothing is left waiting on a
+  // figure that was never recorded.
   const requiredKeys = isInvoiceDocument(item) && !item?.setsRepairCost
-    ? ['invoice_date']
+    ? ['invoice_date', ...(item?.extraFigures || []).filter((f) => f.required).map((f) => f.key)]
     : Object.keys(REQUIRED_FIGURES);
   const missingRequired = requiredKeys
     .filter((key) => !String(figures[key] ?? '').trim())
-    .map((key) => REQUIRED_FIGURES[key]);
+    .map((key) => REQUIRED_FIGURES[key]
+      || `Enter the ${(fields.find((f) => f.key === key)?.label || key).toLowerCase()}`);
 
-  const needsReviewKeys = useMemo(() => figuresNeedingReview(figures, confidence), [figures, confidence]);
+  const needsReviewKeys = useMemo(() => figuresNeedingReview(figures, confidence, fields), [figures, confidence, fields]);
   const unreviewed = needsReviewKeys.filter((key) => !reviewed[key] && !touched[key]);
-  const unreviewedLabels = unreviewed.map((key) => INVOICE_FIGURES.find((f) => f.key === key)?.label || key);
+  const unreviewedLabels = unreviewed.map((key) => fields.find((f) => f.key === key)?.label || key);
 
   const arithmetic = checkArithmetic(figures);
   const matchIssues = checkRightInvoice(figures, claim, item);
@@ -200,7 +210,7 @@ export default function InvoiceReviewModal({
     softBlockers.filter((b) => acked[b.id]).forEach((b) => accepted.push(`${b.text} — accepted`));
     onConfirm({
       figures,
-      corrections: correctionsFromReview(figures, raw, derived),
+      corrections: correctionsFromReview(figures, raw, derived, fields),
       accepted,
       // An invoice waiting on a corrected copy doesn't set the repair cost: the
       // final repair cost comes from an invoice that is within the authority and
@@ -216,7 +226,7 @@ export default function InvoiceReviewModal({
   // The text to highlight on the document is the figure as it is printed there:
   // money carries separators that the bare stored number doesn't, so for amounts
   // the snippet is asked for the amount as written on the invoice.
-  const focusedField = INVOICE_FIGURES.find((f) => f.key === focused);
+  const focusedField = fields.find((f) => f.key === focused);
   const highlightText = (() => {
     const value = String(figures[focused] ?? '');
     if (!value) return '';
@@ -273,7 +283,7 @@ export default function InvoiceReviewModal({
             )}
 
             <div className="space-y-1.5">
-              {INVOICE_FIGURES.map((field) => (
+              {fields.map((field) => (
                 <ExtractedFigureRow
                   key={field.key}
                   field={field}

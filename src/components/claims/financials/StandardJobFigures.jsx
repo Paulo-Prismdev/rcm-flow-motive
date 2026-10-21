@@ -31,21 +31,23 @@ export default function StandardJobFigures({ claim, ctx, missing, onChange, onTr
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 items-start m-keep-2">
-      <FigureField
-        {...fieldEdit('final_repair_cost')}
-        label="Final Repair Cost (£ inc VAT)"
-        type="number"
-        value={claim.final_repair_cost}
-        missing={isMissing('final_repair_cost')}
-        hint={claim.final_repair_cost > 0 ? `ex VAT ${fmtGBP(net)} · VAT ${fmtGBP(vat)}` : 'Drives every calculated invoice'}
-        onCommit={(v) => {
-          const n = num(v);
-          onChange(
-            { final_repair_cost: n },
-            `Final repair cost ${n === null || n === 0 ? 'cleared' : `set to ${fmtGBP(n)}`}`
-          );
-        }}
-      />
+      {!ctx.totalLoss && (
+        <FigureField
+          {...fieldEdit('final_repair_cost')}
+          label="Final Repair Cost (£ inc VAT)"
+          type="number"
+          value={claim.final_repair_cost}
+          missing={isMissing('final_repair_cost')}
+          hint={claim.final_repair_cost > 0 ? `ex VAT ${fmtGBP(net)} · VAT ${fmtGBP(vat)}` : 'Drives every calculated invoice'}
+          onCommit={(v) => {
+            const n = num(v);
+            onChange(
+              { final_repair_cost: n },
+              `Final repair cost ${n === null || n === 0 ? 'cleared' : `set to ${fmtGBP(n)}`}`
+            );
+          }}
+        />
+      )}
 
       {!ctx.creditRepair && (
         <FigureField
@@ -108,7 +110,9 @@ export default function StandardJobFigures({ claim, ctx, missing, onChange, onTr
         </div>
       )}
 
-      {repairerReferralApplies(claim, ctx) && (
+      {/* On a total loss the repairer is invoiced for our share of the storage
+          instead, so there is no referral fee to set. */}
+      {!ctx.totalLoss && repairerReferralApplies(claim, ctx) && (
         <>
           <FigureField
             {...fieldEdit('referral_fee_repairer')}

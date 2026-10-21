@@ -2,7 +2,7 @@ import React from 'react';
 import { Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { buildTrackerMetaPatch, formatInvoiceDay } from '@/components/shared/invoiceChecklist';
-import { returnedBeforeTracking } from '@/components/shared/invoicingQueue';
+import { releasedBeforeTracking } from '@/components/shared/invoicingQueue';
 
 /**
  * The note on a claim whose job dates from before invoicing tracking started: it is
@@ -11,7 +11,7 @@ import { returnedBeforeTracking } from '@/components/shared/invoicingQueue';
  * working either way.
  */
 export default function BeforeTrackingNotice({ claim, trackingStart, onTrackerChange }) {
-  if (!returnedBeforeTracking(claim, trackingStart)) return null;
+  if (!releasedBeforeTracking(claim, trackingStart)) return null;
   const pulledIn = claim?.invoice_tracker?.tracking_override === true;
 
   return (

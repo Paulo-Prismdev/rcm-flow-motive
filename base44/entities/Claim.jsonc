@@ -537,6 +537,16 @@
       "format": "date",
       "description": "Rectification stage \u2014 date the vehicle was handed back to the customer after rectification"
     },
+    "salvage_collected_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Salvage Collected \u2014 total loss claims only. The day the salvage was collected, which puts a total loss claim on the invoicing radar in place of the vehicle's return, and is what its invoice pack is chased from."
+    },
+    "total_loss_marked_date": {
+      "type": "string",
+      "format": "date",
+      "description": "The day the claim was marked Total Loss, stamped by the status change and cleared when the claim comes off Total Loss. Used to chase a salvage collection date that is still missing."
+    },
     "all_parts_on_site": {
       "type": "string",
       "format": "date"
@@ -1041,7 +1051,7 @@
     },
     "invoice_tracker": {
       "type": "object",
-      "description": "Internal invoicing tracker state. Holds { second_referrer_enabled, second_referrer_name, items: { <item_key>: { amount, date, paid, paid_date, not_applicable } } }. Values that duplicate an existing financial field (invoice_amount, invoice_sent_date, invoice_payment_received, final_authority_received, excess_contribution_*) are read from and written to that field instead, so each date and paid status is recorded in exactly one place.",
+      "description": "Internal invoicing tracker state. Holds { second_referrer_enabled, second_referrer_name, storage_fee_percent, items: { <item_key>: { amount, date, paid, paid_date, not_applicable, figures } } }. Values that duplicate an existing financial field (invoice_amount, invoice_sent_date, invoice_payment_received, final_authority_received, excess_contribution_*) are read from and written to that field instead, so each date and paid status is recorded in exactly one place.",
       "default": {}
     },
     "invoice_copies": {

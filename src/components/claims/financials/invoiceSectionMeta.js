@@ -24,10 +24,16 @@ export function emptySectionMessage(section, ctx) {
   const reasons = [];
 
   if (collect) {
-    const referralApplies = !ctx.creditRepair
-      && (ctx.hasReferralFee || (!ctx.privatePaying && ctx.hasRepairer));
-    if (!referralApplies) {
-      reasons.push(ctx.privatePaying ? 'the customer is paying privately' : 'no repairer referral fee');
+    if (ctx.totalLoss) {
+      // A total loss job's own invoice out is our share of the storage charge the
+      // repairer ran up, so the repairer it went to is what it needs.
+      if (!ctx.hasRepairer) reasons.push('no repairer on the job');
+    } else {
+      const referralApplies = !ctx.creditRepair
+        && (ctx.hasReferralFee || (!ctx.privatePaying && ctx.hasRepairer));
+      if (!referralApplies) {
+        reasons.push(ctx.privatePaying ? 'the customer is paying privately' : 'no repairer referral fee');
+      }
     }
   } else {
     if (!ctx.hasReferrer) reasons.push('no referrer');
