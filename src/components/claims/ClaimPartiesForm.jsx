@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import ExcessModeField from "@/components/shared/ExcessModeField";
 import ClientCombobox from '../shared/ClientCombobox';
+import ThirdPartyCombobox from '../shared/ThirdPartyCombobox';
+import { claimPatchFromThirdParty } from '../shared/thirdPartyFields';
 import BrokerCombobox from '../shared/BrokerCombobox';
 import InsurerCombobox from '../shared/InsurerCombobox';
 import CustomSelect from '../shared/CustomSelect';
@@ -119,19 +121,9 @@ export default function ClaimPartiesForm({ claim, onSave, onCancel, mode }) {
     }));
   };
 
-  const handleTPClientSelect = (client) => {
-    if (!client) { set('tp_name', ''); return; }
-    setData(prev => ({
-      ...prev,
-      tp_name: client.name,
-      tp_phone: client.phone || prev.tp_phone,
-      tp_email: client.email || prev.tp_email,
-      tp_address_line_1: client.address_line_1 || prev.tp_address_line_1,
-      tp_address_line_2: client.address_line_2 || prev.tp_address_line_2,
-      tp_town: client.town || prev.tp_town,
-      tp_county: client.county || prev.tp_county,
-      tp_postcode: client.postcode || prev.tp_postcode,
-    }));
+  const handleTPClientSelect = (thirdParty) => {
+    if (!thirdParty) { set('tp_name', ''); return; }
+    setData(prev => ({ ...prev, ...claimPatchFromThirdParty(thirdParty, prev) }));
   };
 
   const handleBrokerSelect = (broker) => {
@@ -364,7 +356,7 @@ export default function ClaimPartiesForm({ claim, onSave, onCancel, mode }) {
       <div className="space-y-4 pt-2">
         <div>
           <label className="block text-xs text-muted-foreground mb-1">Third Party Name</label>
-          <ClientCombobox value={data.tp_name} onChange={handleTPClientSelect} placeholder="Select or add TP client..." allowClear />
+          <ThirdPartyCombobox value={data.tp_name} onChange={handleTPClientSelect} placeholder="Select or add third party..." allowClear />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div>
@@ -508,7 +500,7 @@ export default function ClaimPartiesForm({ claim, onSave, onCancel, mode }) {
         </div>
         {data.has_third_party && (
           <div className="space-y-4">
-            <div><label className="block text-xs text-muted-foreground mb-1">Third Party Name</label><ClientCombobox value={data.tp_name} onChange={handleTPClientSelect} placeholder="Select or add TP client..." allowClear /></div>
+            <div><label className="block text-xs text-muted-foreground mb-1">Third Party Name</label><ThirdPartyCombobox value={data.tp_name} onChange={handleTPClientSelect} placeholder="Select or add third party..." allowClear /></div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div><label className="block text-xs text-muted-foreground mb-1">Phone</label><Input value={data.tp_phone} onChange={(e) => set('tp_phone', e.target.value)} className="neomorph-inset" /></div>
               <div><label className="block text-xs text-muted-foreground mb-1">Email</label><Input type="email" value={data.tp_email} onChange={(e) => set('tp_email', e.target.value)} className="neomorph-inset" /></div>

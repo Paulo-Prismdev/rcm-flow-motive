@@ -9,6 +9,10 @@ import ClaimEditForm from './ClaimEditForm';
 import InsurerCombobox from "../shared/InsurerCombobox";
 import FileUpload from '../shared/FileUpload';
 import ClientCombobox from '../shared/ClientCombobox';
+import ThirdPartyCombobox from '../shared/ThirdPartyCombobox';
+import { findClientMatches, createClientFromClaim } from '../shared/claimClientLink';
+import { claimPatchFromThirdParty } from '../shared/thirdPartyFields';
+import ClientLinkPrompt from './ClientLinkPrompt';
 import ReferrerCombobox from '../shared/ReferrerCombobox';
 import AddClientModal from '../shared/AddClientModal';
 import AddInsurerModal from '../shared/AddInsurerModal';
@@ -109,6 +113,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
   const [aiExtractDialog, setAiExtractDialog] = useState({ isOpen: false, data: null, linkedEntityTypes: [] });
   const [aiEntityLinker, setAiEntityLinker] = useState({ isOpen: false, data: null });
   const [linkedContacts, setLinkedContacts] = useState([]);
+  const [clientLinkPrompt, setClientLinkPrompt] = useState(null);
   const queryClient = useQueryClient();
 
   const { data: currentUser, isLoading: isLoadingUser } = useQuery({
@@ -249,6 +254,21 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
     } finally { setIsLookingUpTPVehicle(false); }
   };
 
+  // Ties the claim's client to the directory. A client typed straight into the form
+  // is matched first (name, email or phone) — a likely match is offered for linking,
+  // otherwise the client record is created from the details entered.
+  const resolveClient = async (submitData) => {
+    if (submitData.client_id || !(submitData.client_name || '').trim()) return submitData;
+    const matches = await findClientMatches(submitData);
+    if (matches.length) {
+      setClientLinkPrompt({ matches, submitData });
+      return null;
+    }
+    const created = await createClientFromClaim(submitData, submitData.job_number);
+    queryClient.invalidateQueries({ queryKey: ['clients'] });
+    return { ...submitData, client_id: created.id };
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault(); e.stopPropagation();
     if (isCreating) return;
@@ -259,14 +279,42 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
       try {
         const response = await base44.functions.invoke('generateJobNumber', { entityType: 'Claim' });
         if (response.data.success) submitData.job_number = response.data.job_number;
-        else { alert(`Failed to generate job number: ${response.data.error || 'Unknown error'}`); return; }
+        else { alert(`Failed to generate job number: ${response.data.error || 'Unknown error'}`); setIsCreating(false); return; }
       } catch (error) {
         alert(`Failed to generate job number: ${error.response?.data?.error || error.message}. Please try again.`);
         setIsCreating(false); return;
       }
       if (submitData.claim_type === 'Fault Claim' || submitData.claim_type === 'Non-Fault - Own Insurer') submitData.third_party_pursuit_status = 'Awaiting Details';
     }
-    onSubmit(submitData);
+    let finalData;
+    try {
+      finalData = await resolveClient(submitData);
+    } catch (error) {
+      alert(`Failed to save the client to the directory: ${error?.message || error}. Please try again.`);
+      setIsCreating(false); return;
+    }
+    // A likely directory match was found — waiting for the user to link it or create a new record
+    if (!finalData) { setIsCreating(false); return; }
+    onSubmit(finalData);
+  };
+
+  const handleClientLinkConfirm = (client) => {
+    const pending = clientLinkPrompt?.submitData;
+    setClientLinkPrompt(null);
+    if (pending && client) onSubmit({ ...pending, client_id: client.id });
+  };
+
+  const handleClientCreateNew = async () => {
+    const pending = clientLinkPrompt?.submitData;
+    setClientLinkPrompt(null);
+    if (!pending) return;
+    try {
+      const created = await createClientFromClaim(pending, pending.job_number);
+      queryClient.invalidateQueries({ queryKey: ['clients'] });
+      onSubmit({ ...pending, client_id: created.id });
+    } catch (error) {
+      alert(`Failed to save the client to the directory: ${error?.message || error}. Please try again.`);
+    }
   };
 
   const handleSaveDraft = async () => {
@@ -359,12 +407,9 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
     }));
   };
 
-  const handleTPChange = async (client) => {
-    setFormData(prev => ({
-      ...prev, tp_name: client.name, tp_phone: client.phone || '', tp_email: client.email || '',
-      tp_address_line_1: client.address_line_1 || '', tp_address_line_2: client.address_line_2 || '',
-      tp_town: client.town || '', tp_county: client.county || '', tp_postcode: client.postcode || ''
-    }));
+  const handleTPChange = (thirdParty) => {
+    if (!thirdParty) { setFormData(prev => ({ ...prev, tp_name: '' })); return; }
+    setFormData(prev => ({ ...prev, ...claimPatchFromThirdParty(thirdParty, prev) }));
   };
 
   const handleInsurerModalSuccess = (newInsurer) => {
@@ -444,6 +489,16 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
     return (<>
       <AIEntityLinker isOpen={aiEntityLinker.isOpen} onClose={() => setAiEntityLinker({ isOpen: false, data: null })}
         extractedData={aiEntityLinker.data} onConfirm={handleEntityLinkerConfirm} />
+      {clientLinkPrompt && (
+        <ClientLinkPrompt
+          isOpen={true}
+          matches={clientLinkPrompt.matches}
+          clientName={clientLinkPrompt.submitData?.client_name || ''}
+          onLink={handleClientLinkConfirm}
+          onCreateNew={handleClientCreateNew}
+          onCancel={() => setClientLinkPrompt(null)}
+        />
+      )}
       <ClaimEditForm formData={formData} handleChange={handleChange} handleCheckboxChange={handleCheckboxChange}
         handleSubmit={handleSubmit} onCancel={onCancel} handleVehicleLookup={handleVehicleLookup}
         isLookingUpVehicle={isLookingUpVehicle} vehicleLookupError={vehicleLookupError}
@@ -468,6 +523,17 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
         linkedEntityTypes={aiExtractDialog.linkedEntityTypes} title="AI Data Extraction" />
 
       {!isLoadingUser && isInternalUser && <AddInsurerModal isOpen={showInsurerModal} onClose={() => setShowInsurerModal(false)} onSuccess={handleInsurerModalSuccess} />}
+
+      {clientLinkPrompt && (
+        <ClientLinkPrompt
+          isOpen={true}
+          matches={clientLinkPrompt.matches}
+          clientName={clientLinkPrompt.submitData?.client_name || ''}
+          onLink={handleClientLinkConfirm}
+          onCreateNew={handleClientCreateNew}
+          onCancel={() => setClientLinkPrompt(null)}
+        />
+      )}
 
       {/* Header + Step Indicator */}
       <div className="bg-card border border-border rounded-[10px] p-4 flex-shrink-0 shadow-sm">
@@ -601,7 +667,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
           <label className="text-sm font-medium">Client Name *</label>
           <ClientCombobox value={formData.client_name} onChange={handleClientChange} />
           {formData.client_name && !formData.client_id && (
-            <p className="text-xs text-muted-foreground">Client not found — save as draft, add in Clients section, then return.</p>
+            <p className="text-xs text-muted-foreground">Not in the client directory yet — this client is saved and linked when you create the claim.</p>
           )}
         </div>
 
@@ -795,7 +861,11 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
         {/* Contact */}
         <div className="space-y-3">
           <h4 className="font-semibold text-sm text-muted-foreground">Contact Details</h4>
-          <div className="space-y-2"><label className="text-sm font-medium">Third Party Name</label><ClientCombobox value={formData.tp_name} onChange={handleTPChange} /></div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Third Party Name</label>
+            <ThirdPartyCombobox value={formData.tp_name} onChange={handleTPChange} />
+            <p className="text-xs text-muted-foreground">Search the third party list to reuse one, or type the details below.</p>
+          </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2"><label className="text-sm font-medium">Phone</label><Input value={formData.tp_phone} onChange={e => handleChange('tp_phone', e.target.value)} /></div>
             <div className="space-y-2"><label className="text-sm font-medium">Email</label><Input type="email" value={formData.tp_email} onChange={e => handleChange('tp_email', e.target.value)} /></div>

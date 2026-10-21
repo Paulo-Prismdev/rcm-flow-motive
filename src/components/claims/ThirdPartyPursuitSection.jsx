@@ -6,7 +6,8 @@ import { AlertTriangle, UserPlus, ExternalLink, Check, X, Search, Loader, XCircl
 import { base44 } from "@/api/base44Client";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { formatUKRegistration } from '../shared/formatRegistration';
-import ClientCombobox from '../shared/ClientCombobox';
+import ThirdPartyCombobox from '../shared/ThirdPartyCombobox';
+import { claimPatchFromThirdParty } from '../shared/thirdPartyFields';
 import InsurerCombobox from '../shared/InsurerCombobox';
 import AddressLookupInput from '../shared/AddressLookupInput';
 
@@ -121,19 +122,10 @@ export default function ThirdPartyPursuitSection({ claim, onUpdate }) {
     setRejectReason('');
   };
 
-  // Handle client selection from combobox
-  const handleClientSelect = (client) => {
-    setTpFormData(prev => ({
-      ...prev,
-      tp_name: client.name || '',
-      tp_phone: client.phone || '',
-      tp_email: client.email || '',
-      tp_address_line_1: client.address_line_1 || '',
-      tp_address_line_2: client.address_line_2 || '',
-      tp_town: client.town || '',
-      tp_county: client.county || '',
-      tp_postcode: client.postcode || '',
-    }));
+  // Handle third party selection from the separate third party list
+  const handleThirdPartySelect = (thirdParty) => {
+    if (!thirdParty) return;
+    setTpFormData(prev => ({ ...prev, ...claimPatchFromThirdParty(thirdParty, prev) }));
   };
 
   // Handle vehicle location change
@@ -374,10 +366,10 @@ export default function ThirdPartyPursuitSection({ claim, onUpdate }) {
           <h4 className="font-semibold text-sm mb-3">Third Party Details</h4>
           
           <div className="mb-3">
-            <label className="text-xs font-semibold text-foreground-muted mb-1 block">Search Existing Client</label>
-            <ClientCombobox
+            <label className="text-xs font-semibold text-foreground-muted mb-1 block">Search Existing Third Party</label>
+            <ThirdPartyCombobox
               value={tpFormData.tp_name}
-              onChange={handleClientSelect}
+              onChange={handleThirdPartySelect}
             />
             <p className="text-xs text-foreground-muted mt-1">Select existing or enter details below</p>
           </div>
