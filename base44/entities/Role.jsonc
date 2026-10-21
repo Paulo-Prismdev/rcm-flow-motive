@@ -45,18 +45,9 @@
       }
     },
     "read": {
-      "$or": [
-        {
-          "user_condition": {
-            "user_type": "internal"
-          }
-        },
-        {
-          "user_condition": {
-            "role": "company_admin"
-          }
-        }
-      ]
+      "user_condition": {
+        "user_type": "internal"
+      }
     },
     "update": {
       "user_condition": {

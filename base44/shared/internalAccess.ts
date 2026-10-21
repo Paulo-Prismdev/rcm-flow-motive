@@ -1,19 +1,20 @@
 /**
  * Internal-only access gate for backend functions.
  *
- * "Internal" means someone who works for the business: an internal user type,
- * or one of the staff admin roles. Portal users (clients, referrers, repairers,
- * suppliers) are never internal, however they signed in.
+ * "Internal" is decided by the user's user type alone: someone who works for
+ * the business. A role never makes anyone internal — admin, super admin and
+ * company admin are also used inside external companies (a referrer's own
+ * company admin, for example), so a staff check must never lean on a role.
+ *
+ * Portal users (clients, referrers, repairers, suppliers) are never internal,
+ * however they signed in.
  *
  * Public form functions do not use this gate — they are opened by their own
  * per-claim token instead.
  */
 
-const INTERNAL_ROLES = ['admin', 'super_admin', 'company_admin'];
-
 export function isInternalUser(user: any): boolean {
-  if (!user) return false;
-  return user.user_type === 'internal' || INTERNAL_ROLES.includes(user.role);
+  return user?.user_type === 'internal';
 }
 
 /**
