@@ -52,6 +52,14 @@ function getClientOverdueHours(claim: any): number | null {
   return hours > 0 ? hours : null;
 }
 
+// A claim is a total loss on its current status alone — the total loss dates record
+// when it happened, not what it is — so a job switched back off Total Loss is read
+// as the repair it is again. Kept in step with isTotalLossClaim in the app
+// (src/components/shared/totalLoss.js).
+const TOTAL_LOSS_STATUS = 'Total Loss';
+const isTotalLossClaim = (claim: any) =>
+  claim?.journey_status === TOTAL_LOSS_STATUS || claim?.job_status === TOTAL_LOSS_STATUS;
+
 // ── Condition evaluation (flexible chaser eligibility) ──
 // Derives a condition field's value from real claim state. On-site is driven by
 // dates (on_site_date set, no hand_over_date) so it matches the Claims table
@@ -68,7 +76,7 @@ function getConditionValue(claim: any, field: string): any {
     case 'secondary_status': return claim.secondary_status || '';
     case 'invoice_status': return claim.invoice_status || '';
     case 'claim_type': return claim.claim_type || '';
-    case 'is_total_loss': return !!claim.total_loss_date;
+    case 'is_total_loss': return isTotalLossClaim(claim);
     case 'is_on_site': return !!claim.on_site_date && !claim.hand_over_date;
     case 'is_returned': return !!claim.hand_over_date;
     case 'has_bodyshop': return !!claim.bodyshop_id;
@@ -373,7 +381,7 @@ Deno.serve(async (req) => {
               reg: claim.reg,
               client_name: claim.client_name,
               journey_status: claim.journey_status,
-              is_total_loss: !!claim.total_loss_date,
+              is_total_loss: isTotalLossClaim(claim),
               recipient_type: rule.recipient_type,
               recipient_email: recipientEmail,
               bodyshop: claim.bodyshop,

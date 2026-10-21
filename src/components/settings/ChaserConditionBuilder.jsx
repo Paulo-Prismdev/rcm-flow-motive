@@ -10,7 +10,7 @@ export const CHASER_FIELDS = [
   { value: 'secondary_status', label: 'Secondary Status', type: 'enum', options: SECONDARY_STATUSES },
   { value: 'invoice_status', label: 'Invoice Status', type: 'enum', options: ['Not Ready for Invoicing', 'Ready to Invoice', 'Invoice Required - Pending', 'Invoiced', 'Invoice Paid', 'Invoice Overdue', 'Not Applicable'] },
   { value: 'claim_type', label: 'Claim Type', type: 'enum', options: ['Fault Claim', 'Non-Fault - Own Insurer', '3rd Party Insurer Direct', '3rd Party Paying Privately', 'Credit Repair', 'Glass Claim', 'Paying Privately'] },
-  { value: 'is_total_loss', label: 'Total Loss', type: 'boolean', hint: 'True when a total loss date is recorded.' },
+  { value: 'is_total_loss', label: 'Total Loss', type: 'boolean', hint: "True when the claim's status is Total Loss." },
   { value: 'is_on_site', label: 'On-Site', type: 'boolean', hint: 'True when on-site date is set and vehicle not yet handed over.' },
   { value: 'is_returned', label: 'Returned to Customer', type: 'boolean', hint: 'True when a hand-over date is set.' },
   { value: 'has_bodyshop', label: 'Repairer Allocated', type: 'boolean', hint: 'True when a bodyshop/repairer is assigned.' },
