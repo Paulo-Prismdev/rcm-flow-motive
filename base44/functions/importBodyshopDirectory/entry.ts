@@ -1,14 +1,13 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 import * as XLSX from 'npm:xlsx@0.18.5';
+import { requireInternalUser } from '../../shared/internalAccess.ts';
 
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
-    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
-    if (user.user_type !== 'internal' && user.role !== 'admin' && user.role !== 'super_admin') {
-      return Response.json({ error: 'Forbidden — admin only' }, { status: 403 });
-    }
+    // Internal-only: bulk directory import.
+    const gate = await requireInternalUser(base44);
+    if (gate.response) return gate.response;
 
     const body = await req.json();
     const fileUrl = body.file_url;

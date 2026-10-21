@@ -1,17 +1,13 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+import { requireInternalUser } from '../../shared/internalAccess.ts';
 
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     
-    // Verify user authentication and restrict to internal/admin users
-    const user = await base44.auth.me();
-    if (!user) {
-      return Response.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-    // Any authenticated user who can create claims is allowed to generate a job number.
-    // The Claim entity RLS enforces who can actually create claims.
-    // We just block completely unauthenticated requests above.
+    // Internal-only: job numbers are issued from the app's own job screens.
+    const gate = await requireInternalUser(base44);
+    if (gate.response) return gate.response;
 
     // Get the entity type from request
     const { entityType } = await req.json();

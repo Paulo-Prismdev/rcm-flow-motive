@@ -1,11 +1,14 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
 import { sendBrandedEmail } from '../../shared/brandedEmail.ts';
+import { requireInternalUser } from '../../shared/internalAccess.ts';
 
 export default async function (req: Request): Promise<Response> {
   try {
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
-    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    // Internal-only: instruction emails go out from the internal instruction flow.
+    const gate = await requireInternalUser(base44);
+    if (gate.response) return gate.response;
+    const user = gate.user;
 
     const body = await req.json();
     const { to, cc, subject, email_body, claim_id } = body || {};

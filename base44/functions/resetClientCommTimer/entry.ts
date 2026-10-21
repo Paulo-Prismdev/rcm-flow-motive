@@ -1,5 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 import { isCancelledClaim } from '../../shared/claimOutcome.ts';
+import { requireInternalUser } from '../../shared/internalAccess.ts';
 
 /**
  * Resets the 48-hour client communication tracker on a Claim.
@@ -15,6 +16,12 @@ import { isCancelledClaim } from '../../shared/claimOutcome.ts';
 export default async function(req: Request): Promise<Response> {
   try {
     const base44 = createClientFromRequest(req);
+
+    // Internal-only: the scheduled workflows run as the app's admin, so they pass
+    // alongside manual internal runs. Nobody else may move a claim's timers.
+    const gate = await requireInternalUser(base44);
+    if (gate.response) return gate.response;
+
     const body = await req.json().catch(() => ({} as any));
 
     // ── Decay mode: refresh client_comm_status_flag for all active claims.

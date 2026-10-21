@@ -1,3 +1,6 @@
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
+import { requireInternalUser } from '../../shared/internalAccess.ts';
+
 const GOOGLE_API_KEY = Deno.env.get("GOOGLE_PLACES_API_KEY");
 
 // Simple in-memory cache to avoid repeated requests
@@ -39,6 +42,11 @@ function parseGoogleComponents(components, formattedAddress, lat, lng) {
 
 Deno.serve(async (req) => {
   try {
+    // Internal-only: address lookup and distance/directions for the app's own screens.
+    const base44 = createClientFromRequest(req);
+    const gate = await requireInternalUser(base44);
+    if (gate.response) return gate.response;
+
     const body = await req.json();
     const action = body.action || 'geocode';
 

@@ -1,13 +1,14 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
+import { requireInternalUser } from '../../shared/internalAccess.ts';
 
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
 
-    const user = await base44.auth.me();
-    if (!user || user.role !== 'admin') {
-      return Response.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
-    }
+    // Internal-only: raised from the task screens and by the scheduled workflows,
+    // which run as the app's admin.
+    const gate = await requireInternalUser(base44);
+    if (gate.response) return gate.response;
 
     // Get all pending/in-progress tasks
     const tasks = await base44.asServiceRole.entities.Task.filter({

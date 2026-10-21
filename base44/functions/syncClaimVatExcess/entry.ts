@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
+import { requireInternalUser } from '../../shared/internalAccess.ts';
 
 /**
  * Refresh the VAT/excess snapshot held on each claim from its linked client's
@@ -10,11 +11,9 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
 export default async function(req: Request): Promise<Response> {
   try {
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
-    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
-    if (user.role !== 'admin' && user.role !== 'super_admin' && user.user_type !== 'internal') {
-      return Response.json({ error: 'Forbidden — internal only' }, { status: 403 });
-    }
+    // Internal-only: claim/directory VAT snapshot sync.
+    const gate = await requireInternalUser(base44);
+    if (gate.response) return gate.response;
 
     // Client settings, keyed by id and by name (older claims link by name only).
     const clients = [];

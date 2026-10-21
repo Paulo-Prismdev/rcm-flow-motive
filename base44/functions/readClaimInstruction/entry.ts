@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
+import { requireInternalUser } from '../../shared/internalAccess.ts';
 
 /**
  * Reading a new claim's instruction into claim details.
@@ -157,8 +158,9 @@ function normalise(value: any) {
 export default async function (req: Request): Promise<Response> {
   try {
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
-    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    // Internal-only: reading instruction documents into a new claim.
+    const gate = await requireInternalUser(base44);
+    if (gate.response) return gate.response;
 
     const body = await req.json();
     const fileUrls: string[] = (Array.isArray(body?.file_urls) ? body.file_urls : [])

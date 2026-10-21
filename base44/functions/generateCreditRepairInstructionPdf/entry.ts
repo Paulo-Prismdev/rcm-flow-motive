@@ -2,15 +2,14 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.49';
 import { jsPDF } from 'npm:jspdf@2.5.1';
 import { PDF_CONST, PDF_COLORS, createPdfHelpers, drawBrandedHeader, formatClaimTypeForInstruction } from '../../shared/instructionPdfHelpers.ts';
 import { fileInstructionDocument } from '../../shared/docChecklist.ts';
+import { requireInternalUser } from '../../shared/internalAccess.ts';
 
 export default async function(req: Request): Promise<Response> {
   try {
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
-    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
-    if (user.role !== 'admin' && user.user_type !== 'internal') {
-      return Response.json({ error: 'Forbidden' }, { status: 403 });
-    }
+    // Internal-only: instruction paperwork is produced by internal staff.
+    const gate = await requireInternalUser(base44);
+    if (gate.response) return gate.response;
 
     const { claimId, saveToClaim = false, contact = null, includeSections = null } = await req.json();
     if (!claimId) return Response.json({ error: 'Missing claimId' }, { status: 400 });

@@ -1,18 +1,14 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+import { requireInternalUser } from '../../shared/internalAccess.ts';
 
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     
-    // Verify user authentication
-    const user = await base44.auth.me();
-    if (!user) {
-      return Response.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    if (user.role !== 'admin' && user.user_type !== 'internal') {
-      return Response.json({ error: 'Forbidden: Internal staff only' }, { status: 403 });
-    }
+    // Internal-only: DVLA vehicle lookups for the app's own claim screens.
+    const gate = await requireInternalUser(base44);
+    if (gate.response) return gate.response;
+    const user = gate.user;
 
     // Get registration number from request
     const { registrationNumber } = await req.json();

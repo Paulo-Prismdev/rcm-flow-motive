@@ -1,18 +1,13 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.4';
+import { requireInternalUser } from '../../shared/internalAccess.ts';
 
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     
-    // Verify user authentication and admin privileges
-    const currentUser = await base44.auth.me();
-    if (!currentUser) {
-      return Response.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    if (currentUser.role !== 'admin' && currentUser.user_type !== 'internal') {
-      return Response.json({ error: 'Forbidden - Admin access required' }, { status: 403 });
-    }
+    // Internal-only: prompting portal users for feedback.
+    const gate = await requireInternalUser(base44);
+    if (gate.response) return gate.response;
 
     const { userId, companyId, companyType } = await req.json();
 

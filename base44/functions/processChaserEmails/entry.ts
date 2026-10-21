@@ -1,6 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 import { sendBrandedEmail } from '../../shared/brandedEmail.ts';
 import { isCancelledClaim, isTotalLossClaim } from '../../shared/claimOutcome.ts';
+import { requireInternalUser } from '../../shared/internalAccess.ts';
 
 // ── Token helpers (stateless, HMAC-style) ──
 async function generateBodyshopToken(claimId: string, secret: string): Promise<string> {
@@ -192,15 +193,10 @@ Deno.serve(async (req) => {
     const isTestMode = !!testEmail;
     const preview: any[] = [];
 
-    // Allow both admin manual runs and automated (no-user) scheduled runs
-    try {
-      const user = await base44.auth.me();
-      if (user && user.role !== 'admin' && user.role !== 'super_admin' && user.role !== 'company_admin') {
-        return Response.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
-      }
-    } catch {
-      // No user context — automated/scheduled call, proceed
-    }
+    // Internal-only: manual runs from the chaser screens, plus the scheduled
+    // workflow run, which runs as the app's admin.
+    const gate = await requireInternalUser(base44);
+    if (gate.response) return gate.response;
 
     // Fetch rules — a specific rule when rule_id is supplied (per-rule run/preview),
     // otherwise all active rules (automated / global run).

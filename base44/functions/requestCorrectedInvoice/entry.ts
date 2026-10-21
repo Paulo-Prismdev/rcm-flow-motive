@@ -1,5 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
 import { parseEmails, sendBrandedEmail } from '../../shared/brandedEmail.ts';
+import { requireInternalUser } from '../../shared/internalAccess.ts';
 
 /**
  * Ask the repairer for a corrected invoice.
@@ -14,11 +15,10 @@ import { parseEmails, sendBrandedEmail } from '../../shared/brandedEmail.ts';
 export default async function (req: Request): Promise<Response> {
   try {
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
-    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
-    if (user.user_type !== 'internal' && user.role !== 'admin') {
-      return Response.json({ error: 'Forbidden' }, { status: 403 });
-    }
+    // Internal-only: chasing a corrected invoice from accounts.
+    const gate = await requireInternalUser(base44);
+    if (gate.response) return gate.response;
+    const user = gate.user;
 
     const { claim_id, to, cc, subject, body, invoice_total, authority_amount } = await req.json();
 

@@ -1,15 +1,15 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { requireInternalUser } from '../../shared/internalAccess.ts';
 
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
 
     // Admin-only: this is a maintenance task
-    const user = await base44.auth.me();
-    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
-    if (user.user_type !== 'internal' && user.role !== 'admin' && user.role !== 'super_admin') {
-      return Response.json({ error: 'Forbidden — admin only' }, { status: 403 });
-    }
+    // Internal-only: this is the nightly directory sweep (the scheduled workflow
+    // runs as the app's admin) and an internal maintenance button.
+    const gate = await requireInternalUser(base44);
+    if (gate.response) return gate.response;
 
     const GOOGLE_API_KEY = Deno.env.get("GOOGLE_PLACES_API_KEY");
 
