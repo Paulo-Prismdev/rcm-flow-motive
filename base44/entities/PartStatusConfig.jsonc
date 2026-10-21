@@ -35,16 +35,25 @@
   ],
   "rls": {
     "create": {
-      "$or": [
+      "$and": [
         {
           "user_condition": {
-            "role": "super_admin"
+            "user_type": "internal"
           }
         },
         {
-          "user_condition": {
-            "role": "admin"
-          }
+          "$or": [
+            {
+              "user_condition": {
+                "role": "super_admin"
+              }
+            },
+            {
+              "user_condition": {
+                "role": "admin"
+              }
+            }
+          ]
         }
       ]
     },
@@ -52,30 +61,48 @@
       "user_condition": {}
     },
     "update": {
-      "$or": [
+      "$and": [
         {
           "user_condition": {
-            "role": "super_admin"
+            "user_type": "internal"
           }
         },
         {
-          "user_condition": {
-            "role": "admin"
-          }
+          "$or": [
+            {
+              "user_condition": {
+                "role": "super_admin"
+              }
+            },
+            {
+              "user_condition": {
+                "role": "admin"
+              }
+            }
+          ]
         }
       ]
     },
     "delete": {
-      "$or": [
+      "$and": [
         {
           "user_condition": {
-            "role": "super_admin"
+            "user_type": "internal"
           }
         },
         {
-          "user_condition": {
-            "role": "admin"
-          }
+          "$or": [
+            {
+              "user_condition": {
+                "role": "super_admin"
+              }
+            },
+            {
+              "user_condition": {
+                "role": "admin"
+              }
+            }
+          ]
         }
       ]
     }
