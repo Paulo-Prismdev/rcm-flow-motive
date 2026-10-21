@@ -49,6 +49,7 @@ import CreditRepairInstructionModal from './CreditRepairInstructionModal';
 import ClaimReferrerForm from './ClaimReferrerForm';
 import ClaimFinancials from './financials/ClaimFinancials';
 import { isTotalLossClaim } from '@/components/shared/totalLoss';
+import { getClaimOutcome, isExceptionOutcome } from '@/components/shared/claimOutcome';
 import ArchiveClaimDialog from './ArchiveClaimDialog';
 import { claimOutstandingItems } from '@/components/shared/claimOutstandingItems';
 import InlineEditableSection, { InlineField, useInlineEdit } from './InlineEditableSection';
@@ -539,7 +540,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
   const handleClaimUpdateCreated = (newStatus, newSecondaryStatus, newTertiaryStatus, updateType, direction, dates) => {
     const now = new Date();
     const effectiveStatus = newStatus || claim.job_status;
-    const isClosedAfterUpdate = isUpdateTrackingClosed({ job_status: effectiveStatus, invoice_status: claim.invoice_status });
+    const isClosedAfterUpdate = isUpdateTrackingClosed({ ...claim, job_status: effectiveStatus, journey_status: newStatus || claim.journey_status, outcome: dates?.outcome || claim.outcome, invoice_status: claim.invoice_status });
     const fortyEightHoursFromNow = new Date(now.getTime() + 48 * 60 * 60 * 1000);
 
     // General 48hr timer only resets on an Incoming update (any type).
@@ -588,6 +589,10 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
     }
 
     if (updateType === 'Status Change') {
+      if (dates?.outcome) {
+        dbUpdate.outcome = dates.outcome;
+        localClaim.outcome = dates.outcome;
+      }
       if (newStatus) {
         dbUpdate.job_status = newStatus;
         dbUpdate.journey_status = newStatus;
@@ -609,7 +614,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
       // completion_date, etc.) so the optimistic full-object save below does
       // not overwrite them with stale values from the old claim prop.
       if (dates) {
-        ['on_site_date', 'completion_date', 'claim_complete_date', 'hand_over_date'].forEach((k) => {
+        ['on_site_date', 'completion_date', 'claim_complete_date', 'salvage_collected_date', 'hand_over_date'].forEach((k) => {
           if (dates[k]) {
             dbUpdate[k] = dates[k];
             localClaim[k] = dates[k];
@@ -1929,6 +1934,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                       </div>
                   </div>
                   <div className="flex items-center gap-2 flex-wrap">
+                    {isExceptionOutcome(getClaimOutcome(claim)) && <StatusBadge status={getClaimOutcome(claim)} />}
                     {claim.secondary_status && <StatusBadge status={claim.secondary_status} />}
                     {claim.tertiary_status && <StatusBadge status={claim.tertiary_status} variant="secondary" />}
                     {!isClosedStatus && claim.update_status_flag && (

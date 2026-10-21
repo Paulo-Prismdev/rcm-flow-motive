@@ -19,18 +19,29 @@
     "job_status": {
       "type": "string"
     },
+    "outcome": {
+      "type": "string",
+      "enum": [
+        "Repair",
+        "Potential Total Loss",
+        "Total Loss",
+        "Cancelled"
+      ],
+      "default": "Repair",
+      "description": "Claim Outcome - what the claim is, kept apart from the journey stage (how far along it is). Repair (default) runs the normal journey through to Claim Complete; Total Loss runs its own short journey (Total Loss -> Salvage Collected -> Claim Complete) with the salvage paperwork in place of the repair invoices; Potential Total Loss is a repair that may yet be written off; Cancelled stops the journey where it is. Everything that asks whether a claim is a total loss - the invoicing flow, the chaser rules, the closed-claim filters - reads this field, never a stage."
+    },
     "secondary_status": {
       "type": "string",
-      "description": "Secondary Status (v2) \u2014 single-select. Dictates the group the job sits in on the table view. Reused from legacy field.",
+      "description": "Main internal status (v2) - single-select. Dictates the group the job sits in on the table view. Internal only: never shown on the client, referrer or repairer-facing portals.",
       "default": "New"
     },
     "journey_status": {
       "type": "string",
-      "description": "Client Journey Status (v2) \u2014 client-facing timeline stage. Single-select."
+      "description": "Client Journey Status (v2) - client-facing timeline stage: the stage the claim has reached, never an outcome. A repair runs Awaiting BID -> Booked In -> On-Site -> Awaiting Parts -> Repairs Complete -> Returned to Customer -> (Rectification) -> Claim Complete; a total loss runs Total Loss -> Salvage Collected -> Claim Complete. Which of those two journeys applies is set by the outcome."
     },
     "tertiary_status": {
       "type": "string",
-      "description": "Tertiary Status (v2) \u2014 single-select, extra information only (no grouping/timeline effect)."
+      "description": "Additional internal status (v2) - single-select, extra information only (no grouping/timeline effect). Internal only: never shown on the client, referrer or repairer-facing portals."
     },
     "job_statuses": {
       "type": "array",
@@ -125,12 +136,12 @@
     },
     "policy_excess": {
       "type": "number",
-      "description": "Policy excess amount in pounds. Use 0 for waived. Empty while excess_tbc is true \u2014 a TBC excess is never a figure."
+      "description": "Policy excess amount in pounds. Use 0 for waived. Empty while excess_tbc is true - a TBC excess is never a figure."
     },
     "excess_tbc": {
       "type": "boolean",
       "default": false,
-      "description": "Excess to be confirmed on authority \u2014 the excess isn't known at allocation. Never read as \u00a30 (0 means waived): displays and calculations wait for the Final Authority, which fills the excess in and clears this."
+      "description": "Excess to be confirmed on authority - the excess isn't known at allocation. Never read as 0 (0 means waived): displays and calculations wait for the Final Authority, which fills the excess in and clears this."
     },
     "broker_id": {
       "type": "string"
@@ -498,12 +509,12 @@
     "authority_received": {
       "type": "string",
       "format": "date",
-      "description": "Initial authority received \u2014 the date the initial authority came back, supplying the Initial Authority document. The final authority has its own date."
+      "description": "Initial authority received - the date the initial authority came back, supplying the Initial Authority document. The final authority has its own date."
     },
     "final_authority_received": {
       "type": "string",
       "format": "date",
-      "description": "Final Authority Received \u2014 the date the final authority came back, supplying the Final Authority close-out document in Financials. Kept separate from authority_received, which is the initial authority."
+      "description": "Final Authority Received - the date the final authority came back, supplying the Final Authority close-out document in Financials. Kept separate from authority_received, which is the initial authority."
     },
     "bs_instructed": {
       "type": "string",
@@ -525,27 +536,27 @@
     "rectification_booking_in_date": {
       "type": "string",
       "format": "date",
-      "description": "Rectification stage \u2014 date the vehicle was booked back in for rectification work"
+      "description": "Rectification stage - date the vehicle was booked back in for rectification work"
     },
     "rectification_completion_date": {
       "type": "string",
       "format": "date",
-      "description": "Rectification stage \u2014 date the rectification repairs were completed"
+      "description": "Rectification stage - date the rectification repairs were completed"
     },
     "rectification_hand_over_date": {
       "type": "string",
       "format": "date",
-      "description": "Rectification stage \u2014 date the vehicle was handed back to the customer after rectification"
+      "description": "Rectification stage - date the vehicle was handed back to the customer after rectification"
     },
     "salvage_collected_date": {
       "type": "string",
       "format": "date",
-      "description": "Salvage Collected \u2014 total loss claims only. The day the salvage was collected, which puts a total loss claim on the invoicing radar in place of the vehicle's return, and is what its invoice pack is chased from."
+      "description": "Salvage Collected - total loss claims only. Written by the Salvage Collected journey stage (as On-Site writes the on-site date). The day the salvage was collected, which puts a total loss claim on the invoicing radar in place of the vehicle's return, and is what its invoice pack is chased from."
     },
     "total_loss_marked_date": {
       "type": "string",
       "format": "date",
-      "description": "The day the claim was marked Total Loss, stamped by the status change and cleared when the claim comes off Total Loss. Used to chase a salvage collection date that is still missing."
+      "description": "The day the claim's outcome became Total Loss, stamped by the status change and cleared when it leaves Total Loss. Used to chase a salvage collection date that is still missing."
     },
     "all_parts_on_site": {
       "type": "string",
@@ -604,7 +615,8 @@
     },
     "total_loss_date": {
       "type": "string",
-      "format": "date"
+      "format": "date",
+      "description": "Legacy imported total loss date. Kept as a record only - what a claim is (total loss or not) is decided by the outcome."
     },
     "storage_amount_net": {
       "type": "number"
@@ -871,7 +883,7 @@
         "Uninsured",
         "Credit Repair"
       ],
-      "description": "Authorising party role \u2014 single source of truth for who the job is for and who pays. Auto-derived from claim type; overridden via authorising_party_overridden."
+      "description": "Authorising party role - single source of truth for who the job is for and who pays. Auto-derived from claim type; overridden via authorising_party_overridden."
     },
     "authorising_party_name": {
       "type": "string",
@@ -927,7 +939,7 @@
     },
     "declaration_of_need_token": {
       "type": "string",
-      "description": "Secure token for the external Declaration of Need \u2013 Replacement Vehicle form link"
+      "description": "Secure token for the external Declaration of Need - Replacement Vehicle form link"
     },
     "declaration_of_need_link_sent_at": {
       "type": "string",
@@ -937,7 +949,7 @@
     "declaration_of_need_signed": {
       "type": "boolean",
       "default": false,
-      "description": "Whether the client has signed the Declaration of Need \u2013 Replacement Vehicle"
+      "description": "Whether the client has signed the Declaration of Need - Replacement Vehicle"
     },
     "declaration_of_need_signed_at": {
       "type": "string",
@@ -1056,7 +1068,7 @@
     },
     "invoice_copies": {
       "type": "object",
-      "description": "Mirror of which invoice items have their copy filed: map of item_key -> true. Rebuilt from the claim's own ClaimDocument rows whenever an invoice copy is uploaded or removed, so the claims list can judge a missing copy \u2014 and read the same 'Pending invoices' status as the claim's Financials screen \u2014 without loading a claim's documents. Items with no copy on file are simply absent.",
+      "description": "Mirror of which invoice items have their copy filed: map of item_key -> true. Rebuilt from the claim's own ClaimDocument rows whenever an invoice copy is uploaded or removed, so the claims list can judge a missing copy - and read the same 'Pending invoices' status as the claim's Financials screen - without loading a claim's documents. Items with no copy on file are simply absent.",
       "default": {}
     }
   },

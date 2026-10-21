@@ -6,6 +6,10 @@
       "type": "string",
       "description": "Name of the claim status"
     },
+    "description": {
+      "type": "string",
+      "description": "One-line meaning of this status, shown beside the picker so a new user knows what it means."
+    },
     "color": {
       "type": "string",
       "enum": [

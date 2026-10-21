@@ -8,6 +8,7 @@ import { X, Clock, Mail, Plus, AtSign, ChevronDown } from 'lucide-react';
 import { Badge } from "@/components/ui/badge";
 import { Command, CommandItem, CommandList } from "@/components/ui/command";
 import StatusChangeFields from "@/components/shared/StatusChangeFields";
+import { getClaimOutcome } from "@/components/shared/claimOutcome";
 import { buildStatusChangeClaimUpdate, isUpdateTrackingClosed } from "@/components/shared/claimStatusUpdate";
 import { createTagNotifications } from "@/components/shared/createTagNotifications";
 import UpdateContactSelector from "@/components/claims/UpdateContactSelector";
@@ -38,12 +39,14 @@ export default function ClaimUpdateForm({
 
   const [newUpdate, setNewUpdate] = useState({
     update_type: defaultUpdateType || 'Other', direction: replyToId ? 'Outgoing' : '', platform: '', description: '', next_steps: '', due_date_for_next_action: '',
+    new_outcome: claim?.outcome || getClaimOutcome(claim),
     new_journey: claim?.journey_status || claim?.job_status || currentStatus || '',
     new_secondary_status: claim?.secondary_status || '',
     new_tertiary_status: claim?.tertiary_status || '',
     new_on_site_date: '',
     new_completion_date: '',
     new_claim_complete_date: '',
+    new_salvage_collected_date: '',
     new_hand_over_date: ''
   });
   const [sendEmail, setSendEmail] = useState(false);
@@ -67,7 +70,8 @@ export default function ClaimUpdateForm({
     selectedContacts.length > 0 ||
     sendEmail ||
     (newUpdate.update_type === 'Status Change' &&
-      (newUpdate.new_journey !== (claim?.journey_status || claim?.job_status || currentStatus || '') ||
+      (newUpdate.new_outcome !== (claim?.outcome || getClaimOutcome(claim)) ||
+        newUpdate.new_journey !== (claim?.journey_status || claim?.job_status || currentStatus || '') ||
         (newUpdate.new_secondary_status || '') !== (claim?.secondary_status || '') ||
         (newUpdate.new_tertiary_status || '') !== (claim?.tertiary_status || '')));
 
@@ -101,8 +105,8 @@ export default function ClaimUpdateForm({
       let created;
       if (updateData.update_type === 'Status Change') {
         const claimUpdate = buildStatusChangeClaimUpdate(claim, {
-          journey: updateData.new_journey, secondary: updateData.new_secondary_status, tertiary: updateData.new_tertiary_status,
-          on_site_date: updateData.new_on_site_date, completion_date: updateData.new_completion_date, claim_complete_date: updateData.new_claim_complete_date, hand_over_date: updateData.new_hand_over_date
+          outcome: updateData.new_outcome, journey: updateData.new_journey, secondary: updateData.new_secondary_status, tertiary: updateData.new_tertiary_status,
+          on_site_date: updateData.new_on_site_date, completion_date: updateData.new_completion_date, claim_complete_date: updateData.new_claim_complete_date, salvage_collected_date: updateData.new_salvage_collected_date, hand_over_date: updateData.new_hand_over_date
         }, updateData.update_type);
         if (Object.keys(claimUpdate).length > 0) {
           await base44.entities.Claim.update(claimId, claimUpdate);
@@ -161,9 +165,11 @@ export default function ClaimUpdateForm({
       queryClient.invalidateQueries({ queryKey: ['claims'] });
       queryClient.invalidateQueries({ queryKey: ['claim', claimId] });
       if (onUpdateCreated) onUpdateCreated(newUpdate.new_journey || null, newUpdate.new_secondary_status || null, newUpdate.new_tertiary_status || null, newUpdate.update_type, newUpdate.direction, {
+        outcome: newUpdate.new_outcome || null,
         on_site_date: newUpdate.new_on_site_date || null,
         completion_date: newUpdate.new_completion_date || null,
         claim_complete_date: newUpdate.new_claim_complete_date || null,
+        salvage_collected_date: newUpdate.new_salvage_collected_date || null,
         hand_over_date: newUpdate.new_hand_over_date || null,
       });
       resetForm();
@@ -172,7 +178,7 @@ export default function ClaimUpdateForm({
   });
 
   const resetForm = () => {
-    setNewUpdate({ update_type: defaultUpdateType || 'Other', direction: replyToId ? 'Outgoing' : '', platform: '', description: '', next_steps: '', due_date_for_next_action: '', new_journey: claim?.journey_status || claim?.job_status || currentStatus || '', new_secondary_status: claim?.secondary_status || '', new_tertiary_status: claim?.tertiary_status || '', new_on_site_date: '', new_completion_date: '', new_claim_complete_date: '', new_hand_over_date: '' });
+    setNewUpdate({ update_type: defaultUpdateType || 'Other', direction: replyToId ? 'Outgoing' : '', platform: '', description: '', next_steps: '', due_date_for_next_action: '', new_outcome: claim?.outcome || getClaimOutcome(claim), new_journey: claim?.journey_status || claim?.job_status || currentStatus || '', new_secondary_status: claim?.secondary_status || '', new_tertiary_status: claim?.tertiary_status || '', new_on_site_date: '', new_completion_date: '', new_claim_complete_date: '', new_salvage_collected_date: '', new_hand_over_date: '' });
     setSendEmail(false); setSelectedEmails([]); setTaggedUsers([]); setSubmitError(''); setShowFollowUp(false); setSelectedContacts([]);
     if (onCancel) onCancel();
   };
@@ -244,6 +250,7 @@ export default function ClaimUpdateForm({
       : selectedContacts.map((c) => c.detail).join(', ');
     if (newUpdate.update_type === 'Status Change' && !finalDescription.trim()) {
       const parts = [];
+      if (newUpdate.new_outcome && newUpdate.new_outcome !== (claim?.outcome || getClaimOutcome(claim))) parts.push(`Outcome → ${newUpdate.new_outcome}`);
       if (newUpdate.new_journey) parts.push(`Journey → ${newUpdate.new_journey}`);
       if (newUpdate.new_secondary_status) parts.push(`Secondary → ${newUpdate.new_secondary_status}`);
       if (newUpdate.new_tertiary_status) parts.push(`Tertiary → ${newUpdate.new_tertiary_status}`);
@@ -255,8 +262,8 @@ export default function ClaimUpdateForm({
       finalDescription = `${finalDescription}\n\n[Emailed to: ${selectedEmails.join(', ')}]`;
     }
 
-    const { new_journey, new_secondary_status, new_tertiary_status, new_on_site_date, new_completion_date, new_claim_complete_date, new_hand_over_date, ...updateDataToSave } = newUpdate;
-    createUpdateMutation.mutate({ ...updateDataToSave, description: finalDescription, contacted_party_name: contactedPartyName, contacted_party_detail: contactedPartyDetail, tagged_user_ids: taggedUsers, new_journey, new_secondary_status, new_tertiary_status, new_on_site_date, new_completion_date, new_claim_complete_date, new_hand_over_date, ...(replyToId && { parent_update_id: replyToId }) });
+    const { new_outcome, new_journey, new_secondary_status, new_tertiary_status, new_on_site_date, new_completion_date, new_claim_complete_date, new_salvage_collected_date, new_hand_over_date, ...updateDataToSave } = newUpdate;
+    createUpdateMutation.mutate({ ...updateDataToSave, description: finalDescription, contacted_party_name: contactedPartyName, contacted_party_detail: contactedPartyDetail, tagged_user_ids: taggedUsers, new_outcome, new_journey, new_secondary_status, new_tertiary_status, new_on_site_date, new_completion_date, new_claim_complete_date, new_salvage_collected_date, new_hand_over_date, ...(replyToId && { parent_update_id: replyToId }) });
   };
 
   const getAvailableEmails = () => {
@@ -326,8 +333,8 @@ export default function ClaimUpdateForm({
         {!replyToId && newUpdate.update_type === 'Status Change' && canChangeStatus && (
           <StatusChangeFields
             claim={claim}
-            value={{ journey: newUpdate.new_journey, secondary: newUpdate.new_secondary_status, tertiary: newUpdate.new_tertiary_status, on_site_date: newUpdate.new_on_site_date, completion_date: newUpdate.new_completion_date, claim_complete_date: newUpdate.new_claim_complete_date, hand_over_date: newUpdate.new_hand_over_date }}
-            onChange={(v) => setNewUpdate({ ...newUpdate, new_journey: v.journey, new_secondary_status: v.secondary, new_tertiary_status: v.tertiary, new_on_site_date: v.on_site_date || '', new_completion_date: v.completion_date || '', new_claim_complete_date: v.claim_complete_date || '', new_hand_over_date: v.hand_over_date || '' })}
+            value={{ outcome: newUpdate.new_outcome, journey: newUpdate.new_journey, secondary: newUpdate.new_secondary_status, tertiary: newUpdate.new_tertiary_status, on_site_date: newUpdate.new_on_site_date, completion_date: newUpdate.new_completion_date, claim_complete_date: newUpdate.new_claim_complete_date, salvage_collected_date: newUpdate.new_salvage_collected_date, hand_over_date: newUpdate.new_hand_over_date }}
+            onChange={(v) => setNewUpdate({ ...newUpdate, new_outcome: v.outcome, new_journey: v.journey, new_secondary_status: v.secondary, new_tertiary_status: v.tertiary, new_on_site_date: v.on_site_date || '', new_completion_date: v.completion_date || '', new_claim_complete_date: v.claim_complete_date || '', new_salvage_collected_date: v.salvage_collected_date || '', new_hand_over_date: v.hand_over_date || '' })}
           />
         )}
 

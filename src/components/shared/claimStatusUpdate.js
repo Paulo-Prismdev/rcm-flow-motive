@@ -1,4 +1,5 @@
-import { EXCEPTION_JOURNEY_STATUSES } from './claimStatusV2';
+import { EXCEPTION_JOURNEY_STATUSES, journeyStatusNamesForOutcome } from './claimStatusV2';
+import { getClaimOutcome, isCancelledClaim } from './claimOutcome';
 import { withTotalLossMarker } from './totalLoss';
 
 // Outcome / closed statuses — journey values that stop the 48hr update timer.
@@ -16,7 +17,7 @@ export function isClosedJourney(journey) {
 // tracking until invoiced.
 export function isUpdateTrackingClosed(claim) {
   if (!claim) return false;
-  if (claim.job_status === 'Cancelled') return true;
+  if (isCancelledClaim(claim)) return true;
   // Rectification journey: tracking stays active until the vehicle is handed
   // back after rectification work (rectification_hand_over_date set).
   if ((claim.journey_status === 'Rectification' || claim.job_status === 'Rectification') && claim.rectification_hand_over_date) return true;
@@ -84,16 +85,33 @@ export function computeClientCommStatusFlag(claim) {
 // journey / secondary / tertiary are the v2 single-select values from the form.
 // job_status is kept in sync with journey so legacy readers (closed detection,
 // existing reports) keep working during the v2 transition.
-export function buildStatusChangeClaimUpdate(claim, { journey, secondary, tertiary, on_site_date, hand_over_date, completion_date, claim_complete_date, rectification_booking_in_date, rectification_completion_date, rectification_hand_over_date }, updateType) {
+export function buildStatusChangeClaimUpdate(claim, { outcome, journey, secondary, tertiary, on_site_date, hand_over_date, completion_date, claim_complete_date, salvage_collected_date, rectification_booking_in_date, rectification_completion_date, rectification_hand_over_date }, updateType) {
   const updateData = {};
   if (updateType !== 'Status Change') return updateData;
 
-  const effectiveJourney = journey || claim?.journey_status;
+  const nextOutcome = outcome || getClaimOutcome(claim);
   const today = new Date().toISOString().split('T')[0];
 
+  // The outcome decides which journey the claim is on, so a stage from the other
+  // journey is never left behind: a write-off starts at Total Loss, and a claim
+  // switched back to a repair drops its salvage stage rather than keeping a stage
+  // its journey no longer has (the stage is cleared for the user to set again).
+  const stages = journeyStatusNamesForOutcome(nextOutcome);
+  let effectiveJourney = journey || claim?.journey_status || claim?.job_status;
+  if (nextOutcome === 'Total Loss') {
+    if (!stages.includes(effectiveJourney)) effectiveJourney = 'Total Loss';
+  } else if (!stages.includes(effectiveJourney)) {
+    effectiveJourney = null;
+  }
+
+  updateData.outcome = nextOutcome;
   if (effectiveJourney) {
     updateData.journey_status = effectiveJourney;
     updateData.job_status = effectiveJourney; // backward compat for legacy readers
+  } else if (claim?.journey_status || claim?.job_status) {
+    // The stage the claim held belongs to the other journey — clear it.
+    updateData.journey_status = null;
+    updateData.job_status = null;
   }
   updateData.secondary_status = secondary || null;
   updateData.tertiary_status = tertiary || null;
@@ -108,6 +126,11 @@ export function buildStatusChangeClaimUpdate(claim, { journey, secondary, tertia
   }
   if (effectiveJourney === 'Repairs Complete') {
     updateData.completion_date = completion_date || claim?.completion_date || today;
+  }
+  // Salvage Collected is the total loss journey's own date milestone, the way
+  // On-Site and Repairs Complete are the repair journey's.
+  if (effectiveJourney === 'Salvage Collected') {
+    updateData.salvage_collected_date = salvage_collected_date || claim?.salvage_collected_date || today;
   }
   if (effectiveJourney === 'Returned to Customer') {
     updateData.hand_over_date = hand_over_date || claim?.hand_over_date || today;
@@ -139,7 +162,7 @@ export function buildStatusChangeClaimUpdate(claim, { journey, secondary, tertia
   // Note: the general 48hr update timer is no longer reset by a status change.
   // It only resets when an Incoming update is logged (any type) — see
   // handleClaimUpdateCreated / handleUpdateCreated in the update UI.
-  // Marking a claim a total loss stamps the day it happened (and taking it off
+  // Setting the outcome to Total Loss stamps the day that happened (and leaving
   // Total Loss clears it again), so a salvage collection date that is still
   // missing can be chased from the job's own marker.
   return withTotalLossMarker(claim, updateData);
