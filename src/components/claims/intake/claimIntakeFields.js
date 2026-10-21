@@ -45,9 +45,20 @@ export const INTAKE_GROUPS = [
       { key: 'client_county', label: 'County' },
       { key: 'client_postcode', label: 'Postcode' },
       { key: 'client_vat_status', label: 'VAT status', type: 'select', options: ['VAT Registered', 'Non-VAT'] },
-      { key: 'driver_name', label: 'Driver (if not client)' },
-      { key: 'driver_phone', label: 'Driver phone' },
-      { key: 'driver_email', label: 'Driver email' },
+    ],
+  },
+  {
+    key: 'driver',
+    label: 'Driver',
+    fields: [
+      { key: 'driver_name', label: 'Name' },
+      { key: 'driver_phone', label: 'Phone' },
+      { key: 'driver_email', label: 'Email' },
+      { key: 'driver_address_line_1', label: 'Address 1' },
+      { key: 'driver_address_line_2', label: 'Address 2' },
+      { key: 'driver_town', label: 'Town' },
+      { key: 'driver_county', label: 'County' },
+      { key: 'driver_postcode', label: 'Postcode' },
     ],
   },
   {
@@ -93,7 +104,10 @@ export const INTAKE_GROUPS = [
 export const INTAKE_FIELDS = INTAKE_GROUPS.flatMap((group) => group.fields.map((field) => ({ ...field, group: group.key })));
 export const INTAKE_KEYS = INTAKE_FIELDS.map((field) => field.key);
 
-const DRIVER_KEYS = ['driver_name', 'driver_phone', 'driver_email'];
+const DRIVER_KEYS = [
+  'driver_name', 'driver_phone', 'driver_email',
+  'driver_address_line_1', 'driver_address_line_2', 'driver_town', 'driver_county', 'driver_postcode',
+];
 
 export const isBlank = (value) => value === null || value === undefined || value === '';
 
@@ -160,10 +174,17 @@ export function intakePatch({ values = {}, claimType = '', dvla = {}, tpDvla = {
     patch[field.key] = value;
   }
 
+  // The driver goes on the claim's own driver contact fields, whether or not they
+  // turn out to be the client (the client choice decides that separately).
   if (hasDriver(values)) {
     patch.driver_contact_name = values.driver_name || '';
     patch.driver_contact_phone = values.driver_phone || '';
     patch.driver_contact_email = values.driver_email || '';
+    patch.driver_contact_address_line_1 = values.driver_address_line_1 || '';
+    patch.driver_contact_address_line_2 = values.driver_address_line_2 || '';
+    patch.driver_contact_town = values.driver_town || '';
+    patch.driver_contact_county = values.driver_county || '';
+    patch.driver_contact_postcode = values.driver_postcode || '';
     patch.driver_same_as_client = false;
   }
 

@@ -6,6 +6,7 @@ import IntakeFieldRow from './IntakeFieldRow';
 import IntakeSourcePane from './IntakeSourcePane';
 import IntakeSuggestions from './IntakeSuggestions';
 import IntakeDirectoryLinks from './IntakeDirectoryLinks';
+import IntakeClientChoice from './IntakeClientChoice';
 import IntakeChecks from './IntakeChecks';
 import {
   INTAKE_FIELDS,
@@ -15,6 +16,7 @@ import {
   intakeValues,
 } from './claimIntakeFields';
 import { linkPatch } from './directoryMatch';
+import { clientChoicePatch, clientChoiceReady } from './clientChoice';
 
 const vehicleFields = (result) => ({
   make_model: result.make_model || '',
@@ -69,6 +71,7 @@ export default function ClaimIntakeReview({ isOpen, reading, files = [], pastedT
   const [activeIndex, setActiveIndex] = useState(0);
   const [claimType, setClaimType] = useState('');
   const [links, setLinks] = useState({});
+  const [clientChoice, setClientChoice] = useState({ mode: null, record: null });
   const [lookups, setLookups] = useState({});
   const startedRef = useRef(false);
 
@@ -81,6 +84,7 @@ export default function ClaimIntakeReview({ isOpen, reading, files = [], pastedT
     setSources(reading?.sources || {});
     setChecked({});
     setLinks({});
+    setClientChoice({ mode: null, record: null });
     setLookups({});
     setClaimType('');
     setActiveIndex(0);
@@ -121,6 +125,7 @@ export default function ClaimIntakeReview({ isOpen, reading, files = [], pastedT
   const groups = useMemo(() => groupsWithValues(values), [values]);
   const needsCheck = useMemo(() => intakeNeedsCheck(values, confidence), [values, confidence]);
   const unreviewed = needsCheck.filter((key) => !checked[key]);
+  const clientChosen = clientChoiceReady(clientChoice);
   const suggestions = reading?.suggestions || {};
   const damageDraft = String(suggestions.damage_draft || '').trim();
 
@@ -164,7 +169,7 @@ export default function ClaimIntakeReview({ isOpen, reading, files = [], pastedT
     const tpDvla = lookups.tp_reg?.patch || {};
     const readPatch = intakePatch({ values, claimType, dvla, tpDvla });
     onConfirm({
-      patch: { ...readPatch, ...linkPatch({ links, values }) },
+      patch: { ...readPatch, ...linkPatch({ links, values }), ...clientChoicePatch(clientChoice, values) },
       files,
       pastedText,
     });
@@ -229,6 +234,13 @@ export default function ClaimIntakeReview({ isOpen, reading, files = [], pastedT
               </div>
             ))}
 
+            <IntakeClientChoice
+              values={values}
+              referrerLink={links.referrer}
+              choice={clientChoice}
+              onChange={setClientChoice}
+            />
+
             <IntakeSuggestions
               suggestions={suggestions}
               claimType={claimType}
@@ -252,14 +264,16 @@ export default function ClaimIntakeReview({ isOpen, reading, files = [], pastedT
             <X className="w-3.5 h-3.5" /> Cancel
           </Button>
           <div className="flex items-center gap-3 min-w-0">
-            {unreviewed.length > 0 && (
+            {(!clientChosen || unreviewed.length > 0) && (
               <p className="text-[11px] text-amber-700 dark:text-amber-400 text-right">
-                {unreviewed.length} value{unreviewed.length === 1 ? '' : 's'} to check first
+                {!clientChosen
+                  ? 'Choose who the client is'
+                  : `${unreviewed.length} value${unreviewed.length === 1 ? '' : 's'} to check first`}
               </p>
             )}
             <Button
               onClick={handleConfirm}
-              disabled={unreviewed.length > 0}
+              disabled={unreviewed.length > 0 || !clientChosen}
               className="gap-1.5 bg-purple-600 hover:bg-purple-700 text-white flex-shrink-0"
             >
               <Check className="w-3.5 h-3.5" /> Add these details to the claim

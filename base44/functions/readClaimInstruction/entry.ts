@@ -29,18 +29,23 @@ const READ_FIELDS: Array<[string, string]> = [
   ['courtesy_car_required', 'Whether a courtesy car is needed ("Yes" or "No") where stated'],
   ['vehicle_location', 'Where the vehicle is now, where the instruction says'],
   ['vehicle_damage', 'The damage described in the instruction'],
-  ['client_name', 'Our client / policyholder — the person or company the claim is for'],
+  ['client_name', 'Our client / policyholder — the person or company the repair is for, where the instruction names them. Empty where the instruction names only a driver and no separate policyholder'],
   ['client_phone', 'Our client\'s phone number'],
   ['client_email', 'Our client\'s email address'],
-  ['client_address_line_1', 'Our client\'s address, first line'],
-  ['client_address_line_2', 'Our client\'s address, second line'],
+  ['client_address_line_1', 'Our client\'s address, first line: street and number only, never the town, county or postcode'],
+  ['client_address_line_2', 'Our client\'s address, second line only where there is one: street or area, never the town, county or postcode'],
   ['client_town', 'Our client\'s town'],
   ['client_county', 'Our client\'s county'],
-  ['client_postcode', 'Our client\'s postcode'],
+  ['client_postcode', 'Our client\'s postcode, on its own and never repeated in an address line'],
   ['client_vat_status', 'Whether our client is VAT registered: "VAT Registered" or "Non-VAT" ONLY where stated'],
-  ['driver_name', 'The driver\'s name ONLY where the driver is someone other than the client/policyholder'],
-  ['driver_phone', 'The driver\'s phone number, only where the driver is not the client'],
-  ['driver_email', 'The driver\'s email address, only where the driver is not the client'],
+  ['driver_name', 'The DRIVER — the person driving the vehicle. Read the driver here wherever the instruction gives them, including a "Driver Info" or "Driver Details" section, and where the driver works for our client. Empty only where no driver is named'],
+  ['driver_phone', 'The driver\'s phone number'],
+  ['driver_email', 'The driver\'s email address'],
+  ['driver_address_line_1', 'The driver\'s address, first line: street and number only, never the town, county or postcode'],
+  ['driver_address_line_2', 'The driver\'s address, second line only where there is one'],
+  ['driver_town', 'The driver\'s town'],
+  ['driver_county', 'The driver\'s county'],
+  ['driver_postcode', 'The driver\'s postcode, on its own and never repeated in an address line'],
   ['insurer', 'The insurance company handling the claim (the client\'s own insurer, or the third party insurer where it is a third party instruction)'],
   ['claim_ref', 'The insurer\'s claim reference number'],
   ['policy_number', 'The policy number'],
@@ -50,11 +55,11 @@ const READ_FIELDS: Array<[string, string]> = [
   ['tp_name', 'The OTHER DRIVER / third party involved — name, or company name where it is a business'],
   ['tp_phone', 'The third party\'s phone number'],
   ['tp_email', 'The third party\'s email address'],
-  ['tp_address_line_1', 'The third party\'s address, first line'],
-  ['tp_address_line_2', 'The third party\'s address, second line'],
+  ['tp_address_line_1', 'The third party\'s address, first line: street and number only, never the town, county or postcode'],
+  ['tp_address_line_2', 'The third party\'s address, second line only where there is one'],
   ['tp_town', 'The third party\'s town'],
   ['tp_county', 'The third party\'s county'],
-  ['tp_postcode', 'The third party\'s postcode'],
+  ['tp_postcode', 'The third party\'s postcode, on its own and never repeated in an address line'],
   ['tp_reg', 'The registration of the third party\'s vehicle'],
   ['tp_make_model', 'Make and model of the third party\'s vehicle'],
   ['tp_insurer', 'The third party\'s insurance company'],
@@ -104,14 +109,12 @@ function buildSchema(keys: string[]) {
     description: 'How certain you are of each value: "high", "medium" or "low". Use "low" for anything blurred, cut off, ambiguous, worked out, or where two sources disagree.',
     properties: stringMap(keys),
   };
+  // The gateway caps how many properties a response schema may carry, so the
+  // per-value lists are kept to two: the file a value came from rides at the
+  // front of its snippet, in square brackets, and is split off again below.
   properties._source_snippets = {
     type: 'object',
-    description: 'For each value, the text from the document where you found it, about 10 to 30 words either side. Empty string where you could not find it.',
-    properties: stringMap(keys),
-  };
-  properties._source_files = {
-    type: 'object',
-    description: 'For each value, the name of the file it was found in (as listed below), or "pasted text" where it came from the text the user pasted, or an empty string where you could not find it.',
+    description: 'For each value: the file you found it in, in square brackets, then the text from the document where you found it, about 10 to 30 words either side. For example "[claim-form.pdf] Vehicle Registration: AB12 CDE", or "[pasted text] ..." where it came from the pasted email. Empty string where you could not find it.',
     properties: stringMap(keys),
   };
   return { type: 'object', properties };
@@ -144,8 +147,10 @@ Rules:
 - Dates are UK format, day first: 03/04/2026 is 3 April 2026. Return dates as YYYY-MM-DD and times as HH:MM (24 hour).
 - The excess: return the amount as printed with no currency symbol, or the word "waived" where the instruction says the excess is waived, nil or not applicable, and an empty string where the instruction says nothing at all about the excess. Never return 0 or "waived" unless that is what the instruction says.
 - The third party fields are for the OTHER party involved, never for our client.
-- driver_name, driver_phone and driver_email only where the driver is someone other than the client/policyholder. Leave them empty where the driver is the client.
-- For every value give a confidence of "high", "medium" or "low", the snippet of text where you found it, and the source file you found it in ("pasted text" for anything taken from the pasted email).
+- The driver is not the client. Where the instruction gives only a driver's details (a "Driver Info" block, a driver named with their own address and phone), those details go in the driver fields — never in our client fields. Only fill the client fields where the instruction names the person or company the repair is for. Many instructions name a driver who works for the client company: that is still the driver, not the client.
+- Addresses: put the street and number in the address lines and the town, county and postcode in their own fields. Never repeat the postcode or the town inside an address line, and never return a value that starts or ends with a comma.
+- Phone numbers: return the UK national number, for example 07547 815994 — drop the +44 country code and the zero that follows it.
+- For every value give a confidence of "high", "medium" or "low", and the snippet of text where you found it written with the file it came from first in square brackets — "[claim-form.pdf] Vehicle Registration: AB12 CDE", or "[pasted text] ..." for anything taken from the pasted email.
 - Set readable to false only if nothing can be read at all.
 
 Values to return: ${keys.join(', ')}.`;
@@ -153,6 +158,129 @@ Values to return: ${keys.join(', ')}.`;
 
 function normalise(value: any) {
   return String(value ?? '').toLowerCase().replace(/[^a-z0-9]/g, '');
+}
+
+/**
+ * Tidying what came back: each address split into street lines, town, county and
+ * postcode (the postcode never left repeated inside a line), stray commas and
+ * double spaces gone, and UK phone numbers written the national way.
+ */
+
+const LONG_TEXT = new Set(['circumstances', 'vehicle_damage', 'tp_vehicle_damage']);
+
+const ADDRESS_FIELDS: Array<[string, string, string, string, string]> = [
+  ['client_address_line_1', 'client_address_line_2', 'client_town', 'client_county', 'client_postcode'],
+  ['driver_address_line_1', 'driver_address_line_2', 'driver_town', 'driver_county', 'driver_postcode'],
+  ['tp_address_line_1', 'tp_address_line_2', 'tp_town', 'tp_county', 'tp_postcode'],
+];
+
+const PHONE_FIELDS = ['client_phone', 'driver_phone', 'tp_phone'];
+
+const POSTCODE = /^([A-Z]{1,2}\d[A-Z\d]?)\s?(\d[A-Z]{2})$/i;
+const POSTCODE_TAIL = /^(.*?)[,\s]+([A-Z]{1,2}\d[A-Z\d]?\s?\d[A-Z]{2})$/i;
+
+function stripStray(value: any) {
+  return String(value ?? '')
+    .replace(/\s+/g, ' ')
+    .replace(/^[\s,;.:-]+/, '')
+    .replace(/[\s,;:]+$/, '');
+}
+
+function formatPostcode(value: any) {
+  const compact = String(value ?? '').replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+  if (compact.length < 5 || compact.length > 7) return String(value ?? '').trim().toUpperCase();
+  return `${compact.slice(0, compact.length - 3)} ${compact.slice(-3)}`;
+}
+
+function addressParts(value: any) {
+  return String(value ?? '')
+    .split(/[,\n;]+/)
+    .map((part) => stripStray(part))
+    .filter(Boolean);
+}
+
+/** +4407547815994 and 07547815994 both come out as 07547 815994. */
+function formatPhone(value: any) {
+  const raw = stripStray(value);
+  if (!raw || !/^[+\d][\d\s().-]*$/.test(raw)) return raw;
+  const compact = raw.replace(/[\s().-]/g, '');
+  let national: string;
+  if (compact.startsWith('+44')) national = compact.slice(3);
+  else if (compact.startsWith('0044')) national = compact.slice(4);
+  else if (compact.startsWith('+')) return raw; // another country: left as written
+  else national = compact;
+  if (!/^\d+$/.test(national)) return raw;
+  if (national.startsWith('0')) national = national.slice(1);
+  const number = `0${national}`;
+  if (number.length === 11) {
+    if (/^0[89]/.test(number)) return `${number.slice(0, 4)} ${number.slice(4, 7)} ${number.slice(7)}`;
+    if (number.startsWith('020')) return `020 ${number.slice(3, 7)} ${number.slice(7)}`;
+    return `${number.slice(0, 5)} ${number.slice(5)}`;
+  }
+  if (number.length === 10) return `${number.slice(0, 4)} ${number.slice(4)}`;
+  return number;
+}
+
+/** Puts one address's parts where they belong: postcode out, nothing repeated. */
+function tidyAddress(fields: Record<string, any>, keys: [string, string, string, string, string]) {
+  const [line1Key, line2Key, townKey, countyKey, postcodeKey] = keys;
+  const from = keys.map((key) => addressParts(fields[key]));
+  if (!from.some((parts) => parts.length)) return;
+
+  let postcode = '';
+  const seen = new Set<string>();
+  const collected: Array<{ text: string; field: string }> = [];
+  keys.forEach((field, index) => {
+    for (const part of from[index]) {
+      let text = part;
+      const tail = text.match(POSTCODE_TAIL);
+      if (tail && stripStray(tail[1])) {
+        if (!postcode) postcode = formatPostcode(tail[2]);
+        text = stripStray(tail[1]);
+      } else if (POSTCODE.test(text)) {
+        if (!postcode) postcode = formatPostcode(text);
+        continue; // the postcode has a field of its own
+      }
+      const mark = normalise(text);
+      if (!mark || seen.has(mark)) continue; // the same line twice, or a town named again
+      seen.add(mark);
+      collected.push({ text, field });
+    }
+  });
+
+  const lineParts = collected
+    .filter((item) => item.field === line1Key || item.field === line2Key)
+    .map((item) => item.text);
+  let town = collected.find((item) => item.field === townKey)?.text || '';
+  let county = collected.find((item) => item.field === countyKey)?.text || '';
+  let lines = lineParts;
+
+  // One line holding the whole address: the last part is the county, the one
+  // before it the town, and the rest are the street lines.
+  if (!town && !county && lines.length > 2) {
+    county = lines[lines.length - 1];
+    town = lines[lines.length - 2];
+    lines = lines.slice(0, lines.length - 2);
+  } else if (!town && !county && lines.length === 2 && from[0].length > 1) {
+    town = lines[1];
+    lines = [lines[0]];
+  }
+
+  fields[line1Key] = lines[0] || '';
+  fields[line2Key] = lines.slice(1).join(', ');
+  fields[townKey] = town;
+  fields[countyKey] = county;
+  fields[postcodeKey] = postcode || String(fields[postcodeKey] || '').trim();
+}
+
+function tidyFields(fields: Record<string, any>) {
+  for (const keys of ADDRESS_FIELDS) tidyAddress(fields, keys);
+  for (const key of PHONE_FIELDS) fields[key] = formatPhone(fields[key]);
+  for (const [key] of READ_FIELDS) {
+    if (LONG_TEXT.has(key) || key.endsWith('address_line_1') || key.endsWith('address_line_2')) continue;
+    if (typeof fields[key] === 'string') fields[key] = stripStray(fields[key]);
+  }
+  return fields;
 }
 
 export default async function (req: Request): Promise<Response> {
@@ -200,14 +328,21 @@ export default async function (req: Request): Promise<Response> {
       fields[key] = value === null || value === undefined ? '' : (typeof value === 'number' ? String(value) : String(value).trim());
     }
 
+    // Split the addresses, tidy the numbers and drop stray punctuation before
+    // anything is shown on the review screen.
+    tidyFields(fields);
+
     const confidence: Record<string, string> = {};
     const snippets: Record<string, string> = {};
     const sources: Record<string, string> = {};
     for (const key of keys) {
       const level = raw?._confidence?.[key];
       confidence[key] = level ? String(level).toLowerCase() : (fields[key] ? 'low' : 'missing');
-      snippets[key] = String(raw?._source_snippets?.[key] || '');
-      sources[key] = String(raw?._source_files?.[key] || '');
+      // The snippet opens with the file it came from, in square brackets.
+      const snippet = String(raw?._source_snippets?.[key] || '').trim();
+      const tagged = snippet.match(/^\[([^\]]{1,80})\]\s*/);
+      sources[key] = tagged ? tagged[1].trim() : '';
+      snippets[key] = (tagged ? snippet.slice(tagged[0].length) : snippet).trim();
     }
 
     // Has this job already been set up? The registration or either reference is

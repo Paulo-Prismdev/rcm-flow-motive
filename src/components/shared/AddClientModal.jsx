@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,9 +27,14 @@ const EMPTY_FORM = {
   longitude: null
 };
 
-export default function AddClientModal({ isOpen, onClose, onSuccess }) {
-  const [formData, setFormData] = useState(EMPTY_FORM);
+export default function AddClientModal({ isOpen, onClose, onSuccess, initial }) {
+  // Anything known about the client already (a name, an address, the driver as a
+  // contact) starts the form off; the user can change every part of it.
+  const startingForm = () => ({ ...EMPTY_FORM, ...(initial || {}) });
+  const [formData, setFormData] = useState(startingForm);
   const { toast } = useToast();
+
+  useEffect(() => { if (isOpen) setFormData(startingForm()); }, [isOpen]);
 
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.Client.create(data),
@@ -47,7 +52,7 @@ export default function AddClientModal({ isOpen, onClose, onSuccess }) {
   });
 
   const handleClose = () => {
-    setFormData(EMPTY_FORM);
+    setFormData(startingForm());
     onClose();
   };
 
