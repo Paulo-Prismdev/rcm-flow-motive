@@ -25,7 +25,8 @@ import {
   Building2,
   PanelLeftClose,
   PanelLeftOpen,
-  Receipt } from
+  Receipt,
+  UserX } from
 "lucide-react";
 import GlobalSearch from "./components/layout/GlobalSearch";
 import Notifications from "./components/layout/Notifications";
@@ -262,6 +263,7 @@ export default function Layout({ children, currentPageName }) {
                 { name: "Insurers", url: createPageUrl("InsurerDirectory"), icon: Shield, overlayPage: "InsurerDirectory" },
                 { name: "Credit Repair", url: createPageUrl("CreditRepairDirectory"), icon: Building2, overlayPage: "CreditRepairDirectory" },
                 { name: "Clients", url: createPageUrl("ClientDirectory"), icon: Users, overlayPage: "ClientDirectory" },
+                { name: "Third Parties", url: createPageUrl("ThirdPartyDirectory"), icon: UserX, overlayPage: "ThirdPartyDirectory" },
                 { name: "Suppliers", url: createPageUrl("SupplierManagement"), icon: Package, overlayPage: "SupplierManagement" },
                 { name: "Referrers", url: "/admin/companies", icon: Building2, overlayPage: "CompanyManagement" },
               ];

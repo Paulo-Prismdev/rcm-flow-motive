@@ -8,6 +8,7 @@ const PAGE_MAP = {
   InsurerDirectory: { title: 'Insurer Directory', component: lazy(() => import('@/pages/InsurerDirectory')) },
   CreditRepairDirectory: { title: 'Credit Repair Companies', component: lazy(() => import('@/pages/CreditRepairDirectory')) },
   ClientDirectory: { title: 'Client Directory', component: lazy(() => import('@/pages/ClientDirectory')) },
+  ThirdPartyDirectory: { title: 'Third Party Directory', component: lazy(() => import('@/pages/ThirdPartyDirectory')) },
   SupplierManagement: { title: 'Suppliers', component: lazy(() => import('@/pages/SupplierManagement')) },
   CompanyManagement: { title: 'Referrers', component: lazy(() => import('@/pages/CompanyManagement')) },
   Settings: { title: 'Settings', component: lazy(() => import('@/pages/Settings')) },
