@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,9 +26,14 @@ const EMPTY_FORM = {
   notes: ''
 };
 
-export default function AddThirdPartyModal({ isOpen, onClose, onSuccess }) {
+export default function AddThirdPartyModal({ isOpen, onClose, onSuccess, initialName = '' }) {
   const [formData, setFormData] = useState(EMPTY_FORM);
   const { toast } = useToast();
+
+  // Where a name has already been read off an instruction, it leads the form.
+  useEffect(() => {
+    if (isOpen) setFormData({ ...EMPTY_FORM, name: initialName || '' });
+  }, [isOpen, initialName]);
 
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.ThirdParty.create(data),

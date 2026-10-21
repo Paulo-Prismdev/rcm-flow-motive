@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,8 +11,13 @@ import NetworkCodesEditor from "./NetworkCodesEditor";
 
 const EMPTY_FORM = { name: '', contact_name: '', phone: '', email: '', claims_line: '', notes: '', useful_contacts: [], network_codes: [] };
 
-export default function AddInsurerModal({ isOpen, onClose, onSuccess }) {
+export default function AddInsurerModal({ isOpen, onClose, onSuccess, initialName = '' }) {
   const [formData, setFormData] = useState(EMPTY_FORM);
+
+  // Where a name has already been read off an instruction, it leads the form.
+  useEffect(() => {
+    if (isOpen) setFormData({ ...EMPTY_FORM, name: initialName || '' });
+  }, [isOpen, initialName]);
 
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.Insurer.create(data),

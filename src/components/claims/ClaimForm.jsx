@@ -25,6 +25,8 @@ import { base44 } from '@/api/base44Client';
 import AddressLookupInput from '../shared/AddressLookupInput';
 import AIExtractConfirmDialog from '../shared/AIExtractConfirmDialog';
 import AIEntityLinker from '../shared/AIEntityLinker';
+import ClaimIntakePanel from './intake/ClaimIntakePanel';
+import ClaimIntakeReview from './intake/ClaimIntakeReview';
 import { COURTESY_CAR_OPTIONS, normalizeCourtesyCar } from '../shared/courtesyCarOptions';
 
 // ── Helpers ──
@@ -112,6 +114,9 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
   const [tpVehicleLookupError, setTpVehicleLookupError] = useState(null);
   const [aiExtractDialog, setAiExtractDialog] = useState({ isOpen: false, data: null, linkedEntityTypes: [] });
   const [aiEntityLinker, setAiEntityLinker] = useState({ isOpen: false, data: null });
+  // Reading the instruction that came in: the files and/or the pasted email,
+  // read together, then checked before anything lands on the claim.
+  const [intake, setIntake] = useState({ isReading: false, error: null, reading: null, files: [], pastedText: '' });
   const [linkedContacts, setLinkedContacts] = useState([]);
   const [clientLinkPrompt, setClientLinkPrompt] = useState(null);
   const queryClient = useQueryClient();
@@ -208,6 +213,37 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
   const handleAIExtractConfirm = (selectedData) => {
     if (selectedData) setFormData(prev => ({ ...prev, ...selectedData }));
     setAiExtractDialog({ isOpen: false, data: null });
+  };
+
+  // Read the instruction (every file together with the pasted email) into one set
+  // of claim details. Nothing reaches the form yet — the review screen shows what
+  // was read first.
+  const handleIntakeRead = async ({ fileUrls, pastedText }) => {
+    setIntake(prev => ({ ...prev, isReading: true, error: null }));
+    try {
+      const response = await base44.functions.invoke('readClaimInstruction', { file_urls: fileUrls, pasted_text: pastedText });
+      const data = response?.data || {};
+      if (data.error) throw new Error(data.error);
+      setIntake({ isReading: false, error: null, reading: data, files: fileUrls || [], pastedText: pastedText || '' });
+    } catch (error) {
+      setIntake(prev => ({
+        ...prev,
+        isReading: false,
+        error: error?.response?.data?.error || error?.message || 'The instruction could not be read. Please try again.',
+      }));
+    }
+  };
+
+  const handleIntakeConfirm = ({ patch, files: readFiles }) => {
+    setFormData(prev => ({
+      ...prev,
+      ...(patch || {}),
+      file_urls: [...(Array.isArray(prev.file_urls) ? prev.file_urls : []), ...(readFiles || [])],
+    }));
+    setIntake(prev => ({ ...prev, reading: null, error: null }));
+    setEntryMode('ai');
+    setChoiceStep(false);
+    setCurrentStep(1);
   };
 
   const handleVehicleLookup = async () => {
@@ -446,6 +482,14 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
 
     return (
       <div className="h-full flex flex-col gap-4 md:gap-6">
+        <ClaimIntakeReview
+          isOpen={!!intake.reading}
+          reading={intake.reading}
+          files={intake.files}
+          pastedText={intake.pastedText}
+          onClose={() => setIntake(prev => ({ ...prev, reading: null, error: null }))}
+          onConfirm={handleIntakeConfirm}
+        />
         <div className="neomorph p-6 flex-shrink-0">
           <div className="flex items-center gap-4">
             <Button onClick={onCancel} className="neomorph-flat p-3"><ArrowLeft className="w-4 h-4 text-gray-600" /></Button>
@@ -464,11 +508,9 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
           <div className="flex items-center justify-center text-gray-400 font-bold text-sm">OR</div>
           <div className="flex-1 neomorph-flat p-6 flex flex-col items-center text-center gap-4 border-2 border-transparent hover:border-purple-300 transition-all rounded-2xl">
             <div className="w-16 h-16 rounded-full bg-purple-600 flex items-center justify-center flex-shrink-0"><Sparkles className="w-8 h-8 text-white" /></div>
-            <div><h3 className="text-lg font-bold text-gray-700 mb-2">Upload & Use AI</h3><p className="text-sm text-gray-500">Upload your instruction document and let AI extract all claim details automatically.</p></div>
-            <div className="w-full mt-auto">
-              <FileUpload value={Array.isArray(formData.file_urls) ? formData.file_urls : []} onChange={urls => handleChange('file_urls', urls)}
-                enableAI={true} analysisType="claim" onAIExtract={data => { handleAIExtract(data); setEntryMode('ai'); setChoiceStep(false); }} />
-              <p className="text-xs text-purple-600 font-medium mt-2">Upload a document — AI extracts details and pre-fills the form.</p>
+            <div><h3 className="text-lg font-bold text-gray-700 mb-2">Upload & Set Up With AI</h3><p className="text-sm text-gray-500">Upload the instruction — the claim form, emails saved as PDF, damage photos — or paste the email. AI reads it all and fills the claim in for you to check.</p></div>
+            <div className="w-full mt-auto text-left">
+              <ClaimIntakePanel onRead={handleIntakeRead} isReading={intake.isReading} error={intake.error} />
             </div>
           </div>
           <div className="flex items-center justify-center text-gray-400 font-bold text-sm">OR</div>
