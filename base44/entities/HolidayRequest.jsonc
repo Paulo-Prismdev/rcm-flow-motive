@@ -70,14 +70,27 @@
     "create": {
       "$or": [
         {
-          "user_condition": {
-            "role": "super_admin"
-          }
-        },
-        {
-          "user_condition": {
-            "role": "admin"
-          }
+          "$and": [
+            {
+              "user_condition": {
+                "user_type": "internal"
+              }
+            },
+            {
+              "$or": [
+                {
+                  "user_condition": {
+                    "role": "super_admin"
+                  }
+                },
+                {
+                  "user_condition": {
+                    "role": "admin"
+                  }
+                }
+              ]
+            }
+          ]
         },
         {
           "$and": [
@@ -96,14 +109,27 @@
     "read": {
       "$or": [
         {
-          "user_condition": {
-            "role": "super_admin"
-          }
-        },
-        {
-          "user_condition": {
-            "role": "admin"
-          }
+          "$and": [
+            {
+              "user_condition": {
+                "user_type": "internal"
+              }
+            },
+            {
+              "$or": [
+                {
+                  "user_condition": {
+                    "role": "super_admin"
+                  }
+                },
+                {
+                  "user_condition": {
+                    "role": "admin"
+                  }
+                }
+              ]
+            }
+          ]
         },
         {
           "data.employee_email": "{{user.email}}"
@@ -111,30 +137,48 @@
       ]
     },
     "update": {
-      "$or": [
+      "$and": [
         {
           "user_condition": {
-            "role": "super_admin"
+            "user_type": "internal"
           }
         },
         {
-          "user_condition": {
-            "role": "admin"
-          }
+          "$or": [
+            {
+              "user_condition": {
+                "role": "super_admin"
+              }
+            },
+            {
+              "user_condition": {
+                "role": "admin"
+              }
+            }
+          ]
         }
       ]
     },
     "delete": {
-      "$or": [
+      "$and": [
         {
           "user_condition": {
-            "role": "super_admin"
+            "user_type": "internal"
           }
         },
         {
-          "user_condition": {
-            "role": "admin"
-          }
+          "$or": [
+            {
+              "user_condition": {
+                "role": "super_admin"
+              }
+            },
+            {
+              "user_condition": {
+                "role": "admin"
+              }
+            }
+          ]
         }
       ]
     }
