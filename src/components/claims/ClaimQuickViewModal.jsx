@@ -6,6 +6,7 @@ import { FileText, User, Shield, Wrench, Users, Car, Calendar, Building2, Copy, 
 import { format } from 'date-fns';
 import { formatUKRegistration } from '../shared/formatRegistration';
 import StatusBadge from '../shared/StatusBadge';
+import ClaimStatusBadges from '../shared/ClaimStatusBadges';
 import { excessLabel } from '../shared/excessState';
 
 const formatDate = (val) => {
@@ -108,7 +109,7 @@ export default function ClaimQuickViewModal({ claim, isOpen, onClose }) {
             Quick View — {claim.reg ? formatUKRegistration(claim.reg) : claim.job_number || 'Claim'}
           </SheetTitle>
           <p className="text-xs text-muted-foreground">
-            {claim.client_name || '—'} · {claim.job_status || 'New'}
+            {claim.client_name || '—'} · {claim.journey_status || claim.job_status || 'New'}
           </p>
         </SheetHeader>
 
@@ -117,7 +118,7 @@ export default function ClaimQuickViewModal({ claim, isOpen, onClose }) {
           <Section icon={FileText} title="Claim Overview" color="bg-primary/10 text-primary">
             <InfoRow label="Job Number" value={claim.job_number} />
             <InfoRow label="Registration" value={claim.reg ? formatUKRegistration(claim.reg) : '—'} />
-            <InfoRow label="Status" value={<StatusBadge status={claim.job_status || 'New'} />} />
+            <InfoRow label="Status" value={<ClaimStatusBadges claim={claim} journeyOnly />} />
             <InfoRow label="Claim Type" value={claim.claim_type} />
             <InfoRow label="Date of Loss" value={formatDate(claim.loss_date)} />
             <InfoRow label="Time of Loss" value={claim.loss_time} />

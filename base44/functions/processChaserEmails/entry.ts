@@ -1,5 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 import { sendBrandedEmail } from '../../shared/brandedEmail.ts';
+import { isCancelledClaim, isTotalLossClaim } from '../../shared/claimOutcome.ts';
 
 // ── Token helpers (stateless, HMAC-style) ──
 async function generateBodyshopToken(claimId: string, secret: string): Promise<string> {
@@ -21,7 +22,7 @@ function replacePlaceholders(template: string, claim: any): string {
 // Update tracking is closed once invoiced or cancelled. Such claims are never chased.
 function isUpdateTrackingClosed(claim: any): boolean {
   if (!claim) return true;
-  if (claim.job_status === 'Cancelled') return true;
+  if (isCancelledClaim(claim)) return true;
   return ['Invoiced', 'Invoice Paid'].includes(claim.invoice_status);
 }
 
@@ -52,13 +53,10 @@ function getClientOverdueHours(claim: any): number | null {
   return hours > 0 ? hours : null;
 }
 
-// A claim is a total loss on its current status alone — the total loss dates record
-// when it happened, not what it is — so a job switched back off Total Loss is read
-// as the repair it is again. Kept in step with isTotalLossClaim in the app
-// (src/components/shared/totalLoss.js).
-const TOTAL_LOSS_STATUS = 'Total Loss';
-const isTotalLossClaim = (claim: any) =>
-  claim?.journey_status === TOTAL_LOSS_STATUS || claim?.job_status === TOTAL_LOSS_STATUS;
+// A claim is a total loss on its outcome alone - the total loss dates record when
+// it happened, not what it is - so a job switched back off Total Loss is read as
+// the repair it is again. isTotalLossClaim comes from the shared claimOutcome
+// module, the same one the app uses.
 
 // ── Condition evaluation (flexible chaser eligibility) ──
 // Derives a condition field's value from real claim state. On-site is driven by

@@ -2,6 +2,7 @@ import React from 'react';
 import { Check, X, AlertTriangle } from 'lucide-react';
 import { format } from 'date-fns';
 import { isExceptionJourney, JOURNEY_STATUSES } from '@/components/shared/claimStatusV2';
+import { getClaimOutcome, CANCELLED_OUTCOME, TOTAL_LOSS_OUTCOME, POTENTIAL_TOTAL_LOSS_OUTCOME } from '@/components/shared/claimOutcome';
 
 const MILESTONES = [
   { id: 'awaiting_booking', label: 'Awaiting Booking In' },
@@ -49,8 +50,12 @@ const EXCEPTION_CONFIG = {
 };
 
 export default function ClaimJourneyTimeline({ claim, updates = [] }) {
+  const outcome = getClaimOutcome(claim);
   const journeyStatus = claim.journey_status || claim.job_status || 'Awaiting BID';
-  const isException = isExceptionJourney(journeyStatus);
+  // Cancelled and total loss leave the repair milestones behind; a potential
+  // write-off is still a repair in progress, so it keeps the repair timeline with
+  // the banner over it.
+  const journeyStopped = outcome === CANCELLED_OUTCOME || outcome === TOTAL_LOSS_OUTCOME;
 
   const formatDate = (d) => {
     if (!d) return null;
@@ -63,9 +68,9 @@ export default function ClaimJourneyTimeline({ claim, updates = [] }) {
       .filter(u => statusNames.some(s => u.description?.toLowerCase().includes(s.toLowerCase())))
       .sort((a, b) => new Date(a.created_date) - new Date(b.created_date))[0];
 
-  if (isException) {
-    const cfg = EXCEPTION_CONFIG[journeyStatus];
-    const exceptionUpdate = getUpdateForStatuses([journeyStatus]);
+  if (journeyStopped) {
+    const cfg = EXCEPTION_CONFIG[outcome];
+    const exceptionUpdate = getUpdateForStatuses([outcome]);
     return (
       <div className={`border rounded-xl px-3 py-2 ${cfg.bg} ${cfg.border}`}>
         <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">Claim Journey</p>
@@ -81,7 +86,7 @@ export default function ClaimJourneyTimeline({ claim, updates = [] }) {
                 {exceptionUpdate.created_by && ` · ${exceptionUpdate.created_by.split('@')[0]}`}
               </p>
             )}
-            {journeyStatus === 'Cancelled' && claim.cancellation_reason && (
+            {outcome === CANCELLED_OUTCOME && claim.cancellation_reason && (
               <p className="text-[11px] text-muted-foreground mt-0.5">Reason: {claim.cancellation_reason}</p>
             )}
           </div>
@@ -90,7 +95,7 @@ export default function ClaimJourneyTimeline({ claim, updates = [] }) {
         {/* A total loss never goes back to the customer, so the day its salvage was
             collected is the date that matters: it is what puts the job on the
             invoicing radar in place of the hand-over. */}
-        {journeyStatus === 'Total Loss' && (
+        {outcome === TOTAL_LOSS_OUTCOME && (
           <div className="mt-2 pt-2 border-t border-gray-300 dark:border-gray-700 flex items-center gap-3">
             <div className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 border-2 ${
               claim.salvage_collected_date
@@ -150,6 +155,22 @@ export default function ClaimJourneyTimeline({ claim, updates = [] }) {
   };
 
   return (
+    <>
+    {/* A potential write-off may still be repaired, so the journey is the repair
+        journey and the open decision is flagged above it. */}
+    {outcome === POTENTIAL_TOTAL_LOSS_OUTCOME && (
+      <div className={`border rounded-xl px-3 py-2 mb-2 ${EXCEPTION_CONFIG[POTENTIAL_TOTAL_LOSS_OUTCOME].bg} ${EXCEPTION_CONFIG[POTENTIAL_TOTAL_LOSS_OUTCOME].border}`}>
+        <div className="flex items-center gap-3">
+          <div className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 border-2 text-white ${EXCEPTION_CONFIG[POTENTIAL_TOTAL_LOSS_OUTCOME].iconBg}`}>
+            <AlertTriangle className="w-4 h-4 stroke-[3]" />
+          </div>
+          <div>
+            <p className={`text-sm font-semibold ${EXCEPTION_CONFIG[POTENTIAL_TOTAL_LOSS_OUTCOME].titleColor}`}>Potential Total Loss</p>
+            <p className="text-[11px] text-muted-foreground mt-0.5">A repair for now — the write-off decision is still open.</p>
+          </div>
+        </div>
+      </div>
+    )}
     <div className="bg-card border border-border rounded-xl px-3 py-2 overflow-x-auto">
       <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">Claim Journey</p>
       <div className="relative flex items-start" style={{ minWidth: 520 }}>
@@ -208,5 +229,6 @@ export default function ClaimJourneyTimeline({ claim, updates = [] }) {
         })}
       </div>
     </div>
+    </>
   );
 }

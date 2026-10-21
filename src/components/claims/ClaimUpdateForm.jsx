@@ -126,7 +126,7 @@ export default function ClaimUpdateForm({
       try {
         if (updateData.update_type === 'General Update' || (updateData.update_type !== 'Status Change' && updateData.direction === 'Incoming')) {
           const now = new Date();
-          const closed = isUpdateTrackingClosed({ job_status: claim?.journey_status || claim?.job_status, invoice_status: claim?.invoice_status });
+          const closed = isUpdateTrackingClosed({ ...claim, invoice_status: claim?.invoice_status });
           await base44.entities.Claim.update(claimId, {
             last_updated_at: now.toISOString(),
             next_update_due_at: new Date(now.getTime() + 48 * 60 * 60 * 1000).toISOString(),
@@ -135,7 +135,7 @@ export default function ClaimUpdateForm({
         }
         if (updateData.update_type === 'Client Communication' && updateData.direction === 'Outgoing') {
           const now = new Date();
-          const closed = isUpdateTrackingClosed({ job_status: claim?.journey_status || claim?.job_status, invoice_status: claim?.invoice_status });
+          const closed = isUpdateTrackingClosed({ ...claim, invoice_status: claim?.invoice_status });
           await base44.entities.Claim.update(claimId, {
             last_client_comm_at: now.toISOString(),
             next_client_comm_due_at: new Date(now.getTime() + 48 * 60 * 60 * 1000).toISOString(),
@@ -229,7 +229,7 @@ export default function ClaimUpdateForm({
     // completion here — those still require invoicing, so a status change to
     // "Returned to Customer" should go through without the block.
     if (newUpdate.update_type === 'Status Change' && newUpdate.new_journey &&
-        isUpdateTrackingClosed({ job_status: newUpdate.new_journey, invoice_status: claim?.invoice_status })) {
+        isUpdateTrackingClosed({ ...claim, journey_status: newUpdate.new_journey, job_status: newUpdate.new_journey, outcome: claim?.outcome, invoice_status: claim?.invoice_status })) {
       try {
         const existing = await base44.entities.ClaimUpdate.filter({ claim_id: claimId }, '-created_date', 500);
         if (existing.some(u => u.starred && !u.parent_update_id)) {

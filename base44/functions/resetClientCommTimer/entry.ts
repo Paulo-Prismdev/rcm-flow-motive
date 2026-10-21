@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
+import { isCancelledClaim } from '../../shared/claimOutcome.ts';
 
 /**
  * Resets the 48-hour client communication tracker on a Claim.
@@ -31,7 +32,7 @@ export default async function(req: Request): Promise<Response> {
       for (const claim of claims) {
         try {
           const isClosed =
-            claim.job_status === 'Cancelled' ||
+            isCancelledClaim(claim) ||
             ['Invoiced', 'Invoice Paid'].includes(claim.invoice_status);
           if (isClosed) {
             if (claim.client_comm_status_flag !== 'Gray') {
@@ -140,7 +141,7 @@ export default async function(req: Request): Promise<Response> {
           );
           if (!latest[0]) continue;
           const isClosed =
-            claim.job_status === 'Cancelled' ||
+            isCancelledClaim(claim) ||
             ['Invoiced', 'Invoice Paid'].includes(claim.invoice_status);
           const now = new Date(latest[0].created_date);
           const nextDue = new Date(now.getTime() + 48 * 60 * 60 * 1000);
@@ -180,7 +181,7 @@ export default async function(req: Request): Promise<Response> {
     }
 
     const isClosed =
-      claim.job_status === 'Cancelled' ||
+      isCancelledClaim(claim) ||
       ['Invoiced', 'Invoice Paid'].includes(claim.invoice_status);
 
     // Use the triggering update's created_date, else fetch the latest

@@ -30,6 +30,8 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import StatusBadge from "../shared/StatusBadge";
+import ClaimStatusBadges from '../shared/ClaimStatusBadges';
+import { getClaimOutcome, isExceptionOutcome } from '../shared/claimOutcome';
 import { formatUKRegistration } from '../shared/formatRegistration';
 import ClaimJourneyTimeline from '../claims/ClaimJourneyTimeline';
 import ClaimUpdatesModal from '../shared/ClaimUpdatesModal';
@@ -214,8 +216,9 @@ export default function ReferrerClaimDetail({ claim, onClose, initialSection }) 
           <div className="neomorph-flat p-4 md:p-6">
             <div className="flex items-center gap-3 mb-4"><Clock className="w-5 h-5 text-gold" /><h3 className="font-bold">Status & Overview</h3></div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
-              <DetailRow label="Job Status" value={claim.job_status} isStatus />
-              {claim.secondary_status && <DetailRow label="Secondary Status" value={claim.secondary_status} isStatus />}
+              {/* The referrer sees where the claim has got to, or what it is when it
+                  is off the normal journey. Our internal statuses are ours alone. */}
+              <DetailRow label="Claim Status" value={isExceptionOutcome(getClaimOutcome(claim)) ? getClaimOutcome(claim) : (claim.journey_status || claim.job_status)} isStatus />
               <DetailRow label="Claim Type" value={claim.claim_type} missing={m('claim_type')} />
               <DetailRow label="Date of Loss" value={claim.loss_date} isDate missing={m('loss_date')} />
               <DetailRow label="Time of Loss" value={claim.loss_time} />
@@ -506,7 +509,7 @@ export default function ReferrerClaimDetail({ claim, onClose, initialSection }) 
 
       <ClaimUpdatesModal
         claimId={claim.id}
-        currentStatus={claim.job_status}
+        currentStatus={claim.journey_status || claim.job_status}
         isOpen={isClaimUpdatesOpen}
         onClose={() => setIsClaimUpdatesOpen(false)}
         onUpdateCreated={handleClaimUpdateCreated}
@@ -525,8 +528,7 @@ export default function ReferrerClaimDetail({ claim, onClose, initialSection }) 
                 {claim.referrer_ref}
               </span>
             )}
-            <StatusBadge status={claim.job_status || 'New'} />
-            {claim.secondary_status && <StatusBadge status={claim.secondary_status} variant="secondary" />}
+            <ClaimStatusBadges claim={claim} journeyOnly />
           </div>
           <div className="flex items-center gap-2 max-md:w-full max-md:flex-wrap">
             <Button 

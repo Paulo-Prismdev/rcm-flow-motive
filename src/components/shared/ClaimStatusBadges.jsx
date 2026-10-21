@@ -17,7 +17,9 @@ export default function ClaimStatusBadges({ claim, compact, journeyOnly }) {
     return (
       <>
         {isExceptionOutcome(outcome) && <StatusBadge status={outcome} compact={compact} />}
-        {journey && <StatusBadge status={journey} compact={compact} />}
+        {/* A legacy claim may still hold the outcome in its stage field - never
+            show the same word twice. */}
+        {journey && journey !== outcome && <StatusBadge status={journey} compact={compact} />}
       </>
     );
   }

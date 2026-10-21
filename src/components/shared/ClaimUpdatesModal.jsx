@@ -149,7 +149,7 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
       try {
         if (updateData.update_type === 'Client Communication') {
           const now = new Date();
-          const closed = isUpdateTrackingClosed({ job_status: claim?.journey_status || claim?.job_status, invoice_status: claim?.invoice_status });
+          const closed = isUpdateTrackingClosed({ ...claim, invoice_status: claim?.invoice_status });
           await base44.entities.Claim.update(claimId, {
             last_client_comm_at: now.toISOString(),
             next_client_comm_due_at: new Date(now.getTime() + 48 * 60 * 60 * 1000).toISOString(),

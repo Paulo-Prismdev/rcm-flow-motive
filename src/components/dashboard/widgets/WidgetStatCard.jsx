@@ -4,6 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { ArrowUpRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
+import { isClaimClosed } from '@/components/shared/claimOutcome';
 
 export default function WidgetStatCard({ config, isEditMode }) {
   const { title = 'Stat Card', entity = 'Claim', color = 'blue' } = config;
@@ -15,7 +16,7 @@ export default function WidgetStatCard({ config, isEditMode }) {
   });
 
   const openCount = records.filter(r => {
-    if (entity === 'Claim') return r.job_status !== 'Completed' && r.job_status !== 'Cancelled';
+    if (entity === 'Claim') return !isClaimClosed(r);
     if (entity === 'Estimate') return r.status !== 'Completed' && r.status !== 'Cancelled';
     if (entity === 'Engineering') return r.status !== 'Completed' && r.status !== 'Cancelled';
     if (entity === 'Part') return r.sourcing_status !== 'Delivered' && r.sourcing_status !== 'Cancelled';

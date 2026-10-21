@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
+import { isCancelledClaim } from '../../shared/claimOutcome.ts';
 
 // Public endpoint: receives a bodyshop's update submission via the chaser email link.
 // Security: _form_secret + token verification (same as getBodyshopUpdateForm).
@@ -84,7 +85,7 @@ Deno.serve(async (req) => {
     // ── Reset the general 48-hour case update timer ──
     // An Incoming update means the case is no longer overdue for an update,
     // so push the next-due time 48h forward and flag Green (or Gray if closed).
-    const closed = claim.job_status === 'Cancelled' ||
+    const closed = isCancelledClaim(claim) ||
       ['Invoiced', 'Invoice Paid'].includes(claim.invoice_status);
     const now = new Date();
     await base44.asServiceRole.entities.Claim.update(claimId, {

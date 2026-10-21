@@ -3,6 +3,8 @@ import { FileText, TrendingUp, Clock, CheckCircle } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { getReferrerClaims } from '@/functions/getReferrerClaims';
+import ClaimStatusBadges from '@/components/shared/ClaimStatusBadges';
+import { isCancelledClaim, isClaimClosed, isClaimClosedForLists } from '@/components/shared/claimOutcome';
 
 export default function ReferrerDashboard() {
   const [activeTab, setActiveTab] = React.useState('dashboard');
@@ -35,8 +37,8 @@ export default function ReferrerDashboard() {
   // Calculate stats
   const stats = React.useMemo(() => {
     const total = claims.length;
-    const active = claims.filter(c => !['Completed', 'Cancelled', 'Total Loss'].includes(c.job_status)).length;
-    const completed = claims.filter(c => c.job_status === 'Completed').length;
+    const active = claims.filter(c => !isClaimClosedForLists(c)).length;
+    const completed = claims.filter(c => !isCancelledClaim(c) && isClaimClosed(c)).length;
     const thisMonth = claims.filter(c => {
       const claimDate = new Date(c.created_date);
       const now = new Date();
@@ -171,9 +173,7 @@ export default function ReferrerDashboard() {
                       {claim.client_name || '—'}
                     </td>
                     <td className="px-4 py-3 text-sm whitespace-nowrap">
-                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
-                        {claim.job_status || 'New'}
-                      </span>
+                      <ClaimStatusBadges claim={claim} journeyOnly />
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">
                       {new Date(claim.created_date).toLocaleDateString()}

@@ -5,6 +5,7 @@ import { AlertCircle, Clock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import UpdateStatusBadge from '../../shared/UpdateStatusBadge';
+import { isClaimClosedForLists } from '@/components/shared/claimOutcome';
 
 export default function WidgetUpdateTracking({ config, isEditMode }) {
   const { data: claims = [], isLoading } = useQuery({
@@ -15,7 +16,7 @@ export default function WidgetUpdateTracking({ config, isEditMode }) {
 
   // Filter out closed claims
   const activeClaims = claims.filter(c => 
-    !c.archived && !['Completed', 'Cancelled', 'Total Loss'].includes(c.job_status)
+    !c.archived && !isClaimClosedForLists(c)
   );
 
   // Count by update status

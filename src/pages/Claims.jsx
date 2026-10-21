@@ -16,6 +16,7 @@ import { formatUKRegistration } from '../components/shared/formatRegistration';
 import { format } from 'date-fns';
 import { useStatusConfigs } from '../components/shared/StatusConfigContext';
 import { getJourneyColor, isExceptionJourney, SECONDARY_STATUSES, JOURNEY_STATUSES } from '@/components/shared/claimStatusV2';
+import { getClaimOutcome, isExceptionOutcome, isCancelledClaim } from '@/components/shared/claimOutcome';
 import { isClosedJourney, isUpdateTrackingClosed, computeClientCommStatusFlag } from '@/components/shared/claimStatusUpdate';
 import { useToast } from "@/components/ui/use-toast";
 import { sanitizeClaimData } from '@/components/shared/sanitizeClaimData';
@@ -109,7 +110,8 @@ const getGroupKey = (c) => {
   // regardless of on-site markers from the original repair.
   if (journey === 'Rectification') return 'Rectification';
   if (c.secondary_status === 'New') return 'New';
-  if (journey === 'Cancelled') return 'Cancelled';
+  // A cancelled job groups as Cancelled wherever its journey stopped.
+  if (isCancelledClaim(c)) return 'Cancelled';
   if (c.on_site_date && !c.hand_over_date) return 'On Site';
   if (c.journey_status && !isExceptionJourney(c.journey_status)) {
     if (c.journey_status === 'On-Site') return 'On Site';
@@ -495,7 +497,7 @@ export default function ClaimsPage() {
     const isClosedStatus = isUpdateTrackingClosed(claim);
     const isDraft = claim.draft === true;
     const journeyStatus = claim.journey_status || claim.job_status;
-    const isException = isExceptionJourney(journeyStatus);
+    const isException = isExceptionOutcome(getClaimOutcome(claim));
 
     return (
       <tr
@@ -543,7 +545,7 @@ export default function ClaimsPage() {
                 Draft
               </span>
             )}
-            {isException && <StatusBadge status={journeyStatus} compact />}
+            {isException && <StatusBadge status={getClaimOutcome(claim)} compact />}
             {claim.secondary_status && <StatusBadge status={claim.secondary_status} compact />}
             {claim.tertiary_status && <StatusBadge status={claim.tertiary_status} variant="secondary" compact />}
             {hasBackorder && (
@@ -616,7 +618,7 @@ export default function ClaimsPage() {
     const isClosedStatus = isUpdateTrackingClosed(claim);
     const isDraft = claim.draft === true;
     const journeyStatus = claim.journey_status || claim.job_status;
-    const isException = isExceptionJourney(journeyStatus);
+    const isException = isExceptionOutcome(getClaimOutcome(claim));
     return (
       <div
         key={claim.id}
@@ -670,7 +672,7 @@ export default function ClaimsPage() {
           {claim.referrer && <span className="text-xs text-gray-400 dark:text-gray-500 truncate">{claim.referrer}</span>}
           {(isException || claim.secondary_status || claim.tertiary_status || INVOICE_STATUS_ATTENTION[deriveInvoiceStatus(claim)]) && (
             <div className="mt-1 flex flex-wrap gap-1 items-center">
-              {isException && <StatusBadge status={journeyStatus} />}
+              {isException && <StatusBadge status={getClaimOutcome(claim)} />}
               {claim.secondary_status && <StatusBadge status={claim.secondary_status} />}
               {claim.tertiary_status && <StatusBadge status={claim.tertiary_status} variant="secondary" />}
               {(() => {

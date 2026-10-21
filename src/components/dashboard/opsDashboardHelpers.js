@@ -1,5 +1,6 @@
 import { computeUpdateStatusFlag, computeClientCommStatusFlag } from '@/components/shared/claimStatusUpdate';
 import { isExceptionJourney } from '@/components/shared/claimStatusV2';
+import { getClaimOutcome, isExceptionOutcome, isClaimClosed } from '@/components/shared/claimOutcome';
 
 export const PIPELINE_STAGES = [
   { key: 'new', label: 'New', color: '#3b82f6' },
@@ -14,7 +15,7 @@ export const PIPELINE_STAGES = [
 export function getPipelineStage(claim) {
   const journey = claim.journey_status || claim.job_status;
   const secondary = claim.secondary_status;
-  if (isExceptionJourney(journey)) return null;
+  if (isExceptionOutcome(getClaimOutcome(claim)) || isExceptionJourney(journey)) return null;
   if (journey === 'Claim Complete' || secondary === 'File Complete') return 'complete';
   if (journey === 'Returned to Customer' || journey === 'Repairs Complete' || secondary === 'Quality Check' || secondary === 'Completed') return 'handover';
   if (journey === 'On-Site' || journey === 'Rectification' || (claim.on_site_date && !claim.hand_over_date) || secondary === 'In Repair') return 'on_site';
@@ -31,7 +32,7 @@ export function getClaimValue(claim) {
 export function isOpenClaim(claim) {
   if (claim.archived || claim.draft) return false;
   const journey = claim.journey_status || claim.job_status;
-  if (journey === 'Claim Complete' || journey === 'Cancelled') return false;
+  if (isClaimClosed(claim)) return false;
   return true;
 }
 

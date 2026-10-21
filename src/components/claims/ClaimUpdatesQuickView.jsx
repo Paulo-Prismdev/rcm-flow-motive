@@ -6,6 +6,7 @@ import { Clock, Calendar, User, MessageSquare, Plus, Star, Copy, Check, AtSign }
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import ClaimUpdateForm from './ClaimUpdateForm';
+import { buildStatusChangeClaimUpdate, isUpdateTrackingClosed } from '@/components/shared/claimStatusUpdate';
 import UpdateDirectionBadges from './UpdateDirectionBadges';
 
 const CopyTextButton = ({ text }) => {
@@ -93,11 +94,10 @@ export default function ClaimUpdatesQuickView({ claim, isOpen, onClose }) {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['claimUpdates', claimId] }),
   });
 
-  const handleUpdateCreated = (newStatus, newSecondaryStatus, newTertiaryStatus, updateType, direction) => {
+  const handleUpdateCreated = (newJourney, newSecondaryStatus, newTertiaryStatus, updateType, direction, dates) => {
     const now = new Date();
-    const closedStatuses = ['Completed', 'Cancelled', 'Total Loss'];
-    const effectiveStatus = newStatus || claim?.job_status;
-    const isClosedAfterUpdate = closedStatuses.includes(effectiveStatus);
+    const effectiveStatus = newJourney || claim?.journey_status || claim?.job_status;
+    const isClosedAfterUpdate = isUpdateTrackingClosed({ ...claim, journey_status: effectiveStatus, job_status: effectiveStatus, outcome: dates?.outcome || claim?.outcome, invoice_status: claim?.invoice_status });
     const fortyEightHoursFromNow = new Date(now.getTime() + 48 * 60 * 60 * 1000);
 
     // General 48hr timer only resets on an Incoming update (any type).
@@ -124,12 +124,21 @@ export default function ClaimUpdatesQuickView({ claim, isOpen, onClose }) {
         updateData.client_comm_status_flag = 'Green';
       }
     }
-    // Only modify statuses for an explicit Status Change — a regular update
-    // must never alter job_status, secondary_status or tertiary_status.
+    // The status change itself is built by the shared helper, so the outcome, the
+    // journey stage, the internal statuses and each milestone date land exactly as
+    // they do from the claim screen.
     if (updateType === 'Status Change') {
-      if (newStatus) updateData.job_status = newStatus;
-      updateData.secondary_status = newSecondaryStatus || null;
-      updateData.tertiary_status = newTertiaryStatus || null;
+      Object.assign(updateData, buildStatusChangeClaimUpdate(claim, {
+        outcome: dates?.outcome || null,
+        journey: newJourney,
+        secondary: newSecondaryStatus,
+        tertiary: newTertiaryStatus,
+        on_site_date: dates?.on_site_date || null,
+        completion_date: dates?.completion_date || null,
+        claim_complete_date: dates?.claim_complete_date || null,
+        salvage_collected_date: dates?.salvage_collected_date || null,
+        hand_over_date: dates?.hand_over_date || null,
+      }, updateType));
     }
 
     base44.entities.Claim.update(claimId, updateData).then(() => {
@@ -169,7 +178,7 @@ export default function ClaimUpdatesQuickView({ claim, isOpen, onClose }) {
             <ClaimUpdateForm
               claimId={claimId}
               claim={claim}
-              currentStatus={claim?.job_status}
+              currentStatus={claim?.journey_status || claim?.job_status}
               onUpdateCreated={handleUpdateCreated}
               onCancel={() => setShowForm(false)}
             />
