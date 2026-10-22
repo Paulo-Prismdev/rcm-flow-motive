@@ -373,9 +373,8 @@ Deno.serve(async (req) => {
         drawHeader('Branded Decals & Signage');
 
         const bodyParas = [
-          'All repairers MUST use the RCM Automotive approved decal supplier for any branded vehicle decals or signage.',
-          'Where a vehicle requires decals, these MUST be ordered as soon as the repair is authorised - if the vehicle is already on site, this should be done immediately. If the vehicle has not yet arrived, decals MUST be ordered prior to the vehicle coming on site.',
-          'Please contact John or Michael Welch at our approved supplier, quoting Orkin as the client and providing the vehicle registration number:',
+          'All decals must be ordered through RCM Automotive.',
+          'Decals must be ordered as soon as authority has been received for vehicles that are on site, and prior to the vehicle coming in for vehicles that are still in use.',
         ];
 
         doc.setFontSize(FS);
@@ -389,28 +388,32 @@ Deno.serve(async (req) => {
 
         yPos += 1;
 
-        // Supplier box
-        const supplierLines = [
-          { text: 'Signs Plus', bold: true, size: 9 },
-          { text: '147 Main Road, Biggin Hill, Kent, TN16 3JP', bold: false, size: 8 },
-          { text: 'Email: enquiries@signsplus.uk', bold: false, size: 8 },
-          { text: 'Phone: 01959 571 074', bold: false, size: 8 },
-        ];
-        const sBoxH = 3 + 5 * supplierLines.length + 3;
+        // Ordering box — the email address is the one thing the repairer needs
+        // to act on, so it sits on its own line at full size inside the box.
+        const tailLines = doc.splitTextToSize('with the vehicle registration, images of the decals required, and details of what is required.', textW - 14);
+        const orderBoxH = 3 + 5 + 7.5 + (tailLines.length * LH) + 3;
         doc.setFillColor(...LIGHT_GREY);
-        doc.setDrawColor(180, 180, 190);
-        doc.roundedRect(TX + 4, yPos, textW - 8, sBoxH, 2, 2, 'FD');
-        let sy = yPos + 3;
-        for (const sl of supplierLines) {
-          doc.setFontSize(sl.size);
-          doc.setFont('helvetica', sl.bold ? 'bold' : 'normal');
-          doc.setTextColor(...DARK_TEXT);
-          doc.text(sl.text, TX + 8, sy + 3.2);
-          sy += 5;
-        }
-        yPos += sBoxH + 3;
+        doc.setDrawColor(...NAVY);
+        doc.setLineWidth(0.4);
+        doc.roundedRect(TX, yPos, textW, orderBoxH, 2, 2, 'FD');
+        let oy = yPos + 3.2;
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(FS);
+        doc.setTextColor(...DARK_TEXT);
+        doc.text('To order, please email', TX + 5, oy + 3.2);
+        oy += 5;
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(13);
+        doc.setTextColor(...NAVY);
+        doc.text('info@rcmautomotive.co.uk', TX + 5, oy + 4.6);
+        oy += 7.5;
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(FS);
+        doc.setTextColor(...DARK_TEXT);
+        for (const line of tailLines) { doc.text(line, TX + 5, oy + 2.6); oy += LH; }
+        yPos += orderBoxH + 3;
 
-        drawWarningBox('WARNING', 'Use of any other supplier for RCM Automotive branded decals is not permitted without prior written approval.', FS, LH);
+        drawWarningBox('WARNING', 'Decals must not be ordered from any other supplier without prior written approval from RCM Automotive.', FS, LH);
         drawWarningBox('WARNING', 'Any repair delayed as a result of the mismanagement of a decal order - including failure to order on time - will result in a charge of GBP 100 per day for each day of delay attributable to the repairer. This will be deducted from any outstanding VAT and excess payments due.', FS, LH);
 
         yPos += 3;
