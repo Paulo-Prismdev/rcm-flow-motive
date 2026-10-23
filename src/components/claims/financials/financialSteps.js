@@ -53,9 +53,35 @@ const STEP = Object.fromEntries(FINANCIAL_STEPS.map((s) => [s.key, s]));
 const TOTAL_LOSS_CLOSE_OUT_HINT = "Salvage Agent Invoice and Total Loss Confirmation — the storage charge and the salvage agent's admin charges are read off the salvage invoice, and the confirmation stands where the Final Authority would.";
 const TOTAL_LOSS_FIGURES_HINT = 'The storage charge read off the Salvage Agent Invoice — storage only, never the admin charges — is what the storage fee invoice we raise is worked out from.';
 
+/**
+ * A credit repair job's close-out paperwork in its own terms: the repairer's final
+ * invoice goes to the credit repair company rather than to an insurer, and its total
+ * is the final repair cost the commission is worked out from.
+ */
+const CREDIT_REPAIR_CLOSE_OUT_HINT = 'The repairer\'s Final Repair Invoice, addressed to the credit repair company, and the Final Authority — plus the Collection Note where there is one. The Final Repair Invoice\'s total is the final repair cost our commission is worked out from, and there are no VAT & excess invoices on a credit repair job.';
+
 /** Rows of one section, and those of them that apply to this claim. */
 const rowsFor = (summary, section) => summary.rows.filter((r) => r.item.section === section);
 const applying = (rows) => rows.filter((r) => !r.state.notApplicable);
+
+/**
+ * The close-out documents this claim has to hold a copy of: everything in the
+ * close-out step that applies to it and is required rather than merely recommended.
+ */
+const closeoutRequired = (summary) =>
+  applying(rowsFor(summary, 'closeout')).filter((r) => !isRecommendedItem(r.item));
+
+/**
+ * Whether the close-out step is settled: a copy of every required close-out document
+ * is on file — one waiting to be replaced by a corrected copy doesn't count — or the
+ * job has been taken past the step with them still to attach. What the repair
+ * commission waits for before it can be invoiced: its amount is worked out from the
+ * final repair cost, which comes off the repairer's final invoice.
+ */
+export function closeoutSettled(summary, claim) {
+  const settled = (r) => r.state.received && !r.state.awaitingCorrected;
+  return closeoutRequired(summary).every(settled) || isStepMovedPast(claim, 'closeout');
+}
 
 /**
  * The copy itself, on file. The raise and collect steps finish on this and
@@ -85,7 +111,7 @@ export function buildFinancialFlow(summary, ctx, claim) {
   // where we handle the client's VAT and excess, the repairer's VAT & excess
   // invoice — the note is never the step's own next action, and while it is
   // missing it is offered as a suggestion instead.
-  const closeRequired = closeApplies.filter((r) => !isRecommendedItem(r.item));
+  const closeRequired = closeoutRequired(summary);
   // A copy that is waiting to be replaced by a corrected one doesn't finish the
   // step: the item stays amber until the corrected copy is uploaded.
   const closeSettled = (r) => r.state.received && !r.state.awaitingCorrected;
@@ -96,7 +122,9 @@ export function buildFinancialFlow(summary, ctx, claim) {
 
   const closeout = {
     ...STEP.closeout,
-    hint: ctx.totalLoss ? TOTAL_LOSS_CLOSE_OUT_HINT : STEP.closeout.hint,
+    hint: ctx.totalLoss ? TOTAL_LOSS_CLOSE_OUT_HINT
+      : ctx.creditRepair ? CREDIT_REPAIR_CLOSE_OUT_HINT
+        : STEP.closeout.hint,
     rows: closeRows,
     empty: closeEmpty,
     done: closeRequired.length === 0 || closeIn === closeRequired.length,
@@ -224,9 +252,10 @@ export function buildFinancialFlow(summary, ctx, claim) {
     return {
       ...s,
       movedPast,
-      // Only the two invoice steps can be moved past, and only while they still
-      // have something to attach.
-      canContinue: (s.key === 'raise' || s.key === 'collect') && !s.done && labels.length > 0,
+      // A step that still has something to attach can be moved past by hand, so the
+      // job can carry on while the missing piece of paper is chased: the close-out
+      // step as much as the two invoice steps.
+      canContinue: ['closeout', 'raise', 'collect'].includes(s.key) && !s.done && labels.length > 0,
       line: movedPast
         ? `Pending — ${labels.length} invoice${labels.length === 1 ? '' : 's'} still to attach: ${labels.join(', ')}`
         : `${s.line}${waitingOn(labels)}`,

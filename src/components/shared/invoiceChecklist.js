@@ -182,6 +182,7 @@ export const isPrivatePayingClaim = (claim) => PRIVATE_TYPES.includes(claim?.cla
 export function invoiceContext(claim, vatExcess) {
   const tracker = claim?.invoice_tracker || {};
   const totalLoss = isTotalLossClaim(claim);
+  const creditRepair = isCreditRepairClaim(claim);
   return {
     hasReferrer: !!claim?.referrer,
     secondReferrerEnabled: tracker.second_referrer_enabled === true,
@@ -191,12 +192,16 @@ export function invoiceContext(claim, vatExcess) {
     // invoice and the Total Loss Confirmation stand in their place — so handling
     // the client's VAT and excess reads as not applying to it, and neither the
     // customer's VAT status nor their excess is asked for.
-    vatExcess: !!vatExcess && !totalLoss,
+    //
+    // A credit repair job carries none of them either, however the customer is set
+    // up: the repairer invoices the partner, and we invoice the partner our hire fee
+    // and our commission, so there is no VAT or excess of the customer's to bill.
+    vatExcess: !!vatExcess && !totalLoss && !creditRepair,
     // That same handling on its own, before the total-loss gate: what would apply
     // were the job not a total loss.
     vatExcessHandled: !!vatExcess,
     hasReferralFee: toNum(claim?.referral_fee_repairer) > 0 || toNum(claim?.referral_fee_repairer_gbp) > 0,
-    creditRepair: isCreditRepairClaim(claim),
+    creditRepair,
     hasRepairer: !!claim?.bodyshop || !!claim?.bodyshop_id,
     privatePaying: isPrivatePayingClaim(claim),
   };
@@ -246,6 +251,22 @@ export function isInvoiceItemVisible(item, ctx = {}) {
   const requirements = Array.isArray(item.requires) ? item.requires : [item.requires];
   return requirements.every((requirement) => matchesRequirement(requirement, ctx));
 }
+
+/**
+ * The item as it reads on this claim. A credit repair job's repairer invoices the
+ * partner rather than an insurer, so the Final Insurer Invoice carries the partner's
+ * own name and party there — nothing else about the item changes, and the rest of
+ * the flow goes on working off its key alone.
+ */
+export function claimInvoiceItem(item, claim) {
+  if (!item?.creditRepair || !isCreditRepairClaim(claim)) return item;
+  return { ...item, ...item.creditRepair };
+}
+
+/** What the repairer's final invoice is called on this claim. */
+export const finalInvoiceLabel = (claim) =>
+  claimInvoiceItem(INVOICE_ITEMS.find((item) => item.key === 'final_invoice'), claim)?.label
+  || 'Final Insurer Invoice';
 
 /** Who an invoice is to (out) or from (in). */
 export function invoicePartyName(claim, item) {
@@ -654,6 +675,9 @@ export function claimCopyOnFile(claim) {
 export function computeInvoiceSummary(claim, ctx, hasFile = claimCopyOnFile(claim), { ignoreCopies = false } = {}) {
   const rows = INVOICE_ITEMS
     .filter((item) => isInvoiceItemVisible(item, ctx))
+    // The item as it reads on this claim, so a credit repair job's final invoice is
+    // named and addressed from the partner everywhere these rows are shown.
+    .map((item) => claimInvoiceItem(item, claim))
     .map((item) => ({ item, state: getInvoiceItemState(item, claim, hasFile(item.key)) }));
 
   // Items this job no longer carries but which still hold something — a claim

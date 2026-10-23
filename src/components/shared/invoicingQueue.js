@@ -47,6 +47,7 @@ import {
   finalInvoiceTotal,
   vatExcessAuthorityPart,
 } from '@/components/claims/financials/invoiceAuthorityCheck';
+import { closeoutSettled } from '@/components/claims/financials/financialSteps';
 import { fmtGBP } from './creditRepairRates';
 
 const dayMs = 24 * 60 * 60 * 1000;
@@ -302,6 +303,12 @@ export function buildInvoicingQueues(claims = [], thresholds = DEFAULT_QUEUE_DAY
 
     const ctx = claimInvoiceContext(claim);
     const summary = computeInvoiceSummary(claim, ctx, claimCopyOnFile(claim));
+    // The partner's repair commission is invoiced off the final repair cost, which
+    // is read off the repairer's final invoice: it is not counted as ready for
+    // accounts until the close-out step is settled — the copies on file, or the job
+    // taken past that step with them still pending. The upfront hire fee is never
+    // held back: it is invoiced at the start of the hire.
+    const commissionReady = closeoutSettled(summary, claim);
     const released = releaseDate(claim);
     const releasedDays = daysSince(released, now);
     const anchor = jobAnchorDate(claim);
@@ -318,7 +325,8 @@ export function buildInvoicingQueues(claims = [], thresholds = DEFAULT_QUEUE_DAY
 
       // Ready to request from accounts: figures complete, nothing asked for yet
       // and no copy raised — the same line the claim's raise step offers.
-      if (chased && canRequestInvoice(item) && !state.paid && !state.requested && !state.copyAttached && !state.awaiting) {
+      if (chased && canRequestInvoice(item) && !state.paid && !state.requested && !state.copyAttached && !state.awaiting
+        && (commissionReady || item.key !== 'cr_repair_commission')) {
         buckets.accounts_ready.push(queueRow(claim, item, {
           section: 'accounts_ready',
           amount: state.amount,
@@ -422,7 +430,8 @@ export function buildInvoicingQueues(claims = [], thresholds = DEFAULT_QUEUE_DAY
         amount: vatRow?.state?.amount,
       }));
       if (comparison?.status === 'over') {
-        buckets.warnings.push(queueRow(claim, { key: 'authority', label: 'Final Insurer Invoice vs authority' }, {
+        const finalLabel = summary.rows.find((r) => r.item.key === 'final_invoice')?.item.label || 'Final Insurer Invoice';
+        buckets.warnings.push(queueRow(claim, { key: 'authority', label: `${finalLabel} vs authority` }, {
           section: 'warnings',
           amount: comparison.measured,
           note: `Over the authorised ${fmtGBP(comparison.authority)} by ${fmtGBP(Math.abs(comparison.difference))}`,
@@ -507,7 +516,7 @@ export function buildInvoicingQueues(claims = [], thresholds = DEFAULT_QUEUE_DAY
       key: 'closeout_missing',
       label: 'Close-out documents missing',
       tone: 'warning',
-      hint: `Close-out documents still missing since the job left our hands — the Final Insurer Invoice, the Final Authority, or a total loss job's Salvage Agent Invoice and Total Loss Confirmation — overdue past ${closeoutDays} day${closeoutDays === 1 ? '' : 's'}.`,
+      hint: `Close-out documents still missing since the job left our hands — the repairer's final invoice, the Final Authority, or a total loss job's Salvage Agent Invoice and Total Loss Confirmation — overdue past ${closeoutDays} day${closeoutDays === 1 ? '' : 's'}.`,
     },
     {
       key: 'in_expected',

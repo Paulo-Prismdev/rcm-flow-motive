@@ -121,7 +121,9 @@ export function creditRepairCommission(claim) {
     return { amount: 0, awaiting: true, hint: 'Awaiting partner rates — commission basis not set' };
   }
   const base = commissionBase(claim, rates.commissionBasis);
-  if (base <= 0) return { amount: 0, awaiting: true, hint: 'Awaiting final repair cost' };
+  // The final repair cost comes off the repairer's final invoice, filed on the
+  // close-out step, so that is where this figure is read from.
+  if (base <= 0) return { amount: 0, awaiting: true, hint: 'Awaiting the final repair cost — read off the Final Repair Invoice' };
   return {
     amount: Math.round(base * rates.commissionPercent) / 100,
     awaiting: false,

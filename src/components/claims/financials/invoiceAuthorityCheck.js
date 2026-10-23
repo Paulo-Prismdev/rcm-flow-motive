@@ -1,5 +1,6 @@
 import { fmtGBP } from '@/components/shared/creditRepairRates';
 import { VAT_RATE, round2, toNum } from './invoiceReview';
+import { finalInvoiceLabel } from '@/components/shared/invoiceChecklist';
 
 /**
  * The check between the repairer's invoices and the Final Authority. A repairer
@@ -174,7 +175,7 @@ export function buildReinvoiceEmail({ claim, comparison, user }) {
   const lines = [
     'Hi,',
     '',
-    `Thank you for the Final Insurer Invoice for the repair on ${claim?.reg || 'the vehicle'}.`,
+    `Thank you for the ${finalInvoiceLabel(claim)} for the repair on ${claim?.reg || 'the vehicle'}.`,
     '',
     why,
     '',

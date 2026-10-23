@@ -13,15 +13,17 @@ import { authorityWorkings } from './invoiceAuthorityCheck';
  * is outstanding while a corrected invoice is being waited on. Nothing is stored:
  * it is worked out from the figures the claim already holds.
  */
-export default function FinalInvoiceAuthorityNote({ comparison, awaitingCorrected, onReinvoice }) {
+export default function FinalInvoiceAuthorityNote({
+  comparison, awaitingCorrected, onReinvoice, label = 'Final Insurer Invoice',
+}) {
   if (awaitingCorrected) {
     return (
       <div className="flex flex-wrap items-center gap-2 rounded-[10px] border border-amber-300 bg-amber-50 px-3 py-2 dark:border-amber-700 dark:bg-amber-900/20">
         <AlertTriangle className="h-3.5 w-3.5 flex-shrink-0 text-amber-600 dark:text-amber-400" />
         <p className="min-w-[200px] flex-1 text-[11px] text-amber-800 dark:text-amber-200">
           {comparison
-            ? `Awaiting a corrected Final Insurer Invoice — invoiced ${fmtGBP(comparison.measured)} against the authorised ${fmtGBP(comparison.authority)}. A corrected copy at the authorised amount clears this.`
-            : 'Awaiting a corrected Final Insurer Invoice from the repairer. A corrected copy clears this.'}
+            ? `Awaiting a corrected ${label} — invoiced ${fmtGBP(comparison.measured)} against the authorised ${fmtGBP(comparison.authority)}. A corrected copy at the authorised amount clears this.`
+            : `Awaiting a corrected ${label} from the repairer. A corrected copy clears this.`}
         </p>
         {onReinvoice && (
           <button
@@ -64,7 +66,7 @@ export default function FinalInvoiceAuthorityNote({ comparison, awaitingCorrecte
           <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />
         </span>
         <p className="text-[11px] font-semibold text-green-700 dark:text-green-400">
-          The Final Insurer Invoice matches the authority — {workings} against the authorised {fmtGBP(authority)}.
+          The {label} matches the authority — {workings} against the authorised {fmtGBP(authority)}.
         </p>
       </div>
     );

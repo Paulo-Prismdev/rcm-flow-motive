@@ -304,6 +304,7 @@ export default function InvoiceReviewModal({
 
             {item?.setsRepairCost && (
               <InvoiceVsAuthority
+                label={item.label}
                 comparison={comparison}
                 mode="invoice"
                 choice={authorityChoice}

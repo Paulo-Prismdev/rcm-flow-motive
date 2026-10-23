@@ -8,6 +8,7 @@ import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from '@/components/ui/dialog';
 import { buildReinvoiceEmail } from './invoiceAuthorityCheck';
+import { finalInvoiceLabel } from '@/components/shared/invoiceChecklist';
 
 /**
  * The pre-filled email asking the repairer for a corrected invoice at the amount
@@ -52,7 +53,7 @@ export default function ReinvoiceRequestModal({ isOpen, onClose, claim, comparis
       if (data.error) throw new Error(data.error);
       toast({
         title: 'Request sent',
-        description: 'The repairer has been asked for a corrected invoice — the Final Insurer Invoice stays amber until it arrives.',
+        description: `The repairer has been asked for a corrected invoice — the ${finalInvoiceLabel(claim)} stays amber until it arrives.`,
       });
       onClose();
     } catch (e) {
@@ -75,7 +76,7 @@ export default function ReinvoiceRequestModal({ isOpen, onClose, claim, comparis
           <DialogTitle>Ask the repairer for a corrected invoice</DialogTitle>
           <DialogDescription>
             {claim?.bodyshop || 'The repairer'} — Job {claim?.job_number || '—'} · {claim?.reg || '—'}. Sending this
-            records the request against the Final Insurer Invoice.
+            records the request against the {finalInvoiceLabel(claim)}.
           </DialogDescription>
         </DialogHeader>
 

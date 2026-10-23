@@ -12,7 +12,7 @@ import InvoiceCalculation from './InvoiceCalculation';
  * same box rather than floating underneath it.
  */
 export default function InvoiceRow({
-  item, state, files, isUploading, claim, focus,
+  item, state, files, isUploading, claim, focus, requestHold,
   onChange, onUpload, onDeleteFile, onRenameFile, onViewFile, onRequest, onUndoRequest, onAskPaid,
 }) {
   const [showCalc, setShowCalc] = useState(false);
@@ -29,6 +29,9 @@ export default function InvoiceRow({
   // Invoice or
   // the close-out paperwork.
   const canAsk = canRequestInvoice(item) && !!onRequest && !state.paid && !state.date && !payFocus;
+  // An invoice the job isn't ready to ask for yet — the partner's commission, before
+  // the close-out step is settled — shows the action, held and saying why.
+  const hold = requestHold || '';
   // The quick paid action belongs on an invoice that has gone out or come in, or
   // has at least been asked for from accounts, and is still waiting to be paid.
   // Its copy being on file is not what decides: a payment is tracked either way.
@@ -107,8 +110,8 @@ export default function InvoiceRow({
         {canAsk && (
           <button
             type="button"
-            disabled={state.awaiting}
-            title={state.awaiting ? (state.hint || 'The amount cannot be worked out yet') : 'Email accounts about this invoice'}
+            disabled={state.awaiting || !!hold}
+            title={hold || (state.awaiting ? (state.hint || 'The amount cannot be worked out yet') : 'Email accounts about this invoice')}
             onClick={() => onRequest(item, state)}
             className="inline-flex items-center gap-1 font-semibold text-primary hover:underline disabled:opacity-40 disabled:no-underline disabled:cursor-not-allowed"
           >

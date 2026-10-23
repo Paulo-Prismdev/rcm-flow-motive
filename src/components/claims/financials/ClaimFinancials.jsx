@@ -51,7 +51,7 @@ import AuthorityReviewModal from './AuthorityReviewModal';
 import ReinvoiceRequestModal from './ReinvoiceRequestModal';
 import FinalInvoiceAuthorityNote from './FinalInvoiceAuthorityNote';
 import RepairCostSplitNote from './RepairCostSplitNote';
-import { buildFinancialFlow } from './financialSteps';
+import { buildFinancialFlow, closeoutSettled } from './financialSteps';
 import { buildStepMovedPastPatch, buildStepReopenPatch } from './financialStepSkip';
 import PendingStepBanner from './PendingStepBanner';
 import { resolveInvoiceParty } from './invoiceParty';
@@ -135,6 +135,10 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
     [claim, docs.files]
   );
   const flow = useMemo(() => buildFinancialFlow(summary, ctx, claim), [summary, ctx, claim]);
+  // The partner's commission waits on the close-out step: its amount comes off the
+  // final repair cost, which the Final Repair Invoice supplies. The upfront hire fee
+  // is never held back — it goes out as soon as the hire category is set.
+  const commissionHeld = !closeoutSettled(summary, claim);
 
   // What clearing a removed file's details would take with it, worked out for the
   // confirmation before anything is removed — together with the payment notice,
@@ -596,12 +600,20 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
     );
   };
 
+  // The commission is only asked for from accounts once step 1 is settled: the
+  // figure it is worked out from is read off the Final Repair Invoice. Every other
+  // invoice is asked for as soon as its own figures are there.
+  const requestHold = (item) => (item.key === 'cr_repair_commission' && commissionHeld
+    ? 'Step 1 has to be settled first — the commission is invoiced from the Final Repair Invoice'
+    : '');
+
   const renderRow = ({ item, state }, focus) => (
     <InvoiceRow
       key={item.key}
       item={item}
       state={state}
       focus={focus}
+      requestHold={requestHold(item)}
       files={docs.filesFor(item.key)}
       isUploading={docs.isUploading}
       claim={claim}
@@ -643,7 +655,8 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
   // flagged here: the figure itself is left exactly as it was.
   const repairCostCheck = claim.invoice_tracker?.repair_cost_check || null;
 
-  const finalInvoiceState = summary.rows.find((r) => r.item.key === 'final_invoice')?.state || null;
+  const finalInvoiceRow = summary.rows.find((r) => r.item.key === 'final_invoice') || null;
+  const finalInvoiceState = finalInvoiceRow?.state || null;
   const vatExcessInState = summary.rows.find((r) => r.item.key === 'vat_excess_invoice_in')?.state || null;
 
   // The repairer's VAT & excess invoice, as the authority check needs it: on a
@@ -679,6 +692,7 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
   const finalInvoiceNote = finalInvoiceState && (finalInvoiceState.reinvoice || finalInvoiceComparison)
     ? (
       <FinalInvoiceAuthorityNote
+        label={finalInvoiceRow.item.label}
         comparison={finalInvoiceComparison}
         awaitingCorrected={!!finalInvoiceState.reinvoice}
         onReinvoice={finalInvoiceComparison ? askRepairerForCorrectedInvoice : null}

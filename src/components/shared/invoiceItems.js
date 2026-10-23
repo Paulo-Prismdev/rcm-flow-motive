@@ -47,8 +47,16 @@ export const INVOICE_ITEMS = [
     kind: 'document',
     direction: 'out',
     dateLabel: 'Sent',
-    requires: ['not_credit_repair', 'not_total_loss'],
+    // Every repaired job carries it, a credit repair job included: there the same
+    // invoice is the repairer's, addressed to the credit repair company rather than
+    // to an insurer — see `creditRepair` below.
+    requires: ['not_total_loss'],
     party: 'authorising_party',
+    // How the item reads on a credit repair job: the partner is who it goes to and
+    // who pays, so that is the name and the party the check is made against. Only
+    // those two change — the key, the figures read off it and the final repair cost
+    // it sets are the same everywhere.
+    creditRepair: { label: 'Final Repair Invoice', party: 'credit_repair' },
     // Its date is the date printed on the invoice itself, never the upload date.
     bindings: { date: 'invoice_sent_date' },
     // The job is invoiced once the Final Insurer Invoice itself is on file.
@@ -85,7 +93,7 @@ export const INVOICE_ITEMS = [
     kind: 'document',
     direction: 'in',
     dateLabel: 'Received',
-    requires: ['not_credit_repair', 'not_total_loss'],
+    requires: ['not_total_loss'],
     // Its own date: "Authority Received" is the initial authority, which belongs
     // to the Initial Authority document, not to this one.
     bindings: { date: 'final_authority_received' },
@@ -101,7 +109,7 @@ export const INVOICE_ITEMS = [
     kind: 'document',
     direction: 'out',
     dateLabel: 'Sent',
-    requires: ['not_credit_repair', 'not_total_loss'],
+    requires: ['not_total_loss'],
     // Recommended, not required: a copy is encouraged and nudged in amber until
     // it is filed, but the job's invoicing finishes without one. "Not available"
     // records why there won't be one, and stops the nudge.

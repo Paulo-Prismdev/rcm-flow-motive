@@ -22,6 +22,7 @@ import {
 } from './authorityReview';
 import { fetchSourceSnippets, snippetsFromExtraction, toNum } from './invoiceReview';
 import { authorityWorkings, compareToAuthority, finalInvoiceTotal } from './invoiceAuthorityCheck';
+import { finalInvoiceLabel } from '@/components/shared/invoiceChecklist';
 
 /**
  * The check before an authority is recorded: the document on the left, the three
@@ -132,7 +133,7 @@ export default function AuthorityReviewModal({
       accepted.push(`${authorityWorkings(comparison)} is ${fmtGBP(Math.abs(comparison.difference))} under the authorised ${fmtGBP(comparison.authority)} — ${authorityChoice === 'reinvoice' ? 'a corrected invoice requested from the repairer' : `accepted as the claim's final repair cost`}`);
     }
     if (comparison?.status === 'over') {
-      accepted.push(`${authorityWorkings(comparison)} is ${fmtGBP(Math.abs(comparison.difference))} over the authorised ${fmtGBP(comparison.authority)} — a repairer can't invoice more than the authority, so the Final Insurer Invoice is flagged on the claim`);
+      accepted.push(`${authorityWorkings(comparison)} is ${fmtGBP(Math.abs(comparison.difference))} over the authorised ${fmtGBP(comparison.authority)} — a repairer can't invoice more than the authority, so the ${finalInvoiceLabel(claim)} is flagged on the claim`);
     }
     if (excess.tbc && excessChoice === 'waived') {
       accepted.push('the policy excess was TBC on authority and this authority shows no excess, so it was marked as Waived');
@@ -272,11 +273,12 @@ export default function AuthorityReviewModal({
 
             {status !== 'reading' && (
               <InvoiceVsAuthority
+                label={finalInvoiceLabel(claim)}
                 comparison={comparison}
                 mode="authority"
                 choice={authorityChoice}
                 onChoice={setAuthorityChoice}
-                emptyNote={comparison ? undefined : 'No Final Insurer Invoice has been read off a copy yet — the two are set against each other as soon as one arrives.'}
+                emptyNote={comparison ? undefined : `No ${finalInvoiceLabel(claim)} has been read off a copy yet — the two are set against each other as soon as one arrives.`}
               />
             )}
           </div>

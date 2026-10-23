@@ -20,6 +20,7 @@ import { authorityWorkings } from './invoiceAuthorityCheck';
  */
 export default function InvoiceVsAuthority({
   comparison, mode = 'invoice', choice, onChoice, onReinvoiceEmail, emptyNote,
+  label = 'Final Insurer Invoice',
 }) {
   if (!comparison) {
     return emptyNote ? (
@@ -73,8 +74,8 @@ export default function InvoiceVsAuthority({
         </p>
         <p className="pl-5 text-[11px] leading-snug text-red-700/90 dark:text-red-400/90">
           {mode === 'invoice'
-            ? "This can't be saved as the Final Insurer Invoice. Reject it and ask the repairer for a corrected invoice."
-            : 'The Final Insurer Invoice already on file is flagged on this claim until a corrected copy at the authorised amount arrives.'}
+            ? `This can't be saved as the ${label}. Reject it and ask the repairer for a corrected invoice.`
+            : `The ${label} already on file is flagged on this claim until a corrected copy at the authorised amount arrives.`}
         </p>
         {onReinvoiceEmail && (
           <div className="pl-5">
@@ -123,7 +124,7 @@ export default function InvoiceVsAuthority({
           <span>
             Ask the repairer to re-invoice to match the authority
             <span className="block font-normal">
-              The Final Insurer Invoice is left amber until a corrected invoice at {fmtGBP(authority)} is uploaded,
+              The {label} is left amber until a corrected invoice at {fmtGBP(authority)} is uploaded,
               with a pre-filled email to the repairer.
             </span>
           </span>

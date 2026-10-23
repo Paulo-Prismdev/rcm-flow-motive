@@ -11,13 +11,11 @@ const capitalise = (text) => (text ? text.charAt(0).toUpperCase() + text.slice(1
  * reads as checked and complete rather than missing.
  */
 export function emptySectionMessage(section, ctx) {
+  // Every job carries close-out paperwork of its own — a repaired job's final
+  // invoice and authority, a total loss job's salvage invoice and confirmation — so
+  // this only stands where none of them applies to the claim at all.
   if (section === 'closeout') {
-    return {
-      title: 'Nothing to close out on this job',
-      reasons: [capitalise(ctx.creditRepair
-        ? 'credit repair jobs finish on the partner invoices'
-        : 'no close-out paperwork applies')],
-    };
+    return { title: 'Nothing to close out on this job', reasons: ['No close-out paperwork applies'] };
   }
 
   const collect = section === 'out';
