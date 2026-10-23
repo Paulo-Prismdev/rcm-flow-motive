@@ -156,12 +156,14 @@ const ignoredClaim = (claim) =>
   !claim || claim.draft === true || claim.secondary_status === 'Cancelled';
 
 /**
- * The close-out paperwork a finished job is expected to hold a copy of. Both jobs'
- * sets are listed: which of them apply is decided by the claim itself, so the ones
- * that don't simply aren't among its rows.
+ * The close-out paperwork a finished job is expected to hold a copy of. Every job's
+ * set is listed — a repaired job's, a total loss job's, and the Collection Note that
+ * is required on a job the customer is paying for privately: which of them apply is
+ * decided by the claim itself, so the ones that don't simply aren't among its rows,
+ * and the ones that are merely recommended are left out where they are looked for.
  */
 const CLOSE_OUT_KEYS = [
-  'final_invoice', 'vat_excess_invoice_in', 'final_authority',
+  'final_invoice', 'vat_excess_invoice_in', 'final_authority', 'collection_note',
   'salvage_invoice_in', 'total_loss_confirmation',
 ];
 
@@ -405,6 +407,10 @@ export function buildInvoicingQueues(claims = [], thresholds = DEFAULT_QUEUE_DAY
       for (const key of CLOSE_OUT_KEYS) {
         const row = summary.rows.find((r) => r.item.key === key);
         if (!row || row.state.notApplicable || row.state.copyAttached) continue;
+        // A required document is chased. One that is merely recommended — the
+        // Collection Note on any job but a private-paying one — is never chased,
+        // exactly as it is never counted anywhere else.
+        if (isRecommendedItem(row.item)) continue;
         buckets.closeout_missing.push(queueRow(claim, row.item, {
           section: 'closeout_missing',
           amount: null,
@@ -442,9 +448,10 @@ export function buildInvoicingQueues(claims = [], thresholds = DEFAULT_QUEUE_DAY
       }
     }
 
-    // An excess still to be confirmed long after the job left our hands. A total
-    // loss has no excess to confirm: no VAT & excess invoice applies to it.
-    if (claim.excess_tbc === true && releasedDays !== null && !ctx.totalLoss) {
+    // An excess still to be confirmed long after the job left our hands. A total loss
+    // has no excess to confirm, and neither has a job the customer is paying for
+    // privately: no VAT & excess invoice applies to either of them.
+    if (claim.excess_tbc === true && releasedDays !== null && !ctx.totalLoss && !ctx.privatePaying) {
       buckets.warnings.push(queueRow(claim, { key: 'excess_tbc', label: 'Policy excess' }, {
         section: 'warnings',
         amount: null,
@@ -516,7 +523,7 @@ export function buildInvoicingQueues(claims = [], thresholds = DEFAULT_QUEUE_DAY
       key: 'closeout_missing',
       label: 'Close-out documents missing',
       tone: 'warning',
-      hint: `Close-out documents still missing since the job left our hands — the repairer's final invoice, the Final Authority, or a total loss job's Salvage Agent Invoice and Total Loss Confirmation — overdue past ${closeoutDays} day${closeoutDays === 1 ? '' : 's'}.`,
+      hint: `Close-out documents still missing since the job left our hands — the repairer's final invoice, the Final Authority, the Collection Note where it is required, or a total loss job's Salvage Agent Invoice and Total Loss Confirmation — overdue past ${closeoutDays} day${closeoutDays === 1 ? '' : 's'}.`,
     },
     {
       key: 'in_expected',
