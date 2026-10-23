@@ -78,6 +78,24 @@ export async function resolveInvoiceParty(claim, item) {
     };
   }
 
+  // The third party is paying for the repair, so our invoice for it is written to
+  // them: the name and address the claim holds for them, and our own claim's address
+  // is never used here.
+  if (item.party === 'third_party') {
+    return {
+      kind: 'third_party',
+      name,
+      addressLines: addressOf({
+        address_line_1: claim?.tp_address_line_1,
+        address_line_2: claim?.tp_address_line_2,
+        town: claim?.tp_town,
+        county: claim?.tp_county,
+        postcode: claim?.tp_postcode,
+      }),
+      contact: clean([claim?.tp_email, claim?.tp_phone]).join(' · '),
+    };
+  }
+
   // The second referrer is picked from the referrers list, so their invoice is
   // written to the contact details their own record holds.
   if (item.party === 'second_referrer') {

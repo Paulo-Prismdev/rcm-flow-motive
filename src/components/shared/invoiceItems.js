@@ -24,7 +24,8 @@
  * rather than paperwork we collect, with our invoice to the customer beside it for
  * the same total (see `privatePaying` on the item and `client_invoice_out`). There is
  * no insurer on such a job, so no Final Authority and no VAT & excess invoices apply
- * to it.
+ * to it. Where the third party rather than our client is paying, that invoice to the
+ * customer goes to the third party instead (see `thirdParty` on `client_invoice_out`).
  */
 
 export const INVOICE_FILE_PREFIX = 'inv_';
@@ -227,11 +228,11 @@ export const INVOICE_ITEMS = [
   },
   {
     // A job the customer is paying for privately: we settle the repairer's own
-    // invoice for the whole repair and recover the whole of it from the customer, so
-    // our invoice to them is that invoice's total, VAT included. It is raised like
-    // any other invoice we send — asked for from accounts, locked at the figure it
-    // went out at and marked paid here — but it waits for the Final Repair Invoice to
-    // be saved, because that invoice's total is the figure it bills.
+    // invoice for the whole repair and recover the whole of it from whoever is paying
+    // for it, so our invoice to them is that invoice's total, VAT included. It is
+    // raised like any other invoice we send — asked for from accounts, locked at the
+    // figure it went out at and marked paid here — but it waits for the Final Repair
+    // Invoice to be saved, because that invoice's total is the figure it bills.
     key: 'client_invoice_out',
     label: 'Client Invoice Out',
     section: 'out',
@@ -241,6 +242,11 @@ export const INVOICE_ITEMS = [
     party: 'client',
     amountSource: 'client_invoice',
     varianceReason: 'The Final Repair Invoice total changed',
+    // Where the third party is the one paying for the repair, the invoice goes to
+    // them rather than to our client: their name and address are what it carries, and
+    // a copy is checked as addressed to them. Only those two change — the key, the
+    // amount it bills and the invoice it waits for are the same on both jobs.
+    thirdParty: { label: 'Third Party Invoice Out', party: 'third_party' },
   },
   {
     key: 'referral_invoice_out',

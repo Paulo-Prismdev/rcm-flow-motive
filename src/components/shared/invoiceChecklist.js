@@ -180,6 +180,14 @@ const PRIVATE_TYPES = ['Paying Privately', '3rd Party Paying Privately'];
 export const isPrivatePayingClaim = (claim) => PRIVATE_TYPES.includes(claim?.claim_type);
 
 /**
+ * The two kinds of private-paying job are settled the same way — the repairer's own
+ * invoice is one we pay and our invoice for the repair is one we send — but they
+ * differ in who that invoice goes to: where the third party is paying, it is written
+ * to them rather than to our client.
+ */
+export const isThirdPartyPayingClaim = (claim) => claim?.claim_type === '3rd Party Paying Privately';
+
+/**
  * Visibility context for a claim. `vatExcess` comes from the claim's stored
  * snapshot of the linked client's "we handle their VAT and excess" flag, falling
  * back to the client record where one is loaded.
@@ -272,13 +280,16 @@ export function isInvoiceItemVisible(item, ctx = {}) {
  * partner rather than an insurer, so the Final Insurer Invoice carries the partner's
  * own name and party there; a job the customer pays for privately takes the same
  * invoice as an invoice we pay, addressed to us by the repairer, with its own date
- * and no authority to be measured against. Nothing about either change reaches the
- * item's key — the rest of the flow goes on working off that alone.
+ * and no authority to be measured against. Where the third party is the one paying
+ * for the repair, our own invoice for it is written to them rather than to our
+ * client. Nothing about any of these changes reaches the item's key — the rest of
+ * the flow goes on working off that alone.
  */
 export function claimInvoiceItem(item, claim) {
   if (!item) return item;
   if (item.creditRepair && isCreditRepairClaim(claim)) return { ...item, ...item.creditRepair };
   if (item.privatePaying && isPrivatePayingClaim(claim)) return { ...item, ...item.privatePaying };
+  if (item.thirdParty && isThirdPartyPayingClaim(claim)) return { ...item, ...item.thirdParty };
   return item;
 }
 
@@ -308,6 +319,8 @@ export function invoicePartyName(claim, item) {
     case 'second_referrer': return tracker.second_referrer_name || '';
     case 'repairer': return claim?.bodyshop || '';
     case 'client': return claim?.client_name || '';
+    // The other side of the incident, where they are the ones paying for the repair.
+    case 'third_party': return claim?.tp_name || '';
     case 'credit_repair': return claim?.credit_repair_company_name || '';
     case 'authorising_party':
       return claim?.authorising_party_name || claim?.insurer || claim?.referrer || claim?.client_name || '';
@@ -486,16 +499,18 @@ const AMOUNT_RESOLVERS = {
     };
   },
   // A job the customer is paying for privately: we settle the repairer's own invoice
-  // for the whole repair and recover the whole of it from the customer, so our
-  // invoice to them is that invoice's total, VAT included. It waits for the invoice
-  // to be saved, because that is the figure it bills.
+  // for the whole repair and recover the whole of it from whoever is paying for it —
+  // our client, or the third party where the third party is the one paying — so our
+  // invoice to them is that invoice's total, VAT included. It waits for the invoice to
+  // be saved, because that is the figure it bills.
   client_invoice: (claim) => {
+    const payer = isThirdPartyPayingClaim(claim) ? 'the third party' : 'the customer';
     const total = recordedFinalInvoiceTotal(claim);
-    if (total === null) return awaiting('Save the Final Repair Invoice — the customer is billed its total');
+    if (total === null) return awaiting(`Save the Final Repair Invoice — ${payer} is billed its total`);
     const { ex, vat } = splitGross(total);
     return {
       amount: total, ex, vat, total, derived: true, awaiting: false,
-      hint: 'The whole of the Final Repair Invoice, recovered from the customer',
+      hint: `The whole of the Final Repair Invoice, recovered from ${payer}`,
       workings: [
         { label: 'Final Repair Invoice total (inc VAT)', value: fmtGBP(total) },
         { label: 'Ex VAT', value: fmtGBP(ex) },
