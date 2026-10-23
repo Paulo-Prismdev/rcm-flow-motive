@@ -1,7 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { AlertTriangle, Pencil } from 'lucide-react';
 import ReferrerCombobox from '@/components/shared/ReferrerCombobox';
-import { buildTrackerMetaPatch, secondReferrerPercent } from '@/components/shared/invoiceChecklist';
+import {
+  buildTrackerMetaPatch,
+  secondReferrerFixedFee,
+  secondReferrerPercent,
+} from '@/components/shared/invoiceChecklist';
+import { fmtGBP } from '@/components/shared/creditRepairRates';
 import { normalise } from './invoiceReview';
 import FigureField from './FigureField';
 import FieldEditActions from './FieldEditActions';
@@ -29,6 +34,8 @@ export default function SecondReferrerToggle({ claim, missing = [], onTrackerCha
   const storedName = tracker.second_referrer_name || '';
   const storedPercent = tracker.second_referrer_percent ?? null;
   const percent = secondReferrerPercent(claim);
+  // A fixed fee agreed with them stands in for the percentage while it is set.
+  const fixedFee = secondReferrerFixedFee(claim);
   const editing = editingKey === 'second_referrer';
   const feeMissing = missing.some((m) => m.key === 'second_referrer_percent');
 
@@ -55,6 +62,10 @@ export default function SecondReferrerToggle({ claim, missing = [], onTrackerCha
   // a referrer's VAT setting can be corrected in the directory and picked up here.
   const storedVat = tracker.second_referrer_vat_registered ?? null;
   const nextVat = draftOn ? (draftRef?.vat_registered !== false) : null;
+  // A fee agreed with the referrer being replaced is not the new one's: it clears
+  // with the referrer, and the card asks for theirs.
+  const storedFixed = tracker.second_referrer_fee_gbp ?? null;
+  const nextFixed = referrerChanged ? null : storedFixed;
 
   const save = () => {
     setEditingKey(null);
@@ -72,8 +83,9 @@ export default function SecondReferrerToggle({ claim, missing = [], onTrackerCha
         second_referrer_name: nextName,
         second_referrer_percent: nextPercent,
         second_referrer_vat_registered: nextVat,
+        second_referrer_fee_gbp: nextFixed,
       }),
-      `Second referrer to pay changed from ${before} to ${after}${feeText}`
+      `Second referrer to pay changed from ${before} to ${after}${feeText}${storedFixed && nextFixed === null ? '; their fixed fee cleared with the referrer change' : ''}`
     );
   };
 
@@ -148,20 +160,45 @@ export default function SecondReferrerToggle({ claim, missing = [], onTrackerCha
       {enabled && conflict(storedId, storedName)}
 
       {enabled && (
-        <FigureField
-          label={`Second Referrer Fee % — ${storedName || 'second referrer'}`}
-          type="number"
-          value={percent > 0 ? percent : null}
-          missing={feeMissing}
-          editing={editingKey === 'second_referrer_percent'}
-          onEdit={() => setEditingKey('second_referrer_percent')}
-          onDone={() => setEditingKey(null)}
-          hint="Charged on the repair cost ex VAT, as the main referrer's is"
-          onCommit={(v) => onTrackerChange(
-            buildTrackerMetaPatch(claim, { second_referrer_percent: num(v) }),
-            `Second referrer fee set to ${num(v) || 0}%`
-          )}
-        />
+        <>
+          <FigureField
+            label={`Second Referrer Fee % — ${storedName || 'second referrer'}`}
+            type="number"
+            value={percent > 0 ? percent : null}
+            missing={feeMissing && fixedFee <= 0}
+            editing={editingKey === 'second_referrer_percent'}
+            onEdit={() => setEditingKey('second_referrer_percent')}
+            onDone={() => setEditingKey(null)}
+            hint={fixedFee > 0
+              ? `Overridden by the fixed fee of ${fmtGBP(fixedFee)}`
+              : "Charged on the repair cost ex VAT, as the main referrer's is"}
+            onCommit={(v) => onTrackerChange(
+              buildTrackerMetaPatch(claim, { second_referrer_percent: num(v) }),
+              `Second referrer fee set to ${num(v) || 0}%`
+            )}
+          />
+          <FigureField
+            label="Second Referrer Fee (£ fixed)"
+            type="number"
+            value={fixedFee || null}
+            missing={feeMissing && percent <= 0}
+            editing={editingKey === 'second_referrer_fee_gbp'}
+            onEdit={() => setEditingKey('second_referrer_fee_gbp')}
+            onDone={() => setEditingKey(null)}
+            hint={fixedFee > 0
+              ? `Fixed fee ${fmtGBP(fixedFee)} — overrides ${percent > 0 ? `${percent}%` : 'the %'}`
+              : 'Optional — set instead of a %'}
+            onCommit={(v) => {
+              const n = num(v);
+              onTrackerChange(
+                buildTrackerMetaPatch(claim, { second_referrer_fee_gbp: n }),
+                n === null || n === 0
+                  ? 'Fixed second referrer fee cleared — the agreed % is used again'
+                  : `Fixed second referrer fee set to ${fmtGBP(n)} — used ahead of the %`
+              );
+            }}
+          />
+        </>
       )}
     </div>
   );

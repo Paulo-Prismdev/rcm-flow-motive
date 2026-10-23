@@ -130,6 +130,16 @@ export const repairVat = (claim) => round2(toNum(claim?.final_repair_cost) - rep
 export const secondReferrerPercent = (claim) => toNum(claim?.invoice_tracker?.second_referrer_percent);
 
 /**
+ * A fixed fee agreed with a referrer as an alternative to their percentage. Where one
+ * is set it is the fee the invoice bills, ahead of the percentage: the percentage
+ * stays on the claim as the agreed rate, and clearing the fixed fee puts it back in
+ * charge. Entered ex VAT, like every other fee here, so VAT goes on it only where that
+ * referrer is VAT registered.
+ */
+export const referrerFixedFee = (claim) => toNum(claim?.invoice_tracker?.referrer_fee_gbp);
+export const secondReferrerFixedFee = (claim) => toNum(claim?.invoice_tracker?.second_referrer_fee_gbp);
+
+/**
  * A referrer's VAT status, which decides whether VAT goes on their invoice: a
  * non-VAT referrer invoices their fee alone, so the expected amount matches what
  * they actually bill. The status sits on the referrer's own record, is carried
@@ -355,6 +365,32 @@ const withVat = (ex, workings, hint) => {
   };
 };
 
+/**
+ * A fixed fee agreed with a referrer instead of their share of the repair: it is the
+ * fee the invoice bills, ahead of the percentage, and it waits on nothing — the repair
+ * cost plays no part in it. Entered ex VAT, with VAT added only where that referrer is
+ * VAT registered, exactly as the percentage is.
+ */
+function fixedFeeAmount(fixed, pct, vatReg) {
+  const workings = [{ label: 'Fixed fee (ex VAT)', value: fmtGBP(fixed) }];
+  if (pct > 0) workings.push({ label: 'Agreed rate', value: `${pct}% — overridden by the fixed fee` });
+  workings.push({ label: 'Referrer VAT status', value: vatReg ? 'VAT registered' : 'Not VAT registered' });
+  const against = pct > 0 ? `, ahead of the agreed ${pct}%` : '';
+  if (!vatReg) {
+    return withoutVat(fixed, [
+      ...workings,
+      { label: 'Non-VAT referrer — no VAT charged', value: '—' },
+      { label: 'Total', value: fmtGBP(fixed), total: true },
+    ], `Fixed fee of ${fmtGBP(fixed)}${against} — no VAT on it, the referrer isn't VAT registered`);
+  }
+  const vat = round2(fixed * VAT_RATE);
+  return withVat(fixed, [
+    ...workings,
+    { label: 'VAT (20%)', value: fmtGBP(vat) },
+    { label: 'Total', value: fmtGBP(round2(fixed + vat)), total: true },
+  ], `Fixed fee of ${fmtGBP(fixed)}${against}`);
+}
+
 /** The same amount with no VAT on it, for a party that isn't VAT registered. */
 const withoutVat = (ex, workings, hint) => {
   const net = round2(ex);
@@ -366,14 +402,17 @@ const withoutVat = (ex, workings, hint) => {
 
 const AMOUNT_RESOLVERS = {
   // The referrer invoices us their agreed share of the repair cost (ex VAT) — with
-  // VAT on it only where the referrer is VAT registered.
+  // VAT on it only where the referrer is VAT registered. A fixed fee agreed with them
+  // instead is the fee the invoice bills, ahead of the percentage.
   referrer_fee: (claim) => {
-    if (toNum(claim.final_repair_cost) <= 0) return awaitingRepairCost(claim);
+    const vatReg = referrerVatRegistered(claim);
     const pct = toNum(claim.percent_to_referrer);
-    if (pct <= 0) return awaiting('Set the referrer fee %');
+    const fixed = referrerFixedFee(claim);
+    if (fixed > 0) return fixedFeeAmount(fixed, pct, vatReg);
+    if (toNum(claim.final_repair_cost) <= 0) return awaitingRepairCost(claim);
+    if (pct <= 0) return awaiting('Set the referrer fee % or a fixed fee');
     const net = repairNet(claim);
     const fee = round2(net * pct / 100);
-    const vatReg = referrerVatRegistered(claim);
     const workings = [
       { label: 'Repair cost ex VAT', value: fmtGBP(net) },
       { label: `Referrer fee (${pct}%)`, value: fmtGBP(fee) },
@@ -394,14 +433,17 @@ const AMOUNT_RESOLVERS = {
     ], `${pct}% of the repair cost ex VAT`);
   },
   // A second referrer invoices us their own share, worked out exactly as the
-  // main referrer's is: their % of the repair cost ex VAT, plus VAT.
+  // main referrer's is: their % of the repair cost ex VAT, plus VAT — or the fixed
+  // fee agreed with them, where one is set.
   second_referrer_fee: (claim) => {
-    if (toNum(claim.final_repair_cost) <= 0) return awaitingRepairCost(claim);
+    const vatReg = secondReferrerVatRegistered(claim);
     const pct = secondReferrerPercent(claim);
-    if (pct <= 0) return awaiting('Set the second referrer fee %');
+    const fixed = secondReferrerFixedFee(claim);
+    if (fixed > 0) return fixedFeeAmount(fixed, pct, vatReg);
+    if (toNum(claim.final_repair_cost) <= 0) return awaitingRepairCost(claim);
+    if (pct <= 0) return awaiting('Set the second referrer fee % or a fixed fee');
     const net = repairNet(claim);
     const fee = round2(net * pct / 100);
-    const vatReg = secondReferrerVatRegistered(claim);
     const workings = [
       { label: 'Repair cost ex VAT', value: fmtGBP(net) },
       { label: `Second referrer fee (${pct}%)`, value: fmtGBP(fee) },
@@ -839,8 +881,8 @@ export function missingJobFigures(claim, ctx) {
   // A second referrer's fee is needed wherever a second referrer is paying —
   // credit repair included — and is asked for like any other figure the invoices
   // are worked out from.
-  if (ctx.secondReferrerEnabled && secondReferrerPercent(claim) <= 0) {
-    missing.push({ key: 'second_referrer_percent', label: 'Second referrer fee %' });
+  if (ctx.secondReferrerEnabled && secondReferrerPercent(claim) <= 0 && secondReferrerFixedFee(claim) <= 0) {
+    missing.push({ key: 'second_referrer_percent', label: 'Second referrer fee % (or fixed £ fee)' });
   }
 
   if (ctx.creditRepair) {
@@ -852,8 +894,8 @@ export function missingJobFigures(claim, ctx) {
     return missing;
   }
 
-  if (ctx.hasReferrer && toNum(claim?.percent_to_referrer) <= 0) {
-    missing.push({ key: 'percent_to_referrer', label: 'Referrer fee %' });
+  if (ctx.hasReferrer && toNum(claim?.percent_to_referrer) <= 0 && referrerFixedFee(claim) <= 0) {
+    missing.push({ key: 'percent_to_referrer', label: 'Referrer fee % (or fixed £ fee)' });
   }
   // The repairer is invoiced for our share of the storage on a total loss instead.
   if (!ctx.totalLoss && repairerReferralApplies(claim, ctx) && !ctx.hasReferralFee) {

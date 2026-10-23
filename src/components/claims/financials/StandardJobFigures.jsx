@@ -1,7 +1,13 @@
 import React from 'react';
 import { Clock } from 'lucide-react';
 import { fmtGBP } from '@/components/shared/creditRepairRates';
-import { repairNet, repairVat, repairerReferralApplies } from '@/components/shared/invoiceChecklist';
+import {
+  buildTrackerMetaPatch,
+  referrerFixedFee,
+  repairNet,
+  repairVat,
+  repairerReferralApplies,
+} from '@/components/shared/invoiceChecklist';
 import { excessMode } from '@/components/shared/excessState';
 import FigureField from './FigureField';
 import SecondReferrerToggle from './SecondReferrerToggle';
@@ -22,6 +28,10 @@ export default function StandardJobFigures({ claim, ctx, missing, onChange, onTr
   const isMissing = (key) => missingKeys.includes(key);
   const net = repairNet(claim);
   const vat = repairVat(claim);
+  // A fixed fee agreed with the referrer takes the place of their percentage while it
+  // is set; clearing it hands the invoice back to the percentage.
+  const referrerFeeGbp = referrerFixedFee(claim);
+  const referrerPercent = num(claim.percent_to_referrer) || 0;
 
   const fieldEdit = (key) => ({
     editing: editingKey === key,
@@ -96,9 +106,30 @@ export default function StandardJobFigures({ claim, ctx, missing, onChange, onTr
             label={`Referrer Fee % — ${claim.referrer}`}
             type="number"
             value={claim.percent_to_referrer}
-            missing={isMissing('percent_to_referrer')}
-            hint="Charged on the repair cost ex VAT"
+            missing={isMissing('percent_to_referrer') && referrerFeeGbp <= 0}
+            hint={referrerFeeGbp > 0
+              ? `Overridden by the fixed fee of ${fmtGBP(referrerFeeGbp)}`
+              : 'Charged on the repair cost ex VAT'}
             onCommit={(v) => onChange({ percent_to_referrer: num(v) }, `Referrer fee set to ${num(v) || 0}%`)}
+          />
+          <FigureField
+            {...fieldEdit('referrer_fee_gbp')}
+            label="Referrer Fee (£ fixed)"
+            type="number"
+            value={referrerFeeGbp || null}
+            missing={isMissing('percent_to_referrer') && referrerPercent <= 0}
+            hint={referrerFeeGbp > 0
+              ? `Fixed fee ${fmtGBP(referrerFeeGbp)} — overrides ${referrerPercent > 0 ? `${referrerPercent}%` : 'the %'}`
+              : 'Optional — set instead of a %'}
+            onCommit={(v) => {
+              const n = num(v);
+              onTrackerChange(
+                buildTrackerMetaPatch(claim, { referrer_fee_gbp: n }),
+                n === null || n === 0
+                  ? 'Fixed referrer fee cleared — the agreed % is used again'
+                  : `Fixed referrer fee set to ${fmtGBP(n)} — used ahead of the %`
+              );
+            }}
           />
           <SecondReferrerToggle
             claim={claim}
