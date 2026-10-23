@@ -60,6 +60,14 @@ const TOTAL_LOSS_FIGURES_HINT = 'The storage charge read off the Salvage Agent I
  */
 const CREDIT_REPAIR_CLOSE_OUT_HINT = 'The repairer\'s Final Repair Invoice, addressed to the credit repair company, and the Final Authority — plus the Collection Note where there is one. The Final Repair Invoice\'s total is the final repair cost our commission is worked out from, and there are no VAT & excess invoices on a credit repair job.';
 
+/**
+ * A job the customer is paying for privately: we settle the repairer's own invoice
+ * for the whole repair and recover it from the customer, so there is no insurer on the
+ * job — no Final Authority and no VAT & excess invoices — and the Collection Note is
+ * required rather than merely recommended.
+ */
+const PRIVATE_PAYING_CLOSE_OUT_HINT = 'The repairer\'s Final Repair Invoice, addressed to us, and the Collection Note. The Final Repair Invoice\'s total is the final repair cost we recover from the customer, and there is no Final Authority on a job the customer is paying for privately — nor any VAT & excess invoices.';
+
 /** Rows of one section, and those of them that apply to this claim. */
 const rowsFor = (summary, section) => summary.rows.filter((r) => r.item.section === section);
 const applying = (rows) => rows.filter((r) => !r.state.notApplicable);
@@ -72,14 +80,15 @@ const closeoutRequired = (summary) =>
   applying(rowsFor(summary, 'closeout')).filter((r) => !isRecommendedItem(r.item));
 
 /**
- * Whether the close-out step is settled: a copy of every required close-out document
- * is on file — one waiting to be replaced by a corrected copy doesn't count — or the
- * job has been taken past the step with them still to attach. What the repair
- * commission waits for before it can be invoiced: its amount is worked out from the
- * final repair cost, which comes off the repairer's final invoice.
+ * Whether the close-out step is settled: a copy of everything the step requires is on
+ * file — one waiting to be replaced by a corrected copy doesn't count — or the job has
+ * been taken past the step with them still to attach. The copy itself is what settles
+ * it, whether the item is paperwork we collect or an invoice we are sent. What the
+ * repair commission waits for before it can be invoiced: its amount is worked out from
+ * the final repair cost, which comes off the repairer's final invoice.
  */
 export function closeoutSettled(summary, claim) {
-  const settled = (r) => r.state.received && !r.state.awaitingCorrected;
+  const settled = (r) => !!r.state.copyAttached && !r.state.awaitingCorrected;
   return closeoutRequired(summary).every(settled) || isStepMovedPast(claim, 'closeout');
 }
 
@@ -114,7 +123,7 @@ export function buildFinancialFlow(summary, ctx, claim) {
   const closeRequired = closeoutRequired(summary);
   // A copy that is waiting to be replaced by a corrected one doesn't finish the
   // step: the item stays amber until the corrected copy is uploaded.
-  const closeSettled = (r) => r.state.received && !r.state.awaitingCorrected;
+  const closeSettled = (r) => !!r.state.copyAttached && !r.state.awaitingCorrected;
   const closeIn = closeRequired.filter(closeSettled).length;
   const closeEmpty = closeApplies.length === 0 ? emptySectionMessage('closeout', ctx) : null;
   const closePending = closeRequired.find((r) => !closeSettled(r));
@@ -124,7 +133,8 @@ export function buildFinancialFlow(summary, ctx, claim) {
     ...STEP.closeout,
     hint: ctx.totalLoss ? TOTAL_LOSS_CLOSE_OUT_HINT
       : ctx.creditRepair ? CREDIT_REPAIR_CLOSE_OUT_HINT
-        : STEP.closeout.hint,
+        : ctx.privatePaying ? PRIVATE_PAYING_CLOSE_OUT_HINT
+          : STEP.closeout.hint,
     rows: closeRows,
     empty: closeEmpty,
     done: closeRequired.length === 0 || closeIn === closeRequired.length,

@@ -22,6 +22,7 @@ import {
   invoiceContext,
   invoiceDocumentKind,
   invoicePartyName,
+  isInvoiceDocument,
   readStorageFeePercent,
   repairNet,
   repairVat,
@@ -778,7 +779,10 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
               {nudge && nudge.item.key === row.item.key && (
                 <RecommendedNudge action={nudge} onDo={runAction} />
               )}
-              {focus === 'closeout' ? renderCloseOut(row) : renderRow(row, focus)}
+              {/* The close-out step holds paperwork we collect and, on a job the
+                  customer pays for privately, the repairer's Final Repair Invoice —
+                  an invoice we pay, shown as an invoice row with the rest of them. */}
+              {focus === 'closeout' && isInvoiceDocument(row.item) ? renderCloseOut(row) : renderRow(row, focus)}
             </div>
           ))}
         </div>

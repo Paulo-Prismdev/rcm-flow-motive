@@ -23,7 +23,7 @@ import {
   snippetsFromExtraction,
   toNum,
 } from './invoiceReview';
-import { isInvoiceDocument } from '@/components/shared/invoiceChecklist';
+import { isInvoiceDocument, isPrivatePayingClaim } from '@/components/shared/invoiceChecklist';
 import RepairCostFromInvoice, { repairCostOffer } from './RepairCostFromInvoice';
 import InvoiceVsAuthority from './InvoiceVsAuthority';
 import { authorityAmount, authorityWorkings, compareToAuthority } from './invoiceAuthorityCheck';
@@ -302,7 +302,10 @@ export default function InvoiceReviewModal({
 
             <RepairCostFromInvoice offer={costOffer} useIt={useRepairCost} onUse={setRepairCostChoice} />
 
-            {item?.setsRepairCost && (
+            {/* The repairer's invoices are only measured against an authority where the
+                job has one: a job the customer is paying for privately has no insurer
+                on it, so there is nothing to set the invoice against. */}
+            {item?.setsRepairCost && !isPrivatePayingClaim(claim) && (
               <InvoiceVsAuthority
                 label={item.label}
                 comparison={comparison}

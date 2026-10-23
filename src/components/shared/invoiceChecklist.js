@@ -21,6 +21,11 @@
  * item that no longer applies to a job that changed type keeps everything recorded
  * against it: the summary hands those back as `dormant` rather than dropping them.
  *
+ * A job the customer is paying for privately runs its own version too: no insurer on
+ * it, so no Final Authority and no VAT & excess invoices either, and the repairer's
+ * own invoice for the whole repair is one we pay — its total being what we recover
+ * from the customer, on our own invoice to them (`client_invoice_out`).
+ *
  * Where an item overlaps an existing Financials field (invoice amount, invoice
  * sent date, payment received, excess contribution paid, authority received…)
  * the item reads from and writes to that same claim field rather than keeping
@@ -183,6 +188,10 @@ export function invoiceContext(claim, vatExcess) {
   const tracker = claim?.invoice_tracker || {};
   const totalLoss = isTotalLossClaim(claim);
   const creditRepair = isCreditRepairClaim(claim);
+  // A job the customer pays for privately: we settle the repairer's invoice for the
+  // whole repair and recover it from the customer, so the job carries the repairer's
+  // final invoice as an invoice we pay and our own invoice to the customer beside it.
+  const privatePaying = isPrivatePayingClaim(claim);
   return {
     hasReferrer: !!claim?.referrer,
     secondReferrerEnabled: tracker.second_referrer_enabled === true,
@@ -196,14 +205,18 @@ export function invoiceContext(claim, vatExcess) {
     // A credit repair job carries none of them either, however the customer is set
     // up: the repairer invoices the partner, and we invoice the partner our hire fee
     // and our commission, so there is no VAT or excess of the customer's to bill.
-    vatExcess: !!vatExcess && !totalLoss && !creditRepair,
-    // That same handling on its own, before the total-loss gate: what would apply
-    // were the job not a total loss.
+    //
+    // Nor does a job the customer is paying for privately, however they are set up:
+    // there is no insurer on it and no policy excess, so we invoice the customer for
+    // the whole repair ourselves and none of the VAT & excess invoices apply.
+    vatExcess: !!vatExcess && !totalLoss && !creditRepair && !privatePaying,
+    // That same handling on its own, before those gates: what would apply were the
+    // job's own outcome and type not standing in the way.
     vatExcessHandled: !!vatExcess,
     hasReferralFee: toNum(claim?.referral_fee_repairer) > 0 || toNum(claim?.referral_fee_repairer_gbp) > 0,
     creditRepair,
     hasRepairer: !!claim?.bodyshop || !!claim?.bodyshop_id,
-    privatePaying: isPrivatePayingClaim(claim),
+    privatePaying,
   };
 }
 
@@ -240,6 +253,8 @@ function matchesRequirement(requirement, ctx) {
       return !!ctx.hasReferralFee || (!ctx.privatePaying && !ctx.creditRepair && !!ctx.hasRepairer);
     case 'credit_repair': return !!ctx.creditRepair;
     case 'not_credit_repair': return !ctx.creditRepair;
+    case 'private_paying': return !!ctx.privatePaying;
+    case 'not_private_paying': return !ctx.privatePaying;
     case 'total_loss': return !!ctx.totalLoss;
     case 'not_total_loss': return !ctx.totalLoss;
     case 'has_repairer': return !!ctx.hasRepairer;
@@ -255,12 +270,27 @@ export function isInvoiceItemVisible(item, ctx = {}) {
 /**
  * The item as it reads on this claim. A credit repair job's repairer invoices the
  * partner rather than an insurer, so the Final Insurer Invoice carries the partner's
- * own name and party there — nothing else about the item changes, and the rest of
- * the flow goes on working off its key alone.
+ * own name and party there; a job the customer pays for privately takes the same
+ * invoice as an invoice we pay, addressed to us by the repairer, with its own date
+ * and no authority to be measured against. Nothing about either change reaches the
+ * item's key — the rest of the flow goes on working off that alone.
  */
 export function claimInvoiceItem(item, claim) {
-  if (!item?.creditRepair || !isCreditRepairClaim(claim)) return item;
-  return { ...item, ...item.creditRepair };
+  if (!item) return item;
+  if (item.creditRepair && isCreditRepairClaim(claim)) return { ...item, ...item.creditRepair };
+  if (item.privatePaying && isPrivatePayingClaim(claim)) return { ...item, ...item.privatePaying };
+  return item;
+}
+
+/**
+ * The total recorded off the repairer's final invoice — the Final Insurer Invoice,
+ * or the Final Repair Invoice where it is one of the invoices we pay. Read off the
+ * invoice's own entry, so it is the same figure on any kind of job, and null until a
+ * copy of that invoice has been read.
+ */
+export function recordedFinalInvoiceTotal(claim) {
+  const stored = toNum(claim?.invoice_tracker?.items?.final_invoice?.amount);
+  return stored > 0 ? round2(stored) : null;
 }
 
 /** What the repairer's final invoice is called on this claim. */
@@ -453,6 +483,25 @@ const AMOUNT_RESOLVERS = {
         { label: 'Total', value: fmtGBP(round2(share + vat)), total: true },
       ], `${pct}% of the storage charge ex VAT`),
       calculation: `Storage ${fmtGBP(storage)} ex VAT × ${pct}% = ${fmtGBP(share)} + ${fmtGBP(vat)} VAT = ${fmtGBP(round2(share + vat))}`,
+    };
+  },
+  // A job the customer is paying for privately: we settle the repairer's own invoice
+  // for the whole repair and recover the whole of it from the customer, so our
+  // invoice to them is that invoice's total, VAT included. It waits for the invoice
+  // to be saved, because that is the figure it bills.
+  client_invoice: (claim) => {
+    const total = recordedFinalInvoiceTotal(claim);
+    if (total === null) return awaiting('Save the Final Repair Invoice — the customer is billed its total');
+    const { ex, vat } = splitGross(total);
+    return {
+      amount: total, ex, vat, total, derived: true, awaiting: false,
+      hint: 'The whole of the Final Repair Invoice, recovered from the customer',
+      workings: [
+        { label: 'Final Repair Invoice total (inc VAT)', value: fmtGBP(total) },
+        { label: 'Ex VAT', value: fmtGBP(ex) },
+        { label: 'VAT (20%)', value: fmtGBP(vat) },
+        { label: 'Total', value: fmtGBP(total), total: true },
+      ],
     };
   },
   // Credit repair: a single agreed fee we invoice the partner for.
@@ -681,14 +730,19 @@ export function computeInvoiceSummary(claim, ctx, hasFile = claimCopyOnFile(clai
     .map((item) => ({ item, state: getInvoiceItemState(item, claim, hasFile(item.key)) }));
 
   // Items this job no longer carries but which still hold something — a claim
-  // switched to or from Total Loss keeps its files, figures and payments. What is
-  // looked for is exactly that change: an item that would apply to this job were
-  // its total-loss state the other way round, and which holds something recorded.
+  // switched to or from Total Loss, or to a job the customer pays for privately and
+  // away from it again, keeps its files, figures and payments. What is looked for is
+  // exactly that change: an item that would apply to this job with the one thing that
+  // decides it turned round — its total-loss state the other way, and read as a job
+  // the customer is not paying for privately — and which holds something recorded.
   // They take no part in the progress, the money or the queues.
-  const otherCtx = { ...ctx, totalLoss: !ctx.totalLoss, vatExcess: ctx.vatExcessHandled };
+  const otherReadings = [
+    { ...ctx, totalLoss: !ctx.totalLoss, vatExcess: ctx.vatExcessHandled },
+    { ...ctx, privatePaying: false },
+  ];
   const dormant = INVOICE_ITEMS
     .filter((item) => !isInvoiceItemVisible(item, ctx)
-      && isInvoiceItemVisible(item, otherCtx)
+      && otherReadings.some((other) => isInvoiceItemVisible(item, other))
       && itemHasRecord(claim, item, hasFile))
     .map((item) => ({ item, state: getInvoiceItemState(item, claim, hasFile(item.key)) }));
 

@@ -18,6 +18,13 @@
  * A total loss job carries its own close-out papers in place of the Final Insurer
  * Invoice and the Final Authority (see ./totalLoss), so those items are gated on
  * `total_loss` / `not_total_loss` rather than on the claim type alone.
+ *
+ * A job the customer is paying for privately carries the repairer's own invoice for
+ * the whole repair — on these items the Final Repair Invoice — as an invoice we pay
+ * rather than paperwork we collect, with our invoice to the customer beside it for
+ * the same total (see `privatePaying` on the item and `client_invoice_out`). There is
+ * no insurer on such a job, so no Final Authority and no VAT & excess invoices apply
+ * to it.
  */
 
 export const INVOICE_FILE_PREFIX = 'inv_';
@@ -49,7 +56,8 @@ export const INVOICE_ITEMS = [
     dateLabel: 'Sent',
     // Every repaired job carries it, a credit repair job included: there the same
     // invoice is the repairer's, addressed to the credit repair company rather than
-    // to an insurer — see `creditRepair` below.
+    // to an insurer — see `creditRepair` below, and `privatePaying` for the job the
+    // customer is paying for themselves, where we settle that invoice ourselves.
     requires: ['not_total_loss'],
     party: 'authorising_party',
     // How the item reads on a credit repair job: the partner is who it goes to and
@@ -57,6 +65,28 @@ export const INVOICE_ITEMS = [
     // those two change — the key, the figures read off it and the final repair cost
     // it sets are the same everywhere.
     creditRepair: { label: 'Final Repair Invoice', party: 'credit_repair' },
+    // How the item reads on a job the customer is paying for privately: the repairer's
+    // own invoice for the whole repair, addressed to us. We settle it in full and
+    // recover it from the customer, so it is not paperwork we collect but an invoice
+    // we pay — it counts in what we owe and is marked paid with the rest — and it is
+    // never set against an insurer authority, because there is none on the job.
+    // Everything that reads off its key is unchanged: it is still the repairer's
+    // final invoice, still read for its total, and that total is still where the
+    // claim's final repair cost comes from.
+    privatePaying: {
+      label: 'Final Repair Invoice',
+      // An invoice rather than close-out paperwork: the money is ours to pay.
+      kind: null,
+      direction: 'in',
+      dateLabel: 'Received',
+      // From the repairer, checked against them as any invoice that comes in is.
+      party: 'repairer',
+      // Its date is its own, recorded against it: it is not the date our own invoice
+      // went out, and receiving it never marks the claim Invoiced.
+      bindings: null,
+      date_status_field: null,
+      date_status_value: null,
+    },
     // Its date is the date printed on the invoice itself, never the upload date.
     bindings: { date: 'invoice_sent_date' },
     // The job is invoiced once the Final Insurer Invoice itself is on file.
@@ -93,7 +123,10 @@ export const INVOICE_ITEMS = [
     kind: 'document',
     direction: 'in',
     dateLabel: 'Received',
-    requires: ['not_total_loss'],
+    // A job the customer is paying for privately has no insurer on it, so there is
+    // no authority to collect and nothing for the repairer's invoice to be measured
+    // against.
+    requires: ['not_total_loss', 'not_private_paying'],
     // Its own date: "Authority Received" is the initial authority, which belongs
     // to the Initial Authority document, not to this one.
     bindings: { date: 'final_authority_received' },
@@ -114,6 +147,10 @@ export const INVOICE_ITEMS = [
     // it is filed, but the job's invoicing finishes without one. "Not available"
     // records why there won't be one, and stops the nudge.
     recommended: true,
+    // On a job the customer is paying for privately it is asked for in earnest: the
+    // note is what we hold the customer to on the whole of the repair, so it is
+    // required there — counted in the step, chased, and never finished without.
+    privatePaying: { recommended: false },
     // Nothing is read off it and it carries no figures: uploading it stores the
     // copy, and that is the whole of it.
     storeOnly: true,
@@ -187,6 +224,23 @@ export const INVOICE_ITEMS = [
     party: 'second_referrer',
     amountSource: 'second_referrer_fee',
     varianceReason: 'Second referrer fee or repair cost changed',
+  },
+  {
+    // A job the customer is paying for privately: we settle the repairer's own
+    // invoice for the whole repair and recover the whole of it from the customer, so
+    // our invoice to them is that invoice's total, VAT included. It is raised like
+    // any other invoice we send — asked for from accounts, locked at the figure it
+    // went out at and marked paid here — but it waits for the Final Repair Invoice to
+    // be saved, because that invoice's total is the figure it bills.
+    key: 'client_invoice_out',
+    label: 'Client Invoice Out',
+    section: 'out',
+    direction: 'out',
+    dateLabel: 'Sent',
+    requires: ['private_paying', 'not_total_loss'],
+    party: 'client',
+    amountSource: 'client_invoice',
+    varianceReason: 'The Final Repair Invoice total changed',
   },
   {
     key: 'referral_invoice_out',

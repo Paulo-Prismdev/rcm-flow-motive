@@ -1,6 +1,6 @@
 import { fmtGBP } from '@/components/shared/creditRepairRates';
 import { VAT_RATE, round2, toNum } from './invoiceReview';
-import { finalInvoiceLabel } from '@/components/shared/invoiceChecklist';
+import { finalInvoiceLabel, isPrivatePayingClaim, recordedFinalInvoiceTotal } from '@/components/shared/invoiceChecklist';
 
 /**
  * The check between the repairer's invoices and the Final Authority. A repairer
@@ -30,18 +30,24 @@ export const FINAL_INVOICE_KEY = 'final_invoice';
 
 /** The amount the job was authorised at, as the repairer's invoice is measured against it. */
 export function authorityAmount(claim) {
+  // A job the customer is paying for privately has no insurer on it: we settle the
+  // repairer's invoice ourselves and recover it from the customer, so there is no
+  // authorised amount for that invoice to be measured against — and nothing to hold
+  // it to.
+  if (isPrivatePayingClaim(claim)) return null;
   const gross = toNum(claim?.authority_cost_gross);
   if (gross !== null && gross > 0) return gross;
   const net = toNum(claim?.authority_cost_net);
   return net !== null && net > 0 ? round2(net * (1 + VAT_RATE)) : null;
 }
 
-/** The total recorded off the Final Insurer Invoice, once a copy of it has been read. */
-export function finalInvoiceTotal(claim) {
-  const entry = claim?.invoice_tracker?.items?.[FINAL_INVOICE_KEY] || {};
-  const stored = toNum(entry.amount);
-  return stored !== null && stored > 0 ? stored : null;
-}
+/**
+ * The total recorded off the repairer's final invoice, once a copy of it has been
+ * read: the figure the authority check measures and, on a job the customer pays for
+ * privately, the figure our invoice to them bills. Read in one place for both
+ * (see invoiceChecklist.recordedFinalInvoiceTotal).
+ */
+export const finalInvoiceTotal = recordedFinalInvoiceTotal;
 
 /**
  * The repairer's VAT & excess invoice, as the authority check needs it. `applies`
