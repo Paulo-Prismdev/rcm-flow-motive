@@ -301,29 +301,74 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
 
   const canEdit = true;
 
-  // Phones: the claim header shrinks to a slim bar as the page scrolls down,
-  // and expands again once the page is back at the top.
+  // Phones: the claim header shrinks to a slim bar as the page scrolls down, and
+  // expands again once the page is back at the top. On phones the header sits in the
+  // page's own flow, so folding it away takes that much height out of the page: on a
+  // short section (Referrer Details, for one) that left the page with nothing left to
+  // scroll, so it pulled itself back to the top, unfolded, and flickered up and down
+  // between the two instead of reaching its end. The header therefore only folds where
+  // the page still has a good deal more to scroll than the header takes up, and only
+  // unfolds again back at the top.
   const rootRef = React.useRef(null);
   const [headerCollapsed, setHeaderCollapsed] = useState(false);
+  // The fold is tracked in a ref as well as in state: the scroll handler has to know
+  // where the header stands without being torn down and rebuilt on every fold.
+  const foldedRef = React.useRef(false);
+  const setHeaderFolded = React.useCallback((next) => {
+    if (foldedRef.current === next) return;
+    foldedRef.current = next;
+    setHeaderCollapsed(next);
+  }, []);
 
   React.useEffect(() => {
-    const onScroll = (e) => {
-      const el = e.target;
-      const top = (el === document || el === document.documentElement || el === document.body)
-        ? (window.scrollY || document.documentElement.scrollTop || 0)
-        : (el?.scrollTop || 0);
-      const next = top > 40;
-      setHeaderCollapsed(prev => (prev === next ? prev : next));
+    const FOLD_AT = 120;    // scrolled past the fold point
+    const UNFOLD_AT = 20;   // back at the top
+    const FOLD_ROOM = 200;  // a page this long still scrolls once the header is out of the way
+    // How much page there is to scroll is read while the header is whole: folding it
+    // takes height out of the page, and that must not be mistaken for a short section.
+    const roomRef = { current: 0 };
+
+    const geometry = (target) => {
+      const el = target?.nodeType === 1 ? target : null;
+      return el
+        ? { top: el.scrollTop || 0, reach: el.scrollHeight - el.clientHeight }
+        : {
+          top: window.scrollY || document.documentElement.scrollTop || 0,
+          reach: document.documentElement.scrollHeight - window.innerHeight,
+        };
     };
-    window.addEventListener('scroll', onScroll, true);
-    return () => window.removeEventListener('scroll', onScroll, true);
-  }, []);
+
+    let frame = 0;
+    const onScroll = (e) => {
+      // Only the page's own scroller folds the header — a scrolling list inside an
+      // open menu is none of its business.
+      const target = e.target;
+      const root = rootRef.current;
+      if (root && target?.nodeType === 1 && !target.contains(root)) return;
+      if (frame) return;
+      frame = requestAnimationFrame(() => {
+        frame = 0;
+        const { top, reach } = geometry(target);
+        if (!foldedRef.current) roomRef.current = reach;
+        const room = roomRef.current;
+        setHeaderFolded(foldedRef.current
+          ? !(top <= UNFOLD_AT || room <= FOLD_ROOM)
+          : (top > FOLD_AT && room > FOLD_ROOM));
+      });
+    };
+
+    window.addEventListener('scroll', onScroll, { capture: true, passive: true });
+    return () => {
+      window.removeEventListener('scroll', onScroll, true);
+      if (frame) cancelAnimationFrame(frame);
+    };
+  }, [setHeaderFolded]);
 
   // Opening a different section starts at the top of the page again.
   React.useEffect(() => {
     const scroller = rootRef.current?.closest('[data-claim-scroll]');
     if (scroller) scroller.scrollTop = 0;
-    setHeaderCollapsed(false);
+    setHeaderFolded(false);
   }, [selectedSection]);
 
   // Rectification milestone dates in Key Dates are only editable once the claim
@@ -1782,7 +1827,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                 }}
               />
 
-      <div className="flex flex-col gap-2 md:gap-3 h-full" data-claim-root style={{touchAction: 'auto', isolation: 'isolate'}}>
+      <div ref={rootRef} className="flex flex-col gap-2 md:gap-3 h-full" data-claim-root style={{touchAction: 'auto', isolation: 'isolate'}}>
 
           {/* ── Starred update notice ── */}
           {starredUpdates.length > 0 && (
