@@ -42,7 +42,7 @@ import {
 } from './invoiceChecklist';
 import { isTotalLossClaim } from './totalLoss';
 import {
-  authorityAmount,
+  claimAuthorityExpectation,
   compareToAuthority,
   finalInvoiceTotal,
   vatExcessAuthorityPart,
@@ -425,13 +425,15 @@ export function buildInvoicingQueues(claims = [], thresholds = DEFAULT_QUEUE_DAY
       }
     }
 
-    // Over authority: the repairer's invoices against what the job was authorised
-    // at, on the same workings and the same 5p as the claim's own check.
+    // Over the insurer's share: the repairer's invoice against the part of the
+    // authorised repair the insurer is billed — the authorised amount ex VAT, plus VAT
+    // only where the customer isn't VAT registered, less their excess and any
+    // contribution — on the same workings and the same 5p as the claim's own check.
     const vatRow = summary.rows.find((r) => r.item.key === 'vat_excess_invoice_in');
     const invoiced = finalInvoiceTotal(claim);
-    const authorised = authorityAmount(claim);
-    if (invoiced !== null && authorised !== null) {
-      const comparison = compareToAuthority(invoiced, authorised, vatExcessAuthorityPart(ctx.vatExcess, {
+    const expectation = claimAuthorityExpectation(claim);
+    if (invoiced !== null && expectation) {
+      const comparison = compareToAuthority(invoiced, expectation, vatExcessAuthorityPart(ctx.vatExcess, {
         attached: !!vatRow?.state.copyAttached,
         amount: vatRow?.state?.amount,
       }));
@@ -439,8 +441,8 @@ export function buildInvoicingQueues(claims = [], thresholds = DEFAULT_QUEUE_DAY
         const finalLabel = summary.rows.find((r) => r.item.key === 'final_invoice')?.item.label || 'Final Insurer Invoice';
         buckets.warnings.push(queueRow(claim, { key: 'authority', label: `${finalLabel} vs authority` }, {
           section: 'warnings',
-          amount: comparison.measured,
-          note: `Over the authorised ${fmtGBP(comparison.authority)} by ${fmtGBP(Math.abs(comparison.difference))}`,
+          amount: comparison.insurerPart,
+          note: `Invoiced ${fmtGBP(comparison.insurerPart)} against the ${fmtGBP(comparison.expected)} the insurer's share of the authorised ${fmtGBP(comparison.authority)} comes to — ${fmtGBP(Math.abs(comparison.difference))} over`,
           waitingSince: claim.invoice_sent_date || '',
           days: daysSince(claim.invoice_sent_date, now),
           party: invoicePartyName(claim, { party: 'authorising_party' }),
@@ -541,7 +543,7 @@ export function buildInvoicingQueues(claims = [], thresholds = DEFAULT_QUEUE_DAY
       key: 'warnings',
       label: 'Warnings',
       tone: 'negative',
-      hint: 'Over-authority invoices, amounts that differ from what was expected, excesses still TBC on authority, and jobs whose return or salvage collection date was never recorded.',
+      hint: "Invoices over the insurer's share of the authority, amounts that differ from what was expected, excesses still TBC on authority, and jobs whose return or salvage collection date was never recorded.",
     },
   ];
 

@@ -2,18 +2,19 @@ import React from 'react';
 import { AlertTriangle, Check, Hourglass, Mail } from 'lucide-react';
 import { fmtGBP } from '@/components/shared/creditRepairRates';
 import { authorityWorkings } from './invoiceAuthorityCheck';
+import CustomerShareLines from './CustomerShareLines';
 
 /**
- * The repairer's invoices set against the amount the job was authorised at. On a
- * claim where we handle the client's VAT and excess the insurer's invoice is only
- * the part the insurer pays, so the VAT & excess invoice is added to it and the
- * working is shown; while that invoice is still to arrive the check says it is
- * waiting rather than reading the insurer's invoice as short.
+ * The repairer's Final Insurer Invoice set against the part of the authorised repair
+ * the insurer is actually billed: the authorised amount ex VAT, plus VAT only where
+ * the customer is not VAT registered, less the customer's excess and any contribution
+ * they are responsible for. The rest — the customer's own VAT, excess and
+ * contributions — is shown underneath with the whole repair the two add up to.
  *
- * Within the rounding tolerance the two agree; under the authority the user
- * chooses whether the invoices stand or the repairer is asked to re-invoice; over
- * it the invoice can never be saved, because a repairer can't invoice more than
- * the authority.
+ * Within the rounding tolerance the two agree; under the expected figure the user
+ * chooses whether the invoice stands or the repairer is asked to re-invoice; over it
+ * the invoice can never be saved, because a repairer can't invoice more than the
+ * insurer's share of what was authorised.
  *
  * The same comparison is shown whichever of the documents was uploaded second —
  * `mode` only says which one this screen is about.
@@ -30,34 +31,36 @@ export default function InvoiceVsAuthority({
     ) : null;
   }
 
-  const { status, authority, difference } = comparison;
+  const { status, expected, insurerPart, difference } = comparison;
 
+  // The customer's excess is still TBC, so their share of the repair — and so the
+  // insurer's share — can't be worked out yet.
   if (status === 'waiting') {
     return (
       <div className="flex items-start gap-2 rounded-lg border border-border bg-muted/30 px-2.5 py-2">
         <Hourglass className="mt-px h-3.5 w-3.5 flex-shrink-0 text-muted-foreground" />
         <p className="text-[11px] leading-snug text-muted-foreground">
-          <span className="font-semibold text-foreground">Waiting for the VAT &amp; Excess Invoice.</span>{' '}
-          The insurer's invoice of {fmtGBP(comparison.insurerPart)} is only the part the insurer pays on this claim —
-          the VAT content of the repair and the excess are on the repairer's VAT &amp; Excess Invoice, and the
-          authority is checked on the two together.
+          <span className="font-semibold text-foreground">Waiting for the policy excess.</span>{' '}
+          The excess is TBC on authority, and the insurer's share of the repair — the authorised{' '}
+          {fmtGBP(comparison.expectation.net)} ex VAT less the customer's excess — can't be worked out until it is known.
+          The invoice of {fmtGBP(insurerPart)} is checked against it as soon as the excess is set.
         </p>
       </div>
     );
   }
 
   const workings = authorityWorkings(comparison);
-  const twoInvoices = comparison.parts.length > 1;
 
   if (status === 'match') {
     return (
-      <div className="flex items-start gap-2 rounded-lg border border-green-300 dark:border-green-800 bg-green-50 dark:bg-green-900/20 px-2.5 py-2">
-        <span className="mt-px w-4 h-4 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
-          <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />
-        </span>
-        <p className="text-[11px] font-semibold text-green-700 dark:text-green-400">
-          Matches authority — {workings} against the authorised {fmtGBP(authority)}.
+      <div className="space-y-1 rounded-lg border border-green-300 dark:border-green-800 bg-green-50 dark:bg-green-900/20 px-2.5 py-2">
+        <p className="flex items-start gap-2 text-[11px] font-semibold text-green-700 dark:text-green-400">
+          <span className="mt-px w-4 h-4 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
+            <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />
+          </span>
+          <span>{workings} — the invoice total of {fmtGBP(insurerPart)} matches.</span>
         </p>
+        <CustomerShareLines comparison={comparison} tone="match" className="pl-6" />
       </div>
     );
   }
@@ -68,15 +71,16 @@ export default function InvoiceVsAuthority({
         <p className="flex items-start gap-1.5 text-[11px] font-semibold text-red-700 dark:text-red-400">
           <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0 mt-px" />
           <span>
-            {workings} is {fmtGBP(Math.abs(difference))} over the authorised {fmtGBP(authority)} — a
-            repairer can't invoice more than the authority.
+            {workings}. The invoice total of {fmtGBP(insurerPart)} is {fmtGBP(Math.abs(difference))} over that — a
+            repairer can't invoice more than the insurer's share of the authorised amount.
           </span>
         </p>
         <p className="pl-5 text-[11px] leading-snug text-red-700/90 dark:text-red-400/90">
           {mode === 'invoice'
             ? `This can't be saved as the ${label}. Reject it and ask the repairer for a corrected invoice.`
-            : `The ${label} already on file is flagged on this claim until a corrected copy at the authorised amount arrives.`}
+            : `The ${label} already on file is flagged on this claim until a corrected copy at the expected amount arrives.`}
         </p>
+        <CustomerShareLines comparison={comparison} tone="over" className="pl-5" />
         {onReinvoiceEmail && (
           <div className="pl-5">
             <button
@@ -93,8 +97,8 @@ export default function InvoiceVsAuthority({
     );
   }
 
-  // Under the authority: the invoices stand at their own total, or the repairer is
-  // asked to invoice the full authorised amount.
+  // Under the expected figure: the invoice stands at its own total, or the repairer
+  // is asked to invoice the insurer's full share of what was authorised.
   const optionClass = (selected) => `w-full flex items-start gap-2 rounded-md border px-2 py-1.5 text-left text-[11px] font-semibold transition-colors ${selected
     ? 'border-amber-500 bg-amber-100/70 dark:bg-amber-900/40 text-amber-900 dark:text-amber-200'
     : 'border-amber-300 dark:border-amber-700 bg-white/60 dark:bg-amber-950/20 text-amber-800 dark:text-amber-300 hover:border-amber-400'}`;
@@ -104,17 +108,20 @@ export default function InvoiceVsAuthority({
       <p className="flex items-start gap-1.5 text-[11px] font-semibold text-amber-800 dark:text-amber-300">
         <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0 mt-px" />
         <span>
-          {workings} is {fmtGBP(Math.abs(difference))} under the authorised {fmtGBP(authority)}.
+          {workings}. The invoice total of {fmtGBP(insurerPart)} is {fmtGBP(Math.abs(difference))} under that.
         </span>
       </p>
+
+      <CustomerShareLines comparison={comparison} tone="under" className="pl-5" />
 
       <div className="pl-5 space-y-1.5">
         <button type="button" onClick={() => onChoice('accept')} className={optionClass(choice === 'accept')}>
           <Check className="w-3 h-3 flex-shrink-0 mt-px" />
           <span>
-            {twoInvoices ? 'Accept the two invoices' : 'Accept the invoice total'}
+            Accept the invoice total and the customer's share
             <span className="block font-normal">
-              {fmtGBP(comparison.measured)} becomes the claim's final repair cost.
+              {fmtGBP(comparison.fullCost)} becomes the claim's final repair cost — the whole repair, not the insurer's
+              part of it.
             </span>
           </span>
         </button>
@@ -122,10 +129,10 @@ export default function InvoiceVsAuthority({
         <button type="button" onClick={() => onChoice('reinvoice')} className={optionClass(choice === 'reinvoice')}>
           <Mail className="w-3 h-3 flex-shrink-0 mt-px" />
           <span>
-            Ask the repairer to re-invoice to match the authority
+            Ask the repairer to re-invoice to the expected {fmtGBP(expected)}
             <span className="block font-normal">
-              The {label} is left amber until a corrected invoice at {fmtGBP(authority)} is uploaded,
-              with a pre-filled email to the repairer.
+              The {label} is left amber until a corrected invoice at {fmtGBP(expected)} is uploaded, with a pre-filled
+              email to the repairer.
             </span>
           </span>
         </button>

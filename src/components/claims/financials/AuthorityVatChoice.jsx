@@ -1,0 +1,54 @@
+import React from 'react';
+import { AlertTriangle, Check } from 'lucide-react';
+
+/**
+ * What the authority's "customer is responsible for" section says about the
+ * customer's VAT status, set against what the claim holds. Where the authority
+ * supplies a figure the claim hasn't got, it is filled in; where the two disagree
+ * the choice is put to the user, because the claim's own setting is never moved
+ * without being asked.
+ */
+export default function AuthorityVatChoice({ check, choice, onChoice }) {
+  if (!check || check.shown === null) return null;
+
+  const label = (status) => (status === 'VAT Registered' ? 'VAT registered' : 'not VAT registered');
+
+  if (check.fills) {
+    return (
+      <div className="flex items-start gap-2 rounded-lg border border-border bg-muted/30 px-2.5 py-2">
+        <Check className="mt-px w-3.5 h-3.5 flex-shrink-0 text-muted-foreground" />
+        <p className="text-[11px] text-muted-foreground">
+          This authority says the customer is <span className="font-semibold text-foreground">{label(check.shown)}</span>
+          {check.stored && check.stored !== 'Unknown' ? '' : ', and the claim doesn\u2019t hold a VAT status for them'} — it will be
+          filled in as the customer VAT status.
+        </p>
+      </div>
+    );
+  }
+
+  if (!check.differs) return null;
+
+  const optionClass = (selected) => `inline-flex items-center gap-1.5 px-2 py-1 rounded-md border text-[10px] font-semibold transition-colors ${selected
+    ? 'border-amber-500 bg-amber-100/70 dark:bg-amber-900/40 text-amber-900 dark:text-amber-200'
+    : 'border-amber-300 dark:border-amber-700 text-amber-800 dark:text-amber-300 hover:border-amber-400'}`;
+
+  return (
+    <div className="space-y-1.5 rounded-lg border border-amber-400 dark:border-amber-600 bg-amber-50 dark:bg-amber-900/25 p-2.5">
+      <p className="flex items-start gap-1.5 text-[11px] font-semibold text-amber-800 dark:text-amber-300">
+        <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0 mt-px" />
+        <span>
+          The customer's VAT status doesn't match — the claim holds {label(check.stored)}, this authority says they are{' '}
+          {label(check.shown)}.
+        </span>
+      </p>
+      <div className="pl-5 flex items-center gap-2 flex-wrap">
+        <button type="button" onClick={() => onChoice('claim')} className={optionClass(choice !== 'authority')}>
+          <Check className="w-3 h-3" /> Keep the claim's {label(check.stored)}
+        </button>
+        <button type="button" onClick={() => onChoice('authority')} className={optionClass(choice === 'authority')}>
+          <Check className="w-3 h-3" /> Use the authority's {label(check.shown)}
+        </button>
+      </div>
+    </div>
+  );
+}

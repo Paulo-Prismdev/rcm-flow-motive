@@ -1,5 +1,6 @@
 import { fmtGBP } from '@/components/shared/creditRepairRates';
 import { excessMode } from '@/components/shared/excessState';
+import { authorityExpectation } from './invoiceAuthorityCheck';
 import {
   VAT_RATE,
   confidenceFromExtraction,
@@ -15,14 +16,19 @@ import {
 /**
  * Reading a Final Authority off the document it arrives on. An authority is far
  * simpler than an invoice: the registration it covers, the amount the repair was
- * authorised at, and the excess it shows. Nothing else is read off it, and none
- * of the invoice's own checks — its number, its parties, the VAT split — apply.
+ * authorised at, and — from its own "customer is responsible for" section — what
+ * the customer pays themselves: their VAT status, the excess and any contribution.
+ * Those are what split the authorised amount into the part the insurer is billed and
+ * the part the customer pays, so they are read with the amount itself. None of the
+ * invoice's own checks — its number, its parties, its VAT split — apply.
  */
 
 export const AUTHORITY_FIGURES = [
   { key: 'reg', label: 'Vehicle reg' },
   { key: 'amount_total', label: 'Authorised amount (total inc VAT)', type: 'number' },
-  { key: 'excess', label: 'Excess shown', type: 'number' },
+  { key: 'excess', label: 'Excess (customer responsible)', type: 'number' },
+  { key: 'contributions', label: 'Contributions (customer responsible)', type: 'number' },
+  { key: 'customer_vat', label: 'Customer VAT status' },
 ];
 
 /** The one figure an authority cannot be recorded without. */
@@ -33,7 +39,9 @@ export const AUTHORITY_REQUIRED = {
 const FIGURE_DESCRIPTIONS = {
   reg: 'The vehicle registration the authority covers, exactly as printed',
   amount_total: 'The final authorised amount — the total the repair is authorised at, including VAT, as a number',
-  excess: 'The policy excess the authority shows, as a number. Leave empty where it shows none.',
+  excess: "The excess the authority says the customer is responsible for, as a number. Leave empty where it shows none.",
+  contributions: "Any other amount the authority says the customer is responsible for (a contribution, betterment or similar), as a number, read on its own. Leave empty where it shows none.",
+  customer_vat: 'Who accounts for the VAT on this repair, as the authority puts it: "VAT Registered" where it says the customer is VAT registered or responsible for the VAT, "Non-VAT" where it says they are not, and empty where the authority does not say.',
 };
 
 const FIGURE_MAP_PROPERTIES = Object.fromEntries(AUTHORITY_FIGURES.map((f) => [f.key, { type: 'string' }]));
@@ -65,15 +73,18 @@ export const AUTHORITY_EXTRACTION_SCHEMA = {
 export function buildAuthorityPrompt({ item, claim }) {
   return `Read this document and extract the figures from it. It is filed against "${item?.label || 'Final Authority'}" on claim ${claim?.job_number || ''} for vehicle ${claim?.reg || ''}.
 
-Return only these three things:
+Return only these things:
 - the vehicle registration the authority covers
 - the final authorised amount: the total the repair is authorised at, including VAT
-- the excess the authority shows, where it shows one
+- the excess the authority shows, read from its "customer is responsible for" section where it has one
+- any other amount the same section says the customer is responsible for (a contribution, betterment or similar), read on its own and never added to the excess
+- who accounts for the VAT: this is stated as the customer being VAT registered, or responsible for the VAT (return "VAT Registered"), or as VAT not applying to the customer (return "Non-VAT")
 
 Rules:
 - Only return what is actually printed. Use an empty string for anything that is not there.
-- Amounts as numbers with no currency symbols.
-- Nothing else is needed: no invoice number, no parties, no VAT split.
+- Amounts as numbers with no currency symbols. Keep each amount separate: never add two of them together, and never split one between two of them.
+- The VAT status is a choice of two answers exactly as written above, from what the document says about the customer. Leave it empty where the authority says nothing about it. Never work it out from an amount.
+- Nothing else is needed: no invoice number, no parties, no VAT split of the amounts.
 - For every figure, give a confidence of "high", "medium" or "low" ("low" for anything blurred, cut off, ambiguous or worked out), and the snippet of text from the document where you found it.
 - Set readable to false only if the document cannot be read at all.`;
 }
@@ -127,6 +138,47 @@ export function excessCheck(figures, claim) {
 }
 
 /**
+ * The authority as the review screen has settled it read, with the choices the user
+ * made beside it: the excess and the customer's VAT status are whichever of the
+ * claim's and the authority's they chose. From those the repair is split the way it
+ * is billed — the insurer's share of it, and what the customer pays the repairer
+ * themselves — which is what the Final Insurer Invoice is checked against, and what
+ * the whole repair comes to.
+ */
+export function authorityExpectationFromReview({ figures, claim, excessChoice, vatChoice }) {
+  const excess = excessCheck(figures, claim);
+  const vat = authorityVatCheck(figures, claim);
+  return authorityExpectation({
+    gross: toNum(figures?.amount_total),
+    excess: excess.tbc && excessChoice === 'waived'
+      ? 0
+      : (excess.fills || (excess.differs && excessChoice === 'authority'))
+        ? excess.shown
+        : excess.shown !== null ? excess.stored : (excess.tbc ? 'tbc' : (excess.stored ?? 0)),
+    contributions: toNum(figures?.contributions),
+    vatStatus: !vat.shown || (vat.differs && vatChoice !== 'authority')
+      ? (claim?.client_vat_status || '')
+      : vat.shown,
+  });
+}
+
+/**
+ * What the authority says about who accounts for the VAT, set against the claim's
+ * own customer VAT status. The status decides whether the VAT is billed to the
+ * insurer or paid by the customer, so a claim that hasn't got one is filled in, and
+ * a difference is put to the user rather than moving the claim's own setting.
+ */
+export function authorityVatCheck(figures, claim) {
+  const printed = String(figures?.customer_vat || '').trim();
+  const stored = claim?.client_vat_status || null;
+  const unknown = !printed || printed === 'Unknown';
+  const shown = unknown ? null : printed;
+  if (shown === null) return { shown: null, stored, differs: false, fills: false };
+  if (!stored || stored === 'Unknown') return { shown, stored, differs: false, fills: true };
+  return { shown, stored, differs: shown !== stored, fills: false };
+}
+
+/**
  * The registration check: an authority is only worth anything on the job it
  * belongs to, so a different vehicle — or none printed at all — is flagged.
  */
@@ -153,14 +205,14 @@ const FINAL_INVOICE_KEY = 'final_invoice';
 
 /**
  * The patch that records an authority: the authorised amount against the claim's
- * authorised cost, the customer's excess where the authority supplies or
- * corrects it, the file the figures were read from — and, where the comparison
- * with the Final Insurer Invoice was settled here, the re-invoice request left
- * against
- * that invoice and the repair cost an accepted invoice total becomes.
+ * authorised cost, the customer's excess and VAT status where the authority supplies
+ * or corrects them, the contributions it holds against the authority's own entry,
+ * the file the figures were read from — and, where the comparison with the Final
+ * Insurer Invoice was settled here, the re-invoice request left against that invoice
+ * and the repair cost an accepted invoice becomes.
  */
 export function buildAuthorityReviewPatch(claim, figures, options = {}) {
-  const { file_url, file_name, excessChoice, acceptTotal, reinvoice } = options;
+  const { file_url, file_name, excessChoice, vatChoice, acceptTotal, reinvoice } = options;
   const source = claim?.invoice_tracker || {};
   const items = { ...(source.items || {}) };
   const entry = { ...(items[AUTHORITY_ITEM_KEY] || {}) };
@@ -185,6 +237,20 @@ export function buildAuthorityReviewPatch(claim, figures, options = {}) {
     // The authority has supplied the figure, so it is nothing left to confirm.
     if (excess.tbc) patch.excess_tbc = false;
   }
+
+  // Who accounts for the VAT decides whether it is billed to the insurer or paid by
+  // the customer, so the authority's own answer fills a claim that hasn't got one,
+  // and replaces the claim's only where that was chosen.
+  const vat = authorityVatCheck(figures, claim);
+  if (vat.fills || (vat.differs && vatChoice === 'authority')) {
+    patch.client_vat_status = vat.shown;
+  }
+
+  // The contributions the authority holds the customer responsible for are kept
+  // against the authority's own entry: they are the authority's figures, not a
+  // claim setting, and the expected insurer's invoice is worked out from them.
+  const contributions = toNum(figures?.contributions);
+  if (contributions !== null) entry.contributions = round2(contributions);
 
   if (file_url) {
     entry.details_source = { file_url, file_name: file_name || '', at: new Date().toISOString() };
@@ -211,11 +277,16 @@ export function buildAuthorityReviewPatch(claim, figures, options = {}) {
 }
 
 /**
- * The figures of an authority that do NOT land on a field of the claim: the
- * amount and the excess are already in the history as their own field changes,
- * so only what the authority holds itself is logged here.
+ * The figures of an authority that do NOT land on a field of the claim: the amount,
+ * the excess and the customer's VAT status are already in the history as their own
+ * field changes, so only what the authority holds itself — its contributions — is
+ * logged here.
  */
-const AUTHORITY_FIGURE_SLOTS = { amount_total: 'authority_cost_gross', excess: 'policy_excess' };
+const AUTHORITY_FIGURE_SLOTS = {
+  amount_total: 'authority_cost_gross',
+  excess: 'policy_excess',
+  customer_vat: 'client_vat_status',
+};
 
 /** The activity history lines for an authority: what was read, changed and accepted. */
 export function buildAuthorityLog({ item, figures, corrections, accepted }) {

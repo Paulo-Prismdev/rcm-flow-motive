@@ -7,29 +7,38 @@ import HighlightableDocumentViewer from '@/components/shared/HighlightableDocume
 import ExtractedFigureRow from './ExtractedFigureRow';
 import { AckRow } from './InvoiceReviewChecks';
 import AuthorityExcessChoice from './AuthorityExcessChoice';
+import AuthorityVatChoice from './AuthorityVatChoice';
 import InvoiceVsAuthority from './InvoiceVsAuthority';
 import {
   AUTHORITY_EXTRACTION_SCHEMA,
   AUTHORITY_FIGURES,
   AUTHORITY_REQUIRED,
   authorityCorrections,
+  authorityExpectationFromReview,
   authorityFiguresForReview,
   authorityNeedsReview,
+  authorityVatCheck,
   buildAuthorityPrompt,
   checkAuthorityReg,
   emptyAuthorityFigures,
   excessCheck,
 } from './authorityReview';
-import { fetchSourceSnippets, snippetsFromExtraction, toNum } from './invoiceReview';
+import { fetchSourceSnippets, snippetsFromExtraction } from './invoiceReview';
 import { authorityWorkings, compareToAuthority, finalInvoiceTotal } from './invoiceAuthorityCheck';
 import { finalInvoiceLabel } from '@/components/shared/invoiceChecklist';
 
 /**
- * The check before an authority is recorded: the document on the left, the three
- * things read off it on the right. Its amount lands on the claim's authorised
- * cost, its registration has to be this vehicle's, its excess is filled in or put
- * to the user — and the amount is set against the repairer's invoices, whichever
- * of them was uploaded second. Nothing is saved until the user confirms here.
+ * The check before an authority is recorded: the document on the left, the figures
+ * read off it on the right — the amount and the registration it covers, and the
+ * customer's own position from its "customer is responsible for" section. The amount
+ * lands on the claim's authorised cost, its registration has to be this vehicle's,
+ * and its excess and the customer's VAT status are filled in or put to the user.
+ *
+ * From those figures the repair is split the way it is actually billed: the insurer's
+ * share of it, and what the customer pays the repairer themselves. The insurer's
+ * share is then set against the Final Insurer Invoice already on file, whichever of
+ * the two documents was uploaded second. Nothing is saved until the user confirms
+ * here.
  */
 export default function AuthorityReviewModal({
   isOpen, onClose, claim, vatExcess, item, fileUrl, fileName, onConfirm,
@@ -44,6 +53,7 @@ export default function AuthorityReviewModal({
   const [focused, setFocused] = useState('amount_total');
   const [acked, setAcked] = useState({});
   const [excessChoice, setExcessChoice] = useState('claim');
+  const [vatChoice, setVatChoice] = useState('claim');
   const [authorityChoice, setAuthorityChoice] = useState(null);
 
   // Read the document once each time the screen opens.
@@ -59,6 +69,7 @@ export default function AuthorityReviewModal({
     setReviewed({});
     setAcked({});
     setExcessChoice('claim');
+    setVatChoice('claim');
     setAuthorityChoice(null);
     setFocused('amount_total');
 
@@ -117,7 +128,17 @@ export default function AuthorityReviewModal({
   const regAcked = !regIssue || !!acked.reg;
 
   const excess = excessCheck(figures, claim);
-  const comparison = compareToAuthority(finalInvoiceTotal(claim), toNum(figures.amount_total), vatExcess);
+  const vat = authorityVatCheck(figures, claim);
+
+  // The authority read as the two halves of the repair: what the insurer's invoice
+  // should come to, and what the customer pays the repairer themselves. The figures
+  // the user has settled on here are the ones the check is made of.
+  const expectation = useMemo(
+    () => authorityExpectationFromReview({ figures, claim, excessChoice, vatChoice }),
+    [figures, claim, excessChoice, vatChoice]
+  );
+
+  const comparison = compareToAuthority(finalInvoiceTotal(claim), expectation, vatExcess);
   const choiceNeeded = comparison?.status === 'under' && !authorityChoice;
 
   const canConfirm = status !== 'reading'
@@ -130,10 +151,10 @@ export default function AuthorityReviewModal({
     const accepted = [];
     if (regIssue) accepted.push(`${regIssue.text} — accepted`);
     if (comparison?.status === 'under') {
-      accepted.push(`${authorityWorkings(comparison)} is ${fmtGBP(Math.abs(comparison.difference))} under the authorised ${fmtGBP(comparison.authority)} — ${authorityChoice === 'reinvoice' ? 'a corrected invoice requested from the repairer' : `accepted as the claim's final repair cost`}`);
+      accepted.push(`${authorityWorkings(comparison)} — the ${finalInvoiceLabel(claim)} of ${fmtGBP(comparison.insurerPart)} is ${fmtGBP(Math.abs(comparison.difference))} under that; ${authorityChoice === 'reinvoice' ? 'a corrected invoice requested from the repairer' : `accepted, the whole repair of ${fmtGBP(comparison.fullCost)} becoming the claim's final repair cost`}`);
     }
     if (comparison?.status === 'over') {
-      accepted.push(`${authorityWorkings(comparison)} is ${fmtGBP(Math.abs(comparison.difference))} over the authorised ${fmtGBP(comparison.authority)} — a repairer can't invoice more than the authority, so the ${finalInvoiceLabel(claim)} is flagged on the claim`);
+      accepted.push(`${authorityWorkings(comparison)} — the ${finalInvoiceLabel(claim)} of ${fmtGBP(comparison.insurerPart)} is ${fmtGBP(Math.abs(comparison.difference))} over that: a repairer can't invoice more than the insurer's share of the authority, so the ${finalInvoiceLabel(claim)} is flagged on the claim`);
     }
     if (excess.tbc && excessChoice === 'waived') {
       accepted.push('the policy excess was TBC on authority and this authority shows no excess, so it was marked as Waived');
@@ -149,12 +170,20 @@ export default function AuthorityReviewModal({
         ? `the policy excess replaced with the authority's ${fmtGBP(excess.shown)} (the claim held ${excess.storedLabel})`
         : `the claim's policy excess of ${excess.storedLabel} kept against the authority's ${fmtGBP(excess.shown)}`);
     }
+    if (vat.fills) {
+      accepted.push(`the customer VAT status filled in from the authority as ${vat.shown === 'VAT Registered' ? 'VAT registered' : 'not VAT registered'}, which the claim didn't hold`);
+    } else if (vat.differs) {
+      accepted.push(vatChoice === 'authority'
+        ? `the customer VAT status replaced with the authority's — ${vat.shown === 'VAT Registered' ? 'VAT registered' : 'not VAT registered'} (the claim held ${vat.stored === 'VAT Registered' ? 'VAT registered' : 'not VAT registered'})`
+        : `the claim's customer VAT status of ${vat.stored === 'VAT Registered' ? 'VAT registered' : 'not VAT registered'} kept against the authority's`);
+    }
 
     onConfirm({
       figures,
       corrections: authorityCorrections(figures, raw),
       accepted,
       excessChoice: excess.differs || (excess.tbc && excessChoice === 'waived') ? excessChoice : null,
+      vatChoice: vat.differs ? vatChoice : null,
       acceptInvoiceTotal: authorityChoice === 'accept',
       requestReinvoice: authorityChoice === 'reinvoice',
     });
@@ -269,6 +298,10 @@ export default function AuthorityReviewModal({
 
             {status !== 'reading' && (
               <AuthorityExcessChoice check={excess} choice={excessChoice} onChoice={setExcessChoice} />
+            )}
+
+            {status !== 'reading' && (
+              <AuthorityVatChoice check={vat} choice={vatChoice} onChoice={setVatChoice} />
             )}
 
             {status !== 'reading' && (

@@ -26,7 +26,7 @@ import {
 import { isInvoiceDocument, isPrivatePayingClaim } from '@/components/shared/invoiceChecklist';
 import RepairCostFromInvoice, { repairCostOffer } from './RepairCostFromInvoice';
 import InvoiceVsAuthority from './InvoiceVsAuthority';
-import { authorityAmount, authorityWorkings, compareToAuthority } from './invoiceAuthorityCheck';
+import { authorityWorkings, claimAuthorityExpectation, compareToAuthority } from './invoiceAuthorityCheck';
 
 /**
  * The check before an invoice is recorded: the document on the left, the figures
@@ -164,21 +164,21 @@ export default function InvoiceReviewModal({
 
   const mismatchAccepted = !mismatch || (acceptedMismatch && reason.trim().length > 0);
 
-  // The Final Insurer Invoice's total — the repairer's two invoices added up where
-  // the VAT and excess are on their own invoice — set against the repair cost
-  // already on the claim: it fills the figure in where there is none, and is
-  // flagged where it differs.
-  const costOffer = repairCostOffer(item, claim, figures, vatExcess);
+  // What the insurer's share of this repair should come to, and what the customer
+  // pays the repairer themselves — the two together are the whole repair, which is
+  // what the claim's final repair cost has to be. Nothing to work it out from until
+  // a Final Authority is on the claim, or on a job with no insurer on it at all.
+  const expectation = item?.setsRepairCost ? claimAuthorityExpectation(claim) : null;
+
+  // The whole repair set against the repair cost already on the claim: it fills the
+  // figure in where there is none, and is flagged where it differs.
+  const costOffer = repairCostOffer(item, claim, figures, expectation);
   const useRepairCost = repairCostChoice ?? costOffer?.defaultUse ?? false;
 
-  // The repairer's invoices are set against the amount the job was authorised at,
-  // and a total over it can never be saved as the Final Insurer Invoice at all.
-  // Where the VAT and excess are on their own invoice the two are added up — and
-  // until that invoice is on file the check waits for it rather than reading the
-  // insurer's invoice as short.
-  const authority = item?.setsRepairCost ? authorityAmount(claim) : null;
+  // The repairer's invoice against the insurer's own share of the authorised amount,
+  // and an invoice over it can never be saved as the Final Insurer Invoice at all.
   const comparison = item?.setsRepairCost
-    ? compareToAuthority(invoiceTotal, authority, vatExcess)
+    ? compareToAuthority(invoiceTotal, expectation, vatExcess)
     : null;
   const overAuthority = comparison?.status === 'over';
   const reinvoiceRequested = authorityChoice === 'reinvoice';
@@ -202,10 +202,10 @@ export default function InvoiceReviewModal({
       accepted.push(`the invoice total ${fmtGBP(mismatch.invoiceTotal)} differs from our calculated ${fmtGBP(mismatch.expected.amount)}${mismatch.expected.note ? ` (${mismatch.expected.note})` : ''} — accepted with the reason: ${reason.trim()}`);
     }
     if (comparison?.status === 'under') {
-      accepted.push(`${authorityWorkings(comparison)} is ${fmtGBP(Math.abs(comparison.difference))} under the authorised ${fmtGBP(comparison.authority)} — ${reinvoiceRequested ? 'a corrected invoice requested from the repairer' : "accepted as the claim's final repair cost"}`);
+      accepted.push(`${authorityWorkings(comparison)} — the invoice total of ${fmtGBP(comparison.insurerPart)} is ${fmtGBP(Math.abs(comparison.difference))} under that; ${reinvoiceRequested ? 'a corrected invoice requested from the repairer' : `accepted, the whole repair of ${fmtGBP(comparison.fullCost)} becoming the claim's final repair cost`}`);
     }
     if (comparison?.status === 'match') {
-      accepted.push(`${authorityWorkings(comparison)} matches the authorised ${fmtGBP(comparison.authority)}`);
+      accepted.push(`${authorityWorkings(comparison)} — the invoice total of ${fmtGBP(comparison.insurerPart)} matches, making the whole repair ${fmtGBP(comparison.fullCost)} against the authorised ${fmtGBP(comparison.authority)}`);
     }
     softBlockers.filter((b) => acked[b.id]).forEach((b) => accepted.push(`${b.text} — accepted`));
     onConfirm({
@@ -313,9 +313,9 @@ export default function InvoiceReviewModal({
                 choice={authorityChoice}
                 onChoice={setAuthorityChoice}
                 onReinvoiceEmail={onReinvoiceEmail}
-                emptyNote={authority === null
-                  ? 'No final authority is on the claim yet — the invoice total is set against it as soon as one arrives.'
-                  : 'Enter the invoice total and it is set against the authorised amount.'}
+                emptyNote={expectation === null
+                  ? "No final authority is on the claim yet — the insurer's share of the invoice is set against it as soon as one arrives."
+                  : "Enter the invoice total and it is set against the insurer's share of the authorised amount."}
               />
             )}
 

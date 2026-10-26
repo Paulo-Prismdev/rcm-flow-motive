@@ -58,9 +58,14 @@ import PendingStepBanner from './PendingStepBanner';
 import { resolveInvoiceParty } from './invoiceParty';
 import useClaimInvoiceDocs from './useClaimInvoiceDocs';
 import { buildReviewLog, toNum } from './invoiceReview';
-import { buildAuthorityLog, buildAuthorityReviewPatch, excessCheck } from './authorityReview';
 import {
-  authorityAmount,
+  authorityExpectationFromReview,
+  buildAuthorityLog,
+  buildAuthorityReviewPatch,
+  excessCheck,
+} from './authorityReview';
+import {
+  claimAuthorityExpectation,
   compareRepairCostSplit,
   compareToAuthority,
   finalInvoiceTotal,
@@ -362,33 +367,29 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
     const { item } = review;
     const total = Number(figures.amount_total) || 0;
 
-    // The repairer's invoices are settled against the amount the job was authorised
-    // at: within the authority their total can become the final repair cost, and
-    // where the repairer is asked to re-invoice, the invoice is left waiting on a
-    // corrected copy instead. Where the VAT and excess are billed on their own
-    // invoice the two are added up, and the figure either choice accepts is the two
-    // together — the repair cost, not the insurer's part of it.
-    const authority = item.setsRepairCost ? authorityAmount(claim) : null;
+    // The repairer's invoice is settled against the insurer's share of the authorised
+    // repair — the authorised amount ex VAT, plus VAT only where the customer isn't
+    // registered, less their excess and any contribution — and the customer pays the
+    // rest to the repairer themselves. Whichever choice settles it here, the figure
+    // that becomes the claim's final repair cost is the WHOLE repair: the insurer's
+    // invoice plus the customer's share, which is what every fee and invoice is worked
+    // out from.
+    const expectation = item.setsRepairCost ? claimAuthorityExpectation(claim) : null;
     const comparison = item.setsRepairCost
-      ? compareToAuthority(total, authority, vatExcessAuthority)
+      ? compareToAuthority(total, expectation, vatExcessAuthority)
       : null;
     const reinvoice = requestReinvoice && comparison?.status === 'under'
-      ? { invoice_total: comparison.measured, authority: comparison.authority, by: paidBy }
+      ? { invoice_total: comparison.insurerPart, authority: comparison.expected, by: paidBy }
       : null;
-    // What the check measured: the insurer's invoice, or the two added up.
-    const measure = comparison?.measured ?? total;
-    const split = (comparison?.parts?.length || 0) > 1;
-    const repairCost = item.setsRepairCost && !reinvoice
-      ? ((acceptInvoiceTotal || useAsRepairCost) ? measure : null)
+    const repairCost = item.setsRepairCost && !reinvoice && (acceptInvoiceTotal || useAsRepairCost)
+      ? (comparison?.fullCost ?? total)
       : null;
 
     const description = reinvoice
-      ? `${item.label} recorded — invoice ${figures.invoice_number}, dated ${figures.invoice_date}, ${fmtGBP(measure)} is ${fmtGBP(Math.abs(comparison.difference))} under the authorised ${fmtGBP(authority)}; a corrected invoice has been requested from the repairer`
-      : acceptInvoiceTotal
-        ? `${item.label} recorded — invoice ${figures.invoice_number}, dated ${figures.invoice_date}, ${fmtGBP(total)}; ${split ? `the two invoices together (${fmtGBP(measure)}) accepted` : 'accepted'} as the final repair cost against the authorised ${fmtGBP(authority)}`
-        : repairCost
-          ? `${item.label} recorded — invoice ${figures.invoice_number}, dated ${figures.invoice_date}, ${fmtGBP(total)}; final repair cost set to ${fmtGBP(repairCost)}${split ? ' from the two invoices' : ' from the invoice'}`
-          : `${item.label} recorded — invoice ${figures.invoice_number}, dated ${figures.invoice_date}, ${fmtGBP(total)}`;
+      ? `${item.label} recorded — invoice ${figures.invoice_number}, dated ${figures.invoice_date}, ${fmtGBP(comparison.insurerPart)} is ${fmtGBP(Math.abs(comparison.difference))} under the ${fmtGBP(comparison.expected)} the insurer's share of this repair comes to; a corrected invoice has been requested from the repairer`
+      : repairCost
+        ? `${item.label} recorded — invoice ${figures.invoice_number}, dated ${figures.invoice_date}, ${fmtGBP(total)}; the whole repair set as the final repair cost, ${fmtGBP(repairCost)}${comparison ? ` (the insurer's invoice plus the customer's ${fmtGBP(comparison.customerShare)})` : ''}`
+        : `${item.label} recorded — invoice ${figures.invoice_number}, dated ${figures.invoice_date}, ${fmtGBP(total)}`;
 
     try {
       await docs.attachFile(item, { file_url: review.fileUrl, file_name: review.fileName });
@@ -429,17 +430,33 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
    * settled here — including the choice to have the repairer re-invoice.
    */
   const handleAuthorityConfirm = async ({
-    figures, corrections, accepted, excessChoice, acceptInvoiceTotal, requestReinvoice,
+    figures, corrections, accepted, excessChoice, vatChoice, acceptInvoiceTotal, requestReinvoice,
   }) => {
     if (!authorityReview) return;
     const { item } = authorityReview;
     const total = toNum(figures.amount_total) || 0;
-    const comparison = compareToAuthority(finalInvoiceTotal(claim), total, vatExcessAuthority);
+
+    // The authority as the user settled it read: from the authorised amount, the
+    // customer's VAT status, their excess and any contribution, the repair splits into
+    // the insurer's share of it and what the customer pays the repairer themselves. The
+    // insurer's share is what the Final Insurer Invoice already on file is measured
+    // against.
+    const expectation = authorityExpectationFromReview({ figures, claim, excessChoice, vatChoice });
+    const comparison = compareToAuthority(finalInvoiceTotal(claim), expectation, vatExcessAuthority);
     const reinvoice = requestReinvoice && comparison?.status === 'under'
-      ? { invoice_total: comparison.measured, authority: comparison.authority, by: paidBy }
+      ? { invoice_total: comparison.insurerPart, authority: comparison.expected, by: paidBy }
       : null;
-    const acceptTotal = acceptInvoiceTotal && comparison?.status === 'under' ? comparison.measured : null;
-    const split = (comparison?.parts?.length || 0) > 1;
+
+    // The whole repair is what the claim's final repair cost has to be: accepting an
+    // invoice under the expected figure sets it, and so does an authority arriving on a
+    // claim whose repair cost was set from the insurer's invoice alone — the authority
+    // is what shows the customer's own share of the repair.
+    const insurerInvoice = finalInvoiceTotal(claim);
+    const setFromInsurerInvoiceAlone = insurerInvoice !== null
+      && Math.abs(toNum(claim.final_repair_cost) - insurerInvoice) < 0.01;
+    const acceptTotal = comparison && (acceptInvoiceTotal ? comparison.status === 'under' : setFromInsurerInvoiceAlone)
+      ? comparison.fullCost
+      : null;
 
     const excess = excessCheck(figures, claim);
     const excessWaived = (excess.tbc && excessChoice === 'waived') || (excess.fills && excess.shown === 0);
@@ -450,7 +467,7 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
         : excess.differs
           ? `; excess kept at ${excessChoice === 'authority' ? fmtGBP(excess.shown) : excess.storedLabel}`
           : '';
-    const decisionText = `${acceptTotal ? `; ${split ? `the two invoices together (${fmtGBP(acceptTotal)})` : `the invoice total of ${fmtGBP(acceptTotal)}`} accepted as the final repair cost` : ''}${reinvoice ? `; a corrected invoice requested from the repairer (invoiced ${fmtGBP(reinvoice.invoice_total)} against ${fmtGBP(reinvoice.authority)})` : ''}`;
+    const decisionText = `${acceptTotal ? `; the whole repair of ${fmtGBP(acceptTotal)} set as the final repair cost (the insurer's invoice ${fmtGBP(comparison.insurerPart)} plus the customer's ${fmtGBP(comparison.customerShare)})` : ''}${reinvoice ? `; a corrected invoice requested from the repairer (invoiced ${fmtGBP(reinvoice.invoice_total)} against the ${fmtGBP(reinvoice.authority)} the insurer's share comes to)` : ''}`;
 
     try {
       await docs.attachFile(item, { file_url: authorityReview.fileUrl, file_name: authorityReview.fileName });
@@ -459,6 +476,7 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
           file_url: authorityReview.fileUrl,
           file_name: authorityReview.fileName,
           excessChoice,
+          vatChoice,
           acceptTotal,
           reinvoice,
         }),
@@ -674,7 +692,7 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
   // file over it flags itself, with no stored state to go stale.
   const finalInvoiceComparison = compareToAuthority(
     finalInvoiceTotal(claim),
-    authorityAmount(claim),
+    claimAuthorityExpectation(claim),
     vatExcessAuthority
   );
 
