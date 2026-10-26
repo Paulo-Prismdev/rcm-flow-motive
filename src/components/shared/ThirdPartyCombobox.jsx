@@ -6,15 +6,15 @@ import {
   Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList,
 } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Check, ChevronsUpDown, Plus, X, Building2, User } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { ChevronsUpDown, Plus, X } from "lucide-react";
 import { sortAlphaNumeric } from "./sortAlphaNumeric";
-import { isThirdPartyTagged, ensureDirectoryTag } from "./directoryTags";
+import { ensureDirectoryTag } from "./directoryTags";
 import AddThirdPartyModal from "./AddThirdPartyModal";
+import DirectoryPickerItem from "./DirectoryPickerItem";
 
-// Searches the one Clients & Third Parties directory. Anyone in it can be the
-// third party; the records already tagged as third parties are listed first, and
-// picking an untagged one adds the Third Party tag.
+// Searches the one Clients & Third Parties directory as a single alphabetical
+// list, each record carrying its own Client / Third Party tags. Anyone in it can
+// be the third party, and picking one adds the Third Party tag.
 export default function ThirdPartyCombobox({ value, onChange, placeholder = "Select third party...", allowClear = false }) {
   const [open, setOpen] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -26,8 +26,6 @@ export default function ThirdPartyCombobox({ value, onChange, placeholder = "Sel
   });
 
   const sorted = sortAlphaNumeric(records, 'name');
-  const thirdPartyRecords = sorted.filter(isThirdPartyTagged);
-  const otherRecords = sorted.filter((r) => !isThirdPartyTagged(r));
 
   const selectedName = typeof value === 'string' ? value : (value?.name || "");
 
@@ -48,17 +46,6 @@ export default function ThirdPartyCombobox({ value, onChange, placeholder = "Sel
     e.stopPropagation();
     onChange(null);
   };
-
-  const renderItem = (record) => (
-    <CommandItem key={record.id} value={record.name} onSelect={() => handleSelect(record)}>
-      <Check className={cn("mr-2 h-4 w-4", selectedName === record.name ? "opacity-100" : "opacity-0")} />
-      {record.client_type === 'Company'
-        ? <Building2 className="mr-1.5 h-3.5 w-3.5 text-muted-foreground" />
-        : <User className="mr-1.5 h-3.5 w-3.5 text-muted-foreground" />
-      }
-      <span>{record.name}</span>
-    </CommandItem>
-  );
 
   return (
     <>
@@ -96,14 +83,16 @@ export default function ThirdPartyCombobox({ value, onChange, placeholder = "Sel
                       Add New Third Party
                     </CommandItem>
                   </CommandGroup>
-                  {thirdPartyRecords.length > 0 && (
-                    <CommandGroup heading="Third parties">
-                      {thirdPartyRecords.map(renderItem)}
-                    </CommandGroup>
-                  )}
-                  {otherRecords.length > 0 && (
-                    <CommandGroup heading="Also in the directory — picking one tags them a third party">
-                      {otherRecords.map(renderItem)}
+                  {sorted.length > 0 && (
+                    <CommandGroup>
+                      {sorted.map((record) => (
+                        <DirectoryPickerItem
+                          key={record.id}
+                          record={record}
+                          selected={selectedName === record.name}
+                          onSelect={handleSelect}
+                        />
+                      ))}
                     </CommandGroup>
                   )}
                 </CommandList>

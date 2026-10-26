@@ -6,15 +6,15 @@ import {
   Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList,
 } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Check, ChevronsUpDown, Plus, X, Building2, User } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { ChevronsUpDown, Plus, X } from "lucide-react";
 import { sortAlphaNumeric } from "./sortAlphaNumeric";
-import { isClientTagged, ensureDirectoryTag } from "./directoryTags";
+import { ensureDirectoryTag } from "./directoryTags";
 import AddClientModal from "./AddClientModal";
+import DirectoryPickerItem from "./DirectoryPickerItem";
 
-// Searches the one Clients & Third Parties directory. Anyone in it can be the
-// client; the records already tagged as clients are listed first, and picking an
-// untagged one adds the Client tag.
+// Searches the one Clients & Third Parties directory as a single alphabetical
+// list, each record carrying its own Client / Third Party tags. Anyone in it can
+// be the client, and picking one adds the Client tag.
 export default function ClientCombobox({ value, onChange, placeholder = "Select client...", allowClear = false, onAddNew }) {
   const [open, setOpen] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -26,8 +26,6 @@ export default function ClientCombobox({ value, onChange, placeholder = "Select 
   });
 
   const sorted = sortAlphaNumeric(records, 'name');
-  const clientRecords = sorted.filter(isClientTagged);
-  const otherRecords = sorted.filter((r) => !isClientTagged(r));
 
   const selectedName = typeof value === 'string' ? value : (value?.name || "");
 
@@ -48,17 +46,6 @@ export default function ClientCombobox({ value, onChange, placeholder = "Select 
     e.stopPropagation();
     onChange(null);
   };
-
-  const renderItem = (record) => (
-    <CommandItem key={record.id} value={record.name} onSelect={() => handleSelect(record)}>
-      <Check className={cn("mr-2 h-4 w-4", selectedName === record.name ? "opacity-100" : "opacity-0")} />
-      {record.client_type === 'Company'
-        ? <Building2 className="mr-1.5 h-3.5 w-3.5 text-muted-foreground" />
-        : <User className="mr-1.5 h-3.5 w-3.5 text-muted-foreground" />
-      }
-      <span>{record.name}</span>
-    </CommandItem>
-  );
 
   return (
     <>
@@ -96,14 +83,16 @@ export default function ClientCombobox({ value, onChange, placeholder = "Select 
                       Add New Client
                     </CommandItem>
                   </CommandGroup>
-                  {clientRecords.length > 0 && (
-                    <CommandGroup heading="Clients">
-                      {clientRecords.map(renderItem)}
-                    </CommandGroup>
-                  )}
-                  {otherRecords.length > 0 && (
-                    <CommandGroup heading="Also in the directory — picking one tags them a client">
-                      {otherRecords.map(renderItem)}
+                  {sorted.length > 0 && (
+                    <CommandGroup>
+                      {sorted.map((record) => (
+                        <DirectoryPickerItem
+                          key={record.id}
+                          record={record}
+                          selected={selectedName === record.name}
+                          onSelect={handleSelect}
+                        />
+                      ))}
                     </CommandGroup>
                   )}
                 </CommandList>
