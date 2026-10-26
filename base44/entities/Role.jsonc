@@ -41,22 +41,22 @@
   "rls": {
     "create": {
       "user_condition": {
-        "user_type": "internal"
+        "data.user_type": "internal"
       }
     },
     "read": {
       "user_condition": {
-        "user_type": "internal"
+        "data.user_type": "internal"
       }
     },
     "update": {
       "user_condition": {
-        "user_type": "internal"
+        "data.user_type": "internal"
       }
     },
     "delete": {
       "user_condition": {
-        "user_type": "internal"
+        "data.user_type": "internal"
       }
     }
   }

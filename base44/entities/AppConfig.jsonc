@@ -17,7 +17,7 @@
   "rls": {
     "create": {
       "user_condition": {
-        "user_type": "internal"
+        "data.user_type": "internal"
       }
     },
     "read": {
@@ -25,12 +25,12 @@
     },
     "update": {
       "user_condition": {
-        "user_type": "internal"
+        "data.user_type": "internal"
       }
     },
     "delete": {
       "user_condition": {
-        "user_type": "internal"
+        "data.user_type": "internal"
       }
     }
   }
