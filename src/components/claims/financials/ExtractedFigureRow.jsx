@@ -10,9 +10,10 @@ const CONFIDENCE_META = {
 };
 
 /**
- * One figure the AI read off the invoice: editable, with what it made of it, the
- * text it found the value in, and — while it is the focused figure — the
- * matching text highlighted on the document beside this panel.
+ * One figure the AI read off the document: what the AI made of it on the row's own
+ * line, with the value on the full width beneath it — a reference or an amount is
+ * never cut off — and, while the figure is in focus, the text it was found in
+ * highlighted on the document beside this panel.
  */
 export default function ExtractedFigureRow({
   field, value, confidence, snippet, focused, needsReview, reviewed,
@@ -30,21 +31,9 @@ export default function ExtractedFigureRow({
       className={`rounded-lg border px-2 py-1.5 cursor-pointer transition-colors ${focused ? 'border-purple-400 dark:border-purple-600 bg-purple-50/70 dark:bg-purple-900/10' : 'border-border hover:border-purple-300 dark:hover:border-purple-800'}`}
     >
       <div className="flex items-center gap-2">
-        <span className="w-[92px] flex-shrink-0 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+        <span className="flex-1 min-w-0 truncate text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
           {field.label}
         </span>
-        <div className="flex-1 min-w-0">
-          <Input
-            type={field.type === 'date' ? 'date' : field.type === 'number' ? 'number' : 'text'}
-            step={field.type === 'number' ? '0.01' : undefined}
-            inputMode={field.type === 'number' ? 'decimal' : undefined}
-            value={value ?? ''}
-            onChange={(e) => onChange(field.key, e.target.value)}
-            onClick={(e) => e.stopPropagation()}
-            onFocus={onFocus}
-            className={`h-7 text-xs ${unchecked ? 'border-amber-300 dark:border-amber-700' : ''}`}
-          />
-        </div>
         <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-semibold flex-shrink-0 ${meta.className}`}>
           <Icon className="w-2.5 h-2.5" strokeWidth={3} /> {meta.label}
         </span>
@@ -58,8 +47,19 @@ export default function ExtractedFigureRow({
         </button>
       </div>
 
+      <Input
+        type={field.type === 'date' ? 'date' : field.type === 'number' ? 'number' : 'text'}
+        step={field.type === 'number' ? '0.01' : undefined}
+        inputMode={field.type === 'number' ? 'decimal' : undefined}
+        value={value ?? ''}
+        onChange={(e) => onChange(field.key, e.target.value)}
+        onClick={(e) => e.stopPropagation()}
+        onFocus={onFocus}
+        className={`mt-1 h-7 text-xs ${unchecked ? 'border-amber-300 dark:border-amber-700' : ''}`}
+      />
+
       {unchecked && (
-        <label className="mt-1 ml-[100px] inline-flex items-center gap-1.5 text-[10px] font-medium text-amber-700 dark:text-amber-400 cursor-pointer">
+        <label className="mt-1 inline-flex items-center gap-1.5 text-[10px] font-medium text-amber-700 dark:text-amber-400 cursor-pointer">
           <input
             type="checkbox"
             checked={!!reviewed}
@@ -72,7 +72,7 @@ export default function ExtractedFigureRow({
       )}
 
       {focused && (
-        <p className="mt-1 ml-[100px] text-[10px] leading-snug text-muted-foreground">
+        <p className="mt-1 text-[10px] leading-snug text-muted-foreground">
           {snippet ? (
             <>
               Found in the document:{' '}

@@ -239,7 +239,7 @@ export default function InvoiceReviewModal({
 
   return (
     <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/50 backdrop-blur-sm p-3" data-mobile-full-modal="true">
-      <div className="bg-card border border-border rounded-xl shadow-2xl w-full max-w-6xl h-[88vh] flex flex-col overflow-hidden">
+      <div className="bg-card border border-border rounded-xl shadow-2xl w-[90vw] max-w-[1400px] h-[90vh] !overflow-hidden flex flex-col">
         <div className="flex items-center gap-3 px-4 py-2.5 border-b border-border flex-shrink-0">
           <div className="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center flex-shrink-0">
             <Sparkles className="w-4 h-4 text-purple-600 dark:text-purple-400" />
@@ -256,16 +256,16 @@ export default function InvoiceReviewModal({
         </div>
 
         <div className="flex-1 flex flex-col md:flex-row overflow-hidden min-h-0">
-          <div className="md:w-1/2 h-52 md:h-full border-b md:border-b-0 md:border-r border-border flex flex-col min-h-0">
+          <div className="md:w-[55%] h-52 md:h-full border-b md:border-b-0 md:border-r border-border flex flex-col min-h-0">
             <div className="px-3 py-1.5 bg-muted/40 border-b border-border text-[10px] font-semibold uppercase tracking-wider text-muted-foreground flex-shrink-0">
               The document
             </div>
             <div className="flex-1 min-h-0">
-              <HighlightableDocumentViewer fileUrl={fileUrl} highlightText={highlightText} />
+              <HighlightableDocumentViewer fileUrl={fileUrl} highlightText={highlightText} fitWidth allowFullscreen />
             </div>
           </div>
 
-          <div className="md:w-1/2 flex-1 overflow-y-auto p-3 space-y-2.5">
+          <div className="md:w-[45%] flex-1 min-h-0 overflow-y-auto p-3 space-y-2.5">
             {status === 'reading' && (
               <div className="flex items-center gap-2 rounded-lg border border-purple-300 dark:border-purple-800 bg-purple-50 dark:bg-purple-900/20 px-2.5 py-2">
                 <Loader2 className="w-4 h-4 animate-spin text-purple-600 dark:text-purple-400 flex-shrink-0" />

@@ -248,8 +248,16 @@ export function readTotals(figures) {
 
 const blank = (v) => v === null || v === undefined || v === '';
 
+/**
+ * Nothing has been entered on the claim: the field is empty, or it holds a nought —
+ * an estimate or an authority is never a nil figure, so a nought means the same as
+ * blank. Those figures are filled in from the document without asking; only a real
+ * figure that differs is put to the user to settle.
+ */
+const nothingEntered = (v) => blank(v) || toNum(v) === 0;
+
 const differs = (type, shown, stored) => {
-  if (blank(stored)) return false;
+  if (nothingEntered(stored)) return false;
   if (type === 'number') {
     const a = toNum(shown);
     const b = toNum(stored);
@@ -292,7 +300,7 @@ export function documentRows({ claim, itemKey, figures }) {
     money: !!money,
     preferDocument: !!preferDocument,
     shown,
-    stored: blank(stored) ? '' : stored,
+    stored: nothingEntered(stored) ? '' : stored,
     differs: !!claimKey && differs(type || 'text', shown, stored),
   });
 
