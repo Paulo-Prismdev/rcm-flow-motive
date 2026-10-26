@@ -231,7 +231,7 @@
       "$or": [
         {
           "user_condition": {
-            "user_type": "internal"
+            "data.user_type": "internal"
           }
         }
       ]
@@ -240,7 +240,7 @@
       "$or": [
         {
           "user_condition": {
-            "user_type": "internal"
+            "data.user_type": "internal"
           }
         },
         {
@@ -262,11 +262,11 @@
         },
         {
           "data.shared_with_departments": {
-            "$in": "{{user.departments_access}}"
+            "$in": "{{user.data.departments_access}}"
           }
         },
         {
-          "created_by": "{{user.id}}"
+          "created_by_id": "{{user.id}}"
         }
       ]
     },
@@ -274,11 +274,11 @@
       "$or": [
         {
           "user_condition": {
-            "user_type": "internal"
+            "data.user_type": "internal"
           }
         },
         {
-          "created_by": "{{user.id}}"
+          "created_by_id": "{{user.id}}"
         },
         {
           "data.can_edit_users": {
@@ -293,11 +293,11 @@
       "$or": [
         {
           "user_condition": {
-            "user_type": "internal"
+            "data.user_type": "internal"
           }
         },
         {
-          "created_by": "{{user.id}}"
+          "created_by_id": "{{user.id}}"
         }
       ]
     }

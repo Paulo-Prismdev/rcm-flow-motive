@@ -11,11 +11,43 @@
         "company_admin"
       ],
       "default": "user",
-      "description": "The role of the user in the app"
+      "description": "The role of the user in the app",
+      "rls": {
+        "update": {
+          "$or": [
+            {
+              "user_condition": {
+                "data.user_type": "internal"
+              }
+            },
+            {
+              "user_condition": {
+                "collaborator_role": "editor"
+              }
+            }
+          ]
+        }
+      }
     },
     "company_id": {
       "type": "string",
-      "description": "ID of the Company entity this user belongs to"
+      "description": "ID of the Company entity this user belongs to",
+      "rls": {
+        "update": {
+          "$or": [
+            {
+              "user_condition": {
+                "data.user_type": "internal"
+              }
+            },
+            {
+              "user_condition": {
+                "collaborator_role": "editor"
+              }
+            }
+          ]
+        }
+      }
     },
     "user_type": {
       "type": "string",
@@ -49,7 +81,23 @@
     "is_active": {
       "type": "boolean",
       "default": true,
-      "description": "Whether this user is active"
+      "description": "Whether this user is active",
+      "rls": {
+        "update": {
+          "$or": [
+            {
+              "user_condition": {
+                "data.user_type": "internal"
+              }
+            },
+            {
+              "user_condition": {
+                "collaborator_role": "editor"
+              }
+            }
+          ]
+        }
+      }
     },
     "phone": {
       "type": "string",
@@ -87,7 +135,23 @@
     "can_manage_permissions": {
       "type": "boolean",
       "default": false,
-      "description": "Can this user manage permissions for others"
+      "description": "Can this user manage permissions for others",
+      "rls": {
+        "update": {
+          "$or": [
+            {
+              "user_condition": {
+                "data.user_type": "internal"
+              }
+            },
+            {
+              "user_condition": {
+                "collaborator_role": "editor"
+              }
+            }
+          ]
+        }
+      }
     },
     "departments_access": {
       "type": "array",
@@ -104,7 +168,23 @@
         ]
       },
       "default": [],
-      "description": "Departments this user has access to"
+      "description": "Departments this user has access to",
+      "rls": {
+        "update": {
+          "$or": [
+            {
+              "user_condition": {
+                "data.user_type": "internal"
+              }
+            },
+            {
+              "user_condition": {
+                "collaborator_role": "editor"
+              }
+            }
+          ]
+        }
+      }
     },
     "profile_picture_url": {
       "type": "string",
@@ -130,7 +210,23 @@
     },
     "linked_referrer_id": {
       "type": "string",
-      "description": "ID of linked Referrer entity"
+      "description": "ID of linked Referrer entity",
+      "rls": {
+        "update": {
+          "$or": [
+            {
+              "user_condition": {
+                "data.user_type": "internal"
+              }
+            },
+            {
+              "user_condition": {
+                "collaborator_role": "editor"
+              }
+            }
+          ]
+        }
+      }
     },
     "linked_contact_email": {
       "type": "string",
@@ -138,15 +234,63 @@
     },
     "linked_bodyshop_id": {
       "type": "string",
-      "description": "ID of linked Bodyshop entity"
+      "description": "ID of linked Bodyshop entity",
+      "rls": {
+        "update": {
+          "$or": [
+            {
+              "user_condition": {
+                "data.user_type": "internal"
+              }
+            },
+            {
+              "user_condition": {
+                "collaborator_role": "editor"
+              }
+            }
+          ]
+        }
+      }
     },
     "linked_supplier_id": {
       "type": "string",
-      "description": "ID of linked Supplier entity"
+      "description": "ID of linked Supplier entity",
+      "rls": {
+        "update": {
+          "$or": [
+            {
+              "user_condition": {
+                "data.user_type": "internal"
+              }
+            },
+            {
+              "user_condition": {
+                "collaborator_role": "editor"
+              }
+            }
+          ]
+        }
+      }
     },
     "linked_client_id": {
       "type": "string",
-      "description": "ID of linked Client entity"
+      "description": "ID of linked Client entity",
+      "rls": {
+        "update": {
+          "$or": [
+            {
+              "user_condition": {
+                "data.user_type": "internal"
+              }
+            },
+            {
+              "user_condition": {
+                "collaborator_role": "editor"
+              }
+            }
+          ]
+        }
+      }
     },
     "notification_preferences": {
       "type": "object",

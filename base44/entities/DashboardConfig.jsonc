@@ -89,21 +89,12 @@
       "$or": [
         {
           "user_condition": {
-            "user_type": "internal"
+            "data.user_type": "internal"
           }
         },
         {
-          "$and": [
-            {
-              "user_condition": {}
-            },
-            {
-              "data.dashboard_type": "user"
-            },
-            {
-              "data.user_id": "{{user.id}}"
-            }
-          ]
+          "data.dashboard_type": "user",
+          "data.user_id": "{{user.id}}"
         }
       ]
     },
@@ -111,7 +102,7 @@
       "$or": [
         {
           "user_condition": {
-            "user_type": "internal"
+            "data.user_type": "internal"
           }
         },
         {
@@ -129,21 +120,12 @@
       "$or": [
         {
           "user_condition": {
-            "user_type": "internal"
+            "data.user_type": "internal"
           }
         },
         {
-          "$and": [
-            {
-              "user_condition": {}
-            },
-            {
-              "data.dashboard_type": "user"
-            },
-            {
-              "data.user_id": "{{user.id}}"
-            }
-          ]
+          "data.dashboard_type": "user",
+          "data.user_id": "{{user.id}}"
         }
       ]
     },
@@ -151,21 +133,12 @@
       "$or": [
         {
           "user_condition": {
-            "user_type": "internal"
+            "data.user_type": "internal"
           }
         },
         {
-          "$and": [
-            {
-              "user_condition": {}
-            },
-            {
-              "data.dashboard_type": "user"
-            },
-            {
-              "data.user_id": "{{user.id}}"
-            }
-          ]
+          "data.dashboard_type": "user",
+          "data.user_id": "{{user.id}}"
         }
       ]
     }

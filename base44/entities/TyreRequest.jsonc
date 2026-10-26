@@ -84,7 +84,16 @@
           }
         },
         {
-          "data.bodyshop_id": "{{user.linked_bodyshop_id}}"
+          "$and": [
+            {
+              "user_condition": {
+                "data.user_type": "bodyshop"
+              }
+            },
+            {
+              "data.bodyshop_id": "{{user.data.linked_bodyshop_id}}"
+            }
+          ]
         }
       ]
     },
@@ -99,7 +108,16 @@
           "created_by_id": "{{user.id}}"
         },
         {
-          "data.bodyshop_id": "{{user.linked_bodyshop_id}}"
+          "$and": [
+            {
+              "user_condition": {
+                "data.user_type": "bodyshop"
+              }
+            },
+            {
+              "data.bodyshop_id": "{{user.data.linked_bodyshop_id}}"
+            }
+          ]
         }
       ]
     },

@@ -247,14 +247,20 @@
       "$or": [
         {
           "user_condition": {
-            "user_type": "internal"
+            "data.user_type": "internal"
           }
         },
         {
-          "user_condition": {
-            "user_type": "bodyshop"
-          },
-          "data.repairer_id": "{{user.linked_bodyshop_id}}"
+          "$and": [
+            {
+              "user_condition": {
+                "data.user_type": "bodyshop"
+              }
+            },
+            {
+              "data.repairer_id": "{{user.data.linked_bodyshop_id}}"
+            }
+          ]
         }
       ]
     },
@@ -262,11 +268,20 @@
       "$or": [
         {
           "user_condition": {
-            "user_type": "internal"
+            "data.user_type": "internal"
           }
         },
         {
-          "data.repairer_id": "{{user.linked_bodyshop_id}}"
+          "$and": [
+            {
+              "user_condition": {
+                "data.user_type": "bodyshop"
+              }
+            },
+            {
+              "data.repairer_id": "{{user.data.linked_bodyshop_id}}"
+            }
+          ]
         }
       ]
     },
@@ -274,20 +289,26 @@
       "$or": [
         {
           "user_condition": {
-            "user_type": "internal"
+            "data.user_type": "internal"
           }
         },
         {
-          "user_condition": {
-            "user_type": "bodyshop"
-          },
-          "data.repairer_id": "{{user.linked_bodyshop_id}}"
+          "$and": [
+            {
+              "user_condition": {
+                "data.user_type": "bodyshop"
+              }
+            },
+            {
+              "data.repairer_id": "{{user.data.linked_bodyshop_id}}"
+            }
+          ]
         }
       ]
     },
     "delete": {
       "user_condition": {
-        "user_type": "internal"
+        "data.user_type": "internal"
       }
     }
   }

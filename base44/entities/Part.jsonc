@@ -291,14 +291,20 @@
       "$or": [
         {
           "user_condition": {
-            "user_type": "internal"
+            "data.user_type": "internal"
           }
         },
         {
-          "user_condition": {
-            "user_type": "bodyshop"
-          },
-          "data.bodyshop_company_id": "{{user.linked_bodyshop_id}}"
+          "$and": [
+            {
+              "user_condition": {
+                "data.user_type": "bodyshop"
+              }
+            },
+            {
+              "data.bodyshop_company_id": "{{user.data.linked_bodyshop_id}}"
+            }
+          ]
         }
       ]
     },
@@ -306,14 +312,32 @@
       "$or": [
         {
           "user_condition": {
-            "user_type": "internal"
+            "data.user_type": "internal"
           }
         },
         {
-          "data.bodyshop_company_id": "{{user.linked_bodyshop_id}}"
+          "$and": [
+            {
+              "user_condition": {
+                "data.user_type": "bodyshop"
+              }
+            },
+            {
+              "data.bodyshop_company_id": "{{user.data.linked_bodyshop_id}}"
+            }
+          ]
         },
         {
-          "data.supplier_id": "{{user.linked_supplier_id}}"
+          "$and": [
+            {
+              "user_condition": {
+                "data.user_type": "supplier"
+              }
+            },
+            {
+              "data.supplier_id": "{{user.data.linked_supplier_id}}"
+            }
+          ]
         }
       ]
     },
@@ -321,26 +345,38 @@
       "$or": [
         {
           "user_condition": {
-            "user_type": "internal"
+            "data.user_type": "internal"
           }
         },
         {
-          "user_condition": {
-            "user_type": "bodyshop"
-          },
-          "data.bodyshop_company_id": "{{user.linked_bodyshop_id}}"
+          "$and": [
+            {
+              "user_condition": {
+                "data.user_type": "bodyshop"
+              }
+            },
+            {
+              "data.bodyshop_company_id": "{{user.data.linked_bodyshop_id}}"
+            }
+          ]
         },
         {
-          "user_condition": {
-            "user_type": "supplier"
-          },
-          "data.supplier_id": "{{user.linked_supplier_id}}"
+          "$and": [
+            {
+              "user_condition": {
+                "data.user_type": "supplier"
+              }
+            },
+            {
+              "data.supplier_id": "{{user.data.linked_supplier_id}}"
+            }
+          ]
         }
       ]
     },
     "delete": {
       "user_condition": {
-        "user_type": "internal"
+        "data.user_type": "internal"
       }
     }
   }
