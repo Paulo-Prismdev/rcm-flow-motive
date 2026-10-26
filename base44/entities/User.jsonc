@@ -28,7 +28,23 @@
         "client"
       ],
       "default": "internal",
-      "description": "Internal (platform owner) or external (referrer/repairer)"
+      "description": "Internal (platform owner) or external (referrer/repairer). Decides internal-only access across the app, so it can only be changed by internal staff (or an app editor) - never by the user themselves.",
+      "rls": {
+        "update": {
+          "$or": [
+            {
+              "user_condition": {
+                "data.user_type": "internal"
+              }
+            },
+            {
+              "user_condition": {
+                "collaborator_role": "editor"
+              }
+            }
+          ]
+        }
+      }
     },
     "is_active": {
       "type": "boolean",
@@ -41,23 +57,23 @@
     },
     "address_line_1": {
       "type": "string",
-      "description": "Street address"
+      "description": "User address line 1"
     },
     "address_line_2": {
       "type": "string",
-      "description": "Additional address line"
+      "description": "User address line 2"
     },
     "town": {
       "type": "string",
-      "description": "Town or City"
+      "description": "User town"
     },
     "county": {
       "type": "string",
-      "description": "County or State"
+      "description": "User county"
     },
     "postcode": {
       "type": "string",
-      "description": "Postal code"
+      "description": "User postcode"
     },
     "job_title": {
       "type": "string",
@@ -96,7 +112,7 @@
     },
     "emergency_contact_name": {
       "type": "string",
-      "description": "Emergency contact person name"
+      "description": "Emergency contact person"
     },
     "emergency_contact_phone": {
       "type": "string",

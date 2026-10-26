@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { excessLabel } from '../shared/excessState';
+import { getReferrerClaimClient } from '@/functions/getReferrerClaimClient';
 import {
   ArrowLeft,
   User,
@@ -147,9 +148,14 @@ export default function ReferrerClaimDetail({ claim, onClose, initialSection }) 
   const [clientRefValue, setClientRefValue] = useState(claim.client_ref || '');
   const queryClient = useQueryClient();
 
+  // The directory is internal-only, so a referrer reads the client behind this claim
+  // through the backend function, which only answers for the referrer's own claims.
   const { data: linkedClient } = useQuery({
-    queryKey: ['client', claim.client_id],
-    queryFn: () => base44.entities.Client.get(claim.client_id),
+    queryKey: ['claimClient', claim.id],
+    queryFn: async () => {
+      const res = await getReferrerClaimClient({ claim_id: claim.id });
+      return res.data?.client || null;
+    },
     enabled: !!claim.client_id && (!claim.client_phone || !claim.client_email),
     staleTime: 5 * 60 * 1000,
   });
