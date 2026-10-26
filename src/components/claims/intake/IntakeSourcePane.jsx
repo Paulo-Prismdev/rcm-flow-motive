@@ -90,7 +90,7 @@ export default function IntakeSourcePane({ files = [], pastedText = '', highligh
             <pre className="whitespace-pre-wrap break-words font-sans text-[11px] leading-relaxed text-foreground">{renderPasted()}</pre>
           </div>
         ) : (
-          <HighlightableDocumentViewer fileUrl={files[activeIndex]} highlightText={highlightText} />
+          <HighlightableDocumentViewer fileUrl={files[activeIndex]} highlightText={highlightText} fitWidth allowFullscreen />
         )}
       </div>
     </div>

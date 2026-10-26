@@ -177,7 +177,9 @@ export default function ClaimIntakeReview({ isOpen, reading, files = [], pastedT
 
   return (
     <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/50 backdrop-blur-sm p-3" data-mobile-full-modal="true">
-      <div className="bg-card border border-border rounded-xl shadow-2xl w-full max-w-6xl h-[90vh] flex flex-col overflow-hidden">
+      {/* The review takes almost the whole screen: the instruction is read against its
+          own full page, so the document needs the room, not a cramped half. */}
+      <div className="bg-card border border-border rounded-xl shadow-2xl w-full max-w-[min(97vw,1700px)] h-[94vh] flex flex-col overflow-hidden">
         <div className="flex items-center gap-3 px-4 py-2.5 border-b border-border flex-shrink-0">
           <div className="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center flex-shrink-0">
             <Sparkles className="w-4 h-4 text-purple-600 dark:text-purple-400" />
@@ -195,11 +197,11 @@ export default function ClaimIntakeReview({ isOpen, reading, files = [], pastedT
         </div>
 
         <div className="flex-1 flex flex-col md:flex-row overflow-hidden min-h-0">
-          <div className="md:w-1/2 h-52 md:h-full border-b md:border-b-0 md:border-r border-border flex flex-col min-h-0">
+          <div className="h-[45vh] min-h-[240px] md:h-full md:flex-1 md:min-w-0 md:min-h-0 border-b md:border-b-0 md:border-r border-border flex flex-col">
             <IntakeSourcePane files={files} pastedText={pastedText} highlightText={highlightText} activeIndex={activeIndex} onActivate={setActiveIndex} />
           </div>
 
-          <div className="md:w-1/2 flex-1 overflow-y-auto p-3 space-y-3">
+          <div className="flex-1 md:flex-none min-h-0 overflow-y-auto p-3 space-y-3 md:w-[38%] md:min-w-[300px] md:max-w-[440px]">
             {!groups.length && (
               <div className="flex items-start gap-2 rounded-lg border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20 px-2.5 py-2">
                 <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-px" />

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import * as pdfjsLib from 'pdfjs-dist';
-import { Loader2, ZoomIn, ZoomOut, FileText } from 'lucide-react';
+import { Loader2, ZoomIn, ZoomOut, FileText, Maximize2, Minimize2 } from 'lucide-react';
 
 // Use CDN-hosted worker matching the installed pdfjs-dist version
 pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
@@ -15,7 +16,23 @@ function getExtension(url) {
   }
 }
 
-export default function HighlightableDocumentViewer({ fileUrl, highlightText }) {
+const MIN_SCALE = 0.3;
+const MAX_SCALE = 3;
+// The pages sit inside a p-3 scroll area, so this much of the viewer is not theirs.
+const PAGE_PADDING = 24;
+
+const clampScale = (value) => Math.min(MAX_SCALE, Math.max(MIN_SCALE, value));
+
+/**
+ * The instruction's pages, with whatever value is in focus highlighted where it sits.
+ *
+ * `fitWidth` opens the document showing the full width of a page — no page cut off at
+ * the right-hand edge — and re-fits it whenever the viewer changes size, while leaving
+ * a deliberate zoom alone. `allowFullscreen` hands the document the whole screen for
+ * checking fine detail. Both are opt-in, so the other review screens keep their own
+ * framing.
+ */
+export default function HighlightableDocumentViewer({ fileUrl, highlightText, fitWidth = false, allowFullscreen = false }) {
   const containerRef = useRef(null);
   const pageRefs = useRef([]);
   const [loading, setLoading] = useState(true);
@@ -25,6 +42,9 @@ export default function HighlightableDocumentViewer({ fileUrl, highlightText }) 
   const [isImage, setIsImage] = useState(false);
   const [useIframeFallback, setUseIframeFallback] = useState(false);
   const [error, setError] = useState(null);
+  const [expanded, setExpanded] = useState(false);
+  // A page's true width at 100%, so the pages can be sized to the viewer.
+  const naturalWidthRef = useRef(0);
 
   // Load & render PDF pages
   useEffect(() => {
@@ -59,6 +79,7 @@ export default function HighlightableDocumentViewer({ fileUrl, highlightText }) 
         for (let i = 1; i <= pdf.numPages; i++) {
           if (cancelled) return;
           const page = await pdf.getPage(i);
+          if (i === 1) naturalWidthRef.current = page.getViewport({ scale: 1 }).width;
           const viewport = page.getViewport({ scale });
           const canvas = document.createElement('canvas');
           const ctx = canvas.getContext('2d');
@@ -102,6 +123,29 @@ export default function HighlightableDocumentViewer({ fileUrl, highlightText }) 
 
     return () => { cancelled = true; };
   }, [fileUrl, scale]);
+
+  // The page is sized to the width the viewer actually has, so a whole page width is
+  // readable without scrolling sideways. Re-runs when the viewer changes size (a new
+  // document, or going full screen) but not when the reader zooms, so a deliberate
+  // zoom-in stays where they put it.
+  useEffect(() => {
+    if (!fitWidth || !naturalWidthRef.current) return;
+    const frame = requestAnimationFrame(() => {
+      const available = (containerRef.current?.clientWidth || 0) - PAGE_PADDING;
+      if (available <= 0) return;
+      const target = clampScale(available / naturalWidthRef.current);
+      setScale((current) => (Math.abs(target - current) > 0.01 ? target : current));
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [fitWidth, fileUrl, expanded, pageData.length]);
+
+  // Full screen steps back out on Escape, so the document can never trap the reader.
+  useEffect(() => {
+    if (!expanded) return;
+    const onKey = (e) => { if (e.key === 'Escape') setExpanded(false); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [expanded]);
 
   // Search text layer & highlight matching regions
   useEffect(() => {
@@ -158,6 +202,16 @@ export default function HighlightableDocumentViewer({ fileUrl, highlightText }) 
     }
   }, [highlightText, pageData]);
 
+  // Zooming from a fitted page steps proportionally, so each click is the same jump
+  // whether the reader is at 60% or 160%; viewers that open at a set scale keep the
+  // fixed steps they have always had.
+  const zoomOut = () => setScale((s) => (fitWidth ? clampScale(s / 1.25) : Math.max(MIN_SCALE, s - 0.3)));
+  const zoomIn = () => setScale((s) => (fitWidth ? clampScale(s * 1.25) : Math.min(MAX_SCALE, s + 0.3)));
+  const fitToWidth = () => {
+    const available = (containerRef.current?.clientWidth || 0) - PAGE_PADDING;
+    if (available > 0 && naturalWidthRef.current > 0) setScale(clampScale(available / naturalWidthRef.current));
+  };
+
   if (!fileUrl) {
     return (
       <div className="flex items-center justify-center h-full bg-gray-100 dark:bg-gray-950">
@@ -202,17 +256,37 @@ export default function HighlightableDocumentViewer({ fileUrl, highlightText }) 
     );
   }
 
-  return (
-    <div className="h-full flex flex-col bg-gray-200 dark:bg-gray-950">
+  const viewer = (
+    <div className={expanded
+      ? 'fixed inset-0 z-[10080] flex flex-col bg-gray-200 dark:bg-gray-950 p-2'
+      : 'h-full flex flex-col bg-gray-200 dark:bg-gray-950'}>
       {/* Zoom controls */}
-      <div className="flex items-center justify-center gap-2 py-1 bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
-        <button onClick={() => setScale(s => Math.max(0.5, s - 0.3))} className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+      <div className="flex items-center justify-center gap-1.5 py-1 bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
+        <button onClick={zoomOut} title="Zoom out" className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
           <ZoomOut className="w-3.5 h-3.5 text-gray-500" />
         </button>
         <span className="text-xs text-gray-500 w-12 text-center tabular-nums">{Math.round(scale * 100)}%</span>
-        <button onClick={() => setScale(s => Math.min(3, s + 0.3))} className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+        <button onClick={zoomIn} title="Zoom in" className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
           <ZoomIn className="w-3.5 h-3.5 text-gray-500" />
         </button>
+        {fitWidth && (
+          <button
+            onClick={fitToWidth}
+            title="Fit the whole page width in the viewer"
+            className="ml-1 px-1.5 py-0.5 rounded text-[11px] font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+          >
+            Fit width
+          </button>
+        )}
+        {allowFullscreen && (
+          <button
+            onClick={() => setExpanded(on => !on)}
+            title={expanded ? 'Back to the review window' : 'Show the document full screen'}
+            className="ml-1 p-1 rounded text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+          >
+            {expanded ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
+          </button>
+        )}
       </div>
       {/* Pages */}
       <div ref={containerRef} className="flex-1 overflow-auto p-3">
@@ -236,4 +310,8 @@ export default function HighlightableDocumentViewer({ fileUrl, highlightText }) 
       </div>
     </div>
   );
+
+  // Full screen is rendered outside the review window, so the document gets the whole
+  // screen rather than the pane it normally shares with the details.
+  return expanded ? createPortal(viewer, document.body) : viewer;
 }
