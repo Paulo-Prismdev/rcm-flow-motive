@@ -1,18 +1,20 @@
-// Keeps a claim's client tied to the client directory.
+// Keeps a claim's client tied to the Clients & Third Parties directory.
 // A claim saved with a client typed straight into the form is matched against the
-// directory first (name, email or phone); if nothing matches, the client record is
-// created from the details entered and linked to the claim.
+// directory first (name, email or phone); if nothing matches, the record is created
+// from the details entered, tagged as a client, and linked to the claim.
 import { base44 } from '@/api/base44Client';
 
 export const clientKey = (v) => (v || '').toString().toLowerCase().replace(/[^a-z0-9]/g, '');
 
-const COMPANY_HINT = /\b(ltd|limited|plc|llp|inc|co|company|group|holdings|partnership|t\/a|ta)\b/i;
+export const COMPANY_HINT = /\b(ltd|limited|plc|llp|inc|co|company|group|holdings|partnership|t\/a|ta)\b/i;
 
 export function clientPayloadFromClaim(formData, jobNumber) {
   const name = (formData.client_name || '').trim();
   return {
     name,
     client_type: COMPANY_HINT.test(name) ? 'Company' : 'Individual',
+    is_client: true,
+    is_third_party: false,
     phone: formData.client_phone || '',
     email: formData.client_email || '',
     address_line_1: formData.client_address_line_1 || '',

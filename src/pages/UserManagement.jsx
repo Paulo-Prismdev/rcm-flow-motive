@@ -3,6 +3,7 @@ import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { UserPlus, Shield, Edit2, X, Check } from "lucide-react";
 import InviteUserModal from "../components/usermgmt/InviteUserModal";
+import { isClientTagged } from "@/components/shared/directoryTags";
 import { updateUserName } from "@/functions/updateUserName";
 
 const USER_TYPES = ["internal", "bodyshop", "referrer", "supplier", "client"];
@@ -235,7 +236,7 @@ export default function UserManagement() {
                                <option key={c.id} value={c.id}>{c.name}</option>
                              ))
                            ) : editData.user_type === "client" ? (
-                             clients.map((c) => (
+                             clients.filter(isClientTagged).map((c) => (
                                <option key={c.id} value={c.id}>{c.name}</option>
                              ))
                            ) : (

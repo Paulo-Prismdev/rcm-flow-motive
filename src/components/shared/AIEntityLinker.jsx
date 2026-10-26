@@ -3,6 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { Sparkles, Link, X, Check, AlertCircle, ChevronRight, User, Building2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { ensureDirectoryTag } from '@/components/shared/directoryTags';
 
 /**
  * AIEntityLinker — shown after AI extraction, before AIExtractConfirmDialog.
@@ -204,11 +205,12 @@ export default function AIEntityLinker({ isOpen, onClose, extractedData, onConfi
     return null;
   }
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     const enriched = { ...extractedData };
     const linkedTypes = [];
 
     if (links.client) {
+      await ensureDirectoryTag(links.client, 'client');
       linkedTypes.push('client');
       enriched.client_name = links.client.name;
       enriched.client_id = links.client.id;

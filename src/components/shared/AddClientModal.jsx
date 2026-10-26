@@ -11,6 +11,9 @@ import AddressLookupInput from './AddressLookupInput';
 
 const EMPTY_FORM = {
   name: '',
+  // Saved in the one Clients & Third Parties directory, tagged as a client.
+  is_client: true,
+  is_third_party: false,
   client_type: 'Individual',
   phone: '',
   email: '',

@@ -1,10 +1,10 @@
 import React from "react";
-import ClientDirectoryTab from "@/components/settings/ClientDirectoryTab";
+import DirectoryTab from "@/components/directory/DirectoryTab";
 
 export default function ClientDirectory() {
   return (
     <div className="h-full">
-      <ClientDirectoryTab />
+      <DirectoryTab />
     </div>
   );
 }

@@ -4,6 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AlertCircle } from "lucide-react";
+import { isClientTagged } from "@/components/shared/directoryTags";
 
 const USER_TYPES = [
   { value: 'internal', label: 'Internal' },
@@ -107,7 +108,7 @@ export default function UserEditForm({ user, onSave, onCancel, isSaving }) {
             className="neomorph-inset w-full px-3 py-2 rounded-lg text-sm"
           >
             <option value="">— Select Client —</option>
-            {clients.map(c => (
+            {clients.filter(isClientTagged).map(c => (
               <option key={c.id} value={c.id}>{c.name}</option>
             ))}
           </select>

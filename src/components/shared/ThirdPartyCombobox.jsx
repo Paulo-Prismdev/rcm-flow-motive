@@ -8,32 +8,38 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Check, ChevronsUpDown, Plus, X, Building2, User } from "lucide-react";
 import { cn } from "@/lib/utils";
-import AddThirdPartyModal from "./AddThirdPartyModal";
 import { sortAlphaNumeric } from "./sortAlphaNumeric";
+import { isThirdPartyTagged, ensureDirectoryTag } from "./directoryTags";
+import AddThirdPartyModal from "./AddThirdPartyModal";
 
-// Searchable list of third parties, kept separate from the client directory
-// so repeat third parties can be reused without becoming clients.
+// Searches the one Clients & Third Parties directory. Anyone in it can be the
+// third party; the records already tagged as third parties are listed first, and
+// picking an untagged one adds the Third Party tag.
 export default function ThirdPartyCombobox({ value, onChange, placeholder = "Select third party...", allowClear = false }) {
   const [open, setOpen] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const queryClient = useQueryClient();
 
-  const { data: thirdParties = [], isLoading } = useQuery({
-    queryKey: ["thirdParties"],
-    queryFn: () => base44.entities.ThirdParty.list('-created_date', 500),
+  const { data: records = [], isLoading } = useQuery({
+    queryKey: ["clients"],
+    queryFn: () => base44.entities.Client.list('-created_date', 1000),
   });
-  const sorted = sortAlphaNumeric(thirdParties, 'name');
+
+  const sorted = sortAlphaNumeric(records, 'name');
+  const thirdPartyRecords = sorted.filter(isThirdPartyTagged);
+  const otherRecords = sorted.filter((r) => !isThirdPartyTagged(r));
 
   const selectedName = typeof value === 'string' ? value : (value?.name || "");
 
-  const handleSelect = (name) => {
-    const selected = thirdParties.find((t) => t.name === name);
-    if (selected) onChange(selected);
+  const handleSelect = async (record) => {
+    const tagged = await ensureDirectoryTag(record, 'third_party');
+    queryClient.invalidateQueries({ queryKey: ["clients"] });
+    onChange(tagged);
     setOpen(false);
   };
 
   const handleAddSuccess = (newThirdParty) => {
-    queryClient.invalidateQueries({ queryKey: ["thirdParties"] });
+    queryClient.invalidateQueries({ queryKey: ["clients"] });
     onChange(newThirdParty);
     setShowAddModal(false);
   };
@@ -42,6 +48,17 @@ export default function ThirdPartyCombobox({ value, onChange, placeholder = "Sel
     e.stopPropagation();
     onChange(null);
   };
+
+  const renderItem = (record) => (
+    <CommandItem key={record.id} value={record.name} onSelect={() => handleSelect(record)}>
+      <Check className={cn("mr-2 h-4 w-4", selectedName === record.name ? "opacity-100" : "opacity-0")} />
+      {record.client_type === 'Company'
+        ? <Building2 className="mr-1.5 h-3.5 w-3.5 text-muted-foreground" />
+        : <User className="mr-1.5 h-3.5 w-3.5 text-muted-foreground" />
+      }
+      <span>{record.name}</span>
+    </CommandItem>
+  );
 
   return (
     <>
@@ -63,11 +80,11 @@ export default function ThirdPartyCombobox({ value, onChange, placeholder = "Sel
             </PopoverTrigger>
             <PopoverContent className="w-[--radix-popover-trigger-width] p-0" style={{ zIndex: 9999 }}>
               <Command>
-                <CommandInput placeholder="Search third parties..." />
+                <CommandInput placeholder="Search the directory..." />
                 <CommandList>
                   {isLoading
                     ? <CommandEmpty>Loading...</CommandEmpty>
-                    : <CommandEmpty>No third party found.</CommandEmpty>
+                    : <CommandEmpty>Nothing found in the directory.</CommandEmpty>
                   }
                   <CommandGroup>
                     <CommandItem
@@ -79,18 +96,16 @@ export default function ThirdPartyCombobox({ value, onChange, placeholder = "Sel
                       Add New Third Party
                     </CommandItem>
                   </CommandGroup>
-                  <CommandGroup heading="Existing Third Parties">
-                    {sorted.map((tp) => (
-                      <CommandItem key={tp.id} value={tp.name} onSelect={() => handleSelect(tp.name)}>
-                        <Check className={cn("mr-2 h-4 w-4", selectedName === tp.name ? "opacity-100" : "opacity-0")} />
-                        {tp.party_type === 'Company'
-                          ? <Building2 className="mr-1.5 h-3.5 w-3.5 text-muted-foreground" />
-                          : <User className="mr-1.5 h-3.5 w-3.5 text-muted-foreground" />
-                        }
-                        <span>{tp.name}</span>
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
+                  {thirdPartyRecords.length > 0 && (
+                    <CommandGroup heading="Third parties">
+                      {thirdPartyRecords.map(renderItem)}
+                    </CommandGroup>
+                  )}
+                  {otherRecords.length > 0 && (
+                    <CommandGroup heading="Also in the directory — picking one tags them a third party">
+                      {otherRecords.map(renderItem)}
+                    </CommandGroup>
+                  )}
                 </CommandList>
               </Command>
             </PopoverContent>

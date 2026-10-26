@@ -11,6 +11,8 @@ import FileUpload from '../shared/FileUpload';
 import ClientCombobox from '../shared/ClientCombobox';
 import ThirdPartyCombobox from '../shared/ThirdPartyCombobox';
 import { findClientMatches, createClientFromClaim } from '../shared/claimClientLink';
+import { findThirdPartyMatches, createThirdPartyFromClaim } from '../shared/thirdPartyLink';
+import { ensureDirectoryTag } from '../shared/directoryTags';
 import { claimPatchFromThirdParty } from '../shared/thirdPartyFields';
 import ClientLinkPrompt from './ClientLinkPrompt';
 import ReferrerCombobox from '../shared/ReferrerCombobox';
@@ -294,7 +296,11 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
   // is matched first (name, email or phone) — a likely match is offered for linking,
   // otherwise the client record is created from the details entered.
   const resolveClient = async (submitData) => {
-    if (submitData.client_id || !(submitData.client_name || '').trim()) return submitData;
+    if (submitData.client_id) {
+      await ensureDirectoryTag({ id: submitData.client_id }, 'client');
+      return submitData;
+    }
+    if (!(submitData.client_name || '').trim()) return submitData;
     const matches = await findClientMatches(submitData);
     if (matches.length) {
       setClientLinkPrompt({ matches, submitData });
@@ -303,6 +309,18 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
     const created = await createClientFromClaim(submitData, submitData.job_number);
     queryClient.invalidateQueries({ queryKey: ['clients'] });
     return { ...submitData, client_id: created.id };
+  };
+
+  // Ties the claim's third party to the directory the same way the client is tied:
+  // a third party typed straight in is matched first (name, email or phone), and the
+  // record that matches — or a new one — is tagged as a third party.
+  const resolveThirdParty = async (submitData) => {
+    if (!(submitData.tp_name || '').trim()) return submitData;
+    const matches = await findThirdPartyMatches(submitData);
+    if (matches.length) await ensureDirectoryTag(matches[0], 'third_party');
+    else await createThirdPartyFromClaim(submitData, submitData.job_number);
+    queryClient.invalidateQueries({ queryKey: ['clients'] });
+    return submitData;
   };
 
   const handleSubmit = async (e) => {
@@ -324,9 +342,9 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
     }
     let finalData;
     try {
-      finalData = await resolveClient(submitData);
+      finalData = await resolveClient(await resolveThirdParty(submitData));
     } catch (error) {
-      alert(`Failed to save the client to the directory: ${error?.message || error}. Please try again.`);
+      alert(`Failed to save to the directory: ${error?.message || error}. Please try again.`);
       setIsCreating(false); return;
     }
     // A likely directory match was found — waiting for the user to link it or create a new record
@@ -334,10 +352,12 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
     onSubmit(finalData);
   };
 
-  const handleClientLinkConfirm = (client) => {
+  const handleClientLinkConfirm = async (client) => {
     const pending = clientLinkPrompt?.submitData;
     setClientLinkPrompt(null);
-    if (pending && client) onSubmit({ ...pending, client_id: client.id });
+    if (!pending || !client) return;
+    const linked = await ensureDirectoryTag(client, 'client');
+    onSubmit(await resolveThirdParty({ ...pending, client_id: linked.id }));
   };
 
   const handleClientCreateNew = async () => {
@@ -347,7 +367,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
     try {
       const created = await createClientFromClaim(pending, pending.job_number);
       queryClient.invalidateQueries({ queryKey: ['clients'] });
-      onSubmit({ ...pending, client_id: created.id });
+      onSubmit(await resolveThirdParty({ ...pending, client_id: created.id }));
     } catch (error) {
       alert(`Failed to save the client to the directory: ${error?.message || error}. Please try again.`);
     }
@@ -400,6 +420,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
     let fresh = client;
     if (client?.id) {
       try { fresh = await base44.entities.Client.get(client.id) || client; } catch {}
+      await ensureDirectoryTag(fresh, 'client');
     }
     const fullAddress = [fresh.address_line_1, fresh.address_line_2, fresh.town, fresh.county, fresh.postcode].filter(Boolean).join(', ');
     let geocodedLat = null, geocodedLng = null;
@@ -443,9 +464,10 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
     }));
   };
 
-  const handleTPChange = (thirdParty) => {
+  const handleTPChange = async (thirdParty) => {
     if (!thirdParty) { setFormData(prev => ({ ...prev, tp_name: '' })); return; }
     setFormData(prev => ({ ...prev, ...claimPatchFromThirdParty(thirdParty, prev) }));
+    await ensureDirectoryTag(thirdParty, 'third_party');
   };
 
   const handleInsurerModalSuccess = (newInsurer) => {

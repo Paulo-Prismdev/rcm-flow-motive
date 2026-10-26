@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Building2, Check, Link2, Plus, User } from 'lucide-react';
 import { bestMatch } from './directoryMatch';
+import { isThirdPartyTagged } from '@/components/shared/directoryTags';
 import AddInsurerModal from '@/components/shared/AddInsurerModal';
 import AddThirdPartyModal from '@/components/shared/AddThirdPartyModal';
 import AddBodyshopModal from '@/components/shared/AddBodyshopModal';
@@ -21,7 +22,13 @@ export default function IntakeDirectoryLinks({ values = {}, onChange }) {
   const { data: referrers = [] } = useQuery({ queryKey: ['companies', 'referrer'], queryFn: () => base44.entities.Company.filter({ company_type: 'referrer' }) });
   const { data: bodyshops = [] } = useQuery({ queryKey: ['bodyshops'], queryFn: () => base44.entities.Bodyshop.list() });
   const { data: insurers = [] } = useQuery({ queryKey: ['insurers'], queryFn: () => base44.entities.Insurer.list('name', 500) });
-  const { data: thirdParties = [] } = useQuery({ queryKey: ['thirdParties'], queryFn: () => base44.entities.ThirdParty.list('name', 500) });
+  // The one directory: third-party-tagged records are offered first, and anyone in
+  // the directory can be picked as the third party.
+  const { data: directory = [] } = useQuery({ queryKey: ['clients'], queryFn: () => base44.entities.Client.list('name', 1000) });
+  const thirdPartyFirst = useMemo(
+    () => [...directory.filter(isThirdPartyTagged), ...directory.filter((r) => !isThirdPartyTagged(r))],
+    [directory],
+  );
 
   // The client is decided in the review screen's own client section — a directory
   // client, a new one, or the driver — so only the other parties are matched here.
@@ -30,18 +37,18 @@ export default function IntakeDirectoryLinks({ values = {}, onChange }) {
     { key: 'bodyshop', label: 'Bodyshop', value: values.bodyshop, match: bestMatch(values.bodyshop, bodyshops), icon: Building2, directory: 'repairer directory', addLabel: 'Add repairer' },
     { key: 'insurer', label: 'Insurer', value: values.insurer, match: bestMatch(values.insurer, insurers), icon: Building2, directory: 'insurer directory', addLabel: 'Add insurer' },
     { key: 'tpInsurer', label: "Third party's insurer", value: values.tp_insurer, match: bestMatch(values.tp_insurer, insurers), icon: Building2, directory: 'insurer directory', addLabel: 'Add insurer' },
-    { key: 'thirdParty', label: 'Third party', value: values.tp_name, match: bestMatch(values.tp_name, thirdParties), icon: User, directory: 'third party list', addLabel: 'Add third party' },
-  ].filter((row) => row.value), [values, referrers, bodyshops, insurers, thirdParties]);
+    { key: 'thirdParty', label: 'Third party', value: values.tp_name, match: bestMatch(values.tp_name, thirdPartyFirst), icon: User, directory: 'directory', addLabel: 'Add third party' },
+  ].filter((row) => row.value), [values, referrers, bodyshops, insurers, thirdPartyFirst]);
 
   // The match found is the starting point: a directory spelling of a name beats
   // the spelling read off the paper.
   useEffect(() => {
     if (reportedRef.current || !rows.length) return;
-    const listsLoaded = referrers.length || bodyshops.length || insurers.length || thirdParties.length;
+    const listsLoaded = referrers.length || bodyshops.length || insurers.length || directory.length;
     if (!listsLoaded) return;
     reportedRef.current = true;
     setLinks(Object.fromEntries(rows.map((row) => [row.key, row.match ? { mode: 'directory', record: row.match.record } : { mode: 'raw' }])));
-  }, [rows, referrers, bodyshops, insurers, thirdParties]);
+  }, [rows, referrers, bodyshops, insurers, directory]);
 
   useEffect(() => { onChange(links); }, [links, onChange]);
 

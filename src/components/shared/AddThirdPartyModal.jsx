@@ -11,6 +11,9 @@ import AddressLookupInput from './AddressLookupInput';
 
 const EMPTY_FORM = {
   name: '',
+  // Saved in the one Clients & Third Parties directory, tagged as a third party.
+  is_client: false,
+  is_third_party: true,
   party_type: 'Individual',
   phone: '',
   email: '',
@@ -36,7 +39,7 @@ export default function AddThirdPartyModal({ isOpen, onClose, onSuccess, initial
   }, [isOpen, initialName]);
 
   const createMutation = useMutation({
-    mutationFn: (data) => base44.entities.ThirdParty.create(data),
+    mutationFn: (data) => base44.entities.Client.create(data),
     onSuccess: (record) => {
       if (onSuccess) onSuccess(record);
       handleClose();
@@ -84,7 +87,7 @@ export default function AddThirdPartyModal({ isOpen, onClose, onSuccess, initial
         <div className="flex justify-between items-center mb-6">
           <div>
             <h2 className="text-xl font-bold">Add New Third Party</h2>
-            <p className="text-xs text-muted-foreground mt-1">Kept in the third party list, not the client directory.</p>
+            <p className="text-xs text-muted-foreground mt-1">Saved in the Clients &amp; Third Parties directory, tagged as a third party.</p>
           </div>
           <Button onClick={handleClose} variant="ghost" size="icon">
             <X className="w-5 h-5" />

@@ -8,25 +8,33 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Check, ChevronsUpDown, Plus, X, Building2, User } from "lucide-react";
 import { cn } from "@/lib/utils";
-import AddClientModal from "./AddClientModal";
 import { sortAlphaNumeric } from "./sortAlphaNumeric";
+import { isClientTagged, ensureDirectoryTag } from "./directoryTags";
+import AddClientModal from "./AddClientModal";
 
+// Searches the one Clients & Third Parties directory. Anyone in it can be the
+// client; the records already tagged as clients are listed first, and picking an
+// untagged one adds the Client tag.
 export default function ClientCombobox({ value, onChange, placeholder = "Select client...", allowClear = false, onAddNew }) {
   const [open, setOpen] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const queryClient = useQueryClient();
 
-  const { data: clients = [], isLoading } = useQuery({
+  const { data: records = [], isLoading } = useQuery({
     queryKey: ["clients"],
-    queryFn: () => base44.entities.Client.list('-created_date', 500),
+    queryFn: () => base44.entities.Client.list('-created_date', 1000),
   });
-  const sortedClients = sortAlphaNumeric(clients, 'name');
 
-  const selectedClientName = typeof value === 'string' ? value : (value?.name || "");
+  const sorted = sortAlphaNumeric(records, 'name');
+  const clientRecords = sorted.filter(isClientTagged);
+  const otherRecords = sorted.filter((r) => !isClientTagged(r));
 
-  const handleSelect = (clientName) => {
-    const selected = clients.find(c => c.name === clientName);
-    if (selected) onChange(selected);
+  const selectedName = typeof value === 'string' ? value : (value?.name || "");
+
+  const handleSelect = async (record) => {
+    const tagged = await ensureDirectoryTag(record, 'client');
+    queryClient.invalidateQueries({ queryKey: ["clients"] });
+    onChange(tagged);
     setOpen(false);
   };
 
@@ -40,6 +48,17 @@ export default function ClientCombobox({ value, onChange, placeholder = "Select 
     e.stopPropagation();
     onChange(null);
   };
+
+  const renderItem = (record) => (
+    <CommandItem key={record.id} value={record.name} onSelect={() => handleSelect(record)}>
+      <Check className={cn("mr-2 h-4 w-4", selectedName === record.name ? "opacity-100" : "opacity-0")} />
+      {record.client_type === 'Company'
+        ? <Building2 className="mr-1.5 h-3.5 w-3.5 text-muted-foreground" />
+        : <User className="mr-1.5 h-3.5 w-3.5 text-muted-foreground" />
+      }
+      <span>{record.name}</span>
+    </CommandItem>
+  );
 
   return (
     <>
@@ -55,17 +74,17 @@ export default function ClientCombobox({ value, onChange, placeholder = "Select 
                 aria-expanded={open}
                 className="w-full justify-between neomorph-inset border-0 focus:ring-0 pr-10"
               >
-                <span className="truncate">{selectedClientName || placeholder}</span>
+                <span className="truncate">{selectedName || placeholder}</span>
                 <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-[--radix-popover-trigger-width] p-0" style={{ zIndex: 9999 }}>
               <Command>
-                <CommandInput placeholder="Search clients..." />
+                <CommandInput placeholder="Search the directory..." />
                 <CommandList>
                   {isLoading
                     ? <CommandEmpty>Loading...</CommandEmpty>
-                    : <CommandEmpty>No client found.</CommandEmpty>
+                    : <CommandEmpty>Nothing found in the directory.</CommandEmpty>
                   }
                   <CommandGroup>
                     <CommandItem
@@ -77,27 +96,21 @@ export default function ClientCombobox({ value, onChange, placeholder = "Select 
                       Add New Client
                     </CommandItem>
                   </CommandGroup>
-                  <CommandGroup heading="Existing Clients">
-                    {sortedClients.map((client) => (
-                      <CommandItem
-                        key={client.id}
-                        value={client.name}
-                        onSelect={handleSelect}
-                      >
-                        <Check className={cn("mr-2 h-4 w-4", selectedClientName === client.name ? "opacity-100" : "opacity-0")} />
-                        {client.client_type === 'Company'
-                          ? <Building2 className="mr-1.5 h-3.5 w-3.5 text-muted-foreground" />
-                          : <User className="mr-1.5 h-3.5 w-3.5 text-muted-foreground" />
-                        }
-                        <span>{client.name}</span>
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
+                  {clientRecords.length > 0 && (
+                    <CommandGroup heading="Clients">
+                      {clientRecords.map(renderItem)}
+                    </CommandGroup>
+                  )}
+                  {otherRecords.length > 0 && (
+                    <CommandGroup heading="Also in the directory — picking one tags them a client">
+                      {otherRecords.map(renderItem)}
+                    </CommandGroup>
+                  )}
                 </CommandList>
               </Command>
             </PopoverContent>
           </Popover>
-          {allowClear && selectedClientName && (
+          {allowClear && selectedName && (
             <Button
               type="button"
               variant="ghost"
