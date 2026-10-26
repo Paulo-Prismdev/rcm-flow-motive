@@ -14,15 +14,19 @@ module.exports = {
   			xl: 'calc(var(--radius) + 4px)',
   			'2xl': 'calc(var(--radius) + 8px)',
   		},
+  		boxShadow: {
+  		mac: '0 1px 2px rgba(16, 24, 40, 0.05)',
+  		},
   		colors: {
-  			mac: {
-  				window: 'hsl(var(--mac-window))',
-  				group: 'hsl(var(--mac-group))',
-  				line: 'hsl(var(--mac-line))',
-  				muted: 'hsl(var(--mac-muted))',
-  				accent: 'hsl(var(--mac-accent))',
-  				sidebar: 'hsl(var(--mac-sidebar))'
-  			},
+  		mac: {
+  			window: 'hsl(var(--mac-window))',
+  			group: 'hsl(var(--mac-group))',
+  			line: 'hsl(var(--mac-line))',
+  			muted: 'hsl(var(--mac-muted))',
+  			accent: 'hsl(var(--mac-accent))',
+  			navy: 'hsl(var(--mac-navy))',
+  			sidebar: 'hsl(var(--mac-sidebar))'
+  		},
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			card: {

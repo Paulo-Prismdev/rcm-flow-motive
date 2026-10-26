@@ -806,7 +806,7 @@ button:not(.btn-sm):not(.btn-icon),
 /* ═══════════════════════════════════════════
    macOS DESIGN LAYER
    The tokens below are the design system: a light grey window, white grouped
-   surfaces, hairline dividers, one blue accent. They are applied by wrapping a
+   surfaces with a soft shadow, hairline dividers, one navy accent. They are applied by wrapping a
    section in .mac-scope, which re-points the app's own semantic tokens inside it —
    so every control already there renders in this language without a second
    implementation, and the layer can be extended to other sections as they are
@@ -816,19 +816,21 @@ button:not(.btn-sm):not(.btn-icon),
 :root {
   --mac-window: 240 2% 96%;       /* #F5F5F7 */
   --mac-group: 0 0% 100%;         /* #FFFFFF */
-  --mac-sidebar: 240 3% 95%;      /* source list, a shade under the window */
+  --mac-sidebar: 227 31% 94%;     /* #ECEEF5 — a soft tint of the brand navy */
   --mac-line: 240 4% 91%;         /* #E5E5EA */
   --mac-muted: 240 2% 56%;        /* #8E8E93 */
-  --mac-accent: 211 100% 50%;     /* #007AFF */
+  --mac-accent: 229 58% 18%;      /* #131D47 — the brand navy */
+  --mac-navy: 229 58% 18%;        /* #131D47 — selection and primary buttons */
 }
 
 .dark {
   --mac-window: 240 3% 11%;       /* #1C1C1E */
   --mac-group: 240 2% 18%;        /* #2C2C2E */
-  --mac-sidebar: 240 3% 14%;
+  --mac-sidebar: 229 40% 15%;     /* navy, a shade up from the window */
   --mac-line: 240 2% 26%;         /* #3A3A3C */
   --mac-muted: 240 2% 60%;        /* #98989D */
-  --mac-accent: 210 100% 52%;     /* #0A84FF */
+  --mac-accent: 231 55% 74%;      /* brand navy, lightened to read on dark surfaces */
+  --mac-navy: 229 58% 18%;        /* #131D47 */
 }
 
 .mac-scope {

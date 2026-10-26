@@ -36,7 +36,7 @@ export default function NoLongerRequired({ items = [], filesFor, onViewFile }) {
         {items.map(({ item, state }) => {
           const files = filesFor(item.key);
           return (
-            <div key={item.key} className="space-y-1 rounded-[10px] border border-mac-line bg-mac-group px-3 py-2">
+            <div key={item.key} className="space-y-1 rounded-[10px] border border-mac-line bg-mac-group px-3 py-2 shadow-mac">
               <p className="text-[13px] font-semibold text-foreground">{item.label}</p>
               <p className="text-[11px] tabular-nums text-mac-muted">{recorded(item, state)}</p>
               {files.length > 0 && (

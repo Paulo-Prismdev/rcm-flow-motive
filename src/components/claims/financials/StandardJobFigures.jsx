@@ -62,9 +62,12 @@ export default function StandardJobFigures({ claim, ctx, missing, onChange, onTr
     missing: isMissing('final_repair_cost'),
   }];
 
-  /* Customer — the two figures the VAT & excess invoices are worked out from. */
+  /* Customer — the customer's VAT status and their policy excess. An excess is a fact
+     of the policy, so it is shown on every job that carries one; where we also handle
+     their VAT and excess it is what the VAT & excess invoices are worked out from. */
   const excess = excessMode(claim);
   const excessValue = num(claim.policy_excess);
+  const excessApplies = !ctx.totalLoss && !ctx.creditRepair && !ctx.privatePaying;
   const customerRows = [];
   if (!ctx.creditRepair) {
     customerRows.push({
@@ -76,7 +79,7 @@ export default function StandardJobFigures({ claim, ctx, missing, onChange, onTr
       missing: isMissing('client_vat_status'),
     });
   }
-  if (ctx.vatExcess) {
+  if (excessApplies) {
     customerRows.push(excess === 'tbc' ? {
       key: 'policy_excess',
       label: 'Policy excess',

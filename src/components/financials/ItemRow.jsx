@@ -29,7 +29,7 @@ export default function ItemRow({ item, state, claim, focus, onClick, amountText
     <MacRow onClick={onClick}>
       <FileText className="h-4 w-4 flex-shrink-0 text-mac-muted" strokeWidth={1.5} />
       <span className="min-w-0 flex-1">
-        <span className="block truncate text-[13px] text-foreground">{item.label}</span>
+        <span className="block truncate text-[13px] font-medium text-foreground">{item.label}</span>
         <span className="block truncate text-[11px] text-mac-muted">{itemSubline(item, state, claim)}</span>
       </span>
       {amount && <span className="text-[13px] tabular-nums text-foreground">{amount}</span>}

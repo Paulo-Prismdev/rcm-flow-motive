@@ -20,7 +20,7 @@ export default function FinancialsSidebar({ items, selected, onSelect, footer })
                 onClick={() => onSelect(item.key)}
                 className={cn(
                   'flex h-8 w-full items-center gap-2.5 rounded-md px-2 text-left transition-colors duration-150',
-                  active ? 'bg-mac-accent text-white' : 'hover:bg-mac-group'
+                  active ? 'bg-mac-navy text-white' : 'hover:bg-foreground/5'
                 )}
               >
                 <StepGlyph state={item.glyph} className={active ? 'text-white' : 'text-mac-muted'} />

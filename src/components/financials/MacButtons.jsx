@@ -7,7 +7,7 @@ export function MacPrimaryButton({ className, ...props }) {
   return (
     <Button
       size="sm"
-      className={cn('h-7 rounded-md bg-mac-accent px-3 text-[12px] font-medium text-white hover:brightness-110 disabled:opacity-40', className)}
+      className={cn('h-7 rounded-md bg-mac-navy px-3 text-[12px] font-medium text-white hover:brightness-110 disabled:opacity-40', className)}
       {...props}
     />
   );

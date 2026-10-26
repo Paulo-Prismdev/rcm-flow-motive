@@ -25,7 +25,7 @@ export default function FinancialsShell({
         )}
 
         {showContent && (
-          <div className="flex min-w-0 flex-1 flex-col">
+          <div className="flex min-w-0 flex-1 flex-col bg-mac-window">
             <div className="flex min-h-11 flex-wrap items-center gap-x-3 gap-y-1 border-b border-mac-line px-3 py-2">
               {isMobile && detailOpen && (
                 <button
