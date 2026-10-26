@@ -54,7 +54,7 @@
       "$or": [
         {
           "user_condition": {
-            "user_type": "internal"
+            "data.user_type": "internal"
           }
         },
         {
@@ -66,7 +66,7 @@
       "$or": [
         {
           "user_condition": {
-            "user_type": "internal"
+            "data.user_type": "internal"
           }
         }
       ]
@@ -75,7 +75,7 @@
       "$or": [
         {
           "user_condition": {
-            "user_type": "internal"
+            "data.user_type": "internal"
           }
         }
       ]
@@ -84,7 +84,7 @@
       "$or": [
         {
           "user_condition": {
-            "user_type": "internal"
+            "data.user_type": "internal"
           }
         }
       ]
