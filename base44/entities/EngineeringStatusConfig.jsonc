@@ -43,7 +43,7 @@
       "$and": [
         {
           "user_condition": {
-            "user_type": "internal"
+            "data.user_type": "internal"
           }
         },
         {
@@ -69,7 +69,7 @@
       "$and": [
         {
           "user_condition": {
-            "user_type": "internal"
+            "data.user_type": "internal"
           }
         },
         {
@@ -92,7 +92,7 @@
       "$and": [
         {
           "user_condition": {
-            "user_type": "internal"
+            "data.user_type": "internal"
           }
         },
         {

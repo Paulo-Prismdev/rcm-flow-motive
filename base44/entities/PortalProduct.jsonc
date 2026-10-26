@@ -71,36 +71,36 @@
   "rls": {
     "create": {
       "user_condition": {
-        "user_type": "internal"
+        "data.user_type": "internal"
       }
     },
     "read": {
       "$or": [
         {
           "user_condition": {
-            "user_type": "internal"
+            "data.user_type": "internal"
           }
         },
         {
           "user_condition": {
-            "user_type": "bodyshop"
+            "data.user_type": "bodyshop"
           }
         },
         {
           "user_condition": {
-            "user_type": "referrer"
+            "data.user_type": "referrer"
           }
         }
       ]
     },
     "update": {
       "user_condition": {
-        "user_type": "internal"
+        "data.user_type": "internal"
       }
     },
     "delete": {
       "user_condition": {
-        "user_type": "internal"
+        "data.user_type": "internal"
       }
     }
   }
