@@ -17,7 +17,7 @@ import { createAccountsRequestNote } from './accountsRequestNote';
  * editable, and sending it touches that invoice only — never the Final Insurer
  * Invoice.
  */
-export default function RequestInvoiceModal({ isOpen, onClose, claim, item, state, party, accountsEmail, currentUser, onRequested }) {
+export default function RequestInvoiceModal({ isOpen, onClose, claim, item, state, party, accountsEmail, currentUser, onRequested, hold = '' }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [to, setTo] = useState('');
@@ -94,6 +94,12 @@ export default function RequestInvoiceModal({ isOpen, onClose, claim, item, stat
           </DialogDescription>
         </DialogHeader>
 
+        {hold && (
+          <div className="rounded-md border border-amber-300 dark:border-amber-700 bg-amber-50/70 dark:bg-amber-900/20 px-3 py-2">
+            <p className="text-xs font-semibold text-amber-800 dark:text-amber-200">Not yet — {hold}</p>
+          </div>
+        )}
+
         <div className="space-y-3">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
@@ -124,7 +130,7 @@ export default function RequestInvoiceModal({ isOpen, onClose, claim, item, stat
 
         <DialogFooter>
           <Button variant="outline" onClick={onClose} disabled={isSending}>Cancel</Button>
-          <Button onClick={handleSend} disabled={isSending} className="gap-2">
+          <Button onClick={handleSend} disabled={isSending || !!hold} className="gap-2">
             <Send className="w-4 h-4" /> {isSending ? 'Sending...' : 'Send request'}
           </Button>
         </DialogFooter>

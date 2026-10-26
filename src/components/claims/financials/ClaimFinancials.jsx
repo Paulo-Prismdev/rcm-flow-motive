@@ -71,6 +71,8 @@ import {
   finalInvoiceTotal,
   vatExcessAuthorityPart,
 } from './invoiceAuthorityCheck';
+import { buildFiguresCheckedPatch } from './figuresCheck';
+import JobFiguresCheck from './JobFiguresCheck';
 import { fmtGBP } from '@/components/shared/creditRepairRates';
 
 /** Readable names for the financial fields in the claim's activity history. */
@@ -108,6 +110,8 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
   const [paidPrompt, setPaidPrompt] = useState(null);
   // The figure the next-step button has asked for, so the card can open it.
   const [figuresFocus, setFiguresFocus] = useState(null);
+  // The same, for the figures check: the prompt's button brings it into view.
+  const [checkFocus, setCheckFocus] = useState(null);
   const quickUploadRef = useRef(null);
 
   const { data: appConfigs = [] } = useQuery({
@@ -140,7 +144,10 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
     () => deriveInvoiceStatus(claim, hasFile, { financialsView: true }),
     [claim, docs.files]
   );
-  const flow = useMemo(() => buildFinancialFlow(summary, ctx, claim), [summary, ctx, claim]);
+  const flow = useMemo(
+    () => buildFinancialFlow(summary, ctx, claim, { storagePercentDefault }),
+    [summary, ctx, claim, storagePercentDefault]
+  );
   // The partner's commission waits on the close-out step: its amount comes off the
   // final repair cost, which the Final Repair Invoice supplies. The upfront hire fee
   // is never held back — it goes out as soon as the hire category is set.
@@ -589,6 +596,12 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
       askPaidDate(action.item, action.state, 'paid');
       return;
     }
+    if (action.kind === 'check_figures') {
+      // Step 2 is already open, so the move is to bring the check itself into view.
+      openStep('figures');
+      setCheckFocus((prev) => ({ n: (prev?.n || 0) + 1 }));
+      return;
+    }
     if (action.kind === 'figures') {
       // The step the button sits in is the step that is already open, so the
       // move is to open the figure that still has to be set.
@@ -619,12 +632,21 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
     );
   };
 
+  // Nothing is asked for from accounts until the job figures have been confirmed:
+  // every amount on the invoice is worked out from them.
+  const figuresConfirmed = flow.steps[1]?.done === true;
+
   // The commission is only asked for from accounts once step 1 is settled: the
   // figure it is worked out from is read off the Final Repair Invoice. Every other
-  // invoice is asked for as soon as its own figures are there.
-  const requestHold = (item) => (item.key === 'cr_repair_commission' && commissionHeld
-    ? 'Step 1 has to be settled first — the commission is invoiced from the Final Repair Invoice'
-    : '');
+  // invoice is asked for as soon as its own figures are there — and none of them
+  // before the figures themselves have been checked.
+  const requestHold = (item) => {
+    if (!figuresConfirmed) return 'Check the job figures first — every amount on this invoice is worked out from them';
+    if (item.key === 'cr_repair_commission' && commissionHeld) {
+      return 'Step 1 has to be settled first — the commission is invoiced from the Final Repair Invoice';
+    }
+    return '';
+  };
 
   const renderRow = ({ item, state }, focus) => (
     <InvoiceRow
@@ -721,6 +743,18 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
 
   const figuresCard = (
     <>
+      <JobFiguresCheck
+        check={figuresStep.check}
+        focus={checkFocus}
+        onConfirm={() => commit(
+          buildFiguresCheckedPatch(claim, {
+            by: paidBy,
+            email: currentUser?.email,
+            rows: figuresStep.check?.rows,
+          }),
+          `Job figures checked and confirmed by ${paidBy || 'a user'}`
+        )}
+      />
       <JobFiguresCard
         claim={claim}
         ctx={ctx}
@@ -975,6 +1009,7 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
           accountsEmail={accountsEmail}
           currentUser={currentUser}
           onRequested={handleRequested}
+          hold={request?.item ? requestHold(request.item) : ''}
         />
       </div>
     </TooltipProvider>

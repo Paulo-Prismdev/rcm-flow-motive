@@ -1,6 +1,7 @@
 import { isInvoiceDocument, isRecommendedItem } from '@/components/shared/invoiceChecklist';
 import { emptySectionMessage } from './invoiceSectionMeta';
 import { isStepMovedPast } from './financialStepSkip';
+import { figuresCheckedLine, figuresCheckState } from './figuresCheck';
 
 /**
  * The Financials section as the five steps the work happens in, worked out from
@@ -21,7 +22,7 @@ export const FINANCIAL_STEPS = [
     key: 'figures',
     n: 2,
     title: 'Check job figures',
-    hint: 'The figures every invoice is worked out from. Anything still missing is flagged here.',
+    hint: 'The figures every invoice is worked out from, read through against the documents behind them and confirmed. Anything still missing is flagged here, and nothing is invoiced until they are confirmed.',
   },
   {
     key: 'raise',
@@ -110,7 +111,7 @@ const upload = (row, label) => ({ kind: 'upload', item: row.item, state: row.sta
 const waitingOn = (labels = []) => labels.length === 0 ? ''
   : ` — waiting on ${labels.slice(0, 3).join(', ')}${labels.length > 3 ? ` +${labels.length - 3} more` : ''}`;
 
-export function buildFinancialFlow(summary, ctx, claim) {
+export function buildFinancialFlow(summary, ctx, claim, options = {}) {
   /* Step 1 — the close-out paperwork: a copy of each, on file. */
   const closeRows = rowsFor(summary, 'closeout');
   const closeApplies = applying(closeRows);
@@ -153,19 +154,33 @@ export function buildFinancialFlow(summary, ctx, claim) {
     suggestion: closeSuggested ? upload(closeSuggested, `upload the ${closeSuggested.item.label}`) : null,
   };
 
-  /* Step 2 — the figures the invoices are worked out from. */
+  /* Step 2 — the figures the invoices are worked out from, checked and confirmed. */
   const { missing } = summary;
+  // The figures as a deliberate check: every figure the invoices are worked out from,
+  // with the ones read off a document marked as such, the ones that have moved since
+  // the last check named, and the confirmation that says someone has been through
+  // them. The step is done on that confirmation — never on the figures merely being
+  // filled in — and a figure that moves afterwards clears it and asks for the check
+  // again. A job whose invoices were already going out before the check existed is
+  // kept as it is.
+  const check = figuresCheckState({ claim, ctx, summary, storagePercentDefault: options.storagePercentDefault });
   const figures = {
     ...STEP.figures,
     hint: ctx.totalLoss ? TOTAL_LOSS_FIGURES_HINT : STEP.figures.hint,
     empty: null,
-    done: missing.length === 0,
-    workable: missing.length > 0,
-    pendingLabels: missing.map((m) => m.label),
-    line: missing.length === 0 ? 'all set' : `${missing.length} still to set`,
-    action: missing.length === 0
-      ? null
-      : { kind: 'figures', key: missing[0].key, label: `set the ${missing[0].label.toLowerCase()}` },
+    check,
+    done: missing.length === 0 && check.settled,
+    workable: missing.length > 0 || !check.settled,
+    pendingLabels: missing.length > 0 ? missing.map((m) => m.label) : check.changed.map((m) => m.label),
+    line: missing.length > 0 ? `${missing.length} still to set`
+      : check.changed.length > 0 ? 'check again'
+        : check.legacy ? 'kept as invoiced'
+          : check.settled ? figuresCheckedLine(check.record)
+            : 'to check',
+    action: missing.length > 0
+      ? { kind: 'figures', key: missing[0].key, label: `set the ${missing[0].label.toLowerCase()}` }
+      : check.settled ? null
+        : { kind: 'check_figures', label: 'Check the job figures' },
   };
 
   /* Step 3 — our invoices, raised and their copies filed. */
@@ -181,16 +196,17 @@ export function buildFinancialFlow(summary, ctx, claim) {
     rows: outRows,
     empty: outEmpty,
     done: outApplies.length === 0 || outPendingRows.length === 0,
-    // Nothing can be raised while every invoice still waiting is waiting on its
-    // figures, which is the figures step's work rather than this one's.
-    workable: outPendingRows.some((r) => !r.state.awaiting),
+    // Nothing can be raised until the job figures have been checked and confirmed:
+    // every amount comes off them. Nor while every invoice still waiting is waiting
+    // on its figures, which is the figures step's work rather than this one's.
+    workable: figures.done && outPendingRows.some((r) => !r.state.awaiting),
     pendingLabels: outPendingRows.map((r) => r.item.label),
     line: outEmpty ? outEmpty.title
       : outPendingRows.length === 0 ? `${outApplies.length} raised`
         : `${outDone} of ${outApplies.length} raised`,
     action: !outPending ? null
       : outPending.state.requested ? upload(outPending, `upload the copy of the ${outPending.item.label}`)
-        : outPending.state.awaiting ? null
+        : outPending.state.awaiting || !figures.done ? null
           : { kind: 'request', item: outPending.item, state: outPending.state, label: `request the ${outPending.item.label} from accounts` },
   };
 

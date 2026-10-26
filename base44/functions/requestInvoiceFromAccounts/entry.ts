@@ -31,6 +31,19 @@ export default async function (req: Request): Promise<Response> {
     const claim = await base44.asServiceRole.entities.Claim.get(claim_id);
     if (!claim) return Response.json({ error: 'Claim not found' }, { status: 404 });
 
+    // Every amount on the invoice is worked out from the job figures, so nothing is
+    // asked for until they have been checked and confirmed on the claim. A job whose
+    // invoices were already going out before the check existed is left as it is.
+    const checked = (claim as any).invoice_tracker?.figures_checked;
+    const alreadyGoingOut = Object.values(((claim as any).invoice_tracker?.items || {}) as Record<string, any>)
+      .some((entry) => entry?.requested || entry?.date);
+    if (!checked && !alreadyGoingOut) {
+      return Response.json(
+        { error: 'Check the job figures first — every amount on this invoice is worked out from them' },
+        { status: 400 }
+      );
+    }
+
     const fromName = user.full_name ? `${user.full_name} — RCM Automotive` : 'RCM Automotive';
     const sent = await sendBrandedEmail({
       base44,
