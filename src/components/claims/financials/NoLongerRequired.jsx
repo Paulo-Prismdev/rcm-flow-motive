@@ -24,23 +24,21 @@ export default function NoLongerRequired({ items = [], filesFor, onViewFile }) {
   };
 
   return (
-    <div className="rounded-[10px] border border-dashed border-border bg-muted/20 px-3 py-2.5 space-y-2">
+    <div className="space-y-2">
       <div>
-        <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-          No longer required
-        </h4>
-        <p className="text-[11px] text-muted-foreground">
+        <h4 className="text-[15px] font-semibold text-foreground">No longer required</h4>
+        <p className="text-[11px] text-mac-muted">
           This job changed type after these were recorded, so they no longer form part of its invoicing.
           The copies, figures and payments are kept here — nothing has been deleted.
         </p>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         {items.map(({ item, state }) => {
           const files = filesFor(item.key);
           return (
-            <div key={item.key} className="rounded-lg border border-border bg-card px-2.5 py-2 space-y-1">
-              <p className="text-xs font-semibold text-foreground">{item.label}</p>
-              <p className="text-[10px] text-muted-foreground tabular-nums">{recorded(item, state)}</p>
+            <div key={item.key} className="space-y-1 rounded-[10px] border border-mac-line bg-mac-group px-3 py-2">
+              <p className="text-[13px] font-semibold text-foreground">{item.label}</p>
+              <p className="text-[11px] tabular-nums text-mac-muted">{recorded(item, state)}</p>
               {files.length > 0 && (
                 <div className="space-y-0.5">
                   {files.map((doc) => (
@@ -48,7 +46,7 @@ export default function NoLongerRequired({ items = [], filesFor, onViewFile }) {
                       key={doc.id}
                       type="button"
                       onClick={() => onViewFile(doc.file_url)}
-                      className="block max-w-full truncate text-[11px] text-primary hover:underline"
+                      className="block max-w-full truncate text-[11px] text-mac-accent hover:underline"
                     >
                       {doc.file_name || doc.file_url.split('/').pop()}
                     </button>

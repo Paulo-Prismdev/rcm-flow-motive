@@ -2,18 +2,24 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 
 /**
- * A grouped container, as System Settings draws them: one rounded surface with the
- * rows inside it separated by hairlines. Presentation only — no borders beyond the
- * hairline, no shadows.
+ * A grouped container, as System Settings draws them: a heading that stands out —
+ * dark, semibold, in the case it was written in — over one rounded surface with its
+ * rows separated by hairlines. An optional action (an Edit button, a Save) sits on
+ * the heading line, a footer under the surface. Presentation only.
  */
-export function MacGroup({ title, footer, children, className }) {
+export function MacGroup({ title, action, footer, children, className }) {
   return (
-    <section className={cn('space-y-1.5', className)}>
-      {title && <h3 className="px-1 text-[11px] text-mac-muted">{title}</h3>}
+    <section className={cn('space-y-2', className)}>
+      {title && (
+        <div className="flex min-h-6 items-center justify-between gap-3">
+          <h3 className="text-[15px] font-semibold text-foreground">{title}</h3>
+          {action}
+        </div>
+      )}
       <div className="divide-y divide-mac-line overflow-hidden rounded-[10px] border border-mac-line bg-mac-group">
         {children}
       </div>
-      {footer && <p className="px-1 text-[11px] text-mac-muted">{footer}</p>}
+      {footer}
     </section>
   );
 }
@@ -35,13 +41,14 @@ export function MacRow({ onClick, className, children }) {
 }
 
 /** A label on the left and its value on the right, with a grey caption underneath. */
-export function MacValueRow({ label, value, sub, caption, right, onClick }) {
+export function MacValueRow({ label, value, note, sub, caption, right, onClick }) {
   return (
     <MacRow onClick={onClick} className="justify-between gap-4">
-      <span className="min-w-0">
+      <span className="min-w-0 flex-1">
         <span className="block text-[13px] text-foreground">{label}</span>
         {caption && <span className="mt-0.5 block text-[11px] text-mac-muted">{caption}</span>}
       </span>
+      {note && <span className="flex-shrink-0 text-[11px] tabular-nums text-mac-muted">{note}</span>}
       <span className="min-w-0 flex-shrink-0 text-right">
         <span className="block text-[13px] font-semibold tabular-nums text-foreground">{value}</span>
         {sub && <span className="mt-0.5 block text-[11px] tabular-nums text-mac-muted">{sub}</span>}

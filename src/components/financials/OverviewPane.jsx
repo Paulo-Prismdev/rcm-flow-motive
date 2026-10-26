@@ -16,13 +16,13 @@ export default function OverviewPane({ claim, ctx, summary, steps, onSelect, dor
   const vat = ctx.totalLoss ? 0 : repairVat(claim);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <header className="space-y-1">
-        <h2 className="text-[15px] font-semibold text-foreground">Overview</h2>
+        <h2 className="text-[17px] font-semibold text-foreground">Overview</h2>
         <p className="text-[11px] text-mac-muted">What the job comes to, and where its invoicing has got to.</p>
       </header>
 
-      <MacGroup>
+      <MacGroup title="What the job comes to">
         <MacValueRow
           label={ctx.totalLoss ? 'Storage charge' : 'Final repair cost'}
           value={finalCost > 0 ? fmtGBP(finalCost) : '—'}
@@ -40,7 +40,7 @@ export default function OverviewPane({ claim, ctx, summary, steps, onSelect, dor
         />
       </MacGroup>
 
-      <MacGroup title="Steps">
+      <MacGroup title="Invoicing steps">
         {steps.map((step) => (
           <MacRow key={step.key} onClick={() => onSelect(step.key)}>
             <StepGlyph state={step.glyph} className="text-mac-muted" />

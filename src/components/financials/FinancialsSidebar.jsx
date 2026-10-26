@@ -9,7 +9,7 @@ import StepGlyph from './StepGlyph';
  */
 export default function FinancialsSidebar({ items, selected, onSelect, footer }) {
   return (
-    <aside className="w-full flex-shrink-0 border-b border-mac-line bg-mac-sidebar p-2 md:w-[220px] md:border-b-0 md:border-r">
+    <aside className="w-full flex-shrink-0 border-b border-mac-line bg-mac-sidebar p-2 md:w-[240px] md:border-b-0 md:border-r">
       <ul className="space-y-0.5">
         {items.map((item) => {
           const active = item.key === selected;

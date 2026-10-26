@@ -42,7 +42,11 @@ export default function FinancialsShell({
               {nextLabel && <MacPrimaryButton onClick={onNext}>{nextLabel}</MacPrimaryButton>}
             </div>
 
-            <div className="min-h-0 flex-1 space-y-4 p-4">{children}</div>
+            {/* The content reads at a comfortable width whatever the window is:
+                centred, and never stretched across a wide screen. */}
+            <div className="min-h-0 flex-1 p-4">
+              <div className="mx-auto w-full max-w-[760px]">{children}</div>
+            </div>
           </div>
         )}
       </div>

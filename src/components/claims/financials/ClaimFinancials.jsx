@@ -119,6 +119,9 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
   const [figuresFocus, setFiguresFocus] = useState(null);
   // The same, for the figures check: the prompt's button brings it into view.
   const [checkFocus, setCheckFocus] = useState(null);
+  // Which group of the job figures is open for editing — one at a time, so a figure
+  // is changed deliberately and a half-finished edit is never left behind.
+  const [editingKey, setEditingKey] = useState(null);
   // Where the reader is in the window — the pane on show, the row whose sheet is
   // open, and whether a phone has pushed onto a step. None of it touches the claim.
   const [pane, setPane] = useState(null);
@@ -682,7 +685,8 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
     },
     ...flow.steps.map((s) => ({
       key: s.key,
-      title: s.title,
+      // The source list carries the step's short name so nothing is ever cut off.
+      title: s.short || s.title,
       glyph: stepGlyphState(s, flow.current),
       count: stepCounts(s).text,
       line: s.line,
@@ -773,6 +777,8 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
     ctx,
     step: figuresStep,
     missing: summary.missing,
+    editingKey,
+    setEditingKey,
     storagePercentDefault,
     jobFiguresFocus: figuresFocus,
     checkFocus,

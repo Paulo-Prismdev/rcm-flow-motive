@@ -3,7 +3,7 @@ import { fmtGBP } from '@/components/shared/creditRepairRates';
 import JobFiguresCard from '@/components/claims/financials/JobFiguresCard';
 import RepairCostCheckNote from '@/components/claims/financials/RepairCostCheckNote';
 import { figuresCheckedLine } from '@/components/claims/financials/figuresCheck';
-import { MacButton, MacPrimaryButton } from './MacButtons';
+import { MacPrimaryButton } from './MacButtons';
 import { MacGroup, MacRow, MacValueRow } from './MacGroup';
 import StatusBadge from './StatusBadge';
 
@@ -18,14 +18,15 @@ const valueText = (row) => {
 const capitalise = (text) => (text ? text.charAt(0).toUpperCase() + text.slice(1) : text);
 
 /**
- * Step 2, opened: the claim's own figures form (unchanged, with its deliberate
- * per-figure edit), then the figures that came off a document shown against the
- * paperwork they were read from and anything that has moved since it was last
- * checked — and the confirmation at the foot of the step, which is what finishes it.
+ * Step 2, opened: the claim's own figures as titled groups, each changed as a whole,
+ * then the figures that came off a document shown against the paperwork they were
+ * read from and anything that has moved since it was last checked — and the
+ * confirmation at the foot of the step, which is what finishes it.
  */
 export default function FiguresPane({
   claim, ctx, step, missing, storagePercentDefault, jobFiguresFocus, checkFocus,
   onChange, onTrackerChange, onConfirm, repairCostCheck, onRepairCostChecked,
+  editingKey, setEditingKey,
 }) {
   const confirmRef = useRef(null);
   const check = step.check;
@@ -38,9 +39,9 @@ export default function FiguresPane({
   }, [checkFocus?.n]);
 
   return (
-    <div className="space-y-4">
+    <div className="mx-auto w-full max-w-[760px] space-y-6">
       <header className="space-y-1">
-        <h2 className="text-[15px] font-semibold text-foreground">Step 2 · Job figures</h2>
+        <h2 className="text-[17px] font-semibold text-foreground">Step 2 · Job figures</h2>
         <p className="text-[11px] text-mac-muted">{step.hint}</p>
       </header>
 
@@ -52,6 +53,8 @@ export default function FiguresPane({
         storagePercentDefault={storagePercentDefault}
         onChange={onChange}
         onTrackerChange={onTrackerChange}
+        editingKey={editingKey}
+        setEditingKey={setEditingKey}
       />
 
       <RepairCostCheckNote check={repairCostCheck} onChecked={onRepairCostChecked} />
@@ -70,12 +73,12 @@ export default function FiguresPane({
         </MacGroup>
       )}
 
-      <MacGroup>
+      <MacGroup title="Confirmation">
         <MacRow className="flex-wrap justify-between gap-3">
           <StatusBadge tone={check.settled ? 'done' : 'waiting'}>
             {check.settled ? figuresCheckedLine(check.record)
               : changedKeys.length > 0 ? 'Check again — a figure has moved'
-                : 'To check'}
+                : 'The figures on this job have not been confirmed yet'}
           </StatusBadge>
           <span ref={confirmRef} className="flex items-center gap-2">
             {!check.canConfirm && (
@@ -95,7 +98,7 @@ export default function FiguresPane({
       </MacGroup>
 
       {check.legacy && !check.settled && (
-        <p className="text-[11px] text-mac-muted">
+        <p className="px-1 text-[11px] text-mac-muted">
           This job's invoices were already on their way before the figures check existed — you are welcome to confirm
           them anyway, and nothing is held back by doing so.
         </p>

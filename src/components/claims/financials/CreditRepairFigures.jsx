@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { AlertTriangle, Lock } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
-import FigureField from './FigureField';
+import FigureGroup from '@/components/financials/FigureGroup';
 import {
   COMMISSION_BASES,
   HIRE_CATEGORIES,
@@ -16,10 +16,12 @@ import {
 const num = (v) => (v === '' || v === null || v === undefined ? null : Number(v));
 
 const RATE_LABELS = {
-  hire_fee: 'Hire fee',
-  commission_percent: 'Commission %',
-  commission_basis: 'Commission basis',
+  hire_fee: 'hire fee',
+  commission_percent: 'commission %',
+  commission_basis: 'commission basis',
 };
+
+const RATE_KEYS = ['hire_fee', 'commission_percent', 'commission_basis'];
 
 const fmtRate = (field, v) => {
   if (v === null || v === undefined || v === '') return 'not set';
@@ -28,11 +30,14 @@ const fmtRate = (field, v) => {
   return String(v);
 };
 
+const money = (v) => (v === null || v === undefined || v === '' ? undefined : fmtGBP(Number(v)));
+
 /**
- * A credit repair claim's job figures: the hire category (which locks the
- * partner's agreed rates onto the claim) and, where they have been adjusted, the
- * hire fee, commission % and commission basis the invoices are worked out from.
- * Each is read-only until its pencil is clicked.
+ * A credit repair claim's job figures: the hire category (which locks the partner's
+ * agreed rates onto the claim) and the hire fee, commission % and basis the invoices
+ * are worked out from, with what those rates bill the partner underneath. The whole
+ * group is changed in one go, so the rates are written together and never one over
+ * the other.
  */
 export default function CreditRepairFigures({ claim, missing, onChange, editingKey, setEditingKey }) {
   const [company, setCompany] = useState(null);
@@ -53,109 +58,129 @@ export default function CreditRepairFigures({ claim, missing, onChange, editingK
   const hireFee = creditRepairHireFee(claim);
   const commission = creditRepairCommission(claim);
   const partnerMissing = company ? missingPartnerRates(company) : [];
+  const partner = company?.name || claim.credit_repair_company_name || 'the credit repair partner';
 
-  const fieldEdit = (key) => ({
-    editing: editingKey === key,
-    onEdit: () => setEditingKey(key),
-    onDone: () => setEditingKey(null),
-  });
+  const rows = [
+    {
+      key: 'hire_category',
+      label: 'Hire category',
+      options: HIRE_CATEGORIES,
+      value: claim.hire_category || '',
+      caption: `Sets which of ${partner}'s agreed rates this job is locked to`,
+      missing: isMissing('hire_category'),
+    },
+    {
+      key: 'hire_fee',
+      label: 'Hire fee',
+      type: 'number',
+      value: num(locked.hire_fee),
+      display: money(locked.hire_fee),
+      caption: "The partner's agreed rate, locked on this claim",
+      missing: isMissing('hire_fee'),
+    },
+    {
+      key: 'commission_percent',
+      label: 'Commission %',
+      type: 'number',
+      value: num(locked.commission_percent),
+      display: num(locked.commission_percent) === null ? undefined : `${num(locked.commission_percent)}%`,
+      caption: "The partner's agreed rate, locked on this claim",
+      missing: isMissing('commission_percent'),
+    },
+    {
+      key: 'commission_basis',
+      label: 'Commission basis',
+      options: COMMISSION_BASES,
+      value: locked.commission_basis || '',
+      caption: 'What the commission is charged on, as agreed with the partner',
+      missing: isMissing('commission_basis'),
+    },
+    {
+      key: 'upfront_hire_fee',
+      label: 'Upfront hire fee',
+      editable: false,
+      display: hireFee.awaiting ? '—' : fmtGBP(hireFee.amount),
+      caption: 'What our hire fee invoice bills the partner',
+    },
+    {
+      key: 'repair_commission',
+      label: 'Repair commission',
+      editable: false,
+      display: commission.awaiting ? '—' : fmtGBP(commission.amount),
+      caption: 'Charged on the final repair cost',
+    },
+  ];
 
-  const setCategory = (category) => {
-    if (!category) {
-      onChange(
-        { hire_category: '', credit_repair_rates_locked: null, credit_repair_rates_overridden: false },
-        `Hire category changed from ${claim.hire_category || 'not set'} to not set`
-      );
-      return;
-    }
-    const next = company ? buildLockedRates(company, category) : null;
-    onChange(
-      {
-        hire_category: category,
-        ...(next ? { credit_repair_rates_locked: next, credit_repair_rates_overridden: false } : {}),
-      },
-      `Hire category changed from ${claim.hire_category || 'not set'} to ${category}${next ? " — partner's rates locked onto this claim" : ''}`
-    );
-  };
-
-  const setRate = (field, raw) => {
-    const next = {
-      locked_at: locked.locked_at || new Date().toISOString(),
-      ...locked,
-      [field]: num(raw),
-    };
-    onChange(
-      { credit_repair_rates_locked: next, credit_repair_rates_overridden: true },
-      `Credit repair ${RATE_LABELS[field].toLowerCase()} changed from ${fmtRate(field, locked[field])} to ${fmtRate(field, num(raw))}`
-    );
-  };
-
-  return (
-    <div className="space-y-2">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 items-start m-keep-2">
-        <FigureField
-          {...fieldEdit('hire_category')}
-          label="Hire Category"
-          options={HIRE_CATEGORIES}
-          value={claim.hire_category || ''}
-          missing={isMissing('hire_category')}
-          hint={company?.name || claim.credit_repair_company_name || undefined}
-          onCommit={setCategory}
-        />
-        <FigureField
-          {...fieldEdit('hire_fee')}
-          label="Hire Fee (£)"
-          type="number"
-          value={locked.hire_fee}
-          missing={isMissing('hire_fee')}
-          hint="We invoice the partner this upfront"
-          onCommit={(v) => setRate('hire_fee', v)}
-        />
-        <FigureField
-          {...fieldEdit('commission_percent')}
-          label="Commission %"
-          type="number"
-          value={locked.commission_percent}
-          missing={isMissing('commission_percent')}
-          onCommit={(v) => setRate('commission_percent', v)}
-        />
-        <FigureField
-          {...fieldEdit('commission_basis')}
-          label="Commission Calculated On"
-          options={COMMISSION_BASES}
-          value={locked.commission_basis || ''}
-          missing={isMissing('commission_basis')}
-          onCommit={(v) => setRate('commission_basis', v)}
-        />
-      </div>
-
-      <div className="flex flex-wrap items-center gap-2">
-        <div className="rounded-lg border border-border bg-muted/30 px-2.5 py-1.5">
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Upfront Hire Fee</p>
-          <p className="text-xs font-bold tabular-nums">{hireFee.awaiting ? '—' : fmtGBP(hireFee.amount)}</p>
-        </div>
-        <div className="rounded-lg border border-border bg-muted/30 px-2.5 py-1.5">
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Repair Commission</p>
-          <p className="text-xs font-bold tabular-nums">{commission.awaiting ? '—' : fmtGBP(commission.amount)}</p>
-        </div>
-        {rates?.overridden && (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 text-[10px] font-semibold">
-            <Lock className="w-2.5 h-2.5" /> Adjusted on this claim
-          </span>
-        )}
-        {rates && !rates.overridden && (
-          <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground">
-            <Lock className="w-2.5 h-2.5" /> Partner's agreed rates, locked to this claim
-          </span>
-        )}
-      </div>
-
-      {partnerMissing.length > 0 && (
-        <p className="flex items-start gap-1.5 text-[11px] text-amber-600 dark:text-amber-400">
-          <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0 mt-px" />
-          <span>{company?.name}'s rates aren't fully set ({partnerMissing.join(', ')}). Add them in the credit repair directory, or enter them here.</span>
+  const footer = (
+    <>
+      {rates && (
+        <p className="px-1 text-[11px] text-mac-muted">
+          {rates.overridden
+            ? 'Adjusted on this claim, against the rates agreed with the partner'
+            : "The partner's agreed rates, locked to this claim"}
         </p>
       )}
-    </div>
+      {partnerMissing.length > 0 && (
+        <p className="flex items-start gap-1.5 px-1 text-[11px] text-amber-600 dark:text-amber-400">
+          <AlertTriangle className="mt-px h-3.5 w-3.5 flex-shrink-0" strokeWidth={1.8} />
+          <span>
+            {company?.name}'s rates aren't fully set ({partnerMissing.join(', ')}). Add them in the credit repair
+            directory, or enter them here.
+          </span>
+        </p>
+      )}
+    </>
+  );
+
+  return (
+    <FigureGroup
+      title="Credit repair"
+      rows={rows}
+      editing={editingKey === 'credit_repair'}
+      onEdit={() => setEditingKey('credit_repair')}
+      onDone={() => setEditingKey(null)}
+      footer={footer}
+      onSave={(changes) => {
+        const categoryGiven = changes.hire_category !== undefined;
+        const nextCategory = categoryGiven ? (changes.hire_category || '') : (claim.hire_category || '');
+        const categoryChanged = categoryGiven && nextCategory !== (claim.hire_category || '');
+        const rateKeys = RATE_KEYS.filter((key) => changes[key] !== undefined);
+
+        if (!categoryChanged && rateKeys.length === 0) return;
+
+        // The category re-locks the partner's agreed rates onto the claim; a rate
+        // changed by hand is written over the locked ones.
+        const relocked = categoryChanged && nextCategory && company
+          ? buildLockedRates(company, nextCategory)
+          : null;
+        const from = relocked || locked;
+        const next = { locked_at: from.locked_at || new Date().toISOString(), ...from };
+        const notes = [];
+        rateKeys.forEach((field) => {
+          next[field] = num(changes[field]);
+          notes.push(`credit repair ${RATE_LABELS[field]} changed from ${fmtRate(field, from[field])} to ${fmtRate(field, num(changes[field]))}`);
+        });
+
+        const headline = categoryChanged
+          ? `Hire category changed from ${claim.hire_category || 'not set'} to ${nextCategory || 'not set'}${relocked ? " — partner's rates locked onto this claim" : ''}`
+          : '';
+
+        const patch = {};
+        if (categoryChanged) patch.hire_category = nextCategory;
+        if (!nextCategory) {
+          // No category: nothing of the partner's is locked to this claim.
+          patch.credit_repair_rates_locked = null;
+          patch.credit_repair_rates_overridden = false;
+        } else if (relocked) {
+          patch.credit_repair_rates_locked = next;
+          patch.credit_repair_rates_overridden = rateKeys.length > 0;
+        } else if (rateKeys.length > 0) {
+          patch.credit_repair_rates_locked = next;
+          patch.credit_repair_rates_overridden = true;
+        }
+
+        onChange(patch, [headline, ...notes].filter(Boolean).join('; ') || 'Credit repair figures updated');
+      }}
+    />
   );
 }
