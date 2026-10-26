@@ -1,5 +1,6 @@
 import React from 'react';
 import { fmtGBP } from '@/components/shared/creditRepairRates';
+import { lightText } from '@/components/shared/trafficLight';
 
 const Figure = ({ label, value, tone = '' }) => (
   <div className="min-w-0">
@@ -17,12 +18,12 @@ export default function HeadlineStrip({ owedToUs = 0, weOwe = 0, overdue = 0, ac
       <Figure
         label="Overdue (60+ days)"
         value={fmtGBP(overdue)}
-        tone={overdue > 0 ? 'text-red-600 dark:text-red-400' : ''}
+        tone={overdue > 0 ? lightText('red') : ''}
       />
       <Figure
         label="Actions waiting"
         value={String(actions)}
-        tone={actions > 0 ? 'text-amber-600 dark:text-amber-400' : ''}
+        tone={actions > 0 ? lightText('amber') : ''}
       />
     </div>
   );

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ChevronRight } from 'lucide-react';
 import { AGE_BANDS, OVERDUE_DAYS, waitingLabel } from '@/components/shared/invoicingQueue';
 import { fmtGBP } from '@/components/shared/creditRepairRates';
+import { lightText } from '@/components/shared/trafficLight';
 import AgedInvoiceRow from './AgedInvoiceRow';
 
 /** One party's aged invoices: what it owes, how old, and the invoices behind it. */
@@ -21,13 +22,13 @@ export default function AgedPartyRow({ group, onOpen }) {
           <span className="text-[11px] text-muted-foreground shrink-0">
             {group.count} invoice{group.count === 1 ? '' : 's'}
           </span>
-          <span className={`text-sm font-semibold tabular-nums shrink-0 ${group.overdue ? 'text-red-600 dark:text-red-400' : ''}`}>
+          <span className={`text-sm font-semibold tabular-nums shrink-0 ${group.overdue ? lightText('red') : ''}`}>
             {fmtGBP(group.total)}
           </span>
         </div>
         <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1 pl-6 text-[11px] text-muted-foreground">
           {AGE_BANDS.map((band) => (group.bands[band.key] ? (
-            <span key={band.key} className={band.min > OVERDUE_DAYS ? 'text-red-600 dark:text-red-400 font-semibold' : ''}>
+            <span key={band.key} className={band.min > OVERDUE_DAYS ? `${lightText('red')} font-semibold` : ''}>
               {band.label} {fmtGBP(group.bands[band.key])}
             </span>
           ) : null))}

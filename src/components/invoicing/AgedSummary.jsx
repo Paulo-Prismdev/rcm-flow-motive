@@ -1,20 +1,22 @@
 import React from 'react';
 import { AGE_BANDS, agedTotals } from '@/components/shared/invoicingQueue';
 import { fmtGBP } from '@/components/shared/creditRepairRates';
+import { lightDot, lightText } from '@/components/shared/trafficLight';
 
 const plural = (count, word) => `${count} ${word}${count === 1 ? '' : 's'}`;
 
-// One bar, four bands, calm through to warning as the money ages.
+// One bar, four bands, calm through to the same amber and red a status is read in as
+// the money ages.
 const BAND_BAR = {
   '0-30': 'bg-muted-foreground/25',
-  '31-60': 'bg-amber-300 dark:bg-amber-500/50',
-  '61-90': 'bg-amber-500',
-  '90+': 'bg-red-500',
+  '31-60': 'bg-[#FF9F0A]/40',
+  '61-90': lightDot('amber'),
+  '90+': lightDot('red'),
 };
 
 const BAND_TEXT = {
-  '61-90': 'text-amber-600 dark:text-amber-400',
-  '90+': 'text-red-600 dark:text-red-400',
+  '61-90': lightText('amber'),
+  '90+': lightText('red'),
 };
 
 /**

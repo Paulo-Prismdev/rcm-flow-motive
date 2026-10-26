@@ -1,17 +1,18 @@
 import React from 'react';
 import { fmtGBP } from '@/components/shared/creditRepairRates';
 import { formatInvoiceDay, invoicePartyName } from '@/components/shared/invoiceChecklist';
-import { invoiceStatusLabel, invoiceToneKey } from '@/components/claims/InvoiceItemCard';
+import { itemLight } from '@/components/shared/trafficLight';
+import LightDot from '@/components/shared/LightDot';
+import LightPill from '@/components/shared/LightPill';
 import { MacGroup, MacRow } from './MacGroup';
-import StatusBadge from './StatusBadge';
-import { toneFor } from './ItemRow';
 
 const HEADERS = ['Invoice', 'Party', 'Direction', 'Amount', 'Status', 'Paid'];
 
 /**
  * Step 5 as a clean table, under its own heading: every invoice, in and out, with
- * what it is, which way the money goes and where it stands. Any row opens the same
- * sheet, with Mark paid on it.
+ * what it is, which way the money goes and where it stands — its status read as the
+ * same traffic light the rows carry everywhere else. Any row opens the same sheet,
+ * with Mark paid on it.
  */
 export default function PaymentsPane({ step, claim, onOpenItem }) {
   const rows = step.rows || [];
@@ -41,28 +42,32 @@ export default function PaymentsPane({ step, claim, onOpenItem }) {
               </tr>
             </thead>
             <tbody>
-              {rows.map(({ item, state }) => (
-                <tr
-                  key={item.key}
-                  onClick={() => onOpenItem(item, state)}
-                  className="h-11 cursor-pointer border-b border-mac-line transition-colors duration-150 last:border-b-0 hover:bg-mac-window"
-                >
-                  <td className="px-3 text-foreground">{item.label}</td>
-                  <td className="px-3 text-mac-muted">{invoicePartyName(claim, item) || '—'}</td>
-                  <td className="px-3 text-mac-muted">{item.direction === 'in' ? 'In' : 'Out'}</td>
-                  <td className="px-3 text-right tabular-nums text-foreground">
-                    {!state.awaiting && state.amount > 0 ? fmtGBP(state.amount) : '—'}
-                  </td>
-                  <td className="px-3">
-                    <StatusBadge tone={toneFor(invoiceToneKey(item, state, 'pay'))}>
-                      {invoiceStatusLabel(item, state)}
-                    </StatusBadge>
-                  </td>
-                  <td className="px-3 tabular-nums text-mac-muted">
-                    {state.paid ? (state.paidDate ? formatInvoiceDay(state.paidDate) : 'Yes') : '—'}
-                  </td>
-                </tr>
-              ))}
+              {rows.map(({ item, state }) => {
+                const light = itemLight(item, state);
+                return (
+                  <tr
+                    key={item.key}
+                    onClick={() => onOpenItem(item, state)}
+                    className="h-11 cursor-pointer border-b border-mac-line transition-colors duration-150 last:border-b-0 hover:bg-mac-window"
+                  >
+                    <td className="px-3 text-foreground">{item.label}</td>
+                    <td className="px-3 text-mac-muted">{invoicePartyName(claim, item) || '—'}</td>
+                    <td className="px-3 text-mac-muted">{item.direction === 'in' ? 'In' : 'Out'}</td>
+                    <td className="px-3 text-right tabular-nums text-foreground">
+                      {!state.awaiting && state.amount > 0 ? fmtGBP(state.amount) : '—'}
+                    </td>
+                    <td className="px-3">
+                      <span className="flex items-center gap-2">
+                        <LightDot lightKey={light.key} />
+                        <LightPill lightKey={light.key}>{light.label}</LightPill>
+                      </span>
+                    </td>
+                    <td className="px-3 tabular-nums text-mac-muted">
+                      {state.paid ? (state.paidDate ? formatInvoiceDay(state.paidDate) : 'Yes') : '—'}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         )}

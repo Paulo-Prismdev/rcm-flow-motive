@@ -1,11 +1,14 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
+import { lightText } from '@/components/shared/trafficLight';
 import StepGlyph from './StepGlyph';
 
 /**
  * The source list: Overview, then the five steps in order, each with its own state
  * and the two figures that say how far along it is. The selected row carries the
- * blue highlight.
+ * navy highlight, and every row's icon is drawn in its own traffic-light colour —
+ * red while something in the step is still to be uploaded, amber while it waits to
+ * be paid, green once the step is done, grey where it holds nothing to do.
  */
 export default function FinancialsSidebar({ items, selected, onSelect, footer }) {
   return (
@@ -23,7 +26,10 @@ export default function FinancialsSidebar({ items, selected, onSelect, footer })
                   active ? 'bg-mac-navy text-white' : 'hover:bg-foreground/5'
                 )}
               >
-                <StepGlyph state={item.glyph} className={active ? 'text-white' : 'text-mac-muted'} />
+                <StepGlyph
+                  state={item.glyph}
+                  className={active && item.light === 'grey' ? 'text-white/60' : lightText(item.light)}
+                />
                 <span className="min-w-0 flex-1 truncate text-[13px]">{item.title}</span>
                 {item.count && (
                   <span className={cn('text-[11px] tabular-nums', active ? 'text-white/80' : 'text-mac-muted')}>

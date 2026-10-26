@@ -1,12 +1,13 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
+import { lightDot } from '@/components/shared/trafficLight';
 
-/** Status in this design is a small dot and a plain label — never a filled card. */
+/** The light's own colours: status in this design is a dot, never a filled card. */
 const DOTS = {
-  done: 'bg-green-500',
-  waiting: 'bg-amber-500',
-  action: 'bg-red-500',
-  idle: 'bg-mac-muted',
+  done: lightDot('green'),
+  waiting: lightDot('amber'),
+  action: lightDot('red'),
+  idle: lightDot('grey'),
 };
 
 export default function StatusBadge({ tone = 'idle', children, className }) {

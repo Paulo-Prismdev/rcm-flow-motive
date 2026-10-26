@@ -4,6 +4,7 @@ import ArchivedTag from './ArchivedTag';
 import { formatInvoiceDay } from '@/components/shared/invoiceChecklist';
 import { isOverdue, waitingLabel } from '@/components/shared/invoicingQueue';
 import { fmtGBP } from '@/components/shared/creditRepairRates';
+import { lightText } from '@/components/shared/trafficLight';
 
 /** One aged invoice, inside its party's row. */
 export default function AgedInvoiceRow({ row, onOpen }) {
@@ -19,7 +20,7 @@ export default function AgedInvoiceRow({ row, onOpen }) {
         <div className="flex items-center gap-2">
           <span className="text-xs font-semibold flex-1 min-w-0 truncate">{row.invoice}</span>
           {row.archived && <ArchivedTag />}
-          <span className={`text-xs font-semibold tabular-nums shrink-0 ${late ? 'text-red-600 dark:text-red-400' : ''}`}>
+          <span className={`text-xs font-semibold tabular-nums shrink-0 ${late ? lightText('red') : ''}`}>
             {fmtGBP(row.amount)}
           </span>
         </div>

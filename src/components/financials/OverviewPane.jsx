@@ -2,15 +2,15 @@ import React from 'react';
 import { ChevronRight } from 'lucide-react';
 import { fmtGBP } from '@/components/shared/creditRepairRates';
 import { repairNet, repairVat, salvageStorageCharge } from '@/components/shared/invoiceChecklist';
+import LightDot from '@/components/shared/LightDot';
 import { MacGroup, MacRow, MacValueRow } from './MacGroup';
-import StepGlyph from './StepGlyph';
 
 /**
- * The whole job at a glance: what it comes to, what is owed either way, and every
- * step with its own state — so the window can be read in one look and any step
- * opened from here.
+ * The whole job at a glance: its status counted out in one line, what it comes to,
+ * what is owed either way, and every step with its own traffic light — so the window
+ * can be read in one look and any step opened from here.
  */
-export default function OverviewPane({ claim, ctx, summary, steps, onSelect, dormant }) {
+export default function OverviewPane({ claim, ctx, summary, steps, light, onSelect, dormant }) {
   const finalCost = ctx.totalLoss ? (salvageStorageCharge(claim) ?? 0) : (Number(claim.final_repair_cost) || 0);
   const net = ctx.totalLoss ? 0 : repairNet(claim);
   const vat = ctx.totalLoss ? 0 : repairVat(claim);
@@ -21,6 +21,20 @@ export default function OverviewPane({ claim, ctx, summary, steps, onSelect, dor
         <h2 className="text-[17px] font-semibold text-foreground">Overview</h2>
         <p className="text-[11px] text-mac-muted">What the job comes to, and where its invoicing has got to.</p>
       </header>
+
+      {light?.entries?.length > 0 && (
+        <p className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[13px] font-medium text-foreground">
+          {light.entries.map((entry, index) => (
+            <React.Fragment key={entry.label}>
+              {index > 0 && <span className="text-mac-muted">·</span>}
+              <span className="inline-flex items-center gap-1.5">
+                <LightDot lightKey={entry.key} />
+                {entry.count} {entry.label.toLowerCase()}
+              </span>
+            </React.Fragment>
+          ))}
+        </p>
+      )}
 
       <MacGroup title="What the job comes to">
         <MacValueRow
@@ -43,7 +57,7 @@ export default function OverviewPane({ claim, ctx, summary, steps, onSelect, dor
       <MacGroup title="Invoicing steps">
         {steps.map((step) => (
           <MacRow key={step.key} onClick={() => onSelect(step.key)}>
-            <StepGlyph state={step.glyph} className="text-mac-muted" />
+            <LightDot lightKey={step.light} />
             <span className="min-w-0 flex-1">
               <span className="block truncate text-[13px] text-foreground">{step.title}</span>
               <span className="mt-0.5 block truncate text-[11px] text-mac-muted">{step.line}</span>

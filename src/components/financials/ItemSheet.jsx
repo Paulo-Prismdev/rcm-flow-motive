@@ -5,15 +5,15 @@ import { fmtGBP } from '@/components/shared/creditRepairRates';
 import {
   canRequestInvoice, formatInvoiceDay, invoicePartyName, isInvoiceDocument, isRecommendedItem,
 } from '@/components/shared/invoiceChecklist';
-import { invoiceStatusLabel, invoiceToneKey } from '@/components/claims/InvoiceItemCard';
 import InvoiceCalculation from '@/components/claims/financials/InvoiceCalculation';
 import InvoiceItemDetails from '@/components/claims/InvoiceItemDetails';
 import DocumentPreview from '@/components/shared/DocumentPreview';
+import { itemLight } from '@/components/shared/trafficLight';
+import LightDot from '@/components/shared/LightDot';
+import LightPill from '@/components/shared/LightPill';
 import { MacButton, MacDangerButton, MacPrimaryButton } from './MacButtons';
 import { MacGroup, MacRow, MacValueRow } from './MacGroup';
 import MacSheet from './MacSheet';
-import StatusBadge from './StatusBadge';
-import { toneFor } from './ItemRow';
 
 /**
  * Everything about one document or invoice in one sheet: the copy on the left, its
@@ -35,7 +35,7 @@ export default function ItemSheet({
 
   const isDocument = isInvoiceDocument(item);
   const party = invoicePartyName(claim, item);
-  const tone = toneFor(invoiceToneKey(item, state, undefined));
+  const light = itemLight(item, state);
   const file = files[0] || null;
   const canAsk = canRequestInvoice(item) && !state.paid && !state.date;
   const canMarkPaid = !state.paid && !state.notApplicable && !state.awaiting && (!!state.date || state.requested);
@@ -139,7 +139,10 @@ export default function ItemSheet({
 
       <div className="min-h-0 space-y-3 overflow-y-auto p-4 md:flex-1">
         <div className="flex items-center justify-between gap-3">
-          <StatusBadge tone={tone}>{invoiceStatusLabel(item, state)}</StatusBadge>
+          <span className="flex items-center gap-2">
+            <LightDot lightKey={light.key} />
+            <LightPill lightKey={light.key}>{light.label}</LightPill>
+          </span>
           {!isDocument && !state.awaiting && state.amount > 0 && (
             <span className="text-[15px] font-semibold tabular-nums text-foreground">{fmtGBP(state.amount)}</span>
           )}

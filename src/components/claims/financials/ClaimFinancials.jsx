@@ -81,6 +81,7 @@ import PaymentsPane from '@/components/financials/PaymentsPane';
 import ItemSheet from '@/components/financials/ItemSheet';
 import { statusText, statusTone, stepCounts, stepGlyphState, toolbarNext } from '@/components/financials/stepSummary';
 import { fmtGBP } from '@/components/shared/creditRepairRates';
+import { lightSummary, stepLight } from '@/components/shared/trafficLight';
 
 /** Readable names for the financial fields in the claim's activity history. */
 const FIELD_LABELS = {
@@ -675,11 +676,15 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
   // What the source list shows of each step, and the one action the toolbar carries:
   // both read off the flow, so nothing is counted or stated twice.
   const stepById = Object.fromEntries(flow.steps.map((s) => [s.key, s]));
+  // The job's own light and the count it opens on, and each step's light beside its
+  // name: the same traffic light the rows underneath them carry.
+  const light = useMemo(() => lightSummary(summary.rows), [summary.rows]);
   const sidebarItems = [
     {
       key: 'overview',
       title: 'Overview',
       glyph: flow.allDone ? 'done' : 'partial',
+      light: light.key,
       count: summary.total > 0 ? `${summary.complete}/${summary.total}` : '',
       line: `${summary.complete} of ${summary.total} invoices complete`,
     },
@@ -688,6 +693,7 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
       // The source list carries the step's short name so nothing is ever cut off.
       title: s.short || s.title,
       glyph: stepGlyphState(s, flow.current),
+      light: stepLight(s),
       count: stepCounts(s).text,
       line: s.line,
     })),
@@ -859,6 +865,7 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
                 ctx={ctx}
                 summary={summary}
                 steps={sidebarItems.filter((s) => s.key !== 'overview')}
+                light={light}
                 onSelect={selectPane}
                 dormant={(
                   <NoLongerRequired

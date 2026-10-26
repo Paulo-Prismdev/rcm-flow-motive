@@ -1,13 +1,14 @@
 import React from 'react';
 import { Check } from 'lucide-react';
 import { fmtGBP } from '@/components/shared/creditRepairRates';
+import { lightText } from '@/components/shared/trafficLight';
 
-// Only the count carries the urgency: red where something is wrong, amber where
-// something is being waited on.
+// Only the count carries the urgency, in the same red and amber a status is read in
+// everywhere else: red where something is wrong, amber where something is waited on.
 const COUNT_TONE = {
   neutral: 'text-foreground',
-  warning: 'text-amber-600 dark:text-amber-400',
-  negative: 'text-red-600 dark:text-red-400',
+  warning: lightText('amber'),
+  negative: lightText('red'),
 };
 
 /** One of the day's queues as a tile; clicking it opens its list under the grid. */
@@ -22,7 +23,7 @@ export default function QueueTile({ section, open, onToggle }) {
         onClick={onToggle}
         className={`rounded-[10px] border flex items-center gap-1.5 px-2.5 py-1.5 text-left transition-colors ${open ? 'border-foreground/25 bg-muted' : 'border-border bg-muted/40 hover:bg-muted/70'}`}
       >
-        <Check className="w-3.5 h-3.5 shrink-0 text-emerald-600 dark:text-emerald-400" />
+        <Check className={`w-3.5 h-3.5 shrink-0 ${lightText('green')}`} />
         <span className="text-[11px] font-medium text-muted-foreground truncate">{section.label}</span>
       </button>
     );

@@ -4,6 +4,7 @@ import ArchivedTag from './ArchivedTag';
 import { formatInvoiceDay } from '@/components/shared/invoiceChecklist';
 import { waitingLabel } from '@/components/shared/invoicingQueue';
 import { fmtGBP } from '@/components/shared/creditRepairRates';
+import LightPill from '@/components/shared/LightPill';
 
 /** One line of the day's queue: the invoice, the job, and the wait behind it. */
 export default function QueueRow({ row, onOpen }) {
@@ -19,11 +20,7 @@ export default function QueueRow({ row, onOpen }) {
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
           <span className="text-sm font-semibold flex-1 min-w-0 truncate">{row.invoice}</span>
-          {row.overdue && (
-            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-400 shrink-0">
-              Overdue
-            </span>
-          )}
+          {row.overdue && <LightPill lightKey="red" className="text-[10px]">Overdue</LightPill>}
           {row.archived && <ArchivedTag />}
           {row.amount > 0 && (
             <span className="text-sm font-semibold tabular-nums shrink-0">{fmtGBP(row.amount)}</span>
