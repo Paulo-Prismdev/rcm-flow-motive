@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { AlertTriangle, Check, Loader2, Sparkles, X } from 'lucide-react';
 import { fmtGBP } from '@/components/shared/creditRepairRates';
 import HighlightableDocumentViewer from '@/components/shared/HighlightableDocumentViewer';
+import TopLevelReviewWindow from '@/components/shared/TopLevelReviewWindow';
 import ExtractedFigureRow from './ExtractedFigureRow';
 import InvoiceReviewChecks from './InvoiceReviewChecks';
 import {
@@ -238,8 +239,12 @@ export default function InvoiceReviewModal({
   })();
 
   return (
-    <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/50 backdrop-blur-sm p-3" data-mobile-full-modal="true">
-      <div className="bg-card border border-border rounded-xl shadow-2xl w-[90vw] max-w-[1400px] h-[90vh] !overflow-hidden flex flex-col">
+    <TopLevelReviewWindow
+      isOpen={isOpen}
+      onClose={onClose}
+      label="Check this invoice before it's saved"
+      className="!overflow-hidden"
+    >
         <div className="flex items-center gap-3 px-4 py-2.5 border-b border-border flex-shrink-0">
           <div className="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center flex-shrink-0">
             <Sparkles className="w-4 h-4 text-purple-600 dark:text-purple-400" />
@@ -349,7 +354,6 @@ export default function InvoiceReviewModal({
             <Check className="w-3.5 h-3.5" /> Save the invoice to the claim
           </Button>
         </div>
-      </div>
-    </div>
+    </TopLevelReviewWindow>
   );
 }
