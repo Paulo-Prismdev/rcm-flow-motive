@@ -140,31 +140,22 @@
   "rls": {
     "create": {
       "user_condition": {
-        "user_type": "internal"
+        "data.user_type": "internal"
       }
     },
     "read": {
-      "$or": [
-        {
-          "user_condition": {
-            "user_type": "internal"
-          }
-        },
-        {
-          "user_condition": {
-            "user_type": "referrer"
-          }
-        }
-      ]
+      "user_condition": {
+        "data.user_type": "internal"
+      }
     },
     "update": {
       "user_condition": {
-        "user_type": "internal"
+        "data.user_type": "internal"
       }
     },
     "delete": {
       "user_condition": {
-        "user_type": "internal"
+        "data.user_type": "internal"
       }
     }
   }
