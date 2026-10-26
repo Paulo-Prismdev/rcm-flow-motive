@@ -42,11 +42,53 @@ const VAT_NOT_REGISTERED = 'Non-VAT';
 export const vatStatusKnown = (status) => status === VAT_REGISTERED || status === VAT_NOT_REGISTERED;
 
 /**
- * The contributions the authority's "customer is responsible for" section showed,
- * kept against the authority's own entry on the claim.
+ * Every authority the claim holds, as the single figure the repair was authorised at.
+ * The Final Authority's own record is used where one has arrived; otherwise the initial
+ * and the supplementary authorised totals are added together. Each authority keeps its
+ * own figures — the initial and supplementary ones come off the documents read in the
+ * claim's Documents panel — so none overwrites another, and this is the one place they
+ * are read as the authorised total the insurer's invoice is measured against.
  */
-export const authorityContributions = (claim) =>
-  toNum(claim?.invoice_tracker?.items?.final_authority?.contributions) || 0;
+export function authorityTotals(claim) {
+  if (!claim) return null;
+  const final = toNum(claim?.invoice_tracker?.items?.final_authority?.amount);
+  if (final !== null && final > 0) {
+    return { gross: round2(final), final: true, initial: null, supplementary: null, source: 'final' };
+  }
+  const documents = claim?.invoice_tracker?.documents || {};
+  const positive = (a, b) => {
+    const first = toNum(a);
+    if (first !== null && first > 0) return round2(first);
+    const second = toNum(b);
+    return second !== null && second > 0 ? round2(second) : 0;
+  };
+  const initial = positive(claim?.authority_cost_gross, documents.initial_authority?.gross);
+  const supplementary = positive(documents.supplementary_authority?.gross, claim?.supplementary_authority_cost_gross);
+  const gross = round2(initial + supplementary);
+  if (gross <= 0) return null;
+  return {
+    gross,
+    initial,
+    supplementary,
+    final: false,
+    source: supplementary > 0 ? 'combined' : 'initial',
+  };
+}
+
+/**
+ * The contributions the authorities' "customer is responsible for" sections showed. The
+ * Final Authority's own record is used where one has arrived — it is what the excess and
+ * the authorised amount are settled from at close-out — and otherwise the initial and
+ * supplementary authorities' contributions are added together.
+ */
+export const authorityContributions = (claim) => {
+  const items = claim?.invoice_tracker?.items || {};
+  const final = toNum(items.final_authority?.contributions);
+  if (final !== null) return final || 0;
+  const documents = claim?.invoice_tracker?.documents || {};
+  return round2((toNum(documents.initial_authority?.contributions) || 0)
+    + (toNum(documents.supplementary_authority?.contributions) || 0));
+};
 
 /**
  * The authority read as the two figures the repair is split into: what the
@@ -85,12 +127,17 @@ export function authorityExpectation({ gross, net, excess, contributions, vatSta
   };
 }
 
-/** The same, read off the claim's own fields. Null where the job has no insurer. */
+/**
+ * The same, read off the claim's own records: the Final Authority where one has
+ * arrived, and otherwise the initial plus supplementary authorised total. Null where
+ * the job has no authority at all to measure the invoice against.
+ */
 export function claimAuthorityExpectation(claim) {
   if (!claim || isPrivatePayingClaim(claim)) return null;
+  const authority = authorityTotals(claim);
+  if (!authority) return null;
   return authorityExpectation({
-    gross: claim.authority_cost_gross,
-    net: claim.authority_cost_net,
+    gross: authority.gross,
     excess: excessMode(claim) === 'tbc' ? 'tbc' : round2(toNum(claim.policy_excess) ?? 0),
     contributions: authorityContributions(claim),
     vatStatus: claim.client_vat_status,

@@ -12,9 +12,18 @@ import { logActivity } from '@/components/shared/useActivityLogger';
 import FileViewer from '@/components/shared/FileViewer';
 import ConfirmDialog from '@/components/shared/ConfirmDialog';
 import {
-  DOC_ITEMS, computeChecklistSummary, itemKeyDate,
+  DOC_ITEMS, computeChecklistSummary,
 } from '@/components/shared/docChecklist';
 import DocumentChecklistCard from '@/components/claims/DocumentChecklistCard';
+import DocumentReviewModal from '@/components/claims/DocumentReviewModal';
+import {
+  buildDocumentLog,
+  buildDocumentPatch,
+  documentDatePatch,
+  documentKeyDate,
+  documentTarget,
+  readsClaimFigures,
+} from '@/components/claims/documentFigures';
 import RemoveFileDialog from '@/components/shared/RemoveFileDialog';
 import { removeFileFromUpdates } from '@/components/shared/removeFileFromUpdates';
 import { formatInvoiceDay } from '@/components/shared/invoiceChecklist';
@@ -53,6 +62,9 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
   // A file name stays on one line (with "…") on phones; tapping the chevron
   // beside it shows the whole name instead.
   const [revealedNames, setRevealedNames] = useState({});
+  // An estimate or an authority waiting to be read and confirmed: nothing is filed
+  // and nothing is written to the claim until that screen is confirmed.
+  const [documentReview, setDocumentReview] = useState(null);
 
   const { data: docs = [], isLoading } = useQuery({
     queryKey: STATUS_QUERY_KEY(claim.id),
@@ -115,12 +127,31 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
 
   const handleUpload = async (itemKey, fileList) => {
     if (!fileList?.length) return;
-    const urls = await uploadFiles(fileList);
+    const item = DOC_ITEMS.find((i) => i.key === itemKey);
+    const files = Array.from(fileList);
+    const urls = await uploadFiles(files);
     if (!urls?.length) return;
+
+    // An estimate or an authority is read before anything is filed: the review settles
+    // its figures and the date printed on it, and the copy is filed only once confirmed.
+    if (readsClaimFigures(itemKey)) {
+      setDocumentReview({
+        item,
+        file_url: urls[0],
+        file_name: files[0]?.name || urls[0].split('/').pop(),
+        // Anything else dropped in with it is filed as another copy of the same
+        // document, without being read a second time.
+        extraCopies: urls.slice(1).map((url, index) => ({
+          file_url: url,
+          file_name: files[index + 1]?.name || url.split('/').pop(),
+        })),
+      });
+      return;
+    }
+
     // The Key Dates date an upload fills in is remembered as coming from the first
     // file that landed, so removing that file can clear the date it set — and
     // nothing else.
-    const item = DOC_ITEMS.find((i) => i.key === itemKey);
     const dateMissing = !!item?.dateField && !claim[item.dateField.field];
     let dateSet = false;
 
@@ -165,6 +196,93 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
     if (dateMissing) {
       setFocusDateKey(item.key);
       setOpenMenuKey(item.key);
+    }
+  };
+
+  /**
+   * Confirming a read: only now is the copy filed and only now do the figures and the
+   * date printed on the document land on the claim. Anything the claim already held a
+   * different figure for was settled on the review screen, so nothing is overwritten
+   * here, and the history says what was read, what was corrected and what was kept.
+   */
+  const handleDocumentReviewConfirm = async ({ figures, corrections, choices, excessChoice, vatChoice }) => {
+    const pending = documentReview;
+    if (!pending) return;
+    const { item } = pending;
+
+    const { patch, applied, kept } = buildDocumentPatch({
+      claim,
+      itemKey: item.key,
+      figures,
+      choices,
+      excessChoice,
+      vatChoice,
+      file: { file_url: pending.file_url, file_name: pending.file_name, by: currentUser?.full_name || '' },
+    });
+
+    // The Key Dates date this document fills in is remembered as coming from this very
+    // copy, so removing it can clear the date it set — and nothing else.
+    const dateField = documentTarget(item.key)?.date?.field;
+    const dateValue = dateField ? patch[dateField] : null;
+    const dateMarks = dateField && dateValue && !claim[dateField]
+      ? { date_set_field: dateField, date_set_value: dateValue }
+      : {};
+
+    if (pending.legacyUrl) {
+      patch.file_urls = (Array.isArray(claim.file_urls) ? claim.file_urls : [])
+        .filter((url) => url !== pending.legacyUrl);
+    }
+
+    try {
+      const documentRecord = {
+        claim_id: claim.id,
+        item_key: item.key,
+        file_url: pending.file_url,
+        file_name: pending.file_name,
+        uploaded_by_email: currentUser?.email || '',
+        uploaded_by_name: currentUser?.full_name || '',
+        uploaded_at: new Date().toISOString(),
+        source: 'manual',
+        ...dateMarks,
+      };
+
+      if (pending.move) {
+        // A copy already filed elsewhere (usually General Documents) is moved onto
+        // this document rather than filed twice.
+        await base44.entities.ClaimDocument.update(pending.move.id, {
+          item_key: item.key,
+          ...dateMarks,
+        });
+      } else {
+        await base44.entities.ClaimDocument.create(documentRecord);
+      }
+      for (const copy of pending.extraCopies || []) {
+        await base44.entities.ClaimDocument.create({ ...documentRecord, ...copy });
+      }
+
+      await logActivity({
+        parentId: claim.id, parentType: 'Claim', action: 'Document Uploaded',
+        description: `Uploaded "${pending.file_name}" to "${item.label}" and read the figures off it`,
+        user: currentUser,
+      });
+
+      queryClient.invalidateQueries({ queryKey: STATUS_QUERY_KEY(claim.id) });
+      const refreshed = await base44.entities.ClaimDocument.filter({ claim_id: claim.id }, { sort: 'created_date' });
+      persistClaimCounts(refreshed.items || [], statusMap, patch);
+
+      buildDocumentLog({ item, itemKey: item.key, figures, corrections, applied, kept })
+        .forEach((entry) => logActivity({ parentId: claim.id, parentType: 'Claim', user: currentUser, ...entry }));
+
+      // A document that printed no date leaves its Key Dates field for the user to
+      // fill in, so it is opened for them rather than being read as today's date.
+      if (dateField && !dateValue && !claim[dateField]) {
+        setFocusDateKey(item.key);
+        setOpenMenuKey(item.key);
+      }
+      setDocumentReview(null);
+      toast({ title: `${item.label} saved`, description: 'The figures read off it are on the claim.' });
+    } catch (e) {
+      toast({ title: `Could not save the ${item.label}`, description: e?.message, variant: 'destructive' });
     }
   };
 
@@ -269,10 +387,20 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
   };
 
   // The date entered against a checklist item IS the claim's Key Dates field —
-  // one value in one place, editable from either screen.
+  // one value in one place, editable from either screen. A document with no Key Dates
+  // field of its own (the supplementary pair) keeps its date on its own record.
   const handleItemDateChange = (item, value) => {
-    onUpdate({ ...claim, [item.dateField.field]: value || null });
+    if (item.dateField) {
+      onUpdate({ ...claim, [item.dateField.field]: value || null });
+      return;
+    }
+    onUpdate({ ...claim, ...documentDatePatch(item.key, claim, value) });
   };
+
+  /** The date a checklist item is recorded at, from wherever that document keeps it. */
+  const keyDateOf = (item) => (item.dateField
+    ? claim[item.dateField.field]
+    : documentKeyDate(item.key, claim));
 
   // Drag a document out of General Documents and drop it on a placeholder to file
   // it as that document.
@@ -292,6 +420,20 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
   };
 
   const fileIntoChecklist = async (item, payload) => {
+    // An estimate or an authority is read whichever way its copy arrives: dropping a
+    // file onto it opens the same review an upload does, and the copy is filed — or
+    // moved off General Documents — only once that is confirmed.
+    if (readsClaimFigures(item.key)) {
+      setDocumentReview({
+        item,
+        file_url: payload.url,
+        file_name: payload.name,
+        move: payload.record ? { id: payload.record.id } : null,
+        legacyUrl: payload.legacyUrl || null,
+      });
+      return;
+    }
+
     // Filing a document is what fills in its Key Dates date, so the file that does
     // it is remembered as the one that set that date.
     const dateMissing = !!item.dateField && !claim[item.dateField.field];
@@ -464,9 +606,9 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
                 status={status}
                 files={itemFiles}
                 uploading={isUploading}
-                dateRecorded={itemKeyDate(item, claim)}
-                keyDateLabel={item.dateField?.label}
-                keyDateValue={item.dateField ? toInputDate(claim[item.dateField.field]) : ''}
+                dateRecorded={keyDateOf(item)}
+                keyDateLabel={item.dateField?.label || documentTarget(item.key)?.date?.label}
+                keyDateValue={keyDateOf(item) ? toInputDate(keyDateOf(item)) : ''}
                 autoFocusKeyDate={focusDateKey === item.key}
                 onKeyDateChange={(value) => handleItemDateChange(item, value)}
                 menuOpen={openMenuKey === item.key}
@@ -607,6 +749,18 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
 
       {viewingFile && (
         <FileViewer fileUrl={viewingFile} onClose={() => setViewingFile(null)} />
+      )}
+
+      {documentReview && (
+        <DocumentReviewModal
+          isOpen
+          onClose={() => setDocumentReview(null)}
+          claim={claim}
+          item={documentReview.item}
+          fileUrl={documentReview.file_url}
+          fileName={documentReview.file_name}
+          onConfirm={handleDocumentReviewConfirm}
+        />
       )}
 
       <ConfirmDialog

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import EstimateAuthorityTotals from './EstimateAuthorityTotals';
 
 export default function ClaimEstimateForm({ claim, onSave, onCancel }) {
     const [formData, setFormData] = useState({
@@ -39,6 +40,9 @@ export default function ClaimEstimateForm({ claim, onSave, onCancel }) {
 
     return (
         <div className="space-y-4 pt-4">
+            {/* What has been read off the estimate and authority documents, each
+                figure on its own line with the supplementary added to it. */}
+            <EstimateAuthorityTotals claim={claim} />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <label className="text-sm text-gray-500">Email Estimate To *</label>

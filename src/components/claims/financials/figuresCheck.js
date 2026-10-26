@@ -7,7 +7,7 @@ import {
   salvageStorageCharge,
 } from '@/components/shared/invoiceChecklist';
 import { excessMode } from '@/components/shared/excessState';
-import { finalInvoiceTotal } from './invoiceAuthorityCheck';
+import { authorityTotals, finalInvoiceTotal } from './invoiceAuthorityCheck';
 
 /**
  * The check on the job figures — the deliberate look at the figures every invoice
@@ -53,24 +53,27 @@ export function figuresCheckedLine(record) {
 export function figureSourceNote(claim, key) {
   const tracker = trackerOf(claim);
   const value = num(claim?.final_repair_cost);
-  const authorityOn = num(claim?.authority_cost_gross) > 0
-    || !!claim?.final_authority_received
-    || !!tracker.items?.final_authority?.details_source;
+  const authority = authorityTotals(claim);
+  const finalAuthority = num(tracker.items?.final_authority?.amount) > 0 || !!claim?.final_authority_received;
+  const authorityOn = !!authority || finalAuthority || !!tracker.items?.final_authority?.details_source;
 
   switch (key) {
     case 'final_repair_cost': {
       const invoice = finalInvoiceTotal(claim);
-      const gross = num(claim?.authority_cost_gross);
       const sources = [];
       if (invoice !== null && value !== null && Math.abs(value - invoice) <= 0.05) sources.push('Final Insurer Invoice');
-      if (gross !== null && gross > 0 && value !== null && Math.abs(value - gross) <= 0.05) sources.push('Final Authority');
+      if (authority && value !== null && Math.abs(value - authority.gross) <= 0.05) {
+        sources.push(authority.final ? 'Final Authority' : 'authority');
+      }
       return sources.length > 0 ? `from the ${sources.join(' and the ')}` : '';
     }
     case 'storage_charge':
       return salvageStorageCharge(claim) !== null ? 'from the Salvage Agent Invoice' : '';
     case 'client_vat_status':
     case 'policy_excess':
-      return authorityOn ? 'from the Final Authority' : '';
+      // The excess and the customer's VAT status are settled from the authorities: the
+      // Final Authority where one has arrived, and otherwise from the authority itself.
+      return authorityOn ? (finalAuthority ? 'from the Final Authority' : 'from the authority') : '';
     case 'storage_fee_percent':
       return num(tracker.storage_fee_percent) !== null ? 'set on this claim' : 'from Settings';
     case 'hire_fee':

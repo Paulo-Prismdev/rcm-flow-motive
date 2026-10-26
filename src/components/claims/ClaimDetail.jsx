@@ -69,6 +69,7 @@ import InstructionDefaultsForm from './InstructionDefaultsForm';
 import ThirdPartyPursuitSection from './ThirdPartyPursuitSection';
 import BackorderedPartsSection from './BackorderedPartsSection';
 import DocumentTrackerModal from './DocumentTrackerModal';
+import EstimateAuthorityTotals from './EstimateAuthorityTotals';
 import NotesSection from '../shared/NotesSection';
 import PartsRequestModal from './PartsRequestModal';
 import EstimateRequestModal from './EstimateRequestModal';
@@ -1644,6 +1645,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
         return (
           <InlineEditableSection title="Estimate Details" icon={Calculator} claim={claim} onUpdate={handleUpdate} canEdit={canEdit}>
             <EstimateInlineFields />
+            <EstimateAuthorityTotals claim={claim} className="mt-2" />
             <div className="mt-2 py-3 px-4 rounded-lg glass-inset">
               <InlineField label="Artura Estimate URL" name="artura_est_url" bare placeholder="Enter URL" />
             </div>

@@ -220,11 +220,14 @@ export function buildAuthorityReviewPatch(claim, figures, options = {}) {
 
   const total = toNum(figures?.amount_total);
   if (total !== null) {
-    // The authorised cost is the claim's own field: the total as printed, with
-    // the net worked back out of it the way the claim's figures already do it.
-    patch.authority_cost_gross = round2(total);
-    patch.authority_cost_net = round2(total / (1 + VAT_RATE));
+    // The final authority's amount is kept as its own record on the claim, with the
+    // net worked back out of it the way the claim's figures already do it. It is NOT
+    // written over the claim's own authorised cost: that field belongs to the initial
+    // authority, so the initial, the supplementary and the final figures each stay on
+    // their own record. What the Final Insurer Invoice is measured against is worked
+    // out from them in invoiceAuthorityCheck.authorityTotals.
     entry.amount = round2(total);
+    entry.net = round2(total / (1 + VAT_RATE));
   }
 
   const excess = excessCheck(figures, claim);
@@ -277,13 +280,12 @@ export function buildAuthorityReviewPatch(claim, figures, options = {}) {
 }
 
 /**
- * The figures of an authority that do NOT land on a field of the claim: the amount,
- * the excess and the customer's VAT status are already in the history as their own
- * field changes, so only what the authority holds itself — its contributions — is
- * logged here.
+ * The figures of an authority that do NOT land on a field of the claim: the excess and
+ * the customer's VAT status are already in the history as their own field changes, so
+ * they are not logged a second time here. The amount lands on the authority's own
+ * record rather than on a claim field, so a correction to it is logged here.
  */
 const AUTHORITY_FIGURE_SLOTS = {
-  amount_total: 'authority_cost_gross',
   excess: 'policy_excess',
   customer_vat: 'client_vat_status',
 };
