@@ -516,6 +516,16 @@
       "format": "date",
       "description": "Final Authority Received - the date the final authority came back, supplying the Final Authority close-out document in Financials. Kept separate from authority_received, which is the initial authority."
     },
+    "supplementary_estimate_completed": {
+      "type": "string",
+      "format": "date",
+      "description": "Supplementary Estimate Completed - the date the supplementary estimate came in, supplying the Supplementary Estimate document. Kept separate from estimate_completed, which is the initial estimate."
+    },
+    "supplementary_authority_received": {
+      "type": "string",
+      "format": "date",
+      "description": "Supplementary Authority Received - the date the supplementary authority came back, supplying the Supplementary Authority document. Kept separate from authority_received, which is the initial authority."
+    },
     "bs_instructed": {
       "type": "string",
       "format": "date"

@@ -185,7 +185,9 @@ export function checkDocumentReg({ itemKey, item, figures, claim }) {
 /**
  * Where each document's figures land. The initial estimate and authority also write
  * the claim's own figures — those are what the rest of the app reads — while the
- * supplementary pair and the final authority keep to their own records.
+ * supplementary pair and the final authority keep their amounts to their own records.
+ * Every document's date goes to its own Key Dates field, so it is the same value on
+ * the document's card and in Key Dates.
  */
 const TARGETS = {
   initial_estimate: {
@@ -200,11 +202,11 @@ const TARGETS = {
     gross: 'authority_cost_gross',
   },
   supplementary_estimate: {
-    date: { label: 'Supplementary Estimate Completed' },
+    date: { label: 'Supplementary Estimate Completed', field: 'supplementary_estimate_completed' },
     reference: true,
   },
   supplementary_authority: {
-    date: { label: 'Supplementary Authority Received' },
+    date: { label: 'Supplementary Authority Received', field: 'supplementary_authority_received' },
   },
 };
 

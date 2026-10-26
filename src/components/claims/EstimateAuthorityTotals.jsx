@@ -47,8 +47,8 @@ export default function EstimateAuthorityTotals({ claim, className }) {
           )}
           {row.final !== null && (
             <div className="text-[10px] leading-snug text-muted-foreground">
-              Final authority {fmtGBP(row.final)} — the figure the insurers' invoices are measured against, kept
-              apart from the figures above
+              Final authority {fmtGBP(row.final)} — the figure the insurers' invoices are measured against
+              {(row.initial !== null || row.supplementary !== null) ? ', kept apart from the figures above' : ''}
             </div>
           )}
         </div>

@@ -16,7 +16,9 @@ export default function ClaimDatesForm({ claim, onSave, onCancel }) {
         date_received: toInputDate(claim.date_received),
         loss_date: toInputDate(claim.loss_date),
         estimate_completed: toInputDate(claim.estimate_completed),
+        supplementary_estimate_completed: toInputDate(claim.supplementary_estimate_completed),
         authority_received: toInputDate(claim.authority_received),
+        supplementary_authority_received: toInputDate(claim.supplementary_authority_received),
         final_authority_received: toInputDate(claim.final_authority_received),
         bs_instructed: toInputDate(claim.bs_instructed),
         booking_in_date: toInputDate(claim.booking_in_date),
@@ -51,8 +53,16 @@ export default function ClaimDatesForm({ claim, onSave, onCancel }) {
                     <Input type="date" value={formData.estimate_completed} onChange={e => handleChange('estimate_completed', e.target.value)} className="neomorph-inset" />
                 </div>
                 <div>
+                    <label className="text-sm text-gray-500">Supplementary Estimate Completed</label>
+                    <Input type="date" value={formData.supplementary_estimate_completed} onChange={e => handleChange('supplementary_estimate_completed', e.target.value)} className="neomorph-inset" />
+                </div>
+                <div>
                     <label className="text-sm text-gray-500">Authority Received</label>
                     <Input type="date" value={formData.authority_received} onChange={e => handleChange('authority_received', e.target.value)} className="neomorph-inset" />
+                </div>
+                <div>
+                    <label className="text-sm text-gray-500">Supplementary Authority Received</label>
+                    <Input type="date" value={formData.supplementary_authority_received} onChange={e => handleChange('supplementary_authority_received', e.target.value)} className="neomorph-inset" />
                 </div>
                 <div>
                     <label className="text-sm text-gray-500">Bodyshop Instructed</label>

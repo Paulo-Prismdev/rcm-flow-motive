@@ -1464,7 +1464,9 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
               <InlineField label="Date Received" name="date_received" isDate />
               <InlineField label="Loss Date" name="loss_date" isDate />
               <InlineField label="Estimate Completed" name="estimate_completed" isDate />
+              <InlineField label="Supplementary Estimate Completed" name="supplementary_estimate_completed" isDate />
               <InlineField label="Authority Received" name="authority_received" isDate />
+              <InlineField label="Supplementary Authority Received" name="supplementary_authority_received" isDate />
               <InlineField label="Bodyshop Instructed" name="bs_instructed" isDate />
               <InlineField label="Booking In Date (BID)" name="booking_in_date" isDate />
               <InlineField label="On-Site Date" name="on_site_date" isDate />
