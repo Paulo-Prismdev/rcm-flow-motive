@@ -1,5 +1,6 @@
 import {
   buildTrackerMetaPatch,
+  canRequestInvoice,
   formatInvoiceDay,
   referrerFixedFee,
   repairerReferralApplies,
@@ -161,13 +162,15 @@ const sameValue = (a, b) => a === b
   || (typeof a === 'number' && typeof b === 'number' && Math.abs(a - b) < 0.005);
 
 /**
- * An invoice that has already gone out, been asked for or been paid: the job's
- * invoicing is under way, so its figures are left exactly as they are and the check
- * is not applied to it after the fact.
+ * An invoice of ours that has already been requested from accounts, sent or paid:
+ * the job's invoicing is under way, so its figures are left exactly as they are and
+ * the check is not forced on it after the fact. The same rule the accounts request
+ * itself is refused by — close-out paperwork we upload and invoices we receive never
+ * count, whichever end asks.
  */
 const invoicesAlreadyRaised = (summary) =>
-  (summary?.rows || []).some(({ item, state }) =>
-    item.direction === 'out' && (!!state.date || !!state.copyAttached || state.paid === true || !!state.requested));
+  (summary?.rows || []).some(({ item, state }) => canRequestInvoice(item)
+    && (state.requested === true || !!state.date || state.paid === true));
 
 /**
  * The check as the claim stands: the figures it covers, the figures that have moved

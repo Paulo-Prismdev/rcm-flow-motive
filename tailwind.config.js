@@ -15,6 +15,14 @@ module.exports = {
   			'2xl': 'calc(var(--radius) + 8px)',
   		},
   		colors: {
+  			mac: {
+  				window: 'hsl(var(--mac-window))',
+  				group: 'hsl(var(--mac-group))',
+  				line: 'hsl(var(--mac-line))',
+  				muted: 'hsl(var(--mac-muted))',
+  				accent: 'hsl(var(--mac-accent))',
+  				sidebar: 'hsl(var(--mac-sidebar))'
+  			},
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			card: {

@@ -72,7 +72,14 @@ import {
   vatExcessAuthorityPart,
 } from './invoiceAuthorityCheck';
 import { buildFiguresCheckedPatch } from './figuresCheck';
-import JobFiguresCheck from './JobFiguresCheck';
+import { useIsMobile } from '@/hooks/use-mobile';
+import FinancialsShell from '@/components/financials/FinancialsShell';
+import OverviewPane from '@/components/financials/OverviewPane';
+import StepPane from '@/components/financials/StepPane';
+import FiguresPane from '@/components/financials/FiguresPane';
+import PaymentsPane from '@/components/financials/PaymentsPane';
+import ItemSheet from '@/components/financials/ItemSheet';
+import { statusText, statusTone, stepCounts, stepGlyphState, toolbarNext } from '@/components/financials/stepSummary';
 import { fmtGBP } from '@/components/shared/creditRepairRates';
 
 /** Readable names for the financial fields in the claim's activity history. */
@@ -112,6 +119,12 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
   const [figuresFocus, setFiguresFocus] = useState(null);
   // The same, for the figures check: the prompt's button brings it into view.
   const [checkFocus, setCheckFocus] = useState(null);
+  // Where the reader is in the window — the pane on show, the row whose sheet is
+  // open, and whether a phone has pushed onto a step. None of it touches the claim.
+  const [pane, setPane] = useState(null);
+  const [openItem, setOpenItem] = useState(null);
+  const [mobileDetail, setMobileDetail] = useState(false);
+  const isMobile = useIsMobile();
   const quickUploadRef = useRef(null);
 
   const { data: appConfigs = [] } = useQuery({
@@ -148,6 +161,12 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
     () => buildFinancialFlow(summary, ctx, claim, { storagePercentDefault }),
     [summary, ctx, claim, storagePercentDefault]
   );
+
+  // The step the job is on is the one the window opens on, and a step the job moves
+  // on to becomes the selected one — wherever the reader had clicked before.
+  useEffect(() => {
+    setPane(flow.current || 'overview');
+  }, [flow.current]);
   // The partner's commission waits on the close-out step: its amount comes off the
   // final repair cost, which the Final Repair Invoice supplies. The upfront hire fee
   // is never held back — it goes out as soon as the hire category is set.
@@ -648,49 +667,29 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
     return '';
   };
 
-  const renderRow = ({ item, state }, focus) => (
-    <InvoiceRow
-      key={item.key}
-      item={item}
-      state={state}
-      focus={focus}
-      requestHold={requestHold(item)}
-      files={docs.filesFor(item.key)}
-      isUploading={docs.isUploading}
-      claim={claim}
-      onChange={(changes, description) => handleItemChange(item, changes, description)}
-      onUpload={handleUpload}
-      onDeleteFile={(doc) => docs.deleteFile(item, doc, state)}
-      onRenameFile={docs.renameFile}
-      onViewFile={docs.setViewingFile}
-      onRequest={openRequest}
-      onUndoRequest={() => handleUndoRequest(item)}
-      onAskPaid={(mode) => askPaidDate(item, state, mode)}
-    />
-  );
-
-  const renderCloseOut = ({ item, state }) => (
-    <CloseOutItem
-      key={item.key}
-      item={item}
-      state={state}
-      files={docs.filesFor(item.key)}
-      isUploading={docs.isUploading}
-      onChange={(changes, description) => handleItemChange(item, changes, description)}
-      onUpload={handleUpload}
-      onAskPaid={(mode) => askPaidDate(item, state, mode)}
-      onDeleteFile={(doc) => docs.deleteFile(item, doc, state)}
-      onRenameFile={docs.renameFile}
-      onViewFile={docs.setViewingFile}
-    />
-  );
-
   const [closeout, figuresStep, raise, collect, payments] = flow.steps;
 
-  // The step the job is on carries the next-step prompt inside it, and anything
-  // merely recommended is nudged with the item it belongs to.
-  const currentStep = flow.steps.find((s) => s.key === flow.current) || null;
-  const suggestion = flow.suggestion;
+  // What the source list shows of each step, and the one action the toolbar carries:
+  // both read off the flow, so nothing is counted or stated twice.
+  const stepById = Object.fromEntries(flow.steps.map((s) => [s.key, s]));
+  const sidebarItems = [
+    {
+      key: 'overview',
+      title: 'Overview',
+      glyph: flow.allDone ? 'done' : 'partial',
+      count: summary.total > 0 ? `${summary.complete}/${summary.total}` : '',
+      line: `${summary.complete} of ${summary.total} invoices complete`,
+    },
+    ...flow.steps.map((s) => ({
+      key: s.key,
+      title: s.title,
+      glyph: stepGlyphState(s, flow.current),
+      count: stepCounts(s).text,
+      line: s.line,
+    })),
+  ];
+  const toolbarAction = toolbarNext(flow);
+  const activePane = pane || (showInvoicing ? (flow.current || 'overview') : 'figures');
 
   // A final repair cost read off an invoice copy that has since been removed is
   // flagged here: the figure itself is left exactly as it was.
@@ -741,38 +740,7 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
     )
     : null;
 
-  const figuresCard = (
-    <>
-      <JobFiguresCheck
-        check={figuresStep.check}
-        focus={checkFocus}
-        onConfirm={() => commit(
-          buildFiguresCheckedPatch(claim, {
-            by: paidBy,
-            email: currentUser?.email,
-            rows: figuresStep.check?.rows,
-          }),
-          `Job figures checked and confirmed by ${paidBy || 'a user'}`
-        )}
-      />
-      <JobFiguresCard
-        claim={claim}
-        ctx={ctx}
-        missing={summary.missing}
-        focus={figuresFocus}
-        storagePercentDefault={storagePercentDefault}
-        onChange={(fields, description) => commit(fields, description, { checkInvoiceImpact: true })}
-        onTrackerChange={(patch, description) => commit(patch, description, { checkInvoiceImpact: true })}
-      />
-      <RepairCostCheckNote
-        check={repairCostCheck}
-        onChecked={() => commit(
-          buildTrackerMetaPatch(claim, { repair_cost_check: null }),
-          `Final repair cost ${fmtGBP(repairCostCheck?.amount || 0)} checked after the invoice copy was removed`
-        )}
-      />
-    </>
-  );
+  // The figures card, its check and its confirmation are the figures pane's now.
 
   /**
    * One of the steps: its header and line, then its own rows. The step the job is
@@ -781,144 +749,164 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
    * where its invoices are not to hand yet. A step already moved past carries its
    * own amber banner instead, with the way back into it.
    */
-  const step = (config, children, nudge) => {
-    const isCurrent = config.key === flow.current;
-    const banner = isCurrent
-      ? (
-        <NextStepPrompt
-          action={config.action}
-          onDo={runAction}
-          pending={flow.stillWaitingOn}
-          onContinue={config.canContinue ? () => movePastStep(config) : null}
-        />
-      )
-      : config.movedPast
-        ? <PendingStepBanner outstanding={config.pendingLabels} onReopen={() => reopenStep(config)} />
-        : null;
-
-    return (
-      <FinancialStep
-        n={config.n}
-        title={config.title}
-        hint={config.hint}
-        line={config.line}
-        status={config.done ? 'done'
-          : config.movedPast ? 'pending'
-            : isCurrent ? 'current'
-              : config.workable ? 'later' : 'dimmed'}
-        open={openSteps.has(config.key)}
-        onToggle={() => toggleStep(config.key)}
-        banner={banner}
-        nudge={nudge}
-      >
-        {children}
-      </FinancialStep>
-    );
-  };
+  // Each step is rendered by its own pane in the window's content area.
 
   /**
    * A step's rows — or, where none apply, the checked reason it holds nothing.
    * `nudge`, where given, is the recommended item's prompt: it goes in the same
    * cell as the item it belongs to, right above its card.
    */
-  const rowsBlock = (config, focus, columns, nudge) => (
-    config.empty
-      ? <InvoiceSectionEmpty title={config.empty.title} reasons={config.empty.reasons} />
-      : (
-        <div className={`grid grid-cols-1 items-stretch gap-2 ${columns}`}>
-          {config.rows.map((row) => (
-            <div key={row.item.key} className="flex flex-col gap-2 [&>*:last-child]:flex-1">
-              {nudge && nudge.item.key === row.item.key && (
-                <RecommendedNudge action={nudge} onDo={runAction} />
-              )}
-              {/* The close-out step holds paperwork we collect and, on a job the
-                  customer pays for privately, the repairer's Final Repair Invoice —
-                  an invoice we pay, shown as an invoice row with the rest of them. */}
-              {focus === 'closeout' && isInvoiceDocument(row.item) ? renderCloseOut(row) : renderRow(row, focus)}
-            </div>
-          ))}
-        </div>
-      )
-  );
+  // The rows of a step are its pane's own list.
+
+  // The row whose sheet is open, looked up fresh each render so a change made in the
+  // sheet — an amount unlocked, a payment recorded — is what the sheet then shows.
+  const openRow = openItem ? summary.rows.find((r) => r.item.key === openItem.key) || null : null;
+
+  const selectPane = (key) => {
+    setPane(key);
+    setOpenItem(null);
+    if (isMobile) setMobileDetail(true);
+  };
+
+  const figuresProps = {
+    claim,
+    ctx,
+    step: figuresStep,
+    missing: summary.missing,
+    storagePercentDefault,
+    jobFiguresFocus: figuresFocus,
+    checkFocus,
+    onChange: (fields, description) => commit(fields, description, { checkInvoiceImpact: true }),
+    onTrackerChange: (patch, description) => commit(patch, description, { checkInvoiceImpact: true }),
+    onConfirm: () => commit(
+      buildFiguresCheckedPatch(claim, { by: paidBy, email: currentUser?.email, rows: figuresStep.check?.rows }),
+      `Job figures checked and confirmed by ${paidBy || 'a user'}`
+    ),
+    repairCostCheck,
+    onRepairCostChecked: () => commit(
+      buildTrackerMetaPatch(claim, { repair_cost_check: null }),
+      `Final repair cost ${fmtGBP(repairCostCheck?.amount || 0)} checked after the invoice copy was removed`
+    ),
+  };
+
+  // One document or invoice, opened: the same sheet from every step, its figures and
+  // its actions in one place.
+  const itemSheet = openRow ? (
+    <ItemSheet
+      item={openRow.item}
+      state={openRow.state}
+      files={docs.filesFor(openRow.item.key)}
+      claim={claim}
+      hold={requestHold(openRow.item)}
+      isUploading={docs.isUploading}
+      onClose={() => setOpenItem(null)}
+      onPickUpload={(item) => {
+        setOpenItem(null);
+        setQuickItem(item);
+        quickUploadRef.current?.click();
+      }}
+      onRemoveFile={(doc) => docs.deleteFile(openRow.item, doc, openRow.state)}
+      onRenameFile={docs.renameFile}
+      onViewFile={docs.setViewingFile}
+      onRequest={openRequest}
+      onUndoRequest={() => { setOpenItem(null); handleUndoRequest(openRow.item); }}
+      onAskPaid={(mode) => askPaidDate(openRow.item, openRow.state, mode)}
+      onChange={(changes, description) => handleItemChange(openRow.item, changes, description)}
+    />
+  ) : null;
 
   return (
     <TooltipProvider delayDuration={250}>
       <div className="space-y-3">
-        <FinancialStatusLine
-          status={status}
-          currentStep={currentStep}
-          stepCount={flow.steps.length}
-          missing={summary.missing}
-          copies={summary.copiesMissing.map((c) => c.label)}
-          payments={flow.toPay}
-        />
-
-        {!showInvoicing && figuresCard}
-
         {showInvoicing && (
-          <>
+          <div className="mac-scope">
             <BeforeTrackingNotice
               claim={claim}
               trackingStart={trackingStart}
               onTrackerChange={(patch, description) => commit(patch, description)}
             />
-
-            <div className="space-y-2.5">
-              {step(
-                closeout,
-                <>
-                  {finalInvoiceNote}
-                  {rowsBlock(closeout, 'closeout', 'sm:grid-cols-3', suggestion)}
-                  <RepairCostSplitNote comparison={repairCostSplit} />
-                </>,
-                suggestion ? <RecommendedNudge action={suggestion} onDo={runAction} /> : null
-              )}
-              {step(figuresStep, figuresCard)}
-              {step(raise, rowsBlock(raise, 'send', 'sm:grid-cols-2'))}
-              {step(collect, rowsBlock(collect, 'send', 'sm:grid-cols-2'))}
-              {step(payments, rowsBlock(payments, 'pay', 'sm:grid-cols-2'))}
-            </div>
-
-            {flow.allDone && <AllDoneLine />}
-
-            {/* Anything the job no longer carries — its paperwork before a change
-                to or from Total Loss — with everything recorded against it kept. */}
-            <NoLongerRequired
-              items={summary.dormant}
-              filesFor={docs.filesFor}
-              onViewFile={docs.setViewingFile}
-            />
-
-            {preparingRequest && (
-              <p className="text-[11px] text-muted-foreground">Preparing the accounts request…</p>
-            )}
-
-            <input
-              ref={quickUploadRef}
-              type="file"
-              multiple
-              className="hidden"
-              onChange={(e) => {
-                // The chosen files are read before the field is cleared: clearing
-                // it first empties the list the browser just handed over, and the
-                // upload would be dropped without a word.
-                const item = quickItem;
-                if (e.target.files?.length && item) handleUpload(item, e.target.files);
-                e.target.value = '';
-              }}
-            />
-          </>
+          </div>
         )}
 
-        <FinancialTotalsPanel
-          summary={summary}
-          // A total loss has no repair cost: the storage charge read off the salvage
-          // invoice is the figure the job stands on.
-          finalCost={ctx.totalLoss ? (salvageStorageCharge(claim) ?? 0) : (Number(claim.final_repair_cost) || 0)}
-          finalCostEx={ctx.totalLoss ? 0 : repairNet(claim)}
-          finalCostVat={ctx.totalLoss ? 0 : repairVat(claim)}
-          costLabel={ctx.totalLoss ? 'Storage charge' : 'Final repair cost'}
-          costSub={ctx.totalLoss ? 'ex VAT, read from the Salvage Agent Invoice' : undefined}
+        {!showInvoicing && <FiguresPane {...figuresProps} />}
+
+        {showInvoicing && (
+          <FinancialsShell
+            sidebarItems={sidebarItems}
+            selected={activePane}
+            onSelect={selectPane}
+            statusLabel={statusText(status)}
+            statusTone={statusTone(status)}
+            waitingLine={flow.stillWaitingOn.length > 0
+              ? `Waiting on ${flow.stillWaitingOn.slice(0, 3).join(', ')}${flow.stillWaitingOn.length > 3 ? ` +${flow.stillWaitingOn.length - 3} more` : ''}`
+              : ''}
+            nextLabel={toolbarAction?.label}
+            onNext={() => runAction(toolbarAction.action)}
+            isMobile={isMobile}
+            detailOpen={mobileDetail}
+            onBack={() => setMobileDetail(false)}
+            overlay={itemSheet}
+          >
+            {activePane === 'overview' && (
+              <OverviewPane
+                claim={claim}
+                ctx={ctx}
+                summary={summary}
+                steps={sidebarItems.filter((s) => s.key !== 'overview')}
+                onSelect={selectPane}
+                dormant={(
+                  <NoLongerRequired
+                    items={summary.dormant}
+                    filesFor={docs.filesFor}
+                    onViewFile={docs.setViewingFile}
+                  />
+                )}
+              />
+            )}
+
+            {activePane === 'figures' && <FiguresPane {...figuresProps} />}
+
+            {activePane === 'payments' && (
+              <PaymentsPane step={payments} claim={claim} onOpenItem={(item) => setOpenItem({ key: item.key })} />
+            )}
+
+            {['closeout', 'raise', 'collect'].includes(activePane) && (
+              <StepPane
+                step={stepById[activePane]}
+                claim={claim}
+                focus={activePane === 'closeout' ? 'closeout' : 'send'}
+                onOpenItem={(item) => setOpenItem({ key: item.key })}
+                onAction={runAction}
+                onContinue={stepById[activePane]?.canContinue ? () => movePastStep(stepById[activePane]) : null}
+                onReopen={stepById[activePane]?.movedPast ? () => reopenStep(stepById[activePane]) : null}
+                extra={activePane === 'closeout' ? (
+                  <>
+                    {finalInvoiceNote}
+                    <RepairCostSplitNote comparison={repairCostSplit} />
+                  </>
+                ) : null}
+              />
+            )}
+          </FinancialsShell>
+        )}
+
+        {preparingRequest && (
+          <p className="text-[11px] text-muted-foreground">Preparing the accounts request…</p>
+        )}
+
+        <input
+          ref={quickUploadRef}
+          type="file"
+          multiple
+          className="hidden"
+          onChange={(e) => {
+            // The chosen files are read before the field is cleared: clearing it
+            // first empties the list the browser just handed over, and the upload
+            // would be dropped without a word.
+            const item = quickItem;
+            if (e.target.files?.length && item) handleUpload(item, e.target.files);
+            e.target.value = '';
+          }}
         />
 
         {docs.viewingFile && (

@@ -802,3 +802,50 @@ button:not(.btn-sm):not(.btn-icon),
     padding-bottom: calc(1.5rem + env(safe-area-inset-bottom));
   }
 }
+
+/* ═══════════════════════════════════════════
+   macOS DESIGN LAYER
+   The tokens below are the design system: a light grey window, white grouped
+   surfaces, hairline dividers, one blue accent. They are applied by wrapping a
+   section in .mac-scope, which re-points the app's own semantic tokens inside it —
+   so every control already there renders in this language without a second
+   implementation, and the layer can be extended to other sections as they are
+   rebuilt.
+   ═══════════════════════════════════════════ */
+
+:root {
+  --mac-window: 240 2% 96%;       /* #F5F5F7 */
+  --mac-group: 0 0% 100%;         /* #FFFFFF */
+  --mac-sidebar: 240 3% 95%;      /* source list, a shade under the window */
+  --mac-line: 240 4% 91%;         /* #E5E5EA */
+  --mac-muted: 240 2% 56%;        /* #8E8E93 */
+  --mac-accent: 211 100% 50%;     /* #007AFF */
+}
+
+.dark {
+  --mac-window: 240 3% 11%;       /* #1C1C1E */
+  --mac-group: 240 2% 18%;        /* #2C2C2E */
+  --mac-sidebar: 240 3% 14%;
+  --mac-line: 240 2% 26%;         /* #3A3A3C */
+  --mac-muted: 240 2% 60%;        /* #98989D */
+  --mac-accent: 210 100% 52%;     /* #0A84FF */
+}
+
+.mac-scope {
+  --background: var(--mac-window);
+  --card: var(--mac-group);
+  --popover: var(--mac-group);
+  --border: var(--mac-line);
+  --input: var(--mac-line);
+  --ring: var(--mac-accent);
+  --primary: var(--mac-accent);
+  --primary-foreground: 0 0% 100%;
+  --accent: var(--mac-window);
+  --accent-foreground: var(--mac-accent);
+  --secondary: var(--mac-window);
+  --muted: var(--mac-window);
+  --muted-foreground: var(--mac-muted);
+  --destructive: 4 90% 58%;
+  --radius: 10px;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", 'Inter', sans-serif;
+}

@@ -1,6 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
 import { parseEmails, sendBrandedEmail } from '../../shared/brandedEmail.ts';
 import { requireInternalUser } from '../../shared/internalAccess.ts';
+import { accountsRequestBlocked } from '../../shared/accountsRequestGate.ts';
 
 /**
  * Ask accounts to raise ONE invoice on the claim.
@@ -32,17 +33,11 @@ export default async function (req: Request): Promise<Response> {
     if (!claim) return Response.json({ error: 'Claim not found' }, { status: 404 });
 
     // Every amount on the invoice is worked out from the job figures, so nothing is
-    // asked for until they have been checked and confirmed on the claim. A job whose
-    // invoices were already going out before the check existed is left as it is.
-    const checked = (claim as any).invoice_tracker?.figures_checked;
-    const alreadyGoingOut = Object.values(((claim as any).invoice_tracker?.items || {}) as Record<string, any>)
-      .some((entry) => entry?.requested || entry?.date);
-    if (!checked && !alreadyGoingOut) {
-      return Response.json(
-        { error: 'Check the job figures first — every amount on this invoice is worked out from them' },
-        { status: 400 }
-      );
-    }
+    // asked for until they have been checked on the claim — or until an invoice of
+    // ours is already under way, which leaves the job as it was. The rule is the
+    // shared one, so the screen and this refusal can never disagree.
+    const blocked = accountsRequestBlocked(claim);
+    if (blocked) return Response.json({ error: blocked }, { status: 400 });
 
     const fromName = user.full_name ? `${user.full_name} — RCM Automotive` : 'RCM Automotive';
     const sent = await sendBrandedEmail({
