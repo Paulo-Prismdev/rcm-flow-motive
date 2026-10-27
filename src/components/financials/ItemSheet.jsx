@@ -7,6 +7,7 @@ import {
   isRecommendedItem, itemDateWord,
 } from '@/components/shared/invoiceChecklist';
 import { referrerReminderDue } from '@/components/claims/financials/referrerRequest';
+import { isVatExcessItem } from '@/components/claims/financials/vatExcessReview';
 import InvoiceCalculation from '@/components/claims/financials/InvoiceCalculation';
 import InvoiceItemDetails from '@/components/claims/InvoiceItemDetails';
 import DocumentPreview from '@/components/shared/DocumentPreview';
@@ -197,7 +198,9 @@ export default function ItemSheet({
             <MacValueRow
               label="Amount"
               value={state.awaiting ? '—' : fmtGBP(state.amount)}
-              sub={state.awaiting ? undefined : `${fmtGBP(state.ex)} + ${fmtGBP(state.vat)} VAT`}
+              sub={state.awaiting ? undefined : (isVatExcessItem(item)
+                ? `Excess ${fmtGBP(state.ex)} + ${fmtGBP(state.vat)} VAT on repair`
+                : `${fmtGBP(state.ex)} + ${fmtGBP(state.vat)} VAT`)}
               caption={state.locked ? `Locked at ${fmtGBP(state.amount)} — the figure it went out at` : undefined}
             />
           )}
