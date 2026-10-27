@@ -9,7 +9,10 @@ Deno.serve(async (req) => {
     const gate = await requireInternalUser(base44);
     if (gate.response) return gate.response;
 
-    const { claimId, saveToClaim = true } = await req.json();
+    // `total` is the amount the user confirmed on the issue screen. Without it the
+    // figure is resolved the same way that screen resolves it, so an order is never
+    // issued at whatever field happened to be first.
+    const { claimId, saveToClaim = true, total: confirmedTotal } = await req.json();
     if (!claimId) return Response.json({ error: 'Missing claimId' }, { status: 400 });
 
     const claim = await base44.asServiceRole.entities.Claim.get(claimId);
@@ -26,14 +29,32 @@ Deno.serve(async (req) => {
       } catch (_) { /* ignore */ }
     }
 
-    // ── Authority figure: prefer the authorised (authority) gross total,
-    //    fall back to the estimate gross total. ──
-    const authorityFigure =
-      (claim.authority_cost_gross != null && claim.authority_cost_gross !== '') ? Number(claim.authority_cost_gross) :
-      (claim.estimate_cost_gross != null && claim.estimate_cost_gross !== '') ? Number(claim.estimate_cost_gross) :
-      (claim.authority_cost_net != null && claim.authority_cost_net !== '') ? Number(claim.authority_cost_net) :
-      (claim.estimate_cost_net != null && claim.estimate_cost_net !== '') ? Number(claim.estimate_cost_net) :
-      0;
+    // ── The figure the order is issued at: the latest authorised amount — the
+    //    supplementary authority where there is one, otherwise the initial authority —
+    //    and failing any authority the latest estimate the same way. A supplementary
+    //    figure is a revised total, so it replaces the one before it. ──
+    const records = claim.invoice_tracker?.documents || {};
+    const firstFigure = (...values: any[]) => {
+      for (const value of values) {
+        const n = Number(value);
+        if (Number.isFinite(n) && n > 0) return n;
+      }
+      return 0;
+    };
+    const confirmed = Number(confirmedTotal);
+    const authorityFigure = Number.isFinite(confirmed) && confirmed > 0
+      ? Math.round(confirmed * 100) / 100
+      : firstFigure(
+        records.supplementary_authority?.gross,
+        claim.supplementary_authority_cost_gross,
+        claim.authority_cost_gross,
+        records.initial_authority?.gross,
+        records.supplementary_estimate?.gross,
+        claim.supplementary_estimate_cost_gross,
+        claim.estimate_cost_gross,
+        claim.authority_cost_net,
+        claim.estimate_cost_net,
+      );
 
     const fmtMoney = (n) => {
       const v = Number(n) || 0;

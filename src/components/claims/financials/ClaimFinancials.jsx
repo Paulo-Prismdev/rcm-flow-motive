@@ -44,6 +44,7 @@ import AllDoneLine from './AllDoneLine';
 import JobFiguresCard from './JobFiguresCard';
 import NoLongerRequired from './NoLongerRequired';
 import InvoiceRow from './InvoiceRow';
+import PurchaseOrderDialog from './PurchaseOrderDialog';
 import CloseOutItem from './CloseOutItem';
 import InvoiceSectionEmpty from './InvoiceSectionEmpty';
 import MarkPaidDialog from './MarkPaidDialog';
@@ -919,28 +920,24 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
     ),
   };
 
-  // A purchase order is issued from the sheet that shows it: the PDF is generated and
-  // recorded on the claim, and the newest order is what the repairer's invoice is
-  // measured against. Issuing a second time revises the order, superseding the first.
-  const [issuingOrder, setIssuingOrder] = useState(false);
-  const issuePurchaseOrder = async () => {
-    setIssuingOrder(true);
-    try {
-      const response = await base44.functions.invoke('generatePurchaseOrderPdf', { claimId: claim.id });
-      const order = response.data?.purchaseOrder;
-      if (!order?.file_url) throw new Error('The order was not generated');
-      const fresh = await base44.entities.Claim.get(claim.id);
-      onUpdate(fresh, { skipFieldLog: true });
-      docs.setViewingFile(order.file_url);
-      toast({
-        title: `${order.number} issued`,
-        description: `${fmtGBP(order.total)} — the repairer's invoice is measured against this order.`,
-      });
-    } catch (e) {
-      toast({ title: 'Could not issue the purchase order', description: e?.message, variant: 'destructive' });
-    } finally {
-      setIssuingOrder(false);
-    }
+  // A purchase order is issued from the sheet that shows it: the amount it will be
+  // issued at is put to the user first, and only then is the PDF generated and
+  // recorded. The newest order is what the repairer's invoice is measured against;
+  // issuing a second time revises the order, superseding the first.
+  const [poDialogOpen, setPoDialogOpen] = useState(false);
+  const issuePurchaseOrder = () => {
+    setOpenItem(null);
+    setPoDialogOpen(true);
+  };
+
+  const handleOrderIssued = async (order) => {
+    const fresh = await base44.entities.Claim.get(claim.id);
+    onUpdate(fresh, { skipFieldLog: true });
+    docs.setViewingFile(order.file_url);
+    toast({
+      title: `${order.number} issued`,
+      description: `${fmtGBP(order.total)} — the repairer's invoice is measured against this order.`,
+    });
   };
 
   // One document or invoice, opened: the same sheet from every step, its figures and
@@ -952,7 +949,6 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
       files={docs.filesFor(openRow.item.key)}
       claim={claim}
       onIssueOrder={issuePurchaseOrder}
-      isIssuingOrder={issuingOrder}
       hold={requestHold(openRow.item)}
       isUploading={docs.isUploading}
       onClose={() => setOpenItem(null)}
@@ -1157,6 +1153,13 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
           currentUser={currentUser}
           onRequested={handleRequested}
           hold={request?.item ? requestHold(request.item) : ''}
+        />
+
+        <PurchaseOrderDialog
+          open={poDialogOpen}
+          onClose={() => setPoDialogOpen(false)}
+          claim={claim}
+          onIssued={handleOrderIssued}
         />
 
         <ReferrerInvoiceRequestModal

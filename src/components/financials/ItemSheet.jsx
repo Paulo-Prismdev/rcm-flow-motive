@@ -28,7 +28,7 @@ export default function ItemSheet({
   item, state, files = [], claim, hold, isUploading,
   onClose, onPickUpload, onRemoveFile, onRenameFile, onViewFile,
   onRequest, onRequestReferrer, onUndoRequest, onAskPaid, onChange,
-  onIssueOrder, isIssuingOrder,
+  onIssueOrder,
 }) {
   const [showCalc, setShowCalc] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
@@ -78,7 +78,7 @@ export default function ItemSheet({
   const primary = isOrder
     ? (order?.file_url
       ? { label: 'Open order', run: () => onViewFile(order.file_url) }
-      : { label: 'Issue purchase order', run: onIssueOrder, disabled: isIssuingOrder })
+      : { label: 'Issue purchase order', run: onIssueOrder })
     : !file
       ? { label: 'Upload', run: () => onPickUpload(item) }
       : (canAsk && !state.requested)
@@ -94,7 +94,6 @@ export default function ItemSheet({
       label: order ? 'Issue a revised order' : 'Issue the order',
       icon: FilePlus2,
       run: onIssueOrder,
-      disabled: isIssuingOrder,
     });
   }
   if (!isOrder && file) actions.push({ label: 'View', icon: Eye, run: () => onViewFile(file.file_url) });

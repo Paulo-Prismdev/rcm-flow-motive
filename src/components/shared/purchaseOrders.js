@@ -68,6 +68,46 @@ export const splitPurchaseOrderTotal = (total) => {
 };
 
 /**
+ * The figure a new order is issued at: the latest authorised amount — the
+ * supplementary authority where there is one, otherwise the initial authority — and
+ * failing any authority, the latest estimate the same way. A supplementary figure is a
+ * revised total that replaces the one before it, never an amount added to it.
+ *
+ * Returns the figure and which document it came from, so the amount is shown to the
+ * user with its source before an order is issued at it.
+ */
+export function purchaseOrderFigureSource(claim) {
+  const records = claim?.invoice_tracker?.documents || {};
+  const num = (...values) => {
+    for (const value of values) {
+      const n = toNum(value);
+      if (n !== null && n !== 0) return round2(n);
+    }
+    return null;
+  };
+
+  const supplementaryAuthority = num(
+    records.supplementary_authority?.gross,
+    claim?.supplementary_authority_cost_gross
+  );
+  if (supplementaryAuthority) return { total: supplementaryAuthority, source: 'Supplementary Authority' };
+
+  const initialAuthority = num(claim?.authority_cost_gross, records.initial_authority?.gross);
+  if (initialAuthority) return { total: initialAuthority, source: 'Initial Authority' };
+
+  const supplementaryEstimate = num(
+    records.supplementary_estimate?.gross,
+    claim?.supplementary_estimate_cost_gross
+  );
+  if (supplementaryEstimate) return { total: supplementaryEstimate, source: 'Supplementary Estimate' };
+
+  const initialEstimate = num(claim?.estimate_cost_gross);
+  if (initialEstimate) return { total: initialEstimate, source: 'Initial Estimate' };
+
+  return { total: 0, source: null };
+}
+
+/**
  * The repairer's invoice set against the Final Purchase Order: the ordered amount is
  * the whole of the repair, so the invoice total is measured against it as it stands —
  * no insurer's share, no excess, nothing to split.
