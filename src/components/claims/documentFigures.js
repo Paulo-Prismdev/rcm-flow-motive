@@ -101,6 +101,14 @@ export const documentExtractionSchema = (itemKey) => {
         type: 'boolean',
         description: `True if this is a legible ${isAuthority(itemKey) ? 'authority or authorisation' : 'estimate or assessment'} document. False if the file cannot be read at all.`,
       },
+      document_kind: {
+        type: 'string',
+        description: 'What the document actually is: "purchase_order" where it is a purchase order authorising a privately paying customer\'s repair (it carries a purchase order number), "estimate" where it is an estimate or assessment, "authority" where it is an authority or authorisation from an insurer, "other" for anything else.',
+      },
+      _po_number: {
+        type: 'string',
+        description: 'Where the document is a purchase order, its purchase order number exactly as printed. Otherwise an empty string.',
+      },
       ...Object.fromEntries(fields.map((f) => [f.key, {
         type: f.type === 'number' ? 'number' : 'string',
         description: f.prompt,
@@ -132,8 +140,10 @@ export function buildDocumentPrompt({ itemKey, item, claim }) {
 Return only these things:
 ${documentFields(itemKey).map((f) => `- ${f.prompt}`).join('\n')}
 - how VAT appears on the document: not mentioned at all, or the amount excluding VAT and the VAT amount both printed, or VAT included without those two amounts being shown separately
+- what the document actually is: a purchase order, an estimate, an authority, or something else — and where it is a purchase order, its purchase order number
 
 Rules:
+- A purchase order is only a purchase order: it is the order that authorises a job the customer pays for privately, and it carries a purchase order number. Say so even though it has been filed as an ${authority ? 'authority' : 'estimate'}. A document that does not carry a purchase order number is never one.
 - Only return what is actually printed. Use an empty string for anything that is not there.
 - Amounts as numbers with no currency symbols. Keep every amount separate: never add two of them together, and never split one between two of them.
 - VAT: return only what the document shows. Where no VAT is mentioned on it at all, the amount excluding VAT is the total and the VAT amount is 0. Where it says VAT is included but the ex-VAT amount and the VAT amount are not printed separately, leave both empty for the user to fill in. Never work VAT out from the total yourself.
@@ -142,6 +152,20 @@ Rules:
 - For every figure, give a confidence of "high", "medium" or "low" ("low" for anything blurred, cut off, ambiguous or worked out), and the snippet of text from the document where you found it.
 - Set readable to false only if the document cannot be read at all.`;
 }
+
+/**
+ * A purchase order reaching the Documents panel, read off the same pass: the order is
+ * ours to issue from Financials, so it is never recorded as an estimate or authority.
+ */
+export const purchaseOrderFound = (extracted) => (
+  String(extracted?.document_kind || '').trim().toLowerCase() === 'purchase_order'
+    ? {
+      number: String(extracted?._po_number || '').trim(),
+      total: toNum(extracted?.amount_total),
+      date: String(extracted?.document_date || '').trim(),
+    }
+    : null
+);
 
 /** What the review screen starts with: the figures, the strings they are highlighted by, and the AI's confidence. */
 export function documentFiguresForReview(extracted, itemKey) {

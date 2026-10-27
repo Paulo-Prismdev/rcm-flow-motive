@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, Check, Loader2, ShieldAlert, X } from 'lucide-react';
+import { AlertTriangle, Check, FileCheck2, Loader2, ShieldAlert, X } from 'lucide-react';
 import { fmtGBP } from '@/components/shared/creditRepairRates';
 import HighlightableDocumentViewer from '@/components/shared/HighlightableDocumentViewer';
 import TopLevelReviewWindow from '@/components/shared/TopLevelReviewWindow';
@@ -28,8 +28,10 @@ import {
   documentTarget,
   emptyDocumentFigures,
   excessForDocument,
+  purchaseOrderFound,
   readTotals,
 } from '@/components/claims/documentFigures';
+import PurchaseOrderUploadNotice from '@/components/claims/PurchaseOrderUploadNotice';
 import { fetchSourceSnippets } from '@/components/claims/financials/invoiceReview';
 
 const isAuthority = (itemKey) => String(itemKey || '').includes('authority');
@@ -64,6 +66,9 @@ export default function DocumentReviewModal({
   const [choices, setChoices] = useState({});
   const [excessChoice, setExcessChoice] = useState('claim');
   const [vatChoice, setVatChoice] = useState('claim');
+  // A purchase order filed here by mistake: its own number and total, shown instead of
+  // being read as this document.
+  const [poFound, setPoFound] = useState(null);
 
   // Read the document once each time the screen opens.
   useEffect(() => {
@@ -82,6 +87,7 @@ export default function DocumentReviewModal({
     setExcessChoice('claim');
     setVatChoice('claim');
     setFocused('amount_total');
+    setPoFound(null);
 
     (async () => {
       try {
@@ -91,6 +97,17 @@ export default function DocumentReviewModal({
           response_json_schema: documentExtractionSchema(itemKey),
         });
         if (cancelled) return;
+
+        // A purchase order is not an estimate or an authority: it is the order issued
+        // from Financials, so it is recognised here and nothing is read off it as this
+        // document. Nothing is filed and nothing is saved.
+        const asOrder = purchaseOrderFound(result);
+        if (asOrder) {
+          setPoFound(asOrder);
+          setStatus('purchase_order');
+          return;
+        }
+
         const readable = result?.readable !== false;
         const extracted = readable ? result : {};
         const read = documentFiguresForReview(extracted, itemKey);
@@ -177,6 +194,37 @@ export default function DocumentReviewModal({
   };
 
   if (!isOpen) return null;
+
+  // The file read as a purchase order: it is the order issued from Financials, so it is
+  // never saved as an estimate or an authority — the user is pointed at the order instead.
+  if (status === 'purchase_order') {
+    return (
+      <TopLevelReviewWindow
+        isOpen={isOpen}
+        onClose={onClose}
+        label="This file is a purchase order"
+        className="!overflow-hidden"
+      >
+        <div className="flex items-center gap-3 px-4 py-2.5 border-b border-border flex-shrink-0">
+          <div className="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center flex-shrink-0">
+            <FileCheck2 className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <h3 className="text-sm font-bold text-foreground">This file is a purchase order</h3>
+            <p className="text-[11px] text-muted-foreground truncate">
+              {item?.label} · {fileName}
+            </p>
+          </div>
+          <button type="button" onClick={onClose} title="Close" className="p-1.5 rounded-lg hover:bg-muted transition-colors flex-shrink-0">
+            <X className="w-4 h-4 text-muted-foreground" />
+          </button>
+        </div>
+        <div className="flex-1 min-h-0 overflow-y-auto">
+          <PurchaseOrderUploadNotice claim={claim} item={item} found={poFound} onClose={onClose} />
+        </div>
+      </TopLevelReviewWindow>
+    );
+  }
 
   // The text to highlight on the document is the figure as it is printed there: money
   // carries separators that the bare stored number doesn't.
