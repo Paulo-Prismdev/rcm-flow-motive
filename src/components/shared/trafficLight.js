@@ -6,15 +6,16 @@
  *   red   — the copy is not on file yet: "Not uploaded", or "Requested" where it has
  *           been asked for from accounts and nothing has come back
  *   amber — the copy is on file but the money has not moved: "Awaiting payment"
- *   green — done: "Paid", or "Received" / "Sent" for a document that carries no
- *           payment of its own (the Final Authority, a Collection Note, an invoice
- *           we only keep a copy of)
+ *   green — done: "Paid", or "Received" for a close-out document, which carries no
+ *           payment of its own and is a copy that comes in to us (the Final Authority,
+ *           the Final Insurer Invoice, the Collection Note, an invoice we only keep a
+ *           copy of)
  *   grey  — nothing to do: not applicable, or a recommended item left unprovided
  *
  * Nothing here decides what an item's state IS — that is the invoice rules' own
  * work. This reads that state into the one light the whole app draws it with.
  */
-import { isInvoiceDocument, isRecommendedItem } from './invoiceChecklist';
+import { isInvoiceDocument, isRecommendedItem, itemDateWord } from './invoiceChecklist';
 
 export const LIGHTS = {
   red: {
@@ -65,7 +66,7 @@ export function itemLight(item, state) {
     // A copy waiting to be replaced is not a copy settled: the corrected one is
     // still to come, so the item reads red until it lands.
     if (s.received && !s.awaitingCorrected) {
-      return { key: 'green', label: item.direction === 'in' ? 'Received' : 'Sent' };
+      return { key: 'green', label: itemDateWord(item) };
     }
     // Recommended, never required: nothing is late while one is missing.
     if (isRecommendedItem(item) && !s.awaitingCorrected) {

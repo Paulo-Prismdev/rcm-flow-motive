@@ -720,15 +720,25 @@ export function getInvoiceItemState(item, claim, hasFiles = false) {
   };
 }
 
+/**
+ * The word an item's own date reads as — on its row, its sheet, its pill and its
+ * history entry. It is the item's own `dateLabel` where it sets one, because the
+ * close-out papers that are merely addressed elsewhere (the repairer's Final Insurer
+ * Invoice, and the Collection Note) are still copies we receive, and read Received
+ * however the invoice they copy is addressed. Everything else: received for an
+ * invoice that comes in to us, sent for one we raise ourselves.
+ */
+export const itemDateWord = (item) => item?.dateLabel || (item?.direction === 'in' ? 'Received' : 'Sent');
+
 export function invoiceItemStatus(item, state) {
   if (state.notApplicable) return 'not_applicable';
   if (isInvoiceDocument(item)) {
     if (!state.received) return 'outstanding';
-    return item.direction === 'in' ? 'received' : 'sent';
+    return itemDateWord(item).toLowerCase();
   }
   if (state.paid) return 'paid';
   if (state.requested) return 'requested';
-  if (state.amount > 0 || state.date) return item.direction === 'in' ? 'received' : 'sent';
+  if (state.amount > 0 || state.date) return itemDateWord(item).toLowerCase();
   return 'outstanding';
 }
 
@@ -1223,7 +1233,7 @@ export function buildInvoiceDetailsClearPatch(item, claim, { fileUrl, clearedBy 
     if (b.date) patch[b.date] = null;
     else entry.date = null;
     if (item.date_flag) patch[item.date_flag] = false;
-    const dateWord = (item.dateLabel || (item.direction === 'in' ? 'Received' : 'Sent')).toLowerCase();
+    const dateWord = itemDateWord(item).toLowerCase();
     clearPoints.push(`the ${dateWord} date it set (${formatInvoiceDay(state.date)})`);
   }
 

@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { fmtGBP } from '@/components/shared/creditRepairRates';
 import {
   canRequestFromReferrer, canRequestInvoice, formatInvoiceDay, invoicePartyName, isInvoiceDocument,
-  isRecommendedItem,
+  isRecommendedItem, itemDateWord,
 } from '@/components/shared/invoiceChecklist';
 import { referrerReminderDue } from '@/components/claims/financials/referrerRequest';
 import InvoiceCalculation from '@/components/claims/financials/InvoiceCalculation';
@@ -48,7 +48,7 @@ export default function ItemSheet({
   // come in against it.
   const reminderDue = canAskReferrer && referrerReminderDue(state);
   const canMarkPaid = !state.paid && !state.notApplicable && !state.awaiting && (!!state.date || state.requested);
-  const dateLabel = state.date ? (item.dateLabel || (item.direction === 'in' ? 'Received' : 'Sent')) : '';
+  const dateLabel = state.date ? itemDateWord(item) : '';
 
   const unlock = () => onChange(
     { amount: null },

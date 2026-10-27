@@ -1,7 +1,9 @@
 import React from 'react';
 import { ChevronRight } from 'lucide-react';
 import { fmtGBP } from '@/components/shared/creditRepairRates';
-import { formatInvoiceDay, invoicePartyName, isInvoiceDocument } from '@/components/shared/invoiceChecklist';
+import {
+  formatInvoiceDay, invoicePartyName, isInvoiceDocument, itemDateWord,
+} from '@/components/shared/invoiceChecklist';
 import { itemLight } from '@/components/shared/trafficLight';
 import LightDot from '@/components/shared/LightDot';
 import LightPill from '@/components/shared/LightPill';
@@ -11,7 +13,7 @@ import { MacRow } from './MacGroup';
 export function itemSubline(item, state, claim) {
   const party = invoicePartyName(claim, item);
   const when = state.paid && state.paidDate ? `Paid ${formatInvoiceDay(state.paidDate)}`
-    : state.date ? `${item.direction === 'in' ? 'Received' : 'Sent'} ${formatInvoiceDay(state.date)}`
+    : state.date ? `${itemDateWord(item)} ${formatInvoiceDay(state.date)}`
       : state.requested && state.requestedAt ? `Requested ${formatInvoiceDay(state.requestedAt)}`
         : '';
   const parts = [party, when].filter(Boolean);

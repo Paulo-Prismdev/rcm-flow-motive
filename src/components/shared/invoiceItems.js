@@ -53,8 +53,12 @@ export const INVOICE_ITEMS = [
     // paid on it ourselves, so it is close-out paperwork like the Final
     // Authority: green on a copy, with no paid step.
     kind: 'document',
+    // Still 'out': the invoice itself is addressed to the insurer (or, on a credit
+    // repair job, to the partner), which is who the party check and the "To" on its
+    // sheet read. Only a copy of it reaches us, so its date is the date it was
+    // received and it reads Received like every other paper in the close-out step.
     direction: 'out',
-    dateLabel: 'Sent',
+    dateLabel: 'Received',
     // Every repaired job carries it, a credit repair job included: there the same
     // invoice is the repairer's, addressed to the credit repair company rather than
     // to an insurer — see `creditRepair` below, and `privatePaying` for the job the
@@ -164,8 +168,10 @@ export const INVOICE_ITEMS = [
     label: 'Collection Note',
     section: 'closeout',
     kind: 'document',
+    // A copy of it comes in to us with the rest of the close-out paperwork, so it
+    // reads Received however it was asked for.
     direction: 'out',
-    dateLabel: 'Sent',
+    dateLabel: 'Received',
     requires: ['not_total_loss'],
     // Recommended, not required: a copy is encouraged and nudged in amber until
     // it is filed, but the job's invoicing finishes without one. "Not available"
