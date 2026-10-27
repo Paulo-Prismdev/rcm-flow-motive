@@ -76,6 +76,7 @@ import {
   compareToAuthority,
   finalInvoiceTotal,
   hasSplit,
+  missingExpectationText,
   repairCostWords,
   splitFromFigures,
   VAT_EXCESS_INVOICE_KEY,
@@ -817,14 +818,14 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
   const finalAuthorityExpectation = claimAuthorityExpectation(claim);
   const finalInvoiceOnFile = finalInvoiceTotal(claim);
   const finalInvoiceComparison = finalInvoiceOnFile !== null && !finalAuthorityExpectation
-    && !ctx.privatePaying && !ctx.totalLoss
+    && !ctx.totalLoss
     ? {
       status: 'waiting',
       reason: 'no_final_authority',
       insurerPart: finalInvoiceOnFile,
       headline: {
         tone: 'wait',
-        text: "Waiting for the Final Authority. This invoice is checked against the Final Authority, and none has been recorded on this claim yet — the initial and supplementary authorities are kept for the record and are not used for the check.",
+        text: missingExpectationText(claim),
       },
     }
     : compareToAuthority(

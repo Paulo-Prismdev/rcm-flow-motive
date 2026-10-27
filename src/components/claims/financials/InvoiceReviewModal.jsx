@@ -33,6 +33,7 @@ import {
   claimAuthorityExpectation,
   compareToAuthority,
   hasSplit,
+  missingExpectationText,
   splitFromFigures,
 } from './invoiceAuthorityCheck';
 
@@ -218,7 +219,7 @@ export default function InvoiceReviewModal({
         reason: 'no_final_authority',
         headline: {
           tone: 'wait',
-          text: "Waiting for the Final Authority. This invoice is checked against the Final Authority, and none has been recorded on this claim yet — the initial and supplementary authorities are kept for the record and are not used for the check.",
+          text: missingExpectationText(claim),
         },
       })
     : null;

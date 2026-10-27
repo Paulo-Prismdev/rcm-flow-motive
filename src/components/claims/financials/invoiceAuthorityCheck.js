@@ -112,7 +112,12 @@ export function authorityExpectation({ gross, net, excess, contributions, vatSta
  * measuring themselves against an earlier figure.
  */
 export function claimAuthorityExpectation(claim) {
-  if (!claim || isPrivatePayingClaim(claim)) return null;
+  if (!claim) return null;
+  // A job the customer pays for privately has no insurer, so no authority: the
+  // purchase order we issue authorises the repair, and the repairer's invoice is
+  // measured against it exactly as an insurer's is measured against the Final
+  // Authority. Null until an order has been generated, so the check waits for it.
+  if (isPrivatePayingClaim(claim)) return purchaseOrderExpectation(claim);
   const authority = authorityTotals(claim);
   if (!authority) return null;
   return authorityExpectation({
@@ -121,6 +126,17 @@ export function claimAuthorityExpectation(claim) {
     contributions: authorityContributions(claim),
     vatStatus: claim.client_vat_status,
   });
+}
+
+/**
+ * What a screen says while the invoice has nothing to be measured against yet: on an
+ * insurer claim the Final Authority, and on a job the customer pays for privately the
+ * purchase order that authorises the repair.
+ */
+export function missingExpectationText(claim) {
+  return isPrivatePayingClaim(claim)
+    ? "Waiting for the Purchase Order. This invoice is checked against the purchase order we issue to authorise a privately paid repair, and none has been generated on this claim yet — generate one from the Financials screen and the invoice is checked against it."
+    : "Waiting for the Final Authority. This invoice is checked against the Final Authority, and none has been recorded on this claim yet — the initial and supplementary authorities are kept for the record and are not used for the check.";
 }
 
 /**
@@ -221,13 +237,14 @@ export function compareToAuthority(insurerPart, expectation, vatExcess = null, s
   // while the excess is still TBC on authority.
   const totalDifference = onSplit ? round2(invoiceTotal - expectation.gross) : 0;
   const totalOver = onSplit && totalDifference > AUTHORITY_TOLERANCE;
+  const based = expectation.purchaseOrder ? 'ordered' : 'authorised';
   const totalCheck = onSplit ? {
     key: 'total',
-    label: 'The full repair against the authorised total',
+    label: `The full repair against the ${based} total`,
     ok: !totalOver,
     detail: totalOver
-      ? `The invoice comes to ${fmtGBP(invoiceTotal)}, ${fmtGBP(totalDifference)} over the ${fmtGBP(expectation.gross)} the repair was authorised at — the full repair can never be more than was authorised.`
-      : `The invoice's ${fmtGBP(invoiceTotal)} is within the ${fmtGBP(expectation.gross)} the repair was authorised at${totalDifference < -AUTHORITY_TOLERANCE ? `, ${fmtGBP(Math.abs(totalDifference))} under it` : ''}.`,
+      ? `The invoice comes to ${fmtGBP(invoiceTotal)}, ${fmtGBP(totalDifference)} over the ${fmtGBP(expectation.gross)} the repair was ${based} at — the full repair can never be more than was ${based}.`
+      : `The invoice's ${fmtGBP(invoiceTotal)} is within the ${fmtGBP(expectation.gross)} the repair was ${based} at${totalDifference < -AUTHORITY_TOLERANCE ? `, ${fmtGBP(Math.abs(totalDifference))} under it` : ''}.`,
   } : null;
 
   const shared = {
@@ -264,6 +281,10 @@ export function compareToAuthority(insurerPart, expectation, vatExcess = null, s
 
   const difference = round2(insurer - expectation.expected);
   const insurerStatus = Math.abs(difference) <= AUTHORITY_TOLERANCE ? 'match' : difference < 0 ? 'under' : 'over';
+  // On a private job there is no insurer: the repairer invoices us, and the customer
+  // is who pays for the repair, so the figures are spoken about by them.
+  const payer = expectation.purchaseOrder ? 'the customer' : 'the insurer';
+  const payerCap = expectation.purchaseOrder ? 'The customer' : 'The insurer';
   const status = totalOver || insurerStatus === 'over' ? 'over' : insurerStatus;
   const overReason = totalOver ? 'total' : insurerStatus === 'over' ? 'insurer' : null;
 
@@ -285,11 +306,11 @@ export function compareToAuthority(insurerPart, expectation, vatExcess = null, s
   if (onSplit) {
     checks.push({
       key: 'insurer',
-      label: "The insurer's share",
+      label: `${payerCap}'s share`,
       ok: insurerStatus === 'match',
       detail: insurerStatus === 'match'
-        ? `${fmtGBP(insurer)} payable by the insurer — what the insurer's share of this repair comes to.`
-        : `${fmtGBP(insurer)} payable by the insurer, against the ${fmtGBP(expectation.expected)} the insurer's share of this repair comes to — ${fmtGBP(Math.abs(difference))} ${difference < 0 ? 'under' : 'over'}.`,
+        ? `${fmtGBP(insurer)} payable by ${payer} — what ${payer}'s share of this repair comes to.`
+        : `${fmtGBP(insurer)} payable by ${payer}, against the ${fmtGBP(expectation.expected)} ${payer}'s share of this repair comes to — ${fmtGBP(Math.abs(difference))} ${difference < 0 ? 'under' : 'over'}.`,
     });
     const terms = customerShareTerms(expectation);
     checks.push({
@@ -331,13 +352,13 @@ export function compareToAuthority(insurerPart, expectation, vatExcess = null, s
     text: status === 'over'
       ? (overReason === 'total'
         ? totalCheck.detail
-        : `${expectationWorkings(expectation)}. The insurer's share of ${fmtGBP(insurer)} is ${fmtGBP(Math.abs(difference))} over that — a repairer can't invoice the insurer more than its share of the authorised amount.`)
+        : `${expectationWorkings(expectation)}. The ${payer}'s share of ${fmtGBP(insurer)} is ${fmtGBP(Math.abs(difference))} over that — a repairer can't invoice ${payer} more than its share of the ${based} amount.`)
       : insurerStatus === 'under'
-        ? `${expectationWorkings(expectation)}. ${onSplit ? `The invoice puts ${fmtGBP(insurer)} on the insurer` : `The invoice total of ${fmtGBP(insurer)}`}, ${fmtGBP(Math.abs(difference))} under that.`
+        ? `${expectationWorkings(expectation)}. ${onSplit ? `The invoice puts ${fmtGBP(insurer)} on ${payer}` : `The invoice total of ${fmtGBP(insurer)}`}, ${fmtGBP(Math.abs(difference))} under that.`
         : failing.length > 0
           ? failing[0].detail
           : onSplit
-            ? `The invoice splits the full repair of ${fmtGBP(invoiceTotal)} the way the authorisation does: ${fmtGBP(insurer)} payable by the insurer and ${fmtGBP(splitCustomer)} by the customer.`
+            ? `The invoice splits the full repair of ${fmtGBP(invoiceTotal)} the way the ${expectation.purchaseOrder ? 'purchase order' : 'authorisation'} does: ${fmtGBP(insurer)} payable by ${payer} and ${fmtGBP(splitCustomer)} by the customer.`
             : `${expectationWorkings(expectation)} — the invoice total of ${fmtGBP(insurer)} matches.`,
   };
 
@@ -387,7 +408,14 @@ export function compareRepairCostSplit({ insurerPart, vatExcessPart, repairCost 
  * contributions taken off, and what is left.
  */
 export function expectationWorkings(expectation) {
-  if (!expectation || expectation.excessTbc) return '';
+  if (!expectation) return '';
+  // A private job has no authority: the purchase order we issued is what authorises
+  // the repair, so the working names the order the invoice is measured against.
+  const po = expectation.purchaseOrder;
+  if (po) {
+    return `Final Purchase Order ${po.number} — ${fmtGBP(expectation.gross)} ordered (${fmtGBP(expectation.net)} ex VAT plus ${fmtGBP(expectation.vat)} VAT)`;
+  }
+  if (expectation.excessTbc) return '';
   const parts = [`Authorised ${fmtGBP(expectation.net)} ex VAT`];
   if (!expectation.vatRegistered) parts.push(`+ ${fmtGBP(expectation.vat)} VAT`);
   if (expectation.excess) parts.push(`− ${fmtGBP(expectation.excess)} excess`);
@@ -464,14 +492,20 @@ export function buildReinvoiceEmail({ claim, comparison, user }) {
   const { status, insurerPart, expected, authority, expectation } = comparison || {};
   const subject = `Corrected invoice required — Job ${claim?.job_number || '—'} | ${claim?.reg || '—'}`;
 
-  const basis = [
-    `the repair was authorised at ${fmtGBP(authority)} in total, ${fmtGBP(expectation?.net ?? 0)} of it excluding VAT`,
-    expectation && !expectation.vatRegistered
-      ? `and the customer is not VAT registered, so VAT is invoiced too`
-      : `and the customer is VAT registered, so no VAT is invoiced`,
-    expectation?.excess ? `${fmtGBP(expectation.excess)} of it is the customer's excess` : null,
-    expectation?.contributions ? `${fmtGBP(expectation.contributions)} of it is the customer's contribution` : null,
-  ].filter(Boolean).join(', ');
+  const po = expectation?.purchaseOrder;
+  const basis = po
+    ? `the repair was ordered at ${fmtGBP(authority)} in total on purchase order ${po.number}, ${fmtGBP(expectation.net)} of it excluding VAT and ${fmtGBP(expectation.vat)} VAT`
+    : [
+      `the repair was authorised at ${fmtGBP(authority)} in total, ${fmtGBP(expectation?.net ?? 0)} of it excluding VAT`,
+      expectation && !expectation.vatRegistered
+        ? `and the customer is not VAT registered, so VAT is invoiced too`
+        : `and the customer is VAT registered, so no VAT is invoiced`,
+      expectation?.excess ? `${fmtGBP(expectation.excess)} of it is the customer's excess` : null,
+      expectation?.contributions ? `${fmtGBP(expectation.contributions)} of it is the customer's contribution` : null,
+    ].filter(Boolean).join(', ');
+  // On a private job it is the customer's own invoice that is being corrected, so
+  // the share being questioned is theirs rather than an insurer's.
+  const part = po ? "the customer's" : "the insurer's";
 
   // An invoice that splits the repair between its payers is spoken about by the
   // share it puts on the insurer, which is the figure being questioned.
@@ -480,8 +514,8 @@ export function buildReinvoiceEmail({ claim, comparison, user }) {
     : `the invoice total of ${fmtGBP(insurerPart)}`;
 
   const why = status === 'over'
-    ? `We're not able to accept it as it stands: ${invoiced} is ${fmtGBP(Math.abs(comparison.difference))} over the ${fmtGBP(expected)} the insurer's part of this repair comes to — ${basis}. A repairer can't invoice more than was authorised.`
-    : `We're not able to accept it as it stands: ${invoiced} is ${fmtGBP(Math.abs(comparison.difference))} under the ${fmtGBP(expected)} the insurer's part of this repair comes to — ${basis}.`;
+    ? `We're not able to accept it as it stands: ${invoiced} is ${fmtGBP(Math.abs(comparison.difference))} over the ${fmtGBP(expected)} ${part} part of this repair comes to — ${basis}. A repairer can't invoice more than was ${po ? 'ordered' : 'authorised'}.`
+    : `We're not able to accept it as it stands: ${invoiced} is ${fmtGBP(Math.abs(comparison.difference))} under the ${fmtGBP(expected)} ${part} part of this repair comes to — ${basis}.`;
 
   const lines = [
     'Hi,',
