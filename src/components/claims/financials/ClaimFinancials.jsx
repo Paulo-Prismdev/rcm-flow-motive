@@ -73,6 +73,7 @@ import {
   compareRepairCostSplit,
   compareToAuthority,
   finalInvoiceTotal,
+  hasSplit,
   repairCostWords,
   splitFromFigures,
   VAT_EXCESS_INVOICE_KEY,
@@ -777,8 +778,14 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
   );
 
   // The same two invoices added up against the claim's final repair cost, once
-  // both copies are on file.
-  const repairCostSplit = ctx.vatExcess && finalInvoiceState?.copyAttached && vatExcessInState?.copyAttached
+  // both copies are on file. Where the Final Insurer Invoice prints the customer's
+  // share itself, that share is already inside the invoice's own total: the one
+  // document is both invoices, so there is nothing to add up and its own total is
+  // the whole repair.
+  const repairCostSplit = ctx.vatExcess
+    && !hasSplit(claimInvoicedSplit(claim))
+    && finalInvoiceState?.copyAttached
+    && vatExcessInState?.copyAttached
     ? compareRepairCostSplit({
       insurerPart: finalInvoiceState.amount,
       vatExcessPart: vatExcessInState.amount,
