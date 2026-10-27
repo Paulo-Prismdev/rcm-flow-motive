@@ -340,8 +340,10 @@ export function buildInvoicingQueues(claims = [], thresholds = DEFAULT_QUEUE_DAY
         }));
       }
 
-      // Requested but not raised: asked for, past the threshold, still no copy.
-      if (chased && state.requested && !state.copyAttached) {
+      // Requested but not raised from accounts: asked for, past the threshold, still
+      // no copy. An invoice asked for from the referrer themselves is not accounts'
+      // work: it is chased in the Invoices in section below, on its own dates.
+      if (chased && state.requested && state.requestedFrom !== 'referrer' && !state.copyAttached) {
         const waited = workingDaysSince(state.requestedAt, now);
         if (waited !== null && waited > accountsDays) {
           buckets.accounts_overdue.push(queueRow(claim, item, {
@@ -360,12 +362,21 @@ export function buildInvoicingQueues(claims = [], thresholds = DEFAULT_QUEUE_DAY
       // has left our hands.
       if (EXPECTED_IN_KEYS.includes(item.key) && releasedDays !== null
         && !state.paid && !state.date && !state.copyAttached && !state.awaiting && state.amount > 0) {
+        // Asked for from the referrer, the wait runs from the day the request went
+        // out — with the reminder beside it — rather than from the day the job left
+        // our hands, so the line says when they were asked and when they were chased.
+        const askedOn = state.requestedAt || '';
+        const waitingSince = askedOn || released;
         buckets.in_expected.push(queueRow(claim, item, {
           section: 'in_expected',
           amount: state.amount,
-          note: state.hint || '',
-          waitingSince: released,
-          days: releasedDays,
+          // The date the wait runs from is the line's own date, so the note carries
+          // what the wait is and, once it has gone out, when they were chased.
+          note: askedOn
+            ? `Requested from the referrer${state.reminderAt ? ` · Reminder sent ${formatInvoiceDay(state.reminderAt)}` : ''}`
+            : (state.hint || ''),
+          waitingSince,
+          days: daysSince(waitingSince, now),
           party: invoicePartyName(claim, item),
         }));
       }

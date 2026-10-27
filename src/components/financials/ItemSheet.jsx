@@ -3,8 +3,10 @@ import { AlertTriangle, Calculator, Check, Eye, FilePlus2, Pencil, Trash2, Undo2
 import { Input } from '@/components/ui/input';
 import { fmtGBP } from '@/components/shared/creditRepairRates';
 import {
-  canRequestInvoice, formatInvoiceDay, invoicePartyName, isInvoiceDocument, isRecommendedItem,
+  canRequestFromReferrer, canRequestInvoice, formatInvoiceDay, invoicePartyName, isInvoiceDocument,
+  isRecommendedItem,
 } from '@/components/shared/invoiceChecklist';
+import { referrerReminderDue } from '@/components/claims/financials/referrerRequest';
 import InvoiceCalculation from '@/components/claims/financials/InvoiceCalculation';
 import InvoiceItemDetails from '@/components/claims/InvoiceItemDetails';
 import DocumentPreview from '@/components/shared/DocumentPreview';
@@ -24,7 +26,7 @@ import MacSheet from './MacSheet';
 export default function ItemSheet({
   item, state, files = [], claim, hold, isUploading,
   onClose, onPickUpload, onRemoveFile, onRenameFile, onViewFile,
-  onRequest, onUndoRequest, onAskPaid, onChange,
+  onRequest, onRequestReferrer, onUndoRequest, onAskPaid, onChange,
 }) {
   const [showCalc, setShowCalc] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
@@ -38,6 +40,13 @@ export default function ItemSheet({
   const light = itemLight(item, state);
   const file = files[0] || null;
   const canAsk = canRequestInvoice(item) && !state.paid && !state.date;
+  // A referrer's own invoice is asked for from the referrer rather than from
+  // accounts, under the same rule: the fee in the request is worked out from the job
+  // figures, so nothing is asked for until they have been checked.
+  const canAskReferrer = canRequestFromReferrer(item) && !!onRequestReferrer && !state.paid && !state.date;
+  // The chase goes out once the request is past its own threshold and nothing has
+  // come in against it.
+  const reminderDue = canAskReferrer && referrerReminderDue(state);
   const canMarkPaid = !state.paid && !state.notApplicable && !state.awaiting && (!!state.date || state.requested);
   const dateLabel = state.date ? (item.dateLabel || (item.direction === 'in' ? 'Received' : 'Sent')) : '';
 
@@ -74,6 +83,22 @@ export default function ItemSheet({
     actions.push({
       label: state.requested ? 'Request again' : 'Request from accounts',
       run: () => onRequest(item, state),
+      disabled: !!hold,
+      title: hold,
+    });
+  }
+  if (canAskReferrer) {
+    actions.push({
+      label: state.requested ? 'Request invoice from referrer again' : 'Request invoice from referrer',
+      run: () => onRequestReferrer(item, state),
+      disabled: !!hold,
+      title: hold,
+    });
+  }
+  if (reminderDue) {
+    actions.push({
+      label: 'Send reminder',
+      run: () => onRequestReferrer(item, state, 'reminder'),
       disabled: !!hold,
       title: hold,
     });
@@ -178,8 +203,12 @@ export default function ItemSheet({
           )}
           {dateLabel && <MacValueRow label={dateLabel} value={formatInvoiceDay(state.date)} />}
           {state.requested && state.requestedAt && (
-            <MacValueRow label="Requested from accounts" value={formatInvoiceDay(state.requestedAt)} />
+            <MacValueRow
+              label={state.requestedFrom === 'referrer' ? 'Requested from referrer' : 'Requested from accounts'}
+              value={formatInvoiceDay(state.requestedAt)}
+            />
           )}
+          {state.reminderAt && <MacValueRow label="Reminder sent" value={formatInvoiceDay(state.reminderAt)} />}
           {state.paid && (
             <MacValueRow
               label="Paid"

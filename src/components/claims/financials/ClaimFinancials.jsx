@@ -12,6 +12,7 @@ import {
   DEFAULT_ACCOUNTS_EMAIL,
   buildInvoiceDetailsClearPatch,
   buildInvoiceItemPatch,
+  buildInvoiceReminderPatch,
   buildInvoiceRequestPatch,
   buildInvoiceReviewPatch,
   buildTrackerMetaPatch,
@@ -50,6 +51,7 @@ import RepairCostCheckNote from './RepairCostCheckNote';
 import RemoveFileDialog from '@/components/shared/RemoveFileDialog';
 import { removeFileFromUpdates } from '@/components/shared/removeFileFromUpdates';
 import RequestInvoiceModal from './RequestInvoiceModal';
+import ReferrerInvoiceRequestModal from './ReferrerInvoiceRequestModal';
 import InvoiceReviewModal from './InvoiceReviewModal';
 import AuthorityReviewModal from './AuthorityReviewModal';
 import ReinvoiceRequestModal from './ReinvoiceRequestModal';
@@ -117,6 +119,7 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
   const docs = useClaimInvoiceDocs(claim, currentUser);
 
   const [request, setRequest] = useState(null);
+  const [referrerRequest, setReferrerRequest] = useState(null);
   const [preparingRequest, setPreparingRequest] = useState(false);
   const [pendingFigureChange, setPendingFigureChange] = useState(null);
   const [review, setReview] = useState(null);
@@ -276,7 +279,11 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
       const after = resolveInvoiceAmount(item, next);
       if (!before || !after || before.awaiting || after.awaiting) continue;
       if (Math.abs((before.amount || 0) - (after.amount || 0)) < 0.01) continue;
-      const word = state.paid ? 'paid' : state.date ? (item.direction === 'out' ? 'sent' : 'received') : 'requested from accounts';
+      const word = state.paid
+        ? 'paid'
+        : state.date
+          ? (item.direction === 'out' ? 'sent' : 'received')
+          : (state.requestedFrom === 'referrer' ? 'requested from the referrer' : 'requested from accounts');
       affected.push({ label: item.label, word, amount: state.amount || before.amount });
     }
 
@@ -621,7 +628,7 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
   const handleUndoRequest = (item) => {
     commit(
       buildInvoiceRequestPatch(claim, item.key, { requested: false }),
-      `${item.label} accounts request undone — back to outstanding`
+      `${item.label} ${item.requestFrom ? 'referrer' : 'accounts'} request undone — back to outstanding`
     );
   };
 
@@ -648,6 +655,41 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
         requested_by: currentUser?.email,
       }),
       `${request.item.label} requested from accounts`
+    );
+  };
+
+  /**
+   * Asking a referrer for their own invoice — or chasing it where nothing has come
+   * back. Both open the same pre-filled email, held under the one rule every request
+   * on the job goes out under: the figures have to be checked first.
+   */
+  const openReferrerRequest = (item, state, mode = 'request') => {
+    setReferrerRequest({ item, state, reminder: mode === 'reminder' });
+  };
+
+  const handleReferrerRequested = ({ requestedAt, reminderAt, reminder, to }) => {
+    const asked = referrerRequest;
+    if (!asked) return;
+    if (reminder) {
+      commit(
+        buildInvoiceReminderPatch(claim, asked.item.key, {
+          reminder_sent_at: reminderAt,
+          reminder_by: currentUser?.email,
+        }),
+        `${asked.item.label} reminder sent to ${to}`
+      );
+      return;
+    }
+    // Recorded the same way the accounts request is, so everything that reads the
+    // request — the light, the sheet, the queues — reads this one too.
+    commit(
+      buildInvoiceRequestPatch(claim, asked.item.key, {
+        requested: true,
+        requested_at: requestedAt,
+        requested_by: currentUser?.email,
+        requested_from: 'referrer',
+      }),
+      `${asked.item.label} requested from the referrer (${to})`
     );
   };
 
@@ -877,6 +919,7 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
       onRenameFile={docs.renameFile}
       onViewFile={docs.setViewingFile}
       onRequest={openRequest}
+      onRequestReferrer={openReferrerRequest}
       onUndoRequest={() => { setOpenItem(null); handleUndoRequest(openRow.item); }}
       onAskPaid={(mode) => askPaidDate(openRow.item, openRow.state, mode)}
       onChange={(changes, description) => handleItemChange(openRow.item, changes, description)}
@@ -1068,6 +1111,18 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
           currentUser={currentUser}
           onRequested={handleRequested}
           hold={request?.item ? requestHold(request.item) : ''}
+        />
+
+        <ReferrerInvoiceRequestModal
+          isOpen={!!referrerRequest}
+          onClose={() => setReferrerRequest(null)}
+          claim={claim}
+          item={referrerRequest?.item}
+          state={referrerRequest?.state}
+          currentUser={currentUser}
+          reminder={!!referrerRequest?.reminder}
+          onSent={handleReferrerRequested}
+          hold={referrerRequest?.item ? requestHold(referrerRequest.item) : ''}
         />
       </div>
     </TooltipProvider>

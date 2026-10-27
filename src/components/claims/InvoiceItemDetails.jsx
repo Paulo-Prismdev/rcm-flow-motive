@@ -105,7 +105,9 @@ export default function InvoiceItemDetails({ item, state, onChange, onAskPaid })
               </button>
             )}
             {state.requested && (
-              <span className="text-[10px] text-amber-600 dark:text-amber-400">Requested from accounts</span>
+              <span className="text-[10px] text-amber-600 dark:text-amber-400">
+                {state.requestedFrom === 'referrer' ? 'Requested from referrer' : 'Requested from accounts'}
+              </span>
             )}
           </div>
 

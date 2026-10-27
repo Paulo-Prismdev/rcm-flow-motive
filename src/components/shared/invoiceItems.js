@@ -227,6 +227,9 @@ export const INVOICE_ITEMS = [
     // claim's own the same way an invoice's is.
     readFigures: ['invoice_date', 'reg'],
   },
+  // The referrer's own invoice to us for their fee. It comes in rather than going
+  // out, but we chase it ourselves: `requestFrom` names the party a direct request
+  // goes to, which is what "Request invoice from referrer" reads.
   {
     key: 'referrer_invoice_in',
     label: 'Referrer Invoice In',
@@ -235,6 +238,7 @@ export const INVOICE_ITEMS = [
     dateLabel: 'Received',
     requires: 'referrer',
     party: 'referrer',
+    requestFrom: 'referrer',
     amountSource: 'referrer_fee',
     varianceReason: 'Referrer fee or repair cost changed',
   },
@@ -246,6 +250,7 @@ export const INVOICE_ITEMS = [
     dateLabel: 'Received',
     requires: 'second_referrer',
     party: 'second_referrer',
+    requestFrom: 'second_referrer',
     amountSource: 'second_referrer_fee',
     varianceReason: 'Second referrer fee or repair cost changed',
   },
@@ -357,3 +362,11 @@ export const isRecommendedItem = (item) => item?.recommended === true;
 /** The invoices we raise, which "Request from accounts" applies to. */
 export const canRequestInvoice = (item) =>
   !!item && !isInvoiceDocument(item) && item.direction === 'out' && item.section === 'out';
+
+/**
+ * The invoices a party sends us that we ask them for directly — a referrer's own
+ * invoice for their fee — which "Request invoice from referrer" applies to. Asked
+ * for by the same rule as an accounts request: the job figures have to be confirmed
+ * first, because the amount asked for is worked out from them.
+ */
+export const canRequestFromReferrer = (item) => !!item?.requestFrom;

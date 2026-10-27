@@ -46,6 +46,7 @@ import { isTotalLossClaim } from './totalLoss';
 import {
   INVOICE_FILE_PREFIX,
   INVOICE_ITEMS,
+  canRequestFromReferrer,
   canRequestInvoice,
   invoiceDocKey,
   invoiceDocumentKind,
@@ -61,6 +62,7 @@ export {
   INVOICE_FILE_PREFIX,
   INVOICE_ITEMS,
   INVOICE_SECTIONS,
+  canRequestFromReferrer,
   canRequestInvoice,
   invoiceDocKey,
   invoiceDocumentKind,
@@ -709,6 +711,12 @@ export function getInvoiceItemState(item, claim, hasFiles = false) {
     variance,
     requested: entry.requested === true,
     requestedAt: entry.requested_at || '',
+    // Who the invoice was asked for from — accounts, or the referrer themselves:
+    // kept on the item so every screen words the request, the chase and the
+    // reminder the same way.
+    requestedFrom: entry.requested_from || 'accounts',
+    reminderAt: entry.reminder_sent_at || '',
+    reminderBy: entry.reminder_by || '',
   };
 }
 
@@ -1265,13 +1273,34 @@ export function buildTrackerMetaPatch(claim, changes) {
  * Patch that records (or clears) an accounts request for one invoice. Only that
  * invoice is touched — the claim's own invoice status is left alone.
  */
-export function buildInvoiceRequestPatch(claim, itemKey, { requested, requested_at, requested_by }) {
+export function buildInvoiceRequestPatch(claim, itemKey, { requested, requested_at, requested_by, requested_from }) {
   const source = claim.invoice_tracker || {};
   const items = { ...(source.items || {}) };
   const entry = { ...(items[itemKey] || {}) };
   entry.requested = !!requested;
   entry.requested_at = requested ? (requested_at || new Date().toISOString()) : null;
   entry.requested_by = requested ? (requested_by || '') : null;
+  entry.requested_from = requested ? (requested_from || entry.requested_from || 'accounts') : null;
+  // A reminder belongs to the request it chased: undoing the request takes the
+  // reminder with it rather than leaving a chase standing on its own.
+  if (!requested) {
+    entry.reminder_sent_at = null;
+    entry.reminder_by = null;
+  }
+  items[itemKey] = entry;
+  return { invoice_tracker: { ...source, items } };
+}
+
+/**
+ * Patch that records a reminder sent after an invoice request — the chase itself,
+ * kept on the item beside the request it chases.
+ */
+export function buildInvoiceReminderPatch(claim, itemKey, { reminder_sent_at, reminder_by }) {
+  const source = claim.invoice_tracker || {};
+  const items = { ...(source.items || {}) };
+  const entry = { ...(items[itemKey] || {}) };
+  entry.reminder_sent_at = reminder_sent_at || new Date().toISOString();
+  entry.reminder_by = reminder_by || '';
   items[itemKey] = entry;
   return { invoice_tracker: { ...source, items } };
 }

@@ -18,7 +18,9 @@ export default function NoLongerRequired({ items = [], filesFor, onViewFile }) {
     const dateLabel = item.dateLabel || (item.direction === 'in' ? 'Received' : 'Sent');
     if (state.date) bits.push(`${dateLabel} ${formatInvoiceDay(state.date)}`);
     if (state.paid) bits.push(state.paidDate ? `Paid ${formatInvoiceDay(state.paidDate)}` : 'Paid');
-    else if (state.requested) bits.push('Requested from accounts');
+    else if (state.requested) {
+      bits.push(state.requestedFrom === 'referrer' ? 'Requested from the referrer' : 'Requested from accounts');
+    }
     if (state.notApplicable) bits.push('Marked not applicable');
     return bits.join(' · ') || 'Nothing recorded against it';
   };

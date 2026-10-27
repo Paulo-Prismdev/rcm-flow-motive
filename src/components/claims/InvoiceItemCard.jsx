@@ -241,7 +241,7 @@ export default function InvoiceItemCard({
                 {state.requested && onUndoRequest && (
                   <ActionRow
                     icon={<Undo2 className="w-3.5 h-3.5" />}
-                    label="Undo accounts request"
+                    label={state.requestedFrom === 'referrer' ? 'Undo referrer request' : 'Undo accounts request'}
                     onClick={() => { close(); onUndoRequest(); }}
                   />
                 )}
