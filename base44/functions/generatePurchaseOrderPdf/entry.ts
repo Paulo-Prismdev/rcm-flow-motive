@@ -40,12 +40,25 @@ Deno.serve(async (req) => {
       return `£${v.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     };
 
-    // ── PO number: job number + reg (sanitised) ──
+    // ── PO number: the job number with PO1, PO2 … for each revision ──
+    // A revised order replaces the one before it: the newest is the Final Purchase
+    // Order the repairer's invoice is measured against, and the earlier ones stay on
+    // the claim marked superseded.
     const reg = (claim.reg || '').toString().toUpperCase().replace(/\s+/g, '');
     const jobNumber = claim.job_number || 'PO';
-    const poNumber = reg ? `${jobNumber}-${reg}` : jobNumber;
+    const existingOrders = Array.isArray(claim.invoice_tracker?.purchase_orders)
+      ? claim.invoice_tracker.purchase_orders.filter((po: any) => po && po.number)
+      : [];
+    const poNumber = `${jobNumber}-PO${existingOrders.length + 1}`;
 
-    const today = new Date().toLocaleDateString('en-GB');
+    // ── The amount, split the way the order states it ──
+    const round2 = (n: number) => Math.round((Number(n) || 0) * 100) / 100;
+    const poNet = round2(authorityFigure / 1.2);
+    const poVat = round2(authorityFigure - poNet);
+    const poTotal = round2(authorityFigure);
+
+    const today = new Date().toISOString().split('T')[0];
+    const todayPrinted = new Date().toLocaleDateString('en-GB');
 
     const doc = new jsPDF();
 
@@ -125,7 +138,7 @@ Deno.serve(async (req) => {
     doc.setFontSize(11);
     doc.setTextColor(...DARK_TEXT);
     doc.text(poNumber, LM + 5, y + 13);
-    doc.text(today, LM + 70, y + 13);
+    doc.text(todayPrinted, LM + 70, y + 13);
     const refText = [reg, jobNumber].filter(Boolean).join('  ·  ') || 'N/A';
     doc.text(doc.splitTextToSize(refText, 65), LM + 120, y + 13);
 

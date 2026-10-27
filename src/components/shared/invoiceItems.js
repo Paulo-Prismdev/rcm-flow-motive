@@ -145,6 +145,22 @@ export const INVOICE_ITEMS = [
     varianceReason: 'Repair cost, excess or VAT status changed',
   },
   {
+    // The purchase order we issue to authorise the repair on a job the customer is
+    // paying for privately. It stands where the Final Authority stands on an insurer
+    // claim: the repairer's Final Repair Invoice is measured against it. It is
+    // generated in the system rather than collected, so it goes green as soon as one
+    // has been generated — no copy has to be uploaded — and the newest order is the
+    // one that counts (see ./purchaseOrders).
+    key: 'final_purchase_order',
+    label: 'Final Purchase Order',
+    section: 'closeout',
+    kind: 'document',
+    direction: 'out',
+    dateLabel: 'Issued',
+    requires: ['private_paying', 'not_total_loss'],
+    generatedBy: 'purchase_order',
+  },
+  {
     key: 'final_authority',
     label: 'Final Authority',
     section: 'closeout',

@@ -43,6 +43,7 @@ import {
 } from './creditRepairRates';
 import { excessMode } from './excessState';
 import { isTotalLossClaim } from './totalLoss';
+import { finalPurchaseOrder, purchaseOrderFigures } from './purchaseOrders';
 import {
   INVOICE_FILE_PREFIX,
   INVOICE_ITEMS,
@@ -613,6 +614,55 @@ export function getInvoiceItemState(item, claim, hasFiles = false) {
   const entry = (claim?.invoice_tracker?.items || {})[item.key] || {};
   const b = item.bindings || {};
   const asDocument = isInvoiceDocument(item);
+
+  // A document the system generates itself — the Final Purchase Order on a job the
+  // customer is paying for privately — is satisfied by the record of what was
+  // generated, not by a copy on file: there is nothing to upload, and it is green
+  // from the moment the order exists.
+  if (item.generatedBy === 'purchase_order') {
+    const po = finalPurchaseOrder(claim);
+    const figures = po ? purchaseOrderFigures(po) : null;
+    return {
+      amount: figures?.total ?? 0,
+      ex: figures?.net ?? 0,
+      vat: figures?.vat ?? 0,
+      total: figures?.total ?? 0,
+      derived: true,
+      awaiting: false,
+      hint: null,
+      calculation: '',
+      workings: figures
+        ? [
+          { label: 'Ex VAT', value: fmtGBP(figures.net) },
+          { label: 'VAT (20%)', value: fmtGBP(figures.vat) },
+          { label: 'Total inc VAT', value: fmtGBP(figures.total) },
+        ]
+        : [],
+      purchaseOrder: po,
+      date: po?.date || '',
+      paid: false,
+      paidDate: '',
+      paidBy: '',
+      received: !!po,
+      copyAttached: !!po,
+      dateRecordedNoCopy: false,
+      reinvoice: null,
+      awaitingCorrected: false,
+      notApplicable: entry.not_applicable === true,
+      notApplicableReason: entry.not_applicable_reason || '',
+      invoiceNumber: po?.number || '',
+      detailsSource: null,
+      keptDetailsWithoutCopy: false,
+      locked: false,
+      adjusted: false,
+      variance: null,
+      requested: false,
+      requestedAt: '',
+      requestedFrom: 'accounts',
+      reminderAt: '',
+      reminderBy: '',
+    };
+  }
   const calc = resolveInvoiceAmount(item, claim);
   // A close-out document records the total read off it, which never counts as
   // money owed, but is what the authority is checked against.
