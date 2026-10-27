@@ -109,6 +109,10 @@ export const documentExtractionSchema = (itemKey) => {
         type: 'string',
         description: 'Where the document is a purchase order, its purchase order number exactly as printed. Otherwise an empty string.',
       },
+      _job_number: {
+        type: 'string',
+        description: 'Our own job number where the document prints one, exactly as printed: a number in the form CLM- followed by five digits and a registration, for example CLM-0000-AB12CDE. Empty string where no number of that form is printed — an insurer claim reference, an estimate or Audatex reference or a purchase order number is never it. Copy it from the page, never from the claim named in the prompt.',
+      },
       ...Object.fromEntries(fields.map((f) => [f.key, {
         type: f.type === 'number' ? 'number' : 'string',
         description: f.prompt,
@@ -141,9 +145,11 @@ Return only these things:
 ${documentFields(itemKey).map((f) => `- ${f.prompt}`).join('\n')}
 - how VAT appears on the document: not mentioned at all, or the amount excluding VAT and the VAT amount both printed, or VAT included without those two amounts being shown separately
 - what the document actually is: a purchase order, an estimate, an authority, or something else — and where it is a purchase order, its purchase order number
+- our job number where the document prints one: a number in the form CLM- followed by five digits and a registration, for example CLM-0000-AB12CDE
 
 Rules:
 - A purchase order is only a purchase order: it is the order that authorises a job the customer pays for privately, and it carries a purchase order number. Say so even though it has been filed as an ${authority ? 'authority' : 'estimate'}. A document that does not carry a purchase order number is never one.
+- Copy the job number from the page exactly. Never take it from the claim named in this message, and never assume it matches it — two jobs can carry the same registration. Leave it empty where the document prints no number of that form, and never read an insurer's claim reference, an estimate or Audatex reference or a purchase order number as it.
 - Only return what is actually printed. Use an empty string for anything that is not there.
 - Amounts as numbers with no currency symbols. Keep every amount separate: never add two of them together, and never split one between two of them.
 - VAT: return only what the document shows. Where no VAT is mentioned on it at all, the amount excluding VAT is the total and the VAT amount is 0. Where it says VAT is included but the ex-VAT amount and the VAT amount are not printed separately, leave both empty for the user to fill in. Never work VAT out from the total yourself.
@@ -170,7 +176,11 @@ export const purchaseOrderFound = (extracted) => (
 /** What the review screen starts with: the figures, the strings they are highlighted by, and the AI's confidence. */
 export function documentFiguresForReview(extracted, itemKey) {
   const read = figuresForReview(extracted || {}, documentFields(itemKey));
-  return { ...read, snippets: snippetsFromExtraction(extracted || {}) };
+  return {
+    ...read,
+    snippets: snippetsFromExtraction(extracted || {}),
+    jobNumber: String(extracted?._job_number || '').trim(),
+  };
 }
 
 export const documentNeedsReview = (itemKey, figures, confidence) =>
@@ -204,6 +214,23 @@ export function checkDocumentReg({ itemKey, item, figures, claim }) {
     };
   }
   return null;
+}
+
+/**
+ * The job number check. Two jobs can share a registration — the same vehicle carries
+ * an insurer claim and a private job — so a document printing a job number that is not
+ * this claim's is being filed on the wrong job even though the registration matches.
+ */
+export function checkDocumentJobNumber({ itemKey, jobNumber, claim }) {
+  const printed = String(jobNumber || '').trim();
+  const mine = String(claim?.job_number || '').trim();
+  const name = isAuthority(itemKey) ? 'authority' : 'estimate';
+  if (!printed || !mine) return null;
+  if (squash(printed).includes(squash(mine))) return null;
+  return {
+    kind: 'mismatch',
+    text: `This ${name} carries job number ${printed}, but it is being filed on ${mine}. The same registration can sit on more than one job, so check this document belongs to this one.`,
+  };
 }
 
 /**

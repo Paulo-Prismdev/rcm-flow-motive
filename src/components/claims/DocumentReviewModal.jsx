@@ -13,6 +13,7 @@ import EstimateAuthorityTotals from '@/components/claims/EstimateAuthorityTotals
 import {
   buildDocumentPatch,
   buildDocumentPrompt,
+  checkDocumentJobNumber,
   checkDocumentReg,
   chosenValue,
   displayValue,
@@ -58,6 +59,8 @@ export default function DocumentReviewModal({
   const [raw, setRaw] = useState({});
   const [confidence, setConfidence] = useState({});
   const [snippets, setSnippets] = useState({});
+  // Our own job number as printed on the document, to check it belongs to this claim.
+  const [jobNumber, setJobNumber] = useState('');
   const [derived, setDerived] = useState([]);
   const [touched, setTouched] = useState({});
   const [reviewed, setReviewed] = useState({});
@@ -79,6 +82,7 @@ export default function DocumentReviewModal({
     setRaw({});
     setConfidence({});
     setSnippets({});
+    setJobNumber('');
     setDerived([]);
     setTouched({});
     setReviewed({});
@@ -127,6 +131,7 @@ export default function DocumentReviewModal({
         setFigures(read.figures);
         setRaw(read.raw);
         setConfidence(read.confidence);
+        setJobNumber(read.jobNumber || '');
         setDerived(read.derived || []);
         setSnippets(found || {});
         setStatus(readable ? 'ready' : 'failed');
@@ -160,6 +165,8 @@ export default function DocumentReviewModal({
 
   const regIssue = checkDocumentReg({ itemKey, item, figures, claim });
   const regAcked = !regIssue || !!acked.reg;
+  const jobIssue = checkDocumentJobNumber({ itemKey, jobNumber, claim });
+  const jobAcked = !jobIssue || !!acked.job;
   const arithmetic = useMemo(() => documentArithmetic(figures), [figures]);
 
   const rows = useMemo(() => documentRows({ claim, itemKey, figures }), [claim, itemKey, figures]);
@@ -181,7 +188,8 @@ export default function DocumentReviewModal({
   const canConfirm = status !== 'reading'
     && missingRequired.length === 0
     && unreviewed.length === 0
-    && regAcked;
+    && regAcked
+    && jobAcked;
 
   const handleConfirm = () => {
     onConfirm({
@@ -345,6 +353,15 @@ export default function DocumentReviewModal({
                 detail={regIssue.text}
                 acked={acked.reg}
                 onAck={(value) => setAcked((prev) => ({ ...prev, reg: value }))}
+              />
+            )}
+
+            {status !== 'reading' && jobIssue && (
+              <AckRow
+                title="This document shows a different job number"
+                detail={jobIssue.text}
+                acked={acked.job}
+                onAck={(value) => setAcked((prev) => ({ ...prev, job: value }))}
               />
             )}
 
