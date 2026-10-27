@@ -60,8 +60,9 @@ export default function InvoiceReviewModal({
   const [repairCostChoice, setRepairCostChoice] = useState(null);
   const [authorityChoice, setAuthorityChoice] = useState(null);
   // Whether this same invoice is to be filed as the customer's own invoice too, where
-  // it carries their share of the repair.
-  const [fileVatExcess, setFileVatExcess] = useState(false);
+  // it carries their share of the repair. Left unset until the invoice has been read:
+  // where it applies it starts ticked, and a deliberate untick overrides that.
+  const [fileVatExcessChoice, setFileVatExcessChoice] = useState(null);
 
   // What this particular invoice carries: the standard set, the few a document
   // names for itself, and any figures read beside them — a salvage invoice's
@@ -86,7 +87,7 @@ export default function InvoiceReviewModal({
     setDuplicate(null);
     setRepairCostChoice(null);
     setAuthorityChoice(null);
-    setFileVatExcess(false);
+    setFileVatExcessChoice(null);
     setFocused('invoice_number');
 
     (async () => {
@@ -201,9 +202,6 @@ export default function InvoiceReviewModal({
   const overAuthority = comparison?.status === 'over';
   const reinvoiceRequested = authorityChoice === 'reinvoice';
   const choiceNeeded = comparison?.status === 'under' && !authorityChoice;
-  // The verdict on the invoice against the authority is part of this screen's one
-  // verdict: while it isn't clear, nothing here announces that everything matches.
-  const authorityOk = !comparison || comparison.headline?.tone === 'ok';
 
   // Where we handle this client's VAT and excess, the invoice often carries their own
   // half of the repair as a payable line of its own — which is exactly what the VAT &
@@ -215,6 +213,9 @@ export default function InvoiceReviewModal({
     && hasSplit(split)
     && splitCustomerShare > 0
     && !vatExcessFiled;
+  // Offered where it applies, and ticked to start with: this document is what that
+  // invoice bills, so the one copy serves both unless the user untick it.
+  const fileVatExcess = fileVatExcessChoice ?? offerVatExcessFile;
   const fileVatExcessConfirmed = offerVatExcessFile && fileVatExcess;
 
   const softBlockers = [
@@ -354,7 +355,7 @@ export default function InvoiceReviewModal({
                   <input
                     type="checkbox"
                     checked={fileVatExcess}
-                    onChange={(e) => setFileVatExcess(e.target.checked)}
+                    onChange={(e) => setFileVatExcessChoice(e.target.checked)}
                     className="mt-0.5 rounded border-border"
                   />
                   <span>Also file it as the VAT &amp; Excess Invoice In at {fmtGBP(splitCustomerShare)}.</span>
@@ -389,8 +390,6 @@ export default function InvoiceReviewModal({
               accepted={acceptedMismatch}
               reason={reason}
               acked={acked}
-              authorityOk={authorityOk}
-              withAuthority={!!comparison}
               onAck={(id, value) => setAcked((prev) => ({ ...prev, [id]: value }))}
               onReason={setReason}
               onAcceptMismatch={() => setAcceptedMismatch(true)}

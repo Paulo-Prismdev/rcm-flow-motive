@@ -38,29 +38,12 @@ export function AckRow({ title, detail, acked, onAck, onReject }) {
 export default function InvoiceReviewChecks({
   arithmetic, matchIssues, duplicate, mismatch, requiredMissing, unreviewed,
   accepted, reason, acked, onAck, onReason, onAcceptMismatch, onReject,
-  authorityOk = true, withAuthority = false,
 }) {
-  const hasChecks = arithmetic.length || matchIssues.length || duplicate?.length || mismatch;
-  // The verdict on the invoice against the authority is part of this screen's verdict:
-  // an invoice that can't be saved is never announced as everything matching, so the
-  // green line only shows when every check on the screen holds.
-  const everythingFine = !hasChecks && requiredMissing.length === 0 && unreviewed.length === 0 && authorityOk;
-
+  // Only what needs attention is shown here. The screen's verdict on the invoice is
+  // the one the authority check carries, with its own checks ticked off under it —
+  // this box never repeats it.
   return (
     <div className="space-y-2">
-      {everythingFine && (
-        <div className="flex items-center gap-2 rounded-lg border border-green-300 dark:border-green-800 bg-green-50 dark:bg-green-900/20 px-2.5 py-2">
-          <span className="w-4 h-4 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
-            <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />
-          </span>
-          <p className="text-[11px] font-semibold text-green-700 dark:text-green-400">
-            {withAuthority
-              ? 'Everything checks out: the figures add up, the invoice is this claim’s, and the amounts agree with what was authorised.'
-              : 'The figures add up, the invoice matches this claim and the amount is what we expected.'}
-          </p>
-        </div>
-      )}
-
       {(requiredMissing.length > 0 || unreviewed.length > 0) && (
         <div className="rounded-lg border border-red-300 dark:border-red-800 bg-red-50 dark:bg-red-900/20 p-2.5">
           <p className="flex items-start gap-1.5 text-[11px] font-semibold text-red-700 dark:text-red-400">

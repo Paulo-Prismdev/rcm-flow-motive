@@ -11,9 +11,10 @@ import { customerShareWorkings, hasSplit, splitFromFigures } from './invoiceAuth
  * this repairer has sent the insurer, plus what the customer pays the repairer
  * themselves — the VAT where they are registered, their excess and any contribution
  * — which together come to the amount the repair was authorised at. It fills the
- * figure in where the claim hasn't got one, says so plainly where the two agree, and
- * flags the difference where they don't, never overwriting a figure that is already
- * there without being asked.
+ * figure in silently where the claim hasn't got one — a blank cost and a nil one are
+ * both simply nothing set — says so plainly where the two agree, and flags the
+ * difference where they don't, never overwriting a real figure already on the claim
+ * without being asked.
  *
  * On a job with no insurer authority to read the split from — one the customer is
  * paying for privately — there is no customer's share, and the invoice's own total
@@ -35,7 +36,9 @@ export function repairCostOffer(item, claim, figures, expectation = null) {
   const basis = { insurerPart, customerShare, expectation: expectation || null, split: onSplit ? split : null };
   const onFile = toNum(claim?.final_repair_cost);
 
-  if (onFile === null) {
+  // A blank figure and a nil one are the same thing here: nothing has been set yet,
+  // so the invoice fills the repair cost in — nothing to warn about and nothing to accept.
+  if (onFile === null || onFile === 0) {
     return { total, onFile: null, status: 'empty', difference: null, defaultUse: true, basis };
   }
   const difference = round2(total - onFile);
@@ -45,15 +48,11 @@ export function repairCostOffer(item, claim, figures, expectation = null) {
   return { total, onFile, status: 'differs', difference, defaultUse: false, basis };
 }
 
-/** The whole repair in words: the invoice and the customer's share named apart. */
-const describeTotal = (offer) => (offer.basis.split
-  ? `the invoice's own full total of ${fmtGBP(offer.total)} — ${fmtGBP(offer.basis.split.insurer)} for the insurer and ${fmtGBP(offer.basis.split.customer)} for the customer`
-  : offer.basis.customerShare
-    ? `the full repair cost of ${fmtGBP(offer.total)} — this invoice's ${fmtGBP(offer.basis.insurerPart)} plus the customer's ${fmtGBP(offer.basis.customerShare)}`
-    : `this invoice's total, ${fmtGBP(offer.total)},`);
-
 export default function RepairCostFromInvoice({ offer, useIt, onUse }) {
-  if (!offer) return null;
+  // Nothing is shown where the claim holds no figure: the invoice fills it in as it
+  // is saved. A box appears only where a real figure is already there and differs —
+  // the one case where saving this invoice would replace it.
+  if (!offer || offer.status === 'empty') return null;
 
   const differs = offer.status === 'differs';
   const onSplit = !!offer.basis.split;
@@ -70,20 +69,6 @@ export default function RepairCostFromInvoice({ offer, useIt, onUse }) {
 
       {withShare && (
         <p className="text-[11px] text-muted-foreground">{customerShareWorkings(offer.basis.expectation)}</p>
-      )}
-
-      {offer.status === 'empty' && (
-        <label className="flex cursor-pointer items-start gap-2 text-[11px]">
-          <input
-            type="checkbox"
-            checked={useIt}
-            onChange={(e) => onUse(e.target.checked)}
-            className="mt-0.5 rounded border-border"
-          />
-          <span>
-            Use {describeTotal(offer)} as the claim's final repair cost.
-          </span>
-        </label>
       )}
 
       {offer.status === 'match' && (
