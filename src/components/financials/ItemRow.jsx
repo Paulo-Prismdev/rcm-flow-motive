@@ -17,7 +17,10 @@ export function itemSubline(item, state, claim) {
       : state.requested && state.requestedAt ? `Requested ${formatInvoiceDay(state.requestedAt)}`
         : '';
   const parts = [party, when].filter(Boolean);
-  return parts.length > 0 ? parts.join(' · ') : (isInvoiceDocument(item) ? 'Not received' : 'Not raised');
+  if (parts.length > 0) return parts.join(' · ');
+  // An order we issue is not something we wait to receive.
+  if (item.generatedBy === 'purchase_order') return 'Not issued yet';
+  return isInvoiceDocument(item) ? 'Not received' : 'Not raised';
 }
 
 /**

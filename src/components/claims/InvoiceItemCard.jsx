@@ -81,6 +81,11 @@ export default function InvoiceItemCard({
   const [naReason, setNaReason] = useState('');
 
   const isDocument = isInvoiceDocument(item);
+  // A document the system issues itself — the purchase order on a job the customer is
+  // paying for privately. There is nothing to upload and no copy to chase: the file to
+  // open is the order that was generated.
+  const isOrder = item.generatedBy === 'purchase_order';
+  const order = isOrder ? state.purchaseOrder : null;
   const dateLabel = itemDateWord(item);
   const toneKey = invoiceToneKey(item, state, step);
   const tone = TRACKER_TONES[toneKey];
@@ -115,13 +120,21 @@ export default function InvoiceItemCard({
         : 'No copy attached yet — upload one and the figures are read off it';
 
   const pickFile = () => fileInputRef.current?.click();
-  const menuFiles = files.map((doc) => ({
-    id: doc.id,
-    name: doc.file_name || doc.file_url.split('/').pop(),
-    onOpen: () => onViewFile(doc.file_url),
-    onRename: (name) => onRenameFile(doc, name),
-    onRemove: () => onDeleteFile(doc),
-  }));
+  const menuFiles = isOrder
+    ? (order?.file_url
+      ? [{
+        id: 'purchase-order',
+        name: order.file_name || `${order.number}.pdf`,
+        onOpen: () => onViewFile(order.file_url),
+      }]
+      : [])
+    : files.map((doc) => ({
+      id: doc.id,
+      name: doc.file_name || doc.file_url.split('/').pop(),
+      onOpen: () => onViewFile(doc.file_url),
+      onRename: (name) => onRenameFile(doc, name),
+      onRemove: () => onDeleteFile(doc),
+    }));
 
   /**
    * Stops the nudge on a recommended item that won't be coming, recording the
@@ -208,17 +221,21 @@ export default function InvoiceItemCard({
             tooltip={tooltip}
             title={item.label}
             files={menuFiles}
-            onUpload={pickFile}
-            onAddFile={pickFile}
+            onUpload={isOrder ? undefined : pickFile}
+            onAddFile={isOrder ? undefined : pickFile}
           >
             {(close) => (
               <>
-                <ActionDivider />
-                <ActionRow
-                  icon={<SlidersHorizontal className="w-3.5 h-3.5" />}
-                  label={detailsOpen ? 'Hide the figures' : 'Figures, dates & paid'}
-                  onClick={() => { close(); onToggleDetails?.(); }}
-                />
+                {!isOrder && (
+                  <>
+                    <ActionDivider />
+                    <ActionRow
+                      icon={<SlidersHorizontal className="w-3.5 h-3.5" />}
+                      label={detailsOpen ? 'Hide the figures' : 'Figures, dates & paid'}
+                      onClick={() => { close(); onToggleDetails?.(); }}
+                    />
+                  </>
+                )}
 
                 {!isDocument && (
                   <>

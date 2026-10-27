@@ -153,9 +153,12 @@ export function buildFinancialFlow(summary, ctx, claim, options = {}) {
         : closeIn === closeRequired.length ? `all ${closeRequired.length} received`
           : `${closeIn} of ${closeRequired.length} received`,
     action: closeEmpty || !closePending ? null
-      : upload(closePending, closePending.state.awaitingCorrected
-        ? `upload the corrected ${closePending.item.label}`
-        : `upload the ${closePending.item.label}`),
+      // A purchase order is not a document we wait to receive: it is issued here.
+      : closePending.item.generatedBy === 'purchase_order'
+        ? { kind: 'issue_order', label: `issue the ${closePending.item.label.toLowerCase()}` }
+        : upload(closePending, closePending.state.awaitingCorrected
+          ? `upload the corrected ${closePending.item.label}`
+          : `upload the ${closePending.item.label}`),
     suggestion: closeSuggested ? upload(closeSuggested, `upload the ${closeSuggested.item.label}`) : null,
   };
 
