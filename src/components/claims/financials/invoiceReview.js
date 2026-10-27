@@ -364,7 +364,7 @@ export function expectedInvoice(item, claim) {
 }
 
 /** Fail-safe 2: is this the invoice we asked for? */
-export function checkRightInvoice(figures, claim, item) {
+export function checkRightInvoice(figures, claim, item, { addressedToClient = false } = {}) {
   const issues = [];
   const printed = squash(INVOICE_FIGURES.map((f) => figures[f.key]).filter(Boolean).join(' '));
 
@@ -381,7 +381,9 @@ export function checkRightInvoice(figures, claim, item) {
 
   const expectedParty = invoicePartyName(claim, item);
   const printedParty = item?.direction === 'in' ? figures.party_from : figures.party_to;
-  if (expectedParty && printedParty && !partiesMatch(printedParty, expectedParty)) {
+  // An insurer's invoice raised in the client's name at the insurer's request is
+  // addressed to the client on purpose: there is nothing to warn about there.
+  if (!addressedToClient && expectedParty && printedParty && !partiesMatch(printedParty, expectedParty)) {
     issues.push(item.direction === 'in'
       ? `This invoice is from "${printedParty}", but the ${item.label} is expected from "${expectedParty}".`
       : `This invoice is addressed to "${printedParty}", but the ${item.label} is expected to go to "${expectedParty}".`);

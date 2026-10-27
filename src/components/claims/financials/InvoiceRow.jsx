@@ -5,6 +5,7 @@ import { canRequestInvoice, invoicePartyName, isInvoiceDocument } from '@/compon
 import InvoiceItemCard from '../InvoiceItemCard';
 import InvoiceItemDetails from '../InvoiceItemDetails';
 import InvoiceCalculation from './InvoiceCalculation';
+import { FINAL_INVOICE_KEY } from './invoiceAuthorityCheck';
 
 /**
  * One invoice, kept inside a single card: the status button, who it is to or
@@ -38,6 +39,13 @@ export default function InvoiceRow({
   const canMarkPaid = !state.paid && !state.notApplicable && !state.awaiting
     && (!!state.date || state.requested) && !sendFocus;
   const hasAmount = !state.awaiting && state.amount > 0;
+  // An insurer's invoice written in the client's name at their request: the whole of
+  // it counts as the insurer's share, and the row says so.
+  const addressedEntry = item.key === FINAL_INVOICE_KEY
+    ? ((claim?.invoice_tracker?.items || {})[item.key] || {})
+    : {};
+  const addressedToClient = !!addressedEntry.addressed_to_client;
+  const addressedNote = addressedEntry.addressed_to_client_note || '';
 
   return (
     <InvoiceItemCard
@@ -61,6 +69,15 @@ export default function InvoiceRow({
           {item.direction === 'out' ? 'To' : 'From'}{' '}
           <span className="font-semibold text-foreground">{partyName}</span>
         </p>
+      )}
+
+      {addressedToClient && (
+        <span
+          title={addressedNote || undefined}
+          className="inline-flex w-fit items-center rounded-full bg-sky-100 px-1.5 py-0.5 text-[10px] font-semibold text-sky-700 dark:bg-sky-900/30 dark:text-sky-300"
+        >
+          Addressed to client — insurer's invoice
+        </span>
       )}
 
       {!isDocument && (

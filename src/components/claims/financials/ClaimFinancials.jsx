@@ -411,6 +411,7 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
   // the customer's VAT & Excess Invoice at the same time.
   const handleReviewConfirm = async ({
     figures, corrections, accepted, useAsRepairCost, acceptInvoiceTotal, requestReinvoice, fileVatExcess,
+    addressedToClient,
   }) => {
     if (!review) return;
     const { item } = review;
@@ -418,7 +419,11 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
     // The invoice's own split of the repair, where the document prints one: each share
     // is measured against its own half of the authorisation, and the whole repair is
     // the invoice's own total rather than that total plus the customer's share again.
-    const split = splitFromFigures(figures);
+    // An invoice addressed to the client at the insurer's request is not split: the
+    // whole of it is the insurer's share of the repair.
+    const split = addressedToClient
+      ? { insurer: null, customer: null, total }
+      : splitFromFigures(figures);
 
     // The repairer's invoice is settled against the insurer's share of the authorised
     // repair — the authorised amount ex VAT, plus VAT only where the customer isn't
@@ -447,7 +452,7 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
     // The same document, filed as the customer's own invoice too, where they are who we
     // handle the VAT and excess for: the share the invoice puts on them is exactly what
     // the VAT & Excess Invoice In bills, so the one copy serves both.
-    const customerShare = toNum(figures.payable_customer);
+    const customerShare = addressedToClient ? 0 : toNum(figures.payable_customer);
     const vatExcessItem = fileVatExcess && customerShare > 0
       ? claimInvoiceItem(INVOICE_ITEMS.find((i) => i.key === VAT_EXCESS_INVOICE_KEY), claim)
       : null;
@@ -459,6 +464,7 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
         file_name: review.fileName,
         repair_cost: repairCost,
         reinvoice,
+        addressed_to_client: addressedToClient || null,
       });
       if (vatExcessItem) {
         await docs.attachFile(vatExcessItem, { file_url: review.fileUrl, file_name: review.fileName });
@@ -495,6 +501,15 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
       buildReviewLog({ item, figures, corrections, accepted }).forEach((entry) => {
         logActivity({ parentId: claim.id, parentType: 'Claim', user: currentUser, ...entry });
       });
+      if (addressedToClient) {
+        logActivity({
+          parentId: claim.id,
+          parentType: 'Claim',
+          action: 'Financials Updated',
+          description: `${item.label}: addressed to the client at the insurer's request — ${addressedToClient}. The whole invoice of ${fmtGBP(total)} is treated as the insurer's share of the repair and checked against it.`,
+          user: currentUser,
+        });
+      }
       if (vatExcessItem) {
         logActivity({
           parentId: claim.id,

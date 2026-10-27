@@ -29,6 +29,7 @@ import RepairCostFromInvoice, { repairCostOffer } from './RepairCostFromInvoice'
 import { isVatExcessItem, vatExcessCheck, vatExcessFigures } from './vatExcessReview';
 import InvoiceVsAuthority from './InvoiceVsAuthority';
 import {
+  FINAL_INVOICE_KEY,
   authorityWorkings,
   claimAuthorityExpectation,
   compareToAuthority,
@@ -36,6 +37,7 @@ import {
   missingExpectationText,
   splitFromFigures,
 } from './invoiceAuthorityCheck';
+import AddressedToClientField from './AddressedToClientField';
 
 /**
  * The check before an invoice is recorded: the document on the left, the figures
@@ -61,6 +63,11 @@ export default function InvoiceReviewModal({
   const [duplicate, setDuplicate] = useState(null);
   const [repairCostChoice, setRepairCostChoice] = useState(null);
   const [authorityChoice, setAuthorityChoice] = useState(null);
+  // The insurer's invoice raised in the client's name at the insurer's request: the
+  // whole invoice is their share of the repair, and the note saying who asked is
+  // required before it can be saved that way.
+  const [addressedToClient, setAddressedToClient] = useState(false);
+  const [addressedNote, setAddressedNote] = useState('');
   // Whether this same invoice is to be filed as the customer's own invoice too, where
   // it carries their share of the repair. Left unset until the invoice has been read:
   // where it applies it starts ticked, and a deliberate untick overrides that.
@@ -96,6 +103,8 @@ export default function InvoiceReviewModal({
     setRepairCostChoice(null);
     setAuthorityChoice(null);
     setFileVatExcessChoice(null);
+    setAddressedToClient(false);
+    setAddressedNote('');
     setFocused('invoice_number');
 
     (async () => {
@@ -180,7 +189,10 @@ export default function InvoiceReviewModal({
   // invoice is held to.
   const vatExcessResult = vatExcessItem ? vatExcessCheck(figures, claim) : null;
   const arithmetic = vatExcessResult ? vatExcessResult.issues : checkArithmetic(figures);
-  const matchIssues = checkRightInvoice(figures, claim, item);
+  // Only the insurer's own invoice can be addressed to the client at the insurer's
+  // request; ticking it means the party it is written to is not the thing to check.
+  const clientAddressed = item?.key === FINAL_INVOICE_KEY && addressedToClient;
+  const matchIssues = checkRightInvoice(figures, claim, item, { addressedToClient: clientAddressed });
   const expected = expectedInvoice(item, claim);
   const invoiceTotal = toNum(figures.amount_total);
   const mismatch = expected.amount && invoiceTotal !== null && Math.abs(invoiceTotal - expected.amount) >= 0.01
@@ -198,8 +210,14 @@ export default function InvoiceReviewModal({
   // The invoice's own split of the repair, where the document prints one: its two
   // shares are checked against their own halves of the authorisation, and the whole
   // repair is the invoice's own total — never that total plus the customer's share a
-  // second time.
-  const split = useMemo(() => splitFromFigures(figures), [figures]);
+  // second time. An invoice addressed to the client at the insurer's request is not
+  // split at all: the whole of it is the insurer's share.
+  const split = useMemo(
+    () => (clientAddressed
+      ? { insurer: null, customer: null, total: toNum(figures.amount_total) }
+      : splitFromFigures(figures)),
+    [figures, clientAddressed]
+  );
 
   // The whole repair set against the repair cost already on the claim: it fills the
   // figure in where there is none, and is flagged where it differs.
@@ -252,7 +270,10 @@ export default function InvoiceReviewModal({
     && unreviewed.length === 0
     && mismatchAccepted
     && !overAuthority
-    && !choiceNeeded;
+    && !choiceNeeded
+    // Ticking the option records why the insurer's invoice is in the client's name,
+    // so it can't be saved without the note.
+    && (!clientAddressed || addressedNote.trim().length > 0);
 
   const handleConfirm = () => {
     const accepted = [];
@@ -277,6 +298,7 @@ export default function InvoiceReviewModal({
       acceptInvoiceTotal: authorityChoice === 'accept',
       requestReinvoice: reinvoiceRequested,
       fileVatExcess: fileVatExcessConfirmed,
+      addressedToClient: clientAddressed ? addressedNote.trim() : null,
     });
   };
 
@@ -399,6 +421,15 @@ export default function InvoiceReviewModal({
                 onChoice={setAuthorityChoice}
                 onReinvoiceEmail={onReinvoiceEmail}
                 emptyNote="Enter the invoice total and it is set against the insurer's share of the authorised amount."
+              />
+            )}
+
+            {item?.key === FINAL_INVOICE_KEY && (
+              <AddressedToClientField
+                checked={addressedToClient}
+                note={addressedNote}
+                onToggle={setAddressedToClient}
+                onNote={setAddressedNote}
               />
             )}
 

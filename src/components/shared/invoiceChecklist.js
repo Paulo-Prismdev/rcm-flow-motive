@@ -1146,6 +1146,16 @@ export function buildInvoiceItemPatch(item, claim, changes, ctx) {
     entry.not_applicable_reason = changes.not_applicable ? (changes.not_applicable_reason || null) : null;
   }
 
+  // An insurer's invoice written in the client's name at their request: the flag and
+  // the note saying who asked for it sit together on its entry, so the invoice reads
+  // as the insurer's own from then on.
+  if (has('addressed_to_client')) {
+    entry.addressed_to_client = !!changes.addressed_to_client;
+    entry.addressed_to_client_note = changes.addressed_to_client
+      ? (changes.addressed_to_client_note || entry.addressed_to_client_note || '')
+      : null;
+  }
+
   items[item.key] = entry;
   return { patch: { ...patch, invoice_tracker: { ...source, items } } };
 }
@@ -1197,6 +1207,13 @@ export function buildInvoiceReviewPatch(item, claim, figures, origin) {
     if (isStored(value)) extra[field.key] = round2(toNum(value));
   }
   if (Object.keys(extra).length > 0) entry.figures = { ...(entry.figures || {}), ...extra };
+  // An invoice the insurer had written in the client's name: recorded with the note
+  // that says so, so every later reading of this invoice treats the whole of it as
+  // the insurer's share.
+  if (origin?.addressed_to_client) {
+    entry.addressed_to_client = true;
+    entry.addressed_to_client_note = origin.addressed_to_client;
+  }
   if (origin?.file_url) {
     const at = new Date().toISOString();
     entry.details_source = {

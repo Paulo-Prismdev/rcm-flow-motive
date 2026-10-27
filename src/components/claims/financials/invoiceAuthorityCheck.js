@@ -193,6 +193,12 @@ export const hasSplit = (split) => toNum(split?.customer) !== null;
 /** The same three figures, read off the Final Insurer Invoice recorded on a claim. */
 export function claimInvoicedSplit(claim) {
   const entry = claim?.invoice_tracker?.items?.[FINAL_INVOICE_KEY] || {};
+  // An invoice the insurer had us write in the client's name: the whole of it is the
+  // insurer's share, so it is read as a single amount however the document's own
+  // "payable by" lines read.
+  if (entry.addressed_to_client) {
+    return { insurer: null, customer: null, total: recordedFinalInvoiceTotal(claim) };
+  }
   return {
     insurer: toNum(entry.figures?.payable_insurer),
     customer: toNum(entry.figures?.payable_customer),

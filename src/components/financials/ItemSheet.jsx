@@ -10,6 +10,7 @@ import { referrerReminderDue } from '@/components/claims/financials/referrerRequ
 import { isVatExcessItem } from '@/components/claims/financials/vatExcessReview';
 import InvoiceCalculation from '@/components/claims/financials/InvoiceCalculation';
 import InvoiceItemDetails from '@/components/claims/InvoiceItemDetails';
+import AddressedToClientOption from '@/components/claims/financials/AddressedToClientOption';
 import DocumentPreview from '@/components/shared/DocumentPreview';
 import { itemLight } from '@/components/shared/trafficLight';
 import LightDot from '@/components/shared/LightDot';
@@ -257,6 +258,8 @@ export default function ItemSheet({
             <MacValueRow label="Copy" value="Details recorded, copy not attached" />
           )}
         </MacGroup>
+
+        <AddressedToClientOption item={item} claim={claim} onChange={onChange} />
 
         {showCalc && <InvoiceCalculation state={state} />}
 
