@@ -28,6 +28,7 @@ export default function ItemSheet({
   item, state, files = [], claim, hold, isUploading,
   onClose, onPickUpload, onRemoveFile, onRenameFile, onViewFile,
   onRequest, onRequestReferrer, onUndoRequest, onAskPaid, onChange,
+  onIssueOrder, isIssuingOrder,
 }) {
   const [showCalc, setShowCalc] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
@@ -50,6 +51,11 @@ export default function ItemSheet({
   const reminderDue = canAskReferrer && referrerReminderDue(state);
   const canMarkPaid = !state.paid && !state.notApplicable && !state.awaiting && (!!state.date || state.requested);
   const dateLabel = state.date ? itemDateWord(item) : '';
+  // A document the system issues itself — the Final Purchase Order on a job the
+  // customer is paying for privately. There is no copy to upload and no figures to
+  // type: the order is generated, and what it says is shown here.
+  const isOrder = item.generatedBy === 'purchase_order';
+  const order = isOrder ? (state.purchaseOrder || null) : null;
 
   const unlock = () => onChange(
     { amount: null },
@@ -69,18 +75,31 @@ export default function ItemSheet({
     onChange({ not_applicable: true, not_applicable_reason: reason }, `${item.label} not available — ${reason}`);
   };
 
-  const primary = !file
-    ? { label: 'Upload', run: () => onPickUpload(item) }
-    : (canAsk && !state.requested)
-      ? { label: 'Request from accounts', run: () => onRequest(item, state), disabled: !!hold, title: hold }
-      : canMarkPaid
-        ? { label: 'Mark paid', run: () => onAskPaid('paid') }
-        : null;
+  const primary = isOrder
+    ? (order?.file_url
+      ? { label: 'Open order', run: () => onViewFile(order.file_url) }
+      : { label: 'Issue purchase order', run: onIssueOrder, disabled: isIssuingOrder })
+    : !file
+      ? { label: 'Upload', run: () => onPickUpload(item) }
+      : (canAsk && !state.requested)
+        ? { label: 'Request from accounts', run: () => onRequest(item, state), disabled: !!hold, title: hold }
+        : canMarkPaid
+          ? { label: 'Mark paid', run: () => onAskPaid('paid') }
+          : null;
 
   const actions = [];
-  if (file) actions.push({ label: 'View', icon: Eye, run: () => onViewFile(file.file_url) });
-  if (primary && primary.label !== 'Upload') actions.push({ label: 'Upload a copy', icon: FilePlus2, run: () => onPickUpload(item) });
-  if (canAsk && primary?.label !== 'Request from accounts') {
+  if (isOrder) {
+    if (order?.file_url) actions.push({ label: 'Open the PDF', icon: Eye, run: () => onViewFile(order.file_url) });
+    actions.push({
+      label: order ? 'Issue a revised order' : 'Issue the order',
+      icon: FilePlus2,
+      run: onIssueOrder,
+      disabled: isIssuingOrder,
+    });
+  }
+  if (!isOrder && file) actions.push({ label: 'View', icon: Eye, run: () => onViewFile(file.file_url) });
+  if (!isOrder && primary && primary.label !== 'Upload') actions.push({ label: 'Upload a copy', icon: FilePlus2, run: () => onPickUpload(item) });
+  if (!isOrder && canAsk && primary?.label !== 'Request from accounts') {
     actions.push({
       label: state.requested ? 'Request again' : 'Request from accounts',
       run: () => onRequest(item, state),
@@ -88,7 +107,7 @@ export default function ItemSheet({
       title: hold,
     });
   }
-  if (canAskReferrer) {
+  if (!isOrder && canAskReferrer) {
     actions.push({
       label: state.requested ? 'Request invoice from referrer again' : 'Request invoice from referrer',
       run: () => onRequestReferrer(item, state),
@@ -96,7 +115,7 @@ export default function ItemSheet({
       title: hold,
     });
   }
-  if (reminderDue) {
+  if (!isOrder && reminderDue) {
     actions.push({
       label: 'Send reminder',
       run: () => onRequestReferrer(item, state, 'reminder'),
@@ -104,18 +123,21 @@ export default function ItemSheet({
       title: hold,
     });
   }
-  if (canMarkPaid && primary?.label !== 'Mark paid') actions.push({ label: 'Mark paid', run: () => onAskPaid('paid') });
-  if (state.paid) {
+  if (!isOrder && canMarkPaid && primary?.label !== 'Mark paid') actions.push({ label: 'Mark paid', run: () => onAskPaid('paid') });
+  if (!isOrder && state.paid) {
     actions.push({ label: 'Change paid date', run: () => onAskPaid('correct') });
     actions.push({ label: 'Mark unpaid', icon: Undo2, run: () => onAskPaid('unpaid') });
   }
-  if (state.requested && onUndoRequest) actions.push({ label: 'Undo request', icon: Undo2, run: onUndoRequest });
-  if (state.locked) actions.push({ label: 'Unlock amount', icon: Unlock, run: unlock });
-  if (!isDocument) {
+  if (!isOrder && state.requested && onUndoRequest) actions.push({ label: 'Undo request', icon: Undo2, run: onUndoRequest });
+  if (!isOrder && state.locked) actions.push({ label: 'Unlock amount', icon: Unlock, run: unlock });
+  if (!isOrder && !isDocument) {
     actions.push({ label: showCalc ? 'Hide calculation' : 'Show calculation', icon: Calculator, run: () => setShowCalc((v) => !v) });
     actions.push({ label: detailsOpen ? 'Hide figures & dates' : 'Figures & dates', icon: Pencil, run: () => setDetailsOpen((v) => !v) });
   }
-  if (isRecommendedItem(item)) {
+  if (isOrder) {
+    // Nothing to switch off: the order applies to every job the customer is paying
+    // for privately, and it is the only thing authorising the repair.
+  } else if (isRecommendedItem(item)) {
     if (state.notApplicable) {
       actions.push({
         label: 'Mark as needed',
@@ -169,7 +191,7 @@ export default function ItemSheet({
             <LightDot lightKey={light.key} />
             <LightPill lightKey={light.key}>{light.label}</LightPill>
           </span>
-          {!isDocument && !state.awaiting && state.amount > 0 && (
+          {(!isDocument || isOrder) && !state.awaiting && state.amount > 0 && (
             <span className="text-[15px] font-semibold tabular-nums text-foreground">{fmtGBP(state.amount)}</span>
           )}
         </div>
@@ -194,6 +216,18 @@ export default function ItemSheet({
 
         <MacGroup>
           {party && <MacValueRow label={item.direction === 'out' ? 'To' : 'From'} value={party} />}
+          {isOrder && (
+            <>
+              <MacValueRow
+                label="Order"
+                value={order?.number || 'Not issued yet'}
+                caption={order?.superseded ? 'Superseded by the order issued after it' : undefined}
+              />
+              <MacValueRow label="Ex VAT" value={fmtGBP(state.ex)} />
+              <MacValueRow label="VAT (20%)" value={fmtGBP(state.vat)} />
+              <MacValueRow label="Total inc VAT" value={fmtGBP(state.total)} />
+            </>
+          )}
           {!isDocument && (
             <MacValueRow
               label="Amount"
@@ -229,8 +263,23 @@ export default function ItemSheet({
 
         {detailsOpen && <InvoiceItemDetails item={item} state={state} onChange={onChange} onAskPaid={onAskPaid} />}
 
-        <MacGroup title={files.length === 1 ? 'File' : `Files (${files.length})`}>
-          {files.length === 0 ? (
+        <MacGroup title={isOrder ? 'Order PDF' : files.length === 1 ? 'File' : `Files (${files.length})`}>
+          {isOrder ? (
+            <MacRow className="gap-2">
+              {order?.file_url ? (
+                <>
+                  <span className="min-w-0 flex-1 truncate text-[13px] text-foreground">
+                    {order.file_name || `${order.number}.pdf`}
+                  </span>
+                  <MacButton onClick={() => onViewFile(order.file_url)}>Open</MacButton>
+                </>
+              ) : (
+                <span className="text-[11px] text-mac-muted">
+                  No order issued yet — the PDF is generated against the job's figure.
+                </span>
+              )}
+            </MacRow>
+          ) : files.length === 0 ? (
             <MacRow>
               <span className="text-[11px] text-mac-muted">
                 {isDocument ? 'No copy attached yet.' : 'No copy attached yet — upload one and the figures are read off it.'}
