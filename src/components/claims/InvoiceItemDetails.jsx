@@ -3,6 +3,7 @@ import { Check, Lock, Pencil } from 'lucide-react';
 import { fmtGBP } from '@/components/shared/creditRepairRates';
 import { formatInvoiceDay, isInvoiceDocument, itemDateWord } from '@/components/shared/invoiceChecklist';
 import FigureField from './financials/FigureField';
+import { isVatExcessItem } from './financials/vatExcessReview';
 
 /**
  * The figures behind an invoice — its number, amount and the date it went out or
@@ -113,7 +114,9 @@ export default function InvoiceItemDetails({ item, state, onChange, onAskPaid })
 
           {state.amount > 0 && (
             <p className="text-[10px] text-muted-foreground tabular-nums">
-              Ex VAT {fmtGBP(state.ex)} + VAT {fmtGBP(state.vat)}
+              {isVatExcessItem(item)
+                ? `Excess ${fmtGBP(state.ex)} + VAT on repair ${fmtGBP(state.vat)}`
+                : `Ex VAT ${fmtGBP(state.ex)} + VAT ${fmtGBP(state.vat)}`}
             </p>
           )}
         </>

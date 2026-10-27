@@ -36,7 +36,7 @@ export function AckRow({ title, detail, acked, onAck, onReject }) {
  * deliberately accepted.
  */
 export default function InvoiceReviewChecks({
-  arithmetic, matchIssues, duplicate, mismatch, requiredMissing, unreviewed,
+  arithmetic, workings, matchIssues, duplicate, mismatch, requiredMissing, unreviewed,
   accepted, reason, acked, onAck, onReason, onAcceptMismatch, onReject,
 }) {
   // Only what needs attention is shown here. The screen's verdict on the invoice is
@@ -104,6 +104,15 @@ export default function InvoiceReviewChecks({
               </button>
             </div>
           )}
+        </div>
+      )}
+
+      {workings && (
+        <div className="rounded-lg border border-green-300 dark:border-green-800 bg-green-50 dark:bg-green-900/20 p-2.5">
+          <p className="flex items-start gap-1.5 text-[11px] font-semibold text-green-700 dark:text-green-400">
+            <Check className="w-3.5 h-3.5 flex-shrink-0 mt-px" /> Excess and VAT checked against the claim
+          </p>
+          <p className="mt-1 pl-5 text-[11px] leading-snug text-green-800/90 dark:text-green-300/90">{workings}</p>
         </div>
       )}
 

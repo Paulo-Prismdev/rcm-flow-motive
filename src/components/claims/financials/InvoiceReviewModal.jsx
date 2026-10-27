@@ -26,6 +26,7 @@ import {
 } from './invoiceReview';
 import { isInvoiceDocument, isPrivatePayingClaim } from '@/components/shared/invoiceChecklist';
 import RepairCostFromInvoice, { repairCostOffer } from './RepairCostFromInvoice';
+import { isVatExcessItem, vatExcessCheck, vatExcessFigures } from './vatExcessReview';
 import InvoiceVsAuthority from './InvoiceVsAuthority';
 import {
   authorityWorkings,
@@ -67,7 +68,13 @@ export default function InvoiceReviewModal({
   // What this particular invoice carries: the standard set, the few a document
   // names for itself, and any figures read beside them — a salvage invoice's
   // storage charge and admin charges.
-  const fields = useMemo(() => invoiceFigures(item), [item]);
+  // A VAT & Excess invoice carries the same three amounts under different names —
+  // the excess, the VAT on the repair and the total.
+  const vatExcessItem = isVatExcessItem(item);
+  const fields = useMemo(() => {
+    const read = invoiceFigures(item);
+    return vatExcessItem ? vatExcessFigures(read) : read;
+  }, [item, vatExcessItem]);
 
   // Read the document once each time the screen opens.
   useEffect(() => {
@@ -167,7 +174,11 @@ export default function InvoiceReviewModal({
   const unreviewed = needsReviewKeys.filter((key) => !reviewed[key] && !touched[key]);
   const unreviewedLabels = unreviewed.map((key) => fields.find((f) => f.key === key)?.label || key);
 
-  const arithmetic = checkArithmetic(figures);
+  // The VAT & Excess invoice is checked against the policy excess and the VAT
+  // content of the repair, not by the 20%-of-the-excess rule that a normal VAT
+  // invoice is held to.
+  const vatExcessResult = vatExcessItem ? vatExcessCheck(figures, claim) : null;
+  const arithmetic = vatExcessResult ? vatExcessResult.issues : checkArithmetic(figures);
   const matchIssues = checkRightInvoice(figures, claim, item);
   const expected = expectedInvoice(item, claim);
   const invoiceTotal = toNum(figures.amount_total);
@@ -382,6 +393,7 @@ export default function InvoiceReviewModal({
 
             <InvoiceReviewChecks
               arithmetic={arithmetic}
+              workings={vatExcessResult?.workings || ''}
               matchIssues={matchIssues}
               duplicate={duplicate}
               mismatch={mismatch}
