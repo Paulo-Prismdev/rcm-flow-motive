@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import ItemActionMenu, { ActionRow, ActionDivider } from '@/components/shared/ItemActionMenu';
 import { fmtGBP } from '@/components/shared/creditRepairRates';
 import { TRACKER_TONES } from './trackerTones';
-import { isInvoiceDocument, isRecommendedItem } from '@/components/shared/invoiceChecklist';
+import { isInvoiceDocument, isRecommendedItem, itemDateWord } from '@/components/shared/invoiceChecklist';
 
 // The status button of one invoice: a light button edged in its status colour —
 // red until it has been raised or received, amber while it waits to be paid or
@@ -60,13 +60,13 @@ export function invoiceStatusLabel(item, state) {
   if (state.awaiting) return 'awaiting figures';
   if (isInvoiceDocument(item)) {
     if (state.awaitingCorrected) return 'awaiting corrected invoice';
-    if (state.received) return item.direction === 'in' ? 'received' : 'sent';
+    if (state.received) return itemDateWord(item).toLowerCase();
     if (isRecommendedItem(item)) return 'recommended';
     return state.dateRecordedNoCopy ? 'date recorded, copy not attached' : 'outstanding';
   }
   if (state.paid) return state.copyAttached ? 'paid' : 'paid · copy still needed';
   if (state.requested && !state.date) return 'requested';
-  if (state.date) return item.direction === 'in' ? 'received' : 'sent';
+  if (state.date) return itemDateWord(item).toLowerCase();
   return 'outstanding';
 }
 
@@ -81,7 +81,7 @@ export default function InvoiceItemCard({
   const [naReason, setNaReason] = useState('');
 
   const isDocument = isInvoiceDocument(item);
-  const dateLabel = item.dateLabel || (item.direction === 'in' ? 'Received' : 'Sent');
+  const dateLabel = itemDateWord(item);
   const toneKey = invoiceToneKey(item, state, step);
   const tone = TRACKER_TONES[toneKey];
   const statusLabel = invoiceStatusLabel(item, state);

@@ -1,6 +1,6 @@
 import React from 'react';
 import { fmtGBP } from '@/components/shared/creditRepairRates';
-import { formatInvoiceDay } from '@/components/shared/invoiceChecklist';
+import { formatInvoiceDay, itemDateWord } from '@/components/shared/invoiceChecklist';
 
 /**
  * The invoices and close-out papers a job no longer carries — the paperwork of a
@@ -15,7 +15,7 @@ export default function NoLongerRequired({ items = [], filesFor, onViewFile }) {
   const recorded = (item, state) => {
     const bits = [];
     if (state.amount > 0) bits.push(fmtGBP(state.amount));
-    const dateLabel = item.dateLabel || (item.direction === 'in' ? 'Received' : 'Sent');
+    const dateLabel = itemDateWord(item);
     if (state.date) bits.push(`${dateLabel} ${formatInvoiceDay(state.date)}`);
     if (state.paid) bits.push(state.paidDate ? `Paid ${formatInvoiceDay(state.paidDate)}` : 'Paid');
     else if (state.requested) {

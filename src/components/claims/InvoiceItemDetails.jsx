@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Check, Lock, Pencil } from 'lucide-react';
 import { fmtGBP } from '@/components/shared/creditRepairRates';
-import { formatInvoiceDay, isInvoiceDocument } from '@/components/shared/invoiceChecklist';
+import { formatInvoiceDay, isInvoiceDocument, itemDateWord } from '@/components/shared/invoiceChecklist';
 import FigureField from './financials/FigureField';
 
 /**
@@ -14,7 +14,7 @@ import FigureField from './financials/FigureField';
 export default function InvoiceItemDetails({ item, state, onChange, onAskPaid }) {
   const [editingKey, setEditingKey] = useState(null);
   const isDocument = isInvoiceDocument(item);
-  const dateLabel = item.dateLabel || (item.direction === 'in' ? 'Received' : 'Sent');
+  const dateLabel = itemDateWord(item);
   const followsCalculation = state.derived && !state.adjusted && !state.locked;
 
   const fieldEdit = (key) => ({

@@ -1,6 +1,6 @@
 import React from 'react';
 import { fmtGBP } from '@/components/shared/creditRepairRates';
-import { formatInvoiceDay, invoicePartyName } from '@/components/shared/invoiceChecklist';
+import { formatInvoiceDay, invoicePartyName, isInvoiceDocument } from '@/components/shared/invoiceChecklist';
 import { itemLight } from '@/components/shared/trafficLight';
 import LightDot from '@/components/shared/LightDot';
 import LightPill from '@/components/shared/LightPill';
@@ -52,7 +52,12 @@ export default function PaymentsPane({ step, claim, onOpenItem }) {
                   >
                     <td className="px-3 text-foreground">{item.label}</td>
                     <td className="px-3 text-mac-muted">{invoicePartyName(claim, item) || '—'}</td>
-                    <td className="px-3 text-mac-muted">{item.direction === 'in' ? 'In' : 'Out'}</td>
+                    {/* Every close-out paper is a copy that comes in to us, whichever way
+                        the invoice it copies is addressed, so only the invoices we raise
+                        ourselves read Out. */}
+                    <td className="px-3 text-mac-muted">
+                      {isInvoiceDocument(item) || item.direction === 'in' ? 'In' : 'Out'}
+                    </td>
                     <td className="px-3 text-right tabular-nums text-foreground">
                       {!state.awaiting && state.amount > 0 ? fmtGBP(state.amount) : '—'}
                     </td>
