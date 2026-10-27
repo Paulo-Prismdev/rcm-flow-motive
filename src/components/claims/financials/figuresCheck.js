@@ -62,8 +62,10 @@ export function figureSourceNote(claim, key) {
       const invoice = finalInvoiceTotal(claim);
       const sources = [];
       if (invoice !== null && value !== null && Math.abs(value - invoice) <= 0.05) sources.push('Final Insurer Invoice');
+      // Only the Final Authority is ever the authorised figure an invoice is worked
+      // from; the initial and supplementary authorities are records only.
       if (authority && value !== null && Math.abs(value - authority.gross) <= 0.05) {
-        sources.push(authority.final ? 'Final Authority' : 'authority');
+        sources.push('Final Authority');
       }
       return sources.length > 0 ? `from the ${sources.join(' and the ')}` : '';
     }

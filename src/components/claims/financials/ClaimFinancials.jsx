@@ -811,13 +811,28 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
 
   // The repairer's invoices against the authority, worked out from the figures the
   // claim already holds — so a change to the authority that leaves an invoice on
-  // file over it flags itself, with no stored state to go stale.
-  const finalInvoiceComparison = compareToAuthority(
-    finalInvoiceTotal(claim),
-    claimAuthorityExpectation(claim),
-    vatExcessAuthority,
-    claimInvoicedSplit(claim)
-  );
+  // file over it flags itself, with no stored state to go stale. Only the Final
+  // Authority is used: an invoice on file with none recorded yet says it is waiting
+  // for it, rather than being measured against the initial or supplementary figures.
+  const finalAuthorityExpectation = claimAuthorityExpectation(claim);
+  const finalInvoiceOnFile = finalInvoiceTotal(claim);
+  const finalInvoiceComparison = finalInvoiceOnFile !== null && !finalAuthorityExpectation
+    && !ctx.privatePaying && !ctx.totalLoss
+    ? {
+      status: 'waiting',
+      reason: 'no_final_authority',
+      insurerPart: finalInvoiceOnFile,
+      headline: {
+        tone: 'wait',
+        text: "Waiting for the Final Authority. This invoice is checked against the Final Authority, and none has been recorded on this claim yet — the initial and supplementary authorities are kept for the record and are not used for the check.",
+      },
+    }
+    : compareToAuthority(
+      finalInvoiceOnFile,
+      finalAuthorityExpectation,
+      vatExcessAuthority,
+      claimInvoicedSplit(claim)
+    );
 
   // The same two invoices added up against the claim's final repair cost, once
   // both copies are on file. Where the Final Insurer Invoice prints the customer's

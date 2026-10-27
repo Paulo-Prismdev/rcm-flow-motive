@@ -28,7 +28,7 @@ export default function FinalInvoiceAuthorityNote({
       <div className="flex flex-wrap items-center gap-2 rounded-[10px] border border-amber-300 bg-amber-50 px-3 py-2 dark:border-amber-700 dark:bg-amber-900/20">
         <AlertTriangle className="h-3.5 w-3.5 flex-shrink-0 text-amber-600 dark:text-amber-400" />
         <p className="min-w-[200px] flex-1 text-[11px] text-amber-800 dark:text-amber-200">
-          {comparison
+          {comparison?.expected != null
             ? `Awaiting a corrected ${label} — invoiced ${fmtGBP(comparison.insurerPart)} against the ${fmtGBP(comparison.expected)} the insurer's share of this repair comes to. A corrected copy at that amount clears this.`
             : `Awaiting a corrected ${label} from the repairer. A corrected copy clears this.`}
         </p>
@@ -63,9 +63,11 @@ export default function FinalInvoiceAuthorityNote({
       <div className="flex flex-wrap items-center gap-2 rounded-[10px] border border-border bg-muted/30 px-3 py-2">
         <Hourglass className="h-3.5 w-3.5 flex-shrink-0 text-muted-foreground" />
         <p className="min-w-[200px] flex-1 text-[11px] text-muted-foreground">
-          {split ? 'Insurer’s share' : 'Insurer invoice'} {fmtGBP(insurerPart)} — waiting for the policy excess. The excess
-          is TBC on authority, and the insurer's share of the repair can't be worked out until it is known. The invoice is
-          checked against it as soon as the excess is set.
+          {comparison.reason === 'no_final_authority'
+            ? `${label} ${fmtGBP(insurerPart)} — waiting for the Final Authority. Only the Final Authority is used for this check, and none has been recorded on this claim yet. It is checked as soon as one arrives.`
+            : <>{split ? 'Insurer’s share' : 'Insurer invoice'} {fmtGBP(insurerPart)} — waiting for the policy excess. The excess
+              is TBC on authority, and the insurer's share of the repair can't be worked out until it is known. The invoice is
+              checked against it as soon as the excess is set.</>}
         </p>
       </div>
     );
