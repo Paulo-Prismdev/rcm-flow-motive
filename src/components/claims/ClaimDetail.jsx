@@ -46,6 +46,7 @@ import ClaimVehicleForm from './ClaimVehicleForm';
 import ClaimCreditRepairForm from './ClaimCreditRepairForm';
 import CreditRepairRatesCard from './CreditRepairRatesCard';
 import CreditRepairInstructionModal from './CreditRepairInstructionModal';
+import PurchaseOrderDialog from './financials/PurchaseOrderDialog';
 import ClaimReferrerForm from './ClaimReferrerForm';
 import ClaimFinancials from './financials/ClaimFinancials';
 import { isTotalLossClaim } from '@/components/shared/totalLoss';
@@ -294,7 +295,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
   const [regenPdfUrl, setRegenPdfUrl] = useState(null);
   const [savedRegenToDocs, setSavedRegenToDocs] = useState(false);
   const [isSavingRegenToDocs, setIsSavingRegenToDocs] = useState(false);
-  const [isGeneratingPo, setIsGeneratingPo] = useState(false);
+  const [isPoDialogOpen, setIsPoDialogOpen] = useState(false);
   const [isCreditRepairInstructionOpen, setIsCreditRepairInstructionOpen] = useState(false);
 
   const [isBackorderedPartsModalOpen, setIsBackorderedPartsModalOpen] = useState(false);
@@ -893,23 +894,12 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
     generateClaimOverviewPdf(claim, linkedClient);
   };
 
-  const handleGeneratePurchaseOrder = async () => {
-    setIsGeneratingPo(true);
-    try {
-      const response = await base44.functions.invoke('generatePurchaseOrderPdf', {
-        claimId: claim.id,
-      });
-      const { file_url } = response.data;
-      if (!file_url) throw new Error('No file URL returned');
-      window.open(file_url, '_blank');
-      queryClient.invalidateQueries({ queryKey: ['claims'] });
-      queryClient.invalidateQueries({ queryKey: ['claim', claim.id] });
-    } catch (error) {
-      console.error('Error generating Purchase Order PDF:', error);
-      alert('Failed to generate Purchase Order. Please try again.');
-    } finally {
-      setIsGeneratingPo(false);
-    }
+  // The amount is checked before anything is generated, so the order is issued at a
+  // figure someone has seen rather than silently off the estimate.
+  const handlePurchaseOrderIssued = (order) => {
+    queryClient.invalidateQueries({ queryKey: ['claims'] });
+    queryClient.invalidateQueries({ queryKey: ['claim', claim.id] });
+    if (order?.file_url) window.open(order.file_url, '_blank');
   };
 
   const renderSelectedSection = () => {
@@ -1669,12 +1659,11 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={handleGeneratePurchaseOrder}
-                  disabled={isGeneratingPo}
+                  onClick={() => setIsPoDialogOpen(true)}
                   className="gap-2"
                 >
-                  <FileText className={`w-4 h-4 ${isGeneratingPo ? 'animate-pulse' : ''}`} />
-                  {isGeneratingPo ? 'Generating...' : 'Generate PO'}
+                  <FileText className="w-4 h-4" />
+                  Generate PO
                 </Button>
               </div>
             </div>
@@ -1818,6 +1807,13 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                 claim={claim}
                 isOpen={isCreditRepairInstructionOpen}
                 onClose={() => setIsCreditRepairInstructionOpen(false)}
+              />
+
+              <PurchaseOrderDialog
+                open={isPoDialogOpen}
+                onClose={() => setIsPoDialogOpen(false)}
+                claim={claim}
+                onIssued={handlePurchaseOrderIssued}
               />
 
               <ArchiveClaimDialog
