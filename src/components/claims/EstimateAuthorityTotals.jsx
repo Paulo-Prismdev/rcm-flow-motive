@@ -1,17 +1,19 @@
 import React from 'react';
 import { fmtGBP } from '@/components/shared/creditRepairRates';
-import { combinedTotalsRows } from '@/components/claims/documentFigures';
+import { latestTotalsRows } from '@/components/claims/documentFigures';
 
 /**
- * Every estimated and authorised figure the claim holds, each on its own line: what
- * was estimated first and what the estimate was later added to, the same for what was
- * authorised, and the Final Authority standing apart from both. Nothing is written
- * here — the lines are worked out from the claim's own fields and the figures read off
- * each document, so the initial, the supplementary and the final can never be confused
- * for one another.
+ * The estimated and authorised figures the claim holds, each on its own line. A
+ * supplementary figure is a revised total, so it is shown as the current figure with
+ * the initial it replaced kept underneath — never as two figures added together. The
+ * Final Authority sits on its own line: it is what the insurers' invoices are measured
+ * against, and the initial and supplementary authorities remain records only.
+ *
+ * Nothing is written here — the lines are worked out from the claim's own fields and the
+ * figures read off each document.
  */
 export default function EstimateAuthorityTotals({ claim, className }) {
-  const rows = combinedTotalsRows(claim);
+  const rows = latestTotalsRows(claim);
   if (rows.length === 0) return null;
 
   return (
@@ -24,31 +26,28 @@ export default function EstimateAuthorityTotals({ claim, className }) {
           <div className="flex items-baseline justify-between gap-3">
             <span className="text-[11px] text-muted-foreground">{row.label}</span>
             <span className="text-sm font-semibold tabular-nums">
-              {fmtGBP(row.total)}
-              {row.netTotal !== null && (
+              {row.current ? fmtGBP(row.current.gross) : '—'}
+              {row.current?.net != null && (
                 <span className="ml-1.5 text-[10px] font-normal text-muted-foreground">
-                  ({fmtGBP(row.netTotal)} ex VAT)
+                  ({fmtGBP(row.current.net)} ex VAT)
                 </span>
               )}
             </span>
           </div>
-          {(row.initial !== null || row.supplementary !== null) && (
+          {row.current && (
             <div className="text-[10px] leading-snug text-muted-foreground">
-              {row.initial !== null && <span>Initial {fmtGBP(row.initial)}</span>}
-              {row.supplementary !== null && (
+              {row.replaced ? (
                 <span>
-                  {row.initial !== null ? ' + ' : ''}Supplementary {fmtGBP(row.supplementary)}
-                  {row.combined !== null && (
-                    <span className="font-medium text-foreground"> = {fmtGBP(row.combined)} combined</span>
-                  )}
+                  Supplementary — replaces the initial {fmtGBP(row.replaced.gross)}
                 </span>
+              ) : (
+                <span>Initial{row.final !== null ? ' — kept for the record' : ''}</span>
               )}
             </div>
           )}
           {row.final !== null && (
             <div className="text-[10px] leading-snug text-muted-foreground">
               Final authority {fmtGBP(row.final)} — the figure the insurers' invoices are measured against
-              {(row.initial !== null || row.supplementary !== null) ? ', kept apart from the figures above' : ''}
             </div>
           )}
         </div>

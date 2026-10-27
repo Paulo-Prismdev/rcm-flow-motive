@@ -207,8 +207,20 @@ export default function InvoiceReviewModal({
 
   // The repairer's invoice against the insurer's own share of the authorised amount,
   // and an invoice over it can never be saved as the Final Insurer Invoice at all.
+  // Only the Final Authority is used: without one there is nothing to measure the
+  // invoice against, so the check says it is waiting for it rather than falling back
+  // on the initial or supplementary authorities, which are records only.
   const comparison = item?.setsRepairCost
-    ? compareToAuthority(invoiceTotal, expectation, vatExcess, split)
+    ? (expectation
+      ? compareToAuthority(invoiceTotal, expectation, vatExcess, split)
+      : {
+        status: 'waiting',
+        reason: 'no_final_authority',
+        headline: {
+          tone: 'wait',
+          text: "Waiting for the Final Authority. This invoice is checked against the Final Authority, and none has been recorded on this claim yet — the initial and supplementary authorities are kept for the record and are not used for the check.",
+        },
+      })
     : null;
   const overAuthority = comparison?.status === 'over';
   const reinvoiceRequested = authorityChoice === 'reinvoice';
@@ -385,9 +397,7 @@ export default function InvoiceReviewModal({
                 choice={authorityChoice}
                 onChoice={setAuthorityChoice}
                 onReinvoiceEmail={onReinvoiceEmail}
-                emptyNote={expectation === null
-                  ? "No final authority is on the claim yet — the insurer's share of the invoice is set against it as soon as one arrives."
-                  : "Enter the invoice total and it is set against the insurer's share of the authorised amount."}
+                emptyNote="Enter the invoice total and it is set against the insurer's share of the authorised amount."
               />
             )}
 

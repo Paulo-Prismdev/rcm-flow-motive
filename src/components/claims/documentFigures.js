@@ -436,12 +436,18 @@ export function buildDocumentPatch({
 }
 
 /**
- * Every authorised figure the claim holds, each on its own line: the initial and
- * supplementary authorities with their combined total, the estimate the same way, and
- * the final authority standing apart from them. Worked out from the claim's own fields
- * and its document records, so it is the same figure wherever it is shown.
+ * The estimated and authorised figures the claim holds, each on its own line, read the
+ * way the paperwork actually works: a supplementary figure is a REVISED total that
+ * replaces the initial one, not an amount added on top of it. So each line shows the
+ * latest figure as the current one — the supplementary where there is one, otherwise
+ * the initial — with the earlier figure kept underneath for the record, and no added-up
+ * "combined" total anywhere.
+ *
+ * The Final Authority stands on its own line beside them: it is the only authority the
+ * invoicing is measured against, and it never replaces or adds to the record of what was
+ * initially and supplementarily estimated and authorised.
  */
-export function combinedTotalsRows(claim) {
+export function latestTotalsRows(claim) {
   const records = claim?.invoice_tracker?.documents || {};
   const num = (v) => (toNum(v) === null ? null : round2(toNum(v)));
   const rows = [];
@@ -450,21 +456,22 @@ export function combinedTotalsRows(claim) {
     const first = num(initial);
     const extra = num(supplementary);
     const last = num(final);
-    const combined = (first === null && extra === null) ? null : round2((first || 0) + (extra || 0));
-    // The figure the job stands on: the Final Authority's where one has arrived, and
-    // otherwise the initial and supplementary figures added together.
-    const total = last !== null ? last : combined;
-    if (total === null) return;
-    const netFirst = num(initialNet);
-    const netExtra = num(supplementaryNet);
+    const hasFirst = first !== null && first !== 0;
+    const hasExtra = extra !== null && extra !== 0;
+    // The figure the line stands on: the supplementary replaces the initial, so it is
+    // the current figure wherever it exists.
+    const current = hasExtra
+      ? { gross: extra, net: num(supplementaryNet), kind: 'supplementary' }
+      : hasFirst
+        ? { gross: first, net: num(initialNet), kind: 'initial' }
+        : null;
+    if (!current && last === null) return;
     rows.push({
       key,
       label,
-      initial: first,
-      supplementary: extra,
-      combined,
-      total,
-      netTotal: (netFirst === null && netExtra === null) ? null : round2((netFirst || 0) + (netExtra || 0)),
+      current,
+      // The figure it replaced, kept underneath for the record.
+      replaced: current?.kind === 'supplementary' && hasFirst ? { gross: first, net: num(initialNet) } : null,
       final: last,
     });
   };

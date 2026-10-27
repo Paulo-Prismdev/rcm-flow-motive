@@ -42,52 +42,29 @@ const VAT_NOT_REGISTERED = 'Non-VAT';
 export const vatStatusKnown = (status) => status === VAT_REGISTERED || status === VAT_NOT_REGISTERED;
 
 /**
- * Every authority the claim holds, as the single figure the repair was authorised at.
- * The Final Authority's own record is used where one has arrived; otherwise the initial
- * and the supplementary authorised totals are added together. Each authority keeps its
- * own figures — the initial and supplementary ones come off the documents read in the
- * claim's Documents panel — so none overwrites another, and this is the one place they
- * are read as the authorised total the insurer's invoice is measured against.
+ * The authorised figure the claim's invoicing is measured against: the Final Authority,
+ * and only the Final Authority. The initial and supplementary authorities are kept for
+ * the record — their dates in Key Dates, their figures on the estimate details — and are
+ * never read as the authorised total here: a supplementary authority is a revised total
+ * that replaces the initial one, not an amount added to it, and neither is a substitute
+ * for the Final Authority. Null until a Final Authority has arrived, which is what makes
+ * the invoice checks wait rather than measure themselves against an earlier figure.
  */
 export function authorityTotals(claim) {
   if (!claim) return null;
   const final = toNum(claim?.invoice_tracker?.items?.final_authority?.amount);
-  if (final !== null && final > 0) {
-    return { gross: round2(final), final: true, initial: null, supplementary: null, source: 'final' };
-  }
-  const documents = claim?.invoice_tracker?.documents || {};
-  const positive = (a, b) => {
-    const first = toNum(a);
-    if (first !== null && first > 0) return round2(first);
-    const second = toNum(b);
-    return second !== null && second > 0 ? round2(second) : 0;
-  };
-  const initial = positive(claim?.authority_cost_gross, documents.initial_authority?.gross);
-  const supplementary = positive(documents.supplementary_authority?.gross, claim?.supplementary_authority_cost_gross);
-  const gross = round2(initial + supplementary);
-  if (gross <= 0) return null;
-  return {
-    gross,
-    initial,
-    supplementary,
-    final: false,
-    source: supplementary > 0 ? 'combined' : 'initial',
-  };
+  if (final === null || final <= 0) return null;
+  return { gross: round2(final), final: true, source: 'final' };
 }
 
 /**
- * The contributions the authorities' "customer is responsible for" sections showed. The
- * Final Authority's own record is used where one has arrived — it is what the excess and
- * the authorised amount are settled from at close-out — and otherwise the initial and
- * supplementary authorities' contributions are added together.
+ * The contributions the Final Authority's "customer is responsible for" section showed —
+ * the Final Authority is the only authority the invoicing is settled from, so the initial
+ * and supplementary authorities' contributions are not counted anywhere here.
  */
 export const authorityContributions = (claim) => {
-  const items = claim?.invoice_tracker?.items || {};
-  const final = toNum(items.final_authority?.contributions);
-  if (final !== null) return final || 0;
-  const documents = claim?.invoice_tracker?.documents || {};
-  return round2((toNum(documents.initial_authority?.contributions) || 0)
-    + (toNum(documents.supplementary_authority?.contributions) || 0));
+  const final = toNum(claim?.invoice_tracker?.items?.final_authority?.contributions);
+  return final !== null ? final : 0;
 };
 
 /**
@@ -128,9 +105,10 @@ export function authorityExpectation({ gross, net, excess, contributions, vatSta
 }
 
 /**
- * The same, read off the claim's own records: the Final Authority where one has
- * arrived, and otherwise the initial plus supplementary authorised total. Null where
- * the job has no authority at all to measure the invoice against.
+ * The same, read off the claim's own records: the Final Authority, and nothing else —
+ * the initial and supplementary authorities are records only. Null until a Final
+ * Authority has arrived, so the invoice checks say they are waiting for it rather than
+ * measuring themselves against an earlier figure.
  */
 export function claimAuthorityExpectation(claim) {
   if (!claim || isPrivatePayingClaim(claim)) return null;
