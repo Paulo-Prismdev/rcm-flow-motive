@@ -87,8 +87,10 @@ export const purchaseOrderExpectation = (claim) => {
     excess: 0,
     excessTbc: false,
     contributions: 0,
-    // The whole repair is what was ordered, with nothing beside it.
+    // The whole repair is what was ordered, with nothing beside it: no excess, no
+    // insurer's share, no VAT of the customer's to take off, so the invoice is held
+    // against the order's total itself.
     expected: figures.total,
-    customerShare: null,
+    customerShare: 0,
   };
 };

@@ -235,24 +235,38 @@ Deno.serve(async (req) => {
     y += detailH + 8;
 
     // ═══════════════════════════════════════════
-    // AUTHORITY FIGURE (estimate total)
+    // ORDER VALUE — the amount with its VAT split shown
     // ═══════════════════════════════════════════
     doc.setFillColor(255, 248, 230);
     doc.setDrawColor(230, 180, 30);
     doc.setLineWidth(0.5);
-    doc.roundedRect(LM, y, MW, 16, 2, 2, 'FD');
+    doc.roundedRect(LM, y, MW, 27, 2, 2, 'FD');
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(9);
     doc.setTextColor(120, 90, 0);
-    doc.text('AUTHORITY FIGURE (Estimate Total)', LM + 5, y + 6.5);
-    doc.setFontSize(16);
-    doc.setTextColor(...NAVY);
-    doc.text(fmtMoney(authorityFigure), PW - LM - 5, y + 11, { align: 'right' });
-    doc.setFontSize(7.5);
+    doc.text('PURCHASE ORDER VALUE', LM + 6, y + 7);
+
+    // The three figures, each under its own heading: what the order is worth before
+    // VAT, the VAT on it, and the total the repair is authorised at.
+    const splitCols = [
+      { label: 'EX VAT', value: fmtMoney(poNet), x: LM + 8 },
+      { label: 'VAT (20%)', value: fmtMoney(poVat), x: LM + 62 },
+      { label: 'TOTAL INC VAT', value: fmtMoney(poTotal), x: LM + 116 },
+    ];
+    for (const col of splitCols) {
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(7);
+      doc.setTextColor(120, 90, 0);
+      doc.text(col.label, col.x, y + 14);
+      doc.setFontSize(12);
+      doc.setTextColor(...NAVY);
+      doc.text(col.value, col.x, y + 21);
+    }
     doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7.5);
     doc.setTextColor(120, 90, 0);
-    doc.text('This amount represents the authorised repair value based on the estimate.', LM + 5, y + 12.5);
-    y += 22;
+    doc.text('The total inc VAT is the amount this repair is authorised at.', LM + 8, y + 25);
+    y += 33;
 
     // ═══════════════════════════════════════════
     // AUTHORITY / INSTRUCTION NOTE
@@ -268,7 +282,7 @@ Deno.serve(async (req) => {
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(...DARK_TEXT);
     const noteLines = [
-      `Please proceed with the repair of the vehicle detailed above, authorised up to the authority figure of ${fmtMoney(authorityFigure)}.`,
+      `Please proceed with the repair of the vehicle detailed above, authorised up to the purchase order value of ${fmtMoney(poTotal)} (${fmtMoney(poNet)} ex VAT plus ${fmtMoney(poVat)} VAT).`,
       'Any additional work required beyond this figure must be authorised in writing by RCM Automotive prior to commencement.',
       'The vehicle registration and job number shown above must be quoted on all correspondence and invoices.',
     ];
@@ -314,16 +328,46 @@ Deno.serve(async (req) => {
       file_url = uploadResult.file_url;
       if (saveToClaim) {
         const currentFileUrls = Array.isArray(claim.file_urls) ? claim.file_urls : [];
+        // The order is recorded on the claim as well as filed with its documents:
+        // the newest is the Final Purchase Order the repairer's invoice is measured
+        // against, and every order before it is kept, marked superseded.
+        const orderRecord = {
+          number: poNumber,
+          date: today,
+          net: poNet,
+          vat: poVat,
+          total: poTotal,
+          file_url,
+          file_name: filename,
+          superseded: false,
+          generated_at: new Date().toISOString(),
+          by: gate.user?.email || '',
+        };
+        const tracker = {
+          ...(claim.invoice_tracker || {}),
+          purchase_orders: [
+            ...existingOrders.map((po: any) => ({ ...po, superseded: true })),
+            orderRecord,
+          ],
+        };
         await base44.asServiceRole.entities.Claim.update(claim.id, {
           file_urls: [...currentFileUrls, file_url],
+          invoice_tracker: tracker,
         });
+        claim.invoice_tracker = tracker;
       }
     } catch (uploadError) {
       console.error('Failed to upload PO PDF:', uploadError);
       return Response.json({ error: 'Failed to upload PDF: ' + uploadError.message }, { status: 500 });
     }
 
-    return Response.json({ file_url, filename, poNumber, authorityFigure });
+    return Response.json({
+      file_url,
+      filename,
+      poNumber,
+      authorityFigure,
+      purchaseOrder: { number: poNumber, date: today, net: poNet, vat: poVat, total: poTotal, file_url },
+    });
   } catch (error) {
     console.error('PO PDF generation error:', error.message);
     return Response.json({ error: error.message }, { status: 500 });

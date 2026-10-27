@@ -2,6 +2,7 @@ import { fmtGBP } from '@/components/shared/creditRepairRates';
 import { excessMode } from '@/components/shared/excessState';
 import { VAT_RATE, round2, toNum } from './invoiceReview';
 import { finalInvoiceLabel, isPrivatePayingClaim, recordedFinalInvoiceTotal } from '@/components/shared/invoiceChecklist';
+import { purchaseOrderExpectation } from '@/components/shared/purchaseOrders';
 
 /**
  * The check between the repairer's Final Insurer Invoice and the Final Authority.
