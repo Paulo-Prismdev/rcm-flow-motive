@@ -43,6 +43,7 @@ import {
 import { isTotalLossClaim } from './totalLoss';
 import {
   claimAuthorityExpectation,
+  claimInvoicedSplit,
   compareToAuthority,
   finalInvoiceTotal,
   vatExcessAuthorityPart,
@@ -436,7 +437,7 @@ export function buildInvoicingQueues(claims = [], thresholds = DEFAULT_QUEUE_DAY
       const comparison = compareToAuthority(invoiced, expectation, vatExcessAuthorityPart(ctx.vatExcess, {
         attached: !!vatRow?.state.copyAttached,
         amount: vatRow?.state?.amount,
-      }));
+      }), claimInvoicedSplit(claim));
       if (comparison?.status === 'over') {
         const finalLabel = summary.rows.find((r) => r.item.key === 'final_invoice')?.item.label || 'Final Insurer Invoice';
         buckets.warnings.push(queueRow(claim, { key: 'authority', label: `${finalLabel} vs authority` }, {

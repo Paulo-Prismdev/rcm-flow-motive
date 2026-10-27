@@ -31,7 +31,9 @@ export default function ReinvoiceRequestModal({ isOpen, onClose, claim, comparis
     setCc('');
     setSubject(built.subject);
     setBody(built.body);
-  }, [isOpen, comparison?.measured, comparison?.authority]);
+    // The figure being questioned is the insurer's share of the invoice, which is
+    // the invoice's whole total on an invoice billing them for all of it.
+  }, [isOpen, comparison?.insurerPart, comparison?.authority]);
 
   const handleSend = async () => {
     if (!to.trim()) {
@@ -46,7 +48,7 @@ export default function ReinvoiceRequestModal({ isOpen, onClose, claim, comparis
         cc: cc.trim(),
         subject,
         body,
-        invoice_total: comparison?.measured,
+        invoice_total: comparison?.insurerPart,
         authority_amount: comparison?.authority,
       });
       const data = res?.data || {};

@@ -165,6 +165,46 @@ export function vatExcessAuthorityPart(applies, filed) {
   return { part: filed?.attached ? toNum(filed.amount) : null };
 }
 
+/* ── The whole repair on one invoice, split between the payers ───────────── *
+ * Repairers commonly bill the whole repair on a single invoice and split it on the
+ * document: the full total, then an "amount payable by" line for the insurer and
+ * another for the customer. Read as the total alone that invoice contradicts itself
+ * — the insurer's share of it looks like an over-invoice, the customer's half gets
+ * counted into the repair cost a second time, and the invoice's own arithmetic still
+ * adds up, so one check objects while another says everything matches.
+ *
+ * So where the invoice prints that split the two shares are read beside the total
+ * and each is measured against its own half of the authorisation: the insurer's
+ * share against the insurer's share, the customer's against theirs, and the full
+ * total against the authorised amount, which it can never be more than. The whole
+ * repair is then the invoice's own total — its two halves together, never the total
+ * plus the customer's share again.
+ *
+ * It is the customer's line that makes an invoice a split one: an invoice carrying
+ * just the insurer's amount is billing the insurer for the whole of it, and is read
+ * exactly as it always was.
+ */
+
+/** The figures an invoice prints when it splits its total between the payers. */
+export const splitFromFigures = (figures = {}) => ({
+  insurer: toNum(figures?.payable_insurer),
+  customer: toNum(figures?.payable_customer),
+  total: toNum(figures?.amount_total),
+});
+
+/** Whether the invoice splits its total: a customer's share printed beside the insurer's. */
+export const hasSplit = (split) => toNum(split?.customer) !== null;
+
+/** The same three figures, read off the Final Insurer Invoice recorded on a claim. */
+export function claimInvoicedSplit(claim) {
+  const entry = claim?.invoice_tracker?.items?.[FINAL_INVOICE_KEY] || {};
+  return {
+    insurer: toNum(entry.figures?.payable_insurer),
+    customer: toNum(entry.figures?.payable_customer),
+    total: recordedFinalInvoiceTotal(claim),
+  };
+}
+
 /**
  * The insurer's invoice against what the authority says it should be. `status` is
  * 'match' within the rounding tolerance, 'under' where the repairer's invoice asks
@@ -172,33 +212,82 @@ export function vatExcessAuthorityPart(applies, filed) {
  * is never allowed), and 'waiting' where the customer's excess is still TBC on
  * authority and the insurer's share cannot be worked out until it is known.
  *
- * `fullCost` is the whole repair as actually invoiced — the insurer's invoice plus
- * what the customer pays the repairer — and `fullDifference` is how far that is from
- * the authorised total, which is what it should come to.
+ * `fullCost` is the whole repair as actually invoiced — a split invoice's own total,
+ * or the insurer's invoice plus what the customer pays the repairer — and
+ * `fullDifference` is how far that is from the authorised total, which is what it
+ * should come to.
+ *
+ * `split` is the invoice's own split of the repair where the document prints one.
+ * `checks` are the individual checks the split is held to, each with a tick or a
+ * cross, and `headline` is the most serious of them, so a screen can show one
+ * verdict rather than two that disagree.
  */
-export function compareToAuthority(insurerPart, expectation, vatExcess = null) {
-  const insurer = toNum(insurerPart);
-  if (!expectation || insurer === null) return null;
+export function compareToAuthority(insurerPart, expectation, vatExcess = null, split = null) {
+  const invoiceTotal = toNum(insurerPart);
+  if (!expectation || invoiceTotal === null) return null;
+
+  const onSplit = hasSplit(split);
+  const splitInsurer = toNum(split?.insurer);
+  const splitCustomer = toNum(split?.customer);
+  // What the insurer is billed on this invoice: the figure it prints payable by
+  // them, and where it prints only the customer's line, what is left of the total.
+  const insurer = onSplit ? (splitInsurer ?? round2(invoiceTotal - splitCustomer)) : invoiceTotal;
+  // The whole repair as the invoice reads it. A split invoice's own total is its two
+  // halves together; an invoice billing the insurer on its own has the customer's
+  // share of the repair beside it.
+  const fullCost = onSplit ? invoiceTotal : round2(insurer + expectation.customerShare);
+
+  // The full total against the authorised amount: it can never be more, and that
+  // holds whatever the customer's excess turns out to be, so it is checked even
+  // while the excess is still TBC on authority.
+  const totalDifference = onSplit ? round2(invoiceTotal - expectation.gross) : 0;
+  const totalOver = onSplit && totalDifference > AUTHORITY_TOLERANCE;
+  const totalCheck = onSplit ? {
+    key: 'total',
+    label: 'The full repair against the authorised total',
+    ok: !totalOver,
+    detail: totalOver
+      ? `The invoice comes to ${fmtGBP(invoiceTotal)}, ${fmtGBP(totalDifference)} over the ${fmtGBP(expectation.gross)} the repair was authorised at — the full repair can never be more than was authorised.`
+      : `The invoice's ${fmtGBP(invoiceTotal)} is within the ${fmtGBP(expectation.gross)} the repair was authorised at${totalDifference < -AUTHORITY_TOLERANCE ? `, ${fmtGBP(Math.abs(totalDifference))} under it` : ''}.`,
+  } : null;
+
+  const shared = {
+    insurerPart: insurer,
+    measured: invoiceTotal,
+    split: onSplit ? { insurer, customer: splitCustomer, total: invoiceTotal } : null,
+    invoicedCustomer: onSplit ? splitCustomer : null,
+    expectation,
+    authority: expectation.gross,
+    fullCost,
+    totalDifference,
+  };
+
   if (expectation.excessTbc) {
     return {
-      status: 'waiting',
-      reason: 'excess_tbc',
-      insurerPart: insurer,
-      expectation,
+      ...shared,
+      status: totalOver ? 'over' : 'waiting',
+      reason: totalOver ? 'total_over' : 'excess_tbc',
+      overReason: totalOver ? 'total' : null,
       expected: null,
-      authority: expectation.gross,
       customerShare: null,
       difference: null,
-      fullCost: null,
-      fullDifference: null,
+      fullDifference: onSplit ? totalDifference : null,
       shareCheck: null,
+      checks: totalCheck ? [totalCheck] : [],
+      headline: totalOver
+        ? { tone: 'block', text: totalCheck.detail }
+        : {
+          tone: 'wait',
+          text: `Waiting for the policy excess. The excess is TBC on authority, and the insurer's share of the repair — the authorised ${fmtGBP(expectation.net)} ex VAT less the customer's excess — can't be worked out until it is known. The invoice of ${fmtGBP(insurer)} is checked against it as soon as the excess is set.`,
+        },
     };
   }
 
   const difference = round2(insurer - expectation.expected);
-  const status = Math.abs(difference) <= AUTHORITY_TOLERANCE ? 'match' : difference < 0 ? 'under' : 'over';
-  const fullCost = round2(insurer + expectation.customerShare);
-  const fullDifference = round2(fullCost - expectation.gross);
+  const insurerStatus = Math.abs(difference) <= AUTHORITY_TOLERANCE ? 'match' : difference < 0 ? 'under' : 'over';
+  const status = totalOver || insurerStatus === 'over' ? 'over' : insurerStatus;
+  const overReason = totalOver ? 'total' : insurerStatus === 'over' ? 'insurer' : null;
+
   const onFile = toNum(vatExcess?.part);
   const shareCheck = onFile === null
     ? null
@@ -209,20 +298,81 @@ export function compareToAuthority(insurerPart, expectation, vatExcess = null) {
       agrees: Math.abs(round2(onFile - expectation.customerShare)) <= AUTHORITY_TOLERANCE,
     };
 
+  const customerDifference = onSplit ? round2(splitCustomer - expectation.customerShare) : null;
+  const sharesSum = onSplit ? round2(insurer + splitCustomer) : null;
+  const sharesOk = onSplit ? Math.abs(round2(sharesSum - invoiceTotal)) <= AUTHORITY_TOLERANCE : null;
+
+  const checks = [];
+  if (onSplit) {
+    checks.push({
+      key: 'insurer',
+      label: "The insurer's share",
+      ok: insurerStatus === 'match',
+      detail: insurerStatus === 'match'
+        ? `${fmtGBP(insurer)} payable by the insurer — what the insurer's share of this repair comes to.`
+        : `${fmtGBP(insurer)} payable by the insurer, against the ${fmtGBP(expectation.expected)} the insurer's share of this repair comes to — ${fmtGBP(Math.abs(difference))} ${difference < 0 ? 'under' : 'over'}.`,
+    });
+    const terms = customerShareTerms(expectation);
+    checks.push({
+      key: 'customer',
+      label: "The customer's share",
+      ok: Math.abs(customerDifference) <= AUTHORITY_TOLERANCE,
+      detail: `${fmtGBP(splitCustomer)} payable by the customer${terms.length ? ` (${terms.join(' + ')})` : ''}, against the ${fmtGBP(expectation.customerShare)} their share of this repair comes to${Math.abs(customerDifference) <= AUTHORITY_TOLERANCE ? '' : ` — ${fmtGBP(Math.abs(customerDifference))} ${customerDifference < 0 ? 'under' : 'over'}`}.`,
+    });
+    checks.push(totalCheck);
+    checks.push({
+      key: 'split',
+      label: 'The two shares against the invoice total',
+      ok: sharesOk,
+      detail: sharesOk
+        ? `${fmtGBP(insurer)} for the insurer plus ${fmtGBP(splitCustomer)} for the customer come to the ${fmtGBP(invoiceTotal)} invoiced.`
+        : `The two shares come to ${fmtGBP(sharesSum)}, but the invoice total reads ${fmtGBP(invoiceTotal)} — ${fmtGBP(Math.abs(round2(sharesSum - invoiceTotal)))} apart.`,
+    });
+  }
+  // A split invoice's own checks are what the screen lists, so the VAT & Excess
+  // Invoice is one of them. On an invoice printed as a single amount it is said
+  // beside the customer's share instead, as it always was.
+  if (shareCheck && onSplit) {
+    checks.push({
+      key: 'vat_excess',
+      label: 'The VAT & Excess Invoice',
+      ok: shareCheck.agrees,
+      detail: shareCheck.agrees
+        ? `The VAT & Excess Invoice of ${fmtGBP(shareCheck.invoice)} agrees with the customer's share of ${fmtGBP(shareCheck.expected)}.`
+        : `The VAT & Excess Invoice reads ${fmtGBP(shareCheck.invoice)}, but the customer's share of this repair is ${fmtGBP(shareCheck.expected)} — ${fmtGBP(Math.abs(shareCheck.difference))} apart.`,
+    });
+  }
+
+  // One headline: a blocking result first, then the first check that doesn't hold,
+  // and plain agreement only when there is nothing left to say.
+  const failing = checks.filter((c) => !c.ok);
+  const tone = status === 'over' ? 'block' : (insurerStatus === 'under' || failing.length > 0) ? 'warn' : 'ok';
+  const headline = {
+    tone,
+    text: status === 'over'
+      ? (overReason === 'total'
+        ? totalCheck.detail
+        : `${expectationWorkings(expectation)}. The insurer's share of ${fmtGBP(insurer)} is ${fmtGBP(Math.abs(difference))} over that — a repairer can't invoice the insurer more than its share of the authorised amount.`)
+      : insurerStatus === 'under'
+        ? `${expectationWorkings(expectation)}. ${onSplit ? `The invoice puts ${fmtGBP(insurer)} on the insurer` : `The invoice total of ${fmtGBP(insurer)}`}, ${fmtGBP(Math.abs(difference))} under that.`
+        : failing.length > 0
+          ? failing[0].detail
+          : onSplit
+            ? `The invoice splits the full repair of ${fmtGBP(invoiceTotal)} the way the authorisation does: ${fmtGBP(insurer)} payable by the insurer and ${fmtGBP(splitCustomer)} by the customer.`
+            : `${expectationWorkings(expectation)} — the invoice total of ${fmtGBP(insurer)} matches.`,
+  };
+
   return {
+    ...shared,
     status,
-    insurerPart: insurer,
-    expectation,
-    // Kept so a screen that says "the invoice total" still means what was invoiced,
-    // and every reading of the insured part reads the same figure.
-    measured: insurer,
+    overReason,
     expected: expectation.expected,
-    authority: expectation.gross,
     customerShare: expectation.customerShare,
     difference,
-    fullCost,
-    fullDifference,
+    fullDifference: round2(fullCost - expectation.gross),
     shareCheck,
+    checks,
+    headline,
   };
 }
 
@@ -274,13 +424,19 @@ export function authorityWorkings(comparison) {
   return expectationWorkings(comparison?.expectation);
 }
 
-/** What the customer pays the repairer themselves, in words. */
-export function customerShareWorkings(expectation) {
-  if (!expectation || expectation.excessTbc) return '';
+/** The parts the customer's own share of the repair is made of, in words. */
+function customerShareTerms(expectation) {
   const terms = [];
   if (expectation.vatRegistered && expectation.vat) terms.push(`${fmtGBP(expectation.vat)} VAT`);
   if (expectation.excess) terms.push(`${fmtGBP(expectation.excess)} excess`);
   if (expectation.contributions) terms.push(`${fmtGBP(expectation.contributions)} contributions`);
+  return terms;
+}
+
+/** What the customer pays the repairer themselves, in words. */
+export function customerShareWorkings(expectation) {
+  if (!expectation || expectation.excessTbc) return '';
+  const terms = customerShareTerms(expectation);
   if (terms.length === 0) return 'Customer pays the repairer: nothing — no VAT, no excess';
   return `Customer pays repairer: ${terms.join(' + ')} = ${fmtGBP(expectation.customerShare)}`;
 }
@@ -288,11 +444,27 @@ export function customerShareWorkings(expectation) {
 /** The whole repair, as it is actually invoiced, against the authorised total. */
 export function fullCostWorkings(comparison) {
   if (!comparison || comparison.fullCost === null) return '';
-  const { insurerPart, customerShare, fullCost, authority, fullDifference } = comparison;
+  const { split, insurerPart, customerShare, fullCost, authority, fullDifference } = comparison;
   const against = Math.abs(fullDifference) <= AUTHORITY_TOLERANCE
     ? `in line with the authorised ${fmtGBP(authority)}`
     : `${fmtGBP(Math.abs(fullDifference))} ${fullDifference < 0 ? 'under' : 'over'} the authorised ${fmtGBP(authority)}`;
-  return `Full repair cost ${fmtGBP(insurerPart)} insurer invoice + ${fmtGBP(customerShare)} customer = ${fmtGBP(fullCost)} — ${against}`;
+  const sum = split
+    ? `${fmtGBP(split.insurer)} insurer + ${fmtGBP(split.customer)} customer on the invoice`
+    : `${fmtGBP(insurerPart)} insurer invoice + ${fmtGBP(customerShare)} customer`;
+  return `Full repair cost ${sum} = ${fmtGBP(fullCost)} — ${against}`;
+}
+
+/**
+ * The whole repair in a few words, for a claim's own history: how the invoice that
+ * supplied it reads. A split invoice carries both halves in its total, so its total
+ * is the repair — naming them apart is what says so.
+ */
+export function repairCostWords(comparison) {
+  if (!comparison) return '';
+  const { split, insurerPart, customerShare, fullCost } = comparison;
+  return split
+    ? `the invoice's own full total of ${fmtGBP(fullCost)}, which it splits into ${fmtGBP(split.insurer)} for the insurer and ${fmtGBP(split.customer)} for the customer`
+    : `the insurer's invoice of ${fmtGBP(insurerPart)} plus the customer's ${fmtGBP(customerShare)}`;
 }
 
 /** What the customer's share is billed on, where we collect the VAT and excess. */
@@ -322,9 +494,15 @@ export function buildReinvoiceEmail({ claim, comparison, user }) {
     expectation?.contributions ? `${fmtGBP(expectation.contributions)} of it is the customer's contribution` : null,
   ].filter(Boolean).join(', ');
 
+  // An invoice that splits the repair between its payers is spoken about by the
+  // share it puts on the insurer, which is the figure being questioned.
+  const invoiced = comparison?.split
+    ? `the insurer's share of ${fmtGBP(insurerPart)} on the invoice`
+    : `the invoice total of ${fmtGBP(insurerPart)}`;
+
   const why = status === 'over'
-    ? `We're not able to accept it as it stands: the invoice total of ${fmtGBP(insurerPart)} is ${fmtGBP(Math.abs(comparison.difference))} over the ${fmtGBP(expected)} the insurer's part of this repair comes to — ${basis}. A repairer can't invoice more than was authorised.`
-    : `We're not able to accept it as it stands: the invoice total of ${fmtGBP(insurerPart)} is ${fmtGBP(Math.abs(comparison.difference))} under the ${fmtGBP(expected)} the insurer's part of this repair comes to — ${basis}.`;
+    ? `We're not able to accept it as it stands: ${invoiced} is ${fmtGBP(Math.abs(comparison.difference))} over the ${fmtGBP(expected)} the insurer's part of this repair comes to — ${basis}. A repairer can't invoice more than was authorised.`
+    : `We're not able to accept it as it stands: ${invoiced} is ${fmtGBP(Math.abs(comparison.difference))} under the ${fmtGBP(expected)} the insurer's part of this repair comes to — ${basis}.`;
 
   const lines = [
     'Hi,',

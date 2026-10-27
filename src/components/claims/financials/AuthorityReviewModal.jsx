@@ -25,7 +25,7 @@ import {
   excessCheck,
 } from './authorityReview';
 import { fetchSourceSnippets, snippetsFromExtraction } from './invoiceReview';
-import { authorityWorkings, compareToAuthority, finalInvoiceTotal } from './invoiceAuthorityCheck';
+import { authorityWorkings, claimInvoicedSplit, compareToAuthority, finalInvoiceTotal } from './invoiceAuthorityCheck';
 import { finalInvoiceLabel } from '@/components/shared/invoiceChecklist';
 
 /**
@@ -139,7 +139,7 @@ export default function AuthorityReviewModal({
     [figures, claim, excessChoice, vatChoice]
   );
 
-  const comparison = compareToAuthority(finalInvoiceTotal(claim), expectation, vatExcess);
+  const comparison = compareToAuthority(finalInvoiceTotal(claim), expectation, vatExcess, claimInvoicedSplit(claim));
   const choiceNeeded = comparison?.status === 'under' && !authorityChoice;
 
   const canConfirm = status !== 'reading'

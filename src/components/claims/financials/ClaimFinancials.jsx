@@ -16,6 +16,9 @@ import {
   buildInvoiceReviewPatch,
   buildTrackerMetaPatch,
   claimHandlesVatExcess,
+  claimInvoiceItem,
+  INVOICE_ITEMS,
+  mergeInvoicePatches,
   computeInvoiceSummary,
   deriveInvoiceStatus,
   formatInvoiceDay,
@@ -57,7 +60,7 @@ import { buildStepMovedPastPatch, buildStepReopenPatch } from './financialStepSk
 import PendingStepBanner from './PendingStepBanner';
 import { resolveInvoiceParty } from './invoiceParty';
 import useClaimInvoiceDocs from './useClaimInvoiceDocs';
-import { buildReviewLog, toNum } from './invoiceReview';
+import { buildReviewLog, round2, toNum } from './invoiceReview';
 import {
   authorityExpectationFromReview,
   buildAuthorityLog,
@@ -66,9 +69,13 @@ import {
 } from './authorityReview';
 import {
   claimAuthorityExpectation,
+  claimInvoicedSplit,
   compareRepairCostSplit,
   compareToAuthority,
   finalInvoiceTotal,
+  repairCostWords,
+  splitFromFigures,
+  VAT_EXCESS_INVOICE_KEY,
   vatExcessAuthorityPart,
 } from './invoiceAuthorityCheck';
 import { buildFiguresCheckedPatch } from './figuresCheck';
@@ -389,24 +396,30 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
   // Nothing has touched the claim until this runs: the file is filed against the
   // invoice, its figures and number are recorded, the date marks it received or
   // sent — which locks the amount — and the history says what was read, changed
-  // and accepted. The Final Insurer Invoice's total can become the final repair cost.
+  // and accepted. The Final Insurer Invoice's total can become the final repair cost,
+  // and where that one invoice splits the repair between its payers it can be filed as
+  // the customer's VAT & Excess Invoice at the same time.
   const handleReviewConfirm = async ({
-    figures, corrections, accepted, useAsRepairCost, acceptInvoiceTotal, requestReinvoice,
+    figures, corrections, accepted, useAsRepairCost, acceptInvoiceTotal, requestReinvoice, fileVatExcess,
   }) => {
     if (!review) return;
     const { item } = review;
     const total = Number(figures.amount_total) || 0;
+    // The invoice's own split of the repair, where the document prints one: each share
+    // is measured against its own half of the authorisation, and the whole repair is
+    // the invoice's own total rather than that total plus the customer's share again.
+    const split = splitFromFigures(figures);
 
     // The repairer's invoice is settled against the insurer's share of the authorised
     // repair — the authorised amount ex VAT, plus VAT only where the customer isn't
     // registered, less their excess and any contribution — and the customer pays the
     // rest to the repairer themselves. Whichever choice settles it here, the figure
-    // that becomes the claim's final repair cost is the WHOLE repair: the insurer's
-    // invoice plus the customer's share, which is what every fee and invoice is worked
-    // out from.
+    // that becomes the claim's final repair cost is the WHOLE repair: a split
+    // invoice's own total, or the insurer's invoice plus the customer's share, which is
+    // what every fee and invoice is worked out from.
     const expectation = item.setsRepairCost ? claimAuthorityExpectation(claim) : null;
     const comparison = item.setsRepairCost
-      ? compareToAuthority(total, expectation, vatExcessAuthority)
+      ? compareToAuthority(total, expectation, vatExcessAuthority, split)
       : null;
     const reinvoice = requestReinvoice && comparison?.status === 'under'
       ? { invoice_total: comparison.insurerPart, authority: comparison.expected, by: paidBy }
@@ -418,17 +431,43 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
     const description = reinvoice
       ? `${item.label} recorded — invoice ${figures.invoice_number}, dated ${figures.invoice_date}, ${fmtGBP(comparison.insurerPart)} is ${fmtGBP(Math.abs(comparison.difference))} under the ${fmtGBP(comparison.expected)} the insurer's share of this repair comes to; a corrected invoice has been requested from the repairer`
       : repairCost
-        ? `${item.label} recorded — invoice ${figures.invoice_number}, dated ${figures.invoice_date}, ${fmtGBP(total)}; the whole repair set as the final repair cost, ${fmtGBP(repairCost)}${comparison ? ` (the insurer's invoice plus the customer's ${fmtGBP(comparison.customerShare)})` : ''}`
+        ? `${item.label} recorded — invoice ${figures.invoice_number}, dated ${figures.invoice_date}, ${fmtGBP(total)}; the whole repair set as the final repair cost, ${fmtGBP(repairCost)}${comparison ? ` (${repairCostWords(comparison)})` : ''}`
         : `${item.label} recorded — invoice ${figures.invoice_number}, dated ${figures.invoice_date}, ${fmtGBP(total)}`;
+
+    // The same document, filed as the customer's own invoice too, where they are who we
+    // handle the VAT and excess for: the share the invoice puts on them is exactly what
+    // the VAT & Excess Invoice In bills, so the one copy serves both.
+    const customerShare = toNum(figures.payable_customer);
+    const vatExcessItem = fileVatExcess && customerShare > 0
+      ? claimInvoiceItem(INVOICE_ITEMS.find((i) => i.key === VAT_EXCESS_INVOICE_KEY), claim)
+      : null;
 
     try {
       await docs.attachFile(item, { file_url: review.fileUrl, file_name: review.fileName });
-      const patch = buildInvoiceReviewPatch(item, claim, figures, {
+      let patch = buildInvoiceReviewPatch(item, claim, figures, {
         file_url: review.fileUrl,
         file_name: review.fileName,
         repair_cost: repairCost,
         reinvoice,
       });
+      if (vatExcessItem) {
+        await docs.attachFile(vatExcessItem, { file_url: review.fileUrl, file_name: review.fileName });
+        // The customer's share split into its own parts where the authority settled
+        // them: their excess and contributions are the amount excluding VAT, and the
+        // VAT is the VAT. Written as a single patch with the invoice above, so neither
+        // loses the other's tracker entry.
+        patch = mergeInvoicePatches(patch, buildInvoiceReviewPatch(vatExcessItem, claim, {
+          invoice_number: figures.invoice_number,
+          invoice_date: figures.invoice_date,
+          amount_total: customerShare,
+          amount_ex_vat: expectation && !expectation.excessTbc
+            ? round2((expectation.excess || 0) + (expectation.contributions || 0))
+            : '',
+          vat_amount: expectation && !expectation.excessTbc && expectation.vatRegistered
+            ? expectation.vat
+            : '',
+        }, { file_url: review.fileUrl, file_name: review.fileName }));
+      }
       // The salvage invoice is where a total loss job's storage share is settled:
       // the figure set in Settings is stamped on the claim as the invoice is
       // recorded, so the storage fee invoice — and every other reading of it — is
@@ -446,6 +485,15 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
       buildReviewLog({ item, figures, corrections, accepted }).forEach((entry) => {
         logActivity({ parentId: claim.id, parentType: 'Claim', user: currentUser, ...entry });
       });
+      if (vatExcessItem) {
+        logActivity({
+          parentId: claim.id,
+          parentType: 'Claim',
+          action: 'Financials Updated',
+          description: `${vatExcessItem.label} filed from the same invoice — the ${fmtGBP(customerShare)} the ${item.label} shows payable by the customer, which is what that invoice bills, so no separate copy is being chased.`,
+          user: currentUser,
+        });
+      }
       setReview(null);
       if (reinvoice) setReinvoice({ comparison });
     } catch (e) {
@@ -472,7 +520,7 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
     // insurer's share is what the Final Insurer Invoice already on file is measured
     // against.
     const expectation = authorityExpectationFromReview({ figures, claim, excessChoice, vatChoice });
-    const comparison = compareToAuthority(finalInvoiceTotal(claim), expectation, vatExcessAuthority);
+    const comparison = compareToAuthority(finalInvoiceTotal(claim), expectation, vatExcessAuthority, claimInvoicedSplit(claim));
     const reinvoice = requestReinvoice && comparison?.status === 'under'
       ? { invoice_total: comparison.insurerPart, authority: comparison.expected, by: paidBy }
       : null;
@@ -497,7 +545,7 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
         : excess.differs
           ? `; excess kept at ${excessChoice === 'authority' ? fmtGBP(excess.shown) : excess.storedLabel}`
           : '';
-    const decisionText = `${acceptTotal ? `; the whole repair of ${fmtGBP(acceptTotal)} set as the final repair cost (the insurer's invoice ${fmtGBP(comparison.insurerPart)} plus the customer's ${fmtGBP(comparison.customerShare)})` : ''}${reinvoice ? `; a corrected invoice requested from the repairer (invoiced ${fmtGBP(reinvoice.invoice_total)} against the ${fmtGBP(reinvoice.authority)} the insurer's share comes to)` : ''}`;
+    const decisionText = `${acceptTotal ? `; the whole repair of ${fmtGBP(acceptTotal)} set as the final repair cost (${repairCostWords(comparison)})` : ''}${reinvoice ? `; a corrected invoice requested from the repairer (invoiced ${fmtGBP(reinvoice.invoice_total)} against the ${fmtGBP(reinvoice.authority)} the insurer's share comes to)` : ''}`;
 
     try {
       await docs.attachFile(item, { file_url: authorityReview.fileUrl, file_name: authorityReview.fileName });
@@ -724,7 +772,8 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
   const finalInvoiceComparison = compareToAuthority(
     finalInvoiceTotal(claim),
     claimAuthorityExpectation(claim),
-    vatExcessAuthority
+    vatExcessAuthority,
+    claimInvoicedSplit(claim)
   );
 
   // The same two invoices added up against the claim's final repair cost, once
@@ -959,6 +1008,7 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
           party={review ? invoicePartyName(claim, review.item) : ''}
           fileUrl={review?.fileUrl}
           fileName={review?.fileName}
+          vatExcessFiled={!!vatExcessInState?.copyAttached}
           onConfirm={handleReviewConfirm}
           onReinvoiceEmail={handleReinvoiceFromReview}
         />

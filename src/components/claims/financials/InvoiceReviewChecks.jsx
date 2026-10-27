@@ -38,9 +38,13 @@ export function AckRow({ title, detail, acked, onAck, onReject }) {
 export default function InvoiceReviewChecks({
   arithmetic, matchIssues, duplicate, mismatch, requiredMissing, unreviewed,
   accepted, reason, acked, onAck, onReason, onAcceptMismatch, onReject,
+  authorityOk = true, withAuthority = false,
 }) {
   const hasChecks = arithmetic.length || matchIssues.length || duplicate?.length || mismatch;
-  const everythingFine = !hasChecks && requiredMissing.length === 0 && unreviewed.length === 0;
+  // The verdict on the invoice against the authority is part of this screen's verdict:
+  // an invoice that can't be saved is never announced as everything matching, so the
+  // green line only shows when every check on the screen holds.
+  const everythingFine = !hasChecks && requiredMissing.length === 0 && unreviewed.length === 0 && authorityOk;
 
   return (
     <div className="space-y-2">
@@ -50,7 +54,9 @@ export default function InvoiceReviewChecks({
             <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />
           </span>
           <p className="text-[11px] font-semibold text-green-700 dark:text-green-400">
-            The figures add up, the invoice matches this claim and the amount is what we expected.
+            {withAuthority
+              ? 'Everything checks out: the figures add up, the invoice is this claim’s, and the amounts agree with what was authorised.'
+              : 'The figures add up, the invoice matches this claim and the amount is what we expected.'}
           </p>
         </div>
       )}

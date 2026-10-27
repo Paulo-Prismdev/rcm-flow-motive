@@ -1275,3 +1275,26 @@ export function buildInvoiceRequestPatch(claim, itemKey, { requested, requested_
   items[itemKey] = entry;
   return { invoice_tracker: { ...source, items } };
 }
+
+/**
+ * Two invoice patches for one claim, written as one: where a single document is
+ * filed against two invoices at once, each patch carries its own tracker entry, and
+ * both are built from the claim as it stands — so applying them one after the other
+ * would have the second drop what the first recorded. The entries are merged here
+ * instead, with the claim's own fields from both, so nothing either patch wrote is
+ * lost.
+ */
+export function mergeInvoicePatches(...patches) {
+  const merged = { invoice_tracker: {} };
+  for (const patch of patches) {
+    if (!patch) continue;
+    const { invoice_tracker: tracker, ...fields } = patch;
+    merged.invoice_tracker = {
+      ...merged.invoice_tracker,
+      ...(tracker || {}),
+      items: { ...(merged.invoice_tracker.items || {}), ...(tracker?.items || {}) },
+    };
+    Object.assign(merged, fields);
+  }
+  return merged;
+}

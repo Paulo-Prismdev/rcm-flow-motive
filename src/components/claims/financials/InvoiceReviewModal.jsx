@@ -27,7 +27,13 @@ import {
 import { isInvoiceDocument, isPrivatePayingClaim } from '@/components/shared/invoiceChecklist';
 import RepairCostFromInvoice, { repairCostOffer } from './RepairCostFromInvoice';
 import InvoiceVsAuthority from './InvoiceVsAuthority';
-import { authorityWorkings, claimAuthorityExpectation, compareToAuthority } from './invoiceAuthorityCheck';
+import {
+  authorityWorkings,
+  claimAuthorityExpectation,
+  compareToAuthority,
+  hasSplit,
+  splitFromFigures,
+} from './invoiceAuthorityCheck';
 
 /**
  * The check before an invoice is recorded: the document on the left, the figures
@@ -36,6 +42,7 @@ import { authorityWorkings, claimAuthorityExpectation, compareToAuthority } from
  */
 export default function InvoiceReviewModal({
   isOpen, onClose, claim, vatExcess, item, party, fileUrl, fileName, onConfirm, onReinvoiceEmail,
+  vatExcessFiled = false,
 }) {
   const [status, setStatus] = useState('reading');
   const [figures, setFigures] = useState(emptyFigures);
@@ -52,6 +59,9 @@ export default function InvoiceReviewModal({
   const [duplicate, setDuplicate] = useState(null);
   const [repairCostChoice, setRepairCostChoice] = useState(null);
   const [authorityChoice, setAuthorityChoice] = useState(null);
+  // Whether this same invoice is to be filed as the customer's own invoice too, where
+  // it carries their share of the repair.
+  const [fileVatExcess, setFileVatExcess] = useState(false);
 
   // What this particular invoice carries: the standard set, the few a document
   // names for itself, and any figures read beside them — a salvage invoice's
@@ -76,6 +86,7 @@ export default function InvoiceReviewModal({
     setDuplicate(null);
     setRepairCostChoice(null);
     setAuthorityChoice(null);
+    setFileVatExcess(false);
     setFocused('invoice_number');
 
     (async () => {
@@ -171,6 +182,12 @@ export default function InvoiceReviewModal({
   // a Final Authority is on the claim, or on a job with no insurer on it at all.
   const expectation = item?.setsRepairCost ? claimAuthorityExpectation(claim) : null;
 
+  // The invoice's own split of the repair, where the document prints one: its two
+  // shares are checked against their own halves of the authorisation, and the whole
+  // repair is the invoice's own total — never that total plus the customer's share a
+  // second time.
+  const split = useMemo(() => splitFromFigures(figures), [figures]);
+
   // The whole repair set against the repair cost already on the claim: it fills the
   // figure in where there is none, and is flagged where it differs.
   const costOffer = repairCostOffer(item, claim, figures, expectation);
@@ -179,11 +196,26 @@ export default function InvoiceReviewModal({
   // The repairer's invoice against the insurer's own share of the authorised amount,
   // and an invoice over it can never be saved as the Final Insurer Invoice at all.
   const comparison = item?.setsRepairCost
-    ? compareToAuthority(invoiceTotal, expectation, vatExcess)
+    ? compareToAuthority(invoiceTotal, expectation, vatExcess, split)
     : null;
   const overAuthority = comparison?.status === 'over';
   const reinvoiceRequested = authorityChoice === 'reinvoice';
   const choiceNeeded = comparison?.status === 'under' && !authorityChoice;
+  // The verdict on the invoice against the authority is part of this screen's one
+  // verdict: while it isn't clear, nothing here announces that everything matches.
+  const authorityOk = !comparison || comparison.headline?.tone === 'ok';
+
+  // Where we handle this client's VAT and excess, the invoice often carries their own
+  // half of the repair as a payable line of its own — which is exactly what the VAT &
+  // Excess Invoice In bills. Filing the one document for both means that invoice is on
+  // file at once, and no separate copy has to be chased for it.
+  const splitCustomerShare = toNum(split.customer);
+  const offerVatExcessFile = !!vatExcess
+    && !!item?.setsRepairCost
+    && hasSplit(split)
+    && splitCustomerShare > 0
+    && !vatExcessFiled;
+  const fileVatExcessConfirmed = offerVatExcessFile && fileVatExcess;
 
   const softBlockers = [
     ...arithmetic.map((text, i) => ({ id: `arith-${i}`, text })),
@@ -219,6 +251,7 @@ export default function InvoiceReviewModal({
       useAsRepairCost: !!costOffer && useRepairCost && !reinvoiceRequested,
       acceptInvoiceTotal: authorityChoice === 'accept',
       requestReinvoice: reinvoiceRequested,
+      fileVatExcess: fileVatExcessConfirmed,
     });
   };
 
@@ -307,6 +340,28 @@ export default function InvoiceReviewModal({
 
             <RepairCostFromInvoice offer={costOffer} useIt={useRepairCost} onUse={setRepairCostChoice} />
 
+            {offerVatExcessFile && (
+              <div className="space-y-1.5 rounded-lg border border-border bg-muted/30 px-2.5 py-2">
+                <p className="text-[11px] font-semibold text-foreground">
+                  File this invoice as the VAT &amp; Excess Invoice In too
+                </p>
+                <p className="text-[11px] leading-snug text-muted-foreground">
+                  It carries {fmtGBP(splitCustomerShare)} payable by {claim?.client_name || 'the customer'}, which is what
+                  that invoice bills. Filing it here puts that invoice on file at once, so no separate copy has to be
+                  chased for it.
+                </p>
+                <label className="flex cursor-pointer items-start gap-2 text-[11px]">
+                  <input
+                    type="checkbox"
+                    checked={fileVatExcess}
+                    onChange={(e) => setFileVatExcess(e.target.checked)}
+                    className="mt-0.5 rounded border-border"
+                  />
+                  <span>Also file it as the VAT &amp; Excess Invoice In at {fmtGBP(splitCustomerShare)}.</span>
+                </label>
+              </div>
+            )}
+
             {/* The repairer's invoices are only measured against an authority where the
                 job has one: a job the customer is paying for privately has no insurer
                 on it, so there is nothing to set the invoice against. */}
@@ -334,6 +389,8 @@ export default function InvoiceReviewModal({
               accepted={acceptedMismatch}
               reason={reason}
               acked={acked}
+              authorityOk={authorityOk}
+              withAuthority={!!comparison}
               onAck={(id, value) => setAcked((prev) => ({ ...prev, [id]: value }))}
               onReason={setReason}
               onAcceptMismatch={() => setAcceptedMismatch(true)}

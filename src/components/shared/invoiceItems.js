@@ -94,6 +94,29 @@ export const INVOICE_ITEMS = [
     date_status_field: 'invoice_status',
     date_status_value: 'Invoiced',
     setsRepairCost: true,
+    // The whole repair, split on the document between who pays what: many repairers
+    // print the full total and then an "amount payable by" line for the insurer and
+    // another for the customer. Those two shares are read beside the total and kept
+    // apart (see ./invoiceAuthorityCheck), so the invoice is checked as the two
+    // payments it really is rather than as one amount that looks over the insurer's
+    // share. An invoice that prints a single amount leaves both empty and is read
+    // exactly as it always was: that amount is what the insurer is billed.
+    extraFigures: [
+      {
+        key: 'payable_insurer',
+        label: 'Payable by the insurer',
+        type: 'number',
+        split: true,
+        prompt: 'where the invoice splits its total between who pays what, the amount it says is payable by the insurer — the "amount payable by" line naming the insurer or their claim. Read it on its own: never added to another figure, and never taken as the invoice total. Leave it empty where the document prints one amount only',
+      },
+      {
+        key: 'payable_customer',
+        label: 'Payable by the customer',
+        type: 'number',
+        split: true,
+        prompt: 'where the invoice splits its total between who pays what, the amount it says is payable by the customer, client, owner or policyholder — the "amount payable by" line naming them (often beside a named excess or the VAT). Read it on its own: never added to another figure, and never taken as the invoice total. Leave it empty where the document prints one amount only',
+      },
+    ],
   },
   {
     // Where we handle a client's VAT and excess, the repairer bills us for the

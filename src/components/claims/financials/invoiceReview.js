@@ -150,6 +150,9 @@ export function buildExtractionPrompt({ item, claim, party, fields = INVOICE_FIG
     ? `an invoice we have received (from ${party || 'the other party'})`
     : `an invoice we have sent (to ${party || 'the other party'})`;
   const money = wantsMoney(fields);
+  // This document can carry a split: the whole repair, with its own payable lines
+  // beneath it (see ./invoiceAuthorityCheck).
+  const splits = fields.some((f) => f.split);
 
   return `Read this document and extract the figures from it. It is filed against "${item?.label}" on claim ${claim?.job_number || ''} for vehicle ${claim?.reg || ''} — ${direction}.
 
@@ -160,7 +163,8 @@ ${fields.map((f) => `- ${f.prompt || FIGURE_PROMPTS[f.key] || f.label}`).join('\
 Rules:
 - Only return what is actually printed. Use an empty string for anything that is not there.${money ? `
 - VAT: return only what the document shows. Where no VAT is mentioned on it at all, the invoice is not a VAT invoice — the amount excluding VAT is the total and the VAT amount is 0. Where it says VAT is included but the ex-VAT amount and the VAT amount are not printed separately, leave both of those figures empty for the user to fill in. Never work VAT out from the total yourself.` : ''}
-- Keep every figure separate, exactly as the document shows it: never add two of them together, and never split one figure between two of them.
+- Keep every figure separate, exactly as the document shows it: never add two of them together, and never split one figure between two of them.${splits ? `
+- Where the invoice splits its total between who pays what, read the full total AND each of those shares beside it, exactly as printed. The total is still the whole invoice: never read one of the shares as the total, and never add the shares together to make a total the invoice doesn't print.` : ''}
 - For every figure, give a confidence of "high", "medium" or "low" ("low" for anything blurred, cut off, ambiguous or worked out).
 - For every figure, give the snippet of text from the document where you found it.
 - Set readable to false only if the document cannot be read at all.`;
@@ -316,6 +320,19 @@ export function checkArithmetic(figures) {
   const ex = toNum(figures.amount_ex_vat);
   const vat = toNum(figures.vat_amount);
   const total = toNum(figures.amount_total);
+
+  // An invoice that splits its total between who pays what has to add up that way
+  // too: the two shares it prints are the whole of it. Read as the total alone the
+  // figures look right while the shares underneath them disagree with it.
+  const insurerShare = toNum(figures.payable_insurer);
+  const customerShare = toNum(figures.payable_customer);
+  if (customerShare !== null && total !== null) {
+    const shares = round2((insurerShare ?? round2(total - customerShare)) + customerShare);
+    if (Math.abs(shares - total) > 0.01) {
+      issues.push(`The amounts payable don't add up: the insurer's share and the customer's come to ${fmtGBP(shares)}, but the invoice total reads ${fmtGBP(total)}.`);
+    }
+  }
+
   if (ex === null || vat === null || total === null) return issues;
 
   if (Math.abs(round2(ex + vat) - round2(total)) > 0.01) {
