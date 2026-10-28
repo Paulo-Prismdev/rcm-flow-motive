@@ -330,7 +330,7 @@ export function checkArithmetic(figures) {
   const customerShare = toNum(figures.payable_customer);
   if (customerShare !== null && total !== null) {
     const shares = round2((insurerShare ?? round2(total - customerShare)) + customerShare);
-    if (Math.abs(shares - total) > 0.01) {
+        if (Math.abs(shares - total) > 0.01 && !(insurerShare !== null && Math.abs(insurerShare - total) <= 0.01)) {
       issues.push(`The amounts payable don't add up: the insurer's share and the customer's come to ${fmtGBP(shares)}, but the invoice total reads ${fmtGBP(total)}.`);
     }
   }
