@@ -224,7 +224,7 @@ export function claimInvoicedSplit(claim) {
  * verdict rather than two that disagree.
  */
 export function compareToAuthority(insurerPart, expectation, vatExcess = null, split = null) {
-  const invoiceTotal = toNum(insurerPart);
+  let invoiceTotal = toNum(insurerPart);
   if (!expectation || invoiceTotal === null) return null;
 
   const onSplit = hasSplit(split);
@@ -233,6 +233,8 @@ export function compareToAuthority(insurerPart, expectation, vatExcess = null, s
   // What the insurer is billed on this invoice: the figure it prints payable by
   // them, and where it prints only the customer's line, what is left of the total.
   const insurer = onSplit ? (splitInsurer ?? round2(invoiceTotal - splitCustomer)) : invoiceTotal;
+    const measuredTotal = invoiceTotal;
+  if (onSplit && Math.abs(round2(invoiceTotal - insurer)) <= AUTHORITY_TOLERANCE) invoiceTotal = round2(insurer + splitCustomer);
   // The whole repair as the invoice reads it. A split invoice's own total is its two
   // halves together; an invoice billing the insurer on its own has the customer's
   // share of the repair beside it.
@@ -255,7 +257,7 @@ export function compareToAuthority(insurerPart, expectation, vatExcess = null, s
 
   const shared = {
     insurerPart: insurer,
-    measured: invoiceTotal,
+    measured: measuredTotal,
     split: onSplit ? { insurer, customer: splitCustomer, total: invoiceTotal } : null,
     invoicedCustomer: onSplit ? splitCustomer : null,
     expectation,
