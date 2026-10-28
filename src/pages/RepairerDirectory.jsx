@@ -6,6 +6,7 @@ import { Loader2, Upload, Building2 } from "lucide-react";
 import DirectoryShell from "@/components/shared/DirectoryShell";
 import RepairerDetailDrawer from "@/components/repairer/RepairerDetailDrawer";
 import AddBodyshopModal from "@/components/shared/AddBodyshopModal";
+import RepairerImportModal from "@/components/directory/RepairerImportModal";
 import { Plus } from "lucide-react";
 
 export default function RepairerDirectory() {
@@ -15,6 +16,10 @@ export default function RepairerDirectory() {
   const [vehicleFilter, setVehicleFilter] = useState("all");
   const [selectedId, setSelectedId] = useState(null);
   const [importing, setImporting] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
+  const [preview, setPreview] = useState(null);
+  const [applying, setApplying] = useState(false);
+  const [importResult, setImportResult] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const fileInputRef = useRef(null);
   const queryClient = useQueryClient();
@@ -62,22 +67,36 @@ export default function RepairerDirectory() {
 
   const handleImportClick = () => fileInputRef.current?.click();
 
+  // Reading the sheet only works out what would happen — nothing is written yet.
   const handleFileSelected = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
     setImporting(true);
     try {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
-      const { importBodyshopDirectory } = await import("@/functions/importBodyshopDirectory");
-      const res = await importBodyshopDirectory({ file_url });
-      const data = res.data;
-      await queryClient.invalidateQueries({ queryKey: ["repairer-directory"] });
-      alert(`Import complete: ${data.created} created, ${data.updated} updated`);
+      const res = await base44.functions.invoke("importBodyshopDirectory", { file_url, mode: "preview" });
+      if (res.data?.error) throw new Error(res.data.error);
+      setPreview(res.data);
+      setImportResult(null);
+      setImportOpen(true);
     } catch (err) {
-      alert("Import failed: " + (err.message || "Unknown error"));
+      alert("Could not read that file: " + (err.message || "Unknown error"));
     } finally {
       setImporting(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const handleConfirmImport = async (applyList) => {
+    setApplying(true);
+    try {
+      const res = await base44.functions.invoke("importBodyshopDirectory", { mode: "apply", apply: applyList });
+      setImportResult(res.data || { created: 0, updated: 0, errors: [] });
+      await queryClient.invalidateQueries({ queryKey: ["repairer-directory"] });
+    } catch (err) {
+      alert("Import failed: " + (err.message || "Unknown error"));
+    } finally {
+      setApplying(false);
     }
   };
 
@@ -120,7 +139,7 @@ export default function RepairerDirectory() {
         className="inline-flex items-center justify-center gap-2 rounded-md text-[13px] font-medium border border-input bg-transparent shadow-sm hover:bg-accent hover:text-accent-foreground h-9 px-4"
       >
         {importing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-        <span className="hidden sm:inline">{importing ? "Importing..." : "Import Excel"}</span>
+        <span className="hidden sm:inline">{importing ? "Reading file..." : "Import spreadsheet"}</span>
       </button>
       <input
         ref={fileInputRef}
@@ -238,6 +257,19 @@ export default function RepairerDirectory() {
           </>
         )}
       </DirectoryShell>
+
+      <RepairerImportModal
+        open={importOpen}
+        preview={preview}
+        applying={applying}
+        result={importResult}
+        onConfirm={handleConfirmImport}
+        onClose={() => {
+          setImportOpen(false);
+          setImportResult(null);
+          setPreview(null);
+        }}
+      />
 
       <RepairerDetailDrawer bodyshopId={selectedId} onClose={() => setSelectedId(null)} />
       <AddBodyshopModal
