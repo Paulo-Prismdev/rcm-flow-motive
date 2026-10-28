@@ -6,6 +6,14 @@
       "type": "string",
       "description": "Name of the bodyshop/repairer"
     },
+    "alternative_names": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Other names this repairer trades or invoices under \u2014 a branch or trading name. Added when a user accepts a name variation on an invoice, so that name is recognised as this repairer from then on."
+    },
     "logo_url": {
       "type": "string",
       "description": "URL of the company logo (JPEG or PNG)"

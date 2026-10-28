@@ -358,7 +358,9 @@ export function compareToAuthority(insurerPart, expectation, vatExcess = null, s
     text: status === 'over'
       ? (overReason === 'total'
         ? totalCheck.detail
-        : `${expectationWorkings(expectation)}. The ${payer}'s share of ${fmtGBP(insurer)} is ${fmtGBP(Math.abs(difference))} over that — a repairer can't invoice ${payer} more than its share of the ${based} amount.`)
+        : expectation.purchaseOrder && !onSplit
+          ? `${expectationWorkings(expectation)}. The invoice total of ${fmtGBP(insurer)} is ${fmtGBP(Math.abs(difference))} over that — a repairer can't invoice more than the repair was ordered at.`
+          : `${expectationWorkings(expectation)}. The ${payer}'s share of ${fmtGBP(insurer)} is ${fmtGBP(Math.abs(difference))} over that — a repairer can't invoice ${payer} more than its share of the ${based} amount.`)
       : insurerStatus === 'under'
         ? `${expectationWorkings(expectation)}. ${onSplit ? `The invoice puts ${fmtGBP(insurer)} on ${payer}` : `The invoice total of ${fmtGBP(insurer)}`}, ${fmtGBP(Math.abs(difference))} under that.`
         : failing.length > 0

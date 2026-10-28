@@ -85,7 +85,7 @@ export default function FinalInvoiceAuthorityNote({
           </span>
           <span>{split ? headline.text : `${authorityWorkings(comparison)} — the ${label} total of ${fmtGBP(insurerPart)} matches.`}</span>
         </p>
-        {!split && <CustomerShareLines comparison={comparison} tone="match" className="pl-6" />}
+        {!split && !ordered && <CustomerShareLines comparison={comparison} tone="match" className="pl-6" />}
       </div>
     );
   }
@@ -97,7 +97,9 @@ export default function FinalInvoiceAuthorityNote({
   const guidance = over
     ? (overReason === 'total'
       ? 'Ask for a corrected invoice, or correct the authority if it is wrong.'
-      : `A repairer can't invoice more than the insurer's share of the authority — ask for a corrected invoice, or correct the authority if it is wrong.`)
+      : ordered
+        ? "A repairer can't invoice more than the repair was ordered at — ask for a corrected invoice, or issue a revised purchase order if the order is wrong."
+        : `A repairer can't invoice more than the insurer's share of the authority — ask for a corrected invoice, or correct the authority if it is wrong.`)
     : status === 'under'
       ? `Accept the whole repair (${fmtGBP(comparison.fullCost)}) as the final repair cost, or ask the repairer to re-invoice to ${fmtGBP(expected)}.`
       : '';
@@ -125,7 +127,7 @@ export default function FinalInvoiceAuthorityNote({
           </button>
         )}
       </div>
-      {!split && <CustomerShareLines comparison={comparison} tone={over ? 'over' : 'under'} className="pl-5" />}
+      {!split && !ordered && <CustomerShareLines comparison={comparison} tone={over ? 'over' : 'under'} className="pl-5" />}
     </div>
   );
 }
