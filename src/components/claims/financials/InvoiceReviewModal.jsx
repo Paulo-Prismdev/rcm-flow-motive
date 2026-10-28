@@ -68,6 +68,11 @@ export default function InvoiceReviewModal({
   // required before it can be saved that way.
   const [addressedToClient, setAddressedToClient] = useState(false);
   const [addressedNote, setAddressedNote] = useState('');
+  // The other names this claim's repairer is already known by, and the ones accepted
+  // on this screen — a name variation is remembered on the repairer's own record, so
+  // the next invoice from the same branch is recognised without being asked again.
+  const [alternatives, setAlternatives] = useState([]);
+  const [remembered, setRemembered] = useState([]);
   // Whether this same invoice is to be filed as the customer's own invoice too, where
   // it carries their share of the repair. Left unset until the invoice has been read:
   // where it applies it starts ticked, and a deliberate untick overrides that.
@@ -83,6 +88,12 @@ export default function InvoiceReviewModal({
     const read = invoiceFigures(item);
     return vatExcessItem ? vatExcessFigures(read) : read;
   }, [item, vatExcessItem]);
+
+  // A job the customer pays for privately carries one invoice for the whole repair,
+  // addressed to us: none of the insurer-side readings — a split between payers, a
+  // VAT & excess invoice, an invoice raised in the client's name — apply to it.
+  const privateJob = isPrivatePayingClaim(claim);
+  const repairerLinked = item?.party === 'repairer' && !!claim?.bodyshop_id;
 
   // Read the document once each time the screen opens.
   useEffect(() => {
@@ -105,6 +116,7 @@ export default function InvoiceReviewModal({
     setFileVatExcessChoice(null);
     setAddressedToClient(false);
     setAddressedNote('');
+    setRemembered([]);
     setFocused('invoice_number');
 
     (async () => {
@@ -145,6 +157,36 @@ export default function InvoiceReviewModal({
 
     return () => { cancelled = true; };
   }, [isOpen, fileUrl, fields]);
+
+  // The other names this repairer is known by, so an invoice under a branch or
+  // trading name is recognised straight away.
+  useEffect(() => {
+    setAlternatives([]);
+    if (!isOpen || !repairerLinked) return undefined;
+    let cancelled = false;
+    base44.entities.Bodyshop.get(claim.bodyshop_id)
+      .then((shop) => {
+        if (!cancelled) setAlternatives(Array.isArray(shop?.alternative_names) ? shop.alternative_names : []);
+      })
+      .catch((e) => console.error('Could not load the repairer’s other names', e));
+    return () => { cancelled = true; };
+  }, [isOpen, repairerLinked, claim?.bodyshop_id]);
+
+  // Accepting a name variation keeps it: it is written to the repairer's own record,
+  // so every later invoice from that branch is recognised without a note.
+  const acceptVariation = async (variation) => {
+    const name = String(variation?.printed || '').trim();
+    if (!name) return;
+    const next = Array.from(new Set([...alternatives, name]));
+    setAlternatives(next);
+    setRemembered((prev) => [...prev, name]);
+    if (!claim?.bodyshop_id) return;
+    try {
+      await base44.entities.Bodyshop.update(claim.bodyshop_id, { alternative_names: next });
+    } catch (e) {
+      console.error('Could not save the repairer’s other name', e);
+    }
+  };
 
   // Has this invoice number already been recorded on another claim?
   useEffect(() => {
@@ -192,7 +234,9 @@ export default function InvoiceReviewModal({
   // Only the insurer's own invoice can be addressed to the client at the insurer's
   // request; ticking it means the party it is written to is not the thing to check.
   const clientAddressed = item?.key === FINAL_INVOICE_KEY && addressedToClient;
-  const matchIssues = checkRightInvoice(figures, claim, item, { addressedToClient: clientAddressed });
+  const { issues: matchIssues, variations: nameVariations } = checkRightInvoice(
+    figures, claim, item, { addressedToClient: clientAddressed, alternatives }
+  );
   const expected = expectedInvoice(item, claim);
   const invoiceTotal = toNum(figures.amount_total);
   const mismatch = expected.amount && invoiceTotal !== null && Math.abs(invoiceTotal - expected.amount) >= 0.01
@@ -251,6 +295,7 @@ export default function InvoiceReviewModal({
   // file at once, and no separate copy has to be chased for it.
   const splitCustomerShare = toNum(split.customer);
   const offerVatExcessFile = !!vatExcess
+    && !privateJob
     && !!item?.setsRepairCost
     && hasSplit(split)
     && splitCustomerShare > 0
@@ -409,10 +454,10 @@ export default function InvoiceReviewModal({
               </div>
             )}
 
-            {/* The repairer's invoices are only measured against an authority where the
-                job has one: a job the customer is paying for privately has no insurer
-                on it, so there is nothing to set the invoice against. */}
-            {item?.setsRepairCost && !isPrivatePayingClaim(claim) && (
+            {/* The repairer's invoice is measured against the authority on an insurer
+                job, and against the purchase order that authorises a repair the
+                customer is paying for privately. */}
+            {item?.setsRepairCost && (
               <InvoiceVsAuthority
                 label={item.label}
                 comparison={comparison}
@@ -420,11 +465,13 @@ export default function InvoiceReviewModal({
                 choice={authorityChoice}
                 onChoice={setAuthorityChoice}
                 onReinvoiceEmail={onReinvoiceEmail}
-                emptyNote="Enter the invoice total and it is set against the insurer's share of the authorised amount."
+                emptyNote={privateJob
+                  ? 'Enter the invoice total and it is set against the purchase order that authorises this repair.'
+                  : "Enter the invoice total and it is set against the insurer's share of the authorised amount."}
               />
             )}
 
-            {item?.key === FINAL_INVOICE_KEY && (
+            {item?.key === FINAL_INVOICE_KEY && !privateJob && (
               <AddressedToClientField
                 checked={addressedToClient}
                 note={addressedNote}
@@ -439,6 +486,9 @@ export default function InvoiceReviewModal({
               matchIssues={matchIssues}
               duplicate={duplicate}
               mismatch={mismatch}
+              nameVariations={nameVariations}
+              remembered={remembered}
+              onAcceptVariation={repairerLinked ? acceptVariation : null}
               requiredMissing={missingRequired}
               unreviewed={unreviewedLabels}
               accepted={acceptedMismatch}

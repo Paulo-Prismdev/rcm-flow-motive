@@ -43,6 +43,10 @@ export default function InvoiceVsAuthority({
   }
 
   const { status, expected, insurerPart, difference, checks = [], headline, split } = comparison;
+  // A job the customer is paying for privately has no insurer's share and no
+  // customer's share beside it: one invoice, for the whole repair, measured against
+  // the purchase order we issued.
+  const ordered = !!comparison.expectation?.purchaseOrder;
 
   // The customer's excess is still TBC, so their share of the repair — and so the
   // insurer's share — can't be worked out yet.
@@ -116,7 +120,7 @@ export default function InvoiceVsAuthority({
         </ul>
       )}
 
-      {!split && (
+      {!split && !ordered && (
         <CustomerShareLines
           comparison={comparison}
           tone={ok ? 'match' : status === 'over' ? 'over' : 'under'}

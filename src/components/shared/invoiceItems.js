@@ -91,6 +91,10 @@ export const INVOICE_ITEMS = [
       bindings: null,
       date_status_field: null,
       date_status_value: null,
+      // There is one invoice for the whole repair on a privately paid job, addressed
+      // to us, because we pay the repair as a whole: it has no insurer's or
+      // customer's share printed on it, so none is read off it and none is checked.
+      extraFigures: [],
     },
     // Its date is the date printed on the invoice itself, never the upload date.
     bindings: { date: 'invoice_sent_date' },

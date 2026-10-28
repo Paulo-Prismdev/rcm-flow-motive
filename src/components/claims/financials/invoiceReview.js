@@ -3,8 +3,10 @@ import {
   INVOICE_ITEMS,
   getInvoiceItemState,
   invoicePartyName,
+  isPrivatePayingClaim,
   resolveInvoiceAmount,
 } from '@/components/shared/invoiceChecklist';
+import { RCM_INVOICE_ADDRESS } from './referrerRequest';
 
 /**
  * Reading an invoice off the document the user uploaded: the figures we ask the
@@ -363,9 +365,17 @@ export function expectedInvoice(item, claim) {
   return { amount, note };
 }
 
-/** Fail-safe 2: is this the invoice we asked for? */
-export function checkRightInvoice(figures, claim, item, { addressedToClient = false } = {}) {
+/**
+ * Fail-safe 2: is this the invoice we asked for? `issues` are the problems that have
+ * to be acknowledged before the invoice can be saved; `variations` are names that are
+ * probably the same party under a different branch or trading name — a soft note
+ * rather than a warning, and one that can be remembered on the party's own record.
+ */
+export function checkRightInvoice(
+  figures, claim, item, { addressedToClient = false, alternatives = [] } = {}
+) {
   const issues = [];
+  const variations = [];
   const printed = squash(INVOICE_FIGURES.map((f) => figures[f.key]).filter(Boolean).join(' '));
 
   // Either reference is enough: a third party's invoice usually carries the reg
@@ -383,12 +393,27 @@ export function checkRightInvoice(figures, claim, item, { addressedToClient = fa
   const printedParty = item?.direction === 'in' ? figures.party_from : figures.party_to;
   // An insurer's invoice raised in the client's name at the insurer's request is
   // addressed to the client on purpose: there is nothing to warn about there.
-  if (!addressedToClient && expectedParty && printedParty && !partiesMatch(printedParty, expectedParty)) {
-    issues.push(item.direction === 'in'
-      ? `This invoice is from "${printedParty}", but the ${item.label} is expected from "${expectedParty}".`
-      : `This invoice is addressed to "${printedParty}", but the ${item.label} is expected to go to "${expectedParty}".`);
+  if (!addressedToClient && expectedParty && printedParty) {
+    const match = partyMatch(printedParty, expectedParty, alternatives);
+    if (match === 'likely') {
+      variations.push({ printed: printedParty, expected: expectedParty });
+    } else if (match === 'different') {
+      issues.push(item.direction === 'in'
+        ? `This invoice is from "${printedParty}", but the ${item.label} is expected from "${expectedParty}".`
+        : `This invoice is addressed to "${printedParty}", but the ${item.label} is expected to go to "${expectedParty}".`);
+    }
   }
-  return issues;
+
+  // A job the customer is paying for privately: the repairer bills the whole repair
+  // to us and we settle it in full, so the document has to be addressed to us —
+  // that is what makes it an invoice we pay rather than one raised in someone
+  // else's name.
+  const printedTo = figures.party_to;
+  if (isPrivatePayingClaim(claim) && printedTo && partyMatch(printedTo, RCM_INVOICE_ADDRESS[0]) === 'different') {
+    issues.push(`This invoice is addressed to "${printedTo}", but on a privately paid repair it has to be addressed to us, ${RCM_INVOICE_ADDRESS[0]}, because we settle the whole of it.`);
+  }
+
+  return { issues, variations };
 }
 
 /**
@@ -414,26 +439,36 @@ const distinctiveWords = (name) => normalise(name)
   .filter((w) => w.length > 2 && !GENERIC_NAME_WORDS.has(w));
 
 /**
- * Are these the same party? Only the distinctive part of a name counts, so a
- * shared "Services" or "Limited" doesn't make "Essex Emergency Services Ltd" the
- * same company as "Hummingbird Insurance Services Ltd". Every distinctive word on
- * the shorter name has to appear on the other one.
+ * How two party names read against each other. Only the distinctive part of a name
+ * counts, so a shared "Services" or "Limited" doesn't make "Essex Emergency
+ * Services Ltd" the same company as "Hummingbird Insurance Services Ltd".
+ *
+ * - 'same'      every distinctive word of the shorter name appears in the longer
+ *               one, or the name is one this party is already known by.
+ * - 'likely'    they share the distinctive part of the name but not the rest —
+ *               the same firm invoicing under a branch or trading name ("Revive!
+ *               West Lincs" against "Revive! Lincoln"). Worth a soft note, never
+ *               a warning.
+ * - 'different' nothing in common but the words everyone in the trade has.
  */
-function partiesMatch(a, b) {
+export function partyMatch(a, b, alternatives = []) {
   const na = normalise(a);
   const nb = normalise(b);
-  if (!na || !nb) return true;
-  if (na === nb) return true;
+  if (!na || !nb) return 'same';
+  if (na === nb) return 'same';
+  // A name this party has already been recognised by, saved on their own record.
+  if (alternatives.some((alt) => normalise(alt) && normalise(alt) === na)) return 'same';
 
   const da = distinctiveWords(a);
   const db = distinctiveWords(b);
   // A name made of nothing but generic words ("Motor Repairs Ltd") can only be
   // compared whole.
-  if (!da.length || !db.length) return na.includes(nb) || nb.includes(na);
+  if (!da.length || !db.length) return na.includes(nb) || nb.includes(na) ? 'same' : 'different';
 
   const [shorter, longer] = da.length <= db.length ? [da, db] : [db, da];
   const haystack = longer.join(' ');
-  return shorter.every((w) => haystack.includes(w));
+  if (shorter.every((w) => haystack.includes(w))) return 'same';
+  return shorter.some((w) => haystack.includes(w)) ? 'likely' : 'different';
 }
 
 /**

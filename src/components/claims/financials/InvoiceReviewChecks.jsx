@@ -1,5 +1,5 @@
 import React from 'react';
-import { AlertTriangle, Check, X, ShieldAlert } from 'lucide-react';
+import { AlertTriangle, Check, Info, X, ShieldAlert } from 'lucide-react';
 import { fmtGBP } from '@/components/shared/creditRepairRates';
 
 export function AckRow({ title, detail, acked, onAck, onReject }) {
@@ -38,6 +38,7 @@ export function AckRow({ title, detail, acked, onAck, onReject }) {
 export default function InvoiceReviewChecks({
   arithmetic, workings, matchIssues, duplicate, mismatch, requiredMissing, unreviewed,
   accepted, reason, acked, onAck, onReason, onAcceptMismatch, onReject,
+  nameVariations = [], remembered = [], onAcceptVariation = null,
 }) {
   // Only what needs attention is shown here. The screen's verdict on the invoice is
   // the one the authority check carries, with its own checks ticked off under it —
@@ -125,6 +126,43 @@ export default function InvoiceReviewChecks({
           onAck={(v) => onAck(`arith-${i}`, v)}
         />
       ))}
+
+      {/* A name that only differs by its branch or trading name is the same firm, not
+          a wrong invoice: noted softly, and remembered on the party's own record once
+          accepted so it is recognised next time without a word. */}
+      {nameVariations.map((v) => (
+        <div key={`${v.printed}|${v.expected}`} className="rounded-lg border border-border bg-muted/40 p-2.5">
+          <p className="flex items-start gap-1.5 text-[11px] font-semibold text-foreground">
+            <Info className="w-3.5 h-3.5 flex-shrink-0 mt-px text-muted-foreground" />
+            Probably the same company, under another name
+          </p>
+          <p className="mt-1 pl-5 text-[11px] leading-snug text-muted-foreground">
+            This invoice reads “{v.printed}”, which looks like the same firm as “{v.expected}” — a branch or
+            trading name rather than a different company. Nothing needs correcting if it is.
+          </p>
+          {onAcceptVariation && (
+            <button
+              type="button"
+              onClick={() => onAcceptVariation(v)}
+              className="mt-1.5 ml-5 inline-flex items-center gap-1 text-[10px] font-semibold text-primary hover:underline"
+            >
+              <Check className="w-3 h-3" /> Yes, same company — remember “{v.printed}”
+            </button>
+          )}
+        </div>
+      ))}
+
+      {remembered.length > 0 && (
+        <div className="rounded-lg border border-green-300 dark:border-green-800 bg-green-50 dark:bg-green-900/20 p-2.5">
+          <p className="flex items-start gap-1.5 text-[11px] font-semibold text-green-700 dark:text-green-400">
+            <Check className="w-3.5 h-3.5 flex-shrink-0 mt-px" /> Name remembered
+          </p>
+          <p className="mt-1 pl-5 text-[11px] leading-snug text-green-800/90 dark:text-green-300/90">
+            {remembered.join(', ')} {remembered.length === 1 ? 'is' : 'are'} now recognised as the same company on
+            every invoice, without being questioned again.
+          </p>
+        </div>
+      )}
 
       {matchIssues.map((text, i) => (
         <AckRow
