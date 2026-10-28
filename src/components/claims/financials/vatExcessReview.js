@@ -23,7 +23,7 @@ const VAT_EXCESS_LABELS = {
   },
   vat_amount: {
     label: 'VAT (on the repair)',
-    prompt: 'the VAT amount printed on the invoice, as a number with no currency symbols. On this invoice the VAT is the VAT content of the repair, not 20% of the excess, so read it exactly as it is printed. Leave it empty where no VAT is shown',
+    prompt: 'the VAT on the repair that this invoice recharges, as a number with no currency symbols. It is normally its own line item, such as "VAT 20%" or "VAT on repair", with its figure in the Amount column. That line is often charged at 0% tax itself, so the invoice may also show "Total No VAT 0.00" or a tax total of 0: ignore those and take the amount on the VAT line item. Leave it empty only where the invoice has no VAT line at all',
   },
   amount_total: {
     label: 'Total',
