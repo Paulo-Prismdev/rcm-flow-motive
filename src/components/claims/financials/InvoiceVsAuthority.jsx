@@ -151,11 +151,13 @@ export default function InvoiceVsAuthority({
           <button type="button" onClick={() => onChoice('accept')} className={optionClass(choice === 'accept')}>
             <Check className="w-3 h-3 flex-shrink-0 mt-px" />
             <span>
-              {split ? 'Accept the invoice as it stands' : "Accept the invoice total and the customer's share"}
+              {split || ordered ? 'Accept the invoice as it stands' : "Accept the invoice total and the customer's share"}
               <span className="block font-normal">
                 {split
                   ? `The invoice's own full total of ${fmtGBP(comparison.fullCost)} — its two halves together — becomes the claim's final repair cost.`
-                  : `${fmtGBP(comparison.fullCost)} becomes the claim's final repair cost — the whole repair, not the insurer's part of it.`}
+                  : ordered
+                    ? `${fmtGBP(comparison.fullCost)} becomes the claim's final repair cost.`
+                    : `${fmtGBP(comparison.fullCost)} becomes the claim's final repair cost — the whole repair, not the insurer's part of it.`}
               </span>
             </span>
           </button>

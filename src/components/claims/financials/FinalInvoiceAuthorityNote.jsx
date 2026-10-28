@@ -48,6 +48,9 @@ export default function FinalInvoiceAuthorityNote({
   if (!comparison) return null;
 
   const { status, expected, insurerPart, difference, headline, split, overReason } = comparison;
+  // A privately paid repair has one invoice for the whole of it, measured against our
+  // purchase order: no insurer's share and no customer's share beside it.
+  const ordered = !!comparison.expectation?.purchaseOrder;
   const tone = headline?.tone || (status === 'match' ? 'ok' : status === 'over' ? 'block' : 'warn');
   // What was invoiced, named as the invoice itself reads it: a split invoice puts a
   // share of the repair on the insurer, an invoice printed as one amount is the
