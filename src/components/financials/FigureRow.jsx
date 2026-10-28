@@ -15,11 +15,14 @@ const INPUT = 'rounded-md border border-mac-line bg-mac-group px-2 text-[13px] t
  */
 export default function FigureRow({
   label, value, display, note, caption, hint, type = 'text', options, missing,
-  editable = true, editing, draft, onDraft, link,
+  editable = true, editing, draft, onDraft, link, links,
 }) {
   const empty = display === undefined && (value === null || value === undefined || value === '');
   const shown = display !== undefined ? display : empty ? 'Not set' : value;
   const open = editing && editable;
+  // A row can carry more than one way on from it — the fee's other form, and "No fee
+  // on this job" beside it.
+  const actions = (Array.isArray(links) ? links : [link]).filter(Boolean);
 
   return (
     <MacRow className="justify-between gap-4">
