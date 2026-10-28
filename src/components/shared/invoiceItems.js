@@ -122,7 +122,7 @@ export const INVOICE_ITEMS = [
         label: 'Payable by the customer',
         type: 'number',
         split: true,
-        prompt: 'where the invoice splits its total between who pays what, the amount it says is payable by the customer, client, owner or policyholder — the "amount payable by" line naming them (often beside a named excess or the VAT). Read it on its own: never added to another figure, and never taken as the invoice total. Leave it empty where the document prints one amount only',
+                prompt: 'where the invoice splits the repair between who pays what, the whole amount the customer, client, owner or policyholder pays. Where the document lists the customer items separately (such as the excess and the VAT) and totals them as the amount due, use that total, never just one of those lines. Never take the insurer share or the full repair as this figure. Leave it empty where the document prints one amount only',
       },
     ],
   },
