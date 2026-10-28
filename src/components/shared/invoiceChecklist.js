@@ -42,6 +42,7 @@ import {
   VAT_RATE,
 } from './creditRepairRates';
 import { excessMode } from './excessState';
+import { NO_FEE_REASON, feeState, noFeeOnJob } from './feeState';
 import { isTotalLossClaim } from './totalLoss';
 import { finalPurchaseOrder, purchaseOrderFigures } from './purchaseOrders';
 import {
@@ -359,6 +360,15 @@ const awaitingRepairCost = (claim) => awaiting(isTotalLossClaim(claim)
   ? 'A total loss job has no repair cost — set this amount by hand'
   : 'Enter the final repair cost');
 
+/**
+ * An invoice whose fee was waived on this job: there is nothing to bill, so its
+ * amount is a settled £0 rather than a figure still waiting to be worked out.
+ */
+const noFeeAmount = () => ({
+  amount: 0, ex: 0, vat: 0, total: 0,
+  derived: true, awaiting: false, hint: 'No fee on this job', workings: [],
+});
+
 const withVat = (ex, workings, hint) => {
   const net = round2(ex);
   const vat = round2(net * VAT_RATE);
@@ -408,6 +418,7 @@ const AMOUNT_RESOLVERS = {
   // VAT on it only where the referrer is VAT registered. A fixed fee agreed with them
   // instead is the fee the invoice bills, ahead of the percentage.
   referrer_fee: (claim) => {
+    if (noFeeOnJob(claim, 'referrer')) return noFeeAmount();
     const vatReg = referrerVatRegistered(claim);
     const pct = toNum(claim.percent_to_referrer);
     const fixed = referrerFixedFee(claim);
@@ -439,6 +450,7 @@ const AMOUNT_RESOLVERS = {
   // main referrer's is: their % of the repair cost ex VAT, plus VAT — or the fixed
   // fee agreed with them, where one is set.
   second_referrer_fee: (claim) => {
+    if (noFeeOnJob(claim, 'second_referrer')) return noFeeAmount();
     const vatReg = secondReferrerVatRegistered(claim);
     const pct = secondReferrerPercent(claim);
     const fixed = secondReferrerFixedFee(claim);
@@ -469,6 +481,7 @@ const AMOUNT_RESOLVERS = {
   // The repairer pays us a referral fee: a fixed £ figure where one is set,
   // otherwise the agreed percentage of the repair cost ex VAT.
   repairer_referral_fee: (claim) => {
+    if (noFeeOnJob(claim, 'repairer_referral')) return noFeeAmount();
     const fixed = toNum(claim.referral_fee_repairer_gbp);
     if (fixed > 0) {
       return withVat(fixed, [
@@ -614,6 +627,10 @@ export function getInvoiceItemState(item, claim, hasFiles = false) {
   const entry = (claim?.invoice_tracker?.items || {})[item.key] || {};
   const b = item.bindings || {};
   const asDocument = isInvoiceDocument(item);
+  // The fee this invoice bills was waived on the job — no fee on this job reads as
+  // "not applicable" rather than as an invoice still to be chased. It is worked out
+  // from the fee itself, so setting a fee again brings the invoice straight back.
+  const noFee = !!item.noFeeSlot && noFeeOnJob(claim, item.noFeeSlot);
 
   // A document the system generates itself — the Final Purchase Order on a job the
   // customer is paying for privately — is satisfied by the record of what was
@@ -683,7 +700,7 @@ export function getInvoiceItemState(item, claim, hasFiles = false) {
   // later change to the job figures cannot move an invoice already gone out.
   const locked = !!calc && stored !== null && (!!date || paid);
   const adjusted = !!calc && stored !== null && !locked;
-  const variance = locked && !calc.awaiting && Math.abs(calc.amount - stored) >= 0.01
+  const variance = !noFee && locked && !calc.awaiting && Math.abs(calc.amount - stored) >= 0.01
     ? {
       invoiced: stored,
       calculated: calc.amount,
@@ -749,8 +766,11 @@ export function getInvoiceItemState(item, claim, hasFiles = false) {
     // item stays amber until the corrected copy lands.
     reinvoice: entry.reinvoice_requested || null,
     awaitingCorrected: !!entry.reinvoice_requested,
-    notApplicable: entry.not_applicable === true,
-    notApplicableReason: entry.not_applicable_reason || '',
+    notApplicable: entry.not_applicable === true || noFee,
+    notApplicableReason: noFee ? NO_FEE_REASON : entry.not_applicable_reason || '',
+    // Set where the fee itself is what makes the invoice not applicable, so the card
+    // offers no "mark as applicable" switch for something only the fee can change.
+    noFee,
     invoiceNumber: entry.invoice_number || '',
     // The file the details were read from, and whether those details are still
     // recorded with no copy left behind them.
@@ -949,7 +969,8 @@ export function missingJobFigures(claim, ctx) {
   // A second referrer's fee is needed wherever a second referrer is paying —
   // credit repair included — and is asked for like any other figure the invoices
   // are worked out from.
-  if (ctx.secondReferrerEnabled && secondReferrerPercent(claim) <= 0 && secondReferrerFixedFee(claim) <= 0) {
+  // A fee deliberately waived — 0% or £0 — is set, not missing.
+  if (ctx.secondReferrerEnabled && feeState(claim, 'second_referrer') === 'missing') {
     missing.push({ key: 'second_referrer_percent', label: 'Second referrer fee % (or fixed £ fee)' });
   }
 
@@ -962,11 +983,11 @@ export function missingJobFigures(claim, ctx) {
     return missing;
   }
 
-  if (ctx.hasReferrer && toNum(claim?.percent_to_referrer) <= 0 && referrerFixedFee(claim) <= 0) {
+  if (ctx.hasReferrer && feeState(claim, 'referrer') === 'missing') {
     missing.push({ key: 'percent_to_referrer', label: 'Referrer fee % (or fixed £ fee)' });
   }
   // The repairer is invoiced for our share of the storage on a total loss instead.
-  if (!ctx.totalLoss && repairerReferralApplies(claim, ctx) && !ctx.hasReferralFee) {
+  if (!ctx.totalLoss && repairerReferralApplies(claim, ctx) && feeState(claim, 'repairer_referral') === 'missing') {
     missing.push({ key: 'referral_fee', label: 'Repairer referral fee (or fixed £ fee)' });
   }
   // Excess and VAT status only matter where we bill the customer's VAT and

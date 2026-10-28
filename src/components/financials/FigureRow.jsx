@@ -69,11 +69,16 @@ export default function FigureRow({
             <span className={cn('text-[13px] tabular-nums', empty ? 'text-mac-muted' : 'font-semibold text-foreground')}>
               {shown}
             </span>
-            {link && (
-              <button type="button" onClick={link.onClick} className="text-[11px] text-mac-accent hover:underline">
-                {link.label}
+            {actions.map((action) => (
+              <button
+                key={action.label}
+                type="button"
+                onClick={action.onClick}
+                className="text-[11px] text-mac-accent hover:underline"
+              >
+                {action.label}
               </button>
-            )}
+            ))}
           </span>
         </>
       )}

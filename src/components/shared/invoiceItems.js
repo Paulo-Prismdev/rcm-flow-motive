@@ -266,6 +266,9 @@ export const INVOICE_ITEMS = [
     party: 'referrer',
     requestFrom: 'referrer',
     amountSource: 'referrer_fee',
+    // Where the referrer's fee is no fee on this job (0% or £0), there is no invoice
+    // to collect: it reads not applicable rather than being chased.
+    noFeeSlot: 'referrer',
     varianceReason: 'Referrer fee or repair cost changed',
   },
   {
@@ -278,6 +281,8 @@ export const INVOICE_ITEMS = [
     party: 'second_referrer',
     requestFrom: 'second_referrer',
     amountSource: 'second_referrer_fee',
+    // No fee on this job: nothing to invoice the second referrer for either.
+    noFeeSlot: 'second_referrer',
     varianceReason: 'Second referrer fee or repair cost changed',
   },
   {
@@ -311,6 +316,8 @@ export const INVOICE_ITEMS = [
     requires: ['not_credit_repair', 'repairer_referral', 'not_total_loss'],
     party: 'repairer',
     amountSource: 'repairer_referral_fee',
+    // No referral fee on this job: nothing to invoice the repairer for.
+    noFeeSlot: 'repairer_referral',
     varianceReason: 'Referral fee or repair cost changed',
   },
   {
