@@ -8,6 +8,7 @@ import {
   repairerReferralApplies,
 } from '@/components/shared/invoiceChecklist';
 import { excessMode } from '@/components/shared/excessState';
+import { NO_FEE_DISPLAY, NO_FEE_LABEL, feeState } from '@/components/shared/feeState';
 import FigureGroup from '@/components/financials/FigureGroup';
 import { figureSourceNote } from './figuresCheck';
 
@@ -42,6 +43,12 @@ export default function StandardJobFigures({ claim, ctx, missing, onChange, onTr
   const [repairerForm, setRepairerForm] = useState(null);
   const referrerShowsFixed = (referrerForm ?? (referrerFeeGbp > 0 ? 'fixed' : 'percent')) === 'fixed';
   const repairerShowsFixed = (repairerForm ?? (repairerFeeGbp > 0 ? 'fixed' : 'percent')) === 'fixed';
+  // A fee is agreed, waived on this job, or still to be set — and a waived fee counts
+  // as set, so it is never flagged as a figure somebody forgot.
+  const referrerState = feeState(claim, 'referrer');
+  const referrerWaived = referrerState === 'none';
+  const repairerState = feeState(claim, 'repairer_referral');
+  const repairerWaived = repairerState === 'none';
 
   const group = (key) => ({
     editing: editingKey === key,
@@ -75,7 +82,10 @@ export default function StandardJobFigures({ claim, ctx, missing, onChange, onTr
       label: 'VAT status',
       options: VAT_STATUSES,
       value: claim.client_vat_status || '',
-      caption: source(claim, 'client_vat_status') || 'Sets the VAT billed on the VAT & excess invoices',
+      caption: source(claim, 'client_vat_status')
+        || (ctx.privatePaying
+          ? 'For reference — we bill the whole repair on our own invoice to the customer'
+          : 'Sets the VAT billed on the VAT & excess invoices'),
       missing: isMissing('client_vat_status'),
     });
   }
@@ -97,11 +107,31 @@ export default function StandardJobFigures({ claim, ctx, missing, onChange, onTr
     });
   }
 
-  /* The referrer's fee: the % or a fixed fee agreed for this job, plus their VAT
-     status, which decides whether their invoice to us carries VAT. */
+  /* The referrer's fee: the % or a fixed fee agreed for this job, no fee at all, plus
+     their VAT status, which decides whether their invoice to us carries VAT. */
+  // "No fee on this job": a deliberate 0%, with any fixed fee cleared — recorded as the
+  // figure it is, so the job reads as settled rather than as a fee still to be agreed.
+  const referrerNoFee = () => {
+    setReferrerForm(null);
+    onTrackerChange(
+      { percent_to_referrer: 0, ...buildTrackerMetaPatch(claim, { referrer_fee_gbp: null }) },
+      `Referrer fee set to no fee on this job${referrerFeeGbp > 0 ? ` — the fixed fee of ${fmtGBP(referrerFeeGbp)} cleared` : ''}`
+    );
+  };
   const referrerRows = [];
   if (ctx.hasReferrer) {
-    referrerRows.push(referrerShowsFixed ? {
+    referrerRows.push(referrerWaived ? {
+      key: 'percent_to_referrer',
+      label: 'Fee',
+      type: 'number',
+      value: claim.percent_to_referrer,
+      display: NO_FEE_DISPLAY,
+      caption: 'No fee on this job — no referrer invoice to collect',
+      link: {
+        label: 'Add a fee',
+        onClick: () => openWith(setReferrerForm, 'percent', 'referrer'),
+      },
+    } : referrerShowsFixed ? {
       key: 'referrer_fee_gbp',
       label: 'Fee',
       type: 'number',
@@ -110,11 +140,11 @@ export default function StandardJobFigures({ claim, ctx, missing, onChange, onTr
       caption: referrerPercent > 0
         ? `Fixed fee, used instead of the agreed ${referrerPercent}%`
         : 'A fixed fee agreed with them for this job',
-      missing: isMissing('percent_to_referrer') && referrerPercent <= 0,
-      link: {
-        label: 'Use the % instead',
-        onClick: () => openWith(setReferrerForm, 'percent', 'referrer'),
-      },
+      missing: referrerState === 'missing',
+      links: [
+        { label: 'Use the % instead', onClick: () => openWith(setReferrerForm, 'percent', 'referrer') },
+        { label: NO_FEE_LABEL, onClick: referrerNoFee },
+      ],
     } : {
       key: 'percent_to_referrer',
       label: 'Fee',
@@ -122,11 +152,11 @@ export default function StandardJobFigures({ claim, ctx, missing, onChange, onTr
       value: claim.percent_to_referrer,
       display: referrerPercent > 0 ? `${referrerPercent}%` : undefined,
       caption: 'Charged on the repair cost ex VAT',
-      missing: isMissing('percent_to_referrer') && referrerFeeGbp <= 0,
-      link: {
-        label: 'Add a fixed fee',
-        onClick: () => openWith(setReferrerForm, 'fixed', 'referrer'),
-      },
+      missing: referrerState === 'missing',
+      links: [
+        { label: 'Add a fixed fee', onClick: () => openWith(setReferrerForm, 'fixed', 'referrer') },
+        { label: NO_FEE_LABEL, onClick: referrerNoFee },
+      ],
     });
     referrerRows.push({
       key: 'referrer_vat_registered',
@@ -139,10 +169,28 @@ export default function StandardJobFigures({ claim, ctx, missing, onChange, onTr
     });
   }
 
-  /* The repairer's referral fee — the same two forms, on the repair they refer. */
+  /* The repairer's referral fee — the same three choices, on the repair they refer. */
+  const repairerNoFee = () => {
+    setRepairerForm(null);
+    onChange(
+      { referral_fee_repairer: 0, referral_fee_repairer_gbp: null },
+      `Repairer referral fee set to no fee on this job${repairerFeeGbp > 0 ? ` — the fixed fee of ${fmtGBP(repairerFeeGbp)} cleared` : ''}`
+    );
+  };
   const repairerRows = [];
   if (!ctx.totalLoss && repairerReferralApplies(claim, ctx)) {
-    repairerRows.push(repairerShowsFixed ? {
+    repairerRows.push(repairerWaived ? {
+      key: 'referral_fee_repairer',
+      label: 'Fee',
+      type: 'number',
+      value: claim.referral_fee_repairer,
+      display: NO_FEE_DISPLAY,
+      caption: 'No fee on this job — no referral invoice to raise',
+      link: {
+        label: 'Add a fee',
+        onClick: () => openWith(setRepairerForm, 'percent', 'repairer_referral'),
+      },
+    } : repairerShowsFixed ? {
       key: 'referral_fee_repairer_gbp',
       label: 'Fee',
       type: 'number',
@@ -151,11 +199,11 @@ export default function StandardJobFigures({ claim, ctx, missing, onChange, onTr
       caption: num(claim.referral_fee_repairer) > 0
         ? `Fixed fee, used instead of the agreed ${num(claim.referral_fee_repairer)}%`
         : 'A fixed fee agreed with them for this job',
-      missing: isMissing('referral_fee') && !claim.referral_fee_repairer,
-      link: {
-        label: 'Use the % instead',
-        onClick: () => openWith(setRepairerForm, 'percent', 'repairer_referral'),
-      },
+      missing: repairerState === 'missing',
+      links: [
+        { label: 'Use the % instead', onClick: () => openWith(setRepairerForm, 'percent', 'repairer_referral') },
+        { label: NO_FEE_LABEL, onClick: repairerNoFee },
+      ],
     } : {
       key: 'referral_fee_repairer',
       label: 'Fee',
@@ -163,11 +211,11 @@ export default function StandardJobFigures({ claim, ctx, missing, onChange, onTr
       value: claim.referral_fee_repairer,
       display: num(claim.referral_fee_repairer) > 0 ? `${num(claim.referral_fee_repairer)}%` : undefined,
       caption: 'Charged on the repair cost ex VAT',
-      missing: isMissing('referral_fee') && !repairerFeeGbp,
-      link: {
-        label: 'Add a fixed fee',
-        onClick: () => openWith(setRepairerForm, 'fixed', 'repairer_referral'),
-      },
+      missing: repairerState === 'missing',
+      links: [
+        { label: 'Add a fixed fee', onClick: () => openWith(setRepairerForm, 'fixed', 'repairer_referral') },
+        { label: NO_FEE_LABEL, onClick: repairerNoFee },
+      ],
     });
   }
 

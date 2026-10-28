@@ -1,12 +1,14 @@
 import {
   buildTrackerMetaPatch,
   canRequestInvoice,
+  finalInvoiceLabel,
   formatInvoiceDay,
   referrerFixedFee,
   repairerReferralApplies,
   salvageStorageCharge,
 } from '@/components/shared/invoiceChecklist';
 import { excessMode } from '@/components/shared/excessState';
+import { NO_FEE_DISPLAY, feeState } from '@/components/shared/feeState';
 import { authorityTotals, finalInvoiceTotal } from './invoiceAuthorityCheck';
 
 /**
@@ -61,7 +63,7 @@ export function figureSourceNote(claim, key) {
     case 'final_repair_cost': {
       const invoice = finalInvoiceTotal(claim);
       const sources = [];
-      if (invoice !== null && value !== null && Math.abs(value - invoice) <= 0.05) sources.push('Final Insurer Invoice');
+      if (invoice !== null && value !== null && Math.abs(value - invoice) <= 0.05) sources.push(finalInvoiceLabel(claim));
       // Only the Final Authority is ever the authorised figure an invoice is worked
       // from; the initial and supplementary authorities are records only.
       if (authority && value !== null && Math.abs(value - authority.gross) <= 0.05) {
@@ -128,7 +130,14 @@ export function figureRows({ claim, ctx, storagePercentDefault }) {
   }
 
   if (ctx?.hasReferrer) {
-    add({ key: 'percent_to_referrer', label: 'Referrer fee', value: num(claim?.percent_to_referrer), percent: true });
+    const referrerFee = feeState(claim, 'referrer');
+    add({
+      key: 'percent_to_referrer',
+      label: 'Referrer fee',
+      value: num(claim?.percent_to_referrer),
+      percent: referrerFee !== 'none',
+      display: referrerFee === 'none' ? NO_FEE_DISPLAY : undefined,
+    });
     const fixed = num(referrerFixedFee(claim));
     if (fixed > 0) {
       add({ key: 'referrer_fee_gbp', label: 'Referrer fee (fixed)', value: fixed, money: true, note: 'used ahead of the %' });
@@ -136,7 +145,14 @@ export function figureRows({ claim, ctx, storagePercentDefault }) {
   }
 
   if (!ctx?.totalLoss && repairerReferralApplies(claim, ctx)) {
-    add({ key: 'referral_fee_repairer', label: 'Repairer referral fee', value: num(claim?.referral_fee_repairer), percent: true });
+    const repairerFee = feeState(claim, 'repairer_referral');
+    add({
+      key: 'referral_fee_repairer',
+      label: 'Repairer referral fee',
+      value: num(claim?.referral_fee_repairer),
+      percent: repairerFee !== 'none',
+      display: repairerFee === 'none' ? NO_FEE_DISPLAY : undefined,
+    });
     const fixed = num(claim?.referral_fee_repairer_gbp);
     if (fixed > 0) {
       add({

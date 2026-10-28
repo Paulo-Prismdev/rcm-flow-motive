@@ -96,7 +96,7 @@ export default function InvoiceItemCard({
   const offText = !state.notApplicable ? ''
     : isRecommendedItem(item)
       ? `Not available${state.notApplicableReason ? ` — ${state.notApplicableReason}` : ''}`
-      : 'Not applicable';
+      : `Not applicable${state.notApplicableReason ? ` — ${state.notApplicableReason}` : ''}`;
 
   const subline = state.notApplicable ? offText
     : state.awaiting ? ''
@@ -113,7 +113,9 @@ export default function InvoiceItemCard({
               : '';
 
   const hint = state.notApplicable
-    ? `${offText} — open the menu to change it`
+    ? (state.noFee
+      ? 'No fee on this job — add a fee in the job figures and this invoice comes back'
+      : `${offText} — open the menu to change it`)
     : state.awaiting ? (state.hint || 'No amount can be worked out yet')
       : isDocument
         ? 'No copy attached yet'
@@ -327,7 +329,7 @@ export default function InvoiceItemCard({
                       )}
                     </>
                   )
-                ) : (
+                ) : state.noFee ? null : (
                   <ActionRow
                     icon={state.notApplicable ? <Check className="w-3.5 h-3.5" /> : <Ban className="w-3.5 h-3.5" />}
                     label={state.notApplicable ? 'Mark as applicable' : 'Mark not applicable'}

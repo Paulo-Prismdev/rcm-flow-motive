@@ -6,6 +6,7 @@ import {
   secondReferrerFixedFee,
   secondReferrerPercent,
 } from '@/components/shared/invoiceChecklist';
+import { NO_FEE_DISPLAY, NO_FEE_LABEL, feeState } from '@/components/shared/feeState';
 import { fmtGBP } from '@/components/shared/creditRepairRates';
 import FigureRow from '@/components/financials/FigureRow';
 import { MacButton, MacPrimaryButton } from '@/components/financials/MacButtons';
@@ -43,11 +44,15 @@ export default function SecondReferrerToggle({ claim, missing = [], onTrackerCha
   const fixedFee = secondReferrerFixedFee(claim);
   const editing = editingKey === 'second_referrer';
   const feeMissing = missing.some((m) => m.key === 'second_referrer_percent');
+  // No fee on this job: their invoice is not applicable, exactly as the main
+  // referrer's is when their fee is waived.
+  const waived = feeState(claim, 'second_referrer') === 'none';
 
   const [draftOn, setDraftOn] = useState(enabled);
   const [draftRef, setDraftRef] = useState(null);
   const [draftPercent, setDraftPercent] = useState(null);
   const [draftFixed, setDraftFixed] = useState(null);
+  const [draftNoFee, setDraftNoFee] = useState(false);
   const [feeForm, setFeeForm] = useState(null);
 
   // Each time the edit step opens it starts from the saved referrer, so a discarded
@@ -58,6 +63,7 @@ export default function SecondReferrerToggle({ claim, missing = [], onTrackerCha
     setDraftRef(storedId || storedName ? { id: storedId, name: storedName } : null);
     setDraftPercent(storedPercent);
     setDraftFixed(storedFixed);
+    setDraftNoFee(waived);
   }, [editing]);
 
   const referrerChanged = (draftRef?.id || '') !== storedId || (draftRef?.name || '') !== storedName;
@@ -75,8 +81,8 @@ export default function SecondReferrerToggle({ claim, missing = [], onTrackerCha
 
   const save = () => {
     setEditingKey(null);
-    const nextPercent = draftOn ? num(draftPercent) : null;
-    const nextFixed = draftOn ? num(draftFixed) : null;
+    const nextPercent = draftOn ? (draftNoFee ? 0 : num(draftPercent)) : null;
+    const nextFixed = draftOn ? (draftNoFee ? null : num(draftFixed)) : null;
     const nextVat = draftOn ? (draftRef?.vat_registered !== false) : null;
     const nextId = draftOn ? (draftRef?.id || '') : '';
     const nextName = draftOn ? (draftRef?.name || '') : '';
@@ -85,11 +91,13 @@ export default function SecondReferrerToggle({ claim, missing = [], onTrackerCha
 
     const before = enabled ? `On (${storedName || 'no referrer'})` : 'Off';
     const after = draftOn ? `On (${nextName || 'no referrer'})` : 'Off';
-    const feeText = nextPercent !== storedPercent
-      ? nextPercent === null ? '; second referrer fee cleared' : `; second referrer fee set to ${nextPercent}%`
-      : nextFixed !== storedFixed
-        ? nextFixed === null ? '; their fixed fee cleared' : `; their fixed fee set to ${fmtGBP(nextFixed)}`
-        : '';
+    const feeText = draftOn && draftNoFee
+      ? (nextPercent === storedPercent && nextFixed === storedFixed ? '' : '; no fee on this job')
+      : nextPercent !== storedPercent
+        ? nextPercent === null ? '; second referrer fee cleared' : `; second referrer fee set to ${nextPercent}%`
+        : nextFixed !== storedFixed
+          ? nextFixed === null ? '; their fixed fee cleared' : `; their fixed fee set to ${fmtGBP(nextFixed)}`
+          : '';
 
     onTrackerChange(
       buildTrackerMetaPatch(claim, {
@@ -112,7 +120,14 @@ export default function SecondReferrerToggle({ claim, missing = [], onTrackerCha
   );
 
   const showsFixed = (feeForm ?? (fixedFee > 0 ? 'fixed' : 'percent')) === 'fixed';
-  const feeRow = showsFixed ? {
+  const feeRow = waived ? {
+    key: 'second_referrer_percent',
+    label: 'Fee',
+    editable: false,
+    display: NO_FEE_DISPLAY,
+    caption: 'No fee on this job — no invoice to collect from them',
+    link: { label: 'Add a fee', onClick: () => { setFeeForm('percent'); setEditingKey('second_referrer'); } },
+  } : showsFixed ? {
     key: 'second_referrer_fee_gbp',
     label: 'Fee',
     editable: false,
@@ -176,12 +191,21 @@ export default function SecondReferrerToggle({ claim, missing = [], onTrackerCha
               <>
                 <ReferrerCombobox value={draftRef?.name || ''} onChange={pickReferrer} compact />
                 {warns(draftRef?.id, draftRef?.name)}
+                <label className="inline-flex cursor-pointer items-center gap-2 text-[13px] text-foreground">
+                  <input
+                    type="checkbox"
+                    checked={draftNoFee}
+                    onChange={(e) => setDraftNoFee(e.target.checked)}
+                    className="h-3.5 w-3.5 rounded border-mac-line"
+                  />
+                  {NO_FEE_LABEL}
+                </label>
                 <div className="flex flex-wrap items-center gap-2">
                   <label className="flex items-center gap-2 text-[13px] text-foreground">
                     Fee %
                     <input
-                      value={draftPercent ?? ''}
-                      onChange={(e) => setDraftPercent(e.target.value)}
+                      value={draftNoFee ? '' : (draftPercent ?? '')}
+                      onChange={(e) => { setDraftNoFee(false); setDraftPercent(e.target.value); }}
                       type="number"
                       step="0.01"
                       inputMode="decimal"
@@ -191,8 +215,8 @@ export default function SecondReferrerToggle({ claim, missing = [], onTrackerCha
                   <label className="flex items-center gap-2 text-[13px] text-foreground">
                     or a fixed fee
                     <input
-                      value={draftFixed ?? ''}
-                      onChange={(e) => setDraftFixed(e.target.value)}
+                      value={draftNoFee ? '' : (draftFixed ?? '')}
+                      onChange={(e) => { setDraftNoFee(false); setDraftFixed(e.target.value); }}
                       type="number"
                       step="0.01"
                       inputMode="decimal"
