@@ -409,7 +409,7 @@ export function checkRightInvoice(
   // that is what makes it an invoice we pay rather than one raised in someone
   // else's name.
   const printedTo = figures.party_to;
-  if (isPrivatePayingClaim(claim) && printedTo && partyMatch(printedTo, RCM_INVOICE_ADDRESS[0]) === 'different') {
+  if (item?.direction === 'in' && isPrivatePayingClaim(claim) && printedTo && partyMatch(printedTo, RCM_INVOICE_ADDRESS[0]) === 'different') {
     issues.push(`This invoice is addressed to "${printedTo}", but on a privately paid repair it has to be addressed to us, ${RCM_INVOICE_ADDRESS[0]}, because we settle the whole of it.`);
   }
 
