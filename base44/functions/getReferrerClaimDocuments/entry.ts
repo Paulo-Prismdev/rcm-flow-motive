@@ -48,9 +48,48 @@ export default async function (req: Request): Promise<Response> {
         uploaded_at: d.uploaded_at || d.created_date || null,
       }));
 
-    const legacyFiles = Array.isArray(claim.file_urls) ? claim.file_urls.filter(Boolean) : [];
+    // Documents the claim holds as a PDF on the record itself rather than as a filed
+    // row: the instruction to the repairer and the two forms the customer signs.
+    // All of them are the referrer's own paperwork, never internal.
+    const fieldDocs = [
+      {
+        id: 'claim-instruction',
+        item_key: 'instruction_to_repairer',
+        label: 'Instruction To Repairer',
+        file_name: `Instruction PDF (${claim.job_number || claim.reg || ''}).pdf`,
+        file_url: claim.instruction_pdf_url,
+        uploaded_at: claim.bs_instructed || null,
+      },
+      {
+        id: 'claim-repair-preference',
+        item_key: 'repair_preference',
+        label: 'Repair Preference Statement',
+        file_name: 'Statement of repair preference (signed).pdf',
+        file_url: claim.repair_preference_pdf_url,
+        uploaded_at: claim.repair_preference_signed_at || null,
+      },
+      {
+        id: 'claim-declaration-of-need',
+        item_key: 'declaration_of_need',
+        label: 'Declaration of Need - Replacement Vehicle',
+        file_name: 'Declaration of need - replacement vehicle (signed).pdf',
+        file_url: claim.declaration_of_need_pdf_url,
+        uploaded_at: claim.declaration_of_need_signed_at || null,
+      },
+    ].filter(
+      (d: any) =>
+        d.file_url && !documents.some((existing: any) => existing.file_url === d.file_url)
+    );
 
-    return Response.json({ documents, legacy_files: legacyFiles });
+    const allDocuments = [...documents, ...fieldDocs];
+
+    const legacyFiles = Array.isArray(claim.file_urls)
+      ? claim.file_urls.filter(
+          (url: string) => url && !allDocuments.some((d: any) => d.file_url === url)
+        )
+      : [];
+
+    return Response.json({ documents: allDocuments, legacy_files: legacyFiles });
   } catch (error: any) {
     return Response.json({ error: error.message }, { status: 500 });
   }

@@ -3,14 +3,13 @@ import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { FileText, ExternalLink, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
-import { getReferrerClaimDocuments } from '@/functions/getReferrerClaimDocuments';
 import { DOC_ITEMS } from '@/components/shared/docChecklist';
 
 const GENERAL_LABEL = 'General Document';
 const LEGACY_LABEL = 'Legacy file';
 
-const itemLabel = (key) =>
-  DOC_ITEMS.find((i) => i.key === key)?.label || GENERAL_LABEL;
+const itemLabel = (doc) =>
+  doc.label || DOC_ITEMS.find((i) => i.key === doc.item_key)?.label || GENERAL_LABEL;
 
 function fileBaseName(url) {
   try {
@@ -79,7 +78,7 @@ function Group({ title, rows }) {
  *
  * Other portal users keep the plain legacy list they have today.
  */
-export default function ReferrerDocumentsSection({ claim, legacyDocuments = [] }) {
+export default function ReferrerDocumentsSection({ claim, legacyDocuments = [], updateFiles = [] }) {
   const { data: currentUser } = useQuery({
     queryKey: ['currentUser'],
     queryFn: () => base44.auth.me(),
@@ -90,8 +89,9 @@ export default function ReferrerDocumentsSection({ claim, legacyDocuments = [] }
   const { data, isLoading } = useQuery({
     queryKey: ['referrerClaimDocuments', claim?.id],
     queryFn: async () => {
-      const res = await getReferrerClaimDocuments({ claim_id: claim.id });
-      return res.data || { documents: [], legacy_files: [] };
+      const res = await base44.functions.invoke('getReferrerClaimDocuments', { claim_id: claim.id });
+      const payload = res?.data ?? res;
+      return payload?.documents ? payload : { documents: [], legacy_files: [] };
     },
     enabled: isReferrer && !!claim?.id,
   });
@@ -129,7 +129,11 @@ export default function ReferrerDocumentsSection({ claim, legacyDocuments = [] }
   }
 
   const docs = data?.documents || [];
-  const legacy = (data?.legacy_files || []).filter((u) => !isImageUrl(u));
+  // Claim-level files nobody has filed against a checklist item, plus whatever
+  // was attached to a claim update (both were already visible to the referrer).
+  const legacy = [...(data?.legacy_files || []), ...updateFiles]
+    .filter((u) => u && !isImageUrl(u))
+    .filter((u, i, arr) => arr.indexOf(u) === i);
 
   // Checklist documents first, in checklist order, then everything else (general).
   const checklistRows = DOC_ITEMS.flatMap((item) =>
@@ -149,7 +153,7 @@ export default function ReferrerDocumentsSection({ claim, legacyDocuments = [] }
     .map((d) => ({
       key: d.id,
       name: displayName(d),
-      type: GENERAL_LABEL,
+      type: itemLabel(d),
       date: formatDay(d.uploaded_at),
       url: d.file_url,
     }));

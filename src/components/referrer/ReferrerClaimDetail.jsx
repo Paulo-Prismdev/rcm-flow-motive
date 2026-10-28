@@ -427,7 +427,7 @@ export default function ReferrerClaimDetail({ claim, onClose, initialSection }) 
         );
 
       case 'documents':
-        return <ReferrerDocumentsSection claim={claim} legacyDocuments={documents} />;
+        return <ReferrerDocumentsSection claim={claim} legacyDocuments={documents} updateFiles={updateFiles} />;
 
       case 'images':
         return (
