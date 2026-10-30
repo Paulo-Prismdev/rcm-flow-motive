@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { getPublicFormToken } from '@/functions/getPublicFormToken';
+import { antiSpamFields, serverMessage } from '@/lib/publicForm';
+import HoneypotField from '@/components/shared/HoneypotField';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -60,7 +61,10 @@ export default function ClientClaimForm() {
   const [submitted, setSubmitted] = useState(false);
   const [submittedData, setSubmittedData] = useState(null);
   const [error, setError] = useState('');
-  const [formToken, setFormToken] = useState('');
+  // When the page opened, and the hidden field people never fill in: the server uses
+  // both to turn away automated submissions.
+  const startedAt = useRef(Date.now());
+  const [honeypot, setHoneypot] = useState('');
   const [photos, setPhotos] = useState([]);
   const [uploadingPhotos, setUploadingPhotos] = useState(false);
   const fileInputRef = useRef(null);
@@ -100,11 +104,6 @@ export default function ClientClaimForm() {
   };
 
   const removePhoto = (index) => setPhotos(p => p.filter((_, i) => i !== index));
-
-  // Fetch form token on mount
-  useEffect(() => {
-    getPublicFormToken({}).then(res => setFormToken(res.data?.token || '')).catch(() => {});
-  }, []);
 
   // Canvas signature
   useEffect(() => {
@@ -199,19 +198,24 @@ export default function ClientClaimForm() {
     const canvas = canvasRef.current;
     const signatureDataUrl = canvas ? canvas.toDataURL('image/png') : '';
 
-    const result = await base44.functions.invoke('submitClientClaimForm', {
-      _form_secret: formToken,
-      formData,
-      signatureDataUrl,
-      photoUrls: photos.map(p => p.url),
-    });
-
-    setIsSubmitting(false);
-    if (result.data?.success) {
-      setSubmittedData(result.data);
-      setSubmitted(true);
-    } else {
-      setError(result.data?.error || 'Submission failed. Please try again.');
+    try {
+      const result = await base44.functions.invoke('submitClientClaimForm', {
+        ...antiSpamFields(startedAt.current, honeypot),
+        formData,
+        signatureDataUrl,
+        photoUrls: photos.map(p => p.url),
+      });
+      if (result.data?.success) {
+        setSubmittedData(result.data);
+        setSubmitted(true);
+      } else {
+        setError(result.data?.error || 'Submission failed. Please try again.');
+      }
+    } catch (e) {
+      // Everything typed stays on the form, so the client can simply try again.
+      setError(serverMessage(e, 'Submission failed. Please try again.'));
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -248,6 +252,7 @@ export default function ClientClaimForm() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <HoneypotField value={honeypot} onChange={setHoneypot} />
       {/* Header */}
       <div className="bg-[#151d44] px-4 py-4 flex items-center justify-center">
         <img
