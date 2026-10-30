@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Link2, Copy, Check, RefreshCw, Loader, ExternalLink, CheckCircle2, Trash2, FileDown } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
+import FormLinkExpiry from './FormLinkExpiry';
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger
@@ -22,7 +23,8 @@ export default function IndemnityLinkManager({ claim, onUpdate }) {
   const linkUrl = hasToken ? `${window.location.origin}/indemnity-form?token=${claim.indemnity_token}` : '';
   const completed = !!claim.indemnity_completed_at;
 
-  const genToken = () => (crypto?.randomUUID?.() || (Math.random().toString(36).slice(2) + Date.now().toString(36)));
+  // A random, unguessable token from the browser's secure generator.
+  const genToken = () => crypto.randomUUID();
 
   const handleGenerate = async () => {
     setGenerating(true);
@@ -203,7 +205,7 @@ export default function IndemnityLinkManager({ claim, onUpdate }) {
           </div>
           <div className="flex items-center justify-between">
             <p className="text-xs text-muted-foreground">
-              Generated {claim.indemnity_link_sent_at ? new Date(claim.indemnity_link_sent_at).toLocaleString('en-GB') : ''}
+              <FormLinkExpiry generatedAt={claim.indemnity_link_sent_at} completed={completed} />
             </p>
             <Button variant="ghost" size="sm" onClick={handleRegenerate} disabled={generating} className="flex items-center gap-1.5 text-xs">
               {generating ? <Loader className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}

@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Link2, Copy, Check, RefreshCw, Loader, ExternalLink, CheckCircle2, FileText, Download, Trash2 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
+import FormLinkExpiry from './FormLinkExpiry';
 
 // Internal-only control. Generates a secure, unguessable per-claim link containing a
 // declaration_of_need_token. External security comes from the token: the public submit
@@ -16,7 +17,8 @@ export default function DeclarationOfNeedLinkManager({ claim, onUpdate }) {
   const linkUrl = hasToken ? `${window.location.origin}/declaration-of-need-form?token=${claim.declaration_of_need_token}` : '';
   const signed = !!claim.declaration_of_need_signed;
 
-  const genToken = () => (crypto?.randomUUID?.() || (Math.random().toString(36).slice(2) + Date.now().toString(36)));
+  // A random, unguessable token from the browser's secure generator.
+  const genToken = () => crypto.randomUUID();
 
   const handleGenerate = async () => {
     setGenerating(true);
@@ -116,7 +118,7 @@ export default function DeclarationOfNeedLinkManager({ claim, onUpdate }) {
           </div>
           <div className="flex items-center justify-between">
             <p className="text-xs text-muted-foreground">
-              Generated {claim.declaration_of_need_link_sent_at ? new Date(claim.declaration_of_need_link_sent_at).toLocaleString('en-GB') : ''}
+              <FormLinkExpiry generatedAt={claim.declaration_of_need_link_sent_at} completed={signed} />
             </p>
             <div className="flex items-center gap-1.5">
               <Button variant="ghost" size="sm" onClick={handleRegenerate} disabled={generating} className="flex items-center gap-1.5 text-xs">
