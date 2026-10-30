@@ -15,9 +15,6 @@ Deno.serve(async (req) => {
     if (!indemnity_token) {
       return Response.json({ error: LINK_MESSAGES.invalid, reason: 'invalid' }, { status: 404 });
     }
-    if (!formData) {
-      return Response.json({ error: 'Missing form data' }, { status: 400 });
-    }
 
     // Look up the claim by its unique indemnity token (service role).
     const claims = await base44.asServiceRole.entities.Claim.filter({ indemnity_token });
@@ -30,6 +27,13 @@ Deno.serve(async (req) => {
     }
     if (signingLinkExpired(claim.indemnity_link_sent_at)) {
       return Response.json({ error: LINK_MESSAGES.expired, reason: 'expired' }, { status: 410 });
+    }
+    // `check_only` lets the form confirm the link is usable before the client starts typing.
+    if (body?.check_only === true) {
+      return Response.json({ valid: true });
+    }
+    if (!formData) {
+      return Response.json({ error: 'Missing form data' }, { status: 400 });
     }
 
     // Calculate driver age from DOB.
