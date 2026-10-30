@@ -1,72 +1,84 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
 import { isCancelledClaim } from '../../shared/claimOutcome.ts';
+import { LINK_MESSAGES, appPublicUrl, clip, verifyClaimLink } from '../../shared/publicLinks.ts';
 
-// Public endpoint: receives a bodyshop's update submission via the chaser email link.
-// Security: _form_secret + token verification (same as getBodyshopUpdateForm).
+const escapeHtml = (text: string) => text
+  .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+  .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+
+// Public endpoint: receives a repairer's update from the link in the chaser email.
+// Security: the link token is signed by the server for this claim and this form,
+// and runs out after 14 days (see shared/publicLinks.ts). No sign-in.
 // Creates an Incoming Bodyshop Communication ClaimUpdate, which resets the 48h timer.
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const body = await req.json();
+    const body = await req.json().catch(() => ({}));
 
-    const secret = body._form_secret;
-    if (!secret || secret !== Deno.env.get('PUBLIC_FORM_SECRET')) {
-      return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    const link = await verifyClaimLink(body?.token, 'bodyshop_update');
+    if (!link.claimId) {
+      return Response.json({ error: LINK_MESSAGES[link.error || 'invalid'], reason: link.error }, { status: 404 });
     }
+    const claimId = link.claimId;
 
-    const { token, description, next_steps, ecd, backordered_parts } = body;
-    if (!token) {
-      return Response.json({ error: 'Missing token' }, { status: 400 });
-    }
-    if (!description || !description.trim()) {
+    const description = clip(body?.description, 5000);
+    const next_steps = clip(body?.next_steps, 2000);
+    // An ECD is a date: anything else is ignored rather than written onto the claim.
+    const ecdRaw = clip(body?.ecd, 40);
+    const ecd = ecdRaw && !Number.isNaN(Date.parse(ecdRaw)) ? ecdRaw : '';
+    const backordered_parts = Array.isArray(body?.backordered_parts) ? body.backordered_parts.slice(0, 20) : [];
+    if (!description) {
       return Response.json({ error: 'Please provide an update description' }, { status: 400 });
     }
 
-    const claimId = await verifyBodyshopToken(token, secret);
-    if (!claimId) {
-      return Response.json({ error: 'Invalid or expired link' }, { status: 404 });
-    }
-
-    const claim = await base44.asServiceRole.entities.Claim.get(claimId);
+    const claim = await base44.asServiceRole.entities.Claim.get(claimId).catch(() => null);
     if (!claim) {
-      return Response.json({ error: 'Claim not found' }, { status: 404 });
+      return Response.json({ error: LINK_MESSAGES.invalid, reason: 'invalid' }, { status: 404 });
     }
 
     // Update the ECD on the claim if a value was provided
-    if (ecd && ecd.trim()) {
-      await base44.asServiceRole.entities.Claim.update(claimId, { ecd: ecd.trim() });
+    if (ecd) {
+      await base44.asServiceRole.entities.Claim.update(claimId, { ecd });
     }
 
     // Mark the claim as having an unread bodyshop update so internal users see a notification bubble
     await base44.asServiceRole.entities.Claim.update(claimId, { unread_bodyshop_update: true });
 
     // Build the update description, noting the ECD if it changed
-    let updateDescription = description.trim();
-    if (ecd && ecd.trim() && ecd.trim() !== (claim.ecd || '')) {
-      updateDescription += `\n\nUpdated ECD: ${ecd.trim()}`;
+    let updateDescription = description;
+    if (ecd && ecd !== (claim.ecd || '')) {
+      updateDescription += `\n\nUpdated ECD: ${ecd}`;
     }
 
     // ── Create backordered part records if any were reported ──
     if (backordered_parts && Array.isArray(backordered_parts) && backordered_parts.length > 0) {
-      const validParts = backordered_parts.filter((p: any) => p.part_description && p.part_description.trim());
+      const validParts = backordered_parts
+        .filter((p: any) => p && clip(p.part_description, 500))
+        .map((p: any) => ({
+          part_description: clip(p.part_description, 500),
+          part_number: clip(p.part_number, 100),
+          supplier_name: clip(p.supplier_name, 200),
+          expected_arrival_date: clip(p.expected_arrival_date, 40),
+          additional_notes: clip(p.additional_notes, 1000),
+        }));
       if (validParts.length > 0) {
         for (const part of validParts) {
           await base44.asServiceRole.entities.BackorderedPart.create({
             claim_id: claimId,
             claim_job_number: claim.job_number || '',
             claim_reg: claim.reg || '',
-            part_description: part.part_description.trim(),
-            part_number: (part.part_number || '').trim(),
-            supplier_name: (part.supplier_name || '').trim(),
-            expected_arrival_date: part.expected_arrival_date || '',
-            additional_notes: (part.additional_notes || '').trim(),
+            part_description: part.part_description,
+            part_number: part.part_number,
+            supplier_name: part.supplier_name,
+            expected_arrival_date: part.expected_arrival_date,
+            additional_notes: part.additional_notes,
             submitted_by_name: claim.bodyshop || '',
             submitted_by_phone: '',
             received_by_repairer: false,
           });
         }
         const partsSummary = validParts.map((p: any) =>
-          `${p.part_description.trim()}${p.part_number ? ` (Part #: ${p.part_number.trim()})` : ''}`
+          `${p.part_description}${p.part_number ? ` (Part #: ${p.part_number})` : ''}`
         ).join('; ');
         updateDescription += `\n\nBackordered Parts: ${partsSummary}`;
       }
@@ -79,7 +91,7 @@ Deno.serve(async (req) => {
       direction: 'Incoming',
       platform: 'E-Mail',
       description: updateDescription,
-      next_steps: (next_steps || '').trim()
+      next_steps,
     });
 
     // ── Reset the general 48-hour case update timer ──
@@ -101,6 +113,8 @@ Deno.serve(async (req) => {
       const notifTitle = `Repair update received from ${claim.bodyshop || 'bodyshop'}${regPart}`;
       const notifMessage = `Job ${claim.job_number || 'Unknown'}: ${updateDescription.slice(0, 200)}${updateDescription.length > 200 ? '...' : ''}`;
       const notifLink = `/claims?id=${claimId}`;
+      const claimUrl = `${appPublicUrl()}/Claims?id=${encodeURIComponent(claimId)}`;
+      const safe = (v: any) => escapeHtml(String(v ?? ''));
 
       const recipients = internalUsers.filter((u: any) => {
         const prefs = u.notification_preferences || {};
@@ -128,12 +142,12 @@ Deno.serve(async (req) => {
             subject: notifTitle,
             body: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">
               <h2 style="color:#131d47;">Repair Update Received</h2>
-              <p><strong>Job:</strong> ${claim.job_number || 'Unknown'}</p>
-              <p><strong>Vehicle:</strong> ${claim.reg || 'N/A'}</p>
-              <p><strong>Bodyshop:</strong> ${claim.bodyshop || 'N/A'}</p>
+              <p><strong>Job:</strong> ${safe(claim.job_number || 'Unknown')}</p>
+              <p><strong>Vehicle:</strong> ${safe(claim.reg || 'N/A')}</p>
+              <p><strong>Bodyshop:</strong> ${safe(claim.bodyshop || 'N/A')}</p>
               <p><strong>Update:</strong></p>
-              <p style="background:#f5f6fa;padding:12px;border-radius:8px;white-space:pre-wrap;">${updateDescription.replace(/\n/g, '<br>')}</p>
-              <p><a href="https://app.base44.com/claims?id=${claimId}" style="background:#131d47;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;display:inline-block;">View Claim</a></p>
+              <p style="background:#f5f6fa;padding:12px;border-radius:8px;white-space:pre-wrap;">${safe(updateDescription).replace(/\n/g, '<br>')}</p>
+              <p><a href="${claimUrl}" style="background:#131d47;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;display:inline-block;">View Claim</a></p>
             </div>`,
           }).catch(() => {});
         }
