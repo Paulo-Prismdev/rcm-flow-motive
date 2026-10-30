@@ -137,7 +137,7 @@ export function ownFileUrls(urls: unknown, max = 40): string[] {
 export function validSignature(dataUrl: unknown): boolean {
   return typeof dataUrl === 'string'
     && dataUrl.startsWith('data:image/png;base64,')
-    && dataUrl.length < 700_000;
+    && dataUrl.length < 2_000_000;
 }
 
 /** Trim a free-text value to a maximum length. */

@@ -1,20 +1,47 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
 import { jsPDF } from 'npm:jspdf@2.5.1';
+import { clip, looksAutomated, ownFileUrls, validSignature } from '../../shared/publicLinks.ts';
+
+// Public endpoint: the open claim form anyone can fill in (no link or sign-in).
+// Protection: a hidden field and a minimum time on the page screen out automated
+// submissions; only the form's own fields are saved, each trimmed to a sensible
+// length; photos must be files uploaded to this app; the claim type must be one the
+// form offers. A new claim always starts as New and is checked by staff.
+const CLAIM_TYPES = ['Credit Repair', 'Fault Claim', 'Non-Fault - Own Insurer', 'Non-Fault Claim', 'Total Loss', 'Glass Claim'];
+const VEHICLE_TYPES = ['Car', 'Van', 'HGV', 'Motorcycle', 'Other'];
+
+async function highestClaimNumber(base44: any): Promise<number> {
+  const allClaims = await base44.asServiceRole.entities.Claim.list('-created_date', 10000);
+  let highest = 0;
+  for (const record of allClaims) {
+    if (record.job_number && record.job_number.startsWith('CLM-')) {
+      const num = parseInt(record.job_number.split('-')[1]);
+      if (!isNaN(num) && num > highest) highest = num;
+    }
+  }
+  return highest;
+}
 
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const body = await req.json();
+    const body = await req.json().catch(() => ({}));
 
-    const secret = body._form_secret;
-    if (!secret || secret !== Deno.env.get('PUBLIC_FORM_SECRET')) {
-      return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    if (looksAutomated(body)) {
+      return Response.json({ error: 'We could not accept this submission. Please try again.' }, { status: 400 });
     }
 
-    const { formData, signatureDataUrl, photoUrls } = body;
+    const raw = body?.formData && typeof body.formData === 'object' ? body.formData : null;
+    const signatureDataUrl = body?.signatureDataUrl;
+    const photoUrls = ownFileUrls(body?.photoUrls);
 
-    if (!formData) {
+    if (!raw) {
       return Response.json({ error: 'Missing form data' }, { status: 400 });
+    }
+    // Every text field trimmed and capped, so nothing oversized lands on the claim.
+    const formData: Record<string, any> = {};
+    for (const [key, value] of Object.entries(raw)) {
+      formData[key] = typeof value === 'string' ? clip(value, key === 'circumstances' || key.endsWith('_damage') ? 5000 : 500) : value;
     }
     if (!formData.client_name) {
       return Response.json({ error: 'Client name is required' }, { status: 400 });
@@ -22,26 +49,17 @@ Deno.serve(async (req) => {
     if (!formData.reg) {
       return Response.json({ error: 'Vehicle registration is required' }, { status: 400 });
     }
-    if (!signatureDataUrl) {
-      return Response.json({ error: 'Signature is required' }, { status: 400 });
+    if (!validSignature(signatureDataUrl)) {
+      return Response.json({ error: 'Please sign the form before submitting.' }, { status: 400 });
     }
 
-    // Generate job number
-    const allClaims = await base44.asServiceRole.entities.Claim.list('-created_date', 10000);
-    let highestNumber = 0;
-    for (const record of allClaims) {
-      if (record.job_number && record.job_number.startsWith('CLM-')) {
-        const num = parseInt(record.job_number.split('-')[1]);
-        if (!isNaN(num) && num > highestNumber) highestNumber = num;
-      }
-    }
-    const jobNumber = `CLM-${String(highestNumber + 1).padStart(4, '0')}`;
+    const jobNumber = `CLM-${String((await highestClaimNumber(base44)) + 1).padStart(4, '0')}`;
 
     // Build claim record
     const claimRecord = {
       job_number: jobNumber,
       reg: (formData.reg || '').toUpperCase(),
-      claim_type: formData.claim_type || 'Credit Repair',
+      claim_type: CLAIM_TYPES.includes(formData.claim_type) ? formData.claim_type : 'Credit Repair',
       circumstances: formData.circumstances || '',
       loss_date: formData.loss_date || '',
       loss_time: formData.loss_time || '',
@@ -59,7 +77,7 @@ Deno.serve(async (req) => {
       make_model: formData.make_model || '',
       vehicle_colour: formData.vehicle_colour || '',
       vehicle_damage: formData.vehicle_damage || '',
-      vehicle_type: formData.vehicle_type || 'Car',
+      vehicle_type: VEHICLE_TYPES.includes(formData.vehicle_type) ? formData.vehicle_type : 'Car',
       unroadworthy: !!formData.unroadworthy,
       recovery_required: !!formData.recovery_required,
       insurer: formData.insurer || '',
@@ -75,11 +93,21 @@ Deno.serve(async (req) => {
       secondary_status: 'New',
       date_received: new Date().toISOString().split('T')[0],
       file_urls: [],
-      image_urls: photoUrls || [],
+      image_urls: photoUrls,
     };
 
     // Create the claim
     const newClaim = await base44.asServiceRole.entities.Claim.create(claimRecord);
+
+    // Two forms sent at the same moment can pick the same number. If another claim
+    // already holds it, this one (the later) moves to the next free number.
+    const sameNumber = await base44.asServiceRole.entities.Claim.filter({ job_number: jobNumber });
+    if ((sameNumber || []).some((c: any) => c.id !== newClaim.id && String(c.created_date) <= String(newClaim.created_date))) {
+      const next = `CLM-${String((await highestClaimNumber(base44)) + 1).padStart(4, '0')}`;
+      await base44.asServiceRole.entities.Claim.update(newClaim.id, { job_number: next });
+      claimRecord.job_number = next;
+    }
+    const finalJobNumber = claimRecord.job_number;
 
     // Generate Statement of Truth PDF
     const doc = new jsPDF();
