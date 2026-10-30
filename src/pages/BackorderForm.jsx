@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { submitBackorderedPart } from '@/functions/submitBackorderedPart';
-import { getPublicFormToken } from '@/functions/getPublicFormToken';
+import { serverMessage } from '@/lib/publicForm';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
@@ -17,11 +17,10 @@ const emptyPart = () => ({
 });
 
 export default function BackorderForm() {
-  const [claimId, setClaimId] = useState('');
+  const [linkToken, setLinkToken] = useState('');
   const [claimInfo, setClaimInfo] = useState(null);
   const [loadingClaim, setLoadingClaim] = useState(true);
   const [claimError, setClaimError] = useState('');
-  const [formToken, setFormToken] = useState('');
 
   const [submitterName, setSubmitterName] = useState('');
   const [submitterPhone, setSubmitterPhone] = useState('');
@@ -32,16 +31,18 @@ export default function BackorderForm() {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const id = params.get('claim');
-    if (!id) {
-      setClaimError('No claim reference found in this link. Please contact us for a valid link.');
+    const token = params.get('token');
+    if (!token) {
+      setClaimError('This link is not valid. Please contact RCM Automotive for a new one.');
       setLoadingClaim(false);
       return;
     }
-    setClaimId(id);
-    setClaimInfo({ id });
-    getPublicFormToken({}).then(res => setFormToken(res.data?.token || '')).catch(() => {});
-    setLoadingClaim(false);
+    setLinkToken(token);
+    // Check the link before anything is typed, and show which vehicle it is for.
+    submitBackorderedPart({ token, check_only: true })
+      .then((res) => setClaimInfo({ job_number: res.data?.job_number || '', reg: res.data?.reg || '' }))
+      .catch((err) => setClaimError(serverMessage(err, 'This link is not valid. Please contact RCM Automotive for a new one.')))
+      .finally(() => setLoadingClaim(false));
   }, []);
 
   const updatePart = (index, field, value) => {
@@ -65,15 +66,14 @@ export default function BackorderForm() {
 
     try {
       await submitBackorderedPart({
-        _form_secret: formToken,
-        claim_id: claimId,
+        token: linkToken,
         submitted_by_name: submitterName,
         submitted_by_phone: submitterPhone,
         parts: validParts,
       });
       setSubmitted(true);
     } catch (err) {
-      setError('Something went wrong. Please try again or contact us directly.');
+      setError(serverMessage(err, 'Something went wrong. Please try again or contact us directly.'));
     } finally {
       setSubmitting(false);
     }
@@ -106,6 +106,11 @@ export default function BackorderForm() {
         <img src={companyLogo} alt="RCM Automotive" className="h-20 w-auto object-contain mb-4" />
         <h1 className="text-2xl font-bold text-white">Backordered Parts Notification</h1>
         <p className="text-white/60 text-sm mt-1">Please complete the form below to notify us of any backordered parts</p>
+        {claimInfo?.reg && (
+          <p className="text-white/80 text-sm mt-2">
+            Vehicle <span className="font-semibold">{claimInfo.reg}</span>{claimInfo.job_number ? ` · ${claimInfo.job_number}` : ''}
+          </p>
+        )}
       </div>
 
       <div className="w-full max-w-2xl bg-white/10 backdrop-blur rounded-2xl border border-white/15 shadow-xl p-6 md:p-8">
