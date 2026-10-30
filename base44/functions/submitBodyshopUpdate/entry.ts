@@ -118,7 +118,8 @@ Deno.serve(async (req) => {
 
       const recipients = internalUsers.filter((u: any) => {
         const prefs = u.notification_preferences || {};
-        return prefs.repair_update_received !== false; // default ON
+        // Staff only: portal users never receive another company's claim updates.
+        return u.user_type === 'internal' && prefs.repair_update_received !== false; // default ON
       });
 
       for (const user of recipients) {
@@ -160,24 +161,7 @@ Deno.serve(async (req) => {
 
     return Response.json({ success: true, claim_id: claimId });
   } catch (error: any) {
-    console.error('submitBodyshopUpdate error:', error.message, error.stack);
-    return Response.json({ error: error.message }, { status: 500 });
+    console.error('submitBodyshopUpdate error:', error?.message, error?.stack);
+    return Response.json({ error: 'Something went wrong. Please try again.' }, { status: 500 });
   }
 });
-
-async function verifyBodyshopToken(token: string, secret: string): Promise<string | null> {
-  try {
-    const [encodedId, hash] = token.split('.');
-    if (!encodedId || !hash) return null;
-    const claimId = atob(encodedId);
-    const encoder = new TextEncoder();
-    const data = encoder.encode(claimId + ':' + secret);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-    const expectedHash = hashHex.substring(0, 24);
-    return hash === expectedHash ? claimId : null;
-  } catch {
-    return null;
-  }
-}
