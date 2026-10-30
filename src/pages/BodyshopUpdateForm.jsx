@@ -3,12 +3,12 @@ import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Check, Loader, AlertTriangle, Car } from 'lucide-react';
+import { serverMessage } from '@/lib/publicForm';
 
 export default function BodyshopUpdateForm() {
   const urlParams = new URLSearchParams(window.location.search);
   const token = urlParams.get('token');
 
-  const [formToken, setFormToken] = useState('');
   const [claim, setClaim] = useState(null);
   const [description, setDescription] = useState('');
   const [nextSteps, setNextSteps] = useState('');
@@ -32,14 +32,7 @@ export default function BodyshopUpdateForm() {
 
     (async () => {
       try {
-        const tokenRes = await base44.functions.invoke('getPublicFormToken', {});
-        const ft = tokenRes.data?.token || '';
-        setFormToken(ft);
-
-        const res = await base44.functions.invoke('getBodyshopUpdateForm', {
-          _form_secret: ft,
-          token
-        });
+        const res = await base44.functions.invoke('getBodyshopUpdateForm', { token });
         if (res.data?.success) {
           setClaim(res.data.claim);
           setEcd(res.data.claim.ecd || '');
@@ -66,7 +59,6 @@ export default function BodyshopUpdateForm() {
         ? backorderParts.filter(p => p.part_description.trim())
         : [];
       const result = await base44.functions.invoke('submitBodyshopUpdate', {
-        _form_secret: formToken,
         token,
         description,
         next_steps: nextSteps,
@@ -79,7 +71,7 @@ export default function BodyshopUpdateForm() {
         setError(result.data?.error || 'Submission failed. Please try again.');
       }
     } catch (e) {
-      setError(e?.message || 'Submission failed. Please try again.');
+      setError(serverMessage(e, 'Submission failed. Please try again.'));
     }
     setIsSubmitting(false);
   };
