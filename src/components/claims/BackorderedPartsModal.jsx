@@ -4,6 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { Package, CheckCircle2, Circle, Trash2, ExternalLink, Copy, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
+import { useBackorderLink } from './useBackorderLink';
 import {
   Dialog,
   DialogContent,
@@ -34,12 +35,10 @@ export default function BackorderedPartsModal({ claim, currentUser, isOpen, onCl
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['backorderedParts', claim.id] }),
   });
 
-  const appOrigin = window.location.hostname.includes('base44.app')
-    ? `https://${window.location.hostname.replace(/^preview-sandbox--/, '')}`
-    : window.location.origin;
-  const formUrl = `${appOrigin}/backorder-form?claim=${claim.id}`;
+  const { url: formUrl, isError: linkError } = useBackorderLink(claim.id);
 
   const copyLink = () => {
+    if (!formUrl) return;
     navigator.clipboard.writeText(formUrl);
     setCopiedLink(true);
     setTimeout(() => setCopiedLink(false), 2000);
@@ -62,14 +61,14 @@ export default function BackorderedPartsModal({ claim, currentUser, isOpen, onCl
 
         {/* Link sharing area */}
         <div className="mb-6 p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-          <p className="text-[13px] text-gray-600 dark:text-gray-400 mb-2">Send this link to the repairer to report backordered parts:</p>
+          <p className="text-[13px] text-gray-600 dark:text-gray-400 mb-2">Send this link to the repairer to report backordered parts. It opens this claim only and lasts 14 days:</p>
           <div className="flex gap-2">
             <input
               readOnly
-              value={formUrl}
+              value={formUrl || (linkError ? 'Could not create the link. Close and reopen to try again.' : 'Creating link…')}
               className="flex-1 text-xs px-3 py-2 rounded-lg bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 truncate"
             />
-            <Button size="sm" variant="outline" onClick={copyLink} className="flex-shrink-0 gap-1.5 h-9">
+            <Button size="sm" variant="outline" onClick={copyLink} disabled={!formUrl} className="flex-shrink-0 gap-1.5 h-9">
               {copiedLink ? <Check className="w-3.5 h-3.5 text-green-500" /> : <Copy className="w-3.5 h-3.5" />}
               {copiedLink ? 'Copied' : 'Copy'}
             </Button>
