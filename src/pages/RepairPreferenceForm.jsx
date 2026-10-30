@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
-import { getPublicFormToken } from '@/functions/getPublicFormToken';
+import { serverMessage } from '@/lib/publicForm';
 import { Button } from '@/components/ui/button';
 import { Check, AlertTriangle, Loader, PenLine, Trash2, FileCheck2 } from 'lucide-react';
 
@@ -11,11 +11,11 @@ export default function RepairPreferenceForm() {
   const [claim, setClaim] = useState(null);
   const [loading, setLoading] = useState(!!repair_preference_token);
   const [linkValid, setLinkValid] = useState(true);
+  const [linkExpired, setLinkExpired] = useState(false);
   const [clientName, setClientName] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [formToken, setFormToken] = useState('');
 
   // Signature canvas
   const canvasRef = useRef(null);
@@ -27,20 +27,15 @@ export default function RepairPreferenceForm() {
     if (!repair_preference_token) { setLinkValid(false); setLoading(false); return; }
     (async () => {
       try {
-        const tokenRes = await getPublicFormToken({});
-        const secret = tokenRes.data?.token || '';
-        setFormToken(secret);
         // Fetch claim details via the public (auth-free) backend function,
-        // gated by the form secret + per-claim token — same as the submit path.
-        const res = await base44.functions.invoke('getRepairPreferenceClaim', {
-          _form_secret: secret,
-          repair_preference_token,
-        });
+        // gated by the per-claim token — same as the submit path.
+        const res = await base44.functions.invoke('getRepairPreferenceClaim', { repair_preference_token });
         const data = res?.data;
         if (data?.valid) {
           setClaim(data);
           if (data.signed) setSubmitted(true);
         } else {
+          setLinkExpired(data?.reason === 'expired');
           setLinkValid(false);
         }
       } catch {
@@ -112,7 +107,6 @@ export default function RepairPreferenceForm() {
     try {
       const signatureDataUrl = canvasRef.current ? canvasRef.current.toDataURL('image/png') : '';
       const result = await base44.functions.invoke('submitRepairPreferenceForm', {
-        _form_secret: formToken,
         repair_preference_token,
         clientName: clientName.trim(),
         signatureDataUrl,
@@ -123,7 +117,7 @@ export default function RepairPreferenceForm() {
         setError(result.data?.error || 'Submission failed. Please try again.');
       }
     } catch (e) {
-      setError(e?.message || 'Submission failed. Please try again.');
+      setError(serverMessage(e, 'Submission failed. Please try again.'));
     }
     setIsSubmitting(false);
   };
@@ -143,8 +137,12 @@ export default function RepairPreferenceForm() {
           <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
             <AlertTriangle className="w-8 h-8 text-red-600" />
           </div>
-          <h2 className="text-xl font-bold text-gray-800 mb-2">Invalid Link</h2>
-          <p className="text-gray-500 text-sm">This repair preference link is invalid or has expired. Please contact us to request a new link.</p>
+          <h2 className="text-xl font-bold text-gray-800 mb-2">{linkExpired ? 'Link expired' : 'Invalid link'}</h2>
+          <p className="text-gray-500 text-sm">
+            {linkExpired
+              ? 'This link has expired. Please contact RCM Automotive for a new one.'
+              : 'This link is not valid. Please contact RCM Automotive for a new one.'}
+          </p>
         </div>
       </div>
     );
