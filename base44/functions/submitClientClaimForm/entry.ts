@@ -145,7 +145,7 @@ Deno.serve(async (req) => {
     doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(80, 80, 80);
-    doc.text(`Claim Reference: ${jobNumber}  |  Date: ${new Date().toLocaleDateString('en-GB')}`, 105, yPos, { align: 'center' });
+    doc.text(`Claim Reference: ${finalJobNumber}  |  Date: ${new Date().toLocaleDateString('en-GB')}`, 105, yPos, { align: 'center' });
 
     yPos += 3;
     // Green accent line
@@ -274,7 +274,7 @@ Deno.serve(async (req) => {
     // Upload PDF
     const pdfBytes = doc.output('arraybuffer');
     const pdfBlob = new Blob([pdfBytes], { type: 'application/pdf' });
-    const filename = `${jobNumber}-statement-of-truth-${new Date().toISOString().replace(/[:.]/g, '-')}.pdf`;
+    const filename = `${finalJobNumber}-statement-of-truth-${new Date().toISOString().replace(/[:.]/g, '-')}.pdf`;
     const pdfFile = new File([pdfBlob], filename, { type: 'application/pdf' });
 
     const uploadResult = await base44.asServiceRole.integrations.Core.UploadFile({ file: pdfFile });
@@ -287,12 +287,12 @@ Deno.serve(async (req) => {
     return Response.json({
       success: true,
       claim_id: newClaim.id,
-      job_number: jobNumber,
+      job_number: finalJobNumber,
       pdf_url: uploadResult.file_url,
     });
 
   } catch (error) {
-    console.error('submitClientClaimForm error:', error.message, error.stack);
-    return Response.json({ error: error.message }, { status: 500 });
+    console.error('submitClientClaimForm error:', error?.message, error?.stack);
+    return Response.json({ error: 'Something went wrong. Please try again.' }, { status: 500 });
   }
 });
