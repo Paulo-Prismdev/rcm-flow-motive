@@ -6,6 +6,15 @@ import { clip, looksAutomated } from '../../shared/publicLinks.ts';
 // submissions, and only the form's own fields are saved, each trimmed to length.
 // A request always starts as New Request and is checked by staff.
 Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response(null, {
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type',
+      },
+    });
+  }
   try {
     const base44 = createClientFromRequest(req);
     const data = await req.json().catch(() => ({}));
