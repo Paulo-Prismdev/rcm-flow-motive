@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { getPublicFormToken } from '@/functions/getPublicFormToken';
+import { serverMessage, serverReason } from '@/lib/publicForm';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -121,12 +121,18 @@ export default function IndemnityForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
-  const [formToken, setFormToken] = useState('');
-  const [linkValid, setLinkValid] = useState(true);
+  // null while the link is being checked; then '' when it can be used, or the reason it can't.
+  const [linkProblem, setLinkProblem] = useState(null);
+  const [linkReason, setLinkReason] = useState(null);
 
   useEffect(() => {
-    if (!indemnity_token) { setLinkValid(false); return; }
-    getPublicFormToken({}).then(res => setFormToken(res.data?.token || '')).catch(() => {});
+    if (!indemnity_token) { setLinkProblem('This link is not valid. Please contact RCM Automotive for a new one.'); return; }
+    base44.functions.invoke('submitIndemnityForm', { indemnity_token, check_only: true })
+      .then(() => setLinkProblem(''))
+      .catch((e) => {
+        setLinkReason(serverReason(e));
+        setLinkProblem(serverMessage(e, 'This link is not valid. Please contact RCM Automotive for a new one.'));
+      });
   }, [indemnity_token]);
 
   const field = (key, value) => setFormData(p => ({ ...p, [key]: value }));
@@ -178,7 +184,6 @@ export default function IndemnityForm() {
     setIsSubmitting(true);
     try {
       const result = await base44.functions.invoke('submitIndemnityForm', {
-        _form_secret: formToken,
         indemnity_token,
         formData,
       });
@@ -188,7 +193,7 @@ export default function IndemnityForm() {
         setError(result.data?.error || 'Submission failed. Please try again.');
       }
     } catch (e) {
-      setError(e?.message || 'Submission failed. Please try again.');
+      setError(serverMessage(e, 'Submission failed. Please try again.'));
     }
     setIsSubmitting(false);
   };
@@ -209,15 +214,25 @@ export default function IndemnityForm() {
     );
   };
 
-  if (!linkValid) {
+  if (linkProblem === null) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <Loader className="w-6 h-6 text-gray-400 animate-spin" aria-label="Checking your link" />
+      </div>
+    );
+  }
+
+  if (linkProblem) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl shadow-lg p-8 max-w-md w-full text-center">
           <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
             <AlertTriangle className="w-8 h-8 text-red-600" />
           </div>
-          <h2 className="text-xl font-bold text-gray-800 mb-2">Invalid Link</h2>
-          <p className="text-gray-500 text-sm">This indemnity link is invalid or has expired. Please contact us to request a new link.</p>
+          <h2 className="text-xl font-bold text-gray-800 mb-2">
+            {linkReason === 'used' ? 'Already completed' : linkReason === 'expired' ? 'Link expired' : 'Invalid link'}
+          </h2>
+          <p className="text-gray-500 text-sm">{linkProblem}</p>
         </div>
       </div>
     );
