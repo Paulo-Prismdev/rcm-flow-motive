@@ -1,42 +1,45 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
 import { jsPDF } from 'npm:jspdf@2.5.1';
+import { LINK_MESSAGES, signingLinkExpired, validSignature } from '../../shared/publicLinks.ts';
 
 // Form version — stored on the claim and printed on the PDF so we can prove
 // which wording the customer agreed to at the time of signing.
 const FORM_VERSION = 'DON-V1.0';
 
 // Public endpoint: receives a client's signed Declaration of Need – Replacement Vehicle.
-// Security: two layers —
-//   1. _form_secret must match PUBLIC_FORM_SECRET (prevents arbitrary external calls)
-//   2. declaration_of_need_token must match a claim's stored token (binds to one claim)
-// No user auth — service role is used to look up and update the claim.
+// Security: declaration_of_need_token must match a claim's stored token. The link
+// runs out 14 days after it was generated and can be signed once (see
+// shared/publicLinks.ts). No sign-in. The answers go only into the signed PDF.
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const body = await req.json();
+    const body = await req.json().catch(() => ({}));
 
-    const secret = body._form_secret;
-    if (!secret || secret !== Deno.env.get('PUBLIC_FORM_SECRET')) {
-      return Response.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const { declaration_of_need_token, formData, signatureDataUrl } = body;
+    const declaration_of_need_token = typeof body?.declaration_of_need_token === 'string' ? body.declaration_of_need_token : '';
+    const formData = body?.formData && typeof body.formData === 'object' ? body.formData : null;
+    const signatureDataUrl = body?.signatureDataUrl;
     if (!declaration_of_need_token) {
-      return Response.json({ error: 'Missing declaration of need token' }, { status: 400 });
+      return Response.json({ error: LINK_MESSAGES.invalid, reason: 'invalid' }, { status: 404 });
     }
     if (!formData) {
       return Response.json({ error: 'Missing form data' }, { status: 400 });
     }
-    if (!signatureDataUrl) {
-      return Response.json({ error: 'Signature is required' }, { status: 400 });
+    if (!validSignature(signatureDataUrl)) {
+      return Response.json({ error: 'Please sign the form before submitting.' }, { status: 400 });
     }
 
     // Look up the claim by its unique declaration of need token (service role).
     const claims = await base44.asServiceRole.entities.Claim.filter({ declaration_of_need_token });
     if (!claims || claims.length === 0) {
-      return Response.json({ error: 'Invalid or expired link' }, { status: 404 });
+      return Response.json({ error: LINK_MESSAGES.invalid, reason: 'invalid' }, { status: 404 });
     }
     const claim = claims[0];
+    if (claim.declaration_of_need_signed) {
+      return Response.json({ error: LINK_MESSAGES.used, reason: 'used' }, { status: 409 });
+    }
+    if (signingLinkExpired(claim.declaration_of_need_link_sent_at)) {
+      return Response.json({ error: LINK_MESSAGES.expired, reason: 'expired' }, { status: 410 });
+    }
 
     // ── Generate the Declaration of Need PDF ──
     const doc = new jsPDF();
@@ -338,7 +341,7 @@ Deno.serve(async (req) => {
 
     return Response.json({ success: true, claim_id: claim.id, pdf_url: pdfUrl });
   } catch (error) {
-    console.error('submitDeclarationOfNeedForm error:', error.message, error.stack);
-    return Response.json({ error: error.message }, { status: 500 });
+    console.error('submitDeclarationOfNeedForm error:', error?.message, error?.stack);
+    return Response.json({ error: 'Something went wrong. Please try again.' }, { status: 500 });
   }
 });

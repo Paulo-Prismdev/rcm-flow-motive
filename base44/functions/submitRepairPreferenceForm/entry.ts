@@ -1,38 +1,41 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
 import { jsPDF } from 'npm:jspdf@2.5.1';
+import { LINK_MESSAGES, clip, signingLinkExpired, validSignature } from '../../shared/publicLinks.ts';
 
 // Public endpoint: receives a client's signed Statement of Repair Preference.
-// Security: two layers —
-//   1. _form_secret must match PUBLIC_FORM_SECRET (prevents arbitrary external calls)
-//   2. repair_preference_token must match a claim's stored token (binds to one claim)
-// No user auth — service role is used to look up and update the claim.
+// Security: repair_preference_token must match a claim's stored token. The link
+// runs out 14 days after it was generated and can be signed once (see
+// shared/publicLinks.ts). No sign-in.
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const body = await req.json();
+    const body = await req.json().catch(() => ({}));
 
-    const secret = body._form_secret;
-    if (!secret || secret !== Deno.env.get('PUBLIC_FORM_SECRET')) {
-      return Response.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const { repair_preference_token, clientName, signatureDataUrl } = body;
+    const repair_preference_token = typeof body?.repair_preference_token === 'string' ? body.repair_preference_token : '';
+    const clientName = clip(body?.clientName, 200);
+    const signatureDataUrl = body?.signatureDataUrl;
     if (!repair_preference_token) {
-      return Response.json({ error: 'Missing repair preference token' }, { status: 400 });
+      return Response.json({ error: LINK_MESSAGES.invalid, reason: 'invalid' }, { status: 404 });
     }
-    if (!clientName || !String(clientName).trim()) {
+    if (!clientName) {
       return Response.json({ error: 'Your name is required' }, { status: 400 });
     }
-    if (!signatureDataUrl) {
-      return Response.json({ error: 'Signature is required' }, { status: 400 });
+    if (!validSignature(signatureDataUrl)) {
+      return Response.json({ error: 'Please sign the form before submitting.' }, { status: 400 });
     }
 
     // Look up the claim by its unique repair preference token (service role).
     const claims = await base44.asServiceRole.entities.Claim.filter({ repair_preference_token });
     if (!claims || claims.length === 0) {
-      return Response.json({ error: 'Invalid or expired link' }, { status: 404 });
+      return Response.json({ error: LINK_MESSAGES.invalid, reason: 'invalid' }, { status: 404 });
     }
     const claim = claims[0];
+    if (claim.repair_preference_signed) {
+      return Response.json({ error: LINK_MESSAGES.used, reason: 'used' }, { status: 409 });
+    }
+    if (signingLinkExpired(claim.repair_preference_link_sent_at)) {
+      return Response.json({ error: LINK_MESSAGES.expired, reason: 'expired' }, { status: 410 });
+    }
 
     // ── Generate the Statement of Repair Preference PDF ──
     const doc = new jsPDF();
@@ -189,7 +192,7 @@ Deno.serve(async (req) => {
 
     return Response.json({ success: true, claim_id: claim.id, pdf_url: pdfUrl });
   } catch (error) {
-    console.error('submitRepairPreferenceForm error:', error.message, error.stack);
-    return Response.json({ error: error.message }, { status: 500 });
+    console.error('submitRepairPreferenceForm error:', error?.message, error?.stack);
+    return Response.json({ error: 'Something went wrong. Please try again.' }, { status: 500 });
   }
 });
