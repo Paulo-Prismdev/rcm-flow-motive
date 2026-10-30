@@ -2,16 +2,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 import { sendBrandedEmail } from '../../shared/brandedEmail.ts';
 import { isCancelledClaim, isTotalLossClaim } from '../../shared/claimOutcome.ts';
 import { requireInternalUser } from '../../shared/internalAccess.ts';
-
-// ── Token helpers (stateless, HMAC-style) ──
-async function generateBodyshopToken(claimId: string, secret: string): Promise<string> {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(claimId + ':' + secret);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-  return btoa(claimId) + '.' + hashHex.substring(0, 24);
-}
+import { signClaimLink } from '../../shared/publicLinks.ts';
 
 // ── Template placeholder replacement ──
 function replacePlaceholders(template: string, claim: any): string {
@@ -178,7 +169,8 @@ Deno.serve(async (req) => {
     // platform dispatcher (base44-dispatcher-production...), which does not serve
     // the public /bodyshop-update page, so every link in the email would 404.
     const baseUrl = (Deno.env.get('APP_PUBLIC_URL') || req.headers.get('origin') || 'https://app.rcmautomotive.co.uk').replace(/\/+$/, '');
-    const formSecret = Deno.env.get('PUBLIC_FORM_SECRET');
+    // Repairer update links are signed by the server and run out after 14 days.
+    const canSignLinks = !!Deno.env.get('PUBLIC_LINK_SIGNING_KEY');
 
     // ── Dry-run mode: preview who WOULD be emailed without sending anything ──
     let dryRun = false;
@@ -249,8 +241,8 @@ Deno.serve(async (req) => {
       }
 
       const claimForTemplate = { ...testClaim };
-      if (rule.recipient_type === 'Bodyshop' && formSecret) {
-        const token = await generateBodyshopToken(testClaim.id, formSecret);
+      if (rule.recipient_type === 'Bodyshop' && canSignLinks) {
+        const token = await signClaimLink('bodyshop_update', testClaim.id);
         claimForTemplate.bodyshop_update_link = `${baseUrl}/bodyshop-update?token=${token}`;
       }
       const emailSubject = replacePlaceholders(rule.email_subject_template, claimForTemplate);
@@ -359,8 +351,8 @@ Deno.serve(async (req) => {
           // Inject the secure bodyshop update link as a placeholder value so admins
           // can place it anywhere in the template via {{claim.bodyshop_update_link}}.
           const claimForTemplate = { ...claim };
-          if (rule.recipient_type === 'Bodyshop' && formSecret) {
-            const token = await generateBodyshopToken(claim.id, formSecret);
+          if (rule.recipient_type === 'Bodyshop' && canSignLinks) {
+            const token = await signClaimLink('bodyshop_update', claim.id);
             claimForTemplate.bodyshop_update_link = `${baseUrl}/bodyshop-update?token=${token}`;
           }
           const emailSubject = replacePlaceholders(rule.email_subject_template, claimForTemplate);
