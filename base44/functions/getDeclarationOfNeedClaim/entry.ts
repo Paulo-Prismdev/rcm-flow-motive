@@ -1,31 +1,33 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
+import { signingLinkExpired } from '../../shared/publicLinks.ts';
 
 // Public endpoint: returns just enough claim info to render the public
 // Declaration of Need – Replacement Vehicle form (pre-fill fields + signed status).
-// Security: same two layers as the other public forms —
-//   1. _form_secret must match PUBLIC_FORM_SECRET
-//   2. declaration_of_need_token must match a claim's stored token
-// No user auth — service role is used to look the claim up.
+// Security: declaration_of_need_token must match a claim's stored token, and the link
+// runs out 14 days after it was generated (see shared/publicLinks.ts). No sign-in.
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const body = await req.json();
+    const body = await req.json().catch(() => ({}));
 
-    const secret = body._form_secret;
-    if (!secret || secret !== Deno.env.get('PUBLIC_FORM_SECRET')) {
-      return Response.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const { declaration_of_need_token } = body;
+    const declaration_of_need_token = typeof body?.declaration_of_need_token === 'string' ? body.declaration_of_need_token : '';
     if (!declaration_of_need_token) {
-      return Response.json({ error: 'Missing declaration of need token' }, { status: 400 });
+      return Response.json({ valid: false, reason: 'invalid' }, { status: 200 });
     }
 
     const claims = await base44.asServiceRole.entities.Claim.filter({ declaration_of_need_token });
     if (!claims || claims.length === 0) {
-      return Response.json({ valid: false }, { status: 200 });
+      return Response.json({ valid: false, reason: 'invalid' }, { status: 200 });
     }
     const claim = claims[0];
+    // A signed form says so whatever its age; an unsigned one stops opening once its link runs out.
+    if (!claim.declaration_of_need_signed && signingLinkExpired(claim.declaration_of_need_link_sent_at)) {
+      return Response.json({ valid: false, reason: 'expired' }, { status: 200 });
+    }
+    // Once signed there is nothing to pre-fill: say so without sending the contact details.
+    if (claim.declaration_of_need_signed) {
+      return Response.json({ valid: true, signed: true, job_number: claim.job_number || '', reg: claim.reg || '' });
+    }
 
     // Try to load the linked Client entity for richer company details
     let linkedClient = null;
@@ -93,7 +95,7 @@ Deno.serve(async (req) => {
       vehicle_use: claim.vehicle_use || '',
     });
   } catch (error) {
-    console.error('getDeclarationOfNeedClaim error:', error.message, error.stack);
-    return Response.json({ error: error.message }, { status: 500 });
+    console.error('getDeclarationOfNeedClaim error:', error?.message, error?.stack);
+    return Response.json({ error: 'Something went wrong. Please try again.' }, { status: 500 });
   }
 });

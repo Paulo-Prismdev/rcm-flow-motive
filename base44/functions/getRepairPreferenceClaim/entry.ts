@@ -1,31 +1,29 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
+import { signingLinkExpired } from '../../shared/publicLinks.ts';
 
 // Public endpoint: returns just enough claim info to render the public
 // Statement of Repair Preference form (vehicle confirmation + signed status).
-// Security: same two layers as submitRepairPreferenceForm —
-//   1. _form_secret must match PUBLIC_FORM_SECRET
-//   2. repair_preference_token must match a claim's stored token
-// No user auth — service role is used to look the claim up.
+// Security: repair_preference_token must match a claim's stored token, and the link
+// runs out 14 days after it was generated (see shared/publicLinks.ts). No sign-in.
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const body = await req.json();
+    const body = await req.json().catch(() => ({}));
 
-    const secret = body._form_secret;
-    if (!secret || secret !== Deno.env.get('PUBLIC_FORM_SECRET')) {
-      return Response.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const { repair_preference_token } = body;
+    const repair_preference_token = typeof body?.repair_preference_token === 'string' ? body.repair_preference_token : '';
     if (!repair_preference_token) {
-      return Response.json({ error: 'Missing repair preference token' }, { status: 400 });
+      return Response.json({ valid: false, reason: 'invalid' }, { status: 200 });
     }
 
     const claims = await base44.asServiceRole.entities.Claim.filter({ repair_preference_token });
     if (!claims || claims.length === 0) {
-      return Response.json({ valid: false }, { status: 200 });
+      return Response.json({ valid: false, reason: 'invalid' }, { status: 200 });
     }
     const claim = claims[0];
+    // A signed form says so whatever its age; an unsigned one stops opening once its link runs out.
+    if (!claim.repair_preference_signed && signingLinkExpired(claim.repair_preference_link_sent_at)) {
+      return Response.json({ valid: false, reason: 'expired' }, { status: 200 });
+    }
 
     // Only expose the minimal display fields — never the full claim record.
     return Response.json({
@@ -37,7 +35,7 @@ Deno.serve(async (req) => {
       signed: !!claim.repair_preference_signed,
     });
   } catch (error) {
-    console.error('getRepairPreferenceClaim error:', error.message, error.stack);
-    return Response.json({ error: error.message }, { status: 500 });
+    console.error('getRepairPreferenceClaim error:', error?.message, error?.stack);
+    return Response.json({ error: 'Something went wrong. Please try again.' }, { status: 500 });
   }
 });

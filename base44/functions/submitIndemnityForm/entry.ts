@@ -1,24 +1,19 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
+import { LINK_MESSAGES, clip, signingLinkExpired } from '../../shared/publicLinks.ts';
 
 // Public endpoint: receives a client's indemnity questionnaire submission.
-// Security: two layers —
-//   1. _form_secret must match PUBLIC_FORM_SECRET (prevents arbitrary external calls)
-//   2. indemnity_token must match a claim's stored token (binds the submission to one claim)
-// No user auth — the form sits externally to the app. Service role is used to look up
-// and update the claim (bypasses RLS), gated entirely by the unguessable per-claim token.
+// Security: the link's indemnity_token must match a claim's stored token. The link
+// runs out 14 days after it was generated and can be completed once (see
+// shared/publicLinks.ts). No sign-in. Only the questionnaire's own fields are saved.
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const body = await req.json();
+    const body = await req.json().catch(() => ({}));
 
-    const secret = body._form_secret;
-    if (!secret || secret !== Deno.env.get('PUBLIC_FORM_SECRET')) {
-      return Response.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const { indemnity_token, formData } = body;
+    const indemnity_token = typeof body?.indemnity_token === 'string' ? body.indemnity_token : '';
+    const formData = body?.formData && typeof body.formData === 'object' ? body.formData : null;
     if (!indemnity_token) {
-      return Response.json({ error: 'Missing indemnity token' }, { status: 400 });
+      return Response.json({ error: LINK_MESSAGES.invalid, reason: 'invalid' }, { status: 404 });
     }
     if (!formData) {
       return Response.json({ error: 'Missing form data' }, { status: 400 });
@@ -27,9 +22,15 @@ Deno.serve(async (req) => {
     // Look up the claim by its unique indemnity token (service role).
     const claims = await base44.asServiceRole.entities.Claim.filter({ indemnity_token });
     if (!claims || claims.length === 0) {
-      return Response.json({ error: 'Invalid or expired link' }, { status: 404 });
+      return Response.json({ error: LINK_MESSAGES.invalid, reason: 'invalid' }, { status: 404 });
     }
     const claim = claims[0];
+    if (claim.indemnity_completed_at) {
+      return Response.json({ error: LINK_MESSAGES.used, reason: 'used' }, { status: 409 });
+    }
+    if (signingLinkExpired(claim.indemnity_link_sent_at)) {
+      return Response.json({ error: LINK_MESSAGES.expired, reason: 'expired' }, { status: 410 });
+    }
 
     // Calculate driver age from DOB.
     const calcAge = (dob) => {
@@ -45,22 +46,22 @@ Deno.serve(async (req) => {
 
     const update = {
       requires_indemnity: true,
-      indemnity_driver_dob: formData.indemnity_driver_dob || '',
+      indemnity_driver_dob: clip(formData.indemnity_driver_dob, 2000),
       indemnity_driver_age: calcAge(formData.indemnity_driver_dob),
-      indemnity_registered_owner: formData.indemnity_registered_owner || '',
-      indemnity_pending_prosecutions: formData.indemnity_pending_prosecutions || '',
-      indemnity_dvla_medical_restrictions: formData.indemnity_dvla_medical_restrictions || '',
-      indemnity_full_license_12_months: formData.indemnity_full_license_12_months || '',
-      indemnity_convictions_last_5_years: formData.indemnity_convictions_last_5_years || '',
-      indemnity_incidents_last_5_years: formData.indemnity_incidents_last_5_years || '',
-      indemnity_vehicle_use_at_incident: formData.indemnity_vehicle_use_at_incident || '',
-      indemnity_vehicle_modifications: formData.indemnity_vehicle_modifications || '',
-      indemnity_modification_details: formData.indemnity_modification_details || '',
-      indemnity_pre_existing_damage: formData.indemnity_pre_existing_damage || '',
-      indemnity_cctv_dashcam: formData.indemnity_cctv_dashcam || '',
-      indemnity_property_damaged: formData.indemnity_property_damaged || '',
-      indemnity_more_photos: formData.indemnity_more_photos || '',
-      indemnity_other_info: formData.indemnity_other_info || '',
+      indemnity_registered_owner: clip(formData.indemnity_registered_owner, 2000),
+      indemnity_pending_prosecutions: clip(formData.indemnity_pending_prosecutions, 2000),
+      indemnity_dvla_medical_restrictions: clip(formData.indemnity_dvla_medical_restrictions, 2000),
+      indemnity_full_license_12_months: clip(formData.indemnity_full_license_12_months, 2000),
+      indemnity_convictions_last_5_years: clip(formData.indemnity_convictions_last_5_years, 2000),
+      indemnity_incidents_last_5_years: clip(formData.indemnity_incidents_last_5_years, 2000),
+      indemnity_vehicle_use_at_incident: clip(formData.indemnity_vehicle_use_at_incident, 2000),
+      indemnity_vehicle_modifications: clip(formData.indemnity_vehicle_modifications, 2000),
+      indemnity_modification_details: clip(formData.indemnity_modification_details, 2000),
+      indemnity_pre_existing_damage: clip(formData.indemnity_pre_existing_damage, 2000),
+      indemnity_cctv_dashcam: clip(formData.indemnity_cctv_dashcam, 2000),
+      indemnity_property_damaged: clip(formData.indemnity_property_damaged, 2000),
+      indemnity_more_photos: clip(formData.indemnity_more_photos, 2000),
+      indemnity_other_info: clip(formData.indemnity_other_info, 2000),
       indemnity_completed_at: new Date().toISOString(),
     };
 
@@ -68,7 +69,7 @@ Deno.serve(async (req) => {
 
     return Response.json({ success: true, claim_id: claim.id });
   } catch (error) {
-    console.error('submitIndemnityForm error:', error.message, error.stack);
-    return Response.json({ error: error.message }, { status: 500 });
+    console.error('submitIndemnityForm error:', error?.message, error?.stack);
+    return Response.json({ error: 'Something went wrong. Please try again.' }, { status: 500 });
   }
 });
