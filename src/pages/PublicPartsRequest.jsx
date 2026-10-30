@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { submitPublicPartsRequest } from '@/functions/submitPublicPartsRequest';
-import { getPublicFormToken } from '@/functions/getPublicFormToken';
+import { antiSpamFields, serverMessage } from '@/lib/publicForm';
+import HoneypotField from '@/components/shared/HoneypotField';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
@@ -9,11 +10,10 @@ import { Package, CheckCircle2 } from 'lucide-react';
 const companyLogo = 'https://media.base44.com/images/public/68ee39fb8915b1b539e13c59/b2cb057e2_RCMAutomotiveLogoGreenAutomotivewithHLights.jpg';
 
 export default function PublicPartsRequest() {
-  const [formToken, setFormToken] = useState('');
-
-  useEffect(() => {
-    getPublicFormToken({}).then(res => setFormToken(res.data?.token || '')).catch(() => {});
-  }, []);
+  // When the page opened, and the hidden field people never fill in: the server uses
+  // both to turn away automated submissions.
+  const startedAt = useRef(Date.now());
+  const [honeypot, setHoneypot] = useState('');
 
   const [formData, setFormData] = useState({
     contact_name: '',
@@ -42,10 +42,10 @@ export default function PublicPartsRequest() {
     setError('');
 
     try {
-      await submitPublicPartsRequest({ ...formData, _form_secret: formToken });
+      await submitPublicPartsRequest({ ...formData, ...antiSpamFields(startedAt.current, honeypot) });
       setSubmitted(true);
     } catch (err) {
-      setError('Something went wrong. Please try again or contact us directly.');
+      setError(serverMessage(err, 'Something went wrong. Please try again or contact us directly.'));
     } finally {
       setSubmitting(false);
     }
@@ -77,6 +77,7 @@ export default function PublicPartsRequest() {
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-5">
+            <HoneypotField value={honeypot} onChange={setHoneypot} />
             {/* Contact Details */}
             <div>
               <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
