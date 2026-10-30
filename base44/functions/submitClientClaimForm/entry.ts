@@ -130,7 +130,7 @@ Deno.serve(async (req) => {
       // Fallback if image fails to load
       doc.setFontSize(14);
       doc.setFont('helvetica', 'bold');
-      doc.setTextColor(RCM_DARK[0], RCM_DARK[1], RCM_DARK[2]);
+      doc.setTextColor(RCM_BLUE[0], RCM_BLUE[1], RCM_BLUE[2]);
       doc.text('RCM Automotive', leftMargin, yPos);
     }
 
