@@ -1,5 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
 import { requireInternalUser } from '../../shared/internalAccess.ts';
+import { fileNameOf, signedUrlsFor } from '../../shared/privateFiles.ts';
 
 /**
  * Reading a new claim's instruction into claim details.
@@ -302,11 +303,13 @@ export default async function (req: Request): Promise<Response> {
 
     const fileNames = fileUrls.map((url) => {
       try {
-        return decodeURIComponent(String(url).split('?')[0].split('/').pop() || 'document');
+        return decodeURIComponent(fileNameOf(String(url)) || 'document');
       } catch {
         return 'document';
       }
     });
+    // Files in private storage are read through short-lived signed links.
+    const readableUrls = await signedUrlsFor(base44, fileUrls);
 
     const keys = READ_FIELDS.map(([k]) => k);
     const prompt = pastedText.trim()
@@ -315,7 +318,7 @@ export default async function (req: Request): Promise<Response> {
 
     const result = await base44.asServiceRole.integrations.Core.InvokeLLM({
       prompt,
-      ...(fileUrls.length ? { file_urls: fileUrls } : {}),
+      ...(readableUrls.length ? { file_urls: readableUrls } : {}),
       response_json_schema: buildSchema(keys),
     });
 
