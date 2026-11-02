@@ -79,32 +79,89 @@ export function buildBrandedHtml(content: string, footerNote?: string): string {
 }
 
 /**
- * Send one branded email through Base44's own email service. Base44 mails a
- * single recipient per email, so the primary address is sent the message and
- * every CC address then receives its own copy of it. Returns { ok, error }
- * rather than throwing, so the caller decides how to report a failure.
+ * Delivery. When RESEND_API_KEY and EMAIL_FROM_ADDRESS are set (EMAIL_FROM_ADDRESS
+ * being an address on a domain verified in Resend, e.g. notifications@rcmautomotive.co.uk),
+ * email goes out through Resend: one message with real To/CC, a Reply-To, any address
+ * at all, and optional attachments. Without them it falls back to Base44's own email
+ * service, which mails one recipient at a time and can't reply-to or attach.
  */
-export async function sendBrandedEmail({ base44, to, cc, subject, content, footerNote, fromName }): Promise<{ ok: boolean; error?: string }> {
-  const recipients = [...new Set([...parseEmails(to), ...parseEmails(cc || '')])];
-  if (recipients.length === 0) return { ok: false, error: 'No valid recipient email address' };
+const RESEND_URL = 'https://api.resend.com/emails';
 
-  const plain = String(content);
-  const html = buildBrandedHtml(plain, footerNote);
-  const text = isHtml(plain) ? htmlToPlain(plain) : plain;
+export type EmailAttachment = { filename: string; path: string };
 
-  for (const recipient of recipients) {
+export function emailProvider(): 'resend' | 'base44' {
+  return Deno.env.get('RESEND_API_KEY') && EMAIL_RE.test(Deno.env.get('EMAIL_FROM_ADDRESS') || '') ? 'resend' : 'base44';
+}
+
+const cleanName = (n: string) => String(n || 'RCM Automotive').replace(/["<>\r\n]/g, '').slice(0, 100);
+
+/**
+ * Send one email (already-built HTML) to one or more people. Returns { ok, error,
+ * provider } rather than throwing, so the caller decides how to report a failure.
+ */
+export async function deliverEmail({ base44, to, cc, subject, html, text, fromName, replyTo, attachments }: {
+  base44: any; to: string | string[]; cc?: string | string[]; subject: string; html: string; text?: string;
+  fromName?: string; replyTo?: string; attachments?: EmailAttachment[];
+}): Promise<{ ok: boolean; error?: string; provider: string }> {
+  const list = (v: any) => (Array.isArray(v) ? parseEmails(v.join(',')) : parseEmails(v || ''));
+  const toList = [...new Set(list(to))];
+  const ccList = [...new Set(list(cc))].filter((e) => !toList.includes(e));
+  const provider = emailProvider();
+  if (toList.length === 0 && ccList.length === 0) return { ok: false, error: 'No valid recipient email address', provider };
+  const safeSubject = String(subject || '').replace(/[\r\n]+/g, ' ').slice(0, 250);
+
+  if (provider === 'resend') {
+    const payload: Record<string, unknown> = {
+      from: `${cleanName(fromName || 'RCM Automotive')} <${Deno.env.get('EMAIL_FROM_ADDRESS')}>`,
+      to: toList.length ? toList : ccList,
+      subject: safeSubject,
+      html,
+      text: text || htmlToPlain(html),
+    };
+    if (toList.length && ccList.length) payload.cc = ccList;
+    const reply = parseEmails(replyTo || '')[0] || parseEmails(Deno.env.get('EMAIL_REPLY_TO') || '')[0];
+    if (reply) payload.reply_to = reply;
+    const files = (attachments || []).filter((a) => a?.filename && /^https:\/\//.test(a?.path || '')).slice(0, 10);
+    if (files.length) payload.attachments = files.map((a) => ({ filename: String(a.filename).slice(0, 150), path: a.path }));
     try {
-      await base44.asServiceRole.integrations.Core.SendEmail({
-        to: recipient,
-        subject,
-        html,
-        text,
-        from_name: fromName || 'RCM Automotive',
+      const res = await fetch(RESEND_URL, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${Deno.env.get('RESEND_API_KEY')}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
       });
-    } catch (error) {
-      return { ok: false, error: `Base44 email error: ${error?.message || error}` };
+      if (!res.ok) {
+        const detail = await res.json().catch(() => ({} as any));
+        return { ok: false, error: `Email service error: ${detail?.message || res.status}`, provider };
+      }
+      return { ok: true, provider };
+    } catch (error: any) {
+      return { ok: false, error: `Email service error: ${error?.message || error}`, provider };
     }
   }
 
-  return { ok: true };
+  // Base44 mails one recipient per email, so each address gets its own copy.
+  for (const recipient of [...toList, ...ccList]) {
+    try {
+      await base44.asServiceRole.integrations.Core.SendEmail({
+        to: recipient,
+        subject: safeSubject,
+        body: html,
+        from_name: cleanName(fromName || 'RCM Automotive'),
+      });
+    } catch (error: any) {
+      return { ok: false, error: `Base44 email error: ${error?.message || error}`, provider };
+    }
+  }
+  return { ok: true, provider };
+}
+
+/** Send one branded email. Returns { ok, error } rather than throwing. */
+export async function sendBrandedEmail({ base44, to, cc, subject, content, footerNote, fromName, replyTo, attachments }: {
+  base44: any; to: string; cc?: string; subject: string; content: string; footerNote?: string;
+  fromName?: string; replyTo?: string; attachments?: EmailAttachment[];
+}): Promise<{ ok: boolean; error?: string; provider?: string }> {
+  const plain = String(content);
+  const html = buildBrandedHtml(plain, footerNote);
+  const text = isHtml(plain) ? htmlToPlain(plain) : plain;
+  return deliverEmail({ base44, to, cc, subject, html, text, fromName, replyTo, attachments });
 }
