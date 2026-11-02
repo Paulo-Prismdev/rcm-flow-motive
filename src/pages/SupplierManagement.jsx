@@ -21,6 +21,7 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { ArrowLeft } from 'lucide-react';
 import { deleteAndLog } from "@/components/shared/useActivityLogger";
+import { askConfirm, notify, warn } from '@/lib/dialogs';
 
 export default function SupplierManagement() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -43,8 +44,8 @@ export default function SupplierManagement() {
     }
   });
 
-  const handleDelete = (supplier) => {
-    if (window.confirm(`Are you sure you want to delete ${supplier.name}?`)) {
+  const handleDelete = async (supplier) => {
+    if (await askConfirm(`Are you sure you want to delete ${supplier.name}?`)) {
       deleteMutation.mutate(supplier.id);
     }
   };
@@ -94,10 +95,10 @@ export default function SupplierManagement() {
       // Bulk create suppliers
       await base44.entities.Supplier.bulkCreate(suppliers);
       queryClient.invalidateQueries({ queryKey: ['suppliers'] });
-      alert(`Successfully imported ${suppliers.length} suppliers`);
+      notify(`Successfully imported ${suppliers.length} suppliers`);
     } catch (error) {
       console.error('CSV upload error:', error);
-      alert('Failed to import suppliers: ' + error.message);
+      warn('Failed to import suppliers: ' + error.message);
     } finally {
       setIsUploading(false);
       e.target.value = '';

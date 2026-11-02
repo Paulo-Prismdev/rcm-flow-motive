@@ -17,6 +17,7 @@ import EngineeringJobForm from './EngineeringJobForm';
 import EngineeringClientForm from './EngineeringClientForm';
 import EngineeringReportForm from './EngineeringReportForm';
 import { deleteAndLog } from "@/components/shared/useActivityLogger";
+import { askConfirm } from '@/lib/dialogs';
 
 const EditableSection = ({ title, icon: Icon, claim, onUpdate, children, EditComponent, canEdit = true }) => {
     const [isEditing, setIsEditing] = useState(false);
@@ -158,20 +159,20 @@ export default function EngineeringDetail({ job, onClose, onUpdate, isInternalUs
     onUpdate({ ...job, file_urls: updatedUrls });
   };
 
-  const handleArchive = () => {
+  const handleArchive = async () => {
     const action = job.archived ? 'restore' : 'archive';
-    if (window.confirm(`Are you sure you want to ${action} this engineering job?`)) {
+    if (await askConfirm(`Are you sure you want to ${action} this engineering job?`)) {
       archiveMutation.mutate();
     }
   };
 
-  const handleDelete = () => {
-    if (window.confirm('Are you sure you want to permanently delete this engineering job? This action cannot be undone.')) {
+  const handleDelete = async () => {
+    if (await askConfirm('Are you sure you want to permanently delete this engineering job? This action cannot be undone.')) {
       deleteMutation.mutate();
     }
   };
 
-  const handleAIExtract = (extractedData) => {
+  const handleAIExtract = async (extractedData) => {
     console.log('AI extracted data from attachment:', extractedData);
     
     const fields = Object.entries(extractedData)
@@ -179,7 +180,7 @@ export default function EngineeringDetail({ job, onClose, onUpdate, isInternalUs
       .map(([key, value]) => `${key}: ${value}`)
       .join('\n');
     
-    if (window.confirm(`AI found the following data:\n\n${fields}\n\nDo you want to update the engineering job with this data?`)) {
+    if (await askConfirm(`AI found the following data:\n\n${fields}\n\nDo you want to update the engineering job with this data?`)) {
       onUpdate({ ...job, ...extractedData });
     }
   };

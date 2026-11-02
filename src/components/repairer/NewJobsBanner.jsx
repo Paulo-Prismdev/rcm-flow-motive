@@ -26,6 +26,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { warn } from '@/lib/dialogs';
 
 export default function NewJobsBanner({ bodyshopId }) {
   const [expanded, setExpanded] = useState(true);
@@ -72,7 +73,7 @@ export default function NewJobsBanner({ bodyshopId }) {
       setWizardStep(2);
     } catch (error) {
       console.error('Error accepting job:', error);
-      alert('Failed to accept job: ' + (error.message || 'Please try again.'));
+      warn('Failed to accept job: ' + (error.message || 'Please try again.'));
     } finally {
       setIsAccepting(false);
     }

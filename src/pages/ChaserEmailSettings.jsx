@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Plus, Edit, Trash2, Play, History, Power, PowerOff, Eye, X, Send } from 'lucide-react';
 import ChaserTestEmailModal from '@/components/settings/ChaserTestEmailModal';
 import ChaserConditionBuilder, { migrateLegacyConditions, summarizeConditions } from '@/components/settings/ChaserConditionBuilder';
+import { askConfirm, warn } from '@/lib/dialogs';
 
 export default function ChaserEmailSettings() {
   const [showForm, setShowForm] = useState(false);
@@ -65,10 +66,10 @@ export default function ChaserEmailSettings() {
     setRunningRuleId(rule.id);
     try {
       const result = await base44.functions.invoke('processChaserEmails', { rule_id: rule.id });
-      alert(`"${rule.rule_name}" processed!\n\nSent: ${result.data.emails_sent}\nSkipped: ${result.data.emails_skipped}\nFailed: ${result.data.errors}`);
+      warn(`"${rule.rule_name}" processed!\n\nSent: ${result.data.emails_sent}\nSkipped: ${result.data.emails_skipped}\nFailed: ${result.data.errors}`);
       queryClient.invalidateQueries({ queryKey: ['chaserEmailLogs'] });
     } catch (error) {
-      alert(`Error: ${error.message}`);
+      warn(`Error: ${error.message}`);
     } finally {
       setRunningRuleId(null);
     }
@@ -80,14 +81,14 @@ export default function ChaserEmailSettings() {
       const result = await base44.functions.invoke('processChaserEmails', { dry_run: true, rule_id: rule.id });
       setPreviewData({ ...result.data, rule_name: rule.rule_name });
     } catch (error) {
-      alert(`Error: ${error.message}`);
+      warn(`Error: ${error.message}`);
     } finally {
       setPreviewingRuleId(null);
     }
   };
 
-  const handleDelete = (rule) => {
-    if (window.confirm(`Are you sure you want to delete the rule "${rule.rule_name}"?`)) {
+  const handleDelete = async (rule) => {
+    if (await askConfirm(`Are you sure you want to delete the rule "${rule.rule_name}"?`)) {
       deleteMutation.mutate(rule.id);
     }
   };

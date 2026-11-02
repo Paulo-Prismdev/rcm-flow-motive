@@ -6,6 +6,7 @@ import DirectoryShell from "../shared/DirectoryShell";
 import AddInsurerModal from "../shared/AddInsurerModal";
 import InsurerDetailModal from "../shared/InsurerDetailModal";
 import { deleteAndLog } from "@/components/shared/useActivityLogger";
+import { askConfirm } from '@/lib/dialogs';
 
 export default function InsurerDirectoryTab() {
   const queryClient = useQueryClient();
@@ -46,8 +47,8 @@ export default function InsurerDirectoryTab() {
     );
   }, [insurers, search]);
 
-  const handleDelete = (insurer) => {
-    if (window.confirm(`Remove "${insurer.name}" from the insurer directory?`)) {
+  const handleDelete = async (insurer) => {
+    if (await askConfirm(`Remove "${insurer.name}" from the insurer directory?`)) {
       deleteMutation.mutate(insurer.id);
     }
   };

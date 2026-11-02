@@ -26,6 +26,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { askConfirm, warn } from '@/lib/dialogs';
 
 // Available placeholders for each item type
 const PLACEHOLDERS = {
@@ -122,7 +123,7 @@ export default function EmailTemplates() {
     },
     onError: (error) => {
       console.error('Failed to create template:', error);
-      alert('Failed to create template. Please try again.');
+      warn('Failed to create template. Please try again.');
     },
   });
 
@@ -138,7 +139,7 @@ export default function EmailTemplates() {
     },
     onError: (error) => {
       console.error('Failed to update template:', error);
-      alert('Failed to update template. Please try again.');
+      warn('Failed to update template. Please try again.');
     },
   });
 
@@ -159,8 +160,8 @@ export default function EmailTemplates() {
     setIsModalOpen(true);
   };
 
-  const handleDelete = (id) => {
-    if (window.confirm('Are you sure you want to delete this template?')) {
+  const handleDelete = async (id) => {
+    if (await askConfirm('Are you sure you want to delete this template?')) {
       deleteMutation.mutate(id);
     }
   };

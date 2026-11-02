@@ -9,6 +9,7 @@ import AddressLookupInput from './AddressLookupInput'; // New import
 export default function AddBodyshopModal({ isOpen, onClose, onSuccess, initialName = '' }) {
   const queryClient = useQueryClient();
 import { createAndLog } from '@/components/shared/useActivityLogger';
+import { warn } from '@/lib/dialogs';
   const [formData, setFormData] = useState({
     name: initialName || '',
     contact_name: '',
@@ -73,7 +74,7 @@ import { createAndLog } from '@/components/shared/useActivityLogger';
     },
     onError: (error) => {
       console.error("[AddBodyshopModal] Mutation error:", error);
-      alert("Failed to add bodyshop: " + error.message);
+      warn("Failed to add bodyshop: " + error.message);
     },
   });
 
@@ -101,7 +102,7 @@ import { createAndLog } from '@/components/shared/useActivityLogger';
     
     if (!formData.name || !formData.contact_name || !formData.phone || !formData.email) {
       console.log("[AddBodyshopModal] Validation failed");
-      alert('Please fill in all required fields: Name, Contact Name, Phone, Email.');
+      warn('Please fill in all required fields: Name, Contact Name, Phone, Email.');
       return;
     }
 

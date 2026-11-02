@@ -3,6 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from "@/components/ui/button";
 import { Image, Upload, Trash2, Building2 } from 'lucide-react';
+import { warn } from '@/lib/dialogs';
 
 export default function BrandingTab() {
   const [logoUploading, setLogoUploading] = useState(false);
@@ -39,7 +40,7 @@ export default function BrandingTab() {
       logoMutation.mutate(result.file_url);
     } catch (error) {
       console.error('Upload failed:', error);
-      alert('Failed to upload logo. Please try again.');
+      warn('Failed to upload logo. Please try again.');
     } finally {
       setLogoUploading(false);
     }

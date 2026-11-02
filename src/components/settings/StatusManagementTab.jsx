@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Trash2, Edit, Check, X, Plus, GripVertical, Lock, ChevronUp, ChevronDown } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+import { warn } from '@/lib/dialogs';
 
 const colorOptions = [
   { name: "blue", bg: "#3b82f6", label: "Blue" },
@@ -305,7 +306,7 @@ export default function StatusManagementTab({ department }) {
     const status = sortedStatuses.find(s => s.id === id);
     // Don't allow renaming "New" status
     if (status?.status_name === 'New' && editingData.status_name !== 'New') {
-      alert('The "New" status name cannot be changed as it is the default status for new records.');
+      warn('The "New" status name cannot be changed as it is the default status for new records.');
       return;
     }
     updateMutation.mutate({ id, data: editingData, oldName: status?.status_name });

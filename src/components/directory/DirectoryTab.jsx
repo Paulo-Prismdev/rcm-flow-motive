@@ -7,6 +7,7 @@ import { isClientTagged, isThirdPartyTagged } from "@/components/shared/director
 import DirectoryTagPills from "./DirectoryTagPills";
 import DirectoryDetailModal from "./DirectoryDetailModal";
 import { deleteAndLog } from "@/components/shared/useActivityLogger";
+import { askConfirm } from '@/lib/dialogs';
 
 /**
  * The one directory: clients and third parties together, each record tagged with
@@ -89,8 +90,8 @@ export default function DirectoryTab() {
     });
   }, [records, search]);
 
-  const handleDelete = (record) => {
-    if (window.confirm(`Remove "${record.name}" from the directory?`)) deleteMutation.mutate(record.id);
+  const handleDelete = async (record) => {
+    if (await askConfirm(`Remove "${record.name}" from the directory?`)) deleteMutation.mutate(record.id);
   };
 
   const vehicleLine = (r) => [r.vehicle_reg, r.vehicle_make_model].filter(Boolean).join(" · ");

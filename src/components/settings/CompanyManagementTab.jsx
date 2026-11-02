@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Plus, Edit, Trash2, Upload, X, Building2, Users, Package, MapPin, Loader, AlertCircle } from 'lucide-react';
+import { askConfirm, warn } from '@/lib/dialogs';
 
 const COMPANY_TYPES = [
   { id: 'bodyshop', label: 'Bodyshops', icon: Building2, entity: 'Bodyshop' },
@@ -54,8 +55,8 @@ export default function CompanyManagementTab() {
     setShowForm(true);
   };
 
-  const handleDelete = (item) => {
-    if (window.confirm(`Are you sure you want to delete "${item.name}"?`)) {
+  const handleDelete = async (item) => {
+    if (await askConfirm(`Are you sure you want to delete "${item.name}"?`)) {
       deleteMutation.mutate(item.id);
     }
   };
@@ -209,7 +210,7 @@ function CompanyForm({ type, initialData, onSubmit, onCancel, isLoading }) {
 
     // Validate file type
     if (!file.type.startsWith('image/')) {
-      alert('Please upload an image file (JPEG or PNG)');
+      warn('Please upload an image file (JPEG or PNG)');
       return;
     }
 
@@ -219,7 +220,7 @@ function CompanyForm({ type, initialData, onSubmit, onCancel, isLoading }) {
       setFormData(prev => ({ ...prev, logo_url: file_url }));
     } catch (error) {
       console.error('Failed to upload logo:', error);
-      alert('Failed to upload logo. Please try again.');
+      warn('Failed to upload logo. Please try again.');
     } finally {
       setUploading(false);
     }

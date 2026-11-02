@@ -9,6 +9,7 @@ import { Loader, X, ChevronDown, Eye, EyeOff } from 'lucide-react';
 import AddressLookupInput from './AddressLookupInput';
 import { VEHICLE_MANUFACTURERS } from './vehicleManufacturers';
 import { updateAndLog, createAndLog } from '@/components/shared/useActivityLogger';
+import { warn } from '@/lib/dialogs';
 
 export default function AddSupplierModal({ isOpen, onClose, onSuccess, editingSupplier = null }) {
   const queryClient = useQueryClient();
@@ -67,7 +68,7 @@ export default function AddSupplierModal({ isOpen, onClose, onSuccess, editingSu
       handleClose();
     },
     onError: (error) => {
-      alert("Failed to add supplier: " + error.message);
+      warn("Failed to add supplier: " + error.message);
     },
   });
 
@@ -87,7 +88,7 @@ export default function AddSupplierModal({ isOpen, onClose, onSuccess, editingSu
     e.stopPropagation();
 
     if (!formData.name || !formData.contact_name || !formData.phone || !formData.emails || formData.emails.length === 0) {
-      alert('Please fill in all required fields: Name, Contact Name, Phone, and at least one Email.');
+      warn('Please fill in all required fields: Name, Contact Name, Phone, and at least one Email.');
       return;
     }
 
@@ -100,12 +101,12 @@ export default function AddSupplierModal({ isOpen, onClose, onSuccess, editingSu
     // Basic email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(newEmail)) {
-      alert('Please enter a valid email address');
+      warn('Please enter a valid email address');
       return;
     }
 
     if (formData.emails.includes(newEmail)) {
-      alert('This email has already been added');
+      warn('This email has already been added');
       return;
     }
 

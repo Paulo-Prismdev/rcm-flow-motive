@@ -8,6 +8,7 @@ import FileUpload from '../shared/FileUpload';
 import ManufacturerModelCombobox from '../shared/ManufacturerModelCombobox';
 import AddressLookupInput from '../shared/AddressLookupInput';
 import { base44 } from '@/api/base44Client';
+import { askConfirm, warn } from '@/lib/dialogs';
 
 export default function EngineeringForm({ job, onSubmit, onCancel }) {
   const [formData, setFormData] = useState(job || {
@@ -49,7 +50,7 @@ export default function EngineeringForm({ job, onSubmit, onCancel }) {
         }
       } catch (error) {
         console.error('Failed to generate job number:', error);
-        alert('Failed to generate job number. Please try again.');
+        warn('Failed to generate job number. Please try again.');
         return;
       }
     }
@@ -68,7 +69,7 @@ export default function EngineeringForm({ job, onSubmit, onCancel }) {
     }));
   };
 
-  const handleAIExtract = (extractedData) => {
+  const handleAIExtract = async (extractedData) => {
     console.log('AI extracted engineering data:', extractedData);
     
     const fields = Object.entries(extractedData)
@@ -76,7 +77,7 @@ export default function EngineeringForm({ job, onSubmit, onCancel }) {
       .map(([key, value]) => `${key}: ${value}`)
       .join('\n');
     
-    if (window.confirm(`AI found the following data:\n\n${fields}\n\nDo you want to auto-fill these fields?`)) {
+    if (await askConfirm(`AI found the following data:\n\n${fields}\n\nDo you want to auto-fill these fields?`)) {
       setFormData(prev => ({
         ...prev,
         ...extractedData

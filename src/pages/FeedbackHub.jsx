@@ -22,6 +22,7 @@ import {
 import { format } from 'date-fns';
 import { createPageUrl } from '@/utils';
 import { Link } from 'react-router-dom';
+import { notify, warn } from '@/lib/dialogs';
 
 const RATING_CONFIG = {
   love: { icon: Heart, color: 'text-pink-500', bgColor: 'bg-pink-50 dark:bg-pink-900/20', label: 'Love Artura' },
@@ -79,11 +80,11 @@ export default function FeedbackHub() {
       queryClient.invalidateQueries({ queryKey: ['referrers'] });
       setSelectedUserId('');
       setSelectedCompanyId('');
-      alert('Feedback request sent successfully!');
+      notify('Feedback request sent successfully!');
     },
     onError: (error) => {
       console.error('Error requesting feedback:', error);
-      alert('Failed to send feedback request: ' + (error.message || 'Unknown error'));
+      warn('Failed to send feedback request: ' + (error.message || 'Unknown error'));
     }
   });
 

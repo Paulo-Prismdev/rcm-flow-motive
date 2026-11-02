@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { X, Plus } from 'lucide-react';
+import { warn } from '@/lib/dialogs';
 
 export default function ReferrerPartsForm({ claims, onClose, onSuccess }) {
   const queryClient = useQueryClient();
@@ -39,7 +40,7 @@ export default function ReferrerPartsForm({ claims, onClose, onSuccess }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!formData.linked_claim_id || !formData.part_description) {
-      alert('Please select a claim and enter a part description');
+      warn('Please select a claim and enter a part description');
       return;
     }
     createMutation.mutate(formData);

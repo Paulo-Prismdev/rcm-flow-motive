@@ -8,6 +8,7 @@ import RepairerDetailDrawer from "@/components/repairer/RepairerDetailDrawer";
 import AddBodyshopModal from "@/components/shared/AddBodyshopModal";
 import RepairerImportModal from "@/components/directory/RepairerImportModal";
 import { Plus } from "lucide-react";
+import { warn } from '@/lib/dialogs';
 
 export default function RepairerDirectory() {
   const [search, setSearch] = useState("");
@@ -80,7 +81,7 @@ export default function RepairerDirectory() {
       setImportResult(null);
       setImportOpen(true);
     } catch (err) {
-      alert("Could not read that file: " + (err.message || "Unknown error"));
+      warn("Could not read that file: " + (err.message || "Unknown error"));
     } finally {
       setImporting(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -94,7 +95,7 @@ export default function RepairerDirectory() {
       setImportResult(res.data || { created: 0, updated: 0, errors: [] });
       await queryClient.invalidateQueries({ queryKey: ["repairer-directory"] });
     } catch (err) {
-      alert("Import failed: " + (err.message || "Unknown error"));
+      warn("Import failed: " + (err.message || "Unknown error"));
     } finally {
       setApplying(false);
     }

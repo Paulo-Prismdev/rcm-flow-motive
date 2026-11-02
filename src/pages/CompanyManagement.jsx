@@ -16,6 +16,7 @@ import DirectoryShell from "@/components/shared/DirectoryShell";
 import ReferrerLinkedUsers from "@/components/settings/ReferrerLinkedUsers";
 import { syncReferrerVat } from "@/components/shared/syncReferrerVat";
 import { deleteAndLog, updateAndLog, createAndLog } from "@/components/shared/useActivityLogger";
+import { askConfirm } from '@/lib/dialogs';
 
 const ALL_PORTAL_SECTIONS = ["Claims", "Parts"];
 
@@ -426,8 +427,8 @@ export default function CompanyManagement() {
     );
   }, [sorted, search]);
 
-  const handleDelete = (company) => {
-    if (window.confirm(`Remove "${company.name}" from the referrer directory?`)) {
+  const handleDelete = async (company) => {
+    if (await askConfirm(`Remove "${company.name}" from the referrer directory?`)) {
       deleteMutation.mutate(company.id);
     }
   };

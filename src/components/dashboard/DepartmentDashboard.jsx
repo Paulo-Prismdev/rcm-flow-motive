@@ -16,6 +16,7 @@ import WidgetDepartmentStats from "./widgets/WidgetDepartmentStats";
 import WidgetStatusBreakdown from "./widgets/WidgetStatusBreakdown";
 import WidgetRecentItems from "./widgets/WidgetRecentItems";
 import WidgetGallery from "./WidgetGallery";
+import { askConfirm } from '@/lib/dialogs';
 
 const WIDGET_COMPONENTS = {
   StatCard: WidgetStatCard,
@@ -154,8 +155,8 @@ export default function DepartmentDashboard({ department }) {
     setIsEditMode(false);
   };
 
-  const handleResetToDefault = () => {
-    if (window.confirm(`Reset ${department} dashboard to default layout? This cannot be undone.`)) {
+  const handleResetToDefault = async () => {
+    if (await askConfirm(`Reset ${department} dashboard to default layout? This cannot be undone.`)) {
       setLocalWidgets(DEPARTMENT_TEMPLATES[department] || []);
     }
   };

@@ -23,6 +23,7 @@ import FileAttachmentModal from '../shared/FileAttachmentModal';
 // New import for PartsModal
 import PartsModal from '../shared/PartsModal'; // Assuming PartsModal exists as it's being opened
 import { deleteAndLog } from "@/components/shared/useActivityLogger";
+import { askConfirm } from '@/lib/dialogs';
 
 
 // New EditableSection component
@@ -178,15 +179,15 @@ export default function EstimateDetail({ estimate, onClose, onUpdate, isInternal
     onClose();
   };
 
-  const handleArchive = () => {
+  const handleArchive = async () => {
     const action = estimate.archived ? 'restore' : 'archive';
-    if (window.confirm(`Are you sure you want to ${action} this estimate?`)) {
+    if (await askConfirm(`Are you sure you want to ${action} this estimate?`)) {
       archiveMutation.mutate();
     }
   };
 
-  const handleDelete = () => {
-    if (window.confirm('Are you sure you want to permanently delete this estimate? This action cannot be undone.')) {
+  const handleDelete = async () => {
+    if (await askConfirm('Are you sure you want to permanently delete this estimate? This action cannot be undone.')) {
       deleteMutation.mutate();
     }
   };
@@ -203,7 +204,7 @@ export default function EstimateDetail({ estimate, onClose, onUpdate, isInternal
     onUpdate({ ...estimate, file_urls: updatedUrls });
   };
 
-  const handleAIExtract = (extractedData) => {
+  const handleAIExtract = async (extractedData) => {
     console.log('AI extracted data from attachment:', extractedData);
     
     const fields = Object.entries(extractedData)
@@ -211,7 +212,7 @@ export default function EstimateDetail({ estimate, onClose, onUpdate, isInternal
       .map(([key, value]) => `${key}: ${value}`)
       .join('\n');
     
-    if (window.confirm(`AI found the following data:\n\n${fields}\n\nDo you want to update the estimate with this data?`)) {
+    if (await askConfirm(`AI found the following data:\n\n${fields}\n\nDo you want to update the estimate with this data?`)) {
       onUpdate({ ...estimate, ...extractedData });
     }
   };

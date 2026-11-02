@@ -6,6 +6,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from '@/api/base44Client';
 import { Loader, X } from 'lucide-react';
 import AddressLookupInput from './AddressLookupInput';
+import { warn } from '@/lib/dialogs';
 
 export default function AddWorkProviderModal({ isOpen, onClose, onSuccess }) {
   const queryClient = useQueryClient();
@@ -32,7 +33,7 @@ export default function AddWorkProviderModal({ isOpen, onClose, onSuccess }) {
       handleClose();
     },
     onError: (error) => {
-      alert("Failed to add work provider: " + error.message);
+      warn("Failed to add work provider: " + error.message);
     },
   });
 
@@ -52,7 +53,7 @@ export default function AddWorkProviderModal({ isOpen, onClose, onSuccess }) {
     e.stopPropagation();
 
     if (!formData.name || !formData.contact_name || !formData.phone || !formData.email) {
-      alert('Please fill in all required fields: Name, Contact Name, Phone, Email.');
+      warn('Please fill in all required fields: Name, Contact Name, Phone, Email.');
       return;
     }
 

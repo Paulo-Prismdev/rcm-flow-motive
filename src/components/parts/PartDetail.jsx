@@ -21,6 +21,7 @@ import EmailComposerModal from '../shared/EmailComposerModal';
 import SupplierTrackingSection from './SupplierTrackingSection';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { deleteAndLog } from "@/components/shared/useActivityLogger";
+import { askConfirm, warn } from '@/lib/dialogs';
 
 
 const EditableSection = ({ title, icon: Icon, claim, onUpdate, children, EditComponent, canEdit = true }) => {
@@ -234,22 +235,22 @@ export default function PartDetail({ part, onClose, onUpdate, isInternalUser = t
     onUpdate({ ...part, file_urls: updatedUrls });
   };
 
-  const handleArchive = () => {
+  const handleArchive = async () => {
     const action = part.archived ? 'restore' : 'archive';
-    if (window.confirm(`Are you sure you want to ${action} this part request?`)) {
+    if (await askConfirm(`Are you sure you want to ${action} this part request?`)) {
       archiveMutation.mutate();
     }
   };
 
-  const handleDelete = () => {
-    if (window.confirm('Are you sure you want to permanently delete this part request? This action cannot be undone.')) {
+  const handleDelete = async () => {
+    if (await askConfirm('Are you sure you want to permanently delete this part request? This action cannot be undone.')) {
       deleteMutation.mutate();
     }
   };
 
   const handleSendToLinkedSuppliers = async () => {
     if (linkedSuppliers.length === 0) {
-      alert('No suppliers found for this manufacturer. Please add suppliers and assign them to this manufacturer in Settings > Suppliers.');
+      warn('No suppliers found for this manufacturer. Please add suppliers and assign them to this manufacturer in Settings > Suppliers.');
       return;
     }
 
@@ -259,7 +260,7 @@ export default function PartDetail({ part, onClose, onUpdate, isInternalUser = t
       .join('; ');
 
     if (!supplierEmails) {
-      alert('None of the linked suppliers have email addresses on file.');
+      warn('None of the linked suppliers have email addresses on file.');
       return;
     }
 

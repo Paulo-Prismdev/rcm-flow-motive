@@ -20,6 +20,7 @@ import {
   Globe
 } from 'lucide-react';
 import ShareTemplateModal from '../components/pdfTemplates/ShareTemplateModal';
+import { askConfirm } from '@/lib/dialogs';
 
 export default function PdfTemplateManager() {
   const [selectedTemplate, setSelectedTemplate] = useState(null);
@@ -276,8 +277,8 @@ export default function PdfTemplateManager() {
                     )}
                     {canDelete && (
                       <Button
-                        onClick={() => {
-                          if (confirm('Delete this template? This cannot be undone.')) {
+                        onClick={async () => {
+                          if (await askConfirm('Delete this template? This cannot be undone.')) {
                             deleteMutation.mutate(template.id);
                           }
                         }}

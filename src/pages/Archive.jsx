@@ -8,6 +8,7 @@ import StatusBadge from "../components/shared/StatusBadge";
 import { format } from "date-fns";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
+import { askConfirm } from '@/lib/dialogs';
 
 export default function Archive() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -68,8 +69,8 @@ export default function Archive() {
     return matchesSearch && matchesDepartment;
   });
 
-  const handleUnarchive = (item) => {
-    if (window.confirm(`Are you sure you want to restore "${item.displayName}" back to active?`)) {
+  const handleUnarchive = async (item) => {
+    if (await askConfirm(`Are you sure you want to restore "${item.displayName}" back to active?`)) {
       unarchiveMutation.mutate({ id: item.id, type: item.department });
     }
   };

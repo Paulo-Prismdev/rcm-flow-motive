@@ -14,6 +14,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { askConfirm } from '@/lib/dialogs';
 
 // UK Bank Holidays for 2025 (update yearly)
 const UK_BANK_HOLIDAYS_2025 = [
@@ -535,8 +536,8 @@ function RoleCard({ role, onEdit }) {
             <Edit className="w-4 h-4" />
           </Button>
           <Button 
-            onClick={() => {
-              if (window.confirm(`Are you sure you want to deactivate the role "${role.role_name}"? This will hide it from available roles but not affect current users.`)) {
+            onClick={async () => {
+              if (await askConfirm(`Are you sure you want to deactivate the role "${role.role_name}"? This will hide it from available roles but not affect current users.`)) {
                 deleteMutation.mutate();
               }
             }} 
@@ -717,8 +718,8 @@ function HolidayRequestCard({ request, canManage, calculateWorkingDays, isOwnReq
     },
   });
 
-  const handleDelete = () => {
-    if (window.confirm('Are you sure you want to delete this holiday request?')) {
+  const handleDelete = async () => {
+    if (await askConfirm('Are you sure you want to delete this holiday request?')) {
       deleteMutation.mutate();
     }
   };

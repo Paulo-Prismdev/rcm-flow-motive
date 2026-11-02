@@ -13,6 +13,7 @@ import AddSupplierModal from '../shared/AddSupplierModal';
 import AddWorkProviderModal from '../shared/AddWorkProviderModal';
 import { useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
+import { warn } from '@/lib/dialogs';
 
 // Vehicle Lookup Component
 function VehicleLookupSection({ vehicleRef, vehicleMake, vehicleModel, manufacturer, onVehicleDataChange }) {
@@ -196,12 +197,12 @@ export default function PartForm({ part, onSubmit, onCancel }) {
           return;
         } else {
           console.error('Failed to generate job number:', response.data.error || 'Unknown error');
-          alert('Failed to generate job number. Please try again.');
+          warn('Failed to generate job number. Please try again.');
           return;
         }
       } catch (error) {
         console.error('Failed to generate job number:', error);
-        alert('Failed to generate job number. Please try again.');
+        warn('Failed to generate job number. Please try again.');
         return;
       }
     }
@@ -248,7 +249,7 @@ export default function PartForm({ part, onSubmit, onCancel }) {
       }));
     } catch (error) {
       console.error("[PartForm] Error in handleBodyshopChange:", error);
-      alert("Error updating bodyshop information: " + error.message);
+      warn("Error updating bodyshop information: " + error.message);
     }
   };
 

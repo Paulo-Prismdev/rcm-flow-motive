@@ -19,6 +19,7 @@ import { createPageUrl } from '@/utils';
 import TaskCard from '../components/tasks/TaskCard';
 import TaskModal from '../components/tasks/TaskModal';
 import { deleteAndLog } from "@/components/shared/useActivityLogger";
+import { askConfirm } from '@/lib/dialogs';
 
 export default function TasksPage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -75,8 +76,8 @@ export default function TasksPage() {
     setIsModalOpen(true);
   };
 
-  const handleDelete = (id) => {
-    if (window.confirm('Are you sure you want to delete this task?')) {
+  const handleDelete = async (id) => {
+    if (await askConfirm('Are you sure you want to delete this task?')) {
       deleteMutation.mutate(id);
     }
   };

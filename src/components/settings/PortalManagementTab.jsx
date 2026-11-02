@@ -41,6 +41,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { askConfirm, warn } from '@/lib/dialogs';
 
 const ICON_OPTIONS = [
   { value: 'Calculator', icon: Calculator },
@@ -195,7 +196,7 @@ export default function PortalManagementTab() {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!formData.name || !formData.image_url) {
-      alert('Please provide a name and image URL');
+      warn('Please provide a name and image URL');
       return;
     }
     if (editingAdvert) {
@@ -205,8 +206,8 @@ export default function PortalManagementTab() {
     }
   };
 
-  const handleDelete = (id) => {
-    if (window.confirm('Are you sure you want to delete this advert?')) {
+  const handleDelete = async (id) => {
+    if (await askConfirm('Are you sure you want to delete this advert?')) {
       deleteMutation.mutate(id);
     }
   };
@@ -228,7 +229,7 @@ export default function PortalManagementTab() {
       setFormData(prev => ({ ...prev, image_url: result.file_url }));
     } catch (error) {
       console.error('Upload failed:', error);
-      alert('Failed to upload image. Please try again.');
+      warn('Failed to upload image. Please try again.');
     } finally {
       setIsUploading(false);
     }
@@ -244,7 +245,7 @@ export default function PortalManagementTab() {
       setFormData(prev => ({ ...prev, mobile_image_url: result.file_url }));
     } catch (error) {
       console.error('Upload failed:', error);
-      alert('Failed to upload image. Please try again.');
+      warn('Failed to upload image. Please try again.');
     } finally {
       setIsUploadingMobile(false);
     }
@@ -289,7 +290,7 @@ export default function PortalManagementTab() {
   const handleProductSubmit = (e) => {
     e.preventDefault();
     if (!productFormData.name || !productFormData.description) {
-      alert('Please provide a name and description');
+      warn('Please provide a name and description');
       return;
     }
     if (editingProduct) {
@@ -299,8 +300,8 @@ export default function PortalManagementTab() {
     }
   };
 
-  const handleDeleteProduct = (id) => {
-    if (window.confirm('Are you sure you want to delete this product?')) {
+  const handleDeleteProduct = async (id) => {
+    if (await askConfirm('Are you sure you want to delete this product?')) {
       deleteProductMutation.mutate(id);
     }
   };

@@ -5,6 +5,7 @@ import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import AuthNotice from '@/components/auth/AuthNotice';
 import { biometricWord, passkeysSupported, registerThisDevice } from '@/lib/passkeys';
+import { askConfirm } from '@/lib/dialogs';
 
 const fmt = (d) => (d ? new Date(d).toLocaleDateString('en-GB') : '');
 
@@ -44,7 +45,7 @@ export default function PasskeyDevices({ userId }) {
   };
 
   const remove = async (device) => {
-    if (!window.confirm(`Remove ${device.device_name}? You'll use the emailed code on it until you set it up again.`)) return;
+    if (!await askConfirm(`Remove ${device.device_name}? You'll use the emailed code on it until you set it up again.`)) return;
     setBusy(device.id);
     setError('');
     try {

@@ -6,6 +6,7 @@ import { base44 } from '@/api/base44Client';
 import { Loader, X } from 'lucide-react';
 import AddressLookupInput from './AddressLookupInput';
 import { createAndLog } from '@/components/shared/useActivityLogger';
+import { warn } from '@/lib/dialogs';
 
 export default function AddReferrerModal({ isOpen, onClose, onSuccess }) {
   const queryClient = useQueryClient();
@@ -48,7 +49,7 @@ export default function AddReferrerModal({ isOpen, onClose, onSuccess }) {
       handleClose();
     },
     onError: (error) => {
-      alert("Failed to add referrer: " + error.message);
+      warn("Failed to add referrer: " + error.message);
     },
   });
 
@@ -68,7 +69,7 @@ export default function AddReferrerModal({ isOpen, onClose, onSuccess }) {
     e.stopPropagation();
 
     if (!formData.name || !formData.contact_name || !formData.phone || !formData.email) {
-      alert('Please fill in all required fields: Name, Contact Name, Phone, Email.');
+      warn('Please fill in all required fields: Name, Contact Name, Phone, Email.');
       return;
     }
 

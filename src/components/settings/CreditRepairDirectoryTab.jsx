@@ -11,6 +11,7 @@ import AddCreditRepairCompanyModal from "../shared/AddCreditRepairCompanyModal";
 import CreditRepairRateFields from "./CreditRepairRateFields";
 import { HIRE_CATEGORIES, basisShort, fmtGBP, hasValue, hireFeeField, missingPartnerRates, normaliseRates } from "../shared/creditRepairRates";
 import { deleteAndLog, updateAndLog } from "@/components/shared/useActivityLogger";
+import { askConfirm } from '@/lib/dialogs';
 
 function CreditRepairDetailModal({ company, onClose, onUpdated }) {
   const [formData, setFormData] = useState(company);
@@ -209,8 +210,8 @@ export default function CreditRepairDirectoryTab() {
     );
   }, [companies, search]);
 
-  const handleDelete = (company) => {
-    if (window.confirm(`Remove "${company.name}" from the credit repair directory?`)) {
+  const handleDelete = async (company) => {
+    if (await askConfirm(`Remove "${company.name}" from the credit repair directory?`)) {
       deleteMutation.mutate(company.id);
     }
   };

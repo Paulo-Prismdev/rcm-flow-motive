@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AlertCircle } from "lucide-react";
 import { isClientTagged } from "@/components/shared/directoryTags";
+import { askConfirm, warn } from '@/lib/dialogs';
 
 // "Not set up" is what a new account starts as: it sees no part of the app until a
 // type is chosen here. Internal gives full staff access, so it is never the default.
@@ -48,14 +49,14 @@ export default function UserEditForm({ user, onSave, onCancel, isSaving }) {
   const [resetState, setResetState] = useState('idle');
   const [devicesState, setDevicesState] = useState('idle');
   const removeDevices = async () => {
-    if (!window.confirm(`Remove all Face ID / fingerprint devices for ${user.email}? They'll sign in with the emailed code until they set one up again.`)) return;
+    if (!await askConfirm(`Remove all Face ID / fingerprint devices for ${user.email}? They'll sign in with the emailed code until they set one up again.`)) return;
     setDevicesState('busy');
     try {
       await base44.functions.invoke('passkeyManage', { action: 'adminRemoveAll', target_user_id: user.id });
       setDevicesState('done');
     } catch (err) {
       setDevicesState('idle');
-      alert(err?.response?.data?.error || 'Could not remove the devices.');
+      warn(err?.response?.data?.error || 'Could not remove the devices.');
     }
   };
   const resetSignIn = async () => {
@@ -65,7 +66,7 @@ export default function UserEditForm({ user, onSave, onCancel, isSaving }) {
       setResetState('done');
     } catch (err) {
       setResetState('idle');
-      alert(err?.response?.data?.error || 'Could not reset the sign-in step.');
+      warn(err?.response?.data?.error || 'Could not reset the sign-in step.');
     }
   };
 

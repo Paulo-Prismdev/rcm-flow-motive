@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Shield, Users, RefreshCw, CheckCircle, XCircle } from "lucide-react";
 import { toast } from "sonner";
+import { askConfirm } from '@/lib/dialogs';
 
 export default function MigrateUsers() {
   const [migrating, setMigrating] = useState(false);
@@ -16,7 +17,7 @@ export default function MigrateUsers() {
   });
 
   const handleMigration = async () => {
-    if (!confirm('This will migrate all users to the new feature-based access control system. Continue?')) {
+    if (!await askConfirm('This will migrate all users to the new feature-based access control system. Continue?')) {
       return;
     }
 
