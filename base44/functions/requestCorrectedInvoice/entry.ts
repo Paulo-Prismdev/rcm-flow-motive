@@ -42,6 +42,7 @@ export default async function (req: Request): Promise<Response> {
       subject,
       content: body,
       fromName,
+      replyTo: user.email,
     });
     if (!sent.ok) return Response.json({ error: sent.error }, { status: 502 });
 

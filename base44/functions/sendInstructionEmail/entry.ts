@@ -18,7 +18,7 @@ export default async function (req: Request): Promise<Response> {
     }
 
     const fromName = user.full_name ? `${user.full_name} — RCM Automotive` : 'RCM Automotive';
-    const sent = await sendBrandedEmail({ base44, to, cc, subject, content: email_body, fromName });
+    const sent = await sendBrandedEmail({ base44, to, cc, subject, content: email_body, fromName, replyTo: user.email });
     if (!sent.ok) return Response.json({ error: sent.error }, { status: 502 });
 
     // Log the instruction email as a ClaimUpdate for traceability
