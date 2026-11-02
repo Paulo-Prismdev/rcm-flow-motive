@@ -4,6 +4,8 @@ import { base44 } from '@/api/base44Client';
 import { FileText, ExternalLink, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { DOC_ITEMS } from '@/components/shared/docChecklist';
+import SecureFileLink from '@/components/shared/SecureFileLink';
+import { fileNameOf, isPrivateRef } from '@/lib/privateFiles';
 
 const GENERAL_LABEL = 'General Document';
 const LEGACY_LABEL = 'Legacy file';
@@ -12,6 +14,7 @@ const itemLabel = (doc) =>
   doc.label || DOC_ITEMS.find((i) => i.key === doc.item_key)?.label || GENERAL_LABEL;
 
 function fileBaseName(url) {
+  if (isPrivateRef(url)) return fileNameOf(url);
   try {
     return decodeURIComponent(String(url).split('?')[0].split('/').pop() || 'File');
   } catch {
@@ -35,13 +38,16 @@ function formatDay(value) {
   }
 }
 
-function DocRow({ name, type, date, url }) {
+// Each document opens through a short-lived link the server issues after checking
+// this claim is the viewer's own, and the opening is logged on the claim.
+function DocRow({ name, type, date, url, claimId }) {
   return (
-    <a
-      href={url}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="flex items-center justify-between gap-3 p-3 rounded-xl border border-border hover:bg-surface-hover transition-colors group"
+    <SecureFileLink
+      fileRef={url}
+      claimId={claimId}
+      purpose="view"
+      title={`Open ${name}`}
+      className="w-full text-left flex items-center justify-between gap-3 p-3 rounded-xl border border-border hover:bg-surface-hover transition-colors group"
     >
       <div className="flex items-center gap-3 min-w-0">
         <FileText className="w-5 h-5 text-primary flex-shrink-0" />
@@ -54,17 +60,17 @@ function DocRow({ name, type, date, url }) {
         </div>
       </div>
       <ExternalLink className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-    </a>
+    </SecureFileLink>
   );
 }
 
-function Group({ title, rows }) {
+function Group({ title, rows, claimId }) {
   if (rows.length === 0) return null;
   return (
     <div className="space-y-2">
       <p className="text-xs font-semibold text-foreground-muted">{title}</p>
       {rows.map((r) => (
-        <DocRow key={r.key} {...r} />
+        <DocRow key={r.key} {...r} claimId={claimId} />
       ))}
     </div>
   );
@@ -108,19 +114,20 @@ export default function ReferrerDocumentsSection({ claim, legacyDocuments = [], 
         ) : (
           <div className="space-y-2">
             {legacyDocuments.map((url, idx) => (
-              <a
+              <SecureFileLink
                 key={idx}
-                href={url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-between p-3 rounded-xl border border-border hover:bg-surface-hover transition-colors group"
+                fileRef={url}
+                claimId={claim?.id}
+                purpose="view"
+                title={`Open ${fileBaseName(url)}`}
+                className="w-full text-left flex items-center justify-between p-3 rounded-xl border border-border hover:bg-surface-hover transition-colors group"
               >
                 <div className="flex items-center gap-3 min-w-0">
                   <FileText className="w-5 h-5 text-primary group-hover:text-primary/80 flex-shrink-0" />
                   <span className="text-sm font-medium truncate max-w-[200px] md:max-w-md">{fileBaseName(url)}</span>
                 </div>
                 <ExternalLink className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-              </a>
+              </SecureFileLink>
             ))}
           </div>
         )}
@@ -184,9 +191,9 @@ export default function ReferrerDocumentsSection({ claim, legacyDocuments = [], 
         <p className="text-center text-muted-foreground py-8 text-sm">No documents attached to this claim.</p>
       ) : (
         <div className="space-y-5">
-          <Group title="Claim documents" rows={checklistRows} />
-          <Group title="General documents" rows={generalRows} />
-          <Group title="Legacy files" rows={legacyRows} />
+          <Group title="Claim documents" rows={checklistRows} claimId={claim?.id} />
+          <Group title="General documents" rows={generalRows} claimId={claim?.id} />
+          <Group title="Legacy files" rows={legacyRows} claimId={claim?.id} />
         </div>
       )}
     </div>
