@@ -22,7 +22,7 @@
     },
     "notes": {
       "type": "string",
-      "description": "Additional notes about this broker."
+      "description": "Additional notes about this broker"
     }
   },
   "required": [
