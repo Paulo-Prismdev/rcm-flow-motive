@@ -475,9 +475,18 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
 
   const starredUpdates = claimUpdates.filter(u => u.starred && !u.parent_update_id);
 
+  // Saves a change to the claim. The screen updates at once; the history is only
+  // written once the save has gone through, and a failed save puts the screen back.
+  // Resolves true when saved, false when not.
   const handleUpdate = async (updatedData, options = {}) => {
+    const previous = claim;
     // Update local state immediately for instant UI feedback
     setClaim(updatedData);
+    const saved = await onUpdate(updatedData);
+    if (saved === false) {
+      setClaim(previous);
+      return false;
+    }
     const oldStatus = claim.job_status || 'New';
     const newStatus = updatedData.job_status;
     const oldSec = claim.secondary_status || '';
@@ -522,7 +531,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
     }
 
     queryClient.invalidateQueries({ queryKey: ['activityLogs', claim.id] });
-    onUpdate(updatedData);
+    return true;
   };
 
   const archiveMutation = useMutation({
