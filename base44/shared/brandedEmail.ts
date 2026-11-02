@@ -110,6 +110,10 @@ export async function deliverEmail({ base44, to, cc, subject, html, text, fromNa
   if (toList.length === 0 && ccList.length === 0) return { ok: false, error: 'No valid recipient email address', provider };
   const safeSubject = String(subject || '').replace(/[\r\n]+/g, ' ').slice(0, 250);
 
+  // A short trace in the function logs (never the content): which service sent it,
+  // to how many people, and Resend's message id, so delivery can be checked.
+  const trace = (msg: string) => console.log(`email: ${msg} | to ${toList.length} cc ${ccList.length} | "${safeSubject.slice(0, 40)}"`);
+
   if (provider === 'resend') {
     const payload: Record<string, unknown> = {
       from: `${cleanName(fromName || 'RCM Automotive')} <${Deno.env.get('EMAIL_FROM_ADDRESS')}>`,
@@ -129,13 +133,16 @@ export async function deliverEmail({ base44, to, cc, subject, html, text, fromNa
         headers: { Authorization: `Bearer ${Deno.env.get('RESEND_API_KEY')}`, 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
-      if (!res.ok) {
-        const detail = await res.json().catch(() => ({} as any));
-        return { ok: false, error: `Email service error: ${detail?.message || res.status}`, provider };
+      const detail = await res.json().catch(() => ({} as any));
+      if (res.ok) {
+        trace(`sent via Resend id ${detail?.id || '?'}`);
+        return { ok: true, provider };
       }
-      return { ok: true, provider };
+      // Resend refused it (key wrong, domain not verified yet...): fall back to Base44's
+      // email below, so a set-up problem never stops a sign-in code or an invoice request.
+      console.error(`email: Resend refused (${res.status}) ${detail?.message || ''} - falling back to Base44`);
     } catch (error: any) {
-      return { ok: false, error: `Email service error: ${error?.message || error}`, provider };
+      console.error(`email: Resend unreachable (${error?.message || error}) - falling back to Base44`);
     }
   }
 
@@ -152,10 +159,11 @@ export async function deliverEmail({ base44, to, cc, subject, html, text, fromNa
         from_name: cleanName(fromName || 'RCM Automotive'),
       });
     } catch (error: any) {
-      return { ok: false, error: `Base44 email error: ${error?.message || error}`, provider };
+      return { ok: false, error: `Base44 email error: ${error?.message || error}`, provider: 'base44' };
     }
   }
-  return { ok: true, provider };
+  trace('sent via Base44');
+  return { ok: true, provider: 'base44' };
 }
 
 /** Send one branded email. Returns { ok, error } rather than throwing. */
