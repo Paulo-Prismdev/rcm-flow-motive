@@ -27,8 +27,9 @@ export default function ClaimEditForm({
   handleTPChange,
   isInternalUser, setShowClientModal,
   aiExtractDialog, setAiExtractDialog, handleAIExtractConfirm, handleAIExtract,
+  errors = {},
 }) {
-  console.log('[ClaimEditForm] Form submit handler:', handleSubmit?.toString?.().substring(0, 100));
+  const errorList = Object.values(errors || {});
   // The three-way excess choice hands back a claim patch; each field goes through
   // the same change handler as the rest of the form.
   const applyExcess = (patch) => Object.entries(patch).forEach(([field, value]) => handleChange(field, value));
@@ -48,7 +49,7 @@ export default function ClaimEditForm({
       />
       <div className="neomorph p-6 flex-shrink-0">
         <div className="flex items-center gap-4">
-          <Button onClick={(e) => { e.preventDefault(); e.stopPropagation(); console.log('[ClaimEditForm] Back button clicked'); onCancel(); }} className="neomorph-flat p-3 transition-all active:neomorph-pressed">
+          <Button onClick={(e) => { e.preventDefault(); e.stopPropagation(); onCancel(); }} className="neomorph-flat p-3 transition-all active:neomorph-pressed">
             <ArrowLeft className="w-4 h-4 text-gray-600" />
           </Button>
           <div>
@@ -59,7 +60,16 @@ export default function ClaimEditForm({
       </div>
 
       <div className="flex-1 overflow-y-auto min-h-0 pr-1">
-        <form onSubmit={(e) => { e.preventDefault(); e.stopPropagation(); handleSubmit(e); }} className="space-y-6">
+        <form onSubmit={(e) => { e.preventDefault(); e.stopPropagation(); handleSubmit(e); }} noValidate className="space-y-6">
+          {errorList.length > 0 && (
+            <div role="alert" className="flex gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-800">
+              <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0" />
+              <div>
+                <p className="font-medium">Please check {errorList.length === 1 ? 'this' : 'these'} before saving:</p>
+                <ul className="mt-1 list-disc pl-4">{errorList.map((m) => <li key={m}>{m}</li>)}</ul>
+              </div>
+            </div>
+          )}
           {/* Basic Info */}
           <div className="neomorph-flat p-6 space-y-4">
             <h3 className="font-bold text-gray-700 mb-4">Basic Information</h3>
@@ -69,7 +79,7 @@ export default function ClaimEditForm({
                 <div className="flex flex-col gap-2">
                   <div className="flex gap-2">
                     <Input value={formData.reg} onChange={(e) => { handleChange('reg', e.target.value); }} className="neomorph-inset px-4 py-3 text-gray-700 border-0" required />
-                    <Button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); console.log('[ClaimEditForm] Vehicle Lookup clicked'); handleVehicleLookup(); }} disabled={isLookingUpVehicle || !formData.reg} className="neomorph-flat px-4 py-3 whitespace-nowrap">
+                    <Button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleVehicleLookup(); }} disabled={isLookingUpVehicle || !formData.reg} className="neomorph-flat px-4 py-3 whitespace-nowrap">
                       {isLookingUpVehicle ? <Loader className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
                     </Button>
                   </div>
@@ -104,7 +114,7 @@ export default function ClaimEditForm({
           <div className="neomorph-flat p-6 space-y-4">
             <h3 className="font-bold text-gray-700 mb-4">Client Details</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div><label className="block text-sm text-gray-600 mb-2">Client Name *</label>{isInternalUser ? <div className="flex gap-2"><div className="flex-1"><ClientCombobox value={formData.client_name} onChange={handleClientChange} /></div><button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); console.log('[ClaimEditForm] Add Client modal clicked'); setShowClientModal(true); }} className="neomorph-flat p-3 rounded-lg"><Plus /></button></div> : <ClientCombobox value={formData.client_name} onChange={handleClientChange} />}</div>
+              <div><label className="block text-sm text-gray-600 mb-2">Client Name *</label>{isInternalUser ? <div className="flex gap-2"><div className="flex-1"><ClientCombobox value={formData.client_name} onChange={handleClientChange} /></div><button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowClientModal(true); }} className="neomorph-flat p-3 rounded-lg"><Plus /></button></div> : <ClientCombobox value={formData.client_name} onChange={handleClientChange} />}</div>
               <div><label className="block text-sm text-gray-600 mb-2">Phone</label><Input value={formData.client_phone} onChange={(e) => handleChange('client_phone', e.target.value)} className="neomorph-inset px-4 py-3 text-gray-700 border-0" /></div>
               <div><label className="block text-sm text-gray-600 mb-2">Driver/Contact Name</label><Input value={formData.driver_contact_name} onChange={(e) => handleChange('driver_contact_name', e.target.value)} className="neomorph-inset px-4 py-3 text-gray-700 border-0" /></div>
             </div>
@@ -197,7 +207,7 @@ export default function ClaimEditForm({
               <h4 className="font-semibold text-gray-700 mt-4">Third Party Vehicle</h4>
               <div className="flex gap-2">
                 <Input value={formData.tp_reg} onChange={(e) => { handleChange('tp_reg', e.target.value.toUpperCase()); setTpVehicleLookupError(null); }} className="neomorph-inset px-4 py-3 text-gray-700 border-0 flex-1" placeholder="e.g. AB12 CDE" />
-                <Button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); console.log('[ClaimEditForm] TP Vehicle Lookup clicked'); handleTPVehicleLookup(); }} disabled={isLookingUpTPVehicle || !formData.tp_reg} className="neomorph-flat px-4 py-3">
+                <Button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleTPVehicleLookup(); }} disabled={isLookingUpTPVehicle || !formData.tp_reg} className="neomorph-flat px-4 py-3">
                   {isLookingUpTPVehicle ? <Loader className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
                 </Button>
               </div>
@@ -220,8 +230,8 @@ export default function ClaimEditForm({
           </div>
 
           <div className="flex justify-end gap-4">
-            <Button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); console.log('[ClaimEditForm] Cancel clicked'); onCancel(); }} className="neomorph-flat px-6 py-3 font-medium text-gray-700 transition-all active:neomorph-pressed">Cancel</Button>
-            <Button type="submit" onClick={(e) => { console.log('[ClaimEditForm] Update Claim submit clicked'); }} className="neomorph-flat px-6 py-3 font-medium text-blue-600 transition-all active:neomorph-pressed">Update Claim</Button>
+            <Button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); onCancel(); }} className="neomorph-flat px-6 py-3 font-medium text-gray-700 transition-all active:neomorph-pressed">Cancel</Button>
+            <Button type="submit" onClick={(e) => { }} className="neomorph-flat px-6 py-3 font-medium text-blue-600 transition-all active:neomorph-pressed">Update Claim</Button>
           </div>
         </form>
       </div>
