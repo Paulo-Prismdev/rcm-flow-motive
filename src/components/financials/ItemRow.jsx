@@ -20,7 +20,8 @@ export function itemSubline(item, state, claim) {
   if (parts.length > 0) return parts.join(' · ');
   // An order we issue is not something we wait to receive.
   if (item.generatedBy === 'purchase_order') return 'Not issued yet';
-  return isInvoiceDocument(item) ? 'Not received' : 'Not raised';
+  // Documents and invoices sent to us (repairer, supplier) are received; invoices we send are raised.
+  return isInvoiceDocument(item) || item.direction === 'in' ? 'Not received' : 'Not raised';
 }
 
 /**
