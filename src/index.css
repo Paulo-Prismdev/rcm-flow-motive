@@ -310,8 +310,8 @@
 }
 
 .btn:focus-visible {
-  ring: 2px solid hsl(var(--ring));
-  ring-offset: 2px;
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
 }
 
 .btn-sm {
@@ -850,4 +850,27 @@ button:not(.btn-sm):not(.btn-icon),
   --destructive: 4 90% 58%;
   --radius: 10px;
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", 'Inter', sans-serif;
+}
+
+/* ═══════════════════════════════════════════
+   ACCESSIBILITY (Round 10)
+   Visual only for keyboard users and people who ask their device for less motion;
+   nothing here changes any layout.
+═══════════════════════════════════════════ */
+
+/* A visible ring on whatever has keyboard focus, where a component doesn't draw its
+   own (shadcn controls set their own ring and keep it, as this rule has no weight). */
+:where(a, button, [role="button"], input, select, textarea, summary, [tabindex]:not([tabindex="-1"])):focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+/* Respect "reduce motion" in the device's accessibility settings. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
