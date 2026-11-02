@@ -347,6 +347,8 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
       if (!isEditing) {
         const firstStep = steps.find((st) => Object.keys(problems).some((f) => FIELD_STEP[f] === st.key));
         if (firstStep) setCurrentStep(firstStep.number);
+      } else {
+        setTimeout(() => document.querySelector('[data-claim-errors]')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
       }
       notifyError('A few details need checking', `${Object.keys(problems).length === 1 ? 'One field needs' : `${Object.keys(problems).length} fields need`} attention before the claim can be saved.`);
       return;

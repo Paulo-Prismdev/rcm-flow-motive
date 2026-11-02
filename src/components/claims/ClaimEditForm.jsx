@@ -62,7 +62,7 @@ export default function ClaimEditForm({
       <div className="flex-1 overflow-y-auto min-h-0 pr-1">
         <form onSubmit={(e) => { e.preventDefault(); e.stopPropagation(); handleSubmit(e); }} noValidate className="space-y-6">
           {errorList.length > 0 && (
-            <div role="alert" className="flex gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-800">
+            <div role="alert" data-claim-errors className="flex gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-800">
               <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0" />
               <div>
                 <p className="font-medium">Please check {errorList.length === 1 ? 'this' : 'these'} before saving:</p>
