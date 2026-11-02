@@ -80,10 +80,10 @@ export function buildBrandedHtml(content: string, footerNote?: string): string {
 
 /**
  * Delivery, in this order:
- *   1. SendGrid, when SENDGRID_API_KEY is set (already saved on the app). Sends from
- *      notifications@updates.rcmautomotive.co.uk (the domain set up in SendGrid), or
- *      EMAIL_FROM_ADDRESS if that secret is added later.
- *   2. Resend, if RESEND_API_KEY is set instead.
+ *   1. Resend, when RESEND_API_KEY is set. Sends from
+ *      notifications@updates.rcmautomotive.co.uk (the domain on Resend), or
+ *      EMAIL_FROM_ADDRESS if that secret is added.
+ *   2. SendGrid, if only SENDGRID_API_KEY is set.
  *   3. Base44's own email service.
  * SendGrid/Resend send one message with real To and CC, a Reply-To, to any address, and
  * can attach files. If either refuses a message (bad key, domain not verified...), it
@@ -97,9 +97,11 @@ const DEFAULT_REPLY_TO = 'info@rcmautomotive.co.uk';
 
 export type EmailAttachment = { filename: string; path: string };
 
+// Resend (updates.rcmautomotive.co.uk, on the prismdev Resend account) is the chosen
+// service; SendGrid is only used if no Resend key has been added.
 export function emailProvider(): 'sendgrid' | 'resend' | 'base44' {
-  if (Deno.env.get('SENDGRID_API_KEY')) return 'sendgrid';
   if (Deno.env.get('RESEND_API_KEY')) return 'resend';
+  if (Deno.env.get('SENDGRID_API_KEY')) return 'sendgrid';
   return 'base44';
 }
 
