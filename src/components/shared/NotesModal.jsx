@@ -10,10 +10,14 @@ import { Badge } from "@/components/ui/badge";
 import InternalUpdateForm from '@/components/shared/InternalUpdateForm';
 import UpdateDirectionBadges from '../claims/UpdateDirectionBadges';
 import FileViewer from '@/components/shared/FileViewer';
+import SecureFileLink from '@/components/shared/SecureFileLink';
+import { fileNameOf, isPrivateRef } from '@/lib/privateFiles';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
 
-const isImageUrl = (url) => /\.(jpe?g|png|gif|webp|bmp|svg)(\?|$)/i.test(url);
+// Private files have no public address, so they show as a file icon rather than a
+// thumbnail: opening one goes through a signed link and is logged.
+const isImageUrl = (url) => !isPrivateRef(url) && /\.(jpe?g|png|gif|webp|bmp|svg)(\?|$)/i.test(url);
 
 const UPDATE_TYPE_COLORS = {
   "Client Communication": "bg-blue-500", "Bodyshop Communication": "bg-green-500",
@@ -180,6 +184,7 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
   const resetForm = () => { setShowForm(false); setReplyToId(null); setFormDirty(false); };
 
   const getFileName = (url) => {
+    if (isPrivateRef(url)) return fileNameOf(url);
     try {
       const decoded = decodeURIComponent(url);
       const parts = decoded.split('/');
@@ -210,7 +215,7 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
             <FileIcon className="w-3.5 h-3.5 text-muted-foreground" />
             <span className="max-w-[180px] truncate">{getFileName(url)}</span>
             <button type="button" onClick={() => setViewingFile(url)} className="p-0.5 hover:text-foreground" title="View"><Eye className="w-3 h-3" /></button>
-            <a href={url} target="_blank" rel="noopener noreferrer" className="p-0.5 hover:text-foreground" title="Download"><Download className="w-3 h-3" /></a>
+            <SecureFileLink fileRef={url} claimId={parentType === 'Claim' ? parentId : null} className="p-0.5 hover:text-foreground" title="Download"><Download className="w-3 h-3" /></SecureFileLink>
             {editable && canEditDelete(note) && (
               <button type="button" onClick={() => deleteFileMutation.mutate({ noteId: note.id, fileUrl: url })} className="p-0.5 hover:text-destructive" title="Remove file"><X className="w-3 h-3" /></button>
             )}
@@ -458,7 +463,7 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
         </DialogContent>
       </Dialog>
 
-      {viewingFile && <FileViewer fileUrl={viewingFile} onClose={() => setViewingFile(null)} />}
+      {viewingFile && <FileViewer fileUrl={viewingFile} claimId={parentType === 'Claim' ? parentId : null} onClose={() => setViewingFile(null)} />}
     </>
   );
 }
