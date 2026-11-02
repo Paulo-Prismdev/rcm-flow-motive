@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Plus, Edit, Trash2, Play, History, Power, PowerOff, Eye, X, Send } from 'lucide-react';
 import ChaserTestEmailModal from '@/components/settings/ChaserTestEmailModal';
 import ChaserConditionBuilder, { migrateLegacyConditions, summarizeConditions } from '@/components/settings/ChaserConditionBuilder';
-import { askConfirm, warn } from '@/lib/dialogs';
+import { askConfirm, notify, warn } from '@/lib/dialogs';
 
 export default function ChaserEmailSettings() {
   const [showForm, setShowForm] = useState(false);
@@ -66,7 +66,7 @@ export default function ChaserEmailSettings() {
     setRunningRuleId(rule.id);
     try {
       const result = await base44.functions.invoke('processChaserEmails', { rule_id: rule.id });
-      warn(`"${rule.rule_name}" processed!\n\nSent: ${result.data.emails_sent}\nSkipped: ${result.data.emails_skipped}\nFailed: ${result.data.errors}`);
+      notify(`"${rule.rule_name}" processed`, `Sent ${result.data.emails_sent} · skipped ${result.data.emails_skipped} · failed ${result.data.errors}`);
       queryClient.invalidateQueries({ queryKey: ['chaserEmailLogs'] });
     } catch (error) {
       warn(`Error: ${error.message}`);
