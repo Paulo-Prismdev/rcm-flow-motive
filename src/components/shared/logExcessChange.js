@@ -13,7 +13,6 @@ export const EXCESS_FIELD_LABELS = {
  * figure is never silent wherever it is done.
  */
 // (The person is stamped server-side; `user` is kept for existing callers.)
-// eslint-disable-next-line no-unused-vars
 export async function logExcessChange(claim, patch, user) {
   if (!claim?.id) return;
   await logChanges({
