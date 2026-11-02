@@ -1,4 +1,3 @@
-import { base44 } from '@/api/base44Client';
 import { logChanges } from '@/components/shared/useActivityLogger';
 
 /** The activity-history labels for the three-way excess choice. */
@@ -13,15 +12,15 @@ export const EXCESS_FIELD_LABELS = {
  * the claim screen's own update, so ticking TBC, choosing Waived or entering a
  * figure is never silent wherever it is done.
  */
+// (The person is stamped server-side; `user` is kept for existing callers.)
+// eslint-disable-next-line no-unused-vars
 export async function logExcessChange(claim, patch, user) {
   if (!claim?.id) return;
-  const actor = user || await base44.auth.me();
   await logChanges({
     parentId: claim.id,
     parentType: 'Claim',
     oldData: claim,
     newData: patch,
-    user: actor,
     fieldLabels: EXCESS_FIELD_LABELS,
   });
 }
