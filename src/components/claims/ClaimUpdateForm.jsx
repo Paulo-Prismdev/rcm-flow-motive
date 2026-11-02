@@ -77,7 +77,7 @@ export default function ClaimUpdateForm({
 
   useEffect(() => {
     if (onDirtyChange) onDirtyChange(isDirty);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [isDirty]);
 
   const { data: currentUser } = useQuery({ queryKey: ['currentUser'], queryFn: () => base44.auth.me(), staleTime: 5 * 60 * 1000 });

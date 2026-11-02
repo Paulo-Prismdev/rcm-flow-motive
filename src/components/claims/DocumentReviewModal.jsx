@@ -145,7 +145,7 @@ export default function DocumentReviewModal({
 
     return () => { cancelled = true; };
     // Read once per opened document: the claim's own updates must not re-read it.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [isOpen, fileUrl, itemKey]);
 
   const setFigure = (key, value) => {

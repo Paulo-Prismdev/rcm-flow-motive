@@ -221,7 +221,7 @@ export function figuresCheckState({ claim, ctx, summary, storagePercentDefault }
     changed,
     legacy: !record && invoicesAlreadyRaised(summary),
     checkedBy: record?.by || '',
-    settled: missing.length === 0 && (!!record ? changed.length === 0 : invoicesAlreadyRaised(summary)),
+    settled: missing.length === 0 && (record ? changed.length === 0 : invoicesAlreadyRaised(summary)),
     canConfirm: missing.length === 0,
   };
 }

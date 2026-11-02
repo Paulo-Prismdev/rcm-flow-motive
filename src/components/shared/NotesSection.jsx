@@ -102,7 +102,7 @@ export default function NotesSection({ parentId, parentType }) {
     const note = notes.find(n => n.id === noteId);
     if (!note) return;
 
-    const reactions = { ...note.reactions } || {};
+    const reactions = { ...(note.reactions || {}) };
     const userEmail = currentUser?.email || '';
     
     // First, remove user from all existing reactions

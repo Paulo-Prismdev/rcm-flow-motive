@@ -194,7 +194,6 @@ export default function ReferrerPortal() {
     referrer_ref: 'Ref',
     driver_contact_name: 'Driver',
     business_division: 'Business Division',
-    referrer_ref: 'Ref',
     claim_type: 'Claim Type',
     claim_ref: 'Claim Ref',
     policy_number: 'Policy No',

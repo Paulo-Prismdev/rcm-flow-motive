@@ -29,7 +29,7 @@ export default function ClaimAuthorisingPartyFields({ formData, handleChange }) 
     if (!role && !overridden) return;
     const shouldOverride = !(derived.authorised_by === role && derived.authorising_party_name === name);
     if (shouldOverride !== overridden) handleChange('authorising_party_overridden', shouldOverride);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [role, name, derived.authorised_by, derived.authorising_party_name, overridden]);
 
   const resetToAuto = () => {

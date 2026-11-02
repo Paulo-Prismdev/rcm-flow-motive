@@ -298,7 +298,7 @@ export default function InstructionPreCheck({ claim, onUpdate, selectedBodyshop 
         authorising_party_overridden: false,
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [claim.claim_type]);
 
   const clientAddress = [claim.client_address_line_1, claim.client_address_line_2, claim.client_town, claim.client_county, claim.client_postcode].filter(Boolean).join(', ');

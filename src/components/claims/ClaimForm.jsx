@@ -457,13 +457,13 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
     // (the combobox list can be stale if the directory was edited elsewhere).
     let fresh = client;
     if (client?.id) {
-      try { fresh = await base44.entities.Client.get(client.id) || client; } catch {}
+      try { fresh = await base44.entities.Client.get(client.id) || client; } catch { /* use the list's copy */ }
       await ensureDirectoryTag(fresh, 'client');
     }
     const fullAddress = [fresh.address_line_1, fresh.address_line_2, fresh.town, fresh.county, fresh.postcode].filter(Boolean).join(', ');
     let geocodedLat = null, geocodedLng = null;
     if (fullAddress) {
-      try { const c = await geocodeAddress(fullAddress); if (c) { geocodedLat = c.lat; geocodedLng = c.lng; } } catch {}
+      try { const c = await geocodeAddress(fullAddress); if (c) { geocodedLat = c.lat; geocodedLng = c.lng; } } catch { /* the claim saves without a map position */ }
     }
     const contacts = fresh.contacts || [];
     const primaryContact = contacts.find(c => c.is_primary) || contacts[0] || null;

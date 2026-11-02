@@ -51,6 +51,5 @@ export default function useLinkedClientSync(clientId, setFormData, setLinkedCont
       })
       .catch(() => {});
     return () => { cancelled = true; };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [clientId]);
 }

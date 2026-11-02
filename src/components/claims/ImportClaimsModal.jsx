@@ -252,7 +252,7 @@ Only map columns that clearly correspond to a field. Be conservative - if unsure
         try {
           const res = await base44.functions.invoke('generateJobNumber', { entityType: 'Claim' });
           jobNumber = res?.data?.job_number || res?.job_number;
-        } catch {}
+        } catch { /* imported without a job number */ }
 
         await base44.entities.Claim.create({
           ...mapped,

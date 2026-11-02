@@ -90,7 +90,7 @@ export default function InternalUpdateForm({
 
   useEffect(() => {
     if (onDirtyChange) onDirtyChange(isDirty);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [isDirty]);
 
   const createNoteMutation = useMutation({
