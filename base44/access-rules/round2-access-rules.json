@@ -1,47 +1,269 @@
 {
-  "_about": "Round 2 access rules, staged. Entity access rules apply to the live app the moment they are saved (they are not held back until publishing), so these are applied by scripts/apply-access-rules.mjs at go-live, after hours, in the same window as publishing the matching screens. Until then the entity files keep their current rules. INT below means internal staff (user type internal).",
-  "_int": { "user_condition": { "data.user_type": "internal" } },
+  "_about": "Round 2 access rules, staged. Entity access rules apply to the live app the moment they are saved (they are not held back until publishing), so these are applied by scripts/apply-access-rules.mjs at go-live, after hours, in the same window as publishing the matching screens. Until then the entity files keep their current rules. INT below means internal staff (user type internal). Since Round 4, INT also requires the staff member to have completed the emailed-code sign-in step (data.twofa_verified), so a password alone never opens staff data.",
+  "_int": {
+    "$and": [
+      {
+        "user_condition": {
+          "data.user_type": "internal"
+        }
+      },
+      {
+        "user_condition": {
+          "data.twofa_verified": true
+        }
+      }
+    ]
+  },
   "entities": {
-    "Claim": { "read": "INT", "create": "INT", "update": "INT", "delete": "INT" },
-    "ClaimDocument": { "read": "INT", "create": "INT", "update": "INT", "delete": "INT" },
-    "ClaimUpdate": { "read": "INT", "create": "INT", "update": "INT", "delete": "INT" },
-    "Note": { "read": "INT", "create": "INT", "update": "INT", "delete": "INT" },
-    "Broker": { "read": "INT", "create": "INT", "update": "INT", "delete": "INT" },
-    "Insurer": { "read": "INT", "create": "INT", "update": "INT", "delete": "INT" },
-    "Supplier": { "read": "INT", "create": "INT", "update": "INT", "delete": "INT" },
-    "CreditRepairCompany": { "read": "INT", "create": "INT", "update": "INT", "delete": "INT" },
-    "EmailTemplate": { "read": "INT", "create": "INT", "update": "INT", "delete": "INT" },
-    "ChaserEmailLog": { "read": "INT", "create": "INT", "update": "INT", "delete": "INT" },
-    "ChaserEmailRule": { "read": "INT", "create": "INT", "update": "INT", "delete": "INT" },
+    "Claim": {
+      "read": "INT",
+      "create": "INT",
+      "update": "INT",
+      "delete": "INT"
+    },
+    "ClaimDocument": {
+      "read": "INT",
+      "create": "INT",
+      "update": "INT",
+      "delete": "INT"
+    },
+    "ClaimUpdate": {
+      "read": "INT",
+      "create": "INT",
+      "update": "INT",
+      "delete": "INT"
+    },
+    "Note": {
+      "read": "INT",
+      "create": "INT",
+      "update": "INT",
+      "delete": "INT"
+    },
+    "Broker": {
+      "read": "INT",
+      "create": "INT",
+      "update": "INT",
+      "delete": "INT"
+    },
+    "Insurer": {
+      "read": "INT",
+      "create": "INT",
+      "update": "INT",
+      "delete": "INT"
+    },
+    "Supplier": {
+      "read": "INT",
+      "create": "INT",
+      "update": "INT",
+      "delete": "INT"
+    },
+    "CreditRepairCompany": {
+      "read": "INT",
+      "create": "INT",
+      "update": "INT",
+      "delete": "INT"
+    },
+    "EmailTemplate": {
+      "read": "INT",
+      "create": "INT",
+      "update": "INT",
+      "delete": "INT"
+    },
+    "ChaserEmailLog": {
+      "read": "INT",
+      "create": "INT",
+      "update": "INT",
+      "delete": "INT"
+    },
+    "ChaserEmailRule": {
+      "read": "INT",
+      "create": "INT",
+      "update": "INT",
+      "delete": "INT"
+    },
     "Bodyshop": {
-      "read": { "$or": ["INT", { "$and": [{ "user_condition": { "data.user_type": "bodyshop" } }, { "id": "{{user.data.linked_bodyshop_id}}" }] }] },
-      "create": "INT", "update": "INT", "delete": "INT"
+      "read": {
+        "$or": [
+          "INT",
+          {
+            "$and": [
+              {
+                "user_condition": {
+                  "data.user_type": "bodyshop"
+                }
+              },
+              {
+                "id": "{{user.data.linked_bodyshop_id}}"
+              }
+            ]
+          }
+        ]
+      },
+      "create": "INT",
+      "update": "INT",
+      "delete": "INT"
     },
     "Company": {
-      "read": { "$or": ["INT",
-        { "$and": [{ "user_condition": { "data.user_type": "referrer" } }, { "id": "{{user.data.company_id}}" }] },
-        { "$and": [{ "user_condition": { "data.user_type": "client" } }, { "id": "{{user.data.company_id}}" }] }] },
-      "create": "INT", "update": "INT", "delete": "INT"
+      "read": {
+        "$or": [
+          "INT",
+          {
+            "$and": [
+              {
+                "user_condition": {
+                  "data.user_type": "referrer"
+                }
+              },
+              {
+                "id": "{{user.data.company_id}}"
+              }
+            ]
+          },
+          {
+            "$and": [
+              {
+                "user_condition": {
+                  "data.user_type": "client"
+                }
+              },
+              {
+                "id": "{{user.data.company_id}}"
+              }
+            ]
+          }
+        ]
+      },
+      "create": "INT",
+      "update": "INT",
+      "delete": "INT"
     },
     "ActivityLog": {
       "read": "INT",
       "create": "INT",
-      "update": { "$and": ["INT", { "user_condition": { "role": "super_admin" } }] },
-      "delete": { "$and": ["INT", { "user_condition": { "role": "super_admin" } }] }
+      "update": {
+        "$and": [
+          "INT",
+          {
+            "user_condition": {
+              "role": "super_admin"
+            }
+          }
+        ]
+      },
+      "delete": {
+        "$and": [
+          "INT",
+          {
+            "user_condition": {
+              "role": "super_admin"
+            }
+          }
+        ]
+      }
     },
     "Notification": {
-      "create": { "$or": ["INT", { "data.user_email": "{{user.email}}" }] }
+      "create": {
+        "$or": [
+          "INT",
+          {
+            "data.user_email": "{{user.email}}"
+          }
+        ]
+      }
     },
     "User": {
-      "read": { "$or": [{ "user_condition": { "role": "super_admin" } }, "INT", { "id": "{{user.id}}" }] },
-      "create": { "$or": [{ "user_condition": { "role": "super_admin" } }, { "$and": ["INT", { "user_condition": { "role": "admin" } }] }] },
-      "update": { "$or": [{ "user_condition": { "role": "super_admin" } }, { "$and": ["INT", { "user_condition": { "role": "admin" } }] }, { "id": "{{user.id}}" }] },
-      "delete": { "user_condition": { "role": "super_admin" } }
+      "read": {
+        "$or": [
+          {
+            "user_condition": {
+              "role": "super_admin"
+            }
+          },
+          "INT",
+          {
+            "id": "{{user.id}}"
+          }
+        ]
+      },
+      "create": {
+        "$or": [
+          {
+            "user_condition": {
+              "role": "super_admin"
+            }
+          },
+          {
+            "$and": [
+              "INT",
+              {
+                "user_condition": {
+                  "role": "admin"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "update": {
+        "$or": [
+          {
+            "user_condition": {
+              "role": "super_admin"
+            }
+          },
+          {
+            "$and": [
+              "INT",
+              {
+                "user_condition": {
+                  "role": "admin"
+                }
+              }
+            ]
+          },
+          {
+            "id": "{{user.id}}"
+          }
+        ]
+      },
+      "delete": {
+        "user_condition": {
+          "role": "super_admin"
+        }
+      }
     }
   },
   "fields": {
     "User.role": {
-      "update": { "$or": [{ "$and": ["INT", { "user_condition": { "role": "super_admin" } }] }, { "$and": ["INT", { "user_condition": { "role": "admin" } }] }, { "user_condition": { "collaborator_role": "editor" } }] }
+      "update": {
+        "$or": [
+          {
+            "$and": [
+              "INT",
+              {
+                "user_condition": {
+                  "role": "super_admin"
+                }
+              }
+            ]
+          },
+          {
+            "$and": [
+              "INT",
+              {
+                "user_condition": {
+                  "role": "admin"
+                }
+              }
+            ]
+          },
+          {
+            "user_condition": {
+              "collaborator_role": "editor"
+            }
+          }
+        ]
+      }
     }
   },
   "defaults": {
