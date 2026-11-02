@@ -82,7 +82,7 @@ const recordName = (r) => (r && (r.job_number || r.name || r.title || r.file_nam
 // failure as before (so callers' error handling still works); the logging never does.
 export async function deleteAndLog(entityName, id, { label } = {}) {
   let rec = null;
-  try { rec = (await base44.entities[entityName].filter({ id }))?.[0] || null; } catch { /* still delete */ }
+  try { rec = (await base44.entities[entityName].get(id)) || null; } catch { /* still delete */ }
   const result = await base44.entities[entityName].delete(id);
   const name = recordName(rec);
   const what = `${label || entityName.replace(/([a-z])([A-Z])/g, '$1 $2').toLowerCase()}${name ? ` – ${name}` : ''}`;
