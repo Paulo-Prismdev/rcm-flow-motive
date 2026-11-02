@@ -105,6 +105,7 @@ export const AuthProvider = ({ children }) => {
         lockedUntil: data.locked_until,
         attemptsRemaining: data.attempts_remaining,
         codeActive: !!data.code_active,
+        hasPasskeys: !!data.has_passkeys,
       });
       return data;
     } catch {
