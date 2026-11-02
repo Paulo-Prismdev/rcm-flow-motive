@@ -146,6 +146,8 @@ export async function deliverEmail({ base44, to, cc, subject, html, text, fromNa
         to: recipient,
         subject: safeSubject,
         body: html,
+        html,
+        text: text || htmlToPlain(html),
         from_name: cleanName(fromName || 'RCM Automotive'),
       });
     } catch (error: any) {
