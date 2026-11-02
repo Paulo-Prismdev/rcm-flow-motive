@@ -186,15 +186,15 @@ export default function AuthorityReviewModal({
 
     setSaving(true);
     try {
-    await onConfirm({
-      figures,
-      corrections: authorityCorrections(figures, raw),
-      accepted,
-      excessChoice: excess.differs || (excess.tbc && excessChoice === 'waived') ? excessChoice : null,
-      vatChoice: vat.differs ? vatChoice : null,
-      acceptInvoiceTotal: authorityChoice === 'accept',
-      requestReinvoice: authorityChoice === 'reinvoice',
-    });
+      await onConfirm({
+        figures,
+        corrections: authorityCorrections(figures, raw),
+        accepted,
+        excessChoice: excess.differs || (excess.tbc && excessChoice === 'waived') ? excessChoice : null,
+        vatChoice: vat.differs ? vatChoice : null,
+        acceptInvoiceTotal: authorityChoice === 'accept',
+        requestReinvoice: authorityChoice === 'reinvoice',
+      });
     } finally {
       setSaving(false);
     }

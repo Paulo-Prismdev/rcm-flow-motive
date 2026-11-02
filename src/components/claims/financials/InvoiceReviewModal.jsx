@@ -339,19 +339,19 @@ export default function InvoiceReviewModal({
     softBlockers.filter((b) => acked[b.id]).forEach((b) => accepted.push(`${b.text} — accepted`));
     setSaving(true);
     try {
-    await onConfirm({
-      figures,
-      corrections: correctionsFromReview(figures, raw, derived, fields),
-      accepted,
-      // An invoice waiting on a corrected copy doesn't set the repair cost: the
-      // final repair cost comes from an invoice that is within the authority and
-      // accepted.
-      useAsRepairCost: !!costOffer && useRepairCost && !reinvoiceRequested,
-      acceptInvoiceTotal: authorityChoice === 'accept',
-      requestReinvoice: reinvoiceRequested,
-      fileVatExcess: fileVatExcessConfirmed,
-      addressedToClient: clientAddressed ? addressedNote.trim() : null,
-    });
+      await onConfirm({
+        figures,
+        corrections: correctionsFromReview(figures, raw, derived, fields),
+        accepted,
+        // An invoice waiting on a corrected copy doesn't set the repair cost: the
+        // final repair cost comes from an invoice that is within the authority and
+        // accepted.
+        useAsRepairCost: !!costOffer && useRepairCost && !reinvoiceRequested,
+        acceptInvoiceTotal: authorityChoice === 'accept',
+        requestReinvoice: reinvoiceRequested,
+        fileVatExcess: fileVatExcessConfirmed,
+        addressedToClient: clientAddressed ? addressedNote.trim() : null,
+      });
     } finally {
       setSaving(false);
     }
