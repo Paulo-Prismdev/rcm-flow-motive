@@ -9,6 +9,7 @@ import { createPortal } from "react-dom";
 import { isClientTagged, isThirdPartyTagged } from "@/components/shared/directoryTags";
 import { syncClaimVatExcess } from "@/components/shared/syncClaimVatExcess";
 import DirectoryTagPills from "./DirectoryTagPills";
+import RecordHistory from '@/components/shared/RecordHistory';
 import { updateAndLog, createAndLog } from '@/components/shared/useActivityLogger';
 
 const EMPTY_FORM = {
@@ -276,7 +277,10 @@ export default function DirectoryDetailModal({ record, onClose, onSaved }) {
             </div>
           </form>
         ) : (
-          readingView
+          <>
+            {readingView}
+            {!isNew && <div className="mt-4"><RecordHistory recordId={record.id} /></div>}
+          </>
         )}
       </div>
     </div>,
