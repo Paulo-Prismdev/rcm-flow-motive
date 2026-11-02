@@ -18,6 +18,11 @@ Deno.serve(async (req) => {
     out.fetch_status = res.status;
     out.content_ok = (await res.text()) === 'private storage check';
     out.cors = res.headers.get('access-control-allow-origin');
+    const bare = await fetch(signed_url.split('?')[0]);
+    out.unsigned_status = bare.status;
+    await new Promise((r) => setTimeout(r, 65000));
+    const late = await fetch(signed_url);
+    out.after_expiry_status = late.status;
   } catch (e: any) {
     out.error = e?.message;
   }
