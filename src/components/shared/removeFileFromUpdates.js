@@ -1,5 +1,4 @@
 import { base44 } from '@/api/base44Client';
-import { deleteAndLog } from "@/components/shared/useActivityLogger";
 
 /**
  * Takes one file out of a claim's Internal Updates: any note carrying it has that
@@ -23,7 +22,7 @@ export async function removeFileFromUpdates(claimId, fileUrl) {
       if (!urls.includes(fileUrl)) continue;
       const remaining = urls.filter((url) => url !== fileUrl);
       if (remaining.length) await base44.entities.Note.update(note.id, { file_urls: remaining });
-      else await deleteAndLog("Note", note.id);
+      else await base44.entities.Note.delete(note.id);
       changed += 1;
     }
     return changed;
