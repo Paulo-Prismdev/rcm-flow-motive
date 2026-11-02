@@ -6,10 +6,10 @@ import { base44 } from '@/api/base44Client';
 import { Loader, X } from 'lucide-react';
 import AddressLookupInput from './AddressLookupInput'; // New import
 
-export default function AddBodyshopModal({ isOpen, onClose, onSuccess, initialName = '' }) {
-  const queryClient = useQueryClient();
 import { createAndLog } from '@/components/shared/useActivityLogger';
 import { warn } from '@/lib/dialogs';
+export default function AddBodyshopModal({ isOpen, onClose, onSuccess, initialName = '' }) {
+  const queryClient = useQueryClient();
   const [formData, setFormData] = useState({
     name: initialName || '',
     contact_name: '',

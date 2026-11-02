@@ -108,6 +108,7 @@ import ClaimStatusEditForm from './ClaimStatusEditForm';
 import { isUpdateTrackingClosed, computeUpdateStatusFlag, computeClientCommStatusFlag } from '../shared/claimStatusUpdate';
 import { saveTimeLogInBackground } from '../shared/saveTimeLogInBackground';
 
+import { askConfirm, notify, notifyError } from '@/lib/dialogs';
 const EditableSection = ({ title, icon: Icon, claim, onUpdate, children, EditComponent, canEdit = true }) => {
     const [isEditing, setIsEditing] = useState(false);
 
@@ -199,7 +200,6 @@ import ActivityLogSection from '../shared/ActivityLogSection';
 import TimeLogsModal from '../shared/TimeLogsModal';
 import ActivityLogModal from '../shared/ActivityLogModal';
 import { logActivity, logChanges, deleteAndLog } from '../shared/useActivityLogger';
-import { askConfirm, notify, notifyError } from '@/lib/dialogs';
 
 const SECTION_FIELDS = {
   status: ['reg', 'claim_type', 'loss_date', 'vehicle_use', 'incident_location', 'circumstances'],
