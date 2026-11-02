@@ -226,7 +226,7 @@ export default function TwoFactorVerify() {
       {info && <AuthNotice tone="info">{info}</AuthNotice>}
 
       <form onSubmit={(e) => { e.preventDefault(); handleVerify(); }} noValidate className="space-y-6">
-        <OtpField ref={otpRef} value={code} onChange={setCode} onComplete={handleVerify} disabled={loading || locked} label="6-digit code" />
+        <OtpField ref={otpRef} value={code} onChange={setCode} onComplete={handleVerify} disabled={loading || locked} label="6-digit code" autoFocus={!usePasskeyFirst} />
         <Button
           type="submit"
           variant={usePasskeyFirst ? 'outline' : 'default'}
