@@ -307,6 +307,7 @@ export default function RepairerDetailDrawer({ bodyshopId, onClose }) {
                   </>
                 )}
               </Section>
+              {!isEditing && <RecordHistory recordId={bodyshopId} />}
             </div>
 
             {/* Edit / Save / Cancel — sticky bottom bar */}
