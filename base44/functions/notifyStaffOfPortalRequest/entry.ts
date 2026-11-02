@@ -26,7 +26,7 @@ Deno.serve(async (req) => {
       || record.repairer_id === scope.bodyshopId || record.bodyshop_company_id === scope.bodyshopId);
     if (!mine) return Response.json({ error: 'Not found' }, { status: 404 });
 
-    const bodyshop = await base44.asServiceRole.entities.Bodyshop.get(scope.bodyshopId).catch(() => null);
+    const bodyshop = await base44.asServiceRole.entities.Bodyshop.get(scope.bodyshopId as string).catch(() => null);
     const from = bodyshop?.name || 'A repairer';
     const note = kind === 'estimate'
       ? {
