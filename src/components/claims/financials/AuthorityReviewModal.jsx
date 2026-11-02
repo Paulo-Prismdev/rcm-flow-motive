@@ -150,7 +150,10 @@ export default function AuthorityReviewModal({
     && regAcked
     && !choiceNeeded;
 
-  const handleConfirm = () => {
+  // One save at a time: a second click while the first is saving does nothing.
+  const [saving, setSaving] = useState(false);
+  const handleConfirm = async () => {
+    if (saving) return;
     const accepted = [];
     if (regIssue) accepted.push(`${regIssue.text} — accepted`);
     if (comparison?.status === 'under') {
@@ -181,7 +184,9 @@ export default function AuthorityReviewModal({
         : `the claim's customer VAT status of ${vat.stored === 'VAT Registered' ? 'VAT registered' : 'not VAT registered'} kept against the authority's`);
     }
 
-    onConfirm({
+    setSaving(true);
+    try {
+    await onConfirm({
       figures,
       corrections: authorityCorrections(figures, raw),
       accepted,
@@ -190,6 +195,9 @@ export default function AuthorityReviewModal({
       acceptInvoiceTotal: authorityChoice === 'accept',
       requestReinvoice: authorityChoice === 'reinvoice',
     });
+    } finally {
+      setSaving(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -325,15 +333,15 @@ export default function AuthorityReviewModal({
         </div>
 
         <div className="flex items-center justify-between gap-3 px-4 py-2.5 border-t border-border flex-shrink-0">
-          <Button variant="outline" onClick={onClose} className="gap-1.5">
+          <Button variant="outline" onClick={onClose} disabled={saving} className="gap-1.5">
             <X className="w-3.5 h-3.5" /> Reject the upload
           </Button>
           <Button
             onClick={handleConfirm}
-            disabled={!canConfirm}
+            disabled={!canConfirm || saving}
             className="gap-1.5 bg-purple-600 hover:bg-purple-700 text-white"
           >
-            <Check className="w-3.5 h-3.5" /> Save the authority
+            <Check className="w-3.5 h-3.5" /> {saving ? 'Saving…' : 'Save the authority'}
           </Button>
         </div>
     </TopLevelReviewWindow>

@@ -322,7 +322,10 @@ export default function InvoiceReviewModal({
     // so it can't be saved without the note.
     && (!clientAddressed || addressedNote.trim().length > 0);
 
-  const handleConfirm = () => {
+  // One save at a time: a second click while the first is saving does nothing.
+  const [saving, setSaving] = useState(false);
+  const handleConfirm = async () => {
+    if (saving) return;
     const accepted = [];
     if (mismatch && acceptedMismatch) {
       accepted.push(`the invoice total ${fmtGBP(mismatch.invoiceTotal)} differs from our calculated ${fmtGBP(mismatch.expected.amount)}${mismatch.expected.note ? ` (${mismatch.expected.note})` : ''} — accepted with the reason: ${reason.trim()}`);
@@ -334,7 +337,9 @@ export default function InvoiceReviewModal({
       accepted.push(`${authorityWorkings(comparison)} — the invoice total of ${fmtGBP(comparison.insurerPart)} matches, making the whole repair ${fmtGBP(comparison.fullCost)} against the authorised ${fmtGBP(comparison.authority)}`);
     }
     softBlockers.filter((b) => acked[b.id]).forEach((b) => accepted.push(`${b.text} — accepted`));
-    onConfirm({
+    setSaving(true);
+    try {
+    await onConfirm({
       figures,
       corrections: correctionsFromReview(figures, raw, derived, fields),
       accepted,
@@ -347,6 +352,9 @@ export default function InvoiceReviewModal({
       fileVatExcess: fileVatExcessConfirmed,
       addressedToClient: clientAddressed ? addressedNote.trim() : null,
     });
+    } finally {
+      setSaving(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -505,15 +513,15 @@ export default function InvoiceReviewModal({
         </div>
 
         <div className="flex items-center justify-between gap-3 px-4 py-2.5 border-t border-border flex-shrink-0">
-          <Button variant="outline" onClick={onClose} className="gap-1.5">
+          <Button variant="outline" onClick={onClose} disabled={saving} className="gap-1.5">
             <X className="w-3.5 h-3.5" /> Reject the upload
           </Button>
           <Button
             onClick={handleConfirm}
-            disabled={!canConfirm}
+            disabled={!canConfirm || saving}
             className="gap-1.5 bg-purple-600 hover:bg-purple-700 text-white"
           >
-            <Check className="w-3.5 h-3.5" /> Save the invoice to the claim
+            <Check className="w-3.5 h-3.5" /> {saving ? 'Saving…' : 'Save the invoice to the claim'}
           </Button>
         </div>
     </TopLevelReviewWindow>
