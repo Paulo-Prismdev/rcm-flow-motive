@@ -109,7 +109,7 @@ export const AuthProvider = ({ children }) => {
     } catch {
       // Fails closed for staff: if we can't tell, the code screen is shown, and the
       // server's access rules decide what can be read either way.
-      setTwofaStatus({ required: true, verified: false, loading: false });
+      setTwofaStatus({ required: true, verified: false, loading: false, failed: true });
       return null;
     }
   }, []);
