@@ -108,12 +108,13 @@ const PORTAL_FIELDS: Record<string, string[]> = {
     'authority_cost_gross', 'final_repair_cost',
     'has_third_party', 'tp_name', 'tp_phone', 'tp_email', 'tp_make_model', 'tp_reg', 'tp_insurer', 'tp_claim_ref', 'tp_policy_number',
   ],
-  // The repairer gets what they need to book in, repair and invoice the job: no third
-  // party, referrer or broker details, and no internal reasons.
+  // The repairer gets what they need to book in, repair and invoice the job: the third
+  // party's insurer and claim reference (for invoicing), but not the third party's own
+  // contact details, nor referrer or broker details or internal reasons.
   bodyshop: [
     ...COMMON_FIELDS,
     'repairer_accepted', 'repairer_accepted_date', 'instruction_pdf_url', 'referral_fee_repairer',
-    'authority_cost_gross',
+    'authority_cost_gross', 'has_third_party', 'tp_insurer', 'tp_claim_ref', 'tp_policy_number', 'tp_reg',
   ],
 };
 

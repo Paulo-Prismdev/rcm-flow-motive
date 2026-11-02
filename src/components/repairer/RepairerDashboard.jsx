@@ -62,8 +62,8 @@ export default function RepairerDashboard({ claims, estimates, parts, activeClai
                   <p className="text-xs text-foreground-muted">{claim.client_name}</p>
                 </div>
                 <div className="flex flex-col gap-1 items-end">
-                  <StatusBadge status={claim.job_status} />
-                  {claim.secondary_status && <StatusBadge status={claim.secondary_status} variant="secondary" />}
+                  {/* Only the journey status: the internal statuses are RCM's own. */}
+                  <StatusBadge status={claim.journey_status || claim.job_status} />
                 </div>
               </div>
             ))}
