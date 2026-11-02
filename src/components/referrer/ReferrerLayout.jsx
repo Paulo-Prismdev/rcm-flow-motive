@@ -36,7 +36,7 @@ export default function ReferrerLayout({ children }) {
 
   return (
     <StatusConfigProvider>
-    <GlobalSearch open={searchOpen} onOpenChange={setSearchOpen} />
+    <GlobalSearch open={searchOpen} onOpenChange={setSearchOpen} portalPage="ReferrerPortal" />
     <div className="flex overflow-hidden bg-gray-100 dark:bg-gray-950 app-height">
       {/* SIDEBAR */}
       <aside className={`

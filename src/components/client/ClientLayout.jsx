@@ -30,7 +30,7 @@ export default function ClientLayout({ children }) {
 
   return (
     <StatusConfigProvider>
-      <GlobalSearch open={searchOpen} onOpenChange={setSearchOpen} />
+      <GlobalSearch open={searchOpen} onOpenChange={setSearchOpen} portalPage="ClientPortal" />
       <div className="flex overflow-hidden bg-gray-100 dark:bg-gray-950 app-height">
         {/* SIDEBAR */}
         <aside className={`

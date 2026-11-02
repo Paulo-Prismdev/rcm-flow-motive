@@ -33,15 +33,31 @@ const iconMap = {
   Parts: Package,
 };
 
-export default function GlobalSearch({ open, onOpenChange }) {
+/**
+ * Search across the app. Staff search every claim, estimate, engineering job and part.
+ * In a portal (`portalPage` set, e.g. 'ReferrerPortal') only the user's own claims are
+ * searched, through the protected portal lookup, and a result opens the claim inside
+ * that portal. Nothing is fetched until the search is opened.
+ */
+export default function GlobalSearch({ open, onOpenChange, portalPage = null }) {
   const [searchTerm, setSearchTerm] = useState('');
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
+  const staff = !portalPage;
 
   // Fetch all records once, filter client-side
-  const { data: allClaims = [] } = useQuery({ queryKey: ['claims-search'], queryFn: () => base44.entities.Claim.list('-created_date', 5000), staleTime: 60000 });
-  const { data: allEstimates = [] } = useQuery({ queryKey: ['estimates-search'], queryFn: () => base44.entities.Estimate.list('-created_date', 2000), staleTime: 60000 });
-  const { data: allEngineering = [] } = useQuery({ queryKey: ['engineering-search'], queryFn: () => base44.entities.Engineering.list('-created_date', 2000), staleTime: 60000 });
-  const { data: allParts = [] } = useQuery({ queryKey: ['parts-search'], queryFn: () => base44.entities.Part.list('-created_date', 2000), staleTime: 60000 });
+  const { data: allClaims = [] } = useQuery({
+    queryKey: staff ? ['claims-search'] : ['portal-claims-search', portalPage],
+    queryFn: async () => {
+      if (staff) return base44.entities.Claim.list('-created_date', 5000);
+      const res = await base44.functions.invoke('getPortalClaims', {});
+      return res.data?.claims || [];
+    },
+    enabled: open,
+    staleTime: 60000,
+  });
+  const { data: allEstimates = [] } = useQuery({ queryKey: ['estimates-search'], queryFn: () => base44.entities.Estimate.list('-created_date', 2000), enabled: open && staff, staleTime: 60000 });
+  const { data: allEngineering = [] } = useQuery({ queryKey: ['engineering-search'], queryFn: () => base44.entities.Engineering.list('-created_date', 2000), enabled: open && staff, staleTime: 60000 });
+  const { data: allParts = [] } = useQuery({ queryKey: ['parts-search'], queryFn: () => base44.entities.Part.list('-created_date', 2000), enabled: open && staff, staleTime: 60000 });
 
   const isLoading = false;
 
@@ -57,7 +73,7 @@ export default function GlobalSearch({ open, onOpenChange }) {
       c.referrer?.toLowerCase().includes(term) ||
       c.business_division?.toLowerCase().includes(term) ||
       c.driver_contact_name?.toLowerCase().includes(term)
-    ).slice(0, 8).map(item => ({ ...item, type: 'Claims', display: `${formatUKRegistration(item.reg)} — ${item.client_name || ''}`, link: createPageUrl(`Claims?id=${item.id}`) }));
+    ).slice(0, 8).map(item => ({ ...item, type: 'Claims', display: `${formatUKRegistration(item.reg)} — ${item.client_name || ''}`, link: createPageUrl(staff ? `Claims?id=${item.id}` : `${portalPage}?claim=${item.id}`) }));
 
     const matchedEstimates = allEstimates.filter(e =>
       e.name?.toLowerCase().includes(term) ||
