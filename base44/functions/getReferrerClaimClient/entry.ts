@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.52';
+import { ownsClaim, portalScope } from '../../shared/portalAccess.ts';
 
 /**
  * The directory record attached to one claim, for a portal user who owns that claim.
@@ -22,10 +23,9 @@ export default async function (req) {
       .catch((e) => (e.status === 404 ? null : Promise.reject(e)));
     if (!claim) return Response.json({ error: 'Claim not found' }, { status: 404 });
 
-    const ownReferrerIds = [user.linked_referrer_id, user.company_id].filter(Boolean);
-    const ownsClaim = ownReferrerIds.length > 0 && ownReferrerIds.includes(claim.referrer_id);
-    const isInternal = user.user_type === 'internal';
-    if (!isInternal && !ownsClaim) {
+    // Any portal (repairer, referrer, client) may read this for a claim of its own.
+    const owns = ownsClaim(portalScope(user), claim);
+    if (!owns) {
       return Response.json({ error: 'Forbidden' }, { status: 403 });
     }
 

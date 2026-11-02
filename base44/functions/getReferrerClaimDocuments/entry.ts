@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
+import { ownsClaim, portalScope } from '../../shared/portalAccess.ts';
 
 /**
  * The documents panel of one claim, for a referrer who owns that claim.
@@ -25,9 +26,9 @@ export default async function (req: Request): Promise<Response> {
       .catch((e: any) => (e.status === 404 ? null : Promise.reject(e)));
     if (!claim) return Response.json({ error: 'Claim not found' }, { status: 404 });
 
-    const ownReferrerIds = [user.linked_referrer_id, user.company_id].filter(Boolean);
-    const ownsClaim = ownReferrerIds.length > 0 && ownReferrerIds.includes(claim.referrer_id);
-    if (user.user_type !== 'internal' && !ownsClaim) {
+    // Any portal (repairer, referrer, client) may read this for a claim of its own.
+    const owns = ownsClaim(portalScope(user), claim);
+    if (!owns) {
       return Response.json({ error: 'Forbidden' }, { status: 403 });
     }
 
