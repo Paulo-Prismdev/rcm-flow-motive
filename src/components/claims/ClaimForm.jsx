@@ -30,6 +30,9 @@ import AIEntityLinker from '../shared/AIEntityLinker';
 import ClaimIntakePanel from './intake/ClaimIntakePanel';
 import ClaimIntakeReview from './intake/ClaimIntakeReview';
 import { COURTESY_CAR_OPTIONS, normalizeCourtesyCar } from '../shared/courtesyCarOptions';
+import { CLAIM_TYPES } from '../shared/claimTypes';
+import { askConfirm, notify, notifyError } from '@/lib/dialogs';
+import { FIELD_STEP, errorsForStep, validateClaim } from './claimValidation';
 
 // ── Helpers ──
 
@@ -180,6 +183,17 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
   const [choiceStep, setChoiceStep] = useState(!isEditing);
   const [entryMode, setEntryMode] = useState(null);
   const [isCreating, setIsCreating] = React.useState(false);
+  // Problems found when moving on or creating. Each message shows under its field and
+  // disappears as soon as the field is put right.
+  const [fieldErrors, setFieldErrors] = useState({});
+  const liveErrors = useMemo(() => validateClaim(formData), [formData]);
+  const shownErrors = useMemo(
+    () => Object.fromEntries(Object.keys(fieldErrors).filter((f) => liveErrors[f]).map((f) => [f, liveErrors[f]])),
+    [fieldErrors, liveErrors]
+  );
+  const FieldError = ({ field }) => (shownErrors[field]
+    ? <p role="alert" className="flex items-center gap-1 text-xs text-red-600"><AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />{shownErrors[field]}</p>
+    : null);
   const [referrerCompanyId, setReferrerCompanyId] = useState(claim?.referrer_id || null);
 
   const { data: referrerCompany } = useQuery({
@@ -326,6 +340,17 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
   const handleSubmit = async (e) => {
     e.preventDefault(); e.stopPropagation();
     if (isCreating) return;
+    const problems = validateClaim(formData);
+    if (Object.keys(problems).length > 0) {
+      setFieldErrors(problems);
+      // In the wizard, open the step with the first problem on it.
+      if (!isEditing) {
+        const firstStep = steps.find((st) => Object.keys(problems).some((f) => FIELD_STEP[f] === st.key));
+        if (firstStep) setCurrentStep(firstStep.number);
+      }
+      notifyError('A few details need checking', `${Object.keys(problems).length === 1 ? 'One field needs' : `${Object.keys(problems).length} fields need`} attention before the claim can be saved.`);
+      return;
+    }
     setIsCreating(true);
     const { id: _id, created_date: _cd, updated_date: _ud, created_by: _cb, ...submitData } = formData;
     submitData.courtesy_car_required = normalizeCourtesyCar(submitData.courtesy_car_required);
@@ -333,9 +358,9 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
       try {
         const response = await base44.functions.invoke('generateJobNumber', { entityType: 'Claim' });
         if (response.data.success) submitData.job_number = response.data.job_number;
-        else { alert(`Failed to generate job number: ${response.data.error || 'Unknown error'}`); setIsCreating(false); return; }
+        else { notifyError('Could not give the claim a job number', response.data.error); setIsCreating(false); return; }
       } catch (error) {
-        alert(`Failed to generate job number: ${error.response?.data?.error || error.message}. Please try again.`);
+        notifyError('Could not give the claim a job number', error);
         setIsCreating(false); return;
       }
       if (submitData.claim_type === 'Fault Claim' || submitData.claim_type === 'Non-Fault - Own Insurer') submitData.third_party_pursuit_status = 'Awaiting Details';
@@ -344,20 +369,27 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
     try {
       finalData = await resolveClient(await resolveThirdParty(submitData));
     } catch (error) {
-      alert(`Failed to save to the directory: ${error?.message || error}. Please try again.`);
+      notifyError('Could not save the client or third party to the directory', error);
       setIsCreating(false); return;
     }
     // A likely directory match was found — waiting for the user to link it or create a new record
     if (!finalData) { setIsCreating(false); return; }
     onSubmit(finalData);
+    // The save itself is tracked by the page (isSubmitting), which also shows any error;
+    // the button must not stay stuck on "Creating..." if it fails.
+    setIsCreating(false);
   };
 
   const handleClientLinkConfirm = async (client) => {
     const pending = clientLinkPrompt?.submitData;
     setClientLinkPrompt(null);
     if (!pending || !client) return;
-    const linked = await ensureDirectoryTag(client, 'client');
-    onSubmit(await resolveThirdParty({ ...pending, client_id: linked.id }));
+    try {
+      const linked = await ensureDirectoryTag(client, 'client');
+      onSubmit(await resolveThirdParty({ ...pending, client_id: linked.id }));
+    } catch (error) {
+      notifyError('Could not link the client', error);
+    }
   };
 
   const handleClientCreateNew = async () => {
@@ -369,14 +401,14 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
       queryClient.invalidateQueries({ queryKey: ['clients'] });
       onSubmit(await resolveThirdParty({ ...pending, client_id: created.id }));
     } catch (error) {
-      alert(`Failed to save the client to the directory: ${error?.message || error}. Please try again.`);
+      notifyError('Could not save the client to the directory', error);
     }
   };
 
   const handleSaveDraft = async () => {
     setIsSavingDraft(true);
     try {
-      if (!formData.reg) { alert('Please enter at least the vehicle registration to save as draft.'); setIsSavingDraft(false); return; }
+      if (!formData.reg) { setFieldErrors((e) => ({ ...e, reg: true })); setIsSavingDraft(false); return; }
       const { id: _id, created_date: _cd, updated_date: _ud, created_by: _cb, ...submitData } = formData;
       submitData.courtesy_car_required = normalizeCourtesyCar(submitData.courtesy_car_required);
       let draftData = submitData;
@@ -385,12 +417,16 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
           const response = await base44.functions.invoke('generateJobNumber', { entityType: 'Claim' });
           if (response.data.success) draftData = { ...submitData, job_number: response.data.job_number };
         } catch (e) { console.error('Job number gen failed:', e); }
+        if (!draftData.job_number) {
+          const go = await askConfirm({ title: 'Save the draft without a job number?', message: 'A job number couldn’t be issued just now. The draft can still be saved and given one later.', confirmLabel: 'Save draft' });
+          if (!go) return;
+        }
       }
       if (claim) await base44.entities.Claim.update(claim.id, draftData);
       else await base44.entities.Claim.create(draftData);
-      alert('Claim saved as draft.');
+      notify('Draft saved', draftData.job_number ? `Job ${draftData.job_number}` : undefined);
       onCancel();
-    } catch (error) { console.error('Draft save failed:', error); alert('Failed to save draft.'); }
+    } catch (error) { console.error('Draft save failed:', error); notifyError('Could not save the draft', error); }
     finally { setIsSavingDraft(false); }
   };
 
@@ -476,7 +512,13 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
     setShowInsurerModal(false);
   };
 
-  const nextStep = () => setCurrentStep(prev => prev + 1);
+  // Moving on checks this step's required details first.
+  const nextStep = () => {
+    const key = steps.find((st) => st.number === currentStep)?.key;
+    const problems = errorsForStep(validateClaim(formData), key);
+    if (Object.keys(problems).length > 0) { setFieldErrors((e) => ({ ...e, ...problems })); return; }
+    setCurrentStep(prev => prev + 1);
+  };
   const prevStep = () => setCurrentStep(prev => prev - 1);
 
   const generateSteps = () => {
@@ -572,7 +614,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
         handleBodyshopChange={handleBodyshopChange} handleIncidentLocationChange={handleIncidentLocationChange}
         handleVehicleLocationChange={handleVehicleLocationChange} handleTPChange={handleTPChange}
         isInternalUser={isInternalUser} aiExtractDialog={aiExtractDialog} setAiExtractDialog={setAiExtractDialog}
-        handleAIExtractConfirm={handleAIExtractConfirm} handleAIExtract={handleAIExtract} />
+        handleAIExtractConfirm={handleAIExtractConfirm} handleAIExtract={handleAIExtract} errors={shownErrors} />
     </>);
   }
 
@@ -674,6 +716,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
             <Button type="button" variant="outline" onClick={handleVehicleLookup} disabled={isLookingUpVehicle || !formData.reg || formData.reg.length < 3}
               className="whitespace-nowrap h-9">{isLookingUpVehicle ? <><Loader className="w-4 h-4 animate-spin mr-2" />Looking up...</> : <><Search className="w-4 h-4 mr-2" />Lookup</>}</Button>
           </div>
+          <FieldError field="reg" />
           {vehicleLookupError && <div className="flex gap-2 p-2 bg-orange-50 border border-orange-200 rounded text-xs text-orange-800"><AlertCircle className="w-4 h-4 flex-shrink-0" />{vehicleLookupError}</div>}
           {formData.make_model && !vehicleLookupError && <div className="p-2 bg-green-50 border border-green-200 rounded text-sm text-green-700">✓ <span className="font-bold">{formData.make_model}</span>{formData.vehicle_colour && ` • ${formData.vehicle_colour}`}{formData.vehicle_year_of_manufacture && ` • ${formData.vehicle_year_of_manufacture}`}</div>}
         </div>
@@ -687,6 +730,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
               <option value="">Select claim type...</option>
               {CLAIM_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
             </select>
+            <FieldError field="claim_type" />
           </div>
           <div className="space-y-2"><label className="text-sm font-medium">Date of Loss</label><Input type="date" value={formData.loss_date} onChange={e => handleChange('loss_date', e.target.value)} /></div>
           <div className="space-y-2"><label className="text-sm font-medium">Time of Loss</label><Input type="time" value={formData.loss_time} onChange={e => handleChange('loss_time', e.target.value)} /></div>
@@ -730,6 +774,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
         <div className="space-y-2">
           <label className="text-sm font-medium">Client Name *</label>
           <ClientCombobox value={formData.client_name} onChange={handleClientChange} />
+          <FieldError field="client_name" />
           {formData.client_name && !formData.client_id && (
             <p className="text-xs text-muted-foreground">Not in the client directory yet — this client is saved and linked when you create the claim.</p>
           )}
@@ -770,7 +815,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
           <div className="space-y-2"><label className="text-xs text-muted-foreground">Name *</label><Input value={formData.client_name} onChange={e => handleChange('client_name', e.target.value)} placeholder="Client name" /></div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5"><label className="text-xs text-muted-foreground">Phone</label><Input value={formData.client_phone} onChange={e => handleChange('client_phone', e.target.value)} /></div>
-            <div className="space-y-1.5"><label className="text-xs text-muted-foreground">Email</label><Input type="email" value={formData.client_email} onChange={e => handleChange('client_email', e.target.value)} /></div>
+            <div className="space-y-1.5"><label className="text-xs text-muted-foreground">Email</label><Input type="email" value={formData.client_email} onChange={e => handleChange('client_email', e.target.value)} /><FieldError field="client_email" /></div>
           </div>
           <div className="space-y-1.5"><label className="text-xs text-muted-foreground">Address Line 1</label><Input value={formData.client_address_line_1} onChange={e => handleChange('client_address_line_1', e.target.value)} /></div>
           <div className="space-y-1.5"><label className="text-xs text-muted-foreground">Address Line 2</label><Input value={formData.client_address_line_2} onChange={e => handleChange('client_address_line_2', e.target.value)} /></div>
@@ -810,7 +855,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
               <div className="space-y-1.5"><label className="text-xs text-muted-foreground">Contact Name</label><Input value={formData.driver_contact_name} onChange={e => handleChange('driver_contact_name', e.target.value)} placeholder="Driver / contact name" /></div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5"><label className="text-xs text-muted-foreground">Phone</label><Input value={formData.driver_contact_phone} onChange={e => handleChange('driver_contact_phone', e.target.value)} /></div>
-                <div className="space-y-1.5"><label className="text-xs text-muted-foreground">Email</label><Input type="email" value={formData.driver_contact_email} onChange={e => handleChange('driver_contact_email', e.target.value)} /></div>
+                <div className="space-y-1.5"><label className="text-xs text-muted-foreground">Email</label><Input type="email" value={formData.driver_contact_email} onChange={e => handleChange('driver_contact_email', e.target.value)} /><FieldError field="driver_contact_email" /></div>
               </div>
               <div className="space-y-1.5"><label className="text-xs text-muted-foreground">Address Line 1</label><Input value={formData.driver_contact_address_line_1} onChange={e => handleChange('driver_contact_address_line_1', e.target.value)} /></div>
               <div className="space-y-1.5"><label className="text-xs text-muted-foreground">Address Line 2</label><Input value={formData.driver_contact_address_line_2} onChange={e => handleChange('driver_contact_address_line_2', e.target.value)} /></div>
@@ -932,7 +977,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2"><label className="text-sm font-medium">Phone</label><Input value={formData.tp_phone} onChange={e => handleChange('tp_phone', e.target.value)} /></div>
-            <div className="space-y-2"><label className="text-sm font-medium">Email</label><Input type="email" value={formData.tp_email} onChange={e => handleChange('tp_email', e.target.value)} /></div>
+            <div className="space-y-2"><label className="text-sm font-medium">Email</label><Input type="email" value={formData.tp_email} onChange={e => handleChange('tp_email', e.target.value)} /><FieldError field="tp_email" /></div>
           </div>
           <div className="grid grid-cols-3 gap-3">
             <div className="space-y-2"><label className="text-sm font-medium">Town</label><Input value={formData.tp_town} onChange={e => handleChange('tp_town', e.target.value)} /></div>
