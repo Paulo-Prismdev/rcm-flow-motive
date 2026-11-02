@@ -7,6 +7,9 @@ import { X, UserPlus, Check } from "lucide-react";
 export default function InviteUserModal({ onClose, onSuccess, isSuperAdmin }) {
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("user");
+  // New accounts start with no access. Staff invited here are given staff access
+  // straight away; anyone else is set up afterwards from their user record.
+  const [access, setAccess] = useState("internal");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
@@ -17,7 +20,10 @@ export default function InviteUserModal({ onClose, onSuccess, isSuperAdmin }) {
     if (!email.trim()) return setError("Please enter an email address.");
     setLoading(true);
     try {
-      await base44.users.inviteUser(email.trim().toLowerCase(), role);
+      const created = await base44.users.inviteUser(email.trim().toLowerCase(), role);
+      if (access === "internal" && created?.id) {
+        await base44.entities.User.update(created.id, { user_type: "internal" });
+      }
       setSuccess(true);
       setTimeout(() => onSuccess(), 1500);
     } catch (err) {
@@ -78,6 +84,19 @@ export default function InviteUserModal({ onClose, onSuccess, isSuperAdmin }) {
               >
                 <option value="user">User</option>
                 {isSuperAdmin && <option value="admin">Admin</option>}
+              </select>
+            </div>
+
+            <div>
+              <label htmlFor="invite-access" className="block text-xs font-medium text-foreground-muted mb-1">Access</label>
+              <select
+                id="invite-access"
+                value={access}
+                onChange={e => setAccess(e.target.value)}
+                className="neomorph-inset w-full px-3 py-2 rounded-lg text-sm"
+              >
+                <option value="internal">RCM staff (full staff access)</option>
+                <option value="external">Set up later (no access until a type is chosen)</option>
               </select>
             </div>
 
