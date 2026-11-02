@@ -1,0 +1,43 @@
+{
+  "name": "Lapse Idle Sign-in Sessions",
+  "description": "Every 5 minutes, ends the second sign-in step for anyone idle for 30 minutes or signed in for over 12 hours, and clears old sign-in codes.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "interval",
+      "cron_expression": null,
+      "one_time_date": null,
+      "timezone": "UTC",
+      "interval_value": 5,
+      "interval_unit": "minutes",
+      "interval_anchor": "2026-11-02T09:00:00.000000",
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "lapse_idle_signin_sessions",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_function": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "twofaManage",
+            "args": {
+              "action": "cleanup"
+            }
+          },
+          "then": "end"
+        }
+      }
+    ]
+  }
+}
