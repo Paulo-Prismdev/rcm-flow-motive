@@ -44,7 +44,10 @@ export default function InternalUpdateForm({
   const [showMentionPopup, setShowMentionPopup] = useState(false);
   const [selectedContacts, setSelectedContacts] = useState([]);
 
+  // Internal update attachments are internal-only, so they go to private storage and
+  // open through a short-lived, logged link (see @/lib/privateFiles).
   const { uploadFiles, uploads, isUploading, retryUpload } = useFileUpload({
+    private: true,
     onComplete: (urls) => setAttachedFiles((prev) => [...prev, ...urls]),
   });
 
