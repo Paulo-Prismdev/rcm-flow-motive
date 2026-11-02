@@ -18,7 +18,9 @@ Keep this list up to date at the end of every round.
 ## Go-live night – testing
 - [ ] Sign in: password, emailed 6-digit code, Face ID / fingerprint enrol + sign-in on phone and tablet.
 - [ ] Check `updateMe({ twofa_verified: true })` is refused from the browser.
-- [ ] Each portal (client, referrer, repairer): sees only its own claims, no internal statuses, files open.
+- [ ] Each portal (client, referrer, repairer): sees only its own claims, journey status only (no secondary/tertiary anywhere, including the update feed and timeline), files open.
+- [ ] Portal update feeds: client sees status changes, client communications and general updates; referrer also sees referrer communications; repairer sees status changes, repairer communications since they were instructed, and parts. Insurer and credit repair communications stay internal.
+- [ ] Repairer portal: no third party contact details, referrer or broker; TP insurer and claim ref still there for invoicing.
 - [ ] Public links (bodyshop update, back-ordered parts, indemnity, repair preference, declaration of need, client claim form, parts request) open and submit; expired links show the expiry message.
 - [ ] Private files open from claims, notes and portals.
 - [ ] Audit log: an edit, a deletion and a sign-in each show the right person's name; the log can't be edited or deleted.
@@ -35,5 +37,6 @@ Keep this list up to date at the end of every round.
 - [ ] User hierarchy and permissions build (separate job).
 
 ## Open questions for Paul
+- [ ] Confirm the portal update-feed rules above (Round 8 default) – easy to change in `base44/shared/portalAccess.ts`.
 - [ ] Should the total-loss storage fee invoice carry VAT?
 - [ ] Optional "Customer pays" row on the VAT & excess summary – wanted?
