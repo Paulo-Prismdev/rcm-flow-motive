@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
+import { usePortalClaims } from '@/components/shared/usePortalClaims';
 import { 
   AlertTriangle, 
   CheckCircle, 
@@ -47,37 +48,17 @@ export default function NewJobsBanner({ bodyshopId }) {
     enabled: !!bodyshopId,
   });
 
-  // Fetch only unaccepted, pending claims for this bodyshop
-  const { data: pendingJobs = [] } = useQuery({
-    queryKey: ['pendingJobs', bodyshopId],
-    queryFn: async () => {
-      const results = await base44.entities.Claim.filter(
-        { bodyshop_id: bodyshopId, repairer_accepted: false },
-        '-created_date'
-      );
-      return results.filter(c => !['Completed', 'Cancelled', 'Total Loss'].includes(c.job_status));
-    },
-    enabled: !!bodyshopId,
-    refetchInterval: 30000,
-  });
+  // Jobs sent to this bodyshop and not yet accepted (closed ones are left out on the server)
+  const { data: pendingJobs = [] } = usePortalClaims({ view: 'pending', enabled: !!bodyshopId, refetchInterval: 30000 });
 
   const acceptJobMutation = useMutation({
     mutationFn: async ({ claimId, claim }) => {
-      // Update the claim to accepted
-      await base44.entities.Claim.update(claimId, {
-        repairer_accepted: true,
-        repairer_accepted_date: new Date().toISOString().split('T')[0],
-      });
-      
-      // Get the latest claim data AFTER update to ensure we have the instruction_pdf_url
-      const latestClaim = await base44.entities.Claim.get(claimId);
-      
-      // Return the latest claim data with the instruction_pdf_url
-      return latestClaim;
+      // Accepted on the server, which returns the claim as it now stands (with its instruction PDF)
+      const res = await base44.functions.invoke('portalClaimAction', { claim_id: claimId, action: 'accept_job' });
+      return res.data?.claim;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['pendingJobs'] });
-      queryClient.invalidateQueries({ queryKey: ['repairerClaims'] });
+      queryClient.invalidateQueries({ queryKey: ['portalClaims'] });
     },
   });
 
@@ -111,24 +92,16 @@ export default function NewJobsBanner({ bodyshopId }) {
     setRejectReason('');
     setWizardStep(1);
     // Invalidate queries after modal is fully closed
-    queryClient.invalidateQueries({ queryKey: ['pendingJobs'] });
-    queryClient.invalidateQueries({ queryKey: ['repairerClaims'] });
+    queryClient.invalidateQueries({ queryKey: ['portalClaims'] });
   };
 
   const rejectJobMutation = useMutation({
     mutationFn: async ({ claimId, claim, reason }) => {
-      // Remove bodyshop from claim and store rejection reason
-      await base44.entities.Claim.update(claimId, {
-        bodyshop_id: null,
-        bodyshop: null,
-        bodyshop_email: null,
-        bs_instructed: null,
-        latest_update: `Job rejected by ${bodyshop?.name || 'Repairer'}. Reason: ${reason}`,
-      });
+      // The job goes back to the team, with the reason, on the server
+      await base44.functions.invoke('portalClaimAction', { claim_id: claimId, action: 'reject_job', reason });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['pendingJobs'] });
-      queryClient.invalidateQueries({ queryKey: ['repairerClaims'] });
+      queryClient.invalidateQueries({ queryKey: ['portalClaims'] });
       setSelectedClaim(null);
       setShowRejectForm(false);
       setRejectReason('');
