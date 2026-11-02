@@ -27,6 +27,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { warn } from '@/lib/dialogs';
+import { activateOnKey } from '@/lib/a11y';
 
 export default function NewJobsBanner({ bodyshopId }) {
   const [expanded, setExpanded] = useState(true);
@@ -125,7 +126,7 @@ export default function NewJobsBanner({ bodyshopId }) {
     <>
       {/* Prominent Banner */}
       <div className="neomorph border-2 border-amber-500 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 overflow-hidden" style={{ animation: 'pulse-border 2s infinite' }}>
-        <div 
+        <div role="button" tabIndex={0} onKeyDown={activateOnKey} 
           className="p-4 cursor-pointer"
           onClick={() => setExpanded(!expanded)}
         >

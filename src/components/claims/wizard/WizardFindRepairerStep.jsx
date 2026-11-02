@@ -13,6 +13,7 @@ import { geocodeAddress } from '@/functions/geocodeAddress';
 import { haversineDistance, formatHaversineDistance } from '@/components/shared/haversine';
 import { sortAlphaNumeric } from '@/components/shared/sortAlphaNumeric';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { activateOnKey } from '@/lib/a11y';
 
 // ── Leaflet icon setup ──
 delete L.Icon.Default.prototype._getIconUrl;
@@ -326,7 +327,7 @@ export default function WizardFindRepairerStep({
                 ? haversineDistance(clientLocation.lat, clientLocation.lng, parseFloat(bodyshop.latitude), parseFloat(bodyshop.longitude))
                 : null;
               return (
-                <div key={bodyshop.id} onClick={() => onSelectBodyshop(bodyshop)}
+                <div role="button" tabIndex={0} onKeyDown={activateOnKey} key={bodyshop.id} onClick={() => onSelectBodyshop(bodyshop)}
                   className={`p-2.5 rounded-lg border-2 cursor-pointer transition-all ${
                     isSelected ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'
                   }`}>

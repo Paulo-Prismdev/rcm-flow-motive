@@ -22,6 +22,7 @@ import FeedbackModal from '../components/shared/FeedbackModal';
 import ClaimCardFieldsModal from '../components/claims/ClaimCardFieldsModal';
 import ClaimTypeTabs from '../components/shared/ClaimTypeTabs';
 import { usePortalClaims, useOpenClaimFromUrl } from '@/components/shared/usePortalClaims';
+import { activateOnKey } from '@/lib/a11y';
 
 export default function ReferrerPortal() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -355,7 +356,7 @@ export default function ReferrerPortal() {
                       const dotColor = getStatusDot(statusGroup);
                       return (
                         <React.Fragment key={statusGroup}>
-                          <div
+                          <div role="button" tabIndex={0} onKeyDown={activateOnKey}
                             className="flex items-center gap-2 px-4 py-2 bg-gray-50 dark:bg-gray-800/60 cursor-pointer select-none border-b border-gray-100 dark:border-gray-800"
                             onClick={() => toggleGroup(statusGroup)}
                           >
@@ -366,7 +367,7 @@ export default function ReferrerPortal() {
                           </div>
                           {!isCollapsed && claimsInGroup.map(claim => {
                             return (
-                              <div
+                              <div role="button" tabIndex={0} onKeyDown={activateOnKey}
                                 key={claim.id}
                                 onClick={() => setViewingClaim(claim)}
                                 className="px-4 py-3 border-b border-gray-100 dark:border-gray-800 cursor-pointer active:bg-gray-50 dark:active:bg-gray-800/60 transition-colors"
@@ -405,14 +406,14 @@ export default function ReferrerPortal() {
                       const isCollapsed = collapsedGroups['__other__'];
                       return (
                         <React.Fragment>
-                          <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 dark:bg-gray-800/60 cursor-pointer select-none border-b border-gray-100 dark:border-gray-800" onClick={() => toggleGroup('__other__')}>
+                          <div role="button" tabIndex={0} onKeyDown={activateOnKey} className="flex items-center gap-2 px-4 py-2 bg-gray-50 dark:bg-gray-800/60 cursor-pointer select-none border-b border-gray-100 dark:border-gray-800" onClick={() => toggleGroup('__other__')}>
                             {isCollapsed ? <ChevronRight className="w-3.5 h-3.5 text-gray-400" /> : <ChevronDown className="w-3.5 h-3.5 text-gray-400" />}
                             <span className="w-2 h-2 rounded-full bg-gray-400 flex-shrink-0" />
                             <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Other</span>
                             <span className="text-xs text-gray-400 ml-1">{ungrouped.length}</span>
                           </div>
                           {!isCollapsed && ungrouped.map(claim => (
-                            <div key={claim.id} onClick={() => setViewingClaim(claim)} className="px-4 py-3 border-b border-gray-100 dark:border-gray-800 cursor-pointer active:bg-gray-50 dark:active:bg-gray-800/60 transition-colors">
+                            <div role="button" tabIndex={0} onKeyDown={activateOnKey} key={claim.id} onClick={() => setViewingClaim(claim)} className="px-4 py-3 border-b border-gray-100 dark:border-gray-800 cursor-pointer active:bg-gray-50 dark:active:bg-gray-800/60 transition-colors">
                               <div className="flex items-center justify-between gap-2">
                                 <span className="inline-flex items-center justify-center rounded-md bg-[#1e2d4a] text-white font-semibold uppercase flex-shrink-0" style={{ fontSize: '13px', width: '96px', height: '28px', letterSpacing: '0.05em' }}>
                                   {claim.reg ? formatUKRegistration(claim.reg) : '—'}

@@ -8,6 +8,7 @@ import ClaimStatusBadges from '@/components/shared/ClaimStatusBadges';
 import ClaimCardFieldsModal from '@/components/claims/ClaimCardFieldsModal';
 import { Settings2, FileText, ChevronRight, Filter, X } from 'lucide-react';
 import ClaimTypeTabs from '@/components/shared/ClaimTypeTabs';
+import { activateOnKey } from '@/lib/a11y';
 
 const FILTERS = ['active', 'completed', 'all'];
 
@@ -270,7 +271,7 @@ export default function RepairerClaimsList({ claims, onViewClaim }) {
       {/* Phone / tablet card view */}
       <div className="lg:hidden space-y-2">
         {filteredClaims.map(claim => (
-          <div
+          <div role="button" tabIndex={0} onKeyDown={activateOnKey}
             key={claim.id}
             onClick={() => onViewClaim?.(claim, null)}
             className="neomorph-flat p-3 cursor-pointer active:bg-gray-50"

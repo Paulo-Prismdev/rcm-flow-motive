@@ -19,6 +19,7 @@ import { SUPPLIER_COVERAGE_AREAS, milesToMeters } from '@/components/map/supplie
 import SheetDragHandle from '@/components/map/SheetDragHandle';
 import { GREAT_BRITAIN_GEOJSON } from '@/components/map/greatBritainOutline';
 import { haversineDistance, formatHaversineDistance } from '@/components/shared/haversine';
+import { activateOnKey } from '@/lib/a11y';
 
 // ── Leaflet icon setup ──
 delete L.Icon.Default.prototype._getIconUrl;
@@ -763,7 +764,7 @@ export default function BodyshopMap() {
                       ? haversineDistance(customerLocation.lat, customerLocation.lng, coords.lat, coords.lng)
                       : null;
                     return (
-                      <div
+                      <div role="button" tabIndex={0} onKeyDown={activateOnKey}
                         key={bodyshop.id}
                         onClick={() => handleSelectBodyshopFromList(bodyshop)}
                         className={`p-3 rounded-lg border-2 cursor-pointer transition-all ${

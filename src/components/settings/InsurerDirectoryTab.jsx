@@ -7,6 +7,7 @@ import AddInsurerModal from "../shared/AddInsurerModal";
 import InsurerDetailModal from "../shared/InsurerDetailModal";
 import { deleteAndLog } from "@/components/shared/useActivityLogger";
 import { askConfirm } from '@/lib/dialogs';
+import { activateOnKey } from '@/lib/a11y';
 
 export default function InsurerDirectoryTab() {
   const queryClient = useQueryClient();
@@ -78,7 +79,7 @@ export default function InsurerDirectoryTab() {
               {filtered.map((ins) => {
                 const codes = ins.network_codes || [];
                 return (
-                  <div
+                  <div role="button" tabIndex={0} onKeyDown={activateOnKey}
                     key={ins.id}
                     onClick={() => setDetailId(ins.id)}
                     className="p-3 hover:bg-muted/50 cursor-pointer transition-colors"

@@ -8,6 +8,7 @@ import DirectoryTagPills from "./DirectoryTagPills";
 import DirectoryDetailModal from "./DirectoryDetailModal";
 import { deleteAndLog } from "@/components/shared/useActivityLogger";
 import { askConfirm } from '@/lib/dialogs';
+import { activateOnKey } from '@/lib/a11y';
 
 /**
  * The one directory: clients and third parties together, each record tagged with
@@ -147,7 +148,7 @@ export default function DirectoryTab() {
             {/* Mobile cards */}
             <div className="sm:hidden divide-y divide-border">
               {filtered.map((r) => (
-                <div key={r.id} onClick={() => setDetailId(r.id)} className="p-3 hover:bg-muted/50 cursor-pointer transition-colors">
+                <div role="button" tabIndex={0} onKeyDown={activateOnKey} key={r.id} onClick={() => setDetailId(r.id)} className="p-3 hover:bg-muted/50 cursor-pointer transition-colors">
                   <div className="flex items-start justify-between gap-2 mb-1">
                     <div className="min-w-0">
                       <div className="flex items-center gap-1.5 flex-wrap">

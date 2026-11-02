@@ -17,6 +17,7 @@ import ReferrerLinkedUsers from "@/components/settings/ReferrerLinkedUsers";
 import { syncReferrerVat } from "@/components/shared/syncReferrerVat";
 import { deleteAndLog, updateAndLog, createAndLog } from "@/components/shared/useActivityLogger";
 import { askConfirm } from '@/lib/dialogs';
+import { activateOnKey } from '@/lib/a11y';
 
 const ALL_PORTAL_SECTIONS = ["Claims", "Parts"];
 
@@ -460,7 +461,7 @@ export default function CompanyManagement() {
               {filtered.map((c) => {
                 const handlerCount = (c.contacts || []).filter(ct => ct.is_handler).length;
                 return (
-                  <div key={c.id} onClick={() => setDetailId(c.id)} className="p-3 hover:bg-muted/50 cursor-pointer transition-colors">
+                  <div role="button" tabIndex={0} onKeyDown={activateOnKey} key={c.id} onClick={() => setDetailId(c.id)} className="p-3 hover:bg-muted/50 cursor-pointer transition-colors">
                     <div className="flex items-start justify-between gap-2 mb-1">
                       <div className="min-w-0">
                         <div className="font-medium text-sm truncate">{c.name}</div>

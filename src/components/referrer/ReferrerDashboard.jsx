@@ -5,6 +5,7 @@ import { base44 } from '@/api/base44Client';
 import { usePortalClaims } from '@/components/shared/usePortalClaims';
 import ClaimStatusBadges from '@/components/shared/ClaimStatusBadges';
 import { isCancelledClaim, isClaimClosed, isClaimClosedForLists } from '@/components/shared/claimOutcome';
+import { activateOnKey } from '@/lib/a11y';
 
 export default function ReferrerDashboard() {
   const [activeTab, setActiveTab] = React.useState('dashboard');
@@ -91,7 +92,7 @@ export default function ReferrerDashboard() {
       {/* Stats grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {statCards.map((stat) => (
-          <div
+          <div role="button" tabIndex={0} onKeyDown={activateOnKey}
             key={stat.title}
             onClick={() => {
               window.dispatchEvent(new CustomEvent('referrer-nav', { detail: 'claims' }));

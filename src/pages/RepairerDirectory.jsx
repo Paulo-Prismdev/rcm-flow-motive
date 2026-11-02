@@ -9,6 +9,7 @@ import AddBodyshopModal from "@/components/shared/AddBodyshopModal";
 import RepairerImportModal from "@/components/directory/RepairerImportModal";
 import { Plus } from "lucide-react";
 import { warn } from '@/lib/dialogs';
+import { activateOnKey } from '@/lib/a11y';
 
 export default function RepairerDirectory() {
   const [search, setSearch] = useState("");
@@ -175,7 +176,7 @@ export default function RepairerDirectory() {
             {/* Mobile cards */}
             <div className="sm:hidden divide-y divide-border">
               {filtered.map((b) => (
-                <div key={b.id} onClick={() => setSelectedId(b.id)} className="p-3 hover:bg-muted/50 cursor-pointer transition-colors">
+                <div role="button" tabIndex={0} onKeyDown={activateOnKey} key={b.id} onClick={() => setSelectedId(b.id)} className="p-3 hover:bg-muted/50 cursor-pointer transition-colors">
                   <div className="flex items-start justify-between gap-2 mb-1">
                     <div className="min-w-0">
                       <div className="font-medium text-sm truncate">{b.name}</div>

@@ -18,6 +18,7 @@ import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { geocodeAddress } from '@/functions/geocodeAddress';
 import { haversineDistance, formatHaversineDistance } from '@/components/shared/haversine';
+import { activateOnKey } from '@/lib/a11y';
 
 // ── Leaflet icon setup ──
 delete L.Icon.Default.prototype._getIconUrl;
@@ -372,7 +373,7 @@ export default function ClaimBodyshopMapModal({ claim, isOpen, onClose, onSelect
                     ? haversineDistance(clientLocation.lat, clientLocation.lng, bodyshop.latitude, bodyshop.longitude)
                     : null;
                   return (
-                    <div key={bodyshop.id} onClick={() => handleBodyshopClick(bodyshop)}
+                    <div role="button" tabIndex={0} onKeyDown={activateOnKey} key={bodyshop.id} onClick={() => handleBodyshopClick(bodyshop)}
                       className={`p-3 rounded-lg border-2 cursor-pointer transition-all ${
                         isSelected ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'
                       }`}>

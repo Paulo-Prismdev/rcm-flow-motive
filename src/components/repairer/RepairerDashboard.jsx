@@ -4,6 +4,7 @@ import { formatUKRegistration } from '@/components/shared/formatRegistration';
 import StatusBadge from '@/components/shared/StatusBadge';
 import NewJobsBanner from './NewJobsBanner';
 import AdvertBanner from './AdvertBanner';
+import { activateOnKey } from '@/lib/a11y';
 
 export default function RepairerDashboard({ claims, estimates, parts, activeClaims, pendingEstimates, activeParts, onNavigate, bodyshopName, bodyshopId }) {
   const stats = [
@@ -32,7 +33,7 @@ export default function RepairerDashboard({ claims, estimates, parts, activeClai
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2 flex-shrink-0">
         {stats.map(({ label, count, icon: Icon, color, tab }) => (
-          <div key={tab} className="neomorph p-4 cursor-pointer hover:shadow-lg transition-all" onClick={() => onNavigate(tab)}>
+          <div role="button" tabIndex={0} onKeyDown={activateOnKey} key={tab} className="neomorph p-4 cursor-pointer hover:shadow-lg transition-all" onClick={() => onNavigate(tab)}>
             <div className="flex items-center gap-3">
               <div className={`w-10 h-10 rounded-lg ${color} flex items-center justify-center`}>
                 <Icon className="w-5 h-5" />

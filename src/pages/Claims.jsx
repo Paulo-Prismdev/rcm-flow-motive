@@ -31,6 +31,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger } from
 "@/components/ui/dropdown-menu";
+import { activateOnKey } from '@/lib/a11y';
 
 // ── Repairs table — fixed column widths (global config) ──
 // Every column has a fixed width (min = max) so the table never recomputes
@@ -628,7 +629,7 @@ export default function ClaimsPage() {
     const journeyStatus = claim.journey_status || claim.job_status;
     const isException = isExceptionOutcome(getClaimOutcome(claim));
     return (
-      <div
+      <div role="button" tabIndex={0} onKeyDown={activateOnKey}
         key={claim.id}
         onClick={() => setSelectedClaim(claim)}
         className="px-4 py-3 border-b border-gray-100 dark:border-gray-800 cursor-pointer active:bg-gray-50 dark:active:bg-gray-800/60 transition-colors"
@@ -905,7 +906,7 @@ export default function ClaimsPage() {
                  const dotColor = getStatusDot(statusGroup);
                  return (
                    <React.Fragment key={statusGroup}>
-                     <div
+                     <div role="button" tabIndex={0} onKeyDown={activateOnKey}
                        className="flex items-center gap-2 px-4 py-2 bg-gray-50 dark:bg-gray-800/60 cursor-pointer select-none border-b border-gray-100 dark:border-gray-800"
                       onClick={() => toggleGroup(statusGroup)}
                     >
@@ -920,7 +921,7 @@ export default function ClaimsPage() {
                       return (
                       <React.Fragment key={subKey}>
                         {hasSubHeader && (
-                          <div
+                          <div role="button" tabIndex={0} onKeyDown={activateOnKey}
                             className="flex items-center gap-1.5 px-10 py-1.5 bg-gray-50/50 dark:bg-gray-800/30 border-b border-gray-100 dark:border-gray-800 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-800/50"
                             onClick={(e) => { e.stopPropagation(); toggleSubGroup(statusGroup, subKey); }}
                           >
@@ -947,7 +948,7 @@ export default function ClaimsPage() {
                     const isCollapsed = collapsedGroups['__other__'];
                     return (
                     <React.Fragment>
-                    <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 dark:bg-gray-800/60 cursor-pointer select-none border-b border-gray-100 dark:border-gray-800" onClick={() => toggleGroup('__other__')}>
+                    <div role="button" tabIndex={0} onKeyDown={activateOnKey} className="flex items-center gap-2 px-4 py-2 bg-gray-50 dark:bg-gray-800/60 cursor-pointer select-none border-b border-gray-100 dark:border-gray-800" onClick={() => toggleGroup('__other__')}>
                       {isCollapsed ? <ChevronRight className="w-3.5 h-3.5 text-gray-400" /> : <ChevronDown className="w-3.5 h-3.5 text-gray-400" />}
                       <span className="w-2 h-2 rounded-full bg-gray-400 flex-shrink-0" />
                       <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Closed</span>
@@ -959,7 +960,7 @@ export default function ClaimsPage() {
                       return (
                       <React.Fragment key={subKey}>
                         {hasSubHeader && (
-                          <div
+                          <div role="button" tabIndex={0} onKeyDown={activateOnKey}
                             className="flex items-center gap-1.5 px-10 py-1.5 bg-gray-50/50 dark:bg-gray-800/30 border-b border-gray-100 dark:border-gray-800 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-800/50"
                             onClick={(e) => { e.stopPropagation(); toggleSubGroup('__other__', subKey); }}
                           >

@@ -5,6 +5,7 @@ import { base44 } from '@/api/base44Client';
 import { usePortalClaims } from '@/components/shared/usePortalClaims';
 import ClaimStatusBadges from '@/components/shared/ClaimStatusBadges';
 import { isCancelledClaim, isClaimClosed, isClaimClosedForLists } from '@/components/shared/claimOutcome';
+import { activateOnKey } from '@/lib/a11y';
 
 export default function ClientDashboard() {
   const [activeTab, setActiveTab] = React.useState('dashboard');
@@ -55,7 +56,7 @@ export default function ClientDashboard() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {statCards.map((stat) => (
-          <div
+          <div role="button" tabIndex={0} onKeyDown={activateOnKey}
             key={stat.title}
             onClick={() => window.dispatchEvent(new CustomEvent('client-nav', { detail: 'claims' }))}
             className="bg-white dark:bg-gray-900 rounded-[10px] border border-gray-100 dark:border-gray-800 p-4 shadow-sm cursor-pointer hover:shadow-md transition-all active:scale-[0.98]"
