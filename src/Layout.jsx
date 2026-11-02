@@ -35,7 +35,6 @@ import RepairerLayout from "./components/repairer/RepairerLayout";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { StatusConfigProvider } from './components/shared/StatusConfigContext';
-import UserTypeFixer from './components/shared/UserTypeFixer';
 import PageLoader from './components/PageLoader';
 import UserProfile, { getUserInitials, getAvatarColor } from "./components/layout/UserProfile";
 import QuickAccessOverlay from "./components/layout/QuickAccessOverlay";
@@ -199,7 +198,6 @@ export default function Layout({ children, currentPageName }) {
 
   return (
     <StatusConfigProvider>
-      <UserTypeFixer />
       <GlobalSearch open={searchOpen} onOpenChange={setSearchOpen} />
       {isInternalUser &&
       <FloatingMessenger
