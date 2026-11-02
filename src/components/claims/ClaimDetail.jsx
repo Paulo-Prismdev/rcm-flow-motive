@@ -558,7 +558,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
     },
     onError: (error) => {
       console.error('Failed to delete claim:', error);
-      alert('Failed to delete claim: ' + (error.message || 'Unknown error'));
+      notifyError('Could not delete the claim', error);
     },
   });
 
@@ -699,9 +699,9 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
     onClose();
   };
 
-  const handleArchive = () => {
+  const handleArchive = async () => {
     if (claim.archived) {
-      if (window.confirm('Are you sure you want to restore this claim?')) archiveMutation.mutate();
+      if (await askConfirm({ title: 'Restore this claim?', message: 'It moves back to the live claims list.', confirmLabel: 'Restore' })) archiveMutation.mutate();
       return;
     }
     // Anything still outstanding is listed before the claim is filed away, so
@@ -711,15 +711,19 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
       setArchiveWarning(outstanding);
       return;
     }
-    if (window.confirm('Are you sure you want to archive this claim?')) {
+    if (await askConfirm({ title: 'Archive this claim?', message: 'It moves to the Archive. You can restore it later.', confirmLabel: 'Archive' })) {
       archiveMutation.mutate();
     }
   };
 
-  const handleDelete = () => {
-    if (window.confirm('Are you sure you want to permanently delete this claim? This action cannot be undone.')) {
-      deleteMutation.mutate();
-    }
+  const handleDelete = async () => {
+    const ok = await askConfirm({
+      title: `Delete claim ${claim.job_number || ''}?`.replace(' ?', '?'),
+      message: 'The claim is deleted permanently and can’t be brought back. Archiving keeps it instead.',
+      confirmLabel: 'Delete permanently',
+      destructive: true,
+    });
+    if (ok) deleteMutation.mutate();
   };
 
   const handleFilesUploaded = (newFileUrls) => {
@@ -760,13 +764,9 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
     setVehicleFetchError('');
     
     try {
-      console.log('Fetching DVLA data for:', claim.reg);
       const response = await lookupVehicleData({ registrationNumber: claim.reg });
-      console.log('DVLA response:', response);
-      
       // The function returns the data directly, not wrapped in success/error
       const result = response.data || response;
-      console.log('Processed result:', result);
       
       if (result.error) {
         setVehicleFetchError(result.message || result.error || 'Failed to fetch vehicle data');
@@ -793,11 +793,14 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
       };
       
       // handleUpdate logs each changed field, so it isn't logged here as well.
-      handleUpdate({ ...claim, ...updates });
-      
-      // Show success message with summary
-      const summary = `${result.make} ${result.model || ''} (${result.year_of_manufacture}) - ${result.colour} ${result.fuel_type}`;
-      alert(`✓ Vehicle data fetched successfully!\n\n${summary}\n\nThe claim has been updated with the DVLA data.`);
+      const saved = await handleUpdate({ ...claim, ...updates });
+      if (saved === false) return;
+      const summary = [
+        [result.make, result.model].filter(Boolean).join(' '),
+        result.year_of_manufacture ? `(${result.year_of_manufacture})` : '',
+        [result.colour, result.fuel_type].filter(Boolean).join(' '),
+      ].filter(Boolean).join(' – ');
+      notify('Vehicle details updated from the DVLA', summary);
     } catch (error) {
       console.error('Failed to fetch vehicle data:', error);
       setVehicleFetchError(error.message || 'An error occurred while fetching vehicle data');
@@ -816,17 +819,20 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
     queryClient.invalidateQueries({ queryKey: ['estimates'] });
   };
 
-  const handleAIExtract = (extractedData) => {
-    console.log('AI extracted data from attachment:', extractedData);
-    
-    const fields = Object.entries(extractedData)
-      .filter(([_, value]) => value !== null && value !== undefined && value !== '')
-      .map(([key, value]) => `${key}: ${value}`)
-      .join('\n');
-    
-    if (window.confirm(`AI found the following data:\n\n${fields}\n\nDo you want to update the claim with this data?`)) {
-      handleUpdate({ ...claim, ...extractedData });
+  const handleAIExtract = async (extractedData) => {
+    const found = Object.entries(extractedData || {})
+      .filter(([, value]) => value !== null && value !== undefined && value !== '');
+    if (found.length === 0) {
+      notify('Nothing to fill in', 'No claim details were found in that file.');
+      return;
     }
+    const label = (key) => key.replace(/_/g, ' ').replace(/^\w/, (c) => c.toUpperCase());
+    const ok = await askConfirm({
+      title: 'Update the claim with these details?',
+      message: found.map(([key, value]) => `${label(key)}: ${value}`).join('\n'),
+      confirmLabel: 'Update the claim',
+    });
+    if (ok) handleUpdate({ ...claim, ...Object.fromEntries(found) });
   };
 
   const openLinkedItem = (pageUrl, itemId) => {
@@ -866,7 +872,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
       queryClient.invalidateQueries({ queryKey: ['claim', claim.id] });
     } catch (error) {
       console.error('Error regenerating instruction PDF:', error);
-      alert('Failed to regenerate instruction PDF. Please try again.');
+      notifyError('Could not create the instruction PDF', error);
     } finally {
       setIsRegeneratingPdf(false);
     }
@@ -886,7 +892,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
       queryClient.invalidateQueries({ queryKey: ['claim', claim.id] });
     } catch (error) {
       console.error('Error saving PDF to claim docs:', error);
-      alert('Failed to save PDF to claim docs. Please try again.');
+      notifyError('Could not save the PDF to the claim documents', error);
     } finally {
       setIsSavingRegenToDocs(false);
     }
