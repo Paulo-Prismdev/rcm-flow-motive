@@ -296,6 +296,85 @@
       "type": "object",
       "description": "User notification preferences",
       "additionalProperties": true
+    },
+    "password_user": {
+      "type": "boolean",
+      "default": false,
+      "description": "True once this person has signed in with an email and password (not Google). Only these accounts are held to the 90-day password change. Set only by the passwordManage backend function.",
+      "rls": {
+        "update": false
+      }
+    },
+    "password_changed_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the password was last set through this app (change or reset). Starts the 90-day clock. Set only by the passwordManage backend function.",
+      "rls": {
+        "update": false
+      }
+    },
+    "twofa_verified": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the user has completed the emailed-code second step for the current sign-in. Set only by the twofaManage backend function. Staff access rules check this.",
+      "rls": {
+        "update": false
+      }
+    },
+    "twofa_verified_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the second step was last completed. Used for the 12-hour absolute session limit.",
+      "rls": {
+        "update": false
+      }
+    },
+    "twofa_last_activity_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Last activity in the app. The second step lapses after 30 minutes without activity.",
+      "rls": {
+        "update": false
+      }
+    },
+    "twofa_attempt_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Wrong-code attempts, counted against the user rather than one code, so asking for a new code never resets it. Back to 0 after a correct code or when a lockout ends.",
+      "rls": {
+        "update": false
+      }
+    },
+    "twofa_locked_until": {
+      "type": "string",
+      "format": "date-time",
+      "description": "After 5 wrong codes the user cannot request or enter codes until this time (15 minutes).",
+      "rls": {
+        "update": false
+      }
+    },
+    "twofa_login_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the user last signed in. If this is later than twofa_verified_at, the second step must be done again.",
+      "rls": {
+        "update": false
+      }
+    },
+    "twofa_initiate_lock": {
+      "type": "string",
+      "description": "Short-lived lock so two simultaneous requests cannot send two codes.",
+      "rls": {
+        "update": false
+      }
+    },
+    "twofa_initiate_lock_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the code-sending lock was taken (it lapses after 10 seconds).",
+      "rls": {
+        "update": false
+      }
     }
   },
   "required": [],

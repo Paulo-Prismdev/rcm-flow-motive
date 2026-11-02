@@ -1,0 +1,49 @@
+{
+  "name": "TwoFactorCode",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "The user this code belongs to"
+    },
+    "code_hash": {
+      "type": "string",
+      "description": "SHA-256 hash of the one-time code. The code itself is never stored."
+    },
+    "channel": {
+      "type": "string",
+      "enum": [
+        "email"
+      ],
+      "default": "email",
+      "description": "How the code was sent."
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the code stops working (5 minutes after sending)"
+    },
+    "consumed_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the code was used. Empty until then; a code works once."
+    },
+    "last_sent_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the code was emailed (for the resend wait)"
+    }
+  },
+  "required": [
+    "user_id",
+    "code_hash",
+    "channel",
+    "expires_at"
+  ],
+  "rls": {
+    "read": false,
+    "create": false,
+    "update": false,
+    "delete": false
+  }
+}
