@@ -79,21 +79,56 @@ export function buildBrandedHtml(content: string, footerNote?: string): string {
 }
 
 /**
- * Delivery. When RESEND_API_KEY and EMAIL_FROM_ADDRESS are set (EMAIL_FROM_ADDRESS
- * being an address on a domain verified in Resend, e.g. notifications@rcmautomotive.co.uk),
- * email goes out through Resend: one message with real To/CC, a Reply-To, any address
- * at all, and optional attachments. Without them it falls back to Base44's own email
- * service, which mails one recipient at a time and can't reply-to or attach.
+ * Delivery, in this order:
+ *   1. SendGrid, when SENDGRID_API_KEY is set (already saved on the app). Sends from
+ *      notifications@updates.rcmautomotive.co.uk (the domain set up in SendGrid), or
+ *      EMAIL_FROM_ADDRESS if that secret is added later.
+ *   2. Resend, if RESEND_API_KEY is set instead.
+ *   3. Base44's own email service.
+ * SendGrid/Resend send one message with real To and CC, a Reply-To, to any address, and
+ * can attach files. If either refuses a message (bad key, domain not verified...), it
+ * goes through Base44 instead, so a set-up problem never stops a sign-in code or an
+ * invoice request.
  */
 const RESEND_URL = 'https://api.resend.com/emails';
+const SENDGRID_URL = 'https://api.sendgrid.com/v3/mail/send';
+const DEFAULT_FROM = 'notifications@updates.rcmautomotive.co.uk';
+const DEFAULT_REPLY_TO = 'info@rcmautomotive.co.uk';
 
 export type EmailAttachment = { filename: string; path: string };
 
-export function emailProvider(): 'resend' | 'base44' {
-  return Deno.env.get('RESEND_API_KEY') && EMAIL_RE.test(Deno.env.get('EMAIL_FROM_ADDRESS') || '') ? 'resend' : 'base44';
+export function emailProvider(): 'sendgrid' | 'resend' | 'base44' {
+  if (Deno.env.get('SENDGRID_API_KEY')) return 'sendgrid';
+  if (Deno.env.get('RESEND_API_KEY')) return 'resend';
+  return 'base44';
 }
 
+const fromAddress = () => {
+  const v = (Deno.env.get('EMAIL_FROM_ADDRESS') || '').trim();
+  return EMAIL_RE.test(v) ? v : DEFAULT_FROM;
+};
+
 const cleanName = (n: string) => String(n || 'RCM Automotive').replace(/["<>\r\n]/g, '').slice(0, 100);
+
+// Files to attach, fetched and base64-encoded (SendGrid needs the bytes). Capped at
+// 10 files and about 15 MB in all; anything that can't be fetched is left out.
+async function encodeAttachments(attachments: EmailAttachment[] = []) {
+  const out: { filename: string; content: string; type: string }[] = [];
+  let total = 0;
+  for (const a of attachments.filter((x) => x?.filename && /^https:\/\//.test(x?.path || '')).slice(0, 10)) {
+    try {
+      const res = await fetch(a.path);
+      if (!res.ok) continue;
+      const buf = new Uint8Array(await res.arrayBuffer());
+      total += buf.length;
+      if (total > 15 * 1024 * 1024) break;
+      let bin = '';
+      for (let i = 0; i < buf.length; i += 0x8000) bin += String.fromCharCode(...buf.subarray(i, i + 0x8000));
+      out.push({ filename: String(a.filename).slice(0, 150), content: btoa(bin), type: res.headers.get('content-type') || 'application/octet-stream' });
+    } catch { /* leave this one out */ }
+  }
+  return out;
+}
 
 /**
  * Send one email (already-built HTML) to one or more people. Returns { ok, error,
@@ -109,22 +144,55 @@ export async function deliverEmail({ base44, to, cc, subject, html, text, fromNa
   const provider = emailProvider();
   if (toList.length === 0 && ccList.length === 0) return { ok: false, error: 'No valid recipient email address', provider };
   const safeSubject = String(subject || '').replace(/[\r\n]+/g, ' ').slice(0, 250);
+  const plain = text || htmlToPlain(html);
+  const name = cleanName(fromName || 'RCM Automotive');
+  const reply = parseEmails(replyTo || '')[0] || parseEmails(Deno.env.get('EMAIL_REPLY_TO') || '')[0] || DEFAULT_REPLY_TO;
+  const primary = toList.length ? toList : ccList;
+  const copies = toList.length ? ccList : [];
 
   // A short trace in the function logs (never the content): which service sent it,
-  // to how many people, and Resend's message id, so delivery can be checked.
+  // to how many people, and the service's message id, so delivery can be checked.
   const trace = (msg: string) => console.log(`email: ${msg} | to ${toList.length} cc ${ccList.length} | "${safeSubject.slice(0, 40)}"`);
 
-  if (provider === 'resend') {
+  if (provider === 'sendgrid') {
+    const personalization: Record<string, unknown> = { to: primary.map((email) => ({ email })) };
+    if (copies.length) personalization.cc = copies.map((email) => ({ email }));
     const payload: Record<string, unknown> = {
-      from: `${cleanName(fromName || 'RCM Automotive')} <${Deno.env.get('EMAIL_FROM_ADDRESS')}>`,
-      to: toList.length ? toList : ccList,
+      personalizations: [personalization],
+      from: { email: fromAddress(), name },
+      reply_to: { email: reply },
+      subject: safeSubject,
+      content: [{ type: 'text/plain', value: plain }, { type: 'text/html', value: html }],
+      // Links stay exactly as written: click tracking would rewrite the signed form links.
+      tracking_settings: { click_tracking: { enable: false, enable_text: false }, open_tracking: { enable: false } },
+    };
+    const files = await encodeAttachments(attachments);
+    if (files.length) payload.attachments = files;
+    try {
+      const res = await fetch(SENDGRID_URL, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${Deno.env.get('SENDGRID_API_KEY')}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (res.ok) {
+        trace(`sent via SendGrid id ${res.headers.get('x-message-id') || '?'} from ${fromAddress()}`);
+        return { ok: true, provider };
+      }
+      const detail = await res.json().catch(() => ({} as any));
+      console.error(`email: SendGrid refused (${res.status}) ${detail?.errors?.[0]?.message || ''} - falling back to Base44`);
+    } catch (error: any) {
+      console.error(`email: SendGrid unreachable (${error?.message || error}) - falling back to Base44`);
+    }
+  } else if (provider === 'resend') {
+    const payload: Record<string, unknown> = {
+      from: `${name} <${fromAddress()}>`,
+      to: primary,
       subject: safeSubject,
       html,
-      text: text || htmlToPlain(html),
+      text: plain,
+      reply_to: reply,
     };
-    if (toList.length && ccList.length) payload.cc = ccList;
-    const reply = parseEmails(replyTo || '')[0] || parseEmails(Deno.env.get('EMAIL_REPLY_TO') || '')[0];
-    if (reply) payload.reply_to = reply;
+    if (copies.length) payload.cc = copies;
     const files = (attachments || []).filter((a) => a?.filename && /^https:\/\//.test(a?.path || '')).slice(0, 10);
     if (files.length) payload.attachments = files.map((a) => ({ filename: String(a.filename).slice(0, 150), path: a.path }));
     try {
@@ -135,11 +203,9 @@ export async function deliverEmail({ base44, to, cc, subject, html, text, fromNa
       });
       const detail = await res.json().catch(() => ({} as any));
       if (res.ok) {
-        trace(`sent via Resend id ${detail?.id || '?'}`);
+        trace(`sent via Resend id ${detail?.id || '?'} from ${fromAddress()}`);
         return { ok: true, provider };
       }
-      // Resend refused it (key wrong, domain not verified yet...): fall back to Base44's
-      // email below, so a set-up problem never stops a sign-in code or an invoice request.
       console.error(`email: Resend refused (${res.status}) ${detail?.message || ''} - falling back to Base44`);
     } catch (error: any) {
       console.error(`email: Resend unreachable (${error?.message || error}) - falling back to Base44`);
