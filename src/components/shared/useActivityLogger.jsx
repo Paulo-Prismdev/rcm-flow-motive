@@ -74,6 +74,30 @@ export function logChanges({ parentId, parentType, oldData = {}, newData = {}, f
   return enqueue(entries);
 }
 
+// Records that belong to a claim (documents, notes, updates) are logged on that claim.
+const LOG_TYPES = new Set(['Claim', 'Estimate', 'Engineering', 'Part', 'Client', 'Bodyshop', 'Insurer', 'Broker', 'Supplier', 'CreditRepairCompany', 'Referrer', 'Company', 'Task', 'Settings']);
+const recordName = (r) => (r && (r.job_number || r.name || r.title || r.file_name || r.reference)) || '';
+
+// Delete a record and log the deletion with what it was. The delete itself throws on
+// failure as before (so callers' error handling still works); the logging never does.
+export async function deleteAndLog(entityName, id, { label } = {}) {
+  let rec = null;
+  try { rec = (await base44.entities[entityName].filter({ id }))?.[0] || null; } catch { /* still delete */ }
+  const result = await base44.entities[entityName].delete(id);
+  const name = recordName(rec);
+  const what = `${label || entityName.replace(/([a-z])([A-Z])/g, '$1 $2').toLowerCase()}${name ? ` – ${name}` : ''}`;
+  let parentType = entityName;
+  let parentId = id;
+  if (!LOG_TYPES.has(entityName)) {
+    const claimId = rec?.claim_id || (rec?.parent_type === 'Claim' ? rec?.parent_id : null);
+    if (!claimId) return result;
+    parentType = 'Claim';
+    parentId = claimId;
+  }
+  logDeletion({ parentId, parentType, label: what, details: name });
+  return result;
+}
+
 // Log that a record was deleted, with a short summary of what it was. Never throws.
 export function logDeletion({ parentId, parentType, label, details }) {
   return logActivity({
