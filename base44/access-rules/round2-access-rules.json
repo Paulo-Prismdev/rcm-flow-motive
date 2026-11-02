@@ -78,9 +78,63 @@
     },
     "ChaserEmailRule": {
       "read": "INT",
-      "create": "INT",
-      "update": "INT",
-      "delete": "INT"
+      "create": {
+        "$and": [
+          "INT",
+          {
+            "$or": [
+              {
+                "user_condition": {
+                  "role": "admin"
+                }
+              },
+              {
+                "user_condition": {
+                  "role": "super_admin"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "update": {
+        "$and": [
+          "INT",
+          {
+            "$or": [
+              {
+                "user_condition": {
+                  "role": "admin"
+                }
+              },
+              {
+                "user_condition": {
+                  "role": "super_admin"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "delete": {
+        "$and": [
+          "INT",
+          {
+            "$or": [
+              {
+                "user_condition": {
+                  "role": "admin"
+                }
+              },
+              {
+                "user_condition": {
+                  "role": "super_admin"
+                }
+              }
+            ]
+          }
+        ]
+      }
     },
     "Bodyshop": {
       "read": {
@@ -214,6 +268,198 @@
           "role": "super_admin"
         }
       }
+    },
+    "AdvertBanner": {
+      "create": {
+        "$and": [
+          "INT",
+          {
+            "$or": [
+              {
+                "user_condition": {
+                  "role": "admin"
+                }
+              },
+              {
+                "user_condition": {
+                  "role": "super_admin"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "update": {
+        "$and": [
+          "INT",
+          {
+            "$or": [
+              {
+                "user_condition": {
+                  "role": "admin"
+                }
+              },
+              {
+                "user_condition": {
+                  "role": "super_admin"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "delete": {
+        "$and": [
+          "INT",
+          {
+            "$or": [
+              {
+                "user_condition": {
+                  "role": "admin"
+                }
+              },
+              {
+                "user_condition": {
+                  "role": "super_admin"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "PortalProduct": {
+      "create": {
+        "$and": [
+          "INT",
+          {
+            "$or": [
+              {
+                "user_condition": {
+                  "role": "admin"
+                }
+              },
+              {
+                "user_condition": {
+                  "role": "super_admin"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "update": {
+        "$and": [
+          "INT",
+          {
+            "$or": [
+              {
+                "user_condition": {
+                  "role": "admin"
+                }
+              },
+              {
+                "user_condition": {
+                  "role": "super_admin"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "delete": {
+        "$and": [
+          "INT",
+          {
+            "$or": [
+              {
+                "user_condition": {
+                  "role": "admin"
+                }
+              },
+              {
+                "user_condition": {
+                  "role": "super_admin"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "AppConfig": {
+      "create": {
+        "$and": [
+          "INT",
+          {
+            "$or": [
+              {
+                "user_condition": {
+                  "role": "admin"
+                }
+              },
+              {
+                "user_condition": {
+                  "role": "super_admin"
+                }
+              },
+              {
+                "user_condition": {
+                  "data.can_manage_permissions": true
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "update": {
+        "$and": [
+          "INT",
+          {
+            "$or": [
+              {
+                "user_condition": {
+                  "role": "admin"
+                }
+              },
+              {
+                "user_condition": {
+                  "role": "super_admin"
+                }
+              },
+              {
+                "user_condition": {
+                  "data.can_manage_permissions": true
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "delete": {
+        "$and": [
+          "INT",
+          {
+            "$or": [
+              {
+                "user_condition": {
+                  "role": "admin"
+                }
+              },
+              {
+                "user_condition": {
+                  "role": "super_admin"
+                }
+              },
+              {
+                "user_condition": {
+                  "data.can_manage_permissions": true
+                }
+              }
+            ]
+          }
+        ]
+      }
     }
   },
   "fields": {
@@ -252,5 +498,6 @@
   "defaults": {
     "User.user_type": "external"
   },
-  "_activitylog": "Round 5: the audit log is written only by server functions (recordActivity stamps the signed-in person). Nobody, super admins included, can add, edit or delete lines from the app."
+  "_activitylog": "Round 5: the audit log is written only by server functions (recordActivity stamps the signed-in person). Nobody, super admins included, can add, edit or delete lines from the app.",
+  "_round9": "Round 9: settings that only admins can open in the app (portal adverts and products, chaser email rules, invoicing settings) can only be changed by admins on the server too. AppConfig also allows staff who can manage permissions (the internal navigation settings live there). Reading is unchanged."
 }
