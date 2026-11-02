@@ -123,7 +123,9 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
     })();
   }, [isLoading, claim.id, claim.instruction_pdf_url, claim.job_number, claim.reg, docs, queryClient]);
 
-  const { uploadFiles, uploads, isUploading } = useFileUpload();
+  // Claim documents (licences, estimates, authorities, invoices…) go to private
+  // storage: they open only through a short-lived signed link, and each opening is logged.
+  const { uploadFiles, uploads, isUploading } = useFileUpload({ private: true });
 
   const handleUpload = async (itemKey, fileList) => {
     if (!fileList?.length) return;

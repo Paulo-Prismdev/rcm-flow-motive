@@ -11,7 +11,9 @@ import { invoiceCopyMap, invoiceDocKey, sameInvoiceCopies } from '@/components/s
  */
 export default function useClaimInvoiceDocs(claim, currentUser) {
   const queryClient = useQueryClient();
-  const { uploadFiles, isUploading } = useFileUpload();
+  // Claim documents (licences, estimates, authorities, invoices…) go to private
+  // storage: they open only through a short-lived signed link, and each opening is logged.
+  const { uploadFiles, isUploading } = useFileUpload({ private: true });
   const [viewingFile, setViewingFile] = useState(null);
   const [pendingDelete, setPendingDelete] = useState(null);
 
