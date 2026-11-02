@@ -43,6 +43,11 @@ export function notify(title, description) {
   toast({ title, description });
 }
 
+/** A short warning in the corner (something to fix, or something that went wrong), as one line. */
+export function warn(title, description) {
+  toast({ title, description, variant: 'destructive' });
+}
+
 /** A short error message in the corner, with the reason when there is a readable one. */
 export function notifyError(title, error) {
   const reason = typeof error === 'string'
