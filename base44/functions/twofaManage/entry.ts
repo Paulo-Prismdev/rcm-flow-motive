@@ -12,6 +12,8 @@ import { auditUser } from '../../shared/userAudit.ts';
  *   ping      activity heartbeat (keeps the 30-minute inactivity window open)
  *   clear     at sign-out
  *   reset     staff admins: clear someone's second step and lockout
+ *
+ * Face ID / fingerprint (passkeyManage) is the other way through the same second step.
  *   cleanup   scheduled: lapse sessions that are over 12 hours old or 30 minutes idle
  *
  * Who needs it: all RCM staff (user type internal). Portal users don't, for now.
@@ -48,6 +50,13 @@ const isExpired = (iso?: string | null) => !iso || Date.parse(iso) < Date.now();
 const timeOf = (iso: string) => new Date(iso).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/London' });
 
 const isRequired = (user: any) => user?.user_type === 'internal';
+
+/** Whether the user has any Face ID / fingerprint device set up (see passkeyManage). */
+async function hasPasskeys(base44: any, userId: string) {
+  const raw = await base44.asServiceRole.entities.PasskeyCredential.filter({ user_id: userId }).catch(() => []);
+  const list = Array.isArray(raw) ? raw : (raw?.items || []);
+  return list.length > 0;
+}
 
 async function loadUser(base44: any) {
   const me = await base44.auth.me().catch(() => null);
@@ -165,7 +174,9 @@ export default async function (req: Request) {
         twofa_login_at: nowIso(), twofa_verified: false, twofa_verified_at: null, twofa_last_activity_at: null,
       });
       await auditUser(base44, user, 'Signed In', 'Signed in');
-      if (isRequired(user) && !(await hasActiveCode(base44, user.id))) {
+      // Someone with Face ID / fingerprint set up isn't emailed a code automatically:
+      // the screen offers Face ID first, and a code is one tap away if they need it.
+      if (isRequired(user) && !(await hasPasskeys(base44, user.id)) && !(await hasActiveCode(base44, user.id))) {
         const lockout = await checkUserLockout(base44, user);
         if (!lockout.locked) await createAndSendCode(base44, user);
       }
@@ -191,6 +202,7 @@ export default async function (req: Request) {
         locked_until: lockout.locked ? lockout.lockedUntil : null,
         attempts_remaining: lockout.locked ? 0 : Math.max(0, MAX_ATTEMPTS - attempts),
         code_active: required && !verified ? await hasActiveCode(base44, user.id) : false,
+        has_passkeys: required ? await hasPasskeys(base44, user.id) : false,
       });
     }
 
