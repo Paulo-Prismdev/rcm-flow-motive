@@ -322,9 +322,17 @@ export default function ClaimsPage() {
   // updatedClaim = the minimal DB payload (only fields that changed).
   // localClaim  = optional full object for immediate UI state before the
   // refetch lands; defaults to updatedClaim for backward compatibility.
-  const handleUpdate = (updatedClaim, localClaim) => {
-    updateMutation.mutate({ id: updatedClaim.id, data: sanitizeClaimData(updatedClaim, selectedClaim) });
+  // Resolves true once the change is saved, false if it wasn't (the screen is put
+  // back and a message shown by onError), so callers only record what really saved.
+  const handleUpdate = async (updatedClaim, localClaim) => {
+    const data = sanitizeClaimData(updatedClaim, selectedClaim);
     setSelectedClaim(localClaim || updatedClaim);
+    try {
+      await updateMutation.mutateAsync({ id: updatedClaim.id, data });
+      return true;
+    } catch {
+      return false;
+    }
   };
 
   const clearAllFilters = () => {
