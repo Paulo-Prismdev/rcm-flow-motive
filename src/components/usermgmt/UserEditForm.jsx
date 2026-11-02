@@ -6,8 +6,11 @@ import { Input } from "@/components/ui/input";
 import { AlertCircle } from "lucide-react";
 import { isClientTagged } from "@/components/shared/directoryTags";
 
+// "Not set up" is what a new account starts as: it sees no part of the app until a
+// type is chosen here. Internal gives full staff access, so it is never the default.
 const USER_TYPES = [
-  { value: 'internal', label: 'Internal' },
+  { value: 'external', label: 'Not set up (no access)' },
+  { value: 'internal', label: 'Internal (staff)' },
   { value: 'bodyshop', label: 'Repairer' },
   { value: 'referrer', label: 'Referrer' },
   { value: 'supplier', label: 'Supplier' },
@@ -18,7 +21,7 @@ export default function UserEditForm({ user, onSave, onCancel, isSaving }) {
   const [formData, setFormData] = useState({
     full_name: user?.full_name || '',
     role: user?.role || 'user',
-    user_type: user?.user_type || 'internal',
+    user_type: user?.user_type || 'external',
     company_id: user?.company_id || '',
     is_active: user?.is_active ?? true,
     can_manage_permissions: user?.can_manage_permissions || false,
@@ -68,7 +71,7 @@ export default function UserEditForm({ user, onSave, onCancel, isSaving }) {
       <div>
         <label className="block text-xs font-medium text-foreground-muted mb-1">User Type</label>
         <select
-          value={formData.user_type || 'internal'}
+          value={formData.user_type || 'external'}
           onChange={(e) => setFormData(p => ({ ...p, user_type: e.target.value }))}
           className="neomorph-inset w-full px-3 py-2 rounded-lg text-sm"
         >
