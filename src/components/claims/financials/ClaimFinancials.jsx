@@ -500,10 +500,12 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
           storage_fee_percent: storagePercentDefault,
         };
       }
-      applyCommit(
+      // A failed save keeps the review open (the claim page has said why), so it can be tried again.
+      const saved = await applyCommit(
         { ...patch, ...(repairCost ? { final_repair_cost: repairCost } : {}) },
         description
       );
+      if (!saved) return;
       buildReviewLog({ item, figures, corrections, accepted }).forEach((entry) => {
         logActivity({ parentId: claim.id, parentType: 'Claim', user: currentUser, ...entry });
       });
@@ -580,7 +582,7 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
 
     try {
       await docs.attachFile(item, { file_url: authorityReview.fileUrl, file_name: authorityReview.fileName });
-      applyCommit(
+      const saved = await applyCommit(
         buildAuthorityReviewPatch(claim, figures, {
           file_url: authorityReview.fileUrl,
           file_name: authorityReview.fileName,
@@ -591,6 +593,7 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
         }),
         `Final Authority recorded — authorised ${fmtGBP(total)}${excessText}${decisionText}`
       );
+      if (!saved) return;
       buildAuthorityLog({ item, figures, corrections, accepted }).forEach((entry) => {
         logActivity({ parentId: claim.id, parentType: 'Claim', user: currentUser, ...entry });
       });
