@@ -35,7 +35,7 @@ import ClaimStatusBadges from '../shared/ClaimStatusBadges';
 import { getClaimOutcome, isExceptionOutcome } from '../shared/claimOutcome';
 import { formatUKRegistration } from '../shared/formatRegistration';
 import ClaimJourneyTimeline from '../claims/ClaimJourneyTimeline';
-import ClaimUpdatesModal from '../shared/ClaimUpdatesModal';
+import PortalUpdatesModal from './PortalUpdatesModal';
 import RepairerDetailsSection from './RepairerDetailsSection';
 import ReferrerDocumentsSection from './ReferrerDocumentsSection';
 import {
@@ -101,11 +101,7 @@ function isImageUrl(url) {
   return /\.(jpg|jpeg|png|gif|webp|svg|bmp)(\?|$)/i.test(url);
 }
 
-function BackorderedPartsSectionReadOnly({ claimId }) {
-  const { data: parts = [], isLoading } = useQuery({
-    queryKey: ['backorderedParts', claimId],
-    queryFn: () => base44.entities.BackorderedPart.filter({ claim_id: claimId }),
-  });
+function BackorderedPartsSectionReadOnly({ parts = [], isLoading }) {
   if (isLoading) return <div className="neomorph-flat p-6 text-center text-sm text-muted-foreground">Loading...</div>;
   return (
     <div className="neomorph-flat p-4 md:p-6">
@@ -134,7 +130,6 @@ function BackorderedPartsSectionReadOnly({ claimId }) {
 export default function ReferrerClaimDetail({ claim, onClose, initialSection }) {
   const [selectedSection, setSelectedSection] = useState(initialSection || 'status');
   const [lightboxUrl, setLightboxUrl] = useState(null);
-  const [replyText, setReplyText] = useState('');
   const [isClaimUpdatesOpen, setIsClaimUpdatesOpen] = useState(false);
   const [editingClientRef, setEditingClientRef] = useState(false);
   const [clientRefValue, setClientRefValue] = useState(claim.client_ref || '');
@@ -153,41 +148,24 @@ export default function ReferrerClaimDetail({ claim, onClose, initialSection }) 
   });
 
   const saveClientRefMutation = useMutation({
-    mutationFn: (value) => base44.entities.Claim.update(claim.id, { client_ref: value }),
+    mutationFn: (value) => base44.functions.invoke('portalClaimAction', { claim_id: claim.id, action: 'set_client_ref', value }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['clientClaimsFn'] });
+      queryClient.invalidateQueries({ queryKey: ['portalClaims'] });
       setEditingClientRef(false);
     },
   });
 
-  // Always fetch updates so documents/images from updates are always included
-  const { data: claimUpdates = [] } = useQuery({
-    queryKey: ['claimUpdates', claim.id],
-    queryFn: () => base44.entities.ClaimUpdate.filter({ claim_id: claim.id }, '-created_date'),
-  });
-
-  const replyMutation = useMutation({
-    mutationFn: (description) => base44.entities.ClaimUpdate.create({
-      claim_id: claim.id,
-      update_type: 'Referrer Response',
-      description,
-    }),
-    onSuccess: () => {
-      setReplyText('');
-      queryClient.invalidateQueries({ queryKey: ['claimUpdates', claim.id] });
+  // The claim's shared updates, backordered parts and repairer details, from the
+  // protected portal lookup (portals can't read these tables directly). Updates are
+  // always fetched so documents/images attached to them are always included.
+  const { data: detail, isLoading: detailLoading } = useQuery({
+    queryKey: ['portalClaimDetail', claim.id],
+    queryFn: async () => {
+      const res = await base44.functions.invoke('getPortalClaimDetail', { claim_id: claim.id });
+      return res.data;
     },
   });
-
-  const handleReply = () => {
-    const text = replyText.trim();
-    if (!text) return;
-    replyMutation.mutate(text);
-  };
-
-  const handleClaimUpdateCreated = () => {
-    queryClient.invalidateQueries({ queryKey: ['claimUpdates', claim.id] });
-    queryClient.invalidateQueries({ queryKey: ['claim', claim.id] });
-  };
+  const claimUpdates = detail?.updates || [];
 
   const incompleteSections = useMemo(() => {
     return Object.entries(SECTION_REQUIRED_FIELDS).reduce((acc, [sectionId, fields]) => {
@@ -396,7 +374,7 @@ export default function ReferrerClaimDetail({ claim, onClose, initialSection }) 
         );
 
       case 'backorderedParts':
-        return <BackorderedPartsSectionReadOnly claimId={claim.id} />;
+        return <BackorderedPartsSectionReadOnly parts={detail?.backordered_parts || []} isLoading={detailLoading} />;
 
       case 'dates':
         return (
@@ -420,6 +398,8 @@ export default function ReferrerClaimDetail({ claim, onClose, initialSection }) 
         return (
           <RepairerDetailsSection
             bodyshopId={claim.bodyshop_id}
+            repairer={detail?.repairer}
+            repairerLoading={detailLoading}
             fallbackName={claim.bodyshop}
             fallbackEmail={claim.bodyshop_email}
             authorisingParty={claim.authorising_party}
@@ -477,12 +457,11 @@ export default function ReferrerClaimDetail({ claim, onClose, initialSection }) 
         </div>
       )}
 
-      <ClaimUpdatesModal
+      <PortalUpdatesModal
         claimId={claim.id}
-        currentStatus={claim.journey_status || claim.job_status}
+        updates={claimUpdates}
         isOpen={isClaimUpdatesOpen}
         onClose={() => setIsClaimUpdatesOpen(false)}
-        onUpdateCreated={handleClaimUpdateCreated}
       />
 
       {/* Combined Header + Section Selector */}
