@@ -748,7 +748,7 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
       )}
 
       {viewingFile && (
-        <FileViewer fileUrl={viewingFile} onClose={() => setViewingFile(null)} />
+        <FileViewer fileUrl={viewingFile} claimId={claim.id} onClose={() => setViewingFile(null)} />
       )}
 
       {documentReview && (

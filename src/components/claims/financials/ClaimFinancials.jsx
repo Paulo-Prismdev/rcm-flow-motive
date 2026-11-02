@@ -1079,7 +1079,7 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
         />
 
         {docs.viewingFile && (
-          <FileViewer fileUrl={docs.viewingFile} onClose={() => docs.setViewingFile(null)} />
+          <FileViewer fileUrl={docs.viewingFile} claimId={claim.id} onClose={() => docs.setViewingFile(null)} />
         )}
 
         <ConfirmDialog
