@@ -89,10 +89,9 @@ export async function deleteAndLog(entityName, id, { label } = {}) {
   let parentType = entityName;
   let parentId = id;
   if (!LOG_TYPES.has(entityName)) {
-    const claimId = rec?.claim_id || (rec?.parent_type === 'Claim' ? rec?.parent_id : null);
-    if (!claimId) return result;
-    parentType = 'Claim';
-    parentId = claimId;
+    if (rec?.claim_id) { parentType = 'Claim'; parentId = rec.claim_id; }
+    else if (rec?.parent_id && LOG_TYPES.has(rec?.parent_type)) { parentType = rec.parent_type; parentId = rec.parent_id; }
+    else return result;
   }
   logDeletion({ parentId, parentType, label: what, details: name });
   return result;
