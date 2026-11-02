@@ -1,6 +1,4 @@
 import React from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
 import { Wrench, Phone, Mail, MapPin, Globe, User, Loader2 } from 'lucide-react';
 
 function Row({ icon: Icon, label, value, href }) {
@@ -26,14 +24,11 @@ function Row({ icon: Icon, label, value, href }) {
   );
 }
 
-export default function RepairerDetailsSection({ bodyshopId, fallbackName, fallbackEmail, authorisingParty }) {
-  const { data: bodyshop, isLoading } = useQuery({
-    queryKey: ['bodyshop', bodyshopId],
-    queryFn: () => base44.entities.Bodyshop.get(bodyshopId),
-    enabled: !!bodyshopId,
-    staleTime: 5 * 60 * 1000,
-    retry: 1,
-  });
+// The repairer's contact details arrive with the claim from the protected portal
+// lookup (the repairer directory is internal-only), so nothing is fetched here.
+export default function RepairerDetailsSection({ bodyshopId, repairer, repairerLoading, fallbackName, fallbackEmail, authorisingParty }) {
+  const bodyshop = repairer;
+  const isLoading = repairerLoading && !repairer;
 
   if (!bodyshopId) {
     return (
