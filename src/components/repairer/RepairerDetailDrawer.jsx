@@ -23,6 +23,7 @@ import {
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
 import { deleteAndLog, updateAndLog } from "@/components/shared/useActivityLogger";
+import RecordHistory from '@/components/shared/RecordHistory';
 
 const TIER_OPTIONS = ["TIER 1", "TIER 2", "Previously on Network", ""];
 const MAP_GROUP_OPTIONS = ["Solution", "QAC", ""];
