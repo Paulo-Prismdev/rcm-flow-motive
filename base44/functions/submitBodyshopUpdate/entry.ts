@@ -1,6 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
 import { isCancelledClaim } from '../../shared/claimOutcome.ts';
 import { LINK_MESSAGES, appPublicUrl, clip, verifyClaimLink } from '../../shared/publicLinks.ts';
+import { buildBrandedHtml, deliverEmail } from '../../shared/brandedEmail.ts';
 
 const escapeHtml = (text: string) => text
   .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -138,10 +139,11 @@ Deno.serve(async (req) => {
         // Send email if the user has the email pref enabled
         const prefs = user.notification_preferences || {};
         if (prefs.email_repair_update_received) {
-          await base44.asServiceRole.integrations.Core.SendEmail({
+          await deliverEmail({
+            base44,
             to: user.email,
             subject: notifTitle,
-            body: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">
+            html: buildBrandedHtml(`<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">
               <h2 style="color:#131d47;">Repair Update Received</h2>
               <p><strong>Job:</strong> ${safe(claim.job_number || 'Unknown')}</p>
               <p><strong>Vehicle:</strong> ${safe(claim.reg || 'N/A')}</p>
@@ -149,8 +151,8 @@ Deno.serve(async (req) => {
               <p><strong>Update:</strong></p>
               <p style="background:#f5f6fa;padding:12px;border-radius:8px;white-space:pre-wrap;">${safe(updateDescription).replace(/\n/g, '<br>')}</p>
               <p><a href="${claimUrl}" style="background:#131d47;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;display:inline-block;">View Claim</a></p>
-            </div>`,
-          }).catch(() => {});
+            </div>`),
+          });
         }
       }
     } catch (notifErr: any) {

@@ -1,5 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
-import { buildBrandedHtml } from '../../shared/brandedEmail.ts';
+import { buildBrandedHtml, deliverEmail } from '../../shared/brandedEmail.ts';
 import { auditUser } from '../../shared/userAudit.ts';
 
 /**
@@ -114,17 +114,15 @@ async function createAndSendCode(base44: any, user: any) {
 <p>Use this code to finish signing in to RCM Flowmotive. It expires in ${CODE_EXPIRY_MINUTES} minutes and works once.</p>
 <p style="text-align:center;margin:24px 0;"><span style="display:inline-block;font-size:32px;font-weight:700;letter-spacing:8px;padding:16px 24px;background:#f4f4f5;border-radius:8px;font-family:ui-monospace,Menlo,Monaco,monospace;">${code}</span></p>
 <p style="color:#65758b;font-size:13px;">If you didn't try to sign in, you can ignore this email, but please tell us, as someone may know your password. Never share this code with anyone.</p>`;
-  try {
-    await base44.asServiceRole.integrations.Core.SendEmail({
-      to: user.email,
-      subject: `Your RCM Flowmotive sign-in code: ${code}`,
-      html: buildBrandedHtml(content),
-      text: `Your RCM Flowmotive sign-in code is ${code}. It expires in ${CODE_EXPIRY_MINUTES} minutes and works once. If you didn't try to sign in, ignore this email and tell us.`,
-      from_name: 'RCM Automotive',
-    });
-  } catch (e: any) {
-    return { error: `We could not email your code just now. ${e?.message || ''}`.trim() };
-  }
+  const sent = await deliverEmail({
+    base44,
+    to: user.email,
+    subject: `Your RCM Flowmotive sign-in code: ${code}`,
+    html: buildBrandedHtml(content),
+    text: `Your RCM Flowmotive sign-in code is ${code}. It expires in ${CODE_EXPIRY_MINUTES} minutes and works once. If you didn't try to sign in, ignore this email and tell us.`,
+    fromName: 'RCM Automotive',
+  });
+  if (!sent.ok) return { error: `We could not email your code just now. ${sent.error || ''}`.trim() };
   return { sent: true, expires_at: expiresAt };
 }
 
