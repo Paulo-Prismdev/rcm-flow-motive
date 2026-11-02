@@ -64,6 +64,29 @@ const allDepartments = [
 
 
 
+/** Shown to a signed-in account that hasn't been given access to anything yet. */
+function NoAccessScreen({ email }) {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+      <div className="max-w-md w-full rounded-xl border border-border bg-card p-8 text-center shadow-sm">
+        <Shield className="w-10 h-10 mx-auto mb-4 text-muted-foreground" aria-hidden="true" />
+        <h1 className="text-lg font-semibold mb-2">Your account isn't set up yet</h1>
+        <p className="text-sm text-muted-foreground">
+          {email ? <>You're signed in as <span className="font-medium text-foreground">{email}</span>, but </> : 'Your account '}
+          hasn't been given access yet. Please contact RCM Automotive and we'll set it up.
+        </p>
+        <button
+          type="button"
+          onClick={() => base44.auth.logout()}
+          className="mt-6 inline-flex h-9 items-center justify-center rounded-md border border-input px-4 text-sm hover:bg-accent"
+        >
+          Sign out
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function Layout({ children, currentPageName }) {
   const location = useLocation();
   const [searchOpen, setSearchOpen] = useState(false);
@@ -98,7 +121,7 @@ export default function Layout({ children, currentPageName }) {
     queryKey: ['messages'],
     queryFn: () => base44.entities.Message.list('-created_date', 5000),
     refetchInterval: messagesOpen ? 5000 : 60000,
-    enabled: !!currentUser && (currentUser.user_type === 'internal' || currentUser.role === 'admin'),
+    enabled: !!currentUser && currentUser.user_type === 'internal',
     staleTime: 30000,
     retry: 1,
     retryDelay: 5000
@@ -120,9 +143,12 @@ export default function Layout({ children, currentPageName }) {
   }, [messages, currentUser]);
 
   const userRole = currentUser?.role;
-  const isSuperAdmin = userRole === 'super_admin';
-  const isAdmin = userRole === 'super_admin' || userRole === 'company_admin' || userRole === 'admin';
-  const isInternalUser = currentUser?.user_type === 'internal' || isAdmin;
+  // Who someone is decides which app they get: staff (user type internal) get this
+  // one, portal users get their portal. A role never makes anyone staff — external
+  // companies have their own admins — so admin roles only matter inside staff.
+  const isInternalUser = currentUser?.user_type === 'internal';
+  const isSuperAdmin = isInternalUser && userRole === 'super_admin';
+  const isAdmin = isInternalUser && (userRole === 'super_admin' || userRole === 'company_admin' || userRole === 'admin');
   const canManagePermissions = isAdmin || currentUser?.can_manage_permissions;
 
   const departments = allDepartments.filter((dept) => {
@@ -132,31 +158,41 @@ export default function Layout({ children, currentPageName }) {
     return userAccess.includes(dept.permission);
   });
 
-  // Repairer/referrer routing
-  if (currentUser?.user_type === 'bodyshop' && !isAdmin && currentPageName === 'RepairerPortal') {
+  // Nothing of the staff app is drawn until we know who is signed in.
+  if (!currentUser) {
+    return <PageLoader />;
+  }
+
+  // Repairer/referrer/client routing
+  if (currentUser.user_type === 'bodyshop' && currentPageName === 'RepairerPortal') {
     return <RepairerLayout>{children}</RepairerLayout>;
   }
-  if (currentUser?.user_type === 'bodyshop' && !isAdmin && currentPageName !== 'RepairerPortal') {
+  if (currentUser.user_type === 'bodyshop') {
     window.location.href = createPageUrl('RepairerPortal');
     return null;
   }
-  const isReferrerUser = (currentUser?.user_type === 'referrer' || currentUser?.linked_referrer_id) &&
-  !isAdmin && currentUser?.user_type !== 'internal';
+  const isReferrerUser = currentUser.user_type === 'referrer' || (!currentUser.user_type && currentUser.linked_referrer_id);
   if (isReferrerUser && currentPageName === 'ReferrerPortal') {
     return children;
   }
-  if (isReferrerUser && currentPageName !== 'ReferrerPortal') {
+  if (isReferrerUser) {
     window.location.href = createPageUrl('ReferrerPortal');
     return null;
   }
 
-  const isClientUser = currentUser?.user_type === 'client' && !isAdmin;
+  const isClientUser = currentUser.user_type === 'client';
   if (isClientUser && currentPageName === 'ClientPortal') {
     return children;
   }
-  if (isClientUser && currentPageName !== 'ClientPortal') {
+  if (isClientUser) {
     window.location.href = createPageUrl('ClientPortal');
     return null;
+  }
+
+  // Anyone who is neither staff nor a set-up portal user (a new account whose type
+  // hasn't been set yet, for example) sees no part of the app until staff set it up.
+  if (!isInternalUser) {
+    return <NoAccessScreen email={currentUser.email} />;
   }
 
   const userInitials = currentUser?.full_name?.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase() || '?';
