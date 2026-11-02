@@ -1,5 +1,5 @@
 {
-  "name": "ARTECH One",
+  "name": "RCM Flowmotive",
   "site": {
     "installCommand": "npm install",
     "buildCommand": "npm run build",
