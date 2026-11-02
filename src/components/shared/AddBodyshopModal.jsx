@@ -54,7 +54,8 @@ export default function AddBodyshopModal({ isOpen, onClose, onSuccess, initialNa
               finalData.longitude = result.longitude;
             }
           }
-        } catch (error) {
+        } catch {
+          // The repairer is saved without a map position; the nightly geocoding fills it in.
         }
       }
       
