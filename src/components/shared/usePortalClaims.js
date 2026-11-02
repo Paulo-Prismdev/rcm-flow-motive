@@ -35,5 +35,5 @@ export function useOpenClaimFromUrl(claims, openClaim) {
     const found = claims.find((c) => c.id === id);
     if (found) openClaim(found);
     navigate(location.pathname, { replace: true });
-  }, [location.search, claims]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [location.search, claims]);
 }
