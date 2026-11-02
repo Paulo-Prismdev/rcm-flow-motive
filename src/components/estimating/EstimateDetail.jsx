@@ -205,7 +205,6 @@ export default function EstimateDetail({ estimate, onClose, onUpdate, isInternal
   };
 
   const handleAIExtract = async (extractedData) => {
-    console.log('AI extracted data from attachment:', extractedData);
     
     const fields = Object.entries(extractedData)
       .filter(([_, value]) => value !== null && value !== undefined && value !== '')

@@ -70,7 +70,6 @@ export default function EngineeringForm({ job, onSubmit, onCancel }) {
   };
 
   const handleAIExtract = async (extractedData) => {
-    console.log('AI extracted engineering data:', extractedData);
     
     const fields = Object.entries(extractedData)
       .filter(([_, value]) => value !== null && value !== undefined && value !== '')

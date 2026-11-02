@@ -40,7 +40,6 @@ export default function ClaimBodyshopInfo({ bodyshopId }) {
     queryFn: async () => {
       try {
         const result = await base44.entities.Bodyshop.get(bodyshopId);
-        console.log('Bodyshop fetched:', result);
         return result;
       } catch (err) {
         console.error('Failed to fetch bodyshop:', err);
@@ -51,14 +50,11 @@ export default function ClaimBodyshopInfo({ bodyshopId }) {
     staleTime: 60000,
   });
 
-  console.log('ClaimBodyshopInfo render - bodyshopId:', bodyshopId, 'bodyshop:', bodyshop, 'isLoading:', isLoading, 'error:', error);
 
   if (!bodyshopId) {
-    console.log('No bodyshopId provided');
     return null;
   }
   if (isLoading) {
-    console.log('Still loading...');
     return (
       <div className="mt-3 p-3 rounded-lg border border-border">
         <div className="text-sm text-muted-foreground">Loading bodyshop details...</div>
@@ -74,7 +70,6 @@ export default function ClaimBodyshopInfo({ bodyshopId }) {
     );
   }
   if (!bodyshop) {
-    console.log('No bodyshop data returned');
     return (
       <div className="mt-3 p-3 rounded-lg border border-border">
         <div className="text-sm text-muted-foreground">No bodyshop data found</div>
@@ -82,7 +77,6 @@ export default function ClaimBodyshopInfo({ bodyshopId }) {
     );
   }
   
-  console.log('Rendering bodyshop:', bodyshop.name, bodyshop.email);
 
   const fullAddress = [bodyshop.address_line_1, bodyshop.address_line_2, bodyshop.town, bodyshop.county, bodyshop.postcode]
     .filter(Boolean)

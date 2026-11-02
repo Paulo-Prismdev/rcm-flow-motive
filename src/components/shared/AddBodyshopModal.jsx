@@ -35,13 +35,11 @@ export default function AddBodyshopModal({ isOpen, onClose, onSuccess, initialNa
 
   const createMutation = useMutation({
     mutationFn: async (data) => {
-      console.log("[AddBodyshopModal] createMutation starting with data:", data);
       
       let finalData = { ...data };
       
       // If lat/lng are missing but we have address info, try to geocode
       if ((!finalData.latitude || !finalData.longitude) && finalData.postcode) {
-        console.log("[AddBodyshopModal] Lat/lng missing, attempting geocode...");
         try {
           const addressToGeocode = [
             finalData.address_line_1,
@@ -54,20 +52,16 @@ export default function AddBodyshopModal({ isOpen, onClose, onSuccess, initialNa
             if (result && result.latitude && result.longitude) {
               finalData.latitude = result.latitude;
               finalData.longitude = result.longitude;
-              console.log("[AddBodyshopModal] Geocoded successfully:", result.latitude, result.longitude);
             }
           }
         } catch (error) {
-          console.log("[AddBodyshopModal] Geocoding failed, continuing without coordinates:", error);
         }
       }
       
       const newBodyshop = await createAndLog('Bodyshop', finalData, { label: 'repairer' });
-      console.log("[AddBodyshopModal] Bodyshop created successfully:", newBodyshop);
       return newBodyshop;
     },
     onSuccess: (newBodyshop) => {
-      console.log("[AddBodyshopModal] onSuccess called with:", newBodyshop);
       queryClient.invalidateQueries({ queryKey: ['bodyshops'] });
       onSuccess(newBodyshop);
       handleClose();
@@ -92,26 +86,21 @@ export default function AddBodyshopModal({ isOpen, onClose, onSuccess, initialNa
   };
 
   const handleSubmit = (e) => {
-    console.log("[AddBodyshopModal] handleSubmit called");
     if (e) {
       e.preventDefault();
       e.stopPropagation();
     }
     
-    console.log("[AddBodyshopModal] Validating form data:", formData);
     
     if (!formData.name || !formData.contact_name || !formData.phone || !formData.email) {
-      console.log("[AddBodyshopModal] Validation failed");
       warn('Please fill in all required fields: Name, Contact Name, Phone, Email.');
       return;
     }
 
-    console.log("[AddBodyshopModal] Validation passed, calling mutation");
     createMutation.mutate(formData);
   };
 
   const handleClose = () => {
-    console.log("[AddBodyshopModal] handleClose called");
     setFormData({
       name: '',
       contact_name: '',
@@ -129,11 +118,9 @@ export default function AddBodyshopModal({ isOpen, onClose, onSuccess, initialNa
   };
 
   if (!isOpen) {
-    console.log("[AddBodyshopModal] Not rendering - isOpen is false");
     return null;
   }
 
-  console.log("[AddBodyshopModal] Rendering modal");
 
   return (
     <div data-overlay-dismiss 

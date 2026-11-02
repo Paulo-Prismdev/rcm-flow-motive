@@ -100,7 +100,6 @@ export default function EstimateForm({ estimate, onSubmit, onCancel }) {
   };
 
   const handleAIExtract = async (extractedData) => {
-    console.log('AI extracted estimate data:', extractedData);
     
     const fields = Object.entries(extractedData)
       .filter(([_, value]) => value !== null && value !== undefined && value !== '')

@@ -128,10 +128,6 @@ export default function PartDetail({ part, onClose, onUpdate, isInternalUser = t
   });
 
   // Debug logging
-  console.log('Part manufacturer:', partManufacturer);
-  console.log('All suppliers:', allSuppliers.length);
-  console.log('Linked suppliers found:', linkedSuppliers.length);
-  console.log('Linked suppliers:', linkedSuppliers.map(s => s.name));
 
   // Archive Mutation
   const archiveMutation = useMutation({
