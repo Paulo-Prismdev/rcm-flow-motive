@@ -35,7 +35,7 @@ export default function TasksPage() {
     queryFn: () => base44.auth.me(),
   });
 
-  const isInternalUser = currentUser?.user_type === 'internal' || currentUser?.role === 'admin';
+  const isInternalUser = currentUser?.user_type === 'internal';
 
   const { data: tasks = [], isLoading } = useQuery({
     queryKey: ['allTasks'],

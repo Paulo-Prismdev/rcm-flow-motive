@@ -52,7 +52,7 @@ export default function Dashboard() {
     staleTime: 120000,
   });
 
-  const isAdmin = currentUser?.role === 'super_admin' || currentUser?.role === 'company_admin' || currentUser?.role === 'admin';
+  const isAdmin = currentUser?.user_type === 'internal' && ['super_admin', 'company_admin', 'admin'].includes(currentUser?.role);
 
   React.useEffect(() => {
     if (isAdmin && persona === 'handler') setPersona('manager');

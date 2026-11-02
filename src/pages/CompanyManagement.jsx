@@ -394,7 +394,7 @@ export default function CompanyManagement() {
   const queryClient = useQueryClient();
 
   const { data: currentUser } = useQuery({ queryKey: ["currentUser"], queryFn: () => base44.auth.me() });
-  const isAdmin = ["admin", "super_admin", "company_admin"].includes(currentUser?.role);
+  const isAdmin = (currentUser?.user_type === 'internal' && ["admin", "super_admin", "company_admin"].includes(currentUser?.role));
 
   const { data: companies = [], isLoading } = useQuery({
     queryKey: ["companies"],

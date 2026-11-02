@@ -156,7 +156,7 @@ export default function UserProfile() {
     return <div className="flex items-center justify-center h-full"><Loader className="w-8 h-8 animate-spin text-primary" /></div>;
   }
 
-  const isInternalUser = currentUser?.user_type === 'internal' || currentUser?.role === 'admin';
+  const isInternalUser = currentUser?.user_type === 'internal';
   const avatarSrc = isEditing ? formData.profile_picture_url : currentUser.profile_picture_url;
 
   return (

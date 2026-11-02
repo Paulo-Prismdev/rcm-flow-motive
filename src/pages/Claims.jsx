@@ -185,8 +185,8 @@ export default function ClaimsPage() {
   const { allStatuses: statusConfigs, claimStatuses } = useStatusConfigs();
 
   const { data: currentUser } = useQuery({ queryKey: ['currentUser'], queryFn: () => base44.auth.me() });
-  const isInternalUser = currentUser?.user_type === 'internal' || currentUser?.role === 'admin';
-  const isAdminUser = ['admin', 'super_admin', 'company_admin'].includes(currentUser?.role);
+  const isInternalUser = currentUser?.user_type === 'internal';
+  const isAdminUser = (currentUser?.user_type === 'internal' && ['admin', 'super_admin', 'company_admin'].includes(currentUser?.role));
   const MANDATORY_FIELDS = ['client_name', 'make_model', 'loss_date', 'referrer'];
   const savedFields = currentUser?.claim_card_fields || [];
   const userCardFields = [...MANDATORY_FIELDS, ...savedFields.filter(f => !MANDATORY_FIELDS.includes(f))];

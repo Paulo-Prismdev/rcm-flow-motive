@@ -81,7 +81,7 @@ export default function PdfTemplateManager() {
 
   const canEditTemplate = (template) => {
     if (!currentUser) return false;
-    if (currentUser.role === 'admin') return true;
+    if (currentUser.user_type === 'internal' && currentUser.role === 'admin') return true;
     if (template.created_by === currentUser.email) return true;
     if (template.can_edit_users?.includes(currentUser.email)) return true;
     return false;
@@ -89,7 +89,7 @@ export default function PdfTemplateManager() {
 
   const canDeleteTemplate = (template) => {
     if (!currentUser) return false;
-    if (currentUser.role === 'admin') return true;
+    if (currentUser.user_type === 'internal' && currentUser.role === 'admin') return true;
     if (template.created_by === currentUser.email) return true;
     return false;
   };

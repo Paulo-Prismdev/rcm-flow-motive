@@ -71,8 +71,8 @@ export default function Settings() {
     queryFn: () => base44.auth.me(),
   });
 
-  const isAdmin = ['admin', 'super_admin', 'company_admin'].includes(currentUser?.role);
-  const canManage = isAdmin || currentUser?.can_manage_permissions;
+  const isAdmin = (currentUser?.user_type === 'internal' && ['admin', 'super_admin', 'company_admin'].includes(currentUser?.role));
+  const canManage = isAdmin || (currentUser?.user_type === 'internal' && currentUser?.can_manage_permissions);
 
   const getVisibleSections = () => {
     return SETTINGS_SECTIONS.map(section => ({

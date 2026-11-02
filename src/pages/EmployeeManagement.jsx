@@ -44,8 +44,8 @@ export default function EmployeeManagement() {
     queryFn: () => base44.auth.me(),
   });
 
-  const canManage = currentUser?.role === 'admin' || currentUser?.can_manage_permissions;
-  const isAdmin = currentUser?.role === 'admin';
+  const canManage = currentUser?.user_type === 'internal' && (currentUser?.role === 'admin' || currentUser?.can_manage_permissions);
+  const isAdmin = currentUser?.user_type === 'internal' && currentUser?.role === 'admin';
 
   const { data: users = [] } = useQuery({
     queryKey: ['users'],

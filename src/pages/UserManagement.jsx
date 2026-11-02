@@ -49,7 +49,7 @@ export default function UserManagement() {
     },
   });
 
-  const isAdmin = ["admin", "super_admin", "company_admin"].includes(currentUser?.role);
+  const isAdmin = (currentUser?.user_type === 'internal' && ["admin", "super_admin", "company_admin"].includes(currentUser?.role));
 
   const filteredUsers = useMemo(() => {
     if (filterType === "all") return users;

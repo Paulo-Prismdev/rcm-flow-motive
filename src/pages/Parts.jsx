@@ -26,7 +26,7 @@ export default function Parts() {
   });
 
   // Determine if the current user is an internal user or admin
-  const isInternalUser = currentUser?.user_type === 'internal' || currentUser?.role === 'admin';
+  const isInternalUser = currentUser?.user_type === 'internal';
 
   const { data: parts = [], isLoading } = useQuery({
     queryKey: ['parts', currentUser?.id],

@@ -140,7 +140,7 @@ export default function FeedbackHub() {
   const repairerFeedback = enrichedFeedback.filter(f => f.user_type === 'bodyshop');
   const referrerFeedback = enrichedFeedback.filter(f => f.user_type === 'referrer');
 
-  const isInternalUser = currentUser?.user_type === 'internal' || currentUser?.role === 'admin';
+  const isInternalUser = currentUser?.user_type === 'internal';
 
   if (!isInternalUser) {
     return (

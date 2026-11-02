@@ -26,7 +26,7 @@ export default function Engineering() {
   });
 
   // Determine if the current user is an internal user or an admin
-  const isInternalUser = currentUser?.user_type === 'internal' || currentUser?.role === 'admin';
+  const isInternalUser = currentUser?.user_type === 'internal';
 
   const { data: engineering = [], isLoading } = useQuery({
     queryKey: ['engineering', currentUser?.id],

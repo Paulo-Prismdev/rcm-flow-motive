@@ -25,7 +25,7 @@ export default function Estimating() {
     queryFn: () => base44.auth.me(),
   });
 
-  const isInternalUser = currentUser?.user_type === 'internal' || currentUser?.role === 'admin';
+  const isInternalUser = currentUser?.user_type === 'internal';
 
   const { data: estimates = [], isLoading } = useQuery({
     queryKey: ['estimates', currentUser?.id],
