@@ -2,7 +2,7 @@ import React, { useMemo, useState, useEffect } from 'react';
 import { FileText, TrendingUp, Clock, CheckCircle } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
-import { getReferrerClaims } from '@/functions/getReferrerClaims';
+import { usePortalClaims } from '@/components/shared/usePortalClaims';
 import ClaimStatusBadges from '@/components/shared/ClaimStatusBadges';
 import { isCancelledClaim, isClaimClosed, isClaimClosedForLists } from '@/components/shared/claimOutcome';
 
@@ -24,14 +24,8 @@ export default function ReferrerDashboard() {
     return () => window.removeEventListener('referrer-nav', handleNav);
   }, []);
 
-  const { data: claims = [] } = useQuery({
-    queryKey: ['referrerClaims', currentUser?.linked_referrer_id, currentUser?.company_id],
-    queryFn: async () => {
-      const res = await getReferrerClaims({});
-      return res.data?.claims || [];
-    },
+  const { data: claims = [] } = usePortalClaims({
     enabled: !!currentUser && !!(currentUser?.linked_referrer_id || currentUser?.company_id),
-    staleTime: 0,
   });
 
   // Calculate stats

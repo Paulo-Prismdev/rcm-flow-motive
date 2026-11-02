@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getClientClaims } from '@/functions/getClientClaims';
+import { usePortalClaims, useOpenClaimFromUrl } from '@/components/shared/usePortalClaims';
 import {
   ChevronRight,
   ChevronDown,
@@ -53,15 +53,8 @@ export default function ClientPortal() {
 
   const companyId = currentUser?.company_id;
 
-  const { data: claims = [], isLoading: claimsLoading } = useQuery({
-    queryKey: ['clientClaimsFn', companyId],
-    queryFn: async () => {
-      const res = await getClientClaims({});
-      return res.data?.claims || [];
-    },
-    enabled: !!companyId,
-    staleTime: 0,
-  });
+  const { data: claims = [], isLoading: claimsLoading } = usePortalClaims({ enabled: !!companyId });
+  useOpenClaimFromUrl(claims, setViewingClaim);
 
   const availableStatuses = useMemo(() => JOURNEY_GROUP_STATUSES, []);
 

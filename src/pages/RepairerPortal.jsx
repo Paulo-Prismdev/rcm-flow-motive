@@ -10,6 +10,7 @@ import RepairerPartsTab from '@/components/repairer/RepairerPartsTab';
 import RepairerProductsTab from '@/components/repairer/RepairerProductsTab';
 import TyreRequestForm from '@/components/repairer/TyreRequestForm';
 import ReferrerClaimDetail from '@/components/referrer/ReferrerClaimDetail';
+import { usePortalClaims } from '@/components/shared/usePortalClaims';
 
 const TABS = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -40,11 +41,7 @@ export default function RepairerPortal() {
   });
 
   // Use server-side filtering instead of fetching everything
-  const { data: claims = [], isLoading: claimsLoading } = useQuery({
-    queryKey: ['repairerClaims', bodyshopId],
-    queryFn: () => base44.entities.Claim.filter({ bodyshop_id: bodyshopId, repairer_accepted: true }, '-created_date'),
-    enabled: !!bodyshopId,
-  });
+  const { data: claims = [], isLoading: claimsLoading } = usePortalClaims({ view: 'accepted', enabled: !!bodyshopId });
 
   const { data: estimates = [], isLoading: estimatesLoading } = useQuery({
     queryKey: ['repairerEstimates', bodyshopId],
@@ -59,11 +56,7 @@ export default function RepairerPortal() {
   });
 
   // Fetch claims for tyre form dropdown (only accepted claims)
-  const { data: allClaims = [] } = useQuery({
-    queryKey: ['repairerAllClaims', bodyshopId],
-    queryFn: () => base44.entities.Claim.filter({ bodyshop_id: bodyshopId, repairer_accepted: true }, '-created_date'),
-    enabled: !!bodyshopId,
-  });
+  const allClaims = claims;
 
   if (!currentUser) {
     return (

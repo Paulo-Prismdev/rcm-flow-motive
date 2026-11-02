@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { FileText, TrendingUp, Clock, CheckCircle } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
-import { getClientClaims } from '@/functions/getClientClaims';
+import { usePortalClaims } from '@/components/shared/usePortalClaims';
 import ClaimStatusBadges from '@/components/shared/ClaimStatusBadges';
 import { isCancelledClaim, isClaimClosed, isClaimClosedForLists } from '@/components/shared/claimOutcome';
 
@@ -23,15 +23,7 @@ export default function ClientDashboard() {
     return () => window.removeEventListener('client-nav', handleNav);
   }, []);
 
-  const { data: claims = [] } = useQuery({
-    queryKey: ['clientClaimsFn', currentUser?.company_id],
-    queryFn: async () => {
-      const res = await getClientClaims({});
-      return res.data?.claims || [];
-    },
-    enabled: !!currentUser?.company_id,
-    staleTime: 0,
-  });
+  const { data: claims = [] } = usePortalClaims({ enabled: !!currentUser?.company_id });
 
   const stats = React.useMemo(() => {
     const total = claims.length;

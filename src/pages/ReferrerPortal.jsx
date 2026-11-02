@@ -21,7 +21,7 @@ import ReferrerDashboard from '../components/referrer/ReferrerDashboard';
 import FeedbackModal from '../components/shared/FeedbackModal';
 import ClaimCardFieldsModal from '../components/claims/ClaimCardFieldsModal';
 import ClaimTypeTabs from '../components/shared/ClaimTypeTabs';
-import { getReferrerClaims } from '@/functions/getReferrerClaims';
+import { usePortalClaims, useOpenClaimFromUrl } from '@/components/shared/usePortalClaims';
 
 export default function ReferrerPortal() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -78,15 +78,8 @@ export default function ReferrerPortal() {
     enabled: !!companyId && !referrerId,
   });
 
-  const { data: claims = [], isLoading: claimsLoading } = useQuery({
-    queryKey: ['referrerClaims', referrerId, companyId],
-    queryFn: async () => {
-      const res = await getReferrerClaims({});
-      return res.data?.claims || [];
-    },
-    enabled: isLinked,
-    staleTime: 0,
-  });
+  const { data: claims = [], isLoading: claimsLoading } = usePortalClaims({ enabled: isLinked });
+  useOpenClaimFromUrl(claims, setViewingClaim);
 
   const availableStatuses = useMemo(() => JOURNEY_GROUP_STATUSES, []);
 
