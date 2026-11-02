@@ -35,6 +35,7 @@ import {
 import PurchaseOrderUploadNotice from '@/components/claims/PurchaseOrderUploadNotice';
 import { fetchSourceSnippets } from '@/components/claims/financials/invoiceReview';
 
+import { resolveFileUrl } from '@/lib/privateFiles';
 const isAuthority = (itemKey) => String(itemKey || '').includes('authority');
 
 /**
@@ -97,7 +98,8 @@ export default function DocumentReviewModal({
       try {
         const result = await base44.integrations.Core.InvokeLLM({
           prompt: buildDocumentPrompt({ itemKey, item, claim }),
-          file_urls: [fileUrl],
+          // A private file is read through a short-lived signed link (see @/lib/privateFiles).
+          file_urls: [await resolveFileUrl(fileUrl, { purpose: 'read' })],
           response_json_schema: documentExtractionSchema(itemKey),
         });
         if (cancelled) return;

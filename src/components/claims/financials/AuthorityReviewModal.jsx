@@ -28,6 +28,7 @@ import { fetchSourceSnippets, snippetsFromExtraction } from './invoiceReview';
 import { authorityWorkings, claimInvoicedSplit, compareToAuthority, finalInvoiceTotal } from './invoiceAuthorityCheck';
 import { finalInvoiceLabel } from '@/components/shared/invoiceChecklist';
 
+import { resolveFileUrl } from '@/lib/privateFiles';
 /**
  * The check before an authority is recorded: the document on the left, the figures
  * read off it on the right — the amount and the registration it covers, and the
@@ -78,7 +79,8 @@ export default function AuthorityReviewModal({
       try {
         const result = await base44.integrations.Core.InvokeLLM({
           prompt: buildAuthorityPrompt({ item, claim }),
-          file_urls: [fileUrl],
+          // A private file is read through a short-lived signed link (see @/lib/privateFiles).
+          file_urls: [await resolveFileUrl(fileUrl, { purpose: 'read' })],
           response_json_schema: AUTHORITY_EXTRACTION_SCHEMA,
         });
         if (cancelled) return;

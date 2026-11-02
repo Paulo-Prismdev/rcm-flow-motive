@@ -8,6 +8,7 @@ import {
 } from '@/components/shared/invoiceChecklist';
 import { RCM_INVOICE_ADDRESS } from './referrerRequest';
 
+import { resolveFileUrl } from '@/lib/privateFiles';
 /**
  * Reading an invoice off the document the user uploaded: the figures we ask the
  * AI for, the prompts and schemas, and the fail-safes that run over what it
@@ -138,7 +139,8 @@ export async function fetchSourceSnippets(base44, fileUrl, figures, fields = INV
 
   const result = await base44.integrations.Core.InvokeLLM({
     prompt: `Look at this document. For each figure below, find the exact text in the document where that value appears. Return a JSON object mapping each figure key to a short snippet of the document text (about 10 to 30 words) showing where the value was found. Use an empty string for figures you cannot find.\n\nFigures:\n${found}`,
-    file_urls: [fileUrl],
+    // A private file is read through a short-lived signed link (see @/lib/privateFiles).
+          file_urls: [await resolveFileUrl(fileUrl, { purpose: 'read' })],
     response_json_schema: {
       type: 'object',
       properties: figureMapProperties(fields),

@@ -4,6 +4,7 @@ import { X, Sparkles, ArrowRight, ArrowLeft, Check, Link as LinkIcon, FileText, 
 import { base44 } from '@/api/base44Client';
 import HighlightableDocumentViewer from './HighlightableDocumentViewer';
 
+import { resolveFileUrl } from '@/lib/privateFiles';
 const LINKED_ENTITY_FIELDS = {
   client: ['client_name', 'client_phone', 'client_email', 'client_address_line_1', 'client_address_line_2', 'client_town', 'client_county', 'client_postcode'],
   referrer: ['referrer', 'referrer_email'],
@@ -68,15 +69,16 @@ export default function AIExtractConfirmDialog({ isOpen, onClose, onConfirm, ext
     if (!fieldsList) return;
 
     setIsFetchingSnippets(true);
-    base44.integrations.Core.InvokeLLM({
+    // A private file is read through a short-lived signed link (see @/lib/privateFiles).
+    resolveFileUrl(fileUrl, { purpose: 'read' }).then((readableUrl) => base44.integrations.Core.InvokeLLM({
       prompt: `Look at this document. For each field below, find the exact text in the document where that value appears. Return a JSON object mapping field names to short text snippets (the surrounding text, about 10-30 words, showing where the value was found in the document). Include a few words before and after the value for context. If you cannot find where a value came from in the document, omit that field.\n\nFields to find:\n${fieldsList}`,
-      file_urls: [fileUrl],
+      file_urls: [readableUrl],
       response_json_schema: {
         type: "object",
         properties: {},
         additionalProperties: { type: "string" }
       }
-    }).then(result => {
+    })).then(result => {
       setFetchedSnippets(result || {});
     }).catch(err => {
       console.error('Failed to fetch source snippets:', err);

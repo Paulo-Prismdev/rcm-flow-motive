@@ -39,6 +39,7 @@ import {
 } from './invoiceAuthorityCheck';
 import AddressedToClientField from './AddressedToClientField';
 
+import { resolveFileUrl } from '@/lib/privateFiles';
 /**
  * The check before an invoice is recorded: the document on the left, the figures
  * the AI read off it on the right, each one highlighted where it was found.
@@ -123,7 +124,8 @@ export default function InvoiceReviewModal({
       try {
         const result = await base44.integrations.Core.InvokeLLM({
           prompt: buildExtractionPrompt({ item, claim, party, fields }),
-          file_urls: [fileUrl],
+          // A private file is read through a short-lived signed link (see @/lib/privateFiles).
+          file_urls: [await resolveFileUrl(fileUrl, { purpose: 'read' })],
           response_json_schema: extractionSchema(fields),
         });
         if (cancelled) return;
