@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { appParams } from '@/lib/app-params';
 import { toast } from '@/components/ui/use-toast';
+import { toPrivateRef } from '@/lib/privateFiles';
 
 const MAX_FILE_SIZE_MB = 25;
 const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
@@ -18,8 +19,13 @@ function genId() {
 /**
  * Uploads a file using XMLHttpRequest to get real upload progress events.
  * Replaces the base44 SDK's axios-based call (which can't report progress).
+ *
+ * With `isPrivate`, the file goes to private storage: it has no public address, and
+ * what comes back is a private reference (see @/lib/privateFiles) that opens only
+ * through a short-lived signed link, issued after a permission check and logged.
+ * Either way the caller gets back one string to store.
  */
-function uploadFileWithProgress(file, onProgress) {
+function uploadFileWithProgress(file, onProgress, isPrivate = false) {
   return new Promise((resolve, reject) => {
     const { serverUrl, appId, token } = appParams;
     const authToken = token || localStorage.getItem('base44_access_token');
@@ -28,7 +34,7 @@ function uploadFileWithProgress(file, onProgress) {
     formData.append('file', file, file.name);
 
     const xhr = new XMLHttpRequest();
-    xhr.open('POST', `${serverUrl}/api/apps/${appId}/integration-endpoints/Core/UploadFile`);
+    xhr.open('POST', `${serverUrl}/api/apps/${appId}/integration-endpoints/Core/${isPrivate ? 'UploadPrivateFile' : 'UploadFile'}`);
     xhr.setRequestHeader('X-App-Id', String(appId));
     if (authToken) {
       xhr.setRequestHeader('Authorization', `Bearer ${authToken}`);
@@ -43,7 +49,13 @@ function uploadFileWithProgress(file, onProgress) {
     xhr.onload = () => {
       if (xhr.status >= 200 && xhr.status < 300) {
         try {
-          resolve(JSON.parse(xhr.responseText));
+          const data = JSON.parse(xhr.responseText);
+          if (isPrivate) {
+            if (!data?.file_uri) throw new Error('No file reference returned');
+            resolve({ file_url: toPrivateRef(data.file_uri, file.name), file_uri: data.file_uri });
+          } else {
+            resolve(data);
+          }
         } catch {
           reject(new Error('Invalid response from server'));
         }
@@ -65,7 +77,7 @@ function uploadFileWithProgress(file, onProgress) {
   });
 }
 
-export function useFileUpload({ onComplete, accept = 'all', label = 'file' } = {}) {
+export function useFileUpload({ onComplete, accept = 'all', label = 'file', private: isPrivate = false } = {}) {
   const [uploads, setUploads] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
 
@@ -110,7 +122,7 @@ export function useFileUpload({ onComplete, accept = 'all', label = 'file' } = {
     try {
       const result = await uploadFileWithProgress(file, (progress) => {
         updateUpload(uploadId, { progress });
-      });
+      }, isPrivate);
       updateUpload(uploadId, { status: 'done', progress: 100, url: result.file_url });
       return result.file_url;
     } catch (error) {
@@ -123,7 +135,7 @@ export function useFileUpload({ onComplete, accept = 'all', label = 'file' } = {
       });
       return null;
     }
-  }, [updateUpload, label]);
+  }, [updateUpload, label, isPrivate]);
 
   const retryUpload = useCallback(async (uploadId) => {
     const uploadEntry = uploads.find(u => u.id === uploadId);
@@ -134,7 +146,7 @@ export function useFileUpload({ onComplete, accept = 'all', label = 'file' } = {
     try {
       const result = await uploadFileWithProgress(uploadEntry.file, (progress) => {
         updateUpload(uploadId, { progress });
-      });
+      }, isPrivate);
       updateUpload(uploadId, { status: 'done', progress: 100, url: result.file_url, error: undefined });
       toast({
         title: 'Upload complete',
@@ -151,7 +163,7 @@ export function useFileUpload({ onComplete, accept = 'all', label = 'file' } = {
       });
       return null;
     }
-  }, [uploads, updateUpload]);
+  }, [uploads, updateUpload, isPrivate]);
 
   const uploadFiles = useCallback(async (files) => {
     if (!files || files.length === 0) return [];
