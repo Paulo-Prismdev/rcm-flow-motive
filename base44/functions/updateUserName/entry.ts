@@ -5,7 +5,8 @@ Deno.serve(async (req) => {
         const base44 = createClientFromRequest(req);
         const user = await base44.auth.me();
 
-        if (!user || !['admin', 'super_admin', 'company_admin'].includes(user.role)) {
+        // Staff admins only: an external company's admin can't rename anyone.
+        if (!user || user.user_type !== 'internal' || !['admin', 'super_admin', 'company_admin'].includes(user.role)) {
             return Response.json({ error: 'Forbidden' }, { status: 403 });
         }
 
@@ -19,6 +20,7 @@ Deno.serve(async (req) => {
         await base44.asServiceRole.entities.User.update(user_id, { display_name: full_name.trim() });
         return Response.json({ success: true });
     } catch (error) {
-        return Response.json({ error: error.message }, { status: 500 });
+        console.error('updateUserName error:', error?.message);
+        return Response.json({ error: 'Could not update the name' }, { status: 500 });
     }
 });
