@@ -20,6 +20,7 @@ import DragDropOverlay from '../shared/DragDropOverlay';
 import EmailComposerModal from '../shared/EmailComposerModal';
 import SupplierTrackingSection from './SupplierTrackingSection';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { deleteAndLog } from "@/components/shared/useActivityLogger";
 
 
 const EditableSection = ({ title, icon: Icon, claim, onUpdate, children, EditComponent, canEdit = true }) => {
@@ -148,7 +149,7 @@ export default function PartDetail({ part, onClose, onUpdate, isInternalUser = t
 
   // Delete Mutation
   const deleteMutation = useMutation({
-    mutationFn: () => base44.entities.Part.delete(part.id),
+    mutationFn: () => deleteAndLog("Part", part.id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['parts'] });
       onClose(); // Close the detail view after successful deletion

@@ -15,6 +15,7 @@ import {
 import DirectoryShell from "@/components/shared/DirectoryShell";
 import ReferrerLinkedUsers from "@/components/settings/ReferrerLinkedUsers";
 import { syncReferrerVat } from "@/components/shared/syncReferrerVat";
+import { deleteAndLog } from "@/components/shared/useActivityLogger";
 
 const ALL_PORTAL_SECTIONS = ["Claims", "Parts"];
 
@@ -405,7 +406,7 @@ export default function CompanyManagement() {
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ["companies"] });
 
   const deleteMutation = useMutation({
-    mutationFn: (id) => base44.entities.Company.delete(id),
+    mutationFn: (id) => deleteAndLog("Company", id),
     onSuccess: () => { invalidate(); toast.success("Referrer deleted"); },
   });
 

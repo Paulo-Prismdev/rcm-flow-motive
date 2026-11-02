@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Plus, ListTodo, CheckCircle2 } from "lucide-react";
 import TaskModal from './TaskModal';
 import TaskCard from './TaskCard';
+import { deleteAndLog } from "@/components/shared/useActivityLogger";
 
 export default function ClaimTasksSection({ claimId, claimJobNumber, claimReg }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -71,7 +72,7 @@ export default function ClaimTasksSection({ claimId, claimJobNumber, claimReg })
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id) => base44.entities.Task.delete(id),
+    mutationFn: (id) => deleteAndLog("Task", id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['claimTasks', claimId] });
     },

@@ -6,6 +6,7 @@ import DirectoryShell from "@/components/shared/DirectoryShell";
 import { isClientTagged, isThirdPartyTagged } from "@/components/shared/directoryTags";
 import DirectoryTagPills from "./DirectoryTagPills";
 import DirectoryDetailModal from "./DirectoryDetailModal";
+import { deleteAndLog } from "@/components/shared/useActivityLogger";
 
 /**
  * The one directory: clients and third parties together, each record tagged with
@@ -59,7 +60,7 @@ export default function DirectoryTab() {
   };
 
   const deleteMutation = useMutation({
-    mutationFn: (id) => base44.entities.Client.delete(id),
+    mutationFn: (id) => deleteAndLog("Client", id, { label: "directory contact" }),
     onSuccess: () => invalidate(),
   });
 

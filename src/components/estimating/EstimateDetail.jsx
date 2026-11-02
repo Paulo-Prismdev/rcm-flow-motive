@@ -22,6 +22,7 @@ import NotesModal from '../shared/NotesModal';
 import FileAttachmentModal from '../shared/FileAttachmentModal';
 // New import for PartsModal
 import PartsModal from '../shared/PartsModal'; // Assuming PartsModal exists as it's being opened
+import { deleteAndLog } from "@/components/shared/useActivityLogger";
 
 
 // New EditableSection component
@@ -131,7 +132,7 @@ export default function EstimateDetail({ estimate, onClose, onUpdate, isInternal
   });
 
   const deleteMutation = useMutation({
-    mutationFn: () => base44.entities.Estimate.delete(estimate.id),
+    mutationFn: () => deleteAndLog("Estimate", estimate.id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['estimates'] });
       onClose();

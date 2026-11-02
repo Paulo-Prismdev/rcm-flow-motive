@@ -5,6 +5,7 @@ import { Trash2, Phone, Mail, Building2, Loader2 } from "lucide-react";
 import DirectoryShell from "../shared/DirectoryShell";
 import AddInsurerModal from "../shared/AddInsurerModal";
 import InsurerDetailModal from "../shared/InsurerDetailModal";
+import { deleteAndLog } from "@/components/shared/useActivityLogger";
 
 export default function InsurerDirectoryTab() {
   const queryClient = useQueryClient();
@@ -21,7 +22,7 @@ export default function InsurerDirectoryTab() {
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ["insurers"] });
 
   const deleteMutation = useMutation({
-    mutationFn: (id) => base44.entities.Insurer.delete(id),
+    mutationFn: (id) => deleteAndLog("Insurer", id),
     onSuccess: () => invalidate(),
   });
 

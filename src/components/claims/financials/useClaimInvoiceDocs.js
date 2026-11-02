@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { useFileUpload } from '@/hooks/useFileUpload';
 import { invoiceCopyMap, invoiceDocKey, sameInvoiceCopies } from '@/components/shared/invoiceChecklist';
+import { deleteAndLog } from "@/components/shared/useActivityLogger";
 
 /**
  * The files filed against a claim's invoices. They are stored as ClaimDocument
@@ -151,7 +152,7 @@ export default function useClaimInvoiceDocs(claim, currentUser) {
 
   /** Removes one filed file and refreshes what the claim shows. */
   const removeFile = async (docId) => {
-    await base44.entities.ClaimDocument.delete(docId);
+    await deleteAndLog("ClaimDocument", docId, { label: "document" });
     refresh();
   };
 

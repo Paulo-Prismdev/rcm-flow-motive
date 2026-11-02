@@ -198,7 +198,7 @@ import { ListTodo, History, Timer } from "lucide-react";
 import ActivityLogSection from '../shared/ActivityLogSection';
 import TimeLogsModal from '../shared/TimeLogsModal';
 import ActivityLogModal from '../shared/ActivityLogModal';
-import { logActivity, logChanges } from '../shared/useActivityLogger';
+import { logActivity, logChanges, deleteAndLog } from '../shared/useActivityLogger';
 
 const SECTION_FIELDS = {
   status: ['reg', 'claim_type', 'loss_date', 'vehicle_use', 'incident_location', 'circumstances'],
@@ -541,7 +541,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
       } catch (e) {
         throw new Error('Claim not found - it may have already been deleted');
       }
-      return base44.entities.Claim.delete(claim.id);
+      return deleteAndLog("Claim", claim.id);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['claims'] });

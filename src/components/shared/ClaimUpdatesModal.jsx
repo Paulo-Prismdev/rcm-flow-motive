@@ -14,6 +14,7 @@ import { isUpdateTrackingClosed } from "@/components/shared/claimStatusUpdate";
 import { withTotalLossMarker } from "@/components/shared/totalLoss";
 import { recomputeUpdateTimers } from "@/components/shared/recomputeUpdateTimers";
 import { createTagNotifications } from "@/components/shared/createTagNotifications";
+import { deleteAndLog } from "@/components/shared/useActivityLogger";
 
 const UPDATE_TYPES = [
   "Status Change", "Client Communication", "Bodyshop Communication", "Insurer Communication",
@@ -215,7 +216,7 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
 
   const deleteUpdateMutation = useMutation({
     mutationFn: async (updateId) => {
-      return await base44.entities.ClaimUpdate.delete(updateId);
+      return await deleteAndLog("ClaimUpdate", updateId, { label: "claim update" });
     },
     onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ['claimUpdates', claimId] });

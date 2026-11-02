@@ -9,6 +9,7 @@ import { format } from "date-fns";
 import EstimateForm from "../components/estimating/EstimateForm";
 import EstimateDetail from "../components/estimating/EstimateDetail";
 import { fetchFilteredEntities } from '../components/shared/accessControl';
+import { deleteAndLog } from "@/components/shared/useActivityLogger";
 
 export default function Estimating() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -70,7 +71,7 @@ export default function Estimating() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id) => base44.entities.Estimate.delete(id),
+    mutationFn: (id) => deleteAndLog("Estimate", id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['estimates'] });
       setSelectedEstimate(null); // Close the detail view after deletion

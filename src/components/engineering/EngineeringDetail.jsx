@@ -16,6 +16,7 @@ import { base44 } from '@/api/base44Client';
 import EngineeringJobForm from './EngineeringJobForm';
 import EngineeringClientForm from './EngineeringClientForm';
 import EngineeringReportForm from './EngineeringReportForm';
+import { deleteAndLog } from "@/components/shared/useActivityLogger";
 
 const EditableSection = ({ title, icon: Icon, claim, onUpdate, children, EditComponent, canEdit = true }) => {
     const [isEditing, setIsEditing] = useState(false);
@@ -101,7 +102,7 @@ export default function EngineeringDetail({ job, onClose, onUpdate, isInternalUs
   });
 
   const deleteMutation = useMutation({
-    mutationFn: () => base44.entities.Engineering.delete(job.id),
+    mutationFn: () => deleteAndLog("Engineering", job.id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['engineering'] });
       onClose();

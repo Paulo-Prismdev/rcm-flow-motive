@@ -14,6 +14,7 @@ import SecureFileLink from '@/components/shared/SecureFileLink';
 import { fileNameOf, isPrivateRef } from '@/lib/privateFiles';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
+import { deleteAndLog } from "@/components/shared/useActivityLogger";
 
 // Private files have no public address, so they show as a file icon rather than a
 // thumbnail: opening one goes through a signed link and is logged.
@@ -124,7 +125,7 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
   });
 
   const deleteNoteMutation = useMutation({
-    mutationFn: async (noteId) => await base44.entities.Note.delete(noteId),
+    mutationFn: async (noteId) => await deleteAndLog("Note", noteId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notes', parentId, parentType] });
       toast({ title: 'Internal update deleted' });

@@ -18,6 +18,7 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import TaskCard from '../components/tasks/TaskCard';
 import TaskModal from '../components/tasks/TaskModal';
+import { deleteAndLog } from "@/components/shared/useActivityLogger";
 
 export default function TasksPage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -63,7 +64,7 @@ export default function TasksPage() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id) => base44.entities.Task.delete(id),
+    mutationFn: (id) => deleteAndLog("Task", id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['allTasks'] });
     },

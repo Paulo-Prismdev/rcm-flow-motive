@@ -20,6 +20,7 @@ import AddSupplierModal from '../components/shared/AddSupplierModal';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { ArrowLeft } from 'lucide-react';
+import { deleteAndLog } from "@/components/shared/useActivityLogger";
 
 export default function SupplierManagement() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -36,7 +37,7 @@ export default function SupplierManagement() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id) => base44.entities.Supplier.delete(id),
+    mutationFn: (id) => deleteAndLog("Supplier", id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['suppliers'] });
     }

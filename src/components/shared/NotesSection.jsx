@@ -17,6 +17,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { deleteAndLog } from "@/components/shared/useActivityLogger";
 
 export default function NotesSection({ parentId, parentType }) {
   const [newNote, setNewNote] = useState('');
@@ -54,7 +55,7 @@ export default function NotesSection({ parentId, parentType }) {
   });
 
   const deleteNoteMutation = useMutation({
-    mutationFn: (noteId) => base44.entities.Note.delete(noteId),
+    mutationFn: (noteId) => deleteAndLog("Note", noteId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notes', parentId, parentType] });
     },

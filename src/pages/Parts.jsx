@@ -9,6 +9,7 @@ import { format } from "date-fns";
 import PartForm from "../components/parts/PartForm";
 import PartDetail from "../components/parts/PartDetail";
 import { fetchFilteredEntities } from '../components/shared/accessControl';
+import { deleteAndLog } from "@/components/shared/useActivityLogger";
 
 export default function Parts() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -76,7 +77,7 @@ export default function Parts() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id) => base44.entities.Part.delete(id),
+    mutationFn: (id) => deleteAndLog("Part", id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['parts'] });
       setSelectedPart(null); // Close detail view after deletion

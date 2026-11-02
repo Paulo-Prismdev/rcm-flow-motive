@@ -9,6 +9,7 @@ import { format } from "date-fns";
 import EngineeringForm from "../components/engineering/EngineeringForm";
 import EngineeringDetail from "../components/engineering/EngineeringDetail";
 import { fetchFilteredEntities } from '../components/shared/accessControl';
+import { deleteAndLog } from "@/components/shared/useActivityLogger";
 
 export default function Engineering() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -74,7 +75,7 @@ export default function Engineering() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id) => base44.entities.Engineering.delete(id),
+    mutationFn: (id) => deleteAndLog("Engineering", id),
     onSuccess: (_, deletedId) => { // Corrected: `deletedId` contains the argument passed to mutationFn
       queryClient.invalidateQueries({ queryKey: ['engineering'] });
       // If the currently selected item was deleted, close the detail view
