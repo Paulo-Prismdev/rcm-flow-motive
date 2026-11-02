@@ -6,10 +6,11 @@ import { Button } from '@/components/ui/button';
 import ChangePasswordForm from '@/components/auth/ChangePasswordForm';
 import AuthNotice from '@/components/auth/AuthNotice';
 import { useAuth } from '@/lib/AuthContext';
+import PasskeyDevices from '@/components/auth/PasskeyDevices';
 
 /** Sign-in and password, on the person's own profile. */
 export default function AccountSecurityCard() {
-  const { twofaStatus } = useAuth();
+  const { twofaStatus, user } = useAuth();
   const [changing, setChanging] = useState(false);
   const [done, setDone] = useState(false);
   const { data, refetch, isLoading } = useQuery({
@@ -25,7 +26,7 @@ export default function AccountSecurityCard() {
       {twofaStatus?.required && (
         <p className="flex items-start gap-2 text-xs text-muted-foreground mb-3">
           <ShieldCheck className="w-4 h-4 mt-px shrink-0 text-green-600" aria-hidden="true" />
-          Each time you sign in we email you a 6-digit code. You're signed out after 30 minutes without activity.
+          Each time you sign in we confirm it's you with Face ID / fingerprint on a device you've set up, or a 6-digit code we email you. You're signed out after 30 minutes without activity.
         </p>
       )}
 
@@ -63,6 +64,7 @@ export default function AccountSecurityCard() {
           )}
         </>
       )}
+      {twofaStatus?.required && user?.id && <PasskeyDevices userId={user.id} />}
     </div>
   );
 }

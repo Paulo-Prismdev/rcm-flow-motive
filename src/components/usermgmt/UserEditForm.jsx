@@ -46,6 +46,18 @@ export default function UserEditForm({ user, onSave, onCancel, isSaving }) {
   // RCM admins can clear someone's sign-in code lockout (5 wrong codes locks for 15
   // minutes). The server checks the admin's rights and records the reset.
   const [resetState, setResetState] = useState('idle');
+  const [devicesState, setDevicesState] = useState('idle');
+  const removeDevices = async () => {
+    if (!window.confirm(`Remove all Face ID / fingerprint devices for ${user.email}? They'll sign in with the emailed code until they set one up again.`)) return;
+    setDevicesState('busy');
+    try {
+      await base44.functions.invoke('passkeyManage', { action: 'adminRemoveAll', target_user_id: user.id });
+      setDevicesState('done');
+    } catch (err) {
+      setDevicesState('idle');
+      alert(err?.response?.data?.error || 'Could not remove the devices.');
+    }
+  };
   const resetSignIn = async () => {
     setResetState('busy');
     try {
@@ -157,6 +169,11 @@ export default function UserEditForm({ user, onSave, onCancel, isSaving }) {
         {user?.id && user?.user_type === 'internal' && (
           <Button type="button" onClick={resetSignIn} disabled={resetState === 'busy'} className="neomorph-flat px-3 py-1.5 text-sm mr-auto" title="Clears a lockout after too many wrong codes, and asks for a fresh code at the next sign-in">
             {resetState === 'busy' ? 'Resetting…' : resetState === 'done' ? 'Sign-in step reset' : 'Reset sign-in code step'}
+          </Button>
+        )}
+        {user?.id && user?.user_type === 'internal' && (
+          <Button type="button" onClick={removeDevices} disabled={devicesState === 'busy'} className="neomorph-flat px-3 py-1.5 text-sm" title="For a lost or replaced phone: they'll use the emailed code until they set Face ID up again">
+            {devicesState === 'busy' ? 'Removing…' : devicesState === 'done' ? 'Face ID devices removed' : 'Remove Face ID devices'}
           </Button>
         )}
         <Button type="button" onClick={onCancel} className="neomorph-flat px-3 py-1.5 text-sm">
