@@ -18,7 +18,6 @@ const BackorderForm = lazy(() => import('@/pages/BackorderForm'));
 const ClientClaimForm = lazy(() => import('@/pages/ClientClaimForm'));
 const TyreRequests = lazy(() => import('@/pages/TyreRequests'));
 const CompanyManagement = lazy(() => import('@/pages/CompanyManagement'));
-const MigrateUsers = lazy(() => import('@/pages/MigrateUsers'));
 const ClientPortal = lazy(() => import('@/pages/ClientPortal'));
 const RepairerDirectory = lazy(() => import('@/pages/RepairerDirectory'));
 const InsurerDirectory = lazy(() => import('@/pages/InsurerDirectory'));
@@ -148,11 +147,6 @@ const AuthenticatedApp = () => {
       <Route path="/admin/companies" element={
         <LayoutWrapper currentPageName="CompanyManagement">
           <CompanyManagement />
-        </LayoutWrapper>
-      } />
-      <Route path="/admin/migrate-users" element={
-        <LayoutWrapper currentPageName="MigrateUsers">
-          <MigrateUsers />
         </LayoutWrapper>
       } />
       <Route path="/admin/status-migration" element={
