@@ -14,9 +14,19 @@
         "Engineering",
         "Part",
         "User",
-        "System"
+        "System",
+        "Client",
+        "Bodyshop",
+        "Insurer",
+        "Broker",
+        "Supplier",
+        "CreditRepairCompany",
+        "Referrer",
+        "Company",
+        "Task",
+        "Settings"
       ],
-      "description": "Type of the parent record (a claim, estimate, engineering job, part, or a user account for sign-in and account events)"
+      "description": "What the line is about: a claim, estimate, engineering job or part; a user account (sign-in and account events); a directory record; a task; or a settings change."
     },
     "action": {
       "type": "string",
