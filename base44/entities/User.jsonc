@@ -375,6 +375,28 @@
       "rls": {
         "update": false
       }
+    },
+    "webauthn_challenge": {
+      "type": "string",
+      "description": "The current Face ID / fingerprint challenge (one use, 5 minutes). Set only by the passkeyManage backend function.",
+      "rls": {
+        "update": false
+      }
+    },
+    "webauthn_challenge_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the Face ID / fingerprint challenge was issued.",
+      "rls": {
+        "update": false
+      }
+    },
+    "webauthn_challenge_type": {
+      "type": "string",
+      "description": "What the challenge is for: registration (adding a device) or authentication (signing in).",
+      "rls": {
+        "update": false
+      }
     }
   },
   "required": [],
