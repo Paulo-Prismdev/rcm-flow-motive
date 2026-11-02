@@ -227,7 +227,7 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
   // old value and the new value, alongside who made it and when. Changes that
   // land inside a stored object (the invoicing tracker, the locked credit repair
   // rates) describe themselves in words instead.
-  const logFigureChanges = (patch, description) => {
+  const logFigureChanges = (patch, description, before = claim) => {
     const entries = Object.entries(patch).filter(([key, value]) =>
       !['id', 'created_date', 'updated_date', 'created_by_id'].includes(key)
       && (value === null || typeof value !== 'object')
@@ -253,7 +253,7 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
         parentType: 'Claim',
         action: 'Financials Updated',
         fieldName: label,
-        oldValue: claim[key] ?? '',
+        oldValue: before[key] ?? '',
         newValue: value ?? '',
         description: description || `${label} updated`,
         user: currentUser,
@@ -261,11 +261,17 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
     }
   };
 
-  const applyCommit = (patch, description) => {
+  // Resolves true once saved. The history is written only after the save goes
+  // through, so a failed save (the claim page says so and puts the screen back)
+  // never leaves a line saying something changed when it didn't.
+  const applyCommit = async (patch, description) => {
     // Financials records the change itself — field, old value, new value, who and
     // when — so the claim page is told not to log the same fields again.
-    onUpdate({ ...claim, ...patch }, { skipFieldLog: true });
-    logFigureChanges(patch, description);
+    const before = claim;
+    const saved = await onUpdate({ ...claim, ...patch }, { skipFieldLog: true });
+    if (saved === false) return false;
+    logFigureChanges(patch, description, before);
+    return true;
   };
 
   // Invoices that have already gone out, been requested from accounts or been
