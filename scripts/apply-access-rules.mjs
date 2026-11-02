@@ -42,6 +42,29 @@ const touch = (name) => {
   return changed.get(name).schema;
 };
 
+// With "upgrade_internal_everywhere", every existing "internal staff" condition in every
+// entity (entity and field rules alike) becomes INT, so the second sign-in step is
+// required wherever staff access is granted, not only on the entities listed below.
+const PLAIN_INT = JSON.stringify({ user_condition: { 'data.user_type': 'internal' } });
+const upgrade = (node) => {
+  if (Array.isArray(node)) return node.map(upgrade);
+  if (node && typeof node === 'object') {
+    if (JSON.stringify(node) === PLAIN_INT) return structuredClone(INT);
+    return Object.fromEntries(Object.entries(node).map(([k, v]) => [k, upgrade(v)]));
+  }
+  return node;
+};
+if (staged.upgrade_internal_everywhere) {
+  for (const file of fs.readdirSync(entityDir).filter((f) => f.endsWith('.jsonc'))) {
+    const name = file.replace(/\.jsonc$/, '');
+    const schema = touch(name);
+    if (schema.rls) schema.rls = upgrade(schema.rls);
+    for (const prop of Object.values(schema.properties || {})) {
+      if (prop && prop.rls) prop.rls = upgrade(prop.rls);
+    }
+  }
+}
+
 for (const [name, ops] of Object.entries(staged.entities || {})) {
   const schema = touch(name);
   schema.rls = schema.rls || {};
