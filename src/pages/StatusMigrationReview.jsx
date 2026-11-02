@@ -35,7 +35,18 @@ function StatusSelect({ value, onChange, options, placeholder, disabled }) {
   );
 }
 
+// A one-off tool that rewrites claim statuses in bulk, so it is for admins only.
 export default function StatusMigrationReview() {
+  const { data: me, isLoading: meLoading } = useQuery({ queryKey: ['currentUser'], queryFn: () => base44.auth.me() });
+  const isAdmin = me?.user_type === 'internal' && ['admin', 'super_admin'].includes(me?.role);
+  if (meLoading) return null;
+  if (!isAdmin) {
+    return <div className="p-8 text-center text-sm text-muted-foreground">This tool is only available to admins.</div>;
+  }
+  return <StatusMigrationReviewTool />;
+}
+
+function StatusMigrationReviewTool() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
