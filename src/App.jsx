@@ -29,6 +29,12 @@ const DeclarationOfNeedForm = lazy(() => import('@/pages/DeclarationOfNeedForm')
 const BodyshopUpdateForm = lazy(() => import('@/pages/BodyshopUpdateForm'));
 const StatusMigrationReview = lazy(() => import('@/pages/StatusMigrationReview'));
 const Invoicing = lazy(() => import('@/pages/Invoicing'));
+const Login = lazy(() => import('@/pages/Login'));
+const ForgotPassword = lazy(() => import('@/pages/ForgotPassword'));
+const ResetPassword = lazy(() => import('@/pages/ResetPassword'));
+const TwoFactorVerify = lazy(() => import('@/pages/TwoFactorVerify'));
+import InactivityGuard from '@/components/auth/InactivityGuard';
+import PasswordGate from '@/components/auth/PasswordGate';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -38,10 +44,10 @@ const LayoutWrapper = ({ children, currentPageName }) => Layout ?
   <Layout currentPageName={currentPageName}>{children}</Layout>
   : <>{children}</>;
 
-const PUBLIC_PATHS = ['/backorder-form', '/parts-request', '/client-claim-form', '/indemnity-form', '/repair-preference-form', '/declaration-of-need-form', '/bodyshop-update'];
+const PUBLIC_PATHS = ['/backorder-form', '/parts-request', '/client-claim-form', '/indemnity-form', '/repair-preference-form', '/declaration-of-need-form', '/bodyshop-update', '/login', '/forgot-password', '/reset-password'];
 
 const AuthenticatedApp = () => {
-  const { isLoadingAuth, isLoadingPublicSettings, authError, isAuthenticated, navigateToLogin } = useAuth();
+  const { isLoadingAuth, isLoadingPublicSettings, authError, isAuthenticated, navigateToLogin, twofaStatus, user } = useAuth();
 
   const isPublicPath = PUBLIC_PATHS.some(p => window.location.pathname.startsWith(p));
 
@@ -57,6 +63,9 @@ const AuthenticatedApp = () => {
           <Route path="/repair-preference-form" element={<RepairPreferenceForm />} />
           <Route path="/declaration-of-need-form" element={<DeclarationOfNeedForm />} />
           <Route path="/bodyshop-update" element={<BodyshopUpdateForm />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
         </Routes>
       </Suspense>
     );
@@ -78,9 +87,29 @@ const AuthenticatedApp = () => {
     }
   }
 
-  // Render the main app
+  // The second sign-in step: staff enter the code we email them before anything of
+  // the app opens. (If the check itself can't run, staff still see the code screen;
+  // portal users, who don't need a code, carry on.)
+  if (twofaStatus.loading) {
+    return <LoadingScreen />;
+  }
+  const needsCode = twofaStatus.required && !twofaStatus.verified
+    && !(twofaStatus.failed && user?.user_type !== 'internal');
+  if (needsCode) {
+    return (
+      <Suspense fallback={<LoadingScreen />}>
+        <InactivityGuard />
+        <TwoFactorVerify />
+      </Suspense>
+    );
+  }
+
+  // Render the main app: signed out after 30 minutes idle, and held at "choose a new
+  // password" once a password is over 90 days old.
   return (
     <Suspense fallback={<LoadingScreen />}>
+    <InactivityGuard />
+    <PasswordGate>
     <Routes>
       <Route path="/" element={
         <LayoutWrapper currentPageName={mainPageKey}>
@@ -153,6 +182,7 @@ const AuthenticatedApp = () => {
       } />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
+    </PasswordGate>
     </Suspense>
   );
 };
@@ -169,6 +199,9 @@ function PublicApp() {
         <Route path="/repair-preference-form" element={<RepairPreferenceForm />} />
         <Route path="/declaration-of-need-form" element={<DeclarationOfNeedForm />} />
         <Route path="/bodyshop-update" element={<BodyshopUpdateForm />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
       </Routes>
     </Suspense>
   );
