@@ -448,7 +448,7 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
                       <span className="text-[10px] text-muted-foreground">{format(new Date(file.date), 'dd/MM/yy HH:mm')}</span>
                       <div className="flex items-center gap-1 mt-1">
                         <button type="button" onClick={() => setViewingFile(file.url)} className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground" title="View"><Eye className="w-3.5 h-3.5" /></button>
-                        <a href={file.url} target="_blank" rel="noopener noreferrer" className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground" title="Download"><Download className="w-3.5 h-3.5" /></a>
+                        <SecureFileLink fileRef={file.url} claimId={parentType === 'Claim' ? parentId : null} className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground" title="Download"><Download className="w-3.5 h-3.5" /></SecureFileLink>
                         {canEditDelete(file.note) && (
                           <button type="button" onClick={() => deleteFileMutation.mutate({ noteId: file.noteId, fileUrl: file.url })} className="p-1 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive ml-auto" title="Remove file"><Trash2 className="w-3.5 h-3.5" /></button>
                         )}

@@ -3,6 +3,8 @@ import { Paperclip, X, Eye, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import FileViewer from './FileViewer';
+import SecureFileLink from './SecureFileLink';
+import { fileNameOf, isPrivateRef } from '@/lib/privateFiles';
 
 export default function FileAttachmentButton({ fileUrls = [], onRemove, isOpen, onOpenChange }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -23,6 +25,7 @@ export default function FileAttachmentButton({ fileUrls = [], onRemove, isOpen, 
   };
 
   const getFileName = (url) => {
+    if (isPrivateRef(url)) return fileNameOf(url);
     try {
       const urlObject = new URL(url);
       const path = urlObject.pathname;
@@ -87,15 +90,9 @@ export default function FileAttachmentButton({ fileUrls = [], onRemove, isOpen, 
                     >
                       <Eye className="w-4 h-4" />
                     </Button>
-                    <a href={url} download target="_blank" rel="noopener noreferrer">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 hover:text-gold"
-                      >
-                        <Download className="w-4 h-4" />
-                      </Button>
-                    </a>
+                    <SecureFileLink fileRef={url} className="h-8 w-8 inline-flex items-center justify-center rounded-md hover:text-gold" title="Download">
+                      <Download className="w-4 h-4" />
+                    </SecureFileLink>
                     {onRemove && (
                       <Button
                         variant="ghost"
