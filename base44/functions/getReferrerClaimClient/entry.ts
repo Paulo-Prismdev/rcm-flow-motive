@@ -9,10 +9,10 @@ import { ownsClaim, portalScope } from '../../shared/portalAccess.ts';
  * this returns that one linked record and nothing else: the claim must be one of the
  * caller's own (their linked referrer or company), otherwise the call is refused.
  */
-export default async function (req) {
+export default async function (req: Request): Promise<Response> {
   try {
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me().catch((e) => (e.status === 401 ? null : Promise.reject(e)));
+    const user = await base44.auth.me().catch((e: any) => (e.status === 401 ? null : Promise.reject(e)));
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
     const { claim_id } = await req.json().catch(() => ({}));
@@ -20,7 +20,7 @@ export default async function (req) {
 
     const claim = await base44.asServiceRole.entities.Claim
       .get(claim_id)
-      .catch((e) => (e.status === 404 ? null : Promise.reject(e)));
+      .catch((e: any) => (e.status === 404 ? null : Promise.reject(e)));
     if (!claim) return Response.json({ error: 'Claim not found' }, { status: 404 });
 
     // Any portal (repairer, referrer, client) may read this for a claim of its own.
@@ -33,10 +33,26 @@ export default async function (req) {
 
     const client = await base44.asServiceRole.entities.Client
       .get(claim.client_id)
-      .catch((e) => (e.status === 404 ? null : Promise.reject(e)));
+      .catch((e: any) => (e.status === 404 ? null : Promise.reject(e)));
 
-    return Response.json({ client: client || null });
-  } catch (error) {
-    return Response.json({ error: error.message }, { status: 500 });
+    if (!client) return Response.json({ client: null });
+    // Only the contact details the portal shows, never the rest of the directory record.
+    const contacts = Array.isArray(client.contacts)
+      ? client.contacts.map((c: any) => ({ name: c?.name, position: c?.position, phone: c?.phone, email: c?.email, is_primary: !!c?.is_primary }))
+      : [];
+    return Response.json({
+      client: {
+        id: client.id,
+        name: client.name,
+        phone: client.phone,
+        email: client.email,
+        company_contact_phone: client.company_contact_phone,
+        company_contact_email: client.company_contact_email,
+        contacts,
+      },
+    });
+  } catch (error: any) {
+    console.error('getReferrerClaimClient error:', error?.message);
+    return Response.json({ error: 'Could not load the client details' }, { status: 500 });
   }
 }
