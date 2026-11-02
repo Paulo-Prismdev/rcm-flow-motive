@@ -8,6 +8,7 @@ import { Mail, Camera, Loader, ArrowLeft, Save, Shield, Bell, Briefcase, Calenda
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { format } from "date-fns";
+import AccountSecurityCard from "@/components/auth/AccountSecurityCard";
 
 const getUserInitials = (user) => {
   if (!user) return '?';
@@ -306,6 +307,7 @@ export default function UserProfile() {
             </p>
           </div>
         )}
+        {activeTab === 'profile' && <AccountSecurityCard />}
 
         {/* Notifications Tab */}
         {activeTab === 'notifications' && (
