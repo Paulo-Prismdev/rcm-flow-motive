@@ -145,7 +145,8 @@ export async function deliverEmail({ base44, to, cc, subject, html, text, fromNa
       await base44.asServiceRole.integrations.Core.SendEmail({
         to: recipient,
         subject: safeSubject,
-        body: html,
+        // Exactly the fields that were delivering before Round 6 (html + text). Sending
+        // `body` as well stopped the sign-in codes arriving.
         html,
         text: text || htmlToPlain(html),
         from_name: cleanName(fromName || 'RCM Automotive'),
