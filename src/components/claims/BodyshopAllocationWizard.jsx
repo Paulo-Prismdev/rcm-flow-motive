@@ -14,6 +14,7 @@ import WizardGeneratePdfBar from './wizard/WizardGeneratePdfBar';
 import WizardConfirmStep from './wizard/WizardConfirmStep';
 import { geocodeAddress } from '@/functions/geocodeAddress';
 import { sanitizeClaimData } from '@/components/shared/sanitizeClaimData';
+import { notifyError } from '@/lib/dialogs';
 
 // Derive the PDF template from the instruction type captured in the Pre-Check
 // (authorised_by). Orkin is a branded variant the user can still pick on the
@@ -182,7 +183,7 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
       queryClient.invalidateQueries({ queryKey: ['claim', claim.id] });
     } catch (error) {
       console.error('Error updating instruction details:', error);
-      alert('Failed to save instruction details. Please try again.');
+      notifyError('Could not save the instruction details', error);
     }
   };
 
@@ -286,7 +287,7 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
       window.open(file_url, '_blank');
     } catch (error) {
       console.error('Error generating PDF:', error);
-      alert('Failed to generate PDF. Please try again.');
+      notifyError('Could not create the PDF', error);
     } finally {
       setIsGeneratingPdf(false);
     }
@@ -316,7 +317,7 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
       queryClient.invalidateQueries({ queryKey: ['claim', claim.id] });
     } catch (error) {
       console.error('Error saving instruction to docs:', error);
-      alert('Failed to save instruction to claim docs. Please try again.');
+      notifyError('Could not save the instruction to the claim documents', error);
     } finally {
       setIsSavingInstructionToDocs(false);
     }
@@ -367,7 +368,7 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
       onClose();
     } catch (error) {
       console.error('Error allocating:', error);
-      alert('Failed to allocate job. Please try again.');
+      notifyError('Could not allocate the job', error);
     } finally {
       setIsAllocating(false);
     }

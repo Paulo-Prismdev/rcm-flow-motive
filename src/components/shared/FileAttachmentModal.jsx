@@ -6,6 +6,7 @@ import AIExtractConfirmDialog from './AIExtractConfirmDialog';
 import { useFileUpload } from '@/hooks/useFileUpload';
 import UploadProgressList from './UploadProgressList';
 import { base44 } from '@/api/base44Client';
+import { notifyError } from '@/lib/dialogs';
 
 export default function FileAttachmentModal({ fileUrls = [], onAdd, onRemove, isOpen, onClose, enableAI = false, analysisType = 'general', onAIExtract = null, existingData = {} }) {
   const [viewingFile, setViewingFile] = useState(null);
@@ -273,11 +274,11 @@ export default function FileAttachmentModal({ fileUrls = [], onAdd, onRemove, is
           fileUrl: fileUrl
         });
       } else {
-        alert('Could not extract data from this file. ' + (result.details || 'Please try again.'));
+        notifyError('Nothing could be read from this file', result.details);
       }
     } catch (error) {
       console.error('AI analysis error:', error);
-      alert('Failed to analyze file with AI. Please try again.');
+      notifyError('The file couldn’t be read', error);
     } finally {
       setAnalyzingFile(null);
     }

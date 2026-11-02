@@ -9,6 +9,7 @@ import {
     DialogContent,
 } from "@/components/ui/dialog";
 import { Loader } from 'lucide-react';
+import { notifyError } from '@/lib/dialogs';
 
 export default function EstimateRequestModal({ claim, isOpen, onClose, onEstimateCreated }) {
     const [estimateData, setEstimateData] = useState({
@@ -24,7 +25,7 @@ export default function EstimateRequestModal({ claim, isOpen, onClose, onEstimat
         },
         onError: (error) => {
             console.error("Failed to create estimate request:", error);
-            alert("Failed to create estimate request. Please try again.");
+            notifyError('Could not create the estimate request');
         }
     });
 

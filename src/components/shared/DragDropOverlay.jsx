@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Upload, Loader } from 'lucide-react';
+import { notifyError } from '@/lib/dialogs';
 
 // Detect touch-primary devices — on these we disable drag-drop entirely
 // so we never block touch events.
@@ -48,7 +49,7 @@ export default function DragDropOverlay({ onFilesUploaded, children }) {
       onFilesUploaded(uploadedUrls);
     } catch (error) {
       console.error('File upload failed:', error);
-      alert('Failed to upload files. Please try again.');
+      notifyError('Could not upload the files', error);
     } finally {
       setIsUploading(false);
     }

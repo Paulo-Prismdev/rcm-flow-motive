@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import FileViewer from './FileViewer';
 import UploadProgressList from './UploadProgressList';
 import { useFileUpload } from '@/hooks/useFileUpload';
+import { notifyError } from '@/lib/dialogs';
 
 export default function FileUpload({ 
   value = [], 
@@ -168,12 +169,12 @@ export default function FileUpload({
         onAIExtract(result.output);
       } else {
         const errorMsg = result.details || 'Unable to extract data from this file. The file may be empty, corrupted, or in an unsupported format.';
-        alert(errorMsg);
+        notifyError('Nothing could be read from this file', errorMsg);
       }
     } catch (error) {
       console.error("AI analysis failed:", error);
       const errorMessage = error.response?.data?.message || error.message || 'Failed to analyze document. Please try again or enter details manually.';
-      alert(`AI Analysis Error: ${errorMessage}`);
+      notifyError('The document couldn’t be read', errorMessage);
     } finally {
       setAnalyzingFile(null);
     }

@@ -13,6 +13,7 @@ import {
   DialogFooter
 } from "@/components/ui/dialog";
 import { Loader } from 'lucide-react';
+import { notifyError } from '@/lib/dialogs';
 
 export default function PartsModal({ estimate, isOpen, onClose }) {
   const [partData, setPartData] = useState({
@@ -38,7 +39,7 @@ export default function PartsModal({ estimate, isOpen, onClose }) {
     },
     onError: (error) => {
       console.error("Failed to create part request:", error);
-      alert("Failed to create part request. Please try again.");
+      notifyError('Could not create the part request');
     }
   });
 
