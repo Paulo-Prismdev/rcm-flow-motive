@@ -23,7 +23,7 @@ Deno.serve(async (req) => {
     const entity = kind === 'estimate' ? 'Estimate' : 'Part';
     const record = await base44.asServiceRole.entities[entity].get(record_id).catch(() => null);
     const mine = record && (record.created_by_id === user.id
-      || record.bodyshop_company_id === scope.bodyshopId || record.bodyshop_id === scope.bodyshopId);
+      || record.repairer_id === scope.bodyshopId || record.bodyshop_company_id === scope.bodyshopId);
     if (!mine) return Response.json({ error: 'Not found' }, { status: 404 });
 
     const bodyshop = await base44.asServiceRole.entities.Bodyshop.get(scope.bodyshopId).catch(() => null);
