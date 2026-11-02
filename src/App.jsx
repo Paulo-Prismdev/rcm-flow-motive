@@ -90,6 +90,10 @@ const AuthenticatedApp = () => {
   // The second sign-in step: staff enter the code we email them before anything of
   // the app opens. (If the check itself can't run, staff still see the code screen;
   // portal users, who don't need a code, carry on.)
+  if (!isAuthenticated) {
+    navigateToLogin();
+    return null;
+  }
   if (twofaStatus.loading) {
     return <LoadingScreen />;
   }
