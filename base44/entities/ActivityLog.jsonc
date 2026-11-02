@@ -12,9 +12,11 @@
         "Claim",
         "Estimate",
         "Engineering",
-        "Part"
+        "Part",
+        "User",
+        "System"
       ],
-      "description": "Type of the parent record"
+      "description": "Type of the parent record (a claim, estimate, engineering job, part, or a user account for sign-in and account events)"
     },
     "action": {
       "type": "string",
