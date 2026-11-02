@@ -1,6 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
 import {
-  claimForPortal, currentUser, ownsClaim, portalScope, repairerForPortal,
+  claimForPortal, currentUser, ownsClaim, portalScope, repairerForPortal, updatesForPortal,
 } from '../../shared/portalAccess.ts';
 
 /**
@@ -33,16 +33,16 @@ Deno.serve(async (req) => {
         : Promise.resolve(null),
     ]);
 
-    // Who liked or was tagged in an update is internal housekeeping, not the client's business.
-    const sharedUpdates = (updates || []).map((u: any) => {
-      const { tagged_user_ids, liked_by, starred, ...rest } = u;
-      return rest;
-    });
+    // Only the updates meant for this portal (see shared/portalAccess.ts).
+    const sharedUpdates = updatesForPortal(updates || [], claim, scope!.kind);
 
     return Response.json({
-      claim: claimForPortal(claim),
+      claim: claimForPortal(claim, scope!.kind),
       updates: sharedUpdates,
-      backordered_parts: parts || [],
+      backordered_parts: (parts || []).map((p: any) => {
+        const { submitted_by_phone, ...rest } = p;
+        return rest;
+      }),
       repairer: repairerForPortal(bodyshop),
     });
   } catch (error: any) {

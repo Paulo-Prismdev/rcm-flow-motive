@@ -31,7 +31,7 @@ Deno.serve(async (req) => {
       claims = (claims || []).filter((c: any) => !CLOSED.includes(c.job_status));
     }
 
-    return Response.json({ claims: (claims || []).map(claimForPortal) });
+    return Response.json({ claims: (claims || []).map((c: any) => claimForPortal(c, scope.kind)) });
   } catch (error: any) {
     console.error('getPortalClaims error:', error?.message);
     return Response.json({ error: 'Could not load claims' }, { status: 500 });

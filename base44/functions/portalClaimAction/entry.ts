@@ -19,7 +19,7 @@ const FORTY_EIGHT_HOURS = 48 * 60 * 60 * 1000;
 const UPDATE_TYPE_BY_KIND: Record<string, string> = {
   bodyshop: 'Bodyshop Communication',
   referrer: 'Referrer Communication',
-  client: 'Referrer Communication',
+  client: 'Client Communication',
 };
 
 async function notifyStaff(base44: any, claim: any, title: string, message: string) {
@@ -65,7 +65,7 @@ Deno.serve(async (req) => {
     switch (action) {
       case 'accept_job': {
         if (scope.kind !== 'bodyshop') break;
-        if (claim.repairer_accepted) return Response.json({ claim: claimForPortal(claim) });
+        if (claim.repairer_accepted) return Response.json({ claim: claimForPortal(claim, scope.kind) });
         await base44.asServiceRole.entities.Claim.update(claim.id, {
           repairer_accepted: true,
           repairer_accepted_date: day(),
@@ -73,7 +73,7 @@ Deno.serve(async (req) => {
         const latest = await base44.asServiceRole.entities.Claim.get(claim.id);
         await notifyStaff(base44, claim, `Job accepted by ${claim.bodyshop || 'repairer'}${reg}`,
           `Job ${claim.job_number || ''} was accepted by ${who(user)}.`);
-        return Response.json({ claim: claimForPortal(latest) });
+        return Response.json({ claim: claimForPortal(latest, scope.kind) });
       }
 
       case 'reject_job': {
@@ -129,7 +129,7 @@ Deno.serve(async (req) => {
           ...(scope.kind === 'bodyshop' ? { unread_bodyshop_update: true } : {}),
         });
         await notifyStaff(base44, claim, `Update from ${who(user)}${reg}`, description);
-        const { tagged_user_ids, liked_by, starred, ...shared } = created || {};
+        const { tagged_user_ids, liked_by, starred, company_id, ...shared } = created || {};
         return Response.json({ update: shared });
       }
     }
