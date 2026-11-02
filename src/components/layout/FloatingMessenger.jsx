@@ -635,7 +635,7 @@ export default function FloatingMessenger({ currentUser, isOpen, onClose }) {
                           <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                             <DropdownMenu open={showEmojiPicker === msg.id} onOpenChange={(open) => setShowEmojiPicker(open ? msg.id : null)}>
                               <DropdownMenuTrigger asChild>
-                                <button className={`p-1 rounded ${isMine ? 'hover:bg-white/20' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
+                                <button aria-label="Add emoji" className={`p-1 rounded ${isMine ? 'hover:bg-white/20' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
                                   <Smile className="w-3 h-3" />
                                 </button>
                               </DropdownMenuTrigger>
@@ -689,7 +689,7 @@ export default function FloatingMessenger({ currentUser, isOpen, onClose }) {
                     className="flex-1 text-sm h-9 rounded-xl bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700"
                     disabled={isUploading}
                   />
-                  <button
+                  <button aria-label="Send"
                     onClick={handleSendMessage}
                     disabled={!messageText.trim() || sendMessageMutation.isPending || isUploading}
                     className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all flex-shrink-0 ${

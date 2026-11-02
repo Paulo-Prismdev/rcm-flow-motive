@@ -167,7 +167,7 @@ export default function UserProfile() {
         <div className="app-card !p-3 md:!p-4">
           <div className="flex items-center gap-3">
             <Link to={createPageUrl("Dashboard")} className="flex-shrink-0">
-              <Button variant="outline" size="icon" className="h-9 w-9"><ArrowLeft className="w-4 h-4" /></Button>
+              <Button aria-label="Back" variant="outline" size="icon" className="h-9 w-9"><ArrowLeft className="w-4 h-4" /></Button>
             </Link>
             {/* Avatar */}
             <div className="relative flex-shrink-0">

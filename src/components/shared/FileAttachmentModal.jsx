@@ -322,7 +322,7 @@ export default function FileAttachmentModal({ fileUrls = [], onAdd, onRemove, is
                 {enableAI && ' • AI analysis available'}
               </p>
             </div>
-            <button
+            <button aria-label="Close"
               onClick={onClose}
               className="w-6 h-6 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
             >

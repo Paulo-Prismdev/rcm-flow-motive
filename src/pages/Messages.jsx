@@ -678,7 +678,7 @@ export default function Messages() {
                             <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                  <button className="glass-button p-1 rounded">
+                                  <button aria-label="Add emoji" className="glass-button p-1 rounded">
                                     <Smile className="w-3 h-3" />
                                   </button>
                                 </DropdownMenuTrigger>
@@ -755,7 +755,7 @@ export default function Messages() {
                       className="glass-inset flex-1"
                       disabled={isUploading}
                     />
-                    <Button
+                    <Button aria-label="Send"
                       onClick={handleSendMessage}
                       className="glass-button px-4 py-2 text-accent"
                       disabled={!messageText.trim() || sendMessageMutation.isPending || isUploading}

@@ -279,7 +279,7 @@ export default function ClaimUpdateForm({
     <div className="bg-muted/30 border border-border rounded-lg p-3">
       <div className="flex items-center justify-between mb-2">
         <h3 className="font-semibold text-sm text-foreground">{replyToId ? 'Reply to Update' : 'Add New Update'}</h3>
-        <Button type="button" variant="ghost" size="sm" onClick={resetForm}><X className="w-4 h-4" /></Button>
+        <Button aria-label="Close" type="button" variant="ghost" size="sm" onClick={resetForm}><X className="w-4 h-4" /></Button>
       </div>
       <form onSubmit={handleSubmit} className="space-y-2">
         {isReferrer ? (

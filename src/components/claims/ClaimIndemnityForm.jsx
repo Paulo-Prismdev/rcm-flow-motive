@@ -180,7 +180,7 @@ export default function ClaimIndemnityForm({ claim, onSave, onCancel }) {
                 className="neomorph-inset pr-10" />
               
                 <PopoverTrigger asChild>
-                  <button
+                  <button aria-label="Pick a date"
                   type="button"
                   className="absolute right-2 top-1/2 -translate-y-1/2 text-foreground-muted hover:text-foreground">
                   

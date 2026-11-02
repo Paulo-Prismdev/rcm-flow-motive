@@ -64,7 +64,7 @@ export default function AddCreditRepairCompanyModal({ isOpen, onClose, onSuccess
       <div className="bg-card border border-border rounded-xl p-6 w-full max-w-lg shadow-xl max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-5">
           <h2 className="text-xl font-bold">Add Credit Repair Company</h2>
-          <Button onClick={handleClose} variant="ghost" size="icon"><X className="w-5 h-5" /></Button>
+          <Button aria-label="Close" onClick={handleClose} variant="ghost" size="icon"><X className="w-5 h-5" /></Button>
         </div>
         <form onSubmit={(e) => { e.preventDefault(); e.stopPropagation(); createMutation.mutate(formData); }} className="space-y-4">
           <div>

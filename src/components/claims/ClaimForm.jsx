@@ -558,7 +558,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
         />
         <div className="neomorph p-6 flex-shrink-0">
           <div className="flex items-center gap-4">
-            <Button onClick={onCancel} className="neomorph-flat p-3"><ArrowLeft className="w-4 h-4 text-gray-600" /></Button>
+            <Button aria-label="Back" onClick={onCancel} className="neomorph-flat p-3"><ArrowLeft className="w-4 h-4 text-gray-600" /></Button>
             <div><h1 className="text-2xl font-bold text-gray-700">New Claim</h1><p className="text-sm text-gray-500 mt-1">How would you like to create this claim?</p></div>
           </div>
         </div>
@@ -646,7 +646,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
       {/* Header + Step Indicator */}
       <div className="bg-card border border-border rounded-[10px] p-4 flex-shrink-0 shadow-sm">
         <div className="flex items-center gap-4 mb-3">
-          <Button onClick={onCancel} variant="ghost" size="icon" className="h-9 w-9"><ArrowLeft className="w-4 h-4" /></Button>
+          <Button aria-label="Back" onClick={onCancel} variant="ghost" size="icon" className="h-9 w-9"><ArrowLeft className="w-4 h-4" /></Button>
           <div className="flex-1">
             <h1 className="text-lg font-bold">New Claim</h1>
             <p className="text-xs text-muted-foreground">Step {currentStep} of {steps.length}</p>

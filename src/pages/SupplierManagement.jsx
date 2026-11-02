@@ -176,7 +176,7 @@ export default function SupplierManagement() {
       <div className="neomorph p-4">
         <div className="flex items-center gap-3 mb-4">
           <Link to={createPageUrl("Settings")}>
-            <Button className="neomorph-flat p-2 bg-[hsl(var(--card))] text-[hsl(var(--foreground))]">
+            <Button aria-label="Back" className="neomorph-flat p-2 bg-[hsl(var(--card))] text-[hsl(var(--foreground))]">
               <ArrowLeft className="w-4 h-4" />
             </Button>
           </Link>

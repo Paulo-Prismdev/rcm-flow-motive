@@ -335,7 +335,7 @@ export default function PartForm({ part, onSubmit, onCancel }) {
 
         <div className="neomorph p-6">
           <div className="flex items-center gap-4 mb-6">
-            <Button onClick={onCancel} className="neomorph-flat p-3"><ArrowLeft className="w-4" /></Button>
+            <Button aria-label="Back" onClick={onCancel} className="neomorph-flat p-3"><ArrowLeft className="w-4" /></Button>
             <h1 className="text-2xl font-bold text-gray-700">Edit Part Request</h1>
           </div>
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -610,7 +610,7 @@ export default function PartForm({ part, onSubmit, onCancel }) {
 
       <div className="neomorph p-6">
         <div className="flex items-center gap-4 mb-6">
-          <Button onClick={onCancel} className="neomorph-flat p-3 transition-all active:neomorph-pressed">
+          <Button aria-label="Back" onClick={onCancel} className="neomorph-flat p-3 transition-all active:neomorph-pressed">
             <ArrowLeft className="w-4 h-4 text-gray-600" />
           </Button>
           <div className="flex-1">

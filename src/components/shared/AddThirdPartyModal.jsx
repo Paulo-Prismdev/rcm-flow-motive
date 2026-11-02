@@ -90,7 +90,7 @@ export default function AddThirdPartyModal({ isOpen, onClose, onSuccess, initial
             <h2 className="text-xl font-bold">Add New Third Party</h2>
             <p className="text-xs text-muted-foreground mt-1">Saved in the Clients &amp; Third Parties directory, tagged as a third party.</p>
           </div>
-          <Button onClick={handleClose} variant="ghost" size="icon">
+          <Button aria-label="Close" onClick={handleClose} variant="ghost" size="icon">
             <X className="w-5 h-5" />
           </Button>
         </div>

@@ -100,7 +100,7 @@ export default function ThirdPartyCombobox({ value, onChange, placeholder = "Sel
             </PopoverContent>
           </Popover>
           {allowClear && selectedName && (
-            <Button
+            <Button aria-label="Close"
               type="button"
               variant="ghost"
               size="sm"

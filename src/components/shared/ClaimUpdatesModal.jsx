@@ -407,8 +407,8 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
                 {searchQuery && (
                   <div className="absolute right-1.5 top-1/2 -translate-y-1/2 flex items-center gap-0.5">
                     <span className="text-[10px] text-muted-foreground tabular-nums">{matchIds.length > 0 ? `${matchIdx + 1}/${matchIds.length}` : '0/0'}</span>
-                    <button type="button" onClick={goPrev} disabled={matchIds.length === 0} className="text-muted-foreground hover:text-foreground disabled:opacity-40 p-0.5"><ChevronUp className="w-3.5 h-3.5" /></button>
-                    <button type="button" onClick={goNext} disabled={matchIds.length === 0} className="text-muted-foreground hover:text-foreground disabled:opacity-40 p-0.5"><ChevronDown className="w-3.5 h-3.5" /></button>
+                    <button aria-label="Collapse" type="button" onClick={goPrev} disabled={matchIds.length === 0} className="text-muted-foreground hover:text-foreground disabled:opacity-40 p-0.5"><ChevronUp className="w-3.5 h-3.5" /></button>
+                    <button aria-label="Expand" type="button" onClick={goNext} disabled={matchIds.length === 0} className="text-muted-foreground hover:text-foreground disabled:opacity-40 p-0.5"><ChevronDown className="w-3.5 h-3.5" /></button>
                     <button type="button" onClick={() => setSearchQuery('')} className="text-muted-foreground hover:text-foreground p-0.5"><X className="w-3.5 h-3.5" /></button>
                   </div>
                 )}

@@ -467,7 +467,7 @@ export default function ReferrerClaimDetail({ claim, onClose, initialSection }) 
       {/* Combined Header + Section Selector */}
       <div className="neomorph p-3 flex-shrink-0 sticky top-0 z-10 bg-background">
         <div className="flex items-center gap-2 max-md:flex-wrap">
-          <Button onClick={onClose} variant="outline" className="p-2 flex-shrink-0">
+          <Button aria-label="Back" onClick={onClose} variant="outline" className="p-2 flex-shrink-0">
             <ArrowLeft className="w-4 h-4" />
           </Button>
           <div className="flex-1 min-w-0 flex items-center gap-2 flex-wrap">

@@ -67,7 +67,7 @@ export default function RepairerEstimateForm({ bodyshopId, bodyshopName, onClose
           <Calculator className="w-6 h-6 text-accent" />
           <h3 className="font-bold text-lg">Request an Estimate</h3>
         </div>
-        <button onClick={onClose} className="neomorph-flat p-2">
+        <button aria-label="Close" onClick={onClose} className="neomorph-flat p-2">
           <X className="w-4 h-4" />
         </button>
       </div>

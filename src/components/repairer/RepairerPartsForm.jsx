@@ -68,7 +68,7 @@ export default function RepairerPartsForm({ bodyshopId, bodyshopName, onClose, o
           <Package className="w-6 h-6 text-accent" />
           <h3 className="font-bold text-lg">Request Parts Support</h3>
         </div>
-        <button onClick={onClose} className="neomorph-flat p-2">
+        <button aria-label="Close" onClick={onClose} className="neomorph-flat p-2">
           <X className="w-4 h-4" />
         </button>
       </div>

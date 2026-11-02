@@ -83,7 +83,7 @@ function ReferrerDetailModal({ company, onClose, onUpdated }) {
           </h2>
           <div className="flex items-center gap-2">
             {!isEditing && <Button onClick={() => setIsEditing(true)} variant="outline" size="sm"><Pencil className="w-4 h-4" /> Edit</Button>}
-            <Button onClick={onClose} variant="ghost" size="icon"><X className="w-5 h-5" /></Button>
+            <Button aria-label="Close" onClick={onClose} variant="ghost" size="icon"><X className="w-5 h-5" /></Button>
           </div>
         </div>
 
@@ -289,7 +289,7 @@ function AddReferrerModal({ onClose, onSuccess }) {
       <div className="bg-card border border-border rounded-xl p-6 w-full max-w-lg shadow-xl max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
         <div className="flex justify-between items-center mb-5">
           <h2 className="text-xl font-bold">Add Referrer</h2>
-          <Button onClick={onClose} variant="ghost" size="icon"><X className="w-5 h-5" /></Button>
+          <Button aria-label="Close" onClick={onClose} variant="ghost" size="icon"><X className="w-5 h-5" /></Button>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div><Label>Referrer Name *</Label><Input value={formData.name} onChange={(e) => set("name", e.target.value)} className="neomorph-inset" required /></div>

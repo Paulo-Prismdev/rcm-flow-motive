@@ -50,7 +50,7 @@ function CreditRepairDetailModal({ company, onClose, onUpdated }) {
           <h2 className="text-xl font-bold">{isEditing ? 'Edit' : ''} {company.name}</h2>
           <div className="flex items-center gap-2">
             {!isEditing && <Button onClick={() => setIsEditing(true)} variant="outline" size="sm"><Pencil className="w-4 h-4" /> Edit</Button>}
-            <Button onClick={onClose} variant="ghost" size="icon"><X className="w-5 h-5" /></Button>
+            <Button aria-label="Close" onClick={onClose} variant="ghost" size="icon"><X className="w-5 h-5" /></Button>
           </div>
         </div>
 

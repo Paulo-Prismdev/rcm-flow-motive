@@ -1892,7 +1892,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
           <div className="hidden lg:block bg-card border border-border rounded-[10px] p-3 flex-shrink-0 shadow-sm">
               <div className="flex flex-col gap-2">
                   <div className="flex items-center gap-2">
-                      <button
+                      <button aria-label="Back"
                         onClick={handleClose}
                         className="p-2 flex-shrink-0 rounded-[10px] border border-border bg-card hover:bg-muted transition-colors"
                       >
@@ -1964,7 +1964,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                         {canEdit && (
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="outline" className="p-2 h-9 w-9"><ChevronDown className="w-4 h-4" /></Button>
+                              <Button aria-label="Expand" variant="outline" className="p-2 h-9 w-9"><ChevronDown className="w-4 h-4" /></Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-56">
                               <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsAttachmentsOpen(true); }}><FileText className="w-4 h-4 mr-2" />Documents</DropdownMenuItem>

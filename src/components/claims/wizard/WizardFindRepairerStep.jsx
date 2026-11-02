@@ -437,7 +437,7 @@ export default function WizardFindRepairerStep({
                 </div>
               </div>
             </div>
-            <Button variant="ghost" size="icon" className="flex-shrink-0" onClick={onClearSelection}>
+            <Button aria-label="Close" variant="ghost" size="icon" className="flex-shrink-0" onClick={onClearSelection}>
               <X className="w-4 h-4" />
             </Button>
           </div>

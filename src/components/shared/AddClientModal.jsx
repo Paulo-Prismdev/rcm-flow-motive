@@ -112,7 +112,7 @@ export default function AddClientModal({ isOpen, onClose, onSuccess, initial }) 
       <div className="bg-card border border-border rounded-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-xl">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-bold">Add New Client</h2>
-          <Button onClick={handleClose} variant="ghost" size="icon">
+          <Button aria-label="Close" onClick={handleClose} variant="ghost" size="icon">
             <X className="w-5 h-5" />
           </Button>
         </div>

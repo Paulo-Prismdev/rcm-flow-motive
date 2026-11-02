@@ -237,7 +237,7 @@ function CompanyForm({ type, initialData, onSubmit, onCancel, isLoading }) {
     <form onSubmit={handleSubmit} className="neomorph-flat p-4 space-y-4">
       <div className="flex justify-between items-center">
         <h3 className="font-bold">{initialData ? 'Edit' : 'Add'} {type.charAt(0).toUpperCase() + type.slice(1)}</h3>
-        <Button type="button" onClick={onCancel} variant="ghost" size="icon">
+        <Button aria-label="Close" type="button" onClick={onCancel} variant="ghost" size="icon">
           <X className="w-4 h-4" />
         </Button>
       </div>

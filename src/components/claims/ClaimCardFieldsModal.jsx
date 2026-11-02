@@ -76,7 +76,7 @@ export default function ClaimCardFieldsModal({ isOpen, onClose, selectedFields, 
       <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-2xl p-6 max-w-lg w-full max-h-[80vh] overflow-hidden flex flex-col">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-bold text-gray-900 dark:text-white">Customise Claim Card Fields</h2>
-          <Button onClick={onClose} variant="ghost" size="icon">
+          <Button aria-label="Close" onClick={onClose} variant="ghost" size="icon">
             <X className="w-4 h-4" />
           </Button>
         </div>

@@ -38,7 +38,7 @@ function StatusItem({ status, onUpdate, onDelete, onEditToggle, editingStatusId,
       className={`neomorph-flat p-3 mb-2 flex items-center justify-between transition-shadow ${snapshot.isDragging ? 'shadow-lg' : ''} ${isProtected ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800' : ''}`}
     >
       <div className="flex items-center gap-3 flex-grow">
-        <button {...provided.dragHandleProps} className="cursor-grab p-1 hidden md:block">
+        <button aria-label="Drag to reorder" {...provided.dragHandleProps} className="cursor-grab p-1 hidden md:block">
           <GripVertical className="w-4 h-4 text-foreground-subtle" />
         </button>
         {isEditing ? (

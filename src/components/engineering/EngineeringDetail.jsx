@@ -294,7 +294,7 @@ export default function EngineeringDetail({ job, onClose, onUpdate, isInternalUs
           <div className="flex flex-col gap-3">
             {/* Top Row: Back button + Title */}
             <div className="flex items-center gap-2 md:gap-4">
-              <Button onClick={handleClose} className="neomorph-flat p-2 flex-shrink-0">
+              <Button aria-label="Back" onClick={handleClose} className="neomorph-flat p-2 flex-shrink-0">
                 <ArrowLeft className="w-4 h-4" />
               </Button>
               <div className="flex-1 min-w-0">
@@ -338,7 +338,7 @@ export default function EngineeringDetail({ job, onClose, onUpdate, isInternalUs
               {canEdit && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button className="neomorph-flat p-1.5 md:p-3">
+                    <Button aria-label="Expand" className="neomorph-flat p-1.5 md:p-3">
                       <ChevronDown className="w-3.5 h-3.5 md:w-4 md:h-4" />
                     </Button>
                   </DropdownMenuTrigger>

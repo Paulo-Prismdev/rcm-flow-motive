@@ -427,7 +427,7 @@ function TemplateEditor({ template, onSave, onCancel }) {
         {/* Header */}
         <div className="neomorph p-6 mb-6">
           <div className="flex items-center gap-4">
-            <Button onClick={onCancel} className="neomorph-flat p-3">
+            <Button aria-label="Back" onClick={onCancel} className="neomorph-flat p-3">
               <ArrowLeft className="w-4 h-4" />
             </Button>
             <div className="flex-1">

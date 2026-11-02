@@ -257,7 +257,7 @@ export default function AIEntityLinker({ isOpen, onClose, extractedData, onConfi
               AI extracted these names — link them to your database to avoid duplicates
             </p>
           </div>
-          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+          <button aria-label="Close" onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
             <X className="w-4 h-4 text-gray-400" />
           </button>
         </div>

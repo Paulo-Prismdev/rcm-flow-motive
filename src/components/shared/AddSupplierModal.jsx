@@ -197,7 +197,7 @@ export default function AddSupplierModal({ isOpen, onClose, onSuccess, editingSu
           <h2 className="text-xl font-bold text-gray-700">
             {editingSupplier ? 'Edit Supplier' : 'Add New Supplier'}
           </h2>
-          <Button onClick={handleClose} variant="ghost" size="icon" disabled={createMutation.isPending}>
+          <Button aria-label="Close" onClick={handleClose} variant="ghost" size="icon" disabled={createMutation.isPending}>
             <X className="w-5 h-5" />
           </Button>
         </div>

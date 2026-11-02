@@ -474,7 +474,7 @@ export default function EmployeeManagement() {
       <div className="glass p-4">
         <div className="flex items-center gap-3 mb-4">
           <Link to={createPageUrl("Dashboard")}>
-            <Button className="glass-button p-2">
+            <Button aria-label="Back" className="glass-button p-2">
               <ArrowLeft className="w-4 h-4" />
             </Button>
           </Link>

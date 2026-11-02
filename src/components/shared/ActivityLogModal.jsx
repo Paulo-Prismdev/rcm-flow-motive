@@ -16,7 +16,7 @@ export default function ActivityLogModal({ parentId, parentType, isOpen, onClose
           <div>
             <h2 className="text-[18px] font-semibold text-gray-900 dark:text-white">Activity Log</h2>
           </div>
-          <button
+          <button aria-label="Close"
             onClick={onClose}
             className="w-6 h-6 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
           >

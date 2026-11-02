@@ -36,7 +36,7 @@ export default function InviteUserModal({ onClose, onSuccess, isSuperAdmin }) {
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" data-mobile-full-modal="true">
       <div className="neomorph w-full max-w-md p-6 relative">
-        <button
+        <button aria-label="Close"
           onClick={onClose}
           className="absolute top-4 right-4 text-foreground-muted hover:text-foreground"
         >

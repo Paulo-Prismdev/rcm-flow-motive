@@ -744,7 +744,7 @@ export default function PortalManagementTab() {
                     placeholder="Add a feature..."
                     onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addFeature())}
                   />
-                  <Button type="button" onClick={addFeature} className="neomorph-flat">
+                  <Button aria-label="Add" type="button" onClick={addFeature} className="neomorph-flat">
                     <Plus className="w-4 h-4" />
                   </Button>
                 </div>

@@ -83,7 +83,7 @@ export default function AddWorkProviderModal({ isOpen, onClose, onSuccess }) {
       <div className="neomorph p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-bold text-gray-700">Add New Work Provider</h2>
-          <Button onClick={handleClose} variant="ghost" size="icon" disabled={createMutation.isPending}>
+          <Button aria-label="Close" onClick={handleClose} variant="ghost" size="icon" disabled={createMutation.isPending}>
             <X className="w-5 h-5" />
           </Button>
         </div>

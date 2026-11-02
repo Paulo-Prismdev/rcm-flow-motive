@@ -216,7 +216,7 @@ export default function AddressLookupInput({
             }} />
 
           {searchText && !disabled &&
-          <button
+          <button aria-label="Close"
             onClick={handleClear}
             className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground-muted hover:text-foreground"
             style={{ zIndex: 10 }}

@@ -192,7 +192,7 @@ export default function PartyDisplayCard({
           <div className="flex items-center gap-2">
             {headerRight}
             {canEdit && !editing && (
-              <Button variant="ghost" size="icon" onClick={onStartEdit} className="h-8 w-8 hover:text-gold">
+              <Button aria-label="Edit" variant="ghost" size="icon" onClick={onStartEdit} className="h-8 w-8 hover:text-gold">
                 <Edit className="w-4 h-4" />
               </Button>
             )}

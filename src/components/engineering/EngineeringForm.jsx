@@ -90,7 +90,7 @@ export default function EngineeringForm({ job, onSubmit, onCancel }) {
       {/* Header - Fixed */}
       <div className="neomorph p-6">
         <div className="flex items-center gap-4">
-          <Button onClick={onCancel} className="neomorph-flat p-3"><ArrowLeft className="w-4 h-4" /></Button>
+          <Button aria-label="Back" onClick={onCancel} className="neomorph-flat p-3"><ArrowLeft className="w-4 h-4" /></Button>
           <div>
             <h1 className="text-2xl font-bold text-gray-700">{job ? 'Edit Job' : 'New Engineering Job'}</h1>
           </div>

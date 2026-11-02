@@ -115,7 +115,7 @@ export default function WidgetGallery({ onClose, onAddWidget, department }) {
             <h2 className="text-xl md:text-2xl font-bold">Widget Gallery</h2>
             <p className="text-xs md:text-sm text-foreground-muted mt-1">Choose a widget to add to your dashboard</p>
           </div>
-          <button onClick={onClose} className="glass-button p-2">
+          <button aria-label="Close" onClick={onClose} className="glass-button p-2">
             <X className="w-4 h-4 md:w-5 md:h-5" />
           </button>
         </div>

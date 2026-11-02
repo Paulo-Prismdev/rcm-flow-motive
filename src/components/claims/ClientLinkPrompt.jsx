@@ -20,7 +20,7 @@ export default function ClientLinkPrompt({ isOpen, matches = [], clientName, isS
               "{clientName}" matches {matches.length === 1 ? 'an existing client' : 'existing clients'}. Link this claim to one, or save it as a new client.
             </p>
           </div>
-          <Button onClick={onCancel} variant="ghost" size="icon"><X className="w-5 h-5" /></Button>
+          <Button aria-label="Close" onClick={onCancel} variant="ghost" size="icon"><X className="w-5 h-5" /></Button>
         </div>
 
         <div className="space-y-2 mb-5">

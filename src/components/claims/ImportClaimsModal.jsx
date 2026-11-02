@@ -300,7 +300,7 @@ Only map columns that clearly correspond to a field. Be conservative - if unsure
               <p className="text-sm text-foreground-muted">AI-powered spreadsheet import</p>
             </div>
           </div>
-          <button onClick={handleClose} className="glass-button w-9 h-9 flex items-center justify-center">
+          <button aria-label="Close" onClick={handleClose} className="glass-button w-9 h-9 flex items-center justify-center">
             <X className="w-4 h-4" />
           </button>
         </div>

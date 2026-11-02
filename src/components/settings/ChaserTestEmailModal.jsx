@@ -67,7 +67,7 @@ export default function ChaserTestEmailModal({ rule, onClose }) {
             <Send className="w-4 h-4 text-purple-600" />
             <h2 className="text-base font-semibold text-gray-900 dark:text-white">Send Test Email</h2>
           </div>
-          <button onClick={onClose} className="p-1.5 text-gray-400 hover:text-gray-900 dark:hover:text-white rounded">
+          <button aria-label="Close" onClick={onClose} className="p-1.5 text-gray-400 hover:text-gray-900 dark:hover:text-white rounded">
             <X className="w-4 h-4" />
           </button>
         </div>

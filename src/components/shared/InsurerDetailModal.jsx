@@ -139,7 +139,7 @@ export default function InsurerDetailModal({ insurer, onClose, onUpdated }) {
                 <Pencil className="w-4 h-4" /> Edit
               </Button>
             }
-            <Button onClick={onClose} variant="ghost" size="icon">
+            <Button aria-label="Close" onClick={onClose} variant="ghost" size="icon">
               <X className="w-5 h-5" />
             </Button>
           </div>

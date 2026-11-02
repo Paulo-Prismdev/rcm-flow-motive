@@ -163,7 +163,7 @@ export default function FeedbackHub() {
       <div className="neomorph p-4 md:p-6">
         <div className="flex items-center gap-4 mb-4">
           <Link to={createPageUrl('Dashboard')}>
-            <Button className="neomorph-flat p-2">
+            <Button aria-label="Back" className="neomorph-flat p-2">
               <ArrowLeft className="w-4 h-4" />
             </Button>
           </Link>

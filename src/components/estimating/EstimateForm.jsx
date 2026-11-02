@@ -120,7 +120,7 @@ export default function EstimateForm({ estimate, onSubmit, onCancel }) {
       {/* Header - Fixed */}
       <div className="neomorph p-6">
         <div className="flex items-center gap-4 mb-6">
-          <Button onClick={onCancel} className="neomorph-flat p-3 transition-all active:neomorph-pressed">
+          <Button aria-label="Back" onClick={onCancel} className="neomorph-flat p-3 transition-all active:neomorph-pressed">
             <ArrowLeft className="w-4 h-4 text-gray-600" />
           </Button>
           <div>

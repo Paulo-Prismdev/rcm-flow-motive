@@ -100,7 +100,7 @@ export default function ClientCombobox({ value, onChange, placeholder = "Select 
             </PopoverContent>
           </Popover>
           {allowClear && selectedName && (
-            <Button
+            <Button aria-label="Close"
               type="button"
               variant="ghost"
               size="sm"

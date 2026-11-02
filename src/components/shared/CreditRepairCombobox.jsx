@@ -86,7 +86,7 @@ export default function CreditRepairCombobox({ value, onChange, placeholder = "S
             </PopoverContent>
           </Popover>
           {selectedName && (
-            <Button
+            <Button aria-label="Close"
               type="button"
               variant="ghost" size="sm" onClick={handleClear}
               className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 p-0 hover:bg-red-100 hover:text-red-600"

@@ -126,7 +126,7 @@ export default function ImageAttachmentModal({ imageUrls = [], onAdd, onRemove, 
                 {imageUrls.length} {imageUrls.length === 1 ? 'item' : 'items'}
               </p>
             </div>
-            <button
+            <button aria-label="Close"
               onClick={onClose}
               className="w-6 h-6 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
             >

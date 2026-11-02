@@ -72,7 +72,7 @@ export default function ShareTemplateModal({ template, isOpen, onClose, onSave }
             <h2 className="text-xl font-bold">Share Template</h2>
             <p className="text-sm text-foreground-muted mt-1">{template.template_name}</p>
           </div>
-          <button onClick={onClose} className="neomorph-flat p-2">
+          <button aria-label="Close" onClick={onClose} className="neomorph-flat p-2">
             <X className="w-5 h-5" />
           </button>
         </div>

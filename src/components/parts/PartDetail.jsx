@@ -469,7 +469,7 @@ const renderSelectedSection = () => {
         <div className="neomorph p-3 md:p-6 flex-shrink-0 sticky top-0 z-10 bg-background">
           <div className="flex flex-col gap-3">
             <div className="flex items-center gap-2 md:gap-4">
-              <Button onClick={handleClose} className="neomorph-flat p-2 flex-shrink-0">
+              <Button aria-label="Back" onClick={handleClose} className="neomorph-flat p-2 flex-shrink-0">
                 <ArrowLeft className="w-4 h-4" />
               </Button>
               <div className="flex-1 min-w-0">
@@ -486,7 +486,7 @@ const renderSelectedSection = () => {
                 {canEdit && (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button className="neomorph-flat p-1.5 md:p-2">
+                      <Button aria-label="Expand" className="neomorph-flat p-1.5 md:p-2">
                         <ChevronDown className="w-3.5 h-3.5 md:w-4 md:h-4" />
                       </Button>
                     </DropdownMenuTrigger>

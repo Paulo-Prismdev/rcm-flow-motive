@@ -50,7 +50,7 @@ export default function ReferrerPartsForm({ claims, onClose, onSuccess }) {
     <div className="neomorph p-4 md:p-6">
       <div className="flex items-center justify-between mb-4">
         <h3 className="font-bold text-lg">Request Parts Support</h3>
-        <Button onClick={onClose} variant="ghost" size="icon">
+        <Button aria-label="Close" onClick={onClose} variant="ghost" size="icon">
           <X className="w-4 h-4" />
         </Button>
       </div>
