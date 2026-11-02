@@ -97,6 +97,33 @@ export async function deleteAndLog(entityName, id, { label } = {}) {
   return result;
 }
 
+// Save changes to a directory or settings record and log each changed field against
+// it. The save throws on failure as before; the logging never does.
+export async function updateAndLog(entityName, id, data, { before } = {}) {
+  let prior = before || null;
+  if (!prior) {
+    try { prior = (await base44.entities[entityName].get(id)) || null; } catch { /* still save */ }
+  }
+  const result = await base44.entities[entityName].update(id, data);
+  if (prior && LOG_TYPES.has(entityName)) {
+    logChanges({ parentId: id, parentType: entityName, oldData: prior, newData: data });
+  }
+  return result;
+}
+
+// Create a directory or settings record and log that it was added.
+export async function createAndLog(entityName, data, { label } = {}) {
+  const created = await base44.entities[entityName].create(data);
+  if (created?.id && LOG_TYPES.has(entityName)) {
+    const name = recordName(created) || recordName(data);
+    logActivity({
+      parentId: created.id, parentType: entityName, action: 'Created',
+      description: `Added ${label || entityName.replace(/([a-z])([A-Z])/g, '$1 $2').toLowerCase()}${name ? ` – ${name}` : ''}`,
+    });
+  }
+  return created;
+}
+
 // Log that a record was deleted, with a short summary of what it was. Never throws.
 export function logDeletion({ parentId, parentType, label, details }) {
   return logActivity({
