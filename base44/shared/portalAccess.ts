@@ -85,8 +85,8 @@ export function claimForPortal(claim: any): any {
 /** The parts of a repairer record a referrer or client may see for their own claim. */
 export function repairerForPortal(bodyshop: any): any {
   if (!bodyshop) return null;
-  const pick = ['id', 'name', 'address', 'address_line_1', 'address_line_2', 'town', 'city', 'county',
-    'postcode', 'phone', 'email', 'contact_name', 'website', 'latitude', 'longitude', 'logo_url'];
+  const pick = ['id', 'name', 'logo_url', 'contact_name', 'phone', 'mobile_phone', 'email', 'web_address',
+    'full_address', 'address_line_1', 'address_line_2', 'town', 'county', 'postcode', 'latitude', 'longitude'];
   const out: Record<string, unknown> = {};
   for (const key of pick) if (bodyshop[key] !== undefined) out[key] = bodyshop[key];
   return out;
