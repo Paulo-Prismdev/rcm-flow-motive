@@ -5,6 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { UserX } from "lucide-react";
 import ClaimBodyshopAllocateButton from './ClaimBodyshopAllocateButton';
 import { base44 } from '@/api/base44Client';
+import { logActivity } from '@/components/shared/useActivityLogger';
 import { useQuery } from '@tanstack/react-query';
 import {
     Dialog,
