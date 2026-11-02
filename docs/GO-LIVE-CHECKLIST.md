@@ -27,14 +27,16 @@ Keep this list up to date at the end of every round.
 - [ ] Financials: record an invoice and an authority; mark paid; a failed save shows a message and leaves no history line.
 - [ ] New claim wizard: Next/Create with the registration, claim type or client name missing shows the message under the field; a bad email is caught. Edit form shows the list at the top.
 - [ ] Confirm boxes (archive, delete claim, delete note/update/task, remove link, unsaved changes) appear in the app's own style and Cancel does nothing.
+- [ ] Directory: edit a client, repairer, insurer and supplier – "Change history" on the record shows who changed which field. Adding a record logs "Added …".
+- [ ] Settings: a non-admin staff member (e.g. info@rcmltd.co.uk) can't change portal adverts/products, chaser rules or invoicing settings; admins can.
+- [ ] Pop-ups app-wide (settings, directories, parts, estimates, engineering, users) now use the app's own boxes and corner messages.
 - [ ] Email: send an invoice request with a CC – check CC, Reply-To and sender name (and that it arrives at all on Base44 email if Resend isn't set up).
 
 ## Deferred to after go-live
 - [ ] Split the large Financials file (`ClaimFinancials.jsx`) – maintenance only, needs live testing.
 - [ ] One-off move of older public documents to private storage (offered, not done).
 - [ ] Make generated PDFs private (ties in with the Resend move – attach instead of link).
-- [ ] Directory record edits (not just deletions) in the audit log – planned for Round 9.
-- [ ] User hierarchy and permissions build (separate job).
+- [ ] User hierarchy and permissions build (separate job). Note: any internal staff member can currently edit Role records (feature permissions) – tighten in that job.
 
 ## Open questions for Paul
 - [ ] Confirm the portal update-feed rules above (Round 8 default) – easy to change in `base44/shared/portalAccess.ts`.
