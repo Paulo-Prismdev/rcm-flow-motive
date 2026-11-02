@@ -12,7 +12,7 @@
       "timezone": "UTC",
       "interval_value": 5,
       "interval_unit": "minutes",
-      "interval_anchor": "2026-11-02T09:00:00.000000",
+      "interval_anchor": "2026-11-02T09:00:00Z",
       "ends_type": "never",
       "ends_on_date": null,
       "ends_after_count": null
