@@ -8,6 +8,7 @@ import { base44 } from '@/api/base44Client';
 import { Loader, X, ChevronDown, Eye, EyeOff } from 'lucide-react';
 import AddressLookupInput from './AddressLookupInput';
 import { VEHICLE_MANUFACTURERS } from './vehicleManufacturers';
+import { updateAndLog, createAndLog } from '@/components/shared/useActivityLogger';
 
 export default function AddSupplierModal({ isOpen, onClose, onSuccess, editingSupplier = null }) {
   const queryClient = useQueryClient();
@@ -58,8 +59,8 @@ export default function AddSupplierModal({ isOpen, onClose, onSuccess, editingSu
 
   const createMutation = useMutation({
     mutationFn: (data) => editingSupplier 
-      ? base44.entities.Supplier.update(editingSupplier.id, data)
-      : base44.entities.Supplier.create(data),
+      ? updateAndLog('Supplier', editingSupplier.id, data, { before: editingSupplier })
+      : createAndLog('Supplier', data, { label: 'supplier' }),
     onSuccess: (newSupplier) => {
       queryClient.invalidateQueries({ queryKey: ['suppliers'] });
       onSuccess(newSupplier);

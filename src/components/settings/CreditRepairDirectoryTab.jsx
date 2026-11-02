@@ -10,7 +10,7 @@ import DirectoryShell from "../shared/DirectoryShell";
 import AddCreditRepairCompanyModal from "../shared/AddCreditRepairCompanyModal";
 import CreditRepairRateFields from "./CreditRepairRateFields";
 import { HIRE_CATEGORIES, basisShort, fmtGBP, hasValue, hireFeeField, missingPartnerRates, normaliseRates } from "../shared/creditRepairRates";
-import { deleteAndLog } from "@/components/shared/useActivityLogger";
+import { deleteAndLog, updateAndLog } from "@/components/shared/useActivityLogger";
 
 function CreditRepairDetailModal({ company, onClose, onUpdated }) {
   const [formData, setFormData] = useState(company);
@@ -18,7 +18,7 @@ function CreditRepairDetailModal({ company, onClose, onUpdated }) {
   const queryClient = useQueryClient();
 
   const updateMutation = useMutation({
-    mutationFn: (data) => base44.entities.CreditRepairCompany.update(company.id, normaliseRates(data)),
+    mutationFn: (data) => updateAndLog('CreditRepairCompany', company.id, normaliseRates(data), { before: company }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["creditRepairCompanies"] });
       onUpdated();

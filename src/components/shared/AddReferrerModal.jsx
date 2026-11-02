@@ -5,6 +5,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from '@/api/base44Client';
 import { Loader, X } from 'lucide-react';
 import AddressLookupInput from './AddressLookupInput';
+import { createAndLog } from '@/components/shared/useActivityLogger';
 
 export default function AddReferrerModal({ isOpen, onClose, onSuccess }) {
   const queryClient = useQueryClient();
@@ -27,7 +28,7 @@ export default function AddReferrerModal({ isOpen, onClose, onSuccess }) {
   // referrer picker searches and where their fee rates are held — so a referrer
   // added here can be picked on the claim straight away.
   const createMutation = useMutation({
-    mutationFn: (data) => base44.entities.Company.create({
+    mutationFn: (data) => createAndLog('Company', {
       name: data.name,
       company_type: 'referrer',
       is_active: true,

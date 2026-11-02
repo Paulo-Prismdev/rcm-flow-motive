@@ -8,6 +8,7 @@ import { base44 } from "@/api/base44Client";
 import { useMutation } from '@tanstack/react-query';
 import { useToast } from "@/components/ui/use-toast";
 import AddressLookupInput from './AddressLookupInput';
+import { createAndLog } from '@/components/shared/useActivityLogger';
 
 const EMPTY_FORM = {
   name: '',
@@ -39,7 +40,7 @@ export default function AddThirdPartyModal({ isOpen, onClose, onSuccess, initial
   }, [isOpen, initialName]);
 
   const createMutation = useMutation({
-    mutationFn: (data) => base44.entities.Client.create(data),
+    mutationFn: (data) => createAndLog('Client', data, { label: 'third party' }),
     onSuccess: (record) => {
       if (onSuccess) onSuccess(record);
       handleClose();

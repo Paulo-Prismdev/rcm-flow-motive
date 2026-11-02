@@ -8,6 +8,7 @@ import AddressLookupInput from './AddressLookupInput'; // New import
 
 export default function AddBodyshopModal({ isOpen, onClose, onSuccess, initialName = '' }) {
   const queryClient = useQueryClient();
+import { createAndLog } from '@/components/shared/useActivityLogger';
   const [formData, setFormData] = useState({
     name: initialName || '',
     contact_name: '',
@@ -60,7 +61,7 @@ export default function AddBodyshopModal({ isOpen, onClose, onSuccess, initialNa
         }
       }
       
-      const newBodyshop = await base44.entities.Bodyshop.create(finalData);
+      const newBodyshop = await createAndLog('Bodyshop', finalData, { label: 'repairer' });
       console.log("[AddBodyshopModal] Bodyshop created successfully:", newBodyshop);
       return newBodyshop;
     },

@@ -15,7 +15,7 @@ import {
 import DirectoryShell from "@/components/shared/DirectoryShell";
 import ReferrerLinkedUsers from "@/components/settings/ReferrerLinkedUsers";
 import { syncReferrerVat } from "@/components/shared/syncReferrerVat";
-import { deleteAndLog } from "@/components/shared/useActivityLogger";
+import { deleteAndLog, updateAndLog, createAndLog } from "@/components/shared/useActivityLogger";
 
 const ALL_PORTAL_SECTIONS = ["Claims", "Parts"];
 
@@ -31,7 +31,7 @@ function ReferrerDetailModal({ company, onClose, onUpdated }) {
   const queryClient = useQueryClient();
 
   const updateMutation = useMutation({
-    mutationFn: (data) => base44.entities.Company.update(company.id, data),
+    mutationFn: (data) => updateAndLog('Company', company.id, data, { before: company }),
     onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ["companies"] });
       onUpdated();
@@ -264,7 +264,7 @@ function AddReferrerModal({ onClose, onSuccess }) {
     contacts: [],
   });
   const createMutation = useMutation({
-    mutationFn: (data) => base44.entities.Company.create(data),
+    mutationFn: (data) => createAndLog('Company', data, { label: 'company' }),
     onSuccess: () => { toast.success("Referrer created"); onSuccess(); },
   });
 

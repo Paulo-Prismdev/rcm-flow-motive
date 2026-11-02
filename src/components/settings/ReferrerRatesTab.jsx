@@ -10,6 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { updateAndLog } from '@/components/shared/useActivityLogger';
 
 export default function ReferrerRatesTab() {
   const queryClient = useQueryClient();
@@ -22,7 +23,7 @@ export default function ReferrerRatesTab() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }) => base44.entities.Referrer.update(id, data),
+    mutationFn: ({ id, data }) => updateAndLog('Referrer', id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['referrers'] });
       setEditingReferrer(null);

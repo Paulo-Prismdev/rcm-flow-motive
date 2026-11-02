@@ -9,6 +9,7 @@ import { createPortal } from "react-dom";
 import { isClientTagged, isThirdPartyTagged } from "@/components/shared/directoryTags";
 import { syncClaimVatExcess } from "@/components/shared/syncClaimVatExcess";
 import DirectoryTagPills from "./DirectoryTagPills";
+import { updateAndLog, createAndLog } from '@/components/shared/useActivityLogger';
 
 const EMPTY_FORM = {
   name: "",
@@ -48,7 +49,7 @@ export default function DirectoryDetailModal({ record, onClose, onSaved }) {
   const [isEditing, setIsEditing] = useState(isNew);
 
   const saveMutation = useMutation({
-    mutationFn: (data) => (isNew ? base44.entities.Client.create(data) : base44.entities.Client.update(record.id, data)),
+    mutationFn: (data) => (isNew ? createAndLog('Client', data, { label: 'directory contact' }) : updateAndLog('Client', record.id, data, { before: record })),
     onSuccess: async (saved) => {
       // A record that is no longer a client never keeps a VAT & excess setting.
       const stillClient = isClientTagged(saved || formData);

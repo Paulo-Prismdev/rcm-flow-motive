@@ -8,6 +8,7 @@ import { base44 } from "@/api/base44Client";
 import { useMutation } from '@tanstack/react-query';
 import InsurerContactsEditor from "./InsurerContactsEditor";
 import NetworkCodesEditor from "./NetworkCodesEditor";
+import { createAndLog } from '@/components/shared/useActivityLogger';
 
 const EMPTY_FORM = { name: '', contact_name: '', phone: '', email: '', claims_line: '', notes: '', useful_contacts: [], network_codes: [] };
 
@@ -20,7 +21,7 @@ export default function AddInsurerModal({ isOpen, onClose, onSuccess, initialNam
   }, [isOpen, initialName]);
 
   const createMutation = useMutation({
-    mutationFn: (data) => base44.entities.Insurer.create(data),
+    mutationFn: (data) => createAndLog('Insurer', data, { label: 'insurer' }),
     onSuccess: (newInsurer) => {
       if (onSuccess) onSuccess(newInsurer);
       handleClose();

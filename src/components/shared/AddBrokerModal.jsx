@@ -5,6 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { X } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useMutation } from '@tanstack/react-query';
+import { createAndLog } from '@/components/shared/useActivityLogger';
 
 const EMPTY_FORM = { name: '', contact_name: '', phone: '', email: '', address: '', notes: '' };
 
@@ -12,7 +13,7 @@ export default function AddBrokerModal({ isOpen, onClose, onSuccess }) {
   const [formData, setFormData] = useState(EMPTY_FORM);
 
   const createMutation = useMutation({
-    mutationFn: (data) => base44.entities.Broker.create(data),
+    mutationFn: (data) => createAndLog('Broker', data, { label: 'broker' }),
     onSuccess: (newBroker) => {
       if (onSuccess) onSuccess(newBroker);
       handleClose();

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { X, Pencil, Phone, Mail, Building2, Network, User, Plus, Trash2, Copy } from "lucide-react";
+import { updateAndLog } from '@/components/shared/useActivityLogger';
 
 const buildForm = (insurer) => ({
   name: insurer.name || "",
@@ -37,14 +38,14 @@ export default function InsurerDetailModal({ insurer, onClose, onUpdated }) {
   };
 
   const updateMutation = useMutation({
-    mutationFn: (data) => base44.entities.Insurer.update(insurer.id, data),
+    mutationFn: (data) => updateAndLog('Insurer', insurer.id, data, { before: insurer }),
     onSuccess: (updated) => {applyToCache(updated);onUpdated?.();setEditMode(false);},
     onError: (err) => toast({ title: "Save failed", description: err?.message || "Please try again", variant: "destructive" })
   });
 
   // Quick partial update (used by inline add/remove in read view)
   const quickMutation = useMutation({
-    mutationFn: (data) => base44.entities.Insurer.update(insurer.id, data),
+    mutationFn: (data) => updateAndLog('Insurer', insurer.id, data, { before: insurer }),
     onSuccess: (updated) => {applyToCache(updated);onUpdated?.();},
     onError: (err) => toast({ title: "Could not save", description: err?.message || "Please try again", variant: "destructive" })
   });

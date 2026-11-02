@@ -9,6 +9,7 @@ import { useMutation } from '@tanstack/react-query';
 import { useToast } from "@/components/ui/use-toast";
 import CreditRepairRateFields from "@/components/settings/CreditRepairRateFields";
 import { normaliseRates } from "./creditRepairRates";
+import { createAndLog } from '@/components/shared/useActivityLogger';
 
 const EMPTY_FORM = { name: '', contact_name: '', phone: '', email: '', contacts: [], address_line_1: '', address_line_2: '', town: '', county: '', postcode: '', account_reference: '', hire_fee_standard: '', hire_fee_prestige: '', hire_fee_super_prestige: '', commission_percent: '', commission_basis: '', notes: '' };
 
@@ -17,7 +18,7 @@ export default function AddCreditRepairCompanyModal({ isOpen, onClose, onSuccess
   const { toast } = useToast();
 
   const createMutation = useMutation({
-    mutationFn: (data) => base44.entities.CreditRepairCompany.create(normaliseRates(data)),
+    mutationFn: (data) => createAndLog('CreditRepairCompany', normaliseRates(data), { label: 'credit repair company' }),
     onSuccess: (newCompany) => {
       if (onSuccess) onSuccess(newCompany);
       handleClose();

@@ -22,7 +22,7 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
-import { deleteAndLog } from "@/components/shared/useActivityLogger";
+import { deleteAndLog, updateAndLog } from "@/components/shared/useActivityLogger";
 
 const TIER_OPTIONS = ["TIER 1", "TIER 2", "Previously on Network", ""];
 const MAP_GROUP_OPTIONS = ["Solution", "QAC", ""];
@@ -110,7 +110,7 @@ export default function RepairerDetailDrawer({ bodyshopId, onClose }) {
   const saveMutation = useMutation({
     mutationFn: (data) => {
       const { id, created_date, updated_date, created_by_id, ...editable } = data;
-      return base44.entities.Bodyshop.update(bodyshopId, editable);
+      return updateAndLog('Bodyshop', bodyshopId, editable);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["bodyshop-detail", bodyshopId] });
