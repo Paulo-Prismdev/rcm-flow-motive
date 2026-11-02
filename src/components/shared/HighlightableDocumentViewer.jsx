@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import * as pdfjsLib from 'pdfjs-dist';
+import withResolvedFile from './withResolvedFile';
 import { Loader2, ZoomIn, ZoomOut, FileText, Maximize2, Minimize2 } from 'lucide-react';
 
 // Use CDN-hosted worker matching the installed pdfjs-dist version
@@ -32,7 +33,7 @@ const clampScale = (value) => Math.min(MAX_SCALE, Math.max(MIN_SCALE, value));
  * checking fine detail. Both are opt-in, so the other review screens keep their own
  * framing.
  */
-export default function HighlightableDocumentViewer({ fileUrl, highlightText, fitWidth = false, allowFullscreen = false }) {
+function HighlightableDocumentViewerInner({ fileUrl, fileExt, highlightText, fitWidth = false, allowFullscreen = false }) {
   const containerRef = useRef(null);
   const pageRefs = useRef([]);
   const [loading, setLoading] = useState(true);
@@ -57,7 +58,7 @@ export default function HighlightableDocumentViewer({ fileUrl, highlightText, fi
     setUseIframeFallback(false);
     pageRefs.current = [];
 
-    const ext = getExtension(fileUrl);
+    const ext = fileExt || getExtension(fileUrl);
     if (ext !== 'pdf') {
       setIsImage(true);
       setLoading(false);
@@ -315,3 +316,6 @@ export default function HighlightableDocumentViewer({ fileUrl, highlightText, fi
   // screen rather than the pane it normally shares with the details.
   return expanded ? createPortal(viewer, document.body) : viewer;
 }
+
+// Takes a stored reference (private or public) and opens it through a signed link.
+export default withResolvedFile(HighlightableDocumentViewerInner);

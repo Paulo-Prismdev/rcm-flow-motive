@@ -1,7 +1,8 @@
 import React from 'react';
 import { FileText } from 'lucide-react';
+import withResolvedFile from './withResolvedFile';
 
-export default function DocumentPreview({ fileUrl }) {
+function DocumentPreviewInner({ fileUrl, fileExt }) {
   if (!fileUrl) {
     return (
       <div className="flex items-center justify-center h-full text-gray-400">
@@ -23,7 +24,7 @@ export default function DocumentPreview({ fileUrl }) {
     }
   };
 
-  const ext = getExtension(fileUrl);
+  const ext = fileExt || getExtension(fileUrl);
   const isImage = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(ext);
   const isPDF = ext === 'pdf';
 
@@ -45,3 +46,6 @@ export default function DocumentPreview({ fileUrl }) {
     </div>
   );
 }
+
+// Takes a stored reference (private or public) and opens it through a signed link.
+export default withResolvedFile(DocumentPreviewInner);
