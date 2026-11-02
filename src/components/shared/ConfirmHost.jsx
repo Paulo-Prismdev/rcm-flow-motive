@@ -18,8 +18,10 @@ export default function ConfirmHost() {
     setCurrent((c) => c || queue.current.shift());
   }), []);
 
+  // A button click and the dialog closing both report in; only the first counts.
   const finish = (answer) => {
-    if (!current) return;
+    if (!current || current.done) return;
+    current.done = true;
     current.resolve(answer);
     setCurrent(queue.current.shift() || null);
   };
