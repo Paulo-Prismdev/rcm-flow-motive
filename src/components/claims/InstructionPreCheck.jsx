@@ -6,7 +6,7 @@ import ExcessModeField from '../shared/ExcessModeField';
 import { excessMode, excessAnswered } from '../shared/excessState';
 import { logExcessChange } from '../shared/logExcessChange';
 
-const CLAIM_TYPES = ['Fault Claim', 'Non-Fault - Own Insurer', '3rd Party Insurer Direct', '3rd Party Paying Privately', 'Credit Repair', 'Glass Claim', 'Paying Privately'];
+import { CLAIM_TYPES } from '@/components/shared/claimTypes';
 const VAT_STATUSES = ['VAT Registered', 'Non-VAT', 'Unknown'];
 
 const INSTRUCTION_TYPES = [

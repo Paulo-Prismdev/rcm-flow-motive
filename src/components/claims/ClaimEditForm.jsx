@@ -15,6 +15,7 @@ import ExcessModeField from '../shared/ExcessModeField';
 import AddressLookupInput from '../shared/AddressLookupInput';
 import AIExtractConfirmDialog from '../shared/AIExtractConfirmDialog';
 import { COURTESY_CAR_OPTIONS } from '../shared/courtesyCarOptions';
+import { CLAIM_TYPES } from '../shared/claimTypes';
 
 export default function ClaimEditForm({
   formData, handleChange, handleCheckboxChange,
@@ -77,7 +78,7 @@ export default function ClaimEditForm({
                 </div>
               </div>
               <div><label className="block text-sm text-gray-600 mb-2">Job Statuses</label><StatusMultiSelect selectedStatuses={formData.job_statuses || []} onStatusesChange={(s) => handleChange('job_statuses', s)} availableStatuses={['New','In Progress','Awaiting Authority','Placed','In Repair','Completed','Cancelled','Total Loss']} placeholder="Select statuses..." /></div>
-              <div><label className="block text-sm text-gray-600 mb-2">Claim Type</label><select value={formData.claim_type} onChange={(e) => handleChange('claim_type', e.target.value)} className="neomorph-inset w-full px-4 py-3 text-gray-700 border-0 rounded-xl"><option>Credit Repair</option><option>Fault Claim</option><option>Non-Fault - Own Insurer</option><option>Non-Fault Claim</option><option>Total Loss</option><option>Glass Claim</option><option>Paying Privately</option></select></div>
+              <div><label className="block text-sm text-gray-600 mb-2">Claim Type</label><select value={formData.claim_type} onChange={(e) => handleChange('claim_type', e.target.value)} className="neomorph-inset w-full px-4 py-3 text-gray-700 border-0 rounded-xl"><option value="">Select claim type...</option>{CLAIM_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}</select></div>
               <div className="md:col-span-2 lg:col-span-3">
                 <ClaimAuthorisingPartyFields formData={formData} handleChange={handleChange} />
               </div>

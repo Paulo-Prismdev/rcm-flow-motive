@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Upload, X, CheckCircle, AlertCircle, Loader2, FileSpreadsheet, Sparkles } from 'lucide-react';
+import { claimTypeFromText } from '@/components/shared/claimTypes';
 
 // Claim fields the AI can map to
 const CLAIM_FIELDS = [
@@ -83,24 +84,9 @@ const NUMBER_FIELDS = new Set(['policy_excess','estimate_cost_net','estimate_cos
   'storage_amount_vat','percent_bld_instruction','percent_to_referrer']);
 const BOOL_FIELDS = new Set(['unroadworthy','recovery_required','factored']);
 
-const CLAIM_TYPE_MAP = {
-  'credit repair': 'Credit Repair', 'credit': 'Credit Repair',
-  'fault': 'Fault Claim',
-  'non-fault own insurer': 'Non-Fault - Own Insurer', 'non fault own insurer': 'Non-Fault - Own Insurer', 'own insurer': 'Non-Fault - Own Insurer',
-  'non fault': 'Non-Fault Claim', 'non-fault': 'Non-Fault Claim',
-  'third party': 'Non-Fault Claim', '3rd party': 'Non-Fault Claim',
-  'total loss': 'Total Loss',
-  'glass': 'Glass Claim',
-};
-
-const mapClaimType = (val) => {
-  if (!val) return undefined;
-  const v = val.toString().toLowerCase().trim();
-  for (const [k, mapped] of Object.entries(CLAIM_TYPE_MAP)) {
-    if (v.includes(k)) return mapped;
-  }
-  return 'Non-Fault Claim';
-};
+// Claim types are read with the shared reader, so an import can only set a type the
+// claim record allows; text it doesn't recognise leaves the type blank to choose by hand.
+const mapClaimType = (val) => claimTypeFromText(val);
 
 // Apply AI-generated column mapping to a raw row
 const applyMapping = (row, mapping) => {
