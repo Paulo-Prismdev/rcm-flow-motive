@@ -3,15 +3,26 @@ import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { X, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import FilePreviewContent from '@/components/shared/FilePreviewContent';
+import { fileNameOf, resolveFileUrl } from '@/lib/privateFiles';
+import { toast } from '@/components/ui/use-toast';
 
-export default function FileViewer({ fileUrl, onClose }) {
+// `fileUrl` is the stored reference: a private file opens through a short-lived signed
+// link and each opening is logged. `claimId` keeps the log entry on the right claim.
+export default function FileViewer({ fileUrl, onClose, claimId }) {
   const returnFocusRef = useRef(null);
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     if (!fileUrl) return;
-    const fileName = fileUrl.split(/[?#]/)[0].split('/').pop() || 'download';
+    const fileName = fileNameOf(fileUrl) || 'download';
+    let href;
+    try {
+      href = await resolveFileUrl(fileUrl, { claimId, log: true, purpose: 'download' });
+    } catch {
+      toast({ title: 'This file could not be downloaded', variant: 'destructive' });
+      return;
+    }
     const a = document.createElement('a');
-    a.href = fileUrl;
+    a.href = href;
     a.download = fileName;
     a.target = '_blank';
     a.rel = 'noopener noreferrer';
@@ -52,7 +63,7 @@ export default function FileViewer({ fileUrl, onClose }) {
               </DialogPrimitive.Close>
             </div>
           </div>
-          {fileUrl && <FilePreviewContent fileUrl={fileUrl} />}
+          {fileUrl && <FilePreviewContent fileUrl={fileUrl} claimId={claimId} />}
         </DialogPrimitive.Content>
       </DialogPrimitive.Portal>
     </DialogPrimitive.Root>
