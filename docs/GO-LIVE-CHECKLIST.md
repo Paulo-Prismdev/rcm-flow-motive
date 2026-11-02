@@ -33,6 +33,8 @@ Keep this list up to date at the end of every round.
 - [ ] Keyboard: Tab through the claims list and a portal list – each row shows a ring and Enter opens it; Escape closes the directory record, the image viewer and the add-repairer panel.
 - [ ] Grey secondary text (e.g. the lines under each Financials row) is a touch darker – check it still looks right.
 - [ ] Email: send an invoice request with a CC – check CC, Reply-To and sender name (and that it arrives at all on Base44 email if Resend isn't set up).
+- [ ] Branding: the browser tab shows the navy RCM icon (not the Base44 logo); "Add to Home Screen" on Anthony's phone/tablet shows the RCM icon named "RCM Flowmotive"; Base44's own sign-in/invite emails say "RCM Flowmotive" not "ARTECH One".
+- [ ] Check nothing you use has gone: Round 11 removed 20 unused components and two dead pages (Part Manufacturer Config, Migrate Users). Everything is in the "Before Round 11" checkpoint if anything needs bringing back.
 
 ## Deferred to after go-live
 - [ ] Split the large Financials file (`ClaimFinancials.jsx`) – maintenance only, needs live testing.
@@ -41,6 +43,7 @@ Keep this list up to date at the end of every round.
 - [ ] User hierarchy and permissions build (separate job). Note: any internal staff member can currently edit Role records (feature permissions) – tighten in that job.
 
 ## Open questions for Paul
+- [ ] The Base44 web address is still `artech-flow.base44.app` (Face ID works on it and on app.rcmautomotive.co.uk). Renaming it in Base44 would break Face ID registered on the old address – leave it, or rename and re-register?
 - [ ] Mac look drift (Round 10 report): about 35 screens still use the older hard-coded greys and white with no dark-mode colours – worst are the Parts form, the Edit Claim form, the vehicle form and the public customer forms. Do a visual-only pass after go-live?
 - [ ] Confirm the portal update-feed rules above (Round 8 default) – easy to change in `base44/shared/portalAccess.ts`.
 - [ ] Should the total-loss storage fee invoice carry VAT?
