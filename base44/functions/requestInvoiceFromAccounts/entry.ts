@@ -73,12 +73,13 @@ export default async function (req: Request): Promise<Response> {
         user_email: user.email || '',
         user_name: user.full_name || '',
       });
-    } catch (logErr) {
+    } catch (logErr: any) {
       console.error('Failed to log the invoice request:', logErr.message);
     }
 
     return Response.json({ success: true, requested_at: requestedAt });
-  } catch (error) {
-    return Response.json({ error: error.message }, { status: 500 });
+  } catch (error: any) {
+    console.error('requestInvoiceFromAccounts error:', error?.message);
+    return Response.json({ error: 'Something went wrong sending the email. Please try again.' }, { status: 500 });
   }
 }

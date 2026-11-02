@@ -95,6 +95,7 @@ export default async function (req: Request): Promise<Response> {
       reminder_sent_at: reminder ? at : null,
     });
   } catch (error: any) {
-    return Response.json({ error: error.message }, { status: 500 });
+    console.error('requestReferrerInvoice error:', error?.message);
+    return Response.json({ error: 'Something went wrong sending the email. Please try again.' }, { status: 500 });
   }
 }

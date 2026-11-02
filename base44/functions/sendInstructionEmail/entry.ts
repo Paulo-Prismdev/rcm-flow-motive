@@ -31,13 +31,14 @@ export default async function (req: Request): Promise<Response> {
           platform: 'E-Mail',
           description: `Instruction email sent to ${to}${cc ? ` (CC: ${cc})` : ''}:\n\nSubject: ${subject}\n\n${email_body}`
         });
-      } catch (logErr) {
+      } catch (logErr: any) {
         console.error('Failed to log instruction email update:', logErr.message);
       }
     }
 
     return Response.json({ success: true, message: 'Instruction email sent' });
-  } catch (error) {
-    return Response.json({ error: error.message }, { status: 500 });
+  } catch (error: any) {
+    console.error('sendInstructionEmail error:', error?.message);
+    return Response.json({ error: 'Something went wrong sending the email. Please try again.' }, { status: 500 });
   }
 }
