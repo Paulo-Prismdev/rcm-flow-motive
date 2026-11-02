@@ -130,7 +130,7 @@ export const AuthProvider = ({ children }) => {
         await base44.functions.invoke('twofaManage', { action: 'login' }).catch(() => {});
         try { localStorage.setItem('twofa_login_token', currentToken); } catch { /* storage unavailable */ }
         // An email-and-password sign-in (or one straight after a reset) starts the
-        // 90-day password clock. Google sign-ins leave no flag, so they're never held to it.
+        // 90-day password clock.
         const flags = takePasswordLoginFlags();
         if (flags) {
           await base44.functions.invoke('passwordManage', { action: 'noteLogin', reset: flags.reset }).catch(() => {});

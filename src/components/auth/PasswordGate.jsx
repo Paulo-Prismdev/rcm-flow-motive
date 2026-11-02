@@ -6,7 +6,7 @@ import PasswordExpiryBanner from '@/components/auth/PasswordExpiryBanner';
 
 /**
  * Holds the app at "choose a new password" once a password is over 90 days old, and
- * shows a reminder in the last week. Google sign-ins have no password here, so the
+ * shows a reminder in the last week. An account counts once it has signed in with its
  * server reports that this doesn't apply to them. Fails open: a failed check never
  * locks anyone out.
  */

@@ -32,9 +32,20 @@ export default function AccountSecurityCard() {
       {isLoading ? (
         <p className="text-xs text-muted-foreground">Loading…</p>
       ) : !data?.applies ? (
-        <p className="text-xs text-muted-foreground">
-          You sign in with Google, so there's no password to manage here. Your Google account's own security settings apply.
-        </p>
+        <>
+          <p className="text-xs text-muted-foreground mb-3">
+            The 90-day password rule starts the next time you sign in with your email and password. You can change your password now if you like.
+          </p>
+          {done && <AuthNotice tone="success">Your password has been changed.</AuthNotice>}
+          {changing ? (
+            <div className="max-w-md">
+              <ChangePasswordForm idPrefix="profile" onDone={() => { setChanging(false); setDone(true); refetch(); }} />
+              <Button type="button" variant="ghost" className="mt-2 w-full" onClick={() => setChanging(false)}>Cancel</Button>
+            </div>
+          ) : (
+            <Button type="button" variant="outline" size="sm" onClick={() => { setDone(false); setChanging(true); }}>Change password</Button>
+          )}
+        </>
       ) : (
         <>
           <p className="text-xs text-muted-foreground mb-3">

@@ -6,8 +6,8 @@ import { auditUser } from '../../shared/userAudit.ts';
  * The 90-day password change (the same approach as Agile v2).
  *
  *   noteLogin  after an email-and-password sign-in (or right after a reset): marks the
- *              account as a password account and starts the clock. Google sign-ins never
- *              call it, so they have no password here to expire.
+ *              account as a password account and starts the clock. (Sign-in is by email
+ *              and password only; an account counts once it has signed in that way.)
  *   status     is the password expired, or due within 7 days?
  *   change     checks the new password, changes it on the platform, restarts the clock.
  *
@@ -50,9 +50,6 @@ export default async function (req: Request) {
     if (body.action === 'status') return Response.json(await statusFor(base44, user));
 
     if (body.action === 'change') {
-      if (!user.password_user) {
-        return Response.json({ error: 'This account signs in with Google, so there is no password to change here.', code: 'no_password' }, { status: 400 });
-      }
       const currentPassword = String(body.currentPassword || '');
       const newPassword = String(body.newPassword || '');
       if (!currentPassword) return Response.json({ error: 'Enter your current password.', field: 'currentPassword' }, { status: 400 });
@@ -70,9 +67,9 @@ export default async function (req: Request) {
         }, { status: wrongCurrent ? 400 : 502 });
       }
       const now = new Date().toISOString();
-      await base44.asServiceRole.entities.User.update(user.id, { password_changed_at: now });
+      await base44.asServiceRole.entities.User.update(user.id, { password_changed_at: now, password_user: true });
       await auditUser(base44, user, 'Password Changed', 'Password changed');
-      return Response.json({ ok: true, ...(await statusFor(base44, { ...user, password_changed_at: now })) });
+      return Response.json({ ok: true, ...(await statusFor(base44, { ...user, password_user: true, password_changed_at: now })) });
     }
 
     return Response.json({ error: 'Unknown action' }, { status: 400 });
