@@ -783,14 +783,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
         vehicle_revenue_weight: result.revenue_weight || null,
       };
       
-      await logChanges({
-        parentId: claim.id,
-        parentType: 'Claim',
-        oldData: claim,
-        newData: { ...claim, ...updates },
-        user: currentUser,
-      });
-      
+      // handleUpdate logs each changed field, so it isn't logged here as well.
       handleUpdate({ ...claim, ...updates });
       
       // Show success message with summary
