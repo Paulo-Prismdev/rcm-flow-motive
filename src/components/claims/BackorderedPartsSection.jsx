@@ -5,6 +5,7 @@ import { Package, CheckCircle2, Circle, Trash2, ExternalLink, Copy, Check } from
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import { useBackorderLink } from './useBackorderLink';
+import { askConfirm, notify, notifyError } from '@/lib/dialogs';
 
 export default function BackorderedPartsSection({ claim, currentUser, onSendEmail }) {
   const queryClient = useQueryClient();
@@ -148,8 +149,8 @@ export default function BackorderedPartsSection({ claim, currentUser, onSendEmai
               </div>
 
               <button
-                onClick={() => {
-                  if (window.confirm('Remove this part from the list?')) {
+                onClick={async () => {
+                  if (await askConfirm({ title: 'Remove this part from the list?', confirmLabel: 'Remove', destructive: true })) {
                     deleteMutation.mutate(part.id);
                   }
                 }}

@@ -18,6 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { askConfirm, notify, notifyError } from '@/lib/dialogs';
 
 // Function to replace placeholders in template with actual data
 const replacePlaceholders = (text, itemData) => {
@@ -125,7 +126,7 @@ export default function EmailComposerModal({ isOpen, onClose, itemType, itemData
 
   const handleOpenInOutlook = () => {
     if (!to) {
-      alert('Please select a recipient');
+      notifyError('Choose who it’s to', 'Select a recipient first.');
       return;
     }
     

@@ -9,6 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { askConfirm, notify, notifyError } from '@/lib/dialogs';
 
 const PRESET_REASONS = [
   { label: 'Awaiting Parts', days: 7, reason: 'Awaiting parts delivery' },
@@ -43,11 +44,11 @@ export default function UpdateOverrideModal({ isOpen, onClose, claim, onSave, tr
   const handleSave = () => {
     const days = selectedPreset ? selectedPreset.days : parseInt(customDays);
     if (!days || days < 1) {
-      alert('Please select a duration');
+      notifyError('Choose how long', 'Pick a duration for the override.');
       return;
     }
     if (!reason.trim()) {
-      alert('Please provide a reason');
+      notifyError('Add a reason', 'Say why the update timer is being overridden.');
       return;
     }
 

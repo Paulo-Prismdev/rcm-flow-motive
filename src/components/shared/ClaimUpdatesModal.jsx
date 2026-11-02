@@ -15,6 +15,7 @@ import { withTotalLossMarker } from "@/components/shared/totalLoss";
 import { recomputeUpdateTimers } from "@/components/shared/recomputeUpdateTimers";
 import { createTagNotifications } from "@/components/shared/createTagNotifications";
 import { deleteAndLog } from "@/components/shared/useActivityLogger";
+import { askConfirm, notify, notifyError } from '@/lib/dialogs';
 
 const UPDATE_TYPES = [
   "Status Change", "Client Communication", "Bodyshop Communication", "Insurer Communication",
@@ -80,9 +81,9 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
 
   const hasUnsavedChanges = formDirty || (editingUpdateId !== null && editDescriptionDirty);
 
-  const handleOpenChange = (open) => {
+  const handleOpenChange = async (open) => {
     if (!open && hasUnsavedChanges) {
-      if (!window.confirm('You have unsaved changes. Are you sure you want to close and lose your progress?')) {
+      if (!(await askConfirm({ title: 'Discard your changes?', message: 'What you’ve typed hasn’t been saved.', confirmLabel: 'Discard', cancelLabel: 'Keep editing', destructive: true }))) {
         return;
       }
     }
@@ -257,7 +258,7 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
   };
 
   const handleDelete = async (updateId) => {
-    if (confirm('Are you sure you want to delete this update?')) {
+    if (await askConfirm({ title: 'Delete this update?', confirmLabel: 'Delete', destructive: true })) {
       deleteUpdateMutation.mutate(updateId);
     }
   };

@@ -10,6 +10,7 @@ import ThirdPartyCombobox from '../shared/ThirdPartyCombobox';
 import { claimPatchFromThirdParty } from '../shared/thirdPartyFields';
 import InsurerCombobox from '../shared/InsurerCombobox';
 import AddressLookupInput from '../shared/AddressLookupInput';
+import { askConfirm, notify, notifyError } from '@/lib/dialogs';
 
 export default function ThirdPartyPursuitSection({ claim, onUpdate }) {
   const [isCreatingClaim, setIsCreatingClaim] = useState(false);
@@ -109,7 +110,7 @@ export default function ThirdPartyPursuitSection({ claim, onUpdate }) {
   // Reject third party capture
   const handleRejectCapture = () => {
     if (!rejectReason.trim()) {
-      alert('Please provide a reason for not capturing third party details');
+      notifyError('Add a reason', 'Say why the third party details aren’t being captured.');
       return;
     }
     

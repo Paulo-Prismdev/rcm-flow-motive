@@ -6,6 +6,7 @@ import { Plus, ListTodo, CheckCircle2 } from "lucide-react";
 import TaskModal from './TaskModal';
 import TaskCard from './TaskCard';
 import { deleteAndLog } from "@/components/shared/useActivityLogger";
+import { askConfirm, notify, notifyError } from '@/lib/dialogs';
 
 export default function ClaimTasksSection({ claimId, claimJobNumber, claimReg }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -91,8 +92,8 @@ export default function ClaimTasksSection({ claimId, claimJobNumber, claimReg })
     setIsModalOpen(true);
   };
 
-  const handleDelete = (id) => {
-    if (window.confirm('Are you sure you want to delete this task?')) {
+  const handleDelete = async (id) => {
+    if (await askConfirm({ title: 'Delete this task?', confirmLabel: 'Delete', destructive: true })) {
       deleteMutation.mutate(id);
     }
   };

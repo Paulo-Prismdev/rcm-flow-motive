@@ -15,6 +15,7 @@ import { fileNameOf, isPrivateRef } from '@/lib/privateFiles';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
 import { deleteAndLog } from "@/components/shared/useActivityLogger";
+import { askConfirm, notify, notifyError } from '@/lib/dialogs';
 
 // Private files have no public address, so they show as a file icon rather than a
 // thumbnail: opening one goes through a signed link and is logged.
@@ -89,10 +90,10 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
 
   const hasUnsavedChanges = formDirty || (editingNoteId !== null && editDirty);
 
-  const handleOpenChange = (open) => {
+  const handleOpenChange = async (open) => {
     if (!open && viewingFile) { setViewingFile(null); return; }
     if (!open && hasUnsavedChanges) {
-      if (!window.confirm('You have unsaved changes. Are you sure you want to close and lose your progress?')) return;
+      if (!(await askConfirm({ title: 'Discard your changes?', message: 'What you’ve typed hasn’t been saved.', confirmLabel: 'Discard', cancelLabel: 'Keep editing', destructive: true }))) return;
     }
     if (!open) { setFormDirty(false); setEditDirty(false); }
     onClose();
@@ -179,7 +180,7 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
 
   const handleEdit = (note) => { setEditingNoteId(note.id); setEditContent(note.content); setEditDirty(false); };
   const handleSaveEdit = (noteId) => updateNoteMutation.mutate({ noteId, content: editContent });
-  const handleDelete = (noteId) => { if (confirm('Are you sure you want to delete this internal update?')) deleteNoteMutation.mutate(noteId); };
+  const handleDelete = async (noteId) => { if (await askConfirm({ title: 'Delete this internal update?', confirmLabel: 'Delete', destructive: true })) deleteNoteMutation.mutate(noteId); };
   const handleReply = (noteId) => { setReplyToId(noteId); setShowForm(true); };
 
   const resetForm = () => { setShowForm(false); setReplyToId(null); setFormDirty(false); };

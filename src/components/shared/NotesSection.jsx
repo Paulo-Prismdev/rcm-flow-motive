@@ -18,6 +18,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { deleteAndLog } from "@/components/shared/useActivityLogger";
+import { askConfirm, notify, notifyError } from '@/lib/dialogs';
 
 export default function NotesSection({ parentId, parentType }) {
   const [newNote, setNewNote] = useState('');
@@ -144,8 +145,8 @@ export default function NotesSection({ parentId, parentType }) {
     }
   };
 
-  const handleDelete = (noteId) => {
-    if (window.confirm('Are you sure you want to delete this note?')) {
+  const handleDelete = async (noteId) => {
+    if (await askConfirm({ title: 'Delete this note?', confirmLabel: 'Delete', destructive: true })) {
       deleteNoteMutation.mutate(noteId);
     }
   };

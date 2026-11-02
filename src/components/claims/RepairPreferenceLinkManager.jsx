@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Link2, Copy, Check, RefreshCw, Loader, ExternalLink, CheckCircle2, FileText, Download, Trash2 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import FormLinkExpiry from './FormLinkExpiry';
+import { askConfirm, notify, notifyError } from '@/lib/dialogs';
 
 // Internal-only control. Generates a secure, unguessable per-claim link containing a
 // repair_preference_token. External security comes from the token: the public submit
@@ -59,7 +60,7 @@ export default function RepairPreferenceLinkManager({ claim, onUpdate }) {
   };
 
   const handleRemove = async () => {
-    if (!confirm('Remove the repair preference link and clear the signed response? You can generate a new link afterwards.')) return;
+    if (!(await askConfirm({ title: 'Remove the repair preference link?', message: 'The link stops working and the signed response is cleared. You can create a new link afterwards.', confirmLabel: 'Remove link', destructive: true }))) return;
     setGenerating(true);
     try {
       await onUpdate({

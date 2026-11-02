@@ -9,6 +9,7 @@ import {
   Dialog,
   DialogContent,
 } from "@/components/ui/dialog";
+import { askConfirm, notify, notifyError } from '@/lib/dialogs';
 
 export default function BackorderedPartsModal({ claim, currentUser, isOpen, onClose, onSendEmail }) {
   const queryClient = useQueryClient();
@@ -145,8 +146,8 @@ export default function BackorderedPartsModal({ claim, currentUser, isOpen, onCl
                     </div>
 
                     <button
-                      onClick={() => {
-                        if (window.confirm('Remove this part from the list?')) {
+                      onClick={async () => {
+                        if (await askConfirm({ title: 'Remove this part from the list?', confirmLabel: 'Remove', destructive: true })) {
                           deleteMutation.mutate(part.id);
                         }
                       }}
