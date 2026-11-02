@@ -43,6 +43,20 @@ export default function UserEditForm({ user, onSave, onCancel, isSaving }) {
     onSave(formData);
   };
 
+  // RCM admins can clear someone's sign-in code lockout (5 wrong codes locks for 15
+  // minutes). The server checks the admin's rights and records the reset.
+  const [resetState, setResetState] = useState('idle');
+  const resetSignIn = async () => {
+    setResetState('busy');
+    try {
+      await base44.functions.invoke('twofaManage', { action: 'reset', target_user_id: user.id });
+      setResetState('done');
+    } catch (err) {
+      setResetState('idle');
+      alert(err?.response?.data?.error || 'Could not reset the sign-in step.');
+    }
+  };
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4 pt-3 border-t border-border mt-3">
       <div>
@@ -139,7 +153,12 @@ export default function UserEditForm({ user, onSave, onCancel, isSaving }) {
         </div>
       )}
 
-      <div className="flex justify-end gap-2 pt-2">
+      <div className="flex flex-wrap justify-end gap-2 pt-2">
+        {user?.id && user?.user_type === 'internal' && (
+          <Button type="button" onClick={resetSignIn} disabled={resetState === 'busy'} className="neomorph-flat px-3 py-1.5 text-sm mr-auto" title="Clears a lockout after too many wrong codes, and asks for a fresh code at the next sign-in">
+            {resetState === 'busy' ? 'Resetting…' : resetState === 'done' ? 'Sign-in step reset' : 'Reset sign-in code step'}
+          </Button>
+        )}
         <Button type="button" onClick={onCancel} className="neomorph-flat px-3 py-1.5 text-sm">
           Cancel
         </Button>
