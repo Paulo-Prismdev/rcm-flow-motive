@@ -9,9 +9,9 @@ Deno.serve(async (req) => {
             return Response.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        // Only internal staff, admins, or bodyshop users can submit tyre requests
-        const isAllowed = user.user_type === 'internal' || user.user_type === 'bodyshop' ||
-            user.role === 'admin' || user.role === 'super_admin';
+        // Only internal staff or repairer (bodyshop) users can submit tyre requests.
+        // A role never grants this: external companies have admins too.
+        const isAllowed = user.user_type === 'internal' || user.user_type === 'bodyshop';
         if (!isAllowed) {
             return Response.json({ error: 'Forbidden' }, { status: 403 });
         }
@@ -60,6 +60,7 @@ Deno.serve(async (req) => {
 
         return Response.json({ success: true, message: 'Tyre request submitted successfully' });
     } catch (error) {
-        return Response.json({ error: error.message }, { status: 500 });
+        console.error('sendTyreRequestEmail error:', error?.message);
+        return Response.json({ error: 'Could not submit the tyre request' }, { status: 500 });
     }
 });
