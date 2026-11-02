@@ -31,7 +31,7 @@ Deno.serve(async (req) => {
     const note = kind === 'estimate'
       ? {
         title: 'New Estimate Request',
-        message: `${from} has requested an estimate for ${record.vehicle_reg || ''} - ${record.make_model || ''}`,
+        message: `${from} has requested an estimate for ${record.name || record.vehicle_reg || ''} - ${record.make_model || ''}`,
         type: 'estimate_request',
         related_item_type: 'Estimate',
         link: `/estimating?id=${record.id}`,

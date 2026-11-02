@@ -34,21 +34,13 @@ export default function RepairerPartsForm({ bodyshopId, bodyshopName, onClose, o
         date_requested: new Date().toISOString().split('T')[0],
       });
 
-      // Notify all admin and internal users
-      const allUsers = await base44.entities.User.list();
-      const recipients = allUsers.filter(u => u.role === 'admin' || u.user_type === 'internal');
-      await Promise.all(recipients.map(u =>
-        base44.entities.Notification.create({
-          user_email: u.email,
-          title: 'New Parts Request',
-          message: `${bodyshopName} has requested parts support for ${data.vehicle_ref} - ${data.part_description}`,
-          type: 'parts_update',
-          related_item_type: 'Part',
-          related_item_id: part.id,
-          link: `/parts?id=${part.id}`,
-          is_read: false,
-        })
-      ));
+      // Tell the team. Done on the server: portal users can't list users or write
+      // other people's notifications. A failed notification never loses the request.
+      try {
+        await base44.functions.invoke('notifyStaffOfPortalRequest', { kind: 'part', record_id: part.id });
+      } catch (e) {
+        console.warn('Team notification failed (request was still saved):', e);
+      }
 
       return part;
     },

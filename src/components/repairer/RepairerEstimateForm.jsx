@@ -33,21 +33,13 @@ export default function RepairerEstimateForm({ bodyshopId, bodyshopName, onClose
         priority: 'Medium',
       });
 
-      // Notify all admin and internal users
-      const allUsers = await base44.entities.User.list();
-      const recipients = allUsers.filter(u => u.role === 'admin' || u.user_type === 'internal');
-      await Promise.all(recipients.map(u =>
-        base44.entities.Notification.create({
-          user_email: u.email,
-          title: 'New Estimate Request',
-          message: `${bodyshopName} has requested an estimate for ${data.vehicle_reg} - ${data.make_model}`,
-          type: 'estimate_request',
-          related_item_type: 'Estimate',
-          related_item_id: estimate.id,
-          link: `/estimating?id=${estimate.id}`,
-          is_read: false,
-        })
-      ));
+      // Tell the team. Done on the server: portal users can't list users or write
+      // other people's notifications. A failed notification never loses the request.
+      try {
+        await base44.functions.invoke('notifyStaffOfPortalRequest', { kind: 'estimate', record_id: estimate.id });
+      } catch (e) {
+        console.warn('Team notification failed (request was still saved):', e);
+      }
 
       return estimate;
     },
