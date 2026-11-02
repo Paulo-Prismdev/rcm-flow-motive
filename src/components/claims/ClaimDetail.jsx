@@ -199,6 +199,7 @@ import ActivityLogSection from '../shared/ActivityLogSection';
 import TimeLogsModal from '../shared/TimeLogsModal';
 import ActivityLogModal from '../shared/ActivityLogModal';
 import { logActivity, logChanges, deleteAndLog } from '../shared/useActivityLogger';
+import { askConfirm, notify, notifyError } from '@/lib/dialogs';
 
 const SECTION_FIELDS = {
   status: ['reg', 'claim_type', 'loss_date', 'vehicle_use', 'incident_location', 'circumstances'],
