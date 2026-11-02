@@ -70,7 +70,8 @@ export async function resolveFileUrl(ref, { claimId = null, log = false, purpose
 /** Opens a stored file in a new tab (resolving a private reference first). */
 export async function openFileInNewTab(ref, opts = {}) {
   // Open the tab straight away, inside the click, so pop-up blockers allow it.
-  const tab = window.open('', '_blank', 'noopener');
+  const tab = window.open('', '_blank');
+  if (tab) tab.opener = null;
   try {
     const url = await resolveFileUrl(ref, { log: true, ...opts });
     if (tab) tab.location.href = url; else window.open(url, '_blank', 'noopener');
