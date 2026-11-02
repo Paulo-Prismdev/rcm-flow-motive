@@ -30,6 +30,8 @@ Keep this list up to date at the end of every round.
 - [ ] Directory: edit a client, repairer, insurer and supplier – "Change history" on the record shows who changed which field. Adding a record logs "Added …".
 - [ ] Settings: a non-admin staff member (e.g. info@rcmltd.co.uk) can't change portal adverts/products, chaser rules or invoicing settings; admins can.
 - [ ] Pop-ups app-wide (settings, directories, parts, estimates, engineering, users) now use the app's own boxes and corner messages.
+- [ ] Keyboard: Tab through the claims list and a portal list – each row shows a ring and Enter opens it; Escape closes the directory record, the image viewer and the add-repairer panel.
+- [ ] Grey secondary text (e.g. the lines under each Financials row) is a touch darker – check it still looks right.
 - [ ] Email: send an invoice request with a CC – check CC, Reply-To and sender name (and that it arrives at all on Base44 email if Resend isn't set up).
 
 ## Deferred to after go-live
@@ -39,6 +41,7 @@ Keep this list up to date at the end of every round.
 - [ ] User hierarchy and permissions build (separate job). Note: any internal staff member can currently edit Role records (feature permissions) – tighten in that job.
 
 ## Open questions for Paul
+- [ ] Mac look drift (Round 10 report): about 35 screens still use the older hard-coded greys and white with no dark-mode colours – worst are the Parts form, the Edit Claim form, the vehicle form and the public customer forms. Do a visual-only pass after go-live?
 - [ ] Confirm the portal update-feed rules above (Round 8 default) – easy to change in `base44/shared/portalAccess.ts`.
 - [ ] Should the total-loss storage fee invoice carry VAT?
 - [ ] Optional "Customer pays" row on the VAT & excess summary – wanted?
