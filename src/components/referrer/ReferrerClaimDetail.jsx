@@ -440,7 +440,7 @@ export default function ReferrerClaimDetail({ claim, onClose, initialSection }) 
     <div className="h-full flex flex-col gap-4 md:gap-6">
       {/* Lightbox */}
       {lightboxUrl && (
-        <div
+        <div data-overlay-dismiss
           className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4"
           onClick={() => setLightboxUrl(null)}
         >

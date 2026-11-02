@@ -400,7 +400,7 @@ export default function Layout({ children, currentPageName }) {
 
         {/* Mobile overlay */}
         {mobileMenuOpen &&
-        <div
+        <div data-overlay-dismiss
           className="fixed inset-0 z-[9998] bg-black/50 md:hidden"
           onClick={() => setMobileMenuOpen(false)} />
         }

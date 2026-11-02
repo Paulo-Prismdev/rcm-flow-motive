@@ -75,7 +75,7 @@ function ReferrerDetailModal({ company, onClose, onUpdated }) {
   };
 
   return createPortal(
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[10002] p-4" onClick={onClose} data-mobile-full-modal="true">
+    <div data-overlay-dismiss className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[10002] p-4" onClick={onClose} data-mobile-full-modal="true">
       <div className="bg-card border border-border rounded-xl p-6 w-full max-w-lg shadow-xl max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
         <div className="flex justify-between items-center mb-5">
           <h2 className="text-xl font-bold flex items-center gap-2">
@@ -285,7 +285,7 @@ function AddReferrerModal({ onClose, onSuccess }) {
   };
 
   return createPortal(
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[10002] p-4" onClick={onClose} data-mobile-full-modal="true">
+    <div data-overlay-dismiss className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[10002] p-4" onClick={onClose} data-mobile-full-modal="true">
       <div className="bg-card border border-border rounded-xl p-6 w-full max-w-lg shadow-xl max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
         <div className="flex justify-between items-center mb-5">
           <h2 className="text-xl font-bold">Add Referrer</h2>

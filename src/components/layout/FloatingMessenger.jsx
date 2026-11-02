@@ -431,7 +431,7 @@ export default function FloatingMessenger({ currentUser, isOpen, onClose }) {
       />
 
       {/* Backdrop */}
-      <div 
+      <div data-overlay-dismiss 
         className="messenger-backdrop fixed inset-0 bg-black/40"
         style={{ zIndex: 10000 }}
         onClick={() => { onClose(); setSelectedConversation(null); }}

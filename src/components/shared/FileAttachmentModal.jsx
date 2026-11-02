@@ -308,7 +308,7 @@ export default function FileAttachmentModal({ fileUrls = [], onAdd, onRemove, is
 
       <FileViewer fileUrl={viewingFile} onClose={() => setViewingFile(null)} />
       
-      <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={onClose}>
+      <div data-overlay-dismiss className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={onClose}>
         <div 
           className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl w-full max-w-[580px] mx-4 max-h-[90vh] flex flex-col shadow-2xl overflow-hidden"
           onClick={(e) => e.stopPropagation()}

@@ -13,6 +13,20 @@ export default function ConfirmHost() {
   const [current, setCurrent] = useState(null);
   const queue = useRef([]);
 
+  // Escape closes the app's own pop-up panels (the ones that close when you click
+  // outside them), the same way it closes the standard dialogs. Only the top one closes.
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key !== 'Escape' || e.defaultPrevented) return;
+      if (document.querySelector('[role="dialog"][data-state="open"], [role="alertdialog"][data-state="open"]')) return;
+      const panels = document.querySelectorAll('[data-overlay-dismiss]');
+      const top = panels[panels.length - 1];
+      if (top) { e.preventDefault(); top.click(); }
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, []);
+
   useEffect(() => registerConfirmHost((opts, resolve) => {
     queue.current.push({ opts, resolve });
     setCurrent((c) => c || queue.current.shift());

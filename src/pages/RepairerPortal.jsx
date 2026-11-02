@@ -108,7 +108,7 @@ export default function RepairerPortal() {
 
       {/* Mobile Menu Overlay */}
       {mobileMenuOpen && (
-        <div className="fixed inset-0 bg-black/50 z-40 md:hidden" onClick={() => setMobileMenuOpen(false)} />
+        <div data-overlay-dismiss className="fixed inset-0 bg-black/50 z-40 md:hidden" onClick={() => setMobileMenuOpen(false)} />
       )}
 
       {/* Mobile Slide-out Menu */}

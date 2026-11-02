@@ -37,7 +37,7 @@ export default function QuickAccessOverlay({ pageName, onClose }) {
   return createPortal(
     <>
       {/* Backdrop */}
-      <div
+      <div data-overlay-dismiss
         className="fixed inset-0 z-[10000] bg-black/50 backdrop-blur-sm"
         onClick={() => {
           if (document.querySelector('[data-custom-portal-modal="true"]')) return;
