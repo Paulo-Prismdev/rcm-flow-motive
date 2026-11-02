@@ -27,7 +27,7 @@ Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
     const me = await base44.auth.me().catch(() => null);
     if (!me) return Response.json({ error: 'Unauthorized' }, { status: 401 });
-    if (me.user_type !== 'internal') return Response.json({ error: 'Forbidden' }, { status: 403 });
+    if (me.user_type !== 'internal' || me.twofa_verified !== true) return Response.json({ error: 'Forbidden' }, { status: 403 });
 
     const body = await req.json().catch(() => ({}));
     const entries = Array.isArray(body?.entries) ? body.entries.slice(0, MAX_ENTRIES) : [];
