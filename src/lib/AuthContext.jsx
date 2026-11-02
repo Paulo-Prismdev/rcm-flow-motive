@@ -3,6 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { appParams } from '@/lib/app-params';
 import { createAxiosClient } from '@base44/sdk/dist/utils/axios-client';
 import { takePasswordLoginFlags } from '@/lib/passwordPolicy';
+import { signOut } from '@/lib/signOut';
 
 const AuthContext = createContext();
 
@@ -156,20 +157,14 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = (shouldRedirect = true, reason) => {
-    base44.functions.invoke('twofaManage', { action: 'clear', reason }).catch(() => {});
-    try {
-      localStorage.removeItem('twofa_login_token');
-      localStorage.removeItem('last_activity_at');
-    } catch { /* storage unavailable */ }
     setUser(null);
     setIsAuthenticated(false);
     setTwofaStatus({ required: false, verified: false, loading: false });
-    
     if (shouldRedirect) {
-      // Use the SDK's logout method which handles token cleanup and redirect
-      base44.auth.logout(window.location.href);
+      signOut(reason);
     } else {
-      // Just remove the token without redirect
+      base44.functions.invoke('twofaManage', { action: 'clear', reason }).catch(() => {});
+      try { localStorage.removeItem('twofa_login_token'); localStorage.removeItem('last_activity_at'); } catch { /* storage unavailable */ }
       base44.auth.logout();
     }
   };

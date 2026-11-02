@@ -14,6 +14,7 @@ import { StatusConfigProvider } from '@/components/shared/StatusConfigContext';
 import RepairerNotifications from '@/components/repairer/RepairerNotifications';
 import PortalProfileModal from '@/components/shared/PortalProfileModal';
 
+import { signOut } from '@/lib/signOut';
 export default function RepairerLayout({ children }) {
   const [isDark, setIsDark] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -239,7 +240,7 @@ export default function RepairerLayout({ children }) {
             {/* Logout Button */}
             <div className="p-4 mt-auto border-t border-border">
               <button
-                onClick={() => base44.auth.logout()}
+                onClick={() => signOut()}
                 className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl glass-button text-red-500 font-medium"
               >
                 <LogOut className="w-5 h-5" />
@@ -323,7 +324,7 @@ export default function RepairerLayout({ children }) {
                   My Profile
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                  onClick={() => base44.auth.logout()}
+                  onClick={() => signOut()}
                   className="cursor-pointer text-red-500"
                 >
                   <LogOut className="w-4 h-4 mr-2" />

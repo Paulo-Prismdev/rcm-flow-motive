@@ -8,6 +8,7 @@ import Notifications from '../layout/Notifications';
 import ThemeToggle from '../layout/ThemeToggle';
 import PortalProfileModal from '../shared/PortalProfileModal';
 
+import { signOut } from '@/lib/signOut';
 export default function ReferrerLayout({ children }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -109,7 +110,7 @@ export default function ReferrerLayout({ children }) {
               <User className="w-4 h-4" />
             </button>
             <button
-              onClick={() => base44.auth.logout()}
+              onClick={() => signOut()}
               title="Log Out"
               className="text-white/40 hover:text-red-400 transition-colors flex-shrink-0">
               <LogOut className="w-4 h-4" />

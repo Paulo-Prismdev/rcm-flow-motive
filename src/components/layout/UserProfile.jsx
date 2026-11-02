@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { LogOut, User } from 'lucide-react';
 
+import { signOut } from '@/lib/signOut';
 // Helper functions for avatar
 export const getUserInitials = (user) => {
   if (!user) return '?';
@@ -52,7 +53,7 @@ export default function UserProfile({ customTrigger }) {
   });
 
   const handleLogout = () => {
-    base44.auth.logout();
+    signOut();
   };
 
   return (

@@ -48,6 +48,7 @@ import {
 "@/components/ui/dropdown-menu";
 import { User } from "lucide-react";
 
+import { signOut } from '@/lib/signOut';
 const allDepartments = [
 { name: "Dashboard", url: createPageUrl("Dashboard"), icon: LayoutDashboard, permission: "Dashboard" },
 { name: "Repairs", url: createPageUrl("Claims"), icon: FileText, permission: "Claims" },
@@ -76,7 +77,7 @@ function NoAccessScreen({ email }) {
         </p>
         <button
           type="button"
-          onClick={() => base44.auth.logout()}
+          onClick={() => signOut()}
           className="mt-6 inline-flex h-9 items-center justify-center rounded-md border border-input px-4 text-sm hover:bg-accent"
         >
           Sign out
