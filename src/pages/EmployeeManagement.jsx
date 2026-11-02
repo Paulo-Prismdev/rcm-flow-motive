@@ -69,7 +69,7 @@ export default function EmployeeManagement() {
     queryFn: () => base44.entities.SicknessRecord.list('-created_date'),
   });
 
-  const internalUsers = users.filter(u => u.user_type === 'internal' || u.role === 'admin');
+  const internalUsers = users.filter(u => u.user_type === 'internal');
 
   const tabs = [
     { id: "calendar", label: "Calendar", icon: Calendar },

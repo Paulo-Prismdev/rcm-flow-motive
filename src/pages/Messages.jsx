@@ -49,7 +49,7 @@ export default function Messages() {
   });
 
   const internalUsers = allUsers.filter(u => 
-    (u.user_type === 'internal' || u.role === 'admin') && 
+    (u.user_type === 'internal') && 
     u.email !== currentUser?.email
   );
 
@@ -71,7 +71,7 @@ export default function Messages() {
       DEPARTMENTS.forEach(dept => {
         if (!existingDeptChannels.includes(dept)) {
           const allInternalEmails = allUsers
-            .filter(u => u.user_type === 'internal' || u.role === 'admin')
+            .filter(u => u.user_type === 'internal')
             .map(u => u.email);
 
           // Check if a message for this department channel already exists before creating

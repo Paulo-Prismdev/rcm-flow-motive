@@ -23,7 +23,7 @@ export default function CompanyIdLookup() {
     queryFn: () => base44.entities.Company.list('name'),
   });
 
-  const isAdmin = ['super_admin', 'company_admin', 'admin'].includes(currentUser?.role);
+  const isAdmin = currentUser?.user_type === 'internal' && ['super_admin', 'company_admin', 'admin'].includes(currentUser?.role);
   if (!isAdmin) return (
     <div className="neomorph p-8 text-center text-foreground-muted">Access denied.</div>
   );
