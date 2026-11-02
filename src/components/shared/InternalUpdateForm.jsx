@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Command, CommandItem, CommandList } from "@/components/ui/command";
 import VoiceInput from '@/components/shared/VoiceInput';
 import { useFileUpload } from '@/hooks/useFileUpload';
+import { fileNameOf, isPrivateRef } from '@/lib/privateFiles';
 import { useToast } from "@/components/ui/use-toast";
 import { createNoteTagNotifications } from '@/components/shared/createNoteTagNotifications';
 import UpdateContactSelector from '@/components/claims/UpdateContactSelector';
@@ -177,6 +178,7 @@ export default function InternalUpdateForm({
   const removeAttachedFile = (url) => setAttachedFiles((prev) => prev.filter((u) => u !== url));
 
   const getFileName = (url) => {
+    if (isPrivateRef(url)) return fileNameOf(url);
     try {
       const decoded = decodeURIComponent(url);
       const parts = decoded.split('/');
