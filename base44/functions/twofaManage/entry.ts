@@ -109,7 +109,8 @@ async function createAndSendCode(base44: any, user: any) {
     await base44.asServiceRole.integrations.Core.SendEmail({
       to: user.email,
       subject: `Your RCM Flowmotive sign-in code: ${code}`,
-      body: buildBrandedHtml(content),
+      html: buildBrandedHtml(content),
+      text: `Your RCM Flowmotive sign-in code is ${code}. It expires in ${CODE_EXPIRY_MINUTES} minutes and works once. If you didn't try to sign in, ignore this email and tell us.`,
       from_name: 'RCM Automotive',
     });
   } catch (e: any) {
