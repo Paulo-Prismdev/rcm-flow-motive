@@ -5,7 +5,7 @@ Keep this list up to date at the end of every round.
 
 ## Before go-live night (Paul)
 - [x] Turn off Google (and Microsoft) sign-in in the Base44 auth settings (done 3 Nov – applies to the live app straight away).
-- [ ] Set your own password via "Forgot password?" on the new sign-in page (and make sure Anthony does too).
+- [ ] Make sure paul@rcmautomotive.co.uk and anthony@rcmautomotive.co.uk (the day-to-day accounts) each have a password – if either only ever used Google, set one with "Forgot password?". The googlemail account is Paul's Base44 owner/testing login.
 - [x] Resend domain updates.rcmautomotive.co.uk verified (3 Nov, DNS on Wix).
 - [x] Resend tested in the preview 3 Nov: sign-in code and an invoice request with CC both arrived from the new address (CC and Reply-To correct).
 - [x] Create a Resend API key (Sending access, that domain only) and add it in Base44 Secrets as `RESEND_API_KEY` – after office hours (saving a secret redeploys functions). Email then goes from notifications@updates.rcmautomotive.co.uk, replies to info@rcmautomotive.co.uk unless a staff member sent it, falling back to Base44 if Resend refuses. Test in the preview: sign-in code and an invoice request with a CC; check the twofaManage / requestInvoiceFromAccounts logs say "sent via Resend".
