@@ -18,6 +18,7 @@ Keep this list up to date at the end of every round.
 3. [x] Remove the old `PUBLIC_FORM_SECRET` secret (3 Nov).
 
 ## Go-live night – testing
+(3 Nov: Paul ran the live checks – sign-in, claims, portal, repair link, invoice email – all good. Still to watch: chasers in Resend over the next day.)
 - [ ] Sign in: password, emailed 6-digit code, Face ID / fingerprint enrol + sign-in on phone and tablet.
 - [ ] Check `updateMe({ twofa_verified: true })` is refused from the browser.
 - [ ] Each portal (client, referrer, repairer): sees only its own claims, journey status only (no secondary/tertiary anywhere, including the update feed and timeline), files open.
