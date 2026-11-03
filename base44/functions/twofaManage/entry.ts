@@ -126,15 +126,17 @@ async function createAndSendCode(base44: any, user: any) {
   return { sent: true, expires_at: expiresAt };
 }
 
-// Only one code can be sent at a time: the lock is taken with a conditional update, so
-// two requests at the same moment can't both take it. It lapses after 10 seconds.
+// Only one code is sent at a time: a short lock on the user, which lapses after 10
+// seconds. (The earlier conditional bulk update never took the lock on this platform, so
+// every "Send a new code" was refused; this reads, sets and re-reads instead. Two taps in
+// the same instant could both get through, which at worst sends two codes.)
 async function acquireInitiateLock(base44: any, userId: string) {
+  const current = await base44.asServiceRole.entities.User.get(userId).catch(() => null);
+  if (!current) return null;
+  const heldAt = current.twofa_initiate_lock_at ? Date.parse(current.twofa_initiate_lock_at) : 0;
+  if (current.twofa_initiate_lock && Date.now() - heldAt < 10000) return null;
   const token = crypto.randomUUID();
-  const staleBefore = new Date(Date.now() - 10000).toISOString();
-  await base44.asServiceRole.entities.User.updateMany(
-    { id: userId, $or: [{ twofa_initiate_lock: null }, { twofa_initiate_lock_at: { $lt: staleBefore } }] },
-    { $set: { twofa_initiate_lock: token, twofa_initiate_lock_at: nowIso() } },
-  ).catch(() => {});
+  await base44.asServiceRole.entities.User.update(userId, { twofa_initiate_lock: token, twofa_initiate_lock_at: nowIso() }).catch(() => {});
   const locked = await base44.asServiceRole.entities.User.get(userId).catch(() => null);
   return locked?.twofa_initiate_lock === token ? token : null;
 }
