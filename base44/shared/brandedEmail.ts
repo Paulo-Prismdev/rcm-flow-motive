@@ -95,6 +95,9 @@ const SENDGRID_URL = 'https://api.sendgrid.com/v3/mail/send';
 const DEFAULT_FROM = 'notifications@updates.rcmautomotive.co.uk';
 const DEFAULT_REPLY_TO = 'info@rcmautomotive.co.uk';
 
+/** Where staff alert emails (e.g. a repairer's update) go: the shared office inbox. */
+export const STAFF_ALERTS_EMAIL = 'info@rcmautomotive.co.uk';
+
 export type EmailAttachment = { filename: string; path: string };
 
 // Resend (updates.rcmautomotive.co.uk, on the prismdev Resend account) is the chosen

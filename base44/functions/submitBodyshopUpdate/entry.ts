@@ -1,7 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
 import { isCancelledClaim } from '../../shared/claimOutcome.ts';
 import { LINK_MESSAGES, appPublicUrl, clip, verifyClaimLink } from '../../shared/publicLinks.ts';
-import { buildBrandedHtml, deliverEmail } from '../../shared/brandedEmail.ts';
+import { STAFF_ALERTS_EMAIL, buildBrandedHtml, deliverEmail } from '../../shared/brandedEmail.ts';
 
 const escapeHtml = (text: string) => text
   .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -107,7 +107,7 @@ Deno.serve(async (req) => {
       update_status_flag: closed ? 'Gray' : 'Green',
     });
 
-    // ── Notify internal users who have the "Repair Update Received" preference enabled ──
+    // ── In-app notification for each staff member (unless turned off), and one email to the office inbox ──
     try {
       const internalUsers = await base44.asServiceRole.entities.User.list('-created_date', 500);
       const regPart = claim.reg ? ` [${claim.reg}]` : '';
@@ -136,14 +136,16 @@ Deno.serve(async (req) => {
           is_read: false,
         }).catch(() => {});
 
-        // Send email if the user has the email pref enabled
-        const prefs = user.notification_preferences || {};
-        if (prefs.email_repair_update_received) {
-          await deliverEmail({
-            base44,
-            to: user.email,
-            subject: notifTitle,
-            html: buildBrandedHtml(`<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">
+      }
+
+      // One email to the office inbox (not one per person), with replies going straight
+      // back to the repairer. Who wants their own copies is for the notifications review.
+      await deliverEmail({
+        base44,
+        to: STAFF_ALERTS_EMAIL,
+        replyTo: claim.bodyshop_email || undefined,
+        subject: notifTitle,
+        html: buildBrandedHtml(`<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">
               <h2 style="color:#131d47;">Repair Update Received</h2>
               <p><strong>Job:</strong> ${safe(claim.job_number || 'Unknown')}</p>
               <p><strong>Vehicle:</strong> ${safe(claim.reg || 'N/A')}</p>
@@ -152,9 +154,7 @@ Deno.serve(async (req) => {
               <p style="background:#f5f6fa;padding:12px;border-radius:8px;white-space:pre-wrap;">${safe(updateDescription).replace(/\n/g, '<br>')}</p>
               <p><a href="${claimUrl}" style="background:#131d47;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;display:inline-block;">View Claim</a></p>
             </div>`),
-          });
-        }
-      }
+      });
     } catch (notifErr: any) {
       console.error('Failed to send repair update notifications:', notifErr.message);
     }
