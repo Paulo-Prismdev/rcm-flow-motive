@@ -64,9 +64,22 @@
     "description"
   ],
   "rls": {
-    "create": null,
-    "read": null,
-    "update": null,
-    "delete": null
+    "create": false,
+    "read": {
+      "$and": [
+        {
+          "user_condition": {
+            "data.user_type": "internal"
+          }
+        },
+        {
+          "user_condition": {
+            "data.twofa_verified": true
+          }
+        }
+      ]
+    },
+    "update": false,
+    "delete": false
   }
 }

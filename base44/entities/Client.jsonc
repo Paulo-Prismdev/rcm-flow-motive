@@ -27,15 +27,15 @@
     },
     "company_contact_name": {
       "type": "string",
-      "description": "Primary contact name (Company records only) \u2014 legacy field, superseded by contacts array"
+      "description": "Primary contact name (Company records only) — legacy field, superseded by contacts array"
     },
     "company_contact_phone": {
       "type": "string",
-      "description": "Primary contact phone (Company records only) \u2014 legacy field, superseded by contacts array"
+      "description": "Primary contact phone (Company records only) — legacy field, superseded by contacts array"
     },
     "company_contact_email": {
       "type": "string",
-      "description": "Primary contact email (Company records only) \u2014 legacy field, superseded by contacts array"
+      "description": "Primary contact email (Company records only) — legacy field, superseded by contacts array"
     },
     "contacts": {
       "type": "array",
@@ -61,7 +61,7 @@
           }
         }
       },
-      "description": "Contacts at this business \u2014 client-only, shown only while the record carries the Client tag",
+      "description": "Contacts at this business — client-only, shown only while the record carries the Client tag",
       "default": []
     },
     "phone": {
@@ -98,7 +98,7 @@
         "Unknown"
       ],
       "default": "Unknown",
-      "description": "VAT registration status \u2014 client-only setting"
+      "description": "VAT registration status — client-only setting"
     },
     "handles_vat_excess": {
       "type": "boolean",
@@ -107,19 +107,19 @@
     },
     "insurer": {
       "type": "string",
-      "description": "The third party's own insurer \u2014 third-party detail"
+      "description": "The third party's own insurer — third-party detail"
     },
     "policy_number": {
       "type": "string",
-      "description": "The third party's policy number \u2014 third-party detail"
+      "description": "The third party's policy number — third-party detail"
     },
     "vehicle_reg": {
       "type": "string",
-      "description": "Registration of the third party's vehicle, where known \u2014 third-party detail"
+      "description": "Registration of the third party's vehicle, where known — third-party detail"
     },
     "vehicle_make_model": {
       "type": "string",
-      "description": "Make and model of the third party's vehicle, where known \u2014 third-party detail"
+      "description": "Make and model of the third party's vehicle, where known — third-party detail"
     },
     "notes": {
       "type": "string",
@@ -139,24 +139,60 @@
   ],
   "rls": {
     "create": {
-      "user_condition": {
-        "data.user_type": "internal"
-      }
+      "$and": [
+        {
+          "user_condition": {
+            "data.user_type": "internal"
+          }
+        },
+        {
+          "user_condition": {
+            "data.twofa_verified": true
+          }
+        }
+      ]
     },
     "read": {
-      "user_condition": {
-        "data.user_type": "internal"
-      }
+      "$and": [
+        {
+          "user_condition": {
+            "data.user_type": "internal"
+          }
+        },
+        {
+          "user_condition": {
+            "data.twofa_verified": true
+          }
+        }
+      ]
     },
     "update": {
-      "user_condition": {
-        "data.user_type": "internal"
-      }
+      "$and": [
+        {
+          "user_condition": {
+            "data.user_type": "internal"
+          }
+        },
+        {
+          "user_condition": {
+            "data.twofa_verified": true
+          }
+        }
+      ]
     },
     "delete": {
-      "user_condition": {
-        "data.user_type": "internal"
-      }
+      "$and": [
+        {
+          "user_condition": {
+            "data.user_type": "internal"
+          }
+        },
+        {
+          "user_condition": {
+            "data.twofa_verified": true
+          }
+        }
+      ]
     }
   }
 }

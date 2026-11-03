@@ -64,24 +64,60 @@
   ],
   "rls": {
     "create": {
-      "user_condition": {
-        "data.user_type": "internal"
-      }
+      "$and": [
+        {
+          "user_condition": {
+            "data.user_type": "internal"
+          }
+        },
+        {
+          "user_condition": {
+            "data.twofa_verified": true
+          }
+        }
+      ]
     },
     "read": {
-      "user_condition": {
-        "data.user_type": "internal"
-      }
+      "$and": [
+        {
+          "user_condition": {
+            "data.user_type": "internal"
+          }
+        },
+        {
+          "user_condition": {
+            "data.twofa_verified": true
+          }
+        }
+      ]
     },
     "update": {
-      "user_condition": {
-        "data.user_type": "internal"
-      }
+      "$and": [
+        {
+          "user_condition": {
+            "data.user_type": "internal"
+          }
+        },
+        {
+          "user_condition": {
+            "data.twofa_verified": true
+          }
+        }
+      ]
     },
     "delete": {
-      "user_condition": {
-        "data.user_type": "internal"
-      }
+      "$and": [
+        {
+          "user_condition": {
+            "data.user_type": "internal"
+          }
+        },
+        {
+          "user_condition": {
+            "data.twofa_verified": true
+          }
+        }
+      ]
     }
   }
 }

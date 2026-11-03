@@ -16,9 +16,50 @@
         "update": {
           "$or": [
             {
-              "user_condition": {
-                "data.user_type": "internal"
-              }
+              "$and": [
+                {
+                  "$and": [
+                    {
+                      "user_condition": {
+                        "data.user_type": "internal"
+                      }
+                    },
+                    {
+                      "user_condition": {
+                        "data.twofa_verified": true
+                      }
+                    }
+                  ]
+                },
+                {
+                  "user_condition": {
+                    "role": "super_admin"
+                  }
+                }
+              ]
+            },
+            {
+              "$and": [
+                {
+                  "$and": [
+                    {
+                      "user_condition": {
+                        "data.user_type": "internal"
+                      }
+                    },
+                    {
+                      "user_condition": {
+                        "data.twofa_verified": true
+                      }
+                    }
+                  ]
+                },
+                {
+                  "user_condition": {
+                    "role": "admin"
+                  }
+                }
+              ]
             },
             {
               "user_condition": {
@@ -36,9 +77,18 @@
         "update": {
           "$or": [
             {
-              "user_condition": {
-                "data.user_type": "internal"
-              }
+              "$and": [
+                {
+                  "user_condition": {
+                    "data.user_type": "internal"
+                  }
+                },
+                {
+                  "user_condition": {
+                    "data.twofa_verified": true
+                  }
+                }
+              ]
             },
             {
               "user_condition": {
@@ -59,15 +109,24 @@
         "supplier",
         "client"
       ],
-      "default": "internal",
+      "default": "external",
       "description": "Internal (platform owner) or external (referrer/repairer). Decides internal-only access across the app, so it can only be changed by internal staff (or an app editor) - never by the user themselves.",
       "rls": {
         "update": {
           "$or": [
             {
-              "user_condition": {
-                "data.user_type": "internal"
-              }
+              "$and": [
+                {
+                  "user_condition": {
+                    "data.user_type": "internal"
+                  }
+                },
+                {
+                  "user_condition": {
+                    "data.twofa_verified": true
+                  }
+                }
+              ]
             },
             {
               "user_condition": {
@@ -86,9 +145,18 @@
         "update": {
           "$or": [
             {
-              "user_condition": {
-                "data.user_type": "internal"
-              }
+              "$and": [
+                {
+                  "user_condition": {
+                    "data.user_type": "internal"
+                  }
+                },
+                {
+                  "user_condition": {
+                    "data.twofa_verified": true
+                  }
+                }
+              ]
             },
             {
               "user_condition": {
@@ -140,9 +208,18 @@
         "update": {
           "$or": [
             {
-              "user_condition": {
-                "data.user_type": "internal"
-              }
+              "$and": [
+                {
+                  "user_condition": {
+                    "data.user_type": "internal"
+                  }
+                },
+                {
+                  "user_condition": {
+                    "data.twofa_verified": true
+                  }
+                }
+              ]
             },
             {
               "user_condition": {
@@ -173,9 +250,18 @@
         "update": {
           "$or": [
             {
-              "user_condition": {
-                "data.user_type": "internal"
-              }
+              "$and": [
+                {
+                  "user_condition": {
+                    "data.user_type": "internal"
+                  }
+                },
+                {
+                  "user_condition": {
+                    "data.twofa_verified": true
+                  }
+                }
+              ]
             },
             {
               "user_condition": {
@@ -215,9 +301,18 @@
         "update": {
           "$or": [
             {
-              "user_condition": {
-                "data.user_type": "internal"
-              }
+              "$and": [
+                {
+                  "user_condition": {
+                    "data.user_type": "internal"
+                  }
+                },
+                {
+                  "user_condition": {
+                    "data.twofa_verified": true
+                  }
+                }
+              ]
             },
             {
               "user_condition": {
@@ -239,9 +334,18 @@
         "update": {
           "$or": [
             {
-              "user_condition": {
-                "data.user_type": "internal"
-              }
+              "$and": [
+                {
+                  "user_condition": {
+                    "data.user_type": "internal"
+                  }
+                },
+                {
+                  "user_condition": {
+                    "data.twofa_verified": true
+                  }
+                }
+              ]
             },
             {
               "user_condition": {
@@ -259,9 +363,18 @@
         "update": {
           "$or": [
             {
-              "user_condition": {
-                "data.user_type": "internal"
-              }
+              "$and": [
+                {
+                  "user_condition": {
+                    "data.user_type": "internal"
+                  }
+                },
+                {
+                  "user_condition": {
+                    "data.twofa_verified": true
+                  }
+                }
+              ]
             },
             {
               "user_condition": {
@@ -279,9 +392,18 @@
         "update": {
           "$or": [
             {
-              "user_condition": {
-                "data.user_type": "internal"
-              }
+              "$and": [
+                {
+                  "user_condition": {
+                    "data.user_type": "internal"
+                  }
+                },
+                {
+                  "user_condition": {
+                    "data.twofa_verified": true
+                  }
+                }
+              ]
             },
             {
               "user_condition": {
@@ -409,9 +531,27 @@
           }
         },
         {
-          "user_condition": {
-            "role": "company_admin"
-          }
+          "$and": [
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "data.user_type": "internal"
+                  }
+                },
+                {
+                  "user_condition": {
+                    "data.twofa_verified": true
+                  }
+                }
+              ]
+            },
+            {
+              "user_condition": {
+                "role": "admin"
+              }
+            }
+          ]
         }
       ]
     },
@@ -423,14 +563,21 @@
           }
         },
         {
-          "user_condition": {
-            "role": "company_admin"
-          }
+          "$and": [
+            {
+              "user_condition": {
+                "data.user_type": "internal"
+              }
+            },
+            {
+              "user_condition": {
+                "data.twofa_verified": true
+              }
+            }
+          ]
         },
         {
-          "user_condition": {
-            "id": "{{user.id}}"
-          }
+          "id": "{{user.id}}"
         }
       ]
     },
@@ -442,14 +589,30 @@
           }
         },
         {
-          "user_condition": {
-            "role": "company_admin"
-          }
+          "$and": [
+            {
+              "$and": [
+                {
+                  "user_condition": {
+                    "data.user_type": "internal"
+                  }
+                },
+                {
+                  "user_condition": {
+                    "data.twofa_verified": true
+                  }
+                }
+              ]
+            },
+            {
+              "user_condition": {
+                "role": "admin"
+              }
+            }
+          ]
         },
         {
-          "user_condition": {
-            "id": "{{user.id}}"
-          }
+          "id": "{{user.id}}"
         }
       ]
     },

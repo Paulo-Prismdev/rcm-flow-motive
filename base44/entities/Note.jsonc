@@ -56,7 +56,7 @@
     },
     "next_steps": {
       "type": "string",
-      "description": "What needs to happen next (optional, internal follow-up only \u2014 does not affect tracking)."
+      "description": "What needs to happen next (optional, internal follow-up only — does not affect tracking)."
     },
     "due_date_for_next_action": {
       "type": "string",
@@ -118,9 +118,61 @@
     "parent_type"
   ],
   "rls": {
-    "create": null,
-    "read": null,
-    "update": null,
-    "delete": null
+    "create": {
+      "$and": [
+        {
+          "user_condition": {
+            "data.user_type": "internal"
+          }
+        },
+        {
+          "user_condition": {
+            "data.twofa_verified": true
+          }
+        }
+      ]
+    },
+    "read": {
+      "$and": [
+        {
+          "user_condition": {
+            "data.user_type": "internal"
+          }
+        },
+        {
+          "user_condition": {
+            "data.twofa_verified": true
+          }
+        }
+      ]
+    },
+    "update": {
+      "$and": [
+        {
+          "user_condition": {
+            "data.user_type": "internal"
+          }
+        },
+        {
+          "user_condition": {
+            "data.twofa_verified": true
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$and": [
+        {
+          "user_condition": {
+            "data.user_type": "internal"
+          }
+        },
+        {
+          "user_condition": {
+            "data.twofa_verified": true
+          }
+        }
+      ]
+    }
   }
 }

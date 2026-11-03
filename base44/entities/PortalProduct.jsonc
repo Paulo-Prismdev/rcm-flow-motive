@@ -70,16 +70,52 @@
   ],
   "rls": {
     "create": {
-      "user_condition": {
-        "data.user_type": "internal"
-      }
+      "$and": [
+        {
+          "$and": [
+            {
+              "user_condition": {
+                "data.user_type": "internal"
+              }
+            },
+            {
+              "user_condition": {
+                "data.twofa_verified": true
+              }
+            }
+          ]
+        },
+        {
+          "$or": [
+            {
+              "user_condition": {
+                "role": "admin"
+              }
+            },
+            {
+              "user_condition": {
+                "role": "super_admin"
+              }
+            }
+          ]
+        }
+      ]
     },
     "read": {
       "$or": [
         {
-          "user_condition": {
-            "data.user_type": "internal"
-          }
+          "$and": [
+            {
+              "user_condition": {
+                "data.user_type": "internal"
+              }
+            },
+            {
+              "user_condition": {
+                "data.twofa_verified": true
+              }
+            }
+          ]
         },
         {
           "user_condition": {
@@ -94,14 +130,68 @@
       ]
     },
     "update": {
-      "user_condition": {
-        "data.user_type": "internal"
-      }
+      "$and": [
+        {
+          "$and": [
+            {
+              "user_condition": {
+                "data.user_type": "internal"
+              }
+            },
+            {
+              "user_condition": {
+                "data.twofa_verified": true
+              }
+            }
+          ]
+        },
+        {
+          "$or": [
+            {
+              "user_condition": {
+                "role": "admin"
+              }
+            },
+            {
+              "user_condition": {
+                "role": "super_admin"
+              }
+            }
+          ]
+        }
+      ]
     },
     "delete": {
-      "user_condition": {
-        "data.user_type": "internal"
-      }
+      "$and": [
+        {
+          "$and": [
+            {
+              "user_condition": {
+                "data.user_type": "internal"
+              }
+            },
+            {
+              "user_condition": {
+                "data.twofa_verified": true
+              }
+            }
+          ]
+        },
+        {
+          "$or": [
+            {
+              "user_condition": {
+                "role": "admin"
+              }
+            },
+            {
+              "user_condition": {
+                "role": "super_admin"
+              }
+            }
+          ]
+        }
+      ]
     }
   }
 }

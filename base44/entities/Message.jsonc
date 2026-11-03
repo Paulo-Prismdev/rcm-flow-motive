@@ -110,16 +110,34 @@
   ],
   "rls": {
     "create": {
-      "user_condition": {
-        "data.user_type": "internal"
-      }
-    },
-    "read": {
-      "$or": [
+      "$and": [
         {
           "user_condition": {
             "data.user_type": "internal"
           }
+        },
+        {
+          "user_condition": {
+            "data.twofa_verified": true
+          }
+        }
+      ]
+    },
+    "read": {
+      "$or": [
+        {
+          "$and": [
+            {
+              "user_condition": {
+                "data.user_type": "internal"
+              }
+            },
+            {
+              "user_condition": {
+                "data.twofa_verified": true
+              }
+            }
+          ]
         },
         {
           "data.sender_email": "{{user.email}}"
@@ -136,9 +154,18 @@
     "update": {
       "$or": [
         {
-          "user_condition": {
-            "data.user_type": "internal"
-          }
+          "$and": [
+            {
+              "user_condition": {
+                "data.user_type": "internal"
+              }
+            },
+            {
+              "user_condition": {
+                "data.twofa_verified": true
+              }
+            }
+          ]
         },
         {
           "data.sender_email": "{{user.email}}"
@@ -148,9 +175,18 @@
     "delete": {
       "$or": [
         {
-          "user_condition": {
-            "data.user_type": "internal"
-          }
+          "$and": [
+            {
+              "user_condition": {
+                "data.user_type": "internal"
+              }
+            },
+            {
+              "user_condition": {
+                "data.twofa_verified": true
+              }
+            }
+          ]
         },
         {
           "data.sender_email": "{{user.email}}"

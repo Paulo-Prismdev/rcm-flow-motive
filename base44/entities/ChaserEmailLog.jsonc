@@ -65,9 +65,61 @@
     "sent_at"
   ],
   "rls": {
-    "create": null,
-    "read": null,
-    "update": null,
-    "delete": null
+    "create": {
+      "$and": [
+        {
+          "user_condition": {
+            "data.user_type": "internal"
+          }
+        },
+        {
+          "user_condition": {
+            "data.twofa_verified": true
+          }
+        }
+      ]
+    },
+    "read": {
+      "$and": [
+        {
+          "user_condition": {
+            "data.user_type": "internal"
+          }
+        },
+        {
+          "user_condition": {
+            "data.twofa_verified": true
+          }
+        }
+      ]
+    },
+    "update": {
+      "$and": [
+        {
+          "user_condition": {
+            "data.user_type": "internal"
+          }
+        },
+        {
+          "user_condition": {
+            "data.twofa_verified": true
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$and": [
+        {
+          "user_condition": {
+            "data.user_type": "internal"
+          }
+        },
+        {
+          "user_condition": {
+            "data.twofa_verified": true
+          }
+        }
+      ]
+    }
   }
 }
