@@ -20,7 +20,7 @@ const fmtTime = (ms) => new Date(ms).toLocaleTimeString('en-GB', { hour: '2-digi
  * Face ID so next time is quicker.
  */
 export default function TwoFactorVerify() {
-  const { user, refreshTwofaStatus, twofaStatus, logout } = useAuth();
+  const { user, refreshTwofaStatus, markTwofaVerified, twofaStatus, logout } = useAuth();
   const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
@@ -102,7 +102,8 @@ export default function TwoFactorVerify() {
       setOfferSetup(true);
       return;
     }
-    await refreshTwofaStatus();
+    // Already confirmed by the server: open the app now, status refreshes behind it.
+    markTwofaVerified();
   };
 
   const failed = (data) => {
@@ -165,7 +166,7 @@ export default function TwoFactorVerify() {
       setSetupError('');
       try {
         await registerThisDevice(user.id);
-        await refreshTwofaStatus();
+        markTwofaVerified();
       } catch (e) {
         setSetupError(e?.message || `${word} could not be set up.`);
         setSetupBusy(false);
@@ -173,7 +174,7 @@ export default function TwoFactorVerify() {
     };
     const notNow = async () => {
       dismissPasskeyOffer(user.id);
-      await refreshTwofaStatus();
+      markTwofaVerified();
     };
     return (
       <AuthLayout icon={word === 'Face ID' ? ScanFace : Fingerprint} title={`Use ${word} next time?`} subtitle="Skip the emailed code on this device">
