@@ -105,8 +105,10 @@ export function buildPdf(ans: ReturnType<typeof cleanAnswers>, claim: any, signa
   };
   const block = (label: string, value: string) => {
     need(12);
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(9.5); doc.setTextColor(70, 70, 70);
-    doc.text(label, LM, y); y += 5;
+    if (label) {
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(9.5); doc.setTextColor(70, 70, 70);
+      doc.text(label, LM, y); y += 5;
+    }
     doc.setFont('helvetica', 'normal'); doc.setFontSize(10); doc.setTextColor(0, 0, 0);
     for (const line of doc.splitTextToSize(value || '—', MW)) { need(5.5); doc.text(line, LM, y); y += 5.5; }
     y += 3;
