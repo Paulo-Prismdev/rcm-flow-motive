@@ -41,6 +41,7 @@ Keep this list up to date at the end of every round.
 - [ ] Check nothing you use has gone: Round 11 removed 20 unused components and two dead pages (Part Manufacturer Config, Migrate Users). Everything is in the "Before Round 11" checkpoint if anything needs bringing back.
 
 ## Deferred to after go-live
+- [ ] Overhaul: notifications review – who wants which alerts. Since 3 Nov, "repair update received" emails go once to info@rcmautomotive.co.uk (reply goes to the repairer); the per-person "email me repair updates" setting no longer sends anything until that review. In-app notifications unchanged.
 - [ ] Split the large Financials file (`ClaimFinancials.jsx`) – maintenance only, needs live testing.
 - [ ] One-off move of older public documents to private storage (offered, not done).
 - [ ] Make generated PDFs private (ties in with the Resend move – attach instead of link).
