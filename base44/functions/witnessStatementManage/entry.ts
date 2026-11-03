@@ -74,7 +74,7 @@ Deno.serve(async (req) => {
       }
 
       const page = await W.filter({ claim_id: claim.id }, '-created_date', 50);
-      const list = Array.isArray(page) ? page : (page?.items || []);
+      const list = Array.isArray(page) ? page : ((page as any)?.items || []);
       return Response.json({ statements: list.map((r: any) => forStaff(r, origin)) });
     }
 

@@ -14,7 +14,7 @@ Deno.serve(async (req) => {
     if (!token) return Response.json({ valid: false, reason: 'invalid' });
 
     const page = await base44.asServiceRole.entities.WitnessStatement.filter({ token });
-    const rec = (Array.isArray(page) ? page : (page?.items || []))[0];
+    const rec = (Array.isArray(page) ? page : ((page as any)?.items || []))[0];
     if (!rec) return Response.json({ valid: false, reason: 'invalid' });
     if (rec.status === 'Signed') return Response.json({ valid: true, signed: true });
     if (signingLinkExpired(rec.link_sent_at)) return Response.json({ valid: false, reason: 'expired' });
