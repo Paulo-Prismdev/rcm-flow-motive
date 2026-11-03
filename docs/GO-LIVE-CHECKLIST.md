@@ -13,9 +13,9 @@ Keep this list up to date at the end of every round.
 - [ ] Give these claims a claim type (Round 7 makes it required when the full edit form is saved): CLM-0116, CLM-0086, CLM-0076, CLM-0070 have none; CLM-0049 and CLM-0012 have the old "3rd Party Direct" (probably "3rd Party Insurer Direct").
 
 ## Go-live night (after office hours, in this order)
-1. [ ] Publish the app in Base44.
-2. [ ] Apply the staged access rules: `node scripts/apply-access-rules.mjs base44/access-rules/round2-access-rules.json` (dry run first with `--dry-run`), then checkpoint. Must come AFTER publish, or the old screens' activity lines will quietly fail.
-3. [ ] Remove the old `PUBLIC_FORM_SECRET` secret.
+1. [x] Publish the app in Base44 (3 Nov, 11:38).
+2. [x] (3 Nov, 11:39) Apply the staged access rules: `node scripts/apply-access-rules.mjs base44/access-rules/round2-access-rules.json` (dry run first with `--dry-run`), then checkpoint. Must come AFTER publish, or the old screens' activity lines will quietly fail.
+3. [x] Remove the old `PUBLIC_FORM_SECRET` secret (3 Nov).
 
 ## Go-live night – testing
 - [ ] Sign in: password, emailed 6-digit code, Face ID / fingerprint enrol + sign-in on phone and tablet.
