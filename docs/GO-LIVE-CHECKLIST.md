@@ -6,7 +6,8 @@ Keep this list up to date at the end of every round.
 ## Before go-live night (Paul)
 - [ ] Turn off Google sign-in in the Base44 auth settings (sign-in is email + password only now).
 - [ ] Set your own password via "Forgot password?" on the new sign-in page (and make sure Anthony does too).
-- [ ] Email now goes through SendGrid (the existing `SENDGRID_API_KEY`) from notifications@updates.rcmautomotive.co.uk, replies to info@rcmautomotive.co.uk unless a staff member sent it, falling back to Base44 if SendGrid refuses. Test in the preview: sign-in code and an invoice request with a CC; check the twofaManage / requestInvoiceFromAccounts logs say "sent via SendGrid".
+- [x] Resend domain updates.rcmautomotive.co.uk verified (3 Nov, DNS on Wix).
+- [ ] Create a Resend API key (Sending access, that domain only) and add it in Base44 Secrets as `RESEND_API_KEY` – after office hours (saving a secret redeploys functions). Email then goes from notifications@updates.rcmautomotive.co.uk, replies to info@rcmautomotive.co.uk unless a staff member sent it, falling back to Base44 if Resend refuses. Test in the preview: sign-in code and an invoice request with a CC; check the twofaManage / requestInvoiceFromAccounts logs say "sent via Resend".
 - [ ] Check `PUBLIC_LINK_SIGNING_KEY` and `APP_PUBLIC_URL` secrets are set.
 - [ ] Give these claims a claim type (Round 7 makes it required when the full edit form is saved): CLM-0116, CLM-0086, CLM-0076, CLM-0070 have none; CLM-0049 and CLM-0012 have the old "3rd Party Direct" (probably "3rd Party Insurer Direct").
 
