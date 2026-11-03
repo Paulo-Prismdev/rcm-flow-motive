@@ -1,6 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.54';
 import { LINK_MESSAGES, appPublicUrl, signingLinkExpired, validSignature } from '../../shared/publicLinks.ts';
-import { buildPdf, cleanAnswers, esc } from '../../shared/witnessStatement.ts';
+import { buildPdf, cleanAnswers, esc, logoDataUrl } from '../../shared/witnessStatement.ts';
 import { STAFF_ALERTS_EMAIL, buildBrandedHtml, deliverEmail } from '../../shared/brandedEmail.ts';
 
 /**
@@ -37,7 +37,7 @@ Deno.serve(async (req) => {
     if (!claim) return Response.json({ error: LINK_MESSAGES.invalid, reason: 'invalid' }, { status: 404 });
 
     const signedAt = new Date();
-    const pdfBytes = buildPdf(ans, claim, body.signatureDataUrl, signedAt);
+    const pdfBytes = buildPdf(ans, claim, body.signatureDataUrl, signedAt, await logoDataUrl());
     const safeName = ans.full_name.replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '').slice(0, 40) || 'witness';
     const filename = `${claim.job_number || 'claim'}-witness-statement-${safeName}.pdf`;
     const file = new File([new Blob([pdfBytes], { type: 'application/pdf' })], filename, { type: 'application/pdf' });

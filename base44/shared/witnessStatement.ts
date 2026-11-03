@@ -41,7 +41,21 @@ export function cleanAnswers(a: any) {
   };
 }
 
-export function buildPdf(ans: ReturnType<typeof cleanAnswers>, claim: any, signature: string, signedAt: Date) {
+/** The RCM logo as a data URL, for the PDF header (jsPDF can't fetch a web address itself). */
+export async function logoDataUrl(): Promise<string | null> {
+  try {
+    const res = await fetch(LOGO_URL);
+    if (!res.ok) return null;
+    const buf = new Uint8Array(await res.arrayBuffer());
+    let bin = '';
+    for (let i = 0; i < buf.length; i += 0x8000) bin += String.fromCharCode(...buf.subarray(i, i + 0x8000));
+    return `data:image/jpeg;base64,${btoa(bin)}`;
+  } catch {
+    return null;
+  }
+}
+
+export function buildPdf(ans: ReturnType<typeof cleanAnswers>, claim: any, signature: string, signedAt: Date, logo: string | null = null) {
   const doc = new jsPDF();
   const LM = 20, RM = 190, MW = RM - LM;
   let y = 0;
@@ -59,7 +73,10 @@ export function buildPdf(ans: ReturnType<typeof cleanAnswers>, claim: any, signa
   const need = (h: number) => { if (y + h > 274) newPage(); };
 
   // Header
-  try { doc.addImage(LOGO_URL, 'JPEG', LM, 10, 46, 20); } catch { /* text title still shows */ }
+  // The logo sits on the brand navy, as on the website and emails.
+  doc.setFillColor(...RCM_BLUE);
+  doc.rect(0, 0, 210, 30, 'F');
+  if (logo) { try { doc.addImage(logo, 'JPEG', 82, 4, 46, 22); } catch { /* title still shows */ } }
   y = 40;
   doc.setFont('helvetica', 'bold'); doc.setFontSize(16); doc.setTextColor(...RCM_BLUE);
   doc.text('WITNESS STATEMENT', 105, y, { align: 'center' });
