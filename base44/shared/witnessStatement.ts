@@ -87,7 +87,10 @@ export function buildPdf(ans: ReturnType<typeof cleanAnswers>, claim: any, signa
   doc.setDrawColor(...RCM_GREEN); doc.setLineWidth(1); doc.line(LM, y, RM, y);
   y += 9;
 
+  let firstHeading = true;
   const heading = (t: string) => {
+    if (!firstHeading) y += 4;
+    firstHeading = false;
     need(14);
     doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.setTextColor(...RCM_BLUE);
     doc.text(t, LM, y);
