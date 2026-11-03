@@ -116,6 +116,13 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
+  // The server has just confirmed the code or Face ID: open the app straight away, and
+  // fetch the full status in the background rather than making the user wait for it.
+  const markTwofaVerified = useCallback(() => {
+    setTwofaStatus((prev) => ({ ...prev, required: true, verified: true, loading: false, failed: false }));
+    refreshTwofaStatus();
+  }, [refreshTwofaStatus]);
+
   const checkUserAuth = async () => {
     try {
       // Now check if the user is authenticated
@@ -204,6 +211,7 @@ export const AuthProvider = ({ children }) => {
       appPublicSettings,
       twofaStatus,
       refreshTwofaStatus,
+      markTwofaVerified,
       logout,
       navigateToLogin,
       checkAppState
