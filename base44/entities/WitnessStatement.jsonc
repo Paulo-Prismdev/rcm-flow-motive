@@ -1,0 +1,87 @@
+{
+  "name": "WitnessStatement",
+  "type": "object",
+  "properties": {
+    "claim_id": {
+      "type": "string",
+      "description": "The claim this witness statement is for"
+    },
+    "witness_name": {
+      "type": "string",
+      "description": "Who the request is for, as entered by staff"
+    },
+    "witness_email": {
+      "type": "string",
+      "description": "Witness email address (optional), used to email the link"
+    },
+    "witness_phone": {
+      "type": "string",
+      "description": "Witness phone number (optional), for staff to send the link by text"
+    },
+    "token": {
+      "type": "string",
+      "description": "The random token in the witness's link. Never shown to portal users."
+    },
+    "link_sent_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the current link was made (it runs out 14 days later)"
+    },
+    "link_emailed_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the link was last emailed to the witness"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Requested",
+        "Signed"
+      ],
+      "default": "Requested"
+    },
+    "signed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "signer_name": {
+      "type": "string",
+      "description": "The name the witness signed with"
+    },
+    "pdf_ref": {
+      "type": "string",
+      "description": "The signed statement PDF (private file reference)"
+    },
+    "answers": {
+      "type": "object",
+      "description": "What the witness entered on the form, kept as submitted"
+    },
+    "requested_by": {
+      "type": "string",
+      "description": "Staff member who created the request"
+    }
+  },
+  "required": [
+    "claim_id",
+    "witness_name"
+  ],
+  "rls": {
+    "read": {
+      "$and": [
+        {
+          "user_condition": {
+            "data.user_type": "internal"
+          }
+        },
+        {
+          "user_condition": {
+            "data.twofa_verified": true
+          }
+        }
+      ]
+    },
+    "create": false,
+    "update": false,
+    "delete": false
+  }
+}
