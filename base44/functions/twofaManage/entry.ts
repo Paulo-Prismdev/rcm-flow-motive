@@ -292,13 +292,16 @@ export default async function (req: Request) {
         }, { status: 400 });
       }
 
-      await base44.asServiceRole.entities.TwoFactorCode.update(active.id, { consumed_at: nowIso() });
+      // The three writes don't depend on each other, so they go together (quicker sign-in).
       const now = nowIso();
-      await base44.asServiceRole.entities.User.update(user.id, {
-        twofa_verified: true, twofa_verified_at: now, twofa_last_activity_at: now,
-        twofa_attempt_count: 0, twofa_locked_until: null,
-      });
-      await auditUser(base44, user, 'Sign-in Verified', 'Completed the emailed-code sign-in step');
+      await Promise.all([
+        base44.asServiceRole.entities.TwoFactorCode.update(active.id, { consumed_at: now }),
+        base44.asServiceRole.entities.User.update(user.id, {
+          twofa_verified: true, twofa_verified_at: now, twofa_last_activity_at: now,
+          twofa_attempt_count: 0, twofa_locked_until: null,
+        }),
+        auditUser(base44, user, 'Sign-in Verified', 'Completed the emailed-code sign-in step'),
+      ]);
       return Response.json({ verified: true, verified_at: now });
     }
 
