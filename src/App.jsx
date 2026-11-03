@@ -25,6 +25,7 @@ const CreditRepairDirectory = lazy(() => import('@/pages/CreditRepairDirectory')
 const ClientDirectory = lazy(() => import('@/pages/ClientDirectory'));
 const IndemnityForm = lazy(() => import('@/pages/IndemnityForm'));
 const RepairPreferenceForm = lazy(() => import('@/pages/RepairPreferenceForm'));
+const WitnessStatementForm = lazy(() => import('@/pages/WitnessStatementForm'));
 const DeclarationOfNeedForm = lazy(() => import('@/pages/DeclarationOfNeedForm'));
 const BodyshopUpdateForm = lazy(() => import('@/pages/BodyshopUpdateForm'));
 const StatusMigrationReview = lazy(() => import('@/pages/StatusMigrationReview'));
@@ -44,7 +45,7 @@ const LayoutWrapper = ({ children, currentPageName }) => Layout ?
   <Layout currentPageName={currentPageName}>{children}</Layout>
   : <>{children}</>;
 
-const PUBLIC_PATHS = ['/backorder-form', '/parts-request', '/client-claim-form', '/indemnity-form', '/repair-preference-form', '/declaration-of-need-form', '/bodyshop-update', '/login', '/forgot-password', '/reset-password'];
+const PUBLIC_PATHS = ['/backorder-form', '/parts-request', '/client-claim-form', '/indemnity-form', '/repair-preference-form', '/witness-statement-form', '/declaration-of-need-form', '/bodyshop-update', '/login', '/forgot-password', '/reset-password'];
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, isAuthenticated, navigateToLogin, twofaStatus, user } = useAuth();
@@ -61,6 +62,7 @@ const AuthenticatedApp = () => {
           <Route path="/client-claim-form" element={<ClientClaimForm />} />
           <Route path="/indemnity-form" element={<IndemnityForm />} />
           <Route path="/repair-preference-form" element={<RepairPreferenceForm />} />
+          <Route path="/witness-statement-form" element={<WitnessStatementForm />} />
           <Route path="/declaration-of-need-form" element={<DeclarationOfNeedForm />} />
           <Route path="/bodyshop-update" element={<BodyshopUpdateForm />} />
           <Route path="/login" element={<Login />} />
@@ -196,6 +198,7 @@ function PublicApp() {
         <Route path="/client-claim-form" element={<ClientClaimForm />} />
         <Route path="/indemnity-form" element={<IndemnityForm />} />
         <Route path="/repair-preference-form" element={<RepairPreferenceForm />} />
+          <Route path="/witness-statement-form" element={<WitnessStatementForm />} />
         <Route path="/declaration-of-need-form" element={<DeclarationOfNeedForm />} />
         <Route path="/bodyshop-update" element={<BodyshopUpdateForm />} />
         <Route path="/login" element={<Login />} />

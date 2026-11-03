@@ -64,6 +64,7 @@ import ClaimVehicleDamageForm from './ClaimVehicleDamageForm';
 import ClaimIndemnityForm from './ClaimIndemnityForm';
 import IndemnityLinkManager from './IndemnityLinkManager';
 import RepairPreferenceLinkManager from './RepairPreferenceLinkManager';
+import WitnessStatementsSection from './WitnessStatementsSection';
 import DeclarationOfNeedLinkManager from './DeclarationOfNeedLinkManager';
 import ClaimExcessContributionForm from './ClaimExcessContributionForm';
 import InstructionDefaultsForm from './InstructionDefaultsForm';
@@ -255,6 +256,7 @@ const DETAIL_SECTIONS = [
   { id: 'indemnity', label: 'Indemnity Details', icon: Shield },
   { id: 'repairPreference', label: 'Repair Preference', icon: FileText },
   { id: 'declarationOfNeed', label: 'Declaration of Need', icon: FileText },
+  { id: 'witnessStatements', label: 'Witness Statements', icon: FileText },
   { id: 'backorderedParts', label: 'Backordered Parts', icon: Package },
   ];
 
@@ -1402,6 +1404,17 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                 </Button>
               </div>
             )}
+          </div>
+        );
+
+      case 'witnessStatements':
+        return (
+          <div className="bg-card border border-border rounded-[10px] p-4 md:p-5 m-card-tight shadow-sm">
+            <div className="flex items-center gap-2.5 pb-3 mb-4 border-b border-border m-card-head">
+              <FileText className="w-4 h-4 text-muted-foreground" />
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Witness Statements</h3>
+            </div>
+            <WitnessStatementsSection claim={claim} />
           </div>
         );
 
