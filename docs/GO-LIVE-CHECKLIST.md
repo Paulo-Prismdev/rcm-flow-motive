@@ -40,6 +40,9 @@ Keep this list up to date at the end of every round.
 - [ ] Branding: the browser tab shows the navy RCM icon (not the Base44 logo); "Add to Home Screen" on Anthony's phone/tablet shows the RCM icon named "RCM Flowmotive"; Base44's own sign-in/invite emails say "RCM Flowmotive" not "ARTECH One".
 - [ ] Check nothing you use has gone: Round 11 removed 20 unused components and two dead pages (Part Manufacturer Config, Migrate Users). Everything is in the "Before Round 11" checkpoint if anything needs bringing back.
 
+## Added after go-live
+- [x] Witness statements (secure link, public form, signed PDF for the insurer) – published and tested by Paul, 4 Nov.
+
 ## Deferred to after go-live
 - [ ] Overhaul: notifications review – who wants which alerts. Since 3 Nov, "repair update received" emails go once to info@rcmautomotive.co.uk (reply goes to the repairer); the per-person "email me repair updates" setting no longer sends anything until that review. In-app notifications unchanged.
 - [ ] Split the large Financials file (`ClaimFinancials.jsx`) – maintenance only, needs live testing.
