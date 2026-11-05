@@ -1080,6 +1080,14 @@
       "type": "object",
       "description": "Mirror of which invoice items have their copy filed: map of item_key -> true. Rebuilt from the claim's own ClaimDocument rows whenever an invoice copy is uploaded or removed, so the claims list can judge a missing copy - and read the same 'Pending invoices' status as the claim's Financials screen - without loading a claim's documents. Items with no copy on file are simply absent.",
       "default": {}
+    },
+    "acg_processing": {
+      "type": "boolean",
+      "description": "ACG (Accident Credit Group) are processing payment: they settle the repairer and collect our referral fee, less their charge. Percentage-fee jobs only."
+    },
+    "acg_fee_percent": {
+      "type": "number",
+      "description": "ACG's charge in percentage points, stamped when the claim was ticked as ACG (taken off our referral fee %)."
     }
   },
   "required": [],

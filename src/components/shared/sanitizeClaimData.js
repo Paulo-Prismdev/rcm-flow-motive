@@ -16,6 +16,7 @@ const CLAIM_NUMBER_FIELDS = new Set([
   "est_fee",
   "referral_fee_repairer",
   "referral_fee_repairer_gbp",
+  "acg_fee_percent",
   "percent_bld_instruction",
   "estimate_cost_net",
   "authority_cost_net",

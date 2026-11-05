@@ -56,6 +56,7 @@ import {
   isInvoiceDocument,
   isRecommendedItem,
 } from './invoiceItems';
+import { ACG_PARTY, acgFeePercent, isAcgClaim, referralPercentAfterAcg } from './acgProcessing';
 
 // The items a claim can carry, the keys their files are filed under and the rules
 // that read them live in ./invoiceItems, re-exported here so every part of the
@@ -304,6 +305,7 @@ export function claimInvoiceItem(item, claim) {
   if (item.creditRepair && isCreditRepairClaim(claim)) return { ...item, ...item.creditRepair };
   if (item.privatePaying && isPrivatePayingClaim(claim)) return { ...item, ...item.privatePaying };
   if (item.thirdParty && isThirdPartyPayingClaim(claim)) return { ...item, ...item.thirdParty };
+  if (item.acg && isAcgClaim(claim)) return { ...item, ...item.acg };
   return item;
 }
 
@@ -336,6 +338,8 @@ export function invoicePartyName(claim, item) {
     // The other side of the incident, where they are the ones paying for the repair.
     case 'third_party': return claim?.tp_name || '';
     case 'credit_repair': return claim?.credit_repair_company_name || '';
+    // ACG collect our referral fee on the repairer's behalf, so our invoice is to them.
+    case 'acg': return ACG_PARTY.name;
     case 'authorising_party':
       return claim?.authorising_party_name || claim?.insurer || claim?.referrer || claim?.client_name || '';
     default: return '';
@@ -494,6 +498,22 @@ const AMOUNT_RESOLVERS = {
     const pct = toNum(claim.referral_fee_repairer);
     if (pct <= 0) return awaiting('Set the repairer referral fee');
     const net = repairNet(claim);
+    // ACG processing payment: their charge comes off our percentage, and the invoice
+    // is raised to them.
+    if (isAcgClaim(claim)) {
+      const acgPct = acgFeePercent(claim);
+      const ours = referralPercentAfterAcg(claim);
+      const acgFee = round2(net * ours / 100);
+      const acgVat = round2(acgFee * VAT_RATE);
+      return withVat(acgFee, [
+        { label: 'Repair cost ex VAT', value: fmtGBP(net) },
+        { label: 'Referral fee agreed', value: `${pct}%` },
+        { label: 'Less ACG charge', value: `${acgPct}%` },
+        { label: `Our fee (${ours}%)`, value: fmtGBP(acgFee) },
+        { label: 'VAT (20%)', value: fmtGBP(acgVat) },
+        { label: 'Total (invoiced to ACG)', value: fmtGBP(round2(acgFee + acgVat)), total: true },
+      ], `${pct}% less ACG's ${acgPct}% = ${ours}% of the repair cost ex VAT, invoiced to ACG`);
+    }
     const fee = round2(net * pct / 100);
     const vat = round2(fee * VAT_RATE);
     return withVat(fee, [

@@ -104,6 +104,8 @@ const FIELD_LABELS = {
   percent_to_referrer: 'Referrer fee %',
   referral_fee_repairer: 'Repairer referral fee %',
   referral_fee_repairer_gbp: 'Repairer referral fee (£)',
+  acg_processing: 'ACG processing payment',
+  acg_fee_percent: 'ACG charge %',
   hire_category: 'Hire category',
   external_invoice_ref: 'External invoice ref',
   invoice_notes: 'Invoice notes',

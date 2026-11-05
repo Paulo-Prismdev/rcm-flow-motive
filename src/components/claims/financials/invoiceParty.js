@@ -1,5 +1,6 @@
 import { base44 } from '@/api/base44Client';
 import { invoicePartyName } from '@/components/shared/invoiceChecklist';
+import { ACG_PARTY } from '@/components/shared/acgProcessing';
 
 const clean = (parts) => parts.filter(Boolean);
 const addressOf = (record) => clean([
@@ -65,6 +66,11 @@ export async function resolveInvoiceParty(claim, item) {
         bodyshop?.phone || bodyshop?.mobile_phone,
       ]).join(' · '),
     };
+  }
+
+  // ACG are processing payment: our referral invoice is raised to them.
+  if (item.party === 'acg') {
+    return { kind: 'acg', name: ACG_PARTY.name, addressLines: ACG_PARTY.addressLines, contact: '' };
   }
 
   if (item.party === 'client') {

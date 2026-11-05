@@ -319,6 +319,9 @@ export const INVOICE_ITEMS = [
     // No referral fee on this job: nothing to invoice the repairer for.
     noFeeSlot: 'repairer_referral',
     varianceReason: 'Referral fee or repair cost changed',
+    // ACG processing payment: the same invoice, raised to ACG instead of the repairer,
+    // for our fee less ACG's charge (see shared/acgProcessing.js).
+    acg: { label: 'Referral Invoice Out (ACG)', party: 'acg' },
   },
   {
     // Total loss: we invoice the repairer our share of the storage charge the
