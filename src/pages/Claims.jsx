@@ -149,6 +149,15 @@ const groupBySub = (claims, statusOrder = []) => {
   return seen.map(k => [k, map[k]]);
 };
 
+// Whether record a was saved more recently than record b (by the server's updated time).
+const isNewer = (a, b) => {
+  const ta = Date.parse(a?.updated_date || '');
+  const tb = Date.parse(b?.updated_date || '');
+  if (Number.isNaN(ta)) return false;
+  if (Number.isNaN(tb)) return true;
+  return ta > tb;
+};
+
 export default function ClaimsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState([]);
@@ -302,11 +311,15 @@ export default function ClaimsPage() {
     },
   });
 
+  // Saves still on their way to the server (see the list sync below).
+  const savesInFlight = useRef(0);
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.Claim.update(id, data),
     onSuccess: (savedClaim) => {
       queryClient.invalidateQueries({ queryKey: ['claims'] });
-      if (savedClaim) setSelectedClaim(savedClaim);
+      // The saved copy replaces the screen's only if it is at least as new: with two
+      // saves close together, the first one's reply must not undo the second.
+      if (savedClaim) setSelectedClaim((current) => (current && current.id === savedClaim.id && isNewer(current, savedClaim) ? current : savedClaim));
     },
     onError: (error, variables) => {
       // Revert the optimistic UI to the server's actual current state
@@ -328,11 +341,14 @@ export default function ClaimsPage() {
   const handleUpdate = async (updatedClaim, localClaim) => {
     const data = sanitizeClaimData(updatedClaim, selectedClaim);
     setSelectedClaim(localClaim || updatedClaim);
+    savesInFlight.current += 1;
     try {
       await updateMutation.mutateAsync({ id: updatedClaim.id, data });
       return true;
     } catch {
       return false;
+    } finally {
+      savesInFlight.current -= 1;
     }
   };
 
@@ -413,10 +429,16 @@ export default function ClaimsPage() {
   // Sync selectedClaim with the latest refetched claims data so that
   // external updates (e.g. wizard saving a PDF directly via Claim.update)
   // are reflected in ClaimDetail without requiring a manual refresh.
+  //
+  // Only ever a NEWER copy, and never while a save is on its way: the list is refetched
+  // every 30 seconds and takes a few seconds to load, so a list that started loading
+  // before a save landed would otherwise put the older copy back on screen, and the
+  // next save would write that older copy over what was just saved (this lost two
+  // recorded referrer invoices on CLM-0007).
   useEffect(() => {
-    if (!selectedClaim) return;
+    if (!selectedClaim || savesInFlight.current > 0) return;
     const fresh = claims.find(c => c.id === selectedClaim.id);
-    if (fresh && fresh.updated_date !== selectedClaim.updated_date) {
+    if (fresh && isNewer(fresh, selectedClaim)) {
       setSelectedClaim(fresh);
     }
   }, [claims]);
