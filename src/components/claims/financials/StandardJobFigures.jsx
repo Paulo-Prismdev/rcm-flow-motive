@@ -10,6 +10,7 @@ import {
 import { excessMode } from '@/components/shared/excessState';
 import { NO_FEE_DISPLAY, NO_FEE_LABEL, feeState } from '@/components/shared/feeState';
 import FigureGroup from '@/components/financials/FigureGroup';
+import { ACG_FEE_PERCENT, acgFeePercent, referralPercentAfterAcg } from '@/components/shared/acgProcessing';
 import { figureSourceNote } from './figuresCheck';
 
 const VAT_STATUSES = ['VAT Registered', 'Non-VAT', 'Unknown'];
@@ -219,6 +220,35 @@ export default function StandardJobFigures({ claim, ctx, missing, onChange, onTr
     });
   }
 
+  /* ACG processing payment: a per-claim choice, on percentage-fee jobs only. Their
+     charge comes off our %, and our referral invoice goes to ACG (shared/acgProcessing). */
+  if (repairerRows.length > 0 && !repairerWaived) {
+    const acgOn = !!claim.acg_processing;
+    if (repairerFeeGbp > 0 || repairerShowsFixed) {
+      repairerRows.push({
+        key: 'acg_processing',
+        label: 'ACG processing',
+        editable: false,
+        display: acgOn ? 'Not applied' : 'No',
+        caption: acgOn
+          ? "ACG can't be used on a fixed-fee job, so it isn't applied – the fee is invoiced to the repairer as normal"
+          : "Not available on fixed-fee jobs",
+      });
+    } else {
+      const pct = num(claim.referral_fee_repairer) || 0;
+      repairerRows.push({
+        key: 'acg_processing',
+        label: 'ACG processing',
+        options: ['No', 'Yes'],
+        value: acgOn ? 'Yes' : 'No',
+        display: acgOn ? 'Yes' : 'No',
+        caption: acgOn
+          ? `ACG pay the repairer and collect our fee: ${pct}% less ACG's ${acgFeePercent(claim)}% = ${referralPercentAfterAcg(claim)}%, invoiced to ACG`
+          : `Tick Yes if Accident Credit Group are processing payment (their ${ACG_FEE_PERCENT}% comes off our fee)`,
+      });
+    }
+  }
+
   return (
     <>
       {!ctx.totalLoss && (
@@ -301,7 +331,24 @@ export default function StandardJobFigures({ claim, ctx, missing, onChange, onTr
               patch.referral_fee_repairer_gbp = n;
               notes.push(`Fixed repairer referral fee set to ${fmtGBP(n || 0)}`);
               setRepairerForm(null);
+              // ACG can't take a fixed-fee job: a fixed fee turns ACG processing off.
+              if (n > 0 && claim.acg_processing) {
+                patch.acg_processing = false;
+                notes.push('ACG processing turned off – not available on fixed-fee jobs');
+              }
             }
+            if (changes.acg_processing !== undefined) {
+              const on = changes.acg_processing === 'Yes';
+              if (on !== !!claim.acg_processing) {
+                patch.acg_processing = on;
+                // The rate is stamped when ticked, so a later change of ACG's rate never alters this job.
+                if (on) patch.acg_fee_percent = ACG_FEE_PERCENT;
+                notes.push(on
+                  ? `ACG processing payment – our fee reduced by ACG's ${ACG_FEE_PERCENT}%, referral invoice raised to Accident Credit Group Limited`
+                  : 'ACG processing removed – referral fee and invoice back to the repairer');
+              }
+            }
+            if (Object.keys(patch).length === 0) return;
             onChange(patch, notes.join('; '));
           }}
         />
