@@ -22,6 +22,7 @@ import StatusMultiSelect from '../shared/StatusMultiSelect';
 import ClaimIndemnityFields from './ClaimIndemnityFields';
 import ExcessModeField from '../shared/ExcessModeField';
 import { excessLabel } from '../shared/excessState';
+import { hireInvoicedSwitch, hireInvoicedPatch } from '../shared/hireCharge';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import AddressLookupInput from '../shared/AddressLookupInput';
@@ -138,7 +139,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
   const [formData, setFormData] = useState(claim || {
     job_number: '', reg: '', job_statuses: ['New'], secondary_status: 'New', claim_type: defaultClaimType || '',
     circumstances: '', loss_date: '', loss_time: '', incident_location: '',
-    vehicle_use: '', courtesy_car_required: 'No', has_third_party: false,
+    vehicle_use: '', courtesy_car_required: 'No', hire_invoiced: 'No', has_third_party: false,
     requires_indemnity: false, file_urls: [], insurer: '', claim_ref: '',
     policy_number: '', policy_excess: null, excess_tbc: false, referrer: '', referrer_id: null,
     referrer_ref: '', file_handler: '', referrer_email: '', percent_to_referrer: 0,
@@ -356,6 +357,12 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
     setIsCreating(true);
     const { id: _id, created_date: _cd, updated_date: _ud, created_by: _cb, ...submitData } = formData;
     submitData.courtesy_car_required = normalizeCourtesyCar(submitData.courtesy_car_required);
+    // Hire invoicing lives in the claim's tracker beside the other invoicing settings,
+    // so the switch chosen here is the same one Financials works from.
+    const hireSwitch = submitData.hire_invoiced;
+    delete submitData.hire_invoiced;
+    const hirePatch = hireSwitch ? hireInvoicedPatch(submitData, hireSwitch) : null;
+    if (hirePatch) submitData.invoice_tracker = hirePatch.invoice_tracker;
     if (!claim) {
       try {
         const response = await base44.functions.invoke('generateJobNumber', { entityType: 'Claim' });
@@ -413,6 +420,10 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
       if (!formData.reg) { setFieldErrors((e) => ({ ...e, reg: true })); setIsSavingDraft(false); return; }
       const { id: _id, created_date: _cd, updated_date: _ud, created_by: _cb, ...submitData } = formData;
       submitData.courtesy_car_required = normalizeCourtesyCar(submitData.courtesy_car_required);
+      const hireSwitch = submitData.hire_invoiced;
+      delete submitData.hire_invoiced;
+      const hirePatch = hireSwitch ? hireInvoicedPatch(submitData, hireSwitch) : null;
+      if (hirePatch) submitData.invoice_tracker = hirePatch.invoice_tracker;
       let draftData = submitData;
       if (!claim) {
         try {
@@ -761,6 +772,16 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
               {COURTESY_CAR_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
             </select>
           </div>
+          <div className="py-2 flex items-center justify-between gap-3">
+            <span className="text-sm font-medium">
+              Hire to invoice
+              <span className="block text-xs font-normal text-muted-foreground">Charged to the insurer at the agreed day rate</span>
+            </span>
+            <select value={hireInvoicedSwitch(formData)} onChange={e => handleChange('hire_invoiced', e.target.value)} className="px-3 py-1.5 text-sm rounded-lg border border-input bg-card text-foreground">
+              <option value="No">No</option>
+              <option value="Yes">Yes</option>
+            </select>
+          </div>
           <div className="py-2"><BoolToggle label="Third party involved" value={formData.has_third_party} onChange={v => handleCheckboxChange('has_third_party', v)} /></div>
           <div className="py-2"><BoolToggle label="Indemnity details required" value={formData.requires_indemnity} onChange={v => handleCheckboxChange('requires_indemnity', v)} /></div>
         </div>
@@ -1034,6 +1055,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
               <ReviewRow label="Time of Loss" value={formData.loss_time} />
               <ReviewRow label="Vehicle Use" value={formData.vehicle_use} />
               <ReviewRow label="Courtesy Car" value={formData.courtesy_car_required || 'No'} />
+              <ReviewRow label="Hire to invoice" value={hireInvoicedSwitch(formData)} />
               <ReviewRow label="Third Party" value={formData.has_third_party ? 'Yes' : 'No'} />
               <ReviewRow label="Indemnity" value={formData.requires_indemnity ? 'Yes' : 'No'} />
             </div>

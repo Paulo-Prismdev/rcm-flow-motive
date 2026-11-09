@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import AddressLookupInput from '../shared/AddressLookupInput';
 import { COURTESY_CAR_OPTIONS } from '../shared/courtesyCarOptions';
+import { hireInvoicedSwitch, hireInvoicedPatch } from '../shared/hireCharge';
 
 export default function ClaimVehicleDamageForm({ claim, onSave, onCancel, mode = 'damage' }) {
   const isLocationOnly = mode === 'location';
@@ -11,6 +12,7 @@ export default function ClaimVehicleDamageForm({ claim, onSave, onCancel, mode =
   const [formData, setFormData] = useState({
     vehicle_damage: claim.vehicle_damage || '',
     courtesy_car_required: claim.courtesy_car_required === true ? 'Yes' : (claim.courtesy_car_required || 'No'),
+    hire_invoiced: hireInvoicedSwitch(claim),
     unroadworthy: claim.unroadworthy || false,
     vehicle_location: claim.vehicle_location || ''
   });
@@ -24,7 +26,10 @@ export default function ClaimVehicleDamageForm({ claim, onSave, onCancel, mode =
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSave(formData);
+    const { hire_invoiced: hireSwitch, ...claimFields } = formData;
+    // The hire switch is saved into the claim's invoicing tracker, not as a field.
+    const hirePatch = isLocationOnly ? null : hireInvoicedPatch(claim, hireSwitch);
+    onSave(hirePatch ? { ...claimFields, ...hirePatch } : claimFields);
   };
 
   return (
@@ -62,6 +67,17 @@ export default function ClaimVehicleDamageForm({ claim, onSave, onCancel, mode =
                 className="px-3 py-1.5 text-sm rounded-lg border border-input bg-card text-foreground"
               >
                 {COURTESY_CAR_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
+              </select>
+            </label>
+            <label className="flex items-center gap-2">
+              <span className="text-sm font-medium">Hire to Invoice</span>
+              <select
+                value={formData.hire_invoiced}
+                onChange={(e) => setFormData({ ...formData, hire_invoiced: e.target.value })}
+                className="px-3 py-1.5 text-sm rounded-lg border border-input bg-card text-foreground"
+              >
+                <option value="No">No</option>
+                <option value="Yes">Yes</option>
               </select>
             </label>
           </div>

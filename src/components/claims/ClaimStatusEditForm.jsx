@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import CustomSelect from '../shared/CustomSelect';
 import { COURTESY_CAR_OPTIONS } from '../shared/courtesyCarOptions';
+import { hireInvoicedSwitch, hireSummaryText, hireInvoicedPatch, withHireSwitch } from '../shared/hireCharge';
 
 export default function ClaimStatusEditForm({ claim: editClaim, onSave, onCancel }) {
   const [form, setForm] = useState({
@@ -12,6 +13,7 @@ export default function ClaimStatusEditForm({ claim: editClaim, onSave, onCancel
     loss_time: editClaim.loss_time || '',
     vehicle_use: editClaim.vehicle_use || '',
     courtesy_car_required: editClaim.courtesy_car_required === true ? 'Yes' : (editClaim.courtesy_car_required || 'No'),
+    hire_invoiced: hireInvoicedSwitch(editClaim),
     incident_location: editClaim.incident_location || '',
     circumstances: editClaim.circumstances || '',
   });
@@ -19,6 +21,9 @@ export default function ClaimStatusEditForm({ claim: editClaim, onSave, onCancel
   const set = (field, value) => setForm(prev => ({ ...prev, [field]: value }));
 
   const handleSave = () => {
+    // The hire switch is held in the claim's tracker beside the other invoicing
+    // settings, so it is saved as that patch rather than as a claim field.
+    const hirePatch = hireInvoicedPatch(editClaim, form.hire_invoiced);
     onSave({
       reg: form.reg,
       claim_type: form.claim_type,
@@ -28,8 +33,11 @@ export default function ClaimStatusEditForm({ claim: editClaim, onSave, onCancel
       courtesy_car_required: form.courtesy_car_required,
       incident_location: form.incident_location,
       circumstances: form.circumstances,
+      ...(hirePatch || {}),
     });
   };
+
+  const hirePreview = hireSummaryText(withHireSwitch(editClaim, form.hire_invoiced));
 
   return (
     <div className="space-y-3">
@@ -105,6 +113,16 @@ export default function ClaimStatusEditForm({ claim: editClaim, onSave, onCancel
             options={COURTESY_CAR_OPTIONS.map(o => ({ value: o, label: o }))}
             className="glass-inset w-full px-3 py-2 text-sm"
           />
+        </div>
+        <div>
+          <label className="block text-xs font-medium text-foreground-muted mb-1">Hire to Invoice</label>
+          <CustomSelect
+            value={form.hire_invoiced}
+            onChange={(v) => set('hire_invoiced', v)}
+            options={[{ value: 'No', label: 'No' }, { value: 'Yes', label: 'Yes' }]}
+            className="glass-inset w-full px-3 py-2 text-sm"
+          />
+          <p className="mt-1 text-xs text-foreground-muted">{hirePreview}</p>
         </div>
       </div>
       <div>

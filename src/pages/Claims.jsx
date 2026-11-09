@@ -23,6 +23,7 @@ import { sanitizeClaimData } from '@/components/shared/sanitizeClaimData';
 import { formatAuthorisingParty, authorisingPartyOrganisation, AUTHORISING_PARTY_LABELS } from '@/components/shared/authorisingParty';
 import { claimInvoiceSummary, deriveInvoiceStatus } from '@/components/shared/invoiceChecklist';
 import { claimInvoicesChased } from '@/components/shared/invoicingQueue';
+import { hireFlagged } from '@/components/shared/hireCharge';
 import InvoiceStatusReviewBanner from '../components/claims/InvoiceStatusReviewBanner';
 import PullToRefresh from '../components/shared/PullToRefresh';
 import {
@@ -584,6 +585,14 @@ export default function ClaimsPage() {
                 <Package className="w-2.5 h-2.5" />BO
               </span>
             )}
+            {hireFlagged(claim) && (
+              <span
+                className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300 text-[10px] font-semibold leading-none"
+                title="Hire to invoice"
+              >
+                Hire
+              </span>
+            )}
             {(() => {
               const rc = claim.doc_checklist_received ?? 0;
               const tot = claim.doc_checklist_total ?? 4;
@@ -674,6 +683,11 @@ export default function ClaimsPage() {
             {hasBackorder && (
               <span className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-red-100 text-red-700 text-[10px] font-medium">
                 <Package className="w-2.5 h-2.5" />BO
+              </span>
+            )}
+            {hireFlagged(claim) && (
+              <span className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-indigo-100 text-indigo-700 text-[10px] font-medium">
+                Hire
               </span>
             )}
 

@@ -14,6 +14,8 @@
  * storage settings, so nothing new has to be stored on the claim itself.
  */
 
+import { fmtGBP } from './creditRepairRates';
+
 export const HIRE_TRACKER_KEY = 'hire';
 
 /** Who the hire charge may be split with, besides the insurer. */
@@ -67,6 +69,50 @@ export function hireSplitPartyName(claim) {
   if (splitParty === 'Repairer') return claim?.bodyshop || '';
   if (splitParty === 'Client') return claim?.client_name || '';
   return '';
+}
+
+/**
+ * The hire switch as the claim's own forms hold it ('Yes' / 'No'). A form keeps the
+ * answer under hire_invoiced while it is open; once saved it lives in the tracker.
+ */
+export const hireInvoicedSwitch = (holder) => {
+  if (holder?.hire_invoiced === 'Yes' || holder?.hire_invoiced === 'No') return holder.hire_invoiced;
+  return hireSetup(holder).invoiced ? 'Yes' : 'No';
+};
+
+/**
+ * The patch recording the switch being set from the claim's own details — the same
+ * setting Financials shows. Nothing is written while the switch stays off on a claim
+ * that has never carried hire, so claims that don't use hire are left untouched.
+ */
+export function hireInvoicedPatch(claim, value) {
+  const base = claim?.invoice_tracker || {};
+  if (value !== 'Yes' && !base[HIRE_TRACKER_KEY]) return null;
+  return buildHirePatch(claim, { hire_invoiced: value });
+}
+
+/** The claim with its hire switch set as a form currently holds it, unsaved. */
+export const withHireSwitch = (holder, value) => ({
+  ...holder,
+  invoice_tracker: {
+    ...(holder?.invoice_tracker || {}),
+    [HIRE_TRACKER_KEY]: {
+      ...((holder?.invoice_tracker || {})[HIRE_TRACKER_KEY] || {}),
+      invoiced: value === 'Yes',
+    },
+  },
+});
+
+/** The hire on the claim in one line, for the claim's own details. */
+export function hireSummaryText(claim) {
+  const setup = hireSetup(claim);
+  if (!setup.invoiced) return 'No';
+  const charge = hireChargeNet(claim);
+  if (charge > 0) {
+    return `Yes — ${fmtGBP(setup.dayRate)} × ${setup.days} day${setup.days === 1 ? '' : 's'} (${fmtGBP(charge)} ex VAT)`;
+  }
+  if (setup.dayRate > 0 || setup.days > 0) return 'Yes — rate or days still to set';
+  return 'Yes — day rate and days to set';
 }
 
 /**

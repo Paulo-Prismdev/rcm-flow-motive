@@ -15,6 +15,7 @@ import ExcessModeField from '../shared/ExcessModeField';
 import AddressLookupInput from '../shared/AddressLookupInput';
 import AIExtractConfirmDialog from '../shared/AIExtractConfirmDialog';
 import { COURTESY_CAR_OPTIONS } from '../shared/courtesyCarOptions';
+import { hireInvoicedSwitch, hireSummaryText, withHireSwitch } from '../shared/hireCharge';
 import { CLAIM_TYPES } from '../shared/claimTypes';
 
 export default function ClaimEditForm({
@@ -103,6 +104,16 @@ export default function ClaimEditForm({
                 <span className="text-sm text-gray-600 flex-1">Courtesy Car Required</span>
                 <select value={formData.courtesy_car_required || 'No'} onChange={(e) => handleChange('courtesy_car_required', e.target.value)} className="neomorph-inset px-3 py-2 text-sm text-gray-700 border-0 rounded-xl">
                   {COURTESY_CAR_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
+                </select>
+              </label>
+              <label className="flex items-center gap-3 cursor-pointer">
+                <span className="text-sm text-gray-600 flex-1">
+                  Hire to Invoice
+                  <span className="block text-xs text-gray-500">{hireSummaryText(withHireSwitch(formData, hireInvoicedSwitch(formData)))}</span>
+                </span>
+                <select value={hireInvoicedSwitch(formData)} onChange={(e) => handleChange('hire_invoiced', e.target.value)} className="neomorph-inset px-3 py-2 text-sm text-gray-700 border-0 rounded-xl">
+                  <option value="No">No</option>
+                  <option value="Yes">Yes</option>
                 </select>
               </label>
               <label className="flex items-center gap-3 cursor-pointer"><input type="checkbox" checked={!!formData.has_third_party} onChange={(e) => handleCheckboxChange('has_third_party', e.target.checked)} className="neomorph-inset" /><span className="text-sm text-gray-600">Third Party Involved</span></label>
