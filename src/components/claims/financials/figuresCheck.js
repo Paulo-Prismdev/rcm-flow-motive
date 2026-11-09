@@ -167,7 +167,7 @@ export function figureRows({ claim, ctx, storagePercentDefault }) {
   }
 
   // Hire to be invoiced: the day rate agreed with the insurer, the days hired and —
-  // where the hire is split — the share the client or repairer is covering.
+  // where the hire is split — the share paid out to the client or repairer.
   if (ctx?.hire) {
     const hire = hireSetup(claim);
     add({ key: 'hire_day_rate', label: 'Hire day rate', value: num(hire.dayRate), money: true });

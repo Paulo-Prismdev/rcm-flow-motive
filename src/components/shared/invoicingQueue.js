@@ -169,7 +169,7 @@ const CLOSE_OUT_KEYS = [
 ];
 
 /** Invoices we are waiting to come in from a party, once the car is back. */
-const EXPECTED_IN_KEYS = ['referrer_invoice_in', 'second_referrer_invoice_in'];
+const EXPECTED_IN_KEYS = ['referrer_invoice_in', 'second_referrer_invoice_in', 'hire_share_invoice'];
 
 /* ── Day thresholds (editable in Settings) ───────────────────────────────── */
 

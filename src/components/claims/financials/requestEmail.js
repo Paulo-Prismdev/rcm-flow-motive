@@ -8,8 +8,13 @@ import { fmtGBP } from '@/components/shared/creditRepairRates';
 export function buildInvoiceRequestEmail({ claim, item, state, party, user }) {
   const subject = `Invoice required — Job ${claim.job_number || '—'} | ${claim.reg || '—'} | ${item.label}`;
 
+  // An invoice we receive — the share of the hire the client or repairer is owed, or a
+  // repairer's final invoice on a job the customer pays for — is asked for the other
+  // way round: accounts get it in from them and settle it.
+  const inbound = item.direction === 'in';
+
   const partyLines = [
-    `Invoice to:     ${party?.name || 'Not set'}`,
+    `${inbound ? 'Invoice from' : 'Invoice to'}:   ${party?.name || 'Not set'}`,
     ...(party?.addressLines || []).map((line) => `                ${line}`),
     ...(party?.contact ? [`Contact:        ${party.contact}`] : []),
   ];
@@ -17,7 +22,9 @@ export function buildInvoiceRequestEmail({ claim, item, state, party, user }) {
   const lines = [
     'Hi Accounts,',
     '',
-    `Please raise the following invoice on our behalf.`,
+    inbound
+      ? 'Please get the following invoice in from them and settle it on our behalf.'
+      : 'Please raise the following invoice on our behalf.',
     '',
     `Job number:     ${claim.job_number || '—'}`,
     `Vehicle Reg:    ${claim.reg || '—'}`,
@@ -36,7 +43,9 @@ export function buildInvoiceRequestEmail({ claim, item, state, party, user }) {
     'How it was calculated:',
     ...state.workings.map((row) => `  ${row.label}: ${row.value}`),
     '',
-    'Please raise this invoice at your earliest convenience.',
+    inbound
+      ? 'Please get this invoice in and settled at your earliest convenience.'
+      : 'Please raise this invoice at your earliest convenience.',
     '',
     'Thanks',
     user?.full_name ? `${user.full_name}` : '',

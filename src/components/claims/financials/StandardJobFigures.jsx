@@ -15,7 +15,6 @@ import {
   HIRE_SPLIT_PARTIES,
   buildHirePatch,
   hireChargeNet,
-  hireInsurerNet,
   hireSetup,
 } from '@/components/shared/hireCharge';
 import { figureSourceNote } from './figuresCheck';
@@ -250,10 +249,10 @@ export default function StandardJobFigures({ claim, ctx, missing, onChange, onTr
     });
   }
 
-  /* Hire — a courtesy vehicle arranged for the customer and invoiced to the insurer at
-     the day rate agreed with them, over the days hired. Sometimes split with the client
-     or the repairer: their share is invoiced to them, and the insurer is billed the rest.
-     Ticking it puts the hire invoices into step 3. */
+  /* Hire — a replacement vehicle charged to the insurer at the day rate agreed with them,
+     over the days hired. The insurer is at fault and covers the whole charge; where the
+     vehicle came from the client or the repairer, their share is paid out to them and
+     tracked as an invoice in. Ticking it puts the hire invoices into the flow. */
   const hire = hireSetup(claim);
   const hireCharge = hireChargeNet(claim);
   const hireRows = [];
@@ -265,7 +264,7 @@ export default function StandardJobFigures({ claim, ctx, missing, onChange, onTr
       value: hire.invoiced ? 'Yes' : 'No',
       display: hire.invoiced ? 'Yes' : 'No',
       caption: hire.invoiced
-        ? 'The hire invoice is carried by this job — the insurer is billed for its share'
+        ? 'The hire is charged to the insurer at the agreed day rate'
         : 'Tick Yes where hire has to be invoiced on this job',
     });
     // The rate, the days and any split are shown once the job carries hire, or while
@@ -297,8 +296,8 @@ export default function StandardJobFigures({ claim, ctx, missing, onChange, onTr
         value: hire.splitParty,
         display: hire.splitParty,
         caption: hire.splitParty === 'None'
-          ? 'The whole hire is billed to the insurer'
-          : 'Their share is invoiced to them, and the insurer is billed the rest',
+          ? 'The whole hire is billed to the insurer and kept by us'
+          : 'Their share of the hire is paid out to them — the insurer still covers the whole charge',
       });
       if (hire.splitParty !== 'None') {
         hireRows.push({
@@ -307,7 +306,7 @@ export default function StandardJobFigures({ claim, ctx, missing, onChange, onTr
           type: 'number',
           value: hire.splitAmount,
           display: hire.splitAmount !== null ? fmtGBP(hire.splitAmount) : undefined,
-          caption: `Ex VAT — the insurer is billed the remaining ${fmtGBP(hireInsurerNet(claim))}`,
+          caption: `Ex VAT — paid out of the ${fmtGBP(hireCharge)} hire the insurer covers`,
           missing: isMissing('hire_split_amount'),
         });
       }

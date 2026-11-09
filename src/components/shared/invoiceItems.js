@@ -351,10 +351,9 @@ export const INVOICE_ITEMS = [
     varianceReason: 'Repair cost, excess or VAT status changed',
   },
   // Hire we arranged for the customer and invoice the insurer for: the day rate
-  // agreed with them over the days hired. Where the hire is split with the client or
-  // the repairer, only the insurer's share is billed here and their share is raised
-  // on its own invoice beside it. Both are ordinary invoices out — asked for from
-  // accounts, locked at the figure they go out at, and marked paid.
+  // agreed with them over the days hired. The insurer is at fault and covers the
+  // whole hire, so nothing comes off it — where the vehicle came from the client or
+  // the repairer, their share is paid out to them on its own invoice in beside it.
   {
     key: 'hire_invoice_out',
     label: 'Hire Invoice Out',
@@ -367,15 +366,18 @@ export const INVOICE_ITEMS = [
     varianceReason: 'Hire day rate, days or split changed',
   },
   {
-    key: 'hire_split_invoice_out',
-    label: 'Hire Split Invoice Out',
-    section: 'out',
-    direction: 'out',
-    dateLabel: 'Sent',
+    // The share of the hire paid out to whoever provided the vehicle — the client or
+    // the repairer. The insurer pays us the whole charge, so this is their invoice to
+    // us: received and settled like any other invoice that comes in.
+    key: 'hire_share_invoice',
+    label: 'Hire Share Invoice',
+    section: 'in',
+    direction: 'in',
+    dateLabel: 'Received',
     requires: ['hire_split', 'not_total_loss', 'not_credit_repair'],
-    // Whoever shares the hire charge with us — the client, or the repairer.
+    // Whoever the hire charge is shared with — the client, or the repairer.
     party: 'hire_split_party',
-    amountSource: 'hire_split_charge',
+    amountSource: 'hire_share_payout',
     varianceReason: 'Hire day rate, days or split changed',
   },
   // Credit repair claims: we invoice the credit repair company for our cut, from

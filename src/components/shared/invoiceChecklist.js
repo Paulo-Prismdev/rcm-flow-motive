@@ -60,7 +60,6 @@ import { ACG_PARTY, acgFeePercent, isAcgClaim, referralPercentAfterAcg } from '.
 import {
   hireChargeNet,
   hireFlagged,
-  hireInsurerNet,
   hireSetup,
   hireSplitApplies,
   hireSplitNet,
@@ -249,9 +248,9 @@ export function invoiceContext(claim, vatExcess) {
     creditRepair,
     hasRepairer: !!claim?.bodyshop || !!claim?.bodyshop_id,
     privatePaying,
-    // Hire to be invoiced on this job: the courtesy vehicle we arranged, billed to
-    // the insurer — and, where the hire is split, the share the client or repairer
-    // is covering, which has its own invoice.
+    // Hire to be invoiced on this job: the courtesy vehicle charged to the insurer,
+    // who covers the whole of it — and, where the hire is split, the share paid out
+    // to the client or repairer, which has its own invoice in.
     hire: hireFlagged(claim),
     hireSplit: hireSplitApplies(claim),
   };
@@ -575,9 +574,9 @@ const AMOUNT_RESOLVERS = {
     };
   },
   // Hire we arranged for the customer, invoiced to the insurer: the day rate agreed
-  // with them over the days hired, less the share the client or repairer is covering
-  // where the hire is split, plus VAT. Their share is billed on its own invoice
-  // (hire_split_charge), never twice here.
+  // with them over the days hired, plus VAT. The insurer is covering the cost, so it
+  // pays the whole charge — where the vehicle came from the client or the repairer,
+  // their share is paid out to them on its own invoice in (hire_share_payout).
   hire_charge: (claim) => {
     const { dayRate, days, splitParty } = hireSetup(claim);
     if (!(dayRate > 0) || !(days > 0)) {
@@ -585,39 +584,31 @@ const AMOUNT_RESOLVERS = {
     }
     const charge = hireChargeNet(claim);
     const split = hireSplitNet(claim);
-    const insurer = hireInsurerNet(claim);
-    if (insurer <= 0) {
-      return awaiting('The whole hire is covered by the client or repairer — nothing left to bill the insurer');
-    }
-    const vat = round2(insurer * VAT_RATE);
-    const workings = [
+    const vat = round2(charge * VAT_RATE);
+    return withVat(charge, [
       { label: 'Day rate agreed with the insurer', value: fmtGBP(dayRate) },
       { label: 'Days hired', value: String(days) },
       { label: 'Hire charge ex VAT', value: fmtGBP(charge) },
-    ];
-    if (split > 0) {
-      workings.push({ label: `Less ${splitParty.toLowerCase()} share`, value: `− ${fmtGBP(split)}` });
-      workings.push({ label: "Insurer's share ex VAT", value: fmtGBP(insurer) });
-    }
-    workings.push({ label: 'VAT (20%)', value: fmtGBP(vat) });
-    workings.push({ label: 'Total', value: fmtGBP(round2(insurer + vat)), total: true });
-    return withVat(insurer, workings, split > 0
-      ? `${days} day${days === 1 ? '' : 's'} at ${fmtGBP(dayRate)} — the insurer's share after the ${splitParty.toLowerCase()}'s`
+      { label: 'VAT (20%)', value: fmtGBP(vat) },
+      { label: 'Total', value: fmtGBP(round2(charge + vat)), total: true },
+    ], split > 0
+      ? `${days} day${days === 1 ? '' : 's'} at ${fmtGBP(dayRate)} — the insurer covers the whole hire, and ${fmtGBP(split)} goes to the ${splitParty.toLowerCase()}`
       : `${days} day${days === 1 ? '' : 's'} at ${fmtGBP(dayRate)}`);
   },
-  // The share of the hire charge the client or repairer is covering: invoiced to
-  // them, with VAT, leaving the insurer billed the rest.
-  hire_split_charge: (claim) => {
+  // The share of the hire paid out to whoever provided the vehicle — the client or the
+  // repairer. The insurer has paid us the whole charge, so this is their invoice to us:
+  // it comes in, is checked against their share and is marked paid when we settle it.
+  hire_share_payout: (claim) => {
     const split = hireSplitNet(claim);
-    if (!(split > 0)) return awaiting('Set the share of the hire the client or the repairer is covering');
+    if (!(split > 0)) return awaiting('Set the share of the hire that goes to the client or the repairer');
     const party = hireSetup(claim).splitParty.toLowerCase();
     const vat = round2(split * VAT_RATE);
     return withVat(split, [
       { label: 'Hire charge ex VAT', value: fmtGBP(hireChargeNet(claim)) },
-      { label: `Their share (${party}) ex VAT`, value: fmtGBP(split) },
+      { label: `Paid to the ${party} ex VAT`, value: fmtGBP(split) },
       { label: 'VAT (20%)', value: fmtGBP(vat) },
       { label: 'Total', value: fmtGBP(round2(split + vat)), total: true },
-    ], `The ${party}'s share of the hire charge`);
+    ], `The ${party}'s share of the hire charge — paid out to them`);
   },
   // Total loss: our share of the storage the vehicle ran up with the repairer —
   // storage only, never the salvage agent's admin charges — plus VAT. The figure

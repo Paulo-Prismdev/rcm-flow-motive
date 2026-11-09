@@ -53,7 +53,7 @@ const findReferrerCompany = async (id, name) => {
  */
 export async function resolveInvoiceParty(claim, item) {
   const name = invoicePartyName(claim, item);
-  // The hire split invoice goes to whoever shares the hire charge with us, and is
+  // The hire share invoice comes from whoever the charge is shared with, and is
   // addressed as their own invoice would be: the repairer's record, or the client's
   // details on the claim.
   const party = item.party === 'hire_split_party'

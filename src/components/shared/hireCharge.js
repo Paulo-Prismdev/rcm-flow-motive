@@ -1,14 +1,14 @@
 /**
  * Hire to be invoiced.
  *
- * Some jobs carry hire we arranged for the customer — a courtesy vehicle — which is
- * billed to the insurer at the day rate agreed with them, over the days hired.
+ * Where the incident is someone else's fault the replacement vehicle is charged to
+ * the insurer, at the day rate agreed with them, over the days hired. The vehicle
+ * itself may have come from us, the client or the repairer.
  *
- * The hire is sometimes split with the client or the repairer: their share of the
- * charge is invoiced to them, and the insurer is billed the rest. Both shares are
- * ordinary invoices out (hire_invoice_out and hire_split_invoice_out), so they are
- * asked for from accounts, locked at the figure they go out at and marked paid with
- * every other invoice on the job.
+ * Where it came from the client or the repairer, a share of the hire is theirs: the
+ * insurer still pays us the whole charge (it is covering the cost), and that share is
+ * paid out to them. The payout is tracked as an invoice in from them, so it is
+ * received and paid like every other invoice we settle.
  *
  * The set-up lives in the claim's invoicing tracker beside the second-referrer and
  * storage settings, so nothing new has to be stored on the claim itself.
@@ -49,7 +49,7 @@ export function hireChargeNet(claim) {
   return round2(dayRate * days);
 }
 
-/** The share the client or repairer is covering, clamped to the charge itself. */
+/** The share of the hire paid out to the client or repairer, clamped to the charge. */
 export function hireSplitNet(claim) {
   const { splitParty, splitAmount } = hireSetup(claim);
   const charge = hireChargeNet(claim);
@@ -57,11 +57,7 @@ export function hireSplitNet(claim) {
   return round2(Math.min(splitAmount, charge));
 }
 
-/** The share billed to the insurer: the charge less the split, where there is one. */
-export const hireInsurerNet = (claim) =>
-  round2(Math.max(0, hireChargeNet(claim) - hireSplitNet(claim)));
-
-/** Whether a split invoice is carried: hire invoiced, split with a party, with a share. */
+/** Whether a share is paid out: hire invoiced, split with a party, with a share set. */
 export const hireSplitApplies = (claim) =>
   hireFlagged(claim) && hireSetup(claim).splitParty !== 'None' && hireSplitNet(claim) > 0;
 
