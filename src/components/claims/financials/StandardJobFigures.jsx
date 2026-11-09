@@ -11,6 +11,13 @@ import { excessMode } from '@/components/shared/excessState';
 import { NO_FEE_DISPLAY, NO_FEE_LABEL, feeState } from '@/components/shared/feeState';
 import FigureGroup from '@/components/financials/FigureGroup';
 import { ACG_FEE_PERCENT, acgFeePercent, referralPercentAfterAcg } from '@/components/shared/acgProcessing';
+import {
+  HIRE_SPLIT_PARTIES,
+  buildHirePatch,
+  hireChargeNet,
+  hireInsurerNet,
+  hireSetup,
+} from '@/components/shared/hireCharge';
 import { figureSourceNote } from './figuresCheck';
 
 const VAT_STATUSES = ['VAT Registered', 'Non-VAT', 'Unknown'];
@@ -18,6 +25,29 @@ const VAT_STATUSES = ['VAT Registered', 'Non-VAT', 'Unknown'];
 const num = (v) => (v === '' || v === null || v === undefined ? null : Number(v));
 const cap = (text) => (text ? text.charAt(0).toUpperCase() + text.slice(1) : text);
 const source = (claim, key) => cap(figureSourceNote(claim, key));
+
+/** The line the claim's history carries for one change to the hire set-up. */
+function hireDescription(changes, next) {
+  const setup = hireSetup(next);
+  const parts = [];
+  if (changes.hire_invoiced !== undefined) {
+    parts.push(changes.hire_invoiced === 'Yes' ? 'hire to be invoiced' : 'hire invoicing switched off');
+  }
+  if (changes.hire_day_rate !== undefined) {
+    parts.push(`day rate ${setup.dayRate > 0 ? fmtGBP(setup.dayRate) : 'cleared'}`);
+  }
+  if (changes.hire_days !== undefined) {
+    parts.push(`${setup.days > 0 ? setup.days : 'no'} days hired`);
+  }
+  if (changes.hire_split_party !== undefined) parts.push(`split with ${setup.splitParty}`);
+  if (changes.hire_split_amount !== undefined) {
+    parts.push(setup.splitAmount > 0
+      ? `${setup.splitParty.toLowerCase()} share ${fmtGBP(setup.splitAmount)}`
+      : 'split share cleared');
+  }
+  const charge = hireChargeNet(next);
+  return `Hire — ${parts.join(', ')}${charge > 0 ? `; hire charge ${fmtGBP(charge)} ex VAT` : ''}`;
+}
 
 /**
  * The figures that drive a standard claim's invoices, as titled groups of rows:
@@ -220,6 +250,70 @@ export default function StandardJobFigures({ claim, ctx, missing, onChange, onTr
     });
   }
 
+  /* Hire — a courtesy vehicle arranged for the customer and invoiced to the insurer at
+     the day rate agreed with them, over the days hired. Sometimes split with the client
+     or the repairer: their share is invoiced to them, and the insurer is billed the rest.
+     Ticking it puts the hire invoices into step 3. */
+  const hire = hireSetup(claim);
+  const hireCharge = hireChargeNet(claim);
+  const hireRows = [];
+  if (!ctx.totalLoss && !ctx.creditRepair && !ctx.privatePaying) {
+    hireRows.push({
+      key: 'hire_invoiced',
+      label: 'Hire to invoice',
+      options: ['No', 'Yes'],
+      value: hire.invoiced ? 'Yes' : 'No',
+      display: hire.invoiced ? 'Yes' : 'No',
+      caption: hire.invoiced
+        ? 'The hire invoice is carried by this job — the insurer is billed for its share'
+        : 'Tick Yes where hire has to be invoiced on this job',
+    });
+    // The rate, the days and any split are shown once the job carries hire, or while
+    // the group is open — so ticking Yes brings them up in the same place.
+    if (hire.invoiced || editingKey === 'hire') {
+      hireRows.push({
+        key: 'hire_day_rate',
+        label: 'Day rate agreed with the insurer',
+        type: 'number',
+        value: hire.dayRate,
+        display: hire.dayRate !== null ? fmtGBP(hire.dayRate) : undefined,
+        caption: 'Ex VAT — VAT is added to the invoice',
+        missing: isMissing('hire_day_rate'),
+      });
+      hireRows.push({
+        key: 'hire_days',
+        label: 'Days hired',
+        type: 'number',
+        value: hire.days,
+        display: hire.days !== null ? String(hire.days) : undefined,
+        note: hireCharge > 0 ? `hire ${fmtGBP(hireCharge)}` : undefined,
+        caption: 'Ex VAT — the day rate over these days',
+        missing: isMissing('hire_days'),
+      });
+      hireRows.push({
+        key: 'hire_split_party',
+        label: 'Split with',
+        options: HIRE_SPLIT_PARTIES,
+        value: hire.splitParty,
+        display: hire.splitParty,
+        caption: hire.splitParty === 'None'
+          ? 'The whole hire is billed to the insurer'
+          : 'Their share is invoiced to them, and the insurer is billed the rest',
+      });
+      if (hire.splitParty !== 'None') {
+        hireRows.push({
+          key: 'hire_split_amount',
+          label: `${hire.splitParty} share`,
+          type: 'number',
+          value: hire.splitAmount,
+          display: hire.splitAmount !== null ? fmtGBP(hire.splitAmount) : undefined,
+          caption: `Ex VAT — the insurer is billed the remaining ${fmtGBP(hireInsurerNet(claim))}`,
+          missing: isMissing('hire_split_amount'),
+        });
+      }
+    }
+  }
+
   /* ACG processing payment: a per-claim choice, on percentage-fee jobs only. Their
      charge comes off our %, and our referral invoice goes to ACG (shared/acgProcessing). */
   if (repairerRows.length > 0 && !repairerWaived) {
@@ -350,6 +444,18 @@ export default function StandardJobFigures({ claim, ctx, missing, onChange, onTr
             }
             if (Object.keys(patch).length === 0) return;
             onChange(patch, notes.join('; '));
+          }}
+        />
+      )}
+
+      {hireRows.length > 0 && (
+        <FigureGroup
+          title="Hire"
+          rows={hireRows}
+          {...group('hire')}
+          onSave={(changes) => {
+            const patch = buildHirePatch(claim, changes);
+            onTrackerChange(patch, hireDescription(changes, { ...claim, ...patch }));
           }}
         />
       )}

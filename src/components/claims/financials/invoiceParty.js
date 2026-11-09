@@ -1,6 +1,7 @@
 import { base44 } from '@/api/base44Client';
 import { invoicePartyName } from '@/components/shared/invoiceChecklist';
 import { ACG_PARTY } from '@/components/shared/acgProcessing';
+import { hireSetup } from '@/components/shared/hireCharge';
 
 const clean = (parts) => parts.filter(Boolean);
 const addressOf = (record) => clean([
@@ -52,8 +53,14 @@ const findReferrerCompany = async (id, name) => {
  */
 export async function resolveInvoiceParty(claim, item) {
   const name = invoicePartyName(claim, item);
+  // The hire split invoice goes to whoever shares the hire charge with us, and is
+  // addressed as their own invoice would be: the repairer's record, or the client's
+  // details on the claim.
+  const party = item.party === 'hire_split_party'
+    ? (hireSetup(claim).splitParty === 'Repairer' ? 'repairer' : 'client')
+    : item.party;
 
-  if (item.party === 'repairer') {
+  if (party === 'repairer') {
     const bodyshop = await findBodyshop(claim.bodyshop);
     const address = addressOf(bodyshop);
     return {
@@ -73,7 +80,7 @@ export async function resolveInvoiceParty(claim, item) {
     return { kind: 'acg', name: ACG_PARTY.name, addressLines: ACG_PARTY.addressLines, contact: '' };
   }
 
-  if (item.party === 'client') {
+  if (party === 'client') {
     return {
       kind: 'client',
       name,
@@ -131,7 +138,7 @@ export async function resolveInvoiceParty(claim, item) {
   }
 
   return {
-    kind: item.party || 'other',
+    kind: party || 'other',
     name,
     addressLines: [],
     contact: clean([item.party === 'referrer' ? claim.referrer_email : '']).join(' · '),

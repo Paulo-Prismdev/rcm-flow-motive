@@ -350,6 +350,34 @@ export const INVOICE_ITEMS = [
     amountSource: 'vat_excess',
     varianceReason: 'Repair cost, excess or VAT status changed',
   },
+  // Hire we arranged for the customer and invoice the insurer for: the day rate
+  // agreed with them over the days hired. Where the hire is split with the client or
+  // the repairer, only the insurer's share is billed here and their share is raised
+  // on its own invoice beside it. Both are ordinary invoices out — asked for from
+  // accounts, locked at the figure they go out at, and marked paid.
+  {
+    key: 'hire_invoice_out',
+    label: 'Hire Invoice Out',
+    section: 'out',
+    direction: 'out',
+    dateLabel: 'Sent',
+    requires: ['hire', 'not_total_loss', 'not_credit_repair'],
+    party: 'authorising_party',
+    amountSource: 'hire_charge',
+    varianceReason: 'Hire day rate, days or split changed',
+  },
+  {
+    key: 'hire_split_invoice_out',
+    label: 'Hire Split Invoice Out',
+    section: 'out',
+    direction: 'out',
+    dateLabel: 'Sent',
+    requires: ['hire_split', 'not_total_loss', 'not_credit_repair'],
+    // Whoever shares the hire charge with us — the client, or the repairer.
+    party: 'hire_split_party',
+    amountSource: 'hire_split_charge',
+    varianceReason: 'Hire day rate, days or split changed',
+  },
   // Credit repair claims: we invoice the credit repair company for our cut, from
   // two separate invoices. Both amounts are derived (hire category rate and
   // commission on the final repair cost), so they are never hand-entered here.

@@ -20,6 +20,11 @@ const GROUP_OF = {
   commission_basis: 'credit_repair',
   storage_charge: 'storage',
   storage_fee_percent: 'storage',
+  hire_invoiced: 'hire',
+  hire_day_rate: 'hire',
+  hire_days: 'hire',
+  hire_split_party: 'hire',
+  hire_split_amount: 'hire',
   external_invoice_ref: 'notes',
   invoice_notes: 'notes',
 };

@@ -9,6 +9,7 @@ import {
 } from '@/components/shared/invoiceChecklist';
 import { excessMode } from '@/components/shared/excessState';
 import { NO_FEE_DISPLAY, feeState } from '@/components/shared/feeState';
+import { hireSetup } from '@/components/shared/hireCharge';
 import { authorityTotals, finalInvoiceTotal } from './invoiceAuthorityCheck';
 
 /**
@@ -161,6 +162,22 @@ export function figureRows({ claim, ctx, storagePercentDefault }) {
         value: fixed,
         money: true,
         note: 'used ahead of the %',
+      });
+    }
+  }
+
+  // Hire to be invoiced: the day rate agreed with the insurer, the days hired and —
+  // where the hire is split — the share the client or repairer is covering.
+  if (ctx?.hire) {
+    const hire = hireSetup(claim);
+    add({ key: 'hire_day_rate', label: 'Hire day rate', value: num(hire.dayRate), money: true });
+    add({ key: 'hire_days', label: 'Hire days', value: num(hire.days) });
+    if (hire.splitParty !== 'None') {
+      add({
+        key: 'hire_split_amount',
+        label: `Hire ${hire.splitParty.toLowerCase()} share`,
+        value: num(hire.splitAmount),
+        money: true,
       });
     }
   }

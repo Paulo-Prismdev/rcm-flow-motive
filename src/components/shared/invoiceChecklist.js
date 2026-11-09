@@ -57,6 +57,15 @@ import {
   isRecommendedItem,
 } from './invoiceItems';
 import { ACG_PARTY, acgFeePercent, isAcgClaim, referralPercentAfterAcg } from './acgProcessing';
+import {
+  hireChargeNet,
+  hireFlagged,
+  hireInsurerNet,
+  hireSetup,
+  hireSplitApplies,
+  hireSplitNet,
+  hireSplitPartyName,
+} from './hireCharge';
 
 // The items a claim can carry, the keys their files are filed under and the rules
 // that read them live in ./invoiceItems, re-exported here so every part of the
@@ -240,6 +249,11 @@ export function invoiceContext(claim, vatExcess) {
     creditRepair,
     hasRepairer: !!claim?.bodyshop || !!claim?.bodyshop_id,
     privatePaying,
+    // Hire to be invoiced on this job: the courtesy vehicle we arranged, billed to
+    // the insurer — and, where the hire is split, the share the client or repairer
+    // is covering, which has its own invoice.
+    hire: hireFlagged(claim),
+    hireSplit: hireSplitApplies(claim),
   };
 }
 
@@ -281,6 +295,8 @@ function matchesRequirement(requirement, ctx) {
     case 'total_loss': return !!ctx.totalLoss;
     case 'not_total_loss': return !ctx.totalLoss;
     case 'has_repairer': return !!ctx.hasRepairer;
+    case 'hire': return !!ctx.hire;
+    case 'hire_split': return !!ctx.hireSplit;
     default: return true;
   }
 }
@@ -340,6 +356,8 @@ export function invoicePartyName(claim, item) {
     case 'credit_repair': return claim?.credit_repair_company_name || '';
     // ACG collect our referral fee on the repairer's behalf, so our invoice is to them.
     case 'acg': return ACG_PARTY.name;
+    // The hire split invoice goes to whoever shares the hire charge with us.
+    case 'hire_split_party': return hireSplitPartyName(claim);
     case 'authorising_party':
       return claim?.authorising_party_name || claim?.insurer || claim?.referrer || claim?.client_name || '';
     default: return '';
@@ -555,6 +573,51 @@ const AMOUNT_RESOLVERS = {
         { label: 'Total', value: fmtGBP(total), total: true },
       ],
     };
+  },
+  // Hire we arranged for the customer, invoiced to the insurer: the day rate agreed
+  // with them over the days hired, less the share the client or repairer is covering
+  // where the hire is split, plus VAT. Their share is billed on its own invoice
+  // (hire_split_charge), never twice here.
+  hire_charge: (claim) => {
+    const { dayRate, days, splitParty } = hireSetup(claim);
+    if (!(dayRate > 0) || !(days > 0)) {
+      return awaiting('Enter the day rate agreed with the insurer and the number of days hired');
+    }
+    const charge = hireChargeNet(claim);
+    const split = hireSplitNet(claim);
+    const insurer = hireInsurerNet(claim);
+    if (insurer <= 0) {
+      return awaiting('The whole hire is covered by the client or repairer — nothing left to bill the insurer');
+    }
+    const vat = round2(insurer * VAT_RATE);
+    const workings = [
+      { label: 'Day rate agreed with the insurer', value: fmtGBP(dayRate) },
+      { label: 'Days hired', value: String(days) },
+      { label: 'Hire charge ex VAT', value: fmtGBP(charge) },
+    ];
+    if (split > 0) {
+      workings.push({ label: `Less ${splitParty.toLowerCase()} share`, value: `− ${fmtGBP(split)}` });
+      workings.push({ label: "Insurer's share ex VAT", value: fmtGBP(insurer) });
+    }
+    workings.push({ label: 'VAT (20%)', value: fmtGBP(vat) });
+    workings.push({ label: 'Total', value: fmtGBP(round2(insurer + vat)), total: true });
+    return withVat(insurer, workings, split > 0
+      ? `${days} day${days === 1 ? '' : 's'} at ${fmtGBP(dayRate)} — the insurer's share after the ${splitParty.toLowerCase()}'s`
+      : `${days} day${days === 1 ? '' : 's'} at ${fmtGBP(dayRate)}`);
+  },
+  // The share of the hire charge the client or repairer is covering: invoiced to
+  // them, with VAT, leaving the insurer billed the rest.
+  hire_split_charge: (claim) => {
+    const split = hireSplitNet(claim);
+    if (!(split > 0)) return awaiting('Set the share of the hire the client or the repairer is covering');
+    const party = hireSetup(claim).splitParty.toLowerCase();
+    const vat = round2(split * VAT_RATE);
+    return withVat(split, [
+      { label: 'Hire charge ex VAT', value: fmtGBP(hireChargeNet(claim)) },
+      { label: `Their share (${party}) ex VAT`, value: fmtGBP(split) },
+      { label: 'VAT (20%)', value: fmtGBP(vat) },
+      { label: 'Total', value: fmtGBP(round2(split + vat)), total: true },
+    ], `The ${party}'s share of the hire charge`);
   },
   // Total loss: our share of the storage the vehicle ran up with the repairer —
   // storage only, never the salvage agent's admin charges — plus VAT. The figure
@@ -904,6 +967,9 @@ export function computeInvoiceSummary(claim, ctx, hasFile = claimCopyOnFile(clai
   const otherReadings = [
     { ...ctx, totalLoss: !ctx.totalLoss, vatExcess: ctx.vatExcessHandled },
     { ...ctx, privatePaying: false },
+    // Hire invoicing switched off again: anything already recorded against its
+    // invoices is still shown rather than disappearing with the tick.
+    { ...ctx, hire: true, hireSplit: true },
   ];
   const dormant = INVOICE_ITEMS
     .filter((item) => !isInvoiceItemVisible(item, ctx)
@@ -992,6 +1058,17 @@ export function missingJobFigures(claim, ctx) {
   // A fee deliberately waived — 0% or £0 — is set, not missing.
   if (ctx.secondReferrerEnabled && feeState(claim, 'second_referrer') === 'missing') {
     missing.push({ key: 'second_referrer_percent', label: 'Second referrer fee % (or fixed £ fee)' });
+  }
+
+  // Hire to be invoiced: the agreed day rate and the days hired are what its invoice
+  // is worked out from — and the share, where the hire is split.
+  if (ctx.hire) {
+    const hire = hireSetup(claim);
+    if (!(hire.dayRate > 0)) missing.push({ key: 'hire_day_rate', label: 'Hire day rate' });
+    if (!(hire.days > 0)) missing.push({ key: 'hire_days', label: 'Hire days' });
+    if (hire.splitParty !== 'None' && !(hireSplitNet(claim) > 0)) {
+      missing.push({ key: 'hire_split_amount', label: `Hire ${hire.splitParty.toLowerCase()} share` });
+    }
   }
 
   if (ctx.creditRepair) {
