@@ -164,11 +164,9 @@ export default function Archive() {
                       <RotateCcw className="w-3.5 h-3.5" />
                       Restore
                     </Button>
-                    <Link to={item.link}>
-                      <Button size="sm" className="neomorph-flat px-3 py-2 transition-all active:neomorph-pressed text-gray-600 text-xs w-full">
-                        View
-                      </Button>
-                    </Link>
+                    <Button asChild size="sm" className="neomorph-flat px-3 py-2 transition-all active:neomorph-pressed text-gray-600 text-xs w-full">
+                      <Link to={item.link}>View</Link>
+                    </Button>
                   </div>
                 </div>
               </div>

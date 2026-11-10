@@ -107,41 +107,39 @@ export default function Notifications() {
                   }`}
                 >
                   {notification.link ? (
-                    <Link 
-                      to={notification.link} 
-                      className="block"
-                      onClick={() => !notification.is_read && markAsReadMutation.mutate(notification.id)}
-                    >
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium text-sm truncate">{notification.title}</p>
-                          <p className="text-xs text-foreground-muted mt-1 line-clamp-2">
-                            {notification.message}
-                          </p>
-                          <p className="text-[10px] text-foreground-subtle mt-1">
-                            {new Date(notification.created_date).toLocaleString()}
-                          </p>
-                        </div>
-                        <div className="flex gap-1 flex-shrink-0">
-                          {!notification.is_read && (
-                            <button
-                              className="surface-button w-6 h-6 flex items-center justify-center"
-                              onClick={(e) => handleMarkAsRead(e, notification.id)}
-                              title="Mark as read"
-                              >
-                              <Check className="w-3 h-3" />
-                              </button>
-                              )}
-                              <button
-                              className="surface-button w-6 h-6 flex items-center justify-center text-red-500"
-                              onClick={(e) => handleDelete(e, notification.id)}
-                              title="Delete"
+                    <div className="flex items-start justify-between gap-2">
+                      <Link
+                        to={notification.link}
+                        className="block flex-1 min-w-0"
+                        onClick={() => !notification.is_read && markAsReadMutation.mutate(notification.id)}
+                      >
+                        <p className="font-medium text-sm truncate">{notification.title}</p>
+                        <p className="text-xs text-foreground-muted mt-1 line-clamp-2">
+                          {notification.message}
+                        </p>
+                        <p className="text-[10px] text-foreground-subtle mt-1">
+                          {new Date(notification.created_date).toLocaleString()}
+                        </p>
+                      </Link>
+                      <div className="flex gap-1 flex-shrink-0">
+                        {!notification.is_read && (
+                          <button
+                            className="surface-button w-6 h-6 flex items-center justify-center"
+                            onClick={(e) => handleMarkAsRead(e, notification.id)}
+                            title="Mark as read"
                           >
-                            <X className="w-3 h-3" />
+                            <Check className="w-3 h-3" />
                           </button>
-                        </div>
+                        )}
+                        <button
+                          className="surface-button w-6 h-6 flex items-center justify-center text-red-500"
+                          onClick={(e) => handleDelete(e, notification.id)}
+                          title="Delete"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
                       </div>
-                    </Link>
+                    </div>
                   ) : (
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex-1 min-w-0">

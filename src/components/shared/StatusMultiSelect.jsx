@@ -60,13 +60,18 @@ export default function StatusMultiSelect({
                   className="flex items-center gap-1"
                 >
                   {status}
-                  <button
-                    onClick={(e) => handleRemove(status, e)}
+                  <span
+                    role="button"
+                    tabIndex={disabled ? -1 : 0}
+                    aria-label={`Remove ${status}`}
+                    onClick={(e) => !disabled && handleRemove(status, e)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') handleRemove(status, e);
+                    }}
                     className="ml-1 hover:bg-muted rounded-full p-0.5"
-                    disabled={disabled}
                   >
                     <X className="w-3 h-3" />
-                  </button>
+                  </span>
                 </Badge>
               ))
             )}

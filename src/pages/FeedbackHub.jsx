@@ -162,11 +162,11 @@ export default function FeedbackHub() {
       {/* Header */}
       <div className="neomorph p-4 md:p-6">
         <div className="flex items-center gap-4 mb-4">
-          <Link to={createPageUrl('Dashboard')}>
-            <Button aria-label="Back" className="neomorph-flat p-2">
+          <Button asChild aria-label="Back" className="neomorph-flat p-2">
+            <Link to={createPageUrl('Dashboard')}>
               <ArrowLeft className="w-4 h-4" />
-            </Button>
-          </Link>
+            </Link>
+          </Button>
           <div className="flex-1">
             <h1 className="text-2xl md:text-3xl font-bold">Feedback Hub</h1>
             <p className="text-foreground-muted mt-1">

@@ -22,10 +22,21 @@ export default function Reports() {
     queryFn: () => base44.entities.Claim.list('-created_date', 10000),
   });
 
-  const { data: referrers = [] } = useQuery({
-    queryKey: ['referrers'],
-    queryFn: () => base44.entities.Referrer.list(),
+  const { data: referrerCompanies = [] } = useQuery({
+    queryKey: ['companies', 'referrer'],
+    queryFn: () => base44.entities.Company.filter({ company_type: 'referrer' }),
   });
+
+  // A claim's referrer is held two ways: the directory record it is linked to
+  // (referrer_id) and the name captured on the claim. Grouping by the link means one
+  // company never shows twice because an older claim carries a shortened name.
+  const refNameById = useMemo(
+    () => Object.fromEntries(referrerCompanies.map((c) => [c.id, c.name])),
+    [referrerCompanies]
+  );
+  const refKey = (claim) => claim.referrer_id || `name:${claim.referrer}`;
+  const refLabel = (claim) =>
+    refNameById[claim.referrer_id] || claim.referrer || 'Direct';
 
   const { data: insurers = [] } = useQuery({
     queryKey: ['insurers'],
@@ -40,12 +51,12 @@ export default function Reports() {
       if (dateTo && claim.created_date && new Date(claim.created_date) > new Date(dateTo)) return false;
       if (filterClaimType !== 'all' && claim.claim_type !== filterClaimType) return false;
       if (filterStatus !== 'all' && claim.job_status !== filterStatus) return false;
-      if (filterReferrer !== 'all' && claim.referrer !== filterReferrer) return false;
+      if (filterReferrer !== 'all' && refKey(claim) !== filterReferrer) return false;
       if (filterInsurer !== 'all' && claim.insurer !== filterInsurer) return false;
       
       return true;
     });
-  }, [claims, dateFrom, dateTo, filterClaimType, filterStatus, filterReferrer, filterInsurer]);
+  }, [claims, dateFrom, dateTo, filterClaimType, filterStatus, filterReferrer, filterInsurer, referrerCompanies]);
 
   const metrics = useMemo(() => {
     const total = filteredClaims.length;
@@ -63,7 +74,7 @@ export default function Reports() {
     }, {});
 
     const byReferrer = filteredClaims.reduce((acc, claim) => {
-      const ref = claim.referrer || 'Direct';
+      const ref = refLabel(claim);
       acc[ref] = (acc[ref] || 0) + 1;
       return acc;
     }, {});
@@ -121,7 +132,7 @@ export default function Reports() {
       claimsByMonth,
       completedClaims: completedClaims.length
     };
-  }, [filteredClaims]);
+  }, [filteredClaims, refNameById]);
 
   const statusChartData = Object.entries(metrics.byStatus).map(([name, value]) => ({ name, value }));
   const typeChartData = Object.entries(metrics.byType).map(([name, value]) => ({ name, value }));
@@ -163,7 +174,13 @@ export default function Reports() {
   };
 
   const uniqueStatuses = [...new Set(claims.map(c => c.job_status).filter(Boolean))];
-  const uniqueReferrers = [...new Set(claims.map(c => c.referrer).filter(Boolean))];
+  const uniqueReferrers = Object.values(
+    claims.reduce((acc, claim) => {
+      if (!claim.referrer_id && !claim.referrer) return acc;
+      acc[refKey(claim)] = { key: refKey(claim), label: refLabel(claim) };
+      return acc;
+    }, {})
+  ).sort((a, b) => a.label.localeCompare(b.label));
   const uniqueInsurers = [...new Set(claims.map(c => c.insurer).filter(Boolean))];
 
   const hasActiveFilters = dateFrom || dateTo || filterClaimType !== 'all' || filterStatus !== 'all' || filterReferrer !== 'all' || filterInsurer !== 'all';
@@ -256,7 +273,7 @@ export default function Reports() {
               className="glass-inset w-full px-3 py-2 text-sm rounded-xl border-0"
             >
               <option value="all">All Referrers</option>
-              {uniqueReferrers.map(r => <option key={r} value={r}>{r}</option>)}
+              {uniqueReferrers.map(r => <option key={r.key} value={r.key}>{r.label}</option>)}
             </select>
           </div>
           <div>

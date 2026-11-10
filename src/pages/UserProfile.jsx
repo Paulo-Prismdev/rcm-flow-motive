@@ -166,9 +166,9 @@ export default function UserProfile() {
         {/* Compact header with avatar */}
         <div className="app-card !p-3 md:!p-4">
           <div className="flex items-center gap-3">
-            <Link to={createPageUrl("Dashboard")} className="flex-shrink-0">
-              <Button aria-label="Back" variant="outline" size="icon" className="h-9 w-9"><ArrowLeft className="w-4 h-4" /></Button>
-            </Link>
+            <Button asChild aria-label="Back" variant="outline" size="icon" className="h-9 w-9 flex-shrink-0">
+              <Link to={createPageUrl("Dashboard")}><ArrowLeft className="w-4 h-4" /></Link>
+            </Button>
             {/* Avatar */}
             <div className="relative flex-shrink-0">
               {avatarSrc ? (
