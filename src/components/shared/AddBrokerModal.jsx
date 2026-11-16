@@ -26,8 +26,8 @@ export default function AddBrokerModal({ isOpen, onClose, onSuccess }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" data-mobile-full-modal="true">
-      <div className="bg-card border border-border rounded-xl p-6 w-full max-w-lg shadow-xl">
+    <div className="fixed inset-0 z-window fm-scrim flex items-center justify-center p-4" data-mobile-full-modal="true">
+      <div className="fm-glass-window rounded-2xl text-foreground p-6 w-full max-w-lg">
         <div className="flex justify-between items-center mb-5">
           <h2 className="text-xl font-bold">Add New Broker</h2>
           <Button aria-label="Close" onClick={handleClose} variant="ghost" size="icon"><X className="w-5 h-5" /></Button>

@@ -176,10 +176,10 @@ export default function ClaimIntakeReview({ isOpen, reading, files = [], pastedT
   };
 
   return (
-    <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/50 backdrop-blur-sm p-3" data-mobile-full-modal="true">
+    <div className="fixed inset-0 z-window fm-scrim flex items-center justify-center p-3" data-mobile-full-modal="true">
       {/* The review takes almost the whole screen: the instruction is read against its
           own full page, so the document needs the room, not a cramped half. */}
-      <div className="bg-card border border-border rounded-xl shadow-2xl w-full max-w-[min(97vw,1700px)] h-[94vh] flex flex-col overflow-hidden">
+      <div className="fm-glass-window rounded-2xl text-foreground w-full max-w-[min(97vw,1700px)] h-[94vh] flex flex-col overflow-hidden">
         <div className="flex items-center gap-3 px-4 py-2.5 border-b border-border flex-shrink-0">
           <div className="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center flex-shrink-0">
             <Sparkles className="w-4 h-4 text-purple-600 dark:text-purple-400" />

@@ -724,8 +724,8 @@ export default function DocumentTracker({ claim, currentUser, onUpdate }) {
 
       {/* Add general document dialog (title prompt) */}
       {generalDialogOpen && (
-        <div className="fixed inset-0 z-[10002] flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-sm rounded-lg border border-border bg-background p-5 shadow-lg">
+        <div className="fixed inset-0 z-window-nested fm-scrim flex items-center justify-center p-4">
+          <div className="fm-glass-window rounded-2xl text-foreground w-full max-w-sm p-5">
             <h3 className="text-sm font-semibold mb-3">Add General Document</h3>
             <label className="text-xs font-medium text-muted-foreground">Title</label>
             <Input

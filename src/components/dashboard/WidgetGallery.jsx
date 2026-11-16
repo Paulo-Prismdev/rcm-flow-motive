@@ -107,8 +107,8 @@ export default function WidgetGallery({ onClose, onAddWidget, department }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 backdrop-blur-sm" data-mobile-full-modal="true">
-      <div className="glass-elevated max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+    <div className="fixed inset-0 z-window fm-scrim flex items-center justify-center p-4" data-mobile-full-modal="true">
+      <div className="fm-glass-window rounded-2xl text-foreground max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-4 md:p-6 border-b border-glass-border">
           <div>

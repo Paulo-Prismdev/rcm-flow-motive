@@ -57,9 +57,9 @@ export default function ChaserTestEmailModal({ rule, onClose }) {
   };
 
   return (
-    <div data-overlay-dismiss className="fixed inset-0 z-[100] bg-black/50 flex items-center justify-center p-4" onClick={onClose} data-mobile-full-modal="true">
+    <div data-overlay-dismiss className="fixed inset-0 z-window fm-scrim flex items-center justify-center p-4" onClick={onClose} data-mobile-full-modal="true">
       <div
-        className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 shadow-xl w-full max-w-lg max-h-[85vh] flex flex-col"
+        className="fm-glass-window rounded-2xl text-foreground w-full max-w-lg max-h-[85vh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-5 py-3 border-b border-gray-200 dark:border-gray-800">

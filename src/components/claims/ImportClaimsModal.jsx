@@ -289,8 +289,8 @@ Only map columns that clearly correspond to a field. Be conservative - if unsure
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.5)' }} data-mobile-full-modal="true">
-      <div className="glass-elevated rounded-2xl w-full max-w-3xl max-h-[90vh] flex flex-col">
+    <div className="fixed inset-0 z-window fm-scrim flex items-center justify-center p-4" data-mobile-full-modal="true">
+      <div className="fm-glass-window rounded-2xl text-foreground w-full max-w-3xl max-h-[90vh] flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-border">
           <div className="flex items-center gap-3">

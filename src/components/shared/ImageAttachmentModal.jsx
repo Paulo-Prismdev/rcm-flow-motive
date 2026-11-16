@@ -113,9 +113,9 @@ export default function ImageAttachmentModal({ imageUrls = [], onAdd, onRemove, 
         </div>
       )}
 
-      <div data-overlay-dismiss className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={onClose}>
+      <div data-overlay-dismiss className="fixed inset-0 z-window fm-scrim flex items-center justify-center" onClick={onClose}>
         <div
-          className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl w-full max-w-3xl mx-4 max-h-[90vh] flex flex-col overflow-hidden"
+          className="fm-glass-window rounded-2xl text-foreground w-full max-w-3xl mx-4 max-h-[90vh] flex flex-col overflow-hidden"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}

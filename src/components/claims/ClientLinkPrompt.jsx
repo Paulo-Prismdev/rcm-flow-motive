@@ -11,8 +11,8 @@ export default function ClientLinkPrompt({ isOpen, matches = [], clientName, isS
   if (!isOpen) return null;
 
   return createPortal(
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[10003] p-4 pointer-events-auto" data-custom-portal-modal="true" data-mobile-full-modal="true">
-      <div className="bg-card border border-border rounded-xl p-6 w-full max-w-lg shadow-xl">
+    <div className="fixed inset-0 z-window-nested fm-scrim flex items-center justify-center p-4 pointer-events-auto" data-custom-portal-modal="true" data-mobile-full-modal="true">
+      <div className="fm-glass-window rounded-2xl text-foreground p-6 w-full max-w-lg">
         <div className="flex justify-between items-start mb-4">
           <div>
             <h2 className="text-lg font-bold">Client already in the directory</h2>

@@ -124,8 +124,8 @@ export default function InsurerDetailModal({ insurer, onClose, onUpdated }) {
 
 
   return createPortal(
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[10002] p-4 pointer-events-auto" data-custom-portal-modal="true" data-mobile-full-modal="true">
-      <div className="bg-card border border-border rounded-xl w-full max-w-lg shadow-xl max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 z-window-nested fm-scrim flex items-center justify-center p-4 pointer-events-auto" data-custom-portal-modal="true" data-mobile-full-modal="true">
+      <div className="fm-glass-window rounded-2xl text-foreground w-full max-w-lg max-h-[90vh] overflow-y-auto">
         <div className="sticky top-0 bg-card border-b border-border px-6 py-4 flex justify-between items-center z-10">
           <div className="flex items-center gap-2 min-w-0">
             <Building2 className="w-5 h-5 text-gray-500 flex-shrink-0" />

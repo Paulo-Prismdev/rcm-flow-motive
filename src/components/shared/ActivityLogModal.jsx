@@ -6,9 +6,9 @@ export default function ActivityLogModal({ parentId, parentType, isOpen, onClose
   if (!isOpen) return null;
 
   return (
-    <div data-overlay-dismiss className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={onClose}>
+    <div data-overlay-dismiss className="fixed inset-0 z-window fm-scrim flex items-center justify-center" onClick={onClose}>
       <div 
-        className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl w-full max-w-[600px] mx-4 max-h-[90vh] flex flex-col shadow-2xl overflow-hidden"
+        className="fm-glass-window rounded-2xl text-foreground w-full max-w-[600px] mx-4 max-h-[90vh] flex flex-col overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}

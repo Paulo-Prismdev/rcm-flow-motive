@@ -76,8 +76,8 @@ function ReferrerDetailModal({ company, onClose, onUpdated }) {
   };
 
   return createPortal(
-    <div data-overlay-dismiss className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[10002] p-4" onClick={onClose} data-mobile-full-modal="true">
-      <div className="bg-card border border-border rounded-xl p-6 w-full max-w-lg shadow-xl max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+    <div data-overlay-dismiss className="fixed inset-0 z-window-nested fm-scrim flex items-center justify-center p-4" onClick={onClose} data-mobile-full-modal="true">
+      <div className="fm-glass-window rounded-2xl text-foreground p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
         <div className="flex justify-between items-center mb-5">
           <h2 className="text-xl font-bold flex items-center gap-2">
             {isEditing ? "Edit" : ""} {company.name}
@@ -286,8 +286,8 @@ function AddReferrerModal({ onClose, onSuccess }) {
   };
 
   return createPortal(
-    <div data-overlay-dismiss className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[10002] p-4" onClick={onClose} data-mobile-full-modal="true">
-      <div className="bg-card border border-border rounded-xl p-6 w-full max-w-lg shadow-xl max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+    <div data-overlay-dismiss className="fixed inset-0 z-window-nested fm-scrim flex items-center justify-center p-4" onClick={onClose} data-mobile-full-modal="true">
+      <div className="fm-glass-window rounded-2xl text-foreground p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
         <div className="flex justify-between items-center mb-5">
           <h2 className="text-xl font-bold">Add Referrer</h2>
           <Button aria-label="Close" onClick={onClose} variant="ghost" size="icon"><X className="w-5 h-5" /></Button>
