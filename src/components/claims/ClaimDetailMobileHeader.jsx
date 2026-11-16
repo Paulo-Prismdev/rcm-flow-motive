@@ -111,7 +111,7 @@ export default function ClaimDetailMobileHeader({
             {claim.reg || 'Claim Details'}
           </p>
           {claim.job_number && (
-            <span className="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 whitespace-nowrap flex-shrink-0">
+            <span className="text-xs font-medium tabular-nums text-muted-foreground whitespace-nowrap flex-shrink-0">
               {claim.job_number}
             </span>
           )}
@@ -158,24 +158,24 @@ export default function ClaimDetailMobileHeader({
       <div className={`flex items-stretch gap-1.5 flex-nowrap px-3 ${collapsed ? 'pb-1.5' : 'pb-2'}`}>
         <button type="button" onClick={onUpdates} className={`${actionBase} ${actionSize} bg-green-600 hover:bg-green-700 text-white`}>
           <MessageSquare className="w-4 h-4" />
-          {!collapsed && <span className="text-[10px] font-medium leading-none">Updates</span>}
+          {!collapsed && <span className="text-xs font-medium leading-none">Updates</span>}
           <CountBadge count={updatesCount} className="bg-white text-green-700" />
         </button>
         <button type="button" onClick={() => onAction('images')} className={`${actionBase} ${actionSize} border border-border bg-card text-foreground`}>
           <Image className="w-4 h-4" />
-          {!collapsed && <span className="text-[10px] font-medium leading-none">Images</span>}
+          {!collapsed && <span className="text-xs font-medium leading-none">Images</span>}
           <CountBadge count={imagesCount} className="bg-blue-500 text-white" />
         </button>
         <button type="button" onClick={() => onAction('docs')} className={`${actionBase} ${actionSize} border border-border bg-card text-foreground`}>
           <FileText className="w-4 h-4" />
-          {!collapsed && <span className="text-[10px] font-medium leading-none">Docs</span>}
+          {!collapsed && <span className="text-xs font-medium leading-none">Docs</span>}
           <CountBadge count={docsCount} className="bg-blue-500 text-white" />
         </button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button type="button" className={`${actionBase} ${actionSize} border border-border bg-card text-foreground`}>
               <MoreHorizontal className="w-4 h-4" />
-              {!collapsed && <span className="text-[10px] font-medium leading-none">More</span>}
+              {!collapsed && <span className="text-xs font-medium leading-none">More</span>}
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56 max-h-72 overflow-y-auto">

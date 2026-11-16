@@ -73,7 +73,7 @@ export default function ClaimJourneyTimeline({ claim, updates = [] }) {
     const exceptionUpdate = getUpdateForStatuses([outcome]);
     return (
       <div className={`border rounded-xl px-3 py-2 ${cfg.bg} ${cfg.border}`}>
-        <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">Claim Journey</p>
+        <p className="text-xs font-medium text-muted-foreground mb-2">Claim journey</p>
         <div className="flex items-center gap-3">
           <div className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 border-2 text-white ${cfg.iconBg}`}>
             <cfg.Icon className="w-4 h-4 stroke-[3]" />
@@ -81,13 +81,13 @@ export default function ClaimJourneyTimeline({ claim, updates = [] }) {
           <div>
             <p className={`text-sm font-semibold ${cfg.titleColor}`}>{cfg.title}</p>
             {exceptionUpdate && (
-              <p className="text-[11px] text-muted-foreground mt-0.5">
+              <p className="text-xs text-muted-foreground mt-0.5">
                 {formatDate(exceptionUpdate.created_date)}
                 {exceptionUpdate.created_by && ` · ${exceptionUpdate.created_by.split('@')[0]}`}
               </p>
             )}
             {outcome === CANCELLED_OUTCOME && claim.cancellation_reason && (
-              <p className="text-[11px] text-muted-foreground mt-0.5">Reason: {claim.cancellation_reason}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Reason: {claim.cancellation_reason}</p>
             )}
           </div>
         </div>
@@ -107,8 +107,8 @@ export default function ClaimJourneyTimeline({ claim, updates = [] }) {
                 : <div className="w-3 h-3 rounded-full bg-primary" />}
             </div>
             <div>
-              <p className="text-[11px] font-semibold text-foreground">Salvage Collected</p>
-              <p className="text-[10px] text-muted-foreground mt-0.5">
+              <p className="text-xs font-semibold text-foreground">Salvage Collected</p>
+              <p className="text-xs text-muted-foreground mt-0.5">
                 {claim.salvage_collected_date
                   ? `${formatDate(claim.salvage_collected_date)} · the job's invoicing is chased from here`
                   : 'Not recorded yet — this is the date that puts the job on the invoicing radar'}
@@ -166,13 +166,13 @@ export default function ClaimJourneyTimeline({ claim, updates = [] }) {
           </div>
           <div>
             <p className={`text-sm font-semibold ${EXCEPTION_CONFIG[POTENTIAL_TOTAL_LOSS_OUTCOME].titleColor}`}>Potential Total Loss</p>
-            <p className="text-[11px] text-muted-foreground mt-0.5">A repair for now — the write-off decision is still open.</p>
+            <p className="text-xs text-muted-foreground mt-0.5">A repair for now — the write-off decision is still open.</p>
           </div>
         </div>
       </div>
     )}
     <div className="bg-card border border-border rounded-xl px-3 py-2 overflow-x-auto">
-      <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">Claim Journey</p>
+      <p className="text-xs font-medium text-muted-foreground mb-2">Claim journey</p>
       <div className="relative flex items-start" style={{ minWidth: 520 }}>
         {/* Background connector line segments */}
         <div className="absolute left-0 right-0 h-[2px] z-0" style={{ top: 18 }}>
@@ -219,7 +219,7 @@ export default function ClaimJourneyTimeline({ claim, updates = [] }) {
                   <p className="text-[10px] text-muted-foreground mt-0.5">{formatDate(info.date)}</p>
                 )}
                 {info.user && (
-                  <p className="text-[9px] text-muted-foreground/50 truncate" title={info.user}>
+                  <p className="text-[10px] text-muted-foreground truncate" title={info.user}>
                     {info.user.split('@')[0]}
                   </p>
                 )}
