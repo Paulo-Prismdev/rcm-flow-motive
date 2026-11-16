@@ -109,8 +109,7 @@ import { generateClaimOverviewPdf } from './claimOverviewPdf';
 import ClaimStatusEditForm from './ClaimStatusEditForm';
 import { isUpdateTrackingClosed, computeUpdateStatusFlag, computeClientCommStatusFlag, buildStatusChangeRecord } from '../shared/claimStatusUpdate';
 import { saveTimeLogInBackground } from '../shared/saveTimeLogInBackground';
-import { useBackLayer } from '@/lib/backNavigation';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { useBackLayer, usePhoneLayout } from '@/lib/backNavigation';
 
 import { askConfirm, notify, notifyError } from '@/lib/dialogs';
 // ── Editing without the fields moving ──
@@ -626,7 +625,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
   };
   // A section page on a phone is its own back step, so the back gesture returns
   // to the claim summary rather than leaving the claim.
-  const isPhoneWidth = useIsMobile();
+  const isPhoneWidth = usePhoneLayout();
   useBackLayer(isPhoneWidth && mobilePage === 'section', () => setMobilePage('summary'), 'claim-section');
   // Going back to the summary starts it at the top, like opening a page.
   React.useEffect(() => {
