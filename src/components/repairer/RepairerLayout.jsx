@@ -61,41 +61,29 @@ export default function RepairerLayout({ children }) {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
+        /* The portal's own style names, taken from the app's shared colours so the
+           portal follows light and dark like everything else. It no longer overwrites
+           the app's core colours (background, text, border, accent), which made every
+           shared card, border and button lose its colour while the portal was open. */
         :root {
-          --background: #f8f9fa;
-          --surface: #ffffff;
-          --surface-elevated: #ffffff;
-          --surface-hover: #f1f3f5;
-          --foreground: #1a1a1a;
-          --foreground-muted: #6c757d;
-          --foreground-subtle: #adb5bd;
-          --accent: #00ff00;
-          --accent-hover: #00cc00;
-          --accent-foreground: #000000;
-          --border: #dee2e6;
-          --border-strong: #ced4da;
-          --glass-bg: rgba(255, 255, 255, 0.85);
-          --glass-border: rgba(0, 0, 0, 0.08);
+          --surface: hsl(var(--card));
+          --surface-elevated: hsl(var(--popover));
+          --surface-hover: hsl(var(--fm-surface-hover));
+          --foreground-muted: hsl(var(--muted-foreground));
+          --foreground-subtle: hsl(var(--fm-ink-subtle));
+          --border-strong: hsl(var(--input));
+          --portal-accent: hsl(var(--fm-brand-green));
+          --portal-accent-fg: #ffffff;
+          --accent-hover: hsl(var(--fm-brand-green) / 0.85);
+          --glass-bg: hsl(var(--card) / 0.85);
+          --glass-border: hsl(var(--border));
           --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
           --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.08);
           --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.1);
         }
 
         [data-theme="dark"] {
-          --background: #070d1a;
-          --surface: #0f1829;
-          --surface-elevated: #182035;
-          --surface-hover: #1e2a45;
-          --foreground: #f1f5f9;
-          --foreground-muted: #cbd5e1;
-          --foreground-subtle: #64748b;
-          --accent: #00ff00;
-          --accent-hover: #00cc00;
-          --accent-foreground: #000000;
-          --border: #334155;
-          --border-strong: #475569;
-          --glass-bg: rgba(30, 41, 59, 0.85);
-          --glass-border: rgba(255, 255, 255, 0.08);
+          --portal-accent-fg: #04120b;
           --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
           --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
           --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.5);
@@ -103,8 +91,8 @@ export default function RepairerLayout({ children }) {
 
         body {
           font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-          background: var(--background);
-          color: var(--foreground);
+          background: hsl(var(--background));
+          color: hsl(var(--foreground));
         }
 
         .header-glass {
@@ -126,14 +114,14 @@ export default function RepairerLayout({ children }) {
 
         .neomorph-flat {
           background: var(--surface);
-          border: 1px solid var(--border);
+          border: 1px solid hsl(var(--border));
           border-radius: 12px;
           box-shadow: var(--shadow-sm);
         }
 
         .neomorph-inset {
           background: var(--surface);
-          border: 1px solid var(--border);
+          border: 1px solid hsl(var(--border));
           border-radius: 12px;
           box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
         }
@@ -275,9 +263,9 @@ export default function RepairerLayout({ children }) {
                     </div>
               <div className="flex items-baseline gap-1">
                 <span style={{ fontFamily: "'Palatino Linotype', serif", fontSize: '1.1rem' }} className="md:text-xl">
-                  <span style={{ color: 'var(--accent)' }}>R</span>
+                  <span style={{ color: 'var(--portal-accent)' }}>R</span>
                   <span>CM</span>
-                  <span style={{ color: 'var(--accent)' }}>A</span>
+                  <span style={{ color: 'var(--portal-accent)' }}>A</span>
                 </span>
                 <span style={{ fontWeight: 300 }} className="text-lg md:text-xl">utomotive</span>
               </div>

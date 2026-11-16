@@ -116,9 +116,9 @@ export default function RepairerPortal() {
         className={`fixed top-0 left-0 bottom-0 w-[80%] max-w-[320px] z-50 md:hidden transform transition-transform duration-300 ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}
         style={{ background: 'var(--glass-bg)', backdropFilter: 'blur(24px)', borderRight: '1px solid var(--border-strong)' }}
       >
-        <div className="p-4 border-b flex items-center justify-between" style={{ borderColor: 'var(--border)' }}>
+        <div className="p-4 border-b flex items-center justify-between" style={{ borderColor: 'hsl(var(--border))' }}>
           <h2 className="font-bold text-lg">Menu</h2>
-          <button onClick={() => setMobileMenuOpen(false)} className="w-10 h-10 flex items-center justify-center rounded-xl" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
+          <button onClick={() => setMobileMenuOpen(false)} className="w-10 h-10 flex items-center justify-center rounded-xl" style={{ background: 'var(--surface)', border: '1px solid hsl(var(--border))' }}>
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -129,9 +129,9 @@ export default function RepairerPortal() {
               onClick={() => handleTabChange(tab.id)}
               className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all"
               style={{
-                background: activeTab === tab.id ? 'var(--accent)' : 'var(--surface)',
-                border: `1px solid ${activeTab === tab.id ? 'var(--accent)' : 'var(--border)'}`,
-                color: activeTab === tab.id ? 'var(--accent-foreground)' : 'var(--foreground)',
+                background: activeTab === tab.id ? 'var(--portal-accent)' : 'var(--surface)',
+                border: `1px solid ${activeTab === tab.id ? 'var(--portal-accent)' : 'hsl(var(--border))'}`,
+                color: activeTab === tab.id ? 'var(--portal-accent-fg)' : 'hsl(var(--foreground))',
               }}
             >
               <tab.icon className="w-5 h-5" />
@@ -149,7 +149,7 @@ export default function RepairerPortal() {
         >
           <Menu className="w-5 h-5" />
         </button>
-        <div className="flex-1 text-center font-bold" style={{ color: 'var(--accent)' }}>
+        <div className="flex-1 text-center font-bold" style={{ color: 'var(--portal-accent)' }}>
           {TABS.find(t => t.id === activeTab)?.label}
         </div>
         <div className="w-10" />
@@ -165,8 +165,8 @@ export default function RepairerPortal() {
               onClick={() => setActiveTab(tab.id)}
               className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium whitespace-nowrap transition-all"
               style={{
-                background: isActive ? 'var(--accent)' : 'rgba(255,255,255,0.07)',
-                border: `1px solid ${isActive ? 'var(--accent)' : 'rgba(255,255,255,0.12)'}`,
+                background: isActive ? 'var(--portal-accent)' : 'rgba(255,255,255,0.07)',
+                border: `1px solid ${isActive ? 'var(--portal-accent)' : 'rgba(255,255,255,0.12)'}`,
                 boxShadow: isActive ? '0 4px 12px rgba(0, 255, 0, 0.3)' : 'var(--shadow-sm)',
                 color: isActive ? '#000000' : 'rgba(255,255,255,0.95)',
                 cursor: 'pointer',
