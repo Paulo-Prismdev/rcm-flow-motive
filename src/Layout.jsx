@@ -244,12 +244,12 @@ export default function Layout({ children, currentPageName }) {
 
       }
 
-      <div className="flex overflow-hidden bg-gray-100 dark:bg-gray-950 app-height">
+      <div className="flex overflow-hidden app-height">
 
         {/* ── SIDEBAR ── */}
         <aside className={`
           fixed inset-y-0 left-0 z-[9999] flex flex-col
-          w-56 bg-[#131d47] text-white
+          w-56 fm-glass-chrome text-white
           transition-transform duration-300
           ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
           ${desktopSidebarOpen
@@ -267,8 +267,9 @@ export default function Layout({ children, currentPageName }) {
             </button>
             <button
               onClick={() => setDesktopSidebarOpen(false)}
-              className="ml-auto hidden md:flex items-center justify-center w-7 h-7 rounded-md text-white/50 hover:text-white hover:bg-white/10 transition-colors"
-              title="Hide sidebar">
+              className="ml-auto hidden md:flex items-center justify-center w-8 h-8 rounded-lg text-white/60 hover:text-white hover:bg-white/10 transition-colors"
+              title="Hide sidebar"
+              aria-label="Hide sidebar">
               <PanelLeftClose className="w-4 h-4" />
             </button>
           </div>
@@ -279,24 +280,22 @@ export default function Layout({ children, currentPageName }) {
             <div className="md:hidden pb-2 mb-2 border-b border-white/10 space-y-0.5">
               <button
                 onClick={() => { setMobileMenuOpen(false); setSearchOpen(true); }}
-                className="w-full flex items-center gap-3 px-3 py-2 rounded-[10px] text-sm font-medium text-white/60 hover:bg-white/8 hover:text-white/90 transition-all">
+                className={`w-full ${NAV_BASE} ${NAV_REST}`}>
                 <Search className="w-4 h-4 flex-shrink-0" /><span>Search</span>
               </button>
               <button
-                onClick={() => window.location.reload()}
-                className="w-full flex items-center gap-3 px-3 py-2 rounded-[10px] text-sm font-medium text-white/60 hover:bg-white/8 hover:text-white/90 transition-all">
+                onClick={() => { setMobileMenuOpen(false); refreshData(); }}
+                className={`w-full ${NAV_BASE} ${NAV_REST}`}>
                 <RefreshCw className="w-4 h-4 flex-shrink-0" /><span>Refresh</span>
               </button>
-              <div className="flex items-center gap-3 px-3 py-2 rounded-[10px] text-sm font-medium text-white/60">
+              <div className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-white/70">
                 <ThemeToggle /><span>Theme</span>
               </div>
             </div>
             {departments.map((dept) => {
               const isActive = location.pathname === dept.url;
-              const cls = `flex items-center gap-3 px-3 py-2 rounded-[10px] text-sm font-medium transition-all md:justify-center md:px-2 lg:justify-start lg:px-3 ${
-                isActive || overlayPage === dept.overlayPage ?
-                'bg-white/10 text-white border border-white/15' :
-                'text-white/60 hover:bg-white/8 hover:text-white/90'}`;
+              const isOn = isActive || overlayPage === dept.overlayPage;
+              const cls = `${NAV_BASE} ${isOn ? NAV_ON : NAV_REST}`;
               if (dept.overlayPage) {
                 return (
                   <button
@@ -307,6 +306,7 @@ export default function Layout({ children, currentPageName }) {
                   >
                     <dept.icon className="w-4 h-4 flex-shrink-0" />
                     <span className="md:hidden lg:block">{dept.name}</span>
+                    <NavMarker active={isOn} opensOver />
                   </button>
                 );
               }
@@ -320,7 +320,7 @@ export default function Layout({ children, currentPageName }) {
                 >
                   <dept.icon className="w-4 h-4 flex-shrink-0" />
                   <span className="md:hidden lg:block">{dept.name}</span>
-                  {isActive && <ChevronRight className="w-3 h-3 ml-auto opacity-60 md:hidden lg:block" />}
+                  <NavMarker active={isActive} />
                 </Link>
               );
             })}
@@ -329,12 +329,12 @@ export default function Layout({ children, currentPageName }) {
             {isInternalUser &&
             (() => {
               const dirLinks = [
-                { name: "Repairers", url: createPageUrl("RepairerDirectory"), icon: Building2, overlayPage: "RepairerDirectory" },
+                { name: "Repairers", url: createPageUrl("RepairerDirectory"), icon: Warehouse, overlayPage: "RepairerDirectory" },
                 { name: "Insurers", url: createPageUrl("InsurerDirectory"), icon: Shield, overlayPage: "InsurerDirectory" },
-                { name: "Credit Repair", url: createPageUrl("CreditRepairDirectory"), icon: Building2, overlayPage: "CreditRepairDirectory" },
+                { name: "Credit Repair", url: createPageUrl("CreditRepairDirectory"), icon: CreditCard, overlayPage: "CreditRepairDirectory" },
                 { name: "Clients & Third Parties", url: createPageUrl("ClientDirectory"), icon: Users, overlayPage: "ClientDirectory" },
-                { name: "Suppliers", url: createPageUrl("SupplierManagement"), icon: Package, overlayPage: "SupplierManagement" },
-                { name: "Referrers", url: "/admin/companies", icon: Building2, overlayPage: "CompanyManagement" },
+                { name: "Suppliers", url: createPageUrl("SupplierManagement"), icon: Truck, overlayPage: "SupplierManagement" },
+                { name: "Referrers", url: "/admin/companies", icon: Handshake, overlayPage: "CompanyManagement" },
               ];
               const anyActive = dirLinks.some((d) => location.pathname === d.url);
               const open = directoriesOpen || anyActive;
@@ -344,27 +344,23 @@ export default function Layout({ children, currentPageName }) {
                     type="button"
                     onClick={() => setDirectoriesOpen((v) => !v)}
                     title="Directories"
-                    className={`w-full flex items-center gap-3 px-3 py-2 rounded-[10px] text-sm font-medium transition-all md:justify-center md:px-2 lg:justify-start lg:px-3 ${
-                      open ? 'text-white' : 'text-white/60 hover:bg-white/8 hover:text-white/90'
-                    }`}>
+                    className={`w-full ${NAV_BASE} ${open ? 'text-white hover:bg-white/[0.08]' : NAV_REST}`}>
                     <Building2 className="w-4 h-4 flex-shrink-0" />
                     <span className="md:hidden lg:block flex-1 text-left">Directories</span>
                     <ChevronDown className={`w-3.5 h-3.5 transition-transform md:hidden lg:block ${open ? 'rotate-180' : ''}`} />
                   </button>
                   {open && dirLinks.map((d) => {
                     const isActive = location.pathname === d.url;
+                    const isOn = isActive || overlayPage === d.overlayPage;
                     return (
                       <button
                         key={d.name}
                         onClick={() => { setOverlayPage(d.overlayPage); setMobileMenuOpen(false); }}
                         title={d.name}
-                        className={`flex items-center gap-3 px-3 py-2 rounded-[10px] text-sm font-medium transition-all md:justify-center md:px-2 lg:justify-start lg:pl-7 lg:pr-3 ${
-                          isActive || overlayPage === d.overlayPage
-                            ? 'bg-white/10 text-white border border-white/15'
-                            : 'text-white/60 hover:bg-white/8 hover:text-white/90'
-                        }`}>
+                        className={`${NAV_BASE} lg:pl-7 ${isOn ? NAV_ON : NAV_REST}`}>
                         <d.icon className="w-4 h-4 flex-shrink-0" />
-                        <span className="md:hidden lg:block">{d.name}</span>
+                        <span className="md:hidden lg:block text-left">{d.name}</span>
+                        <NavMarker active={isOn} opensOver />
                       </button>
                     );
                   })}
@@ -377,7 +373,7 @@ export default function Layout({ children, currentPageName }) {
             {(isAdmin || canManagePermissions) &&
             <>
                 <div className="pt-4 pb-1 px-3 md:px-2 lg:px-3">
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-white/30 md:hidden lg:block">Management</p>
+                  <p className="text-xs font-medium text-white/60 md:hidden lg:block">Management</p>
                   <div className="hidden md:block lg:hidden border-t border-white/10 mt-1" />
                 </div>
                 {isAdmin &&
