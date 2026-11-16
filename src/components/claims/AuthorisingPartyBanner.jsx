@@ -74,7 +74,7 @@ export default function AuthorisingPartyBanner({ claim, compact = false, caption
         <span className="break-words">{claimTypePart}</span>
         <span className="text-muted-foreground" aria-hidden="true">·</span>
         <span className="inline-flex items-center gap-1.5 break-words">
-          <span className={`w-2 h-2 rounded-full border flex-shrink-0 ${style.bg} ${style.border}`} aria-hidden="true" />
+          <span className={`w-2 h-2 rounded-full flex-shrink-0 ${style.dot || 'bg-muted-foreground'}`} aria-hidden="true" />
           <span>{partyPart}</span>
         </span>
         <span className="text-muted-foreground" aria-hidden="true">·</span>
