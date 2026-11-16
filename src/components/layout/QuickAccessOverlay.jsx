@@ -2,6 +2,7 @@ import React, { Suspense, lazy, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import PageLoader from '@/components/PageLoader';
+import { escapeWindowsOpen } from '@/hooks/useEscapeToClose';
 
 const PAGE_MAP = {
   RepairerDirectory: { title: 'Repairer Directory', component: lazy(() => import('@/pages/RepairerDirectory')) },
@@ -26,6 +27,7 @@ export default function QuickAccessOverlay({ pageName, onClose }) {
       if (e.key === 'Escape') {
         if (document.querySelector('[data-custom-portal-modal="true"]')) return;
         // A window opened from inside this one closes first.
+        if (escapeWindowsOpen() > 0) return;
         if (document.querySelector('[data-overlay-dismiss], [role="dialog"][data-state="open"], [role="alertdialog"][data-state="open"]')) return;
         onClose();
       }
