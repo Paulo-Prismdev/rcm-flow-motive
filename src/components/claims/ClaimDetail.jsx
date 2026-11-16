@@ -213,7 +213,8 @@ const EditableSection = ({ title, icon: Icon, claim, onUpdate, children, EditCom
 
     return (
         <div className="bg-card border border-border rounded-xl p-4 md:p-5 m-card-tight shadow-card">
-            <div className="flex justify-between items-center pb-3 mb-4 border-b border-border m-card-head">
+            {/* Fixed-height header so it doesn't shrink when the Edit button hides */}
+            <div className="flex justify-between items-center min-h-[2.75rem] pb-3 mb-4 border-b border-border m-card-head">
                 <div
                     className="flex items-center gap-2.5 text-left flex-grow min-w-0"
                 >
@@ -221,8 +222,9 @@ const EditableSection = ({ title, icon: Icon, claim, onUpdate, children, EditCom
                     <h3 className="text-[15px] font-semibold text-foreground truncate">{title}</h3>
                 </div>
                 <div className='flex items-center gap-2'>
+                    {isEditing && <span className="text-xs font-medium text-primary">Editing</span>}
                     {!isEditing && EditComponent && canEdit && (
-                        <Button variant="outline" size="sm" onClick={() => { setIsEditing(true); }} className="gap-1.5" aria-label={`Edit ${title}`}>
+                        <Button variant="outline" size="sm" onClick={() => startEdit(null)} className="gap-1.5" aria-label={`Edit ${title}`}>
                             <Edit className="w-3.5 h-3.5" aria-hidden="true" />
                             Edit
                         </Button>
