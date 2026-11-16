@@ -166,7 +166,7 @@ export default function TasksPage() {
             { n: stats.total, label: 'Active', tone: '' },
             { n: stats.overdue, label: 'Overdue', tone: stats.overdue > 0 ? 'danger' : '' },
             { n: stats.today, label: 'Due today', tone: stats.today > 0 ? 'warning' : '' },
-            { n: stats.pending, label: 'Not started', tone: '' },
+            { n: stats.pending, label: 'Pending', tone: '' },
           ].map(({ n, label, tone }) => (
             <div key={label} className={`rounded-xl border p-3 shadow-card ${tone === 'danger' ? 'bg-danger-bg border-danger/30' : tone === 'warning' ? 'bg-warning-bg border-warning/30' : 'bg-card border-border'}`}>
               <div className={`text-2xl font-semibold tabular-nums ${tone === 'danger' ? 'text-danger-fg' : tone === 'warning' ? 'text-warning-fg' : 'text-foreground'}`}>{n}</div>

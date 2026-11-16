@@ -74,10 +74,10 @@ export default function TaskModal({ isOpen, onClose, onSave, task, claimId, clai
   };
 
   const priorityColors = {
-    Low: 'bg-gray-100 text-gray-700',
-    Medium: 'bg-blue-100 text-blue-700',
-    High: 'bg-orange-100 text-orange-700',
-    Urgent: 'bg-red-100 text-red-700'
+    Low: 'bg-muted text-foreground',
+    Medium: 'bg-info-bg text-info-fg',
+    High: 'bg-warning-bg text-warning-fg',
+    Urgent: 'bg-danger-bg text-danger-fg'
   };
 
   return (
@@ -162,7 +162,7 @@ export default function TaskModal({ isOpen, onClose, onSave, task, claimId, clai
                     className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
                       formData.priority === p 
                         ? priorityColors[p] + ' ring-2 ring-offset-1 ring-current' 
-                        : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                        : 'bg-muted text-muted-foreground hover:bg-accent'
                     }`}
                   >
                     {p}

@@ -15,17 +15,17 @@ import {
 
 export default function TaskCard({ task, onEdit, onDelete, onStatusChange, compact = false }) {
   const priorityStyles = {
-    Low: { bg: 'bg-gray-100', text: 'text-gray-700', border: 'border-gray-200' },
-    Medium: { bg: 'bg-blue-100', text: 'text-blue-700', border: 'border-blue-200' },
-    High: { bg: 'bg-orange-100', text: 'text-orange-700', border: 'border-orange-200' },
-    Urgent: { bg: 'bg-red-100', text: 'text-red-700', border: 'border-red-200' }
+    Low: { bg: 'bg-muted', text: 'text-foreground', border: 'border-border' },
+    Medium: { bg: 'bg-info-bg', text: 'text-info-fg', border: 'border-info/30' },
+    High: { bg: 'bg-warning-bg', text: 'text-warning-fg', border: 'border-warning/30' },
+    Urgent: { bg: 'bg-danger-bg', text: 'text-danger-fg', border: 'border-danger/30' }
   };
 
   const statusStyles = {
-    Pending: { bg: 'bg-gray-100', text: 'text-gray-700', icon: Clock },
-    'In Progress': { bg: 'bg-blue-100', text: 'text-blue-700', icon: Play },
-    Completed: { bg: 'bg-green-100', text: 'text-green-700', icon: CheckCircle2 },
-    Cancelled: { bg: 'bg-gray-100', text: 'text-gray-500', icon: Clock }
+    Pending: { bg: 'bg-muted', text: 'text-foreground', icon: Clock },
+    'In Progress': { bg: 'bg-info-bg', text: 'text-info-fg', icon: Play },
+    Completed: { bg: 'bg-success-bg', text: 'text-success-fg', icon: CheckCircle2 },
+    Cancelled: { bg: 'bg-muted', text: 'text-muted-foreground', icon: Clock }
   };
 
   const getDueDateDisplay = () => {
@@ -41,19 +41,19 @@ export default function TaskCard({ task, onEdit, onDelete, onStatusChange, compa
     let style = 'text-foreground-muted';
 
     if (task.status === 'Completed' || task.status === 'Cancelled') {
-      style = 'text-gray-400';
+      style = 'text-muted-foreground';
     } else if (isOverdue) {
       label = `Overdue (${format(dueDate, 'dd MMM')})`;
-      style = 'text-red-600 font-medium';
+      style = 'text-danger-fg font-medium';
     } else if (isDueToday) {
       label = 'Due Today';
-      style = 'text-orange-600 font-medium';
+      style = 'text-warning-fg font-medium';
     } else if (isDueTomorrow) {
       label = 'Due Tomorrow';
-      style = 'text-amber-600 font-medium';
+      style = 'text-warning-fg font-medium';
     } else if (daysUntil <= 3) {
       label = `Due in ${daysUntil} days`;
-      style = 'text-amber-600';
+      style = 'text-warning-fg';
     }
 
     return { label, style, isOverdue };
@@ -66,7 +66,7 @@ export default function TaskCard({ task, onEdit, onDelete, onStatusChange, compa
 
   if (compact) {
     return (
-      <div className={`p-3 rounded-lg border ${task.status === 'Completed' ? 'opacity-60' : ''} ${dueInfo?.isOverdue ? 'border-red-300 bg-red-50' : 'neomorph-flat'}`}>
+      <div className={`p-3 rounded-lg border ${task.status === 'Completed' ? 'opacity-60' : ''} ${dueInfo?.isOverdue ? 'border-danger/30 bg-danger-bg' : 'neomorph-flat'}`}>
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
@@ -99,7 +99,7 @@ export default function TaskCard({ task, onEdit, onDelete, onStatusChange, compa
                 size="sm"
                 variant="ghost"
                 onClick={() => onStatusChange(task.id, 'Completed')}
-                className="h-7 w-7 p-0 text-green-600 hover:bg-green-100"
+                className="h-7 w-7 p-0 text-success-fg hover:bg-success-bg"
                 title="Mark Complete"
               >
                 <CheckCircle2 className="w-4 h-4" />
@@ -120,7 +120,7 @@ export default function TaskCard({ task, onEdit, onDelete, onStatusChange, compa
   }
 
   return (
-    <div className={`p-4 rounded-xl border transition-all ${task.status === 'Completed' ? 'opacity-60' : ''} ${dueInfo?.isOverdue ? 'border-red-300 bg-red-50/50' : 'neomorph-flat hover:shadow-md'}`}>
+    <div className={`p-4 rounded-xl border transition-all ${task.status === 'Completed' ? 'opacity-60' : ''} ${dueInfo?.isOverdue ? 'border-danger/30 bg-danger-bg' : 'neomorph-flat hover:shadow-md'}`}>
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-2 flex-wrap">
@@ -134,7 +134,7 @@ export default function TaskCard({ task, onEdit, onDelete, onStatusChange, compa
             </span>
           </div>
           
-          <h3 className={`font-semibold text-base mb-1 ${task.status === 'Completed' ? 'line-through text-gray-500' : ''}`}>
+          <h3 className={`font-semibold text-base mb-1 ${task.status === 'Completed' ? 'line-through text-muted-foreground' : ''}`}>
             {task.title}
           </h3>
           
@@ -167,7 +167,7 @@ export default function TaskCard({ task, onEdit, onDelete, onStatusChange, compa
               size="sm"
               variant="ghost"
               onClick={() => onStatusChange(task.id, 'In Progress')}
-              className="h-8 px-2 text-blue-600 hover:bg-blue-100"
+              className="h-8 px-2 text-info-fg hover:bg-info-bg"
               title="Start Task"
             >
               <Play className="w-4 h-4" />
@@ -178,7 +178,7 @@ export default function TaskCard({ task, onEdit, onDelete, onStatusChange, compa
               size="sm"
               variant="ghost"
               onClick={() => onStatusChange(task.id, 'Completed')}
-              className="h-8 px-2 text-green-600 hover:bg-green-100"
+              className="h-8 px-2 text-success-fg hover:bg-success-bg"
               title="Complete"
             >
               <CheckCircle2 className="w-4 h-4" />
@@ -196,7 +196,7 @@ export default function TaskCard({ task, onEdit, onDelete, onStatusChange, compa
             size="sm"
             variant="ghost"
             onClick={() => onDelete(task.id)}
-            className="h-8 px-2 text-red-500 hover:bg-red-100"
+            className="h-8 px-2 text-danger-fg hover:bg-danger-bg"
           >
             <Trash2 className="w-4 h-4" />
           </Button>
