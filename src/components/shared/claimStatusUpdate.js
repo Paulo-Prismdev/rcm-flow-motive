@@ -6,6 +6,39 @@ import { withTotalLossMarker } from './totalLoss';
 // 'Returned to Customer' is the v2 equivalent of the legacy 'Completed'.
 export const CLOSED_STATUSES = ['Completed', 'Cancelled', 'Total Loss', 'Returned to Customer'];
 
+// A claim whose vehicle is back in for rectification work that has not yet been
+// handed back. Its original repair dates are kept, so anything that reads those
+// dates as "returned" or "released" checks this first.
+export function isInRectification(claim) {
+  if (!claim) return false;
+  const journey = claim.journey_status || claim.job_status;
+  return journey === 'Rectification' && !claim.rectification_hand_over_date;
+}
+
+// The four statuses a status-change record captures.
+const STATUS_KEYS = ['outcome', 'journey', 'secondary', 'tertiary'];
+
+function statusSnapshot(claim) {
+  return {
+    outcome: claim?.outcome || getClaimOutcome(claim) || '',
+    journey: claim?.journey_status || claim?.job_status || '',
+    secondary: claim?.secondary_status || '',
+    tertiary: claim?.tertiary_status || '',
+  };
+}
+
+// Structured record of a status change, saved on the ClaimUpdate as
+// status_change: the statuses before (from) and after (to), which changed, and
+// whether a person ('manual') or Flowmotive ('auto') made it. `changes` is the
+// claim-field payload being written. Returns null when nothing changed.
+export function buildStatusChangeRecord(claim, changes, source = 'manual') {
+  const from = statusSnapshot(claim);
+  const to = statusSnapshot({ ...claim, ...changes });
+  const changed = STATUS_KEYS.filter((k) => from[k] !== to[k]);
+  if (!changed.length) return null;
+  return { from, to, changed, source };
+}
+
 export function isClosedJourney(journey) {
   if (!journey) return false;
   return CLOSED_STATUSES.includes(journey) || EXCEPTION_JOURNEY_STATUSES.includes(journey);
@@ -68,7 +101,9 @@ export function computeClientCommStatusFlag(claim) {
 
   // Once the vehicle has been handed back to the customer, client 48h
   // communication tracking is complete — show "Complete" (Blue) regardless of timers.
-  if (claim.hand_over_date) return 'Complete';
+  // A claim back in for rectification keeps its original hand-over date, so that
+  // date no longer counts until the rectification hand-over (handled above).
+  if (claim.hand_over_date && !isInRectification(claim)) return 'Complete';
 
   if (isUpdateTrackingClosed(claim)) return 'Gray';
 
@@ -140,15 +175,14 @@ export function buildStatusChangeClaimUpdate(claim, { outcome, journey, secondar
   }
   // Rectification milestone dates are managed in the Key Dates section of the
   // claim record (greyed out until the Rectification journey is applied), so a
-  // status change to Rectification does not write any dates here. The 48hr
+  // status change to Rectification does not write any dates here. The original
+  // repair dates (on site, completion, hand-over, claim complete) are kept as a
+  // record of the first repair; readers that treat them as "returned" check
+  // isInRectification first. The 48hr
   // update & client communication timers are reactivated (the job is back in),
   // and stay active until a rectification_hand_over_date is entered — handled
   // by isUpdateTrackingClosed / computeClientCommStatusFlag.
   if (effectiveJourney === 'Rectification') {
-    updateData.on_site_date = null;
-    updateData.hand_over_date = null;
-    updateData.completion_date = null;
-    updateData.claim_complete_date = null;
     const nowMs = Date.now();
     const due = new Date(nowMs + 48 * 60 * 60 * 1000).toISOString();
     updateData.last_updated_at = new Date(nowMs).toISOString();
