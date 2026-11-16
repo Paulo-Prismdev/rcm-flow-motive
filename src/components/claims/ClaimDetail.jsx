@@ -2089,8 +2089,8 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
           </div>
         )}
 
-        {/* Sections: a source list down the left on desktop, the Mac way (phones choose
-            the section in ClaimDetailMobileHeader). Same sections, same order. */}
+        {/* Sections: a source list down the left on desktop, the Mac way (phones open a
+            section from ClaimMobileSummary). Same sections, same order. */}
         <div className={`flex-1 min-h-0 flex gap-3 ${mobilePage === 'summary' ? 'max-lg:hidden' : ''}`}>
           <nav aria-label="Claim sections" className="hidden lg:flex w-56 flex-shrink-0 flex-col gap-0.5 min-h-0 overflow-y-auto rounded-xl border border-border bg-muted p-2">
             {DETAIL_SECTIONS.filter(s => s.id !== 'creditRepair' || claim.claim_type === 'Credit Repair').map(section => {
