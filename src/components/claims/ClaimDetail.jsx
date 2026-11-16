@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useLayoutEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { excessLabel, excessAnswered } from "@/components/shared/excessState";
 import {
