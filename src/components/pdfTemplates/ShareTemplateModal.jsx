@@ -5,7 +5,9 @@ import { X, Lock, Users, Globe, Search, UserPlus, CheckSquare, Square } from 'lu
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 
+import useEscapeToClose from '@/hooks/useEscapeToClose';
 export default function ShareTemplateModal({ template, isOpen, onClose, onSave }) {
+  useEscapeToClose(onClose, isOpen);
   const [visibility, setVisibility] = useState(template?.visibility || 'private');
   const [sharedWithUsers, setSharedWithUsers] = useState(template?.shared_with_users || []);
   const [canEditUsers, setCanEditUsers] = useState(template?.can_edit_users || []);

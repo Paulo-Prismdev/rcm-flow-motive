@@ -2,7 +2,9 @@ import React from 'react';
 import { X } from "lucide-react";
 import ActivityLogSection from './ActivityLogSection';
 
+import useEscapeToClose from '@/hooks/useEscapeToClose';
 export default function ActivityLogModal({ parentId, parentType, isOpen, onClose }) {
+  useEscapeToClose(onClose, isOpen);
   if (!isOpen) return null;
 
   return (

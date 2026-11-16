@@ -5,6 +5,7 @@ import { Sparkles, Link, X, Check, AlertCircle, ChevronRight, User, Building2 } 
 import { Button } from '@/components/ui/button';
 import { ensureDirectoryTag } from '@/components/shared/directoryTags';
 
+import useEscapeToClose from '@/hooks/useEscapeToClose';
 /**
  * AIEntityLinker — shown after AI extraction, before AIExtractConfirmDialog.
  * For fields that map to DB entities (client, referrer, bodyshop),
@@ -162,6 +163,7 @@ function EntityLinkRow({ label, icon: Icon, extractedName, candidates, nameKey, 
 }
 
 export default function AIEntityLinker({ isOpen, onClose, extractedData, onConfirm }) {
+  useEscapeToClose(onClose, isOpen);
   const [links, setLinks] = useState({ client: null, referrer: null, bodyshop: null });
   const [skipped, setSkipped] = useState({ client: false, referrer: false, bodyshop: false });
 

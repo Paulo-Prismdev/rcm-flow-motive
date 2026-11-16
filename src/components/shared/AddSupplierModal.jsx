@@ -11,7 +11,9 @@ import { VEHICLE_MANUFACTURERS } from './vehicleManufacturers';
 import { updateAndLog, createAndLog } from '@/components/shared/useActivityLogger';
 import { warn } from '@/lib/dialogs';
 
+import useEscapeToClose from '@/hooks/useEscapeToClose';
 export default function AddSupplierModal({ isOpen, onClose, onSuccess, editingSupplier = null }) {
+  useEscapeToClose(onClose, isOpen);
   const queryClient = useQueryClient();
   const [formData, setFormData] = useState({
     name: '',

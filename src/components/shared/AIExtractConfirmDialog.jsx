@@ -5,6 +5,7 @@ import { base44 } from '@/api/base44Client';
 import HighlightableDocumentViewer from './HighlightableDocumentViewer';
 
 import { resolveFileUrl } from '@/lib/privateFiles';
+import useEscapeToClose from '@/hooks/useEscapeToClose';
 const LINKED_ENTITY_FIELDS = {
   client: ['client_name', 'client_phone', 'client_email', 'client_address_line_1', 'client_address_line_2', 'client_town', 'client_county', 'client_postcode'],
   referrer: ['referrer', 'referrer_email'],
@@ -12,6 +13,7 @@ const LINKED_ENTITY_FIELDS = {
 };
 
 export default function AIExtractConfirmDialog({ isOpen, onClose, onConfirm, extractedData, existingData = {}, linkedEntityTypes = [], title = 'AI Data Extraction', fileUrl }) {
+  useEscapeToClose(onClose, isOpen);
   const lockedFields = useMemo(
     () => new Set(linkedEntityTypes.flatMap(t => LINKED_ENTITY_FIELDS[t] || [])),
     [linkedEntityTypes]

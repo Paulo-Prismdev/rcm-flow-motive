@@ -8,7 +8,9 @@ import UploadProgressList from './UploadProgressList';
 import { base44 } from '@/api/base44Client';
 import { notifyError } from '@/lib/dialogs';
 
+import useEscapeToClose from '@/hooks/useEscapeToClose';
 export default function FileAttachmentModal({ fileUrls = [], onAdd, onRemove, isOpen, onClose, enableAI = false, analysisType = 'general', onAIExtract = null, existingData = {} }) {
+  useEscapeToClose(onClose, isOpen);
   const [viewingFile, setViewingFile] = useState(null);
   const [analyzingFile, setAnalyzingFile] = useState(null);
   const [aiExtractDialog, setAiExtractDialog] = useState({ isOpen: false, data: null, fileUrl: null });

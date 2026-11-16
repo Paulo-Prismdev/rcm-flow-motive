@@ -7,9 +7,11 @@ import { base44 } from "@/api/base44Client";
 import { useMutation } from '@tanstack/react-query';
 import { createAndLog } from '@/components/shared/useActivityLogger';
 
+import useEscapeToClose from '@/hooks/useEscapeToClose';
 const EMPTY_FORM = { name: '', contact_name: '', phone: '', email: '', address: '', notes: '' };
 
 export default function AddBrokerModal({ isOpen, onClose, onSuccess }) {
+  useEscapeToClose(onClose, isOpen);
   const [formData, setFormData] = useState(EMPTY_FORM);
 
   const createMutation = useMutation({

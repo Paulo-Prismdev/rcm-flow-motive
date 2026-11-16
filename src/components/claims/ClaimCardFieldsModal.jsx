@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { X, GripVertical, Check, Lock } from "lucide-react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 
+import useEscapeToClose from '@/hooks/useEscapeToClose';
 const DEFAULT_MANDATORY_FIELDS = ['client_name', 'make_model', 'loss_date', 'referrer'];
 
 const AVAILABLE_FIELDS = [
@@ -31,6 +32,7 @@ const AVAILABLE_FIELDS = [
 ];
 
 export default function ClaimCardFieldsModal({ isOpen, onClose, selectedFields, onSave, mandatoryFields }) {
+  useEscapeToClose(onClose, isOpen);
   const effectiveMandatory = mandatoryFields !== undefined ? mandatoryFields : DEFAULT_MANDATORY_FIELDS;
   // Ensure mandatory fields are always included
   const initialFields = selectedFields || [];

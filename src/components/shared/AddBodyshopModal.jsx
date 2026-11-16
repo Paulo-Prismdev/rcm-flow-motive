@@ -8,7 +8,9 @@ import AddressLookupInput from './AddressLookupInput'; // New import
 
 import { createAndLog } from '@/components/shared/useActivityLogger';
 import { warn } from '@/lib/dialogs';
+import useEscapeToClose from '@/hooks/useEscapeToClose';
 export default function AddBodyshopModal({ isOpen, onClose, onSuccess, initialName = '' }) {
+  useEscapeToClose(onClose, isOpen);
   const queryClient = useQueryClient();
   const [formData, setFormData] = useState({
     name: initialName || '',

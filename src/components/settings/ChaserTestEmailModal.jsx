@@ -5,7 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { X, Send, ExternalLink, Search, CheckCircle2 } from 'lucide-react';
 
+import useEscapeToClose from '@/hooks/useEscapeToClose';
 export default function ChaserTestEmailModal({ rule, onClose }) {
+  useEscapeToClose(onClose);
   const [search, setSearch] = useState('');
   const [selectedClaim, setSelectedClaim] = useState(null);
   const [email, setEmail] = useState('');

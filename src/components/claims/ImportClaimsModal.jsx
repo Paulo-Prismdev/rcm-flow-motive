@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Upload, X, CheckCircle, AlertCircle, Loader2, FileSpreadsheet, Sparkles } from 'lucide-react';
 import { claimTypeFromText } from '@/components/shared/claimTypes';
 
+import useEscapeToClose from '@/hooks/useEscapeToClose';
 // Claim fields the AI can map to
 const CLAIM_FIELDS = [
   { key: 'reg', label: 'Vehicle Registration' },
@@ -144,6 +145,7 @@ const isEmptyRow = (row) => {
 };
 
 export default function ImportClaimsModal({ isOpen, onClose, onImportComplete }) {
+  useEscapeToClose(onClose, isOpen);
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState([]);
   const [columnMapping, setColumnMapping] = useState({});

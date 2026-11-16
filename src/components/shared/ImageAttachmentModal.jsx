@@ -5,7 +5,9 @@ import { useFileUpload } from '@/hooks/useFileUpload';
 import UploadProgressList from './UploadProgressList';
 import ConfirmDialog from './ConfirmDialog';
 
+import useEscapeToClose from '@/hooks/useEscapeToClose';
 export default function ImageAttachmentModal({ imageUrls = [], onAdd, onRemove, isOpen, onClose }) {
+  useEscapeToClose(onClose, isOpen);
   const [viewingImage, setViewingImage] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
   const [imageToRemove, setImageToRemove] = useState(null);

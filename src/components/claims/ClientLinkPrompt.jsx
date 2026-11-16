@@ -3,9 +3,11 @@ import { createPortal } from 'react-dom';
 import { Button } from "@/components/ui/button";
 import { X, Building2, User, Link2, UserPlus } from "lucide-react";
 
+import useEscapeToClose from '@/hooks/useEscapeToClose';
 // Shown when a claim is saved with a client that isn't linked to the directory
 // but a likely match already exists — link to it, or create a new record.
 export default function ClientLinkPrompt({ isOpen, matches = [], clientName, isSaving, onLink, onCreateNew, onCancel }) {
+  useEscapeToClose(onCancel, isOpen);
   const [selectedId, setSelectedId] = useState(matches[0]?.id || null);
 
   if (!isOpen) return null;

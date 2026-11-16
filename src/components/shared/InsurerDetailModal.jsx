@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { X, Pencil, Phone, Mail, Building2, Network, User, Plus, Trash2, Copy } from "lucide-react";
 import { updateAndLog } from '@/components/shared/useActivityLogger';
 
+import useEscapeToClose from '@/hooks/useEscapeToClose';
 const buildForm = (insurer) => ({
   name: insurer.name || "",
   contact_name: insurer.contact_name || "",
@@ -21,6 +22,7 @@ const buildForm = (insurer) => ({
 });
 
 export default function InsurerDetailModal({ insurer, onClose, onUpdated }) {
+  useEscapeToClose(onClose);
   const [editMode, setEditMode] = useState(false);
   const [form, setForm] = useState(buildForm(insurer));
   const [newCode, setNewCode] = useState("");

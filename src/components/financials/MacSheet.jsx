@@ -2,11 +2,13 @@ import React from 'react';
 import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
+import useEscapeToClose from '@/hooks/useEscapeToClose';
 /**
  * A sheet as macOS shows one: a panel that slides in over the dimmed window. On a
  * phone it takes the whole screen, which is what data-mobile-full-modal asks for.
  */
 export default function MacSheet({ title, subtitle, onClose, children, footer, className }) {
+  useEscapeToClose(onClose);
   return (
     <div className="fixed inset-0 z-window flex items-center justify-center p-0 sm:p-6" data-mobile-full-modal="true">
       <div

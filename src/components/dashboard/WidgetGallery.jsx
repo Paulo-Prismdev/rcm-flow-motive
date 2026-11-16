@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { X, Calculator, DollarSign, TrendingUp, Activity, Zap, PieChart, Clock } from 'lucide-react';
 import WidgetUpdateTracking from './widgets/WidgetUpdateTracking';
 
+import useEscapeToClose from '@/hooks/useEscapeToClose';
 const WIDGET_TYPES = [
   {
     type: 'DepartmentStats',
@@ -90,6 +91,7 @@ const WIDGET_TYPES = [
 ];
 
 export default function WidgetGallery({ onClose, onAddWidget, department }) {
+  useEscapeToClose(onClose);
   const [selectedType, setSelectedType] = useState(null);
   const [config, setConfig] = useState({});
 

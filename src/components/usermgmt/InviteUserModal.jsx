@@ -4,7 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { X, UserPlus, Check } from "lucide-react";
 
+import useEscapeToClose from '@/hooks/useEscapeToClose';
 export default function InviteUserModal({ onClose, onSuccess, isSuperAdmin }) {
+  useEscapeToClose(onClose);
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("user");
   // New accounts start with no access. Staff invited here are given staff access

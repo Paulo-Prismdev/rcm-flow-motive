@@ -8,7 +8,9 @@ import { Loader, X } from 'lucide-react';
 import AddressLookupInput from './AddressLookupInput';
 import { warn } from '@/lib/dialogs';
 
+import useEscapeToClose from '@/hooks/useEscapeToClose';
 export default function AddWorkProviderModal({ isOpen, onClose, onSuccess }) {
+  useEscapeToClose(onClose, isOpen);
   const queryClient = useQueryClient();
   const [formData, setFormData] = useState({
     name: '', // Changed from initialName

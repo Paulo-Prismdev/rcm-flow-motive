@@ -10,6 +10,7 @@ import { useToast } from "@/components/ui/use-toast";
 import AddressLookupInput from './AddressLookupInput';
 import { createAndLog } from '@/components/shared/useActivityLogger';
 
+import useEscapeToClose from '@/hooks/useEscapeToClose';
 const EMPTY_FORM = {
   name: '',
   // Saved in the one Clients & Third Parties directory, tagged as a client.
@@ -32,6 +33,7 @@ const EMPTY_FORM = {
 };
 
 export default function AddClientModal({ isOpen, onClose, onSuccess, initial }) {
+  useEscapeToClose(onClose, isOpen);
   // Anything known about the client already (a name, an address, the driver as a
   // contact) starts the form off; the user can change every part of it.
   const startingForm = () => ({ ...EMPTY_FORM, ...(initial || {}) });

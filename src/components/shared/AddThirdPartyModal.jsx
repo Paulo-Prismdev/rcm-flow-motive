@@ -10,6 +10,7 @@ import { useToast } from "@/components/ui/use-toast";
 import AddressLookupInput from './AddressLookupInput';
 import { createAndLog } from '@/components/shared/useActivityLogger';
 
+import useEscapeToClose from '@/hooks/useEscapeToClose';
 const EMPTY_FORM = {
   name: '',
   // Saved in the one Clients & Third Parties directory, tagged as a third party.
@@ -31,6 +32,7 @@ const EMPTY_FORM = {
 };
 
 export default function AddThirdPartyModal({ isOpen, onClose, onSuccess, initialName = '' }) {
+  useEscapeToClose(onClose, isOpen);
   const [formData, setFormData] = useState(EMPTY_FORM);
   const { toast } = useToast();
 

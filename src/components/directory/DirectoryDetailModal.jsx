@@ -12,6 +12,7 @@ import DirectoryTagPills from "./DirectoryTagPills";
 import RecordHistory from '@/components/shared/RecordHistory';
 import { updateAndLog, createAndLog } from '@/components/shared/useActivityLogger';
 
+import useEscapeToClose from '@/hooks/useEscapeToClose';
 const EMPTY_FORM = {
   name: "",
   client_type: "Individual",
@@ -45,6 +46,7 @@ const TAG_BUTTONS = [
  * a client, the insurer and vehicle details to a third party.
  */
 export default function DirectoryDetailModal({ record, onClose, onSaved }) {
+  useEscapeToClose(onClose);
   const isNew = !record;
   const [formData, setFormData] = useState(record ? { ...EMPTY_FORM, ...record } : EMPTY_FORM);
   const [isEditing, setIsEditing] = useState(isNew);

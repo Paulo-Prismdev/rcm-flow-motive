@@ -10,9 +10,11 @@ import InsurerContactsEditor from "./InsurerContactsEditor";
 import NetworkCodesEditor from "./NetworkCodesEditor";
 import { createAndLog } from '@/components/shared/useActivityLogger';
 
+import useEscapeToClose from '@/hooks/useEscapeToClose';
 const EMPTY_FORM = { name: '', contact_name: '', phone: '', email: '', claims_line: '', notes: '', useful_contacts: [], network_codes: [] };
 
 export default function AddInsurerModal({ isOpen, onClose, onSuccess, initialName = '' }) {
+  useEscapeToClose(onClose, isOpen);
   const [formData, setFormData] = useState(EMPTY_FORM);
 
   // Where a name has already been read off an instruction, it leads the form.

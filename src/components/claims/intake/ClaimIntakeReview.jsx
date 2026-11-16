@@ -18,6 +18,7 @@ import {
 import { linkPatch } from './directoryMatch';
 import { clientChoicePatch, clientChoiceReady } from './clientChoice';
 
+import useEscapeToClose from '@/hooks/useEscapeToClose';
 const vehicleFields = (result) => ({
   make_model: result.make_model || '',
   vehicle_make: result.make || '',
@@ -62,6 +63,7 @@ const UK_DATE = /^\d{4}-\d{2}-\d{2}$/;
  * until the user confirms here.
  */
 export default function ClaimIntakeReview({ isOpen, reading, files = [], pastedText = '', onClose, onConfirm }) {
+  useEscapeToClose(onClose, isOpen);
   const [values, setValues] = useState({});
   const [confidence, setConfidence] = useState({});
   const [snippets, setSnippets] = useState({});

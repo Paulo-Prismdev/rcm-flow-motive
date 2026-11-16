@@ -11,9 +11,11 @@ import CreditRepairRateFields from "@/components/settings/CreditRepairRateFields
 import { normaliseRates } from "./creditRepairRates";
 import { createAndLog } from '@/components/shared/useActivityLogger';
 
+import useEscapeToClose from '@/hooks/useEscapeToClose';
 const EMPTY_FORM = { name: '', contact_name: '', phone: '', email: '', contacts: [], address_line_1: '', address_line_2: '', town: '', county: '', postcode: '', account_reference: '', hire_fee_standard: '', hire_fee_prestige: '', hire_fee_super_prestige: '', commission_percent: '', commission_basis: '', notes: '' };
 
 export default function AddCreditRepairCompanyModal({ isOpen, onClose, onSuccess }) {
+  useEscapeToClose(onClose, isOpen);
   const [formData, setFormData] = useState(EMPTY_FORM);
   const { toast } = useToast();
 
