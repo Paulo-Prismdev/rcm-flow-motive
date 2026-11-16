@@ -127,7 +127,7 @@ export default function Settings() {
           type="button"
           onClick={onBack}
           aria-label="Back to settings"
-          className="p-1.5 -ml-1.5 rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground transition-colors flex-shrink-0"
+          className="lg:hidden p-1.5 -ml-1.5 rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground transition-colors flex-shrink-0"
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
@@ -188,19 +188,12 @@ export default function Settings() {
         </nav>
       </aside>
 
-      {/* ── The chosen setting ── */}
-      {/* Phone: shown once a setting is opened, with a back arrow to the list */}
-      {chosenItem && (
-        <section className="lg:hidden flex-1 min-w-0 flex flex-col overflow-hidden">
-          <ItemHeader item={chosenItem} onBack={() => setActiveTab(null)} />
-          <main className="flex-1 overflow-y-auto p-4">{renderContent(chosenItem.id)}</main>
-        </section>
-      )}
-      {/* Computer: always beside the list */}
+      {/* ── The chosen setting: beside the list on a computer; on a phone it replaces
+            the list once opened, with a back arrow. Rendered once either way. ── */}
       {desktopItem && (
-        <section className="hidden lg:flex flex-1 min-w-0 flex-col overflow-hidden">
-          <ItemHeader item={desktopItem} />
-          <main className="flex-1 overflow-y-auto p-5">{renderContent(desktopItem.id)}</main>
+        <section className={`${chosenItem ? 'flex' : 'hidden lg:flex'} flex-1 min-w-0 flex-col overflow-hidden`}>
+          <ItemHeader item={desktopItem} onBack={() => setActiveTab(null)} />
+          <main className="flex-1 overflow-y-auto p-4 lg:p-5">{renderContent(desktopItem.id)}</main>
         </section>
       )}
     </div>
