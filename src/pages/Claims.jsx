@@ -537,12 +537,12 @@ export default function ClaimsPage() {
         onClick={() => setSelectedClaim(claim)}
         className={`group border-b border-border cursor-pointer transition-colors text-sm ${
           isSelected
-            ? 'bg-blue-50 dark:bg-blue-900/20'
-            : 'hover:bg-gray-50 dark:hover:bg-gray-800/50'
+            ? 'bg-info-bg'
+            : 'hover:bg-accent'
         }`}
       >
         {/* Sticky left: Reg */}
-        <td style={{ width: `${REG_W}px`, minWidth: `${REG_W}px`, maxWidth: `${REG_W}px` }} className={`sticky left-0 z-10 px-2 py-2.5 whitespace-nowrap ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-white dark:bg-gray-900 group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50'}`}>
+        <td style={{ width: `${REG_W}px`, minWidth: `${REG_W}px`, maxWidth: `${REG_W}px` }} className={`sticky left-0 z-10 px-2 py-2.5 whitespace-nowrap ${isSelected ? 'bg-info-bg' : 'bg-card group-hover:bg-muted'}`}>
           <span
             className="inline-flex items-center justify-center rounded-md bg-[#1e2d4a] text-white font-semibold uppercase"
             style={{ fontSize: '13px', width: '96px', height: '28px', letterSpacing: '0.05em' }}
@@ -562,15 +562,15 @@ export default function ClaimsPage() {
           );
         })}
         {/* Sticky right: Case Update 48hrs badge */}
-        <td style={{ width: `${CASE_W}px`, minWidth: `${CASE_W}px`, maxWidth: `${CASE_W}px` }} className={`sticky right-[397px] z-10 px-2 py-2.5 whitespace-nowrap text-center ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-white dark:bg-gray-900 group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50'}`}>
+        <td style={{ width: `${CASE_W}px`, minWidth: `${CASE_W}px`, maxWidth: `${CASE_W}px` }} className={`sticky right-[397px] z-10 px-2 py-2.5 whitespace-nowrap text-center ${isSelected ? 'bg-info-bg' : 'bg-card group-hover:bg-muted'}`}>
           <UpdateStatusBadge status={updateStatus} small />
         </td>
         {/* Sticky right: Client Update 48hrs badge */}
-        <td style={{ width: `${CLIENT_W}px`, minWidth: `${CLIENT_W}px`, maxWidth: `${CLIENT_W}px` }} className={`sticky right-[292px] z-10 px-2 py-2.5 whitespace-nowrap text-center ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-white dark:bg-gray-900 group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50'}`}>
+        <td style={{ width: `${CLIENT_W}px`, minWidth: `${CLIENT_W}px`, maxWidth: `${CLIENT_W}px` }} className={`sticky right-[292px] z-10 px-2 py-2.5 whitespace-nowrap text-center ${isSelected ? 'bg-info-bg' : 'bg-card group-hover:bg-muted'}`}>
           <UpdateStatusBadge status={clientCommStatus} small />
         </td>
         {/* Sticky right: Status + alerts */}
-        <td style={{ width: `${STATUS_W}px`, minWidth: `${STATUS_W}px`, maxWidth: `${STATUS_W}px` }} className={`sticky right-[132px] z-10 px-2 py-2.5 whitespace-nowrap ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-white dark:bg-gray-900 group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50'}`}>
+        <td style={{ width: `${STATUS_W}px`, minWidth: `${STATUS_W}px`, maxWidth: `${STATUS_W}px` }} className={`sticky right-[132px] z-10 px-2 py-2.5 whitespace-nowrap ${isSelected ? 'bg-info-bg' : 'bg-card group-hover:bg-muted'}`}>
           <div className="flex items-center justify-center gap-1 flex-wrap min-h-[42px]">
             {isDraft && (
               <span className="px-1.5 py-0.5 rounded-md bg-warning-bg text-warning-fg text-xs font-medium leading-none">
@@ -624,7 +624,7 @@ export default function ClaimsPage() {
           </div>
         </td>
         {/* Sticky right: Updates quick view */}
-        <td style={{ width: `${UPDATES_W}px`, minWidth: `${UPDATES_W}px`, maxWidth: `${UPDATES_W}px` }} className={`sticky right-[52px] z-10 px-2 py-2.5 whitespace-nowrap text-center ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-white dark:bg-gray-900 group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50'}`}>
+        <td style={{ width: `${UPDATES_W}px`, minWidth: `${UPDATES_W}px`, maxWidth: `${UPDATES_W}px` }} className={`sticky right-[52px] z-10 px-2 py-2.5 whitespace-nowrap text-center ${isSelected ? 'bg-info-bg' : 'bg-card group-hover:bg-muted'}`}>
           <button
             onClick={(e) => { e.stopPropagation(); setQuickViewClaim(claim); }}
             className="relative p-1.5 rounded-md text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
@@ -637,7 +637,7 @@ export default function ClaimsPage() {
           </button>
         </td>
         {/* Sticky right-end: Quick info view */}
-        <td style={{ width: `${INFO_W}px`, minWidth: `${INFO_W}px`, maxWidth: `${INFO_W}px` }} className={`sticky right-0 z-10 px-2 py-2.5 whitespace-nowrap text-center ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-white dark:bg-gray-900 group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50'}`}>
+        <td style={{ width: `${INFO_W}px`, minWidth: `${INFO_W}px`, maxWidth: `${INFO_W}px` }} className={`sticky right-0 z-10 px-2 py-2.5 whitespace-nowrap text-center ${isSelected ? 'bg-info-bg' : 'bg-card group-hover:bg-muted'}`}>
           <button
             onClick={(e) => { e.stopPropagation(); setQuickInfoClaim(claim); }}
             className="p-1.5 rounded-md text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
@@ -663,7 +663,7 @@ export default function ClaimsPage() {
       <div role="button" tabIndex={0} onKeyDown={activateOnKey}
         key={claim.id}
         onClick={() => setSelectedClaim(claim)}
-        className="px-4 py-3 border-b border-border cursor-pointer active:bg-gray-50 dark:active:bg-gray-800/60 transition-colors"
+        className="px-4 py-3 border-b border-border cursor-pointer active:bg-muted dark:active:bg-gray-800/60 transition-colors"
       >
         <div className="flex items-center justify-between gap-2">
           <span
@@ -737,7 +737,7 @@ export default function ClaimsPage() {
   };
 
   const claimsListView = (
-    <div className="flex flex-col h-full min-h-0 bg-card lg:rounded-[10px] lg:border lg:border-gray-100 dark:lg:border-gray-800 overflow-hidden lg:shadow-sm" data-list-shell>
+    <div className="flex flex-col h-full min-h-0 bg-card lg:rounded-[10px] lg:border lg:border-border dark:lg:border-gray-800 overflow-hidden lg:shadow-sm" data-list-shell>
       <ImportClaimsModal isOpen={showImportModal} onClose={() => setShowImportModal(false)}
         onImportComplete={() => { queryClient.invalidateQueries({ queryKey: ['claims'] }); setShowImportModal(false); }} />
       <ClaimCardFieldsModal isOpen={showFieldsModal} onClose={() => setShowFieldsModal(false)}
@@ -754,7 +754,7 @@ export default function ClaimsPage() {
           {isInternalUser && (
             <>
               <button onClick={() => setShowArchived(!showArchived)}
-                className={`hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${showArchived ? 'bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-600' : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'}`}>
+                className={`hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${showArchived ? 'bg-muted border-input' : 'border-border text-muted-foreground hover:bg-accent'}`}>
                 <Archive className="w-3.5 h-3.5" />{showArchived ? 'Hide Archived' : 'Archived'}
               </button>
               <button onClick={() => setShowImportModal(true)}
@@ -792,8 +792,8 @@ export default function ClaimsPage() {
             onClick={() => setOverdueOnly(!overdueOnly)}
             className={`flex items-center gap-1 lg:gap-1.5 px-2 lg:px-3 py-1.5 rounded-lg text-xs lg:text-xs font-medium border transition-all flex-shrink-0 ${
               overdueOnly
-                ? 'bg-red-50 border-red-200 text-red-700 dark:bg-red-900/20 dark:border-red-700 dark:text-red-300'
-                : 'border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-800 hover:border-gray-300'
+                ? 'bg-danger-bg border-danger/30 text-danger-fg'
+                : 'border-border text-muted-foreground hover:bg-card hover:border-input'
             }`}
             title="Show only claims with an overdue Case or Client 48hr update"
           >
@@ -829,7 +829,7 @@ export default function ClaimsPage() {
 
           {/* Quick filter dropdowns */}
           <button onClick={() => setShowFilters(!showFilters)}
-            className={`flex items-center gap-1 lg:gap-1.5 px-2 lg:px-3 py-1.5 rounded-lg text-xs lg:text-xs font-medium border transition-all flex-shrink-0 ${activeFiltersCount > 0 ? 'bg-blue-50 border-blue-200 text-blue-700 dark:bg-blue-900/20 dark:border-blue-700 dark:text-blue-300' : 'border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-800 hover:border-gray-300'}`}>
+            className={`flex items-center gap-1 lg:gap-1.5 px-2 lg:px-3 py-1.5 rounded-lg text-xs lg:text-xs font-medium border transition-all flex-shrink-0 ${activeFiltersCount > 0 ? 'bg-info-bg border-info/30 text-info-fg' : 'border-border text-muted-foreground hover:bg-card hover:border-input'}`}>
             <Filter className="w-3.5 h-3.5" />
             Filters{activeFiltersCount > 0 ? ` (${activeFiltersCount})` : ''}
           </button>
@@ -1176,7 +1176,7 @@ export default function ClaimsPage() {
       {/* Detail panel — full width, replacing the list */}
       {selectedClaim && (
         <div className="flex-1 min-w-0 min-h-0 flex flex-col w-full" data-claim-scroll>
-          <div className="h-full lg:rounded-xl lg:border lg:border-gray-200 dark:lg:border-gray-800 bg-card overflow-hidden" data-claim-shell>
+          <div className="h-full lg:rounded-xl lg:border lg:border-border dark:lg:border-gray-800 bg-card overflow-hidden" data-claim-shell>
             <ClaimDetail
               key={selectedClaim.id}
               claim={selectedClaim}
