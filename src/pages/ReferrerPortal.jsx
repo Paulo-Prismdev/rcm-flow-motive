@@ -148,7 +148,7 @@ export default function ReferrerPortal() {
   if (!isLinked) {
     return (
       <div className="h-full flex items-center justify-center">
-        <AlertCircle className="w-16 h-16 mx-auto text-amber-500 mb-4" />
+        <AlertCircle className="w-16 h-16 mx-auto text-warning-fg mb-4" />
         <h2 className="text-xl font-bold mb-2">Account Not Linked</h2>
         <p className="text-foreground-muted">
           Your account is not linked to a referrer. Please contact RCM Automotive to set up your referrer portal access.
@@ -211,7 +211,7 @@ export default function ReferrerPortal() {
       return (
         <span className="relative group cursor-default">
           <span className="truncate max-w-[120px] inline-block">{val}</span>
-          <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 hidden group-hover:block z-50 bg-gray-900 text-white text-xs rounded-lg px-3 py-2 max-w-xs break-words shadow-lg">
+          <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 hidden group-hover:block z-50 bg-foreground text-background text-xs rounded-lg px-3 py-2 max-w-xs break-words shadow-lg">
             {val}
           </span>
         </span>
@@ -222,7 +222,7 @@ export default function ReferrerPortal() {
       return (
         <button
           onClick={(e) => { e.stopPropagation(); setInitialSection('documents'); setViewingClaim(claim); }}
-          className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 text-xs font-medium hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors"
+          className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-info-bg text-info-fg text-xs font-medium hover:bg-info-bg transition-colors"
         >
           <FileText className="w-3 h-3" />
           {docCount}
@@ -244,29 +244,29 @@ export default function ReferrerPortal() {
         <FeedbackModal user={currentUser} onClose={() => {}} />
       )}
       {/* Claims list */}
-      <div className="h-full flex flex-col min-h-0 bg-white dark:bg-gray-900 rounded-[10px] border border-gray-100 dark:border-gray-800 overflow-hidden shadow-sm m-4 mt-0 max-md:m-0">
+      <div className="h-full flex flex-col min-h-0 bg-card rounded-xl border border-border overflow-hidden shadow-card m-4 mt-0 max-md:m-0">
             {/* Repairs / Paying Privately tabs */}
-            <div className="flex items-center px-5 py-2 border-b border-gray-100 dark:border-gray-800 flex-shrink-0">
+            <div className="flex items-center px-5 py-2 border-b border-border flex-shrink-0">
               <ClaimTypeTabs activeTab={claimTypeTab} onChange={setClaimTypeTab} claimsCount={standardClaims.length} privateCount={privateClaims.length} />
             </div>
             {/* Search bar with filters */}
-            <div className="flex items-center gap-3 px-5 py-2.5 border-b border-gray-100 dark:border-gray-800 flex-shrink-0 bg-gray-50 dark:bg-gray-900/50 flex-wrap gap-y-2">
+            <div className="flex items-center gap-3 px-5 py-2.5 border-b border-border flex-shrink-0 bg-muted flex-wrap gap-y-2">
               <div className="flex-1 min-w-[200px] relative">
                 <input
                   value={search}
                   onChange={e => setSearch(e.target.value)}
                   placeholder="Search by reg, client, job number, driver..."
-                  className="w-full px-4 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-[10px] focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/15 text-gray-900 dark:text-white placeholder-gray-400 transition-all"
+                  className="w-full px-4 py-2 text-sm bg-card border border-border rounded-lg focus:outline-none focus:border-ring focus:ring-2 focus:ring-blue-500/15 text-foreground placeholder-gray-400 transition-all"
                 />
                 {search && (
-                  <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                  <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-muted-foreground">
                     <X className="w-3.5 h-3.5" />
                   </button>
                 )}
               </div>
               <div className="flex items-center gap-2">
                 <select value={sortBy} onChange={e => setSortBy(e.target.value)}
-                  className="px-2 py-1.5 text-[11px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-[10px] text-gray-700 dark:text-gray-300 focus:outline-none focus:border-blue-400 cursor-pointer">
+                  className="px-2 py-1.5 text-xs bg-card border border-border rounded-lg text-foreground focus:outline-none focus:border-ring cursor-pointer">
                   <option value="created_desc">Created (Newest)</option>
                   <option value="created_asc">Created (Oldest)</option>
                   <option value="loss_desc">Accident Date (Newest)</option>
@@ -274,39 +274,39 @@ export default function ReferrerPortal() {
                 </select>
                 <button
                   onClick={() => setShowFieldsModal(true)}
-                  className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                  className="p-2 text-muted-foreground hover:text-muted-foreground transition-colors"
                   title="Customise columns"
                 >
                   <Settings2 className="w-4 h-4" />
                 </button>
                 <button onClick={() => setShowFilters(!showFilters)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-[10px] text-xs font-medium border transition-all ${activeFiltersCount > 0 ? 'bg-blue-50 border-blue-200 text-blue-700 dark:bg-blue-900/20 dark:border-blue-700 dark:text-blue-300' : 'border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-800 hover:border-gray-300'}`}>
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${activeFiltersCount > 0 ? 'bg-info-bg border-info/30 text-info-fg' : 'border-border text-muted-foreground hover:bg-card hover:border-border'}`}>
                   <Filter className="w-3.5 h-3.5" />
                   Filters{activeFiltersCount > 0 ? ` (${activeFiltersCount})` : ''}
                 </button>
                 {activeFiltersCount > 0 && (
                         <button onClick={() => { setStatusFilter('all'); setInsurerFilter(''); setClaimTypeFilter(''); setBusinessDivisionFilter(''); }}
-                          className="p-1.5 text-gray-400 hover:text-gray-600 transition-colors"><X className="w-3.5 h-3.5" /></button>
+                          className="p-1.5 text-muted-foreground hover:text-muted-foreground transition-colors"><X className="w-3.5 h-3.5" /></button>
                       )}
               </div>
             </div>
 
             {/* Filter panel */}
             {showFilters && (
-              <div className="px-5 py-3 border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/30 flex-shrink-0">
+              <div className="px-5 py-3 border-b border-border bg-muted flex-shrink-0">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                   <div>
-                    <label className="block text-[10px] font-medium text-gray-400 dark:text-gray-500 mb-0.5">Status</label>
+                    <label className="block text-xs font-medium text-muted-foreground mb-0.5">Status</label>
                     <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
-                      className="w-full px-2 py-1 text-[11px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-700 dark:text-gray-300 focus:outline-none">
+                      className="w-full px-2 py-1 text-xs bg-card border border-border rounded text-foreground focus:outline-none">
                       <option value="all">All Statuses</option>
                       {availableStatuses.map(s => <option key={s} value={s}>{s}</option>)}
                     </select>
                   </div>
                   <div>
-                    <label className="block text-[10px] font-medium text-gray-400 dark:text-gray-500 mb-0.5">Claim Type</label>
+                    <label className="block text-xs font-medium text-muted-foreground mb-0.5">Claim Type</label>
                     <select value={claimTypeFilter} onChange={e => setClaimTypeFilter(e.target.value)}
-                      className="w-full px-2 py-1 text-[11px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-700 dark:text-gray-300 focus:outline-none">
+                      className="w-full px-2 py-1 text-xs bg-card border border-border rounded text-foreground focus:outline-none">
                       <option value="">All Types</option>
                       <option value="Fault Claim">Fault Claim</option>
                       <option value="Non-Fault - Own Insurer">Non-Fault - Own Insurer</option>
@@ -317,17 +317,17 @@ export default function ReferrerPortal() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-[10px] font-medium text-gray-400 dark:text-gray-500 mb-0.5">Insurer</label>
+                    <label className="block text-xs font-medium text-muted-foreground mb-0.5">Insurer</label>
                     <select value={insurerFilter} onChange={e => setInsurerFilter(e.target.value)}
-                      className="w-full px-2 py-1 text-[11px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-700 dark:text-gray-300 focus:outline-none">
+                      className="w-full px-2 py-1 text-xs bg-card border border-border rounded text-foreground focus:outline-none">
                       <option value="">All Insurers</option>
                       {uniqueInsurers.map(i => <option key={i} value={i}>{i}</option>)}
                     </select>
                   </div>
                   <div>
-                    <label className="block text-[10px] font-medium text-gray-400 dark:text-gray-500 mb-0.5">Business Division</label>
+                    <label className="block text-xs font-medium text-muted-foreground mb-0.5">Business Division</label>
                     <select value={businessDivisionFilter} onChange={e => setBusinessDivisionFilter(e.target.value)}
-                      className="w-full px-2 py-1 text-[11px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-700 dark:text-gray-300 focus:outline-none">
+                      className="w-full px-2 py-1 text-xs bg-card border border-border rounded text-foreground focus:outline-none">
                       <option value="">All Divisions</option>
                       {uniqueBusinessDivisions.map(d => <option key={d} value={d}>{d}</option>)}
                     </select>
@@ -339,10 +339,10 @@ export default function ReferrerPortal() {
             {/* Table/List with status grouping */}
             <div className="flex-1 overflow-auto min-h-0" style={{WebkitOverflowScrolling: 'touch'}}>
               {isLoading ? (
-                <div className="flex items-center justify-center h-32 text-sm text-gray-400">Loading claims...</div>
+                <div className="flex items-center justify-center h-32 text-sm text-muted-foreground">Loading claims...</div>
               ) : filteredClaims.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-32 gap-2">
-                  <p className="text-sm text-gray-400">{search ? 'No claims match your search.' : 'No claims found.'}</p>
+                  <p className="text-sm text-muted-foreground">{search ? 'No claims match your search.' : 'No claims found.'}</p>
                 </div>
               ) : (
                 <>
@@ -356,20 +356,20 @@ export default function ReferrerPortal() {
                       return (
                         <React.Fragment key={statusGroup}>
                           <div role="button" tabIndex={0} onKeyDown={activateOnKey}
-                            className="flex items-center gap-2 px-4 py-2 bg-gray-50 dark:bg-gray-800/60 cursor-pointer select-none border-b border-gray-100 dark:border-gray-800"
+                            className="flex items-center gap-2 px-4 py-2 bg-muted cursor-pointer select-none border-b border-border"
                             onClick={() => toggleGroup(statusGroup)}
                           >
-                            {isCollapsed ? <ChevronRight className="w-3.5 h-3.5 text-gray-400" /> : <ChevronDown className="w-3.5 h-3.5 text-gray-400" />}
+                            {isCollapsed ? <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" /> : <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />}
                             <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: dotColor }} />
-                            <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">{statusGroup}</span>
-                            <span className="text-xs text-gray-400 ml-1">{claimsInGroup.length}</span>
+                            <span className="text-sm font-semibold text-foreground">{statusGroup}</span>
+                            <span className="text-xs text-muted-foreground ml-1">{claimsInGroup.length}</span>
                           </div>
                           {!isCollapsed && claimsInGroup.map(claim => {
                             return (
                               <div role="button" tabIndex={0} onKeyDown={activateOnKey}
                                 key={claim.id}
                                 onClick={() => setViewingClaim(claim)}
-                                className="px-4 py-3 border-b border-gray-100 dark:border-gray-800 cursor-pointer active:bg-gray-50 dark:active:bg-gray-800/60 transition-colors"
+                                className="px-4 py-3 border-b border-border cursor-pointer active:bg-muted transition-colors"
                               >
                                 <div className="flex items-center justify-between gap-2">
                                   <span
@@ -380,14 +380,14 @@ export default function ReferrerPortal() {
                                   </span>
                                   <div className="flex items-center gap-1 flex-shrink-0">
                                     <ClaimStatusBadges claim={claim} journeyOnly />
-                                    <ChevronRight className="w-4 h-4 text-gray-400 ml-1" />
+                                    <ChevronRight className="w-4 h-4 text-muted-foreground ml-1" />
                                   </div>
                                 </div>
                                 <div className="mt-1.5 flex flex-col gap-0.5">
-                                  <span className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate">{claim.client_name || '—'}</span>
-                                  <span className="text-xs text-gray-500 dark:text-gray-400 truncate">{claim.make_model || '—'}</span>
-                                  <span className="text-xs text-gray-500 dark:text-gray-400">{formatDate(claim.loss_date)}</span>
-                                  {claim.insurer && <span className="text-xs text-gray-400 dark:text-gray-500 truncate">{claim.insurer}</span>}
+                                  <span className="text-sm font-medium text-foreground truncate">{claim.client_name || '—'}</span>
+                                  <span className="text-xs text-muted-foreground truncate">{claim.make_model || '—'}</span>
+                                  <span className="text-xs text-muted-foreground">{formatDate(claim.loss_date)}</span>
+                                  {claim.insurer && <span className="text-xs text-muted-foreground truncate">{claim.insurer}</span>}
                                 </div>
                               </div>
                             );
@@ -405,27 +405,27 @@ export default function ReferrerPortal() {
                       const isCollapsed = collapsedGroups['__other__'];
                       return (
                         <React.Fragment>
-                          <div role="button" tabIndex={0} onKeyDown={activateOnKey} className="flex items-center gap-2 px-4 py-2 bg-gray-50 dark:bg-gray-800/60 cursor-pointer select-none border-b border-gray-100 dark:border-gray-800" onClick={() => toggleGroup('__other__')}>
-                            {isCollapsed ? <ChevronRight className="w-3.5 h-3.5 text-gray-400" /> : <ChevronDown className="w-3.5 h-3.5 text-gray-400" />}
+                          <div role="button" tabIndex={0} onKeyDown={activateOnKey} className="flex items-center gap-2 px-4 py-2 bg-muted cursor-pointer select-none border-b border-border" onClick={() => toggleGroup('__other__')}>
+                            {isCollapsed ? <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" /> : <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />}
                             <span className="w-2 h-2 rounded-full bg-gray-400 flex-shrink-0" />
-                            <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Other</span>
-                            <span className="text-xs text-gray-400 ml-1">{ungrouped.length}</span>
+                            <span className="text-sm font-semibold text-foreground">Other</span>
+                            <span className="text-xs text-muted-foreground ml-1">{ungrouped.length}</span>
                           </div>
                           {!isCollapsed && ungrouped.map(claim => (
-                            <div role="button" tabIndex={0} onKeyDown={activateOnKey} key={claim.id} onClick={() => setViewingClaim(claim)} className="px-4 py-3 border-b border-gray-100 dark:border-gray-800 cursor-pointer active:bg-gray-50 dark:active:bg-gray-800/60 transition-colors">
+                            <div role="button" tabIndex={0} onKeyDown={activateOnKey} key={claim.id} onClick={() => setViewingClaim(claim)} className="px-4 py-3 border-b border-border cursor-pointer active:bg-muted transition-colors">
                               <div className="flex items-center justify-between gap-2">
                                 <span className="inline-flex items-center justify-center rounded-md bg-[#1e2d4a] text-white font-semibold uppercase flex-shrink-0" style={{ fontSize: '13px', width: '96px', height: '28px', letterSpacing: '0.05em' }}>
                                   {claim.reg ? formatUKRegistration(claim.reg) : '—'}
                                 </span>
                                 <div className="flex items-center gap-1 flex-shrink-0">
                                   <ClaimStatusBadges claim={claim} journeyOnly />
-                                  <ChevronRight className="w-4 h-4 text-gray-400 ml-1" />
+                                  <ChevronRight className="w-4 h-4 text-muted-foreground ml-1" />
                                 </div>
                               </div>
                               <div className="mt-1.5 flex flex-col gap-0.5">
-                                <span className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate">{claim.client_name || '—'}</span>
-                                <span className="text-xs text-gray-500 dark:text-gray-400 truncate">{claim.make_model || '—'}</span>
-                                <span className="text-xs text-gray-500 dark:text-gray-400">{formatDate(claim.loss_date)}</span>
+                                <span className="text-sm font-medium text-foreground truncate">{claim.client_name || '—'}</span>
+                                <span className="text-xs text-muted-foreground truncate">{claim.make_model || '—'}</span>
+                                <span className="text-xs text-muted-foreground">{formatDate(claim.loss_date)}</span>
                               </div>
                             </div>
                           ))}
@@ -436,15 +436,15 @@ export default function ReferrerPortal() {
 
                   {/* Desktop table view with grouping */}
                   <table className="hidden lg:table w-full min-w-[700px]">
-                    <thead className="sticky top-0 bg-white dark:bg-gray-900 z-10">
-                      <tr className="border-b border-gray-200 dark:border-gray-700">
-                        <th className="sticky left-0 z-20 bg-white dark:bg-gray-900 px-4 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap">REG</th>
+                    <thead className="sticky top-0 bg-card z-10">
+                      <tr className="border-b border-border">
+                        <th className="sticky left-0 z-20 bg-card px-4 py-2 text-left text-xs font-semibold text-muted-foreground whitespace-nowrap">REG</th>
                         {displayFields.map(fieldId => (
-                          <th key={fieldId} className="px-4 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap">
+                          <th key={fieldId} className="px-4 py-2 text-left text-xs font-semibold text-muted-foreground whitespace-nowrap">
                             {FIELD_LABELS[fieldId] || fieldId}
                           </th>
                         ))}
-                        <th className="sticky right-0 z-20 bg-white dark:bg-gray-900 px-4 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap">STATUS</th>
+                        <th className="sticky right-0 z-20 bg-card px-4 py-2 text-left text-xs font-semibold text-muted-foreground whitespace-nowrap">STATUS</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -457,15 +457,15 @@ export default function ReferrerPortal() {
                         return (
                           <React.Fragment key={statusGroup}>
                             <tr
-                              className="bg-gray-50 dark:bg-gray-800/60 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-800"
+                              className="bg-muted cursor-pointer select-none hover:bg-muted"
                               onClick={() => toggleGroup(statusGroup)}
                             >
                               <td colSpan={colSpan} className="px-4 py-2">
                                 <div className="flex items-center gap-2">
-                                  {isCollapsed ? <ChevronRight className="w-3.5 h-3.5 text-gray-400" /> : <ChevronDown className="w-3.5 h-3.5 text-gray-400" />}
+                                  {isCollapsed ? <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" /> : <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />}
                                   <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: dotColor }} />
-                                  <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">{statusGroup}</span>
-                                  <span className="text-xs text-gray-400 font-normal ml-1">{claimsInGroup.length}</span>
+                                  <span className="text-sm font-semibold text-foreground">{statusGroup}</span>
+                                  <span className="text-xs text-muted-foreground font-normal ml-1">{claimsInGroup.length}</span>
                                 </div>
                               </td>
                             </tr>
@@ -474,9 +474,9 @@ export default function ReferrerPortal() {
                                 <tr
                                   key={claim.id}
                                   onClick={() => setViewingClaim(claim)}
-                                  className="group border-b border-gray-100 dark:border-gray-800 cursor-pointer transition-colors text-sm hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                                  className="group border-b border-border cursor-pointer transition-colors text-sm hover:bg-muted"
                                 >
-                                  <td className="sticky left-0 z-10 px-4 py-2.5 whitespace-nowrap bg-white dark:bg-gray-900 group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50">
+                                  <td className="sticky left-0 z-10 px-4 py-2.5 whitespace-nowrap bg-card group-hover:bg-muted">
                                     <span
                                       className="inline-flex items-center justify-center rounded-md bg-[#1e2d4a] text-white font-semibold uppercase"
                                       style={{ fontSize: '13px', width: '96px', height: '28px', letterSpacing: '0.05em' }}
@@ -485,11 +485,11 @@ export default function ReferrerPortal() {
                                     </span>
                                   </td>
                                   {displayFields.map(fieldId => (
-                                    <td key={fieldId} className={`px-4 py-2.5 text-gray-600 dark:text-gray-400 whitespace-nowrap max-w-[160px] ${fieldId === 'vehicle_damage' ? 'overflow-visible' : 'overflow-hidden text-ellipsis'}`}>
+                                    <td key={fieldId} className={`px-4 py-2.5 text-muted-foreground whitespace-nowrap max-w-[160px] ${fieldId === 'vehicle_damage' ? 'overflow-visible' : 'overflow-hidden text-ellipsis'}`}>
                                       {renderFieldValue(claim, fieldId)}
                                     </td>
                                   ))}
-                                  <td className="sticky right-0 z-10 px-3 py-2.5 whitespace-nowrap bg-white dark:bg-gray-900 group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50">
+                                  <td className="sticky right-0 z-10 px-3 py-2.5 whitespace-nowrap bg-card group-hover:bg-muted">
                                     <div className="flex items-center gap-1.5 justify-end flex-wrap">
                                       <ClaimStatusBadges claim={claim} journeyOnly />
                                     </div>
@@ -508,29 +508,29 @@ export default function ReferrerPortal() {
                         const colSpan = displayFields.length + 2;
                         return (
                           <React.Fragment>
-                            <tr className="bg-gray-50 dark:bg-gray-800/60 cursor-pointer select-none" onClick={() => toggleGroup('__other__')}>
+                            <tr className="bg-muted cursor-pointer select-none" onClick={() => toggleGroup('__other__')}>
                               <td colSpan={colSpan} className="px-4 py-2">
                                 <div className="flex items-center gap-2">
-                                  {isCollapsed ? <ChevronRight className="w-3.5 h-3.5 text-gray-400" /> : <ChevronDown className="w-3.5 h-3.5 text-gray-400" />}
+                                  {isCollapsed ? <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" /> : <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />}
                                   <span className="w-2 h-2 rounded-full bg-gray-400 flex-shrink-0" />
-                                  <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Other</span>
-                                  <span className="text-xs text-gray-400 ml-1">{ungrouped.length}</span>
+                                  <span className="text-sm font-semibold text-foreground">Other</span>
+                                  <span className="text-xs text-muted-foreground ml-1">{ungrouped.length}</span>
                                 </div>
                               </td>
                             </tr>
                             {!isCollapsed && ungrouped.map(claim => (
-                              <tr key={claim.id} onClick={() => setViewingClaim(claim)} className="group border-b border-gray-100 dark:border-gray-800 cursor-pointer transition-colors text-sm hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                                <td className="sticky left-0 z-10 px-4 py-2.5 whitespace-nowrap bg-white dark:bg-gray-900 group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50">
+                              <tr key={claim.id} onClick={() => setViewingClaim(claim)} className="group border-b border-border cursor-pointer transition-colors text-sm hover:bg-muted">
+                                <td className="sticky left-0 z-10 px-4 py-2.5 whitespace-nowrap bg-card group-hover:bg-muted">
                                   <span className="inline-flex items-center justify-center rounded-md bg-[#1e2d4a] text-white font-semibold uppercase" style={{ fontSize: '13px', width: '96px', height: '28px', letterSpacing: '0.05em' }}>
                                     {claim.reg ? formatUKRegistration(claim.reg) : ''}
                                   </span>
                                 </td>
                                 {displayFields.map(fieldId => (
-                                  <td key={fieldId} className={`px-4 py-2.5 text-gray-600 dark:text-gray-400 whitespace-nowrap max-w-[160px] ${fieldId === 'vehicle_damage' ? 'overflow-visible' : 'overflow-hidden text-ellipsis'}`}>
+                                  <td key={fieldId} className={`px-4 py-2.5 text-muted-foreground whitespace-nowrap max-w-[160px] ${fieldId === 'vehicle_damage' ? 'overflow-visible' : 'overflow-hidden text-ellipsis'}`}>
                                     {renderFieldValue(claim, fieldId)}
                                   </td>
                                 ))}
-                                <td className="sticky right-0 z-10 px-3 py-2.5 whitespace-nowrap bg-white dark:bg-gray-900 group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50">
+                                <td className="sticky right-0 z-10 px-3 py-2.5 whitespace-nowrap bg-card group-hover:bg-muted">
                                   <div className="flex items-center gap-1.5 justify-end flex-wrap">
                                     <ClaimStatusBadges claim={claim} journeyOnly />
                                   </div>
@@ -547,7 +547,7 @@ export default function ReferrerPortal() {
             </div>
 
             {/* Footer count */}
-            <div className="px-5 py-2 border-t border-gray-100 dark:border-gray-800 text-xs text-gray-400 flex-shrink-0">
+            <div className="px-5 py-2 border-t border-border text-xs text-muted-foreground flex-shrink-0">
               {filteredClaims.length} of {tabClaims.length} {claimTypeTab === 'private' ? 'repairs' : 'claims'}
             </div>
           </div>

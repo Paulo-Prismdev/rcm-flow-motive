@@ -92,7 +92,7 @@ export default function BackorderForm() {
       <div className="min-h-screen flex items-center justify-center px-4" style={{ background: '#151d44' }}>
         <div className="text-center">
           <img src={companyLogo} alt="RCM Automotive" className="h-16 w-auto object-contain mx-auto mb-6" />
-          <div className="bg-red-500/10 border border-red-400/30 rounded-xl p-6 text-red-300 max-w-md">
+          <div className="bg-danger/10 border border-danger rounded-xl p-6 text-red-300 max-w-md">
             {claimError}
           </div>
         </div>
@@ -243,13 +243,13 @@ export default function BackorderForm() {
             </div>
 
             {error && (
-              <p className="text-red-400 text-sm bg-red-400/10 border border-red-400/20 rounded-lg px-4 py-2">{error}</p>
+              <p className="text-red-400 text-sm bg-danger/10 border border-danger rounded-lg px-4 py-2">{error}</p>
             )}
 
             <Button
               type="submit"
               disabled={submitting || !submitterName.trim()}
-              className="w-full h-12 bg-[#D4AF37] hover:bg-[#C19B2B] text-black font-semibold text-base"
+              className="w-full h-12 bg-[#D4AF37] hover:bg-[#C19B2B] text-foreground font-semibold text-base"
             >
               {submitting ? 'Submitting...' : 'Submit Backorder Notification'}
             </Button>

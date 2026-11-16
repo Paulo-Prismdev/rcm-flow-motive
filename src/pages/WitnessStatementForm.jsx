@@ -109,21 +109,21 @@ export default function WitnessStatementForm() {
   };
 
   const shell = (children) => (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-muted">
       <div className="bg-[#151d44] px-4 py-4 flex items-center justify-center">
         <img src={LOGO} alt="RCM Automotive" className="h-14 w-auto object-contain" />
       </div>
       {children}
     </div>
   );
-  const card = 'bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-4 space-y-4';
-  const input = 'w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#151d44]/30 text-base';
-  const label = 'block text-sm font-medium text-gray-700 mb-1.5';
+  const card = 'bg-card rounded-2xl shadow-card border border-border p-5 mb-4 space-y-4';
+  const input = 'w-full px-4 py-3 rounded-xl border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-[#151d44]/30 text-base';
+  const label = 'block text-sm font-medium text-foreground mb-1.5';
   const Choice = ({ field, options }) => (
     <div className="flex flex-wrap gap-2">
       {options.map((o) => (
         <button key={o} type="button" onClick={() => set(field, o)} aria-pressed={a[field] === o}
-          className={`px-3 py-2 rounded-xl border text-sm ${a[field] === o ? 'bg-[#151d44] border-[#151d44] text-white' : 'bg-white border-gray-200 text-gray-700'}`}>
+          className={`px-3 py-2 rounded-xl border text-sm ${a[field] === o ? 'bg-[#151d44] border-[#151d44] text-white' : 'bg-card border-border text-foreground'}`}>
           {o}
         </button>
       ))}
@@ -134,10 +134,10 @@ export default function WitnessStatementForm() {
 
   if (linkProblem) {
     return shell(
-      <div className="max-w-md mx-auto p-6 mt-10 bg-white rounded-2xl shadow text-center">
-        <AlertTriangle className="w-10 h-10 text-red-500 mx-auto mb-3" />
-        <h2 className="text-xl font-bold text-gray-800 mb-2">{linkProblem === 'expired' ? 'Link expired' : 'Link not valid'}</h2>
-        <p className="text-sm text-gray-500">
+      <div className="max-w-md mx-auto p-6 mt-10 bg-card rounded-2xl shadow text-center">
+        <AlertTriangle className="w-10 h-10 text-danger-fg mx-auto mb-3" />
+        <h2 className="text-xl font-bold text-foreground mb-2">{linkProblem === 'expired' ? 'Link expired' : 'Link not valid'}</h2>
+        <p className="text-sm text-muted-foreground">
           {linkProblem === 'expired' ? 'This link has expired.' : 'This link is not valid.'} Please contact RCM Automotive on info@rcmautomotive.co.uk for a new one.
         </p>
       </div>,
@@ -146,26 +146,26 @@ export default function WitnessStatementForm() {
 
   if (submitted) {
     return shell(
-      <div className="max-w-md mx-auto p-6 mt-10 bg-white rounded-2xl shadow text-center">
-        <FileCheck2 className="w-10 h-10 text-green-600 mx-auto mb-3" />
-        <h2 className="text-2xl font-bold text-gray-800 mb-2">Thank you</h2>
-        <p className="text-gray-500 mb-2">Your witness statement has been signed and sent to RCM Automotive.</p>
-        <p className="text-xs text-gray-400">You can close this page now.</p>
+      <div className="max-w-md mx-auto p-6 mt-10 bg-card rounded-2xl shadow text-center">
+        <FileCheck2 className="w-10 h-10 text-success-fg mx-auto mb-3" />
+        <h2 className="text-2xl font-bold text-foreground mb-2">Thank you</h2>
+        <p className="text-muted-foreground mb-2">Your witness statement has been signed and sent to RCM Automotive.</p>
+        <p className="text-xs text-muted-foreground">You can close this page now.</p>
       </div>,
     );
   }
 
   return shell(
     <div className="max-w-xl mx-auto px-4 py-6">
-      <h1 className="text-2xl font-bold text-gray-800">Witness statement</h1>
-      <p className="text-sm text-gray-500 mt-1 mb-4">
+      <h1 className="text-2xl font-bold text-foreground">Witness statement</h1>
+      <p className="text-sm text-muted-foreground mt-1 mb-4">
         Thank you for helping. Please tell us what you saw in your own words and sign at the end. It takes about five minutes.
         Your statement may be shared with the insurers dealing with the claim.
       </p>
 
       {info && (info.incident_date || info.incident_location || info.vehicle_reg) && (
-        <div className="mb-4 p-4 bg-white rounded-2xl border border-gray-100 shadow-sm text-sm text-gray-700">
-          <p className="font-semibold text-gray-800 mb-1">The accident we're asking about</p>
+        <div className="mb-4 p-4 bg-card rounded-2xl border border-border shadow-card text-sm text-foreground">
+          <p className="font-semibold text-foreground mb-1">The accident we're asking about</p>
           {info.incident_date && <p>Date: {ukDate(info.incident_date)}{info.incident_time ? ` at ${info.incident_time}` : ''}</p>}
           {info.incident_location && <p>Place: {info.incident_location}</p>}
           {info.vehicle_reg && <p>Our customer's vehicle: {info.vehicle_reg}{info.vehicle ? ` (${info.vehicle})` : ''}</p>}
@@ -174,7 +174,7 @@ export default function WitnessStatementForm() {
       )}
 
       <div className={card}>
-        <h2 className="font-semibold text-gray-800">About you</h2>
+        <h2 className="font-semibold text-foreground">About you</h2>
         <div><label className={label} htmlFor="w-name">Full name *</label><input id="w-name" className={input} value={a.full_name} onChange={(e) => set('full_name', e.target.value)} autoComplete="name" /></div>
         <div><label className={label} htmlFor="w-addr">Address *</label><input id="w-addr" className={input} value={a.address} onChange={(e) => set('address', e.target.value)} autoComplete="street-address" /></div>
         <div className="grid grid-cols-2 gap-3 m-keep-2">
@@ -195,7 +195,7 @@ export default function WitnessStatementForm() {
       </div>
 
       <div className={card}>
-        <h2 className="font-semibold text-gray-800">The accident</h2>
+        <h2 className="font-semibold text-foreground">The accident</h2>
         <div className="grid grid-cols-2 gap-3 m-keep-2">
           <div><label className={label} htmlFor="w-date">Date</label><input id="w-date" type="date" className={input} value={a.incident_date} onChange={(e) => set('incident_date', e.target.value)} /></div>
           <div><label className={label} htmlFor="w-time">Time (roughly)</label><input id="w-time" type="time" className={input} value={a.incident_time} onChange={(e) => set('incident_time', e.target.value)} /></div>
@@ -206,7 +206,7 @@ export default function WitnessStatementForm() {
       </div>
 
       <div className={card}>
-        <h2 className="font-semibold text-gray-800">What you saw</h2>
+        <h2 className="font-semibold text-foreground">What you saw</h2>
         <div>
           <label className={label} htmlFor="w-account">In your own words, describe what you saw happen *</label>
           <textarea id="w-account" rows={7} className={input} value={a.account} onChange={(e) => set('account', e.target.value)}
@@ -224,30 +224,30 @@ export default function WitnessStatementForm() {
       </div>
 
       <div className={card}>
-        <h2 className="font-semibold text-gray-800">Statement of truth</h2>
-        <label className="flex items-start gap-3 text-sm text-gray-700">
+        <h2 className="font-semibold text-foreground">Statement of truth</h2>
+        <label className="flex items-start gap-3 text-sm text-foreground">
           <input type="checkbox" className="mt-1 w-5 h-5" checked={truth} onChange={(e) => setTruth(e.target.checked)} />
           <span>I believe that the facts stated in this witness statement are true. I understand that proceedings for contempt of court may be brought against anyone who makes, or causes to be made, a false statement in a document verified by a statement of truth without an honest belief in its truth.</span>
         </label>
         <div>
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-gray-700 flex items-center gap-2"><PenLine className="w-4 h-4" /> Sign below *</span>
-            <button type="button" onClick={clearSig} className="text-xs text-gray-500 hover:text-red-500 flex items-center gap-1"><Trash2 className="w-3.5 h-3.5" /> Clear</button>
+            <span className="text-sm font-medium text-foreground flex items-center gap-2"><PenLine className="w-4 h-4" /> Sign below *</span>
+            <button type="button" onClick={clearSig} className="text-xs text-muted-foreground hover:text-danger-fg flex items-center gap-1"><Trash2 className="w-3.5 h-3.5" /> Clear</button>
           </div>
-          <div className="border-2 border-dashed border-gray-300 rounded-xl overflow-hidden bg-white" style={{ touchAction: 'none' }}>
+          <div className="border-2 border-dashed border-border rounded-xl overflow-hidden bg-card" style={{ touchAction: 'none' }}>
             <canvas ref={canvasRef} width={560} height={150} className="w-full block cursor-crosshair" aria-label="Signature box"
               onMouseDown={start} onMouseMove={move} onMouseUp={end} onMouseLeave={end}
               onTouchStart={start} onTouchMove={move} onTouchEnd={end} />
           </div>
-          <p className={`text-xs mt-1 text-center ${hasSig ? 'text-green-600' : 'text-gray-500'}`}>
+          <p className={`text-xs mt-1 text-center ${hasSig ? 'text-success-fg' : 'text-muted-foreground'}`}>
             {hasSig ? <span className="inline-flex items-center gap-1"><Check className="w-3.5 h-3.5" /> Signature captured</span> : 'Draw your signature with your finger or mouse'}
           </p>
         </div>
       </div>
 
-      {error && <div role="alert" className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">{error}</div>}
+      {error && <div role="alert" className="mb-4 p-3 bg-danger-bg border border-danger/30 rounded-xl text-sm text-danger-fg">{error}</div>}
 
-      <Button onClick={submit} disabled={busy} className="w-full h-12 rounded-xl bg-green-600 hover:bg-green-700 text-white flex items-center justify-center gap-2">
+      <Button onClick={submit} disabled={busy} className="w-full h-12 rounded-xl bg-success hover:bg-success text-on-solid flex items-center justify-center gap-2">
         {busy ? <><Loader className="w-5 h-5 animate-spin" /> Sending…</> : <><FileCheck2 className="w-5 h-5" /> Sign and send my statement</>}
       </Button>
     </div>,

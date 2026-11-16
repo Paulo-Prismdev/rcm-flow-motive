@@ -125,33 +125,33 @@ export default function NewJobsBanner({ bodyshopId }) {
   return (
     <>
       {/* Prominent Banner */}
-      <div className="neomorph border-2 border-amber-500 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 overflow-hidden" style={{ animation: 'pulse-border 2s infinite' }}>
+      <div className="neomorph border-2 border-warning bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 overflow-hidden" style={{ animation: 'pulse-border 2s infinite' }}>
         <div role="button" tabIndex={0} onKeyDown={activateOnKey} 
           className="p-4 cursor-pointer"
           onClick={() => setExpanded(!expanded)}
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-amber-500 flex items-center justify-center animate-bounce">
+              <div className="w-12 h-12 rounded-full bg-warning flex items-center justify-center animate-bounce">
                 <AlertTriangle className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h3 className="font-bold text-lg text-amber-800 dark:text-amber-200">
+                <h3 className="font-bold text-lg text-warning-fg">
                   {pendingJobs.length} New Job{pendingJobs.length !== 1 ? 's' : ''} Awaiting Acceptance
                 </h3>
-                <p className="text-sm text-amber-600 dark:text-amber-300">
+                <p className="text-sm text-warning-fg">
                   Please review and accept to confirm you can handle these repairs
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-2xl font-bold text-amber-600 bg-white/50 px-3 py-1 rounded-full">
+              <span className="text-2xl font-bold text-warning-fg bg-white/50 px-3 py-1 rounded-full">
                 {pendingJobs.length}
               </span>
               {expanded ? (
-                <ChevronUp className="w-5 h-5 text-amber-600" />
+                <ChevronUp className="w-5 h-5 text-warning-fg" />
               ) : (
-                <ChevronDown className="w-5 h-5 text-amber-600" />
+                <ChevronDown className="w-5 h-5 text-warning-fg" />
               )}
             </div>
           </div>
@@ -159,7 +159,7 @@ export default function NewJobsBanner({ bodyshopId }) {
 
         {/* Expanded Job List */}
         {expanded && (
-          <div className="border-t border-amber-300 dark:border-amber-700 p-4 space-y-3 max-h-[300px] overflow-y-auto">
+          <div className="border-t border-warning/30 p-4 space-y-3 max-h-[300px] overflow-y-auto">
             {pendingJobs.map(job => (
               <div 
                 key={job.id} 
@@ -198,7 +198,7 @@ export default function NewJobsBanner({ bodyshopId }) {
                 <div className="flex gap-2">
                   <Button
                     onClick={() => setSelectedClaim(job)}
-                    className="bg-green-600 hover:bg-green-700 text-white font-bold px-6 py-2 gap-2"
+                    className="bg-success hover:bg-success text-on-solid font-bold px-6 py-2 gap-2"
                   >
                     <CheckCircle className="w-4 h-4" />
                     Accept Job
@@ -240,13 +240,13 @@ export default function NewJobsBanner({ bodyshopId }) {
                       wizardStep === step 
                         ? 'bg-primary text-primary-foreground' 
                         : wizardStep > step 
-                          ? 'bg-green-500 text-primary-foreground'
-                          : 'bg-gray-200 dark:bg-gray-700 text-gray-500'
+                          ? 'bg-success text-primary-foreground'
+                          : 'bg-accent text-muted-foreground'
                     }`}>
                       {wizardStep > step ? <CheckCircle className="w-4 h-4" /> : step}
                     </div>
                     {step < 3 && (
-                      <div className={`w-8 h-1 ${wizardStep > step ? 'bg-green-500' : 'bg-gray-200 dark:bg-gray-700'}`} />
+                      <div className={`w-8 h-1 ${wizardStep > step ? 'bg-success' : 'bg-accent'}`} />
                     )}
                   </div>
                 ))}
@@ -276,12 +276,12 @@ export default function NewJobsBanner({ bodyshopId }) {
                     </div>
 
                     {/* Terms of Repair */}
-                    <div className="p-4 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-300 dark:border-amber-700">
-                      <h5 className="font-bold text-sm mb-2 text-amber-800 dark:text-amber-200">Terms of Repair</h5>
-                      <p className="text-sm text-amber-700 dark:text-amber-300 mb-3">
+                    <div className="p-4 rounded-lg bg-warning-bg border border-warning/30">
+                      <h5 className="font-bold text-sm mb-2 text-warning-fg">Terms of Repair</h5>
+                      <p className="text-sm text-warning-fg mb-3">
                         By accepting this repair, you agree to the following:
                       </p>
-                      <ul className="text-sm space-y-2 text-amber-700 dark:text-amber-300">
+                      <ul className="text-sm space-y-2 text-warning-fg">
                         <li className="flex items-start gap-2">
                           <span className="font-bold">•</span>
                           <span>
@@ -309,7 +309,7 @@ export default function NewJobsBanner({ bodyshopId }) {
                       <Button
                         onClick={() => handleAccept(selectedClaim)}
                         disabled={isAccepting}
-                        className="w-full bg-green-600 hover:bg-green-700 text-white gap-2"
+                        className="w-full bg-success hover:bg-success text-on-solid gap-2"
                       >
                         {isAccepting ? (
                           <>
@@ -326,7 +326,7 @@ export default function NewJobsBanner({ bodyshopId }) {
                       <Button
                         variant="outline"
                         onClick={() => setShowRejectForm(true)}
-                        className="w-full text-red-600 border-red-300 hover:bg-red-50 gap-2"
+                        className="w-full text-danger-fg border-danger/30 hover:bg-danger-bg gap-2"
                       >
                         <XCircle className="w-4 h-4" />
                         Reject Job
@@ -341,7 +341,7 @@ export default function NewJobsBanner({ bodyshopId }) {
                 <>
                   <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
-                      <XCircle className="w-5 h-5 text-red-600" />
+                      <XCircle className="w-5 h-5 text-danger-fg" />
                       Reject Job
                     </DialogTitle>
                   </DialogHeader>
@@ -351,9 +351,9 @@ export default function NewJobsBanner({ bodyshopId }) {
                       <h4 className="font-bold text-lg mb-2">{formatUKRegistration(selectedClaim.reg)}</h4>
                     </div>
 
-                    <div className="p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-300 dark:border-red-700">
-                      <h5 className="font-bold text-sm mb-2 text-red-800 dark:text-red-200">Rejection Reason</h5>
-                      <p className="text-sm text-red-700 dark:text-red-300 mb-3">
+                    <div className="p-4 rounded-lg bg-danger-bg border border-danger/30">
+                      <h5 className="font-bold text-sm mb-2 text-danger-fg">Rejection Reason</h5>
+                      <p className="text-sm text-danger-fg mb-3">
                         Please provide a reason for rejecting this job. This will be sent to RCM Automotive.
                       </p>
                       <Textarea
@@ -375,7 +375,7 @@ export default function NewJobsBanner({ bodyshopId }) {
                       <Button
                         onClick={() => handleReject(selectedClaim)}
                         disabled={isRejecting || !rejectReason.trim()}
-                        className="flex-1 bg-red-600 hover:bg-red-700 text-white gap-2"
+                        className="flex-1 bg-danger hover:bg-danger text-on-solid gap-2"
                       >
                         {isRejecting ? (
                           <>
@@ -405,10 +405,10 @@ export default function NewJobsBanner({ bodyshopId }) {
                   </DialogHeader>
 
                   <div className="space-y-4">
-                    <div className="p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-300 dark:border-green-700 text-center">
-                      <CheckCircle className="w-10 h-10 text-green-600 mx-auto mb-2" />
-                      <p className="font-medium text-green-800 dark:text-green-200">Job Accepted!</p>
-                      <p className="text-sm text-green-600 dark:text-green-300">{formatUKRegistration(selectedClaim.reg)}</p>
+                    <div className="p-4 rounded-lg bg-success-bg border border-success/30 text-center">
+                      <CheckCircle className="w-10 h-10 text-success-fg mx-auto mb-2" />
+                      <p className="font-medium text-success-fg">Job Accepted!</p>
+                      <p className="text-sm text-success-fg">{formatUKRegistration(selectedClaim.reg)}</p>
                     </div>
 
                     {selectedClaim.instruction_pdf_url ? (
@@ -429,8 +429,8 @@ export default function NewJobsBanner({ bodyshopId }) {
                         </Button>
                       </div>
                     ) : (
-                      <div className="p-4 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-300">
-                        <p className="text-sm text-amber-700 dark:text-amber-300 mb-3">
+                      <div className="p-4 rounded-lg bg-warning-bg border border-warning/30">
+                        <p className="text-sm text-warning-fg mb-3">
                           No instruction document is available for this job yet. You can proceed without downloading.
                         </p>
                         <Button
@@ -450,16 +450,16 @@ export default function NewJobsBanner({ bodyshopId }) {
                 <>
                   <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
-                      <CheckCircle className="w-5 h-5 text-green-600" />
+                      <CheckCircle className="w-5 h-5 text-success-fg" />
                       Step 3: Complete
                     </DialogTitle>
                   </DialogHeader>
 
                   <div className="space-y-4">
-                    <div className="p-6 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-300 dark:border-green-700 text-center">
-                      <CheckCircle className="w-16 h-16 text-green-600 mx-auto mb-3" />
-                      <h4 className="font-bold text-xl mb-2 text-green-800 dark:text-green-200">All Done!</h4>
-                      <p className="text-sm text-green-600 dark:text-green-300">
+                    <div className="p-6 rounded-lg bg-success-bg border border-success/30 text-center">
+                      <CheckCircle className="w-16 h-16 text-success-fg mx-auto mb-3" />
+                      <h4 className="font-bold text-xl mb-2 text-success-fg">All Done!</h4>
+                      <p className="text-sm text-success-fg">
                         You have successfully accepted <strong>{formatUKRegistration(selectedClaim.reg)}</strong>
                       </p>
                     </div>

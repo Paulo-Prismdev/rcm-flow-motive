@@ -190,11 +190,11 @@ export default function PublicPartsRequest() {
                     onChange={(e) => handleChange('part_type', e.target.value)}
                     className="w-full px-3 py-2 rounded-lg bg-white/10 border border-white/20 text-white"
                   >
-                    <option value="" className="bg-slate-800">Any</option>
-                    <option value="OEM" className="bg-slate-800">OEM (Original)</option>
-                    <option value="Aftermarket" className="bg-slate-800">Aftermarket</option>
-                    <option value="Recycled" className="bg-slate-800">Recycled / Green Parts</option>
-                    <option value="Refurbished" className="bg-slate-800">Refurbished</option>
+                    <option value="" className="bg-foreground">Any</option>
+                    <option value="OEM" className="bg-foreground">OEM (Original)</option>
+                    <option value="Aftermarket" className="bg-foreground">Aftermarket</option>
+                    <option value="Recycled" className="bg-foreground">Recycled / Green Parts</option>
+                    <option value="Refurbished" className="bg-foreground">Refurbished</option>
                   </select>
                 </div>
                 <div className="md:col-span-2">
@@ -219,13 +219,13 @@ export default function PublicPartsRequest() {
             </div>
 
             {error && (
-              <p className="text-red-400 text-sm bg-red-400/10 border border-red-400/20 rounded-lg px-4 py-2">{error}</p>
+              <p className="text-red-400 text-sm bg-danger/10 border border-danger rounded-lg px-4 py-2">{error}</p>
             )}
 
             <Button
               type="submit"
               disabled={submitting || !formData.vehicle_ref || !formData.manufacturer || !formData.part_description || !formData.contact_name || !formData.contact_number}
-              className="w-full h-12 bg-[#D4AF37] hover:bg-[#C19B2B] text-black font-semibold text-base"
+              className="w-full h-12 bg-[#D4AF37] hover:bg-[#C19B2B] text-foreground font-semibold text-base"
             >
               {submitting ? 'Submitting...' : 'Submit Parts Request'}
             </Button>

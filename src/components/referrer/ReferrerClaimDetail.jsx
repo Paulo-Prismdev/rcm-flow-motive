@@ -70,13 +70,13 @@ function DetailRow({ label, value, isCurrency = false, isDate = false, isStatus 
   if (isEmpty(value)) displayValue = '-';
 
   return (
-    <div className={`py-3 px-4 rounded-lg transition-colors ${missing ? 'bg-amber-50 dark:bg-amber-900/15 border border-amber-200 dark:border-amber-700/50' : 'hover:bg-surface-hover'}`}>
+    <div className={`py-3 px-4 rounded-lg transition-colors ${missing ? 'bg-warning-bg border border-warning/30' : 'hover:bg-surface-hover'}`}>
       <div className="flex items-center gap-1.5 mb-1">
         <span className="text-xs font-semibold text-foreground-muted">{label}</span>
-        {missing && <span className="inline-block w-1.5 h-1.5 rounded-full bg-amber-400 flex-shrink-0" />}
+        {missing && <span className="inline-block w-1.5 h-1.5 rounded-full bg-warning flex-shrink-0" />}
       </div>
       <div className="text-sm font-medium">
-        {isStatus ? <StatusBadge status={displayValue} /> : <span className={missing ? 'text-amber-600 dark:text-amber-400 italic text-xs' : ''}>{missing ? 'Not filled in' : displayValue}</span>}
+        {isStatus ? <StatusBadge status={displayValue} /> : <span className={missing ? 'text-warning-fg italic text-xs' : ''}>{missing ? 'Not filled in' : displayValue}</span>}
       </div>
     </div>
   );
@@ -111,14 +111,14 @@ function BackorderedPartsSectionReadOnly({ parts = [], isLoading }) {
       ) : (
         <div className="space-y-2">
           {parts.map(part => (
-            <div key={part.id} className={`p-3 rounded-xl border ${part.received_by_repairer ? 'bg-green-50 border-green-200 dark:bg-green-900/10 dark:border-green-800' : 'bg-amber-50 border-amber-200 dark:bg-amber-900/10 dark:border-amber-800'}`}>
+            <div key={part.id} className={`p-3 rounded-xl border ${part.received_by_repairer ? 'bg-success-bg border-success/30' : 'bg-warning-bg border-warning/30'}`}>
               <p className={`font-medium text-sm ${part.received_by_repairer ? 'line-through text-muted-foreground' : ''}`}>{part.part_description}</p>
               <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1">
                 {part.part_number && <span className="text-xs text-muted-foreground">Part #: {part.part_number}</span>}
                 {part.supplier_name && <span className="text-xs text-muted-foreground">Supplier: {part.supplier_name}</span>}
                 {part.expected_arrival_date && <span className="text-xs text-muted-foreground">Expected: {part.expected_arrival_date}</span>}
               </div>
-              {part.received_by_repairer && <p className="text-xs text-green-600 mt-1 font-medium">✓ Received</p>}
+              {part.received_by_repairer && <p className="text-xs text-success-fg mt-1 font-medium">✓ Received</p>}
             </div>
           ))}
         </div>
@@ -201,14 +201,14 @@ export default function ReferrerClaimDetail({ claim, onClose, initialSection }) 
               <DetailRow label="Use of Vehicle" value={claim.vehicle_use} />
               <DetailRow label="Courtesy Car Required" value={claim.courtesy_car_required === true ? 'Yes' : (claim.courtesy_car_required || 'No')} />
             </div>
-            <div className={`mt-2 py-3 px-4 rounded-lg ${m('circumstances') ? 'bg-amber-50 dark:bg-amber-900/15 border border-amber-200 dark:border-amber-700/50' : 'glass-inset'}`}>
+            <div className={`mt-2 py-3 px-4 rounded-lg ${m('circumstances') ? 'bg-warning-bg border border-warning/30' : 'glass-inset'}`}>
               <div className="text-xs font-semibold text-foreground-muted mb-2">Incident Location</div>
               <div className="text-sm font-medium mb-3">{claim.incident_location || '-'}</div>
               <div className="flex items-center gap-1.5 mb-2">
                 <span className="text-xs font-semibold text-foreground-muted">Circumstances</span>
-                {m('circumstances') && <span className="inline-block w-1.5 h-1.5 rounded-full bg-amber-400" />}
+                {m('circumstances') && <span className="inline-block w-1.5 h-1.5 rounded-full bg-warning" />}
               </div>
-              <div className={`text-sm leading-relaxed whitespace-pre-wrap ${m('circumstances') ? 'text-amber-600 dark:text-amber-400 italic' : ''}`}>{claim.circumstances || 'Not filled in'}</div>
+              <div className={`text-sm leading-relaxed whitespace-pre-wrap ${m('circumstances') ? 'text-warning-fg italic' : ''}`}>{claim.circumstances || 'Not filled in'}</div>
             </div>
           </div>
         );
@@ -236,7 +236,7 @@ export default function ReferrerClaimDetail({ claim, onClose, initialSection }) 
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-xs font-semibold text-foreground-muted">Client Ref</span>
                   {!editingClientRef && (
-                    <button onClick={() => { setClientRefValue(claim.client_ref || ''); setEditingClientRef(true); }} className="p-1 rounded text-gray-400 hover:text-primary transition-colors">
+                    <button onClick={() => { setClientRefValue(claim.client_ref || ''); setEditingClientRef(true); }} className="p-1 rounded text-muted-foreground hover:text-primary transition-colors">
                       <Edit className="w-3 h-3" />
                     </button>
                   )}
@@ -250,10 +250,10 @@ export default function ReferrerClaimDetail({ claim, onClose, initialSection }) 
                       placeholder="e.g. fleet ref, account number..."
                       autoFocus
                     />
-                    <button onClick={() => saveClientRefMutation.mutate(clientRefValue)} disabled={saveClientRefMutation.isPending} className="p-1.5 rounded bg-green-600 text-white hover:bg-green-700 transition-colors">
+                    <button onClick={() => saveClientRefMutation.mutate(clientRefValue)} disabled={saveClientRefMutation.isPending} className="p-1.5 rounded bg-success text-on-solid hover:bg-success transition-colors">
                       <Check className="w-3.5 h-3.5" />
                     </button>
-                    <button onClick={() => setEditingClientRef(false)} className="p-1.5 rounded bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 transition-colors">
+                    <button onClick={() => setEditingClientRef(false)} className="p-1.5 rounded bg-muted text-muted-foreground hover:bg-accent transition-colors">
                       <X className="w-3.5 h-3.5" />
                     </button>
                   </div>
@@ -262,10 +262,10 @@ export default function ReferrerClaimDetail({ claim, onClose, initialSection }) 
                 )}
               </div>
             </div>
-            <div className={`mt-2 py-3 px-4 rounded-lg ${(m('client_address_line_1') || m('client_postcode')) ? 'bg-amber-50 dark:bg-amber-900/15 border border-amber-200 dark:border-amber-700/50' : 'glass-inset'}`}>
+            <div className={`mt-2 py-3 px-4 rounded-lg ${(m('client_address_line_1') || m('client_postcode')) ? 'bg-warning-bg border border-warning/30' : 'glass-inset'}`}>
               <div className="flex items-center gap-1.5 mb-2">
                 <span className="text-xs font-semibold text-foreground-muted">Address</span>
-                {(m('client_address_line_1') || m('client_postcode')) && <span className="inline-block w-1.5 h-1.5 rounded-full bg-amber-400" />}
+                {(m('client_address_line_1') || m('client_postcode')) && <span className="inline-block w-1.5 h-1.5 rounded-full bg-warning" />}
               </div>
               <div className="text-sm leading-relaxed space-y-0.5">
                 {claim.client_address_line_1 && <div>{claim.client_address_line_1}</div>}
@@ -273,7 +273,7 @@ export default function ReferrerClaimDetail({ claim, onClose, initialSection }) 
                 {claim.client_town && <div>{claim.client_town}</div>}
                 {claim.client_county && <div>{claim.client_county}</div>}
                 {claim.client_postcode && <div>{claim.client_postcode}</div>}
-                {!claim.client_address_line_1 && !claim.client_town && !claim.client_postcode && <span className="text-amber-600 dark:text-amber-400 italic">Not filled in</span>}
+                {!claim.client_address_line_1 && !claim.client_town && !claim.client_postcode && <span className="text-warning-fg italic">Not filled in</span>}
               </div>
             </div>
           </div>
@@ -284,7 +284,7 @@ export default function ReferrerClaimDetail({ claim, onClose, initialSection }) 
           <div className="neomorph-flat p-4 md:p-6">
             <div className="flex items-center gap-3 mb-4"><Car className="w-5 h-5 text-gold" /><h3 className="font-bold">Vehicle Details</h3></div>
             <div className="mb-6">
-              <h4 className="text-sm font-semibold text-gray-600 mb-3">Basic Information</h4>
+              <h4 className="text-sm font-semibold text-muted-foreground mb-3">Basic Information</h4>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
                 <DetailRow label="Make/Model" value={claim.make_model} missing={m('make_model')} />
                 <DetailRow label="Colour" value={claim.vehicle_colour} missing={m('vehicle_colour')} />
@@ -294,7 +294,7 @@ export default function ReferrerClaimDetail({ claim, onClose, initialSection }) 
               </div>
             </div>
             <div>
-              <h4 className="text-sm font-semibold text-gray-600 mb-3">MOT & Tax Status</h4>
+              <h4 className="text-sm font-semibold text-muted-foreground mb-3">MOT & Tax Status</h4>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
                 <DetailRow label="MOT Status" value={claim.vehicle_mot_status} />
                 <DetailRow label="MOT Expiry Date" value={claim.vehicle_mot_expiry_date} isDate />
@@ -313,14 +313,14 @@ export default function ReferrerClaimDetail({ claim, onClose, initialSection }) 
               <DetailRow label="Courtesy Car Needed" value={claim.courtesy_car_required === true ? 'Yes' : (claim.courtesy_car_required || 'No')} />
               <DetailRow label="Undriveable / Drivable" value={claim.unroadworthy ? 'Undriveable' : 'Drivable'} />
             </div>
-            <div className={`mt-2 py-3 px-4 rounded-lg ${m('vehicle_damage') ? 'bg-amber-50 dark:bg-amber-900/15 border border-amber-200 dark:border-amber-700/50' : 'glass-inset'}`}>
+            <div className={`mt-2 py-3 px-4 rounded-lg ${m('vehicle_damage') ? 'bg-warning-bg border border-warning/30' : 'glass-inset'}`}>
               <div className="text-xs font-semibold text-foreground-muted mb-2">Vehicle Location</div>
               <div className="text-sm mb-3">{claim.vehicle_location || '-'}</div>
               <div className="flex items-center gap-1.5 mb-2">
                 <span className="text-xs font-semibold text-foreground-muted">Damage Description</span>
-                {m('vehicle_damage') && <span className="inline-block w-1.5 h-1.5 rounded-full bg-amber-400" />}
+                {m('vehicle_damage') && <span className="inline-block w-1.5 h-1.5 rounded-full bg-warning" />}
               </div>
-              <div className={`text-sm leading-relaxed whitespace-pre-wrap ${m('vehicle_damage') ? 'text-amber-600 dark:text-amber-400 italic' : ''}`}>{claim.vehicle_damage || 'Not filled in'}</div>
+              <div className={`text-sm leading-relaxed whitespace-pre-wrap ${m('vehicle_damage') ? 'text-warning-fg italic' : ''}`}>{claim.vehicle_damage || 'Not filled in'}</div>
             </div>
           </div>
         );
@@ -482,11 +482,11 @@ export default function ReferrerClaimDetail({ claim, onClose, initialSection }) 
           <div className="flex items-center gap-2 max-md:w-full max-md:flex-wrap">
             <Button 
               onClick={() => setIsClaimUpdatesOpen(true)} 
-              className="h-9 px-4 text-sm font-medium rounded-lg bg-green-600 hover:bg-green-700 text-white relative"
+              className="h-9 px-4 text-sm font-medium rounded-lg bg-success hover:bg-success text-on-solid relative"
             >
               Updates & Status
               {claimUpdates.length > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-white text-green-700 text-[10px] font-bold flex items-center justify-center leading-none shadow">
+                <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-card text-success-fg text-xs font-bold flex items-center justify-center leading-none shadow">
                   {claimUpdates.length}
                 </span>
               )}
@@ -494,7 +494,7 @@ export default function ReferrerClaimDetail({ claim, onClose, initialSection }) 
             <Button onClick={() => setSelectedSection('images')} variant="outline" className="h-9 px-3 text-sm font-medium rounded-lg gap-1.5 relative">
               <Image className="w-4 h-4" /> Images
               {images.length > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-blue-500 text-white text-[10px] font-bold flex items-center justify-center leading-none shadow">
+                <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-info text-on-solid text-xs font-bold flex items-center justify-center leading-none shadow">
                   {images.length}
                 </span>
               )}
@@ -502,7 +502,7 @@ export default function ReferrerClaimDetail({ claim, onClose, initialSection }) 
             <Button onClick={() => setSelectedSection('documents')} variant="outline" className="h-9 px-3 text-sm font-medium rounded-lg gap-1.5 relative">
               <FileText className="w-4 h-4" /> Docs
               {documents.length > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-blue-500 text-white text-[10px] font-bold flex items-center justify-center leading-none shadow">
+                <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-info text-on-solid text-xs font-bold flex items-center justify-center leading-none shadow">
                   {documents.length}
                 </span>
               )}
@@ -525,7 +525,7 @@ export default function ReferrerClaimDetail({ claim, onClose, initialSection }) 
                     <section.icon className="w-4 h-4 mr-2 flex-shrink-0" />
                     <span className="flex-1">{section.label}</span>
                     {incompleteSections.has(section.id) && (
-                      <span className="ml-2 w-2 h-2 rounded-full bg-amber-400 flex-shrink-0" />
+                      <span className="ml-2 w-2 h-2 rounded-full bg-warning flex-shrink-0" />
                     )}
                   </DropdownMenuItem>
                 ))}

@@ -81,7 +81,7 @@ export default function RepairerPortal() {
     return (
       <div className="h-full flex items-center justify-center">
         <div className="neomorph p-8 text-center max-w-md">
-          <AlertCircle className="w-16 h-16 mx-auto text-amber-500 mb-4" />
+          <AlertCircle className="w-16 h-16 mx-auto text-warning-fg mb-4" />
           <h2 className="text-xl font-bold mb-2">Account Not Linked</h2>
           <p className="text-foreground-muted">
             Your account is not linked to a bodyshop. Please contact RCM Automotive to set up your repairer portal access.
@@ -172,7 +172,7 @@ export default function RepairerPortal() {
                 cursor: 'pointer',
               }}
             >
-              <tab.icon className={`w-4 h-4 ${isActive ? 'text-black' : ''}`} />
+              <tab.icon className={`w-4 h-4 ${isActive ? 'text-foreground' : ''}`} />
               <span className={isActive ? 'text-black' : ''}>{tab.label}</span>
             </button>
           );

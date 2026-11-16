@@ -219,20 +219,20 @@ export default function DeclarationOfNeedForm() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <Loader className="w-8 h-8 text-amber-500 animate-spin" />
+      <div className="min-h-screen bg-muted flex items-center justify-center p-4">
+        <Loader className="w-8 h-8 text-warning-fg animate-spin" />
       </div>
     );
   }
   if (!linkValid) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-lg p-8 max-w-md w-full text-center">
-          <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
-            <AlertTriangle className="w-8 h-8 text-red-600" />
+      <div className="min-h-screen bg-muted flex items-center justify-center p-4">
+        <div className="bg-card rounded-2xl shadow-lg p-8 max-w-md w-full text-center">
+          <div className="w-16 h-16 rounded-full bg-danger-bg flex items-center justify-center mx-auto mb-4">
+            <AlertTriangle className="w-8 h-8 text-danger-fg" />
           </div>
-          <h2 className="text-xl font-bold text-gray-800 mb-2">{linkExpired ? 'Link expired' : 'Invalid link'}</h2>
-          <p className="text-gray-500 text-sm">
+          <h2 className="text-xl font-bold text-foreground mb-2">{linkExpired ? 'Link expired' : 'Invalid link'}</h2>
+          <p className="text-muted-foreground text-sm">
             {linkExpired
               ? 'This link has expired. Please contact RCM Automotive for a new one.'
               : 'This link is not valid. Please contact RCM Automotive for a new one.'}
@@ -243,51 +243,51 @@ export default function DeclarationOfNeedForm() {
   }
   if (submitted) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-lg p-8 max-w-md w-full text-center">
-          <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
-            <FileCheck2 className="w-8 h-8 text-green-600" />
+      <div className="min-h-screen bg-muted flex items-center justify-center p-4">
+        <div className="bg-card rounded-2xl shadow-lg p-8 max-w-md w-full text-center">
+          <div className="w-16 h-16 rounded-full bg-success-bg flex items-center justify-center mx-auto mb-4">
+            <FileCheck2 className="w-8 h-8 text-success-fg" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">Thank You!</h2>
-          <p className="text-gray-500 mb-4">Your Declaration of Need – Replacement Vehicle has been signed and saved to your claim file. Our team has been notified.</p>
-          <p className="text-xs text-gray-400">You can now close this page.</p>
+          <h2 className="text-2xl font-bold text-foreground mb-2">Thank You!</h2>
+          <p className="text-muted-foreground mb-4">Your Declaration of Need – Replacement Vehicle has been signed and saved to your claim file. Our team has been notified.</p>
+          <p className="text-xs text-muted-foreground">You can now close this page.</p>
         </div>
       </div>
     );
   }
 
-  const inputCls = 'w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-amber-400 text-sm';
-  const labelCls = 'block text-sm font-medium text-gray-600 mb-1.5';
-  const sectionCls = 'bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-4';
+  const inputCls = 'w-full px-4 py-3 rounded-xl border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-amber-400 text-sm';
+  const labelCls = 'block text-sm font-medium text-muted-foreground mb-1.5';
+  const sectionCls = 'bg-card rounded-2xl shadow-card border border-border p-5 mb-4';
 
   const Checkbox = ({ checked, onChange, label }) => (
     <label className="flex items-start gap-3 py-2.5 cursor-pointer">
-      <input type="checkbox" checked={checked} onChange={e => onChange(e.target.checked)} className="mt-1 w-5 h-5 rounded border-gray-300 text-amber-500 focus:ring-amber-400 flex-shrink-0" />
-      <span className="text-sm text-gray-700 leading-relaxed">{label}</span>
+      <input type="checkbox" checked={checked} onChange={e => onChange(e.target.checked)} className="mt-1 w-5 h-5 rounded border-border text-warning-fg focus:ring-amber-400 flex-shrink-0" />
+      <span className="text-sm text-foreground leading-relaxed">{label}</span>
     </label>
   );
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-muted">
       <div className="bg-[#151d44] px-4 py-4 flex items-center justify-center">
         <img src="https://media.base44.com/images/public/68ee39fb8915b1b539e13c59/b2cb057e2_RCMAutomotiveLogoGreenAutomotivewithHLights.jpg" alt="RCM Automotive" className="h-14 w-auto object-contain" />
       </div>
 
       <div className="max-w-2xl mx-auto px-4 py-6">
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">Declaration of Need – Replacement Vehicle</h1>
-          <p className="text-sm text-gray-500 mt-1">This form is the company's signed evidence that a like-for-like replacement vehicle was needed because no other vehicle was available within the fleet.</p>
+          <h1 className="text-2xl font-bold text-foreground">Declaration of Need – Replacement Vehicle</h1>
+          <p className="text-sm text-muted-foreground mt-1">This form is the company's signed evidence that a like-for-like replacement vehicle was needed because no other vehicle was available within the fleet.</p>
         </div>
 
         {/* Pre-fill confirmation */}
         {claim && (
-          <div className="mb-4 p-4 bg-white rounded-2xl shadow-sm border border-gray-100">
-            <h3 className="text-sm font-semibold text-gray-700 mb-2">Claim Reference</h3>
+          <div className="mb-4 p-4 bg-card rounded-2xl shadow-card border border-border">
+            <h3 className="text-sm font-semibold text-foreground mb-2">Claim Reference</h3>
             <div className="grid grid-cols-2 gap-2 text-sm">
-              <div><span className="text-gray-500">Job:</span> <span className="font-semibold text-gray-800">{claim.job_number || '—'}</span></div>
-              <div><span className="text-gray-500">Reg:</span> <span className="font-semibold text-gray-800">{(claim.reg || '').toUpperCase()}</span></div>
-              <div><span className="text-gray-500">Claim Ref:</span> <span className="font-semibold text-gray-800">{claim.claim_ref || '—'}</span></div>
-              <div><span className="text-gray-500">Incident Date:</span> <span className="font-semibold text-gray-800">{claim.loss_date || '—'}</span></div>
+              <div><span className="text-muted-foreground">Job:</span> <span className="font-semibold text-foreground">{claim.job_number || '—'}</span></div>
+              <div><span className="text-muted-foreground">Reg:</span> <span className="font-semibold text-foreground">{(claim.reg || '').toUpperCase()}</span></div>
+              <div><span className="text-muted-foreground">Claim Ref:</span> <span className="font-semibold text-foreground">{claim.claim_ref || '—'}</span></div>
+              <div><span className="text-muted-foreground">Incident Date:</span> <span className="font-semibold text-foreground">{claim.loss_date || '—'}</span></div>
             </div>
           </div>
         )}
@@ -296,10 +296,10 @@ export default function DeclarationOfNeedForm() {
         <div className="flex items-center gap-1 mb-6 overflow-x-auto pb-1">
           {STEPS.map((s, i) => (
             <div key={s.key} className="flex items-center gap-1 flex-shrink-0">
-              <button onClick={() => i < step && setStep(i)} className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${i === step ? 'bg-[#151d44] text-white' : i < step ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-400'}`}>
+              <button onClick={() => i < step && setStep(i)} className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${i === step ? 'bg-[#151d44] text-white' : i < step ? 'bg-success-bg text-success-fg' : 'bg-muted text-muted-foreground'}`}>
                 {i + 1}. {s.title}
               </button>
-              {i < STEPS.length - 1 && <div className={`w-4 h-0.5 ${i < step ? 'bg-green-400' : 'bg-gray-200'}`} />}
+              {i < STEPS.length - 1 && <div className={`w-4 h-0.5 ${i < step ? 'bg-success' : 'bg-accent'}`} />}
             </div>
           ))}
         </div>
@@ -307,7 +307,7 @@ export default function DeclarationOfNeedForm() {
         {/* Step 0: Company Details */}
         {step === 0 && (
           <div className={sectionCls}>
-            <h3 className="text-base font-semibold text-gray-800 mb-4">Section 1 – Company Details</h3>
+            <h3 className="text-base font-semibold text-foreground mb-4">Section 1 – Company Details</h3>
             <div className="space-y-3">
               <div><label className={labelCls}>Registered Company Name *</label><input value={formData.company.registered_name} onChange={e => update('company.registered_name', e.target.value)} className={inputCls} placeholder="Company Ltd" /></div>
               <div><label className={labelCls}>Company Number</label><input value={formData.company.company_number} onChange={e => update('company.company_number', e.target.value)} className={inputCls} placeholder="e.g. 12345678" /></div>
@@ -327,7 +327,7 @@ export default function DeclarationOfNeedForm() {
         {/* Step 1: Damaged Vehicle */}
         {step === 1 && (
           <div className={sectionCls}>
-            <h3 className="text-base font-semibold text-gray-800 mb-4">Section 2 – Damaged Vehicle</h3>
+            <h3 className="text-base font-semibold text-foreground mb-4">Section 2 – Damaged Vehicle</h3>
             <div className="space-y-3">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div><label className={labelCls}>Registration *</label><input value={formData.vehicle.registration} onChange={e => update('vehicle.registration', e.target.value)} className={inputCls} placeholder="e.g. AB12 CDE" /></div>
@@ -346,8 +346,8 @@ export default function DeclarationOfNeedForm() {
                 <div className="flex gap-3">
                   {[['Yes', 'Yes'], ['No', 'No']].map(([label, val]) => (
                     <label key={val} className="flex items-center gap-2 cursor-pointer">
-                      <input type="radio" name="roadworthy" checked={formData.vehicle.roadworthy === val} onChange={() => update('vehicle.roadworthy', val)} className="w-5 h-5 text-amber-500 focus:ring-amber-400" />
-                      <span className="text-sm text-gray-700">{label}</span>
+                      <input type="radio" name="roadworthy" checked={formData.vehicle.roadworthy === val} onChange={() => update('vehicle.roadworthy', val)} className="w-5 h-5 text-warning-fg focus:ring-amber-400" />
+                      <span className="text-sm text-foreground">{label}</span>
                     </label>
                   ))}
                 </div>
@@ -360,7 +360,7 @@ export default function DeclarationOfNeedForm() {
         {/* Step 2: Fleet Availability */}
         {step === 2 && (
           <div className={sectionCls}>
-            <h3 className="text-base font-semibold text-gray-800 mb-4">Section 3 – Fleet Availability</h3>
+            <h3 className="text-base font-semibold text-foreground mb-4">Section 3 – Fleet Availability</h3>
             <div className="space-y-3">
               <div className="space-y-3">
                 <div><label className={labelCls}>Total Vehicles Operated</label><input type="number" value={formData.fleet.total_vehicles} onChange={e => update('fleet.total_vehicles', e.target.value)} className={inputCls} placeholder="e.g. 12" /></div>
@@ -368,8 +368,8 @@ export default function DeclarationOfNeedForm() {
               </div>
 
               {/* Confirmations */}
-              <div className="border-t border-gray-100 pt-3">
-                <p className="text-sm font-medium text-gray-700 mb-1">I confirm on behalf of the company that, at the date of the incident and for the expected repair period:</p>
+              <div className="border-t border-border pt-3">
+                <p className="text-sm font-medium text-foreground mb-1">I confirm on behalf of the company that, at the date of the incident and for the expected repair period:</p>
                 <Checkbox checked={formData.fleet.confirmations.all_assigned} onChange={v => update('fleet.confirmations.all_assigned', v)} label="Every vehicle in the company fleet is permanently assigned to, and in daily use by, a named member of staff for business purposes." />
                 <Checkbox checked={formData.fleet.confirmations.no_spare} onChange={v => update('fleet.confirmations.no_spare', v)} label="The company has no spare, pool, reserve or unassigned vehicles available." />
                 <Checkbox checked={formData.fleet.confirmations.no_reallocation} onChange={v => update('fleet.confirmations.no_reallocation', v)} label="No vehicle could be reallocated to the driver of the damaged vehicle without taking another vehicle off essential business operations." />
@@ -387,9 +387,9 @@ export default function DeclarationOfNeedForm() {
         {/* Step 3: Like-for-Like */}
         {step === 3 && (
           <div className={sectionCls}>
-            <h3 className="text-base font-semibold text-gray-800 mb-4">Section 4 – Requirement for a Like-for-Like Vehicle</h3>
+            <h3 className="text-base font-semibold text-foreground mb-4">Section 4 – Requirement for a Like-for-Like Vehicle</h3>
             <div className="space-y-3">
-              <p className="text-sm font-medium text-gray-700">The replacement vehicle must be equivalent to the damaged vehicle for the following business reasons (tick all that apply):</p>
+              <p className="text-sm font-medium text-foreground">The replacement vehicle must be equivalent to the damaged vehicle for the following business reasons (tick all that apply):</p>
               {LIKE_FOR_LIKE_REASONS.map(r => (
                 <Checkbox key={r} checked={formData.like_for_like.reasons.includes(r)} onChange={() => toggleArrayItem('like_for_like.reasons', r)} label={r} />
               ))}
@@ -408,9 +408,9 @@ export default function DeclarationOfNeedForm() {
         {/* Step 4: Consequences */}
         {step === 4 && (
           <div className={sectionCls}>
-            <h3 className="text-base font-semibold text-gray-800 mb-4">Section 5 – Consequences of Being Without a Vehicle</h3>
+            <h3 className="text-base font-semibold text-foreground mb-4">Section 5 – Consequences of Being Without a Vehicle</h3>
             <div className="space-y-3">
-              <p className="text-sm font-medium text-gray-700">Without a replacement vehicle the company would be unable to (tick all that apply):</p>
+              <p className="text-sm font-medium text-foreground">Without a replacement vehicle the company would be unable to (tick all that apply):</p>
               {CONSEQUENCE_OPTIONS.map(c => (
                 <Checkbox key={c} checked={formData.consequences.impacts.includes(c)} onChange={() => toggleArrayItem('consequences.impacts', c)} label={c} />
               ))}
@@ -425,9 +425,9 @@ export default function DeclarationOfNeedForm() {
         {/* Step 5: Mitigation */}
         {step === 5 && (
           <div className={sectionCls}>
-            <h3 className="text-base font-semibold text-gray-800 mb-4">Section 6 – Mitigation and Undertakings</h3>
-            <p className="text-sm text-gray-700 mb-3">The company confirms that it will:</p>
-            <div className="bg-gray-50 rounded-xl p-4 mb-3 text-sm text-gray-700 leading-relaxed space-y-2">
+            <h3 className="text-base font-semibold text-foreground mb-4">Section 6 – Mitigation and Undertakings</h3>
+            <p className="text-sm text-foreground mb-3">The company confirms that it will:</p>
+            <div className="bg-muted rounded-xl p-4 mb-3 text-sm text-foreground leading-relaxed space-y-2">
               <p>• use the replacement vehicle only for the purposes it would have used the damaged vehicle for;</p>
               <p>• tell RCM Automotive Ltd straight away if any fleet vehicle becomes available, or if the damaged vehicle is repaired, replaced or declared a total loss;</p>
               <p>• return the replacement vehicle promptly when it is no longer needed; and</p>
@@ -440,10 +440,10 @@ export default function DeclarationOfNeedForm() {
         {/* Step 6: Declaration */}
         {step === 6 && (
           <div className={sectionCls}>
-            <h3 className="text-base font-semibold text-gray-800 mb-4">Section 7 – Declaration and Statement of Truth</h3>
+            <h3 className="text-base font-semibold text-foreground mb-4">Section 7 – Declaration and Statement of Truth</h3>
             <div className="space-y-3">
               <Checkbox checked={formData.declaration.authorised} onChange={v => update('declaration.authorised', v)} label="I confirm that I am authorised to make this declaration on behalf of the company named above." />
-              <div className="bg-gray-50 rounded-xl p-4 text-sm text-gray-700 leading-relaxed">
+              <div className="bg-muted rounded-xl p-4 text-sm text-foreground leading-relaxed">
                 I believe that the facts stated in this declaration are true and complete. I understand that this declaration may be relied on by RCM Automotive Ltd, its credit hire and repair partners, insurers and, if necessary, the courts in support of a claim for the cost of a replacement vehicle. I understand that making a false or misleading statement may cause the claim to fail and may result in legal action against the company and/or me personally.
               </div>
               <Checkbox checked={formData.declaration.statement_of_truth_accepted} onChange={v => update('declaration.statement_of_truth_accepted', v)} label="I accept the above statement of truth." />
@@ -453,27 +453,27 @@ export default function DeclarationOfNeedForm() {
               </div>
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label className="text-sm font-medium text-gray-600 mb-0 flex items-center gap-2"><PenLine className="w-4 h-4" /> Sign below *</label>
-                  <button onClick={clearSig} className="text-xs text-gray-400 hover:text-red-500 flex items-center gap-1"><Trash2 className="w-3.5 h-3.5" /> Clear</button>
+                  <label className="text-sm font-medium text-muted-foreground mb-0 flex items-center gap-2"><PenLine className="w-4 h-4" /> Sign below *</label>
+                  <button onClick={clearSig} className="text-xs text-muted-foreground hover:text-danger-fg flex items-center gap-1"><Trash2 className="w-3.5 h-3.5" /> Clear</button>
                 </div>
-                <div className="border-2 border-dashed border-gray-300 rounded-xl overflow-hidden bg-white" style={{ touchAction: 'none' }}>
+                <div className="border-2 border-dashed border-border rounded-xl overflow-hidden bg-card" style={{ touchAction: 'none' }}>
                   <canvas ref={canvasRef} width={560} height={150} className="w-full block cursor-crosshair"
                     onMouseDown={startDraw} onMouseMove={draw} onMouseUp={endDraw} onMouseLeave={endDraw}
                     onTouchStart={startDraw} onTouchMove={draw} onTouchEnd={endDraw} />
                 </div>
-                {!hasSig && <p className="text-xs text-gray-400 mt-1 text-center">Draw your signature with your finger or mouse</p>}
-                {hasSig && <p className="text-xs text-green-600 mt-1 text-center flex items-center justify-center gap-1"><Check className="w-3.5 h-3.5" /> Signature captured</p>}
+                {!hasSig && <p className="text-xs text-muted-foreground mt-1 text-center">Draw your signature with your finger or mouse</p>}
+                {hasSig && <p className="text-xs text-success-fg mt-1 text-center flex items-center justify-center gap-1"><Check className="w-3.5 h-3.5" /> Signature captured</p>}
               </div>
               <div><label className={labelCls}>Date</label><input value={formData.declaration.date} onChange={e => update('declaration.date', e.target.value)} className={inputCls} placeholder="DD/MM/YYYY" /></div>
             </div>
           </div>
         )}
 
-        {error && <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">{error}</div>}
+        {error && <div className="mb-4 p-3 bg-danger-bg border border-danger/30 rounded-xl text-sm text-danger-fg">{error}</div>}
 
         {/* Navigation */}
         <div className="flex items-center justify-between gap-3">
-          <Button onClick={handleBack} disabled={step === 0} variant="outline" className="flex items-center gap-2 text-gray-600">
+          <Button onClick={handleBack} disabled={step === 0} variant="outline" className="flex items-center gap-2 text-muted-foreground">
             <ArrowLeft className="w-4 h-4" /> Back
           </Button>
           {step < STEPS.length - 1 ? (
@@ -481,15 +481,15 @@ export default function DeclarationOfNeedForm() {
               Next <ArrowRight className="w-4 h-4" />
             </Button>
           ) : (
-            <Button onClick={handleSubmit} disabled={isSubmitting} className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white">
+            <Button onClick={handleSubmit} disabled={isSubmitting} className="flex items-center gap-2 bg-success hover:bg-success text-on-solid">
               {isSubmitting ? <><Loader className="w-5 h-5 animate-spin" /> Submitting...</> : <><FileCheck2 className="w-5 h-5" /> Sign & Submit</>}
             </Button>
           )}
         </div>
 
         {/* Data protection footer */}
-        <div className="mt-6 p-4 bg-gray-100 rounded-xl">
-          <p className="text-xs text-gray-500 leading-relaxed">
+        <div className="mt-6 p-4 bg-muted rounded-xl">
+          <p className="text-xs text-muted-foreground leading-relaxed">
             <strong>Data Protection:</strong> The information on this form will be processed by RCM Automotive Ltd for the purpose of managing and pursuing your claim, and may be shared with insurers, solicitors, credit hire providers and repairers involved in the claim.
           </p>
         </div>

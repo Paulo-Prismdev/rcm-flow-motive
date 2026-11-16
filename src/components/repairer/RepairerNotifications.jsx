@@ -63,7 +63,7 @@ export default function RepairerNotifications() {
         <button className="glass-button w-8 h-8 flex items-center justify-center relative" style={{ color: 'hsl(var(--foreground))' }}>
           <Bell className="w-3.5 h-3.5" />
           {unreadCount > 0 && (
-            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold animate-pulse">
+            <span className="absolute -top-1 -right-1 bg-danger text-on-solid text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold animate-pulse">
               {unreadCount > 9 ? '9+' : unreadCount}
             </span>
           )}
@@ -107,7 +107,7 @@ export default function RepairerNotifications() {
                       <p className="text-xs text-foreground-muted mt-1 line-clamp-2">
                         {notification.message}
                       </p>
-                      <p className="text-[10px] text-foreground-subtle mt-1">
+                      <p className="text-xs text-foreground-subtle mt-1">
                         {new Date(notification.created_date).toLocaleString()}
                       </p>
                     </div>
@@ -122,7 +122,7 @@ export default function RepairerNotifications() {
                         </button>
                       )}
                       <button
-                        className="glass-button w-6 h-6 flex items-center justify-center text-red-500"
+                        className="glass-button w-6 h-6 flex items-center justify-center text-danger-fg"
                         onClick={(e) => handleDelete(e, notification.id)}
                         title="Delete"
                       >

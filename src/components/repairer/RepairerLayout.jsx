@@ -229,7 +229,7 @@ export default function RepairerLayout({ children }) {
             <div className="p-4 mt-auto border-t border-border">
               <button
                 onClick={() => signOut()}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl glass-button text-red-500 font-medium"
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl glass-button text-danger-fg font-medium"
               >
                 <LogOut className="w-5 h-5" />
                 Log Out
@@ -313,7 +313,7 @@ export default function RepairerLayout({ children }) {
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => signOut()}
-                  className="cursor-pointer text-red-500"
+                  className="cursor-pointer text-danger-fg"
                 >
                   <LogOut className="w-4 h-4 mr-2" />
                   Log Out

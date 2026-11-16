@@ -48,21 +48,21 @@ export default function ReferrerDashboard() {
       title: 'Total Claims',
       value: stats.total,
       icon: FileText,
-      color: 'bg-blue-500',
+      color: 'bg-info',
       trend: 'All time'
     },
     {
       title: 'Active Claims',
       value: stats.active,
       icon: Clock,
-      color: 'bg-orange-500',
+      color: 'bg-warning',
       trend: 'In progress'
     },
     {
       title: 'Completed',
       value: stats.completed,
       icon: CheckCircle,
-      color: 'bg-green-500',
+      color: 'bg-success',
       trend: 'Successfully closed'
     },
     {
@@ -81,10 +81,10 @@ export default function ReferrerDashboard() {
     <div className="h-full overflow-auto p-4 lg:p-6 space-y-6">
       {/* Welcome header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
+        <h1 className="text-2xl font-bold text-foreground mb-1">
           Dashboard
         </h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400">
+        <p className="text-sm text-muted-foreground">
           Overview of your claims activity
         </p>
       </div>
@@ -97,20 +97,20 @@ export default function ReferrerDashboard() {
             onClick={() => {
               window.dispatchEvent(new CustomEvent('referrer-nav', { detail: 'claims' }));
             }}
-            className="bg-white dark:bg-gray-900 rounded-[10px] border border-gray-100 dark:border-gray-800 p-4 shadow-sm cursor-pointer hover:shadow-md transition-all active:scale-[0.98]"
+            className="bg-card rounded-xl border border-border p-4 shadow-card cursor-pointer hover:shadow-md transition-all active:scale-[0.98]"
           >
             <div className="flex items-center justify-between mb-3">
               <div className={`w-10 h-10 ${stat.color} rounded-lg flex items-center justify-center`}>
                 <stat.icon className="w-5 h-5 text-white" />
               </div>
             </div>
-            <div className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
+            <div className="text-2xl font-bold text-foreground mb-1">
               {stat.value}
             </div>
-            <div className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+            <div className="text-xs text-muted-foreground font-medium">
               {stat.title}
             </div>
-            <div className="text-[10px] text-gray-400 dark:text-gray-500 mt-1">
+            <div className="text-xs text-muted-foreground mt-1">
               {stat.trend}
             </div>
           </div>
@@ -118,26 +118,26 @@ export default function ReferrerDashboard() {
       </div>
 
       {/* Recent claims */}
-      <div className="bg-white dark:bg-gray-900 rounded-[10px] border border-gray-100 dark:border-gray-800 overflow-hidden shadow-sm">
-        <div className="px-5 py-4 border-b border-gray-100 dark:border-gray-800">
-          <h2 className="text-sm font-semibold text-gray-900 dark:text-white">
+      <div className="bg-card rounded-xl border border-border overflow-hidden shadow-card">
+        <div className="px-5 py-4 border-b border-border">
+          <h2 className="text-sm font-semibold text-foreground">
             Recent Claims
           </h2>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-50 dark:bg-gray-800/50">
+            <thead className="bg-muted">
               <tr>
-                <th className="px-4 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap">
+                <th className="px-4 py-2 text-left text-xs font-semibold text-muted-foreground whitespace-nowrap">
                   REG
                 </th>
-                <th className="px-4 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap">
+                <th className="px-4 py-2 text-left text-xs font-semibold text-muted-foreground whitespace-nowrap">
                   Client
                 </th>
-                <th className="px-4 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap">
+                <th className="px-4 py-2 text-left text-xs font-semibold text-muted-foreground whitespace-nowrap">
                   Status
                 </th>
-                <th className="px-4 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap">
+                <th className="px-4 py-2 text-left text-xs font-semibold text-muted-foreground whitespace-nowrap">
                   Date
                 </th>
               </tr>
@@ -145,7 +145,7 @@ export default function ReferrerDashboard() {
             <tbody>
               {recentClaims.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-4 py-8 text-center text-sm text-gray-400">
+                  <td colSpan={4} className="px-4 py-8 text-center text-sm text-muted-foreground">
                     No claims yet
                   </td>
                 </tr>
@@ -156,7 +156,7 @@ export default function ReferrerDashboard() {
                     onClick={() => {
                       window.dispatchEvent(new CustomEvent('referrer-nav', { detail: 'claims' }));
                     }}
-                    className="border-b border-gray-100 dark:border-gray-800 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer"
+                    className="border-b border-border last:border-0 hover:bg-muted cursor-pointer"
                   >
                     <td className="px-4 py-3 whitespace-nowrap">
                       <span className="inline-flex items-center justify-center rounded-md bg-[#1e2d4a] text-white font-semibold uppercase text-xs"
@@ -164,13 +164,13 @@ export default function ReferrerDashboard() {
                         {claim.reg || '—'}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300 whitespace-nowrap">
+                    <td className="px-4 py-3 text-sm text-foreground whitespace-nowrap">
                       {claim.client_name || '—'}
                     </td>
                     <td className="px-4 py-3 text-sm whitespace-nowrap">
                       <ClaimStatusBadges claim={claim} journeyOnly />
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                    <td className="px-4 py-3 text-sm text-muted-foreground whitespace-nowrap">
                       {new Date(claim.created_date).toLocaleDateString()}
                     </td>
                   </tr>

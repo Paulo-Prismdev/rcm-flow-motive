@@ -61,7 +61,7 @@ export default function PortalUpdatesModal({ claimId, updates = [], isOpen, onCl
             aria-invalid={!!error}
             aria-describedby={error ? 'portal-update-error' : undefined}
           />
-          {error && <p id="portal-update-error" className="text-xs text-red-600">{error}</p>}
+          {error && <p id="portal-update-error" className="text-xs text-danger-fg">{error}</p>}
           <div className="flex justify-end">
             <Button type="submit" size="sm" disabled={send.isPending} className="gap-1.5">
               {send.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
@@ -75,7 +75,7 @@ export default function PortalUpdatesModal({ claimId, updates = [], isOpen, onCl
             <p className="text-center text-sm text-muted-foreground py-8">No updates yet.</p>
           ) : topLevel.map((u) => (
             <div key={u.id} className="rounded-lg border border-border bg-card p-3">
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground mb-1.5">
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground mb-1.5">
                 <span className="font-semibold text-foreground">{u.update_type || 'Update'}</span>
                 <span className="inline-flex items-center gap-1"><User className="w-3 h-3" />{u.created_by || 'RCM Automotive'}</span>
                 {u.created_date && (
@@ -86,7 +86,7 @@ export default function PortalUpdatesModal({ claimId, updates = [], isOpen, onCl
               {u.next_steps && <p className="text-xs text-muted-foreground mt-1.5 whitespace-pre-wrap"><span className="font-semibold">Next steps:</span> {u.next_steps}</p>}
               {repliesTo(u.id).map((r) => (
                 <div key={r.id} className="mt-2 ml-4 border-l-2 border-border pl-3">
-                  <p className="text-[11px] text-muted-foreground mb-0.5">
+                  <p className="text-xs text-muted-foreground mb-0.5">
                     {r.created_by || 'RCM Automotive'}{r.created_date ? ` · ${format(new Date(r.created_date), 'dd/MM/yyyy HH:mm')}` : ''}
                   </p>
                   {r.description && <p className="text-sm whitespace-pre-wrap">{r.description}</p>}

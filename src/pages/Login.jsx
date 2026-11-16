@@ -62,7 +62,7 @@ export default function Login() {
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
           <div className="relative">
-            <Mail className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" aria-hidden="true" />
+            <Mail className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
             <Input
               id="email"
               type="email"
@@ -74,7 +74,7 @@ export default function Login() {
               placeholder="you@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="pl-10 h-12 bg-white text-gray-900 dark:bg-[#2c2c2e] dark:text-gray-100"
+              className="pl-10 h-12 bg-card text-foreground dark:bg-[#2c2c2e]"
             />
           </div>
         </div>
@@ -84,7 +84,7 @@ export default function Login() {
           value={password}
           onChange={setPassword}
           autoComplete="current-password"
-          aside={<Link to="/forgot-password" className="text-xs text-blue-700 dark:text-blue-300 hover:underline py-2">Forgot password?</Link>}
+          aside={<Link to="/forgot-password" className="text-xs text-info-fg hover:underline py-2">Forgot password?</Link>}
         />
         <Button type="submit" className="w-full h-12 font-medium bg-[#151d44] hover:bg-[#1f2a5c] text-white" disabled={loading}>
           {loading ? (<><Loader2 className="w-4 h-4 mr-2 animate-spin" aria-hidden="true" />Signing in</>) : 'Sign in'}

@@ -219,39 +219,39 @@ export default function ClientClaimForm() {
     }
   };
 
-  const inputCls = 'w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-amber-400 text-sm';
-  const labelCls = 'block text-sm font-medium text-gray-600 mb-1.5';
+  const inputCls = 'w-full px-4 py-3 rounded-xl border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-amber-400 text-sm';
+  const labelCls = 'block text-sm font-medium text-muted-foreground mb-1.5';
   const checkboxRow = (id, label, key) => (
     <label key={id} className="flex items-center gap-3 cursor-pointer">
       <input type="checkbox" checked={!!formData[key]} onChange={e => check(key, e.target.checked)}
         className="w-5 h-5 rounded accent-amber-500" />
-      <span className="text-sm text-gray-700">{label}</span>
+      <span className="text-sm text-foreground">{label}</span>
     </label>
   );
 
   if (submitted) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-lg p-8 max-w-md w-full text-center">
-          <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
-            <Check className="w-8 h-8 text-green-600" />
+      <div className="min-h-screen bg-muted flex items-center justify-center p-4">
+        <div className="bg-card rounded-2xl shadow-lg p-8 max-w-md w-full text-center">
+          <div className="w-16 h-16 rounded-full bg-success-bg flex items-center justify-center mx-auto mb-4">
+            <Check className="w-8 h-8 text-success-fg" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">Form Submitted!</h2>
-          <p className="text-gray-500 mb-4">Thank you. Your claim has been received and a Statement of Truth PDF has been generated and saved.</p>
+          <h2 className="text-2xl font-bold text-foreground mb-2">Form Submitted!</h2>
+          <p className="text-muted-foreground mb-4">Thank you. Your claim has been received and a Statement of Truth PDF has been generated and saved.</p>
           {submittedData?.job_number && (
-            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-4">
-              <p className="text-sm text-amber-700 font-medium">Your reference number</p>
-              <p className="text-2xl font-bold text-amber-800">{submittedData.job_number}</p>
+            <div className="bg-warning-bg border border-warning/30 rounded-xl p-4 mb-4">
+              <p className="text-sm text-warning-fg font-medium">Your reference number</p>
+              <p className="text-2xl font-bold text-warning-fg">{submittedData.job_number}</p>
             </div>
           )}
-          <p className="text-xs text-gray-400">Our team will be in touch shortly. You can close this page.</p>
+          <p className="text-xs text-muted-foreground">Our team will be in touch shortly. You can close this page.</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-muted">
       <HoneypotField value={honeypot} onChange={setHoneypot} />
       {/* Header */}
       <div className="bg-[#151d44] px-4 py-4 flex items-center justify-center">
@@ -265,8 +265,8 @@ export default function ClientClaimForm() {
       <div className="max-w-xl mx-auto px-4 py-6">
         {/* Title */}
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">Claim Notification Form</h1>
-          <p className="text-sm text-gray-500 mt-1">Please complete all sections as accurately as possible.</p>
+          <h1 className="text-2xl font-bold text-foreground">Claim Notification Form</h1>
+          <p className="text-sm text-muted-foreground mt-1">Please complete all sections as accurately as possible.</p>
         </div>
 
         {/* Progress */}
@@ -275,22 +275,22 @@ export default function ClientClaimForm() {
             <React.Fragment key={s.key}>
               <div className="flex flex-col items-center">
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
-                  i < step ? 'bg-green-500 text-white' : i === step ? 'bg-amber-500 text-white' : 'bg-gray-200 text-gray-500'
+                  i < step ? 'bg-success text-on-solid' : i === step ? 'bg-warning text-on-solid' : 'bg-accent text-muted-foreground'
                 }`}>
                   {i < step ? <Check className="w-4 h-4" /> : i + 1}
                 </div>
-                <span className="text-[10px] text-gray-500 mt-1 hidden sm:block text-center max-w-[60px]">{s.title}</span>
+                <span className="text-xs text-muted-foreground mt-1 hidden sm:block text-center max-w-[60px]">{s.title}</span>
               </div>
               {i < visibleSteps.length - 1 && (
-                <div className={`flex-1 h-0.5 mx-1 mb-4 ${i < step ? 'bg-green-400' : 'bg-gray-200'}`} />
+                <div className={`flex-1 h-0.5 mx-1 mb-4 ${i < step ? 'bg-success' : 'bg-accent'}`} />
               )}
             </React.Fragment>
           ))}
         </div>
 
         {/* Card */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-4">
-          <h2 className="text-lg font-bold text-gray-800 mb-5">{visibleSteps[step]?.title}</h2>
+        <div className="bg-card rounded-2xl shadow-card border border-border p-6 mb-4">
+          <h2 className="text-lg font-bold text-foreground mb-5">{visibleSteps[step]?.title}</h2>
 
           {/* Step: personal */}
           {currentStepKey === 'personal' && (
@@ -384,7 +384,7 @@ export default function ClientClaimForm() {
           {/* Step: third_party */}
           {currentStepKey === 'third_party' && (
             <div className="space-y-4">
-              <p className="text-sm text-gray-500 mb-2">Please provide as much detail as possible about the other party.</p>
+              <p className="text-sm text-muted-foreground mb-2">Please provide as much detail as possible about the other party.</p>
               <div><label className={labelCls}>Third Party Name</label><Input value={formData.tp_name} onChange={e => field('tp_name', e.target.value)} className={inputCls} placeholder="Full name" /></div>
               <div><label className={labelCls}>Third Party Phone</label><Input value={formData.tp_phone} onChange={e => field('tp_phone', e.target.value)} className={inputCls} /></div>
               <div><label className={labelCls}>Third Party Vehicle Reg</label><Input value={formData.tp_reg} onChange={e => field('tp_reg', e.target.value.toUpperCase())} className={inputCls} placeholder="e.g. XY21 ZAB" /></div>
@@ -396,14 +396,14 @@ export default function ClientClaimForm() {
           {/* Step: photos */}
           {currentStepKey === 'photos' && (
             <div className="space-y-4">
-              <p className="text-sm text-gray-500">Please add any photos of the damage or incident scene. You can take a photo now or upload from your device.</p>
+              <p className="text-sm text-muted-foreground">Please add any photos of the damage or incident scene. You can take a photo now or upload from your device.</p>
 
               {/* Upload buttons */}
               <div className="grid grid-cols-2 gap-3 m-keep-2">
                 <button
                   type="button"
                   onClick={() => cameraInputRef.current?.click()}
-                  className="flex flex-col items-center justify-center gap-2 p-4 border-2 border-dashed border-amber-300 rounded-xl bg-amber-50 text-amber-700 hover:bg-amber-100 transition-colors"
+                  className="flex flex-col items-center justify-center gap-2 p-4 border-2 border-dashed border-warning/30 rounded-xl bg-warning-bg text-warning-fg hover:bg-warning-bg transition-colors"
                 >
                   <Camera className="w-7 h-7" />
                   <span className="text-sm font-medium">Take Photo</span>
@@ -411,7 +411,7 @@ export default function ClientClaimForm() {
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="flex flex-col items-center justify-center gap-2 p-4 border-2 border-dashed border-gray-300 rounded-xl bg-gray-50 text-gray-600 hover:bg-gray-100 transition-colors"
+                  className="flex flex-col items-center justify-center gap-2 p-4 border-2 border-dashed border-border rounded-xl bg-muted text-muted-foreground hover:bg-muted transition-colors"
                 >
                   <Upload className="w-7 h-7" />
                   <span className="text-sm font-medium">Upload from Library</span>
@@ -439,7 +439,7 @@ export default function ClientClaimForm() {
 
               {/* Uploading indicator */}
               {uploadingPhotos && (
-                <div className="flex items-center gap-2 text-sm text-amber-600">
+                <div className="flex items-center gap-2 text-sm text-warning-fg">
                   <Loader className="w-4 h-4 animate-spin" /> Uploading photos...
                 </div>
               )}
@@ -448,12 +448,12 @@ export default function ClientClaimForm() {
               {photos.length > 0 && (
                 <div className="grid grid-cols-3 gap-2 m-keep-3">
                   {photos.map((photo, i) => (
-                    <div key={i} className="relative aspect-square rounded-xl overflow-hidden border border-gray-200 group">
+                    <div key={i} className="relative aspect-square rounded-xl overflow-hidden border border-border group">
                       <img src={photo.preview} alt={`Photo ${i + 1}`} className="w-full h-full object-cover" />
                       <button
                         type="button"
                         onClick={() => removePhoto(i)}
-                        className="absolute top-1 right-1 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute top-1 right-1 w-6 h-6 bg-danger text-on-solid rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                       >
                         <X className="w-3.5 h-3.5" />
                       </button>
@@ -463,14 +463,14 @@ export default function ClientClaimForm() {
               )}
 
               {photos.length === 0 && !uploadingPhotos && (
-                <div className="text-center py-6 text-gray-400">
+                <div className="text-center py-6 text-muted-foreground">
                   <Image className="w-10 h-10 mx-auto mb-2 opacity-40" />
                   <p className="text-sm">No photos added yet. This step is optional.</p>
                 </div>
               )}
 
               {photos.length > 0 && (
-                <p className="text-xs text-green-600 flex items-center gap-1">
+                <p className="text-xs text-success-fg flex items-center gap-1">
                   <Check className="w-3.5 h-3.5" /> {photos.length} photo{photos.length > 1 ? 's' : ''} added
                 </p>
               )}
@@ -480,7 +480,7 @@ export default function ClientClaimForm() {
           {/* Step: signature */}
           {currentStepKey === 'signature' && (
             <div className="space-y-5">
-              <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-800">
+              <div className="bg-warning-bg border border-warning/30 rounded-xl p-4 text-sm text-warning-fg">
                 <p className="font-semibold mb-1">Statement of Truth</p>
                 <p>I believe that the facts stated in this form are true and accurate to the best of my knowledge and belief. I understand that proceedings for contempt of court may be brought against anyone who makes a false statement without honest belief in its truth.</p>
               </div>
@@ -488,11 +488,11 @@ export default function ClientClaimForm() {
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <label className={labelCls + ' mb-0 flex items-center gap-2'}><PenLine className="w-4 h-4" /> Sign below *</label>
-                  <button onClick={clearSig} className="text-xs text-gray-400 hover:text-red-500 flex items-center gap-1">
+                  <button onClick={clearSig} className="text-xs text-muted-foreground hover:text-danger-fg flex items-center gap-1">
                     <Trash2 className="w-3.5 h-3.5" /> Clear
                   </button>
                 </div>
-                <div className="border-2 border-dashed border-gray-300 rounded-xl overflow-hidden bg-white" style={{ touchAction: 'none' }}>
+                <div className="border-2 border-dashed border-border rounded-xl overflow-hidden bg-card" style={{ touchAction: 'none' }}>
                   <canvas
                     ref={canvasRef}
                     width={560}
@@ -507,11 +507,11 @@ export default function ClientClaimForm() {
                     onTouchEnd={endDraw}
                   />
                 </div>
-                {!hasSig && <p className="text-xs text-gray-400 mt-1 text-center">Draw your signature with your finger or mouse</p>}
-                {hasSig && <p className="text-xs text-green-600 mt-1 text-center flex items-center justify-center gap-1"><Check className="w-3.5 h-3.5" /> Signature captured</p>}
+                {!hasSig && <p className="text-xs text-muted-foreground mt-1 text-center">Draw your signature with your finger or mouse</p>}
+                {hasSig && <p className="text-xs text-success-fg mt-1 text-center flex items-center justify-center gap-1"><Check className="w-3.5 h-3.5" /> Signature captured</p>}
               </div>
 
-              <div className="bg-gray-50 rounded-xl p-3 text-xs text-gray-500 space-y-1">
+              <div className="bg-muted rounded-xl p-3 text-xs text-muted-foreground space-y-1">
                 <p><strong>Submitting for:</strong> {formData.client_name}</p>
                 <p><strong>Vehicle Reg:</strong> {formData.reg}</p>
                 <p><strong>Date of Loss:</strong> {formData.loss_date || 'Not specified'}</p>
@@ -521,7 +521,7 @@ export default function ClientClaimForm() {
 
           {/* Error */}
           {error && (
-            <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">{error}</div>
+            <div className="mt-4 p-3 bg-danger-bg border border-danger/30 rounded-xl text-sm text-danger-fg">{error}</div>
           )}
         </div>
 
@@ -534,14 +534,14 @@ export default function ClientClaimForm() {
           ) : <div />}
 
           {step < visibleSteps.length - 1 ? (
-            <Button onClick={next} className="bg-amber-500 hover:bg-amber-600 text-white flex items-center gap-2">
+            <Button onClick={next} className="bg-warning hover:bg-warning text-on-solid flex items-center gap-2">
               Next <ArrowRight className="w-4 h-4" />
             </Button>
           ) : (
             <Button
               onClick={handleSubmit}
               disabled={isSubmitting}
-              className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
+              className="bg-success hover:bg-success text-on-solid flex items-center gap-2"
             >
               {isSubmitting ? <><Loader className="w-4 h-4 animate-spin" /> Submitting...</> : <><Check className="w-4 h-4" /> Submit & Sign</>}
             </Button>

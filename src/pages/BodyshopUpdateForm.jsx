@@ -76,8 +76,8 @@ export default function BodyshopUpdateForm() {
     setIsSubmitting(false);
   };
 
-  const inputCls = 'w-full px-4 py-3 rounded-xl border border-gray-200 bg-white !bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm';
-  const labelCls = 'block text-sm font-medium text-gray-600 mb-1.5';
+  const inputCls = 'w-full px-4 py-3 rounded-xl border border-border bg-card !bg-white text-foreground focus:outline-none focus:ring-2 focus:ring-ring text-sm';
+  const labelCls = 'block text-sm font-medium text-muted-foreground mb-1.5';
 
   const updatePart = (index, field, value) => {
     setBackorderParts(prev => prev.map((p, i) => i === index ? { ...p, [field]: value } : p));
@@ -88,8 +88,8 @@ export default function BodyshopUpdateForm() {
   // ── Loading state ──
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="flex flex-col items-center gap-3 text-gray-500">
+      <div className="min-h-screen bg-muted flex items-center justify-center p-4">
+        <div className="flex flex-col items-center gap-3 text-muted-foreground">
           <Loader className="w-8 h-8 animate-spin" />
           <p className="text-sm">Loading...</p>
         </div>
@@ -100,11 +100,11 @@ export default function BodyshopUpdateForm() {
   // ── Invalid link ──
   if (!linkValid) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-white rounded-2xl border border-gray-200 p-8 text-center">
+      <div className="min-h-screen bg-muted flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-card rounded-2xl border border-border p-8 text-center">
           <AlertTriangle className="w-12 h-12 text-red-400 mx-auto mb-4" />
-          <h1 className="text-xl font-bold text-gray-900 mb-2">Link Invalid</h1>
-          <p className="text-sm text-gray-500">
+          <h1 className="text-xl font-bold text-foreground mb-2">Link Invalid</h1>
+          <p className="text-sm text-muted-foreground">
             This update link is invalid or has expired. Please contact us if you believe this is an error.
           </p>
         </div>
@@ -115,13 +115,13 @@ export default function BodyshopUpdateForm() {
   // ── Success state ──
   if (submitted) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-white rounded-2xl border border-gray-200 p-8 text-center">
-          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Check className="w-8 h-8 text-green-600" />
+      <div className="min-h-screen bg-muted flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-card rounded-2xl border border-border p-8 text-center">
+          <div className="w-16 h-16 bg-success-bg rounded-full flex items-center justify-center mx-auto mb-4">
+            <Check className="w-8 h-8 text-success-fg" />
           </div>
-          <h1 className="text-xl font-bold text-gray-900 mb-2">Update Received</h1>
-          <p className="text-sm text-gray-500">
+          <h1 className="text-xl font-bold text-foreground mb-2">Update Received</h1>
+          <p className="text-sm text-muted-foreground">
             Thank you — your update has been logged and our team has been notified. No further action is required.
           </p>
         </div>
@@ -131,7 +131,7 @@ export default function BodyshopUpdateForm() {
 
   // ── Form ──
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-muted">
       {/* Full-width header */}
       <div className="w-full bg-[#131d47] py-6 px-4 mb-8">
         <div className="flex items-center justify-center">
@@ -145,36 +145,36 @@ export default function BodyshopUpdateForm() {
 
       <div className="max-w-2xl mx-auto px-4">
         <div className="text-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">Repair Update Form</h1>
-          <p className="text-sm text-gray-500 mt-1">Please provide an update on the repair status</p>
+          <h1 className="text-2xl font-bold text-foreground">Repair Update Form</h1>
+          <p className="text-sm text-muted-foreground mt-1">Please provide an update on the repair status</p>
         </div>
 
         {/* Claim info card */}
         {claim && (
-          <div className="bg-white rounded-2xl border border-gray-200 p-5 mb-5">
+          <div className="bg-card rounded-2xl border border-border p-5 mb-5">
             <div className="flex items-center gap-3 mb-3">
-              <Car className="w-5 h-5 text-gray-400" />
-              <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Claim Details</span>
+              <Car className="w-5 h-5 text-muted-foreground" />
+              <span className="text-xs font-semibold text-muted-foreground  ">Claim Details</span>
             </div>
             <div className="grid grid-cols-2 gap-3 text-sm">
               <div>
-                <p className="text-xs text-gray-500">Registration</p>
-                <p className="font-medium text-gray-900">{claim.reg || '—'}</p>
+                <p className="text-xs text-muted-foreground">Registration</p>
+                <p className="font-medium text-foreground">{claim.reg || '—'}</p>
               </div>
               <div>
-                <p className="text-xs text-gray-500">Vehicle</p>
-                <p className="font-medium text-gray-900">{claim.make_model || '—'}</p>
+                <p className="text-xs text-muted-foreground">Vehicle</p>
+                <p className="font-medium text-foreground">{claim.make_model || '—'}</p>
               </div>
               <div>
-                <p className="text-xs text-gray-500">Client</p>
-                <p className="font-medium text-gray-900">{claim.client_name || '—'}</p>
+                <p className="text-xs text-muted-foreground">Client</p>
+                <p className="font-medium text-foreground">{claim.client_name || '—'}</p>
               </div>
             </div>
           </div>
         )}
 
         {/* Form card */}
-        <div className="bg-white rounded-2xl border border-gray-200 p-6 space-y-5">
+        <div className="bg-card rounded-2xl border border-border p-6 space-y-5">
           <div>
             <label className={labelCls}>Update Description *</label>
             <Textarea
@@ -204,22 +204,22 @@ export default function BodyshopUpdateForm() {
                 type="checkbox"
                 checked={hasBackorder}
                 onChange={(e) => setHasBackorder(e.target.checked)}
-                className="w-5 h-5 rounded border-gray-300 text-[#131d47] focus:ring-[#131d47] cursor-pointer"
+                className="w-5 h-5 rounded border-border text-[#131d47] focus:ring-[#131d47] cursor-pointer"
               />
-              <span className="text-sm font-medium text-gray-700">Are there any backordered parts?</span>
+              <span className="text-sm font-medium text-foreground">Are there any backordered parts?</span>
             </label>
 
             {hasBackorder && (
               <div className="mt-4 space-y-3">
                 {backorderParts.map((part, index) => (
-                  <div key={index} className="border border-gray-200 rounded-xl p-4 bg-gray-50">
+                  <div key={index} className="border border-border rounded-xl p-4 bg-muted">
                     <div className="flex items-center justify-between mb-3">
-                      <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Part {index + 1}</span>
+                      <span className="text-xs font-semibold text-muted-foreground  ">Part {index + 1}</span>
                       {backorderParts.length > 1 && (
                         <button
                           type="button"
                           onClick={() => removePart(index)}
-                          className="text-gray-400 hover:text-red-500 text-xs font-medium"
+                          className="text-muted-foreground hover:text-danger-fg text-xs font-medium"
                         >
                           Remove
                         </button>
@@ -227,7 +227,7 @@ export default function BodyshopUpdateForm() {
                     </div>
                     <div className="space-y-3">
                       <div>
-                        <label className="block text-xs font-medium text-gray-500 mb-1">Part Description *</label>
+                        <label className="block text-xs font-medium text-muted-foreground mb-1">Part Description *</label>
                         <input
                           value={part.part_description}
                           onChange={(e) => updatePart(index, 'part_description', e.target.value)}
@@ -237,7 +237,7 @@ export default function BodyshopUpdateForm() {
                       </div>
                       <div className="grid grid-cols-2 gap-3">
                         <div>
-                          <label className="block text-xs font-medium text-gray-500 mb-1">Part Number</label>
+                          <label className="block text-xs font-medium text-muted-foreground mb-1">Part Number</label>
                           <input
                             value={part.part_number}
                             onChange={(e) => updatePart(index, 'part_number', e.target.value)}
@@ -246,7 +246,7 @@ export default function BodyshopUpdateForm() {
                           />
                         </div>
                         <div>
-                          <label className="block text-xs font-medium text-gray-500 mb-1">Supplier</label>
+                          <label className="block text-xs font-medium text-muted-foreground mb-1">Supplier</label>
                           <input
                             value={part.supplier_name}
                             onChange={(e) => updatePart(index, 'supplier_name', e.target.value)}
@@ -256,7 +256,7 @@ export default function BodyshopUpdateForm() {
                         </div>
                       </div>
                       <div>
-                        <label className="block text-xs font-medium text-gray-500 mb-1">Expected Arrival Date</label>
+                        <label className="block text-xs font-medium text-muted-foreground mb-1">Expected Arrival Date</label>
                         <input
                           type="date"
                           value={part.expected_arrival_date}
@@ -289,7 +289,7 @@ export default function BodyshopUpdateForm() {
           </div>
 
           {error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
+            <div className="p-3 bg-danger-bg border border-danger/30 rounded-xl text-sm text-danger-fg">
               {error}
             </div>
           )}
@@ -307,7 +307,7 @@ export default function BodyshopUpdateForm() {
           </Button>
         </div>
 
-        <p className="text-center text-xs text-gray-400 mt-4">
+        <p className="text-center text-xs text-muted-foreground mt-4">
           RCM Flow-motive — Repair Management System
         </p>
       </div>

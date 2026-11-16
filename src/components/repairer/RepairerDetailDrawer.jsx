@@ -76,7 +76,7 @@ function Section({ title, icon: Icon, children }) {
     <div className="space-y-0">
       <div className="flex items-center gap-2 pt-4 pb-1">
         <Icon className="w-4 h-4 text-muted-foreground" />
-        <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{title}</h3>
+        <h3 className="text-xs font-semibold text-muted-foreground">{title}</h3>
       </div>
       <div className="px-1">{children}</div>
     </div>
@@ -159,8 +159,8 @@ export default function RepairerDetailDrawer({ bodyshopId, onClose }) {
           <div className="flex flex-wrap gap-1.5 mt-1">
           {data?.tier && <Badge variant="outline">{data.tier}</Badge>}
           {data?.map_group && <Badge className="bg-violet-100 text-violet-700">{data.map_group}</Badge>}
-          {data?.acg_signed_up === "Yes" && <Badge className="bg-green-100 text-green-700">ACG</Badge>}
-          {data?.bs10125_certified === "Yes" && <Badge className="bg-blue-100 text-blue-700">BS10125</Badge>}
+          {data?.acg_signed_up === "Yes" && <Badge className="bg-success-bg text-success-fg">ACG</Badge>}
+          {data?.bs10125_certified === "Yes" && <Badge className="bg-info-bg text-info-fg">BS10125</Badge>}
           </div>
           {!isEditing && (
             <div className="flex gap-2 mt-3 pb-3 border-b border-border">
@@ -207,7 +207,7 @@ export default function RepairerDetailDrawer({ bodyshopId, onClose }) {
                     <ViewField label="Directors" value={bodyshop.company_directors} />
                     {bodyshop.web_address && (
                       <a href={bodyshop.web_address} target="_blank" rel="noopener noreferrer"
-                         className="inline-flex items-center gap-1 text-xs text-blue-600 hover:underline mt-2">
+                         className="inline-flex items-center gap-1 text-xs text-info-fg hover:underline mt-2">
                         <Globe className="w-3 h-3" /> Visit Website <ExternalLink className="w-3 h-3" />
                       </a>
                     )}
@@ -356,7 +356,7 @@ export default function RepairerDetailDrawer({ bodyshopId, onClose }) {
             <AlertDialogAction
               onClick={() => deleteMutation.mutate()}
               disabled={deleteMutation.isPending}
-              className="bg-red-600 hover:bg-red-700 text-white"
+              className="bg-danger hover:bg-danger text-on-solid"
             >
               {deleteMutation.isPending ? "Deleting..." : "Delete"}
             </AlertDialogAction>

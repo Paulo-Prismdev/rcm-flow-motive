@@ -6,13 +6,13 @@ import { Calculator, Package, FileText, TrendingUp, Wrench, Gift, CheckCircle2 }
 const ICONS = { Calculator, Package, FileText, TrendingUp, Wrench };
 
 const COLOR_CLASSES = {
-  blue: 'bg-blue-100 text-blue-600',
-  green: 'bg-green-100 text-green-600',
+  blue: 'bg-info-bg text-info-fg',
+  green: 'bg-success-bg text-success-fg',
   purple: 'bg-purple-100 text-purple-600',
-  orange: 'bg-orange-100 text-orange-600',
-  red: 'bg-red-100 text-red-600',
-  yellow: 'bg-yellow-100 text-yellow-600',
-  indigo: 'bg-indigo-100 text-indigo-600',
+  orange: 'bg-warning-bg text-warning-fg',
+  red: 'bg-danger-bg text-danger-fg',
+  yellow: 'bg-warning-bg text-warning-fg',
+  indigo: 'bg-info-bg text-info-fg',
   pink: 'bg-pink-100 text-pink-600',
 };
 
@@ -63,7 +63,7 @@ export default function RepairerProductsTab() {
                       <ul className="space-y-1 mb-4">
                         {product.features.map((feature, idx) => (
                           <li key={idx} className="flex items-center gap-2 text-sm">
-                            <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0" />
+                            <CheckCircle2 className="w-4 h-4 text-success-fg flex-shrink-0" />
                             {feature}
                           </li>
                         ))}

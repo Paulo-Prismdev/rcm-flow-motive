@@ -38,7 +38,7 @@ export default function ReferrerLayout({ children }) {
   return (
     <StatusConfigProvider>
     <GlobalSearch open={searchOpen} onOpenChange={setSearchOpen} portalPage="ReferrerPortal" />
-    <div className="flex overflow-hidden bg-gray-100 dark:bg-gray-950 app-height">
+    <div className="flex overflow-hidden bg-muted app-height">
       {/* SIDEBAR */}
       <aside className={`
         fixed inset-y-0 left-0 z-[9999] flex flex-col
@@ -65,7 +65,7 @@ export default function ReferrerLayout({ children }) {
               e.preventDefault();
               window.dispatchEvent(new CustomEvent('referrer-nav', { detail: 'dashboard' }));
             }}
-            className={`flex items-center gap-3 px-3 py-2 rounded-[10px] text-sm font-medium transition-all ${
+            className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
               activeTab === 'dashboard'
                 ? 'bg-white/10 text-white border border-white/15'
                 : 'text-white/60 hover:bg-white/8 hover:text-white/90'
@@ -80,7 +80,7 @@ export default function ReferrerLayout({ children }) {
               e.preventDefault();
               window.dispatchEvent(new CustomEvent('referrer-nav', { detail: 'claims' }));
             }}
-            className={`flex items-center gap-3 px-3 py-2 rounded-[10px] text-sm font-medium transition-all ${
+            className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
               activeTab === 'claims'
                 ? 'bg-white/10 text-white border border-white/15'
                 : 'text-white/60 hover:bg-white/8 hover:text-white/90'
@@ -129,15 +129,15 @@ export default function ReferrerLayout({ children }) {
       {/* MAIN CONTENT */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* TOP BAR */}
-        <header className="hidden lg:flex flex-shrink-0 dark:bg-gray-900/95 border-b border-gray-100 dark:border-gray-800/80 items-center gap-3 px-5 relative z-30 backdrop-blur-sm bg-[hsl(var(--background))]" style={{ height: '48px', minHeight: '48px' }}>
+        <header className="hidden lg:flex flex-shrink-0 dark:bg-gray-900/95 border-b border-border items-center gap-3 px-5 relative z-30 backdrop-blur-sm bg-[hsl(var(--background))]" style={{ height: '48px', minHeight: '48px' }}>
           {/* Left: Referrer Name + Portal Label */}
           <div className="flex items-center gap-2">
             {referrer && (
               <>
-                <span className="text-sm font-medium text-gray-600 dark:text-gray-300">
+                <span className="text-sm font-medium text-muted-foreground">
                   {referrer.name}
                 </span>
-                <span className="text-sm font-medium text-green-600 dark:text-green-400">
+                <span className="text-sm font-medium text-success-fg">
                   Referrer Portal
                 </span>
               </>
@@ -147,48 +147,48 @@ export default function ReferrerLayout({ children }) {
           <div className="flex items-center gap-2">
             <button
               onClick={() => window.location.reload()}
-              className="p-1.5 rounded-[10px] text-gray-400 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-gray-200 transition-colors"
+              className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
               title="Refresh">
               <RefreshCw className="w-4 h-4" />
             </button>
             <button
               onClick={() => setSearchOpen(true)}
-              className="p-1.5 rounded-[10px] text-gray-400 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-gray-200 transition-colors"
+              className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
               title="Search">
               <Search className="w-4 h-4" />
             </button>
-            <div className="p-1.5 rounded-[10px]">
+            <div className="p-1.5 rounded-lg">
               <ThemeToggle />
             </div>
-            <div className="p-1.5 rounded-[10px]">
+            <div className="p-1.5 rounded-lg">
               <Notifications />
             </div>
           </div>
         </header>
 
         {/* Mobile bottom tab bar */}
-        <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 flex items-center justify-around px-2 safe-area-inset-bottom" style={{ height: '60px', zIndex: 1000 }}>
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-card border-t border-border flex items-center justify-around px-2 safe-area-inset-bottom" style={{ height: '60px', zIndex: 1000 }}>
           <button onClick={() => setMobileMenuOpen((prev) => !prev)} className={`flex flex-col items-center justify-center gap-0.5 p-3 touch-manipulation min-w-[44px] min-h-[44px] ${
-            mobileMenuOpen ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'
+            mobileMenuOpen ? 'text-info-fg' : 'text-muted-foreground'
           }`}>
             <Menu className="w-5 h-5" />
-            <span className="text-[9px]">Menu</span>
+            <span className="text-xs">Menu</span>
           </button>
-          <button onClick={() => setSearchOpen(true)} className="flex flex-col items-center justify-center gap-0.5 p-3 text-gray-500 dark:text-gray-400 touch-manipulation min-w-[44px] min-h-[44px]">
+          <button onClick={() => setSearchOpen(true)} className="flex flex-col items-center justify-center gap-0.5 p-3 text-muted-foreground touch-manipulation min-w-[44px] min-h-[44px]">
             <Search className="w-5 h-5" />
-            <span className="text-[9px]">Search</span>
+            <span className="text-xs">Search</span>
           </button>
-          <button onClick={() => window.location.reload()} className="flex flex-col items-center justify-center gap-0.5 p-3 text-gray-500 dark:text-gray-400 touch-manipulation min-w-[44px] min-h-[44px]">
+          <button onClick={() => window.location.reload()} className="flex flex-col items-center justify-center gap-0.5 p-3 text-muted-foreground touch-manipulation min-w-[44px] min-h-[44px]">
             <RefreshCw className="w-5 h-5" />
-            <span className="text-[9px]">Refresh</span>
+            <span className="text-xs">Refresh</span>
           </button>
-          <div className="flex flex-col items-center justify-center gap-0.5 p-3 text-gray-500 dark:text-gray-400 touch-manipulation min-w-[44px] min-h-[44px]">
+          <div className="flex flex-col items-center justify-center gap-0.5 p-3 text-muted-foreground touch-manipulation min-w-[44px] min-h-[44px]">
             <ThemeToggle />
-            <span className="text-[9px]">Theme</span>
+            <span className="text-xs">Theme</span>
           </div>
-          <div className="flex flex-col items-center justify-center gap-0.5 p-3 text-gray-500 dark:text-gray-400 touch-manipulation min-w-[44px] min-h-[44px]">
+          <div className="flex flex-col items-center justify-center gap-0.5 p-3 text-muted-foreground touch-manipulation min-w-[44px] min-h-[44px]">
             <Notifications />
-            <span className="text-[9px]">Alerts</span>
+            <span className="text-xs">Alerts</span>
           </div>
         </div>
 

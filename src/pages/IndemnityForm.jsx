@@ -75,7 +75,7 @@ const DOBPicker = ({ value, onChange }) => {
     }
   };
 
-  const selCls = 'w-full px-3 py-3 rounded-xl border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-amber-400 text-sm';
+  const selCls = 'w-full px-3 py-3 rounded-xl border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-amber-400 text-sm';
   return (
     <div className="grid grid-cols-3 gap-2 m-keep-3">
       <select value={parts.day} onChange={e => update(e.target.value === '' ? '' : parseInt(e.target.value), undefined, undefined)} className={selCls}>
@@ -198,41 +198,41 @@ export default function IndemnityForm() {
     setIsSubmitting(false);
   };
 
-  const inputCls = 'w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-amber-400 text-sm';
-  const labelCls = 'block text-sm font-medium text-gray-600 mb-1.5';
+  const inputCls = 'w-full px-4 py-3 rounded-xl border border-border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-amber-400 text-sm';
+  const labelCls = 'block text-sm font-medium text-muted-foreground mb-1.5';
 
   // Default polarity: No = green (good), Yes = red (risk).
   // For positive-capability questions (CCTV footage, more photos) pass yesGood to flip.
   const YesNo = ({ value, onChange, yesGood = false }) => {
-    const yesColor = yesGood ? 'bg-green-500 border-green-500' : 'bg-red-500 border-red-500';
-    const noColor = yesGood ? 'bg-red-500 border-red-500' : 'bg-green-500 border-green-500';
+    const yesColor = yesGood ? 'bg-success border-success' : 'bg-danger border-danger';
+    const noColor = yesGood ? 'bg-danger border-danger' : 'bg-success border-success';
     return (
       <div className="grid grid-cols-2 gap-2 m-keep-2">
-        <button type="button" onClick={() => onChange('Yes')} className={`px-4 py-3 rounded-xl border text-sm font-medium transition-colors ${value === 'Yes' ? `${yesColor} text-white` : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'}`}>Yes</button>
-        <button type="button" onClick={() => onChange('No')} className={`px-4 py-3 rounded-xl border text-sm font-medium transition-colors ${value === 'No' ? `${noColor} text-white` : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'}`}>No</button>
+        <button type="button" onClick={() => onChange('Yes')} className={`px-4 py-3 rounded-xl border text-sm font-medium transition-colors ${value === 'Yes' ?}`${yesColor} text-white` : 'bg-card text-muted-foreground border-border hover:border-border'}`}>Yes</button>
+        <button type="button" onClick={() => onChange('No')} className={`px-4 py-3 rounded-xl border text-sm font-medium transition-colors ${value === 'No' ?}`${noColor} text-white` : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'}`}>No</button>
       </div>
     );
   };
 
   if (linkProblem === null) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <Loader className="w-6 h-6 text-gray-400 animate-spin" aria-label="Checking your link" />
+      <div className="min-h-screen bg-muted flex items-center justify-center p-4">
+        <Loader className="w-6 h-6 text-muted-foreground animate-spin" aria-label="Checking your link" />
       </div>
     );
   }
 
   if (linkProblem) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-lg p-8 max-w-md w-full text-center">
-          <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
-            <AlertTriangle className="w-8 h-8 text-red-600" />
+      <div className="min-h-screen bg-muted flex items-center justify-center p-4">
+        <div className="bg-card rounded-2xl shadow-lg p-8 max-w-md w-full text-center">
+          <div className="w-16 h-16 rounded-full bg-danger-bg flex items-center justify-center mx-auto mb-4">
+            <AlertTriangle className="w-8 h-8 text-danger-fg" />
           </div>
-          <h2 className="text-xl font-bold text-gray-800 mb-2">
+          <h2 className="text-xl font-bold text-foreground mb-2">
             {linkReason === 'used' ? 'Already completed' : linkReason === 'expired' ? 'Link expired' : 'Invalid link'}
           </h2>
-          <p className="text-gray-500 text-sm">{linkProblem}</p>
+          <p className="text-muted-foreground text-sm">{linkProblem}</p>
         </div>
       </div>
     );
@@ -240,39 +240,39 @@ export default function IndemnityForm() {
 
   if (submitted) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-lg p-8 max-w-md w-full text-center">
-          <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
-            <ShieldCheck className="w-8 h-8 text-green-600" />
+      <div className="min-h-screen bg-muted flex items-center justify-center p-4">
+        <div className="bg-card rounded-2xl shadow-lg p-8 max-w-md w-full text-center">
+          <div className="w-16 h-16 rounded-full bg-success-bg flex items-center justify-center mx-auto mb-4">
+            <ShieldCheck className="w-8 h-8 text-success-fg" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">Thank You!</h2>
-          <p className="text-gray-500 mb-4">Your indemnity details have been submitted and added to your claim. Our team will review the information and be in touch if anything further is required.</p>
-          <p className="text-xs text-gray-400">You can now close this page.</p>
+          <h2 className="text-2xl font-bold text-foreground mb-2">Thank You!</h2>
+          <p className="text-muted-foreground mb-4">Your indemnity details have been submitted and added to your claim. Our team will review the information and be in touch if anything further is required.</p>
+          <p className="text-xs text-muted-foreground">You can now close this page.</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-muted">
       <div className="bg-[#151d44] px-4 py-4 flex items-center justify-center">
         <img src="https://media.base44.com/images/public/68ee39fb8915b1b539e13c59/b2cb057e2_RCMAutomotiveLogoGreenAutomotivewithHLights.jpg" alt="RCM Automotive" className="h-14 w-auto object-contain" />
       </div>
 
       <div className="max-w-xl mx-auto px-4 py-6">
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">Indemnity Questionnaire</h1>
-          <p className="text-sm text-gray-500 mt-1">Please complete all sections as accurately as possible. Your answers will be added directly to your claim file.</p>
+          <h1 className="text-2xl font-bold text-foreground">Indemnity Questionnaire</h1>
+          <p className="text-sm text-muted-foreground mt-1">Please complete all sections as accurately as possible. Your answers will be added directly to your claim file.</p>
         </div>
 
         {/* Percentage completion tracker */}
         <div className="mb-6">
           <div className="flex items-center justify-between mb-1.5">
-            <span className="text-xs font-medium text-gray-500">Progress</span>
-            <span className="text-xs font-bold text-amber-600">{completion}% complete</span>
+            <span className="text-xs font-medium text-muted-foreground">Progress</span>
+            <span className="text-xs font-bold text-warning-fg">{completion}% complete</span>
           </div>
-          <div className="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
-            <div className="h-full bg-amber-500 rounded-full transition-all duration-300" style={{ width: `${completion}%` }} />
+          <div className="h-2 w-full bg-accent rounded-full overflow-hidden">
+            <div className="h-full bg-warning rounded-full transition-all duration-300" style={{ width: `${completion}%` }} />
           </div>
         </div>
 
@@ -281,28 +281,28 @@ export default function IndemnityForm() {
           {STEPS.map((s, i) => (
             <React.Fragment key={s.key}>
               <div className="flex flex-col items-center">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${i < step ? 'bg-green-500 text-white' : i === step ? 'bg-amber-500 text-white' : 'bg-gray-200 text-gray-500'}`}>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${i < step ? 'bg-success text-on-solid' : i === step ? 'bg-warning text-on-solid' : 'bg-accent text-muted-foreground'}`}>
                   {i < step ? <Check className="w-4 h-4" /> : i + 1}
                 </div>
-                <span className="text-[10px] text-gray-500 mt-1 hidden sm:block text-center max-w-[64px]">{s.title}</span>
+                <span className="text-xs text-muted-foreground mt-1 hidden sm:block text-center max-w-[64px]">{s.title}</span>
               </div>
               {i < STEPS.length - 1 && (
-                <div className={`flex-1 h-0.5 mx-1 mb-4 ${i < step ? 'bg-green-400' : 'bg-gray-200'}`} />
+                <div className={`flex-1 h-0.5 mx-1 mb-4 ${i < step ? 'bg-success' : 'bg-accent'}`} />
               )}
             </React.Fragment>
           ))}
         </div>
 
         {/* Card */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-4">
-          <h2 className="text-lg font-bold text-gray-800 mb-5">{STEPS[step]?.title}</h2>
+        <div className="bg-card rounded-2xl shadow-card border border-border p-6 mb-4">
+          <h2 className="text-lg font-bold text-foreground mb-5">{STEPS[step]?.title}</h2>
 
           {currentStepKey === 'driver' && (
             <div className="space-y-4">
               <div>
                 <label className={labelCls}>Your Date of Birth *</label>
                 <DOBPicker value={formData.indemnity_driver_dob} onChange={v => field('indemnity_driver_dob', v)} />
-                {(() => { const a = calcAge(formData.indemnity_driver_dob); return a !== null ? <p className="text-xs text-gray-500 mt-1">Calculated age: <span className="font-semibold text-gray-700">{a} years</span></p> : null; })()}
+                {(() => { const a = calcAge(formData.indemnity_driver_dob); return a !== null ? <p className="text-xs text-muted-foreground mt-1">Calculated age: <span className="font-semibold text-foreground">{a} years</span></p> : null; })()}
               </div>
               <div><label className={labelCls}>Registered Owner / Keeper of the Vehicle *</label><Input value={formData.indemnity_registered_owner} onChange={e => field('indemnity_registered_owner', e.target.value)} className={inputCls} placeholder="Full name of the registered owner/keeper" /></div>
               <div>
@@ -351,11 +351,11 @@ export default function IndemnityForm() {
 
           {currentStepKey === 'review' && (
             <div className="space-y-5">
-              <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-800">
+              <div className="bg-warning-bg border border-warning/30 rounded-xl p-4 text-sm text-warning-fg">
                 <p className="font-semibold mb-1">Declaration</p>
                 <p>I confirm that the information provided in this form is true and accurate to the best of my knowledge and belief. I understand that this information will be used in connection with my insurance claim.</p>
               </div>
-              <div className="bg-gray-50 rounded-xl p-4 text-xs text-gray-600 space-y-1">
+              <div className="bg-muted rounded-xl p-4 text-xs text-muted-foreground space-y-1">
                 <p><strong>Date of Birth:</strong> {formData.indemnity_driver_dob || '—'}</p>
                 <p><strong>Registered Owner/Keeper:</strong> {formData.indemnity_registered_owner || '—'}</p>
                 <p><strong>Full licence 12+ months:</strong> {formData.indemnity_full_license_12_months || '—'}</p>
@@ -370,12 +370,12 @@ export default function IndemnityForm() {
                 <p><strong>Property damaged:</strong> {formData.indemnity_property_damaged || '—'}</p>
                 <p><strong>More photos:</strong> {formData.indemnity_more_photos || '—'}</p>
               </div>
-              <p className="text-xs text-gray-400 text-center">Please review the summary above and click Submit when ready.</p>
+              <p className="text-xs text-muted-foreground text-center">Please review the summary above and click Submit when ready.</p>
             </div>
           )}
 
           {error && (
-            <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">{error}</div>
+            <div className="mt-4 p-3 bg-danger-bg border border-danger/30 rounded-xl text-sm text-danger-fg">{error}</div>
           )}
         </div>
 
@@ -387,11 +387,11 @@ export default function IndemnityForm() {
             </Button>
           ) : <div />}
           {step < STEPS.length - 1 ? (
-            <Button onClick={next} className="bg-amber-500 hover:bg-amber-600 text-white flex items-center gap-2">
+            <Button onClick={next} className="bg-warning hover:bg-warning text-on-solid flex items-center gap-2">
               Next <ArrowRight className="w-4 h-4" />
             </Button>
           ) : (
-            <Button onClick={handleSubmit} disabled={isSubmitting} className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2">
+            <Button onClick={handleSubmit} disabled={isSubmitting} className="bg-success hover:bg-success text-on-solid flex items-center gap-2">
               {isSubmitting ? <><Loader className="w-4 h-4 animate-spin" /> Submitting...</> : <><ShieldCheck className="w-4 h-4" /> Submit</>}
             </Button>
           )}

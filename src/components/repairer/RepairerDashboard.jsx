@@ -8,9 +8,9 @@ import { activateOnKey } from '@/lib/a11y';
 
 export default function RepairerDashboard({ claims, estimates, parts, activeClaims, pendingEstimates, activeParts, onNavigate, bodyshopName, bodyshopId }) {
   const stats = [
-    { label: 'Active Claims', count: activeClaims.length, icon: FileText, color: 'bg-blue-100 text-blue-600', tab: 'claims' },
-    { label: 'Pending Estimates', count: pendingEstimates.length, icon: Calculator, color: 'bg-green-100 text-green-600', tab: 'estimates' },
-    { label: 'Parts Requests', count: activeParts.length, icon: Package, color: 'bg-orange-100 text-orange-600', tab: 'parts' },
+    { label: 'Active Claims', count: activeClaims.length, icon: FileText, color: 'bg-info-bg text-info-fg', tab: 'claims' },
+    { label: 'Pending Estimates', count: pendingEstimates.length, icon: Calculator, color: 'bg-success-bg text-success-fg', tab: 'estimates' },
+    { label: 'Parts Requests', count: activeParts.length, icon: Package, color: 'bg-warning-bg text-warning-fg', tab: 'parts' },
     { label: 'ARTURA Products', count: 'New', icon: Gift, color: 'bg-purple-100 text-purple-600', tab: 'products' },
   ];
 

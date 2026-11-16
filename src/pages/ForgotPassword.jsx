@@ -49,7 +49,7 @@ export default function ForgotPassword() {
           <AuthNotice tone="success" className="mb-0 text-left">
             If there is an account for {email.trim()}, a reset link is on its way. It can take a few minutes, so check your junk folder too.
           </AuthNotice>
-          <button type="button" onClick={() => setSent(false)} className="h-11 text-sm text-blue-700 dark:text-blue-300 font-medium hover:underline md:h-9">
+          <button type="button" onClick={() => setSent(false)} className="h-11 text-sm text-info-fg font-medium hover:underline md:h-9">
             Use a different email
           </button>
         </div>
@@ -59,7 +59,7 @@ export default function ForgotPassword() {
           <div className="space-y-2">
             <Label htmlFor="email">Email address</Label>
             <div className="relative">
-              <Mail className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" aria-hidden="true" />
+              <Mail className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
               <Input
                 id="email"
                 type="email"
@@ -71,7 +71,7 @@ export default function ForgotPassword() {
                 placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="pl-10 h-12 bg-white text-gray-900 dark:bg-[#2c2c2e] dark:text-gray-100"
+                className="pl-10 h-12 bg-card text-foreground dark:bg-[#2c2c2e]"
               />
             </div>
           </div>

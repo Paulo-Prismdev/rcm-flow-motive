@@ -67,7 +67,7 @@ export default function RepairerClaimsList({ claims, onViewClaim }) {
       return (
         <span className="relative group cursor-default">
           <span className="md:truncate md:max-w-[120px] md:inline-block">{val}</span>
-          <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 hidden group-hover:block z-50 bg-gray-900 text-white text-xs rounded-lg px-3 py-2 max-w-xs break-words shadow-lg">
+          <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 hidden group-hover:block z-50 bg-foreground text-background text-xs rounded-lg px-3 py-2 max-w-xs break-words shadow-lg">
             {val}
           </span>
         </span>
@@ -78,7 +78,7 @@ export default function RepairerClaimsList({ claims, onViewClaim }) {
       return (
         <button
           onClick={(e) => { e.stopPropagation(); onViewClaim?.(claim, 'documents'); }}
-          className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 text-xs font-medium hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors cursor-pointer"
+          className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-info-bg text-info-fg text-xs font-medium hover:bg-info-bg transition-colors cursor-pointer"
         >
           <FileText className="w-3 h-3" />
           {docCount}
@@ -146,7 +146,7 @@ export default function RepairerClaimsList({ claims, onViewClaim }) {
           ))}
           <div className="flex-1" />
           <select value={sortBy} onChange={e => setSortBy(e.target.value)}
-            className="px-2 py-1 text-[11px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-700 dark:text-gray-300 focus:outline-none cursor-pointer">
+            className="px-2 py-1 text-xs bg-card border border-border rounded-lg text-foreground focus:outline-none cursor-pointer">
             <option value="created_desc">Created (Newest)</option>
             <option value="created_asc">Created (Oldest)</option>
             <option value="loss_desc">Accident Date (Newest)</option>
@@ -166,32 +166,32 @@ export default function RepairerClaimsList({ claims, onViewClaim }) {
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Search by reg, client, job number, driver..."
-              className="w-full px-4 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-[10px] focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/15 text-gray-900 dark:text-white placeholder-gray-400 transition-all"
+              className="w-full px-4 py-2 text-sm bg-card border border-border rounded-lg focus:outline-none focus:border-ring focus:ring-2 focus:ring-blue-500/15 text-foreground placeholder-gray-400 transition-all"
             />
             {search && (
-              <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+              <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-muted-foreground">
                 <X className="w-3.5 h-3.5" />
               </button>
             )}
           </div>
           <button onClick={() => setShowFilters(!showFilters)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-[10px] text-xs font-medium border transition-all ${activeFiltersCount > 0 ? 'bg-blue-50 border-blue-200 text-blue-700 dark:bg-blue-900/20 dark:border-blue-700 dark:text-blue-300' : 'border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-800 hover:border-gray-300'}`}>
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${activeFiltersCount > 0 ? 'bg-info-bg border-info/30 text-info-fg' : 'border-border text-muted-foreground hover:bg-card hover:border-border'}`}>
             <Filter className="w-3.5 h-3.5" />
             Filters{activeFiltersCount > 0 ? ` (${activeFiltersCount})` : ''}
           </button>
           {activeFiltersCount > 0 && (
             <button onClick={() => { setSearch(''); setInsurerFilter(''); setClaimTypeFilter(''); setBusinessDivisionFilter(''); }}
-              className="p-1.5 text-gray-400 hover:text-gray-600 transition-colors"><X className="w-3.5 h-3.5" /></button>
+              className="p-1.5 text-muted-foreground hover:text-muted-foreground transition-colors"><X className="w-3.5 h-3.5" /></button>
           )}
         </div>
         {/* Filter panel */}
         {showFilters && (
-          <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-800">
+          <div className="p-3 rounded-lg bg-muted border border-border">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
               <div>
-                <label className="block text-[10px] font-medium text-gray-400 dark:text-gray-500 mb-0.5">Claim Type</label>
+                <label className="block text-xs font-medium text-muted-foreground mb-0.5">Claim Type</label>
                 <select value={claimTypeFilter} onChange={e => setClaimTypeFilter(e.target.value)}
-                  className="w-full px-2 py-1 text-[11px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-700 dark:text-gray-300 focus:outline-none">
+                  className="w-full px-2 py-1 text-xs bg-card border border-border rounded text-foreground focus:outline-none">
                   <option value="">All Types</option>
                   <option value="Fault Claim">Fault Claim</option>
                   <option value="Non-Fault - Own Insurer">Non-Fault - Own Insurer</option>
@@ -202,17 +202,17 @@ export default function RepairerClaimsList({ claims, onViewClaim }) {
                 </select>
               </div>
               <div>
-                <label className="block text-[10px] font-medium text-gray-400 dark:text-gray-500 mb-0.5">Insurer</label>
+                <label className="block text-xs font-medium text-muted-foreground mb-0.5">Insurer</label>
                 <select value={insurerFilter} onChange={e => setInsurerFilter(e.target.value)}
-                  className="w-full px-2 py-1 text-[11px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-700 dark:text-gray-300 focus:outline-none">
+                  className="w-full px-2 py-1 text-xs bg-card border border-border rounded text-foreground focus:outline-none">
                   <option value="">All Insurers</option>
                   {uniqueInsurers.map(i => <option key={i} value={i}>{i}</option>)}
                 </select>
               </div>
               <div>
-                <label className="block text-[10px] font-medium text-gray-400 dark:text-gray-500 mb-0.5">Business Division</label>
+                <label className="block text-xs font-medium text-muted-foreground mb-0.5">Business Division</label>
                 <select value={businessDivisionFilter} onChange={e => setBusinessDivisionFilter(e.target.value)}
-                  className="w-full px-2 py-1 text-[11px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-700 dark:text-gray-300 focus:outline-none">
+                  className="w-full px-2 py-1 text-xs bg-card border border-border rounded text-foreground focus:outline-none">
                   <option value="">All Divisions</option>
                   {uniqueBusinessDivisions.map(d => <option key={d} value={d}>{d}</option>)}
                 </select>
@@ -227,13 +227,13 @@ export default function RepairerClaimsList({ claims, onViewClaim }) {
         <table className="w-full min-w-[600px]">
           <thead>
             <tr className="border-b border-border">
-              <th className="px-4 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-foreground-muted whitespace-nowrap">REG</th>
+              <th className="px-4 py-2 text-left text-xs font-semibold text-foreground-muted whitespace-nowrap">REG</th>
               {displayFields.map(fieldId => (
-                <th key={fieldId} className="px-4 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-foreground-muted whitespace-nowrap">
+                <th key={fieldId} className="px-4 py-2 text-left text-xs font-semibold text-foreground-muted whitespace-nowrap">
                   {FIELD_LABELS[fieldId] || fieldId}
                 </th>
               ))}
-              <th className="px-4 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-foreground-muted whitespace-nowrap">STATUS</th>
+              <th className="px-4 py-2 text-left text-xs font-semibold text-foreground-muted whitespace-nowrap">STATUS</th>
             </tr>
           </thead>
           <tbody>
@@ -274,7 +274,7 @@ export default function RepairerClaimsList({ claims, onViewClaim }) {
           <div role="button" tabIndex={0} onKeyDown={activateOnKey}
             key={claim.id}
             onClick={() => onViewClaim?.(claim, null)}
-            className="neomorph-flat p-3 cursor-pointer active:bg-gray-50"
+            className="neomorph-flat p-3 cursor-pointer active:bg-muted"
           >
             <div className="flex items-center justify-between gap-2">
               <span
@@ -285,7 +285,7 @@ export default function RepairerClaimsList({ claims, onViewClaim }) {
               </span>
               <div className="flex items-center gap-1 flex-wrap justify-end min-w-0">
                 {claim.job_number && (
-                  <span className="text-[11px] font-mono px-1.5 py-0.5 rounded bg-primary/20 text-primary">
+                  <span className="text-xs font-mono px-1.5 py-0.5 rounded bg-primary/20 text-primary">
                     {claim.job_number}
                   </span>
                 )}
