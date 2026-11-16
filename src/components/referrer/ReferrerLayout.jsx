@@ -122,7 +122,7 @@ export default function ReferrerLayout({ children }) {
       {/* Mobile overlay */}
       {mobileMenuOpen &&
         <div data-overlay-dismiss
-          className="fixed inset-0 z-[9998] bg-black/50 lg:hidden"
+          className="fixed inset-0 z-[9998] fm-scrim lg:hidden"
           onClick={() => setMobileMenuOpen(false)} />
       }
 
