@@ -27,6 +27,7 @@ import { hireFlagged } from '@/components/shared/hireCharge';
 import InvoiceStatusReviewBanner from '../components/claims/InvoiceStatusReviewBanner';
 import PullToRefresh from '../components/shared/PullToRefresh';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useBackLayer } from '@/lib/backNavigation';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -435,6 +436,10 @@ export default function ClaimsPage() {
     (['Red', 'Amber'].includes(calculateUpdateStatus(c)) || ['Red', 'Amber'].includes(computeClientCommStatusFlag(c)));
   const chipMatches = (c, chip) => chip === 'all' || (chip === 'action' ? needsAction(c) : getGroupKey(c) === chip);
   const cardClaims = isPhone ? filteredClaims.filter(c => chipMatches(c, phoneChip)) : filteredClaims;
+
+  // An open claim is one step in the back history: the phone's back gesture, the
+  // browser's back button and the claim's own Back all close it.
+  useBackLayer(!!selectedClaim, () => { setSelectedClaim(null); setOpenSection('status'); }, 'claim');
 
   // Hide the global layout header on mobile when a claim detail is open
   useEffect(() => {
