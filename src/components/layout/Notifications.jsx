@@ -65,10 +65,10 @@ export default function Notifications() {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <button className="flex items-center justify-center relative touch-manipulation text-gray-500 dark:text-gray-400">
-          <Bell className="w-5 h-5" />
+        <button type="button" aria-label="Notifications" className="flex items-center justify-center relative touch-manipulation text-current">
+          <Bell className="w-5 h-5 md:w-4 md:h-4" />
           {unreadCount > 0 && (
-            <span className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center font-bold" style={{fontSize:'9px'}}>
+            <span className="absolute -top-2 -right-2 bg-danger text-on-solid rounded-md min-w-[18px] h-[18px] px-1 flex items-center justify-center text-xs font-semibold">
               {unreadCount > 9 ? '9+' : unreadCount}
             </span>
           )}
