@@ -325,7 +325,7 @@ export default function EstimateDetail({ estimate, onClose, onUpdate, isInternal
                           <ArrowLeft className="w-4 h-4" />
                       </Button>
                       <div className="flex-1 min-w-0">
-                          <h1 className="text-base md:text-2xl font-bold truncate">{estimate.name || 'Estimate'}</h1>
+                          <h1 className="text-lg md:text-page-title truncate">{estimate.name || 'Estimate'}</h1>
                       </div>
                   </div>
 

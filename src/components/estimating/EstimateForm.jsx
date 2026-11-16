@@ -123,7 +123,7 @@ export default function EstimateForm({ estimate, onSubmit, onCancel }) {
             <ArrowLeft className="w-4 h-4 text-muted-foreground" />
           </Button>
           <div>
-            <h1 className="text-2xl font-bold text-foreground">{estimate ? 'Edit Estimate' : 'New Estimate'}</h1>
+            <h1 className="text-page-title text-foreground">{estimate ? 'Edit estimate' : 'New estimate'}</h1>
             <p className="text-sm text-muted-foreground mt-1">Enter estimate details</p>
           </div>
         </div>
