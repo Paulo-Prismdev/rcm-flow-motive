@@ -587,7 +587,7 @@ export default function ClaimsPage() {
             )}
             {hireFlagged(claim) && (
               <span
-                className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-info-bg text-info-fg dark:bg-indigo-900/40 dark:text-indigo-300 text-xs font-semibold leading-none"
+                className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-info-bg text-info-fg text-xs font-semibold leading-none"
                 title="Hire to invoice"
               >
                 Hire
@@ -632,7 +632,7 @@ export default function ClaimsPage() {
           >
             <MessageSquare className="w-4 h-4" />
             {claim.unread_bodyshop_update && (
-              <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-success ring-2 ring-white dark:ring-gray-900 flex-shrink-0" />
+              <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-success ring-2 ring-card flex-shrink-0" />
             )}
           </button>
         </td>
@@ -663,7 +663,7 @@ export default function ClaimsPage() {
       <div role="button" tabIndex={0} onKeyDown={activateOnKey}
         key={claim.id}
         onClick={() => setSelectedClaim(claim)}
-        className="px-4 py-3 border-b border-border cursor-pointer active:bg-muted dark:active:bg-gray-800/60 transition-colors"
+        className="px-4 py-3 border-b border-border cursor-pointer active:bg-muted transition-colors"
       >
         <div className="flex items-center justify-between gap-2">
           <span
@@ -698,7 +698,7 @@ export default function ClaimsPage() {
             >
               <MessageSquare className="w-4 h-4" />
               {claim.unread_bodyshop_update && (
-                <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-success ring-2 ring-white dark:ring-gray-900 flex-shrink-0" />
+                <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-success ring-2 ring-card flex-shrink-0" />
               )}
             </button>
             <button
@@ -1007,7 +1007,7 @@ export default function ClaimsPage() {
                     <React.Fragment>
                     <div role="button" tabIndex={0} onKeyDown={activateOnKey} className="flex items-center gap-2 px-4 py-2 bg-muted cursor-pointer select-none border-b border-border" onClick={() => toggleGroup('__other__')}>
                       {isCollapsed ? <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" /> : <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />}
-                      <span className="w-2 h-2 rounded-full bg-gray-400 flex-shrink-0" />
+                      <span className="w-2 h-2 rounded-full bg-muted-foreground/50 flex-shrink-0" />
                       <span className="text-sm font-semibold text-foreground">Closed</span>
                       <span className="text-xs text-muted-foreground ml-1">{ungrouped.length}</span>
                     </div>
@@ -1125,7 +1125,7 @@ export default function ClaimsPage() {
                         <td colSpan={userCardFields.length + 6} className="p-0">
                           <div className="sticky left-0 z-10 flex w-fit items-center gap-2 px-4 py-2">
                             {isCollapsed ? <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" /> : <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />}
-                            <span className="w-2 h-2 rounded-full bg-gray-400 flex-shrink-0" />
+                            <span className="w-2 h-2 rounded-full bg-muted-foreground/50 flex-shrink-0" />
                             <span className="text-sm font-semibold text-foreground">Closed</span>
                             <span className="text-xs text-muted-foreground ml-1">{ungrouped.length}</span>
                           </div>
@@ -1197,7 +1197,7 @@ export default function ClaimsPage() {
       {/* Detail panel — full width, replacing the list */}
       {selectedClaim && (
         <div className="flex-1 min-w-0 min-h-0 flex flex-col w-full" data-claim-scroll>
-          <div className="h-full lg:rounded-xl lg:border lg:border-border dark:lg:border-gray-800 bg-card overflow-hidden" data-claim-shell>
+          <div className="h-full lg:rounded-xl lg:border lg:border-border bg-card overflow-hidden" data-claim-shell>
             <ClaimDetail
               key={selectedClaim.id}
               claim={selectedClaim}
