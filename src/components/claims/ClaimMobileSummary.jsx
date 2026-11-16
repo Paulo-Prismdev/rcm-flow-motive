@@ -133,12 +133,12 @@ const Plate = ({ reg }) => (
 export function ClaimMobileSectionBar({ claim, title, onBack, onAction, isInternalUser }) {
   return (
     <div data-claim-header className="lg:hidden sticky top-0 flex-shrink-0 bg-card/90 backdrop-blur-md">
-      <div className="grid grid-cols-[1fr_auto_1fr] m-keep-2 items-center gap-1 px-2 min-h-[48px]">
-        <button type="button" onClick={onBack} className="justify-self-start flex items-center gap-0.5 pr-2 py-2 text-link text-[15px] font-medium min-w-0">
-          <ChevronLeft className="w-6 h-6 flex-shrink-0" aria-hidden="true" /><span className="truncate">{claim.reg || 'Claim'}</span>
+      <div className="relative flex items-center justify-between gap-1 px-2 min-h-[48px]">
+        <button type="button" onClick={onBack} className="relative z-10 flex items-center gap-0.5 pr-2 py-2 text-link font-medium whitespace-nowrap">
+          <ChevronLeft className="w-6 h-6 flex-shrink-0" aria-hidden="true" /><span className="text-[15px]">{claim.reg || 'Claim'}</span>
         </button>
-        <h1 className="text-[15px] font-semibold truncate max-w-[52vw] text-center">{title}</h1>
-        <span className="justify-self-end"><MoreMenu claim={claim} onAction={onAction} isInternalUser={isInternalUser} /></span>
+        <h1 className="absolute inset-x-[110px] text-center text-[15px] font-semibold truncate pointer-events-none">{title}</h1>
+        <span className="relative z-10"><MoreMenu claim={claim} onAction={onAction} isInternalUser={isInternalUser} /></span>
       </div>
     </div>
   );
