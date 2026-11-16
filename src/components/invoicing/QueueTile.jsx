@@ -13,7 +13,7 @@ const COUNT_TONE = {
 
 /** One of the day's queues as a tile; clicking it opens its list under the grid. */
 export default function QueueTile({ section, open, onToggle }) {
-  const frame = `rounded-[10px] border text-left transition-colors ${open ? 'border-foreground/25 bg-muted/60' : 'border-border bg-card hover:bg-muted/40'}`;
+  const frame = `rounded-xl border text-left transition-colors ${open ? 'border-primary/40 bg-surface-selected' : 'border-border bg-card shadow-card hover:bg-muted/40'}`;
 
   // A clear queue is a small muted chip: nothing to do, nothing to read.
   if (section.count === 0) {
@@ -21,6 +21,7 @@ export default function QueueTile({ section, open, onToggle }) {
       <button
         type="button"
         onClick={onToggle}
+        aria-expanded={open}
         className={`rounded-lg border flex items-center gap-1.5 px-2.5 py-1.5 text-left transition-colors ${open ? 'border-foreground/25 bg-muted' : 'border-border bg-muted/40 hover:bg-muted/70'}`}
       >
         <Check className={`w-3.5 h-3.5 shrink-0 ${lightText('green')}`} />
@@ -33,7 +34,7 @@ export default function QueueTile({ section, open, onToggle }) {
   // of the tile so every amount in a row lines up, and a queue with no money in it
   // simply has no amount line.
   return (
-    <button type="button" onClick={onToggle} className={`${frame} flex flex-col px-3 py-2`}>
+    <button type="button" onClick={onToggle} aria-expanded={open} className={`${frame} flex flex-col px-3 py-2`}>
       <span className="text-[13px] font-semibold leading-snug line-clamp-2">{section.label}</span>
       <p className={`text-lg lg:text-xl font-bold tabular-nums leading-none mt-1.5 ${COUNT_TONE[section.tone] || COUNT_TONE.neutral}`}>
         {section.count}
