@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Command, CommandItem, CommandList } from "@/components/ui/command";
 import StatusChangeFields from "@/components/shared/StatusChangeFields";
 import { getClaimOutcome } from "@/components/shared/claimOutcome";
-import { buildStatusChangeClaimUpdate, isUpdateTrackingClosed } from "@/components/shared/claimStatusUpdate";
+import { buildStatusChangeClaimUpdate, buildStatusChangeRecord, isUpdateTrackingClosed } from "@/components/shared/claimStatusUpdate";
 import { createTagNotifications } from "@/components/shared/createTagNotifications";
 import UpdateContactSelector from "@/components/claims/UpdateContactSelector";
 import { getAvailableUpdateTypes } from "@/components/shared/claimTypeLogic";
@@ -108,11 +108,14 @@ export default function ClaimUpdateForm({
           outcome: updateData.new_outcome, journey: updateData.new_journey, secondary: updateData.new_secondary_status, tertiary: updateData.new_tertiary_status,
           on_site_date: updateData.new_on_site_date, completion_date: updateData.new_completion_date, claim_complete_date: updateData.new_claim_complete_date, salvage_collected_date: updateData.new_salvage_collected_date, hand_over_date: updateData.new_hand_over_date
         }, updateData.update_type);
+        // Taken before the claim is written, so `from` is what the claim held.
+        const statusRecord = buildStatusChangeRecord(claim, claimUpdate);
         if (Object.keys(claimUpdate).length > 0) {
           await base44.entities.Claim.update(claimId, claimUpdate);
         }
         created = await base44.entities.ClaimUpdate.create({
           update_type: 'Status Change', description: updateData.description, next_steps: updateData.next_steps,
+          ...(statusRecord && { status_change: statusRecord }),
           due_date_for_next_action: updateData.due_date_for_next_action, claim_id: claimId,
           parent_update_id: updateData.parent_update_id, tagged_user_ids: updateData.tagged_user_ids,
           ...(currentUser?.company_id && { company_id: currentUser.company_id })
