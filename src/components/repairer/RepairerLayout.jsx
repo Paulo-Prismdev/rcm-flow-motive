@@ -205,8 +205,8 @@ export default function RepairerLayout({ children }) {
               <div className="p-4 border-b border-border">
                 <div className="neomorph-flat p-4 rounded-xl">
                   <div className="flex items-center gap-3 mb-3">
-                    <div className="w-12 h-12 rounded-full bg-accent flex items-center justify-center">
-                      <span className="text-base font-bold text-accent-foreground">
+                    <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center">
+                      <span className="text-base font-bold text-primary-foreground">
                         {currentUser.full_name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || '?'}
                       </span>
                     </div>
