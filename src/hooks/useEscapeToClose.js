@@ -28,8 +28,10 @@ export default function useEscapeToClose(onClose, active = true) {
   const ref = useRef(onClose);
   ref.current = onClose;
 
+  const enabled = !!active && typeof onClose === 'function';
+
   useEffect(() => {
-    if (!active || typeof onClose !== 'function') return undefined;
+    if (!enabled) return undefined;
     stack.push(ref);
     if (!listening) {
       document.addEventListener('keydown', onKeyDown);
@@ -39,5 +41,5 @@ export default function useEscapeToClose(onClose, active = true) {
       const i = stack.lastIndexOf(ref);
       if (i !== -1) stack.splice(i, 1);
     };
-  }, [active, typeof onClose === 'function']); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [enabled]);
 }
