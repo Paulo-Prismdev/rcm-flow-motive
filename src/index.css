@@ -998,8 +998,16 @@ fieldset.fm-readonly { border: 0; margin: 0; padding: 0; min-width: 0; }
 .fm-readonly button[role="switch"], .fm-readonly button[role="checkbox"], .fm-readonly input[type="checkbox"], .fm-readonly input[type="radio"] {
   opacity: 0.85 !important; pointer-events: none;
 }
-/* Form buttons (Save, Cancel, look-ups) only appear while editing. */
-.fm-readonly button:not([role="switch"]):not([role="checkbox"]):not([role="combobox"]) { display: none !important; }
+/* Dropdowns built from buttons keep showing their value; action buttons (Save, Cancel,
+   look-ups, add/remove) are tagged fm-hide by the section and only appear while editing. */
+.fm-readonly button { opacity: 1 !important; pointer-events: none; cursor: inherit !important; }
+.fm-readonly button:not([role="switch"]):not([role="checkbox"]) {
+  border-color: transparent !important; box-shadow: none !important;
+  color: hsl(var(--foreground)) !important;
+}
+.fm-readonly .fm-hide { display: none !important; }
+/* Empty date boxes: amber, without the browser's dd/mm/yyyy pattern */
+.fm-readonly input[type="date"].fm-empty, .fm-readonly input[type="time"].fm-empty { color: transparent !important; -webkit-text-fill-color: transparent; }
 .fm-readonly select { appearance: none; }
 .fm-click-edit { cursor: text; }
 .fm-click-edit [data-edit-label] { cursor: pointer; }

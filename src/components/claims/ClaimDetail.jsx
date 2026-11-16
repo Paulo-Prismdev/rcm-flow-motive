@@ -176,6 +176,14 @@ const EditableSection = ({ title, icon: Icon, claim, onUpdate, children, EditCom
             el.classList.toggle('fm-empty', empty);
             if (empty && !el.dataset.fmPh) { el.dataset.fmPh = '1'; el.placeholder = 'Not set'; }
         });
+        // Action buttons only make sense while editing; dropdown buttons stay (they show the value).
+        const ACTION = /^(save|cancel|update|add|remove|delete|clear|fetch|look ?up|search|upload|apply|reset|copy|send|use)\b/i;
+        bodyRef.current.querySelectorAll('.fm-readonly button').forEach((b) => {
+            const role = b.getAttribute('role');
+            if (role === 'switch' || role === 'checkbox' || role === 'combobox') return;
+            const text = (b.textContent || '').trim();
+            if (b.type === 'submit' || ACTION.test(text) || (!text && !b.closest('[data-radix-popper-content-wrapper]') && b.querySelector('svg') && !b.getAttribute('aria-haspopup'))) b.classList.add('fm-hide');
+        });
     });
 
     // After switching to edit, put the cursor where the user clicked.
