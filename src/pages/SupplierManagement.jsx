@@ -282,11 +282,11 @@ export default function SupplierManagement() {
           </div> :
         filteredSuppliers.length === 0 ?
         <div className="text-center py-12">
-            <Building2 className="w-12 h-12 mx-auto mb-4 text-foreground-muted" />
-            <p className="text-foreground-muted mb-4">No suppliers found</p>
+            <Building2 className="w-10 h-10 mx-auto mb-3 text-muted-foreground" aria-hidden="true" />
+            <p className="text-sm text-muted-foreground mb-4">No suppliers found</p>
             <Button onClick={() => setIsAddModalOpen(true)} size="sm" className="gap-1.5">
               <Plus className="w-4 h-4" />
-              Add First Supplier
+              Add the first supplier
             </Button>
           </div> :
 
