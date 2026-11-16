@@ -349,7 +349,7 @@ export default function ClaimMobileSummary({
         <h2 className="px-4 pt-3 pb-1 text-[19px] font-bold tracking-tight">All details</h2>
         {grouped.map(([title, list]) => (
           <div key={title} className="mb-3">
-            <h3 className="flex items-center justify-between px-5 pt-2.5 pb-1.5 text-[13px] font-semibold text-foreground">
+            <h3 className="flex items-center justify-between px-4 pt-3 pb-2 text-base font-bold tracking-tight text-foreground">
               <span>{title}</span>
               {list.some((s) => s.empty) && (
                 <span className="flex items-center gap-1.5 text-xs font-medium text-warning-fg">
