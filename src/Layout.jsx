@@ -60,11 +60,11 @@ import { escapeWindowsOpen } from '@/hooks/useEscapeToClose';
 const allDepartments = [
 { name: "Dashboard", url: createPageUrl("Dashboard"), icon: LayoutDashboard, permission: "Dashboard" },
 { name: "Repairs", url: createPageUrl("Claims"), icon: FileText, permission: "Claims" },
-{ name: "My Tasks", url: createPageUrl("Tasks"), icon: CheckSquare, permission: "Claims" },
+{ name: "My tasks", url: createPageUrl("Tasks"), icon: CheckSquare, permission: "Claims" },
 { name: "Estimating", url: createPageUrl("Estimating"), icon: Calculator, permission: "Estimating" },
 { name: "Engineering", url: createPageUrl("Engineering"), icon: Wrench, permission: "Engineering" },
 { name: "Parts", url: createPageUrl("Parts"), icon: Package, permission: "Parts" },
-{ name: "Tyre Requests", url: createPageUrl("TyreRequests"), icon: CircleDot, permission: "Parts" },
+{ name: "Tyre requests", url: createPageUrl("TyreRequests"), icon: CircleDot, permission: "Parts" },
 
 { name: "Invoicing", url: createPageUrl("Invoicing"), icon: Receipt, permission: "Invoicing" },
 { name: "Reports", url: createPageUrl("Reports"), icon: BarChart3, permission: "Reports", overlayPage: "Reports" },
