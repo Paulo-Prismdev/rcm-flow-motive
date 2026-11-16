@@ -409,9 +409,9 @@ export default function Layout({ children, currentPageName }) {
 
                     {isSuperAdmin &&
                 <Link to={createPageUrl("FeedbackHub")} onClick={() => setMobileMenuOpen(false)}
-                title="Feedback Hub"
+                title="Feedback hub"
                 className={`${NAV_BASE} ${location.pathname === createPageUrl("FeedbackHub") ? NAV_ON : NAV_REST}`}>
-                        <MessageSquare className="w-4 h-4 flex-shrink-0" /><span className="md:hidden lg:block">Feedback Hub</span>
+                        <MessageSquare className="w-4 h-4 flex-shrink-0" /><span className="md:hidden lg:block">Feedback hub</span>
                       </Link>
                 }
                   </>
