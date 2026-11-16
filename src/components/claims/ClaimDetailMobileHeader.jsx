@@ -159,7 +159,7 @@ export default function ClaimDetailMobileHeader({
         <button type="button" onClick={onUpdates} className={`${actionBase} ${actionSize} bg-primary hover:bg-primary/90 text-primary-foreground`}>
           <MessageSquare className="w-4 h-4" />
           {!collapsed && <span className="text-xs font-medium leading-none">Updates</span>}
-          <CountBadge count={updatesCount} className="bg-white text-green-700" />
+          <CountBadge count={updatesCount} className="bg-card text-foreground ring-1 ring-border" />
         </button>
         <button type="button" onClick={() => onAction('images')} className={`${actionBase} ${actionSize} border border-border bg-card text-foreground`}>
           <Image className="w-4 h-4" />
