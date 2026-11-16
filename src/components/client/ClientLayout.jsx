@@ -32,11 +32,11 @@ export default function ClientLayout({ children }) {
   return (
     <StatusConfigProvider>
       <GlobalSearch open={searchOpen} onOpenChange={setSearchOpen} portalPage="ClientPortal" />
-      <div className="flex overflow-hidden bg-muted app-height">
+      <div className="flex overflow-hidden app-height">
         {/* SIDEBAR */}
         <aside className={`
           fixed inset-y-0 left-0 z-[9999] flex flex-col
-          w-56 bg-[#131d47] text-white
+          w-56 fm-glass-chrome text-white
           transition-transform duration-300
           ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
           lg:relative lg:translate-x-0 lg:flex-shrink-0
@@ -62,8 +62,8 @@ export default function ClientLayout({ children }) {
               }}
               className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
                 activeTab === 'dashboard'
-                  ? 'bg-white/10 text-white border border-white/15'
-                  : 'text-white/60 hover:bg-white/8 hover:text-white/90'
+                  ? 'bg-white/[0.12] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.10)]'
+                  : 'text-white/70 hover:bg-white/[0.08] hover:text-white'
               }`}
             >
               <LayoutDashboard className="w-4 h-4 flex-shrink-0" />
@@ -78,12 +78,12 @@ export default function ClientLayout({ children }) {
               }}
               className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
                 activeTab === 'claims'
-                  ? 'bg-white/10 text-white border border-white/15'
-                  : 'text-white/60 hover:bg-white/8 hover:text-white/90'
+                  ? 'bg-white/[0.12] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.10)]'
+                  : 'text-white/70 hover:bg-white/[0.08] hover:text-white'
               }`}
             >
               <FileText className="w-4 h-4 flex-shrink-0" />
-              <span>My Claims</span>
+              <span>My claims</span>
             </a>
           </nav>
 
@@ -101,13 +101,13 @@ export default function ClientLayout({ children }) {
               </div>
               <button
                 onClick={() => setProfileOpen(true)}
-                title="My Profile"
+                title="My profile" aria-label="My profile"
                 className="text-white/40 hover:text-white transition-colors flex-shrink-0">
                 <User className="w-4 h-4" />
               </button>
               <button
                 onClick={() => signOut()}
-                title="Log Out"
+                title="Sign out" aria-label="Sign out"
                 className="text-white/40 hover:text-red-400 transition-colors flex-shrink-0">
                 <LogOut className="w-4 h-4" />
               </button>
