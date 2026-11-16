@@ -38,27 +38,28 @@ export default function QuickAccessOverlay({ pageName, onClose }) {
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 z-[10000] bg-black/50 backdrop-blur-sm"
+        className="fixed inset-0 z-[10000] fm-scrim"
         onClick={() => {
           if (document.querySelector('[data-custom-portal-modal="true"]')) return;
           onClose();
         }}
       />
-      {/* Content panel */}
-      <div className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[10001] w-[95vw] h-[92vh] max-h-[92vh] bg-background border border-border rounded-xl shadow-2xl flex flex-col overflow-hidden">
-        <div className="flex items-center justify-between px-4 py-2.5 border-b border-border flex-shrink-0 bg-card">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">{config?.title}</h2>
+      {/* The workspace window: a whole area opened over the page, in glass. */}
+      <div role="dialog" aria-modal="true" aria-label={config?.title} className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[10001] w-[95vw] h-[92vh] max-h-[92vh] fm-glass-window rounded-2xl text-foreground flex flex-col overflow-hidden max-md:w-screen max-md:h-[100dvh] max-md:max-h-[100dvh] max-md:rounded-none">
+        <div className="flex items-center gap-3 px-4 py-2.5 border-b border-border flex-shrink-0">
           <button
             onClick={() => {
               if (document.querySelector('[data-custom-portal-modal="true"]')) return;
               onClose();
             }}
-            className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+            aria-label={`Close ${config?.title || ''}`}
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
+          <h2 className="text-base font-semibold text-foreground">{config?.title}</h2>
         </div>
-        <div className="flex-1 overflow-auto min-h-0 bg-background">
+        <div className="flex-1 overflow-auto min-h-0">
           {PageComponent && (
             <Suspense fallback={<PageLoader />}>
               <PageComponent />
