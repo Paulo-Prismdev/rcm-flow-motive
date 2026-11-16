@@ -19,7 +19,8 @@ import {
 import AddSupplierModal from '../components/shared/AddSupplierModal';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Search } from 'lucide-react';
+import PageHeader from '@/components/shared/PageHeader';
 import { deleteAndLog } from "@/components/shared/useActivityLogger";
 import { askConfirm, notify, warn } from '@/lib/dialogs';
 
