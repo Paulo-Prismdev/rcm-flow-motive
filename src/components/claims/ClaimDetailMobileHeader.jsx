@@ -156,7 +156,7 @@ export default function ClaimDetailMobileHeader({
 
       {/* Action row — four equal buttons, one line only */}
       <div className={`flex items-stretch gap-1.5 flex-nowrap px-3 ${collapsed ? 'pb-1.5' : 'pb-2'}`}>
-        <button type="button" onClick={onUpdates} className={`${actionBase} ${actionSize} bg-green-600 hover:bg-green-700 text-white`}>
+        <button type="button" onClick={onUpdates} className={`${actionBase} ${actionSize} bg-primary hover:bg-primary/90 text-primary-foreground`}>
           <MessageSquare className="w-4 h-4" />
           {!collapsed && <span className="text-xs font-medium leading-none">Updates</span>}
           <CountBadge count={updatesCount} className="bg-white text-green-700" />
