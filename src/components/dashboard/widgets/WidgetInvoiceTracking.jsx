@@ -50,11 +50,11 @@ export default function WidgetInvoiceTracking({ config, isEditMode }) {
   ];
 
   const content = (
-    <div className="bg-card text-card-foreground rounded-2xl border border-border shadow-sm hover:shadow-md transition-all duration-200 p-5 col-span-1 md:col-span-2">
+    <div className="bg-card text-card-foreground rounded-2xl border border-border shadow-card hover:shadow-md transition-all duration-200 p-5 col-span-1 md:col-span-2">
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-xl bg-amber-500/10 flex items-center justify-center">
-            <DollarSign className="w-4 h-4 text-amber-500" />
+          <div className="w-8 h-8 rounded-xl bg-warning/10 flex items-center justify-center">
+            <DollarSign className="w-4 h-4 text-warning-fg" />
           </div>
           <h2 className="text-sm font-bold">Invoice Tracking</h2>
         </div>
@@ -63,9 +63,9 @@ export default function WidgetInvoiceTracking({ config, isEditMode }) {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 m-keep-2">
         {metrics.map(m => (
           <div key={m.label} className="bg-muted rounded-xl p-4">
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">{m.label}</p>
+            <p className="text-xs font-semibold text-muted-foreground mb-2">{m.label}</p>
             <p className={`text-2xl font-bold tabular-nums ${m.accent} mb-1`}>{m.value}</p>
-            <p className="text-[11px] text-muted-foreground mb-3">{m.sub}</p>
+            <p className="text-xs text-muted-foreground mb-3">{m.sub}</p>
             <div className="w-full h-1 bg-border rounded-full overflow-hidden">
               <div className={`h-full ${m.bar} rounded-full transition-all duration-700`} style={{ width: `${m.barPct}%` }} />
             </div>

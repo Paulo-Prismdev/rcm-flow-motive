@@ -143,7 +143,7 @@ export default function WidgetGallery({ onClose, onAddWidget, department }) {
                   <h3 className="font-bold text-sm md:text-base mb-1 md:mb-2">{widget.name}</h3>
                   <p className="text-xs md:text-sm text-foreground-muted">{widget.description}</p>
                   {widget.configurable && (
-                    <span className="inline-block mt-2 md:mt-3 text-[10px] md:text-xs px-2 py-1 rounded-full bg-accent bg-opacity-20 text-accent">
+                    <span className="inline-block mt-2 md:mt-3 text-xs md:text-xs px-2 py-1 rounded-full bg-accent bg-opacity-20 text-accent">
                       Configurable
                     </span>
                   )}

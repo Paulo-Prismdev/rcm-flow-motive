@@ -28,11 +28,11 @@ export default function WidgetRecentActivity({ config, isEditMode }) {
   ].sort((a, b) => new Date(b.created_date) - new Date(a.created_date)).slice(0, limit);
 
   return (
-    <div className="bg-card text-card-foreground rounded-2xl border border-border shadow-sm p-5 col-span-1 md:col-span-2 lg:col-span-4">
+    <div className="bg-card text-card-foreground rounded-2xl border border-border shadow-card p-5 col-span-1 md:col-span-2 lg:col-span-4">
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-xl bg-blue-500/10 flex items-center justify-center">
-            <Clock className="w-4 h-4 text-blue-500" />
+          <div className="w-8 h-8 rounded-xl bg-info/10 flex items-center justify-center">
+            <Clock className="w-4 h-4 text-info-fg" />
           </div>
           <h2 className="text-sm font-bold">Recent Activity</h2>
         </div>
@@ -47,10 +47,10 @@ export default function WidgetRecentActivity({ config, isEditMode }) {
           {recentCases.map((item) => (
             <Link key={item.id} to={item.link}>
               <div className="flex items-center gap-4 py-3 hover:bg-muted rounded-xl px-2 transition-colors group">
-                <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${item.type === 'Claim' ? 'bg-blue-500/10' : 'bg-emerald-500/10'}`}>
+                <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${item.type === 'Claim' ? 'bg-info/10' : 'bg-success/10'}`}>
                   {item.type === 'Claim'
-                    ? <FileText className="w-4 h-4 text-blue-500" />
-                    : <Calculator className="w-4 h-4 text-emerald-500" />}
+                    ? <FileText className="w-4 h-4 text-info-fg" />
+                    : <Calculator className="w-4 h-4 text-success-fg" />}
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold truncate">
@@ -60,7 +60,7 @@ export default function WidgetRecentActivity({ config, isEditMode }) {
                 </div>
                 <div className="flex items-center gap-3 flex-shrink-0">
                   <StatusBadge status={item.job_status || item.status || 'New'} />
-                  <span className="text-[11px] text-muted-foreground w-12 text-right">{format(new Date(item.created_date), 'MMM d')}</span>
+                  <span className="text-xs text-muted-foreground w-12 text-right">{format(new Date(item.created_date), 'MMM d')}</span>
                 </div>
               </div>
             </Link>
