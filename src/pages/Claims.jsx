@@ -780,11 +780,11 @@ export default function ClaimsPage() {
         className="relative w-full flex items-center gap-3 px-3.5 py-3 text-left active:bg-muted [&+&]:before:absolute [&+&]:before:top-0 [&+&]:before:left-3.5 [&+&]:before:right-0 [&+&]:before:h-px [&+&]:before:bg-border"
       >
         <span className="flex-1 min-w-0">
-          <span className="flex items-center gap-2 min-w-0">
+          <span className="flex flex-nowrap items-center gap-2 min-w-0">
             <span className="flex-shrink-0 rounded-[5px] bg-primary text-primary-foreground px-1.5 py-0.5 text-xs font-bold tracking-wider tabular-nums whitespace-nowrap">
               {claim.reg ? formatUKRegistration(claim.reg) : 'No reg'}
             </span>
-            <span className="text-[15px] font-semibold truncate">{claim.client_name || 'No client name'}</span>
+            <span className="min-w-0 text-[15px] font-semibold truncate">{claim.client_name || 'No client name'}</span>
             {claim.draft === true && <span className="flex-shrink-0 text-xs font-medium text-warning-fg">Draft</span>}
             {claim.unread_bodyshop_update && <span className="flex-shrink-0 w-2 h-2 rounded-full bg-info" title="New update from the repairer" aria-label="New update from the repairer" />}
           </span>
