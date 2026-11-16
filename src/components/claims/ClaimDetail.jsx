@@ -1404,7 +1404,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
           <div className="bg-card border border-border rounded-xl p-4 md:p-5 m-card-tight shadow-card">
             <div className="flex items-center gap-2.5 pb-3 mb-4 border-b border-border m-card-head">
               <FileText className="w-4 h-4 text-muted-foreground" />
-              <h3 className="text-xs font-semibold text-muted-foreground">Statement of Repair Preference</h3>
+              <h3 className="text-[15px] font-semibold text-foreground">Statement of Repair Preference</h3>
             </div>
             <RepairPreferenceLinkManager claim={claim} onUpdate={handleUpdate} />
             <div className="grid grid-cols-1 lg:grid-cols-2 m-fields-2 gap-2 mt-4">
@@ -1431,7 +1431,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
           <div className="bg-card border border-border rounded-xl p-4 md:p-5 m-card-tight shadow-card">
             <div className="flex items-center gap-2.5 pb-3 mb-4 border-b border-border m-card-head">
               <FileText className="w-4 h-4 text-muted-foreground" />
-              <h3 className="text-xs font-semibold text-muted-foreground">Witness statements</h3>
+              <h3 className="text-[15px] font-semibold text-foreground">Witness statements</h3>
             </div>
             <WitnessStatementsSection claim={claim} />
           </div>
@@ -1442,7 +1442,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
           <div className="bg-card border border-border rounded-xl p-4 md:p-5 m-card-tight shadow-card">
             <div className="flex items-center gap-2.5 pb-3 mb-4 border-b border-border m-card-head">
               <FileText className="w-4 h-4 text-muted-foreground" />
-              <h3 className="text-xs font-semibold text-muted-foreground">Declaration of Need – Replacement Vehicle</h3>
+              <h3 className="text-[15px] font-semibold text-foreground">Declaration of Need – Replacement Vehicle</h3>
             </div>
             <DeclarationOfNeedLinkManager claim={claim} onUpdate={handleUpdate} />
             <div className="grid grid-cols-1 lg:grid-cols-2 m-fields-2 gap-2 mt-4">
@@ -1472,10 +1472,10 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
           <div className="bg-card border border-border rounded-xl p-4 md:p-5 m-card-tight shadow-card">
             <div className="flex items-center gap-2.5 pb-3 mb-4 border-b border-border m-card-head">
               <DollarSign className="w-4 h-4 text-muted-foreground" />
-              <h3 className="text-xs font-semibold text-muted-foreground">Financials</h3>
+              <h3 className="text-[15px] font-semibold text-foreground">Financials</h3>
               {isInternalUser && (
                 <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground text-xs font-semibold">
-                  <Lock className="w-2.5 h-2.5" /> Internal only
+                  <Lock className="w-3 h-3" aria-hidden="true" /> Internal only
                 </span>
               )}
             </div>

@@ -144,7 +144,7 @@ export default function IndemnityLinkManager({ claim, onUpdate }) {
     <div className="rounded-xl border border-border bg-card p-4 md:p-5 shadow-card">
       <div className="flex items-center gap-2.5 pb-3 mb-4 border-b border-border">
         <Link2 className="w-4 h-4 text-muted-foreground" />
-        <h3 className="text-xs font-semibold text-muted-foreground">Request Indemnity Details</h3>
+        <h3 className="text-[15px] font-semibold text-foreground">Request Indemnity Details</h3>
       </div>
 
       {!hasToken ? (
