@@ -113,7 +113,7 @@ import { saveTimeLogInBackground } from '../shared/saveTimeLogInBackground';
 import { askConfirm, notify, notifyError } from '@/lib/dialogs';
 // ── Editing without the fields moving ──
 // Controls a form shows (inputs, dropdowns, switches), in page order.
-const FIELD_SELECTOR = 'input:not([type="hidden"]), textarea, select, button[role="combobox"], button[role="switch"], button[role="checkbox"]';
+const FIELD_SELECTOR = 'input:not([type="hidden"]), textarea, select, button[role="combobox"], button[aria-haspopup], button[role="switch"], button[role="checkbox"]';
 const norm = (t) => String(t || '').toLowerCase().replace(/\(.*?\)|[^a-z0-9]+/g, ' ').replace(/\b(driver|client|no|number)\b/g, ' ').replace(/\s+/g, ' ').trim();
 
 // Find the edit-form control whose label best matches the label the user clicked in the view.
