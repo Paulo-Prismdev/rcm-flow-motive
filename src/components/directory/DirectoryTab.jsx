@@ -136,7 +136,7 @@ export default function DirectoryTab() {
         onAdd={() => setAdding(true)}
         search={search}
         onSearchChange={setSearch}
-        searchPlaceholder="Search name, contact, phone, email, postcode, insurer, vehicle..."
+        searchPlaceholder="Search name, contact, phone, email, postcode, insurer, vehicle…"
         filters={filters}
       >
         {isLoading ? (

@@ -163,7 +163,7 @@ export default function RepairerDirectory() {
         onAdd={() => setShowAddModal(true)}
         search={search}
         onSearchChange={setSearch}
-        searchPlaceholder="Search name, address, email, manager..."
+        searchPlaceholder="Search name, address, email, manager…"
         filters={filters}
         headerExtra={headerExtra}
       >

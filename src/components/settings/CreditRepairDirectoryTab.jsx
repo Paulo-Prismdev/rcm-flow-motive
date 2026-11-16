@@ -227,7 +227,7 @@ export default function CreditRepairDirectoryTab() {
         onAdd={() => setShowAdd(true)}
         search={search}
         onSearchChange={setSearch}
-        searchPlaceholder="Search name, contact, phone, email, account ref..."
+        searchPlaceholder="Search name, contact, phone, email, account ref…"
       >
         {isLoading ? (
           <div className="p-8 text-center"><Loader2 className="w-6 h-6 animate-spin mx-auto text-muted-foreground" /></div>

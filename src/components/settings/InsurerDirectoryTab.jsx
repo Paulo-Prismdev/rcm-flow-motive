@@ -64,7 +64,7 @@ export default function InsurerDirectoryTab() {
         onAdd={() => setShowAdd(true)}
         search={search}
         onSearchChange={setSearch}
-        searchPlaceholder="Search name, contact, phone, email, network code..."
+        searchPlaceholder="Search name, contact, phone, email, network code…"
       >
         {isLoading ? (
           <div className="p-8 text-center">

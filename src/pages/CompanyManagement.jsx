@@ -448,7 +448,7 @@ export default function CompanyManagement() {
         onAdd={() => setShowAdd(true)}
         search={search}
         onSearchChange={setSearch}
-        searchPlaceholder="Search name, contact, phone, email, postcode..."
+        searchPlaceholder="Search name, contact, phone, email, postcode…"
       >
         {isLoading ? (
           <div className="p-8 text-center"><Loader2 className="w-6 h-6 animate-spin mx-auto text-muted-foreground" /></div>
