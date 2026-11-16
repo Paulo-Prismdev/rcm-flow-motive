@@ -26,24 +26,24 @@ function Row({ claim, starred, onClick }) {
   return (
     <button
       onClick={onClick}
-      className="w-full flex items-center gap-3 px-4 py-2.5 border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-left"
+      className="w-full flex items-center gap-3 px-4 py-2.5 border-b border-border hover:bg-muted transition-colors text-left"
     >
       {/* REG pill */}
       {claim.reg ? (
-        <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-slate-800 text-white font-mono text-[11px] font-semibold whitespace-nowrap flex-shrink-0 min-w-[64px] justify-center">
+        <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-foreground text-background font-mono text-xs font-semibold whitespace-nowrap flex-shrink-0 min-w-[64px] justify-center">
           {formatUKRegistration(claim.reg)}
         </span>
       ) : (
-        <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-gray-100 text-gray-400 text-[11px] font-semibold flex-shrink-0 min-w-[64px] justify-center">—</span>
+        <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-muted text-muted-foreground text-xs font-semibold flex-shrink-0 min-w-[64px] justify-center">—</span>
       )}
 
       {/* Client + vehicle */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1.5">
-          <span className="text-[13px] font-medium text-gray-900 dark:text-gray-100 truncate">{claim.client_name || 'Unknown'}</span>
-          {starred && <span className="text-[11px] text-amber-500">★</span>}
+          <span className="text-[13px] font-medium text-foreground truncate">{claim.client_name || 'Unknown'}</span>
+          {starred && <span className="text-xs text-warning-fg">★</span>}
         </div>
-        <span className="text-[11px] text-gray-400 dark:text-gray-500 truncate block">{claim.make_model || '—'}</span>
+        <span className="text-xs text-muted-foreground truncate block">{claim.make_model || '—'}</span>
       </div>
 
       {/* Case 48hrs */}
@@ -61,10 +61,10 @@ function Row({ claim, starred, onClick }) {
       </div>
 
       {/* Handler avatar */}
-      <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0 ${getAvatarColor(claim.file_handler)}`}>
+      <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${getAvatarColor(claim.file_handler)}`}>
         {getInitials(claim.file_handler)}
       </div>
-      <ChevronRight className="w-4 h-4 text-gray-300 dark:text-gray-600 flex-shrink-0" />
+      <ChevronRight className="w-4 h-4 text-muted-foreground/70 flex-shrink-0" />
     </button>
   );
 }
@@ -89,23 +89,23 @@ export default function NeedsActionPanel({ claims, starredClaimIds, emptyNote })
   const openClaim = (claim) => navigate(createPageUrl('Claims') + '?id=' + claim.id);
 
   return (
-    <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-[10px] shadow-sm flex flex-col h-full overflow-hidden">
-      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-800">
+    <div className="bg-card border border-border rounded-xl shadow-card flex flex-col h-full overflow-hidden">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-border">
         <div className="flex items-center gap-2">
-          <Clock className="w-4 h-4 text-gray-400" />
-          <h2 className="text-[15px] font-semibold text-gray-900 dark:text-white">Needs Action Today</h2>
-          <span className="text-[12px] text-gray-400">{filtered.length}</span>
+          <Clock className="w-4 h-4 text-muted-foreground" />
+          <h2 className="text-[15px] font-semibold text-foreground">Needs Action Today</h2>
+          <span className="text-[12px] text-muted-foreground">{filtered.length}</span>
         </div>
       </div>
-      <div className="flex items-center gap-1 px-3 py-2 border-b border-gray-100 dark:border-gray-800 overflow-x-auto">
+      <div className="flex items-center gap-1 px-3 py-2 border-b border-border overflow-x-auto">
         {TABS.map((t) => (
           <button
             key={t.key}
             onClick={() => setTab(t.key)}
-            className={`px-2.5 py-1 text-[11px] font-medium rounded-lg whitespace-nowrap transition-colors ${
+            className={`px-2.5 py-1 text-xs font-medium rounded-lg whitespace-nowrap transition-colors ${
               tab === t.key
                 ? 'bg-primary text-primary-foreground'
-                : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
+                : 'text-muted-foreground hover:bg-muted'
             }`}
           >
             {t.label}
@@ -115,7 +115,7 @@ export default function NeedsActionPanel({ claims, starredClaimIds, emptyNote })
       <div className="flex-1 overflow-y-auto min-h-[200px]" style={{ maxHeight: '520px' }}>
         {filtered.length === 0 ? (
           <div className="flex items-center justify-center h-full py-12">
-            <p className="text-[13px] text-gray-400">{emptyNote || 'Nothing overdue — all on track'}</p>
+            <p className="text-[13px] text-muted-foreground">{emptyNote || 'Nothing overdue — all on track'}</p>
           </div>
         ) : (
           filtered.map((claim) => (

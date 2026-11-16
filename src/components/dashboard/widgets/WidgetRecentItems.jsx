@@ -32,7 +32,7 @@ export default function WidgetRecentItems({ config, isEditMode }) {
   };
 
   return (
-    <div className="bg-card text-card-foreground rounded-2xl border border-border shadow-sm p-5 col-span-1 md:col-span-2 lg:col-span-4">
+    <div className="bg-card text-card-foreground rounded-2xl border border-border shadow-card p-5 col-span-1 md:col-span-2 lg:col-span-4">
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-xl bg-muted flex items-center justify-center">
@@ -40,7 +40,7 @@ export default function WidgetRecentItems({ config, isEditMode }) {
           </div>
           <h2 className="text-sm font-bold">Recent {department}</h2>
         </div>
-        <span className="text-[11px] text-muted-foreground">{records.filter(r => !r.archived).length} items</span>
+        <span className="text-xs text-muted-foreground">{records.filter(r => !r.archived).length} items</span>
       </div>
 
       {isLoading ? (

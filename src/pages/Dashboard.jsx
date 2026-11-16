@@ -99,25 +99,25 @@ export default function Dashboard() {
   if (claimsLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="w-8 h-8 border-4 border-teal-500 border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-success border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   const personaToggle = (desktop) => (
-    <div className={`inline-flex items-center rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden ${desktop ? '' : 'w-full'}`}>
+    <div className={`inline-flex items-center rounded-lg border border-border overflow-hidden ${desktop ? '' : 'w-full'}`}>
       <button
         onClick={() => setPersona('handler')}
-        className={`px-3 py-1.5 text-[11px] font-medium transition-colors ${
-          persona === 'handler' ? 'bg-primary text-primary-foreground' : 'bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
+        className={`px-3 py-1.5 text-xs font-medium transition-colors ${
+          persona === 'handler' ? 'bg-primary text-primary-foreground' : 'bg-card text-muted-foreground hover:bg-muted'
         }`}
       >
         Handler View
       </button>
       <button
         onClick={() => setPersona('manager')}
-        className={`px-3 py-1.5 text-[11px] font-medium transition-colors ${
-          persona === 'manager' ? 'bg-primary text-primary-foreground' : 'bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
+        className={`px-3 py-1.5 text-xs font-medium transition-colors ${
+          persona === 'manager' ? 'bg-primary text-primary-foreground' : 'bg-card text-muted-foreground hover:bg-muted'
         }`}
       >
         Manager Overview
@@ -128,21 +128,21 @@ export default function Dashboard() {
   return (
     <div className="space-y-3 lg:space-y-4">
       {/* ── Header Rail ── */}
-      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-[10px] shadow-sm px-4 py-3">
+      <div className="bg-card border border-border rounded-xl shadow-card px-4 py-3">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
-            <h1 className="text-[18px] font-bold text-gray-900 dark:text-white whitespace-nowrap">
+            <h1 className="text-[18px] font-bold text-foreground whitespace-nowrap">
               Claims Operations
             </h1>
             {!isMobile && (
               <div className="relative">
-                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
                 <input
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   onKeyDown={onSearch}
                   placeholder="Search claims…"
-                  className="w-48 h-8 pl-8 pr-3 text-[13px] bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg outline-none focus:border-teal-500 text-gray-900 dark:text-gray-100"
+                  className="w-48 h-8 pl-8 pr-3 text-[13px] bg-muted border border-border rounded-lg outline-none focus:border-ring text-foreground"
                 />
               </div>
             )}
@@ -152,7 +152,7 @@ export default function Dashboard() {
               <select
                 value={persona}
                 onChange={(e) => setPersona(e.target.value)}
-                className="h-8 px-2 text-[12px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100"
+                className="h-8 px-2 text-[12px] bg-card border border-border rounded-lg text-foreground"
               >
                 <option value="handler">Handler View</option>
                 <option value="manager">Manager Overview</option>
@@ -163,26 +163,26 @@ export default function Dashboard() {
                 <img src={currentUser.profile_picture_url} alt="" className="w-full h-full object-cover" />
               ) : (
                 <div className={`w-full h-full flex items-center justify-center ${getAvatarColor(currentUser?.email)}`}>
-                  <span className="text-[11px] font-bold text-white">{getUserInitials(currentUser)}</span>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
+ <span className="text-xs font-bold text-white">{getUserInitials(currentUser)}</span>
+ </div>
+ )}
+ </div>
+ </div>
+ </div>
+ </div>
 
-      {/* ── At a Glance Strip ── */}
-      <AtAGlanceStrip stats={stats} valueTotal={valueTotal} />
+ {/* ── At a Glance Strip ── */}
+ <AtAGlanceStrip stats={stats} valueTotal={valueTotal} />
 
-      {/* ── Mobile tab switcher ── */}
-      {isMobile && (
-        <div className="flex items-center gap-1 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-[10px] p-1">
-          {MOBILE_TABS.map((t) => (
-            <button
-              key={t.key}
-              onClick={() => setMobileTab(t.key)}
-              className={`flex-1 py-1.5 text-[12px] font-medium rounded-lg transition-colors ${
-                mobileTab === t.key ? 'bg-primary text-primary-foreground' : 'text-gray-500 dark:text-gray-400'
+ {/* ── Mobile tab switcher ── */}
+ {isMobile && (
+ <div className="flex items-center gap-1 bg-card border border-border rounded-lg p-1">
+ {MOBILE_TABS.map((t) => (
+ <button
+ key={t.key}
+ onClick={() => setMobileTab(t.key)}
+ className={`flex-1 py-1.5 text-[12px] font-medium rounded-lg transition-colors ${
+                mobileTab === t.key ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'
               }`}
             >
               {t.label}
