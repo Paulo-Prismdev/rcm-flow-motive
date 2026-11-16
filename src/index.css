@@ -927,16 +927,13 @@ textarea::placeholder {
   --card: var(--mac-group);
   --popover: var(--mac-group);
   --border: var(--mac-line);
-  --input: var(--mac-line);
   --ring: var(--mac-accent);
   --primary: var(--mac-accent);
-  --primary-foreground: 0 0% 100%;
   --accent: var(--mac-window);
   --accent-foreground: var(--mac-accent);
   --secondary: var(--mac-window);
   --muted: var(--mac-window);
   --muted-foreground: var(--mac-muted);
-  --input: var(--fm-line);
   --radius: 0.5rem;
 }
 
