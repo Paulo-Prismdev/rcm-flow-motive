@@ -107,15 +107,15 @@ export default function RepairerDirectory() {
       <select
         value={tierFilter}
         onChange={(e) => setTierFilter(e.target.value)}
-        className="h-9 rounded-md border border-input bg-transparent px-3 text-sm flex-1 sm:flex-none"
+        className="h-8 rounded-lg border border-input bg-card px-2.5 text-[13px] text-foreground flex-1 sm:flex-none"
       >
-        <option value="all">All Tiers</option>
+        <option value="all">All tiers</option>
         {tiers.map((t) => (<option key={t} value={t}>{t}</option>))}
       </select>
       <select
         value={acgFilter}
         onChange={(e) => setAcgFilter(e.target.value)}
-        className="h-9 rounded-md border border-input bg-transparent px-3 text-sm flex-1 sm:flex-none"
+        className="h-8 rounded-lg border border-input bg-card px-2.5 text-[13px] text-foreground flex-1 sm:flex-none"
       >
         <option value="all">All ACG</option>
         <option value="Yes">ACG: Yes</option>
@@ -125,9 +125,9 @@ export default function RepairerDirectory() {
       <select
         value={vehicleFilter}
         onChange={(e) => setVehicleFilter(e.target.value)}
-        className="h-9 rounded-md border border-input bg-transparent px-3 text-sm flex-1 sm:flex-none"
+        className="h-8 rounded-lg border border-input bg-card px-2.5 text-[13px] text-foreground flex-1 sm:flex-none"
       >
-        <option value="all">All Vehicles</option>
+        <option value="all">All vehicles</option>
         {vehicleOptions.map((v) => (<option key={v} value={v}>{v}</option>))}
       </select>
     </div>
@@ -138,10 +138,10 @@ export default function RepairerDirectory() {
       <button
         onClick={handleImportClick}
         disabled={importing}
-        className="inline-flex items-center justify-center gap-2 rounded-md text-[13px] font-medium border border-input bg-transparent shadow-card hover:bg-accent hover:text-accent-foreground h-9 px-4"
+        className="inline-flex items-center justify-center gap-1.5 rounded-lg text-[13px] font-medium border border-input bg-card hover:bg-accent h-8 px-3 disabled:opacity-60"
       >
         {importing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-        <span className="hidden sm:inline">{importing ? "Reading file..." : "Import spreadsheet"}</span>
+        <span className="hidden sm:inline">{importing ? "Reading file…" : "Import spreadsheet"}</span>
       </button>
       <input
         ref={fileInputRef}
@@ -157,9 +157,9 @@ export default function RepairerDirectory() {
     <>
       <DirectoryShell
         icon={Building2}
-        title="Repairer Directory"
+        title="Repairers"
         count={`${filtered.length} of ${bodyshops.length} repairers`}
-        addLabel="Add Repairer"
+        addLabel="Add repairer"
         onAdd={() => setShowAddModal(true)}
         search={search}
         onSearchChange={setSearch}
@@ -170,7 +170,7 @@ export default function RepairerDirectory() {
         {isLoading ? (
           <div className="p-8 text-center"><Loader2 className="w-6 h-6 animate-spin mx-auto text-muted-foreground" /></div>
         ) : filtered.length === 0 ? (
-          <div className="p-8 text-center text-sm text-muted-foreground">No repairers found</div>
+          <div className="p-8 text-center text-sm text-muted-foreground">No repairers match your search</div>
         ) : (
           <>
             {/* Mobile cards */}

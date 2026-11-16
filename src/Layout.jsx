@@ -349,8 +349,8 @@ export default function Layout({ children, currentPageName }) {
               const dirLinks = [
                 { name: "Repairers", url: createPageUrl("RepairerDirectory"), icon: Warehouse, overlayPage: "RepairerDirectory" },
                 { name: "Insurers", url: createPageUrl("InsurerDirectory"), icon: Shield, overlayPage: "InsurerDirectory" },
-                { name: "Credit Repair", url: createPageUrl("CreditRepairDirectory"), icon: CreditCard, overlayPage: "CreditRepairDirectory" },
-                { name: "Clients & Third Parties", url: createPageUrl("ClientDirectory"), icon: Users, overlayPage: "ClientDirectory" },
+                { name: "Credit repair", url: createPageUrl("CreditRepairDirectory"), icon: CreditCard, overlayPage: "CreditRepairDirectory" },
+                { name: "Clients & third parties", url: createPageUrl("ClientDirectory"), icon: Users, overlayPage: "ClientDirectory" },
                 { name: "Suppliers", url: createPageUrl("SupplierManagement"), icon: Truck, overlayPage: "SupplierManagement" },
                 { name: "Referrers", url: "/admin/companies", icon: Handshake, overlayPage: "CompanyManagement" },
               ];

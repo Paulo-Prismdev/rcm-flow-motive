@@ -126,7 +126,7 @@ export default function DirectoryTab() {
     <>
       <DirectoryShell
         icon={User}
-        title="Clients & Third Parties"
+        title="Clients & third parties"
         count={
           counts.both
             ? `${filtered.length} of ${total} shown · ${counts.both} carry both tags`
@@ -163,7 +163,7 @@ export default function DirectoryTab() {
                         </span>
                       )}
                     </div>
-                    <button onClick={(e) => { e.stopPropagation(); handleDelete(r); }} className="p-1.5 rounded-md text-muted-foreground hover:text-danger-fg hover:bg-danger-bg flex-shrink-0">
+                    <button onClick={(e) => { e.stopPropagation(); handleDelete(r); }} className="p-1.5 rounded-md text-muted-foreground hover:text-danger-fg hover:bg-danger-bg flex-shrink-0" title="Remove" aria-label="Remove">
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
@@ -214,7 +214,7 @@ export default function DirectoryTab() {
                     <td className="p-3 text-sm text-muted-foreground hidden lg:table-cell">{isThirdPartyTagged(r) ? vehicleLine(r) || "—" : "—"}</td>
                     <td className="p-3 text-sm text-muted-foreground hidden lg:table-cell">{r.postcode || "—"}</td>
                     <td className="p-3 text-right" onClick={(e) => e.stopPropagation()}>
-                      <button onClick={() => handleDelete(r)} className="p-1.5 rounded-md text-muted-foreground hover:text-danger-fg hover:bg-danger-bg" title="Remove"><Trash2 className="w-4 h-4" /></button>
+                      <button onClick={() => handleDelete(r)} className="p-1.5 rounded-md text-muted-foreground hover:text-danger-fg hover:bg-danger-bg" title="Remove" aria-label="Remove"><Trash2 className="w-4 h-4" /></button>
                     </td>
                   </tr>
                 ))}

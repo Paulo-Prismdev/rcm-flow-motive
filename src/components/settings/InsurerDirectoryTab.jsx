@@ -58,9 +58,9 @@ export default function InsurerDirectoryTab() {
     <>
       <DirectoryShell
         icon={Building2}
-        title="Insurer Directory"
+        title="Insurers"
         count={`${filtered.length} of ${insurers.length} insurers`}
-        addLabel="Add Insurer"
+        addLabel="Add insurer"
         onAdd={() => setShowAdd(true)}
         search={search}
         onSearchChange={setSearch}
@@ -149,7 +149,7 @@ export default function InsurerDirectoryTab() {
                         ) : <span className="text-sm text-muted-foreground">—</span>}
                       </td>
                       <td className="p-3 text-right" onClick={(e) => e.stopPropagation()}>
-                        <button onClick={() => handleDelete(ins)} className="p-1.5 rounded-md text-muted-foreground hover:text-danger-fg hover:bg-danger-bg" title="Remove">
+                        <button onClick={() => handleDelete(ins)} className="p-1.5 rounded-md text-muted-foreground hover:text-danger-fg hover:bg-danger-bg" title="Remove" aria-label="Remove">
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </td>

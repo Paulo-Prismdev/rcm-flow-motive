@@ -221,9 +221,9 @@ export default function CreditRepairDirectoryTab() {
     <>
       <DirectoryShell
         icon={Building2}
-        title="Credit Repair Companies"
+        title="Credit repair companies"
         count={`${filtered.length} of ${companies.length} companies`}
-        addLabel="Add Company"
+        addLabel="Add company"
         onAdd={() => setShowAdd(true)}
         search={search}
         onSearchChange={setSearch}
@@ -244,7 +244,7 @@ export default function CreditRepairDirectoryTab() {
                       <div className="font-medium text-sm truncate">{c.name}</div>
                       {c.contact_name && <div className="text-xs text-muted-foreground truncate">{c.contact_name}</div>}
                     </div>
-                    <button onClick={(e) => { e.stopPropagation(); handleDelete(c); }} className="p-1.5 rounded-md text-muted-foreground hover:text-danger-fg hover:bg-danger-bg flex-shrink-0">
+                    <button onClick={(e) => { e.stopPropagation(); handleDelete(c); }} className="p-1.5 rounded-md text-muted-foreground hover:text-danger-fg hover:bg-danger-bg flex-shrink-0" title="Remove" aria-label="Remove">
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
@@ -293,7 +293,7 @@ export default function CreditRepairDirectoryTab() {
                       )}
                     </td>
                     <td className="p-3 text-right" onClick={(e) => e.stopPropagation()}>
-                      <button onClick={() => handleDelete(c)} className="p-1.5 rounded-md text-muted-foreground hover:text-danger-fg hover:bg-danger-bg" title="Remove"><Trash2 className="w-4 h-4" /></button>
+                      <button onClick={() => handleDelete(c)} className="p-1.5 rounded-md text-muted-foreground hover:text-danger-fg hover:bg-danger-bg" title="Remove" aria-label="Remove"><Trash2 className="w-4 h-4" /></button>
                     </td>
                   </tr>
                 ))}

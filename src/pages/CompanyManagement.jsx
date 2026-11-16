@@ -444,7 +444,7 @@ export default function CompanyManagement() {
         icon={Building2}
         title="Referrers"
         count={`${filtered.length} of ${companies.length} referrers`}
-        addLabel="Add Referrer"
+        addLabel="Add referrer"
         onAdd={() => setShowAdd(true)}
         search={search}
         onSearchChange={setSearch}
@@ -467,7 +467,7 @@ export default function CompanyManagement() {
                         <div className="font-medium text-sm truncate">{c.name}</div>
                         {c.contact_name && <div className="text-xs text-muted-foreground truncate">{c.contact_name}</div>}
                       </div>
-                      <button onClick={(e) => { e.stopPropagation(); handleDelete(c); }} className="p-1.5 rounded-md text-muted-foreground hover:text-danger-fg hover:bg-danger-bg flex-shrink-0"><Trash2 className="w-4 h-4" /></button>
+                      <button onClick={(e) => { e.stopPropagation(); handleDelete(c); }} className="p-1.5 rounded-md text-muted-foreground hover:text-danger-fg hover:bg-danger-bg flex-shrink-0" title="Remove" aria-label="Remove"><Trash2 className="w-4 h-4" /></button>
                     </div>
                     <div className="flex flex-col gap-1 text-xs text-muted-foreground">
                       {c.contact_phone && <span className="flex items-center gap-1.5"><Phone className="w-3.5 h-3.5" /> {c.contact_phone}</span>}
@@ -521,7 +521,7 @@ export default function CompanyManagement() {
                         ) : <span className="text-sm text-muted-foreground">—</span>}
                       </td>
                       <td className="p-3 text-right" onClick={(e) => e.stopPropagation()}>
-                        <button onClick={() => handleDelete(c)} className="p-1.5 rounded-md text-muted-foreground hover:text-danger-fg hover:bg-danger-bg" title="Remove"><Trash2 className="w-4 h-4" /></button>
+                        <button onClick={() => handleDelete(c)} className="p-1.5 rounded-md text-muted-foreground hover:text-danger-fg hover:bg-danger-bg" title="Remove" aria-label="Remove"><Trash2 className="w-4 h-4" /></button>
                       </td>
                     </tr>
                   );
