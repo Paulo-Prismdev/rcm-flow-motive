@@ -4,26 +4,29 @@ import { cva } from "class-variance-authority";
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 rounded-md text-[13px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 rounded-lg text-[13px] font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
     {
       variants: {
         variant: {
           default:
-            "bg-primary text-primary-foreground shadow hover:bg-[#2563eb] h-11 lg:h-9 px-4",
+            "bg-primary text-primary-foreground shadow-card hover:bg-primary/90 h-11 lg:h-9 px-4",
           destructive:
-            "bg-[#ef4444] text-destructive-foreground shadow-sm hover:bg-[#ef4444]/90 h-11 lg:h-9 px-4",
+            "bg-destructive text-destructive-foreground shadow-card hover:bg-destructive/90 h-11 lg:h-9 px-4",
+          // The design system's one name for it; "destructive" stays for existing screens.
+          danger:
+            "bg-destructive text-destructive-foreground shadow-card hover:bg-destructive/90 h-11 lg:h-9 px-4",
           outline:
-            "border border-input bg-transparent shadow-sm hover:bg-accent hover:text-accent-foreground h-11 lg:h-9 px-4",
+            "border border-input bg-card text-foreground shadow-card hover:bg-accent hover:text-accent-foreground h-11 lg:h-9 px-4",
           secondary:
-            "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80 h-11 lg:h-9 px-4",
+            "border border-border bg-secondary text-secondary-foreground hover:bg-accent h-11 lg:h-9 px-4",
           ghost: "hover:bg-accent hover:text-accent-foreground h-11 lg:h-9 px-4",
-          link: "text-primary underline-offset-4 hover:underline h-auto px-0",
+          link: "text-link underline-offset-4 hover:underline h-auto px-0",
         },
         size: {
           default: "h-9 px-4",
-          sm: "h-[30px] rounded-md px-[10px] text-[13px]",
-          lg: "h-9 rounded-md px-4",
-          icon: "h-11 w-11 lg:h-[30px] lg:w-[30px]",
+          sm: "h-8 px-[10px] text-[13px]",
+          lg: "h-9 px-4",
+          icon: "h-11 w-11 lg:h-8 lg:w-8",
         },
       },
     defaultVariants: {
