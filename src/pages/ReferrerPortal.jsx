@@ -407,7 +407,7 @@ export default function ReferrerPortal() {
                         <React.Fragment>
                           <div role="button" tabIndex={0} onKeyDown={activateOnKey} className="flex items-center gap-2 px-4 py-2 bg-muted cursor-pointer select-none border-b border-border" onClick={() => toggleGroup('__other__')}>
                             {isCollapsed ? <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" /> : <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />}
-                            <span className="w-2 h-2 rounded-full bg-gray-400 flex-shrink-0" />
+                            <span className="w-2 h-2 rounded-full bg-muted-foreground/50 flex-shrink-0" />
                             <span className="text-sm font-semibold text-foreground">Other</span>
                             <span className="text-xs text-muted-foreground ml-1">{ungrouped.length}</span>
                           </div>
@@ -512,7 +512,7 @@ export default function ReferrerPortal() {
                               <td colSpan={colSpan} className="px-4 py-2">
                                 <div className="flex items-center gap-2">
                                   {isCollapsed ? <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" /> : <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />}
-                                  <span className="w-2 h-2 rounded-full bg-gray-400 flex-shrink-0" />
+                                  <span className="w-2 h-2 rounded-full bg-muted-foreground/50 flex-shrink-0" />
                                   <span className="text-sm font-semibold text-foreground">Other</span>
                                   <span className="text-xs text-muted-foreground ml-1">{ungrouped.length}</span>
                                 </div>

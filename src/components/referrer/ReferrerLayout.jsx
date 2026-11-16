@@ -129,7 +129,7 @@ export default function ReferrerLayout({ children }) {
       {/* MAIN CONTENT */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* TOP BAR */}
-        <header className="hidden lg:flex flex-shrink-0 dark:bg-gray-900/95 border-b border-border items-center gap-3 px-5 relative z-30 backdrop-blur-sm bg-[hsl(var(--background))]" style={{ height: '48px', minHeight: '48px' }}>
+        <header className="hidden lg:flex flex-shrink-0 fm-glass-bar items-center gap-3 px-5 relative z-30" style={{ height: '48px', minHeight: '48px' }}>
           {/* Left: Referrer Name + Portal Label */}
           <div className="flex items-center gap-2">
             {referrer && (
