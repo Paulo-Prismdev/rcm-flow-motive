@@ -82,7 +82,7 @@ const INVOICE_STATUS_ATTENTION = {
   },
   'Invoice Overdue': {
     short: 'Overdue', title: 'invoice overdue',
-    chip: 'bg-red-500 text-white',
+    chip: 'bg-danger text-on-solid',
   },
 };
 
@@ -573,7 +573,7 @@ export default function ClaimsPage() {
         <td style={{ width: `${STATUS_W}px`, minWidth: `${STATUS_W}px`, maxWidth: `${STATUS_W}px` }} className={`sticky right-[132px] z-10 px-2 py-2.5 whitespace-nowrap ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-white dark:bg-gray-900 group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50'}`}>
           <div className="flex items-center justify-center gap-1 flex-wrap min-h-[42px]">
             {isDraft && (
-              <span className="px-1.5 py-0.5 rounded-md bg-yellow-100 text-warning-fg text-xs font-medium leading-none">
+              <span className="px-1.5 py-0.5 rounded-md bg-warning-bg text-warning-fg text-xs font-medium leading-none">
                 Draft
               </span>
             )}
@@ -581,13 +581,13 @@ export default function ClaimsPage() {
             {claim.secondary_status && <StatusBadge status={claim.secondary_status} compact />}
             {claim.tertiary_status && <StatusBadge status={claim.tertiary_status} variant="secondary" compact />}
             {hasBackorder && (
-              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-red-500 text-white text-xs font-semibold leading-none shadow-sm">
+              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-danger text-on-solid text-xs font-semibold leading-none shadow-sm">
                 <Package className="w-2.5 h-2.5" />BO
               </span>
             )}
             {hireFlagged(claim) && (
               <span
-                className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300 text-xs font-semibold leading-none"
+                className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-info-bg text-info-fg dark:bg-indigo-900/40 dark:text-indigo-300 text-xs font-semibold leading-none"
                 title="Hire to invoice"
               >
                 Hire
@@ -632,7 +632,7 @@ export default function ClaimsPage() {
           >
             <MessageSquare className="w-4 h-4" />
             {claim.unread_bodyshop_update && (
-              <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-green-500 ring-2 ring-white dark:ring-gray-900 flex-shrink-0" />
+              <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-success ring-2 ring-white dark:ring-gray-900 flex-shrink-0" />
             )}
           </button>
         </td>
@@ -674,7 +674,7 @@ export default function ClaimsPage() {
           </span>
           <div className="flex items-center gap-1 flex-shrink-0">
             {isDraft && (
-              <span className="px-1.5 py-0.5 rounded-full bg-yellow-100 text-warning-fg text-xs font-medium">
+              <span className="px-1.5 py-0.5 rounded-full bg-warning-bg text-warning-fg text-xs font-medium">
                 Draft
               </span>
             )}
@@ -686,7 +686,7 @@ export default function ClaimsPage() {
               </span>
             )}
             {hireFlagged(claim) && (
-              <span className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-indigo-100 text-indigo-700 text-xs font-medium">
+              <span className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-info-bg text-info-fg text-xs font-medium">
                 Hire
               </span>
             )}
@@ -698,7 +698,7 @@ export default function ClaimsPage() {
             >
               <MessageSquare className="w-4 h-4" />
               {claim.unread_bodyshop_update && (
-                <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-green-500 ring-2 ring-white dark:ring-gray-900 flex-shrink-0" />
+                <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-success ring-2 ring-white dark:ring-gray-900 flex-shrink-0" />
               )}
             </button>
             <button
