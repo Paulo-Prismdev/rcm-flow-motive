@@ -44,7 +44,7 @@ export default function PartSupplierForm({ part, onSave, onCancel }) {
       
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm text-gray-600 mb-2">Supplier</label>
+          <label className="block text-sm text-muted-foreground mb-2">Supplier</label>
           <div className="flex gap-2">
             <div className="flex-1">
               <SupplierCombobox 
@@ -62,11 +62,11 @@ export default function PartSupplierForm({ part, onSave, onCancel }) {
           </div>
         </div>
         <div>
-          <label className="block text-sm text-gray-600 mb-2">Part Type</label>
+          <label className="block text-sm text-muted-foreground mb-2">Part Type</label>
           <select
             value={formData.part_type}
             onChange={(e) => setFormData({...formData, part_type: e.target.value})}
-            className="neomorph-inset w-full px-4 py-3 text-gray-700 border-0 rounded-xl"
+            className="neomorph-inset w-full px-4 py-3 text-foreground border-0 rounded-xl"
           >
             <option>OEM</option>
             <option>Aftermarket</option>
@@ -75,11 +75,11 @@ export default function PartSupplierForm({ part, onSave, onCancel }) {
           </select>
         </div>
         <div>
-          <label className="block text-sm text-gray-600 mb-2">Condition</label>
+          <label className="block text-sm text-muted-foreground mb-2">Condition</label>
           <select
             value={formData.condition}
             onChange={(e) => setFormData({...formData, condition: e.target.value})}
-            className="neomorph-inset w-full px-4 py-3 text-gray-700 border-0 rounded-xl"
+            className="neomorph-inset w-full px-4 py-3 text-foreground border-0 rounded-xl"
           >
             <option>New</option>
             <option>Used</option>
@@ -88,39 +88,39 @@ export default function PartSupplierForm({ part, onSave, onCancel }) {
         </div>
         <div className="grid grid-cols-3 gap-4">
           <div>
-            <label className="block text-sm text-gray-600 mb-2">RRP</label>
+            <label className="block text-sm text-muted-foreground mb-2">RRP</label>
             <Input
               type="number"
               step="0.01"
               value={formData.rrp}
               onChange={(e) => setFormData({...formData, rrp: parseFloat(e.target.value) || 0})}
-              className="neomorph-inset px-4 py-3 text-gray-700 border-0"
+              className="neomorph-inset px-4 py-3 text-foreground border-0"
             />
           </div>
           <div>
-            <label className="block text-sm text-gray-600 mb-2">Net Price</label>
+            <label className="block text-sm text-muted-foreground mb-2">Net Price</label>
             <Input
               type="number"
               step="0.01"
               value={formData.net_price}
               onChange={(e) => setFormData({...formData, net_price: parseFloat(e.target.value) || 0})}
-              className="neomorph-inset px-4 py-3 text-gray-700 border-0"
+              className="neomorph-inset px-4 py-3 text-foreground border-0"
             />
           </div>
           <div>
-            <label className="block text-sm text-gray-600 mb-2">Sourcing Fee</label>
+            <label className="block text-sm text-muted-foreground mb-2">Sourcing Fee</label>
             <Input
               type="number"
               step="0.01"
               value={formData.sourcing_fee}
               onChange={(e) => setFormData({...formData, sourcing_fee: parseFloat(e.target.value) || 0})}
-              className="neomorph-inset px-4 py-3 text-gray-700 border-0"
+              className="neomorph-inset px-4 py-3 text-foreground border-0"
             />
           </div>
         </div>
         <div className="flex justify-end gap-3 pt-4">
           <Button type="button" onClick={onCancel} className="neomorph-flat px-6 py-2">Cancel</Button>
-          <Button type="submit" className="neomorph-flat px-6 py-2 text-blue-600">Save</Button>
+          <Button type="submit" className="neomorph-flat px-6 py-2 text-info-fg">Save</Button>
         </div>
       </form>
     </>

@@ -42,20 +42,20 @@ export default function PartOrderForm({ part, onSave, onCancel }) {
       
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm text-gray-600 mb-2">Date of Initial Order</label>
+          <label className="block text-sm text-muted-foreground mb-2">Date of Initial Order</label>
           <Input
             type="date"
             value={formData.date_ordered}
             onChange={(e) => setFormData({...formData, date_ordered: e.target.value})}
-            className="neomorph-inset px-4 py-3 text-gray-700 border-0"
+            className="neomorph-inset px-4 py-3 text-foreground border-0"
           />
         </div>
         <div>
-          <label className="block text-sm text-gray-600 mb-2">Expected Delivery Time</label>
+          <label className="block text-sm text-muted-foreground mb-2">Expected Delivery Time</label>
           <select
             value={formData.delivery_time_weeks}
             onChange={(e) => setFormData({...formData, delivery_time_weeks: parseInt(e.target.value)})}
-            className="neomorph-inset w-full px-4 py-3 text-gray-700 border-0 rounded-xl"
+            className="neomorph-inset w-full px-4 py-3 text-foreground border-0 rounded-xl"
           >
             <option value={0}>No Date</option>
             <option value={1}>1 Week</option>
@@ -68,7 +68,7 @@ export default function PartOrderForm({ part, onSave, onCancel }) {
           </select>
         </div>
         <div>
-          <label className="block text-sm text-gray-600 mb-2">Work Provider</label>
+          <label className="block text-sm text-muted-foreground mb-2">Work Provider</label>
           <div className="flex gap-2">
             <div className="flex-1">
               <WorkProviderCombobox
@@ -86,11 +86,11 @@ export default function PartOrderForm({ part, onSave, onCancel }) {
           </div>
         </div>
         <div>
-          <label className="block text-sm text-gray-600 mb-2">Courtesy Vehicle</label>
+          <label className="block text-sm text-muted-foreground mb-2">Courtesy Vehicle</label>
           <select
             value={formData.courtesy_vehicle_type}
             onChange={(e) => setFormData({...formData, courtesy_vehicle_type: e.target.value})}
-            className="neomorph-inset w-full px-4 py-3 text-gray-700 border-0 rounded-xl"
+            className="neomorph-inset w-full px-4 py-3 text-foreground border-0 rounded-xl"
           >
             <option value="None">None</option>
             <option value="Credit Hire">Credit Hire</option>
@@ -100,7 +100,7 @@ export default function PartOrderForm({ part, onSave, onCancel }) {
         </div>
         <div className="flex justify-end gap-3 pt-4">
           <Button type="button" onClick={onCancel} className="neomorph-flat px-6 py-2">Cancel</Button>
-          <Button type="submit" className="neomorph-flat px-6 py-2 text-blue-600">Save</Button>
+          <Button type="submit" className="neomorph-flat px-6 py-2 text-info-fg">Save</Button>
         </div>
       </form>
     </>

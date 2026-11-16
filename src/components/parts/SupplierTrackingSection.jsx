@@ -63,24 +63,24 @@ export default function SupplierTrackingSection({ part, onUpdate, isOpen, onTogg
     <div className="neomorph p-6">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h3 className="font-bold text-gray-700 flex items-center gap-2">
+          <h3 className="font-bold text-foreground flex items-center gap-2">
             <Users className="w-5 h-5 text-gold" />
             Supplier Search Tracking
           </h3>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-muted-foreground mt-1">
             Track which suppliers you've contacted and who has the part in stock
           </p>
         </div>
         <div className="flex items-center gap-3">
           <div className="neomorph-flat px-4 py-2">
-            <span className="text-sm text-gray-500">Contacted: </span>
-            <span className="font-bold text-blue-600">{contactedSuppliers.length}</span>
-            <span className="text-sm text-gray-500"> / </span>
-            <span className="font-bold text-gray-700">{allSuppliers.length}</span>
+            <span className="text-sm text-muted-foreground">Contacted: </span>
+            <span className="font-bold text-info-fg">{contactedSuppliers.length}</span>
+            <span className="text-sm text-muted-foreground"> / </span>
+            <span className="font-bold text-foreground">{allSuppliers.length}</span>
           </div>
           <div className="neomorph-flat px-4 py-2">
-            <span className="text-sm text-gray-500">In Stock: </span>
-            <span className="font-bold text-green-600">{suppliersWithStock.length}</span>
+            <span className="text-sm text-muted-foreground">In Stock: </span>
+            <span className="font-bold text-success-fg">{suppliersWithStock.length}</span>
           </div>
         </div>
       </div>
@@ -106,7 +106,7 @@ export default function SupplierTrackingSection({ part, onUpdate, isOpen, onTogg
 
       <div className="space-y-2 max-h-[600px] overflow-y-auto pr-2">
         {allSuppliers.length === 0 ? (
-          <p className="text-sm text-center text-gray-500 py-8">
+          <p className="text-sm text-center text-muted-foreground py-8">
             No suppliers in database. Add suppliers to track them here.
           </p>
         ) : (
@@ -118,15 +118,15 @@ export default function SupplierTrackingSection({ part, onUpdate, isOpen, onTogg
               <div
                 key={supplier.id}
                 className={`neomorph-inset p-4 transition-all ${
-                  hasStock ? 'border-2 border-green-500' : ''
+                  hasStock ? 'border-2 border-success' : ''
                 }`}
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-3">
-                      <h4 className="font-medium text-gray-700 text-lg">{supplier.name}</h4>
+                      <h4 className="font-medium text-foreground text-lg">{supplier.name}</h4>
                       {hasStock && (
-                        <span className="neomorph-flat px-3 py-1 text-xs font-medium text-green-600 flex items-center gap-1">
+                        <span className="neomorph-flat px-3 py-1 text-xs font-medium text-success-fg flex items-center gap-1">
                           <Package className="w-3 h-3" />
                           In Stock
                         </span>
@@ -134,12 +134,12 @@ export default function SupplierTrackingSection({ part, onUpdate, isOpen, onTogg
                     </div>
                     
                     {supplier.contact_name && (
-                      <p className="text-sm text-gray-500 mb-2">Contact: {supplier.contact_name}</p>
+                      <p className="text-sm text-muted-foreground mb-2">Contact: {supplier.contact_name}</p>
                     )}
                     
                     <div className="flex flex-wrap gap-4 mb-3">
                       {supplier.phone && (
-                        <div className="flex items-center gap-1 text-sm text-gray-600">
+                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
                           <Phone className="w-3 h-3" />
                           <a href={`tel:${supplier.phone}`} className="hover:text-gold">
                             {supplier.phone}
@@ -147,7 +147,7 @@ export default function SupplierTrackingSection({ part, onUpdate, isOpen, onTogg
                         </div>
                       )}
                       {supplier.email && (
-                        <div className="flex items-center gap-1 text-sm text-gray-600">
+                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
                           <Mail className="w-3 h-3" />
                           <a href={`mailto:${supplier.email}`} className="hover:text-gold">
                             {supplier.email}
@@ -156,31 +156,31 @@ export default function SupplierTrackingSection({ part, onUpdate, isOpen, onTogg
                       )}
                     </div>
 
-                    <div className="flex gap-4 mt-3 pt-3 border-t border-gray-300 border-opacity-50">
+                    <div className="flex gap-4 mt-3 pt-3 border-t border-border border-opacity-50">
                       <button
                         onClick={() => handleToggleContacted(supplier.name)}
-                        className="flex items-center gap-2 text-sm cursor-pointer hover:text-blue-600 transition-colors"
+                        className="flex items-center gap-2 text-sm cursor-pointer hover:text-info-fg transition-colors"
                       >
                         {isContacted ? (
-                          <CheckSquare className="w-5 h-5 text-blue-600" />
+                          <CheckSquare className="w-5 h-5 text-info-fg" />
                         ) : (
-                          <Square className="w-5 h-5 text-gray-400" />
+                          <Square className="w-5 h-5 text-muted-foreground" />
                         )}
-                        <span className={isContacted ? 'text-blue-600 font-medium' : 'text-gray-600'}>
+                        <span className={isContacted ? 'text-info-fg font-medium' : 'text-muted-foreground'}>
                           Contacted
                         </span>
                       </button>
 
                       <button
                         onClick={() => handleToggleStock(supplier.name)}
-                        className="flex items-center gap-2 text-sm cursor-pointer hover:text-green-600 transition-colors"
+                        className="flex items-center gap-2 text-sm cursor-pointer hover:text-success-fg transition-colors"
                       >
                         {hasStock ? (
-                          <CheckSquare className="w-5 h-5 text-green-600" />
+                          <CheckSquare className="w-5 h-5 text-success-fg" />
                         ) : (
-                          <Square className="w-5 h-5 text-gray-400" />
+                          <Square className="w-5 h-5 text-muted-foreground" />
                         )}
-                        <span className={hasStock ? 'text-green-600 font-medium' : 'text-gray-600'}>
+                        <span className={hasStock ? 'text-success-fg font-medium' : 'text-muted-foreground'}>
                           Has Stock
                         </span>
                       </button>

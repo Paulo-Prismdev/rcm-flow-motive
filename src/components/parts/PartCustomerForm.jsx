@@ -68,7 +68,7 @@ export default function PartCustomerForm({ part, onSave, onCancel }) {
       
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm text-gray-600 mb-2">Bodyshop Company</label>
+          <label className="block text-sm text-muted-foreground mb-2">Bodyshop Company</label>
           <div className="flex gap-2">
             <div className="flex-1">
               <BodyshopCombobox 
@@ -86,49 +86,49 @@ export default function PartCustomerForm({ part, onSave, onCancel }) {
           </div>
         </div>
         <div>
-          <label className="block text-sm text-gray-600 mb-2">Contact Name</label>
+          <label className="block text-sm text-muted-foreground mb-2">Contact Name</label>
           <Input
             value={formData.contact_name}
             onChange={(e) => setFormData({...formData, contact_name: e.target.value})}
-            className="neomorph-inset px-4 py-3 text-gray-700 border-0"
+            className="neomorph-inset px-4 py-3 text-foreground border-0"
           />
         </div>
         <div>
-          <label className="block text-sm text-gray-600 mb-2">Contact Number</label>
+          <label className="block text-sm text-muted-foreground mb-2">Contact Number</label>
           <Input
             value={formData.contact_number}
             onChange={(e) => setFormData({...formData, contact_number: e.target.value})}
-            className="neomorph-inset px-4 py-3 text-gray-700 border-0"
+            className="neomorph-inset px-4 py-3 text-foreground border-0"
           />
         </div>
         <div>
-          <label className="block text-sm text-gray-600 mb-2">Contact Email</label>
+          <label className="block text-sm text-muted-foreground mb-2">Contact Email</label>
           <Input
             type="email"
             value={formData.contact_email}
             onChange={(e) => setFormData({...formData, contact_email: e.target.value})}
-            className="neomorph-inset px-4 py-3 text-gray-700 border-0"
+            className="neomorph-inset px-4 py-3 text-foreground border-0"
           />
         </div>
         <div>
-          <label className="block text-sm text-gray-600 mb-2">Delivery Address</label>
+          <label className="block text-sm text-muted-foreground mb-2">Delivery Address</label>
           <AddressLookupInput
             value={formData.delivery_address}
             onChange={handleAddressChange}
             placeholder="Start typing address or postcode..."
             className="neomorph-inset"
           />
-          <p className="text-xs text-gray-500 mt-1">Or enter manually in the field below</p>
+          <p className="text-xs text-muted-foreground mt-1">Or enter manually in the field below</p>
           <Textarea
             value={formData.delivery_address}
             onChange={(e) => setFormData({...formData, delivery_address: e.target.value})}
-            className="neomorph-inset px-4 py-3 text-gray-700 border-0 h-20 mt-2"
+            className="neomorph-inset px-4 py-3 text-foreground border-0 h-20 mt-2"
             placeholder="Full delivery address"
           />
         </div>
         <div className="flex justify-end gap-3 pt-4">
           <Button type="button" onClick={onCancel} className="neomorph-flat px-6 py-2">Cancel</Button>
-          <Button type="submit" className="neomorph-flat px-6 py-2 text-blue-600">Save</Button>
+          <Button type="submit" className="neomorph-flat px-6 py-2 text-info-fg">Save</Button>
         </div>
       </form>
     </>

@@ -517,7 +517,7 @@ const renderSelectedSection = () => {
                         <Archive className="w-4 h-4 mr-2" />
                         {part.archived ? 'Unarchive' : 'Archive'}
                       </DropdownMenuItem>
-                      <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleDelete(); }} disabled={deleteMutation.isLoading} className="text-red-600">
+                      <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleDelete(); }} disabled={deleteMutation.isLoading} className="text-danger-fg">
                         <Trash2 className="w-4 h-4 mr-2" />
                         Delete
                       </DropdownMenuItem>
@@ -535,7 +535,7 @@ const renderSelectedSection = () => {
                 customStatuses={customStatuses}
               />
               {part.archived && (
-                <span className="neomorph-flat px-2 md:px-3 py-0.5 md:py-1 text-xs font-medium text-gray-600">
+                <span className="neomorph-flat px-2 md:px-3 py-0.5 md:py-1 text-xs font-medium text-muted-foreground">
                   Archived
                 </span>
               )}
@@ -555,8 +555,8 @@ const renderSelectedSection = () => {
                 className="neomorph-flat px-4 py-2 text-sm hover:neomorph transition-all cursor-pointer"
                 title="Click to open in new window"
               >
-                <span className="text-gray-500">Claim:</span>{' '}
-                <span className="font-medium text-blue-600 underline">{linkedClaim.job_number || linkedClaim.reg}</span>
+                <span className="text-muted-foreground">Claim:</span>{' '}
+                <span className="font-medium text-info-fg underline">{linkedClaim.job_number || linkedClaim.reg}</span>
               </button>
             </div>
           </div>
@@ -566,11 +566,11 @@ const renderSelectedSection = () => {
           <div className="neomorph p-4 flex-shrink-0">
             <div className="flex items-center justify-between mb-3">
               <div>
-                <h3 className="font-bold text-gray-700 flex items-center gap-2">
+                <h3 className="font-bold text-foreground flex items-center gap-2">
                   <Mail className="w-5 h-5 text-gold" />
                   Linked Suppliers for {part.manufacturer || part.vehicle_make}
                 </h3>
-                <p className="text-sm text-gray-500 mt-1">
+                <p className="text-sm text-muted-foreground mt-1">
                   {linkedSuppliers.length} supplier(s) configured for this manufacturer
                 </p>
               </div>
@@ -585,9 +585,9 @@ const renderSelectedSection = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {linkedSuppliers.map(supplier => (
                 <div key={supplier.id} className="neomorph-flat p-3">
-                  <p className="font-medium text-gray-700 text-sm">{supplier.name}</p>
-                  <p className="text-xs text-gray-500">{supplier.contact_name}</p>
-                  <p className="text-xs text-gray-600">{supplier.email}</p>
+                  <p className="font-medium text-foreground text-sm">{supplier.name}</p>
+                  <p className="text-xs text-muted-foreground">{supplier.contact_name}</p>
+                  <p className="text-xs text-muted-foreground">{supplier.email}</p>
                 </div>
               ))}
             </div>

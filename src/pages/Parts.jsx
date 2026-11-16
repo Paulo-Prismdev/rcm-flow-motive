@@ -209,25 +209,25 @@ export default function Parts() {
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
-                      <h3 className="text-base font-bold text-gray-700">{part.vehicle_ref || 'No reference'}</h3>
+                      <h3 className="text-base font-bold text-foreground">{part.vehicle_ref || 'No reference'}</h3>
                       <StatusBadge status={part.sourcing_status || 'New Request'} />
                     </div>
                     <div className="grid grid-cols-2 gap-2 text-xs m-keep-2">
                       <div>
-                        <p className="text-gray-500">Part Description</p>
-                        <p className="font-medium text-gray-700">{part.part_description?.substring(0, 50) || '-'}</p>
+                        <p className="text-muted-foreground">Part Description</p>
+                        <p className="font-medium text-foreground">{part.part_description?.substring(0, 50) || '-'}</p>
                       </div>
                       <div>
-                        <p className="text-gray-500">Bodyshop</p>
-                        <p className="font-medium text-gray-700">{part.bodyshop_company || '-'}</p>
+                        <p className="text-muted-foreground">Bodyshop</p>
+                        <p className="font-medium text-foreground">{part.bodyshop_company || '-'}</p>
                       </div>
                       <div>
-                        <p className="text-gray-500">Supplier</p>
-                        <p className="font-medium text-gray-700">{part.supplier || '-'}</p>
+                        <p className="text-muted-foreground">Supplier</p>
+                        <p className="font-medium text-foreground">{part.supplier || '-'}</p>
                       </div>
                       <div>
-                        <p className="text-gray-500">Requested</p>
-                        <p className="font-medium text-gray-700">
+                        <p className="text-muted-foreground">Requested</p>
+                        <p className="font-medium text-foreground">
                           {part.date_requested ? format(new Date(part.date_requested), 'dd/MM/yyyy') : '-'}
                         </p>
                       </div>
@@ -240,7 +240,7 @@ export default function Parts() {
                     onClick={(e) => { e.stopPropagation(); setSelectedPart(part); }}
                     className="ml-3 flex-shrink-0"
                   >
-                    <Eye className="w-4 h-4 text-gray-600" />
+                    <Eye className="w-4 h-4 text-muted-foreground" />
                   </Button>
                 </div>
               </div>

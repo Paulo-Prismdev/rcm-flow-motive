@@ -72,12 +72,12 @@ function VehicleLookupSection({ vehicleRef, vehicleMake, vehicleModel, manufactu
   return (
     <div className="space-y-4">
       <div>
-        <label className="block text-sm text-gray-600 mb-2">Vehicle Registration *</label>
+        <label className="block text-sm text-muted-foreground mb-2">Vehicle Registration *</label>
         <div className="flex gap-2">
           <Input
             value={vehicleRef}
             onChange={(e) => onVehicleDataChange({ vehicle_ref: e.target.value })}
-            className="neomorph-inset px-4 py-3 text-gray-700 border-0 text-lg flex-1"
+            className="neomorph-inset px-4 py-3 text-foreground border-0 text-lg flex-1"
             placeholder="e.g. AB12 CDE"
             maxLength={10}
             required
@@ -97,14 +97,14 @@ function VehicleLookupSection({ vehicleRef, vehicleMake, vehicleModel, manufactu
           </Button>
         </div>
         {lookupError && (
-          <p className="text-xs text-red-600 mt-1">{lookupError}</p>
+          <p className="text-xs text-danger-fg mt-1">{lookupError}</p>
         )}
       </div>
 
       {vehicleMake && (
-        <div className="neomorph-inset p-4 bg-green-50 dark:bg-green-900/20">
-          <p className="text-sm font-medium text-green-800 dark:text-green-200 mb-2">✓ Vehicle Found</p>
-          <div className="grid grid-cols-2 gap-2 text-sm text-gray-700">
+        <div className="neomorph-inset p-4 bg-success-bg">
+          <p className="text-sm font-medium text-success-fg mb-2">✓ Vehicle Found</p>
+          <div className="grid grid-cols-2 gap-2 text-sm text-foreground">
             <div><span className="font-medium">Make:</span> {vehicleMake}</div>
             <div><span className="font-medium">Model:</span> {vehicleModel || 'N/A'}</div>
           </div>
@@ -113,13 +113,13 @@ function VehicleLookupSection({ vehicleRef, vehicleMake, vehicleModel, manufactu
 
       {!vehicleMake && vehicleRef && (
         <div>
-          <label className="block text-sm text-gray-600 mb-2">Manufacturer (Manual Entry)</label>
+          <label className="block text-sm text-muted-foreground mb-2">Manufacturer (Manual Entry)</label>
           <ManufacturerModelCombobox
             value={manufacturer}
             onChange={(value) => onVehicleDataChange({ manufacturer: value })}
             placeholder="Select make & model..."
           />
-          <p className="text-xs text-gray-500 mt-1">Enter manually if lookup didn't work</p>
+          <p className="text-xs text-muted-foreground mt-1">Enter manually if lookup didn't work</p>
         </div>
       )}
     </div>
@@ -336,34 +336,34 @@ export default function PartForm({ part, onSubmit, onCancel }) {
         <div className="neomorph p-6">
           <div className="flex items-center gap-4 mb-6">
             <Button aria-label="Back" onClick={onCancel} className="neomorph-flat p-3"><ArrowLeft className="w-4" /></Button>
-            <h1 className="text-2xl font-bold text-gray-700">Edit Part Request</h1>
+            <h1 className="text-2xl font-bold text-foreground">Edit Part Request</h1>
           </div>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="neomorph-flat p-6 grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="block text-sm text-gray-600 mb-2">Job Number</label>
+                <label className="block text-sm text-muted-foreground mb-2">Job Number</label>
                 <Input
                   value={formData.job_number}
                   readOnly
-                  className="neomorph-inset px-4 py-3 text-gray-700 border-0"
+                  className="neomorph-inset px-4 py-3 text-foreground border-0"
                 />
               </div>
               <div>
-                <label className="block text-sm text-gray-600 mb-2">Vehicle Ref</label>
+                <label className="block text-sm text-muted-foreground mb-2">Vehicle Ref</label>
                 <Input
                   placeholder="Vehicle Ref"
                   value={formData.vehicle_ref}
                   onChange={e => handleChange('vehicle_ref', e.target.value)}
-                  className="neomorph-inset px-4 py-3 text-gray-700 border-0"
+                  className="neomorph-inset px-4 py-3 text-foreground border-0"
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm text-gray-600 mb-2">Status</label>
+                <label className="block text-sm text-muted-foreground mb-2">Status</label>
                 <select
                   value={formData.sourcing_status}
                   onChange={e => handleChange('sourcing_status', e.target.value)}
-                  className="neomorph-inset w-full px-4 py-3 text-gray-700 border-0 rounded-xl"
+                  className="neomorph-inset w-full px-4 py-3 text-foreground border-0 rounded-xl"
                 >
                   <option>New Request</option>
                   <option>Searching</option>
@@ -374,21 +374,21 @@ export default function PartForm({ part, onSubmit, onCancel }) {
                 </select>
               </div>
               <div>
-                <label className="block text-sm text-gray-600 mb-2">Date Requested</label>
+                <label className="block text-sm text-muted-foreground mb-2">Date Requested</label>
                 <Input
                   type="date"
                   value={formData.date_requested}
                   onChange={e => handleChange('date_requested', e.target.value)}
-                  className="neomorph-inset px-4 py-3 text-gray-700 border-0"
+                  className="neomorph-inset px-4 py-3 text-foreground border-0"
                 />
               </div>
             </div>
 
             <div className="neomorph-flat p-6 space-y-4">
-              <h3 className="font-bold text-gray-700 mb-4">Part Details</h3>
+              <h3 className="font-bold text-foreground mb-4">Part Details</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm text-gray-600 mb-2">Manufacturer & Model</label>
+                  <label className="block text-sm text-muted-foreground mb-2">Manufacturer & Model</label>
                   <ManufacturerModelCombobox
                     value={formData.manufacturer}
                     onChange={(value) => handleChange('manufacturer', value)}
@@ -396,33 +396,33 @@ export default function PartForm({ part, onSubmit, onCancel }) {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm text-gray-600 mb-2">Part Number</label>
+                  <label className="block text-sm text-muted-foreground mb-2">Part Number</label>
                   <Input
                     placeholder="Part Number"
                     value={formData.part_number}
                     onChange={e => handleChange('part_number', e.target.value)}
-                    className="neomorph-inset px-4 py-3 text-gray-700 border-0"
+                    className="neomorph-inset px-4 py-3 text-foreground border-0"
                     maxLength={50}
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-sm text-gray-600 mb-2">Part Description</label>
+                <label className="block text-sm text-muted-foreground mb-2">Part Description</label>
                 <Textarea
                   placeholder="Part Description"
                   value={formData.part_description}
                   onChange={e => handleChange('part_description', e.target.value)}
-                  className="neomorph-inset px-4 py-3 text-gray-700 border-0 h-24"
+                  className="neomorph-inset px-4 py-3 text-foreground border-0 h-24"
                   maxLength={50}
                 />
               </div>
             </div>
 
             <div className="neomorph-flat p-6 space-y-4">
-              <h3 className="font-bold text-gray-700 mb-4">Bodyshop & Contact Details</h3>
+              <h3 className="font-bold text-foreground mb-4">Bodyshop & Contact Details</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm text-gray-600 mb-2">Bodyshop Company</label>
+                  <label className="block text-sm text-muted-foreground mb-2">Bodyshop Company</label>
                   <div className="flex gap-2">
                     <div className="flex-1">
                       <BodyshopCombobox value={formData.bodyshop_company} onChange={handleBodyshopChange} />
@@ -437,63 +437,63 @@ export default function PartForm({ part, onSubmit, onCancel }) {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm text-gray-600 mb-2">Contact Name</label>
+                  <label className="block text-sm text-muted-foreground mb-2">Contact Name</label>
                   <Input
                     placeholder="Auto-filled"
                     value={formData.contact_name}
                     onChange={e => handleChange('contact_name', e.target.value)}
-                    className="neomorph-inset px-4 py-3 text-gray-700 border-0"
+                    className="neomorph-inset px-4 py-3 text-foreground border-0"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm text-gray-600 mb-2">Contact Number</label>
+                  <label className="block text-sm text-muted-foreground mb-2">Contact Number</label>
                   <Input
                     placeholder="Auto-filled"
                     value={formData.contact_number}
                     onChange={e => handleChange('contact_number', e.target.value)}
-                    className="neomorph-inset px-4 py-3 text-gray-700 border-0"
+                    className="neomorph-inset px-4 py-3 text-foreground border-0"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm text-gray-600 mb-2">Contact Email</label>
+                  <label className="block text-sm text-muted-foreground mb-2">Contact Email</label>
                   <Input
                     type="email"
                     placeholder="Auto-filled"
                     value={formData.contact_email}
                     onChange={e => handleChange('contact_email', e.target.value)}
-                    className="neomorph-inset px-4 py-3 text-gray-700 border-0"
+                    className="neomorph-inset px-4 py-3 text-foreground border-0"
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-sm text-gray-600 mb-2">Delivery Address</label>
+                <label className="block text-sm text-muted-foreground mb-2">Delivery Address</label>
                 <Textarea
                   placeholder="Auto-filled"
                   value={formData.delivery_address}
                   onChange={e => handleChange('delivery_address', e.target.value)}
-                  className="neomorph-inset px-4 py-3 text-gray-700 border-0 h-20"
+                  className="neomorph-inset px-4 py-3 text-foreground border-0 h-20"
                 />
               </div>
             </div>
 
             <div className="neomorph-flat p-6 space-y-4">
-              <h3 className="font-bold text-gray-700 mb-4">Order Details</h3>
+              <h3 className="font-bold text-foreground mb-4">Order Details</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm text-gray-600 mb-2">Date of Initial Order</label>
+                  <label className="block text-sm text-muted-foreground mb-2">Date of Initial Order</label>
                   <Input
                     type="date"
                     value={formData.date_ordered}
                     onChange={e => handleChange('date_ordered', e.target.value)}
-                    className="neomorph-inset px-4 py-3 text-gray-700 border-0"
+                    className="neomorph-inset px-4 py-3 text-foreground border-0"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm text-gray-600 mb-2">Expected Delivery Time</label>
+                  <label className="block text-sm text-muted-foreground mb-2">Expected Delivery Time</label>
                   <select
                     value={formData.delivery_time_weeks}
                     onChange={e => handleChange('delivery_time_weeks', parseInt(e.target.value))}
-                    className="neomorph-inset w-full px-4 py-3 text-gray-700 border-0 rounded-xl"
+                    className="neomorph-inset w-full px-4 py-3 text-foreground border-0 rounded-xl"
                   >
                     <option value={0}>No Date</option>
                     <option value={1}>1 Week</option>
@@ -506,7 +506,7 @@ export default function PartForm({ part, onSubmit, onCancel }) {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm text-gray-600 mb-2">Work Provider</label>
+                  <label className="block text-sm text-muted-foreground mb-2">Work Provider</label>
                   <div className="flex gap-2">
                     <div className="flex-1">
                       <WorkProviderCombobox
@@ -524,11 +524,11 @@ export default function PartForm({ part, onSubmit, onCancel }) {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm text-gray-600 mb-2">Courtesy Vehicle</label>
+                  <label className="block text-sm text-muted-foreground mb-2">Courtesy Vehicle</label>
                   <select
                     value={formData.courtesy_vehicle_type}
                     onChange={e => handleChange('courtesy_vehicle_type', e.target.value)}
-                    className="neomorph-inset w-full px-4 py-3 text-gray-700 border-0 rounded-xl"
+                    className="neomorph-inset w-full px-4 py-3 text-foreground border-0 rounded-xl"
                   >
                     <option value="None">None</option>
                     <option value="Credit Hire">Credit Hire</option>
@@ -540,10 +540,10 @@ export default function PartForm({ part, onSubmit, onCancel }) {
             </div>
 
             <div className="neomorph-flat p-6 space-y-4">
-              <h3 className="font-bold text-gray-700 mb-4">Supplier & Sourcing</h3>
+              <h3 className="font-bold text-foreground mb-4">Supplier & Sourcing</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm text-gray-600 mb-2">Supplier</label>
+                  <label className="block text-sm text-muted-foreground mb-2">Supplier</label>
                   <div className="flex gap-2">
                     <div className="flex-1">
                       <SupplierCombobox value={formData.supplier} onChange={handleSupplierChange} />
@@ -558,11 +558,11 @@ export default function PartForm({ part, onSubmit, onCancel }) {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm text-gray-600 mb-2">Part Type</label>
+                  <label className="block text-sm text-muted-foreground mb-2">Part Type</label>
                   <select
                     value={formData.part_type}
                     onChange={e => handleChange('part_type', e.target.value)}
-                    className="neomorph-inset w-full px-4 py-3 text-gray-700 border-0 rounded-xl"
+                    className="neomorph-inset w-full px-4 py-3 text-foreground border-0 rounded-xl"
                   >
                     <option>OEM</option>
                     <option>Aftermarket</option>
@@ -571,11 +571,11 @@ export default function PartForm({ part, onSubmit, onCancel }) {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm text-gray-600 mb-2">Condition</label>
+                  <label className="block text-sm text-muted-foreground mb-2">Condition</label>
                   <select
                     value={formData.condition}
                     onChange={e => handleChange('condition', e.target.value)}
-                    className="neomorph-inset w-full px-4 py-3 text-gray-700 border-0 rounded-xl"
+                    className="neomorph-inset w-full px-4 py-3 text-foreground border-0 rounded-xl"
                   >
                     <option>New</option>
                     <option>Used</option>
@@ -586,13 +586,13 @@ export default function PartForm({ part, onSubmit, onCancel }) {
             </div>
 
             <div className="neomorph-flat p-6 space-y-4">
-              <h3 className="font-bold text-gray-700 mb-4">File Uploads</h3>
+              <h3 className="font-bold text-foreground mb-4">File Uploads</h3>
               <FileUpload value={Array.isArray(formData.file_urls) ? formData.file_urls : []} onChange={(urls) => handleChange('file_urls', urls)} />
             </div>
 
             <div className="flex justify-end gap-4">
               <Button type="button" onClick={onCancel} className="neomorph-flat px-6 py-3">Cancel</Button>
-              <Button type="submit" className="neomorph-flat px-6 py-3 text-blue-600">Update Request</Button>
+              <Button type="submit" className="neomorph-flat px-6 py-3 text-info-fg">Update Request</Button>
             </div>
           </form>
         </div>
@@ -611,11 +611,11 @@ export default function PartForm({ part, onSubmit, onCancel }) {
       <div className="neomorph p-6">
         <div className="flex items-center gap-4 mb-6">
           <Button aria-label="Back" onClick={onCancel} className="neomorph-flat p-3 transition-all active:neomorph-pressed">
-            <ArrowLeft className="w-4 h-4 text-gray-600" />
+            <ArrowLeft className="w-4 h-4 text-muted-foreground" />
           </Button>
           <div className="flex-1">
-            <h1 className="text-2xl font-bold text-gray-700">New Part Request</h1>
-            <p className="text-sm text-gray-500 mt-1">Step {currentStep} of {steps.length}</p>
+            <h1 className="text-2xl font-bold text-foreground">New Part Request</h1>
+            <p className="text-sm text-muted-foreground mt-1">Step {currentStep} of {steps.length}</p>
           </div>
         </div>
 
@@ -626,18 +626,18 @@ export default function PartForm({ part, onSubmit, onCancel }) {
               <div className="flex flex-col items-center">
                 <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
                   currentStep > step.number
-                    ? 'bg-green-600 text-white'
+                    ? 'bg-success text-on-solid'
                     : currentStep === step.number
-                      ? 'bg-gold text-black'
-                      : 'bg-gray-300 text-gray-600'
+                      ? 'bg-gold text-foreground'
+                      : 'bg-accent text-muted-foreground'
                 }`}>
                   {currentStep > step.number ? <Check className="w-5 h-5" /> : step.number}
                 </div>
-                <span className="text-xs text-gray-500 mt-2 hidden md:block">{step.title}</span>
+                <span className="text-xs text-muted-foreground mt-2 hidden md:block">{step.title}</span>
               </div>
               {index < steps.length - 1 && (
                 <div className={`flex-1 h-1 mx-2 transition-all ${
-                  currentStep > step.number ? 'bg-green-600' : 'bg-gray-300'
+                  currentStep > step.number ? 'bg-success' : 'bg-accent'
                 }`} />
               )}
             </React.Fragment>
@@ -648,7 +648,7 @@ export default function PartForm({ part, onSubmit, onCancel }) {
           {/* Step 1: Basic Info */}
           {currentStep === 1 && (
             <div className="neomorph-flat p-6 space-y-6">
-              <h3 className="text-xl font-bold text-gray-700 mb-4">Let's start with the basics</h3>
+              <h3 className="text-xl font-bold text-foreground mb-4">Let's start with the basics</h3>
 
               <VehicleLookupSection
                 vehicleRef={formData.vehicle_ref}
@@ -664,22 +664,22 @@ export default function PartForm({ part, onSubmit, onCancel }) {
               />
 
               <div>
-                <label className="block text-sm text-gray-600 mb-2">Part Description</label>
+                <label className="block text-sm text-muted-foreground mb-2">Part Description</label>
                 <Input
                   value={formData.part_description}
                   onChange={(e) => handleChange('part_description', e.target.value)}
-                  className="neomorph-inset px-4 py-3 text-gray-700 border-0"
+                  className="neomorph-inset px-4 py-3 text-foreground border-0"
                   placeholder="Brief description of the part needed..."
                   maxLength={50}
                 />
               </div>
 
               <div>
-                <label className="block text-sm text-gray-600 mb-2">Part Number</label>
+                <label className="block text-sm text-muted-foreground mb-2">Part Number</label>
                 <Input
                   value={formData.part_number}
                   onChange={(e) => handleChange('part_number', e.target.value)}
-                  className="neomorph-inset px-4 py-3 text-gray-700 border-0"
+                  className="neomorph-inset px-4 py-3 text-foreground border-0"
                   placeholder="If known"
                   maxLength={50}
                 />
@@ -690,11 +690,11 @@ export default function PartForm({ part, onSubmit, onCancel }) {
           {/* Step 2: Customer Details */}
           {currentStep === 2 && (
             <div className="neomorph-flat p-6 space-y-6">
-              <h3 className="text-xl font-bold text-gray-700 mb-4">Customer & Delivery Details</h3>
-              <p className="text-sm text-gray-500 mb-4">Select the bodyshop or customer for this parts request</p>
+              <h3 className="text-xl font-bold text-foreground mb-4">Customer & Delivery Details</h3>
+              <p className="text-sm text-muted-foreground mb-4">Select the bodyshop or customer for this parts request</p>
 
               <div>
-                <label className="block text-sm text-gray-600 mb-2">Customer (Bodyshop) *</label>
+                <label className="block text-sm text-muted-foreground mb-2">Customer (Bodyshop) *</label>
                 <div className="flex gap-2">
                   <div className="flex-1">
                     <BodyshopCombobox
@@ -714,30 +714,30 @@ export default function PartForm({ part, onSubmit, onCancel }) {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm text-gray-600 mb-2">Contact Name</label>
+                  <label className="block text-sm text-muted-foreground mb-2">Contact Name</label>
                   <Input
                     value={formData.contact_name}
                     onChange={(e) => handleChange('contact_name', e.target.value)}
-                    className="neomorph-inset px-4 py-3 text-gray-700 border-0"
+                    className="neomorph-inset px-4 py-3 text-foreground border-0"
                     placeholder="Auto-filled from selection"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm text-gray-600 mb-2">Contact Number</label>
+                  <label className="block text-sm text-muted-foreground mb-2">Contact Number</label>
                   <Input
                     value={formData.contact_number}
                     onChange={(e) => handleChange('contact_number', e.target.value)}
-                    className="neomorph-inset px-4 py-3 text-gray-700 border-0"
+                    className="neomorph-inset px-4 py-3 text-foreground border-0"
                     placeholder="Auto-filled from selection"
                   />
                 </div>
                 <div className="md:col-span-2">
-                  <label className="block text-sm text-gray-600 mb-2">Contact Email</label>
+                  <label className="block text-sm text-muted-foreground mb-2">Contact Email</label>
                   <Input
                     type="email"
                     value={formData.contact_email}
                     onChange={(e) => handleChange('contact_email', e.target.value)}
-                    className="neomorph-inset px-4 py-3 text-gray-700 border-0"
+                    className="neomorph-inset px-4 py-3 text-foreground border-0"
                     placeholder="Auto-filled from selection"
                   />
                 </div>
@@ -752,27 +752,27 @@ export default function PartForm({ part, onSubmit, onCancel }) {
                     onChange={(e) => handleDeliveryCheckboxChange(e.target.checked)}
                     className="w-5 h-5"
                   />
-                  <label htmlFor="delivery_same" className="text-sm text-gray-600">
+                  <label htmlFor="delivery_same" className="text-sm text-muted-foreground">
                     Delivery address same as customer address
                   </label>
                 </div>
 
                 {!sections.deliverySameAsCustomer && (
                   <div>
-                    <label className="block text-sm text-gray-600 mb-2">Delivery Address</label>
+                    <label className="block text-sm text-muted-foreground mb-2">Delivery Address</label>
                     <Textarea
                       value={formData.delivery_address}
                       onChange={(e) => handleChange('delivery_address', e.target.value)}
-                      className="neomorph-inset px-4 py-3 text-gray-700 border-0 h-24"
+                      className="neomorph-inset px-4 py-3 text-foreground border-0 h-24"
                       placeholder="Enter delivery address if different from customer address..."
                     />
                   </div>
                 )}
 
                 {sections.deliverySameAsCustomer && formData.delivery_address && (
-                  <div className="neomorph-inset p-4 bg-gray-50">
-                    <p className="text-sm text-gray-500 mb-1">Delivery Address:</p>
-                    <p className="text-sm text-gray-700">{formData.delivery_address}</p>
+                  <div className="neomorph-inset p-4 bg-muted">
+                    <p className="text-sm text-muted-foreground mb-1">Delivery Address:</p>
+                    <p className="text-sm text-foreground">{formData.delivery_address}</p>
                   </div>
                 )}
               </div>
@@ -782,26 +782,26 @@ export default function PartForm({ part, onSubmit, onCancel }) {
           {/* Step 3: Order Details */}
           {currentStep === 3 && (
             <div className="neomorph-flat p-6 space-y-6">
-              <h3 className="text-xl font-bold text-gray-700 mb-4">Order Details</h3>
-              <p className="text-sm text-gray-500 mb-6">Additional information about this parts request</p>
+              <h3 className="text-xl font-bold text-foreground mb-4">Order Details</h3>
+              <p className="text-sm text-muted-foreground mb-6">Additional information about this parts request</p>
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm text-gray-600 mb-2">Date of Initial Order</label>
+                  <label className="block text-sm text-muted-foreground mb-2">Date of Initial Order</label>
                   <Input
                     type="date"
                     value={formData.date_ordered}
                     onChange={(e) => handleChange('date_ordered', e.target.value)}
-                    className="neomorph-inset px-4 py-3 text-gray-700 border-0"
+                    className="neomorph-inset px-4 py-3 text-foreground border-0"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm text-gray-600 mb-2">Expected Time of Delivery</label>
+                  <label className="block text-sm text-muted-foreground mb-2">Expected Time of Delivery</label>
                   <select
                     value={formData.delivery_time_weeks}
                     onChange={(e) => handleChange('delivery_time_weeks', parseInt(e.target.value))}
-                    className="neomorph-inset w-full px-4 py-3 text-gray-700 border-0 rounded-xl"
+                    className="neomorph-inset w-full px-4 py-3 text-foreground border-0 rounded-xl"
                   >
                     <option value={0}>No Date</option>
                     <option value={1}>1 Week</option>
@@ -815,7 +815,7 @@ export default function PartForm({ part, onSubmit, onCancel }) {
                 </div>
 
                 <div>
-                  <label className="block text-sm text-gray-600 mb-2">Work Provider</label>
+                  <label className="block text-sm text-muted-foreground mb-2">Work Provider</label>
                   <div className="flex gap-2">
                     <div className="flex-1">
                       <WorkProviderCombobox
@@ -834,11 +834,11 @@ export default function PartForm({ part, onSubmit, onCancel }) {
                 </div>
 
                 <div>
-                  <label className="block text-sm text-gray-600 mb-2">Is Driver in a Courtesy Vehicle?</label>
+                  <label className="block text-sm text-muted-foreground mb-2">Is Driver in a Courtesy Vehicle?</label>
                   <select
                     value={formData.courtesy_vehicle_type}
                     onChange={(e) => handleChange('courtesy_vehicle_type', e.target.value)}
-                    className="neomorph-inset w-full px-4 py-3 text-gray-700 border-0 rounded-xl"
+                    className="neomorph-inset w-full px-4 py-3 text-foreground border-0 rounded-xl"
                   >
                     <option value="None">None</option>
                     <option value="Credit Hire">Credit Hire</option>
@@ -853,62 +853,62 @@ export default function PartForm({ part, onSubmit, onCancel }) {
           {/* Final Step: Review */}
           {currentStep === steps.length && (
             <div className="neomorph-flat p-6 space-y-6">
-              <h3 className="text-xl font-bold text-gray-700 mb-4">Review & Create</h3>
-              <p className="text-sm text-gray-500 mb-6">Check the details below. You can edit any section after creating the request.</p>
+              <h3 className="text-xl font-bold text-foreground mb-4">Review & Create</h3>
+              <p className="text-sm text-muted-foreground mb-6">Check the details below. You can edit any section after creating the request.</p>
 
               <div className="space-y-4">
                 {formData.job_number && (
                   <div className="neomorph-inset p-4">
-                    <p className="text-sm text-gray-500 mb-2">Job Number</p>
+                    <p className="text-sm text-muted-foreground mb-2">Job Number</p>
                     <p className="font-bold text-lg text-gold">{formData.job_number}</p>
                   </div>
                 )}
                 <div className="neomorph-inset p-4">
-                  <p className="text-sm text-gray-500 mb-2">Vehicle Reference</p>
+                  <p className="text-sm text-muted-foreground mb-2">Vehicle Reference</p>
                   <p className="font-bold text-lg text-gold">{formData.vehicle_ref}</p>
                 </div>
 
                 <div className="neomorph-inset p-4">
-                  <p className="text-sm text-gray-500 mb-2">Manufacturer</p>
-                  <p className="font-medium text-gray-700">{formData.manufacturer || formData.vehicle_make || 'Not specified'}</p>
+                  <p className="text-sm text-muted-foreground mb-2">Manufacturer</p>
+                  <p className="font-medium text-foreground">{formData.manufacturer || formData.vehicle_make || 'Not specified'}</p>
                 </div>
 
                 {formData.vehicle_model && (
                   <div className="neomorph-inset p-4">
-                    <p className="text-sm text-gray-500 mb-2">Model</p>
-                    <p className="font-medium text-gray-700">{formData.vehicle_model}</p>
+                    <p className="text-sm text-muted-foreground mb-2">Model</p>
+                    <p className="font-medium text-foreground">{formData.vehicle_model}</p>
                   </div>
                 )}
 
                 <div className="neomorph-inset p-4">
-                  <p className="text-sm text-gray-500 mb-2">Part Description</p>
-                  <p className="font-medium text-gray-700">{formData.part_description || 'Not specified'}</p>
+                  <p className="text-sm text-muted-foreground mb-2">Part Description</p>
+                  <p className="font-medium text-foreground">{formData.part_description || 'Not specified'}</p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="neomorph-inset p-4">
-                    <p className="text-sm text-gray-500 mb-2">Part Number</p>
-                    <p className="font-medium text-gray-700">{formData.part_number || 'Not specified'}</p>
+                    <p className="text-sm text-muted-foreground mb-2">Part Number</p>
+                    <p className="font-medium text-foreground">{formData.part_number || 'Not specified'}</p>
                   </div>
 
                   <div className="neomorph-inset p-4">
-                    <p className="text-sm text-gray-500 mb-2">Part Type</p>
-                    <p className="font-medium text-gray-700">{formData.part_type}</p>
+                    <p className="text-sm text-muted-foreground mb-2">Part Type</p>
+                    <p className="font-medium text-foreground">{formData.part_type}</p>
                   </div>
 
                   <div className="neomorph-inset p-4">
-                    <p className="text-sm text-gray-500 mb-2">Condition</p>
-                    <p className="font-medium text-gray-700">{formData.condition}</p>
+                    <p className="text-sm text-muted-foreground mb-2">Condition</p>
+                    <p className="font-medium text-foreground">{formData.condition}</p>
                   </div>
 
                   <div className="neomorph-inset p-4">
-                    <p className="text-sm text-gray-500 mb-2">Date Ordered</p>
-                    <p className="font-medium text-gray-700">{formData.date_ordered || 'Not specified'}</p>
+                    <p className="text-sm text-muted-foreground mb-2">Date Ordered</p>
+                    <p className="font-medium text-foreground">{formData.date_ordered || 'Not specified'}</p>
                   </div>
 
                   <div className="neomorph-inset p-4">
-                    <p className="text-sm text-gray-500 mb-2">Expected Delivery</p>
-                    <p className="font-medium text-gray-700">
+                    <p className="text-sm text-muted-foreground mb-2">Expected Delivery</p>
+                    <p className="font-medium text-foreground">
                       {formData.delivery_time_weeks === 0 ? 'No Date' : `${formData.delivery_time_weeks} Week(s)`}
                     </p>
                   </div>
@@ -916,41 +916,41 @@ export default function PartForm({ part, onSubmit, onCancel }) {
 
                 {formData.bodyshop_company && (
                   <div className="neomorph-inset p-4">
-                    <p className="text-sm text-gray-500 mb-2">Customer</p>
-                    <p className="font-medium text-gray-700">{formData.bodyshop_company}</p>
-                    {formData.contact_name && <p className="text-sm text-gray-600">Contact: {formData.contact_name}</p>}
-                    {formData.contact_number && <p className="text-sm text-gray-600">Tel: {formData.contact_number}</p>}
-                    {formData.contact_email && <p className="text-sm text-gray-600">Email: {formData.contact_email}</p>}
+                    <p className="text-sm text-muted-foreground mb-2">Customer</p>
+                    <p className="font-medium text-foreground">{formData.bodyshop_company}</p>
+                    {formData.contact_name && <p className="text-sm text-muted-foreground">Contact: {formData.contact_name}</p>}
+                    {formData.contact_number && <p className="text-sm text-muted-foreground">Tel: {formData.contact_number}</p>}
+                    {formData.contact_email && <p className="text-sm text-muted-foreground">Email: {formData.contact_email}</p>}
                     {formData.delivery_address && (
-                      <p className="text-sm text-gray-600 mt-2">Delivery Address: {formData.delivery_address}</p>
+                      <p className="text-sm text-muted-foreground mt-2">Delivery Address: {formData.delivery_address}</p>
                     )}
                   </div>
                 )}
 
                 {formData.work_provider && (
                   <div className="neomorph-inset p-4">
-                    <p className="text-sm text-gray-500 mb-2">Work Provider</p>
-                    <p className="font-medium text-gray-700">{formData.work_provider}</p>
+                    <p className="text-sm text-muted-foreground mb-2">Work Provider</p>
+                    <p className="font-medium text-foreground">{formData.work_provider}</p>
                   </div>
                 )}
 
                 {formData.courtesy_vehicle_type !== 'None' && (
                   <div className="neomorph-inset p-4">
-                    <p className="text-sm text-gray-500 mb-2">Courtesy Vehicle</p>
-                    <p className="font-medium text-gray-700">{formData.courtesy_vehicle_type}</p>
+                    <p className="text-sm text-muted-foreground mb-2">Courtesy Vehicle</p>
+                    <p className="font-medium text-foreground">{formData.courtesy_vehicle_type}</p>
                   </div>
                 )}
 
                 {formData.supplier && (
                   <div className="neomorph-inset p-4">
-                    <p className="text-sm text-gray-500 mb-2">Supplier</p>
-                    <p className="font-medium text-gray-700">{formData.supplier}</p>
+                    <p className="text-sm text-muted-foreground mb-2">Supplier</p>
+                    <p className="font-medium text-foreground">{formData.supplier}</p>
                   </div>
                 )}
               </div>
 
               <div className="neomorph-flat p-6">
-                <h4 className="font-semibold text-gray-700 mb-4">Upload Files (Optional)</h4>
+                <h4 className="font-semibold text-foreground mb-4">Upload Files (Optional)</h4>
                 <FileUpload
                   value={Array.isArray(formData.file_urls) ? formData.file_urls : []}
                   onChange={(urls) => handleChange('file_urls', urls)}
@@ -965,7 +965,7 @@ export default function PartForm({ part, onSubmit, onCancel }) {
               <Button
                 type="button"
                 onClick={prevStep}
-                className="neomorph-flat px-6 py-3 font-medium text-gray-700 transition-all active:neomorph-pressed flex items-center gap-2"
+                className="neomorph-flat px-6 py-3 font-medium text-foreground transition-all active:neomorph-pressed flex items-center gap-2"
               >
                 <ArrowLeft className="w-4 h-4" />
                 Previous
@@ -978,7 +978,7 @@ export default function PartForm({ part, onSubmit, onCancel }) {
               <Button
                 type="button"
                 onClick={nextStep}
-                className="neomorph-flat px-6 py-3 font-medium text-blue-600 transition-all active:neomorph-pressed flex items-center gap-2"
+                className="neomorph-flat px-6 py-3 font-medium text-info-fg transition-all active:neomorph-pressed flex items-center gap-2"
                 disabled={!canGoNext()}
               >
                 Next

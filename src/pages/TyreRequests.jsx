@@ -6,7 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Package, Search, Filter, Mail, CheckCircle, Clock } from "lucide-react";
+import { Package, Search, Filter, Mail, CheckCircle, Clock, CircleDot } from "lucide-react";
+import PageHeader from "@/components/shared/PageHeader";
 import { toast } from "@/components/ui/use-toast";
 
 export default function TyreRequests() {
@@ -41,10 +42,11 @@ export default function TyreRequests() {
     return matchesSearch && matchesStatus && matchesType;
   });
 
-  const statusColors = {
-    Pending: "bg-yellow-500",
-    Processed: "bg-blue-500",
-    Completed: "bg-green-500",
+  // Same status pills as the rest of the app (amber = waiting, blue = in hand, green = done).
+  const statusVariant = {
+    Pending: "warning",
+    Processed: "info",
+    Completed: "success",
   };
 
   const handleStatusChange = (id, newStatus) => {
@@ -153,7 +155,7 @@ Request Type: ${req.request_type === 'price' ? 'Price request' : 'Order'}
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
                       <div className="flex items-center gap-2">
-                        <Badge className={statusColors[req.status]}>
+                        <Badge variant={statusVariant[req.status] || "neutral"}>
                           {req.status}
                         </Badge>
                         <Badge variant="outline">
