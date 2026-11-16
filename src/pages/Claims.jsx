@@ -882,7 +882,7 @@ export default function ClaimsPage() {
 
           {/* Quick filter dropdowns */}
           <button onClick={() => setShowFilters(!showFilters)}
-            className={`flex items-center gap-1 lg:gap-1.5 px-2 lg:px-3 py-1.5 rounded-lg text-xs lg:text-xs font-medium border transition-all flex-shrink-0 ${activeFiltersCount > 0 ? 'bg-info-bg border-info/30 text-info-fg' : 'border-border text-muted-foreground hover:bg-card hover:border-input'}`}>
+            className={`hidden md:flex items-center gap-1 lg:gap-1.5 px-2 lg:px-3 py-1.5 rounded-lg text-xs lg:text-xs font-medium border transition-all flex-shrink-0 ${activeFiltersCount > 0 ? 'bg-info-bg border-info/30 text-info-fg' : 'border-border text-muted-foreground hover:bg-card hover:border-input'}`}>
             <Filter className="w-3.5 h-3.5" />
             Filters{activeFiltersCount > 0 ? ` (${activeFiltersCount})` : ''}
           </button>
