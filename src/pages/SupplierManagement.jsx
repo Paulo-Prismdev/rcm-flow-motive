@@ -175,19 +175,18 @@ export default function SupplierManagement() {
 
       <div className="neomorph p-4">
         <div className="flex items-center gap-3 mb-4">
-          <Button asChild aria-label="Back" className="neomorph-flat p-2 bg-[hsl(var(--card))] text-[hsl(var(--foreground))]">
+          <Button asChild variant="outline" size="icon" aria-label="Back to settings">
             <Link to={createPageUrl("Settings")}>
               <ArrowLeft className="w-4 h-4" />
             </Link>
           </Button>
-          <div className="flex items-center gap-3 flex-1">
-            <Building2 className="w-5 h-5 text-accent" />
-            <div>
-              <h1 className="text-xl font-bold">Supplier Management</h1>
-              <p className="text-xs text-foreground-muted">Manage suppliers and their manufacturer associations</p>
-            </div>
-          </div>
-          <div className="flex gap-2">
+          <PageHeader
+            className="flex-1 min-w-0"
+            icon={Building2}
+            title="Suppliers"
+            subtitle="Suppliers and the manufacturers they cover"
+          />
+          <div className="flex gap-2 flex-wrap justify-end">
             <input
               type="file"
               accept=".csv"
@@ -197,11 +196,11 @@ export default function SupplierManagement() {
               disabled={isUploading} />
             
             <label htmlFor="csv-upload">
-              <Button className="neomorph-flat gap-2 text-[hsl(var(--card-foreground))] bg-[hsl(var(--card))]" disabled={isUploading} as="span">
+              <Button variant="outline" size="sm" className="gap-1.5" disabled={isUploading} as="span">
                 {isUploading ?
                 <>
                     <Loader className="w-4 h-4 animate-spin" />
-                    Uploading...
+                    Uploading…
                   </> :
 
                 <>
@@ -211,30 +210,35 @@ export default function SupplierManagement() {
                 }
               </Button>
             </label>
-            <Button onClick={handleExportCSV} className="neomorph-flat gap-2 text-[hsl(var(--foreground))] bg-[hsl(var(--card))]">
+            <Button onClick={handleExportCSV} variant="outline" size="sm" className="gap-1.5">
               <Download className="w-4 h-4" />
               Export CSV
             </Button>
-            <Button onClick={() => setIsAddModalOpen(true)} className="neomorph-flat gap-2 bg-accent/10 text-accent">
+            <Button onClick={() => setIsAddModalOpen(true)} size="sm" className="gap-1.5">
               <Plus className="w-4 h-4" />
-              Add Supplier
+              Add supplier
             </Button>
           </div>
         </div>
 
         <div className="flex gap-3 flex-wrap items-center">
-          <Input
-            placeholder="Search suppliers (name, contact, email, phone, location, manufacturer...)"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="neomorph-inset flex-1 min-w-[200px]" />
+          <div className="relative flex-1 min-w-[200px]">
+            <Search className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-subtle" aria-hidden="true" />
+            <Input
+              placeholder="Search name, contact, email, phone, location, manufacturer…"
+              aria-label="Search suppliers"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-8" />
+          </div>
           
           <select
             value={filterType}
             onChange={(e) => setFilterType(e.target.value)}
-            className="neomorph-inset px-4 py-2 rounded-xl border-0 min-w-[150px]">
+            aria-label="Supplier type"
+            className="h-8 rounded-lg border border-input bg-card px-2.5 text-[13px] text-foreground min-w-[150px]">
             
-            <option value="all">All Types</option>
+            <option value="all">All types</option>
             <option value="OEM">OEM</option>
             <option value="Green">Green (Used)</option>
             <option value="Aftermarket">Aftermarket</option>
@@ -244,9 +248,10 @@ export default function SupplierManagement() {
           <select
             value={filterManufacturer}
             onChange={(e) => setFilterManufacturer(e.target.value)}
-            className="neomorph-inset px-4 py-2 rounded-xl border-0 min-w-[200px]">
+            aria-label="Manufacturer"
+            className="h-8 rounded-lg border border-input bg-card px-2.5 text-[13px] text-foreground min-w-[200px]">
             
-            <option value="all">All Manufacturers</option>
+            <option value="all">All manufacturers</option>
             {uniqueManufacturers.map((mfr) =>
             <option key={mfr} value={mfr}>{mfr}</option>
             )}
