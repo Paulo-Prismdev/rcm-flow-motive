@@ -57,6 +57,7 @@ import { User } from "lucide-react";
 
 import { signOut } from '@/lib/signOut';
 import { escapeWindowsOpen } from '@/hooks/useEscapeToClose';
+import { installBackGuard } from '@/lib/backNavigation';
 const allDepartments = [
 { name: "Dashboard", url: createPageUrl("Dashboard"), icon: LayoutDashboard, permission: "Dashboard" },
 { name: "Repairs", url: createPageUrl("Claims"), icon: FileText, permission: "Claims" },
@@ -127,6 +128,10 @@ export default function Layout({ children, currentPageName }) {
     queryClient.cancelQueries();
     setTimeout(() => window.location.reload(), 150);
   };
+
+  // Stepping back from the first screen stays in the app instead of going back to
+  // the sign-in page (see lib/backNavigation).
+  useEffect(() => { installBackGuard(); }, []);
 
   // Escape closes the top-most hand-built window (one whose backdrop is marked
   // data-overlay-dismiss), the same as the shared windows already do. A shared window
