@@ -118,8 +118,6 @@ export default function Layout({ children, currentPageName }) {
   const [overlayPage, setOverlayPage] = useState(null);
   const queryClient = useQueryClient();
 
-  // Refresh reloads the data on screen, never the browser page, so open windows and
-  // scroll positions stay where they are.
   // Full reload, as before round 2: some screens load their data outside the shared
   // query cache, so only a reload refreshes everything. The icon spins so it's clear
   // the click registered; the open claim stays open (its id is in the address).
