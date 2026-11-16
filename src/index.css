@@ -4,6 +4,12 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Tell the browser which theme is showing, so its own controls (date pickers,
+   select menus, scrollbars, autofill) draw light or dark to match. */
+:root { color-scheme: light; }
+:root.dark { color-scheme: dark; }
+
+
 @layer base {
   html, body, #root {
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
