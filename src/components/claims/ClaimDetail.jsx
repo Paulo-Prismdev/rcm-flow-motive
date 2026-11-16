@@ -2018,7 +2018,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
 
           {/* ── Starred update notice: one row under the header ── */}
           {starredUpdates.length > 0 && (
-            <div role="status" className="bg-warning-bg border border-warning/40 rounded-xl px-3 py-2 flex items-center gap-2.5 flex-shrink-0">
+            <div role="status" className="max-lg:hidden bg-warning-bg border border-warning/40 rounded-xl px-3 py-2 flex items-center gap-2.5 flex-shrink-0">
               <Star className="w-4 h-4 text-warning fill-current flex-shrink-0" aria-hidden="true" />
               <p className="flex-1 min-w-0 text-sm text-warning-fg">
                 <span className="font-semibold">{starredUpdates.length} flagged update{starredUpdates.length !== 1 ? 's' : ''}.</span>{' '}
@@ -2091,7 +2091,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
 
         {/* Sections: a source list down the left on desktop, the Mac way (phones choose
             the section in ClaimDetailMobileHeader). Same sections, same order. */}
-        <div className="flex-1 min-h-0 flex gap-3">
+        <div className={`flex-1 min-h-0 flex gap-3 ${mobilePage === 'summary' ? 'max-lg:hidden' : ''}`}>
           <nav aria-label="Claim sections" className="hidden lg:flex w-56 flex-shrink-0 flex-col gap-0.5 min-h-0 overflow-y-auto rounded-xl border border-border bg-muted p-2">
             {DETAIL_SECTIONS.filter(s => s.id !== 'creditRepair' || claim.claim_type === 'Credit Repair').map(section => {
               const on = selectedSection === section.id;
