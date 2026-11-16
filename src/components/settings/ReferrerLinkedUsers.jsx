@@ -88,19 +88,19 @@ export default function ReferrerLinkedUsers({ companyId, contacts, companyName }
   return (
     <div className="border-t pt-3">
       <div className="flex items-center justify-between mb-2">
-        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+        <p className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
           <Link2 className="w-3.5 h-3.5" /> Linked Portal Users
         </p>
         <div className="flex gap-1.5">
           <button
             onClick={() => { setShowLinkExisting((v) => !v); setShowInvite(false); }}
-            className="text-[11px] px-2 py-1 rounded-md border border-border bg-card hover:bg-muted flex items-center gap-1"
+            className="text-xs px-2 py-1 rounded-md border border-border bg-card hover:bg-muted flex items-center gap-1"
           >
             <UserCog className="w-3 h-3" /> Link existing
           </button>
           <button
             onClick={() => { setShowInvite((v) => !v); setShowLinkExisting(false); }}
-            className="text-[11px] px-2 py-1 rounded-md bg-primary text-primary-foreground hover:opacity-90 flex items-center gap-1"
+            className="text-xs px-2 py-1 rounded-md bg-primary text-primary-foreground hover:opacity-90 flex items-center gap-1"
           >
             <UserPlus className="w-3 h-3" /> Invite & link
           </button>
@@ -130,7 +130,7 @@ export default function ReferrerLinkedUsers({ companyId, contacts, companyName }
               <X className="w-3.5 h-3.5" />
             </button>
           </div>
-          <p className="text-[10px] text-muted-foreground mt-1.5">Sends an invite; the new user is auto-linked to {companyName || "this referrer"} and auto-matched to a contact if their email matches.</p>
+          <p className="text-xs text-muted-foreground mt-1.5">Sends an invite; the new user is auto-linked to {companyName || "this referrer"} and auto-matched to a contact if their email matches.</p>
         </div>
       )}
 
@@ -147,12 +147,12 @@ export default function ReferrerLinkedUsers({ companyId, contacts, companyName }
                   <div key={u.id} className="flex items-center justify-between gap-2 rounded-md border border-border bg-card px-2 py-1.5">
                     <div className="min-w-0">
                       <div className="text-xs font-medium truncate">{u.full_name || "Unnamed"}</div>
-                      <div className="text-[10px] text-muted-foreground truncate">{u.email}</div>
+                      <div className="text-xs text-muted-foreground truncate">{u.email}</div>
                     </div>
                     <button
                       onClick={() => attachMutation.mutate({ userId: u.id, email: autoMatch || "" })}
                       disabled={attachMutation.isPending}
-                      className="text-[11px] px-2 py-1 rounded-md bg-primary text-primary-foreground disabled:opacity-50 flex-shrink-0"
+                      className="text-xs px-2 py-1 rounded-md bg-primary text-primary-foreground disabled:opacity-50 flex-shrink-0"
                     >
                       Link
                     </button>
@@ -161,7 +161,7 @@ export default function ReferrerLinkedUsers({ companyId, contacts, companyName }
               })}
             </div>
           )}
-          <button onClick={() => setShowLinkExisting(false)} className="mt-1.5 text-[10px] text-muted-foreground hover:text-foreground">Cancel</button>
+          <button onClick={() => setShowLinkExisting(false)} className="mt-1.5 text-xs text-muted-foreground hover:text-foreground">Cancel</button>
         </div>
       )}
 
@@ -185,7 +185,7 @@ export default function ReferrerLinkedUsers({ companyId, contacts, companyName }
                     </div>
                   </div>
                   {autoMatched && (
-                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300 flex-shrink-0">auto</span>
+                    <span className="text-xs px-1.5 py-0.5 rounded bg-warning-bg text-warning-fg flex-shrink-0">auto</span>
                   )}
                 </div>
                 <div className="flex items-center gap-2">

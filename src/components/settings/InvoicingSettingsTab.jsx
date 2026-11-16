@@ -167,10 +167,10 @@ export default function InvoicingSettingsTab() {
 
   return (
     <div className="max-w-2xl space-y-4">
-      <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4 space-y-3">
+      <div className="bg-card rounded-xl border border-border p-4 space-y-3">
         <div>
-          <h2 className="text-sm font-semibold text-gray-900 dark:text-white">Accounts Email</h2>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+          <h2 className="text-sm font-semibold text-foreground">Accounts Email</h2>
+          <p className="text-xs text-muted-foreground mt-0.5">
             The address "Request from accounts" emails by default when you ask accounts to raise an invoice. You can still change the recipient on any single request before sending it.
           </p>
         </div>
@@ -189,16 +189,16 @@ export default function InvoicingSettingsTab() {
         </div>
       </div>
 
-      <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4 space-y-3">
+      <div className="bg-card rounded-xl border border-border p-4 space-y-3">
         <div>
-          <h2 className="text-sm font-semibold text-gray-900 dark:text-white">Invoicing Timings</h2>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+          <h2 className="text-sm font-semibold text-foreground">Invoicing Timings</h2>
+          <p className="text-xs text-muted-foreground mt-0.5">
             A job's invoices and close-out paperwork are worked on from the day the vehicle goes back to the customer, or from the day the salvage is collected on a total loss; these are the waits after which a request or a document reads as overdue on today's actions list. Working days count Monday to Friday only.
           </p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-lg">
           <label className="space-y-1">
-            <span className="text-xs font-medium text-gray-700 dark:text-gray-300">Accounts request — working days</span>
+            <span className="text-xs font-medium text-foreground">Accounts request — working days</span>
             <Input
               type="number"
               min="0"
@@ -208,7 +208,7 @@ export default function InvoicingSettingsTab() {
             />
           </label>
           <label className="space-y-1">
-            <span className="text-xs font-medium text-gray-700 dark:text-gray-300">Close-out paperwork — overdue after (days)</span>
+            <span className="text-xs font-medium text-foreground">Close-out paperwork — overdue after (days)</span>
             <Input
               type="number"
               min="0"
@@ -223,10 +223,10 @@ export default function InvoicingSettingsTab() {
         </Button>
       </div>
 
-      <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4 space-y-3">
+      <div className="bg-card rounded-xl border border-border p-4 space-y-3">
         <div>
-          <h2 className="text-sm font-semibold text-gray-900 dark:text-white">Total Loss — Storage Share</h2>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+          <h2 className="text-sm font-semibold text-foreground">Total Loss — Storage Share</h2>
+          <p className="text-xs text-muted-foreground mt-0.5">
             The share of the storage charge we invoice the repairer for on a total loss — storage only, never the salvage agent's admin charges, with VAT added on our share. The figure comes off the Salvage Agent Invoice, so the Storage Fee Invoice Out waits until that copy is uploaded. Any single claim can be set to a different share from its own job figures.
           </p>
         </div>
@@ -240,17 +240,17 @@ export default function InvoicingSettingsTab() {
             onKeyDown={(e) => { if (e.key === 'Enter') handleSaveShare(); }}
             className="h-9 text-sm w-24"
           />
-          <span className="text-xs text-gray-500 dark:text-gray-400">% of the storage charge ex VAT</span>
+          <span className="text-xs text-muted-foreground">% of the storage charge ex VAT</span>
           <Button onClick={handleSaveShare} disabled={isSavingShare}>
             {isSavingShare ? 'Saving...' : 'Save'}
           </Button>
         </div>
       </div>
 
-      <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4 space-y-3">
+      <div className="bg-card rounded-xl border border-border p-4 space-y-3">
         <div>
-          <h2 className="text-sm font-semibold text-gray-900 dark:text-white">Invoicing Tracking Start Date</h2>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+          <h2 className="text-sm font-semibold text-foreground">Invoicing Tracking Start Date</h2>
+          <p className="text-xs text-muted-foreground mt-0.5">
             Jobs that left us before this date — the vehicle back with the customer, or the salvage collected on a total loss — were invoiced in the old system, so they are left out of Today's actions and the aged invoices instead of swamping them. Their own Financials still work, and any single claim can be pulled back in from its Financials if money is still owed on it. A job still with us is never left out, and neither is a job with no such date recorded.
           </p>
         </div>
@@ -268,13 +268,13 @@ export default function InvoicingSettingsTab() {
             <button
               type="button"
               onClick={() => setStart('')}
-              className="h-9 px-3 rounded-lg text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              className="h-9 px-3 rounded-lg text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
             >
               Clear date
             </button>
           )}
         </div>
-        <p className="text-xs text-gray-500 dark:text-gray-400">
+        <p className="text-xs text-muted-foreground">
           {start
             ? `${tracking.before} claim${tracking.before === 1 ? '' : 's'} fall before ${formatInvoiceDay(start)} and ${tracking.before === 1 ? 'is' : 'are'} left out of the Invoicing page.${tracking.pulledIn > 0 ? ` ${tracking.pulledIn} more ${tracking.pulledIn === 1 ? 'has' : 'have'} been pulled back in from their claim.` : ''}`
             : 'No start date set — every claim is tracked.'}

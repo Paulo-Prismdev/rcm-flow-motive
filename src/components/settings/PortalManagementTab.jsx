@@ -336,8 +336,8 @@ export default function PortalManagementTab() {
       <div>
         <div className="flex items-start justify-between gap-3 mb-3">
           <div className="flex-1">
-            <h2 className="text-base font-semibold text-gray-900 dark:text-white">Advert Banners</h2>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+            <h2 className="text-base font-semibold text-foreground">Advert Banners</h2>
+            <p className="text-xs text-muted-foreground mt-0.5">
               Recommended: 1200x150px
             </p>
           </div>
@@ -348,19 +348,19 @@ export default function PortalManagementTab() {
         </div>
 
         {isLoading ? (
-          <div className="text-center py-6 text-sm text-gray-400">Loading...</div>
+          <div className="text-center py-6 text-sm text-muted-foreground">Loading...</div>
         ) : adverts.length === 0 ? (
-          <div className="text-center py-6 text-sm text-gray-400">
+          <div className="text-center py-6 text-sm text-muted-foreground">
             No adverts configured
           </div>
         ) : (
-          <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden divide-y divide-gray-200 dark:divide-gray-800">
+          <div className="bg-card rounded-lg border border-border overflow-hidden divide-y divide-border">
             {adverts.map((advert) => (
               <div 
                 key={advert.id} 
-                className={`p-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors flex items-center gap-3 ${!advert.is_active ? 'opacity-50' : ''}`}
+                className={`p-3 hover:bg-muted transition-colors flex items-center gap-3 ${!advert.is_active ? 'opacity-50' : ''}`}
               >
-                <div className="w-20 h-10 rounded overflow-hidden bg-gray-100 dark:bg-gray-800 flex-shrink-0">
+                <div className="w-20 h-10 rounded overflow-hidden bg-muted flex-shrink-0">
                   {advert.image_url ? (
                     <img 
                       src={advert.image_url} 
@@ -369,15 +369,15 @@ export default function PortalManagementTab() {
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
-                      <Image className="w-4 h-4 text-gray-400" />
+                      <Image className="w-4 h-4 text-muted-foreground" />
                     </div>
                   )}
                 </div>
 
                 <div className="flex-1 min-w-0">
-                  <div className="text-sm font-medium text-gray-900 dark:text-white truncate">{advert.name}</div>
+                  <div className="text-sm font-medium text-foreground truncate">{advert.name}</div>
                   {advert.link_url && (
-                    <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                    <div className="text-xs text-muted-foreground truncate">
                       {advert.link_url}
                     </div>
                   )}
@@ -393,13 +393,13 @@ export default function PortalManagementTab() {
                 <div className="flex items-center gap-1 flex-shrink-0">
                   <button 
                     onClick={() => openModal(advert)}
-                    className="p-1.5 text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white rounded transition-colors"
+                    className="p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground rounded transition-colors"
                   >
                     <Edit className="w-3.5 h-3.5" />
                   </button>
                   <button 
                     onClick={() => handleDelete(advert.id)}
-                    className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
+                    className="p-1.5 text-muted-foreground hover:text-danger-fg hover:bg-danger-bg rounded transition-colors"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
@@ -414,8 +414,8 @@ export default function PortalManagementTab() {
       <div>
         <div className="flex items-start justify-between gap-3 mb-3">
           <div className="flex-1">
-            <h2 className="text-base font-semibold text-gray-900 dark:text-white">Products & Services</h2>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+            <h2 className="text-base font-semibold text-foreground">Products & Services</h2>
+            <p className="text-xs text-muted-foreground mt-0.5">
               Shown in ARTURA Products tab
             </p>
           </div>
@@ -426,37 +426,37 @@ export default function PortalManagementTab() {
         </div>
 
         {productsLoading ? (
-          <div className="text-center py-6 text-sm text-gray-400">Loading...</div>
+          <div className="text-center py-6 text-sm text-muted-foreground">Loading...</div>
         ) : products.length === 0 ? (
-          <div className="text-center py-6 text-sm text-gray-400">
+          <div className="text-center py-6 text-sm text-muted-foreground">
             No products configured
           </div>
         ) : (
-          <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden divide-y divide-gray-200 dark:divide-gray-800">
+          <div className="bg-card rounded-lg border border-border overflow-hidden divide-y divide-border">
             {products.map((product) => {
               const IconComp = getIconComponent(product.icon);
               const colorMap = {
-                blue: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400',
-                green: 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400',
+                blue: 'bg-info-bg text-info-fg',
+                green: 'bg-success-bg text-success-fg',
                 purple: 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400',
-                orange: 'bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400',
-                red: 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400',
-                yellow: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400',
-                indigo: 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400',
+                orange: 'bg-warning-bg text-warning-fg',
+                red: 'bg-danger-bg text-danger-fg',
+                yellow: 'bg-warning-bg text-warning-fg',
+                indigo: 'bg-info-bg text-info-fg',
                 pink: 'bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400',
               };
               return (
                 <div 
                   key={product.id} 
-                  className={`p-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors flex items-center gap-3 ${!product.is_active ? 'opacity-50' : ''}`}
+                  className={`p-3 hover:bg-muted transition-colors flex items-center gap-3 ${!product.is_active ? 'opacity-50' : ''}`}
                 >
                   <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${colorMap[product.color] || colorMap.blue}`}>
                     <IconComp className="w-4 h-4" />
                   </div>
 
                   <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium text-gray-900 dark:text-white truncate">{product.name}</div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400 truncate">{product.description}</div>
+                    <div className="text-sm font-medium text-foreground truncate">{product.name}</div>
+                    <div className="text-xs text-muted-foreground truncate">{product.description}</div>
                   </div>
 
                   <div className="flex items-center gap-2 flex-shrink-0">
@@ -469,13 +469,13 @@ export default function PortalManagementTab() {
                   <div className="flex items-center gap-1 flex-shrink-0">
                     <button 
                       onClick={() => openProductModal(product)}
-                      className="p-1.5 text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white rounded transition-colors"
+                      className="p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground rounded transition-colors"
                     >
                       <Edit className="w-3.5 h-3.5" />
                     </button>
                     <button 
                       onClick={() => handleDeleteProduct(product.id)}
-                      className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
+                      className="p-1.5 text-muted-foreground hover:text-danger-fg hover:bg-danger-bg rounded transition-colors"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
@@ -731,7 +731,7 @@ export default function PortalManagementTab() {
                       variant="ghost" 
                       size="icon"
                       onClick={() => removeFeature(index)}
-                      className="h-8 w-8 text-red-500"
+                      className="h-8 w-8 text-danger-fg"
                     >
                       <X className="w-4 h-4" />
                     </Button>

@@ -168,53 +168,53 @@ export default function EmailTemplates() {
 
   return (
     <div className="space-y-3">
-      <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 p-3">
+      <div className="bg-card rounded-lg border border-border p-3">
         <div className="flex items-start justify-between gap-3 mb-3">
           <div className="flex-1 min-w-0">
-            <h2 className="text-base font-bold text-gray-900 dark:text-white">Email Templates</h2>
-            <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">Manage email templates for different item types</p>
+            <h2 className="text-base font-bold text-foreground">Email Templates</h2>
+            <p className="text-xs text-muted-foreground mt-0.5">Manage email templates for different item types</p>
           </div>
-          <button onClick={handleCreate} className="flex items-center gap-1.5 px-2.5 py-1.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors flex-shrink-0 whitespace-nowrap">
+          <button onClick={handleCreate} className="flex items-center gap-1.5 px-2.5 py-1.5 bg-info text-on-solid text-sm font-medium rounded-lg hover:bg-info transition-colors flex-shrink-0 whitespace-nowrap">
             <Plus className="w-4 h-4" />
             Create
           </button>
         </div>
 
         {isLoading ? (
-          <div className="text-center py-6 text-gray-500 text-sm">Loading templates...</div>
+          <div className="text-center py-6 text-muted-foreground text-sm">Loading templates...</div>
         ) : templates.length === 0 ? (
-          <div className="text-center py-6 text-gray-500 text-sm">
+          <div className="text-center py-6 text-muted-foreground text-sm">
             No email templates yet. Create your first template to get started.
           </div>
         ) : (
           <div className="space-y-2">
             {templates.map((template) => (
-              <div key={template.id} className="bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg p-2.5">
+              <div key={template.id} className="bg-muted border border-border rounded-lg p-2.5">
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1.5 flex-wrap">
-                      <h3 className="font-medium text-gray-900 dark:text-white text-sm">{template.name}</h3>
-                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 flex-shrink-0">
+                      <h3 className="font-medium text-foreground text-sm">{template.name}</h3>
+                      <span className="text-xs px-1.5 py-0.5 rounded bg-info-bg text-info-fg flex-shrink-0">
                         {template.item_type}
                       </span>
                     </div>
                     {template.description && (
-                      <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5 line-clamp-1">{template.description}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{template.description}</p>
                     )}
-                    <p className="text-[10px] text-gray-500 dark:text-gray-500 mt-0.5 truncate">
+                    <p className="text-xs text-muted-foreground mt-0.5 truncate">
                       <span className="font-medium">Subject:</span> {template.subject}
                     </p>
                   </div>
                   <div className="flex items-center gap-1 flex-shrink-0">
                     <button
                       onClick={() => handleEdit(template)}
-                      className="p-1.5 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors"
+                      className="p-1.5 text-muted-foreground hover:bg-accent rounded transition-colors"
                     >
                       <Edit className="w-3.5 h-3.5" />
                     </button>
                     <button
                       onClick={() => handleDelete(template.id)}
-                      className="p-1.5 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/20 rounded transition-colors disabled:opacity-50"
+                      className="p-1.5 text-danger-fg hover:bg-danger-bg rounded transition-colors disabled:opacity-50"
                       disabled={deleteMutation.isLoading}
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -332,7 +332,7 @@ function TemplateFormModal({ isOpen, onClose, template, onSubmit, isLoading }) {
 
         <form onSubmit={handleSubmit} className="space-y-3">
           <div>
-            <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Template Name *</label>
+            <label className="block text-xs font-semibold text-foreground mb-1">Template Name *</label>
             <Input
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -344,7 +344,7 @@ function TemplateFormModal({ isOpen, onClose, template, onSubmit, isLoading }) {
 
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Item Type *</label>
+              <label className="block text-xs font-semibold text-foreground mb-1">Item Type *</label>
               <Select
                 value={formData.item_type}
                 onValueChange={(value) => setFormData({ ...formData, item_type: value })}
@@ -362,7 +362,7 @@ function TemplateFormModal({ isOpen, onClose, template, onSubmit, isLoading }) {
               </Select>
             </div>
             <div>
-              <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Description</label>
+              <label className="block text-xs font-semibold text-foreground mb-1">Description</label>
               <Input
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
@@ -374,17 +374,17 @@ function TemplateFormModal({ isOpen, onClose, template, onSubmit, isLoading }) {
 
           <div>
             <div className="flex items-center justify-between mb-1">
-              <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300">Subject *</label>
+              <label className="block text-xs font-semibold text-foreground">Subject *</label>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button type="button" className="text-[10px] px-1.5 py-0.5 rounded border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                  <button type="button" className="text-xs px-1.5 py-0.5 rounded border border-border text-muted-foreground hover:bg-muted transition-colors">
                     + Placeholder
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="max-h-64 overflow-y-auto text-xs w-64">
                   {placeholderGroups.map(({ type, items }) => (
                     <React.Fragment key={type}>
-                      <DropdownMenuLabel className="text-[10px] font-semibold uppercase tracking-wide text-gray-400 px-2 py-1">{type}</DropdownMenuLabel>
+                      <DropdownMenuLabel className="text-xs font-semibold text-muted-foreground px-2 py-1">{type}</DropdownMenuLabel>
                       {items.map(({ tag, label }) => (
                         <DropdownMenuItem
                           key={tag}
@@ -393,8 +393,8 @@ function TemplateFormModal({ isOpen, onClose, template, onSubmit, isLoading }) {
                             insertPlaceholder(tag, 'subject');
                           }}
                         >
-                          <span className="font-mono text-[10px] mr-1">{tag}</span>
-                          <span className="text-gray-500 dark:text-gray-400">{label}</span>
+                          <span className="font-mono text-xs mr-1">{tag}</span>
+                          <span className="text-muted-foreground">{label}</span>
                         </DropdownMenuItem>
                       ))}
                       <DropdownMenuSeparator />
@@ -415,17 +415,17 @@ function TemplateFormModal({ isOpen, onClose, template, onSubmit, isLoading }) {
 
           <div>
             <div className="flex items-center justify-between mb-1">
-              <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300">Body *</label>
+              <label className="block text-xs font-semibold text-foreground">Body *</label>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button type="button" className="text-[10px] px-1.5 py-0.5 rounded border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                  <button type="button" className="text-xs px-1.5 py-0.5 rounded border border-border text-muted-foreground hover:bg-muted transition-colors">
                     + Placeholder
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="max-h-64 overflow-y-auto text-xs w-64">
                   {placeholderGroups.map(({ type, items }) => (
                     <React.Fragment key={type}>
-                      <DropdownMenuLabel className="text-[10px] font-semibold uppercase tracking-wide text-gray-400 px-2 py-1">{type}</DropdownMenuLabel>
+                      <DropdownMenuLabel className="text-xs font-semibold text-muted-foreground px-2 py-1">{type}</DropdownMenuLabel>
                       {items.map(({ tag, label }) => (
                         <DropdownMenuItem
                           key={tag}
@@ -434,8 +434,8 @@ function TemplateFormModal({ isOpen, onClose, template, onSubmit, isLoading }) {
                             insertPlaceholder(tag, 'body');
                           }}
                         >
-                          <span className="font-mono text-[10px] mr-1">{tag}</span>
-                          <span className="text-gray-500 dark:text-gray-400">{label}</span>
+                          <span className="font-mono text-xs mr-1">{tag}</span>
+                          <span className="text-muted-foreground">{label}</span>
                         </DropdownMenuItem>
                       ))}
                       <DropdownMenuSeparator />
@@ -452,12 +452,12 @@ function TemplateFormModal({ isOpen, onClose, template, onSubmit, isLoading }) {
             />
           </div>
 
-          <div className="flex justify-end gap-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+          <div className="flex justify-end gap-2 pt-2 border-t border-border">
             <button
               type="button"
               onClick={onClose}
               disabled={isLoading}
-              className="px-3 py-1.5 text-xs rounded text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors disabled:opacity-50"
+              className="px-3 py-1.5 text-xs rounded text-muted-foreground hover:bg-muted transition-colors disabled:opacity-50"
             >
               Cancel
             </button>
@@ -469,7 +469,7 @@ function TemplateFormModal({ isOpen, onClose, template, onSubmit, isLoading }) {
                 e.stopPropagation();
                 onSubmit(formData);
               }}
-              className="px-3 py-1.5 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors disabled:opacity-50 font-medium flex items-center gap-1"
+              className="px-3 py-1.5 text-xs bg-info text-on-solid rounded hover:bg-info transition-colors disabled:opacity-50 font-medium flex items-center gap-1"
             >
               <Save className="w-3 h-3" />
               {isLoading ? 'Saving...' : (template ? 'Update' : 'Create')}

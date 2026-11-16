@@ -147,9 +147,9 @@ export default function UserEditForm({ user, onSave, onCancel, isSaving }) {
         <div>
           <label className="block text-xs font-medium text-foreground-muted mb-1">Company *</label>
           {companies.length === 0 ? (
-            <div className="w-full px-3 py-2 rounded-lg text-sm border border-yellow-500/30 bg-yellow-500/5 flex items-start gap-2">
-              <AlertCircle className="w-4 h-4 text-yellow-600 flex-shrink-0 mt-0.5" />
-              <span className="text-yellow-700 dark:text-yellow-500 text-xs">No companies available. Check user permissions.</span>
+            <div className="w-full px-3 py-2 rounded-lg text-sm border border-warning bg-warning/5 flex items-start gap-2">
+              <AlertCircle className="w-4 h-4 text-warning-fg flex-shrink-0 mt-0.5" />
+              <span className="text-warning-fg text-xs">No companies available. Check user permissions.</span>
             </div>
           ) : (
             <select

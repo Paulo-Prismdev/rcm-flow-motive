@@ -57,8 +57,8 @@ export default function InviteUserModal({ onClose, onSuccess, isSuperAdmin }) {
 
         {success ? (
           <div className="flex flex-col items-center gap-3 py-6 text-center">
-            <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
-              <Check className="w-6 h-6 text-green-600" />
+            <div className="w-12 h-12 rounded-full bg-success-bg flex items-center justify-center">
+              <Check className="w-6 h-6 text-success-fg" />
             </div>
             <p className="font-semibold text-foreground">Invitation sent!</p>
             <p className="text-sm text-foreground-muted">{email} will receive an invite email shortly.</p>
@@ -103,7 +103,7 @@ export default function InviteUserModal({ onClose, onSuccess, isSuperAdmin }) {
             </div>
 
             {error && (
-              <p className="text-sm text-red-500 bg-red-50 px-3 py-2 rounded-lg">{error}</p>
+              <p className="text-sm text-danger-fg bg-danger-bg px-3 py-2 rounded-lg">{error}</p>
             )}
 
             <div className="flex gap-2 pt-1">

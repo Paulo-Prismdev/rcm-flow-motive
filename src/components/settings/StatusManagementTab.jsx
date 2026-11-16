@@ -35,7 +35,7 @@ function StatusItem({ status, onUpdate, onDelete, onEditToggle, editingStatusId,
     <div
       ref={provided.innerRef}
       {...provided.draggableProps}
-      className={`neomorph-flat p-3 mb-2 flex items-center justify-between transition-shadow ${snapshot.isDragging ? 'shadow-lg' : ''} ${isProtected ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800' : ''}`}
+      className={`neomorph-flat p-3 mb-2 flex items-center justify-between transition-shadow ${snapshot.isDragging ? 'shadow-lg' : ''} ${isProtected ? 'bg-info-bg border-info/30' : ''}`}
     >
       <div className="flex items-center gap-3 flex-grow">
         <button aria-label="Drag to reorder" {...provided.dragHandleProps} className="cursor-grab p-1 hidden md:block">
@@ -59,7 +59,7 @@ function StatusItem({ status, onUpdate, onDelete, onEditToggle, editingStatusId,
                     className={`w-7 h-7 rounded-full border-2 transition-all hover:scale-110 ${
                       editingData.color === color.name 
                         ? 'ring-2 ring-primary ring-offset-2' 
-                        : 'border-gray-300 dark:border-gray-600'
+                        : 'border-border'
                     }`}
                     style={{ backgroundColor: color.bg }}
                     title={color.label}
@@ -72,7 +72,7 @@ function StatusItem({ status, onUpdate, onDelete, onEditToggle, editingStatusId,
           <>
             <div className="flex items-center gap-2">
               <div 
-                className="w-5 h-5 rounded-full border-2 border-gray-300 dark:border-gray-600 flex-shrink-0"
+                className="w-5 h-5 rounded-full border-2 border-border flex-shrink-0"
                 style={{ backgroundColor: statusColorObj?.bg || '#6b7280' }}
                 title={statusColorObj?.label || 'Unknown'}
               />
@@ -80,13 +80,13 @@ function StatusItem({ status, onUpdate, onDelete, onEditToggle, editingStatusId,
                 {status.status_name}
               </span>
               {isProtected && (
-                <div className="flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400">
+                <div className="flex items-center gap-1 text-xs text-info-fg">
                   <Lock className="w-3 h-3" />
                   <span>Default</span>
                 </div>
               )}
               {isInUse && (
-                <div className="flex items-center gap-1 text-xs text-amber-600 dark:text-amber-400">
+                <div className="flex items-center gap-1 text-xs text-warning-fg">
                   <Lock className="w-3 h-3" />
                   <span>In use</span>
                 </div>
@@ -98,10 +98,10 @@ function StatusItem({ status, onUpdate, onDelete, onEditToggle, editingStatusId,
       <div className="flex items-center gap-2">
         {isEditing ? (
           <>
-            <Button size="icon" variant="ghost" onClick={() => onUpdate(status.id)} className="text-green-500 hover:text-green-600">
+            <Button size="icon" variant="ghost" onClick={() => onUpdate(status.id)} className="text-success-fg hover:text-success-fg">
               <Check className="w-4 h-4" />
             </Button>
-            <Button size="icon" variant="ghost" onClick={() => onEditToggle(null)} className="text-gray-500 hover:text-gray-600">
+            <Button size="icon" variant="ghost" onClick={() => onEditToggle(null)} className="text-muted-foreground hover:text-muted-foreground">
               <X className="w-4 h-4" />
             </Button>
           </>
@@ -114,7 +114,7 @@ function StatusItem({ status, onUpdate, onDelete, onEditToggle, editingStatusId,
                 variant="ghost"
                 disabled={!canMoveUp}
                 onClick={() => onMove(-1)}
-                className="h-5 w-7 text-gray-500 disabled:opacity-25"
+                className="h-5 w-7 text-muted-foreground disabled:opacity-25"
                 title="Move up"
               >
                 <ChevronUp className="w-4 h-4" />
@@ -124,17 +124,17 @@ function StatusItem({ status, onUpdate, onDelete, onEditToggle, editingStatusId,
                 variant="ghost"
                 disabled={!canMoveDown}
                 onClick={() => onMove(1)}
-                className="h-5 w-7 text-gray-500 disabled:opacity-25"
+                className="h-5 w-7 text-muted-foreground disabled:opacity-25"
                 title="Move down"
               >
                 <ChevronDown className="w-4 h-4" />
               </Button>
             </div>
-            <Button size="icon" variant="ghost" onClick={() => onEditToggle(status)} className="text-blue-500 hover:text-blue-600">
+            <Button size="icon" variant="ghost" onClick={() => onEditToggle(status)} className="text-info-fg hover:text-info-fg">
               <Edit className="w-4 h-4" />
             </Button>
             {!isInUse && (
-              <Button size="icon" variant="ghost" onClick={() => onDelete(status.id)} className="text-red-500 hover:text-red-600">
+              <Button size="icon" variant="ghost" onClick={() => onDelete(status.id)} className="text-danger-fg hover:text-danger-fg">
                 <Trash2 className="w-4 h-4" />
               </Button>
             )}
@@ -361,10 +361,10 @@ export default function StatusManagementTab({ department }) {
   return (
     <div className="space-y-4">
       <h2 className="text-lg font-bold">{department} Statuses</h2>
-      <div className="neomorph-inset p-4 bg-blue-50 dark:bg-blue-900/20">
+      <div className="neomorph-inset p-4 bg-info-bg">
         <div className="flex items-start gap-2">
-          <Lock className="w-4 h-4 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
-          <div className="text-sm text-blue-800 dark:text-blue-200">
+          <Lock className="w-4 h-4 text-info-fg mt-0.5 flex-shrink-0" />
+          <div className="text-sm text-info-fg">
             <strong>Note:</strong> Only the "New" status is marked as Default and cannot be renamed. Any status that is currently in use on active records cannot be deleted. All other statuses can be freely edited or removed when no longer in use.
           </div>
         </div>
@@ -391,7 +391,7 @@ export default function StatusManagementTab({ department }) {
                   className={`w-8 h-8 rounded-full border-2 transition-all hover:scale-110 ${
                     newStatusColor === color.name 
                       ? 'ring-2 ring-primary ring-offset-2' 
-                      : 'border-gray-300 dark:border-gray-600'
+                      : 'border-border'
                   }`}
                   style={{ backgroundColor: color.bg }}
                   title={color.label}

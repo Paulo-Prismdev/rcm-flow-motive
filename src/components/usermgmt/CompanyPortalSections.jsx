@@ -40,22 +40,22 @@ export default function CompanyPortalSections({ company, companyType, canEdit })
     <div>
       {!isEditing ? (
         <div className="flex items-center gap-1.5 flex-wrap">
-          <span className="text-[10px] text-gray-600 dark:text-gray-400 font-medium">Portal:</span>
+          <span className="text-xs text-muted-foreground font-medium">Portal:</span>
           {currentSections.map(s => (
-            <span key={s} className="text-[10px] px-1.5 py-0.5 rounded bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400">{s}</span>
+            <span key={s} className="text-xs px-1.5 py-0.5 rounded bg-success-bg text-success-fg">{s}</span>
           ))}
           {canEdit && (
             <button
               onClick={() => { setSelected([...currentSections]); setIsEditing(true); }}
-              className="text-[10px] px-1.5 py-0.5 rounded border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors flex items-center gap-1"
+              className="text-xs px-1.5 py-0.5 rounded border border-border text-muted-foreground hover:bg-muted transition-colors flex items-center gap-1"
             >
               <Settings2 className="w-3 h-3" /> Edit
             </button>
           )}
         </div>
       ) : (
-        <div className="mt-1.5 p-2.5 bg-gray-50 dark:bg-gray-800/50 rounded-lg space-y-1.5">
-          <p className="text-[10px] font-medium text-gray-600 dark:text-gray-400">Select sections</p>
+        <div className="mt-1.5 p-2.5 bg-muted rounded-lg space-y-1.5">
+          <p className="text-xs font-medium text-muted-foreground">Select sections</p>
           <div className="flex flex-wrap gap-1">
             {availableSections.map(section => {
               const enabled = selected.includes(section);
@@ -64,10 +64,10 @@ export default function CompanyPortalSections({ company, companyType, canEdit })
                   key={section}
                   type="button"
                   onClick={() => toggle(section)}
-                  className={`px-2 py-1 text-[10px] font-medium rounded border transition-all ${
+                  className={`px-2 py-1 text-xs font-medium rounded border transition-all ${
                     enabled
-                      ? 'bg-green-600 text-white border-green-600'
-                      : 'bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800'
+                      ? 'bg-success text-on-solid border-success'
+                      : 'bg-card text-muted-foreground border-border hover:bg-muted'
                   }`}
                 >
                   {section}
@@ -79,7 +79,7 @@ export default function CompanyPortalSections({ company, companyType, canEdit })
             <button
               type="button"
               onClick={() => setIsEditing(false)}
-              className="px-2 py-1 text-xs rounded text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+              className="px-2 py-1 text-xs rounded text-muted-foreground hover:bg-accent transition-colors"
             >
               Cancel
             </button>
@@ -87,7 +87,7 @@ export default function CompanyPortalSections({ company, companyType, canEdit })
               type="button"
               onClick={() => updateMutation.mutate(selected)}
               disabled={updateMutation.isPending}
-              className="px-2 py-1 text-xs rounded bg-green-600 text-white hover:bg-green-700 transition-colors disabled:opacity-50"
+              className="px-2 py-1 text-xs rounded bg-success text-on-solid hover:bg-success transition-colors disabled:opacity-50"
             >
               {updateMutation.isPending ? 'Saving...' : 'Save'}
             </button>

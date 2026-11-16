@@ -124,39 +124,39 @@ export default function ChaserEmailSettings() {
     return (
       <div className="h-full flex flex-col gap-3">
         <div className="flex items-center justify-between">
-          <h1 className="text-lg font-semibold text-gray-900 dark:text-white">Chaser Email Logs</h1>
-          <button onClick={() => setShowLogs(false)} className="px-3 py-1.5 text-sm font-medium text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors">
+          <h1 className="text-lg font-semibold text-foreground">Chaser Email Logs</h1>
+          <button onClick={() => setShowLogs(false)} className="px-3 py-1.5 text-sm font-medium text-muted-foreground bg-card border border-border hover:bg-muted rounded-lg transition-colors">
             Back
           </button>
         </div>
 
         <div className="flex-1 overflow-y-auto min-h-0">
           {recentLogs.length === 0 ? (
-            <div className="text-center py-6 text-sm text-gray-400">
+            <div className="text-center py-6 text-sm text-muted-foreground">
               No logs found
             </div>
           ) : (
             <div className="space-y-2">
               {recentLogs.map((log) => (
-                <div key={log.id} className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 p-3">
+                <div key={log.id} className="bg-card rounded-lg border border-border p-3">
                   <div className="flex items-start justify-between gap-2 mb-2">
-                    <h3 className="text-sm font-medium text-gray-900 dark:text-white truncate">{log.rule_name}</h3>
-                    <span className={`text-[10px] px-1.5 py-0.5 rounded flex-shrink-0 ${
-                      log.status === 'Sent' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' :
-                      log.status === 'Failed' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' :
-                      'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400'
+                    <h3 className="text-sm font-medium text-foreground truncate">{log.rule_name}</h3>
+                    <span className={`text-xs px-1.5 py-0.5 rounded flex-shrink-0 ${
+                      log.status === 'Sent' ? 'bg-success-bg text-success-fg' :
+                      log.status === 'Failed' ? 'bg-danger-bg text-danger-fg' :
+                      'bg-muted text-foreground'
                     }`}>
                       {log.status}
                     </span>
                   </div>
-                  <div className="grid grid-cols-2 gap-2 text-xs text-gray-600 dark:text-gray-400">
-                    <div><span className="text-gray-500 dark:text-gray-500">To:</span> {log.recipient_email}</div>
-                    <div><span className="text-gray-500 dark:text-gray-500">Type:</span> {log.recipient_type}</div>
-                    <div><span className="text-gray-500 dark:text-gray-500">Sent:</span> {new Date(log.sent_at).toLocaleString().split(', ')[1]}</div>
-                    <div><span className="text-gray-500 dark:text-gray-500">Status:</span> {log.claim_status_at_send}</div>
+                  <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
+                    <div><span className="text-muted-foreground">To:</span> {log.recipient_email}</div>
+                    <div><span className="text-muted-foreground">Type:</span> {log.recipient_type}</div>
+                    <div><span className="text-muted-foreground">Sent:</span> {new Date(log.sent_at).toLocaleString().split(', ')[1]}</div>
+                    <div><span className="text-muted-foreground">Status:</span> {log.claim_status_at_send}</div>
                   </div>
                   {log.error_message && (
-                    <div className="mt-2 text-xs text-red-600 dark:text-red-400">
+                    <div className="mt-2 text-xs text-danger-fg">
                       Error: {log.error_message}
                     </div>
                   )}
@@ -173,13 +173,13 @@ export default function ChaserEmailSettings() {
     <div className="h-full flex flex-col gap-3">
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div className="flex-1">
-          <h1 className="text-lg font-semibold text-gray-900 dark:text-white">Automated Chaser Emails</h1>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Rules run daily automatically</p>
+          <h1 className="text-lg font-semibold text-foreground">Automated Chaser Emails</h1>
+          <p className="text-xs text-muted-foreground mt-1">Rules run daily automatically</p>
         </div>
         <div className="flex gap-2 flex-wrap">
           <button
             onClick={() => setShowLogs(true)}
-            className="px-3 py-1.5 text-sm font-medium text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg flex items-center gap-2 transition-colors"
+            className="px-3 py-1.5 text-sm font-medium text-muted-foreground bg-card border border-border hover:bg-muted rounded-lg flex items-center gap-2 transition-colors"
           >
             <History className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Logs</span>
@@ -194,8 +194,8 @@ export default function ChaserEmailSettings() {
         </div>
       </div>
 
-      <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
-        <p className="text-xs text-blue-900 dark:text-blue-300">
+      <div className="bg-info-bg border border-info/30 rounded-lg p-3">
+        <p className="text-xs text-info-fg">
           <strong>How it works:</strong> Each rule is fully programmable — set <strong>Fire only if</strong> conditions (all must
           be true) and <strong>Skip if</strong> conditions (any true skips the claim), choose which 48-hour update timer must be
           overdue, and how long to wait after it goes Red. Conditions are evaluated against the claim's real state (on-site and
@@ -208,46 +208,46 @@ export default function ChaserEmailSettings() {
 
       <div className="flex-1 overflow-y-auto min-h-0">
         {isLoading ? (
-          <div className="text-center py-6 text-sm text-gray-400">Loading...</div>
+          <div className="text-center py-6 text-sm text-muted-foreground">Loading...</div>
         ) : rules.length === 0 ? (
-          <div className="text-center py-6 text-sm text-gray-400">
+          <div className="text-center py-6 text-sm text-muted-foreground">
             No rules configured
           </div>
         ) : (
           <div className="space-y-2">
             {rules.map((rule) => (
-              <div key={rule.id} className={`bg-white dark:bg-gray-900 rounded-lg border-2 p-3 pl-4 transition-all ${
+              <div key={rule.id} className={`bg-card rounded-lg border-2 p-3 pl-4 transition-all ${
                 rule.is_active
-                  ? 'border-l-green-500 border-l-4 border-t-gray-200 border-r-gray-200 border-b-gray-200 dark:border-t-gray-800 dark:border-r-gray-800 dark:border-b-gray-800'
-                  : 'border-gray-300 dark:border-gray-700 border-l-4 border-l-gray-400 dark:border-l-gray-600 opacity-60'
+                  ? 'border-l-green-500 border-l-4 border-t-border border-r-border border-b-border'
+                  : 'border-border border-l-4 border-l-gray-400 opacity-60'
               }`}>
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-2">
-                      <h3 className="text-sm font-semibold text-gray-900 dark:text-white truncate">{rule.rule_name}</h3>
+                      <h3 className="text-sm font-semibold text-foreground truncate">{rule.rule_name}</h3>
                       {rule.is_active ? (
-                        <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-green-500 text-white flex-shrink-0 shadow-sm">
-                          <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>ACTIVE
+                        <span className="inline-flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-full bg-success text-on-solid flex-shrink-0 shadow-card">
+                          <span className="w-1.5 h-1.5 rounded-full bg-card animate-pulse"></span>ACTIVE
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-gray-400 text-white flex-shrink-0">
-                          <span className="w-1.5 h-1.5 rounded-full bg-white"></span>PAUSED
+                        <span className="inline-flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-full bg-gray-400 text-white flex-shrink-0">
+                          <span className="w-1.5 h-1.5 rounded-full bg-card"></span>PAUSED
                         </span>
                       )}
                     </div>
                     
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs mb-2">
                       <div>
-                        <span className="text-gray-500 dark:text-gray-400">Timer:</span> <span className="font-medium text-gray-900 dark:text-white">{rule.trigger_timer || '—'}</span>
+                        <span className="text-muted-foreground">Timer:</span> <span className="font-medium text-foreground">{rule.trigger_timer || '—'}</span>
                       </div>
                       <div>
-                        <span className="text-gray-500 dark:text-gray-400">Wait:</span> <span className="font-medium text-gray-900 dark:text-white">{rule.hours_overdue_before_send || 0}h overdue</span>
+                        <span className="text-muted-foreground">Wait:</span> <span className="font-medium text-foreground">{rule.hours_overdue_before_send || 0}h overdue</span>
                       </div>
                       <div>
-                        <span className="text-gray-500 dark:text-gray-400">To:</span> <span className="font-medium text-gray-900 dark:text-white">{rule.recipient_type}</span>
+                        <span className="text-muted-foreground">To:</span> <span className="font-medium text-foreground">{rule.recipient_type}</span>
                       </div>
                       <div>
-                        <span className="text-gray-500 dark:text-gray-400">Freq:</span> <span className="font-medium text-gray-900 dark:text-white">{rule.send_frequency}</span>
+                        <span className="text-muted-foreground">Freq:</span> <span className="font-medium text-foreground">{rule.send_frequency}</span>
                       </div>
                     </div>
                     {(() => {
@@ -259,17 +259,17 @@ export default function ChaserEmailSettings() {
                         <div className="flex flex-col gap-1 mb-2">
                           {incSum.length > 0 && (
                             <div className="flex flex-wrap gap-1 items-center">
-                              <span className="text-[9px] font-semibold uppercase tracking-wide text-gray-400">Fire:</span>
+                              <span className="text-xs font-semibold text-muted-foreground">Fire:</span>
                               {incSum.map((s, i) => (
-                                <span key={i} className="text-[10px] px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300">{s}</span>
+                                <span key={i} className="text-xs px-1.5 py-0.5 rounded bg-info-bg text-info-fg">{s}</span>
                               ))}
                             </div>
                           )}
                           {excSum.length > 0 && (
                             <div className="flex flex-wrap gap-1 items-center">
-                              <span className="text-[9px] font-semibold uppercase tracking-wide text-gray-400">Skip:</span>
+                              <span className="text-xs font-semibold text-muted-foreground">Skip:</span>
                               {excSum.map((s, i) => (
-                                <span key={i} className="text-[10px] px-1.5 py-0.5 rounded bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300">{s}</span>
+                                <span key={i} className="text-xs px-1.5 py-0.5 rounded bg-danger-bg text-danger-fg">{s}</span>
                               ))}
                             </div>
                           )}
@@ -277,7 +277,7 @@ export default function ChaserEmailSettings() {
                       );
                     })()}
 
-                    <div className="text-xs text-gray-600 dark:text-gray-400 line-clamp-1">
+                    <div className="text-xs text-muted-foreground line-clamp-1">
                       Subject: {rule.email_subject_template}
                     </div>
                   </div>
@@ -293,25 +293,25 @@ export default function ChaserEmailSettings() {
                     <button
                       onClick={() => handlePreview(rule)}
                       disabled={previewingRuleId === rule.id}
-                      className="p-1.5 text-amber-600 hover:bg-amber-100 dark:hover:bg-amber-900/20 rounded transition-colors disabled:opacity-50"
+                      className="p-1.5 text-warning-fg hover:bg-warning-bg rounded transition-colors disabled:opacity-50"
                       title="Preview who would be emailed"
                     >
-                      {previewingRuleId === rule.id ? <span className="text-[10px] px-1">...</span> : <Eye className="w-3.5 h-3.5" />}
+                      {previewingRuleId === rule.id ? <span className="text-xs px-1">...</span> : <Eye className="w-3.5 h-3.5" />}
                     </button>
                     <button
                       onClick={() => handleRunNow(rule)}
                       disabled={runningRuleId === rule.id}
-                      className="p-1.5 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/20 rounded transition-colors disabled:opacity-50"
+                      className="p-1.5 text-info-fg hover:bg-info-bg rounded transition-colors disabled:opacity-50"
                       title="Run this rule now"
                     >
-                      {runningRuleId === rule.id ? <span className="text-[10px] px-1">...</span> : <Play className="w-3.5 h-3.5" />}
+                      {runningRuleId === rule.id ? <span className="text-xs px-1">...</span> : <Play className="w-3.5 h-3.5" />}
                     </button>
                     <button
                       onClick={() => handleToggleActive(rule)}
                       className={`p-1.5 rounded transition-colors ${
                         rule.is_active
-                          ? 'text-green-600 bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/40'
-                          : 'text-gray-400 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700'
+                          ? 'text-success-fg bg-success-bg hover:bg-success-bg'
+                          : 'text-muted-foreground bg-muted hover:bg-accent'
                       }`}
                       title={rule.is_active ? 'Deactivate (currently ACTIVE)' : 'Activate (currently PAUSED)'}
                     >
@@ -319,13 +319,13 @@ export default function ChaserEmailSettings() {
                     </button>
                     <button
                       onClick={() => setEditingRule(rule)}
-                      className="p-1.5 text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white rounded transition-colors"
+                      className="p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground rounded transition-colors"
                     >
                       <Edit className="w-3.5 h-3.5" />
                     </button>
                     <button
                       onClick={() => handleDelete(rule)}
-                      className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
+                      className="p-1.5 text-muted-foreground hover:text-danger-fg hover:bg-danger-bg rounded transition-colors"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
@@ -340,17 +340,17 @@ export default function ChaserEmailSettings() {
       {previewData && (
         <div data-overlay-dismiss className="fixed inset-0 z-window fm-scrim flex items-center justify-center p-4" onClick={() => setPreviewData(null)} data-mobile-full-modal="true">
           <div className="fm-glass-window rounded-2xl text-foreground w-full max-w-3xl max-h-[85vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between px-5 py-3 border-b border-gray-200 dark:border-gray-800">
+            <div className="flex items-center justify-between px-5 py-3 border-b border-border">
               <div>
-                <h2 className="text-base font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                  <Eye className="w-4 h-4 text-amber-600" />
+                <h2 className="text-base font-semibold text-foreground flex items-center gap-2">
+                  <Eye className="w-4 h-4 text-warning-fg" />
                   Dry Run Preview{previewData.rule_name ? ` · ${previewData.rule_name}` : ''}
                 </h2>
-                <p className="text-xs text-gray-500 mt-0.5">
+                <p className="text-xs text-muted-foreground mt-0.5">
                   {previewData.emails_sent} claim(s) would be emailed · {previewData.emails_skipped} skipped · {previewData.claims_evaluated} evaluated
                 </p>
               </div>
-              <button onClick={() => setPreviewData(null)} className="p-1.5 text-gray-400 hover:text-gray-900 dark:hover:text-white rounded">
+              <button onClick={() => setPreviewData(null)} className="p-1.5 text-muted-foreground hover:text-foreground rounded">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -358,34 +358,34 @@ export default function ChaserEmailSettings() {
               {previewData.preview && previewData.preview.length > 0 ? (
                 <div className="space-y-2">
                   {previewData.preview.map((p, i) => (
-                    <div key={i} className="bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-800 p-3">
+                    <div key={i} className="bg-muted rounded-lg border border-border p-3">
                       <div className="flex items-start justify-between gap-2 mb-1">
                         <div className="min-w-0 flex items-center gap-2 flex-wrap">
-                          <span className="text-sm font-semibold text-gray-900 dark:text-white">{p.job_number}</span>
-                          <span className="text-xs text-gray-500">{p.reg}</span>
+                          <span className="text-sm font-semibold text-foreground">{p.job_number}</span>
+                          <span className="text-xs text-muted-foreground">{p.reg}</span>
                           {p.is_total_loss && (
-                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300 font-medium">Total Loss</span>
+                            <span className="text-xs px-1.5 py-0.5 rounded bg-warning-bg text-warning-fg font-medium">Total Loss</span>
                           )}
                         </div>
-                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 flex-shrink-0">{p.journey_status || p.job_status}</span>
+                        <span className="text-xs px-1.5 py-0.5 rounded bg-info-bg text-info-fg flex-shrink-0">{p.journey_status || p.job_status}</span>
                       </div>
-                      <div className="text-xs text-gray-600 dark:text-gray-400">
-                        <div><span className="text-gray-500">Rule:</span> {p.rule_name}</div>
-                        <div><span className="text-gray-500">To:</span> {p.recipient_type} &lt;{p.recipient_email}&gt;</div>
-                        <div><span className="text-gray-500">Client:</span> {p.client_name || '—'}</div>
-                        <div><span className="text-gray-500">Timer:</span> {p.trigger_timer} · {p.hours_overdue}h overdue</div>
-                        <div className="truncate text-gray-400 mt-1 italic">{p.email_subject}</div>
+                      <div className="text-xs text-muted-foreground">
+                        <div><span className="text-muted-foreground">Rule:</span> {p.rule_name}</div>
+                        <div><span className="text-muted-foreground">To:</span> {p.recipient_type} &lt;{p.recipient_email}&gt;</div>
+                        <div><span className="text-muted-foreground">Client:</span> {p.client_name || '—'}</div>
+                        <div><span className="text-muted-foreground">Timer:</span> {p.trigger_timer} · {p.hours_overdue}h overdue</div>
+                        <div className="truncate text-muted-foreground mt-1 italic">{p.email_subject}</div>
                       </div>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-8 text-sm text-gray-400">
+                <div className="text-center py-8 text-sm text-muted-foreground">
                   No claims would be emailed right now.
                 </div>
               )}
             </div>
-            <div className="px-5 py-3 border-t border-gray-200 dark:border-gray-800 flex justify-end gap-2">
+            <div className="px-5 py-3 border-t border-border flex justify-end gap-2">
               <Button variant="outline" onClick={() => setPreviewData(null)}>Close</Button>
             </div>
           </div>
@@ -457,7 +457,7 @@ function ChaserEmailRuleForm({ rule, onSubmit, onCancel }) {
     <div className="h-full flex flex-col gap-4">
       <div className="neomorph p-6 flex-shrink-0">
         <h1 className="text-2xl font-bold">{rule ? 'Edit' : 'New'} Chaser Email Rule</h1>
-        <p className="text-sm text-gray-500 mt-1">Configure when and how chaser emails are sent</p>
+        <p className="text-sm text-muted-foreground mt-1">Configure when and how chaser emails are sent</p>
       </div>
 
       <div className="flex-1 overflow-y-auto min-h-0 pr-1">
@@ -477,7 +477,7 @@ function ChaserEmailRuleForm({ rule, onSubmit, onCancel }) {
             </div>
 
             <div className="neomorph-inset p-4 rounded-xl space-y-4">
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-muted-foreground">
                 Build the eligibility logic for this rule. Conditions are evaluated against the claim's real state
                 (e.g. on-site is derived from dates, not just the status label), so they stay accurate even when
                 statuses lag behind.
@@ -487,7 +487,7 @@ function ChaserEmailRuleForm({ rule, onSubmit, onCancel }) {
                 onChange={(c) => setFormData({ ...formData, include_conditions: c })}
                 mode="include"
               />
-              <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+              <div className="border-t border-border pt-4">
                 <ChaserConditionBuilder
                   conditions={formData.exclude_conditions}
                   onChange={(c) => setFormData({ ...formData, exclude_conditions: c })}
@@ -510,7 +510,7 @@ function ChaserEmailRuleForm({ rule, onSubmit, onCancel }) {
                   <option value="Either">Either timer overdue</option>
                   <option value="Both">Both timers overdue</option>
                 </select>
-                <p className="text-xs text-gray-500 mt-1">Which 48-hour update timer must be overdue</p>
+                <p className="text-xs text-muted-foreground mt-1">Which 48-hour update timer must be overdue</p>
               </div>
 
               <div>
@@ -523,7 +523,7 @@ function ChaserEmailRuleForm({ rule, onSubmit, onCancel }) {
                   required
                   className="neomorph-inset"
                 />
-                <p className="text-xs text-gray-500 mt-1">Wait this many hours after the timer goes Red before sending (0 = immediately)</p>
+                <p className="text-xs text-muted-foreground mt-1">Wait this many hours after the timer goes Red before sending (0 = immediately)</p>
               </div>
             </div>
 
@@ -585,7 +585,7 @@ function ChaserEmailRuleForm({ rule, onSubmit, onCancel }) {
                   onChange={(e) => setFormData({ ...formData, max_sends: parseInt(e.target.value) })}
                   className="neomorph-inset"
                 />
-                <p className="text-xs text-gray-500 mt-1">Limit number of chasers per claim</p>
+                <p className="text-xs text-muted-foreground mt-1">Limit number of chasers per claim</p>
               </div>
             </div>
 
@@ -597,7 +597,7 @@ function ChaserEmailRuleForm({ rule, onSubmit, onCancel }) {
                 placeholder="email1@example.com, email2@example.com"
                 className="neomorph-inset"
               />
-              <p className="text-xs text-gray-500 mt-1">Comma-separated list</p>
+              <p className="text-xs text-muted-foreground mt-1">Comma-separated list</p>
             </div>
           </div>
 

@@ -170,8 +170,8 @@ export default function EmployeeManagement() {
                 <div className="mt-1.5 space-y-1">
                   {events.map((event, i) => (
                     <div key={i} className="flex items-center gap-2 min-h-[38px]">
-                      <span className={`text-[10px] font-semibold px-2 py-1 rounded-full text-white flex-shrink-0 ${
-                        event.type === 'bank-holiday' ? 'bg-purple-500' : event.type === 'holiday' ? 'bg-blue-500' : 'bg-red-500'
+                      <span className={`text-xs font-semibold px-2 py-1 rounded-full text-white flex-shrink-0 ${
+                        event.type === 'bank-holiday' ? 'bg-purple-500' : event.type === 'holiday' ? 'bg-info' : 'bg-danger'
                       }`}>
                         {event.type === 'bank-holiday' ? 'Bank Holiday' : event.type === 'holiday' ? 'Holiday' : 'Sickness'}
                       </span>
@@ -248,10 +248,10 @@ export default function EmployeeManagement() {
                   {events.map((event, eventIdx) => (
                     <div
                       key={eventIdx}
-                      className={`text-[10px] px-1 py-0.5 rounded ${
+                      className={`text-xs px-1 py-0.5 rounded ${
                         event.type === 'bank-holiday' ? 'bg-purple-500 text-white font-semibold' :
-                        event.type === 'holiday' ? 'bg-blue-500 text-white' : 
-                        'bg-red-500 text-white'
+                        event.type === 'holiday' ? 'bg-info text-on-solid' : 
+                        'bg-danger text-on-solid'
                       }`}
                       title={event.type === 'bank-holiday' ? event.name : event.name}
                     >
@@ -270,11 +270,11 @@ export default function EmployeeManagement() {
             <span>Bank Holiday</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-blue-500 rounded"></div>
+            <div className="w-4 h-4 bg-info rounded"></div>
             <span>Staff Holiday</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-red-500 rounded"></div>
+            <div className="w-4 h-4 bg-danger rounded"></div>
             <span>Sickness</span>
           </div>
         </div>
@@ -326,15 +326,15 @@ export default function EmployeeManagement() {
             </div>
             <div className="glass-flat p-4">
               <p className="text-sm text-foreground-muted">Days Approved</p>
-              <p className="text-2xl font-bold text-green-600">{myApprovedDays} days</p>
+              <p className="text-2xl font-bold text-success-fg">{myApprovedDays} days</p>
             </div>
             <div className="glass-flat p-4">
               <p className="text-sm text-foreground-muted">Days Pending</p>
-              <p className="text-2xl font-bold text-orange-600">{myPendingDays} days</p>
+              <p className="text-2xl font-bold text-warning-fg">{myPendingDays} days</p>
             </div>
             <div className="glass-flat p-4">
               <p className="text-sm text-foreground-muted">Days Remaining</p>
-              <p className="text-2xl font-bold text-blue-600">{myRemaining} days</p>
+              <p className="text-2xl font-bold text-info-fg">{myRemaining} days</p>
             </div>
           </div>
         </div>
@@ -342,7 +342,7 @@ export default function EmployeeManagement() {
         {pendingRequests.length > 0 && (
           <div className="glass p-4">
             <h3 className="font-bold text-lg mb-3 flex items-center gap-2">
-              <Clock className="w-5 h-5 text-orange-500" />
+              <Clock className="w-5 h-5 text-warning-fg" />
               Pending Requests
             </h3>
             <div className="space-y-2">
@@ -541,7 +541,7 @@ function RoleCard({ role, onEdit }) {
                 deleteMutation.mutate();
               }
             }} 
-            className="glass-button p-2 text-red-600" 
+            className="glass-button p-2 text-danger-fg" 
             title="Deactivate Role"
           >
             <Trash2 className="w-4 h-4" />
@@ -664,7 +664,7 @@ function RoleModal({ isOpen, onClose, role }) {
                         : (formData.departments_access || []).filter(d => d !== dept);
                       setFormData({ ...formData, departments_access: newDepts });
                     }}
-                    className="form-checkbox h-4 w-4 text-primary rounded focus:ring-primary border-gray-300"
+                    className="form-checkbox h-4 w-4 text-primary rounded focus:ring-primary border-border"
                   />
                   <span className="text-sm">{dept}</span>
                 </label>
@@ -726,10 +726,10 @@ function HolidayRequestCard({ request, canManage, calculateWorkingDays, isOwnReq
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'Approved': return 'text-green-600';
-      case 'Rejected': return 'text-red-600';
-      case 'Pending': return 'text-orange-600';
-      default: return 'text-gray-600';
+      case 'Approved': return 'text-success-fg';
+      case 'Rejected': return 'text-danger-fg';
+      case 'Pending': return 'text-warning-fg';
+      default: return 'text-muted-foreground';
     }
   };
 
@@ -772,7 +772,7 @@ function HolidayRequestCard({ request, canManage, calculateWorkingDays, isOwnReq
             <>
               <Button
                 onClick={() => approveMutation.mutate('Approved')}
-                className="glass-button p-2 text-green-600"
+                className="glass-button p-2 text-success-fg"
                 title="Approve"
                 disabled={approveMutation.isPending}
               >
@@ -780,7 +780,7 @@ function HolidayRequestCard({ request, canManage, calculateWorkingDays, isOwnReq
               </Button>
               <Button
                 onClick={() => approveMutation.mutate('Rejected')}
-                className="glass-button p-2 text-red-600"
+                className="glass-button p-2 text-danger-fg"
                 title="Reject"
                 disabled={approveMutation.isPending}
               >
@@ -791,7 +791,7 @@ function HolidayRequestCard({ request, canManage, calculateWorkingDays, isOwnReq
           {isOwnRequest && request.status === 'Pending' && (
             <Button
               onClick={handleDelete}
-              className="glass-button p-2 text-red-600"
+              className="glass-button p-2 text-danger-fg"
               title="Delete Request"
               disabled={deleteMutation.isPending}
             >
@@ -1075,7 +1075,7 @@ function SicknessRecordModal({ isOpen, onClose, users }) {
               id="certified"
               checked={formData.certified}
               onChange={(e) => setFormData({ ...formData, certified: e.target.checked })}
-              className="form-checkbox h-4 w-4 text-primary rounded focus:ring-primary border-gray-300"
+              className="form-checkbox h-4 w-4 text-primary rounded focus:ring-primary border-border"
             />
             <label htmlFor="certified" className="text-sm">Doctor's note provided</label>
           </div>

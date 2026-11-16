@@ -82,7 +82,7 @@ export default function CompanyIdLookup() {
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-border hover:bg-surface-hover transition-all flex-shrink-0"
               >
                 {copied === record.id ? (
-                  <><Check className="w-3.5 h-3.5 text-green-500" /> Copied</>
+                  <><Check className="w-3.5 h-3.5 text-success-fg" /> Copied</>
                 ) : (
                   <><Copy className="w-3.5 h-3.5" /> Copy ID</>
                 )}

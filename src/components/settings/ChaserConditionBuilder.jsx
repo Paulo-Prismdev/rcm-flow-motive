@@ -103,7 +103,7 @@ export default function ChaserConditionBuilder({ conditions, onChange, mode }) {
   return (
     <div>
       <label className="block text-sm font-medium mb-1">{title}</label>
-      <p className="text-xs text-gray-500 mb-2">{subtitle}</p>
+      <p className="text-xs text-muted-foreground mb-2">{subtitle}</p>
 
       <div className="space-y-2">
         {list.map((cond, i) => {
@@ -160,10 +160,10 @@ export default function ChaserConditionBuilder({ conditions, onChange, mode }) {
                           const nextVal = selected ? current.filter((v) => v !== opt) : [...current, opt];
                           updateCondition(i, { value: nextVal.join(',') });
                         }}
-                        className={`px-2 py-0.5 text-[11px] rounded-full border transition-colors ${
+                        className={`px-2 py-0.5 text-xs rounded-full border transition-colors ${
                           selected
                             ? 'bg-[#131d47] text-white border-[#131d47]'
-                            : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'
+                            : 'bg-card text-muted-foreground border-border hover:bg-muted'
                         }`}
                       >
                         {opt}
@@ -177,7 +177,7 @@ export default function ChaserConditionBuilder({ conditions, onChange, mode }) {
               <button
                 type="button"
                 onClick={() => removeCondition(i)}
-                className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
+                className="p-1 text-muted-foreground hover:text-danger-fg hover:bg-danger-bg rounded transition-colors"
                 title="Remove condition"
               >
                 <X className="w-3.5 h-3.5" />

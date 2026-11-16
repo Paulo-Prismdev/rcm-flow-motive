@@ -56,12 +56,12 @@ export default function ExcessReviewTab() {
           <ClipboardCheck className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
           <div className="min-w-0">
             <h3 className="text-sm font-semibold text-foreground">Claims holding a £0 excess</h3>
-            <p className="text-[11px] text-muted-foreground mt-0.5">
+            <p className="text-xs text-muted-foreground mt-0.5">
               £0 has always been read as <span className="font-semibold text-foreground">Waived</span> — nothing payable — and
               existing claims are left exactly as they are. Where the excess was really never known, set it to{' '}
               <span className="font-semibold text-foreground">TBC on authority</span> and the claim leaves this list.
             </p>
-            <p className="text-[11px] font-semibold text-foreground mt-1">
+            <p className="text-xs font-semibold text-foreground mt-1">
               {isLoading ? 'Checking claims…' : `${claims.length} open claim${claims.length === 1 ? '' : 's'} to check`}
             </p>
           </div>
@@ -88,21 +88,21 @@ export default function ExcessReviewTab() {
                 >
                   {claim.job_number || 'Claim'}
                 </Link>
-                <p className="text-[11px] text-muted-foreground m-ellipsis">{claim.reg || 'No registration'}</p>
-                <p className="text-[11px] text-muted-foreground m-ellipsis">{claim.client_name || 'No client'}</p>
+                <p className="text-xs text-muted-foreground m-ellipsis">{claim.reg || 'No registration'}</p>
+                <p className="text-xs text-muted-foreground m-ellipsis">{claim.client_name || 'No client'}</p>
               </div>
 
               <div className="md:w-44 flex-shrink-0 min-w-0">
-                <p className="text-[11px] text-muted-foreground m-ellipsis">{claim.claim_type || 'Claim type not set'}</p>
-                <p className="text-[11px] text-muted-foreground m-ellipsis">{claim.secondary_status || claim.job_status || '—'}</p>
-                <p className="text-[11px] text-muted-foreground m-ellipsis">{claim.insurer || '—'}</p>
+                <p className="text-xs text-muted-foreground m-ellipsis">{claim.claim_type || 'Claim type not set'}</p>
+                <p className="text-xs text-muted-foreground m-ellipsis">{claim.secondary_status || claim.job_status || '—'}</p>
+                <p className="text-xs text-muted-foreground m-ellipsis">{claim.insurer || '—'}</p>
               </div>
 
               <div className="flex-1 min-w-0">
                 {savingId === claim.id ? (
                   <div className="flex items-center gap-2 text-muted-foreground py-2">
                     <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    <span className="text-[11px]">Saving…</span>
+                    <span className="text-xs">Saving…</span>
                   </div>
                 ) : (
                   <ExcessModeField claim={claim} onChange={(patch) => change(claim, patch)} compact />
