@@ -380,19 +380,19 @@ export default function Layout({ children, currentPageName }) {
               <>
                     <button onClick={() => { setOverlayPage("Settings"); setMobileMenuOpen(false); }}
                 title="Settings"
-                className="flex items-center gap-3 px-3 py-2 rounded-[10px] text-sm font-medium text-white/60 hover:bg-white/8 hover:text-white/90 transition-all md:justify-center md:px-2 lg:justify-start lg:px-3">
-                      <Settings className="w-4 h-4 flex-shrink-0" /><span className="md:hidden lg:block">Settings</span>
+                className={`${NAV_BASE} ${overlayPage === "Settings" ? NAV_ON : NAV_REST}`}>
+                      <Settings className="w-4 h-4 flex-shrink-0" /><span className="md:hidden lg:block">Settings</span><NavMarker active={overlayPage === "Settings"} opensOver />
                     </button>
                     <Link to={createPageUrl("Archive")} onClick={() => setMobileMenuOpen(false)}
                 title="Archive"
-                className="flex items-center gap-3 px-3 py-2 rounded-[10px] text-sm font-medium text-white/60 hover:bg-white/8 hover:text-white/90 transition-all md:justify-center md:px-2 lg:justify-start lg:px-3">
+                className={`${NAV_BASE} ${location.pathname === createPageUrl("Archive") ? NAV_ON : NAV_REST}`}>
                       <Archive className="w-4 h-4 flex-shrink-0" /><span className="md:hidden lg:block">Archive</span>
                     </Link>
 
                     {isSuperAdmin &&
                 <Link to={createPageUrl("FeedbackHub")} onClick={() => setMobileMenuOpen(false)}
                 title="Feedback Hub"
-                className="flex items-center gap-3 px-3 py-2 rounded-[10px] text-sm font-medium text-white/60 hover:bg-white/8 hover:text-white/90 transition-all md:justify-center md:px-2 lg:justify-start lg:px-3">
+                className={`${NAV_BASE} ${location.pathname === createPageUrl("FeedbackHub") ? NAV_ON : NAV_REST}`}>
                         <MessageSquare className="w-4 h-4 flex-shrink-0" /><span className="md:hidden lg:block">Feedback Hub</span>
                       </Link>
                 }
@@ -422,8 +422,8 @@ export default function Layout({ children, currentPageName }) {
                   </div>
                   <div className="flex-1 min-w-0 md:hidden lg:block">
                     <p className="text-sm font-medium text-white truncate">{currentUser?.full_name || 'User'}</p>
-                    <p className="text-xs text-white/40 truncate">{currentUser?.email || ''}</p>
-                    <p className="text-[10px] text-white/30 truncate mt-0.5">Click for profile & logout</p>
+                    <p className="text-xs text-white/70 truncate">{currentUser?.email || ''}</p>
+                    <p className="text-xs text-white/60 truncate mt-0.5">Profile and sign out</p>
                   </div>
                 </div>
               } />
@@ -441,8 +441,9 @@ export default function Layout({ children, currentPageName }) {
         {!desktopSidebarOpen && (
           <button
             onClick={() => setDesktopSidebarOpen(true)}
-            className="hidden md:flex fixed top-2 left-2 z-[9999] items-center justify-center w-8 h-8 rounded-md bg-[#131d47] text-white shadow-md hover:bg-[#1e2d4a] transition-colors"
-            title="Show sidebar">
+            className="hidden md:flex fixed top-2.5 left-2 z-[9999] items-center justify-center w-8 h-8 rounded-lg fm-glass-chrome text-white shadow-raised hover:bg-[#1f2c63] transition-colors"
+            title="Show sidebar"
+            aria-label="Show sidebar">
             <PanelLeftOpen className="w-4 h-4" />
           </button>
         )}
