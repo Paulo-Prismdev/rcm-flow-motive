@@ -102,7 +102,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import ClaimDetailMobileHeader from './ClaimDetailMobileHeader';
+import ClaimMobileSummary, { ClaimMobileSectionBar } from './ClaimMobileSummary';
 import AuthorisingPartyBanner from './AuthorisingPartyBanner';
 import ClaimJourneyTimeline from './ClaimJourneyTimeline';
 import { generateClaimOverviewPdf } from './claimOverviewPdf';
@@ -612,6 +612,38 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
   const notesTotalCount = claimNotes.length + notesFileCount;
 
   const starredUpdates = claimUpdates.filter(u => u.starred && !u.parent_update_id);
+
+  // Phones: the claim opens on its summary; a section opens on its own page.
+  const [mobilePage, setMobilePage] = useState('summary');
+  const phoneSections = DETAIL_SECTIONS
+    .filter(s => s.id !== 'creditRepair' || claim.claim_type === 'Credit Repair')
+    .map(s => ({ ...s, empty: isSectionEmpty(s.id, claim) }));
+  const openPhoneSection = (id) => {
+    setSelectedSection(id);
+    setMobilePage('section');
+  };
+  // Going back to the summary starts it at the top, like opening a page.
+  React.useEffect(() => {
+    const scroller = rootRef.current?.closest('[data-claim-scroll]');
+    if (scroller) scroller.scrollTop = 0;
+  }, [mobilePage]);
+  const handlePhoneAction = (val) => {
+    if (val === 'notes') setIsNotesOpen(true);
+    else if (val === 'docs') setIsAttachmentsOpen(true);
+    else if (val === 'images') setIsImagesOpen(true);
+    else if (val === 'timelogs') setIsTimeLogsOpen(true);
+    else if (val === 'activity') setIsActivityLogOpen(true);
+    else if (val === 'email') setIsEmailModalOpen(true);
+    else if (val === 'tasks') setIsTasksModalOpen(true);
+    else if (val === 'download_pdf') window.open(claim.instruction_pdf_url, '_blank');
+    else if (val === 'download_overview') handleDownloadOverviewPdf();
+    else if (val === 'estimate') setIsEstimateModalOpen(true);
+    else if (val === 'parts') setIsPartsModalOpen(true);
+    else if (val === 'backorders') setIsBackorderedPartsModalOpen(true);
+    else if (val === 'duplicate') setIsDuplicateModalOpen(true);
+    else if (val === 'archive') handleArchive();
+    else if (val === 'delete') handleDelete();
+  };
 
   // Saves a change to the claim. The screen updates at once; the history is only
   // written once the save has gone through, and a failed save puts the screen back.
@@ -1882,25 +1914,6 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
               isInternalUser={isInternalUser}
             />
           )}
-          {false && <ClaimDetailMobileHeader
-            onAction={(val) => {
-              if (val === 'notes') setIsNotesOpen(true);
-              else if (val === 'docs') setIsAttachmentsOpen(true);
-              else if (val === 'images') setIsImagesOpen(true);
-              else if (val === 'timelogs') setIsTimeLogsOpen(true);
-              else if (val === 'activity') setIsActivityLogOpen(true);
-              else if (val === 'email') setIsEmailModalOpen(true);
-              else if (val === 'tasks') setIsTasksModalOpen(true);
-              else if (val === 'download_pdf') window.open(claim.instruction_pdf_url, '_blank');
-              else if (val === 'download_overview') handleDownloadOverviewPdf();
-              else if (val === 'estimate') setIsEstimateModalOpen(true);
-              else if (val === 'parts') setIsPartsModalOpen(true);
-              else if (val === 'backorders') setIsBackorderedPartsModalOpen(true);
-              else if (val === 'duplicate') setIsDuplicateModalOpen(true);
-              else if (val === 'archive') handleArchive();
-              else if (val === 'delete') handleDelete();
-            }}
-          />}
 
           {/* ── DESKTOP top bar (≥ lg) ── */}
           <div className="hidden lg:block bg-card border border-border rounded-xl p-3 flex-shrink-0 shadow-card">
