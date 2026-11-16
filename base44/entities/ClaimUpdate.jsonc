@@ -1,17 +1,143 @@
 {
   "name": "ClaimUpdate",
-  "type": "object",
   "properties": {
     "claim_id": {
-      "type": "string",
-      "description": "ID of the claim this update belongs to"
+      "description": "ID of the claim this update belongs to",
+      "type": "string"
     },
     "company_id": {
-      "type": "string",
-      "description": "Company ID of the user who created this update"
+      "description": "Company ID of the user who created this update",
+      "type": "string"
+    },
+    "contacted_party_detail": {
+      "description": "Email or phone number of the contacted party",
+      "type": "string"
+    },
+    "contacted_party_name": {
+      "description": "Name of the party contacted for this communication update (shown next to the update type in the header)",
+      "type": "string"
+    },
+    "description": {
+      "description": "Detailed description of what was done/updated",
+      "type": "string"
+    },
+    "direction": {
+      "description": "Whether this communication was incoming or outgoing",
+      "enum": [
+        "Incoming",
+        "Outgoing"
+      ],
+      "type": "string"
+    },
+    "due_date_for_next_action": {
+      "description": "When the next action is due (optional)",
+      "format": "date",
+      "type": "string"
+    },
+    "file_urls": {
+      "default": [],
+      "description": "Files attached to this update",
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "liked_by": {
+      "default": [],
+      "description": "User IDs of users who liked this update",
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "next_steps": {
+      "description": "What needs to happen next (optional)",
+      "type": "string"
+    },
+    "parent_update_id": {
+      "description": "ID of parent update if this is a reply",
+      "type": "string"
+    },
+    "platform": {
+      "description": "Communication platform used for this update",
+      "enum": [
+        "Phone",
+        "E-Mail",
+        "Whatsapp",
+        "Text Message"
+      ],
+      "type": "string"
+    },
+    "starred": {
+      "default": false,
+      "description": "Whether this update is starred/flagged as important and blocks job completion until removed",
+      "type": "boolean"
+    },
+    "status_change": {
+      "description": "Structured record of a status change: the outcome, journey, secondary and tertiary statuses before (from) and after (to), which of them changed, and whether a person or Flowmotive made the change. Who and when come from created_by and created_date.",
+      "properties": {
+        "changed": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "from": {
+          "properties": {
+            "journey": {
+              "type": "string"
+            },
+            "outcome": {
+              "type": "string"
+            },
+            "secondary": {
+              "type": "string"
+            },
+            "tertiary": {
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
+        "source": {
+          "default": "manual",
+          "enum": [
+            "manual",
+            "auto"
+          ],
+          "type": "string"
+        },
+        "to": {
+          "properties": {
+            "journey": {
+              "type": "string"
+            },
+            "outcome": {
+              "type": "string"
+            },
+            "secondary": {
+              "type": "string"
+            },
+            "tertiary": {
+              "type": "string"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "tagged_user_ids": {
+      "default": [],
+      "description": "User IDs of users tagged in this update",
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
     },
     "update_type": {
-      "type": "string",
+      "default": "Other",
+      "description": "Type of update - categorizes the activity",
       "enum": [
         "Status Change",
         "Client Communication",
@@ -23,80 +149,7 @@
         "General Update",
         "Other"
       ],
-      "default": "Other",
-      "description": "Type of update - categorizes the activity"
-    },
-    "direction": {
-      "type": "string",
-      "enum": [
-        "Incoming",
-        "Outgoing"
-      ],
-      "description": "Whether this communication was incoming or outgoing"
-    },
-    "platform": {
-      "type": "string",
-      "enum": [
-        "Phone",
-        "E-Mail",
-        "Whatsapp",
-        "Text Message"
-      ],
-      "description": "Communication platform used for this update"
-    },
-    "description": {
-      "type": "string",
-      "description": "Detailed description of what was done/updated"
-    },
-    "next_steps": {
-      "type": "string",
-      "description": "What needs to happen next (optional)"
-    },
-    "due_date_for_next_action": {
-      "type": "string",
-      "format": "date",
-      "description": "When the next action is due (optional)"
-    },
-    "file_urls": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      },
-      "description": "Files attached to this update",
-      "default": []
-    },
-    "tagged_user_ids": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      },
-      "description": "User IDs of users tagged in this update",
-      "default": []
-    },
-    "liked_by": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      },
-      "description": "User IDs of users who liked this update",
-      "default": []
-    },
-    "parent_update_id": {
-      "type": "string",
-      "description": "ID of parent update if this is a reply"
-    },
-    "contacted_party_name": {
-      "type": "string",
-      "description": "Name of the party contacted for this communication update (shown next to the update type in the header)"
-    },
-    "contacted_party_detail": {
-      "type": "string",
-      "description": "Email or phone number of the contacted party"
-    },
-    "starred": {
-      "type": "boolean",
-      "default": false,
-      "description": "Whether this update is starred/flagged as important and blocks job completion until removed"
+      "type": "string"
     }
   },
   "required": [
@@ -104,6 +157,7 @@
     "update_type",
     "description"
   ],
+  "type": "object",
   "rls": {
     "create": {
       "$and": [
