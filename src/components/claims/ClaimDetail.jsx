@@ -125,18 +125,19 @@ const EditableSection = ({ title, icon: Icon, claim, onUpdate, children, EditCom
     };
 
     return (
-        <div className="bg-card border border-border rounded-lg p-4 md:p-5 m-card-tight shadow-sm">
+        <div className="bg-card border border-border rounded-xl p-4 md:p-5 m-card-tight shadow-card">
             <div className="flex justify-between items-center pb-3 mb-4 border-b border-border m-card-head">
                 <div
-                    className="flex items-center gap-2.5 text-left flex-grow"
+                    className="flex items-center gap-2.5 text-left flex-grow min-w-0"
                 >
-                    <Icon className="w-4 h-4 text-muted-foreground" />
-                    <h3 className="text-xs font-semibold text-muted-foreground">{title}</h3>
+                    <Icon className="w-4 h-4 text-muted-foreground flex-shrink-0" aria-hidden="true" />
+                    <h3 className="text-[15px] font-semibold text-foreground truncate">{title}</h3>
                 </div>
                 <div className='flex items-center gap-2'>
                     {!isEditing && EditComponent && canEdit && (
-                        <Button variant="ghost" size="icon" onClick={() => { setIsEditing(true); }} className="h-8 w-8 hover:text-gold">
-                            <Edit className="w-4 h-4" />
+                        <Button variant="outline" size="sm" onClick={() => { setIsEditing(true); }} className="gap-1.5" aria-label={`Edit ${title}`}>
+                            <Edit className="w-3.5 h-3.5" aria-hidden="true" />
+                            Edit
                         </Button>
                     )}
                 </div>
@@ -182,15 +183,16 @@ function DetailRow({ label, value, isCurrency = false, isDate = false, isStatus 
 
     const isEmpty = value === null || typeof value === 'undefined' || value === '' || value === 0;
     if (isEmpty) {
-        displayValue = '-';
+        displayValue = 'Not set';
     }
 
+    // Empty fields stay marked (amber) so gaps are easy to spot, just more quietly.
     return (
-        <div className={`py-2 px-3 rounded-[8px] transition-colors ${isEmpty ? 'bg-warning-bg border border-warning/50' : 'hover:bg-muted/50'}`}>
+        <div className={`py-2 px-3 rounded-lg transition-colors ${isEmpty ? 'bg-warning-bg/60 border border-warning/25' : 'hover:bg-muted/50'}`}>
             <div className="text-xs font-medium text-muted-foreground mb-0.5">
                 {label}
             </div>
-            <div className={`text-sm font-medium ${isEmpty ? 'text-warning' : 'text-foreground'} ${(isCurrency || (typeof value === 'number')) ? 'tabular-nums' : ''}`}>
+            <div className={`text-sm ${isEmpty ? 'text-warning-fg font-normal' : 'text-foreground font-medium'} ${(isCurrency || (typeof value === 'number')) ? 'tabular-nums' : ''}`}>
                 {isStatus ? <StatusBadge status={displayValue} /> : displayValue}
             </div>
         </div>
@@ -252,27 +254,27 @@ const isSectionEmpty = (sectionId, claim) => {
 };
 
 const DETAIL_SECTIONS = [
-  { id: 'status', label: 'Job Overview', icon: Clock },
-  { id: 'dates', label: 'Key Dates', icon: Calendar },
-  { id: 'estimate', label: 'Estimate Details', icon: Calculator },
-  { id: 'client', label: 'Client Details', icon: Users },
-  { id: 'creditRepair', label: 'Credit Repair', icon: Shield },
-  { id: 'driver', label: 'Repair Contact (Driver)', icon: Users },
-  { id: 'vehicle', label: 'Vehicle Details', icon: Car },
-  { id: 'vehicleDamage', label: 'Vehicle Damage', icon: AlertTriangle },
-  { id: 'vehicleLocation', label: 'Vehicle Location', icon: MapPin },
-  { id: 'thirdParty', label: 'Third Party Details', icon: Users },
-  { id: 'bodyshop', label: 'Bodyshop Details', icon: Wrench },
-  { id: 'referrer', label: 'Referrer Details', icon: Briefcase },
-  { id: 'instructionDefaults', label: 'Instruction Defaults', icon: FileText },
-  { id: 'excessContribution', label: 'Excess Contribution', icon: BadgePercent },
+  { id: 'status', label: 'Job overview', icon: Clock },
+  { id: 'dates', label: 'Key dates', icon: Calendar },
+  { id: 'estimate', label: 'Estimate details', icon: Calculator },
+  { id: 'client', label: 'Client details', icon: Users },
+  { id: 'creditRepair', label: 'Credit repair', icon: Shield },
+  { id: 'driver', label: 'Repair contact (driver)', icon: Users },
+  { id: 'vehicle', label: 'Vehicle details', icon: Car },
+  { id: 'vehicleDamage', label: 'Vehicle damage', icon: AlertTriangle },
+  { id: 'vehicleLocation', label: 'Vehicle location', icon: MapPin },
+  { id: 'thirdParty', label: 'Third party details', icon: Users },
+  { id: 'bodyshop', label: 'Bodyshop details', icon: Wrench },
+  { id: 'referrer', label: 'Referrer details', icon: Briefcase },
+  { id: 'instructionDefaults', label: 'Instruction defaults', icon: FileText },
+  { id: 'excessContribution', label: 'Excess contribution', icon: BadgePercent },
   { id: 'financials', label: 'Financials', icon: DollarSign },
-  { id: 'thirdpartyPursuit', label: 'Third Party Pursuit', icon: Users },
-  { id: 'indemnity', label: 'Indemnity Details', icon: Shield },
-  { id: 'repairPreference', label: 'Repair Preference', icon: FileText },
-  { id: 'declarationOfNeed', label: 'Declaration of Need', icon: FileText },
-  { id: 'witnessStatements', label: 'Witness Statements', icon: FileText },
-  { id: 'backorderedParts', label: 'Backordered Parts', icon: Package },
+  { id: 'thirdpartyPursuit', label: 'Third party pursuit', icon: Users },
+  { id: 'indemnity', label: 'Indemnity details', icon: Shield },
+  { id: 'repairPreference', label: 'Repair preference', icon: FileText },
+  { id: 'declarationOfNeed', label: 'Declaration of need', icon: FileText },
+  { id: 'witnessStatements', label: 'Witness statements', icon: FileText },
+  { id: 'backorderedParts', label: 'Backordered parts', icon: Package },
   ];
 
 export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInternalUser = true, initialSection = 'status' }) {
@@ -937,7 +939,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
             <div className="neomorph-flat p-3 md:p-5">
               <div className="flex items-center gap-3 mb-4">
                 <Users className="w-5 h-5 text-gold" />
-                <h3 className="font-bold">Third Party Pursuit</h3>
+                <h3 className="font-bold">Third party pursuit</h3>
               </div>
               <div className="text-center py-12 text-muted-foreground">
                 <p>Third party pursuit is only applicable for Fault Claims.</p>
@@ -950,7 +952,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
       case 'status':
         return (
           <EditableSection 
-            title="Job Overview" 
+            title="Job overview" 
             icon={Clock} 
             claim={claim} 
             onUpdate={handleUpdate}
@@ -1054,7 +1056,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
 
       case 'creditRepair':
         return (
-          <EditableSection title="Credit Repair" icon={Shield} claim={claim} onUpdate={handleUpdate} EditComponent={ClaimCreditRepairForm} canEdit={canEdit}>
+          <EditableSection title="Credit repair" icon={Shield} claim={claim} onUpdate={handleUpdate} EditComponent={ClaimCreditRepairForm} canEdit={canEdit}>
             <div className="grid grid-cols-1 lg:grid-cols-2 m-fields-2 gap-2">
               <DetailRow label="Company" value={claim.credit_repair_company_name} />
               <DetailRow label="Contact Name" value={claim.credit_repair_company_contact_name} />
@@ -1148,7 +1150,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
 
       case 'vehicle':
         return (
-          <EditableSection title="Vehicle Details" icon={Car} claim={claim} onUpdate={handleUpdate} EditComponent={ClaimVehicleForm} canEdit={canEdit}>
+          <EditableSection title="Vehicle details" icon={Car} claim={claim} onUpdate={handleUpdate} EditComponent={ClaimVehicleForm} canEdit={canEdit}>
             {/* DVLA Lookup Button */}
             {claim.reg && (
               <div className="mb-4 p-3 rounded-xl bg-info-bg border border-info/30">
@@ -1210,7 +1212,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
       case 'vehicleLocation':
         return (
           <EditableSection 
-            title="Vehicle Location" 
+            title="Vehicle location" 
             icon={MapPin} 
             claim={claim} 
             onUpdate={handleUpdate} 
@@ -1224,7 +1226,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
       case 'vehicleDamage':
         return (
           <EditableSection 
-            title="Vehicle Damage" 
+            title="Vehicle damage" 
             icon={AlertTriangle} 
             claim={claim} 
             onUpdate={handleUpdate} 
@@ -1248,7 +1250,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
       case 'excessContribution':
         return (
           <EditableSection 
-            title="Excess Contribution" 
+            title="Excess contribution" 
             icon={BadgePercent}
             claim={claim} 
             onUpdate={handleUpdate} 
@@ -1288,7 +1290,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
       case 'instructionDefaults':
         return (
           <EditableSection 
-            title="Instruction Defaults" 
+            title="Instruction defaults" 
             icon={FileText}
             claim={claim} 
             onUpdate={handleUpdate} 
@@ -1304,7 +1306,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
 
       case 'referrer':
         return (
-          <EditableSection title="Referrer Details" icon={Briefcase} claim={claim} onUpdate={handleUpdate} EditComponent={ClaimReferrerForm} canEdit={canEdit}>
+          <EditableSection title="Referrer details" icon={Briefcase} claim={claim} onUpdate={handleUpdate} EditComponent={ClaimReferrerForm} canEdit={canEdit}>
             {claim.referrer ? (
               <div className="grid grid-cols-1 lg:grid-cols-2 m-fields-2 gap-2">
                 <DetailRow label="Referrer" value={claim.referrer} />
@@ -1326,7 +1328,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
         if (!claim.requires_indemnity) {
           return (
             <EditableSection 
-              title="Indemnity Details" 
+              title="Indemnity details" 
               icon={Shield} 
               claim={claim} 
               onUpdate={handleUpdate} 
@@ -1344,7 +1346,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
         
         return (
           <EditableSection 
-            title="Indemnity Details" 
+            title="Indemnity details" 
             icon={Shield} 
             claim={claim} 
             onUpdate={handleUpdate} 
@@ -1429,7 +1431,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
           <div className="bg-card border border-border rounded-lg p-4 md:p-5 m-card-tight shadow-sm">
             <div className="flex items-center gap-2.5 pb-3 mb-4 border-b border-border m-card-head">
               <FileText className="w-4 h-4 text-muted-foreground" />
-              <h3 className="text-xs font-semibold text-muted-foreground">Witness Statements</h3>
+              <h3 className="text-xs font-semibold text-muted-foreground">Witness statements</h3>
             </div>
             <WitnessStatementsSection claim={claim} />
           </div>
@@ -1488,7 +1490,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
 
       case 'dates':
         return (
-          <InlineEditableSection title="Key Dates" icon={Calendar} claim={claim} onUpdate={handleUpdate} canEdit={canEdit}>
+          <InlineEditableSection title="Key dates" icon={Calendar} claim={claim} onUpdate={handleUpdate} canEdit={canEdit}>
             <div className="grid grid-cols-1 lg:grid-cols-2 m-fields-2 gap-2">
               <InlineField label="Date Received" name="date_received" isDate />
               <InlineField label="Loss Date" name="loss_date" isDate />
@@ -1520,7 +1522,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
 
       case 'bodyshop':
         return (
-          <EditableSection title="Bodyshop Details" icon={Wrench} claim={claim} onUpdate={handleUpdate} EditComponent={ClaimBodyshopForm} canEdit={canEdit}>
+          <EditableSection title="Bodyshop details" icon={Wrench} claim={claim} onUpdate={handleUpdate} EditComponent={ClaimBodyshopForm} canEdit={canEdit}>
             {/* Find Repairer on Map — always visible, no edit mode needed */}
             <div className="mb-4">
               <ClaimBodyshopAllocateButton claim={claim} onAllocated={(data) => handleUpdate({ ...claim, ...data })} />
@@ -1674,7 +1676,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
 
       case 'estimate':
         return (
-          <InlineEditableSection title="Estimate Details" icon={Calculator} claim={claim} onUpdate={handleUpdate} canEdit={canEdit}>
+          <InlineEditableSection title="Estimate details" icon={Calculator} claim={claim} onUpdate={handleUpdate} canEdit={canEdit}>
             <EstimateInlineFields />
             <EstimateAuthorityTotals claim={claim} className="mt-2" />
             <div className="mt-2 py-3 px-4 rounded-lg glass-inset">
@@ -1970,8 +1972,8 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                               <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleDownloadOverviewPdf(); }}><FileText className="w-4 h-4 mr-2" />Download File Overview</DropdownMenuItem>
                               <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsEstimateModalOpen(true); }}><Calculator className="w-4 h-4 mr-2" />Request Estimate</DropdownMenuItem>
                               <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsPartsModalOpen(true); }}><Package className="w-4 h-4 mr-2" />Log Parts Issue</DropdownMenuItem>
-                              <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsBackorderedPartsModalOpen(true); }}><Package className="w-4 h-4 mr-2" />Backordered Parts</DropdownMenuItem>
-                              <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setSelectedSection('declarationOfNeed'); }}><FileText className="w-4 h-4 mr-2" />Declaration of Need</DropdownMenuItem>
+                              <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsBackorderedPartsModalOpen(true); }}><Package className="w-4 h-4 mr-2" />Backordered parts</DropdownMenuItem>
+                              <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setSelectedSection('declarationOfNeed'); }}><FileText className="w-4 h-4 mr-2" />Declaration of need</DropdownMenuItem>
                               <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsDuplicateModalOpen(true); }}><Copy className="w-4 h-4 mr-2" />Duplicate Claim</DropdownMenuItem>
                               <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleArchive(); }} disabled={archiveMutation.isLoading}><Archive className="w-4 h-4 mr-2" />{claim.archived ? 'Unarchive' : 'Archive'}</DropdownMenuItem>
                               <DropdownMenuItem onSelect={() => handleDelete()} disabled={deleteMutation.isLoading} className="text-danger-fg"><Trash2 className="w-4 h-4 mr-2" />Delete</DropdownMenuItem>
