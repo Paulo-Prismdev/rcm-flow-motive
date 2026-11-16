@@ -46,8 +46,8 @@ export default function InviteUserModal({ onClose, onSuccess, isSuperAdmin }) {
         </button>
 
         <div className="flex items-center gap-3 mb-5">
-          <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center">
-            <UserPlus className="w-5 h-5 text-accent" />
+          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+            <UserPlus className="w-5 h-5 text-primary" />
           </div>
           <div>
             <h2 className="text-lg font-bold">Invite User</h2>
@@ -113,7 +113,7 @@ export default function InviteUserModal({ onClose, onSuccess, isSuperAdmin }) {
               <Button
                 type="submit"
                 disabled={loading}
-                className="flex-1 bg-accent text-accent-foreground text-sm"
+                className="flex-1 bg-primary text-primary-foreground text-sm"
               >
                 {loading ? "Sending..." : "Send Invite"}
               </Button>

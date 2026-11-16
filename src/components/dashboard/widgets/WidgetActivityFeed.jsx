@@ -7,7 +7,7 @@ export default function WidgetActivityFeed({ config, isEditMode }) {
   return (
     <div className="glass p-4 md:p-6 col-span-1 md:col-span-2">
       <div className="flex items-center gap-2 mb-4">
-        <Activity className="w-5 h-5 text-accent" />
+        <Activity className="w-5 h-5 text-primary" />
         <h2 className="text-lg md:text-xl font-bold">Activity Feed</h2>
       </div>
       <div className="space-y-3">

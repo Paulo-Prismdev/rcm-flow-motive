@@ -24,7 +24,7 @@ export default function AuthorityExcessChoice({ check, choice, onChoice }) {
         className={`w-full flex items-start gap-2 rounded-lg border px-2.5 py-2 text-left transition-colors ${
           on
             ? 'border-green-400 dark:border-green-700 bg-green-50 dark:bg-green-900/20'
-            : 'border-border bg-muted/30 hover:border-accent/50'}`}
+            : 'border-border bg-muted/30 hover:border-primary/50'}`}
       >
         <span className={`mt-px flex h-3.5 w-3.5 flex-shrink-0 items-center justify-center rounded border ${on ? 'border-green-600 bg-green-600' : 'border-muted-foreground/50'}`}>
           {on && <Check className="w-2.5 h-2.5 text-white" />}

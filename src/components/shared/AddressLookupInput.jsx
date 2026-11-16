@@ -244,7 +244,7 @@ export default function AddressLookupInput({
               onClick={() => handleSelectSuggestion(suggestion)}
               className="w-full text-left px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors border-b border-gray-100 dark:border-gray-700 last:border-b-0 first:rounded-t-lg last:rounded-b-lg">
                   <div className="flex items-start gap-2">
-                    <MapPin className="w-3.5 h-3.5 text-accent flex-shrink-0 mt-0.5" />
+                    <MapPin className="w-3.5 h-3.5 text-primary flex-shrink-0 mt-0.5" />
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-medium truncate">{suggestion.description}</p>
                     </div>

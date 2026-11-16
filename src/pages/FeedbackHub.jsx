@@ -179,7 +179,7 @@ export default function FeedbackHub() {
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
           <div className="neomorph-flat p-4">
             <div className="flex items-center gap-2 mb-2">
-              <MessageCircle className="w-5 h-5 text-accent" />
+              <MessageCircle className="w-5 h-5 text-primary" />
               <span className="text-xs text-foreground-muted">Total</span>
             </div>
             <p className="text-2xl font-bold">{stats.total}</p>
@@ -218,7 +218,7 @@ export default function FeedbackHub() {
       {/* Request Feedback Section */}
       <div className="neomorph p-4 md:p-6">
         <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
-          <Send className="w-5 h-5 text-accent" />
+          <Send className="w-5 h-5 text-primary" />
           Request Feedback
         </h3>
         
@@ -235,7 +235,7 @@ export default function FeedbackHub() {
                 }}
                 className={`flex-1 px-4 py-3 rounded-xl font-medium transition-all ${
                   requestType === 'bodyshop'
-                    ? 'bg-accent text-accent-foreground'
+                    ? 'bg-primary text-primary-foreground'
                     : 'neomorph-flat hover:bg-surface-hover'
                 }`}
               >
@@ -249,7 +249,7 @@ export default function FeedbackHub() {
                 }}
                 className={`flex-1 px-4 py-3 rounded-xl font-medium transition-all ${
                   requestType === 'referrer'
-                    ? 'bg-accent text-accent-foreground'
+                    ? 'bg-primary text-primary-foreground'
                     : 'neomorph-flat hover:bg-surface-hover'
                 }`}
               >
@@ -310,7 +310,7 @@ export default function FeedbackHub() {
               }
             }}
             disabled={!selectedCompanyId || requestFeedbackMutation.isPending}
-            className="w-full neomorph-flat px-6 py-3 bg-accent/10 text-accent font-medium"
+            className="w-full neomorph-flat px-6 py-3 bg-primary/10 text-primary font-medium"
           >
             {requestFeedbackMutation.isPending 
               ? 'Sending...' 
@@ -366,7 +366,7 @@ export default function FeedbackHub() {
         {feedbackLoading ? (
           <div className="neomorph p-4">
             <div className="text-center py-8">
-              <div className="animate-spin w-8 h-8 border-4 border-accent border-t-transparent rounded-full mx-auto mb-2"></div>
+              <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-2"></div>
               <p className="text-foreground-muted">Loading feedback...</p>
             </div>
           </div>
@@ -383,7 +383,7 @@ export default function FeedbackHub() {
             {repairerFeedback.length > 0 && (
               <div className="neomorph p-4">
                 <h3 className="font-bold mb-4 flex items-center gap-2">
-                  <Wrench className="w-5 h-5 text-accent" />
+                  <Wrench className="w-5 h-5 text-primary" />
                   Repairer Feedback ({repairerFeedback.length})
                 </h3>
                 <div className="space-y-3">
@@ -401,7 +401,7 @@ export default function FeedbackHub() {
                               </div>
                               <div>
                                 <p className="font-bold">{item.user_email}</p>
-                                <p className="text-sm font-medium text-accent">{item.companyName}</p>
+                                <p className="text-sm font-medium text-primary">{item.companyName}</p>
                                 <p className="text-xs text-foreground-muted">
                                   {item.submission_date ? format(new Date(item.submission_date), 'dd/MM/yyyy HH:mm') : 'N/A'}
                                 </p>
@@ -434,7 +434,7 @@ export default function FeedbackHub() {
             {referrerFeedback.length > 0 && (
               <div className="neomorph p-4">
                 <h3 className="font-bold mb-4 flex items-center gap-2">
-                  <Users className="w-5 h-5 text-accent" />
+                  <Users className="w-5 h-5 text-primary" />
                   Referrer Feedback ({referrerFeedback.length})
                 </h3>
                 <div className="space-y-3">
@@ -452,7 +452,7 @@ export default function FeedbackHub() {
                               </div>
                               <div>
                                 <p className="font-bold">{item.user_email}</p>
-                                <p className="text-sm font-medium text-accent">{item.companyName}</p>
+                                <p className="text-sm font-medium text-primary">{item.companyName}</p>
                                 <p className="text-xs text-foreground-muted">
                                   {item.submission_date ? format(new Date(item.submission_date), 'dd/MM/yyyy HH:mm') : 'N/A'}
                                 </p>

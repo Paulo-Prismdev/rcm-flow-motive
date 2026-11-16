@@ -265,7 +265,7 @@ export default function ClaimClientForm({ claim, onSave, onCancel }) {
         <Button type="button" onClick={onCancel} className="neomorph-flat px-6 py-3">
           Cancel
         </Button>
-        <Button type="submit" className="neomorph-flat px-6 py-3 text-accent">
+        <Button type="submit" className="neomorph-flat px-6 py-3 text-primary">
           Save Changes
         </Button>
       </div>

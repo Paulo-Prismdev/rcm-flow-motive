@@ -77,7 +77,7 @@ export default function UserProfile({ customTrigger }) {
           </button>
         )}
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="glass-elevated w-56 md:w-64 border-accent" align="end">
+      <DropdownMenuContent className="glass-elevated w-56 md:w-64 border-primary" align="end">
         <DropdownMenuLabel className="font-normal">
           <div className="flex items-center gap-3">
             {user?.profile_picture_url ? (

@@ -215,7 +215,7 @@ export default function NotesSection({ parentId, parentType }) {
       <div className="space-y-3 mt-6">
         {isLoading ? (
           <div className="text-center py-8">
-            <div className="w-8 h-8 border-4 border-accent border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
             <p className="text-sm text-foreground-muted">Loading updates...</p>
           </div>
         ) : mainNotes.length === 0 ? (

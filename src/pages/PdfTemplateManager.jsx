@@ -437,7 +437,7 @@ function TemplateEditor({ template, onSave, onCancel }) {
             </div>
             <Button
               onClick={() => onSave(formData)}
-              className="neomorph-flat px-6 py-3 bg-accent/10 font-medium"
+              className="neomorph-flat px-6 py-3 bg-primary/10 font-medium"
             >
               Save Template
             </Button>
@@ -486,7 +486,7 @@ function TemplateEditor({ template, onSave, onCancel }) {
                 className="neomorph-flat p-2"
               >
                 {formData.header_config.show_logo ? (
-                  <CheckSquare className="w-5 h-5 text-accent" />
+                  <CheckSquare className="w-5 h-5 text-primary" />
                 ) : (
                   <Square className="w-5 h-5" />
                 )}
@@ -528,7 +528,7 @@ function TemplateEditor({ template, onSave, onCancel }) {
                 className="neomorph-flat p-2"
               >
                 {formData.header_config.show_claim_type ? (
-                  <CheckSquare className="w-5 h-5 text-accent" />
+                  <CheckSquare className="w-5 h-5 text-primary" />
                 ) : (
                   <Square className="w-5 h-5" />
                 )}
@@ -563,7 +563,7 @@ function TemplateEditor({ template, onSave, onCancel }) {
                     className="neomorph-flat p-2"
                   >
                     {section.enabled ? (
-                      <CheckSquare className="w-5 h-5 text-accent" />
+                      <CheckSquare className="w-5 h-5 text-primary" />
                     ) : (
                       <Square className="w-5 h-5" />
                     )}
@@ -583,7 +583,7 @@ function TemplateEditor({ template, onSave, onCancel }) {
                           className="neomorph-flat p-1"
                         >
                           {field.enabled ? (
-                            <CheckSquare className="w-4 h-4 text-accent" />
+                            <CheckSquare className="w-4 h-4 text-primary" />
                           ) : (
                             <Square className="w-4 h-4" />
                           )}
@@ -611,7 +611,7 @@ function TemplateEditor({ template, onSave, onCancel }) {
                 className="neomorph-flat p-2"
               >
                 {formData.footer_config.show_footer ? (
-                  <CheckSquare className="w-5 h-5 text-accent" />
+                  <CheckSquare className="w-5 h-5 text-primary" />
                 ) : (
                   <Square className="w-5 h-5" />
                 )}

@@ -32,7 +32,7 @@ export default function WidgetUpdateTracking({ config, isEditMode }) {
   const content = (
     <div className="glass p-4 md:p-6 card-hover h-full">
       <div className="flex items-center gap-2 mb-4">
-        <Clock className="w-5 h-5 text-accent" />
+        <Clock className="w-5 h-5 text-primary" />
         <h2 className="text-lg font-bold">48-Hour Update Tracking</h2>
       </div>
 

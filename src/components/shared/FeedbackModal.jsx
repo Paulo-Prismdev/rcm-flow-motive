@@ -153,7 +153,7 @@ export default function FeedbackModal({ user, onClose }) {
           <Button
             onClick={handleSubmit}
             disabled={submitFeedbackMutation.isPending}
-            className="w-full py-6 text-lg font-semibold bg-accent hover:bg-accent-hover text-accent-foreground"
+            className="w-full py-6 text-lg font-semibold bg-primary hover:bg-accent-hover text-primary-foreground"
           >
             {submitFeedbackMutation.isPending ? 'Submitting...' : 'Submit Feedback'}
           </Button>

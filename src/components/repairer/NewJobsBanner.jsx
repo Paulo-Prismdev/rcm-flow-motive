@@ -169,7 +169,7 @@ export default function NewJobsBanner({ bodyshopId }) {
                   <div className="flex items-center gap-2 mb-2">
                     <span className="font-bold text-lg">{formatUKRegistration(job.reg)}</span>
                     {job.job_number && (
-                      <span className="text-xs font-mono px-2 py-0.5 rounded bg-accent/20 text-accent">
+                      <span className="text-xs font-mono px-2 py-0.5 rounded bg-primary/20 text-primary">
                         {job.job_number}
                       </span>
                     )}
@@ -238,9 +238,9 @@ export default function NewJobsBanner({ bodyshopId }) {
                   <div key={step} className="flex items-center">
                     <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
                       wizardStep === step 
-                        ? 'bg-accent text-accent-foreground' 
+                        ? 'bg-primary text-primary-foreground' 
                         : wizardStep > step 
-                          ? 'bg-green-500 text-white'
+                          ? 'bg-green-500 text-primary-foreground'
                           : 'bg-gray-200 dark:bg-gray-700 text-gray-500'
                     }`}>
                       {wizardStep > step ? <CheckCircle className="w-4 h-4" /> : step}
@@ -257,7 +257,7 @@ export default function NewJobsBanner({ bodyshopId }) {
                 <>
                   <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
-                      <FileText className="w-5 h-5 text-accent" />
+                      <FileText className="w-5 h-5 text-primary" />
                       Step 1: Review Job
                     </DialogTitle>
                   </DialogHeader>
@@ -399,7 +399,7 @@ export default function NewJobsBanner({ bodyshopId }) {
                 <>
                   <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
-                      <Download className="w-5 h-5 text-accent" />
+                      <Download className="w-5 h-5 text-primary" />
                       Step 2: Download Instructions
                     </DialogTitle>
                   </DialogHeader>
@@ -412,9 +412,9 @@ export default function NewJobsBanner({ bodyshopId }) {
                     </div>
 
                     {selectedClaim.instruction_pdf_url ? (
-                      <div className="p-4 rounded-lg bg-accent/10 border border-accent">
+                      <div className="p-4 rounded-lg bg-primary/10 border border-primary">
                         <h5 className="font-bold text-sm mb-2 flex items-center gap-2">
-                          <FileText className="w-4 h-4 text-accent" />
+                          <FileText className="w-4 h-4 text-primary" />
                           Repair Instructions
                         </h5>
                         <p className="text-sm text-foreground-muted mb-3">
@@ -422,7 +422,7 @@ export default function NewJobsBanner({ bodyshopId }) {
                         </p>
                         <Button
                           onClick={handleDownloadAndConfirm}
-                          className="w-full bg-accent hover:bg-accent-hover text-accent-foreground gap-2"
+                          className="w-full bg-primary hover:bg-accent-hover text-primary-foreground gap-2"
                         >
                           <Download className="w-4 h-4" />
                           Download & Continue
@@ -484,7 +484,7 @@ export default function NewJobsBanner({ bodyshopId }) {
 
                     <Button
                       onClick={handleFinalClose}
-                      className="w-full bg-accent hover:bg-accent-hover text-accent-foreground"
+                      className="w-full bg-primary hover:bg-accent-hover text-primary-foreground"
                     >
                       Close
                     </Button>

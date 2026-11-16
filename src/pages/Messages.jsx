@@ -413,13 +413,13 @@ export default function Messages() {
       <div className="glass p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <MessageSquare className="w-5 h-5 text-accent" />
+            <MessageSquare className="w-5 h-5 text-primary" />
             <div>
               <h1 className="text-xl font-bold">Messages</h1>
               <p className="text-xs text-foreground-muted">Chat with your team</p>
             </div>
             {totalUnread > 0 && (
-              <span className="ml-2 bg-accent text-accent-foreground px-3 py-1 rounded-full text-sm font-bold">
+              <span className="ml-2 bg-primary text-primary-foreground px-3 py-1 rounded-full text-sm font-bold">
                 {totalUnread} unread
               </span>
             )}
@@ -510,12 +510,12 @@ export default function Messages() {
                         key={conv.id}
                         onClick={() => setSelectedConversation(conv)}
                         className={`w-full p-3 rounded-lg transition-all flex items-center gap-3 ${
-                          selectedConversation?.id === conv.id ? 'bg-accent text-accent-foreground' : 'hover:bg-surface-hover'
+                          selectedConversation?.id === conv.id ? 'bg-primary text-primary-foreground' : 'hover:bg-surface-hover'
                         }`}
                       >
                         {conv.type === 'channel' ? (
                           <div className="w-10 h-10 rounded-lg bg-surface-elevated flex items-center justify-center flex-shrink-0">
-                            <Hash className="w-5 h-5 text-accent" />
+                            <Hash className="w-5 h-5 text-primary" />
                           </div>
                         ) : (
                           <div className={`w-10 h-10 rounded-full ${getAvatarColor(conv.otherUser?.email)} flex items-center justify-center flex-shrink-0`}>
@@ -565,7 +565,7 @@ export default function Messages() {
                     {selectedConversation.type === 'channel' ? (
                       <>
                         <div className="w-10 h-10 rounded-lg bg-surface-elevated flex items-center justify-center">
-                          <Hash className="w-5 h-5 text-accent" />
+                          <Hash className="w-5 h-5 text-primary" />
                         </div>
                         <div>
                           <p className="font-bold">{selectedConversation.name}</p>
@@ -621,7 +621,7 @@ export default function Messages() {
                     
                     return (
                       <div key={msg.id} className={`flex ${isMine ? 'justify-end' : 'justify-start'}`}>
-                        <div className={`max-w-[70%] ${isMine ? 'bg-accent text-accent-foreground' : 'glass-flat'} rounded-lg p-3 group`}>
+                        <div className={`max-w-[70%] ${isMine ? 'bg-primary text-primary-foreground' : 'glass-flat'} rounded-lg p-3 group`}>
                           {selectedConversation.type === 'channel' && !isMine && (
                             <p className="text-xs font-semibold mb-1">{msg.sender_name}</p>
                           )}
@@ -659,7 +659,7 @@ export default function Messages() {
                                   key={emoji}
                                   onClick={() => currentUser && addReactionMutation.mutate({ messageId: msg.id, emoji })}
                                   className={`glass-inset px-2 py-0.5 rounded-full text-xs flex items-center gap-1 ${
-                                    currentUser && users.includes(currentUser.email) ? 'ring-1 ring-accent' : ''
+                                    currentUser && users.includes(currentUser.email) ? 'ring-1 ring-primary' : ''
                                   }`}
                                 >
                                   <span>{emoji}</span>
@@ -757,7 +757,7 @@ export default function Messages() {
                     />
                     <Button aria-label="Send"
                       onClick={handleSendMessage}
-                      className="glass-button px-4 py-2 text-accent"
+                      className="glass-button px-4 py-2 text-primary"
                       disabled={!messageText.trim() || sendMessageMutation.isPending || isUploading}
                     >
                       <Send className="w-4 h-4" />
@@ -904,7 +904,7 @@ function CreateChannelModal({ isOpen, onClose, currentUser, allUsers }) {
                       }
                     }}
                     disabled={user.email === currentUser?.email} // Disable checkbox for current user
-                    className="form-checkbox h-4 w-4 text-accent rounded"
+                    className="form-checkbox h-4 w-4 text-primary rounded"
                   />
                   <span className="text-sm">{user.full_name} {user.email === currentUser?.email && "(You)"}</span>
                 </label>
@@ -918,7 +918,7 @@ function CreateChannelModal({ isOpen, onClose, currentUser, allUsers }) {
             <Button
               onClick={handleCreate}
               disabled={!channelName.trim() || createChannelMutation.isPending}
-              className="glass-button px-4 py-2 text-accent"
+              className="glass-button px-4 py-2 text-primary"
             >
               Create Channel
             </Button>
@@ -988,7 +988,7 @@ function ChannelSettingsModal({ isOpen, onClose, channel, allUsers, currentUser,
                         }
                       }}
                       disabled={user.email === currentUser?.email} // Disable checkbox for current user
-                      className="form-checkbox h-4 w-4 text-accent rounded"
+                      className="form-checkbox h-4 w-4 text-primary rounded"
                     />
                     <span className="text-sm">{user.full_name} {user.email === currentUser?.email && "(You)"}</span>
                   </label>
@@ -1009,7 +1009,7 @@ function ChannelSettingsModal({ isOpen, onClose, channel, allUsers, currentUser,
               <Button
                 onClick={handleSave}
                 disabled={updateMembersMutation.isPending}
-                className="glass-button px-4 py-2 text-accent"
+                className="glass-button px-4 py-2 text-primary"
               >
                 Save Changes
               </Button>

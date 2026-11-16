@@ -180,7 +180,7 @@ export default function UserEditForm({ user, onSave, onCancel, isSaving }) {
         <Button type="button" onClick={onCancel} className="neomorph-flat px-3 py-1.5 text-sm">
           Cancel
         </Button>
-        <Button type="submit" disabled={isSaving} className="neomorph-flat px-3 py-1.5 text-sm bg-accent/10 text-accent">
+        <Button type="submit" disabled={isSaving} className="neomorph-flat px-3 py-1.5 text-sm bg-primary/10 text-primary">
           {isSaving ? 'Saving...' : 'Save Changes'}
         </Button>
       </div>

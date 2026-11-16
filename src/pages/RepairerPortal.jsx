@@ -62,7 +62,7 @@ export default function RepairerPortal() {
     return (
       <div className="h-full flex items-center justify-center">
         <div className="neomorph p-8 text-center">
-          <div className="animate-spin w-8 h-8 border-4 border-accent border-t-transparent rounded-full mx-auto" />
+          <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto" />
           <p className="mt-4 text-foreground-muted">Loading...</p>
         </div>
       </div>

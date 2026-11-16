@@ -790,7 +790,7 @@ function CreateChannelModal({ isOpen, onClose, currentUser, allUsers }) {
                         setSelectedMembers(selectedMembers.filter(email => email !== user.email));
                       }
                     }}
-                    className="form-checkbox h-4 w-4 text-accent rounded"
+                    className="form-checkbox h-4 w-4 text-primary rounded"
                   />
                   <span className="text-sm">{user.full_name}</span>
                 </label>
@@ -804,7 +804,7 @@ function CreateChannelModal({ isOpen, onClose, currentUser, allUsers }) {
             <button
               onClick={handleCreate}
               disabled={!channelName.trim() || createChannelMutation.isPending}
-              className="glass-button px-4 py-2 text-accent"
+              className="glass-button px-4 py-2 text-primary"
             >
               Create
             </button>
@@ -874,7 +874,7 @@ function ChannelSettingsModal({ isOpen, onClose, channel, allUsers, currentUser,
                           setMembers(members.filter(email => email !== user.email));
                         }
                       }}
-                      className="form-checkbox h-4 w-4 text-accent rounded"
+                      className="form-checkbox h-4 w-4 text-primary rounded"
                     />
                     <span className="text-sm">{user.full_name}</span>
                   </label>
@@ -907,7 +907,7 @@ function ChannelSettingsModal({ isOpen, onClose, channel, allUsers, currentUser,
                 <button
                   onClick={handleSave}
                   disabled={updateMembersMutation.isPending}
-                  className="glass-button px-4 py-2 text-accent"
+                  className="glass-button px-4 py-2 text-primary"
                 >
                   Save
                 </button>

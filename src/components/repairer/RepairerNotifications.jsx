@@ -80,7 +80,7 @@ export default function RepairerNotifications() {
         <div className="overflow-y-auto flex-1">
           {isLoading && (
             <div className="flex justify-center p-6">
-              <Loader className="animate-spin text-accent w-5 h-5" />
+              <Loader className="animate-spin text-primary w-5 h-5" />
             </div>
           )}
           

@@ -473,7 +473,7 @@ export default function AddSupplierModal({ isOpen, onClose, onSuccess, editingSu
                   {formData.manufacturer_associations.map((mfr) => (
                     <span
                       key={mfr}
-                      className="text-xs px-2 py-1 rounded-full bg-accent/10 text-accent flex items-center gap-1"
+                      className="text-xs px-2 py-1 rounded-full bg-primary/10 text-primary flex items-center gap-1"
                     >
                       {mfr}
                       <button

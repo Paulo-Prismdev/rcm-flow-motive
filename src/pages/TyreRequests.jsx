@@ -84,7 +84,7 @@ Request Type: ${req.request_type === 'price' ? 'Price Request' : 'Order'}
     <div className="h-full flex flex-col gap-3 overflow-hidden p-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Package className="w-6 h-6 text-accent" />
+          <Package className="w-6 h-6 text-primary" />
           <h1 className="text-2xl font-bold">Tyre Requests</h1>
         </div>
       </div>
@@ -137,7 +137,7 @@ Request Type: ${req.request_type === 'price' ? 'Price Request' : 'Order'}
       <div className="flex-1 overflow-y-auto min-h-0">
         {isLoading ? (
           <div className="flex items-center justify-center h-full">
-            <div className="animate-spin w-8 h-8 border-4 border-accent border-t-transparent rounded-full" />
+            <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
           </div>
         ) : filteredRequests.length === 0 ? (
           <Card>

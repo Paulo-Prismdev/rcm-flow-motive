@@ -51,7 +51,7 @@ export default function RepairerDashboard({ claims, estimates, parts, activeClai
         <div className="neomorph p-4 flex flex-col min-h-0 overflow-hidden">
           <div className="flex items-center justify-between mb-4 flex-shrink-0">
             <h3 className="font-bold">Recent Claims</h3>
-            <button onClick={() => onNavigate('claims')} className="text-sm text-accent hover:underline">
+            <button onClick={() => onNavigate('claims')} className="text-sm text-primary hover:underline">
               View All
             </button>
           </div>
@@ -84,7 +84,7 @@ export default function RepairerDashboard({ claims, estimates, parts, activeClai
                 className="w-full neomorph-flat p-4 flex items-center justify-between hover:shadow-md transition-all"
               >
                 <div className="flex items-center gap-3">
-                  <Icon className="w-5 h-5 text-accent" />
+                  <Icon className="w-5 h-5 text-primary" />
                   <span className="font-medium">{label}</span>
                 </div>
                 <ChevronRight className="w-4 h-4" />

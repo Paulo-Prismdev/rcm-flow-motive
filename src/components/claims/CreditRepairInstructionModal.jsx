@@ -315,10 +315,10 @@ export default function CreditRepairInstructionModal({ claim, isOpen, onClose })
           </div>
 
           {/* PDF generation */}
-          <div className="p-3 rounded-lg bg-accent/10 border border-accent/30">
+          <div className="p-3 rounded-lg bg-primary/10 border border-primary/30">
             <div className="flex items-center justify-between gap-3 flex-wrap">
               <div className="flex items-center gap-2">
-                <FileText className="w-4 h-4 text-accent" />
+                <FileText className="w-4 h-4 text-primary" />
                 <span className="text-sm font-medium">Instruction PDF</span>
               </div>
               <div className="flex items-center gap-2">
@@ -334,7 +334,7 @@ export default function CreditRepairInstructionModal({ claim, isOpen, onClose })
               </div>
             </div>
             {generatedPdfUrl && !isGeneratingPdf && (
-              <div className="mt-3 pt-3 border-t border-accent/20 space-y-2">
+              <div className="mt-3 pt-3 border-t border-primary/20 space-y-2">
                 <div className="flex items-center gap-2 p-2.5 rounded-lg bg-green-50 border border-green-200 text-green-700">
                   <CheckCircle className="w-4 h-4 flex-shrink-0" />
                   <span className="text-sm flex-1">{savedToDocs ? 'Saved to claim docs.' : 'PDF generated.'}</span>

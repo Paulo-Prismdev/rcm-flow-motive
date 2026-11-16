@@ -661,7 +661,7 @@ function ChaserEmailRuleForm({ rule, onSubmit, onCancel }) {
             <Button type="button" onClick={onCancel} className="neomorph-flat">
               Cancel
             </Button>
-            <Button type="submit" className="neomorph-flat bg-accent/10 text-accent">
+            <Button type="submit" className="neomorph-flat bg-primary/10 text-primary">
               {rule ? 'Update Rule' : 'Create Rule'}
             </Button>
           </div>

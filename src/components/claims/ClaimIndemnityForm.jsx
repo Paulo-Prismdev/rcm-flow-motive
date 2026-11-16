@@ -83,8 +83,8 @@ function DOBCalendar({ selected, onSelect }) {
           key={day}
           type="button"
           onClick={() => handleDayClick(day)}
-          className={`p-2 text-sm rounded-md hover:bg-accent/20 transition-colors ${
-          isSelected(day) ? 'bg-accent text-accent-foreground font-bold' : ''}`
+          className={`p-2 text-sm rounded-md hover:bg-primary/20 transition-colors ${
+          isSelected(day) ? 'bg-primary text-primary-foreground font-bold' : ''}`
           }>
           
             {day}
@@ -305,7 +305,7 @@ export default function ClaimIndemnityForm({ claim, onSave, onCancel }) {
         <Button type="button" onClick={onCancel} className="neomorph-flat flex-1 bg-[hsl(var(--card))] text-[hsl(var(--foreground))]">
           Cancel
         </Button>
-        <Button type="submit" className="neomorph-flat bg-accent/10 text-accent flex-1">
+        <Button type="submit" className="neomorph-flat bg-primary/10 text-primary flex-1">
           Save Changes
         </Button>
       </div>

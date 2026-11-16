@@ -119,7 +119,7 @@ export default function UpdateOverrideModal({ isOpen, onClose, claim, onSave, tr
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Clock className="w-5 h-5 text-accent" />
+            <Clock className="w-5 h-5 text-primary" />
             {title}
           </DialogTitle>
         </DialogHeader>

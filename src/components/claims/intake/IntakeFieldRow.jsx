@@ -41,7 +41,7 @@ export default function IntakeFieldRow({
               type="button"
               onClick={() => { onChange(field.key, value === option ? '' : option); onFocus(); }}
               className={`px-2 py-1 rounded-md text-[11px] font-medium border transition-colors ${
-                value === option ? 'bg-accent text-accent-foreground border-accent' : 'border-input text-muted-foreground hover:bg-muted'
+                value === option ? 'bg-primary text-primary-foreground border-primary' : 'border-input text-muted-foreground hover:bg-muted'
               }`}
             >
               {option === 'yes' ? 'Yes' : 'No'}

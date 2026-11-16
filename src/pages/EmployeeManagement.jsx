@@ -162,7 +162,7 @@ export default function EmployeeManagement() {
             {dayRows.map(({ day, events }) => (
               <div
                 key={format(day, 'yyyy-MM-dd')}
-                className={`glass-inset p-3 ${isSameDay(day, new Date()) ? 'border-2 border-accent' : ''}`}
+                className={`glass-inset p-3 ${isSameDay(day, new Date()) ? 'border-2 border-primary' : ''}`}
               >
                 <p className="text-xs font-semibold text-foreground-muted">
                   {format(day, 'EEE d MMM')}{isSameDay(day, new Date()) ? ' · Today' : ''}
@@ -237,7 +237,7 @@ export default function EmployeeManagement() {
             return (
               <div
                 key={idx}
-                className={`glass-inset p-2 min-h-[80px] max-md:p-1 max-md:min-h-[68px] ${isToday ? 'border-2 border-accent' : ''} ${
+                className={`glass-inset p-2 min-h-[80px] max-md:p-1 max-md:min-h-[68px] ${isToday ? 'border-2 border-primary' : ''} ${
                   isWeekendDay ? 'bg-opacity-50' : ''
                 } ${!isCurrentMonth ? 'opacity-40' : ''}`}
               >
@@ -479,7 +479,7 @@ export default function EmployeeManagement() {
             </Link>
           </Button>
           <div className="flex items-center gap-3">
-            <Users className="w-5 h-5 text-accent" />
+            <Users className="w-5 h-5 text-primary" />
             <div>
               <h1 className="text-xl font-bold">Employee Management</h1>
               <p className="text-xs text-foreground-muted">Manage staff, holidays, and permissions</p>
@@ -495,7 +495,7 @@ export default function EmployeeManagement() {
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={`glass-button px-4 py-2 text-sm whitespace-nowrap flex items-center gap-2 ${
-                  activeTab === tab.id ? 'border-accent text-accent' : ''
+                  activeTab === tab.id ? 'border-primary text-primary' : ''
                 }`}
               >
                 <Icon className="w-4 h-4" />
@@ -528,7 +528,7 @@ function RoleCard({ role, onEdit }) {
     <div className="glass-flat p-4">
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-2">
-          <Briefcase className="w-5 h-5 text-accent" />
+          <Briefcase className="w-5 h-5 text-primary" />
           <h4 className="font-bold text-lg">{role.role_name}</h4>
         </div>
         <div className="flex gap-2">
@@ -664,7 +664,7 @@ function RoleModal({ isOpen, onClose, role }) {
                         : (formData.departments_access || []).filter(d => d !== dept);
                       setFormData({ ...formData, departments_access: newDepts });
                     }}
-                    className="form-checkbox h-4 w-4 text-accent rounded focus:ring-accent border-gray-300"
+                    className="form-checkbox h-4 w-4 text-primary rounded focus:ring-primary border-gray-300"
                   />
                   <span className="text-sm">{dept}</span>
                 </label>
@@ -676,7 +676,7 @@ function RoleModal({ isOpen, onClose, role }) {
             <Button type="button" onClick={onClose} className="glass-button px-4 py-2">
               Cancel
             </Button>
-            <Button type="submit" className="glass-button px-4 py-2 text-accent" disabled={saveMutation.isPending}>
+            <Button type="submit" className="glass-button px-4 py-2 text-primary" disabled={saveMutation.isPending}>
               {saveMutation.isPending ? 'Saving...' : (role ? 'Update Role' : 'Create Role')}
             </Button>
           </div>
@@ -969,7 +969,7 @@ function HolidayRequestModal({ isOpen, onClose, currentUser, users, canManage, c
             <Button type="button" onClick={onClose} className="glass-button px-4 py-2">
               Cancel
             </Button>
-            <Button type="submit" className="glass-button px-4 py-2 text-accent" disabled={createMutation.isPending}>
+            <Button type="submit" className="glass-button px-4 py-2 text-primary" disabled={createMutation.isPending}>
               {createMutation.isPending ? 'Submitting...' : 'Submit Request'}
             </Button>
           </div>
@@ -1075,7 +1075,7 @@ function SicknessRecordModal({ isOpen, onClose, users }) {
               id="certified"
               checked={formData.certified}
               onChange={(e) => setFormData({ ...formData, certified: e.target.checked })}
-              className="form-checkbox h-4 w-4 text-accent rounded focus:ring-accent border-gray-300"
+              className="form-checkbox h-4 w-4 text-primary rounded focus:ring-primary border-gray-300"
             />
             <label htmlFor="certified" className="text-sm">Doctor's note provided</label>
           </div>
@@ -1091,7 +1091,7 @@ function SicknessRecordModal({ isOpen, onClose, users }) {
             <Button type="button" onClick={onClose} className="glass-button px-4 py-2">
               Cancel
             </Button>
-            <Button type="submit" className="glass-button px-4 py-2 text-accent" disabled={createMutation.isPending}>
+            <Button type="submit" className="glass-button px-4 py-2 text-primary" disabled={createMutation.isPending}>
               {createMutation.isPending ? 'Adding...' : 'Add Record'}
             </Button>
           </div>
@@ -1186,7 +1186,7 @@ function AllowanceModal({ isOpen, onClose, users }) {
             <Button type="button" onClick={onClose} className="glass-button px-4 py-2">
               Cancel
             </Button>
-            <Button type="submit" className="glass-button px-4 py-2 text-accent" disabled={updateMutation.isPending || !selectedUser}>
+            <Button type="submit" className="glass-button px-4 py-2 text-primary" disabled={updateMutation.isPending || !selectedUser}>
               {updateMutation.isPending ? 'Updating...' : 'Update Allowance'}
             </Button>
           </div>

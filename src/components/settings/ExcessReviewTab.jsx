@@ -53,7 +53,7 @@ export default function ExcessReviewTab() {
     <div className="space-y-3">
       <div className="rounded-lg border border-border bg-card p-3">
         <div className="flex items-start gap-2">
-          <ClipboardCheck className="w-4 h-4 text-accent flex-shrink-0 mt-0.5" />
+          <ClipboardCheck className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
           <div className="min-w-0">
             <h3 className="text-sm font-semibold text-foreground">Claims holding a £0 excess</h3>
             <p className="text-[11px] text-muted-foreground mt-0.5">

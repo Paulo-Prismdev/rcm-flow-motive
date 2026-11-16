@@ -12,7 +12,7 @@ export default function RepairerEstimatesTab({ estimates, bodyshopId, bodyshopNa
         <h3 className="font-bold">Estimate Requests</h3>
         <button
           onClick={() => setShowForm(true)}
-          className="neomorph-flat px-4 py-2 text-sm font-medium bg-accent/10 text-accent hover:bg-accent/20 rounded-xl"
+          className="neomorph-flat px-4 py-2 text-sm font-medium bg-primary/10 text-primary hover:bg-primary/20 rounded-xl"
         >
           + Request New Estimate
         </button>

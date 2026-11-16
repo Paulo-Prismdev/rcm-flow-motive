@@ -442,7 +442,7 @@ export default function Reports() {
                       <span className="text-sm font-medium">{status}</span>
                       <div className="flex items-center gap-3">
                         <span className="text-sm text-foreground-muted">{count} claims</span>
-                        <span className="text-sm font-bold text-accent">{((count / metrics.total) * 100).toFixed(1)}%</span>
+                        <span className="text-sm font-bold text-primary">{((count / metrics.total) * 100).toFixed(1)}%</span>
                       </div>
                     </div>
                   ))}
@@ -459,7 +459,7 @@ export default function Reports() {
                       <span className="text-sm font-medium">{insurer}</span>
                       <div className="flex items-center gap-3">
                         <span className="text-sm text-foreground-muted">{count} claims</span>
-                        <span className="text-sm font-bold text-accent">{((count / metrics.total) * 100).toFixed(1)}%</span>
+                        <span className="text-sm font-bold text-primary">{((count / metrics.total) * 100).toFixed(1)}%</span>
                       </div>
                     </div>
                   ))}

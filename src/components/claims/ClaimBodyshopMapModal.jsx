@@ -304,7 +304,7 @@ export default function ClaimBodyshopMapModal({ claim, isOpen, onClose, onSelect
       <DialogContent className="max-w-6xl max-h-[90vh] p-0 overflow-hidden flex flex-col">
         <DialogHeader className="p-4 border-b flex-shrink-0">
           <DialogTitle className="flex items-center gap-2 text-base">
-            <MapPin className="w-5 h-5 text-accent" />
+            <MapPin className="w-5 h-5 text-primary" />
             Find Repairer on Map — {claim.reg}
           </DialogTitle>
         </DialogHeader>

@@ -105,7 +105,7 @@ export default function FigureField({
             type="button"
             onClick={onEdit}
             title={`Edit ${label}`}
-            className="p-1 -mr-1 rounded text-muted-foreground hover:text-foreground hover:bg-accent/10 transition-colors flex-shrink-0"
+            className="p-1 -mr-1 rounded text-muted-foreground hover:text-foreground hover:bg-primary/10 transition-colors flex-shrink-0"
           >
             <Pencil className="w-3 h-3" />
           </button>

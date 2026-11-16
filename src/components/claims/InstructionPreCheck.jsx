@@ -139,7 +139,7 @@ function Row({ label, field, value, claim, onFieldChange, type = 'text', options
         {label}
         {sourceLabel && <span className="block text-[9px] font-normal text-muted-foreground/60">via {sourceLabel}</span>}
       </div>
-      <div className={`flex-1 min-w-0 flex items-center rounded-md border px-2 py-1 ${isEmpty ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-300 dark:border-amber-700' : 'bg-muted/50 border-border'} ${editing ? 'ring-1 ring-accent/40 border-accent/50' : ''}`}>
+      <div className={`flex-1 min-w-0 flex items-center rounded-md border px-2 py-1 ${isEmpty ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-300 dark:border-amber-700' : 'bg-muted/50 border-border'} ${editing ? 'ring-1 ring-primary/40 border-primary/50' : ''}`}>
         <div className="flex-1 min-w-0">
           {editing ? control : (
             <div className={`text-sm font-medium truncate ${isEmpty ? 'text-amber-500' : 'text-foreground'}`}>{displayValue}</div>
@@ -151,7 +151,7 @@ function Row({ label, field, value, claim, onFieldChange, type = 'text', options
         <button
           type="button"
           onClick={() => editing ? commit() : setEditing(true)}
-          className="flex-shrink-0 p-1 rounded text-muted-foreground hover:text-accent hover:bg-accent/10 transition-colors"
+          className="flex-shrink-0 p-1 rounded text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
           title={editing ? 'Save' : 'Edit'}>
           {editing ? <Check className="w-3.5 h-3.5 text-green-600" /> : <Pencil className="w-3 h-3" />}
         </button>
@@ -192,7 +192,7 @@ function ExcessRow({ claim, onFieldChange }) {
 function Group({ title, children }) {
   return (
     <div className="mb-1.5">
-      <div className="text-[10px] font-bold uppercase tracking-wider text-accent px-2 py-1 border-b border-border">{title}</div>
+      <div className="text-[10px] font-bold uppercase tracking-wider text-primary px-2 py-1 border-b border-border">{title}</div>
       {children}
     </div>
   );

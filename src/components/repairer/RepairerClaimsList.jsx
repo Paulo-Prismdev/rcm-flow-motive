@@ -138,7 +138,7 @@ export default function RepairerClaimsList({ claims, onViewClaim }) {
               key={f}
               onClick={() => setFilter(f)}
               className={`px-4 py-2 rounded-lg text-sm font-medium capitalize ${
-                filter === f ? 'bg-accent text-accent-foreground' : 'neomorph-flat hover:shadow-md'
+                filter === f ? 'bg-primary text-primary-foreground' : 'neomorph-flat hover:shadow-md'
               }`}
             >
               {f}
@@ -285,7 +285,7 @@ export default function RepairerClaimsList({ claims, onViewClaim }) {
               </span>
               <div className="flex items-center gap-1 flex-wrap justify-end min-w-0">
                 {claim.job_number && (
-                  <span className="text-[11px] font-mono px-1.5 py-0.5 rounded bg-accent/20 text-accent">
+                  <span className="text-[11px] font-mono px-1.5 py-0.5 rounded bg-primary/20 text-primary">
                     {claim.job_number}
                   </span>
                 )}

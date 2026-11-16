@@ -55,7 +55,7 @@ export default function CompanyIdLookup() {
               onClick={() => setActiveTab(type)}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-all flex-shrink-0 capitalize ${
                 activeTab === type
-                  ? 'bg-accent text-accent-foreground shadow'
+                  ? 'bg-primary text-primary-foreground shadow'
                   : 'text-foreground-muted hover:text-foreground hover:bg-surface-hover'
               }`}
             >

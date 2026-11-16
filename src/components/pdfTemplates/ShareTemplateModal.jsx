@@ -88,7 +88,7 @@ export default function ShareTemplateModal({ template, isOpen, onClose, onSave }
               <button
                 onClick={() => setVisibility('private')}
                 className={`w-full neomorph-flat p-4 rounded-xl flex items-start gap-3 transition-all ${
-                  visibility === 'private' ? 'ring-2 ring-accent' : ''
+                  visibility === 'private' ? 'ring-2 ring-primary' : ''
                 }`}
               >
                 <Lock className="w-5 h-5 flex-shrink-0 mt-0.5" />
@@ -97,14 +97,14 @@ export default function ShareTemplateModal({ template, isOpen, onClose, onSave }
                   <div className="text-xs text-foreground-muted">Only you can view and use this template</div>
                 </div>
                 {visibility === 'private' && (
-                  <CheckSquare className="w-5 h-5 text-accent flex-shrink-0" />
+                  <CheckSquare className="w-5 h-5 text-primary flex-shrink-0" />
                 )}
               </button>
 
               <button
                 onClick={() => setVisibility('team')}
                 className={`w-full neomorph-flat p-4 rounded-xl flex items-start gap-3 transition-all ${
-                  visibility === 'team' ? 'ring-2 ring-accent' : ''
+                  visibility === 'team' ? 'ring-2 ring-primary' : ''
                 }`}
               >
                 <Users className="w-5 h-5 flex-shrink-0 mt-0.5" />
@@ -113,14 +113,14 @@ export default function ShareTemplateModal({ template, isOpen, onClose, onSave }
                   <div className="text-xs text-foreground-muted">Share with specific users or departments</div>
                 </div>
                 {visibility === 'team' && (
-                  <CheckSquare className="w-5 h-5 text-accent flex-shrink-0" />
+                  <CheckSquare className="w-5 h-5 text-primary flex-shrink-0" />
                 )}
               </button>
 
               <button
                 onClick={() => setVisibility('organization')}
                 className={`w-full neomorph-flat p-4 rounded-xl flex items-start gap-3 transition-all ${
-                  visibility === 'organization' ? 'ring-2 ring-accent' : ''
+                  visibility === 'organization' ? 'ring-2 ring-primary' : ''
                 }`}
               >
                 <Globe className="w-5 h-5 flex-shrink-0 mt-0.5" />
@@ -129,7 +129,7 @@ export default function ShareTemplateModal({ template, isOpen, onClose, onSave }
                   <div className="text-xs text-foreground-muted">Available to all internal users</div>
                 </div>
                 {visibility === 'organization' && (
-                  <CheckSquare className="w-5 h-5 text-accent flex-shrink-0" />
+                  <CheckSquare className="w-5 h-5 text-primary flex-shrink-0" />
                 )}
               </button>
             </div>
@@ -146,11 +146,11 @@ export default function ShareTemplateModal({ template, isOpen, onClose, onSave }
                       key={dept}
                       onClick={() => toggleDepartment(dept)}
                       className={`neomorph-flat p-3 rounded-lg text-sm flex items-center gap-2 ${
-                        sharedWithDepartments.includes(dept) ? 'ring-2 ring-accent' : ''
+                        sharedWithDepartments.includes(dept) ? 'ring-2 ring-primary' : ''
                       }`}
                     >
                       {sharedWithDepartments.includes(dept) ? (
-                        <CheckSquare className="w-4 h-4 text-accent" />
+                        <CheckSquare className="w-4 h-4 text-primary" />
                       ) : (
                         <Square className="w-4 h-4" />
                       )}
@@ -184,7 +184,7 @@ export default function ShareTemplateModal({ template, isOpen, onClose, onSave }
                           <button
                             onClick={() => toggleUserShare(user.email)}
                             className={`neomorph-flat px-3 py-1 text-xs rounded ${
-                              sharedWithUsers.includes(user.email) ? 'bg-accent/20 text-accent' : ''
+                              sharedWithUsers.includes(user.email) ? 'bg-primary/20 text-primary' : ''
                             }`}
                           >
                             {sharedWithUsers.includes(user.email) ? 'Can View' : 'Add'}
@@ -222,7 +222,7 @@ export default function ShareTemplateModal({ template, isOpen, onClose, onSave }
               className="neomorph-flat p-4 rounded-xl w-full flex items-center gap-3"
             >
               {allowDuplicate ? (
-                <CheckSquare className="w-5 h-5 text-accent" />
+                <CheckSquare className="w-5 h-5 text-primary" />
               ) : (
                 <Square className="w-5 h-5" />
               )}
@@ -267,7 +267,7 @@ export default function ShareTemplateModal({ template, isOpen, onClose, onSave }
           <Button onClick={onClose} className="neomorph-flat">
             Cancel
           </Button>
-          <Button onClick={handleSave} className="neomorph-flat bg-accent/10 text-accent font-medium">
+          <Button onClick={handleSave} className="neomorph-flat bg-primary/10 text-primary font-medium">
             Save Sharing Settings
           </Button>
         </div>

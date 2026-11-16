@@ -117,7 +117,7 @@ export default function ClaimTasksSection({ claimId, claimJobNumber, claimReg })
           <ListTodo className="w-5 h-5 text-gold" />
           <h3 className="font-bold">Tasks</h3>
           {pendingTasks.length > 0 && (
-            <span className="px-2 py-0.5 rounded-full bg-accent/20 text-accent text-xs font-medium">
+            <span className="px-2 py-0.5 rounded-full bg-primary/20 text-primary text-xs font-medium">
               {pendingTasks.length} pending
             </span>
           )}

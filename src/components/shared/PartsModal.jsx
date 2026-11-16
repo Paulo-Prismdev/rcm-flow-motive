@@ -119,7 +119,7 @@ export default function PartsModal({ estimate, isOpen, onClose }) {
           </Button>
           <Button 
             onClick={handleSubmit} 
-            className="neomorph-flat px-6 py-3 text-accent font-medium" 
+            className="neomorph-flat px-6 py-3 text-primary font-medium" 
             disabled={createPartMutation.isPending || !partData.part_description}
           >
             {createPartMutation.isPending ? (

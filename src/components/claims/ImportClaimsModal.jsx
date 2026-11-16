@@ -296,7 +296,7 @@ Only map columns that clearly correspond to a field. Be conservative - if unsure
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-border">
           <div className="flex items-center gap-3">
-            <FileSpreadsheet className="w-6 h-6 text-accent" />
+            <FileSpreadsheet className="w-6 h-6 text-primary" />
             <div>
               <h2 className="text-xl font-bold">Import Claims</h2>
               <p className="text-sm text-foreground-muted">AI-powered spreadsheet import</p>
@@ -313,17 +313,17 @@ Only map columns that clearly correspond to a field. Be conservative - if unsure
             <div className="space-y-6">
               <div
                 onClick={() => !isLoading && fileInputRef.current?.click()}
-                className={`border-2 border-dashed rounded-xl p-12 text-center transition-colors ${isLoading ? 'border-accent cursor-wait' : 'border-border cursor-pointer hover:border-accent'}`}
+                className={`border-2 border-dashed rounded-xl p-12 text-center transition-colors ${isLoading ? 'border-primary cursor-wait' : 'border-border cursor-pointer hover:border-primary'}`}
               >
                 {parsing ? (
                   <>
-                    <Loader2 className="w-12 h-12 mx-auto mb-4 text-accent animate-spin" />
+                    <Loader2 className="w-12 h-12 mx-auto mb-4 text-primary animate-spin" />
                     <p className="text-lg font-medium mb-1">Reading spreadsheet...</p>
                     <p className="text-sm text-foreground-muted">{file?.name}</p>
                   </>
                 ) : aiProcessing ? (
                   <>
-                    <Sparkles className="w-12 h-12 mx-auto mb-4 text-accent animate-pulse" />
+                    <Sparkles className="w-12 h-12 mx-auto mb-4 text-primary animate-pulse" />
                     <p className="text-lg font-medium mb-1">AI is mapping your columns...</p>
                     <p className="text-sm text-foreground-muted">Analysing column headers and data patterns</p>
                   </>
@@ -355,7 +355,7 @@ Only map columns that clearly correspond to a field. Be conservative - if unsure
               )}
 
               <div className="glass-flat p-4 rounded-xl text-sm flex items-start gap-3">
-                <Sparkles className="w-4 h-4 text-accent shrink-0 mt-0.5" />
+                <Sparkles className="w-4 h-4 text-primary shrink-0 mt-0.5" />
                 <p className="text-foreground-muted">
                   The AI will automatically analyse your spreadsheet's column headers and map them to the correct claim fields — no matter what format your file uses.
                 </p>
@@ -385,7 +385,7 @@ Only map columns that clearly correspond to a field. Be conservative - if unsure
                       .map(([col, field]) => {
                         const fieldDef = CLAIM_FIELDS.find(f => f.key === field);
                         return (
-                          <span key={col} className="text-xs bg-accent/10 text-accent px-2 py-0.5 rounded-full">
+                          <span key={col} className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
                             {col} → {fieldDef?.label || field}
                           </span>
                         );
@@ -449,7 +449,7 @@ Only map columns that clearly correspond to a field. Be conservative - if unsure
             <Button
               onClick={handleImport}
               disabled={importing}
-              className="bg-accent text-accent-foreground"
+              className="bg-primary text-primary-foreground"
             >
               {importing ? (
                 <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Importing...</>

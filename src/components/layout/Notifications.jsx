@@ -85,7 +85,7 @@ export default function Notifications() {
         <div className="overflow-y-auto flex-1">
           {isLoading && (
             <div className="flex justify-center p-8">
-              <Loader className="animate-spin text-accent w-6 h-6" />
+              <Loader className="animate-spin text-primary w-6 h-6" />
             </div>
           )}
           

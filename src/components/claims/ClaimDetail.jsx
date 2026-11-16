@@ -1411,9 +1411,9 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
               <DetailRow label="Signed By" value={claim.repair_preference_client_name} />
             </div>
             {claim.repair_preference_pdf_url && (
-              <div className="mt-3 p-3 rounded-lg bg-accent/10 border border-accent/30 flex items-center justify-between">
+              <div className="mt-3 p-3 rounded-lg bg-primary/10 border border-primary/30 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <FileText className="w-4 h-4 text-accent" />
+                  <FileText className="w-4 h-4 text-primary" />
                   <span className="text-sm font-medium">Signed PDF</span>
                 </div>
                 <Button variant="outline" size="sm" onClick={() => window.open(claim.repair_preference_pdf_url, '_blank')} className="gap-2">
@@ -1450,9 +1450,9 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
               <DetailRow label="Form Version" value={claim.declaration_of_need_form_version} />
             </div>
             {claim.declaration_of_need_pdf_url && (
-              <div className="mt-3 p-3 rounded-lg bg-accent/10 border border-accent/30 flex items-center justify-between">
+              <div className="mt-3 p-3 rounded-lg bg-primary/10 border border-primary/30 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <FileText className="w-4 h-4 text-accent" />
+                  <FileText className="w-4 h-4 text-primary" />
                   <span className="text-sm font-medium">Signed PDF</span>
                 </div>
                 <Button variant="outline" size="sm" onClick={() => window.open(claim.declaration_of_need_pdf_url, '_blank')} className="gap-2">
@@ -1557,10 +1557,10 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
             )}
             
             {/* Instruction PDF Download / Regenerate */}
-            <div className="mt-4 p-3 rounded-lg bg-accent/10 border border-accent/30">
+            <div className="mt-4 p-3 rounded-lg bg-primary/10 border border-primary/30">
               <div className="flex items-center justify-between gap-3 flex-wrap">
                 <div className="flex items-center gap-2">
-                  <FileText className="w-4 h-4 text-accent" />
+                  <FileText className="w-4 h-4 text-primary" />
                   <span className="text-sm font-medium">Instruction PDF</span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -1593,7 +1593,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                 </div>
               </div>
               {regenTemplateOpen && (
-                <div className="mt-3 pt-3 border-t border-accent/20 space-y-2">
+                <div className="mt-3 pt-3 border-t border-primary/20 space-y-2">
                   <p className="text-xs font-medium text-muted-foreground">Select template to regenerate:</p>
                   <div className="grid grid-cols-2 gap-2">
                     <button
@@ -1636,7 +1636,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                 </div>
               )}
               {regenPdfUrl && !isRegeneratingPdf && (
-                <div className="mt-3 pt-3 border-t border-accent/20 space-y-2">
+                <div className="mt-3 pt-3 border-t border-primary/20 space-y-2">
                   <div className="flex items-center gap-2 p-2.5 rounded-lg bg-success-bg border border-success/30 text-success-fg">
                     <CheckCircle className="w-4 h-4 flex-shrink-0" />
                     <span className="text-sm flex-1">
@@ -1681,10 +1681,10 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
               <InlineField label="Artura Estimate URL" name="artura_est_url" bare placeholder="Enter URL" />
             </div>
             {/* Purchase Order generation — uses estimate total as authority figure */}
-            <div className="mt-4 p-3 rounded-lg bg-accent/10 border border-accent/30">
+            <div className="mt-4 p-3 rounded-lg bg-primary/10 border border-primary/30">
               <div className="flex items-center justify-between gap-3 flex-wrap">
                 <div className="flex items-center gap-2">
-                  <FileText className="w-4 h-4 text-accent" />
+                  <FileText className="w-4 h-4 text-primary" />
                   <div>
                     <span className="text-sm font-medium block">Purchase Order</span>
                     <span className="text-xs text-muted-foreground">

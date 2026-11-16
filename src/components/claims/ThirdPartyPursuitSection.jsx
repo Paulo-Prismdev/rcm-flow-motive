@@ -332,7 +332,7 @@ export default function ThirdPartyPursuitSection({ claim, onUpdate }) {
         >
           <ExternalLink className="w-4 h-4" />
           <span>View Third-Party Claim: </span>
-          <span className="font-medium text-accent">
+          <span className="font-medium text-primary">
             {linkedTPClaim.job_number || formatUKRegistration(linkedTPClaim.reg) || 'View Claim'}
           </span>
         </button>
@@ -615,7 +615,7 @@ export default function ThirdPartyPursuitSection({ claim, onUpdate }) {
           <Button
             onClick={() => createTPClaimMutation.mutate(tpFormData)}
             disabled={!tpFormData.tp_name || createTPClaimMutation.isPending}
-            className="neomorph-flat px-4 py-2 bg-accent/10 text-accent font-medium"
+            className="neomorph-flat px-4 py-2 bg-primary/10 text-primary font-medium"
           >
             <UserPlus className="w-4 h-4 mr-2" />
             Save & Create Third-Party Claim

@@ -28,7 +28,7 @@ export default function RepairerProductsTab() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="animate-spin w-8 h-8 border-4 border-accent border-t-transparent rounded-full" />
+        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
       </div>
     );
   }
@@ -72,7 +72,7 @@ export default function RepairerProductsTab() {
                     {product.link_url && (
                       <button
                         onClick={() => window.open(product.link_url, '_blank')}
-                        className="neomorph-flat px-4 py-2 text-sm font-medium text-accent hover:bg-accent/10 rounded-xl"
+                        className="neomorph-flat px-4 py-2 text-sm font-medium text-primary hover:bg-primary/10 rounded-xl"
                       >
                         Learn More →
                       </button>
@@ -85,10 +85,10 @@ export default function RepairerProductsTab() {
         </div>
       )}
 
-      <div className="neomorph p-6 text-center bg-accent/5">
+      <div className="neomorph p-6 text-center bg-primary/5">
         <h3 className="font-bold text-lg mb-2">Interested in partnering with ARTURA?</h3>
         <p className="text-foreground-muted mb-4">Contact us to discuss how we can support your business</p>
-        <button className="neomorph-flat px-6 py-3 font-medium bg-accent text-accent-foreground rounded-xl">
+        <button className="neomorph-flat px-6 py-3 font-medium bg-primary text-primary-foreground rounded-xl">
           Contact Us
         </button>
       </div>

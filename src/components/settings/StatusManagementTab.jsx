@@ -58,7 +58,7 @@ function StatusItem({ status, onUpdate, onDelete, onEditToggle, editingStatusId,
                     onClick={() => setEditingData({ ...editingData, color: color.name })}
                     className={`w-7 h-7 rounded-full border-2 transition-all hover:scale-110 ${
                       editingData.color === color.name 
-                        ? 'ring-2 ring-accent ring-offset-2' 
+                        ? 'ring-2 ring-primary ring-offset-2' 
                         : 'border-gray-300 dark:border-gray-600'
                     }`}
                     style={{ backgroundColor: color.bg }}
@@ -390,7 +390,7 @@ export default function StatusManagementTab({ department }) {
                   onClick={() => setNewStatusColor(color.name)}
                   className={`w-8 h-8 rounded-full border-2 transition-all hover:scale-110 ${
                     newStatusColor === color.name 
-                      ? 'ring-2 ring-accent ring-offset-2' 
+                      ? 'ring-2 ring-primary ring-offset-2' 
                       : 'border-gray-300 dark:border-gray-600'
                   }`}
                   style={{ backgroundColor: color.bg }}
@@ -399,7 +399,7 @@ export default function StatusManagementTab({ department }) {
               ))}
             </div>
           </div>
-          <Button onClick={handleAddStatus} className="neomorph-flat text-accent flex items-center gap-2 w-full md:w-auto">
+          <Button onClick={handleAddStatus} className="neomorph-flat text-primary flex items-center gap-2 w-full md:w-auto">
             <Plus className="w-4 h-4" /> Add Status
           </Button>
         </div>

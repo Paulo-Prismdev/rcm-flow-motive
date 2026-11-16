@@ -55,7 +55,7 @@ const BoolToggle = ({ label, value, onChange }) => (
     <div className="flex gap-0.5">
       <button type="button" onClick={() => onChange(true)}
         className={`px-3 py-1.5 rounded-l-lg text-xs font-medium transition-colors ${
-          value === true ? 'bg-accent text-accent-foreground' : 'bg-muted text-muted-foreground hover:bg-muted/80'}`}>Yes</button>
+          value === true ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:bg-muted/80'}`}>Yes</button>
       <button type="button" onClick={() => onChange(false)}
         className={`px-3 py-1.5 rounded-r-lg text-xs font-medium transition-colors ${
           value === false ? 'bg-muted-foreground/20 text-foreground' : 'bg-muted text-muted-foreground hover:bg-muted/80'}`}>No</button>
@@ -71,7 +71,7 @@ const StepIndicator = ({ steps, currentStep }) => (
       return (
         <React.Fragment key={s.key}>
           <div className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs transition-all flex-shrink-0 ${
-            isActive ? 'bg-accent text-accent-foreground shadow-sm' :
+            isActive ? 'bg-primary text-primary-foreground shadow-sm' :
             isDone ? 'bg-green-100 text-green-700' : 'bg-muted text-muted-foreground opacity-60'}`}>
             <span className="w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold
               ${isDone ? 'bg-green-500 text-white' : isActive ? 'bg-accent-foreground/20' : 'bg-muted-foreground/20'}">
@@ -575,7 +575,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
         </div>
         <div className="flex-1 flex flex-col md:flex-row gap-4 p-1">
           <div className="flex-1 neomorph-flat p-6 flex flex-col items-center text-center gap-4 border-2 border-transparent hover:border-blue-300 transition-all rounded-2xl">
-            <div className="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center flex-shrink-0"><Send className="w-8 h-8 text-white" /></div>
+            <div className="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center flex-shrink-0"><Send className="w-8 h-8 text-primary-foreground" /></div>
             <div><h3 className="text-lg font-bold text-gray-700 mb-2">Send to Client</h3><p className="text-sm text-gray-500">Share a link so your client fills in their details and signs a Statement of Truth.</p></div>
             <div className="w-full mt-auto space-y-3">
               <div className="flex gap-2"><input readOnly value={formUrl} className="flex-1 text-xs px-3 py-2 rounded-lg bg-gray-50 border border-gray-200 text-gray-500 truncate" /><CopyLinkButton url={formUrl} /></div>
@@ -584,7 +584,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
           </div>
           <div className="flex items-center justify-center text-gray-400 font-bold text-sm">OR</div>
           <div className="flex-1 neomorph-flat p-6 flex flex-col items-center text-center gap-4 border-2 border-transparent hover:border-purple-300 transition-all rounded-2xl">
-            <div className="w-16 h-16 rounded-full bg-purple-600 flex items-center justify-center flex-shrink-0"><Sparkles className="w-8 h-8 text-white" /></div>
+            <div className="w-16 h-16 rounded-full bg-purple-600 flex items-center justify-center flex-shrink-0"><Sparkles className="w-8 h-8 text-primary-foreground" /></div>
             <div><h3 className="text-lg font-bold text-gray-700 mb-2">Upload & Set Up With AI</h3><p className="text-sm text-gray-500">Upload the instruction — the claim form, emails saved as PDF, damage photos — or paste the email. AI reads it all and fills the claim in for you to check.</p></div>
             <div className="w-full mt-auto text-left">
               <ClaimIntakePanel onRead={handleIntakeRead} isReading={intake.isReading} error={intake.error} />
@@ -593,7 +593,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
           <div className="flex items-center justify-center text-gray-400 font-bold text-sm">OR</div>
           <div className="flex-1 neomorph-flat p-6 flex flex-col items-center text-center gap-4 cursor-pointer border-2 border-transparent hover:border-green-300 transition-all rounded-2xl"
             onClick={() => { setEntryMode('manual'); setChoiceStep(false); }}>
-            <div className="w-16 h-16 rounded-full bg-green-600 flex items-center justify-center flex-shrink-0"><Check className="w-8 h-8 text-white" /></div>
+            <div className="w-16 h-16 rounded-full bg-green-600 flex items-center justify-center flex-shrink-0"><Check className="w-8 h-8 text-primary-foreground" /></div>
             <div><h3 className="text-lg font-bold text-gray-700 mb-2">Fill In Manually</h3><p className="text-sm text-gray-500">You have all the information and want to create the claim yourself.</p></div>
             <Button type="button" onClick={e => { e.preventDefault(); e.stopPropagation(); setEntryMode('manual'); setChoiceStep(false); }}
               className="mt-auto neomorph-flat px-6 py-3 font-medium text-green-600 border border-green-300 hover:bg-green-50">Start Wizard →</Button>
@@ -664,7 +664,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
           </div>
           <div className="flex items-center gap-2">
             <div className="h-2 w-24 bg-muted rounded-full overflow-hidden">
-              <div className="h-full bg-accent rounded-full transition-all" style={{ width: `${(filledCount / TRACKED_FIELDS.length) * 100}%` }} />
+              <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${(filledCount / TRACKED_FIELDS.length) * 100}%` }} />
             </div>
             <span className="text-xs font-medium text-muted-foreground">{filledCount}/{TRACKED_FIELDS.length}</span>
           </div>
@@ -705,7 +705,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
           </Button>
         ) : (
           <Button type="button" onClick={handleSubmit} disabled={isSubmitting || isCreating}
-            className="flex-1 max-w-[170px] max-md:max-w-none h-10 gap-2 bg-accent text-accent-foreground">
+            className="flex-1 max-w-[170px] max-md:max-w-none h-10 gap-2 bg-primary text-primary-foreground">
             {isSubmitting || isCreating ? <><Loader className="w-4 h-4 animate-spin" /> Creating...</> : <><Check className="w-5 h-5" /> Create Claim</>}
           </Button>
         )}
@@ -867,9 +867,9 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
             </div>
             <div className="flex gap-0.5 flex-shrink-0">
               <button type="button" onClick={() => handleDriverSameToggle(true)}
-                className={`px-3 py-1.5 rounded-l-lg text-xs font-medium transition-colors ${formData.driver_same_as_client === true ? 'bg-accent text-accent-foreground' : 'bg-muted text-muted-foreground hover:bg-muted/80'}`}>Yes</button>
+                className={`px-3 py-1.5 rounded-l-lg text-xs font-medium transition-colors ${formData.driver_same_as_client === true ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:bg-muted/80'}`}>Yes</button>
               <button type="button" onClick={() => handleDriverSameToggle(false)}
-                className={`px-3 py-1.5 rounded-r-lg text-xs font-medium transition-colors ${formData.driver_same_as_client === false ? 'bg-accent text-accent-foreground' : 'bg-muted text-muted-foreground hover:bg-muted/80'}`}>No</button>
+                className={`px-3 py-1.5 rounded-r-lg text-xs font-medium transition-colors ${formData.driver_same_as_client === false ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:bg-muted/80'}`}>No</button>
             </div>
           </div>
           {formData.driver_same_as_client === false && (

@@ -100,7 +100,7 @@ export default function ClaimVehicleDamageForm({ claim, onSave, onCancel, mode =
         <Button type="button" onClick={onCancel} className="neomorph-flat flex-1 bg-[hsl(var(--card))] text-[hsl(var(--foreground))]">
           Cancel
         </Button>
-        <Button type="submit" className="neomorph-flat bg-accent/10 text-accent flex-1">
+        <Button type="submit" className="neomorph-flat bg-primary/10 text-primary flex-1">
           Save Changes
         </Button>
       </div>

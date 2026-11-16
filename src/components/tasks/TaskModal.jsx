@@ -193,7 +193,7 @@ export default function TaskModal({ isOpen, onClose, onSave, task, claimId, clai
               <X className="w-4 h-4 mr-2" />
               Cancel
             </Button>
-            <Button type="submit" className="bg-accent text-accent-foreground">
+            <Button type="submit" className="bg-primary text-primary-foreground">
               <Save className="w-4 h-4 mr-2" />
               {task ? 'Update Task' : 'Create Task'}
             </Button>

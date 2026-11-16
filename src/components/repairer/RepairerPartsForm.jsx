@@ -65,7 +65,7 @@ export default function RepairerPartsForm({ bodyshopId, bodyshopName, onClose, o
     <div className="neomorph p-6">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <Package className="w-6 h-6 text-accent" />
+          <Package className="w-6 h-6 text-primary" />
           <h3 className="font-bold text-lg">Request Parts Support</h3>
         </div>
         <button aria-label="Close" onClick={onClose} className="neomorph-flat p-2">
@@ -165,7 +165,7 @@ export default function RepairerPartsForm({ bodyshopId, bodyshopName, onClose, o
           <Button
             type="submit"
             disabled={createMutation.isPending || !formData.vehicle_ref || !formData.manufacturer || !formData.part_description}
-            className="neomorph-flat flex-1 bg-accent text-accent-foreground"
+            className="neomorph-flat flex-1 bg-primary text-primary-foreground"
           >
             {createMutation.isPending ? 'Submitting...' : 'Submit Request'}
           </Button>

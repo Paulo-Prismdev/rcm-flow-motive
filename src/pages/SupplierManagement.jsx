@@ -277,7 +277,7 @@ export default function SupplierManagement() {
       <div className="neomorph p-4">
         {isLoading ?
         <div className="text-center py-12">
-            <Loader className="w-8 h-8 animate-spin mx-auto mb-2 text-accent" />
+            <Loader className="w-8 h-8 animate-spin mx-auto mb-2 text-primary" />
             <p className="text-foreground-muted">Loading suppliers...</p>
           </div> :
         filteredSuppliers.length === 0 ?
@@ -346,7 +346,7 @@ export default function SupplierManagement() {
                             type="button"
                             onClick={(e) => { e.stopPropagation(); navigator.clipboard?.writeText(email); }}
                             title="Copy email"
-                            className="p-1 rounded text-foreground-muted hover:text-accent hover:bg-accent/10 transition-colors flex-shrink-0"
+                            className="p-1 rounded text-foreground-muted hover:text-primary hover:bg-primary/10 transition-colors flex-shrink-0"
                           >
                             <Copy className="w-3 h-3" />
                           </button>
@@ -361,7 +361,7 @@ export default function SupplierManagement() {
                         type="button"
                         onClick={(e) => { e.stopPropagation(); navigator.clipboard?.writeText(supplier.email); }}
                         title="Copy email"
-                        className="p-1 rounded text-foreground-muted hover:text-accent hover:bg-accent/10 transition-colors flex-shrink-0"
+                        className="p-1 rounded text-foreground-muted hover:text-primary hover:bg-primary/10 transition-colors flex-shrink-0"
                       >
                         <Copy className="w-3 h-3" />
                       </button>
@@ -387,7 +387,7 @@ export default function SupplierManagement() {
                     <p className="text-xs font-semibold text-foreground-muted mb-2">Manufacturers:</p>
                     <div className="flex flex-wrap gap-1 max-w-full">
                       {allMfrs.slice(0, 3).map((mfr, idx) => (
-                        <span key={idx} title={mfr} className="text-xs px-2 py-0.5 rounded-full bg-accent/10 text-accent max-w-full truncate">
+                        <span key={idx} title={mfr} className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary max-w-full truncate">
                           {mfr}
                         </span>
                       ))}

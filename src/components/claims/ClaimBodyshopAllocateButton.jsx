@@ -54,7 +54,7 @@ export default function ClaimBodyshopAllocateButton({ claim, onAllocated }) {
       <Button
         type="button"
         onClick={() => setIsMapOpen(true)}
-        className="w-full neomorph-flat py-3 text-accent hover:bg-accent/10 border-accent/30"
+        className="w-full neomorph-flat py-3 text-primary hover:bg-primary/10 border-primary/30"
       >
         <MapPin className="w-4 h-4 mr-2" />
         Find Repairer on Map

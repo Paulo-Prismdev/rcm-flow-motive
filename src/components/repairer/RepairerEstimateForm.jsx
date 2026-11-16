@@ -64,7 +64,7 @@ export default function RepairerEstimateForm({ bodyshopId, bodyshopName, onClose
     <div className="neomorph p-6">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <Calculator className="w-6 h-6 text-accent" />
+          <Calculator className="w-6 h-6 text-primary" />
           <h3 className="font-bold text-lg">Request an Estimate</h3>
         </div>
         <button aria-label="Close" onClick={onClose} className="neomorph-flat p-2">
@@ -153,7 +153,7 @@ export default function RepairerEstimateForm({ bodyshopId, bodyshopName, onClose
           <Button
             type="submit"
             disabled={createMutation.isPending || !formData.vehicle_reg || !formData.make_model}
-            className="neomorph-flat flex-1 bg-accent text-accent-foreground"
+            className="neomorph-flat flex-1 bg-primary text-primary-foreground"
           >
             {createMutation.isPending ? 'Submitting...' : 'Submit Request'}
           </Button>

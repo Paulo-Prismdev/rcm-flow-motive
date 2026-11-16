@@ -46,8 +46,8 @@ export default function ExcessModeField({ claim, onChange, compact = false }) {
       onClick={() => { setEditing(false); onChange(excessPatch(choice.key, claim)); }}
       className={`rounded-full border font-semibold transition-colors ${compact ? 'px-2 py-0.5 text-[9px]' : 'px-2.5 py-1 text-[11px]'} ${
         mode === choice.key
-          ? 'border-accent bg-accent/15 text-accent'
-          : 'border-border bg-card text-muted-foreground hover:border-accent/50 hover:text-foreground'}`}
+          ? 'border-primary bg-primary/15 text-primary'
+          : 'border-border bg-card text-muted-foreground hover:border-primary/50 hover:text-foreground'}`}
     >
       {choice.label}
     </button>
@@ -85,7 +85,7 @@ export default function ExcessModeField({ claim, onChange, compact = false }) {
         <span className={`font-medium ${compact ? 'text-xs' : 'text-sm'} ${blank ? 'text-amber-500' : 'text-foreground'}`}>
           {blank ? 'Not set' : fmtGBP(Number(value))}
         </span>
-        <button type="button" onClick={() => setEditing(true)} title="Edit the excess" className="p-0.5 rounded text-muted-foreground hover:text-accent">
+        <button type="button" onClick={() => setEditing(true)} title="Edit the excess" className="p-0.5 rounded text-muted-foreground hover:text-primary">
           <Pencil className="w-3 h-3" />
         </button>
       </span>

@@ -118,7 +118,7 @@ export default function ClientPortal() {
   if (!currentUser) {
     return (
       <div className="h-full flex items-center justify-center">
-        <div className="animate-spin w-8 h-8 border-4 border-accent border-t-transparent rounded-full mx-auto"></div>
+        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto"></div>
       </div>
     );
   }

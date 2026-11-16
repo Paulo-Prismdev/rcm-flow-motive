@@ -134,7 +134,7 @@ export default function WidgetGallery({ onClose, onAddWidget, department }) {
                   key={widget.type}
                   onClick={() => handleSelect(widget)}
                   className={`glass text-left p-4 md:p-6 hover:scale-105 transition-all ${
-                    isSelected ? 'border-2 border-accent' : ''
+                    isSelected ? 'border-2 border-primary' : ''
                   }`}
                 >
                   <div className={`w-10 h-10 md:w-12 md:h-12 rounded-lg bg-${widget.color}-500 bg-opacity-20 flex items-center justify-center mb-3 md:mb-4`}>
@@ -143,7 +143,7 @@ export default function WidgetGallery({ onClose, onAddWidget, department }) {
                   <h3 className="font-bold text-sm md:text-base mb-1 md:mb-2">{widget.name}</h3>
                   <p className="text-xs md:text-sm text-foreground-muted">{widget.description}</p>
                   {widget.configurable && (
-                    <span className="inline-block mt-2 md:mt-3 text-xs md:text-xs px-2 py-1 rounded-full bg-accent bg-opacity-20 text-accent">
+                    <span className="inline-block mt-2 md:mt-3 text-xs md:text-xs px-2 py-1 rounded-full bg-accent bg-opacity-20 text-primary">
                       Configurable
                     </span>
                   )}
@@ -176,7 +176,7 @@ export default function WidgetGallery({ onClose, onAddWidget, department }) {
                           key={color}
                           onClick={() => setConfig({ ...config, color })}
                           className={`w-7 h-7 md:w-8 md:h-8 rounded-full bg-${color}-500 ${
-                            config.color === color ? 'ring-2 ring-accent ring-offset-2' : ''
+                            config.color === color ? 'ring-2 ring-primary ring-offset-2' : ''
                           }`}
                         />
                       ))}
@@ -250,7 +250,7 @@ export default function WidgetGallery({ onClose, onAddWidget, department }) {
           <Button
             onClick={handleAdd}
             disabled={!selectedType}
-            className="glass-button px-4 md:px-6 py-2 text-accent text-sm"
+            className="glass-button px-4 md:px-6 py-2 text-primary text-sm"
           >
             Add Widget
           </Button>

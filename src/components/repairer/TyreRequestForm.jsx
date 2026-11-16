@@ -59,7 +59,7 @@ export default function TyreRequestForm({ onClose, bodyshopId }) {
     <Card className="bg-card border-border">
       <CardHeader>
         <div className="flex items-center gap-2">
-          <Package className="w-6 h-6 text-accent" />
+          <Package className="w-6 h-6 text-primary" />
           <CardTitle>Tyre Request</CardTitle>
         </div>
       </CardHeader>

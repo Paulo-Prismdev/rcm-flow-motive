@@ -91,7 +91,7 @@ export default function ClaimBodyshopInfo({ bodyshopId }) {
         </div>
         <Link
           to={`${createPageUrl('BodyshopMap')}?bodyshop_id=${bodyshop.id}`}
-          className="text-[11px] text-accent hover:underline flex items-center gap-1"
+          className="text-[11px] text-primary hover:underline flex items-center gap-1"
         >
           <MapPin className="w-3 h-3" /> View on Map
         </Link>

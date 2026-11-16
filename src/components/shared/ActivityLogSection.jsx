@@ -40,13 +40,13 @@ export default function ActivityLogSection({ parentId, parentType }) {
           {logs.map((log) => (
             <div key={log.id} className="neomorph-inset p-3 rounded-lg">
               <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center flex-shrink-0">
-                  <User className="w-4 h-4 text-accent" />
+                <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                  <User className="w-4 h-4 text-primary" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="font-medium text-sm">{log.user_name || log.user_email || 'System'}</span>
-                    <span className="text-xs px-2 py-0.5 rounded bg-accent/10 text-accent font-medium">
+                    <span className="text-xs px-2 py-0.5 rounded bg-primary/10 text-primary font-medium">
                       {log.action}
                     </span>
                   </div>

@@ -434,7 +434,7 @@ export default function BodyshopMap() {
       <div className="absolute inset-0">
         {isLoading ? (
           <div className="flex justify-center items-center h-full">
-            <Loader className="w-8 h-8 animate-spin text-accent" />
+            <Loader className="w-8 h-8 animate-spin text-primary" />
           </div>
         ) : resolvedBodyshops.length === 0 ? (
           <div className="flex flex-col justify-center items-center h-full text-foreground-muted p-6 text-center">
