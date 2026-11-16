@@ -1,7 +1,7 @@
+import { notify, notifyError } from '@/lib/dialogs';
 import React, { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
-import { toast } from "sonner";
 import { Loader2, UserCog, Link2, Mail, UserPlus, X } from "lucide-react";
 
 /**
@@ -39,9 +39,9 @@ export default function ReferrerLinkedUsers({ companyId, contacts, companyName }
       base44.entities.User.update(userId, { linked_contact_email: email || null }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["referrer-users", companyId] });
-      toast.success("User contact link updated");
+      notify("User contact link updated");
     },
-    onError: (err) => toast.error("Could not update link: " + (err.message || "Unknown error")),
+    onError: (err) => notifyError("Could not update link", err),
   });
 
   const inviteMutation = useMutation({
@@ -59,11 +59,11 @@ export default function ReferrerLinkedUsers({ companyId, contacts, companyName }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["referrer-users", companyId] });
-      toast.success("Invitation sent and user linked to this referrer");
+      notify("Invitation sent and user linked to this referrer");
       setInviteEmail("");
       setShowInvite(false);
     },
-    onError: (err) => toast.error("Could not invite: " + (err.message || "Unknown error")),
+    onError: (err) => notifyError("Could not invite", err),
   });
 
   const attachMutation = useMutation({
@@ -72,9 +72,9 @@ export default function ReferrerLinkedUsers({ companyId, contacts, companyName }
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["referrer-users", companyId] });
       queryClient.invalidateQueries({ queryKey: ["unlinked-referrer-users"] });
-      toast.success("User linked to this referrer");
+      notify("User linked to this referrer");
     },
-    onError: (err) => toast.error("Could not link user: " + (err.message || "Unknown error")),
+    onError: (err) => notifyError("Could not link user", err),
   });
 
   const resolveSelected = (user) => {

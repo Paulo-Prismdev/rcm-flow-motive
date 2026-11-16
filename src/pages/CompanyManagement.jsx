@@ -8,7 +8,6 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { createPortal } from "react-dom";
-import { toast } from "sonner";
 import {
   Trash2, Phone, Mail, Building2, Users, Star, UserCog, Pencil, X, Plus, Loader2,
 } from "lucide-react";
@@ -16,7 +15,7 @@ import DirectoryShell from "@/components/shared/DirectoryShell";
 import ReferrerLinkedUsers from "@/components/settings/ReferrerLinkedUsers";
 import { syncReferrerVat } from "@/components/shared/syncReferrerVat";
 import { deleteAndLog, updateAndLog, createAndLog } from "@/components/shared/useActivityLogger";
-import { askConfirm } from '@/lib/dialogs';
+import { askConfirm, notify } from '@/lib/dialogs';
 import { activateOnKey } from '@/lib/a11y';
 
 const ALL_PORTAL_SECTIONS = ["Claims", "Parts"];
@@ -38,7 +37,7 @@ function ReferrerDetailModal({ company, onClose, onUpdated }) {
       queryClient.invalidateQueries({ queryKey: ["companies"] });
       onUpdated();
       setIsEditing(false);
-      toast.success("Referrer updated");
+      notify("Referrer updated");
       // Their claims carry a snapshot of this setting, so refresh it when it
       // changes: their invoices are worked out from it.
       const nextVat = formData.vat_registered !== false;
@@ -267,7 +266,7 @@ function AddReferrerModal({ onClose, onSuccess }) {
   });
   const createMutation = useMutation({
     mutationFn: (data) => createAndLog('Company', data, { label: 'company' }),
-    onSuccess: () => { toast.success("Referrer created"); onSuccess(); },
+    onSuccess: () => { notify("Referrer created"); onSuccess(); },
   });
 
   const set = (field, value) => setFormData(prev => ({ ...prev, [field]: value }));
@@ -409,7 +408,7 @@ export default function CompanyManagement() {
 
   const deleteMutation = useMutation({
     mutationFn: (id) => deleteAndLog("Company", id),
-    onSuccess: () => { invalidate(); toast.success("Referrer deleted"); },
+    onSuccess: () => { invalidate(); notify("Referrer deleted"); },
   });
 
   const sorted = useMemo(() => [...companies].sort((a, b) => (a.name || "").localeCompare(b.name || "", undefined, { sensitivity: "base" })), [companies]);
