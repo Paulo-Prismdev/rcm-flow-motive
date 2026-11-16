@@ -8,6 +8,7 @@ import { formatUKRegistration } from '../shared/formatRegistration';
 import StatusBadge from '../shared/StatusBadge';
 import ClaimStatusBadges from '../shared/ClaimStatusBadges';
 import { excessLabel } from '../shared/excessState';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const formatDate = (val) => {
   if (!val) return '—';
@@ -21,6 +22,8 @@ const formatCurrency = (val) => {
   return isNaN(num) ? '—' : `£${num.toLocaleString()}`;
 };
 
+// Quick view: every key fact on one sheet, each with its own copy button.
+// Phones: slides up from the bottom. Desktop: a panel on the right.
 const InfoRow = ({ label, value, href, fullWidth }) => {
   const isEmpty = !value || value === '—';
   const [copied, setCopied] = useState(false);
@@ -31,50 +34,67 @@ const InfoRow = ({ label, value, href, fullWidth }) => {
     e.stopPropagation();
     const text = valueRef.current?.textContent || '';
     if (!text) return;
-    navigator.clipboard.writeText(text).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
-    }).catch(() => {});
+    const done = () => { setCopied(true); setTimeout(() => setCopied(false), 1500); };
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(text).then(done).catch(() => selectText(valueRef.current));
+    } else {
+      selectText(valueRef.current);
+    }
   };
 
   return (
-    <div className={fullWidth ? 'col-span-2' : ''}>
-      <div className="text-xs font-medium text-muted-foreground  ">{label}</div>
-      <div className="flex items-start gap-1.5">
+    <div data-qv-row data-qv-label={label} className={`flex items-start gap-2 py-2.5 px-3.5 border-t border-border first:border-t-0 ${fullWidth ? 'sm:col-span-2' : ''}`}>
+      <div className="flex-1 min-w-0">
+        <div className="text-xs text-muted-foreground">{label}</div>
         {href && !isEmpty ? (
-          <a href={href} ref={valueRef} className="text-sm font-medium text-info-fg hover:underline break-all flex-1">{value}</a>
+          <a href={href} ref={valueRef} data-qv-value className="block text-[15px] font-medium text-link break-words">{value}</a>
         ) : (
-          <div ref={valueRef} className={`text-sm font-medium flex-1 ${isEmpty ? 'text-muted-foreground/50' : 'text-foreground'} ${fullWidth ? 'whitespace-pre-wrap break-words' : ''}`}>{value || '—'}</div>
-        )}
-        {!isEmpty && (
-          <button
-            type="button"
-            onClick={handleCopy}
-            className="shrink-0 mt-0.5 text-muted-foreground/40 hover:text-primary transition-colors"
-            title="Copy"
-            aria-label={`Copy ${label}`}
-          >
-            {copied ? <Check className="w-3 h-3 text-success-fg" /> : <Copy className="w-3 h-3" />}
-          </button>
+          <div ref={valueRef} data-qv-value className={`text-[15px] font-medium break-words ${isEmpty ? 'text-muted-foreground/60 font-normal' : 'text-foreground'} ${fullWidth ? 'whitespace-pre-wrap' : ''}`}>{value || '—'}</div>
         )}
       </div>
+      {!isEmpty && (
+        <button
+          type="button"
+          onClick={handleCopy}
+          className={`shrink-0 h-8 px-2 -mr-1.5 rounded-lg flex items-center gap-1 text-xs font-medium transition-colors ${copied ? 'text-success-fg' : 'text-muted-foreground hover:text-foreground hover:bg-muted active:bg-muted'}`}
+          title="Copy"
+          aria-label={copied ? `${label} copied` : `Copy ${label}`}
+        >
+          {copied ? <><Check className="w-4 h-4" />Copied</> : <Copy className="w-4 h-4" />}
+        </button>
+      )}
     </div>
   );
 };
 
-const Section = ({ icon: Icon, title, color, children }) => (
-  <div className="border border-border rounded-lg overflow-hidden">
-    <div className={`flex items-center gap-2 px-3 py-2 ${color}`}>
-      <Icon className="w-4 h-4 flex-shrink-0" />
-      <h3 className="text-sm font-semibold">{title}</h3>
+// When the browser won't copy, select the text so a long-press copies it.
+function selectText(el) {
+  if (!el || !window.getSelection) return;
+  const range = document.createRange();
+  range.selectNodeContents(el);
+  const sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+}
+
+const Section = ({ icon: Icon, title, children }) => (
+  <section className="rounded-2xl bg-card shadow-card overflow-hidden" aria-label={title}>
+    <div className="flex items-center gap-2.5 px-3.5 pt-3 pb-2">
+      <span className="w-7 h-7 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
+        <Icon className="w-4 h-4 text-foreground" aria-hidden="true" />
+      </span>
+      <h3 className="text-[15px] font-semibold">{title}</h3>
     </div>
-    <div className="p-3 grid grid-cols-2 gap-x-3 gap-y-2">
+    <div className="grid grid-cols-1 sm:grid-cols-2">
       {children}
     </div>
-  </div>
+  </section>
 );
 
 export default function ClaimQuickViewModal({ claim, isOpen, onClose }) {
+  const isPhone = useIsMobile();
+  const bodyRef = useRef(null);
+  const [copiedAll, setCopiedAll] = useState(false);
   const { data: bodyshop } = useQuery({
     queryKey: ['bodyshop', claim?.bodyshop_id],
     queryFn: () => base44.entities.Bodyshop.get(claim.bodyshop_id),
@@ -98,22 +118,56 @@ export default function ClaimQuickViewModal({ claim, isOpen, onClose }) {
 
   if (!claim) return null;
 
+  // Every filled-in field as "Label: value" lines, ready to paste.
+  const copyAll = () => {
+    const lines = [];
+    bodyRef.current?.querySelectorAll('section').forEach((sec) => {
+      const rows = [...sec.querySelectorAll('[data-qv-row]')]
+        .map((r) => [r.dataset.qvLabel, r.querySelector('[data-qv-value]')?.textContent?.trim()])
+        .filter(([, v]) => v && v !== '—');
+      if (!rows.length) return;
+      lines.push(sec.getAttribute('aria-label').toUpperCase());
+      rows.forEach(([l, v]) => lines.push(`${l}: ${v}`));
+      lines.push('');
+    });
+    const text = [`${claim.reg || ''} ${claim.job_number || ''}`.trim(), '', ...lines].join('\n').trim();
+    navigator.clipboard?.writeText(text).then(() => {
+      setCopiedAll(true);
+      setTimeout(() => setCopiedAll(false), 1500);
+    }).catch(() => {});
+  };
+
   const bodyshopPhone = bodyshop?.phone || bodyshop?.mobile_phone || '';
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
-      <SheetContent side="right" className="w-full sm:max-w-lg p-0 flex flex-col">
-        <SheetHeader className="px-5 pt-5 pb-3 border-b border-border flex-shrink-0">
-          <SheetTitle className="flex items-center gap-2 text-base">
-            <FileText className="w-4 h-4 text-primary" />
-            Quick View — {claim.reg ? formatUKRegistration(claim.reg) : claim.job_number || 'Claim'}
+      <SheetContent
+        side={isPhone ? 'bottom' : 'right'}
+        className={`p-0 flex flex-col gap-0 bg-background ${isPhone ? 'h-[90dvh] rounded-t-2xl' : 'w-full sm:max-w-lg'}`}
+      >
+        {isPhone && <div className="mx-auto mt-2 h-1.5 w-10 rounded-full bg-border flex-shrink-0" aria-hidden="true" />}
+        <SheetHeader className="px-4 pt-3 pb-3 flex-shrink-0 text-left space-y-1.5 pr-14">
+          <SheetTitle className="flex items-center gap-2.5 flex-wrap">
+            <span className="rounded-md bg-primary text-primary-foreground px-2 py-0.5 text-[15px] font-bold tracking-wider tabular-nums">
+              {claim.reg ? formatUKRegistration(claim.reg) : claim.job_number || 'Claim'}
+            </span>
+            <span className="text-lg font-semibold">Quick view</span>
           </SheetTitle>
-          <p className="text-xs text-muted-foreground">
-            {claim.client_name || '—'} · {claim.journey_status || claim.job_status || 'New'}
-          </p>
+          <div className="flex items-center gap-3">
+            <p className="flex-1 min-w-0 text-[13px] text-muted-foreground">
+              {[claim.client_name, claim.job_number, claim.journey_status || claim.job_status].filter(Boolean).join(' · ')}
+            </p>
+            <button
+              type="button"
+              onClick={copyAll}
+              className={`flex-shrink-0 h-8 px-3 rounded-lg border border-border bg-card text-xs font-medium flex items-center gap-1.5 ${copiedAll ? 'text-success-fg' : ''}`}
+            >
+              {copiedAll ? <><Check className="w-3.5 h-3.5" />Copied</> : <><Copy className="w-3.5 h-3.5" />Copy all</>}
+            </button>
+          </div>
         </SheetHeader>
 
-        <div className="flex-1 overflow-y-auto px-5 py-4 space-y-3">
+        <div ref={bodyRef} className="flex-1 overflow-y-auto px-3 space-y-3" style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 1.5rem)' }}>
           {/* Overview */}
           <Section icon={FileText} title="Claim Overview" color="bg-primary/10 text-primary">
             <InfoRow label="Job Number" value={claim.job_number} />
@@ -143,7 +197,7 @@ export default function ClaimQuickViewModal({ claim, isOpen, onClose }) {
                 const legacyEmail = linkedClient?.company_contact_email;
                 if (!legacyName && !legacyPhone && !legacyEmail) return null;
                 return (
-                  <div className="col-span-2 mt-1 rounded-lg border border-border bg-muted/30 p-2.5 space-y-1.5">
+                  <div className="sm:col-span-2 mx-3.5 mb-3 mt-1 rounded-xl border border-border bg-muted/40 p-2.5 space-y-1.5">
                     <div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
                       <Users className="w-3 h-3" /> Contacts at this business
                     </div>
@@ -158,7 +212,7 @@ export default function ClaimQuickViewModal({ claim, isOpen, onClose }) {
                 );
               }
               return (
-                <div className="col-span-2 mt-1 rounded-lg border border-border bg-muted/30 p-2.5 space-y-1.5">
+                <div className="sm:col-span-2 mx-3.5 mb-3 mt-1 rounded-xl border border-border bg-muted/40 p-2.5 space-y-1.5">
                   <div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
                     <Users className="w-3 h-3" /> Contacts at this business
                   </div>
