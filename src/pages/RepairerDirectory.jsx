@@ -196,7 +196,7 @@ export default function RepairerDirectory() {
                     {b.contact_name || b.bodyshop_manager ? <span className="truncate">{b.contact_name || b.bodyshop_manager}</span> : null}
                   </div>
                   <div className="flex items-center gap-2 mt-1.5">
-                    {b.map_group && <Badge className="bg-violet-100 text-violet-700 text-xs px-1.5 py-0">{b.map_group}</Badge>}
+                    {b.map_group && <Badge className="bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300 text-xs px-1.5 py-0">{b.map_group}</Badge>}
                     {b.acg_signed_up === "Yes" && <Badge className="bg-success-bg text-success-fg text-xs px-1.5 py-0">ACG: Yes</Badge>}
                     {b.acg_signed_up === "No" && <Badge className="bg-danger-bg text-danger-fg text-xs px-1.5 py-0">ACG: No</Badge>}
                     {b.bs10125_certified === "Yes" && <Badge className="bg-success-bg text-success-fg text-xs px-1.5 py-0">BS10125</Badge>}
@@ -239,7 +239,7 @@ export default function RepairerDirectory() {
                             : "bg-muted text-foreground"
                           }`}>{b.tier}</Badge>
                         ) : <span className="text-muted-foreground text-sm">—</span>}
-                        {b.map_group && <Badge className="text-xs bg-violet-100 text-violet-700">{b.map_group}</Badge>}
+                        {b.map_group && <Badge className="text-xs bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300">{b.map_group}</Badge>}
                       </div>
                     </td>
                     <td className="p-3 hidden sm:table-cell">
