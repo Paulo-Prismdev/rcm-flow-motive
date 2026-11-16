@@ -20,16 +20,20 @@ module.exports = {
   		raised: 'var(--fm-shadow-raised)',
   		window: 'var(--fm-shadow-window)',
   		},
-  		// Flowmotive design system: eight named layers, three control heights.
+  		// Flowmotive design system: the named layers, lowest to highest. Every window,
+  		// sheet and menu uses one of these, so nothing opens behind something else.
+  		// The numbers sit above the old scale (sidebar 9999) so screens not yet moved
+  		// over keep their order.
   		zIndex: {
-  			raised: '10',
-  			chrome: '30',
-  			workspace: '40',
-  			sheet: '50',
-  			window: '60',
-  			menu: '70',
-  			toast: '80',
-  			tooltip: '90',
+  			raised: '10',          // sticky table headers and columns
+  			chrome: '9999',        // sidebar
+  			workspace: '10000',    // Reports, Map, Directories, Settings
+  			sheet: '10002',        // side sheets, the messenger
+  			window: '10004',       // dialogs, confirms, pop-up windows
+  			'window-nested': '10006', // a window opened from inside a window
+  			menu: '10010',         // menus, popovers, selects, comboboxes
+  			toast: '10020',
+  			tooltip: '10030',
   		},
   		height: {
   			'control-sm': '2rem',
