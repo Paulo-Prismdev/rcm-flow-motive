@@ -2086,7 +2086,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                   type="button"
                   onClick={() => setSelectedSection(section.id)}
                   aria-current={on ? 'true' : undefined}
-                  className={`flex items-center gap-2 h-[34px] px-2.5 rounded-lg text-left text-[13px] font-medium transition-colors ${on ? 'bg-primary text-primary-foreground' : 'text-foreground hover:bg-accent'}`}
+                  className={`flex flex-shrink-0 items-center gap-2 h-8 px-2.5 rounded-lg text-left text-[13px] font-medium transition-colors ${on ? 'bg-primary text-primary-foreground' : 'text-foreground hover:bg-accent'}`}
                 >
                   <section.icon className={`w-4 h-4 flex-shrink-0 ${on ? '' : 'text-muted-foreground'}`} aria-hidden="true" />
                   <span className="flex-1 truncate">{section.label}</span>
