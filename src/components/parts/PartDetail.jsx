@@ -470,7 +470,7 @@ const renderSelectedSection = () => {
               </Button>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <h1 className="text-base md:text-2xl font-bold truncate">{part.vehicle_ref || 'Part Request'}</h1>
+                  <h1 className="text-lg md:text-[22px] font-semibold leading-tight truncate">{part.vehicle_ref || 'Part request'}</h1>
                   {part.job_number && (
                     <span className="text-xs md:text-sm font-mono px-2 py-0.5 md:py-1 rounded bg-gold/20 text-gold font-semibold">
                       {part.job_number}
