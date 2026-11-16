@@ -56,3 +56,13 @@ Keep this list up to date at the end of every round.
 - [ ] Confirm the portal update-feed rules above (Round 8 default) – easy to change in `base44/shared/portalAccess.ts`.
 - [ ] Should the total-loss storage fee invoice carry VAT?
 - [ ] Optional "Customer pays" row on the VAT & excess summary – wanted?
+
+## UI overhaul (from 16 Nov 2026)
+
+Built to the "RCM Flowmotive" design system and the UI audit (all 17 changes approved). Only looks and layout change; no calculation, save, rule or email is edited.
+
+- [x] Round 1 – design tokens (light and dark), shared buttons, fields, dialogs, sheets, menus, badges, cards, tabs, toasts; old neomorph / glass-inset / Mac classes re-pointed to the tokens.
+- [x] Round 2 – glass sidebar (own icon per item, green dot on the current item, arrow on items that open over the page), glass top bar with search field and Cmd+K, Refresh reloads data not the page, phone tab labels 12px, workspace window for Reports / Map / Directories / Settings, shared PageHeader (directories use it), theme follows the device until chosen.
+- [ ] Round 3 – the 45 hand-built overlays onto the shared window; eight named layers replace the z-index values.
+- [ ] Round 4 – screens one by one: Repairs list, claim, Dashboard, Directories, Tasks, Invoicing, Estimating, Engineering, Parts and Tyres, Reports, Settings, portals and public forms.
+- [ ] Round 5 – one toast system, skeleton loading, empty states, status colours from one place.
