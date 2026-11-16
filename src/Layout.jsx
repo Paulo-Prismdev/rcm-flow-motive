@@ -450,9 +450,9 @@ export default function Layout({ children, currentPageName }) {
 
         {/* ── MAIN CONTENT ── */}
         <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-          {/* ── MOBILE bottom tab bar (< lg) ── */}
+          {/* ── MOBILE bottom tab bar (< md) ── */}
           {!claimDetailOpen &&
-          <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 flex items-center justify-around px-2 safe-area-inset-bottom" style={{ height: '60px', zIndex: 1000 }}>
+          <nav aria-label="Main" className="md:hidden fixed bottom-0 left-0 right-0 fm-glass-bar flex items-center justify-around px-2 safe-area-inset-bottom" style={{ height: '60px', zIndex: 1000 }}>
               {[
             { name: 'Repairs', url: createPageUrl('Claims'), icon: FileText },
             { name: 'Tasks', url: createPageUrl('Tasks'), icon: CheckSquare }].
@@ -460,68 +460,70 @@ export default function Layout({ children, currentPageName }) {
             <Link
               key={tab.name}
               to={tab.url}
-              className={`flex flex-col items-center justify-center gap-0.5 p-3 touch-manipulation min-w-[44px] min-h-[44px] ${location.pathname === tab.url ? 'text-primary' : 'text-gray-500 dark:text-gray-400'}`}>
+              className={`flex flex-col items-center justify-center gap-0.5 px-2 py-1 touch-manipulation min-w-[52px] min-h-[44px] ${location.pathname === tab.url ? 'text-foreground font-semibold' : 'text-muted-foreground'}`}>
                   <tab.icon className="w-5 h-5" />
-                  <span className="text-[9px]">{tab.name}</span>
+                  <span className="text-xs">{tab.name}</span>
                 </Link>
             )}
               {isInternalUser &&
-            <button onClick={() => setMessagesOpen((prev) => !prev)} className="relative flex flex-col items-center justify-center gap-0.5 p-3 text-gray-500 dark:text-gray-400 touch-manipulation min-w-[44px] min-h-[44px]">
+            <button onClick={() => setMessagesOpen((prev) => !prev)} className="relative flex flex-col items-center justify-center gap-0.5 px-2 py-1 text-muted-foreground touch-manipulation min-w-[52px] min-h-[44px]">
                   <MessageSquare className="w-5 h-5" />
-                  <span className="text-[9px]">Messages</span>
+                  <span className="text-xs">Messages</span>
                   {unreadMessagesCount > 0 &&
-              <span className="absolute top-1 right-2 bg-red-500 text-white text-[9px] rounded-full w-4 h-4 flex items-center justify-center font-bold">
+              <span className="absolute top-0 right-1 bg-info text-on-solid text-xs rounded-md min-w-[18px] h-[18px] px-1 flex items-center justify-center font-semibold">
                       {unreadMessagesCount > 9 ? '9+' : unreadMessagesCount}
                     </span>
               }
                 </button>
             }
-              <div className="flex flex-col items-center justify-center gap-0.5 touch-manipulation min-w-[44px] min-h-[44px]">
+              <div className="flex flex-col items-center justify-center gap-0.5 touch-manipulation min-w-[52px] min-h-[44px] text-muted-foreground">
                 <Notifications />
-                <span className="text-[9px] text-gray-500">Alerts</span>
+                <span className="text-xs">Alerts</span>
               </div>
-              <button onClick={() => setMobileMenuOpen((prev) => !prev)} className={`flex flex-col items-center justify-center gap-0.5 p-3 touch-manipulation min-w-[44px] min-h-[44px] ${mobileMenuOpen ? 'text-primary' : 'text-gray-500 dark:text-gray-400'}`}>
+              <button onClick={() => setMobileMenuOpen((prev) => !prev)} className={`flex flex-col items-center justify-center gap-0.5 px-2 py-1 touch-manipulation min-w-[52px] min-h-[44px] ${mobileMenuOpen ? 'text-foreground font-semibold' : 'text-muted-foreground'}`}>
                 <Menu className="w-5 h-5" />
-                <span className="text-[9px]">Menu</span>
+                <span className="text-xs">Menu</span>
               </button>
-              </div>
+              </nav>
           }
 
-              {/* ── DESKTOP top bar (≥ lg) ── */}
+              {/* ── DESKTOP top bar (≥ md) ── */}
           {!claimDetailOpen &&
-          <header className="hidden md:flex flex-shrink-0 dark:bg-gray-900/95 border-b border-gray-100 dark:border-gray-800/80 items-center gap-3 px-5 relative z-30 backdrop-blur-sm bg-[hsl(var(--background))]" style={{ height: '48px', minHeight: '48px' }}>
-              <div className="flex-1" />
-              <div className="flex items-center gap-2">
-                <button
-                onClick={() => window.location.reload()}
-                className="p-1.5 rounded-[10px] text-gray-400 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-gray-200 transition-colors"
-                title="Refresh">
-                
-                  <RefreshCw className="w-4 h-4" />
-                </button>
-                <button
+          <header className="hidden md:flex flex-shrink-0 fm-glass-bar items-center gap-3 px-5 relative z-30" style={{ height: '48px', minHeight: '48px' }}>
+              <button
+                type="button"
                 onClick={() => setSearchOpen(true)}
-                className="p-1.5 rounded-[10px] text-gray-400 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-gray-200 transition-colors"
-                title="Search">
-                
-                  <Search className="w-4 h-4" />
+                className="flex h-8 w-full max-w-sm items-center gap-2 rounded-lg border border-input bg-card px-2.5 text-[13px] text-ink-subtle transition-colors hover:bg-accent"
+                aria-label="Search">
+                <Search className="w-4 h-4 flex-shrink-0" />
+                <span className="flex-1 text-left truncate">Search claims, registrations, people</span>
+                <kbd className="hidden lg:inline text-xs font-sans text-muted-foreground">⌘K</kbd>
+              </button>
+              <div className="flex-1" />
+              <div className="flex items-center gap-1">
+                <button
+                onClick={refreshData}
+                className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+                title="Refresh data"
+                aria-label="Refresh data">
+                  <RefreshCw className="w-4 h-4" />
                 </button>
                 {isInternalUser &&
               <button
                 onClick={() => setMessagesOpen(true)}
-                className="relative p-1.5 rounded-[10px] text-gray-400 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-gray-200 transition-colors"
-                title="Messages">
-                
+                className="relative flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+                title="Messages"
+                aria-label="Messages">
                     <MessageSquare className="w-4 h-4" />
                     {unreadMessagesCount > 0 &&
-                <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[9px] rounded-full w-3.5 h-3.5 flex items-center justify-center font-bold">
+                <span className="absolute -top-1 -right-1 bg-info text-on-solid text-xs rounded-md min-w-[18px] h-[18px] px-1 flex items-center justify-center font-semibold">
                         {unreadMessagesCount > 9 ? '9+' : unreadMessagesCount}
                       </span>
                 }
                   </button>
               }
-                <ThemeToggle />
-                <Notifications />
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-accent transition-colors" title="Switch theme"><ThemeToggle /></div>
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-accent transition-colors" title="Notifications"><Notifications /></div>
               </div>
             </header>
           }
