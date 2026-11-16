@@ -88,3 +88,9 @@ Built to the "RCM Flowmotive" design system and the UI audit (all 17 changes app
 - Moving a claim to Rectification no longer clears the on-site, completion, hand-over or claim-complete dates.
 - While a claim is in Rectification (no rectification hand-over yet), the kept dates are ignored by: client contact tracking, the invoicing queue release date and "return date missing" warning, and chaser rules "is on site" / "is returned" — so those behave exactly as before.
 - Test live: change a claim's status from the Updates form, then from the status section; move a returned claim to Rectification and check its dates stay and the client contact timer shows green.
+
+## Phone layout (16 Nov 2026) — phones only, desktop and tablet unchanged
+- Claim header (ClaimDetailMobileHeader.jsx, rewritten): reg plate, job number and vehicle, client; authorising party line; stage in the client's words as a step bar (shared/clientJourney.js); internal statuses and update timers; five actions — Update, Call driver/client (tel:), WhatsApp (wa.me, 07… → 447…), Photos, Docs; section dropdown with previous/next (same sections and order as the desktop list, amber dots kept). Everything from the old "More" menu is under the ⋯ button.
+- Repairs list (Claims.jsx, under 768px): search behind an icon, stage chips (Needs action = case or client update overdue or due soon, All, each stage), List / Grouped switch (remembered per phone), cards in the chosen sort, floating New claim button.
+- Updates (ClaimUpdatesModal.jsx): bottom sheet on phones, short title, Add update first. Status changes now show before → after chips from the new status history (all screen sizes).
+- Test live on a phone: Call and WhatsApp open the right number; section dropdown and arrows; Grouped view still groups by stage; New claim button sits above the bottom bar on an iPhone with a home bar.
