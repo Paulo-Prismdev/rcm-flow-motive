@@ -662,7 +662,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
             claim_id: claim.id,
             update_type: 'Status Change',
             ...(statusRecord && { status_change: statusRecord }),
-            description: parts.join(' · '),
+            description: parts.join(' · ') || 'Status updated',
             next_steps: '',
             due_date_for_next_action: ''
         });
