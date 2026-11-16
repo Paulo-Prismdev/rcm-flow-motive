@@ -111,17 +111,104 @@ import { isUpdateTrackingClosed, computeUpdateStatusFlag, computeClientCommStatu
 import { saveTimeLogInBackground } from '../shared/saveTimeLogInBackground';
 
 import { askConfirm, notify, notifyError } from '@/lib/dialogs';
-const EditableSection = ({ title, icon: Icon, claim, onUpdate, children, EditComponent, canEdit = true }) => {
-    const [isEditing, setIsEditing] = useState(false);
+// ── Editing without the fields moving ──
+// Controls a form shows (inputs, dropdowns, switches), in page order.
+const FIELD_SELECTOR = 'input:not([type="hidden"]), textarea, select, button[role="combobox"], button[role="switch"], button[role="checkbox"]';
+const norm = (t) => String(t || '').toLowerCase().replace(/\(.*?\)|[^a-z0-9]+/g, ' ').replace(/\b(driver|client|no|number)\b/g, ' ').replace(/\s+/g, ' ').trim();
 
-    // Exit edit mode when claim is updated externally (e.g. wizard save)
+// Find the edit-form control whose label best matches the label the user clicked in the view.
+function findControlByLabel(container, wanted) {
+    const w = norm(wanted);
+    if (!w) return null;
+    let best = null; let bestScore = 0;
+    container.querySelectorAll('label').forEach((lab) => {
+        const l = norm(lab.textContent);
+        if (!l) return;
+        const score = l === w ? 3 : (l.includes(w) || w.includes(l)) ? 2 : 0;
+        if (score > bestScore) { best = lab; bestScore = score; }
+    });
+    if (!best) return null;
+    if (best.htmlFor) { const byId = container.querySelector(`#${CSS.escape(best.htmlFor)}`); if (byId) return byId; }
+    return best.querySelector(FIELD_SELECTOR) || best.parentElement?.querySelector(FIELD_SELECTOR) || null;
+}
+
+function focusAndFlash(el) {
+    if (!el) return;
+    el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    try { el.focus({ preventScroll: true }); } catch { el.focus(); }
+    el.classList.add('fm-flash');
+    setTimeout(() => el.classList.remove('fm-flash'), 1400);
+}
+
+/**
+ * A claim section card.
+ *  sameLayout  → the edit form is always shown, locked and styled as text, so pressing Edit
+ *                (or clicking a field) just unlocks it in place – nothing moves.
+ *                `children` then holds only read-only extras (system dates, summaries).
+ *  otherwise   → the section's own view is shown; clicking a value opens the form and
+ *                jumps to that field, ready to type in.
+ */
+const EditableSection = ({ title, icon: Icon, claim, onUpdate, children, EditComponent, canEdit = true, sameLayout = false }) => {
+    const [isEditing, setIsEditing] = useState(false);
+    const [version, setVersion] = useState(0);
+    const bodyRef = useRef(null);
+    const pendingFocus = useRef(null); // { index } (same layout) or { label } (own view)
+
+    // Exit edit mode when claim is updated externally (e.g. wizard save), and redraw the
+    // locked form from the fresh claim.
     useEffect(() => {
         setIsEditing(false);
+        setVersion((v) => v + 1);
     }, [claim]);
 
     const handleSave = (updatedData) => {
         onUpdate({ ...claim, ...updatedData });
         setIsEditing(false);
+    };
+
+    const editable = !!(EditComponent && canEdit);
+
+    // Locked view: mark empty fields (amber, "Not set") the way the old view did.
+    useLayoutEffect(() => {
+        if (!sameLayout || isEditing || !bodyRef.current) return;
+        bodyRef.current.querySelectorAll('input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]), textarea, select').forEach((el) => {
+            const empty = el.value === '' || el.value == null;
+            el.classList.toggle('fm-empty', empty);
+            if (empty && !el.dataset.fmPh) { el.dataset.fmPh = '1'; el.placeholder = 'Not set'; }
+        });
+    });
+
+    // After switching to edit, put the cursor where the user clicked.
+    useEffect(() => {
+        if (!isEditing || !pendingFocus.current || !bodyRef.current) return;
+        const want = pendingFocus.current; pendingFocus.current = null;
+        requestAnimationFrame(() => {
+            const root = bodyRef.current; if (!root) return;
+            const el = want.index != null
+                ? root.querySelectorAll(FIELD_SELECTOR)[want.index]
+                : findControlByLabel(root, want.label);
+            focusAndFlash(el || root.querySelector(FIELD_SELECTOR));
+        });
+    }, [isEditing]);
+
+    const startEdit = (focus) => { if (!editable) return; pendingFocus.current = focus || null; setIsEditing(true); };
+
+    // Same layout: a click anywhere in a locked field opens editing on that field.
+    const onLockedClick = (e) => {
+        if (!editable) return;
+        const root = bodyRef.current; if (!root) return;
+        const block = e.target.closest('div'); if (!block) return;
+        const control = block.querySelector(FIELD_SELECTOR) || e.target.closest('label')?.parentElement?.querySelector(FIELD_SELECTOR);
+        const list = Array.from(root.querySelectorAll(FIELD_SELECTOR));
+        const index = control ? list.indexOf(control) : -1;
+        startEdit(index >= 0 ? { index } : null);
+    };
+
+    // Own view: clicking a value (DetailRow etc.) opens editing on the matching field.
+    const onViewClick = (e) => {
+        if (!editable) return;
+        const row = e.target.closest('[data-edit-label]');
+        if (row) startEdit({ label: row.getAttribute('data-edit-label') });
     };
 
     return (
@@ -142,11 +229,24 @@ const EditableSection = ({ title, icon: Icon, claim, onUpdate, children, EditCom
                     )}
                 </div>
             </div>
-            <div className="">
-                {isEditing ? (
+            <div ref={bodyRef}>
+                {sameLayout && EditComponent ? (
+                    <>
+                        {children}
+                        {isEditing ? (
+                            <EditComponent key={`edit-${version}`} claim={claim} onSave={handleSave} onCancel={() => setIsEditing(false)} />
+                        ) : (
+                            // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
+                            <fieldset key={`view-${version}`} disabled className={`fm-readonly ${editable ? 'fm-click-edit' : ''}`} onClick={onLockedClick} title={editable ? 'Click a field to edit it' : undefined}>
+                                <EditComponent claim={claim} onSave={() => {}} onCancel={() => {}} />
+                            </fieldset>
+                        )}
+                    </>
+                ) : isEditing ? (
                     <EditComponent claim={claim} onSave={handleSave} onCancel={() => setIsEditing(false)} />
                 ) : (
-                    children
+                    // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
+                    <div className={editable ? 'fm-click-edit' : ''} onClick={onViewClick}>{children}</div>
                 )}
             </div>
         </div>
@@ -188,7 +288,7 @@ function DetailRow({ label, value, isCurrency = false, isDate = false, isStatus 
 
     // Empty fields stay marked (amber) so gaps are easy to spot, just more quietly.
     return (
-        <div className={`py-2 px-3 rounded-lg transition-colors ${isEmpty ? 'bg-warning-bg/60 border border-warning/25' : 'hover:bg-muted/50'}`}>
+        <div data-edit-label={label} className={`py-2 px-3 rounded-lg transition-colors ${isEmpty ? 'bg-warning-bg/60 border border-warning/25' : 'hover:bg-muted/50'}`}>
             <div className="text-xs font-medium text-muted-foreground mb-0.5">
                 {label}
             </div>
