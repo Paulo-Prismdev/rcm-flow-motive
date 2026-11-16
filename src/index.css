@@ -94,13 +94,15 @@
     --fm-glass-edge: rgba(255, 255, 255, 0.70);
     --fm-glass-outline: rgba(17, 24, 52, 0.10);
     --fm-scrim: rgba(10, 15, 36, 0.32);
-    --fm-glow-navy: rgba(36, 58, 160, 0.26);
-    --fm-glow-green: rgba(20, 147, 90, 0.20);
+    --fm-glow-navy: rgba(59, 108, 255, 0.30);
+    --fm-glow-green: rgba(0, 190, 115, 0.24);
+    --fm-glow-indigo: rgba(88, 80, 236, 0.14);
+    --fm-glow-mint: rgba(0, 214, 160, 0.14);
     --fm-chrome-glow-green: rgba(0, 214, 130, 0.30);
     --fm-chrome-glow-blue: rgba(59, 108, 255, 0.36);
     --fm-on-chrome-muted: #B9C1DE;
 
-    --fm-shadow-card: 0 1px 2px rgba(17, 24, 52, 0.06);
+    --fm-shadow-card: 0 1px 2px rgba(17, 24, 52, 0.06), 0 6px 18px -8px rgba(17, 24, 52, 0.16);
     --fm-shadow-raised: 0 8px 20px -6px rgba(17, 24, 52, 0.18);
     --fm-shadow-window: 0 28px 70px -18px rgba(10, 15, 36, 0.45);
     --fm-blur-chrome: 20px;
@@ -171,13 +173,15 @@
     --fm-glass-edge: rgba(255, 255, 255, 0.10);
     --fm-glass-outline: rgba(0, 0, 0, 0.40);
     --fm-scrim: rgba(0, 0, 0, 0.55);
-    --fm-glow-navy: rgba(64, 96, 255, 0.32);
-    --fm-glow-green: rgba(60, 203, 127, 0.20);
+    --fm-glow-navy: rgba(64, 108, 255, 0.36);
+    --fm-glow-green: rgba(0, 210, 130, 0.22);
+    --fm-glow-indigo: rgba(110, 90, 255, 0.18);
+    --fm-glow-mint: rgba(0, 224, 160, 0.12);
     --fm-chrome-glow-green: rgba(0, 224, 140, 0.24);
     --fm-chrome-glow-blue: rgba(59, 108, 255, 0.32);
     --fm-on-chrome-muted: #AEB6D6;
 
-    --fm-shadow-card: 0 1px 2px rgba(0, 0, 0, 0.40);
+    --fm-shadow-card: 0 1px 2px rgba(0, 0, 0, 0.40), 0 8px 22px -10px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.04);
     --fm-shadow-raised: 0 8px 20px -6px rgba(0, 0, 0, 0.55);
     --fm-shadow-window: 0 28px 70px -14px rgba(0, 0, 0, 0.70);
   }
@@ -189,8 +193,11 @@
 ═══════════════════════════════════════════ */
 .fm-canvas {
   background:
-    radial-gradient(60% 55% at 100% 0%, var(--fm-glow-navy) 0%, transparent 70%),
-    radial-gradient(55% 50% at 0% 100%, var(--fm-glow-green) 0%, transparent 70%),
+    radial-gradient(55% 50% at 100% 0%, var(--fm-glow-navy) 0%, transparent 70%),
+    radial-gradient(50% 55% at 0% 100%, var(--fm-glow-green) 0%, transparent 70%),
+    radial-gradient(45% 40% at 18% 38%, var(--fm-glow-indigo) 0%, transparent 70%),
+    radial-gradient(40% 35% at 62% 8%, var(--fm-glow-mint) 0%, transparent 70%),
+    radial-gradient(45% 45% at 85% 85%, var(--fm-glow-indigo) 0%, transparent 70%),
     hsl(var(--background));
   background-attachment: fixed;
 }
@@ -242,8 +249,11 @@
   body {
     @apply bg-background text-foreground;
     background:
-      radial-gradient(60% 55% at 100% 0%, var(--fm-glow-navy) 0%, transparent 70%),
-      radial-gradient(55% 50% at 0% 100%, var(--fm-glow-green) 0%, transparent 70%),
+      radial-gradient(55% 50% at 100% 0%, var(--fm-glow-navy) 0%, transparent 70%),
+      radial-gradient(50% 55% at 0% 100%, var(--fm-glow-green) 0%, transparent 70%),
+      radial-gradient(45% 40% at 18% 38%, var(--fm-glow-indigo) 0%, transparent 70%),
+      radial-gradient(40% 35% at 62% 8%, var(--fm-glow-mint) 0%, transparent 70%),
+      radial-gradient(45% 45% at 85% 85%, var(--fm-glow-indigo) 0%, transparent 70%),
       hsl(var(--background));
     background-attachment: fixed;
     font-variant-numeric: tabular-nums;
