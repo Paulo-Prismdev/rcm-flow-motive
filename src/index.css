@@ -444,9 +444,10 @@ select:not([size]):not([multiple]) {
   box-sizing: border-box;
 }
 
-/* Side padding at zero weight, so a field that makes room for an icon (pl-8) keeps it
-   instead of the icon sitting on top of the text. */
-:where(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="hidden"]), select:not([size]):not([multiple])) {
+/* Side padding at element weight only, so a field that makes room for an icon (pl-8)
+   keeps it instead of the icon sitting on top of the text. */
+input:where(:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="hidden"])),
+select:where(:not([size]):not([multiple])) {
   padding-left: 10px;
   padding-right: 10px;
 }
