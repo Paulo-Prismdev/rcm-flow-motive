@@ -44,7 +44,7 @@ const EXCEPTION_CONFIG = {
   },
   'Total Loss': {
     bg: 'bg-muted', border: 'border-border',
-    iconBg: 'bg-gray-500 border-gray-500', title: 'Total Loss',
+    iconBg: 'bg-neutral border-neutral', title: 'Total Loss',
     titleColor: 'text-foreground', Icon: AlertTriangle,
   },
 };

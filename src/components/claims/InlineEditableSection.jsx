@@ -23,7 +23,7 @@ export function InlineField({ label, name, type = 'text', isCurrency = false, is
     const { isEditing, draft, setField } = useInlineEdit();
     const value = draft[name];
     const isEmpty = !isEditing && (value === null || value === undefined || value === '' || value === 0);
-    const display = formatDisplay(value, isDate, isCurrency);
+    const display = isEmpty ? 'Not set' : formatDisplay(value, isDate, isCurrency);
     const inputType = isDate ? 'date' : (isCurrency || type === 'number' ? 'number' : type);
 
     const handleChange = (e) => {
@@ -48,10 +48,10 @@ export function InlineField({ label, name, type = 'text', isCurrency = false, is
             placeholder={placeholder}
             readOnly={readOnly}
             style={{ height: '24px', minHeight: '24px', maxHeight: '24px', padding: '0 8px', lineHeight: '24px' }}
-            className={`w-full ${valueClass} ${isEmpty ? 'text-warning-fg' : 'text-foreground'} bg-muted/50 dark:bg-gray-800 border border-border/70 rounded-[5px] outline-none focus:border-ring focus:ring-1 focus:ring-ring/40 ${readOnly ? 'cursor-not-allowed opacity-60' : ''}`}
+            className={`w-full ${valueClass} ${isEmpty ? 'text-warning-fg' : 'text-foreground'} bg-card border border-input rounded-md outline-none focus:border-ring focus:ring-1 focus:ring-ring/40 ${readOnly ? 'cursor-not-allowed opacity-60' : ''}`}
         />
     ) : (
-        <div className={`${valueClass} ${isEmpty ? 'text-warning-fg' : 'text-foreground'} ${readOnly ? 'opacity-60' : ''}`}>
+        <div className={`${valueClass} ${isEmpty ? 'text-warning-fg !font-normal' : 'text-foreground'} ${readOnly ? 'opacity-60' : ''}`}>
             {display}
         </div>
     );
@@ -59,14 +59,14 @@ export function InlineField({ label, name, type = 'text', isCurrency = false, is
     if (bare) {
         return (
             <div>
-                <div className="text-xs font-semibold text-foreground-muted mb-1">{label}</div>
+                <div className="text-xs font-medium text-muted-foreground mb-1">{label}</div>
                 <div className="flex items-center min-h-[24px]">{content}</div>
             </div>
         );
     }
 
     return (
-        <div className={`py-2 px-3 rounded-[8px] transition-colors ${isEmpty ? 'bg-warning-bg border border-warning/30' : isEditing ? 'bg-muted/30' : 'hover:bg-muted/50'}`}>
+        <div className={`py-2 px-3 rounded-lg transition-colors ${isEmpty ? 'bg-warning-bg/60 border border-warning/25' : isEditing ? 'bg-muted/30' : 'hover:bg-muted/50'}`}>
             <div className="text-xs font-medium text-muted-foreground mb-0.5">{label}</div>
             <div className="flex items-center min-h-[24px]">{content}</div>
         </div>
@@ -94,14 +94,15 @@ export default function InlineEditableSection({ title, icon: Icon, claim, onUpda
         <InlineEditContext.Provider value={{ isEditing, draft, setField }}>
             <div className="bg-card border border-border rounded-xl p-4 md:p-5 shadow-card">
                 <div className="flex justify-between items-center pb-3 mb-4 border-b border-border">
-                    <div className="flex items-center gap-2.5 text-left flex-grow">
-                        <Icon className="w-4 h-4 text-muted-foreground" />
-                        <h3 className="text-xs font-semibold text-muted-foreground">{title}</h3>
+                    <div className="flex items-center gap-2.5 text-left flex-grow min-w-0">
+                        <Icon className="w-4 h-4 text-muted-foreground flex-shrink-0" aria-hidden="true" />
+                        <h3 className="text-[15px] font-semibold text-foreground truncate">{title}</h3>
                     </div>
                     <div className="flex items-center gap-2">
                         {canEdit && !isEditing && (
-                            <Button variant="ghost" size="icon" onClick={() => setIsEditing(true)} className="h-8 w-8 hover:text-gold">
-                                <Edit className="w-4 h-4" />
+                            <Button variant="outline" size="sm" onClick={() => setIsEditing(true)} className="gap-1.5" aria-label={`Edit ${title}`}>
+                                <Edit className="w-3.5 h-3.5" aria-hidden="true" />
+                                Edit
                             </Button>
                         )}
                         {isEditing && (
@@ -109,7 +110,7 @@ export default function InlineEditableSection({ title, icon: Icon, claim, onUpda
                                 <Button variant="outline" size="sm" onClick={handleCancel} className="h-8 gap-1.5">
                                     <X className="w-3.5 h-3.5" /> Cancel
                                 </Button>
-                                <Button size="sm" onClick={handleSave} className="h-8 gap-1.5 bg-primary text-primary-foreground">
+                                <Button size="sm" onClick={handleSave} className="h-8 gap-1.5">
                                     <Save className="w-3.5 h-3.5" /> Save
                                 </Button>
                             </div>

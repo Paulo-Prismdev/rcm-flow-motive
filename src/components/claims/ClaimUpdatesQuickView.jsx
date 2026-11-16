@@ -37,7 +37,7 @@ const UPDATE_TYPE_COLORS = {
   "Referrer Response": "bg-warning", "Credit Repair Communication": "bg-danger", "Action Taken": "bg-info",
   "Awaiting Information": "bg-warning", "Documentation Received": "bg-success",
   "Parts Update": "bg-pink-500", "Repair Progress": "bg-info",
-  "Quality Check": "bg-success", "Other": "bg-gray-500"
+  "Quality Check": "bg-success", "Other": "bg-neutral"
 };
 
 export default function ClaimUpdatesQuickView({ claim, isOpen, onClose }) {
