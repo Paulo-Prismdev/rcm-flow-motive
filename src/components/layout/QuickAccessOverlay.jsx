@@ -25,6 +25,8 @@ export default function QuickAccessOverlay({ pageName, onClose }) {
     const handler = (e) => {
       if (e.key === 'Escape') {
         if (document.querySelector('[data-custom-portal-modal="true"]')) return;
+        // A window opened from inside this one closes first.
+        if (document.querySelector('[data-overlay-dismiss], [role="dialog"][data-state="open"], [role="alertdialog"][data-state="open"]')) return;
         onClose();
       }
     };
