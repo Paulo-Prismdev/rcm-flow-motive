@@ -1052,6 +1052,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
       case 'status':
         return (
           <EditableSection 
+            sameLayout
             title="Job overview" 
             icon={Clock} 
             claim={claim} 
@@ -1059,24 +1060,9 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
             EditComponent={ClaimStatusEditForm}
             canEdit={canEdit}
           >
-            <div className="grid grid-cols-1 lg:grid-cols-2 m-fields-2 gap-2">
-              <DetailRow label="Registration" value={claim.reg} />
-              <DetailRow label="Claim Type" value={claim.claim_type} />
-              <DetailRow label="Date Created (System)" value={claim.created_date} isDate />
-              <DetailRow label="Date of Loss" value={claim.loss_date} isDate />
-              <DetailRow label="Time of Loss" value={claim.loss_time} />
-              <DetailRow label="Use of Vehicle" value={claim.vehicle_use} />
-              <DetailRow label="Courtesy Car Required" value={claim.courtesy_car_required === true ? 'Yes' : (claim.courtesy_car_required || 'No')} />
-              <DetailRow label="Hire to Invoice" value={hireSummaryText(claim)} />
-            </div>
-            <div className="mt-2 py-3 px-4 rounded-lg glass-inset">
-              <div className="text-xs font-semibold text-foreground-muted mb-2">Incident Location</div>
-              <div className="text-sm font-medium mb-3">{claim.incident_location || '-'}</div>
-              <div className="text-xs font-semibold text-foreground-muted mb-2">Circumstances</div>
-              <div className="text-sm leading-relaxed whitespace-pre-wrap">
-                {claim.circumstances || '-'}
-              </div>
-            </div>
+            {claim.created_date && (
+              <p className="text-xs text-muted-foreground mb-3">Created in the system {(() => { try { return format(new Date(claim.created_date), 'dd/MM/yyyy'); } catch { return ''; } })()}</p>
+            )}
           </EditableSection>
         );
 
@@ -1187,70 +1173,22 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
 
       case 'driver':
         return (
-          <EditableSection title="Repair Contact — Driver" icon={User} claim={claim} onUpdate={handleUpdate} EditComponent={DriverEditComponent} canEdit={canEdit}>
-            <PartyDisplayCard
-              title="Repair Contact — Driver"
-              partyType="driver"
-              data={{
-                name: claim.driver_contact_name,
-                phone: claim.driver_contact_phone,
-                email: claim.driver_contact_email,
-                address_line_1: claim.driver_contact_address_line_1,
-                address_line_2: claim.driver_contact_address_line_2,
-                town: claim.driver_contact_town,
-                county: claim.driver_contact_county,
-                postcode: claim.driver_contact_postcode,
-              }}
-              extras={[
-                { label: 'Driving License', value: claim.client_driving_license, isEmpty: !claim.client_driving_license },
-                { label: 'Same as Client', value: claim.driver_same_as_client === false ? 'No — different person' : 'Yes', isEmpty: false },
-              ]}
-              canEdit={false}
-              bare={true}
-            />
+          <EditableSection sameLayout
+            title="Repair Contact — Driver" icon={User} claim={claim} onUpdate={handleUpdate} EditComponent={DriverEditComponent} canEdit={canEdit}>
           </EditableSection>
         );
 
       case 'thirdParty':
         return (
-          <EditableSection title="Third Party" icon={Users} claim={claim} onUpdate={handleUpdate} EditComponent={ThirdPartyEditComponent} canEdit={canEdit}>
-            {(claim.tp_name || claim.tp_reg) ? (
-              <div className="space-y-3">
-                <PartyDisplayCard
-                  title="Third Party"
-                  partyType="thirdParty"
-                  data={{
-                    name: claim.tp_name,
-                    phone: claim.tp_phone,
-                    email: claim.tp_email,
-                    address_line_1: claim.tp_address_line_1,
-                    address_line_2: claim.tp_address_line_2,
-                    town: claim.tp_town,
-                    county: claim.tp_county,
-                    postcode: claim.tp_postcode,
-                  }}
-                  extras={[
-                    { label: 'TP Driver/Contact', value: claim.tp_driver_contact, isEmpty: !claim.tp_driver_contact },
-                    { label: 'TP Broker', value: claim.tp_broker_name, isEmpty: !claim.tp_broker_name },
-                    { label: 'TP Insurer', value: claim.tp_insurer, isEmpty: !claim.tp_insurer },
-                    { label: 'TP Claim Ref', value: claim.tp_claim_ref, isEmpty: !claim.tp_claim_ref },
-                    { label: 'TP Policy No.', value: claim.tp_policy_number, isEmpty: !claim.tp_policy_number },
-                    { label: 'TP Registration', value: claim.tp_reg, isEmpty: !claim.tp_reg },
-                    { label: 'TP Make / Model', value: claim.tp_make_model, isEmpty: !claim.tp_make_model },
-                  ]}
-                  canEdit={false}
-                  bare={true}
-                />
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground text-center py-8">No third party involvement recorded. Click edit to add details.</p>
-            )}
+          <EditableSection sameLayout
+            title="Third Party" icon={Users} claim={claim} onUpdate={handleUpdate} EditComponent={ThirdPartyEditComponent} canEdit={canEdit}>
           </EditableSection>
         );
 
       case 'vehicle':
         return (
-          <EditableSection title="Vehicle details" icon={Car} claim={claim} onUpdate={handleUpdate} EditComponent={ClaimVehicleForm} canEdit={canEdit}>
+          <EditableSection sameLayout
+            title="Vehicle details" icon={Car} claim={claim} onUpdate={handleUpdate} EditComponent={ClaimVehicleForm} canEdit={canEdit}>
             {/* DVLA Lookup Button */}
             {claim.reg && (
               <div className="mb-4 p-3 rounded-xl bg-info-bg border border-info/30">
@@ -1272,40 +1210,6 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                 )}
               </div>
             )}
-            
-            <div className="mb-6 m-block-tight">
-              <h4 className="text-sm font-semibold text-muted-foreground mb-3">Basic Information</h4>
-              <div className="grid grid-cols-1 lg:grid-cols-2 m-fields-2 gap-2">
-                <DetailRow label="Make (DVLA)" value={claim.vehicle_make} />
-                <DetailRow label="Model (DVLA)" value={claim.vehicle_model} />
-                <DetailRow label="Colour" value={claim.vehicle_colour} />
-                <DetailRow label="Fuel Type" value={claim.vehicle_fuel_type} />
-                <DetailRow label="Year of Manufacture" value={claim.vehicle_year_of_manufacture} />
-                <DetailRow label="Vehicle Type" value={claim.vehicle_type} />
-              </div>
-            </div>
-
-            <div className="mb-6 m-block-tight">
-              <h4 className="text-sm font-semibold text-muted-foreground mb-3">Technical Details</h4>
-              <div className="grid grid-cols-1 lg:grid-cols-2 m-fields-2 gap-2">
-                <DetailRow label="Engine Capacity (CC)" value={claim.vehicle_engine_capacity} />
-                <DetailRow label="CO2 Emissions (g/km)" value={claim.vehicle_co2_emissions} />
-                <DetailRow label="Euro Status" value={claim.vehicle_euro_status} />
-                <DetailRow label="Wheelplan" value={claim.vehicle_wheelplan} />
-                <DetailRow label="Revenue Weight (kg)" value={claim.vehicle_revenue_weight} />
-              </div>
-            </div>
-
-            <div className="mb-6 m-block-tight">
-              <h4 className="text-sm font-semibold text-muted-foreground mb-3">MOT & Tax Status</h4>
-              <div className="grid grid-cols-1 lg:grid-cols-2 m-fields-2 gap-2">
-                <DetailRow label="MOT Status" value={claim.vehicle_mot_status} />
-                <DetailRow label="MOT Expiry Date" value={claim.vehicle_mot_expiry_date} isDate />
-                <DetailRow label="Tax Status" value={claim.vehicle_tax_status} />
-                <DetailRow label="Tax Due Date" value={claim.vehicle_tax_due_date} isDate />
-                <DetailRow label="Last V5C Issued" value={claim.vehicle_date_of_last_v5c_issued} isDate />
-              </div>
-            </div>
           </EditableSection>
         );
 
@@ -1350,6 +1254,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
       case 'excessContribution':
         return (
           <EditableSection 
+            sameLayout
             title="Excess contribution" 
             icon={BadgePercent}
             claim={claim} 
@@ -1357,39 +1262,13 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
             EditComponent={ClaimExcessContributionForm} 
             canEdit={canEdit}
           >
-            {(!claim.excess_contribution_method || claim.excess_contribution_method === 'None') ? (
-              <div className="text-center py-8">
-                <p className="text-muted-foreground text-sm">Excess Contribution — Not Applicable</p>
-                <p className="text-xs text-muted-foreground mt-1">Toggle this on in the edit form if an excess contribution is needed.</p>
-              </div>
-            ) : (
-              <>
-                <div className="grid grid-cols-1 lg:grid-cols-2 m-fields-2 gap-2">
-                  <DetailRow label="Contribution Amount" value={claim.excess_contribution_amount} isCurrency />
-                  <DetailRow label="Payment Method" value={claim.excess_contribution_method || 'None'} />
-                  <DetailRow label="Contribution Paid" value={claim.excess_contribution_paid ? 'Yes' : 'No'} />
-                  <DetailRow label="Date Paid" value={claim.excess_contribution_paid_date} isDate />
-                </div>
-                {claim.excess_contribution_method === 'Via Repairer' && (
-                  <div className="mt-2 py-3 px-4 rounded-lg glass-inset">
-                    <div className="text-xs font-semibold text-foreground-muted mb-2">Invoice from Repairer</div>
-                    <div className="text-sm">{claim.excess_contribution_invoice_received ? 'Received ✓' : 'Not Received'}</div>
-                  </div>
-                )}
-                {claim.excess_contribution_notes && (
-                  <div className="mt-2 py-3 px-4 rounded-lg glass-inset">
-                    <div className="text-xs font-semibold text-foreground-muted mb-2">Notes</div>
-                    <div className="text-sm leading-relaxed whitespace-pre-wrap">{claim.excess_contribution_notes}</div>
-                  </div>
-                )}
-              </>
-            )}
           </EditableSection>
         );
 
       case 'instructionDefaults':
         return (
           <EditableSection 
+            sameLayout
             title="Instruction defaults" 
             icon={FileText}
             claim={claim} 
@@ -1397,30 +1276,13 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
             EditComponent={InstructionDefaultsForm}
             canEdit={canEdit}
           >
-            <div className="grid grid-cols-1 lg:grid-cols-2 m-fields-2 gap-2">
-              <DetailRow label="Default Contact Source" value={claim.last_contact_source || 'Not set'} />
-              <DetailRow label="Authorised By" value={claim.authorised_by || 'Not set'} />
-            </div>
           </EditableSection>
         );
 
       case 'referrer':
         return (
-          <EditableSection title="Referrer details" icon={Briefcase} claim={claim} onUpdate={handleUpdate} EditComponent={ClaimReferrerForm} canEdit={canEdit}>
-            {claim.referrer ? (
-              <div className="grid grid-cols-1 lg:grid-cols-2 m-fields-2 gap-2">
-                <DetailRow label="Referrer" value={claim.referrer} />
-                <DetailRow label="Referrer Email" value={claim.referrer_email} />
-                <DetailRow label="Referrer Ref" value={claim.referrer_ref} />
-                <DetailRow label="File Handler" value={claim.file_handler} />
-                <DetailRow label="% to Referrer" value={claim.percent_to_referrer} />
-              </div>
-            ) : (
-              <div className="text-center py-8">
-                <p className="text-muted-foreground text-sm">No Referrer — Direct Client</p>
-                <p className="text-xs text-muted-foreground mt-1">No referral fees are payable for this claim.</p>
-              </div>
-            )}
+          <EditableSection sameLayout
+            title="Referrer details" icon={Briefcase} claim={claim} onUpdate={handleUpdate} EditComponent={ClaimReferrerForm} canEdit={canEdit}>
           </EditableSection>
         );
 
