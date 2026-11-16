@@ -67,8 +67,10 @@ function getConditionValue(claim: any, field: string): any {
     case 'invoice_status': return claim.invoice_status || '';
     case 'claim_type': return claim.claim_type || '';
     case 'is_total_loss': return isTotalLossClaim(claim);
-    case 'is_on_site': return !!claim.on_site_date && !claim.hand_over_date;
-    case 'is_returned': return !!claim.hand_over_date;
+    // A claim back in for rectification keeps its original repair dates, which
+    // must not read as on site or returned (same as before those dates were kept).
+    case 'is_on_site': return claim.journey_status !== 'Rectification' && !!claim.on_site_date && !claim.hand_over_date;
+    case 'is_returned': return claim.journey_status !== 'Rectification' && !!claim.hand_over_date;
     case 'has_bodyshop': return !!claim.bodyshop_id;
     case 'requires_indemnity': return !!claim.requires_indemnity;
     default: return claim[field];
