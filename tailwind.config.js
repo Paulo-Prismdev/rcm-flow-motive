@@ -15,7 +15,26 @@ module.exports = {
   			'2xl': 'calc(var(--radius) + 8px)',
   		},
   		boxShadow: {
-  		mac: '0 1px 2px rgba(16, 24, 40, 0.05)',
+  		mac: 'var(--fm-shadow-card)',
+  		card: 'var(--fm-shadow-card)',
+  		raised: 'var(--fm-shadow-raised)',
+  		window: 'var(--fm-shadow-window)',
+  		},
+  		// Flowmotive design system: eight named layers, three control heights.
+  		zIndex: {
+  			raised: '10',
+  			chrome: '30',
+  			workspace: '40',
+  			sheet: '50',
+  			window: '60',
+  			menu: '70',
+  			toast: '80',
+  			tooltip: '90',
+  		},
+  		height: {
+  			'control-sm': '2rem',
+  			control: '2.25rem',
+  			'control-lg': '2.75rem',
   		},
   		colors: {
   		mac: {
@@ -27,6 +46,29 @@ module.exports = {
   			navy: 'hsl(var(--mac-navy))',
   			sidebar: 'hsl(var(--mac-sidebar))'
   		},
+  			surface: {
+  				DEFAULT: 'hsl(var(--card))',
+  				muted: 'hsl(var(--fm-surface-muted))',
+  				hover: 'hsl(var(--fm-surface-hover))',
+  				selected: 'hsl(var(--fm-surface-selected))',
+  			},
+  			ink: {
+  				DEFAULT: 'hsl(var(--foreground))',
+  				muted: 'hsl(var(--muted-foreground))',
+  				subtle: 'hsl(var(--fm-ink-subtle))',
+  			},
+  			line: {
+  				DEFAULT: 'hsl(var(--border))',
+  				strong: 'hsl(var(--input))',
+  			},
+  			brand: { green: 'hsl(var(--fm-brand-green))' },
+  			link: 'hsl(var(--fm-link))',
+  			'on-solid': 'hsl(var(--fm-on-solid))',
+  			success: { DEFAULT: 'hsl(var(--fm-success) / <alpha-value>)', bg: 'hsl(var(--fm-success-bg))', fg: 'hsl(var(--fm-success-fg))' },
+  			warning: { DEFAULT: 'hsl(var(--fm-warning) / <alpha-value>)', bg: 'hsl(var(--fm-warning-bg))', fg: 'hsl(var(--fm-warning-fg))' },
+  			danger: { DEFAULT: 'hsl(var(--fm-danger) / <alpha-value>)', bg: 'hsl(var(--fm-danger-bg))', fg: 'hsl(var(--fm-danger-fg))' },
+  			info: { DEFAULT: 'hsl(var(--fm-info) / <alpha-value>)', bg: 'hsl(var(--fm-info-bg))', fg: 'hsl(var(--fm-info-fg))' },
+  			neutral: { DEFAULT: 'hsl(var(--fm-neutral) / <alpha-value>)', bg: 'hsl(var(--fm-neutral-bg))', fg: 'hsl(var(--fm-neutral-fg))' },
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			card: {
