@@ -120,7 +120,15 @@ export default function Layout({ children, currentPageName }) {
 
   // Refresh reloads the data on screen, never the browser page, so open windows and
   // scroll positions stay where they are.
-  const refreshData = () => queryClient.invalidateQueries();
+  // Full reload, as before round 2: some screens load their data outside the shared
+  // query cache, so only a reload refreshes everything. The icon spins so it's clear
+  // the click registered; the open claim stays open (its id is in the address).
+  const [refreshing, setRefreshing] = useState(false);
+  const refreshData = () => {
+    setRefreshing(true);
+    queryClient.cancelQueries();
+    setTimeout(() => window.location.reload(), 150);
+  };
 
   // Escape closes the top-most hand-built window (one whose backdrop is marked
   // data-overlay-dismiss), the same as the shared windows already do. A shared window
@@ -521,10 +529,11 @@ export default function Layout({ children, currentPageName }) {
               <div className="flex items-center gap-1">
                 <button
                 onClick={refreshData}
+                disabled={refreshing}
                 className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
-                title="Refresh data"
-                aria-label="Refresh data">
-                  <RefreshCw className="w-4 h-4" />
+                title="Refresh"
+                aria-label={refreshing ? 'Refreshing' : 'Refresh'}>
+                  <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin text-foreground' : ''}`} />
                 </button>
                 {isInternalUser &&
               <button
