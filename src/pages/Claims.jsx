@@ -983,17 +983,11 @@ export default function ClaimsPage() {
 
       {/* Phones: Filters, stage chips you swipe through, and the List / Grouped switch */}
       {isPhone && (
-        <div className="md:hidden flex-shrink-0 border-b border-border">
-          <div className="flex gap-2 overflow-x-auto px-3 pt-2.5 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" role="group" aria-label="Filter by stage">
-            <button
-              type="button"
-              onClick={() => setShowFilters(s => !s)}
-              className={`flex-shrink-0 inline-flex items-center gap-1.5 h-9 px-3 rounded-full border text-[13px] font-medium ${activeFiltersCount > 0 || showFilters ? 'bg-info-bg border-info/30 text-info-fg' : 'border-border bg-card'}`}>
-              <Filter className="w-3.5 h-3.5" />Filters{activeFiltersCount > 0 ? ` (${activeFiltersCount})` : ''}
-            </button>
+        <div className="md:hidden flex-shrink-0">
+          <div className="flex gap-1.5 overflow-x-auto px-4 pt-1 pb-2.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" role="group" aria-label="Show">
             {[
-              { key: 'action', label: 'Needs action' },
               { key: 'all', label: 'All' },
+              { key: 'action', label: 'Needs action' },
               ...availableStatuses.map(s => ({ key: s, label: s })),
             ].map(({ key, label }) => {
               const n = filteredClaims.filter(c => chipMatches(c, key)).length;
@@ -1005,30 +999,19 @@ export default function ClaimsPage() {
                   type="button"
                   onClick={() => setPhoneChip(key)}
                   aria-pressed={on}
-                  className={`flex-shrink-0 inline-flex items-center gap-1.5 h-9 px-3 rounded-full border text-[13px] font-medium whitespace-nowrap transition-colors ${on ? 'bg-primary border-primary text-primary-foreground' : 'border-border bg-card text-foreground'}`}>
+                  className={`flex-shrink-0 inline-flex items-center gap-1.5 h-[34px] px-3 rounded-full border text-[13px] font-medium whitespace-nowrap transition-colors ${on ? 'bg-primary border-primary text-primary-foreground' : 'border-border bg-card text-muted-foreground'}`}>
                   {key === 'action' && <span className="w-1.5 h-1.5 rounded-full bg-danger" aria-hidden="true" />}
                   {label}
-                  <span className={`text-[11.5px] tabular-nums ${on ? 'opacity-75' : 'text-muted-foreground'}`}>{n}</span>
+                  <span className={`text-[12px] font-semibold tabular-nums ${on ? '' : 'text-foreground'}`}>{n}</span>
                 </button>
               );
             })}
-          </div>
-          <div className="flex items-center justify-between px-4 pb-2">
-            <span className="text-xs text-muted-foreground">
-              {phoneView === 'list' ? (sortBy === 'priority' ? 'Most urgent first' : (SORT_OPTIONS.find(o => o.value === sortBy) || {}).label?.replace('Sort: ', '')) : 'By stage'}
-            </span>
-            <div className="inline-flex rounded-lg bg-muted p-0.5" role="group" aria-label="View">
-              {[['list', 'List'], ['groups', 'Grouped']].map(([v, l]) => (
-                <button
-                  key={v}
-                  type="button"
-                  onClick={() => setPhoneView(v)}
-                  aria-pressed={phoneView === v}
-                  className={`h-7 px-3 rounded-md text-xs font-medium ${phoneView === v ? 'bg-card text-foreground shadow-card' : 'text-muted-foreground'}`}>
-                  {l}
-                </button>
-              ))}
-            </div>
+            <button
+              type="button"
+              onClick={() => setShowFilters(s => !s)}
+              className={`flex-shrink-0 inline-flex items-center gap-1.5 h-[34px] px-3 rounded-full border text-[13px] font-medium ${activeFiltersCount > 0 || showFilters ? 'bg-info-bg border-info/30 text-info-fg' : 'border-border bg-card text-muted-foreground'}`}>
+              <Filter className="w-3.5 h-3.5" />Filters{activeFiltersCount > 0 ? ` (${activeFiltersCount})` : ''}
+            </button>
           </div>
         </div>
       )}
@@ -1135,17 +1118,27 @@ export default function ClaimsPage() {
           </div>
         ) : (
           <>
-            {/* ── PHONE flat list: one card per claim, in the chosen sort (most urgent first by default) ── */}
-            {isPhone && phoneView === 'list' && (
-              <div className="xl:hidden py-1 pb-24">
-                {cardClaims.length === 0
-                  ? <p className="text-sm text-muted-foreground text-center py-10">No claims in this view.</p>
-                  : cardClaims.map(renderMobileCard)}
+            {/* ── PHONE: "Needs action today" then everything else, or grouped by stage ── */}
+            {isPhone && (
+              <div className="md:hidden pb-28">
+                {cardClaims.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-10">No claims in this view.</p>
+                ) : phoneView === 'list' ? (
+                  <>
+                    {phoneGroup('Needs action today', cardClaims.filter(needsAction), 'phone-action', false)}
+                    {phoneGroup(cardClaims.some(needsAction) ? 'Everything else' : 'Claims', cardClaims.filter(c => !needsAction(c)), 'phone-rest', false)}
+                  </>
+                ) : (
+                  <>
+                    {availableStatuses.map(g => phoneGroup(g, cardClaims.filter(c => getGroupKey(c) === g), g, true))}
+                    {phoneGroup('Closed', cardClaims.filter(c => !availableStatuses.includes(getGroupKey(c))), '__other__', true)}
+                  </>
+                )}
               </div>
             )}
 
-            {/* ── MOBILE / TABLET card list (< xl) ── */}
-            <div className={`xl:hidden ${isPhone ? 'pb-24' : ''}`} hidden={isPhone && phoneView === 'list'}>
+            {/* ── TABLET card list (md to xl) ── */}
+            <div className="xl:hidden" hidden={isPhone}>
               {availableStatuses.map(statusGroup => {
                 const claimsInGroup = cardClaims.filter(c => getGroupKey(c) === statusGroup);
                  if (claimsInGroup.length === 0) return null;
