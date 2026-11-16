@@ -25,14 +25,21 @@ import {
   Building2,
   PanelLeftClose,
   PanelLeftOpen,
-  Receipt } from
+  Receipt,
+  CircleDot,
+  MapPin,
+  Warehouse,
+  CreditCard,
+  Truck,
+  Handshake,
+  ArrowUpRight } from
 "lucide-react";
 import GlobalSearch from "./components/layout/GlobalSearch";
 import Notifications from "./components/layout/Notifications";
 import ThemeToggle from "./components/layout/ThemeToggle";
 import FloatingMessenger from "./components/layout/FloatingMessenger";
 import RepairerLayout from "./components/repairer/RepairerLayout";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { StatusConfigProvider } from './components/shared/StatusConfigContext';
 import PageLoader from './components/PageLoader';
@@ -56,11 +63,23 @@ const allDepartments = [
 { name: "Estimating", url: createPageUrl("Estimating"), icon: Calculator, permission: "Estimating" },
 { name: "Engineering", url: createPageUrl("Engineering"), icon: Wrench, permission: "Engineering" },
 { name: "Parts", url: createPageUrl("Parts"), icon: Package, permission: "Parts" },
-{ name: "Tyre Requests", url: createPageUrl("TyreRequests"), icon: Package, permission: "Parts" },
+{ name: "Tyre Requests", url: createPageUrl("TyreRequests"), icon: CircleDot, permission: "Parts" },
 
 { name: "Invoicing", url: createPageUrl("Invoicing"), icon: Receipt, permission: "Invoicing" },
 { name: "Reports", url: createPageUrl("Reports"), icon: BarChart3, permission: "Reports", overlayPage: "Reports" },
-{ name: "Map", url: createPageUrl("BodyshopMap"), icon: Search, permission: "Map", overlayPage: "BodyshopMap" }];
+{ name: "Map", url: createPageUrl("BodyshopMap"), icon: MapPin, permission: "Map", overlayPage: "BodyshopMap" }];
+
+// Sidebar item looks, from the design system: resting, hover and the current item.
+const NAV_BASE = "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-150 md:justify-center md:px-2 lg:justify-start lg:px-3";
+const NAV_REST = "text-white/70 hover:bg-white/[0.08] hover:text-white";
+const NAV_ON = "bg-white/[0.12] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.10)]";
+
+/** The green dot on the current item, and the arrow on items that open over the page. */
+const NavMarker = ({ active, opensOver }) => {
+  if (active) return <span className="ml-auto h-[7px] w-[7px] flex-shrink-0 rounded-full bg-brand-green md:hidden lg:block" aria-hidden="true" />;
+  if (opensOver) return <ArrowUpRight className="ml-auto h-3.5 w-3.5 flex-shrink-0 opacity-50 md:hidden lg:block" aria-label="Opens over the page" />;
+  return null;
+};
 
 
 
@@ -96,6 +115,23 @@ export default function Layout({ children, currentPageName }) {
   const [directoriesOpen, setDirectoriesOpen] = useState(false);
   const [desktopSidebarOpen, setDesktopSidebarOpen] = useState(true);
   const [overlayPage, setOverlayPage] = useState(null);
+  const queryClient = useQueryClient();
+
+  // Refresh reloads the data on screen, never the browser page, so open windows and
+  // scroll positions stay where they are.
+  const refreshData = () => queryClient.invalidateQueries();
+
+  // Cmd+K / Ctrl+K opens search from anywhere.
+  useEffect(() => {
+    const onKey = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setSearchOpen(true);
+      }
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, []);
 
   useEffect(() => {
     const observer = new MutationObserver(() => {
