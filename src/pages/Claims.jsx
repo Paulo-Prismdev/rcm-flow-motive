@@ -74,11 +74,11 @@ const STATUS_COLORS = {
 const INVOICE_STATUS_ATTENTION = {
   'Not Ready for Invoicing': {
     short: 'Figures', title: 'figures missing',
-    chip: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
+    chip: 'bg-warning-bg text-warning-fg',
   },
   'Invoice Required - Pending': {
     short: 'Invoices', title: 'invoices still outstanding',
-    chip: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
+    chip: 'bg-warning-bg text-warning-fg',
   },
   'Invoice Overdue': {
     short: 'Overdue', title: 'invoice overdue',
@@ -506,7 +506,7 @@ export default function ClaimsPage() {
     return (
       <div className="h-full overflow-y-auto bg-background p-4" data-wizard>
         {createError && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700 flex items-start gap-2">
+          <div className="mb-4 p-3 bg-danger-bg border border-danger/30 rounded-lg text-sm text-danger-fg flex items-start gap-2">
             <span className="font-semibold">Error:</span> {createError}
           </div>
         )}
@@ -535,7 +535,7 @@ export default function ClaimsPage() {
       <tr
         key={claim.id}
         onClick={() => setSelectedClaim(claim)}
-        className={`group border-b border-gray-100 dark:border-gray-800 cursor-pointer transition-colors text-sm ${
+        className={`group border-b border-border cursor-pointer transition-colors text-sm ${
           isSelected
             ? 'bg-blue-50 dark:bg-blue-900/20'
             : 'hover:bg-gray-50 dark:hover:bg-gray-800/50'
@@ -556,7 +556,7 @@ export default function ClaimsPage() {
           const val = cfg ? cfg.render(claim) : '—';
           const w = colWidth(fieldId);
           return (
-            <td key={fieldId} title={typeof val === 'string' ? val : undefined} style={{ minWidth: `${w}px` }} className="px-2 py-2.5 text-gray-600 dark:text-gray-400 whitespace-nowrap overflow-hidden text-ellipsis">
+            <td key={fieldId} title={typeof val === 'string' ? val : undefined} style={{ minWidth: `${w}px` }} className="px-2 py-2.5 text-muted-foreground whitespace-nowrap overflow-hidden text-ellipsis">
               {val}
             </td>
           );
@@ -573,7 +573,7 @@ export default function ClaimsPage() {
         <td style={{ width: `${STATUS_W}px`, minWidth: `${STATUS_W}px`, maxWidth: `${STATUS_W}px` }} className={`sticky right-[132px] z-10 px-2 py-2.5 whitespace-nowrap ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-white dark:bg-gray-900 group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50'}`}>
           <div className="flex items-center justify-center gap-1 flex-wrap min-h-[42px]">
             {isDraft && (
-              <span className="px-1.5 py-0.5 rounded-md bg-yellow-100 text-yellow-700 text-[10px] font-medium leading-none">
+              <span className="px-1.5 py-0.5 rounded-md bg-yellow-100 text-warning-fg text-xs font-medium leading-none">
                 Draft
               </span>
             )}
@@ -581,13 +581,13 @@ export default function ClaimsPage() {
             {claim.secondary_status && <StatusBadge status={claim.secondary_status} compact />}
             {claim.tertiary_status && <StatusBadge status={claim.tertiary_status} variant="secondary" compact />}
             {hasBackorder && (
-              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-red-500 text-white text-[10px] font-semibold leading-none shadow-sm">
+              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-red-500 text-white text-xs font-semibold leading-none shadow-sm">
                 <Package className="w-2.5 h-2.5" />BO
               </span>
             )}
             {hireFlagged(claim) && (
               <span
-                className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300 text-[10px] font-semibold leading-none"
+                className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300 text-xs font-semibold leading-none"
                 title="Hire to invoice"
               >
                 Hire
@@ -600,7 +600,7 @@ export default function ClaimsPage() {
               if (outstanding <= 0) return null;
               return (
                 <span
-                  className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300 text-[10px] font-semibold leading-none"
+                  className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-warning-bg text-warning-fg text-xs font-semibold leading-none"
                   title={`${outstanding} required document${outstanding === 1 ? '' : 's'} outstanding`}
                 >
                   <FileText className="w-2.5 h-2.5" />{outstanding}
@@ -614,7 +614,7 @@ export default function ClaimsPage() {
               if (!INVOICE_STATUS_ATTENTION[inv]) return null;
               return (
                 <span
-                  className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md text-[10px] font-semibold leading-none ${INVOICE_STATUS_ATTENTION[inv].chip}`}
+                  className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md text-xs font-semibold leading-none ${INVOICE_STATUS_ATTENTION[inv].chip}`}
                   title={`Invoicing: ${INVOICE_STATUS_ATTENTION[inv].title}`}
                 >
                   <FileText className="w-2.5 h-2.5" />{INVOICE_STATUS_ATTENTION[inv].short}
@@ -627,7 +627,7 @@ export default function ClaimsPage() {
         <td style={{ width: `${UPDATES_W}px`, minWidth: `${UPDATES_W}px`, maxWidth: `${UPDATES_W}px` }} className={`sticky right-[52px] z-10 px-2 py-2.5 whitespace-nowrap text-center ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-white dark:bg-gray-900 group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50'}`}>
           <button
             onClick={(e) => { e.stopPropagation(); setQuickViewClaim(claim); }}
-            className="relative p-1.5 rounded-md text-gray-400 hover:text-primary hover:bg-primary/10 transition-colors"
+            className="relative p-1.5 rounded-md text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
             title="Quick view updates"
           >
             <MessageSquare className="w-4 h-4" />
@@ -640,7 +640,7 @@ export default function ClaimsPage() {
         <td style={{ width: `${INFO_W}px`, minWidth: `${INFO_W}px`, maxWidth: `${INFO_W}px` }} className={`sticky right-0 z-10 px-2 py-2.5 whitespace-nowrap text-center ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-white dark:bg-gray-900 group-hover:bg-gray-50 dark:group-hover:bg-gray-800/50'}`}>
           <button
             onClick={(e) => { e.stopPropagation(); setQuickInfoClaim(claim); }}
-            className="p-1.5 rounded-md text-gray-400 hover:text-primary hover:bg-primary/10 transition-colors"
+            className="p-1.5 rounded-md text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
             title="Quick view call info"
           >
             <Eye className="w-4 h-4" />
@@ -663,7 +663,7 @@ export default function ClaimsPage() {
       <div role="button" tabIndex={0} onKeyDown={activateOnKey}
         key={claim.id}
         onClick={() => setSelectedClaim(claim)}
-        className="px-4 py-3 border-b border-gray-100 dark:border-gray-800 cursor-pointer active:bg-gray-50 dark:active:bg-gray-800/60 transition-colors"
+        className="px-4 py-3 border-b border-border cursor-pointer active:bg-gray-50 dark:active:bg-gray-800/60 transition-colors"
       >
         <div className="flex items-center justify-between gap-2">
           <span
@@ -674,26 +674,26 @@ export default function ClaimsPage() {
           </span>
           <div className="flex items-center gap-1 flex-shrink-0">
             {isDraft && (
-              <span className="px-1.5 py-0.5 rounded-full bg-yellow-100 text-yellow-700 text-[10px] font-medium">
+              <span className="px-1.5 py-0.5 rounded-full bg-yellow-100 text-warning-fg text-xs font-medium">
                 Draft
               </span>
             )}
             {!isClosedStatus && <UpdateStatusBadge status={updateStatus} small />}
             {!isClosedStatus && <UpdateStatusBadge status={clientCommStatus} small />}
             {hasBackorder && (
-              <span className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-red-100 text-red-700 text-[10px] font-medium">
+              <span className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-danger-bg text-danger-fg text-xs font-medium">
                 <Package className="w-2.5 h-2.5" />BO
               </span>
             )}
             {hireFlagged(claim) && (
-              <span className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-indigo-100 text-indigo-700 text-[10px] font-medium">
+              <span className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-indigo-100 text-indigo-700 text-xs font-medium">
                 Hire
               </span>
             )}
 
             <button
               onClick={(e) => { e.stopPropagation(); setQuickViewClaim(claim); }}
-              className="relative p-1 rounded-md text-gray-400 hover:text-primary hover:bg-primary/10 transition-colors"
+              className="relative p-1 rounded-md text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
               title="Quick view updates"
             >
               <MessageSquare className="w-4 h-4" />
@@ -703,18 +703,18 @@ export default function ClaimsPage() {
             </button>
             <button
               onClick={(e) => { e.stopPropagation(); setQuickInfoClaim(claim); }}
-              className="p-1 rounded-md text-gray-400 hover:text-primary hover:bg-primary/10 transition-colors"
+              className="p-1 rounded-md text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
               title="Quick view call info"
             >
               <Eye className="w-4 h-4" />
             </button>
-            <ChevronRight className="w-4 h-4 text-gray-400 ml-1" />
+            <ChevronRight className="w-4 h-4 text-muted-foreground ml-1" />
           </div>
         </div>
         <div className="mt-1.5 flex flex-col gap-0.5">
-          <span className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate">{claim.client_name || '—'}</span>
-          <span className="text-xs text-gray-500 dark:text-gray-400 truncate">{claim.make_model || '—'} · {formatDate(claim.loss_date)}</span>
-          {claim.referrer && <span className="text-xs text-gray-400 dark:text-gray-500 truncate">{claim.referrer}</span>}
+          <span className="text-sm font-medium text-foreground truncate">{claim.client_name || '—'}</span>
+          <span className="text-xs text-muted-foreground truncate">{claim.make_model || '—'} · {formatDate(claim.loss_date)}</span>
+          {claim.referrer && <span className="text-xs text-muted-foreground truncate">{claim.referrer}</span>}
           {(isException || claim.secondary_status || claim.tertiary_status || INVOICE_STATUS_ATTENTION[deriveInvoiceStatus(claim)]) && (
             <div className="mt-1 flex flex-wrap gap-1 items-center">
               {isException && <StatusBadge status={getClaimOutcome(claim)} />}
@@ -724,7 +724,7 @@ export default function ClaimsPage() {
                 const inv = INVOICE_STATUS_ATTENTION[deriveInvoiceStatus(claim)];
                 if (!inv) return null;
                 return (
-                  <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-medium leading-none ${inv.chip}`} title={`Invoicing: ${inv.title}`}>
+                  <span className={`px-1.5 py-0.5 rounded-full text-xs font-medium leading-none ${inv.chip}`} title={`Invoicing: ${inv.title}`}>
                     {inv.title}
                   </span>
                 );
@@ -737,18 +737,18 @@ export default function ClaimsPage() {
   };
 
   const claimsListView = (
-    <div className="flex flex-col h-full min-h-0 bg-white dark:bg-gray-900 lg:rounded-[10px] lg:border lg:border-gray-100 dark:lg:border-gray-800 overflow-hidden lg:shadow-sm" data-list-shell>
+    <div className="flex flex-col h-full min-h-0 bg-card lg:rounded-[10px] lg:border lg:border-gray-100 dark:lg:border-gray-800 overflow-hidden lg:shadow-sm" data-list-shell>
       <ImportClaimsModal isOpen={showImportModal} onClose={() => setShowImportModal(false)}
         onImportComplete={() => { queryClient.invalidateQueries({ queryKey: ['claims'] }); setShowImportModal(false); }} />
       <ClaimCardFieldsModal isOpen={showFieldsModal} onClose={() => setShowFieldsModal(false)}
         selectedFields={userCardFields} onSave={(fields) => updateUserFieldsMutation.mutate(fields)} />
 
       {/* Top bar */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-800 flex-shrink-0">
-        <h1 className="text-base lg:text-lg font-semibold text-gray-900 dark:text-white">Repairs</h1>
+      <div className="flex items-center justify-between px-4 py-3 border-b border-border flex-shrink-0">
+        <h1 className="text-base lg:text-lg font-semibold text-foreground">Repairs</h1>
         <div className="flex items-center gap-1.5">
           {/* Desktop-only buttons */}
-          <button onClick={() => setShowFieldsModal(true)} className="hidden lg:flex p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors" title="Customise columns">
+          <button onClick={() => setShowFieldsModal(true)} className="hidden lg:flex p-1.5 text-muted-foreground hover:text-foreground transition-colors" title="Customise columns">
             <Settings2 className="w-4 h-4" />
           </button>
           {isInternalUser && (
@@ -758,31 +758,31 @@ export default function ClaimsPage() {
                 <Archive className="w-3.5 h-3.5" />{showArchived ? 'Hide Archived' : 'Archived'}
               </button>
               <button onClick={() => setShowImportModal(true)}
-                className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-border text-muted-foreground hover:bg-accent transition-colors">
                 <Upload className="w-3.5 h-3.5" />Import
               </button>
             </>
           )}
           <button onClick={() => setShowForm(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-[10px] text-xs font-semibold bg-primary text-primary-foreground hover:opacity-90 transition-colors shadow-sm">
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-primary text-primary-foreground hover:opacity-90 transition-colors shadow-sm">
             <Plus className="w-3.5 h-3.5" /><span>New Claim</span>
           </button>
         </div>
       </div>
 
       {/* Repairs / Paying Privately tabs */}
-      <div className="flex items-center px-5 py-2 border-b border-gray-100 dark:border-gray-800 flex-shrink-0">
+      <div className="flex items-center px-5 py-2 border-b border-border flex-shrink-0">
         <ClaimTypeTabs activeTab={claimTab} onChange={setClaimTab} claimsCount={standardClaims.length} privateCount={privateClaims.length} />
       </div>
 
       {/* Search + filters bar */}
-      <div className="flex flex-col lg:flex-row lg:items-center gap-3 px-5 py-2.5 border-b border-gray-100 dark:border-gray-800 flex-shrink-0 bg-gray-50 dark:bg-gray-900/50">
+      <div className="flex flex-col lg:flex-row lg:items-center gap-3 px-5 py-2.5 border-b border-border flex-shrink-0 bg-muted">
         <div className="flex-1 w-full">
           <input
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
             placeholder="Search by reg, client, job number, driver..."
-            className="w-full pl-3 pr-3 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-[10px] focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/15 text-gray-900 dark:text-white placeholder-gray-400 transition-all"
+            className="w-full pl-3 pr-3 py-2 text-sm bg-card border border-border rounded-lg focus:outline-none focus:border-ring focus:ring-2 focus:ring-ring/20 text-foreground placeholder:text-ink-subtle transition-all"
           />
         </div>
 
@@ -790,7 +790,7 @@ export default function ClaimsPage() {
           {/* Overdue-only toggle */}
           <button
             onClick={() => setOverdueOnly(!overdueOnly)}
-            className={`flex items-center gap-1 lg:gap-1.5 px-2 lg:px-3 py-1.5 rounded-[10px] text-[11px] lg:text-xs font-medium border transition-all flex-shrink-0 ${
+            className={`flex items-center gap-1 lg:gap-1.5 px-2 lg:px-3 py-1.5 rounded-lg text-xs lg:text-xs font-medium border transition-all flex-shrink-0 ${
               overdueOnly
                 ? 'bg-red-50 border-red-200 text-red-700 dark:bg-red-900/20 dark:border-red-700 dark:text-red-300'
                 : 'border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-800 hover:border-gray-300'
@@ -803,14 +803,14 @@ export default function ClaimsPage() {
           </button>
           {/* Sort — select on desktop, compact icon menu on phones */}
           <select value={sortBy} onChange={e => setSortBy(e.target.value)}
-            className="hidden lg:block px-2 py-1.5 text-[11px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-[10px] text-gray-700 dark:text-gray-300 focus:outline-none focus:border-blue-400 cursor-pointer">
+            className="hidden lg:block px-2 py-1.5 text-xs bg-card border border-border rounded-lg text-foreground focus:outline-none focus:border-ring cursor-pointer">
             {SORT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
           </select>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
                 title="Sort claims"
-                className="lg:hidden flex items-center gap-1 px-2 py-1.5 rounded-[10px] text-[11px] font-medium border border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 flex-shrink-0">
+                className="lg:hidden flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-medium border border-border text-muted-foreground bg-card flex-shrink-0">
                 <ArrowUpDown className="w-3.5 h-3.5" />
                 <span>{(SORT_OPTIONS.find(o => o.value === sortBy) || SORT_OPTIONS[0]).short}</span>
               </button>
@@ -820,7 +820,7 @@ export default function ClaimsPage() {
                 <DropdownMenuItem
                   key={o.value}
                   onSelect={() => setSortBy(o.value)}
-                  className={sortBy === o.value ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : ''}>
+                  className={sortBy === o.value ? 'bg-info-bg text-info-fg' : ''}>
                   {o.label.replace('Sort: ', '')}
                 </DropdownMenuItem>
               )}
@@ -829,19 +829,19 @@ export default function ClaimsPage() {
 
           {/* Quick filter dropdowns */}
           <button onClick={() => setShowFilters(!showFilters)}
-            className={`flex items-center gap-1 lg:gap-1.5 px-2 lg:px-3 py-1.5 rounded-[10px] text-[11px] lg:text-xs font-medium border transition-all flex-shrink-0 ${activeFiltersCount > 0 ? 'bg-blue-50 border-blue-200 text-blue-700 dark:bg-blue-900/20 dark:border-blue-700 dark:text-blue-300' : 'border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-800 hover:border-gray-300'}`}>
+            className={`flex items-center gap-1 lg:gap-1.5 px-2 lg:px-3 py-1.5 rounded-lg text-xs lg:text-xs font-medium border transition-all flex-shrink-0 ${activeFiltersCount > 0 ? 'bg-blue-50 border-blue-200 text-blue-700 dark:bg-blue-900/20 dark:border-blue-700 dark:text-blue-300' : 'border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-800 hover:border-gray-300'}`}>
             <Filter className="w-3.5 h-3.5" />
             Filters{activeFiltersCount > 0 ? ` (${activeFiltersCount})` : ''}
           </button>
           {activeFiltersCount > 0 && (
-            <button onClick={clearAllFilters} title="Clear filters" className="p-1.5 text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0"><X className="w-3.5 h-3.5" /></button>
+            <button onClick={clearAllFilters} title="Clear filters" className="p-1.5 text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"><X className="w-3.5 h-3.5" /></button>
           )}
         </div>
       </div>
 
       {/* Filter panel */}
       {showFilters && (
-        <div className="px-5 py-3 border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/30 flex-shrink-0">
+        <div className="px-5 py-3 border-b border-border bg-muted flex-shrink-0">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
             {[
               { label: 'Claim Type', value: claimTypeFilter, onChange: setClaimTypeFilter, options: uniqueClaimTypes },
@@ -852,18 +852,18 @@ export default function ClaimsPage() {
               { label: 'Business Division', value: businessDivisionFilter, onChange: setBusinessDivisionFilter, options: uniqueBusinessDivisions },
             ].map(f => (
               <div key={f.label}>
-                <label className="block text-[10px] font-medium text-gray-400 dark:text-gray-500 mb-0.5">{f.label}</label>
+                <label className="block text-xs font-medium text-muted-foreground mb-0.5">{f.label}</label>
                 <select value={f.value} onChange={e => f.onChange(e.target.value)}
-                  className="w-full px-2 py-1 text-[11px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-700 dark:text-gray-300 focus:outline-none">
+                  className="w-full px-2 py-1 text-xs bg-card border border-border rounded text-foreground focus:outline-none">
                   <option value="">All {f.label}s</option>
                   {f.options.map(o => <option key={o} value={o}>{o}</option>)}
                 </select>
               </div>
             ))}
             <div>
-              <label className="block text-[10px] font-medium text-gray-400 dark:text-gray-500 mb-0.5">Update Status</label>
+              <label className="block text-xs font-medium text-muted-foreground mb-0.5">Update Status</label>
               <select value={updateStatusFilter} onChange={e => setUpdateStatusFilter(e.target.value)}
-                className="w-full px-2 py-1 text-[11px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-700 dark:text-gray-300 focus:outline-none">
+                className="w-full px-2 py-1 text-xs bg-card border border-border rounded text-foreground focus:outline-none">
                 <option value="">All</option>
                 <option value="Red">Overdue</option>
                 <option value="Amber">Due Soon</option>
@@ -873,26 +873,26 @@ export default function ClaimsPage() {
               </select>
             </div>
             <div>
-              <label className="block text-[10px] font-medium text-gray-400 dark:text-gray-500 mb-0.5">Repairer Acceptance</label>
+              <label className="block text-xs font-medium text-muted-foreground mb-0.5">Repairer Acceptance</label>
               <select value={repairerAcceptanceFilter} onChange={e => setRepairerAcceptanceFilter(e.target.value)}
-                className="w-full px-2 py-1 text-[11px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-700 dark:text-gray-300 focus:outline-none">
+                className="w-full px-2 py-1 text-xs bg-card border border-border rounded text-foreground focus:outline-none">
                 <option value="">All</option>
                 <option value="awaiting">Awaiting</option>
                 <option value="accepted">Accepted</option>
               </select>
             </div>
             <div>
-              <label className="block text-[10px] font-medium text-gray-400 dark:text-gray-500 mb-0.5">Backordered Parts</label>
+              <label className="block text-xs font-medium text-muted-foreground mb-0.5">Backordered Parts</label>
               <select value={hasBackorderedPartsFilter ? 'true' : ''} onChange={e => setHasBackorderedPartsFilter(e.target.value === 'true')}
-                className="w-full px-2 py-1 text-[11px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-700 dark:text-gray-300 focus:outline-none">
+                className="w-full px-2 py-1 text-xs bg-card border border-border rounded text-foreground focus:outline-none">
                 <option value="">All</option>
                 <option value="true">Has Backorders</option>
               </select>
             </div>
             <div>
-              <label className="block text-[10px] font-medium text-gray-400 dark:text-gray-500 mb-0.5">Invoicing</label>
+              <label className="block text-xs font-medium text-muted-foreground mb-0.5">Invoicing</label>
               <select value={invoiceFilter} onChange={e => setInvoiceFilter(e.target.value)}
-                className="w-full px-2 py-1 text-[11px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-700 dark:text-gray-300 focus:outline-none">
+                className="w-full px-2 py-1 text-xs bg-card border border-border rounded text-foreground focus:outline-none">
                 <option value="">All</option>
                 <option value="outstanding">Outstanding invoices</option>
                 <option value="owed_to_us">Owed to us</option>
@@ -900,13 +900,13 @@ export default function ClaimsPage() {
               </select>
             </div>
             <div className="sm:col-span-2 lg:col-span-2">
-              <label className="block text-[10px] font-medium text-gray-400 dark:text-gray-500 mb-0.5">Date Received</label>
+              <label className="block text-xs font-medium text-muted-foreground mb-0.5">Date Received</label>
               <div className="flex items-center gap-1.5">
                 <input type="date" value={dateReceivedFrom} onChange={e => setDateReceivedFrom(e.target.value)}
-                  className="w-full px-2 py-1 text-[11px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-700 dark:text-gray-300 focus:outline-none" />
-                <span className="text-[11px] text-gray-400">to</span>
+                  className="w-full px-2 py-1 text-xs bg-card border border-border rounded text-foreground focus:outline-none" />
+                <span className="text-xs text-muted-foreground">to</span>
                 <input type="date" value={dateReceivedTo} onChange={e => setDateReceivedTo(e.target.value)}
-                  className="w-full px-2 py-1 text-[11px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-gray-700 dark:text-gray-300 focus:outline-none" />
+                  className="w-full px-2 py-1 text-xs bg-card border border-border rounded text-foreground focus:outline-none" />
               </div>
             </div>
           </div>
@@ -921,13 +921,13 @@ export default function ClaimsPage() {
       {/* List / Table */}
       <div ref={scrollRef} className="flex-1 overflow-auto min-h-0" data-list-body style={{WebkitOverflowScrolling: 'touch'}}>
         {isLoading ? (
-          <div className="flex items-center justify-center h-32 text-sm text-gray-400">Loading claims...</div>
+          <div className="flex items-center justify-center h-32 text-sm text-muted-foreground">Loading claims...</div>
         ) : filteredClaims.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-32 gap-2">
-            <p className="text-sm text-gray-400">{activeFiltersCount > 0 ? 'No claims match your filters' : 'No claims found'}</p>
+            <p className="text-sm text-muted-foreground">{activeFiltersCount > 0 ? 'No claims match your filters' : 'No claims found'}</p>
             {activeFiltersCount > 0
-              ? <button onClick={clearAllFilters} className="text-xs text-blue-600 hover:underline">Clear filters</button>
-              : <button onClick={() => setShowForm(true)} className="text-xs text-blue-600 hover:underline">Create first claim</button>
+              ? <button onClick={clearAllFilters} className="text-xs text-info-fg hover:underline">Clear filters</button>
+              : <button onClick={() => setShowForm(true)} className="text-xs text-info-fg hover:underline">Create first claim</button>
             }
           </div>
         ) : (
@@ -943,13 +943,13 @@ export default function ClaimsPage() {
                  return (
                    <React.Fragment key={statusGroup}>
                      <div role="button" tabIndex={0} onKeyDown={activateOnKey}
-                       className="flex items-center gap-2 px-4 py-2 bg-gray-50 dark:bg-gray-800/60 cursor-pointer select-none border-b border-gray-100 dark:border-gray-800"
+                       className="flex items-center gap-2 px-4 py-2 bg-muted cursor-pointer select-none border-b border-border"
                       onClick={() => toggleGroup(statusGroup)}
                     >
-                      {isCollapsed ? <ChevronRight className="w-3.5 h-3.5 text-gray-400" /> : <ChevronDown className="w-3.5 h-3.5 text-gray-400" />}
+                      {isCollapsed ? <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" /> : <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />}
                       <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: dotColor }} />
-                      <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">{statusGroup}</span>
-                      <span className="text-xs text-gray-400 ml-1">{claimsInGroup.length}</span>
+                      <span className="text-sm font-semibold text-foreground">{statusGroup}</span>
+                      <span className="text-xs text-muted-foreground ml-1">{claimsInGroup.length}</span>
                     </div>
                     {!isCollapsed && groupBySub(claimsInGroup, availableStatuses).map(([subKey, subClaims]) => {
                       const hasSubHeader = claimsInGroup.length > subClaims.length;
@@ -958,13 +958,13 @@ export default function ClaimsPage() {
                       <React.Fragment key={subKey}>
                         {hasSubHeader && (
                           <div role="button" tabIndex={0} onKeyDown={activateOnKey}
-                            className="flex items-center gap-1.5 px-10 py-1.5 bg-gray-50/50 dark:bg-gray-800/30 border-b border-gray-100 dark:border-gray-800 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-800/50"
+                            className="flex items-center gap-1.5 px-10 py-1.5 bg-muted/50 border-b border-border cursor-pointer select-none hover:bg-accent"
                             onClick={(e) => { e.stopPropagation(); toggleSubGroup(statusGroup, subKey); }}
                           >
-                            {subCollapsed ? <ChevronRight className="w-3 h-3 text-gray-400" /> : <ChevronDown className="w-3 h-3 text-gray-400" />}
+                            {subCollapsed ? <ChevronRight className="w-3 h-3 text-muted-foreground" /> : <ChevronDown className="w-3 h-3 text-muted-foreground" />}
                             <span className="w-2 h-2 rounded-full" style={{ backgroundColor: getStatusDot(subKey) }} />
-                            <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">{subKey}</span>
-                            <span className="text-xs text-gray-400 font-normal">{subClaims.length}</span>
+                            <span className="text-sm font-semibold text-muted-foreground">{subKey}</span>
+                            <span className="text-xs text-muted-foreground font-normal">{subClaims.length}</span>
                           </div>
                         )}
                         {!subCollapsed && subClaims.map(renderMobileCard)}
@@ -984,11 +984,11 @@ export default function ClaimsPage() {
                     const isCollapsed = collapsedGroups['__other__'];
                     return (
                     <React.Fragment>
-                    <div role="button" tabIndex={0} onKeyDown={activateOnKey} className="flex items-center gap-2 px-4 py-2 bg-gray-50 dark:bg-gray-800/60 cursor-pointer select-none border-b border-gray-100 dark:border-gray-800" onClick={() => toggleGroup('__other__')}>
-                      {isCollapsed ? <ChevronRight className="w-3.5 h-3.5 text-gray-400" /> : <ChevronDown className="w-3.5 h-3.5 text-gray-400" />}
+                    <div role="button" tabIndex={0} onKeyDown={activateOnKey} className="flex items-center gap-2 px-4 py-2 bg-muted cursor-pointer select-none border-b border-border" onClick={() => toggleGroup('__other__')}>
+                      {isCollapsed ? <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" /> : <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />}
                       <span className="w-2 h-2 rounded-full bg-gray-400 flex-shrink-0" />
-                      <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Closed</span>
-                      <span className="text-xs text-gray-400 ml-1">{ungrouped.length}</span>
+                      <span className="text-sm font-semibold text-foreground">Closed</span>
+                      <span className="text-xs text-muted-foreground ml-1">{ungrouped.length}</span>
                     </div>
                     {!isCollapsed && groupBySub(ungrouped, availableStatuses).map(([subKey, subClaims]) => {
                       const hasSubHeader = ungrouped.length > subClaims.length;
@@ -997,13 +997,13 @@ export default function ClaimsPage() {
                       <React.Fragment key={subKey}>
                         {hasSubHeader && (
                           <div role="button" tabIndex={0} onKeyDown={activateOnKey}
-                            className="flex items-center gap-1.5 px-10 py-1.5 bg-gray-50/50 dark:bg-gray-800/30 border-b border-gray-100 dark:border-gray-800 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-800/50"
+                            className="flex items-center gap-1.5 px-10 py-1.5 bg-muted/50 border-b border-border cursor-pointer select-none hover:bg-accent"
                             onClick={(e) => { e.stopPropagation(); toggleSubGroup('__other__', subKey); }}
                           >
-                            {subCollapsed ? <ChevronRight className="w-3 h-3 text-gray-400" /> : <ChevronDown className="w-3 h-3 text-gray-400" />}
+                            {subCollapsed ? <ChevronRight className="w-3 h-3 text-muted-foreground" /> : <ChevronDown className="w-3 h-3 text-muted-foreground" />}
                             <span className="w-2 h-2 rounded-full" style={{ backgroundColor: getStatusDot(subKey) }} />
-                            <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">{subKey}</span>
-                            <span className="text-xs text-gray-400 font-normal">{subClaims.length}</span>
+                            <span className="text-sm font-semibold text-muted-foreground">{subKey}</span>
+                            <span className="text-xs text-muted-foreground font-normal">{subClaims.length}</span>
                           </div>
                         )}
                         {!subCollapsed && subClaims.map(renderMobileCard)}
@@ -1017,31 +1017,31 @@ export default function ClaimsPage() {
 
             {/* ── DESKTOP table (≥ xl) ── */}
             <table className="hidden xl:table w-full" style={{ minWidth: `${TABLE_WIDTH}px` }}>
-              <thead className="sticky top-0 bg-white dark:bg-gray-900 z-10">
-                <tr className="border-b border-gray-200 dark:border-gray-700">
-                  <th title="Reg" style={{ width: `${REG_W}px`, minWidth: `${REG_W}px`, maxWidth: `${REG_W}px`, verticalAlign: 'bottom' }} className="sticky left-0 z-20 bg-white dark:bg-gray-900 px-2 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap overflow-hidden text-ellipsis">Reg</th>
+              <thead className="sticky top-0 bg-card z-10">
+                <tr className="border-b border-border">
+                  <th title="Reg" style={{ width: `${REG_W}px`, minWidth: `${REG_W}px`, maxWidth: `${REG_W}px`, verticalAlign: 'bottom' }} className="sticky left-0 z-20 bg-card px-2 py-2 text-left text-xs font-semibold text-muted-foreground whitespace-nowrap overflow-hidden text-ellipsis">Reg</th>
                   {userCardFields.map(fieldId => {
                     const w = colWidth(fieldId);
                     const label = CARD_FIELD_CONFIG[fieldId]?.label || fieldId;
                     return (
-                      <th key={fieldId} title={label} style={{ minWidth: `${w}px`, verticalAlign: 'bottom' }} className="px-2 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap overflow-hidden text-ellipsis">{label}</th>
+                      <th key={fieldId} title={label} style={{ minWidth: `${w}px`, verticalAlign: 'bottom' }} className="px-2 py-2 text-left text-xs font-semibold text-muted-foreground whitespace-nowrap overflow-hidden text-ellipsis">{label}</th>
                     );
                   })}
-                  <th title="Case Update 48hrs" style={{ width: `${CASE_W}px`, minWidth: `${CASE_W}px`, maxWidth: `${CASE_W}px`, verticalAlign: 'bottom' }} className="sticky right-[397px] z-20 bg-white dark:bg-gray-900 px-2 py-2 text-center text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-normal leading-[1.15]">
+                  <th title="Case Update 48hrs" style={{ width: `${CASE_W}px`, minWidth: `${CASE_W}px`, maxWidth: `${CASE_W}px`, verticalAlign: 'bottom' }} className="sticky right-[397px] z-20 bg-card px-2 py-2 text-center text-xs font-semibold text-muted-foreground whitespace-normal leading-[1.15]">
                     <div className="flex flex-col items-center">
                       <span>CASE</span>
                       <span>48HRS</span>
                     </div>
                   </th>
-                  <th title="Client Update 48hrs" style={{ width: `${CLIENT_W}px`, minWidth: `${CLIENT_W}px`, maxWidth: `${CLIENT_W}px`, verticalAlign: 'bottom' }} className="sticky right-[292px] z-20 bg-white dark:bg-gray-900 px-2 py-2 text-center text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-normal leading-[1.15]">
+                  <th title="Client Update 48hrs" style={{ width: `${CLIENT_W}px`, minWidth: `${CLIENT_W}px`, maxWidth: `${CLIENT_W}px`, verticalAlign: 'bottom' }} className="sticky right-[292px] z-20 bg-card px-2 py-2 text-center text-xs font-semibold text-muted-foreground whitespace-normal leading-[1.15]">
                     <div className="flex flex-col items-center">
                       <span>CLIENT</span>
                       <span>48HRS</span>
                     </div>
                   </th>
-                  <th title="Status" style={{ width: `${STATUS_W}px`, minWidth: `${STATUS_W}px`, maxWidth: `${STATUS_W}px`, verticalAlign: 'bottom' }} className="sticky right-[132px] z-20 bg-white dark:bg-gray-900 px-2 py-2 text-center text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap overflow-hidden text-ellipsis">Status</th>
-                  <th title="Updates" style={{ width: `${UPDATES_W}px`, minWidth: `${UPDATES_W}px`, maxWidth: `${UPDATES_W}px`, verticalAlign: 'bottom' }} className="sticky right-[52px] z-20 bg-white dark:bg-gray-900 px-2 py-2 text-center text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap overflow-hidden text-ellipsis">Updates</th>
-                  <th title="Info" style={{ width: `${INFO_W}px`, minWidth: `${INFO_W}px`, maxWidth: `${INFO_W}px`, verticalAlign: 'bottom' }} className="sticky right-0 z-20 bg-white dark:bg-gray-900 px-2 py-2 text-center text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 whitespace-nowrap overflow-hidden text-ellipsis">Info</th>
+                  <th title="Status" style={{ width: `${STATUS_W}px`, minWidth: `${STATUS_W}px`, maxWidth: `${STATUS_W}px`, verticalAlign: 'bottom' }} className="sticky right-[132px] z-20 bg-card px-2 py-2 text-center text-xs font-semibold text-muted-foreground whitespace-nowrap overflow-hidden text-ellipsis">Status</th>
+                  <th title="Updates" style={{ width: `${UPDATES_W}px`, minWidth: `${UPDATES_W}px`, maxWidth: `${UPDATES_W}px`, verticalAlign: 'bottom' }} className="sticky right-[52px] z-20 bg-card px-2 py-2 text-center text-xs font-semibold text-muted-foreground whitespace-nowrap overflow-hidden text-ellipsis">Updates</th>
+                  <th title="Info" style={{ width: `${INFO_W}px`, minWidth: `${INFO_W}px`, maxWidth: `${INFO_W}px`, verticalAlign: 'bottom' }} className="sticky right-0 z-20 bg-card px-2 py-2 text-center text-xs font-semibold text-muted-foreground whitespace-nowrap overflow-hidden text-ellipsis">Info</th>
                 </tr>
               </thead>
               <tbody>
@@ -1054,15 +1054,15 @@ export default function ClaimsPage() {
                   return (
                     <React.Fragment key={statusGroup}>
                       <tr
-                        className="bg-gray-50 dark:bg-gray-800/60 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-800"
+                        className="bg-muted cursor-pointer select-none hover:bg-accent"
                         onClick={() => toggleGroup(statusGroup)}
                       >
                         <td colSpan={userCardFields.length + 6} className="p-0">
                           <div className="sticky left-0 z-10 flex w-fit items-center gap-2 px-4 py-2">
-                            {isCollapsed ? <ChevronRight className="w-3.5 h-3.5 text-gray-400" /> : <ChevronDown className="w-3.5 h-3.5 text-gray-400" />}
+                            {isCollapsed ? <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" /> : <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />}
                             <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: dotColor }} />
-                            <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">{statusGroup}</span>
-                            <span className="text-xs text-gray-400 font-normal ml-1">{claimsInGroup.length}</span>
+                            <span className="text-sm font-semibold text-foreground">{statusGroup}</span>
+                            <span className="text-xs text-muted-foreground font-normal ml-1">{claimsInGroup.length}</span>
                           </div>
                         </td>
                       </tr>
@@ -1073,15 +1073,15 @@ export default function ClaimsPage() {
                         <React.Fragment key={subKey}>
                           {hasSubHeader && (
                             <tr
-                              className="bg-gray-50/50 dark:bg-gray-800/30 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-800/50"
+                              className="bg-muted/50 cursor-pointer select-none hover:bg-accent"
                               onClick={(e) => { e.stopPropagation(); toggleSubGroup(statusGroup, subKey); }}
                             >
                               <td colSpan={userCardFields.length + 6} className="p-0">
                                 <div className="sticky left-0 z-10 flex w-fit items-center gap-2 pl-12 px-4 py-1">
-                                  {subCollapsed ? <ChevronRight className="w-3 h-3 text-gray-400" /> : <ChevronDown className="w-3 h-3 text-gray-400" />}
+                                  {subCollapsed ? <ChevronRight className="w-3 h-3 text-muted-foreground" /> : <ChevronDown className="w-3 h-3 text-muted-foreground" />}
                                   <span className="w-2 h-2 rounded-full" style={{ backgroundColor: getStatusDot(subKey) }} />
-                                  <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">{subKey}</span>
-                                  <span className="text-xs text-gray-400 font-normal">{subClaims.length}</span>
+                                  <span className="text-sm font-semibold text-muted-foreground">{subKey}</span>
+                                  <span className="text-xs text-muted-foreground font-normal">{subClaims.length}</span>
                                 </div>
                               </td>
                             </tr>
@@ -1100,13 +1100,13 @@ export default function ClaimsPage() {
                   const isCollapsed = collapsedGroups['__other__'];
                   return (
                     <React.Fragment>
-                      <tr className="bg-gray-50 dark:bg-gray-800/60 cursor-pointer select-none" onClick={() => toggleGroup('__other__')}>
+                      <tr className="bg-muted cursor-pointer select-none" onClick={() => toggleGroup('__other__')}>
                         <td colSpan={userCardFields.length + 6} className="p-0">
                           <div className="sticky left-0 z-10 flex w-fit items-center gap-2 px-4 py-2">
-                            {isCollapsed ? <ChevronRight className="w-3.5 h-3.5 text-gray-400" /> : <ChevronDown className="w-3.5 h-3.5 text-gray-400" />}
+                            {isCollapsed ? <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" /> : <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />}
                             <span className="w-2 h-2 rounded-full bg-gray-400 flex-shrink-0" />
-                            <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Closed</span>
-                            <span className="text-xs text-gray-400 ml-1">{ungrouped.length}</span>
+                            <span className="text-sm font-semibold text-foreground">Closed</span>
+                            <span className="text-xs text-muted-foreground ml-1">{ungrouped.length}</span>
                           </div>
                         </td>
                       </tr>
@@ -1117,15 +1117,15 @@ export default function ClaimsPage() {
                         <React.Fragment key={subKey}>
                           {hasSubHeader && (
                             <tr
-                              className="bg-gray-50/50 dark:bg-gray-800/30 cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-gray-800/50"
+                              className="bg-muted/50 cursor-pointer select-none hover:bg-accent"
                               onClick={(e) => { e.stopPropagation(); toggleSubGroup('__other__', subKey); }}
                             >
                               <td colSpan={userCardFields.length + 6} className="p-0">
                                 <div className="sticky left-0 z-10 flex w-fit items-center gap-2 pl-12 px-4 py-1">
-                                  {subCollapsed ? <ChevronRight className="w-3 h-3 text-gray-400" /> : <ChevronDown className="w-3 h-3 text-gray-400" />}
+                                  {subCollapsed ? <ChevronRight className="w-3 h-3 text-muted-foreground" /> : <ChevronDown className="w-3 h-3 text-muted-foreground" />}
                                   <span className="w-2 h-2 rounded-full" style={{ backgroundColor: getStatusDot(subKey) }} />
-                                  <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">{subKey}</span>
-                                  <span className="text-xs text-gray-400 font-normal">{subClaims.length}</span>
+                                  <span className="text-sm font-semibold text-muted-foreground">{subKey}</span>
+                                  <span className="text-xs text-muted-foreground font-normal">{subClaims.length}</span>
                                 </div>
                               </td>
                             </tr>
@@ -1144,7 +1144,7 @@ export default function ClaimsPage() {
       </div>
 
       {/* Footer count — sits at the end of the list, not in a fixed bar */}
-      <div className="px-5 py-2 border-t border-gray-100 dark:border-gray-800 text-xs text-gray-400 flex-shrink-0 m-list-foot">
+      <div className="px-5 py-2 border-t border-border text-xs text-muted-foreground flex-shrink-0 m-list-foot">
         {filteredClaims.length} of {tabClaims.length} {claimTab === 'private' ? 'repairs' : 'claims'}
       </div>
     </div>
@@ -1176,7 +1176,7 @@ export default function ClaimsPage() {
       {/* Detail panel — full width, replacing the list */}
       {selectedClaim && (
         <div className="flex-1 min-w-0 min-h-0 flex flex-col w-full" data-claim-scroll>
-          <div className="h-full lg:rounded-xl lg:border lg:border-gray-200 dark:lg:border-gray-800 bg-white dark:bg-gray-900 overflow-hidden" data-claim-shell>
+          <div className="h-full lg:rounded-xl lg:border lg:border-gray-200 dark:lg:border-gray-800 bg-card overflow-hidden" data-claim-shell>
             <ClaimDetail
               key={selectedClaim.id}
               claim={selectedClaim}
