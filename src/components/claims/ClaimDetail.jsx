@@ -2026,8 +2026,8 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
         {(linkedEstimate || linkedEngineering || linkedParts || linkedThirdPartyClaim || linkedOriginalClaim) && (
           <div className="hidden lg:block bg-card border border-border rounded-lg p-3 flex-shrink-0 shadow-sm">
             <div className="flex items-center gap-2 mb-3">
-              <span className="w-4 h-4 text-gold">🔗</span>
-              <h3 className="font-medium">Linked Cases</h3>
+              <Link2 className="w-4 h-4 text-muted-foreground" aria-hidden="true" />
+              <h3 className="text-sm font-semibold">Linked cases</h3>
             </div>
             <div className="flex gap-3 flex-wrap">
               {linkedOriginalClaim && (
@@ -2084,39 +2084,35 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
           </div>
         )}
 
-        {/* Section selector — desktop only (mobile uses ClaimDetailMobileHeader) */}
-        <div className="hidden lg:block bg-card border border-border rounded-lg px-3 py-2 flex-shrink-0 shadow-sm">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="w-full px-3 py-3 flex items-center justify-between bg-transparent">
-                <div className="flex items-center gap-2">
-                  {React.createElement(DETAIL_SECTIONS.find(s => s.id === selectedSection)?.icon || User, { className: "w-5 h-5" })}
-                  <span className="font-medium">{DETAIL_SECTIONS.find(s => s.id === selectedSection)?.label || 'Select Section'}</span>
-                </div>
-                <ChevronDown className="w-4 h-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-full max-h-80 overflow-y-auto" align="start" side="bottom">
-              {DETAIL_SECTIONS.filter(s => s.id !== 'creditRepair' || claim.claim_type === 'Credit Repair').map(section => (
-                <DropdownMenuItem
+        {/* Sections: a source list down the left on desktop, the Mac way (phones choose
+            the section in ClaimDetailMobileHeader). Same sections, same order. */}
+        <div className="flex-1 min-h-0 flex gap-3">
+          <nav aria-label="Claim sections" className="hidden lg:flex w-56 flex-shrink-0 flex-col gap-0.5 overflow-y-auto rounded-xl border border-border bg-muted p-2 self-start max-h-full">
+            {DETAIL_SECTIONS.filter(s => s.id !== 'creditRepair' || claim.claim_type === 'Credit Repair').map(section => {
+              const on = selectedSection === section.id;
+              const empty = isSectionEmpty(section.id, claim);
+              return (
+                <button
                   key={section.id}
-                  onSelect={() => setSelectedSection(section.id)}
-                  className={selectedSection === section.id ? 'bg-glass-hover' : ''}
+                  type="button"
+                  onClick={() => setSelectedSection(section.id)}
+                  aria-current={on ? 'true' : undefined}
+                  className={`flex items-center gap-2 h-[34px] px-2.5 rounded-lg text-left text-[13px] font-medium transition-colors ${on ? 'bg-primary text-primary-foreground' : 'text-foreground hover:bg-accent'}`}
                 >
-                  <section.icon className="w-4 h-4 mr-2" />
-                  <span className="flex-1">{section.label}</span>
-                  {isSectionEmpty(section.id, claim) && (
-                    <span className="w-2 h-2 rounded-full bg-amber-400 flex-shrink-0 ml-2" />
+                  <section.icon className={`w-4 h-4 flex-shrink-0 ${on ? '' : 'text-muted-foreground'}`} aria-hidden="true" />
+                  <span className="flex-1 truncate">{section.label}</span>
+                  {empty && (
+                    <span className="w-2 h-2 rounded-full bg-warning flex-shrink-0" title="Has details still to fill in" aria-label="Has details still to fill in" />
                   )}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+                </button>
+              );
+            })}
+          </nav>
 
-        <div className="flex-1 overflow-y-auto min-h-0 pr-1 pb-4" data-claim-body style={{WebkitOverflowScrolling: 'touch'}}>
-          <div>
-            {renderSelectedSection()}
+          <div className="flex-1 min-w-0 overflow-y-auto min-h-0 pr-1 pb-4" data-claim-body style={{WebkitOverflowScrolling: 'touch'}}>
+            <div>
+              {renderSelectedSection()}
+            </div>
           </div>
         </div>
       </div>
