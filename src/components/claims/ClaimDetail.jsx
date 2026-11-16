@@ -1896,6 +1896,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
               isInternalUser={isInternalUser}
               onClose={handleClose}
               onOpenSection={openPhoneSection}
+              onQuickView={() => setIsQuickViewOpen(true)}
               onUpdates={() => setIsClaimUpdatesOpen(true)}
               onUpdateTracking={() => setIsUpdateTrackingOpen(true)}
               onAction={handlePhoneAction}
