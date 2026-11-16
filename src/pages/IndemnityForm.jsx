@@ -208,8 +208,8 @@ export default function IndemnityForm() {
     const noColor = yesGood ? 'bg-danger border-danger' : 'bg-success border-success';
     return (
       <div className="grid grid-cols-2 gap-2 m-keep-2">
-        <button type="button" onClick={() => onChange('Yes')} className={`px-4 py-3 rounded-xl border text-sm font-medium transition-colors ${value === 'Yes' ?}`${yesColor} text-white` : 'bg-card text-muted-foreground border-border hover:border-border'}`}>Yes</button>
-        <button type="button" onClick={() => onChange('No')} className={`px-4 py-3 rounded-xl border text-sm font-medium transition-colors ${value === 'No' ?}`${noColor} text-white` : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'}`}>No</button>
+        <button type="button" onClick={() => onChange('Yes')} className={`px-4 py-3 rounded-xl border text-sm font-medium transition-colors ${value === 'Yes' ? `${yesColor} text-on-solid` : 'bg-card text-muted-foreground border-border hover:border-input'}`}>Yes</button>
+        <button type="button" onClick={() => onChange('No')} className={`px-4 py-3 rounded-xl border text-sm font-medium transition-colors ${value === 'No' ? `${noColor} text-on-solid` : 'bg-card text-muted-foreground border-border hover:border-input'}`}>No</button>
       </div>
     );
   };

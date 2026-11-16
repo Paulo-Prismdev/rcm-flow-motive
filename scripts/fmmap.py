@@ -100,7 +100,11 @@ def process(src):
     src = re.sub(r'(className=")([^"]*)(")', rep_attr, src)
     src = re.sub(r"(className=')([^']*)(')", rep_attr, src)
     def rep_tpl(m):
-        n[0] += 1; return '`' + conv_template(m.group(1)) + '`'
+        body = m.group(1)
+        # A template nested inside ${...} ends the match early; leave those untouched.
+        if body.count('{') != body.count('}'):
+            return m.group(0)
+        n[0] += 1; return '`' + conv_template(body) + '`'
     # only template literals that are class lists: className={`...`} or cn(`...`)
     src = re.sub(r'(?<=className=\{)`([^`]*)`', rep_tpl, src)
     src = re.sub(r'(?<=cn\()`([^`]*)`', rep_tpl, src)
