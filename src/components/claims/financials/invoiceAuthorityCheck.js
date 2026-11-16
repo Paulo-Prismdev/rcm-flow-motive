@@ -190,6 +190,23 @@ export const splitFromFigures = (figures = {}) => ({
 /** Whether the invoice splits its total: a customer's share printed beside the insurer's. */
 export const hasSplit = (split) => toNum(split?.customer) !== null;
 
+/**
+ * A split that isn't one. An insurer's invoice that takes the excess (and, for a VAT
+ * registered customer, the VAT) off its subtotal prints a "customer" line that is
+ * really a deduction: its total is already just the insurer's share, and the customer
+ * is billed on a separate VAT & excess invoice. Where the invoice total is exactly
+ * the insurer's share of the authorised repair — and not the whole repair — it is
+ * read as the insurer's invoice alone, whatever payable lines were read off it.
+ */
+export function effectiveSplit(split, expectation) {
+  if (!hasSplit(split) || !expectation || expectation.excessTbc || expectation.expected === null) return split;
+  const total = toNum(split?.total);
+  if (total === null) return split;
+  const insurerOnly = Math.abs(round2(total - expectation.expected)) <= AUTHORITY_TOLERANCE
+    && Math.abs(round2(total - expectation.gross)) > AUTHORITY_TOLERANCE;
+  return insurerOnly ? { insurer: null, customer: null, total } : split;
+}
+
 /** The same three figures, read off the Final Insurer Invoice recorded on a claim. */
 export function claimInvoicedSplit(claim) {
   const entry = claim?.invoice_tracker?.items?.[FINAL_INVOICE_KEY] || {};
@@ -199,11 +216,11 @@ export function claimInvoicedSplit(claim) {
   if (entry.addressed_to_client) {
     return { insurer: null, customer: null, total: recordedFinalInvoiceTotal(claim) };
   }
-  return {
+  return effectiveSplit({
     insurer: toNum(entry.figures?.payable_insurer),
     customer: toNum(entry.figures?.payable_customer),
     total: recordedFinalInvoiceTotal(claim),
-  };
+  }, claimAuthorityExpectation(claim));
 }
 
 /**
@@ -223,9 +240,10 @@ export function claimInvoicedSplit(claim) {
  * cross, and `headline` is the most serious of them, so a screen can show one
  * verdict rather than two that disagree.
  */
-export function compareToAuthority(insurerPart, expectation, vatExcess = null, split = null) {
+export function compareToAuthority(insurerPart, expectation, vatExcess = null, givenSplit = null) {
   let invoiceTotal = toNum(insurerPart);
   if (!expectation || invoiceTotal === null) return null;
+  const split = givenSplit ? effectiveSplit({ ...givenSplit, total: invoiceTotal }, expectation) : null;
 
   const onSplit = hasSplit(split);
   const splitInsurer = toNum(split?.insurer);
