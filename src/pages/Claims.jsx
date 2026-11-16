@@ -682,7 +682,9 @@ export default function ClaimsPage() {
       <div role="button" tabIndex={0} onKeyDown={activateOnKey}
         key={claim.id}
         onClick={() => setSelectedClaim(claim)}
-        className="px-4 py-3 border-b border-border cursor-pointer active:bg-muted transition-colors"
+        className={isPhone
+          ? 'mx-3 my-2 p-3 rounded-2xl border border-border bg-card shadow-card cursor-pointer active:scale-[0.99] transition-transform'
+          : 'px-4 py-3 border-b border-border cursor-pointer active:bg-muted transition-colors'}
       >
         <div className="flex items-center justify-between gap-2">
           <span
@@ -731,11 +733,14 @@ export default function ClaimsPage() {
           </div>
         </div>
         <div className="mt-1.5 flex flex-col gap-0.5">
-          <span className="text-sm font-medium text-foreground truncate">{claim.client_name || '—'}</span>
-          <span className="text-xs text-muted-foreground truncate">{claim.make_model || '—'} · {formatDate(claim.loss_date)}</span>
+          <span className={`${isPhone ? 'text-[15px] font-semibold' : 'text-sm font-medium'} text-foreground truncate`}>{claim.client_name || 'No client name'}</span>
+          {(claim.make_model || claim.loss_date) && (
+            <span className="text-xs text-muted-foreground truncate">{[claim.make_model, claim.loss_date && `Loss ${formatDate(claim.loss_date)}`].filter(Boolean).join(' · ')}</span>
+          )}
           {claim.referrer && <span className="text-xs text-muted-foreground truncate">{claim.referrer}</span>}
-          {(isException || claim.secondary_status || claim.tertiary_status || INVOICE_STATUS_ATTENTION[deriveInvoiceStatus(claim)]) && (
+          {(isException || claim.secondary_status || claim.tertiary_status || INVOICE_STATUS_ATTENTION[deriveInvoiceStatus(claim)] || (isPhone && journeyStatus)) && (
             <div className="mt-1 flex flex-wrap gap-1 items-center">
+              {isPhone && journeyStatus && !isException && <StatusBadge status={journeyStatus} variant="secondary" />}
               {isException && <StatusBadge status={getClaimOutcome(claim)} />}
               {claim.secondary_status && <StatusBadge status={claim.secondary_status} />}
               {claim.tertiary_status && <StatusBadge status={claim.tertiary_status} variant="secondary" />}
