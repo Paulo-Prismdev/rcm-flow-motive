@@ -116,7 +116,15 @@ const laterOf = (a, b) => {
 export const releaseDate = (claim) =>
   isTotalLossClaim(claim)
     ? (claim?.salvage_collected_date || '')
-    : laterOf(claim?.hand_over_date, claim?.rectification_hand_over_date);
+    : rectificationOpen(claim)
+      // Back in for rectification: the original hand-over is kept on record but
+      // the job is not released again until the rectification hand-over.
+      ? ''
+      : laterOf(claim?.hand_over_date, claim?.rectification_hand_over_date);
+
+/** The vehicle is back in for rectification and not yet handed back. */
+const rectificationOpen = (claim) =>
+  (claim?.journey_status || claim?.job_status) === 'Rectification' && !claim?.rectification_hand_over_date;
 
 /** That same date in the job's own terms, for the note a queue line carries. */
 export const releaseWording = (claim) =>
@@ -504,7 +512,7 @@ export function buildInvoicingQueues(claims = [], thresholds = DEFAULT_QUEUE_DAY
       }
     } else {
       const completedDays = daysSince(claim.completion_date, now);
-      if (releasedDays === null && completedDays !== null && completedDays > closeoutDays) {
+      if (!rectificationOpen(claim) && releasedDays === null && completedDays !== null && completedDays > closeoutDays) {
         buckets.warnings.push(queueRow(claim, { key: 'return_date_missing', label: 'Return date missing' }, {
           section: 'warnings',
           amount: null,
