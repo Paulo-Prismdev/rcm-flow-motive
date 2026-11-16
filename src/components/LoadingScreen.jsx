@@ -54,6 +54,8 @@ export default function LoadingScreen({ stage = "page" }) {
   const [slow, setSlow] = useState(false);
 
   useEffect(() => {
+    // Keep hold of the element now: React clears the ref before this effect's clean-up runs.
+    const node = rootRef.current;
     session.mounted += 1;
     if (!session.started) session.started = Date.now();
     const elapsed = Date.now() - session.started;
@@ -76,7 +78,6 @@ export default function LoadingScreen({ stage = "page" }) {
       clearTimeout(showTimer); clearInterval(tick); clearTimeout(slowTimer);
       session.mounted -= 1;
       // If no other loading screen takes over, fade this one out over the page.
-      const node = rootRef.current;
       const wasShown = session.shown;
       setTimeout(() => {
         if (session.mounted > 0) return;
