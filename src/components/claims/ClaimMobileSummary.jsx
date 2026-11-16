@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { format } from 'date-fns';
 import {
   ChevronLeft, ChevronRight, MoreHorizontal, MessageSquare, Phone, Image, FileText, Clock,
-  Mail, ListTodo, Timer, History, Package, Download, Archive, Trash2, Calculator, Copy, NotebookPen,
+  Mail, ListTodo, Timer, History, Package, Download, Archive, Trash2, Calculator, Copy, NotebookPen, Eye,
 } from 'lucide-react';
 import { clientJourney } from '../shared/clientJourney';
 import { getClaimOutcome } from '../shared/claimOutcome';
@@ -66,15 +66,29 @@ const Card = ({ title, children }) => (
   </section>
 );
 
-const Row = ({ onClick, icon: Icon, label, sub, right, dot }) => (
+// The sections, grouped under headings so the list reads as a few short lists.
+const DETAIL_GROUPS = [
+  ['The job', ['status', 'dates', 'estimate', 'financials', 'excessContribution']],
+  ['People', ['client', 'creditRepair', 'driver', 'thirdParty', 'referrer']],
+  ['The vehicle', ['vehicle', 'vehicleDamage', 'vehicleLocation']],
+  ['The repair', ['bodyshop', 'instructionDefaults', 'repairPreference', 'backorderedParts']],
+  ['Recovery and legal', ['thirdpartyPursuit', 'indemnity', 'declarationOfNeed', 'witnessStatements']],
+];
+
+const Row = ({ onClick, icon: Icon, tile: Tile, label, sub, right, dot }) => (
   <button
     type="button"
     onClick={onClick}
-    className="relative w-full flex items-center gap-3 px-3.5 py-3 text-left active:bg-muted [&+&]:before:absolute [&+&]:before:top-0 [&+&]:before:left-3.5 [&+&]:before:right-0 [&+&]:before:h-px [&+&]:before:bg-border"
+    className={`relative w-full flex items-center gap-3 px-3.5 text-left active:bg-muted [&+&]:before:absolute [&+&]:before:top-0 [&+&]:before:right-0 [&+&]:before:h-px [&+&]:before:bg-border ${Tile ? 'py-2.5 [&+&]:before:left-[62px]' : 'py-3 [&+&]:before:left-3.5'}`}
   >
     {Icon && <Icon className="w-5 h-5 text-muted-foreground flex-shrink-0" aria-hidden="true" />}
+    {Tile && (
+      <span className="w-9 h-9 rounded-xl bg-muted flex items-center justify-center flex-shrink-0">
+        <Tile className="w-[18px] h-[18px] text-foreground" aria-hidden="true" />
+      </span>
+    )}
     <span className="flex-1 min-w-0">
-      <span className="block text-[15px] font-medium truncate m-ellipsis">{label}</span>
+      <span className={`block text-[15px] truncate m-ellipsis ${Tile ? 'font-semibold' : 'font-medium'}`}>{label}</span>
       {sub && <span className="block text-[13px] text-muted-foreground truncate m-ellipsis mt-px">{sub}</span>}
     </span>
     {dot && <span className="w-[7px] h-[7px] rounded-full bg-warning flex-shrink-0" aria-label="Has details still to fill in" />}
@@ -154,6 +168,7 @@ export default function ClaimMobileSummary({
   isInternalUser = true,
   onClose,
   onOpenSection,
+  onQuickView,
   onUpdates,
   onUpdateTracking,
   onAction,
@@ -186,6 +201,25 @@ export default function ClaimMobileSummary({
 
   const missing = sections.filter((s) => s.empty);
 
+  // The big plate sits at the top of the page; once it scrolls away a small one
+  // appears in the bar so you always know which claim you're on.
+  const plateRef = useRef(null);
+  const [plateInBar, setPlateInBar] = useState(false);
+  useEffect(() => {
+    const el = plateRef.current;
+    if (!el || typeof IntersectionObserver === 'undefined') return undefined;
+    const io = new IntersectionObserver(([e]) => setPlateInBar(!e.isIntersecting), { rootMargin: '-56px 0px 0px 0px' });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  const grouped = DETAIL_GROUPS
+    .map(([title, ids]) => [title, ids.map((id) => sections.find((s) => s.id === id)).filter(Boolean)])
+    .filter(([, list]) => list.length);
+  const placed = new Set(DETAIL_GROUPS.flatMap(([, ids]) => ids));
+  const others = sections.filter((s) => !placed.has(s.id));
+  if (others.length) grouped.push(['Other', others]);
+
   const people = [
     { role: 'Client', name: claim.client_name, phone: claim.client_phone, section: 'client' },
     claim.driver_same_as_client
@@ -209,13 +243,30 @@ export default function ClaimMobileSummary({
           <button type="button" onClick={onClose} className="flex items-center gap-0.5 pr-2 py-2 text-link text-[15px] font-medium">
             <ChevronLeft className="w-6 h-6" aria-hidden="true" />Repairs
           </button>
-          <span className="flex-1 flex justify-center min-w-0"><Plate reg={claim.reg} /></span>
+          <span className={`flex-1 flex justify-center min-w-0 transition-opacity duration-200 ${plateInBar ? 'opacity-100' : 'opacity-0'}`} aria-hidden={!plateInBar}>
+            <Plate reg={claim.reg} />
+          </span>
+          {onQuickView && (
+            <button type="button" onClick={onQuickView} aria-label="Quick view" title="Quick view" className="tap-44 w-10 h-10 rounded-xl flex items-center justify-center active:bg-muted">
+              <Eye className="w-[22px] h-[22px]" />
+            </button>
+          )}
           <MoreMenu claim={claim} onAction={onAction} isInternalUser={isInternalUser} />
         </div>
       </div>
 
       <div className="flex-1 pb-4">
-        <div className="px-4 pt-3 pb-4">
+        <div className="px-4 pt-2 pb-4">
+          <div ref={plateRef} className="flex items-center gap-2.5 mb-3">
+            <span className="rounded-lg bg-primary text-primary-foreground px-3 py-1 text-[22px] font-bold tracking-[0.08em] tabular-nums leading-tight shadow-card">
+              {claim.reg || 'No reg'}
+            </span>
+            {onQuickView && (
+              <button type="button" onClick={onQuickView} className="h-9 px-3 rounded-xl border border-border bg-card text-[13px] font-medium flex items-center gap-1.5 active:bg-muted">
+                <Eye className="w-4 h-4" aria-hidden="true" />Quick view
+              </button>
+            )}
+          </div>
           <p className="text-[22px] font-bold tracking-tight leading-tight break-words">{claim.client_name || 'No client name'}</p>
           <p className="text-[13.5px] text-muted-foreground mt-1">
             {[vehicle, claim.job_number, partyName].filter(Boolean).join(' · ')}
@@ -295,12 +346,25 @@ export default function ClaimMobileSummary({
           </div>
         </Card>
 
-        <h2 className="px-5 pt-2 pb-1.5 text-[12.5px] font-medium text-muted-foreground">All details</h2>
-        <div className="mx-3 rounded-[16px] bg-card shadow-card overflow-hidden">
-          {sections.map((s) => (
-            <Row key={s.id} label={s.label} sub={sectionPreview(s.id, claim)} dot={s.empty} onClick={() => onOpenSection(s.id)} />
-          ))}
-        </div>
+        <h2 className="px-4 pt-3 pb-1 text-[19px] font-bold tracking-tight">All details</h2>
+        {grouped.map(([title, list]) => (
+          <div key={title} className="mb-3">
+            <h3 className="flex items-center justify-between px-5 pt-2.5 pb-1.5 text-[13px] font-semibold text-foreground">
+              <span>{title}</span>
+              {list.some((s) => s.empty) && (
+                <span className="flex items-center gap-1.5 text-xs font-medium text-warning-fg">
+                  <span className="w-1.5 h-1.5 rounded-full bg-warning" aria-hidden="true" />
+                  {list.filter((s) => s.empty).length} to fill in
+                </span>
+              )}
+            </h3>
+            <div className="mx-3 rounded-[16px] bg-card shadow-card overflow-hidden">
+              {list.map((s) => (
+                <Row key={s.id} tile={s.icon} label={s.label} sub={sectionPreview(s.id, claim)} dot={s.empty} onClick={() => onOpenSection(s.id)} />
+              ))}
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* Main actions, under your thumb */}
