@@ -46,10 +46,10 @@ export default function WidgetUpdateTracking({ config, isEditMode }) {
               className="glass-elevated p-4 hover:scale-105 transition-transform"
             >
               <div className="flex items-center gap-2 mb-2">
-                <AlertCircle className="w-4 h-4 text-danger-fg" />
+                <AlertCircle className="w-4 h-4 text-red-500" />
                 <span className="text-xs text-foreground-muted">Overdue</span>
               </div>
-              <p className="text-2xl font-bold text-danger-fg">{statusCounts.Red}</p>
+              <p className="text-2xl font-bold text-red-600">{statusCounts.Red}</p>
             </Link>
 
             <Link 
@@ -57,10 +57,10 @@ export default function WidgetUpdateTracking({ config, isEditMode }) {
               className="glass-elevated p-4 hover:scale-105 transition-transform"
             >
               <div className="flex items-center gap-2 mb-2">
-                <Clock className="w-4 h-4 text-warning-fg" />
+                <Clock className="w-4 h-4 text-orange-500" />
                 <span className="text-xs text-foreground-muted">Due Soon</span>
               </div>
-              <p className="text-2xl font-bold text-warning-fg">{statusCounts.Amber}</p>
+              <p className="text-2xl font-bold text-orange-600">{statusCounts.Amber}</p>
             </Link>
           </div>
 
@@ -81,8 +81,8 @@ export default function WidgetUpdateTracking({ config, isEditMode }) {
           </div>
 
           {totalNeedingAttention > 0 && (
-            <div className="glass-elevated p-3 bg-danger-bg border border-danger/30">
-              <p className="text-sm font-semibold text-danger-fg">
+            <div className="glass-elevated p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+              <p className="text-sm font-semibold text-red-800 dark:text-red-200">
                 ⚠️ {totalNeedingAttention} claim{totalNeedingAttention !== 1 ? 's' : ''} need{totalNeedingAttention === 1 ? 's' : ''} attention
               </p>
             </div>

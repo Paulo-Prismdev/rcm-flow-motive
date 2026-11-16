@@ -25,10 +25,10 @@ export default function WidgetStatusBreakdown({ config, isEditMode }) {
 
   const statusEntries = Object.entries(statusCounts).sort((a, b) => b[1] - a[1]);
 
-  const BAR_COLORS = ['bg-info','bg-violet-500','bg-success','bg-warning','bg-danger','bg-info','bg-warning'];
+  const BAR_COLORS = ['bg-blue-500','bg-violet-500','bg-emerald-500','bg-orange-500','bg-rose-500','bg-cyan-500','bg-amber-500'];
 
   const content = (
-    <div className="bg-card text-card-foreground rounded-2xl border border-border shadow-card hover:shadow-md transition-all duration-200 p-5 col-span-1 md:col-span-2">
+    <div className="bg-card text-card-foreground rounded-2xl border border-border shadow-sm hover:shadow-md transition-all duration-200 p-5 col-span-1 md:col-span-2">
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-xl bg-violet-500/10 flex items-center justify-center">
@@ -36,7 +36,7 @@ export default function WidgetStatusBreakdown({ config, isEditMode }) {
           </div>
           <h2 className="text-sm font-bold">Status Breakdown</h2>
         </div>
-        <span className="text-xs text-muted-foreground">{activeRecords.length} records</span>
+        <span className="text-[11px] text-muted-foreground">{activeRecords.length} records</span>
       </div>
       <div className="space-y-3">
         {isLoading ? (
@@ -51,15 +51,15 @@ export default function WidgetStatusBreakdown({ config, isEditMode }) {
                 <div className="flex items-center justify-between mb-1.5">
                   <div className="flex items-center gap-2">
                     <span className={`w-2 h-2 rounded-full flex-shrink-0 ${BAR_COLORS[i % BAR_COLORS.length]}`} />
- <span className="text-xs font-medium truncate max-w-[140px]">{status}</span>
- </div>
- <div className="flex items-center gap-2 flex-shrink-0">
- <span className="text-xs text-muted-foreground">{count}</span>
- <span className="text-xs font-semibold text-muted-foreground w-9 text-right">{percentage}%</span>
- </div>
- </div>
- <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
- <div className={`h-full ${BAR_COLORS[i % BAR_COLORS.length]} rounded-full transition-all duration-500`} style={{ width: `${percentage}%` }} />
+                    <span className="text-xs font-medium truncate max-w-[140px]">{status}</span>
+                  </div>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <span className="text-xs text-muted-foreground">{count}</span>
+                    <span className="text-[11px] font-semibold text-muted-foreground w-9 text-right">{percentage}%</span>
+                  </div>
+                </div>
+                <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
+                  <div className={`h-full ${BAR_COLORS[i % BAR_COLORS.length]} rounded-full transition-all duration-500`} style={{ width: `${percentage}%` }} />
                 </div>
               </div>
             );

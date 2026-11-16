@@ -27,12 +27,12 @@ export default function WidgetStatCard({ config, isEditMode }) {
   const pct = total > 0 ? Math.round((openCount / total) * 100) : 0;
 
   const colorMap = {
-    blue:   { bar: 'bg-info',   pill: 'bg-info-bg text-info-fg',   dot: 'bg-info' },
-    green:  { bar: 'bg-success', pill: 'bg-success-bg text-success-fg', dot: 'bg-success' },
-    orange: { bar: 'bg-warning', pill: 'bg-warning-bg text-warning-fg', dot: 'bg-warning' },
-    red:    { bar: 'bg-danger',   pill: 'bg-danger-bg text-danger-fg',   dot: 'bg-danger' },
+    blue:   { bar: 'bg-blue-500',   pill: 'bg-blue-50 text-blue-600',   dot: 'bg-blue-500' },
+    green:  { bar: 'bg-emerald-500', pill: 'bg-emerald-50 text-emerald-600', dot: 'bg-emerald-500' },
+    orange: { bar: 'bg-orange-500', pill: 'bg-orange-50 text-orange-600', dot: 'bg-orange-500' },
+    red:    { bar: 'bg-rose-500',   pill: 'bg-rose-50 text-rose-600',   dot: 'bg-rose-500' },
     purple: { bar: 'bg-violet-500', pill: 'bg-violet-50 text-violet-600', dot: 'bg-violet-500' },
-    gray:   { bar: 'bg-slate-400',  pill: 'bg-muted text-muted-foreground',  dot: 'bg-slate-400' },
+    gray:   { bar: 'bg-slate-400',  pill: 'bg-slate-50 text-slate-600',  dot: 'bg-slate-400' },
   };
   const c = colorMap[color] || colorMap.blue;
 
@@ -40,30 +40,30 @@ export default function WidgetStatCard({ config, isEditMode }) {
   const pageName = pageMap[entity] || 'Dashboard';
 
   const content = (
-    <div className="h-full bg-card text-card-foreground rounded-2xl border border-border shadow-card hover:shadow-md transition-all duration-200 p-5 flex flex-col gap-4 group">
+    <div className="h-full bg-card text-card-foreground rounded-2xl border border-border shadow-sm hover:shadow-md transition-all duration-200 p-5 flex flex-col gap-4 group">
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-xs font-semibold text-muted-foreground mb-1">{title}</p>
+          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-1">{title}</p>
           <h3 className="text-3xl font-bold tabular-nums">
             {isLoading ? <span className="inline-block w-12 h-8 bg-muted rounded animate-pulse" /> : openCount}
           </h3>
         </div>
         <span className={`w-8 h-8 rounded-full ${c.dot} opacity-10 group-hover:opacity-20 transition-opacity`} />
- </div>
+      </div>
 
- {/* Progress bar */}
- <div>
- <div className="flex items-center justify-between mb-1.5">
- <span className="text-xs text-muted-foreground">Active vs Total</span>
- <span className="text-xs font-semibold text-muted-foreground">{pct}%</span>
- </div>
- <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
- <div className={`h-full ${c.bar} rounded-full transition-all duration-500`} style={{ width: `${pct}%` }} />
+      {/* Progress bar */}
+      <div>
+        <div className="flex items-center justify-between mb-1.5">
+          <span className="text-[11px] text-muted-foreground">Active vs Total</span>
+          <span className="text-[11px] font-semibold text-muted-foreground">{pct}%</span>
+        </div>
+        <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
+          <div className={`h-full ${c.bar} rounded-full transition-all duration-500`} style={{ width: `${pct}%` }} />
         </div>
       </div>
 
       <div className="flex items-center justify-between mt-auto">
-        <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${c.pill}`}>{total} total</span>
+        <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full ${c.pill}`}>{total} total</span>
         <ArrowUpRight className="w-4 h-4 text-muted-foreground/40 group-hover:text-muted-foreground transition-colors" />
       </div>
     </div>
