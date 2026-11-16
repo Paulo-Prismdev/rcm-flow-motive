@@ -30,6 +30,7 @@ import { isVatExcessItem, vatExcessCheck, vatExcessFigures } from './vatExcessRe
 import InvoiceVsAuthority from './InvoiceVsAuthority';
 import {
   FINAL_INVOICE_KEY,
+  authorityContributions,
   authorityWorkings,
   claimAuthorityExpectation,
   compareToAuthority,
@@ -232,7 +233,13 @@ export default function InvoiceReviewModal({
   // content of the repair, not by the 20%-of-the-excess rule that a normal VAT
   // invoice is held to.
   const vatExcessResult = vatExcessItem ? vatExcessCheck(figures, claim) : null;
-  const arithmetic = vatExcessResult ? vatExcessResult.issues : checkArithmetic(figures);
+  // The repairer's final invoice usually takes the customer's excess (and any
+  // contribution) off its subtotal, so a total that is the figures less those adds up.
+  const arithmetic = vatExcessResult
+    ? vatExcessResult.issues
+    : checkArithmetic(figures, item?.setsRepairCost
+      ? { excess: toNum(claim?.policy_excess) || 0, contributions: authorityContributions(claim) }
+      : {});
   // Only the insurer's own invoice can be addressed to the client at the insurer's
   // request; ticking it means the party it is written to is not the thing to check.
   const clientAddressed = item?.key === FINAL_INVOICE_KEY && addressedToClient;
@@ -295,11 +302,14 @@ export default function InvoiceReviewModal({
   // half of the repair as a payable line of its own — which is exactly what the VAT &
   // Excess Invoice In bills. Filing the one document for both means that invoice is on
   // file at once, and no separate copy has to be chased for it.
-  const splitCustomerShare = toNum(split.customer);
+  // Only a real split counts: an excess line taken off the insurer's total is not the
+  // customer's half of the repair (see effectiveSplit).
+  const realSplit = comparison?.split || (expectation ? null : split);
+  const splitCustomerShare = toNum(realSplit?.customer);
   const offerVatExcessFile = !!vatExcess
     && !privateJob
     && !!item?.setsRepairCost
-    && hasSplit(split)
+    && hasSplit(realSplit)
     && splitCustomerShare > 0
     && !vatExcessFiled;
   // Offered where it applies, and ticked to start with: this document is what that
