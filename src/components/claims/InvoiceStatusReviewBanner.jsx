@@ -41,22 +41,22 @@ export default function InvoiceStatusReviewBanner({ claims, onOpenClaim }) {
 
   return (
     <>
-      <div className="flex items-center gap-2 px-4 py-1.5 border-b border-amber-200 dark:border-amber-900/60 bg-amber-50 dark:bg-amber-900/20 flex-shrink-0">
-        <AlertTriangle className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 flex-shrink-0" />
-        <p className="text-[11px] text-amber-800 dark:text-amber-200 flex-1 truncate m-ellipsis">
+      <div className="flex items-center gap-2 px-4 py-1.5 border-b border-warning/40 bg-warning-bg flex-shrink-0">
+        <AlertTriangle className="w-3.5 h-3.5 text-warning-fg flex-shrink-0" />
+        <p className="text-xs text-warning-fg flex-1 truncate m-ellipsis">
           {flagged.length} claim{flagged.length === 1 ? '' : 's'} marked Invoiced with invoices still outstanding or figures missing.
         </p>
         <button
           type="button"
           onClick={() => setIsOpen(true)}
-          className="text-[11px] font-medium text-amber-700 dark:text-amber-300 underline underline-offset-2 flex-shrink-0">
+          className="text-xs font-medium text-warning-fg underline underline-offset-2 flex-shrink-0">
           Review
         </button>
         <button
           type="button"
           onClick={dismiss}
           title="Dismiss for this session"
-          className="p-1 -mr-1 text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-200 flex-shrink-0">
+          className="p-1 -mr-1 text-warning-fg hover:text-warning-fg dark:hover:text-amber-200 flex-shrink-0">
           <X className="w-3.5 h-3.5" />
         </button>
       </div>

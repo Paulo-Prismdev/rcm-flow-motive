@@ -4,37 +4,37 @@ import { Clock, AlertCircle, CheckCircle, Pause, XCircle } from 'lucide-react';
 // Low-contrast pill style consistent with StatusBadge
 const configs = {
   Red: {
-    classes: 'bg-red-50 text-red-700 dark:bg-red-900/25 dark:text-red-300',
+    classes: 'bg-danger-bg text-danger-fg',
     icon: AlertCircle,
     label: 'Overdue',
     description: 'Update overdue',
   },
   Amber: {
-    classes: 'bg-amber-50 text-amber-700 dark:bg-amber-900/25 dark:text-amber-300',
+    classes: 'bg-warning-bg text-warning-fg',
     icon: Clock,
     label: 'Due Soon',
     description: 'Update due soon',
   },
   Green: {
-    classes: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/25 dark:text-emerald-300',
+    classes: 'bg-success-bg text-success-fg',
     icon: CheckCircle,
     label: 'On Track',
     description: 'On track',
   },
   Blue: {
-    classes: 'bg-blue-50 text-blue-700 dark:bg-blue-900/25 dark:text-blue-300',
+    classes: 'bg-info-bg text-info-fg',
     icon: Pause,
     label: 'Snoozed',
     description: 'Update tracking paused',
   },
   Complete: {
-    classes: 'bg-blue-50 text-blue-700 dark:bg-blue-900/25 dark:text-blue-300',
+    classes: 'bg-info-bg text-info-fg',
     icon: CheckCircle,
     label: 'Complete',
     description: 'Tracking complete',
   },
   Gray: {
-    classes: 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400',
+    classes: 'bg-muted text-muted-foreground',
     icon: XCircle,
     label: 'Closed',
     description: 'Claim closed',
@@ -51,7 +51,7 @@ export default function UpdateStatusBadge({ status, small = false, labelPrefix }
   if (small) {
     return (
       <span
-        className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold whitespace-nowrap ${config.classes}`}
+        className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold whitespace-nowrap ${config.classes}`}
         title={title}
       >
         <Icon className="w-3 h-3" />

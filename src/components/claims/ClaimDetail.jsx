@@ -125,13 +125,13 @@ const EditableSection = ({ title, icon: Icon, claim, onUpdate, children, EditCom
     };
 
     return (
-        <div className="bg-card border border-border rounded-[10px] p-4 md:p-5 m-card-tight shadow-sm">
+        <div className="bg-card border border-border rounded-lg p-4 md:p-5 m-card-tight shadow-sm">
             <div className="flex justify-between items-center pb-3 mb-4 border-b border-border m-card-head">
                 <div
                     className="flex items-center gap-2.5 text-left flex-grow"
                 >
                     <Icon className="w-4 h-4 text-muted-foreground" />
-                    <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{title}</h3>
+                    <h3 className="text-xs font-semibold text-muted-foreground">{title}</h3>
                 </div>
                 <div className='flex items-center gap-2'>
                     {!isEditing && EditComponent && canEdit && (
@@ -186,11 +186,11 @@ function DetailRow({ label, value, isCurrency = false, isDate = false, isStatus 
     }
 
     return (
-        <div className={`py-2 px-3 rounded-[8px] transition-colors ${isEmpty ? 'bg-amber-50 dark:bg-amber-900/20 border border-amber-300 dark:border-amber-700' : 'hover:bg-muted/50'}`}>
-            <div className="text-[11px] font-medium text-muted-foreground mb-0.5">
+        <div className={`py-2 px-3 rounded-[8px] transition-colors ${isEmpty ? 'bg-warning-bg border border-warning/50' : 'hover:bg-muted/50'}`}>
+            <div className="text-xs font-medium text-muted-foreground mb-0.5">
                 {label}
             </div>
-            <div className={`text-sm font-medium ${isEmpty ? 'text-amber-500' : 'text-foreground'} ${(isCurrency || (typeof value === 'number')) ? 'tabular-nums' : ''}`}>
+            <div className={`text-sm font-medium ${isEmpty ? 'text-warning' : 'text-foreground'} ${(isCurrency || (typeof value === 'number')) ? 'tabular-nums' : ''}`}>
                 {isStatus ? <StatusBadge status={displayValue} /> : displayValue}
             </div>
         </div>
@@ -925,7 +925,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                 <Users className="w-5 h-5 text-gold" />
                 <h3 className="font-bold">Third Party Pursuit</h3>
               </div>
-              <div className="text-center py-12 text-gray-500">
+              <div className="text-center py-12 text-muted-foreground">
                 <p>Third party pursuit is only applicable for Fault Claims.</p>
               </div>
             </div>
@@ -979,19 +979,19 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
         return (
           <EditableSection title="Billing Party — Client" icon={Users} claim={claim} onUpdate={handleUpdate} EditComponent={ClientEditComponent} canEdit={canEdit}>
             <div className="grid grid-cols-1 lg:grid-cols-2 m-fields-2 gap-2">
-              <div className="py-2 px-3 rounded-[8px] hover:bg-muted/50"><div className="text-[11px] font-medium text-muted-foreground mb-0.5">Name</div><div className="text-sm font-medium">{clientName || '-'}</div></div>
-              {companyContactName && <div className="py-2 px-3 rounded-[8px] hover:bg-muted/50"><div className="text-[11px] font-medium text-muted-foreground mb-0.5">Company Contact Name</div><div className="text-sm font-medium">{companyContactName}</div></div>}
-              {companyContactPhone && <div className="py-2 px-3 rounded-[8px] hover:bg-muted/50"><div className="text-[11px] font-medium text-muted-foreground mb-0.5">Company Contact Phone</div><div className="text-sm font-medium">{companyContactPhone}</div></div>}
-              {companyContactEmail && <div className="py-2 px-3 rounded-[8px] hover:bg-muted/50"><div className="text-[11px] font-medium text-muted-foreground mb-0.5">Company Contact Email</div><div className="text-sm font-medium">{companyContactEmail}</div></div>}
-              <div className={`py-2 px-3 rounded-[8px] ${!clientPhone ? 'bg-amber-50 dark:bg-amber-900/20 border border-amber-300 dark:border-amber-700' : 'hover:bg-muted/50'}`}><div className="text-[11px] font-medium text-muted-foreground mb-0.5">Phone</div><div className={`text-sm font-medium ${!clientPhone ? 'text-amber-500' : ''}`}>{clientPhone || '-'}</div></div>
-              <div className={`py-2 px-3 rounded-[8px] ${!clientEmail ? 'bg-amber-50 dark:bg-amber-900/20 border border-amber-300 dark:border-amber-700' : 'hover:bg-muted/50'}`}><div className="text-[11px] font-medium text-muted-foreground mb-0.5">Email</div><div className={`text-sm font-medium ${!clientEmail ? 'text-amber-500' : ''}`}>{clientEmail || '-'}</div></div>
-              <div className="py-2 px-3 rounded-[8px] hover:bg-muted/50"><div className="text-[11px] font-medium text-muted-foreground mb-0.5">VAT Status</div><div className="text-sm font-medium">{vatStatus}</div></div>
-              { claim.client_ref && <div className="py-2 px-3 rounded-[8px] hover:bg-muted/50"><div className="text-[11px] font-medium text-muted-foreground mb-0.5">Client Ref</div><div className="text-sm font-medium">{claim.client_ref}</div></div>}
-              {claim.business_division && <div className="py-2 px-3 rounded-[8px] hover:bg-muted/50"><div className="text-[11px] font-medium text-muted-foreground mb-0.5">Business Division</div><div className="text-sm font-medium">{claim.business_division}</div></div>}
+              <div className="py-2 px-3 rounded-[8px] hover:bg-muted/50"><div className="text-xs font-medium text-muted-foreground mb-0.5">Name</div><div className="text-sm font-medium">{clientName || '-'}</div></div>
+              {companyContactName && <div className="py-2 px-3 rounded-[8px] hover:bg-muted/50"><div className="text-xs font-medium text-muted-foreground mb-0.5">Company Contact Name</div><div className="text-sm font-medium">{companyContactName}</div></div>}
+              {companyContactPhone && <div className="py-2 px-3 rounded-[8px] hover:bg-muted/50"><div className="text-xs font-medium text-muted-foreground mb-0.5">Company Contact Phone</div><div className="text-sm font-medium">{companyContactPhone}</div></div>}
+              {companyContactEmail && <div className="py-2 px-3 rounded-[8px] hover:bg-muted/50"><div className="text-xs font-medium text-muted-foreground mb-0.5">Company Contact Email</div><div className="text-sm font-medium">{companyContactEmail}</div></div>}
+              <div className={`py-2 px-3 rounded-[8px] ${!clientPhone ? 'bg-warning-bg border border-warning/50' : 'hover:bg-muted/50'}`}><div className="text-xs font-medium text-muted-foreground mb-0.5">Phone</div><div className={`text-sm font-medium ${!clientPhone ? 'text-warning' : ''}`}>{clientPhone || '-'}</div></div>
+              <div className={`py-2 px-3 rounded-[8px] ${!clientEmail ? 'bg-warning-bg border border-warning/50' : 'hover:bg-muted/50'}`}><div className="text-xs font-medium text-muted-foreground mb-0.5">Email</div><div className={`text-sm font-medium ${!clientEmail ? 'text-warning' : ''}`}>{clientEmail || '-'}</div></div>
+              <div className="py-2 px-3 rounded-[8px] hover:bg-muted/50"><div className="text-xs font-medium text-muted-foreground mb-0.5">VAT Status</div><div className="text-sm font-medium">{vatStatus}</div></div>
+              { claim.client_ref && <div className="py-2 px-3 rounded-[8px] hover:bg-muted/50"><div className="text-xs font-medium text-muted-foreground mb-0.5">Client Ref</div><div className="text-sm font-medium">{claim.client_ref}</div></div>}
+              {claim.business_division && <div className="py-2 px-3 rounded-[8px] hover:bg-muted/50"><div className="text-xs font-medium text-muted-foreground mb-0.5">Business Division</div><div className="text-sm font-medium">{claim.business_division}</div></div>}
             </div>
             {clientContacts.length > 0 && (
               <div className="mt-3 rounded-lg border border-border bg-muted/30 p-3 space-y-2">
-                <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                <div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
                   <Users className="w-3.5 h-3.5" /> Contacts at this business
                 </div>
                 <div className="space-y-1.5">
@@ -1002,7 +1002,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="text-sm font-medium">{c.name || '—'}</span>
                           {c.position && <span className="text-xs text-muted-foreground">· {c.position}</span>}
-                          {primary && <span className="inline-flex items-center gap-0.5 text-xs text-amber-600 font-medium"><Star className="w-3 h-3 fill-amber-500 text-amber-500" /> Primary</span>}
+                          {primary && <span className="inline-flex items-center gap-0.5 text-xs text-warning-fg font-medium"><Star className="w-3 h-3 fill-amber-500 text-warning" /> Primary</span>}
                         </div>
                         <div className="flex flex-wrap gap-3 mt-1 text-xs text-muted-foreground">
                           {c.phone && <span className="flex items-center gap-1"><Phone className="w-3 h-3" /> {c.phone}</span>}
@@ -1015,7 +1015,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
               </div>
             )}
             <div className="mt-3 pt-3 border-t border-border">
-              <p className="text-[11px] font-semibold text-muted-foreground mb-2">Insurance Details</p>
+              <p className="text-xs font-semibold text-muted-foreground mb-2">Insurance Details</p>
               <div className="grid grid-cols-1 lg:grid-cols-2 m-fields-2 gap-2">
                 <DetailRow label="Broker" value={claim.broker_name} />
                 <DetailRow label="Insurer" value={claim.insurer} />
@@ -1051,13 +1051,13 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
             </div>
             <CreditRepairRatesCard claim={claim} />
             {claim.credit_repair_company_name && (
-              <div className="mt-4 p-3 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800">
+              <div className="mt-4 p-3 rounded-lg bg-info-bg dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800">
                 <div className="flex items-center justify-between gap-3 flex-wrap">
                   <div className="flex items-center gap-2">
-                    <Mail className="w-4 h-4 text-indigo-600 flex-shrink-0" />
+                    <Mail className="w-4 h-4 text-info-fg flex-shrink-0" />
                     <div>
                       <span className="text-sm font-medium block">Credit Repair Instruction</span>
-                      <span className="text-[11px] text-muted-foreground">Generate a PDF instruction and email it to {claim.credit_repair_company_name}.</span>
+                      <span className="text-xs text-muted-foreground">Generate a PDF instruction and email it to {claim.credit_repair_company_name}.</span>
                     </div>
                   </div>
                   <Button size="sm" onClick={() => setIsCreditRepairInstructionOpen(true)} className="gap-2">
@@ -1137,28 +1137,28 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
           <EditableSection title="Vehicle Details" icon={Car} claim={claim} onUpdate={handleUpdate} EditComponent={ClaimVehicleForm} canEdit={canEdit}>
             {/* DVLA Lookup Button */}
             {claim.reg && (
-              <div className="mb-4 p-3 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+              <div className="mb-4 p-3 rounded-xl bg-info-bg border border-info/30">
                 <div className="flex items-center justify-between gap-3">
                   <div>
-                    <p className="font-medium text-blue-800 dark:text-blue-200 text-sm">DVLA Vehicle Lookup</p>
-                    <p className="text-xs text-blue-600 dark:text-blue-300">Fetch vehicle data from DVLA for {claim.reg}</p>
+                    <p className="font-medium text-info-fg text-sm">DVLA Vehicle Lookup</p>
+                    <p className="text-xs text-info-fg">Fetch vehicle data from DVLA for {claim.reg}</p>
                   </div>
                   <Button
                     onClick={handleFetchVehicleData}
                     disabled={isFetchingVehicle}
-                    className="bg-blue-600 hover:bg-blue-700 text-white text-sm"
+                    className="bg-info hover:bg-info/90 text-on-solid text-sm"
                   >
                     {isFetchingVehicle ? 'Fetching...' : 'Fetch from DVLA'}
                   </Button>
                 </div>
                 {vehicleFetchError && (
-                  <p className="mt-2 text-xs text-red-600 dark:text-red-400">{vehicleFetchError}</p>
+                  <p className="mt-2 text-xs text-danger-fg">{vehicleFetchError}</p>
                 )}
               </div>
             )}
             
             <div className="mb-6 m-block-tight">
-              <h4 className="text-sm font-semibold text-gray-600 mb-3">Basic Information</h4>
+              <h4 className="text-sm font-semibold text-muted-foreground mb-3">Basic Information</h4>
               <div className="grid grid-cols-1 lg:grid-cols-2 m-fields-2 gap-2">
                 <DetailRow label="Make (DVLA)" value={claim.vehicle_make} />
                 <DetailRow label="Model (DVLA)" value={claim.vehicle_model} />
@@ -1170,7 +1170,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
             </div>
 
             <div className="mb-6 m-block-tight">
-              <h4 className="text-sm font-semibold text-gray-600 mb-3">Technical Details</h4>
+              <h4 className="text-sm font-semibold text-muted-foreground mb-3">Technical Details</h4>
               <div className="grid grid-cols-1 lg:grid-cols-2 m-fields-2 gap-2">
                 <DetailRow label="Engine Capacity (CC)" value={claim.vehicle_engine_capacity} />
                 <DetailRow label="CO2 Emissions (g/km)" value={claim.vehicle_co2_emissions} />
@@ -1181,7 +1181,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
             </div>
 
             <div className="mb-6 m-block-tight">
-              <h4 className="text-sm font-semibold text-gray-600 mb-3">MOT & Tax Status</h4>
+              <h4 className="text-sm font-semibold text-muted-foreground mb-3">MOT & Tax Status</h4>
               <div className="grid grid-cols-1 lg:grid-cols-2 m-fields-2 gap-2">
                 <DetailRow label="MOT Status" value={claim.vehicle_mot_status} />
                 <DetailRow label="MOT Expiry Date" value={claim.vehicle_mot_expiry_date} isDate />
@@ -1320,7 +1320,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
               canEdit={canEdit}
             >
               <IndemnityLinkManager claim={claim} onUpdate={handleUpdate} />
-              <div className="text-center py-8 text-gray-500">
+              <div className="text-center py-8 text-muted-foreground">
                 <p className="mb-4">This claim does not currently require indemnity checks.</p>
                 <p className="text-sm">Click the edit button to enable indemnity details if needed.</p>
               </div>
@@ -1385,10 +1385,10 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
 
       case 'repairPreference':
         return (
-          <div className="bg-card border border-border rounded-[10px] p-4 md:p-5 m-card-tight shadow-sm">
+          <div className="bg-card border border-border rounded-lg p-4 md:p-5 m-card-tight shadow-sm">
             <div className="flex items-center gap-2.5 pb-3 mb-4 border-b border-border m-card-head">
               <FileText className="w-4 h-4 text-muted-foreground" />
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Statement of Repair Preference</h3>
+              <h3 className="text-xs font-semibold text-muted-foreground">Statement of Repair Preference</h3>
             </div>
             <RepairPreferenceLinkManager claim={claim} onUpdate={handleUpdate} />
             <div className="grid grid-cols-1 lg:grid-cols-2 m-fields-2 gap-2 mt-4">
@@ -1412,10 +1412,10 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
 
       case 'witnessStatements':
         return (
-          <div className="bg-card border border-border rounded-[10px] p-4 md:p-5 m-card-tight shadow-sm">
+          <div className="bg-card border border-border rounded-lg p-4 md:p-5 m-card-tight shadow-sm">
             <div className="flex items-center gap-2.5 pb-3 mb-4 border-b border-border m-card-head">
               <FileText className="w-4 h-4 text-muted-foreground" />
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Witness Statements</h3>
+              <h3 className="text-xs font-semibold text-muted-foreground">Witness Statements</h3>
             </div>
             <WitnessStatementsSection claim={claim} />
           </div>
@@ -1423,10 +1423,10 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
 
       case 'declarationOfNeed':
         return (
-          <div className="bg-card border border-border rounded-[10px] p-4 md:p-5 m-card-tight shadow-sm">
+          <div className="bg-card border border-border rounded-lg p-4 md:p-5 m-card-tight shadow-sm">
             <div className="flex items-center gap-2.5 pb-3 mb-4 border-b border-border m-card-head">
               <FileText className="w-4 h-4 text-muted-foreground" />
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Declaration of Need – Replacement Vehicle</h3>
+              <h3 className="text-xs font-semibold text-muted-foreground">Declaration of Need – Replacement Vehicle</h3>
             </div>
             <DeclarationOfNeedLinkManager claim={claim} onUpdate={handleUpdate} />
             <div className="grid grid-cols-1 lg:grid-cols-2 m-fields-2 gap-2 mt-4">
@@ -1453,12 +1453,12 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
 
       case 'financials':
         return (
-          <div className="bg-card border border-border rounded-[10px] p-4 md:p-5 m-card-tight shadow-sm">
+          <div className="bg-card border border-border rounded-lg p-4 md:p-5 m-card-tight shadow-sm">
             <div className="flex items-center gap-2.5 pb-3 mb-4 border-b border-border m-card-head">
               <DollarSign className="w-4 h-4 text-muted-foreground" />
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Financials</h3>
+              <h3 className="text-xs font-semibold text-muted-foreground">Financials</h3>
               {isInternalUser && (
-                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground text-[10px] font-semibold">
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground text-xs font-semibold">
                   <Lock className="w-2.5 h-2.5" /> Internal only
                 </span>
               )}
@@ -1494,7 +1494,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
               <InlineField label="Claim Complete Date" name="claim_complete_date" isDate />
             </div>
             <div className="mt-3 pt-3 border-t border-border">
-              <p className="text-[11px] text-muted-foreground mb-2">Rectification milestones — greyed out until the claim is on the Rectification journey.</p>
+              <p className="text-xs text-muted-foreground mb-2">Rectification milestones — greyed out until the claim is on the Rectification journey.</p>
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
                 <InlineField label="Rectification Booking In" name="rectification_booking_in_date" isDate readOnly={!isRectification} />
                 <InlineField label="Rectification Completion" name="rectification_completion_date" isDate readOnly={!isRectification} />
@@ -1513,22 +1513,22 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
             </div>
             {/* Repairer Acceptance Status Banner */}
             {claim.bodyshop_id && !claim.repairer_accepted && (
-              <div className="mb-4 p-3 rounded-lg border-2 border-amber-500 bg-amber-50 dark:bg-amber-900/20 flex items-center gap-3">
-                <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0" />
+              <div className="mb-4 p-3 rounded-lg border-2 border-amber-500 bg-warning-bg flex items-center gap-3">
+                <AlertTriangle className="w-5 h-5 text-warning-fg flex-shrink-0" />
                 <div>
-                  <p className="font-medium text-amber-800 dark:text-amber-200">Awaiting Repairer Acceptance</p>
-                  <p className="text-xs text-amber-600 dark:text-amber-300">The bodyshop has not yet confirmed they can handle this repair</p>
+                  <p className="font-medium text-warning-fg">Awaiting Repairer Acceptance</p>
+                  <p className="text-xs text-warning-fg">The bodyshop has not yet confirmed they can handle this repair</p>
                 </div>
               </div>
             )}
             {claim.bodyshop_id && claim.repairer_accepted && (
-              <div className="mb-4 p-3 rounded-lg border-2 border-green-500 bg-green-50 dark:bg-green-900/20 flex items-center gap-3">
-                <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
+              <div className="mb-4 p-3 rounded-lg border-2 border-green-500 bg-success-bg flex items-center gap-3">
+                <div className="w-5 h-5 rounded-full bg-success flex items-center justify-center flex-shrink-0">
                   <span className="text-white text-xs">✓</span>
                 </div>
                 <div>
-                  <p className="font-medium text-green-800 dark:text-green-200">Repairer Accepted</p>
-                  <p className="text-xs text-green-600 dark:text-green-300">
+                  <p className="font-medium text-success-fg">Repairer Accepted</p>
+                  <p className="text-xs text-success-fg">
                     {claim.repairer_accepted_date ? `Accepted on ${format(new Date(claim.repairer_accepted_date), 'dd/MM/yyyy')}` : 'Job confirmed by bodyshop'}
                   </p>
                 </div>
@@ -1623,7 +1623,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
               )}
               {regenPdfUrl && !isRegeneratingPdf && (
                 <div className="mt-3 pt-3 border-t border-accent/20 space-y-2">
-                  <div className="flex items-center gap-2 p-2.5 rounded-lg bg-green-50 border border-green-200 text-green-700">
+                  <div className="flex items-center gap-2 p-2.5 rounded-lg bg-success-bg border border-success/30 text-success-fg">
                     <CheckCircle className="w-4 h-4 flex-shrink-0" />
                     <span className="text-sm flex-1">
                       {savedRegenToDocs ? 'Saved to claim docs.' : 'PDF generated.'}
@@ -1673,7 +1673,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                   <FileText className="w-4 h-4 text-accent" />
                   <div>
                     <span className="text-sm font-medium block">Purchase Order</span>
-                    <span className="text-[11px] text-muted-foreground">
+                    <span className="text-xs text-muted-foreground">
                       Authority figure: {(() => {
                         const v = claim.authority_cost_gross ?? claim.estimate_cost_gross ?? claim.authority_cost_net ?? claim.estimate_cost_net;
                         return v != null && v !== '' ? `£${Number(v).toLocaleString('en-GB', { minimumFractionDigits: 2 })}` : '—';
@@ -1856,14 +1856,14 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
 
           {/* ── Starred update notice ── */}
           {starredUpdates.length > 0 && (
-            <div className="bg-amber-50 dark:bg-amber-900/20 border-2 border-amber-500 rounded-[10px] p-3 flex items-start gap-3 flex-shrink-0 shadow-sm">
-              <Star className="w-5 h-5 text-amber-500 fill-amber-400 flex-shrink-0 mt-0.5" />
+            <div className="bg-warning-bg border-2 border-amber-500 rounded-lg p-3 flex items-start gap-3 flex-shrink-0 shadow-sm">
+              <Star className="w-5 h-5 text-warning fill-amber-400 flex-shrink-0 mt-0.5" />
               <div className="flex-1 min-w-0">
-                <p className="font-semibold text-amber-800 dark:text-amber-200 text-sm">Flagged update requires attention</p>
-                <p className="text-xs text-amber-700 dark:text-amber-300 mt-0.5">
+                <p className="font-semibold text-warning-fg text-sm">Flagged update requires attention</p>
+                <p className="text-xs text-warning-fg mt-0.5">
                   {starredUpdates.length} update{starredUpdates.length !== 1 ? 's' : ''} flagged as important. This job cannot be completed until the star{starredUpdates.length !== 1 ? 's' : ''} {starredUpdates.length !== 1 ? 'are' : 'is'} removed.
                 </p>
-                <button onClick={() => setIsClaimUpdatesOpen(true)} className="mt-1 text-xs font-medium text-amber-800 dark:text-amber-200 underline hover:opacity-80">View & manage flagged updates</button>
+                <button onClick={() => setIsClaimUpdatesOpen(true)} className="mt-1 text-xs font-medium text-warning-fg underline hover:opacity-80">View & manage flagged updates</button>
               </div>
             </div>
           )}
@@ -1905,12 +1905,12 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
           />
 
           {/* ── DESKTOP top bar (≥ lg) — unchanged Radix dropdown ── */}
-          <div className="hidden lg:block bg-card border border-border rounded-[10px] p-3 flex-shrink-0 shadow-sm">
+          <div className="hidden lg:block bg-card border border-border rounded-lg p-3 flex-shrink-0 shadow-sm">
               <div className="flex flex-col gap-2">
                   <div className="flex items-center gap-2">
                       <button aria-label="Back"
                         onClick={handleClose}
-                        className="p-2 flex-shrink-0 rounded-[10px] border border-border bg-card hover:bg-muted transition-colors"
+                        className="p-2 flex-shrink-0 rounded-lg border border-border bg-card hover:bg-muted transition-colors"
                       >
                           <ArrowLeft className="w-4 h-4" />
                       </button>
@@ -1929,13 +1929,13 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                           <Eye className="w-4 h-4" /> Quick View
                         </Button>
                         {canEdit && (
-                          <Button onClick={() => setIsClaimUpdatesOpen(true)} className="h-9 px-4 text-sm font-medium rounded-lg bg-green-600 hover:bg-green-700 text-white relative">
+                          <Button onClick={() => setIsClaimUpdatesOpen(true)} className="h-9 px-4 text-sm font-medium rounded-lg bg-success hover:bg-success/90 text-on-solid relative">
                             Updates & Status
                             {claim.unread_bodyshop_update && (
-                              <span className="absolute -top-1.5 -right-1.5 w-3.5 h-3.5 rounded-full bg-blue-500 ring-2 ring-white flex-shrink-0" />
+                              <span className="absolute -top-1.5 -right-1.5 w-3.5 h-3.5 rounded-full bg-info ring-2 ring-white flex-shrink-0" />
                             )}
                             {claimUpdates.length > 0 && (
-                              <span className="absolute -top-1.5 right-3 min-w-[18px] h-[18px] px-1 rounded-full bg-white text-green-700 text-[10px] font-bold flex items-center justify-center leading-none shadow">
+                              <span className="absolute -top-1.5 right-3 min-w-[18px] h-[18px] px-1 rounded-full bg-card text-success-fg text-xs font-bold flex items-center justify-center leading-none shadow">
                                 {claimUpdates.length}
                               </span>
                             )}
@@ -1945,7 +1945,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                           <Button onClick={() => setIsClaimUpdatesOpen(true)} variant="outline" className="h-9 px-4 text-sm font-medium rounded-lg relative">
                             Updates
                             {claimUpdates.length > 0 && (
-                              <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-green-600 text-white text-[10px] font-bold flex items-center justify-center leading-none shadow">
+                              <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-success text-on-solid text-xs font-bold flex items-center justify-center leading-none shadow">
                                 {claimUpdates.length}
                               </span>
                             )}
@@ -1954,7 +1954,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                         <Button onClick={() => setIsImagesOpen(true)} variant="outline" className="h-9 px-3 text-sm font-medium rounded-lg gap-1.5 relative">
                           <Image className="w-4 h-4" /> Images
                           {(claim.image_urls?.length > 0) && (
-                            <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-blue-500 text-white text-[10px] font-bold flex items-center justify-center leading-none shadow">
+                            <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-info text-on-solid text-xs font-bold flex items-center justify-center leading-none shadow">
                               {claim.image_urls.length}
                             </span>
                           )}
@@ -1962,7 +1962,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                         <Button onClick={() => setIsAttachmentsOpen(true)} variant="outline" className="h-9 px-3 text-sm font-medium rounded-lg gap-1.5 relative">
                           <FileText className="w-4 h-4" /> Docs
                           {(claim.file_urls?.length > 0) && (
-                            <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-blue-500 text-white text-[10px] font-bold flex items-center justify-center leading-none shadow">
+                            <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-info text-on-solid text-xs font-bold flex items-center justify-center leading-none shadow">
                               {claim.file_urls.length}
                             </span>
                           )}
@@ -1971,7 +1971,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                           <Button onClick={() => setIsNotesOpen(true)} variant="outline" className="h-9 px-3 text-sm font-medium rounded-lg gap-1.5 relative">
                             <Edit className="w-4 h-4" /> Internal Updates
                             {notesTotalCount > 0 && (
-                              <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-blue-500 text-white text-[10px] font-bold flex items-center justify-center leading-none shadow">
+                              <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-info text-on-solid text-xs font-bold flex items-center justify-center leading-none shadow">
                                 {notesTotalCount}
                               </span>
                             )}
@@ -1997,7 +1997,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                               <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setSelectedSection('declarationOfNeed'); }}><FileText className="w-4 h-4 mr-2" />Declaration of Need</DropdownMenuItem>
                               <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsDuplicateModalOpen(true); }}><Copy className="w-4 h-4 mr-2" />Duplicate Claim</DropdownMenuItem>
                               <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleArchive(); }} disabled={archiveMutation.isLoading}><Archive className="w-4 h-4 mr-2" />{claim.archived ? 'Unarchive' : 'Archive'}</DropdownMenuItem>
-                              <DropdownMenuItem onSelect={() => handleDelete()} disabled={deleteMutation.isLoading} className="text-red-600"><Trash2 className="w-4 h-4 mr-2" />Delete</DropdownMenuItem>
+                              <DropdownMenuItem onSelect={() => handleDelete()} disabled={deleteMutation.isLoading} className="text-danger-fg"><Trash2 className="w-4 h-4 mr-2" />Delete</DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
                         )}
@@ -2017,14 +2017,14 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                         <UpdateStatusBadge status={computeClientCommStatusFlag(claim)} small labelPrefix="Client" />
                       </button>
                     )}
-                    {claim.archived && <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400">Archived</span>}
+                    {claim.archived && <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-muted text-muted-foreground">Archived</span>}
                   </div>
                   <ClaimJourneyTimeline claim={claim} updates={claimUpdates} />
               </div>
           </div>
 
         {(linkedEstimate || linkedEngineering || linkedParts || linkedThirdPartyClaim || linkedOriginalClaim) && (
-          <div className="hidden lg:block bg-card border border-border rounded-[10px] p-3 flex-shrink-0 shadow-sm">
+          <div className="hidden lg:block bg-card border border-border rounded-lg p-3 flex-shrink-0 shadow-sm">
             <div className="flex items-center gap-2 mb-3">
               <span className="w-4 h-4 text-gold">🔗</span>
               <h3 className="font-medium">Linked Cases</h3>
@@ -2036,8 +2036,8 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                   className="bg-muted hover:bg-muted/80 border border-border rounded-[8px] px-3 py-1.5 text-sm transition-all cursor-pointer"
                   title="Click to open in new window"
                 >
-                  <span className="text-gray-500">Original Fault Claim:</span>{' '}
-                  <span className="font-medium text-blue-600 underline">{linkedOriginalClaim.job_number || linkedOriginalClaim.reg}</span>
+                  <span className="text-muted-foreground">Original Fault Claim:</span>{' '}
+                  <span className="font-medium text-info-fg underline">{linkedOriginalClaim.job_number || linkedOriginalClaim.reg}</span>
                 </button>
               )}
               {linkedThirdPartyClaim && (
@@ -2046,8 +2046,8 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                   className="bg-muted hover:bg-muted/80 border border-border rounded-[8px] px-3 py-1.5 text-sm transition-all cursor-pointer"
                   title="Click to open in new window"
                 >
-                  <span className="text-gray-500">Third Party Claim:</span>{' '}
-                  <span className="font-medium text-indigo-600 underline">{linkedThirdPartyClaim.job_number || linkedThirdPartyClaim.reg}</span>
+                  <span className="text-muted-foreground">Third Party Claim:</span>{' '}
+                  <span className="font-medium text-info-fg underline">{linkedThirdPartyClaim.job_number || linkedThirdPartyClaim.reg}</span>
                 </button>
               )}
               {linkedEstimate && (
@@ -2056,8 +2056,8 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                   className="bg-muted hover:bg-muted/80 border border-border rounded-[8px] px-3 py-1.5 text-sm transition-all cursor-pointer"
                   title="Click to open in new window"
                 >
-                  <span className="text-gray-500">Estimate:</span>{' '}
-                  <span className="font-medium text-green-600 underline">{linkedEstimate.name}</span>
+                  <span className="text-muted-foreground">Estimate:</span>{' '}
+                  <span className="font-medium text-success-fg underline">{linkedEstimate.name}</span>
                 </button>
               )}
               {linkedEngineering && (
@@ -2066,7 +2066,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                   className="bg-muted hover:bg-muted/80 border border-border rounded-[8px] px-3 py-1.5 text-sm transition-all cursor-pointer"
                   title="Click to open in new window"
                 >
-                  <span className="text-gray-500">Engineering:</span>{' '}
+                  <span className="text-muted-foreground">Engineering:</span>{' '}
                   <span className="font-medium text-purple-600 underline">{linkedEngineering.reference}</span>
                 </button>
               )}
@@ -2076,8 +2076,8 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                   className="bg-muted hover:bg-muted/80 border border-border rounded-[8px] px-3 py-1.5 text-sm transition-all cursor-pointer"
                   title="Click to open in new window"
                 >
-                  <span className="text-gray-500">Parts:</span>{' '}
-                  <span className="font-medium text-orange-600 underline">{linkedParts.vehicle_ref}</span>
+                  <span className="text-muted-foreground">Parts:</span>{' '}
+                  <span className="font-medium text-warning-fg underline">{linkedParts.vehicle_ref}</span>
                 </button>
               )}
             </div>
@@ -2085,7 +2085,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
         )}
 
         {/* Section selector — desktop only (mobile uses ClaimDetailMobileHeader) */}
-        <div className="hidden lg:block bg-card border border-border rounded-[10px] px-3 py-2 flex-shrink-0 shadow-sm">
+        <div className="hidden lg:block bg-card border border-border rounded-lg px-3 py-2 flex-shrink-0 shadow-sm">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="w-full px-3 py-3 flex items-center justify-between bg-transparent">
