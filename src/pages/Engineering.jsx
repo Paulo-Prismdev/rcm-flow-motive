@@ -128,6 +128,12 @@ export default function Engineering() {
           subtitle={`${filteredJobs.length} ${displayArchived ? "archived" : "active"} job${filteredJobs.length === 1 ? "" : "s"}`}
           actions={isInternalUser && (
             <>
+              {!displayArchived && (
+                <Button size="sm" onClick={() => setShowForm(true)} className="gap-1.5">
+                  <Plus className="w-4 h-4" aria-hidden="true" />
+                  <span className="hidden sm:inline">New job</span>
+                </Button>
+              )}
               <Button
                 variant="outline"
                 size="sm"
@@ -138,12 +144,6 @@ export default function Engineering() {
                 {displayArchived ? <Eye className="w-4 h-4" aria-hidden="true" /> : <Archive className="w-4 h-4" aria-hidden="true" />}
                 <span className="hidden sm:inline">{displayArchived ? "Show active" : "Archived"}</span>
               </Button>
-              {!displayArchived && (
-                <Button size="sm" onClick={() => setShowForm(true)} className="gap-1.5">
-                  <Plus className="w-4 h-4" aria-hidden="true" />
-                  <span className="hidden sm:inline">New job</span>
-                </Button>
-              )}
             </>
           )}
         />
