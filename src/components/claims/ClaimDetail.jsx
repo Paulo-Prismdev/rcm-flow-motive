@@ -114,6 +114,9 @@ import { askConfirm, notify, notifyError } from '@/lib/dialogs';
 // ── Editing without the fields moving ──
 // Controls a form shows (inputs, dropdowns, switches), in page order.
 const FIELD_SELECTOR = 'input:not([type="hidden"]), textarea, select, button[role="combobox"], button[aria-haspopup], button[role="switch"], button[role="checkbox"]';
+// Every control, in page order. The locked and editing forms are the same form, so the
+// Nth control in one is the Nth control in the other.
+const ANY_CONTROL = 'input:not([type="hidden"]), textarea, select, button';
 const norm = (t) => String(t || '').toLowerCase().replace(/\(.*?\)|[^a-z0-9]+/g, ' ').replace(/\b(driver|client|no|number)\b/g, ' ').replace(/\s+/g, ' ').trim();
 
 // Find the edit-form control whose label best matches the label the user clicked in the view.
@@ -193,7 +196,7 @@ const EditableSection = ({ title, icon: Icon, claim, onUpdate, children, EditCom
         requestAnimationFrame(() => {
             const root = bodyRef.current; if (!root) return;
             const el = want.index != null
-                ? root.querySelectorAll(FIELD_SELECTOR)[want.index]
+                ? root.querySelectorAll(ANY_CONTROL)[want.index]
                 : findControlByLabel(root, want.label);
             focusAndFlash(el || root.querySelector(FIELD_SELECTOR));
         });
@@ -206,8 +209,9 @@ const EditableSection = ({ title, icon: Icon, claim, onUpdate, children, EditCom
         if (!editable) return;
         const root = bodyRef.current; if (!root) return;
         const block = e.target.closest('div'); if (!block) return;
-        const control = block.querySelector(FIELD_SELECTOR) || e.target.closest('label')?.parentElement?.querySelector(FIELD_SELECTOR);
-        const list = Array.from(root.querySelectorAll(FIELD_SELECTOR));
+        const pick = (el) => el && Array.from(el.querySelectorAll(ANY_CONTROL)).find((c) => !c.classList.contains('fm-hide'));
+        const control = pick(block) || pick(e.target.closest('label')?.parentElement);
+        const list = Array.from(root.querySelectorAll(ANY_CONTROL));
         const index = control ? list.indexOf(control) : -1;
         startEdit(index >= 0 ? { index } : null);
     };
