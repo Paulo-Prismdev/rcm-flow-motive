@@ -117,15 +117,14 @@ export default function UserManagement() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-lg font-semibold text-foreground">User Management</h1>
-          <p className="text-xs text-muted-foreground">{users.length} users total</p>
+          <p className="text-sm font-medium text-foreground">{users.length} user{users.length === 1 ? '' : 's'}</p>
         </div>
         <button
           onClick={() => setShowInvite(true)}
-          className="flex items-center gap-2 px-3 py-1.5 bg-[#131d47] text-white text-sm rounded-lg hover:bg-[#1a2660] transition-colors"
+          className="flex items-center gap-2 px-3 py-1.5 bg-primary text-primary-foreground text-sm rounded-lg hover:bg-primary/90 transition-colors"
         >
           <UserPlus className="w-4 h-4" />
-          Invite User
+          Invite user
         </button>
       </div>
 
@@ -137,7 +136,7 @@ export default function UserManagement() {
             onClick={() => setFilterType(tab.id)}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all flex-shrink-0 ${
               filterType === tab.id
-                ? "bg-[#131d47] text-white"
+                ? "bg-primary text-primary-foreground"
                 : "bg-muted text-muted-foreground hover:bg-accent"
             }`}
           >
@@ -174,7 +173,7 @@ export default function UserManagement() {
                   <tr key={user.id} className={`hover:bg-muted transition-colors ${isEditing ? "bg-info-bg" : ""}`}>
                     <td className="px-4 py-2.5">
                      <div className="flex items-center gap-2">
-                       <div className="w-7 h-7 rounded-full bg-[#131d47]/10 flex items-center justify-center flex-shrink-0 text-xs font-bold text-[#131d47] dark:text-white dark:bg-white/10">
+                       <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 text-xs font-bold text-primary">
                          {(getDisplayName(user) || user.email)?.[0]?.toUpperCase()}
                        </div>
                        {isEditing ? (

@@ -341,7 +341,7 @@ export default function PortalManagementTab() {
               Recommended: 1200x150px
             </p>
           </div>
-          <button onClick={() => openModal()} className="px-3 py-1.5 text-sm font-medium text-white bg-[#131d47] hover:bg-[#1a2660] rounded-lg flex items-center gap-2 flex-shrink-0 transition-colors">
+          <button onClick={() => openModal()} className="px-3 py-1.5 text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg flex items-center gap-2 flex-shrink-0 transition-colors">
             <Plus className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Add</span>
           </button>
@@ -419,7 +419,7 @@ export default function PortalManagementTab() {
               Shown in ARTURA Products tab
             </p>
           </div>
-          <button onClick={() => openProductModal()} className="px-3 py-1.5 text-sm font-medium text-white bg-[#131d47] hover:bg-[#1a2660] rounded-lg flex items-center gap-2 flex-shrink-0 transition-colors">
+          <button onClick={() => openProductModal()} className="px-3 py-1.5 text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg flex items-center gap-2 flex-shrink-0 transition-colors">
             <Plus className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Add</span>
           </button>

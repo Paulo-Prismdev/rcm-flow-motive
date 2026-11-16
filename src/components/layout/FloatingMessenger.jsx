@@ -470,7 +470,7 @@ export default function FloatingMessenger({ currentUser, isOpen, onClose }) {
                     onClick={() => setViewMode(mode)}
                     className={`flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 text-xs font-medium rounded-lg transition-colors ${
                       viewMode === mode
-                        ? 'bg-[#131d47] text-white'
+                        ? 'bg-primary text-primary-foreground'
                         : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 dark:text-gray-400'
                     }`}
                   >
@@ -513,8 +513,8 @@ export default function FloatingMessenger({ currentUser, isOpen, onClose }) {
                         className="w-full px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors flex items-center gap-3 text-left"
                       >
                         {conv.type === 'channel' ? (
-                          <div className="w-10 h-10 rounded-xl bg-[#131d47]/10 dark:bg-[#131d47]/40 flex items-center justify-center flex-shrink-0">
-                            <Hash className="w-5 h-5 text-[#131d47] dark:text-blue-300" />
+                          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                            <Hash className="w-5 h-5 text-primary" />
                           </div>
                         ) : (
                           <div className={`w-10 h-10 rounded-full ${getAvatarColor(conv.otherUser?.email)} flex items-center justify-center flex-shrink-0`}>
@@ -554,8 +554,8 @@ export default function FloatingMessenger({ currentUser, isOpen, onClose }) {
                   </button>
                   {selectedConversation.type === 'channel' ? (
                     <>
-                      <div className="w-7 h-7 rounded-lg bg-[#131d47]/10 flex items-center justify-center flex-shrink-0">
-                        <Hash className="w-4 h-4 text-[#131d47] dark:text-blue-300" />
+                      <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                        <Hash className="w-4 h-4 text-primary" />
                       </div>
                       <span className="font-semibold text-sm text-gray-900 dark:text-white truncate">{selectedConversation.name}</span>
                     </>
@@ -587,7 +587,7 @@ export default function FloatingMessenger({ currentUser, isOpen, onClose }) {
                     <div key={msg.id} className={`flex ${isMine ? 'justify-end' : 'justify-start'}`}>
                       <div className={`max-w-[80%] rounded-2xl px-3 py-2 group relative ${
                         isMine 
-                          ? 'bg-[#131d47] text-white'
+                          ? 'bg-primary text-primary-foreground'
                           : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm border border-gray-100 dark:border-gray-700'
                       }`}>
                         {selectedConversation.type === 'channel' && !isMine && (
@@ -693,7 +693,7 @@ export default function FloatingMessenger({ currentUser, isOpen, onClose }) {
                     onClick={handleSendMessage}
                     disabled={!messageText.trim() || sendMessageMutation.isPending || isUploading}
                     className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all flex-shrink-0 ${
-                      messageText.trim() ? 'bg-[#131d47] text-white hover:bg-[#1a2660]' : 'bg-gray-100 dark:bg-gray-800 text-gray-400'
+                      messageText.trim() ? 'bg-primary text-primary-foreground hover:bg-primary/90' : 'bg-gray-100 dark:bg-gray-800 text-gray-400'
                     } disabled:opacity-50`}
                   >
                     <Send className="w-4 h-4" />

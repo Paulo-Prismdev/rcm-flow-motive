@@ -124,7 +124,7 @@ export default function ChaserEmailSettings() {
     return (
       <div className="h-full flex flex-col gap-3">
         <div className="flex items-center justify-between">
-          <h1 className="text-lg font-semibold text-foreground">Chaser Email Logs</h1>
+          <h1 className="text-[15px] font-semibold text-foreground">Chaser email log</h1>
           <button onClick={() => setShowLogs(false)} className="px-3 py-1.5 text-sm font-medium text-muted-foreground bg-card border border-border hover:bg-muted rounded-lg transition-colors">
             Back
           </button>
@@ -173,7 +173,7 @@ export default function ChaserEmailSettings() {
     <div className="h-full flex flex-col gap-3">
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div className="flex-1">
-          <h1 className="text-lg font-semibold text-foreground">Automated Chaser Emails</h1>
+          <h1 className="text-[15px] font-semibold text-foreground">Automatic chaser emails</h1>
           <p className="text-xs text-muted-foreground mt-1">Rules run daily automatically</p>
         </div>
         <div className="flex gap-2 flex-wrap">
@@ -186,7 +186,7 @@ export default function ChaserEmailSettings() {
           </button>
           <button
             onClick={() => setShowForm(true)}
-            className="px-3 py-1.5 text-sm font-medium text-white bg-[#131d47] hover:bg-[#1a2660] rounded-lg flex items-center gap-2 transition-colors"
+            className="px-3 py-1.5 text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg flex items-center gap-2 transition-colors"
           >
             <Plus className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">New</span>
@@ -219,7 +219,7 @@ export default function ChaserEmailSettings() {
               <div key={rule.id} className={`bg-card rounded-lg border-2 p-3 pl-4 transition-all ${
                 rule.is_active
                   ? 'border-l-green-500 border-l-4 border-t-border border-r-border border-b-border'
-                  : 'border-border border-l-4 border-l-gray-400 opacity-60'
+                  : 'border-border border-l-4 border-l-muted-foreground/40 opacity-60'
               }`}>
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
@@ -230,7 +230,7 @@ export default function ChaserEmailSettings() {
                           <span className="w-1.5 h-1.5 rounded-full bg-card animate-pulse"></span>ACTIVE
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-full bg-gray-400 text-white flex-shrink-0">
+                        <span className="inline-flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-full bg-muted text-muted-foreground flex-shrink-0">
                           <span className="w-1.5 h-1.5 rounded-full bg-card"></span>PAUSED
                         </span>
                       )}
@@ -456,7 +456,7 @@ function ChaserEmailRuleForm({ rule, onSubmit, onCancel }) {
   return (
     <div className="h-full flex flex-col gap-4">
       <div className="neomorph p-6 flex-shrink-0">
-        <h1 className="text-2xl font-bold">{rule ? 'Edit' : 'New'} Chaser Email Rule</h1>
+        <h1 className="text-[17px] font-semibold">{rule ? 'Edit' : 'New'} chaser email rule</h1>
         <p className="text-sm text-muted-foreground mt-1">Configure when and how chaser emails are sent</p>
       </div>
 

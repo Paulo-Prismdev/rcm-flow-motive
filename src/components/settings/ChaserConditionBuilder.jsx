@@ -162,7 +162,7 @@ export default function ChaserConditionBuilder({ conditions, onChange, mode }) {
                         }}
                         className={`px-2 py-0.5 text-xs rounded-full border transition-colors ${
                           selected
-                            ? 'bg-[#131d47] text-white border-[#131d47]'
+                            ? 'bg-primary text-primary-foreground border-primary'
                             : 'bg-card text-muted-foreground border-border hover:bg-muted'
                         }`}
                       >
@@ -190,7 +190,7 @@ export default function ChaserConditionBuilder({ conditions, onChange, mode }) {
       <button
         type="button"
         onClick={addCondition}
-        className="mt-2 flex items-center gap-1 text-xs font-medium text-[#131d47] dark:text-blue-400 hover:underline"
+        className="mt-2 flex items-center gap-1 text-xs font-medium text-link hover:underline"
       >
         <Plus className="w-3.5 h-3.5" />
         Add condition

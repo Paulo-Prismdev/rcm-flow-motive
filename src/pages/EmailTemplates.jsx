@@ -171,7 +171,7 @@ export default function EmailTemplates() {
       <div className="bg-card rounded-lg border border-border p-3">
         <div className="flex items-start justify-between gap-3 mb-3">
           <div className="flex-1 min-w-0">
-            <h2 className="text-base font-bold text-foreground">Email Templates</h2>
+            <h2 className="text-[15px] font-semibold text-foreground">Templates</h2>
             <p className="text-xs text-muted-foreground mt-0.5">Manage email templates for different item types</p>
           </div>
           <button onClick={handleCreate} className="flex items-center gap-1.5 px-2.5 py-1.5 bg-info text-on-solid text-sm font-medium rounded-lg hover:bg-info transition-colors flex-shrink-0 whitespace-nowrap">
