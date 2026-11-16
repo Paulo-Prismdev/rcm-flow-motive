@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Plus, Eye, Archive } from "lucide-react"; // Import Archive icon
+import PageHeader from '@/components/shared/PageHeader';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import StatusBadge from "../components/shared/StatusBadge";
@@ -120,63 +121,51 @@ export default function Engineering() {
 
   return (
     <div className="h-full flex flex-col gap-3 md:gap-4">
-      {/* Header - Fixed */}
-      <div className="glass p-3 md:p-4 flex-shrink-0">
-        <div className="flex items-center justify-between mb-3 md:mb-4 flex-wrap gap-2">
-          <div>
-            <h1 className="text-lg md:text-xl font-bold text-gray-700">
-              {displayArchived ? "Archived Engineering" : "Engineering Management"}
-            </h1>
-            <p className="text-xs text-foreground-muted mt-0.5">
-              {filteredJobs.length} {displayArchived ? "archived jobs" : "active jobs"}
-            </p>
-          </div>
-          <div className="flex gap-2">
-            {!displayArchived && isInternalUser && ( // Show New Job button only for internal users and if not displaying archived
+      {/* Header */}
+      <div className="flex-shrink-0 space-y-3 px-3 pt-3 md:px-0 md:pt-0">
+        <PageHeader
+          title={displayArchived ? "Archived engineering" : "Engineering"}
+          subtitle={`${filteredJobs.length} ${displayArchived ? "archived" : "active"} job${filteredJobs.length === 1 ? "" : "s"}`}
+          actions={isInternalUser && (
+            <>
               <Button
-                onClick={() => setShowForm(true)}
-                className="glass-button px-3 md:px-4 py-2 text-xs md:text-sm flex items-center gap-2"
-              >
-                <Plus className="w-3.5 h-3.5 md:w-4 md:h-4" />
-                <span className="hidden sm:inline">New Job</span>
-              </Button>
-            )}
-            {isInternalUser && ( // Show Archive/Active toggle only for internal users
-              <Button
+                variant="outline"
+                size="sm"
                 onClick={() => setDisplayArchived(!displayArchived)}
-                className="glass-button px-3 md:px-4 py-2 text-xs md:text-sm flex items-center gap-2"
+                aria-pressed={displayArchived}
+                className="gap-1.5"
               >
-                {displayArchived ? (
-                  <>
-                    <Eye className="w-3.5 h-3.5 md:w-4 md:h-4" />
-                    <span className="hidden sm:inline">Active</span>
-                  </>
-                ) : (
-                  <>
-                    <Archive className="w-3.5 h-3.5 md:w-4 md:h-4" />
-                    <span className="hidden sm:inline">Archived</span>
-                  </>
-                )}
+                {displayArchived ? <Eye className="w-4 h-4" aria-hidden="true" /> : <Archive className="w-4 h-4" aria-hidden="true" />}
+                <span className="hidden sm:inline">{displayArchived ? "Show active" : "Archived"}</span>
               </Button>
-            )}
-          </div>
-        </div>
+              {!displayArchived && (
+                <Button size="sm" onClick={() => setShowForm(true)} className="gap-1.5">
+                  <Plus className="w-4 h-4" aria-hidden="true" />
+                  <span className="hidden sm:inline">New job</span>
+                </Button>
+              )}
+            </>
+          )}
+        />
 
-        <div className="flex flex-col sm:flex-row gap-2 lg:gap-3">
-          <div className="flex-1">
+        <div className="flex flex-col sm:flex-row gap-2">
+          <div className="relative flex-1 min-w-0">
+            <Search className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-subtle" aria-hidden="true" />
             <Input
-              placeholder="Search by reference or vehicle..."
+              placeholder="Search by reference or vehicle…"
+              aria-label="Search by reference or vehicle"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="neomorph-inset px-3 py-2 text-sm text-gray-700 border-0 focus:ring-0"
+              className="pl-8"
             />
           </div>
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="neomorph-inset px-3 py-2 text-sm text-gray-700 border-0 rounded-lg"
+            aria-label="Status"
+            className="h-9 rounded-lg border border-input bg-card px-2.5 text-[13px] text-foreground"
           >
-            <option value="all">All Statuses</option>
+            <option value="all">All statuses</option>
             <option value="New">New</option>
             <option value="Scheduled">Scheduled</option>
             <option value="In Progress">In Progress</option>
@@ -187,24 +176,26 @@ export default function Engineering() {
       </div>
 
       {/* Engineering List - Scrollable */}
-      <div className="flex-1 overflow-y-auto min-h-0 pr-1">
+      <div className="flex-1 overflow-y-auto min-h-0 px-3 pb-3 md:px-0 md:pb-0 md:pr-1">
         <div className="space-y-2">
           {isLoading ? (
-            <div className="glass p-6 text-center text-gray-500 text-sm">Loading engineering jobs...</div>
+            <div className="space-y-2" aria-busy="true" aria-label="Loading">
+              {[0, 1, 2, 3].map((i) => <div key={i} className="h-28 rounded-xl bg-muted animate-pulse" />)}
+            </div>
           ) : filteredJobs.length === 0 ? ( // Use filteredJobs here
-            <div className="glass p-6 text-center text-gray-500 text-sm">
-              No {displayArchived ? "archived" : "active"} engineering jobs found.
+            <div className="rounded-xl border border-border bg-card shadow-card p-8 text-center text-sm text-muted-foreground">
+              {searchTerm || filterStatus !== "all" ? "Nothing matches your search." : <>No {displayArchived ? "archived" : "active"} engineering jobs found.</>}
             </div>
           ) : (
             filteredJobs.map((job) => ( // Use filteredJobs here
-              <div key={job.id} className={`glass card-hover p-4 ${job.archived ? 'opacity-60' : ''}`}>
+              <div key={job.id} onClick={() => setSelectedEngineering(job)} className={`rounded-xl border border-border bg-card shadow-card hover:bg-muted/40 cursor-pointer transition-colors p-4 ${job.archived ? 'opacity-60' : ''}`}>
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
                       <h3 className="text-base font-bold text-gray-700">{job.reference || job.vehicle_reg || 'Untitled'}</h3>
                       <StatusBadge status={job.status || 'New'} />
                       {job.archived && (
-                        <span className="neomorph-flat px-2 py-1 text-xs font-medium text-gray-600">
+                        <span className="px-2 py-0.5 rounded-full bg-muted text-xs font-medium text-muted-foreground">
                           Archived
                         </span>
                       )}
@@ -231,8 +222,11 @@ export default function Engineering() {
                     </div>
                   </div>
                   <Button
-                    onClick={() => setSelectedEngineering(job)} // Updated state setter
-                    className="neomorph-flat p-2 transition-all active:neomorph-pressed ml-3"
+                    variant="ghost"
+                    size="icon"
+                    aria-label="Open"
+                    onClick={(e) => { e.stopPropagation(); setSelectedEngineering(job); }} // Updated state setter
+                    className="ml-3 flex-shrink-0"
                   >
                     <Eye className="w-4 h-4 text-gray-600" />
                   </Button>
