@@ -26,6 +26,7 @@ import { claimInvoicesChased } from '@/components/shared/invoicingQueue';
 import { hireFlagged } from '@/components/shared/hireCharge';
 import InvoiceStatusReviewBanner from '../components/claims/InvoiceStatusReviewBanner';
 import PullToRefresh from '../components/shared/PullToRefresh';
+import { useIsMobile } from '@/hooks/use-mobile';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -189,6 +190,17 @@ export default function ClaimsPage() {
   const [quickViewClaim, setQuickViewClaim] = useState(null);
   const [quickInfoClaim, setQuickInfoClaim] = useState(null);
   const [claimTab, setClaimTab] = useState('claims');
+  // Phones only: a flat list (most urgent first) or the stage groups, a stage chip
+  // filter, and search tucked behind an icon. Tablets and desktop are unchanged.
+  const isPhone = useIsMobile();
+  const [phoneView, setPhoneView] = useState(() => {
+    try { return localStorage.getItem('fm-repairs-phone-view') || 'list'; } catch { return 'list'; }
+  });
+  const [phoneChip, setPhoneChip] = useState('all');
+  const [phoneSearchOpen, setPhoneSearchOpen] = useState(false);
+  useEffect(() => {
+    try { localStorage.setItem('fm-repairs-phone-view', phoneView); } catch { /* storage unavailable */ }
+  }, [phoneView]);
   const containerRef = React.useRef(null);
   const scrollRef = React.useRef(null);
   const savedScrollTop = React.useRef(0);
@@ -416,6 +428,13 @@ export default function ClaimsPage() {
     if (pa !== pb) return pa - pb;
     return new Date(b.created_date) - new Date(a.created_date);
   });
+
+  // Phone chip filter: "Needs action" is any claim whose case or client update is
+  // overdue or due soon; the other chips are the same stage groups as the list.
+  const needsAction = (c) => !isUpdateTrackingClosed(c) &&
+    (['Red', 'Amber'].includes(calculateUpdateStatus(c)) || ['Red', 'Amber'].includes(computeClientCommStatusFlag(c)));
+  const chipMatches = (c, chip) => chip === 'all' || (chip === 'action' ? needsAction(c) : getGroupKey(c) === chip);
+  const cardClaims = isPhone ? filteredClaims.filter(c => chipMatches(c, phoneChip)) : filteredClaims;
 
   // Hide the global layout header on mobile when a claim detail is open
   useEffect(() => {
