@@ -193,7 +193,7 @@ export default function ShareTemplateModal({ template, isOpen, onClose, onSave }
                             <button
                               onClick={() => toggleUserEdit(user.email)}
                               className={`neomorph-flat px-3 py-1 text-xs rounded ${
-                                canEditUsers.includes(user.email) ? 'bg-blue-100 text-blue-600' : ''
+                                canEditUsers.includes(user.email) ? 'bg-info-bg text-info-fg' : ''
                               }`}
                             >
                               {canEditUsers.includes(user.email) ? 'Can Edit' : 'Edit?'}
@@ -235,7 +235,7 @@ export default function ShareTemplateModal({ template, isOpen, onClose, onSave }
 
           {/* Summary */}
           {(sharedWithUsers.length > 0 || sharedWithDepartments.length > 0 || visibility === 'organization') && (
-            <div className="neomorph-flat p-4 rounded-xl bg-blue-50 dark:bg-blue-900/20">
+            <div className="neomorph-flat p-4 rounded-xl bg-info-bg">
               <h4 className="font-semibold text-sm mb-2">Sharing Summary</h4>
               {visibility === 'organization' ? (
                 <p className="text-xs text-foreground-muted">This template will be available to all internal users</p>

@@ -60,7 +60,7 @@ export default function ConfirmHost() {
           <AlertDialogCancel onClick={() => finish(false)}>{opts.cancelLabel || 'Cancel'}</AlertDialogCancel>
           <AlertDialogAction
             onClick={() => finish(true)}
-            className={opts.destructive ? 'bg-red-600 hover:bg-red-700 text-white' : undefined}
+            className={opts.destructive ? 'bg-danger hover:bg-danger text-on-solid' : undefined}
           >
             {opts.confirmLabel || 'OK'}
           </AlertDialogAction>

@@ -96,7 +96,7 @@ export default function DragDropOverlay({ onFilesUploaded, children }) {
                 <>
                   <Upload className="w-16 h-16 text-gold" />
                   <p className="text-xl font-bold text-gold">Drop files here to attach</p>
-                  <p className="text-sm text-gray-500">Release to upload files to this job</p>
+                  <p className="text-sm text-muted-foreground">Release to upload files to this job</p>
                 </>
               )}
             </div>

@@ -228,7 +228,7 @@ export default function AddressLookupInput({
           {/* Suggestions Dropdown */}
           {showSuggestions && (suggestions.length > 0 || isLoadingSuggestions) &&
           <div
-            className="absolute w-full mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-60 overflow-y-auto"
+            className="absolute w-full mt-2 bg-card border border-border rounded-lg shadow-lg max-h-60 overflow-y-auto"
             style={{ zIndex: 9999 }}>
 
               {isLoadingSuggestions &&
@@ -242,7 +242,7 @@ export default function AddressLookupInput({
               key={suggestion.place_id || index}
               type="button"
               onClick={() => handleSelectSuggestion(suggestion)}
-              className="w-full text-left px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors border-b border-gray-100 dark:border-gray-700 last:border-b-0 first:rounded-t-lg last:rounded-b-lg">
+              className="w-full text-left px-3 py-2 hover:bg-muted transition-colors border-b border-border last:border-b-0 first:rounded-t-lg last:rounded-b-lg">
                   <div className="flex items-start gap-2">
                     <MapPin className="w-3.5 h-3.5 text-primary flex-shrink-0 mt-0.5" />
                     <div className="flex-1 min-w-0">
@@ -270,7 +270,7 @@ export default function AddressLookupInput({
       </div>
 
       {error &&
-      <div className="mt-2 p-2 glass-inset rounded-lg border border-orange-500 border-opacity-30 text-orange-600 text-xs flex items-start gap-2">
+      <div className="mt-2 p-2 glass-inset rounded-lg border border-warning border-opacity-30 text-warning-fg text-xs flex items-start gap-2">
           <span>⚠️</span>
           <span>{error}</span>
         </div>

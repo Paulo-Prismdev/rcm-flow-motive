@@ -32,7 +32,7 @@ export default function FinancialsSidebar({ items, selected, onSelect, footer })
                 />
                 <span className="min-w-0 flex-1 truncate text-[13px]">{item.title}</span>
                 {item.count && (
-                  <span className={cn('text-[11px] tabular-nums', active ? 'text-white/80' : 'text-mac-muted')}>
+                  <span className={cn('text-xs tabular-nums', active ? 'text-white/80' : 'text-mac-muted')}>
                     {item.count}
                   </span>
                 )}

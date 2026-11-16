@@ -178,7 +178,7 @@ export default function TwoFactorVerify() {
     };
     return (
       <AuthLayout icon={word === 'Face ID' ? ScanFace : Fingerprint} title={`Use ${word} next time?`} subtitle="Skip the emailed code on this device">
-        <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+        <p className="text-sm text-muted-foreground mb-4">
           Next time you sign in on this device, you can confirm it's you with {word} instead of waiting for an email.
           Your face or fingerprint stays on the device. We never see it.
         </p>
@@ -216,9 +216,9 @@ export default function TwoFactorVerify() {
               : (<>{word === 'Face ID' ? <ScanFace className="w-5 h-5 mr-2" aria-hidden="true" /> : <Fingerprint className="w-5 h-5 mr-2" aria-hidden="true" />}Use {word}</>)}
           </Button>
           <div className="relative my-6" role="separator" aria-label="or">
-            <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-200 dark:border-gray-700" /></div>
+            <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-border" /></div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-white dark:bg-[#1c1c1e] px-3 text-gray-500">or use an emailed code</span>
+              <span className="bg-card dark:bg-[#1c1c1e] px-3 text-muted-foreground">or use an emailed code</span>
             </div>
           </div>
         </>
@@ -239,20 +239,20 @@ export default function TwoFactorVerify() {
       </form>
 
       <div className="mt-4 flex items-center justify-between gap-3">
-        <span className="text-xs text-gray-500" aria-live="polite">
+        <span className="text-xs text-muted-foreground" aria-live="polite">
           {!locked && attemptsRemaining < 5 && `${attemptsRemaining} ${attemptsRemaining === 1 ? 'try' : 'tries'} left`}
         </span>
         <button
           type="button"
           onClick={handleResend}
           disabled={cooldown > 0 || sending || locked}
-          className="h-11 text-sm text-blue-700 dark:text-blue-300 font-medium hover:underline disabled:opacity-50 disabled:no-underline md:h-9"
+          className="h-11 text-sm text-info-fg font-medium hover:underline disabled:opacity-50 disabled:no-underline md:h-9"
         >
           {sending ? 'Sending' : cooldown > 0 ? `Send a new code in ${cooldown}s` : (usePasskeyFirst && !twofaStatus.codeActive ? 'Email me a code' : 'Send a new code')}
         </button>
       </div>
 
-      <p className="mt-4 text-center text-xs text-gray-500">
+      <p className="mt-4 text-center text-xs text-muted-foreground">
         A code expires in 5 minutes and works once. If you didn't try to sign in, ignore the email and let us know.
       </p>
     </AuthLayout>

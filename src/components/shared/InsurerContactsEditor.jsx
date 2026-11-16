@@ -13,9 +13,9 @@ export default function InsurerContactsEditor({ value = [], onChange }) {
     <div className="space-y-2">
       {value.length > 0 && (
         <div className="hidden sm:grid grid-cols-[1fr_1fr_1fr_auto] gap-2 px-1">
-          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Name</p>
-          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Phone</p>
-          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Email</p>
+          <p className="text-xs font-semibold text-muted-foreground">Name</p>
+          <p className="text-xs font-semibold text-muted-foreground">Phone</p>
+          <p className="text-xs font-semibold text-muted-foreground">Email</p>
           <span />
         </div>
       )}
@@ -45,7 +45,7 @@ export default function InsurerContactsEditor({ value = [], onChange }) {
             variant="ghost"
             size="icon"
             onClick={() => removeContact(idx)}
-            className="text-gray-400 hover:text-red-600"
+            className="text-muted-foreground hover:text-danger-fg"
             title="Remove contact"
           >
             <Trash2 className="w-4 h-4" />

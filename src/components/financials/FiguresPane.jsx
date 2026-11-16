@@ -42,7 +42,7 @@ export default function FiguresPane({
     <div className="mx-auto w-full max-w-[760px] space-y-6">
       <header className="space-y-1">
         <h2 className="text-[17px] font-semibold text-foreground">Step 2 · Job figures</h2>
-        <p className="text-[11px] text-mac-muted">{step.hint}</p>
+        <p className="text-xs text-mac-muted">{step.hint}</p>
       </header>
 
       <JobFiguresCard
@@ -82,7 +82,7 @@ export default function FiguresPane({
           </StatusBadge>
           <span ref={confirmRef} className="flex items-center gap-2">
             {!check.canConfirm && (
-              <span className="text-[11px] text-amber-600 dark:text-amber-400">
+              <span className="text-xs text-warning-fg">
                 {missing.length === 1 ? '1 figure' : `${missing.length} figures`} still to set
               </span>
             )}
@@ -98,7 +98,7 @@ export default function FiguresPane({
       </MacGroup>
 
       {check.legacy && !check.settled && (
-        <p className="px-1 text-[11px] text-mac-muted">
+        <p className="px-1 text-xs text-mac-muted">
           This job's invoices were already on their way before the figures check existed — you are welcome to confirm
           them anyway, and nothing is held back by doing so.
         </p>

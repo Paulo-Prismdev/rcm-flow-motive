@@ -29,12 +29,12 @@ export default function FigureRow({
       <span className="min-w-0 flex-1">
         <span className={cn(
           'flex items-center gap-1.5 text-[13px] font-medium',
-          missing ? 'text-amber-600 dark:text-amber-400' : 'text-foreground'
+          missing ? 'text-warning-fg' : 'text-foreground'
         )}>
           {missing && <AlertTriangle className="h-3.5 w-3.5 flex-shrink-0" strokeWidth={1.8} />}
           {label}
         </span>
-        {(caption || hint) && <span className="mt-0.5 block text-[11px] text-mac-muted">{caption || hint}</span>}
+        {(caption || hint) && <span className="mt-0.5 block text-xs text-mac-muted">{caption || hint}</span>}
       </span>
 
       {open ? (
@@ -64,7 +64,7 @@ export default function FigureRow({
         </span>
       ) : (
         <>
-          {note && <span className="flex-shrink-0 text-[11px] tabular-nums text-mac-muted">{note}</span>}
+          {note && <span className="flex-shrink-0 text-xs tabular-nums text-mac-muted">{note}</span>}
           <span className="flex flex-shrink-0 items-center gap-2">
             <span className={cn('text-[13px] tabular-nums', empty ? 'text-mac-muted' : 'font-semibold text-foreground')}>
               {shown}
@@ -74,7 +74,7 @@ export default function FigureRow({
                 key={action.label}
                 type="button"
                 onClick={action.onClick}
-                className="text-[11px] text-mac-accent hover:underline"
+                className="text-xs text-mac-accent hover:underline"
               >
                 {action.label}
               </button>

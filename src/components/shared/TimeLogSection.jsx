@@ -41,7 +41,7 @@ export default function TimeLogSection({ parentId, parentType }) {
         </button>
         <div className="flex items-center gap-3">
           <div className="neomorph-flat px-4 py-2">
-            <span className="text-sm text-gray-500">Total: </span>
+            <span className="text-sm text-muted-foreground">Total: </span>
             <span className="font-bold text-gold">{formatDuration(totalSeconds)}</span>
           </div>
           <button onClick={() => setIsOpen(!isOpen)}>
@@ -51,23 +51,23 @@ export default function TimeLogSection({ parentId, parentType }) {
       </div>
 
       {isOpen && (
-        <div className="mt-4 pt-4 border-t border-gray-300 border-opacity-50">
+        <div className="mt-4 pt-4 border-t border-border border-opacity-50">
           <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
-            {isLoading && <p className="text-sm text-gray-500">Loading activity…</p>}
+            {isLoading && <p className="text-sm text-muted-foreground">Loading activity…</p>}
             {!isLoading && timeLogs.length === 0 && (
-              <p className="text-sm text-center text-gray-500 py-4">No time logged yet.</p>
+              <p className="text-sm text-center text-muted-foreground py-4">No time logged yet.</p>
             )}
             
             {timeLogs.map(log => (
               <div key={log.id} className="neomorph-inset p-3">
                 <div className="flex items-start justify-between mb-2">
                   <div className="flex items-center gap-2">
-                    <User className="w-4 h-4 text-gray-500" />
-                    <span className="text-sm font-medium text-gray-700">{log.created_by}</span>
+                    <User className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-sm font-medium text-foreground">{log.created_by}</span>
                   </div>
                   <span className="text-sm font-bold text-gold">{formatDuration(log.duration_seconds)}</span>
                 </div>
-                <div className="text-xs text-gray-500 flex justify-between">
+                <div className="text-xs text-muted-foreground flex justify-between">
                   <span>Started: {format(new Date(log.started_at), 'dd/MM/yyyy HH:mm')}</span>
                   <span>Ended: {format(new Date(log.ended_at), 'dd/MM/yyyy HH:mm')}</span>
                 </div>

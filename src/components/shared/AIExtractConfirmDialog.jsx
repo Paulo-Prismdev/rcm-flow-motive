@@ -142,7 +142,7 @@ export default function AIExtractConfirmDialog({ isOpen, onClose, onConfirm, ext
     return (
       <>
         {snippet.substring(0, idx)}
-        <mark className="bg-yellow-200 dark:bg-yellow-700/50 text-gray-900 dark:text-yellow-100 rounded px-0.5 font-semibold">
+        <mark className="bg-yellow-200 dark:bg-yellow-700/50 text-foreground rounded px-0.5 font-semibold">
           {snippet.substring(idx, idx + valueStr.length)}
         </mark>
         {snippet.substring(idx + valueStr.length)}
@@ -193,28 +193,28 @@ export default function AIExtractConfirmDialog({ isOpen, onClose, onConfirm, ext
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-3 border-b border-gray-200 dark:border-gray-800 flex-shrink-0">
+        <div className="flex items-center justify-between px-5 py-3 border-b border-border flex-shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-full bg-purple-500/20 flex items-center justify-center flex-shrink-0">
               <Sparkles className="w-4 h-4 text-purple-600 dark:text-purple-400" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">{showSummary ? 'Review Changes' : title}</h3>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
+              <h3 className="text-base font-bold text-foreground">{showSummary ? 'Review Changes' : title}</h3>
+              <p className="text-xs text-muted-foreground">
                 {showSummary
                   ? `${changesToApply.length} field${changesToApply.length !== 1 ? 's' : ''} will be updated`
                   : `Reviewing field ${currentIndex + 1} of ${fields.length} • ${selectedCount} selected to apply`}
               </p>
             </div>
           </div>
-          <button aria-label="Close" onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-            <X className="w-4 h-4 text-gray-400" />
+          <button aria-label="Close" onClick={onClose} className="p-1.5 rounded-lg hover:bg-muted transition-colors">
+            <X className="w-4 h-4 text-muted-foreground" />
           </button>
         </div>
 
         {/* Progress Bar (hidden on summary) */}
         {!showSummary && (
-          <div className="h-1 bg-gray-100 dark:bg-gray-800 flex-shrink-0">
+          <div className="h-1 bg-muted flex-shrink-0">
             <div
               className="h-full bg-purple-500 transition-all duration-300"
               style={{ width: `${((currentIndex + 1) / fields.length) * 100}%` }}
@@ -227,17 +227,17 @@ export default function AIExtractConfirmDialog({ isOpen, onClose, onConfirm, ext
           <div className="flex-1 overflow-y-auto p-5">
             {changesToApply.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full text-center">
-                <Check className="w-12 h-12 text-green-500 mb-3" />
-                <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">No changes to apply</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                <Check className="w-12 h-12 text-success-fg mb-3" />
+                <p className="text-lg font-semibold text-foreground">No changes to apply</p>
+                <p className="text-sm text-muted-foreground mt-1">
                   All AI-extracted values match the existing data.
                 </p>
               </div>
             ) : (
               <>
-                <div className="flex items-center gap-2 mb-4 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg">
-                  <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0" />
-                  <p className="text-sm text-amber-700 dark:text-amber-400 font-medium">
+                <div className="flex items-center gap-2 mb-4 p-3 bg-warning-bg border border-warning/30 rounded-lg">
+                  <AlertTriangle className="w-4 h-4 text-warning-fg flex-shrink-0" />
+                  <p className="text-sm text-warning-fg font-medium">
                     Please review all changes below before applying. This will overwrite existing data.
                   </p>
                 </div>
@@ -245,24 +245,24 @@ export default function AIExtractConfirmDialog({ isOpen, onClose, onConfirm, ext
                   {changesToApply.map(([key, value]) => {
                     const { hasExisting, existingValue } = compareValues(key, value);
                     return (
-                      <div key={key} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700">
+                      <div key={key} className="flex items-center gap-3 p-3 bg-muted rounded-lg border border-border">
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">
+                          <p className="text-xs font-semibold text-muted-foreground mb-1">
                             {formatFieldName(key)}
                           </p>
                           <div className="flex items-center gap-2 flex-wrap">
                             {hasExisting ? (
                               <>
-                                <span className="text-sm text-gray-500 dark:text-gray-400 break-words">
+                                <span className="text-sm text-muted-foreground break-words">
                                   {formatValue(existingValue)}
                                 </span>
-                                <ArrowRight className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
+                                <ArrowRight className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
                                 <span className="text-sm font-semibold text-purple-700 dark:text-purple-300 break-words">
                                   {formatValue(value)}
                                 </span>
                               </>
                             ) : (
-                              <span className="text-sm font-semibold text-green-700 dark:text-green-400 break-words">
+                              <span className="text-sm font-semibold text-success-fg break-words">
                                 ✨ {formatValue(value)}
                               </span>
                             )}
@@ -279,10 +279,10 @@ export default function AIExtractConfirmDialog({ isOpen, onClose, onConfirm, ext
           /* ══ Split Pane: Document | Field Review ══ */
           <div className="flex-1 flex flex-col md:flex-row overflow-hidden min-h-0">
             {/* Document Preview with Highlighting */}
-            <div className="md:w-1/2 h-52 md:h-full border-b md:border-b-0 md:border-r border-gray-200 dark:border-gray-800 flex flex-col min-h-0">
-              <div className="px-3 py-2 bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700 flex items-center gap-2 flex-shrink-0">
-                <FileText className="w-3.5 h-3.5 text-gray-400" />
-                <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Source Document</span>
+            <div className="md:w-1/2 h-52 md:h-full border-b md:border-b-0 md:border-r border-border flex flex-col min-h-0">
+              <div className="px-3 py-2 bg-muted border-b border-border flex items-center gap-2 flex-shrink-0">
+                <FileText className="w-3.5 h-3.5 text-muted-foreground" />
+                <span className="text-xs font-medium text-muted-foreground">Source Document</span>
               </div>
               <div className="flex-1 min-h-0">
                 <HighlightableDocumentViewer fileUrl={fileUrl} highlightText={formatValue(currentValue)} />
@@ -295,14 +295,14 @@ export default function AIExtractConfirmDialog({ isOpen, onClose, onConfirm, ext
                 <div className="flex flex-col h-full">
                   {/* Field Name */}
                   <div className="mb-4">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-1">
+                    <p className="text-xs font-semibold text-muted-foreground mb-1">
                       Field {currentIndex + 1} of {fields.length}
                     </p>
-                    <h4 className="text-lg font-bold text-gray-900 dark:text-gray-100 break-words">
+                    <h4 className="text-lg font-bold text-foreground break-words">
                       {formatFieldName(currentKey)}
                     </h4>
                     {isLocked && linkedEntity && (
-                      <span className="inline-flex items-center mt-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300">
+                      <span className="inline-flex items-center mt-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-info-bg text-info-fg">
                         <LinkIcon className="w-3 h-3 mr-1" />
                         From linked {linkedEntity}
                       </span>
@@ -312,16 +312,16 @@ export default function AIExtractConfirmDialog({ isOpen, onClose, onConfirm, ext
                   {/* Source Snippet */}
                   {sourceSnippets[currentKey] ? (
                     <div className="mb-4">
-                      <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 flex items-center gap-1">
+                      <p className="text-xs font-semibold text-muted-foreground mb-1.5 flex items-center gap-1">
                         <FileText className="w-3 h-3" /> Found in Document
                       </p>
-                      <div className="bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                      <div className="bg-muted border border-border rounded-lg p-3 text-sm text-muted-foreground leading-relaxed">
                         {renderHighlightedSnippet(sourceSnippets[currentKey], currentValue)}
                       </div>
                     </div>
                   ) : isFetchingSnippets && (
                     <div className="mb-4">
-                      <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 mb-1.5 flex items-center gap-1">
+                      <p className="text-xs font-semibold text-muted-foreground mb-1.5 flex items-center gap-1">
                         <Loader2 className="w-3 h-3 animate-spin" /> Searching document for source...
                       </p>
                     </div>
@@ -329,26 +329,26 @@ export default function AIExtractConfirmDialog({ isOpen, onClose, onConfirm, ext
 
                   {/* Locked field display */}
                   {isLocked ? (
-                    <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-200 dark:border-blue-700 rounded-lg">
-                      <p className="text-xs font-semibold text-blue-600 dark:text-blue-400 mb-1 flex items-center gap-1">
+                    <div className="mb-4 p-3 bg-info-bg border-2 border-info/30 rounded-lg">
+                      <p className="text-xs font-semibold text-info-fg mb-1 flex items-center gap-1">
                         <LinkIcon className="w-3 h-3" /> From linked {linkedEntity}
                       </p>
-                      <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 break-words">
+                      <p className="text-sm font-semibold text-foreground break-words">
                         {formatValue(currentValue)}
                       </p>
                     </div>
                   ) : valuesMatch ? (
                     /* Values match — no choice needed */
-                    <div className="mb-4 flex items-center gap-2 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg">
-                      <Check className="w-4 h-4 text-green-600 dark:text-green-400 flex-shrink-0" />
-                      <span className="text-sm text-green-700 dark:text-green-400 font-medium">
+                    <div className="mb-4 flex items-center gap-2 p-3 bg-success-bg border border-success/30 rounded-lg">
+                      <Check className="w-4 h-4 text-success-fg flex-shrink-0" />
+                      <span className="text-sm text-success-fg font-medium">
                         Values match — no change needed
                       </span>
                     </div>
                   ) : (
                     /* Choose what to save — two explicit cards */
                     <div className="mb-4">
-                      <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2">Choose what to save:</p>
+                      <p className="text-xs font-semibold text-muted-foreground mb-2">Choose what to save:</p>
                       <div className="space-y-2">
                         {/* Use AI value */}
                         <button
@@ -356,14 +356,14 @@ export default function AIExtractConfirmDialog({ isOpen, onClose, onConfirm, ext
                           className={`w-full text-left rounded-lg border-2 p-3 transition-all ${
                             isFieldSelected(currentKey)
                               ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
-                              : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                              : 'border-border hover:border-border'
                           } cursor-pointer`}
                         >
                           <div className="flex items-start gap-2.5">
                             <div className={`w-4 h-4 rounded-full border-2 flex-shrink-0 mt-0.5 flex items-center justify-center ${
                               isFieldSelected(currentKey)
                                 ? 'border-purple-500 bg-purple-500'
-                                : 'border-gray-300 dark:border-gray-600'
+                                : 'border-border'
                             }`}>
                               {isFieldSelected(currentKey) && <Check className="w-2.5 h-2.5 text-white" />}
                             </div>
@@ -371,7 +371,7 @@ export default function AIExtractConfirmDialog({ isOpen, onClose, onConfirm, ext
                               <p className="text-xs font-semibold text-purple-600 dark:text-purple-400 flex items-center gap-1">
                                 <Sparkles className="w-3 h-3" /> Use AI value
                               </p>
-                              <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 break-words mt-0.5">
+                              <p className="text-sm font-semibold text-foreground break-words mt-0.5">
                                 {formatValue(currentValue)}
                               </p>
                             </div>
@@ -384,23 +384,23 @@ export default function AIExtractConfirmDialog({ isOpen, onClose, onConfirm, ext
                             onClick={() => selectField(currentKey, false)}
                             className={`w-full text-left rounded-lg border-2 p-3 transition-all ${
                               !isFieldSelected(currentKey)
-                                ? 'border-gray-400 dark:border-gray-600 bg-gray-50 dark:bg-gray-800/50'
-                                : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                                ? 'border-gray-400 dark:border-gray-600 bg-muted'
+                                : 'border-border hover:border-border'
                             } cursor-pointer`}
                           >
                             <div className="flex items-start gap-2.5">
                               <div className={`w-4 h-4 rounded-full border-2 flex-shrink-0 mt-0.5 flex items-center justify-center ${
                                 !isFieldSelected(currentKey)
                                   ? 'border-gray-500 bg-gray-500'
-                                  : 'border-gray-300 dark:border-gray-600'
+                                  : 'border-border'
                               }`}>
                                 {!isFieldSelected(currentKey) && <Check className="w-2.5 h-2.5 text-white" />}
                               </div>
                               <div className="flex-1 min-w-0">
-                                <p className="text-xs font-semibold text-gray-500 dark:text-gray-400">
+                                <p className="text-xs font-semibold text-muted-foreground">
                                   Keep existing value
                                 </p>
-                                <p className="text-sm font-medium text-gray-700 dark:text-gray-300 break-words mt-0.5">
+                                <p className="text-sm font-medium text-foreground break-words mt-0.5">
                                   {formatValue(existingValue)}
                                 </p>
                               </div>
@@ -411,21 +411,21 @@ export default function AIExtractConfirmDialog({ isOpen, onClose, onConfirm, ext
                             onClick={() => selectField(currentKey, false)}
                             className={`w-full text-left rounded-lg border-2 p-3 transition-all ${
                               !isFieldSelected(currentKey)
-                                ? 'border-gray-400 dark:border-gray-600 bg-gray-50 dark:bg-gray-800/50'
-                                : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                                ? 'border-gray-400 dark:border-gray-600 bg-muted'
+                                : 'border-border hover:border-border'
                             } cursor-pointer`}
                           >
                             <div className="flex items-start gap-2.5">
                               <div className={`w-4 h-4 rounded-full border-2 flex-shrink-0 mt-0.5 flex items-center justify-center ${
                                 !isFieldSelected(currentKey)
                                   ? 'border-gray-500 bg-gray-500'
-                                  : 'border-gray-300 dark:border-gray-600'
+                                  : 'border-border'
                               }`}>
                                 {!isFieldSelected(currentKey) && <Check className="w-2.5 h-2.5 text-white" />}
                               </div>
                               <div>
-                                <p className="text-xs font-semibold text-gray-500 dark:text-gray-400">Skip this field</p>
-                                <p className="text-xs text-gray-400 dark:text-gray-500">Don't save anything</p>
+                                <p className="text-xs font-semibold text-muted-foreground">Skip this field</p>
+                                <p className="text-xs text-muted-foreground">Don't save anything</p>
                               </div>
                             </div>
                           </button>
@@ -436,12 +436,12 @@ export default function AIExtractConfirmDialog({ isOpen, onClose, onConfirm, ext
 
                   {/* Warning */}
                   {!isLocked && isFieldSelected(currentKey) && hasExisting && !valuesMatch && (
-                    <p className="text-xs text-amber-600 dark:text-amber-400 font-medium flex items-center gap-1">
+                    <p className="text-xs text-warning-fg font-medium flex items-center gap-1">
                       <AlertTriangle className="w-3 h-3" /> Will overwrite existing data
                     </p>
                   )}
                   {!isLocked && isFieldSelected(currentKey) && !hasExisting && (
-                    <p className="text-xs text-green-700 dark:text-green-400 font-semibold flex items-center gap-1">
+                    <p className="text-xs text-success-fg font-semibold flex items-center gap-1">
                       ✨ New data — will be added
                     </p>
                   )}
@@ -452,7 +452,7 @@ export default function AIExtractConfirmDialog({ isOpen, onClose, onConfirm, ext
         )}
 
         {/* Footer Navigation */}
-        <div className="flex items-center justify-between px-5 py-3 border-t border-gray-200 dark:border-gray-800 flex-shrink-0 gap-3">
+        <div className="flex items-center justify-between px-5 py-3 border-t border-border flex-shrink-0 gap-3">
           <Button
             variant="outline"
             onClick={goBack}
@@ -474,7 +474,7 @@ export default function AIExtractConfirmDialog({ isOpen, onClose, onConfirm, ext
                       ? 'bg-purple-600 w-4'
                       : isFieldSelected(key)
                         ? 'bg-purple-300 dark:bg-purple-700'
-                        : 'bg-gray-300 dark:bg-gray-600'
+                        : 'bg-accent'
                   }`}
                   title={formatFieldName(key)}
                 />

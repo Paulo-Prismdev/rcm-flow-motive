@@ -31,7 +31,7 @@ export function MacDangerButton({ className, ...props }) {
     <Button
       variant="ghost"
       size="sm"
-      className={cn('h-7 rounded-md px-3 text-[12px] font-normal text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/30', className)}
+      className={cn('h-7 rounded-md px-3 text-[12px] font-normal text-danger-fg hover:bg-danger-bg', className)}
       {...props}
     />
   );

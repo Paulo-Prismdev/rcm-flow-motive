@@ -316,17 +316,17 @@ export default function FileAttachmentModal({ fileUrls = [], onAdd, onRemove, is
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-start justify-between px-8 py-6 border-b border-gray-200 dark:border-gray-800 flex-shrink-0">
+          <div className="flex items-start justify-between px-8 py-6 border-b border-border flex-shrink-0">
             <div>
-              <h3 className="text-[18px] font-semibold text-gray-900 dark:text-white">Attachments</h3>
-              <p className="text-[13px] text-gray-500 dark:text-gray-400 mt-1">
+              <h3 className="text-[18px] font-semibold text-foreground">Attachments</h3>
+              <p className="text-[13px] text-muted-foreground mt-1">
                 {fileUrls.length} {fileUrls.length === 1 ? 'file' : 'files'}
                 {enableAI && ' • AI analysis available'}
               </p>
             </div>
             <button aria-label="Close"
               onClick={onClose}
-              className="w-6 h-6 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+              className="w-6 h-6 text-muted-foreground hover:text-muted-foreground transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
@@ -335,22 +335,22 @@ export default function FileAttachmentModal({ fileUrls = [], onAdd, onRemove, is
           {/* Upload Area */}
           <div className="px-8 pt-6 flex-shrink-0">
             <div
-              className={`border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg p-6 text-center transition-all cursor-pointer ${isDragging ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'hover:border-gray-400 dark:hover:border-gray-600'}`}
+              className={`border-2 border-dashed border-border rounded-lg p-6 text-center transition-all cursor-pointer ${isDragging ? 'border-info bg-info-bg' : 'hover:border-gray-400 dark:hover:border-gray-600'}`}
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
               onClick={() => !isUploading && fileInputRef.current?.click()}
             >
               {isUploading ? (
-                <div className="flex flex-col items-center gap-2 text-gray-500 dark:text-gray-400">
+                <div className="flex flex-col items-center gap-2 text-muted-foreground">
                   <Loader className="w-6 h-6 animate-spin" />
                   <span className="text-sm">Uploading {uploads.filter(u => u.status === 'uploading').length} of {uploads.length}...</span>
                 </div>
               ) : (
-                <div className="flex flex-col items-center gap-2 text-gray-500 dark:text-gray-400">
-                  <Upload className={`w-6 h-6 ${isDragging ? 'text-blue-500' : ''}`} />
+                <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                  <Upload className={`w-6 h-6 ${isDragging ? 'text-info-fg' : ''}`} />
                   <span className="text-sm">{isDragging ? 'Drop files here!' : 'Click or drag & drop files to upload'}</span>
-                  <span className="text-xs text-gray-400 dark:text-gray-500">PDF, DOC, DOCX, XLS, XLSX supported</span>
+                  <span className="text-xs text-muted-foreground">PDF, DOC, DOCX, XLS, XLSX supported</span>
                 </div>
               )}
               <input
@@ -374,7 +374,7 @@ export default function FileAttachmentModal({ fileUrls = [], onAdd, onRemove, is
           {/* Files List - Scrollable */}
           <div className="flex-1 overflow-y-auto px-8 py-6">
             {fileUrls.length === 0 ? (
-              <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+              <div className="text-center py-12 text-muted-foreground">
                 <FileText className="w-12 h-12 mx-auto mb-3 opacity-40" />
                 <p>No files uploaded yet</p>
               </div>
@@ -388,7 +388,7 @@ export default function FileAttachmentModal({ fileUrls = [], onAdd, onRemove, is
                   return (
                     <div
                       key={index}
-                      className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 flex items-center gap-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all"
+                      className="border border-border rounded-lg p-4 flex items-center gap-4 hover:bg-muted transition-all"
                     >
                       <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
                         <FileText className="w-5 h-5 text-primary" />
@@ -450,10 +450,10 @@ export default function FileAttachmentModal({ fileUrls = [], onAdd, onRemove, is
 
           {/* Footer with AI Info */}
           {enableAI && fileUrls.length > 0 && (
-            <div className="px-8 py-4 border-t border-gray-200 dark:border-gray-800 bg-blue-50 dark:bg-blue-900/20 flex-shrink-0">
+            <div className="px-8 py-4 border-t border-border bg-info-bg flex-shrink-0">
               <div className="flex items-start gap-2 text-[13px]">
-                <Sparkles className="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
-                <p className="text-blue-800 dark:text-blue-200">
+                <Sparkles className="w-4 h-4 text-info-fg flex-shrink-0 mt-0.5" />
+                <p className="text-info-fg">
                   <strong className="font-semibold">AI Analysis:</strong> Click the sparkle icon to automatically extract data from documents. 
                   The AI will analyze the file and populate matching fields for you to review.
                 </p>
@@ -462,10 +462,10 @@ export default function FileAttachmentModal({ fileUrls = [], onAdd, onRemove, is
           )}
 
           {/* Footer */}
-          <div className="px-8 py-4 border-t border-gray-200 dark:border-gray-800 flex-shrink-0 flex justify-end gap-3">
+          <div className="px-8 py-4 border-t border-border flex-shrink-0 flex justify-end gap-3">
             <button
               onClick={onClose}
-              className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors h-9"
+              className="px-4 py-2 text-sm font-medium text-foreground bg-card border border-border rounded-lg hover:bg-muted transition-colors h-9"
             >
               Close
             </button>

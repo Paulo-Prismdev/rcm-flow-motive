@@ -55,9 +55,9 @@ export default function ActivityLogSection({ parentId, parentType }) {
                   {log.field_name && log.old_value !== undefined && log.new_value !== undefined && (
                     <div className="mt-2 text-xs bg-surface p-2 rounded">
                       <span className="text-foreground-muted">{log.field_name}: </span>
-                      <span className="line-through text-red-500">{log.old_value || '(empty)'}</span>
+                      <span className="line-through text-danger-fg">{log.old_value || '(empty)'}</span>
                       <span className="mx-2">→</span>
-                      <span className="text-green-500">{log.new_value || '(empty)'}</span>
+                      <span className="text-success-fg">{log.new_value || '(empty)'}</span>
                     </div>
                   )}
                   <div className="flex items-center gap-1 mt-2 text-xs text-foreground-subtle">

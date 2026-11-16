@@ -127,16 +127,16 @@ export default function AddCreditRepairCompanyModal({ isOpen, onClose, onSuccess
                       <button
                         type="button"
                         onClick={() => setPrimaryContact(idx)}
-                        className={`flex items-center gap-1 text-xs font-medium ${contact.is_primary ? 'text-amber-600' : 'text-muted-foreground hover:text-amber-500'}`}
+                        className={`flex items-center gap-1 text-xs font-medium ${contact.is_primary ? 'text-warning-fg' : 'text-muted-foreground hover:text-warning-fg'}`}
                         title={contact.is_primary ? 'Primary contact' : 'Set as primary'}
                       >
-                        <Star className={`w-3.5 h-3.5 ${contact.is_primary ? 'fill-amber-500 text-amber-500' : ''}`} />
+                        <Star className={`w-3.5 h-3.5 ${contact.is_primary ? 'fill-amber-500 text-warning-fg' : ''}`} />
                         {contact.is_primary ? 'Primary' : 'Set primary'}
                       </button>
                       <button
                         type="button"
                         onClick={() => removeContact(idx)}
-                        className="p-1 text-muted-foreground hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
+                        className="p-1 text-muted-foreground hover:text-danger-fg hover:bg-danger-bg rounded transition-colors"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>

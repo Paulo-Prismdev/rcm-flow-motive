@@ -203,7 +203,7 @@ export default function NotesSection({ parentId, parentType }) {
           <Button
             onClick={handleAddNote}
             disabled={!newNote.trim() || createNoteMutation.isPending}
-            className="glass-button px-4 py-2 flex items-center gap-2 text-blue-600"
+            className="glass-button px-4 py-2 flex items-center gap-2 text-info-fg"
           >
             <Send className="w-4 h-4" />
             {createNoteMutation.isPending ? 'Sending...' : 'Send Update'}
@@ -240,7 +240,7 @@ export default function NotesSection({ parentId, parentType }) {
                         {format(new Date(note.created_date), 'MMM d, yyyy HH:mm')}
                       </span>
                       {!isViewed && (
-                        <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                        <span className="w-2 h-2 bg-info rounded-full"></span>
                       )}
                     </div>
                     <p className="text-sm whitespace-pre-wrap">{note.content}</p>
@@ -250,7 +250,7 @@ export default function NotesSection({ parentId, parentType }) {
                       onClick={() => handleDelete(note.id)}
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8 text-red-600 hover:text-red-700"
+                      className="h-8 w-8 text-danger-fg hover:text-danger-fg"
                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>
@@ -336,7 +336,7 @@ export default function NotesSection({ parentId, parentType }) {
                       <button
                         onClick={() => handleMarkAsViewed(note.id)}
                         className={`px-3 py-1.5 rounded-lg text-sm flex items-center gap-1.5 transition-all ml-auto ${
-                          isViewed ? 'glass-inset text-green-600' : 'glass-inset hover:glass'
+                          isViewed ? 'glass-inset text-success-fg' : 'glass-inset hover:glass'
                         }`}
                       >
                         <Eye className="w-3.5 h-3.5" />
@@ -350,7 +350,7 @@ export default function NotesSection({ parentId, parentType }) {
                           {note.viewed_by && note.viewed_by.length > 0 ? (
                             note.viewed_by.map(email => (
                               <div key={email} className="flex items-center gap-2">
-                                <Eye className="w-3 h-3 text-green-600" />
+                                <Eye className="w-3 h-3 text-success-fg" />
                                 {email}
                               </div>
                             ))
@@ -378,7 +378,7 @@ export default function NotesSection({ parentId, parentType }) {
                       <Button
                         onClick={() => handleAddReply(note.id)}
                         disabled={!replyContent.trim() || createNoteMutation.isPending}
-                        className="glass-button px-3 py-1 text-xs flex items-center gap-2 text-blue-600"
+                        className="glass-button px-3 py-1 text-xs flex items-center gap-2 text-info-fg"
                       >
                         <Send className="w-3 h-3" />
                         Send
@@ -419,7 +419,7 @@ export default function NotesSection({ parentId, parentType }) {
                                 onClick={() => handleDelete(reply.id)}
                                 variant="ghost"
                                 size="icon"
-                                className="h-6 w-6 text-red-600 hover:text-red-700"
+                                className="h-6 w-6 text-danger-fg hover:text-danger-fg"
                               >
                                 <Trash2 className="w-3 h-3" />
                               </Button>

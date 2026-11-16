@@ -178,10 +178,10 @@ function StatusMigrationReviewTool() {
         </div>
       </div>
 
-      <div className="neomorph p-3 bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800">
+      <div className="neomorph p-3 bg-warning-bg border-warning/30">
         <div className="flex items-start gap-2">
-          <AlertTriangle className="w-4 h-4 text-amber-600 mt-0.5 shrink-0" />
-          <p className="text-sm text-amber-800 dark:text-amber-200">
+          <AlertTriangle className="w-4 h-4 text-warning-fg mt-0.5 shrink-0" />
+          <p className="text-sm text-warning-fg">
             <strong>Staging:</strong> This tool is live but the new status UI is disabled until the v2 flag is switched on.
             Applying here only populates the new fields so they're ready when you go live.
           </p>
@@ -209,7 +209,7 @@ function StatusMigrationReviewTool() {
                       {claim.reg && <span className="font-medium">{claim.reg} · </span>}
                       {[claim.vehicle_make, claim.vehicle_model].filter(Boolean).join(' ') || claim.make_model || '—'}
                     </div>
-                    <div className="mt-1 flex flex-wrap gap-1 text-[11px]">
+                    <div className="mt-1 flex flex-wrap gap-1 text-xs">
                       <span className="px-1.5 py-0.5 rounded bg-muted">Old: {claim.job_status || '—'}</span>
                       {claim.secondary_status && <span className="px-1.5 py-0.5 rounded bg-muted">Old sec: {claim.secondary_status}</span>}
                     </div>
@@ -218,7 +218,7 @@ function StatusMigrationReviewTool() {
                   {/* New mapping — three single-selects */}
                   <div className="flex-1 grid md:grid-cols-3 gap-3 items-start">
                     <div>
-                      <label className="block text-[11px] font-medium text-muted-foreground mb-1">Client Journey Status</label>
+                      <label className="block text-xs font-medium text-muted-foreground mb-1">Client Journey Status</label>
                       <StatusSelect
                         value={e.journey_status}
                         onChange={(v) => setEdits((s) => ({ ...s, [claim.id]: { ...s[claim.id], journey_status: v } }))}
@@ -226,11 +226,11 @@ function StatusMigrationReviewTool() {
                         placeholder="— Select journey —"
                       />
                       {exception && (
-                        <span className="block text-[10px] text-amber-600 mt-1">Exception — banner override</span>
+                        <span className="block text-xs text-warning-fg mt-1">Exception — banner override</span>
                       )}
                     </div>
                     <div>
-                      <label className="block text-[11px] font-medium text-muted-foreground mb-1">
+                      <label className="block text-xs font-medium text-muted-foreground mb-1">
                         Secondary Status {exception && '(not used)'}
                       </label>
                       <StatusSelect
@@ -242,7 +242,7 @@ function StatusMigrationReviewTool() {
                       />
                     </div>
                     <div>
-                      <label className="block text-[11px] font-medium text-muted-foreground mb-1">
+                      <label className="block text-xs font-medium text-muted-foreground mb-1">
                         Tertiary Status {exception && '(not used)'}
                       </label>
                       <StatusSelect
@@ -267,7 +267,7 @@ function StatusMigrationReviewTool() {
                       <ArrowRight className="w-3.5 h-3.5" /> Apply
                     </Button>
                     {claim.journey_status && (
-                      <span className="text-[10px] text-green-600 flex items-center gap-1">
+                      <span className="text-xs text-success-fg flex items-center gap-1">
                         <CheckCircle2 className="w-3 h-3" /> migrated
                       </span>
                     )}

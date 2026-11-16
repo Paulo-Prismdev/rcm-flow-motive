@@ -14,13 +14,13 @@ export default function ActivityLogModal({ parentId, parentType, isOpen, onClose
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-start justify-between px-8 py-6 border-b border-gray-200 dark:border-gray-800 flex-shrink-0">
+        <div className="flex items-start justify-between px-8 py-6 border-b border-border flex-shrink-0">
           <div>
-            <h2 className="text-[18px] font-semibold text-gray-900 dark:text-white">Activity Log</h2>
+            <h2 className="text-[18px] font-semibold text-foreground">Activity Log</h2>
           </div>
           <button aria-label="Close"
             onClick={onClose}
-            className="w-6 h-6 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+            className="w-6 h-6 text-muted-foreground hover:text-muted-foreground transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -32,10 +32,10 @@ export default function ActivityLogModal({ parentId, parentType, isOpen, onClose
         </div>
 
         {/* Footer */}
-        <div className="px-8 py-4 border-t border-gray-200 dark:border-gray-800 flex-shrink-0 flex justify-end gap-3">
+        <div className="px-8 py-4 border-t border-border flex-shrink-0 flex justify-end gap-3">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors h-9"
+            className="px-4 py-2 text-sm font-medium text-foreground bg-card border border-border rounded-lg hover:bg-muted transition-colors h-9"
           >
             Close
           </button>

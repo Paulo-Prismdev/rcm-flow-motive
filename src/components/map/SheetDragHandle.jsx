@@ -10,7 +10,7 @@ export default function SheetDragHandle({
   onClose,
   targetRef,
   className = 'py-2',
-  barClassName = 'h-1.5 w-10 rounded-full bg-gray-300 dark:bg-gray-600',
+  barClassName = 'h-1.5 w-10 rounded-full bg-accent',
 }) {
   const startY = useRef(0);
   const dy = useRef(0);

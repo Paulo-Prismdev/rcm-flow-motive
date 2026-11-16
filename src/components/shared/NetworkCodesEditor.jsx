@@ -27,7 +27,7 @@ export default function NetworkCodesEditor({ value = [], onChange }) {
               <button
                 type="button"
                 onClick={() => removeCode(code)}
-                className="hover:text-red-600 transition-colors"
+                className="hover:text-danger-fg transition-colors"
                 title="Remove code"
               >
                 <X className="w-3 h-3" />

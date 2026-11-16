@@ -39,7 +39,7 @@ export default function ItemRow({ item, state, claim, onClick, amountText }) {
           <LightDot lightKey={light.key} />
           <span className="min-w-0 flex-1 truncate text-[13px] font-medium text-foreground">{item.label}</span>
         </span>
-        <span className="mt-0.5 block truncate text-[11px] text-mac-muted">{itemSubline(item, state, claim)}</span>
+        <span className="mt-0.5 block truncate text-xs text-mac-muted">{itemSubline(item, state, claim)}</span>
       </span>
       {amount && <span className="text-[13px] tabular-nums text-foreground">{amount}</span>}
       <LightPill lightKey={light.key}>{light.label}</LightPill>

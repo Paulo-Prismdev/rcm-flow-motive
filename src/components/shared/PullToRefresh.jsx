@@ -101,7 +101,7 @@ export default function PullToRefresh({ onRefresh, children, className = '', ...
         className="absolute left-0 right-0 top-0 z-30 flex items-end justify-center overflow-hidden pointer-events-none"
         style={{ height: 0 }}
       >
-        <span className="flex items-center gap-1.5 pb-2 text-[11px] text-gray-400">
+        <span className="flex items-center gap-1.5 pb-2 text-xs text-muted-foreground">
           <ArrowDown ref={arrowRef} className="w-3.5 h-3.5" />
           <Loader2 ref={spinRef} className="w-3.5 h-3.5 animate-spin hidden" />
           <span ref={labelRef}>Pull to refresh</span>

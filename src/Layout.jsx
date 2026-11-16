@@ -88,7 +88,7 @@ const NavMarker = ({ active, opensOver }) => {
 function NoAccessScreen({ email }) {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <div className="max-w-md w-full rounded-xl border border-border bg-card p-8 text-center shadow-sm">
+      <div className="max-w-md w-full rounded-xl border border-border bg-card p-8 text-center shadow-card">
         <Shield className="w-10 h-10 mx-auto mb-4 text-muted-foreground" aria-hidden="true" />
         <h1 className="text-lg font-semibold mb-2">Your account isn't set up yet</h1>
         <p className="text-sm text-muted-foreground">

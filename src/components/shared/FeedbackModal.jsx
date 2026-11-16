@@ -20,28 +20,28 @@ const RATINGS = [
     value: 'good', 
     label: 'Good, no problems here', 
     icon: Smile, 
-    color: 'text-green-500',
-    bgColor: 'bg-green-50 dark:bg-green-900/20',
-    hoverColor: 'hover:bg-green-100 dark:hover:bg-green-900/30',
-    borderColor: 'border-green-300 dark:border-green-700'
+    color: 'text-success-fg',
+    bgColor: 'bg-success-bg',
+    hoverColor: 'hover:bg-success-bg',
+    borderColor: 'border-success/30'
   },
   { 
     value: 'ok', 
     label: 'I mean, they are ok', 
     icon: Meh, 
-    color: 'text-yellow-500',
-    bgColor: 'bg-yellow-50 dark:bg-yellow-900/20',
-    hoverColor: 'hover:bg-yellow-100 dark:hover:bg-yellow-900/30',
-    borderColor: 'border-yellow-300 dark:border-yellow-700'
+    color: 'text-warning-fg',
+    bgColor: 'bg-warning-bg',
+    hoverColor: 'hover:bg-warning-bg',
+    borderColor: 'border-warning/30'
   },
   { 
     value: 'hate', 
     label: 'We hate you, sort it out', 
     icon: Frown, 
-    color: 'text-red-500',
-    bgColor: 'bg-red-50 dark:bg-red-900/20',
-    hoverColor: 'hover:bg-red-100 dark:hover:bg-red-900/30',
-    borderColor: 'border-red-300 dark:border-red-700'
+    color: 'text-danger-fg',
+    bgColor: 'bg-danger-bg',
+    hoverColor: 'hover:bg-danger-bg',
+    borderColor: 'border-danger/30'
   }
 ];
 
@@ -144,8 +144,8 @@ export default function FeedbackModal({ user, onClose }) {
 
           {/* Error Message */}
           {error && (
-            <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-300 dark:border-red-700">
-              <p className="text-sm text-red-600 dark:text-red-300">{error}</p>
+            <div className="p-3 rounded-lg bg-danger-bg border border-danger/30">
+              <p className="text-sm text-danger-fg">{error}</p>
             </div>
           )}
 

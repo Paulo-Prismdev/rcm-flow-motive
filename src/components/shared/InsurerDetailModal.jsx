@@ -106,7 +106,7 @@ export default function InsurerDetailModal({ insurer, onClose, onUpdated }) {
   <button
     type="button"
     onClick={() => copyText(value)}
-    className="p-0.5 rounded text-gray-500 hover:text-primary hover:bg-primary/10 transition-colors"
+    className="p-0.5 rounded text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
     title="Copy">
     
       <Copy className="w-3 h-3" />
@@ -115,10 +115,10 @@ export default function InsurerDetailModal({ insurer, onClose, onUpdated }) {
 
   const Field = ({ label, icon: Icon, copyValue, children }) =>
   <div className="group">
-      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1 flex items-center gap-1.5">
+      <p className="text-xs font-semibold text-muted-foreground mb-1 flex items-center gap-1.5">
         {Icon && <Icon className="w-3.5 h-3.5" />} {label}
       </p>
-      <div className="text-sm text-gray-900 dark:text-white flex items-center gap-1.5">
+      <div className="text-sm text-foreground flex items-center gap-1.5">
         <span className="min-w-0">{children}</span>
         {copyValue && <CopyBtn value={copyValue} />}
       </div>
@@ -130,7 +130,7 @@ export default function InsurerDetailModal({ insurer, onClose, onUpdated }) {
       <div className="fm-glass-window rounded-2xl text-foreground w-full max-w-lg max-h-[90vh] overflow-y-auto">
         <div className="sticky top-0 bg-card border-b border-border px-6 py-4 flex justify-between items-center z-10">
           <div className="flex items-center gap-2 min-w-0">
-            <Building2 className="w-5 h-5 text-gray-500 flex-shrink-0" />
+            <Building2 className="w-5 h-5 text-muted-foreground flex-shrink-0" />
             <h2 className="text-xl font-bold truncate">
               {editMode ? "Edit Insurer" : insurer.name}
             </h2>
@@ -207,30 +207,30 @@ export default function InsurerDetailModal({ insurer, onClose, onUpdated }) {
 
             {/* Useful Contacts — inline add/remove, no edit mode needed */}
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Useful Contacts</p>
+              <p className="text-xs font-semibold text-muted-foreground mb-2">Useful Contacts</p>
               {contacts.length > 0 ?
             <div className="space-y-2">
                   {contacts.map((c, idx) =>
               <div key={idx} className="bg-muted/50 rounded-lg p-3 border border-border">
                       <div className="flex items-start justify-between gap-2">
-                        <p className="text-sm font-medium text-gray-900 dark:text-white">{c.name || "—"}</p>
+                        <p className="text-sm font-medium text-foreground">{c.name || "—"}</p>
                         <button
                     type="button"
                     onClick={() => removeContact(idx)}
                     disabled={quickMutation.isPending}
-                    className="p-1 rounded-md text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 disabled:opacity-50"
+                    className="p-1 rounded-md text-muted-foreground hover:text-danger-fg hover:bg-danger-bg disabled:opacity-50"
                     title="Remove contact">
                     
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
                       </div>
-                      <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1 text-xs text-gray-600 dark:text-gray-400">
+                      <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1 text-xs text-muted-foreground">
                         {c.phone &&
                   <span className="flex items-center gap-1.5">
                             <a href={`tel:${c.phone}`} className="flex items-center gap-1.5 hover:text-primary">
                               <Phone className="w-3 h-3" /> {c.phone}
                             </a>
-                            <button type="button" onClick={() => copyText(c.phone)} className="text-gray-500 hover:text-primary" title="Copy phone">
+                            <button type="button" onClick={() => copyText(c.phone)} className="text-muted-foreground hover:text-primary" title="Copy phone">
                               <Copy className="w-3 h-3" />
                             </button>
                           </span>
@@ -240,7 +240,7 @@ export default function InsurerDetailModal({ insurer, onClose, onUpdated }) {
                             <a href={`mailto:${c.email}`} className="flex items-center gap-1.5 hover:text-primary truncate">
                               <Mail className="w-3 h-3" /> {c.email}
                             </a>
-                            <button type="button" onClick={() => copyText(c.email)} className="text-gray-500 hover:text-primary" title="Copy email">
+                            <button type="button" onClick={() => copyText(c.email)} className="text-muted-foreground hover:text-primary" title="Copy email">
                               <Copy className="w-3 h-3" />
                             </button>
                           </span>
@@ -250,7 +250,7 @@ export default function InsurerDetailModal({ insurer, onClose, onUpdated }) {
               )}
                 </div> :
 
-            <p className="text-sm text-gray-400 mb-2">No contacts added yet</p>
+            <p className="text-sm text-muted-foreground mb-2">No contacts added yet</p>
             }
 
               {showAddContact ?
@@ -283,7 +283,7 @@ export default function InsurerDetailModal({ insurer, onClose, onUpdated }) {
 
             {/* Network Codes — inline add/remove, no edit mode needed */}
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2 flex items-center gap-1.5">
+              <p className="text-xs font-semibold text-muted-foreground mb-2 flex items-center gap-1.5">
                 <Network className="w-3.5 h-3.5" /> Network Codes
               </p>
               {codes.length > 0 ?
@@ -303,7 +303,7 @@ export default function InsurerDetailModal({ insurer, onClose, onUpdated }) {
                   type="button"
                   onClick={() => removeCode(code)}
                   disabled={quickMutation.isPending}
-                  className="hover:text-red-600 transition-colors disabled:opacity-50"
+                  className="hover:text-danger-fg transition-colors disabled:opacity-50"
                   title="Remove code">
                   
                         <X className="w-3 h-3" />
@@ -312,7 +312,7 @@ export default function InsurerDetailModal({ insurer, onClose, onUpdated }) {
               )}
                 </div> :
 
-            <p className="text-sm text-gray-400 mb-2">No network codes added yet</p>
+            <p className="text-sm text-muted-foreground mb-2">No network codes added yet</p>
             }
               <div className="flex gap-2">
                 <Input

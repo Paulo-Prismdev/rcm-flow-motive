@@ -22,11 +22,11 @@ import { askConfirm, notify, notifyError } from '@/lib/dialogs';
 const isImageUrl = (url) => !isPrivateRef(url) && /\.(jpe?g|png|gif|webp|bmp|svg)(\?|$)/i.test(url);
 
 const UPDATE_TYPE_COLORS = {
-  "Client Communication": "bg-blue-500", "Bodyshop Communication": "bg-green-500",
-  "Insurer Communication": "bg-orange-500", "Referrer Response": "bg-amber-500", "Credit Repair Communication": "bg-rose-500",
-  "Action Taken": "bg-indigo-500", "Awaiting Information": "bg-yellow-500",
-  "Documentation Received": "bg-teal-500", "Parts Update": "bg-pink-500",
-  "Repair Progress": "bg-cyan-500", "Quality Check": "bg-emerald-500",
+  "Client Communication": "bg-info", "Bodyshop Communication": "bg-success",
+  "Insurer Communication": "bg-warning", "Referrer Response": "bg-warning", "Credit Repair Communication": "bg-danger",
+  "Action Taken": "bg-info", "Awaiting Information": "bg-warning",
+  "Documentation Received": "bg-success", "Parts Update": "bg-pink-500",
+  "Repair Progress": "bg-info", "Quality Check": "bg-success",
   "Accounts": "bg-violet-500",
   "Other": "bg-gray-500"
 };
@@ -242,8 +242,8 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden min-h-0">
             <TabsList className="grid w-full grid-cols-2 mb-3 flex-shrink-0">
-              <TabsTrigger value="updates" className="text-sm gap-1.5">Updates {mainNotes.length > 0 && <span className="text-[10px] bg-muted text-muted-foreground rounded-full px-1.5 py-0.5">{mainNotes.length}</span>}</TabsTrigger>
-              <TabsTrigger value="files" className="text-sm gap-1.5">Files {allFiles.length > 0 && <span className="text-[10px] bg-muted text-muted-foreground rounded-full px-1.5 py-0.5">{allFiles.length}</span>}</TabsTrigger>
+              <TabsTrigger value="updates" className="text-sm gap-1.5">Updates {mainNotes.length > 0 && <span className="text-xs bg-muted text-muted-foreground rounded-full px-1.5 py-0.5">{mainNotes.length}</span>}</TabsTrigger>
+              <TabsTrigger value="files" className="text-sm gap-1.5">Files {allFiles.length > 0 && <span className="text-xs bg-muted text-muted-foreground rounded-full px-1.5 py-0.5">{allFiles.length}</span>}</TabsTrigger>
             </TabsList>
 
           <TabsContent value="updates" className="flex-1 overflow-y-auto overflow-x-hidden space-y-4 pr-2 mt-0 min-h-0">
@@ -275,7 +275,7 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
                   />
                   {searchQuery && (
                     <div className="absolute right-1.5 top-1/2 -translate-y-1/2 flex items-center gap-0.5">
-                      <span className="text-[10px] text-muted-foreground tabular-nums">{matchIds.length > 0 ? `${matchIdx + 1}/${matchIds.length}` : '0/0'}</span>
+                      <span className="text-xs text-muted-foreground tabular-nums">{matchIds.length > 0 ? `${matchIdx + 1}/${matchIds.length}` : '0/0'}</span>
                       <button aria-label="Collapse" type="button" onClick={goPrev} disabled={matchIds.length === 0} className="text-muted-foreground hover:text-foreground disabled:opacity-40 p-0.5"><ChevronUp className="w-3.5 h-3.5" /></button>
                       <button aria-label="Expand" type="button" onClick={goNext} disabled={matchIds.length === 0} className="text-muted-foreground hover:text-foreground disabled:opacity-40 p-0.5"><ChevronDown className="w-3.5 h-3.5" /></button>
                       <button type="button" onClick={() => setSearchQuery('')} className="text-muted-foreground hover:text-foreground p-0.5"><X className="w-3.5 h-3.5" /></button>
@@ -296,20 +296,20 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
                     const replies = getReplies(note.id);
                     const isNote = !!note.content?.trim();
                     return (
-                      <div key={note.id} ref={(el) => { matchRefs.current[note.id] = el; }} className={`border rounded-lg p-3 ${note.starred ? 'ring-2 ring-amber-400 border-amber-400' : ''} ${currentMatchId === note.id ? 'ring-2 ring-blue-400' : ''} ${isNote ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700' : 'bg-card border-border'}`}>
+                      <div key={note.id} ref={(el) => { matchRefs.current[note.id] = el; }} className={`border rounded-lg p-3 ${note.starred ? 'ring-2 ring-amber-400 border-warning' : ''} ${currentMatchId === note.id ? 'ring-2 ring-blue-400' : ''} ${isNote ? 'bg-info-bg border-info/30' : 'bg-card border-border'}`}>
                         <div className="flex items-start justify-between mb-2">
                           <div className="flex items-center gap-2 flex-wrap">
                             {note.update_type && <Badge className={`${UPDATE_TYPE_COLORS[note.update_type] || 'bg-gray-500'} rounded-full`}>{note.update_type}</Badge>}
                             {note.contacted_party_name && (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-muted text-muted-foreground border border-border">
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-muted text-muted-foreground border border-border">
                                 <User className="w-3 h-3" />
                                 {note.contacted_party_name}
                               </span>
                             )}
                             <UpdateDirectionBadges update={note} />
-                            {note.starred && <span className="inline-flex items-center gap-1 text-amber-500 text-[10px] font-semibold"><Star className="w-3 h-3 fill-amber-400" />Flagged</span>}
-                            <span className="text-[10px] text-muted-foreground flex items-center gap-1"><Calendar className="w-3 h-3" />{format(new Date(note.created_date), 'dd/MM/yyyy HH:mm')}</span>
-                            {note.tagged_users?.length > 0 && <span className="text-[10px] text-primary flex items-center gap-1"><AtSign className="w-3 h-3" />{note.tagged_users.length} tagged</span>}
+                            {note.starred && <span className="inline-flex items-center gap-1 text-warning-fg text-xs font-semibold"><Star className="w-3 h-3 fill-amber-400" />Flagged</span>}
+                            <span className="text-xs text-muted-foreground flex items-center gap-1"><Calendar className="w-3 h-3" />{format(new Date(note.created_date), 'dd/MM/yyyy HH:mm')}</span>
+                            {note.tagged_users?.length > 0 && <span className="text-xs text-primary flex items-center gap-1"><AtSign className="w-3 h-3" />{note.tagged_users.length} tagged</span>}
                           </div>
                         </div>
 
@@ -324,30 +324,30 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
                         ) : (
                           <>
                             {note.contacted_party_detail && (
-                              <div className="text-[11px] text-muted-foreground flex items-center gap-1 mb-1.5">
+                              <div className="text-xs text-muted-foreground flex items-center gap-1 mb-1.5">
                                 <AtSign className="w-3 h-3 flex-shrink-0" />
                                 <span className="truncate">{note.contacted_party_detail}</span>
                               </div>
                             )}
                             {note.content && <div className="text-sm mb-2"><p className="text-foreground whitespace-pre-wrap"><Highlight text={note.content} query={q} /></p></div>}
-                            {note.next_steps && <div className="text-sm mb-2 mt-2 bg-muted/50 rounded p-2"><p className="font-medium mb-1 text-foreground text-xs uppercase tracking-wide">Next Steps:</p><p className="text-muted-foreground whitespace-pre-wrap"><Highlight text={note.next_steps} query={q} /></p></div>}
+                            {note.next_steps && <div className="text-sm mb-2 mt-2 bg-muted/50 rounded p-2"><p className="font-medium mb-1 text-foreground text-xs  ">Next Steps:</p><p className="text-muted-foreground whitespace-pre-wrap"><Highlight text={note.next_steps} query={q} /></p></div>}
                             {note.due_date_for_next_action && <div className="text-xs text-muted-foreground flex items-center gap-1 mt-2"><Clock className="w-3 h-3" />Due: {format(new Date(note.due_date_for_next_action), 'dd/MM/yyyy')}</div>}
                             {renderFileChips(note, true)}
                           </>
                         )}
 
                         <div className="flex items-center justify-between flex-wrap gap-y-2 mt-2 pt-2 border-t border-border/50">
-                          <div className="flex items-center gap-1 text-[10px] text-muted-foreground min-w-0"><User className="w-3 h-3 flex-shrink-0" /><span className="truncate"><Highlight text={getDisplayName(note.created_by)} query={q} /></span></div>
+                          <div className="flex items-center gap-1 text-xs text-muted-foreground min-w-0"><User className="w-3 h-3 flex-shrink-0" /><span className="truncate"><Highlight text={getDisplayName(note.created_by)} query={q} /></span></div>
                           <div className="flex items-center gap-1">
-                            <Button type="button" variant="ghost" size="sm" onClick={() => handleCopy(note)} className="h-7 px-2 text-xs text-muted-foreground" title="Copy contents"><span className="flex items-center gap-1">{copiedId === note.id ? <><Check className="w-3.5 h-3.5 text-green-500" /><span className="hidden sm:inline">Copied</span></> : <><Copy className="w-3.5 h-3.5" /><span className="hidden sm:inline">Copy</span></>}</span></Button>
+                            <Button type="button" variant="ghost" size="sm" onClick={() => handleCopy(note)} className="h-7 px-2 text-xs text-muted-foreground" title="Copy contents"><span className="flex items-center gap-1">{copiedId === note.id ? <><Check className="w-3.5 h-3.5 text-success-fg" /><span className="hidden sm:inline">Copied</span></> : <><Copy className="w-3.5 h-3.5" /><span className="hidden sm:inline">Copy</span></>}</span></Button>
                             {canEditDelete(note) && (
                               <>
                                 <Button type="button" variant="ghost" size="sm" onClick={() => handleEdit(note)} className="h-7 px-2 text-xs text-muted-foreground"><Pencil className="w-3.5 h-3.5" /></Button>
                                 <Button type="button" variant="ghost" size="sm" onClick={() => handleDelete(note.id)} className="h-7 px-2 text-xs text-muted-foreground"><Trash2 className="w-3.5 h-3.5" /></Button>
                               </>
                             )}
-                            <Button type="button" variant="ghost" size="sm" onClick={() => toggleStarMutation.mutate({ noteId: note.id, isStarred: note.starred })} className={`h-7 px-2 text-xs ${note.starred ? 'text-amber-500 hover:text-amber-600' : 'text-muted-foreground'}`} title={note.starred ? 'Remove flag' : 'Flag as important'}><Star className={`w-3.5 h-3.5 sm:mr-1 ${note.starred ? 'fill-amber-400' : ''}`} /><span className="hidden sm:inline">{note.starred ? 'Flagged' : 'Flag'}</span></Button>
-                            <Button type="button" variant="ghost" size="sm" onClick={() => toggleLikeMutation.mutate({ noteId: note.id, isLiked })} className={`h-7 px-2 text-xs ${isLiked ? 'text-red-500 hover:text-red-600' : 'text-muted-foreground'}`}><Heart className={`w-3.5 h-3.5 mr-1 ${isLiked ? 'fill-current' : ''}`} />{likeCount > 0 && likeCount}</Button>
+                            <Button type="button" variant="ghost" size="sm" onClick={() => toggleStarMutation.mutate({ noteId: note.id, isStarred: note.starred })} className={`h-7 px-2 text-xs ${note.starred ? 'text-warning-fg hover:text-warning-fg' : 'text-muted-foreground'}`} title={note.starred ? 'Remove flag' : 'Flag as important'}><Star className={`w-3.5 h-3.5 sm:mr-1 ${note.starred ? 'fill-amber-400' : ''}`} /><span className="hidden sm:inline">{note.starred ? 'Flagged' : 'Flag'}</span></Button>
+                            <Button type="button" variant="ghost" size="sm" onClick={() => toggleLikeMutation.mutate({ noteId: note.id, isLiked })} className={`h-7 px-2 text-xs ${isLiked ? 'text-danger-fg hover:text-danger-fg' : 'text-muted-foreground'}`}><Heart className={`w-3.5 h-3.5 mr-1 ${isLiked ? 'fill-current' : ''}`} />{likeCount > 0 && likeCount}</Button>
                             <Button type="button" variant="ghost" size="sm" onClick={() => handleReply(note.id)} className="h-7 px-2 text-xs text-muted-foreground"><Reply className="w-3.5 h-3.5 sm:mr-1" /><span className="hidden sm:inline">Reply</span></Button>
                           </div>
                         </div>
@@ -385,27 +385,27 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
                                     <>
                                       <div className="flex items-center justify-between mb-2">
                                         <div className="flex items-center gap-2">
-                                          <span className="text-[10px] text-muted-foreground flex items-center gap-1"><User className="w-3 h-3" />{getDisplayName(reply.created_by)}</span>
-                                          <span className="text-[10px] text-muted-foreground flex items-center gap-1"><Calendar className="w-3 h-3" />{format(new Date(reply.created_date), 'dd/MM/yyyy HH:mm')}</span>
+                                          <span className="text-xs text-muted-foreground flex items-center gap-1"><User className="w-3 h-3" />{getDisplayName(reply.created_by)}</span>
+                                          <span className="text-xs text-muted-foreground flex items-center gap-1"><Calendar className="w-3 h-3" />{format(new Date(reply.created_date), 'dd/MM/yyyy HH:mm')}</span>
                                           {reply.contacted_party_name && (
-                                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-muted text-muted-foreground border border-border">
+                                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-muted text-muted-foreground border border-border">
                                               <User className="w-3 h-3" />{reply.contacted_party_name}
                                             </span>
                                           )}
                                         </div>
                                         <div className="flex items-center gap-1">
-                                          <Button type="button" variant="ghost" size="sm" onClick={() => handleCopy(reply)} className="h-5 px-1 text-xs text-muted-foreground" title="Copy">{copiedId === reply.id ? <Check className="w-3 h-3 text-green-500" /> : <Copy className="w-3 h-3" />}</Button>
+                                          <Button type="button" variant="ghost" size="sm" onClick={() => handleCopy(reply)} className="h-5 px-1 text-xs text-muted-foreground" title="Copy">{copiedId === reply.id ? <Check className="w-3 h-3 text-success-fg" /> : <Copy className="w-3 h-3" />}</Button>
                                           {canEditDelete(reply) && (
                                             <>
                                               <Button type="button" variant="ghost" size="sm" onClick={() => handleEdit(reply)} className="h-5 px-1 text-xs text-muted-foreground"><Pencil className="w-3 h-3" /></Button>
                                               <Button type="button" variant="ghost" size="sm" onClick={() => handleDelete(reply.id)} className="h-5 px-1 text-xs text-muted-foreground"><Trash2 className="w-3 h-3" /></Button>
                                             </>
                                           )}
-                                          <Button type="button" variant="ghost" size="sm" onClick={() => toggleLikeMutation.mutate({ noteId: reply.id, isLiked: replyIsLiked })} className={`h-5 px-1 text-xs ${replyIsLiked ? 'text-red-500' : 'text-muted-foreground'}`}><Heart className={`w-3 h-3 ${replyIsLiked ? 'fill-current' : ''}`} />{replyLikeCount > 0 && replyLikeCount}</Button>
+                                          <Button type="button" variant="ghost" size="sm" onClick={() => toggleLikeMutation.mutate({ noteId: reply.id, isLiked: replyIsLiked })} className={`h-5 px-1 text-xs ${replyIsLiked ? 'text-danger-fg' : 'text-muted-foreground'}`}><Heart className={`w-3 h-3 ${replyIsLiked ? 'fill-current' : ''}`} />{replyLikeCount > 0 && replyLikeCount}</Button>
                                         </div>
                                       </div>
                                       {reply.contacted_party_detail && (
-                                        <div className="text-[11px] text-muted-foreground flex items-center gap-1 mb-1.5">
+                                        <div className="text-xs text-muted-foreground flex items-center gap-1 mb-1.5">
                                           <AtSign className="w-3 h-3 flex-shrink-0" />
                                           <span className="truncate">{reply.contacted_party_detail}</span>
                                         </div>
@@ -446,8 +446,8 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
                     </button>
                     <div className="p-2 flex flex-col gap-1 flex-1 min-w-0">
                       <span className="text-xs font-medium truncate" title={file.fileName}>{file.fileName}</span>
-                      <span className="text-[10px] text-muted-foreground truncate">{file.author}</span>
-                      <span className="text-[10px] text-muted-foreground">{format(new Date(file.date), 'dd/MM/yy HH:mm')}</span>
+                      <span className="text-xs text-muted-foreground truncate">{file.author}</span>
+                      <span className="text-xs text-muted-foreground">{format(new Date(file.date), 'dd/MM/yy HH:mm')}</span>
                       <div className="flex items-center gap-1 mt-1">
                         <button type="button" onClick={() => setViewingFile(file.url)} className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground" title="View"><Eye className="w-3.5 h-3.5" /></button>
                         <SecureFileLink fileRef={file.url} claimId={parentType === 'Claim' ? parentId : null} className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground" title="Download"><Download className="w-3.5 h-3.5" /></SecureFileLink>

@@ -19,7 +19,7 @@ export default function OverviewPane({ claim, ctx, summary, steps, light, onSele
     <div className="space-y-6">
       <header className="space-y-1">
         <h2 className="text-[17px] font-semibold text-foreground">Overview</h2>
-        <p className="text-[11px] text-mac-muted">What the job comes to, and where its invoicing has got to.</p>
+        <p className="text-xs text-mac-muted">What the job comes to, and where its invoicing has got to.</p>
       </header>
 
       {light?.entries?.length > 0 && (
@@ -60,9 +60,9 @@ export default function OverviewPane({ claim, ctx, summary, steps, light, onSele
             <LightDot lightKey={step.light} />
             <span className="min-w-0 flex-1">
               <span className="block truncate text-[13px] text-foreground">{step.title}</span>
-              <span className="mt-0.5 block truncate text-[11px] text-mac-muted">{step.line}</span>
+              <span className="mt-0.5 block truncate text-xs text-mac-muted">{step.line}</span>
             </span>
-            {step.count && <span className="text-[11px] tabular-nums text-mac-muted">{step.count}</span>}
+            {step.count && <span className="text-xs tabular-nums text-mac-muted">{step.count}</span>}
             <ChevronRight className="h-4 w-4 flex-shrink-0 text-mac-muted" strokeWidth={1.5} />
           </MacRow>
         ))}

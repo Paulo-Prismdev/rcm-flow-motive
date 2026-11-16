@@ -2,10 +2,10 @@ import React from 'react';
 import { AlertCircle, CheckCircle2, Info } from 'lucide-react';
 
 const TONES = {
-  danger: { cls: 'bg-red-50 text-red-800 dark:bg-red-950/40 dark:text-red-200', Icon: AlertCircle, role: 'alert' },
-  warning: { cls: 'bg-amber-50 text-amber-900 dark:bg-amber-950/40 dark:text-amber-200', Icon: AlertCircle, role: 'alert' },
-  success: { cls: 'bg-green-50 text-green-800 dark:bg-green-950/40 dark:text-green-200', Icon: CheckCircle2, role: 'status' },
-  info: { cls: 'bg-blue-50 text-blue-900 dark:bg-blue-950/40 dark:text-blue-200', Icon: Info, role: 'status' },
+  danger: { cls: 'bg-danger-bg text-danger-fg', Icon: AlertCircle, role: 'alert' },
+  warning: { cls: 'bg-warning-bg text-warning-fg', Icon: AlertCircle, role: 'alert' },
+  success: { cls: 'bg-success-bg text-success-fg', Icon: CheckCircle2, role: 'status' },
+  info: { cls: 'bg-info-bg text-info-fg', Icon: Info, role: 'status' },
 };
 
 // A short message above a form. Errors are announced to screen readers as they appear.

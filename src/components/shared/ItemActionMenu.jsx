@@ -18,12 +18,12 @@ export function ActionRow({
       title={title}
       disabled={disabled}
       onClick={onClick}
-      className={`flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-xs transition-colors hover:bg-accent hover:text-accent-foreground disabled:pointer-events-none disabled:opacity-40 ${danger ? 'text-red-600 dark:text-red-400' : ''} ${className}`}
+      className={`flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-xs transition-colors hover:bg-accent hover:text-accent-foreground disabled:pointer-events-none disabled:opacity-40 ${danger ? 'text-danger-fg' : ''} ${className}`}
     >
       {icon}
       <span className="min-w-0 flex-1 truncate">
         {label}
-        {hint && <span className="block truncate text-[10px] font-normal text-muted-foreground">{hint}</span>}
+        {hint && <span className="block truncate text-xs font-normal text-muted-foreground">{hint}</span>}
       </span>
       {trailing}
     </button>
@@ -98,7 +98,7 @@ export default function ItemActionMenu({
             <Eye className="w-4 h-4 flex-shrink-0" />
             <span className="min-w-0 flex-1">
               View document
-              <span className="block text-[10px] font-normal text-muted-foreground">Pick which copy to open</span>
+              <span className="block text-xs font-normal text-muted-foreground">Pick which copy to open</span>
             </span>
           </div>
         )}
@@ -123,7 +123,7 @@ export default function ItemActionMenu({
                     <button
                       type="button"
                       onClick={() => submitRename(file)}
-                      className="p-1 text-green-600 hover:bg-green-50 dark:hover:bg-green-950/40 rounded"
+                      className="p-1 text-success-fg hover:bg-success-bg rounded"
                       title="Save"
                     >
                       <Check className="w-3.5 h-3.5" />
@@ -158,7 +158,7 @@ export default function ItemActionMenu({
                     <button
                       type="button"
                       onClick={run(() => file.onRemove?.())}
-                      className="p-1 text-muted-foreground hover:text-red-500 rounded flex-shrink-0"
+                      className="p-1 text-muted-foreground hover:text-danger-fg rounded flex-shrink-0"
                       title="Remove"
                     >
                       <Trash2 className="w-3 h-3" />

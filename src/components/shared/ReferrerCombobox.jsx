@@ -80,7 +80,7 @@ export default function ReferrerCombobox({ value, onChange, compact = false }) {
               variant="outline"
               role="combobox"
               aria-expanded={open}
-              className="w-full justify-between neomorph-inset text-gray-700 border-0 focus:ring-0 pr-10"
+              className="w-full justify-between neomorph-inset text-foreground border-0 focus:ring-0 pr-10"
             >
               {selectedName || "Select a referrer..."}
               <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -139,7 +139,7 @@ export default function ReferrerCombobox({ value, onChange, compact = false }) {
             variant="ghost"
             size="sm"
             onClick={handleClear}
-            className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 p-0 hover:bg-red-100 hover:text-red-600"
+            className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 p-0 hover:bg-danger-bg hover:text-danger-fg"
             title="Clear referrer"
           >
             <X className="h-4 w-4" />

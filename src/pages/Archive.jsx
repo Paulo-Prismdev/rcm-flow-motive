@@ -55,10 +55,10 @@ export default function Archive() {
 
   // Combine all archived items
   const allArchived = [
-    ...claims.filter(c => c.archived).map(c => ({ ...c, department: 'Claims', icon: FileText, color: 'text-blue-600', link: createPageUrl(`Claims?view=${c.id}`), displayName: c.reg || 'No Reg' })),
-    ...estimates.filter(e => e.archived).map(e => ({ ...e, department: 'Estimating', icon: Calculator, color: 'text-green-600', link: createPageUrl(`Estimating?view=${e.id}`), displayName: e.name || 'Untitled' })),
+    ...claims.filter(c => c.archived).map(c => ({ ...c, department: 'Claims', icon: FileText, color: 'text-info-fg', link: createPageUrl(`Claims?view=${c.id}`), displayName: c.reg || 'No Reg' })),
+    ...estimates.filter(e => e.archived).map(e => ({ ...e, department: 'Estimating', icon: Calculator, color: 'text-success-fg', link: createPageUrl(`Estimating?view=${e.id}`), displayName: e.name || 'Untitled' })),
     ...engineering.filter(e => e.archived).map(e => ({ ...e, department: 'Engineering', icon: Wrench, color: 'text-purple-600', link: createPageUrl(`Engineering?view=${e.id}`), displayName: e.reference || e.vehicle_reg || 'Untitled' })),
-    ...parts.filter(p => p.archived).map(p => ({ ...p, department: 'Parts', icon: Package, color: 'text-orange-600', link: createPageUrl(`Parts?view=${p.id}`), displayName: p.vehicle_ref || 'No Ref' })),
+    ...parts.filter(p => p.archived).map(p => ({ ...p, department: 'Parts', icon: Package, color: 'text-warning-fg', link: createPageUrl(`Parts?view=${p.id}`), displayName: p.vehicle_ref || 'No Ref' })),
   ].sort((a, b) => new Date(b.updated_date) - new Date(a.updated_date));
 
   const filteredItems = allArchived.filter(item => {
@@ -80,11 +80,11 @@ export default function Archive() {
       <div className="neomorph p-4 lg:p-6">
         <div className="flex items-center justify-between mb-4 lg:mb-6">
           <div>
-            <h1 className="text-lg lg:text-2xl font-bold text-gray-700 flex items-center gap-2 lg:gap-3">
-              <ArchiveIcon className="w-5 h-5 lg:w-7 lg:h-7 text-gray-600" />
+            <h1 className="text-lg lg:text-2xl font-bold text-foreground flex items-center gap-2 lg:gap-3">
+              <ArchiveIcon className="w-5 h-5 lg:w-7 lg:h-7 text-muted-foreground" />
               Archive
             </h1>
-            <p className="text-sm text-gray-500 mt-1">{allArchived.length} archived items</p>
+            <p className="text-sm text-muted-foreground mt-1">{allArchived.length} archived items</p>
           </div>
         </div>
 
@@ -94,13 +94,13 @@ export default function Archive() {
               placeholder="Search archived items..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="neomorph-inset px-3 py-2 text-gray-700 border-0 focus:ring-0"
+              className="neomorph-inset px-3 py-2 text-foreground border-0 focus:ring-0"
             />
           </div>
           <select
             value={filterDepartment}
             onChange={(e) => setFilterDepartment(e.target.value)}
-            className="neomorph-inset px-3 py-2 text-gray-700 border-0 rounded-xl text-sm"
+            className="neomorph-inset px-3 py-2 text-foreground border-0 rounded-xl text-sm"
           >
             <option value="all">All Departments</option>
             <option value="Claims">Claims</option>
@@ -113,7 +113,7 @@ export default function Archive() {
 
       <div className="space-y-4">
         {filteredItems.length === 0 ? (
-          <div className="neomorph p-8 text-center text-gray-500">
+          <div className="neomorph p-8 text-center text-muted-foreground">
             {searchTerm || filterDepartment !== "all" ? "No matching archived items found." : "No archived items yet."}
           </div>
         ) : (
@@ -128,27 +128,27 @@ export default function Archive() {
                         <Icon className={`w-4 h-4 lg:w-5 lg:h-5 ${item.color}`} />
                       </div>
                       <div className="min-w-0">
-                        <h3 className="text-sm lg:text-lg font-bold text-gray-700 truncate">{item.displayName}</h3>
-                        <p className="text-xs text-gray-500">{item.department}</p>
+                        <h3 className="text-sm lg:text-lg font-bold text-foreground truncate">{item.displayName}</h3>
+                        <p className="text-xs text-muted-foreground">{item.department}</p>
                       </div>
                       <StatusBadge status={item.job_status || item.status || item.sourcing_status || 'N/A'} />
                     </div>
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 lg:gap-4 text-sm mt-2 lg:mt-4 m-keep-2">
                       {item.client_name && (
                         <div>
-                          <p className="text-gray-500">Client</p>
-                          <p className="font-medium text-gray-700">{item.client_name}</p>
+                          <p className="text-muted-foreground">Client</p>
+                          <p className="font-medium text-foreground">{item.client_name}</p>
                         </div>
                       )}
                       {item.make_model && (
                         <div>
-                          <p className="text-gray-500">Vehicle</p>
-                          <p className="font-medium text-gray-700">{item.make_model}</p>
+                          <p className="text-muted-foreground">Vehicle</p>
+                          <p className="font-medium text-foreground">{item.make_model}</p>
                         </div>
                       )}
                       <div>
-                        <p className="text-gray-500">Archived</p>
-                        <p className="font-medium text-gray-700">
+                        <p className="text-muted-foreground">Archived</p>
+                        <p className="font-medium text-foreground">
                           {item.updated_date ? format(new Date(item.updated_date), 'dd/MM/yyyy') : '-'}
                         </p>
                       </div>
@@ -158,13 +158,13 @@ export default function Archive() {
                     <Button
                       onClick={() => handleUnarchive(item)}
                       size="sm"
-                      className="neomorph-flat px-3 py-2 transition-all active:neomorph-pressed flex items-center gap-1.5 text-green-600 text-xs"
+                      className="neomorph-flat px-3 py-2 transition-all active:neomorph-pressed flex items-center gap-1.5 text-success-fg text-xs"
                       disabled={unarchiveMutation.isLoading}
                     >
                       <RotateCcw className="w-3.5 h-3.5" />
                       Restore
                     </Button>
-                    <Button asChild size="sm" className="neomorph-flat px-3 py-2 transition-all active:neomorph-pressed text-gray-600 text-xs w-full">
+                    <Button asChild size="sm" className="neomorph-flat px-3 py-2 transition-all active:neomorph-pressed text-muted-foreground text-xs w-full">
                       <Link to={item.link}>View</Link>
                     </Button>
                   </div>

@@ -23,7 +23,7 @@ const getUserInitials = (user) => {
 
 const getAvatarColor = (email) => {
   if (!email) return 'bg-gray-500';
-  const colors = ['bg-blue-500', 'bg-green-500', 'bg-purple-500', 'bg-pink-500', 'bg-yellow-500', 'bg-indigo-500', 'bg-red-500', 'bg-teal-500'];
+  const colors = ['bg-info', 'bg-success', 'bg-purple-500', 'bg-pink-500', 'bg-warning', 'bg-info', 'bg-danger', 'bg-success'];
   const hash = email.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
   return colors[hash % colors.length];
 };
@@ -49,7 +49,7 @@ const DEFAULT_PREFS = {
 
 const Field = ({ label, icon: Icon, children, full }) => (
   <div className={full ? "sm:col-span-2" : ""}>
-    <label className="block text-[11px] font-semibold uppercase tracking-wide text-muted-foreground mb-1 flex items-center gap-1.5">
+    <label className="block text-xs font-semibold text-muted-foreground mb-1 flex items-center gap-1.5">
       {Icon && <Icon className="w-3 h-3" />}{label}
     </label>
     {children}
@@ -234,7 +234,7 @@ export default function UserProfile() {
 
               <Field label="Role" icon={Shield}>
                 <div className="flex flex-wrap gap-1.5 items-center min-h-[36px]">
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${currentUser.role === 'admin' ? 'bg-primary text-primary-foreground' : 'bg-blue-500 text-white'}`}>{currentUser.role === 'admin' ? 'Administrator' : 'User'}</span>
+                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${currentUser.role === 'admin' ? 'bg-primary text-primary-foreground' : 'bg-info text-on-solid'}`}>{currentUser.role === 'admin' ? 'Administrator' : 'User'}</span>
                   {currentUser.can_manage_permissions && <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-500 text-white">Permissions</span>}
                 </div>
               </Field>
@@ -286,23 +286,23 @@ export default function UserProfile() {
                 <div className="flex flex-wrap items-center gap-4">
                   <div className="flex items-center gap-2">
                     <Sun className="w-4 h-4 text-primary" />
-                    <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Annual Leave:</span>
+                    <span className="text-xs font-semibold text-muted-foreground">Annual Leave:</span>
                     <span className="text-sm font-medium">{currentUser.annual_leave_taken || 0} taken</span>
                     <span className="text-muted-foreground">·</span>
-                    <span className="text-sm font-bold text-green-600">{(currentUser.annual_leave_allowance || 25) - (currentUser.annual_leave_taken || 0)} left</span>
+                    <span className="text-sm font-bold text-success-fg">{(currentUser.annual_leave_allowance || 25) - (currentUser.annual_leave_taken || 0)} left</span>
                     <span className="text-xs text-muted-foreground">of {currentUser.annual_leave_allowance || 25}</span>
                   </div>
                 </div>
                 {currentUser.role !== 'admin' && currentUser.departments_access?.length > 0 && (
                   <div className="flex flex-wrap items-center gap-1.5">
-                    <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mr-1">Departments:</span>
+                    <span className="text-xs font-semibold text-muted-foreground mr-1">Departments:</span>
                     {currentUser.departments_access.map(dept => <span key={dept} className="bg-primary/10 text-primary px-2 py-0.5 text-xs rounded-full">{dept}</span>)}
                   </div>
                 )}
               </div>
             )}
 
-            <p className="mt-3 pt-3 border-t text-[11px] text-muted-foreground">
+            <p className="mt-3 pt-3 border-t text-xs text-muted-foreground">
               Account created {new Date(currentUser.created_date).toLocaleDateString()} · Updated {new Date(currentUser.updated_date).toLocaleDateString()}
             </p>
           </div>
@@ -319,8 +319,8 @@ export default function UserProfile() {
                 {[0, 1].map(col => (
                   <div key={col} className="flex items-center gap-2 px-1 pb-1">
                     <div className="flex-1" />
-                    <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground w-12 text-center">In-App</span>
-                    <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground w-12 text-center">Email</span>
+                    <span className="text-xs font-semibold text-muted-foreground w-12 text-center">In-App</span>
+                    <span className="text-xs font-semibold text-muted-foreground w-12 text-center">Email</span>
                   </div>
                 ))}
               </div>
@@ -329,7 +329,7 @@ export default function UserProfile() {
                   <div key={key} className="flex items-center gap-2 p-2.5 bg-muted/50 border rounded-md">
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-sm">{label}</p>
-                      <p className="text-[11px] text-muted-foreground truncate">{desc}</p>
+                      <p className="text-xs text-muted-foreground truncate">{desc}</p>
                     </div>
                     <Switch checked={!!formData.notification_preferences[key]} onCheckedChange={() => handleNotificationToggle(key)} className="flex-shrink-0" />
                     <Switch checked={!!formData.notification_preferences[emailKey]} onCheckedChange={() => handleNotificationToggle(emailKey)} className="flex-shrink-0" />

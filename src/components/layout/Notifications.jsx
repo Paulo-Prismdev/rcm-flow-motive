@@ -117,7 +117,7 @@ export default function Notifications() {
                         <p className="text-xs text-foreground-muted mt-1 line-clamp-2">
                           {notification.message}
                         </p>
-                        <p className="text-[10px] text-foreground-subtle mt-1">
+                        <p className="text-xs text-foreground-subtle mt-1">
                           {new Date(notification.created_date).toLocaleString()}
                         </p>
                       </Link>
@@ -132,7 +132,7 @@ export default function Notifications() {
                           </button>
                         )}
                         <button
-                          className="surface-button w-6 h-6 flex items-center justify-center text-red-500"
+                          className="surface-button w-6 h-6 flex items-center justify-center text-danger-fg"
                           onClick={(e) => handleDelete(e, notification.id)}
                           title="Delete"
                         >
@@ -147,7 +147,7 @@ export default function Notifications() {
                         <p className="text-xs text-foreground-muted mt-1 line-clamp-2">
                           {notification.message}
                         </p>
-                        <p className="text-[10px] text-foreground-subtle mt-1">
+                        <p className="text-xs text-foreground-subtle mt-1">
                           {new Date(notification.created_date).toLocaleString()}
                         </p>
                       </div>
@@ -162,7 +162,7 @@ export default function Notifications() {
                           </button>
                         )}
                         <button
-                          className="surface-button w-6 h-6 flex items-center justify-center text-red-500"
+                          className="surface-button w-6 h-6 flex items-center justify-center text-danger-fg"
                           onClick={(e) => handleDelete(e, notification.id)}
                           title="Delete"
                         >

@@ -44,7 +44,7 @@ export default function ExcessModeField({ claim, onChange, compact = false }) {
       key={choice.key}
       type="button"
       onClick={() => { setEditing(false); onChange(excessPatch(choice.key, claim)); }}
-      className={`rounded-full border font-semibold transition-colors ${compact ? 'px-2 py-0.5 text-[9px]' : 'px-2.5 py-1 text-[11px]'} ${
+      className={`rounded-full border font-semibold transition-colors ${compact ? 'px-2 py-0.5 text-xs' : 'px-2.5 py-1 text-xs'} ${
         mode === choice.key
           ? 'border-primary bg-primary/15 text-primary'
           : 'border-border bg-card text-muted-foreground hover:border-primary/50 hover:text-foreground'}`}
@@ -54,13 +54,13 @@ export default function ExcessModeField({ claim, onChange, compact = false }) {
   );
 
   const note = zeroTyped
-    ? { tone: 'text-amber-600 dark:text-amber-400', text: '£0 means Waived — choose Waived.' }
+    ? { tone: 'text-warning-fg', text: '£0 means Waived — choose Waived.' }
     : mode === 'waived'
       ? { tone: 'text-muted-foreground', text: 'No excess payable — treated as £0.' }
       : mode === 'tbc'
         ? { tone: 'text-muted-foreground', text: 'Not known yet — the excess invoices wait for the Final Authority.' }
         : blank
-          ? { tone: 'text-amber-600 dark:text-amber-400', text: 'Enter an amount, or choose Waived.' }
+          ? { tone: 'text-warning-fg', text: 'Enter an amount, or choose Waived.' }
           : null;
 
   const valueLine = mode === 'amount' ? (
@@ -82,7 +82,7 @@ export default function ExcessModeField({ claim, onChange, compact = false }) {
       />
     ) : (
       <span className="flex items-center gap-1.5">
-        <span className={`font-medium ${compact ? 'text-xs' : 'text-sm'} ${blank ? 'text-amber-500' : 'text-foreground'}`}>
+        <span className={`font-medium ${compact ? 'text-xs' : 'text-sm'} ${blank ? 'text-warning-fg' : 'text-foreground'}`}>
           {blank ? 'Not set' : fmtGBP(Number(value))}
         </span>
         <button type="button" onClick={() => setEditing(true)} title="Edit the excess" className="p-0.5 rounded text-muted-foreground hover:text-primary">
@@ -99,11 +99,11 @@ export default function ExcessModeField({ claim, onChange, compact = false }) {
   return (
     <div className={compact ? 'space-y-1' : 'space-y-2'}>
       <div className="flex items-center gap-1 flex-wrap">{CHOICES.map(chip)}</div>
-      <div className={`flex items-center gap-1.5 rounded-md border px-2 ${editing ? 'border-transparent px-0' : mode === 'amount' && blank ? 'border-amber-300 dark:border-amber-700 bg-amber-50/60 dark:bg-amber-900/10' : 'border-border bg-muted/30'} ${compact ? 'min-h-7 py-0.5' : 'min-h-9 py-1'}`}>
+      <div className={`flex items-center gap-1.5 rounded-md border px-2 ${editing ? 'border-transparent px-0' : mode === 'amount' && blank ? 'border-warning/30 bg-warning-bg' : 'border-border bg-muted/30'} ${compact ? 'min-h-7 py-0.5' : 'min-h-9 py-1'}`}>
         {valueLine}
-        {mode === 'amount' && blank && !editing && <AlertTriangle className="w-3 h-3 flex-shrink-0 text-amber-500" />}
+        {mode === 'amount' && blank && !editing && <AlertTriangle className="w-3 h-3 flex-shrink-0 text-warning-fg" />}
       </div>
-      {note && <p className={`text-[10px] ${note.tone}`}>{note.text}</p>}
+      {note && <p className={`text-xs ${note.tone}`}>{note.text}</p>}
     </div>
   );
 }

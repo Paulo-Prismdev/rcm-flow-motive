@@ -581,7 +581,7 @@ export default function ClaimsPage() {
             {claim.secondary_status && <StatusBadge status={claim.secondary_status} compact />}
             {claim.tertiary_status && <StatusBadge status={claim.tertiary_status} variant="secondary" compact />}
             {hasBackorder && (
-              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-danger text-on-solid text-xs font-semibold leading-none shadow-sm">
+              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-danger text-on-solid text-xs font-semibold leading-none shadow-card">
                 <Package className="w-2.5 h-2.5" />BO
               </span>
             )}
@@ -756,7 +756,7 @@ export default function ClaimsPage() {
         <div className="flex items-center gap-2">
           {/* Desktop-only buttons */}
           <button onClick={() => setShowFieldsModal(true)}
-            className="hidden lg:flex items-center gap-1.5 h-8 px-3 rounded-lg text-[13px] font-medium border border-input bg-card text-foreground shadow-card hover:bg-accent transition-colors"
+            className="hidden lg:flex items-center gap-1.5 h-8 px-3 rounded-xl text-[13px] font-medium border border-input bg-card text-foreground shadow-card hover:bg-accent transition-colors"
             title="Choose the columns shown">
             <Settings2 className="w-4 h-4" />Columns
           </button>
@@ -768,7 +768,7 @@ export default function ClaimsPage() {
                 <Archive className="w-4 h-4" />{showArchived ? 'Hide archived' : 'Archived'}
               </button>
               <button onClick={() => setShowImportModal(true)}
-                className="hidden lg:flex items-center gap-1.5 h-8 px-3 rounded-lg text-[13px] font-medium border border-input bg-card text-foreground shadow-card hover:bg-accent transition-colors">
+                className="hidden lg:flex items-center gap-1.5 h-8 px-3 rounded-xl text-[13px] font-medium border border-input bg-card text-foreground shadow-card hover:bg-accent transition-colors">
                 <Upload className="w-4 h-4" />Import
               </button>
             </>

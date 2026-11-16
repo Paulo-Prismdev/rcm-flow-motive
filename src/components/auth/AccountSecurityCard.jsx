@@ -25,7 +25,7 @@ export default function AccountSecurityCard() {
 
       {twofaStatus?.required && (
         <p className="flex items-start gap-2 text-xs text-muted-foreground mb-3">
-          <ShieldCheck className="w-4 h-4 mt-px shrink-0 text-green-600" aria-hidden="true" />
+          <ShieldCheck className="w-4 h-4 mt-px shrink-0 text-success-fg" aria-hidden="true" />
           Each time you sign in we confirm it's you with Face ID / fingerprint on a device you've set up, or a 6-digit code we email you. You're signed out after 30 minutes without activity.
         </p>
       )}

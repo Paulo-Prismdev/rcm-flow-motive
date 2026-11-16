@@ -21,21 +21,21 @@ export default function PaymentsPane({ step, claim, onOpenItem }) {
     <div className="space-y-6">
       <header className="space-y-1">
         <h2 className="text-[17px] font-semibold text-foreground">Step 5 · Payments</h2>
-        <p className="text-[11px] text-mac-muted">{step.hint}</p>
+        <p className="text-xs text-mac-muted">{step.hint}</p>
       </header>
 
       <MacGroup title="Invoices in and out">
         {step.empty ? (
           <MacRow className="flex-col items-start gap-0.5">
             <span className="text-[13px] text-foreground">{step.empty.title}</span>
-            <span className="text-[11px] text-mac-muted">{step.empty.reasons.join(' · ')}</span>
+            <span className="text-xs text-mac-muted">{step.empty.reasons.join(' · ')}</span>
           </MacRow>
         ) : (
           <table className="w-full border-collapse text-[13px]">
             <thead>
               <tr className="border-b border-mac-line">
                 {HEADERS.map((heading) => (
-                  <th key={heading} className="px-3 py-2 text-left text-[11px] font-normal text-mac-muted">
+                  <th key={heading} className="px-3 py-2 text-left text-xs font-normal text-mac-muted">
                     {heading}
                   </th>
                 ))}

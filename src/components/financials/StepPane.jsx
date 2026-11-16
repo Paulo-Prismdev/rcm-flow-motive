@@ -20,9 +20,9 @@ export default function StepPane({ step, claim, focus, onOpenItem, onAction, onC
     <div className="space-y-6">
       <header className="space-y-1">
         <h2 className="text-[17px] font-semibold text-foreground">Step {step.n} · {step.title}</h2>
-        <p className="text-[11px] text-mac-muted">{step.hint}</p>
+        <p className="text-xs text-mac-muted">{step.hint}</p>
         {step.movedPast && (
-          <p className="text-[11px] text-amber-600 dark:text-amber-400">{step.line}</p>
+          <p className="text-xs text-warning-fg">{step.line}</p>
         )}
       </header>
 
@@ -30,7 +30,7 @@ export default function StepPane({ step, claim, focus, onOpenItem, onAction, onC
         <MacGroup title={stepListTitle(step)}>
           <MacRow className="flex-col items-start gap-0.5">
             <span className="text-[13px] text-foreground">{step.empty.title}</span>
-            <span className="text-[11px] text-mac-muted">{step.empty.reasons.join(' · ')}</span>
+            <span className="text-xs text-mac-muted">{step.empty.reasons.join(' · ')}</span>
           </MacRow>
         </MacGroup>
       ) : (
@@ -53,7 +53,7 @@ export default function StepPane({ step, claim, focus, onOpenItem, onAction, onC
       {step.suggestion && (
         <MacGroup title="Recommended">
           <MacRow>
-            <span className="min-w-0 flex-1 text-[11px] text-mac-muted">
+            <span className="min-w-0 flex-1 text-xs text-mac-muted">
               {capitalise(step.suggestion.label)} — recommended, not required.
             </span>
             <MacButton onClick={() => onAction(step.suggestion)}>Upload</MacButton>

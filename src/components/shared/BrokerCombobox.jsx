@@ -87,7 +87,7 @@ export default function BrokerCombobox({ value, onChange, placeholder = "Select 
         {selectedName && (
           <Button aria-label="Close"
             variant="ghost" size="sm" onClick={handleClear}
-            className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 p-0 hover:bg-red-100 hover:text-red-600"
+            className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 p-0 hover:bg-danger-bg hover:text-danger-fg"
           >
             <X className="h-4 w-4" />
           </Button>

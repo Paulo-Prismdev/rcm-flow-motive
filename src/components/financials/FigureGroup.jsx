@@ -28,11 +28,11 @@ export default function FigureGroup({ title, rows, editing, onEdit, onDone, onSa
 
   const action = editable.length === 0 ? null : editing ? (
     <span className="flex items-center gap-1">
-      <MacButton onClick={onDone} className="h-6 px-2 text-[11px]">Cancel</MacButton>
-      <MacPrimaryButton onClick={save} className="h-6 px-2 text-[11px]">Save</MacPrimaryButton>
+      <MacButton onClick={onDone} className="h-6 px-2 text-[10px]">Cancel</MacButton>
+      <MacPrimaryButton onClick={save} className="h-6 px-2 text-[10px]">Save</MacPrimaryButton>
     </span>
   ) : (
-    <MacButton onClick={onEdit} className="h-6 px-2 text-[11px]">Edit</MacButton>
+    <MacButton onClick={onEdit} className="h-6 px-2 text-[10px]">Edit</MacButton>
   );
 
   return (

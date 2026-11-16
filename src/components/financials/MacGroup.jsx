@@ -16,7 +16,7 @@ export function MacGroup({ title, action, footer, children, className }) {
           {action}
         </div>
       )}
-      <div className="divide-y divide-mac-line overflow-hidden rounded-[10px] border border-mac-line bg-mac-group shadow-mac">
+      <div className="divide-y divide-mac-line overflow-hidden rounded-lg border border-mac-line bg-mac-group shadow-mac">
         {children}
       </div>
       {footer}
@@ -46,12 +46,12 @@ export function MacValueRow({ label, value, note, sub, caption, right, onClick }
     <MacRow onClick={onClick} className="justify-between gap-4">
       <span className="min-w-0 flex-1">
         <span className="block text-[13px] font-medium text-foreground">{label}</span>
-        {caption && <span className="mt-0.5 block text-[11px] text-mac-muted">{caption}</span>}
+        {caption && <span className="mt-0.5 block text-xs text-mac-muted">{caption}</span>}
       </span>
-      {note && <span className="flex-shrink-0 text-[11px] tabular-nums text-mac-muted">{note}</span>}
+      {note && <span className="flex-shrink-0 text-xs tabular-nums text-mac-muted">{note}</span>}
       <span className="min-w-0 flex-shrink-0 text-right">
         <span className="block text-[13px] font-semibold tabular-nums text-foreground">{value}</span>
-        {sub && <span className="mt-0.5 block text-[11px] tabular-nums text-mac-muted">{sub}</span>}
+        {sub && <span className="mt-0.5 block text-xs tabular-nums text-mac-muted">{sub}</span>}
         {right}
       </span>
     </MacRow>

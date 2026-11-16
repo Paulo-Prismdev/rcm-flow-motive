@@ -198,12 +198,12 @@ export default function AddClientModal({ isOpen, onClose, onSuccess, initial }) 
           <div>
             <label className="block text-sm text-muted-foreground mb-1">VAT Status</label>
             <select value={formData.vat_status} onChange={e => set('vat_status', e.target.value)}
-              className="w-full px-3 py-2 text-sm rounded-[10px] border border-input bg-card text-foreground">
+              className="w-full px-3 py-2 text-sm rounded-lg border border-input bg-card text-foreground">
               <option>Unknown</option><option>VAT Registered</option><option>Non-VAT</option>
             </select>
           </div>
 
-          <label className="flex items-start gap-2.5 rounded-[10px] border border-border bg-muted/30 p-3 cursor-pointer">
+          <label className="flex items-start gap-2.5 rounded-lg border border-border bg-muted/30 p-3 cursor-pointer">
             <input type="checkbox" checked={formData.handles_vat_excess === true} onChange={e => set('handles_vat_excess', e.target.checked)} className="mt-0.5 rounded border-border" />
             <span>
               <span className="block text-sm font-medium">We handle their VAT and excess</span>
@@ -231,16 +231,16 @@ export default function AddClientModal({ isOpen, onClose, onSuccess, initial }) 
                         <button
                           type="button"
                           onClick={() => setPrimaryContact(idx)}
-                          className={`flex items-center gap-1 text-xs font-medium ${contact.is_primary ? 'text-amber-600' : 'text-muted-foreground hover:text-amber-500'}`}
+                          className={`flex items-center gap-1 text-xs font-medium ${contact.is_primary ? 'text-warning-fg' : 'text-muted-foreground hover:text-warning-fg'}`}
                           title={contact.is_primary ? 'Primary contact' : 'Set as primary'}
                         >
-                          <Star className={`w-3.5 h-3.5 ${contact.is_primary ? 'fill-amber-500 text-amber-500' : ''}`} />
+                          <Star className={`w-3.5 h-3.5 ${contact.is_primary ? 'fill-amber-500 text-warning-fg' : ''}`} />
                           {contact.is_primary ? 'Primary' : 'Set primary'}
                         </button>
                         <button
                           type="button"
                           onClick={() => removeContact(idx)}
-                          className="p-1 text-muted-foreground hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
+                          className="p-1 text-muted-foreground hover:text-danger-fg hover:bg-danger-bg rounded transition-colors"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>

@@ -8,7 +8,7 @@ export default function LightPill({ lightKey, children, className }) {
   return (
     <span
       className={cn(
-        'inline-flex flex-shrink-0 items-center whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] font-semibold',
+        'inline-flex flex-shrink-0 items-center whitespace-nowrap rounded-full px-2 py-0.5 text-xs font-semibold',
         lightPill(lightKey),
         className
       )}

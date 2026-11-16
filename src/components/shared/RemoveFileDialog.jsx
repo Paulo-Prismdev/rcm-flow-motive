@@ -33,13 +33,13 @@ export default function RemoveFileDialog({
       }
     >
       <div className="space-y-2.5">
-        <div className="rounded-[10px] border border-border bg-muted/40 p-3">
-          <p className="mb-1.5 text-[11px] font-semibold text-foreground">
+        <div className="rounded-lg border border-border bg-muted/40 p-3">
+          <p className="mb-1.5 text-xs font-semibold text-foreground">
             Removing the file and clearing its details will:
           </p>
           <ul className="space-y-1">
             {clearPoints.map((point) => (
-              <li key={point} className="flex items-start gap-1.5 text-[11px] text-muted-foreground">
+              <li key={point} className="flex items-start gap-1.5 text-xs text-muted-foreground">
                 <span className="mt-1.5 h-1 w-1 flex-shrink-0 rounded-full bg-muted-foreground/70" />
                 <span>{point}</span>
               </li>
@@ -47,24 +47,24 @@ export default function RemoveFileDialog({
           </ul>
         </div>
 
-        <div className="rounded-[10px] border border-border bg-muted/20 p-3">
-          <p className="mb-1 text-[11px] font-semibold text-foreground">
+        <div className="rounded-lg border border-border bg-muted/20 p-3">
+          <p className="mb-1 text-xs font-semibold text-foreground">
             Removing the file only will:
           </p>
-          <p className="text-[11px] text-muted-foreground">
+          <p className="text-xs text-muted-foreground">
             Keep everything already recorded, so the item shows amber with “{keepHint}” until a
             replacement copy is added.
           </p>
         </div>
 
         {paidText && (
-          <p className="flex items-start gap-1.5 rounded-[10px] border border-amber-300 bg-amber-50 p-3 text-[11px] text-amber-800 dark:border-amber-700 dark:bg-amber-900/20 dark:text-amber-200">
+          <p className="flex items-start gap-1.5 rounded-lg border border-warning/30 bg-warning-bg p-3 text-xs text-warning-fg">
             <AlertTriangle className="mt-px h-3.5 w-3.5 flex-shrink-0" />
             <span>{paidText}</span>
           </p>
         )}
 
-        <p className="text-[10px] text-muted-foreground">
+        <p className="text-xs text-muted-foreground">
           The matching copy is taken out of Internal Updates either way, and the removal is recorded
           in the activity history.
         </p>

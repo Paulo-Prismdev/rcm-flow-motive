@@ -18,7 +18,7 @@ export default function FinancialsShell({
   const showContent = !isMobile || detailOpen;
 
   return (
-    <div className="mac-scope rounded-[10px] border border-mac-line bg-mac-group">
+    <div className="mac-scope rounded-lg border border-mac-line bg-mac-group">
       <div className="flex min-h-0 flex-col md:min-h-[560px] md:flex-row">
         {showSidebar && (
           <FinancialsSidebar items={sidebarItems} selected={selected} onSelect={onSelect} footer={sidebarFooter} />
@@ -37,7 +37,7 @@ export default function FinancialsShell({
                 </button>
               )}
               <StatusBadge tone={statusTone}>{statusLabel}</StatusBadge>
-              {waitingLine && <span className="min-w-0 flex-1 truncate text-[11px] text-mac-muted">{waitingLine}</span>}
+              {waitingLine && <span className="min-w-0 flex-1 truncate text-xs text-mac-muted">{waitingLine}</span>}
               <span className="ml-auto" />
               {nextLabel && <MacPrimaryButton onClick={onNext}>{nextLabel}</MacPrimaryButton>}
             </div>

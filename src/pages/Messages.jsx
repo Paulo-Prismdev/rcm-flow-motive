@@ -543,7 +543,7 @@ export default function Messages() {
                           )}
                         </div>
                         {conv.unreadCount > 0 && (
-                          <span className="bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">
+                          <span className="bg-danger text-on-solid w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">
                             {conv.unreadCount > 9 ? '9+' : conv.unreadCount}
                           </span>
                         )}
@@ -670,7 +670,7 @@ export default function Messages() {
                           )}
 
                           <div className="flex items-center justify-between mt-2">
-                            <p className={`text-[10px] ${isMine ? 'text-accent-foreground opacity-70' : 'text-foreground-subtle'}`}>
+                            <p className={`text-xs ${isMine ? 'text-accent-foreground opacity-70' : 'text-foreground-subtle'}`}>
                               {format(new Date(msg.created_date), 'HH:mm')}
                             </p>
                             
@@ -763,7 +763,7 @@ export default function Messages() {
                       <Send className="w-4 h-4" />
                     </Button>
                   </div>
-                  <p className="text-[10px] text-foreground-subtle mt-1">
+                  <p className="text-xs text-foreground-subtle mt-1">
                     Tip: Use @name or @email to mention someone
                   </p>
                 </div>
@@ -803,14 +803,14 @@ function getUserInitials(user) {
 function getAvatarColor(email) {
   if (!email) return 'bg-gray-500';
   const colors = [
-    'bg-blue-500',
-    'bg-green-500',
+    'bg-info',
+    'bg-success',
     'bg-purple-500',
     'bg-pink-500',
-    'bg-yellow-500',
-    'bg-indigo-500',
-    'bg-red-500',
-    'bg-teal-500',
+    'bg-warning',
+    'bg-info',
+    'bg-danger',
+    'bg-success',
   ];
   const hash = email.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
   return colors[hash % colors.length];

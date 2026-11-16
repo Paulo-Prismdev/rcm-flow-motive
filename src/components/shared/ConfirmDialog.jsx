@@ -15,16 +15,16 @@ import { cn } from '@/lib/utils';
 export default function ConfirmDialog({ isOpen, onClose, onConfirm, title, message, confirmText = 'Confirm', cancelText = 'Cancel', variant = 'primary' }) {
   const variantStyles = {
     primary: 'bg-primary hover:bg-primary/90 text-primary-foreground',
-    success: 'bg-green-600 hover:bg-green-700 text-white',
-    danger: 'bg-red-600 hover:bg-red-700 text-white',
-    info: 'bg-blue-600 hover:bg-blue-700 text-white',
+    success: 'bg-success hover:bg-success text-on-solid',
+    danger: 'bg-danger hover:bg-danger text-on-solid',
+    info: 'bg-info hover:bg-info text-on-solid',
   };
 
   const iconColor = {
     primary: 'text-primary',
-    success: 'text-green-600',
-    danger: 'text-red-600',
-    info: 'text-blue-600',
+    success: 'text-success-fg',
+    danger: 'text-danger-fg',
+    info: 'text-info-fg',
   };
 
   return (
@@ -35,7 +35,7 @@ export default function ConfirmDialog({ isOpen, onClose, onConfirm, title, messa
       >
         <AlertDialogHeader>
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center flex-shrink-0">
+            <div className="w-9 h-9 rounded-full bg-danger-bg flex items-center justify-center flex-shrink-0">
               <AlertTriangle className={cn('w-4 h-4', iconColor[variant] || iconColor.primary)} />
             </div>
             <AlertDialogTitle>{title}</AlertDialogTitle>

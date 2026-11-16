@@ -107,12 +107,12 @@ function decodePolyline(encoded) {
 }
 
 function getTimeBadgeClass(seconds) {
-  if (!seconds) return 'bg-gray-100 text-gray-600';
+  if (!seconds) return 'bg-muted text-muted-foreground';
   const mins = seconds / 60;
-  if (mins < 15) return 'bg-green-100 text-green-700';
-  if (mins < 30) return 'bg-blue-100 text-blue-700';
-  if (mins < 45) return 'bg-amber-100 text-amber-700';
-  return 'bg-gray-100 text-gray-600';
+  if (mins < 15) return 'bg-success-bg text-success-fg';
+  if (mins < 30) return 'bg-info-bg text-info-fg';
+  if (mins < 45) return 'bg-warning-bg text-warning-fg';
+  return 'bg-muted text-muted-foreground';
 }
 
 function TravelBadge({ log }) {
@@ -565,7 +565,7 @@ export default function BodyshopMap() {
                   <Tooltip sticky>
                     <div className="text-xs">
                       <p className="font-semibold">{bodyshop.name}{[bodyshop.tier, bodyshop.map_group].filter(Boolean).join(', ') ? ` (${[bodyshop.tier, bodyshop.map_group].filter(Boolean).join(', ')})` : ''}</p>
-                      {log?.duration_text && <p className="text-green-600">{log.duration_text} • {log.distance_text}</p>}
+                      {log?.duration_text && <p className="text-success-fg">{log.duration_text} • {log.distance_text}</p>}
                     </div>
                   </Tooltip>
                 </Marker>
@@ -577,7 +577,7 @@ export default function BodyshopMap() {
 
       {/* ── FLOATING SEARCH PILL (top) ── */}
       <div className="absolute top-3 left-3 right-3 z-[1000] flex items-center gap-2">
-        <div className="flex-1 min-w-0 bg-white dark:bg-gray-800 shadow-lg rounded-full border border-border overflow-visible">
+        <div className="flex-1 min-w-0 bg-card shadow-lg rounded-full border border-border overflow-visible">
           <AddressLookupInput
             placeholder="Search postcode or address..."
             onChange={handleAddressSelect}
@@ -588,8 +588,8 @@ export default function BodyshopMap() {
           onClick={() => { setShowSupplierPanel(s => !s); if (isMobile) setShowSettings(false); }}
           className={`relative z-[1001] flex-shrink-0 w-10 h-10 rounded-full shadow-lg border flex items-center justify-center transition-colors ${
             showSupplierPanel || Object.values(enabledSuppliers).some(Boolean)
-              ? 'bg-blue-500 text-white border-blue-500'
-              : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-border hover:bg-gray-50 dark:hover:bg-gray-700'
+              ? 'bg-info text-on-solid border-info'
+              : 'bg-card text-muted-foreground border-border hover:bg-muted'
           }`}
           title="Supplier coverage areas"
         >
@@ -600,7 +600,7 @@ export default function BodyshopMap() {
           className={`relative z-[1001] flex-shrink-0 w-10 h-10 rounded-full shadow-lg border flex items-center justify-center transition-colors ${
             showSettings
               ? 'bg-primary text-primary-foreground border-primary'
-              : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-border hover:bg-gray-50 dark:hover:bg-gray-700'
+              : 'bg-card text-muted-foreground border-border hover:bg-muted'
           }`}
         >
           <Sliders className="w-4 h-4" />
@@ -614,12 +614,12 @@ export default function BodyshopMap() {
           <div
             ref={supplierSheetRef}
             className={isMobile
-            ? 'absolute left-0 right-0 bottom-0 z-[1099] max-h-[75vh] overflow-y-auto rounded-t-2xl border-t border-border bg-white dark:bg-gray-800 px-3 pt-2 pb-[calc(1.25rem+env(safe-area-inset-bottom))] shadow-2xl space-y-2'
-            : 'absolute top-16 right-3 z-[999] bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-border p-2.5 space-y-2 w-[210px]'}>
+            ? 'absolute left-0 right-0 bottom-0 z-[1099] max-h-[75vh] overflow-y-auto rounded-t-2xl border-t border-border bg-card px-3 pt-2 pb-[calc(1.25rem+env(safe-area-inset-bottom))] shadow-2xl space-y-2'
+            : 'absolute top-16 right-3 z-[999] bg-card rounded-xl shadow-xl border border-border p-2.5 space-y-2 w-[210px]'}>
             {isMobile && (
-              <div className="sticky top-0 z-10 flex items-center justify-center bg-white dark:bg-gray-800">
+              <div className="sticky top-0 z-10 flex items-center justify-center bg-card">
                 <SheetDragHandle onClose={() => setShowSupplierPanel(false)} targetRef={supplierSheetRef} />
-                <button onClick={() => setShowSupplierPanel(false)} className="absolute right-0 top-1.5 p-1 text-gray-400" title="Close">
+                <button onClick={() => setShowSupplierPanel(false)} className="absolute right-0 top-1.5 p-1 text-muted-foreground" title="Close">
                   <X className="w-4 h-4" />
                 </button>
               </div>
@@ -628,8 +628,8 @@ export default function BodyshopMap() {
           {SUPPLIER_COVERAGE_AREAS.map(supplier => (
             <div key={supplier.supplier_name} className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full border-2 border-white shadow flex-shrink-0" style={{ backgroundColor: supplier.color }} />
-              <span className="text-xs font-medium text-gray-700 dark:text-gray-200 flex-1">{supplier.supplier_name}</span>
-              <span className="text-[10px] text-muted-foreground">{supplier.nationwide ? 'Nationwide' : `${supplier.radius_miles}mi`}</span>
+              <span className="text-xs font-medium text-foreground flex-1">{supplier.supplier_name}</span>
+              <span className="text-xs text-muted-foreground">{supplier.nationwide ? 'Nationwide' : `${supplier.radius_miles}mi`}</span>
               <Switch
                 checked={!!enabledSuppliers[supplier.supplier_name]}
                 onCheckedChange={(checked) =>
@@ -638,7 +638,7 @@ export default function BodyshopMap() {
               />
             </div>
           ))}
-          <p className="text-[10px] text-muted-foreground pt-1 border-t border-border">
+          <p className="text-xs text-muted-foreground pt-1 border-t border-border">
             Toggle suppliers on/off to show their coverage areas on the map.
           </p>
           </div>
@@ -652,12 +652,12 @@ export default function BodyshopMap() {
           <div
             ref={settingsSheetRef}
             className={isMobile
-            ? 'absolute left-0 right-0 bottom-0 z-[1099] max-h-[75vh] overflow-y-auto rounded-t-2xl border-t border-border bg-white dark:bg-gray-800 px-3 pt-2 pb-[calc(1.25rem+env(safe-area-inset-bottom))] shadow-2xl space-y-2'
-            : 'absolute top-16 left-3 z-[999] bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-border p-3 space-y-2 w-[220px]'}>
+            ? 'absolute left-0 right-0 bottom-0 z-[1099] max-h-[75vh] overflow-y-auto rounded-t-2xl border-t border-border bg-card px-3 pt-2 pb-[calc(1.25rem+env(safe-area-inset-bottom))] shadow-2xl space-y-2'
+            : 'absolute top-16 left-3 z-[999] bg-card rounded-xl shadow-xl border border-border p-3 space-y-2 w-[220px]'}>
             {isMobile && (
-              <div className="sticky top-0 z-10 flex items-center justify-center bg-white dark:bg-gray-800">
+              <div className="sticky top-0 z-10 flex items-center justify-center bg-card">
                 <SheetDragHandle onClose={() => setShowSettings(false)} targetRef={settingsSheetRef} />
-                <button onClick={() => setShowSettings(false)} className="absolute right-0 top-1.5 p-1 text-gray-400" title="Close">
+                <button onClick={() => setShowSettings(false)} className="absolute right-0 top-1.5 p-1 text-muted-foreground" title="Close">
                   <X className="w-4 h-4" />
                 </button>
               </div>
@@ -672,8 +672,8 @@ export default function BodyshopMap() {
                   visibleTiers[t.key] ? 'opacity-100' : 'opacity-40'
                 }`}
               >
-                <div className="w-3 h-3 rounded-full border border-white shadow-sm" style={{ backgroundColor: t.color }}></div>
-                <span className="text-xs font-medium text-gray-700 dark:text-gray-200">{t.label}</span>
+                <div className="w-3 h-3 rounded-full border border-white shadow-card" style={{ backgroundColor: t.color }}></div>
+                <span className="text-xs font-medium text-foreground">{t.label}</span>
               </button>
             ))}
           </div>
@@ -688,8 +688,8 @@ export default function BodyshopMap() {
                     visibleTiers[t.key] ? 'opacity-100' : 'opacity-40'
                   }`}
                 >
-                  <div className="w-3 h-3 rounded-full border border-white shadow-sm" style={{ backgroundColor: t.color }}></div>
-                  <span className="text-xs font-medium text-gray-700 dark:text-gray-200">{t.label}</span>
+                  <div className="w-3 h-3 rounded-full border border-white shadow-card" style={{ backgroundColor: t.color }}></div>
+                  <span className="text-xs font-medium text-foreground">{t.label}</span>
                 </button>
               ))}
             </div>
@@ -704,12 +704,12 @@ export default function BodyshopMap() {
           <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm rounded-full shadow-md px-3 py-1.5 flex items-center gap-2">
             {isLoadingDistance ? (
               <>
-                <Navigation className="w-3.5 h-3.5 text-blue-500 animate-pulse" />
+                <Navigation className="w-3.5 h-3.5 text-info-fg animate-pulse" />
                 <span className="text-xs">Calculating distance...</span>
               </>
             ) : (
               <>
-                <MapPinned className="w-3.5 h-3.5 text-amber-500 animate-pulse" />
+                <MapPinned className="w-3.5 h-3.5 text-warning-fg animate-pulse" />
                 <span className="text-xs">Resolving addresses...</span>
               </>
             )}
@@ -742,11 +742,11 @@ export default function BodyshopMap() {
             }}
             className={`w-full flex items-center justify-center gap-2 touch-manipulation ${!listExpanded && isMobile ? 'px-4 py-3 whitespace-nowrap' : 'pt-2 pb-1.5'}`}
           >
-            <ChevronUp className={`w-5 h-5 text-gray-400 transition-transform ${listExpanded ? '' : 'rotate-180'}`} />
+            <ChevronUp className={`w-5 h-5 text-muted-foreground transition-transform ${listExpanded ? '' : 'rotate-180'}`} />
             <span className="text-xs font-medium text-muted-foreground">
               {listExpanded ? 'Hide list' : `${tierFilteredBodyshops.length} bodyshops`}
             </span>
-            <span className="text-[8px] text-gray-300 dark:text-gray-500">© Google Maps</span>
+            <span className="text-xs text-muted-foreground/70">© Google Maps</span>
           </button>
           {listExpanded && (
             <div className="overflow-y-auto px-3 pb-4" style={{ height: isMobile ? 'calc(85vh - 52px)' : 'calc(50vh - 52px)' }}>
@@ -776,7 +776,7 @@ export default function BodyshopMap() {
                           {log ? (
                             <TravelBadge log={log} />
                           ) : haversineMiles != null ? (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold flex-shrink-0 bg-gray-100 text-gray-500">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold flex-shrink-0 bg-muted text-muted-foreground">
                               <Navigation className="w-3 h-3" />
                               ≈{formatHaversineDistance(haversineMiles)}
                             </span>
@@ -803,20 +803,20 @@ export default function BodyshopMap() {
           <div className="absolute inset-0 bg-black/30" />
           <div
             ref={selectedSheetRef}
-            className="relative w-full bg-white dark:bg-gray-900 rounded-t-2xl shadow-2xl max-h-[30vh] overflow-hidden"
+            className="relative w-full bg-card rounded-t-2xl shadow-2xl max-h-[30vh] overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Drag handle — swipe down or tap to close */}
             <SheetDragHandle
               onClose={() => setSelectedBodyshop(null)}
               targetRef={selectedSheetRef}
-              className="bg-white dark:bg-gray-900 pt-1.5 pb-0.5"
-              barClassName="w-8 h-1 rounded-full bg-gray-300 dark:bg-gray-700"
+              className="bg-card pt-1.5 pb-0.5"
+              barClassName="w-8 h-1 rounded-full bg-accent"
             />
             {/* Close button */}
             <button
               onClick={() => setSelectedBodyshop(null)}
-              className="absolute top-1.5 right-2 p-0.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+              className="absolute top-1.5 right-2 p-0.5 text-muted-foreground hover:text-muted-foreground"
             >
               <X className="w-4 h-4" />
             </button>
@@ -825,25 +825,25 @@ export default function BodyshopMap() {
               {/* Header */}
               <div>
                 <div className="flex items-center gap-1.5 mb-0.5">
-                  <span className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium ${
-                    selectedBodyshop.tier === 'TIER 1' ? 'bg-green-100 text-green-700' :
-                    selectedBodyshop.tier === 'TIER 2' ? 'bg-orange-100 text-orange-700' :
-                    'bg-gray-100 text-gray-600'
+                  <span className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium ${
+                    selectedBodyshop.tier === 'TIER 1' ? 'bg-success-bg text-success-fg' :
+                    selectedBodyshop.tier === 'TIER 2' ? 'bg-warning-bg text-warning-fg' :
+                    'bg-muted text-muted-foreground'
                   }`}>
                     {selectedBodyshop.tier || 'No Tier'}
                   </span>
                   {selectedLog && <TravelBadge log={selectedLog} />}
                 </div>
-                <h3 className="text-sm font-bold text-gray-900 dark:text-white truncate">{selectedBodyshop.name}</h3>
+                <h3 className="text-sm font-bold text-foreground truncate">{selectedBodyshop.name}</h3>
                 {selectedBodyshop.group_name && (
-                  <p className="text-[10px] text-muted-foreground truncate">{selectedBodyshop.group_name}</p>
+                  <p className="text-xs text-muted-foreground truncate">{selectedBodyshop.group_name}</p>
                 )}
               </div>
 
               {/* Address */}
               <div className="flex items-start gap-1.5 text-xs">
                 <MapPinned className="w-3 h-3 text-muted-foreground flex-shrink-0 mt-0.5" />
-                <div className="text-gray-700 dark:text-gray-300 truncate">
+                <div className="text-foreground truncate">
                   {selectedBodyshop.address_line_1 && <span>{selectedBodyshop.address_line_1}, </span>}
                   {selectedBodyshop.town && <span>{selectedBodyshop.town} </span>}
                   {selectedBodyshop.postcode && <span className="font-medium">{selectedBodyshop.postcode}</span>}
@@ -853,8 +853,8 @@ export default function BodyshopMap() {
               {/* Distance */}
               {selectedLog && (
                 <div className="flex items-center gap-1.5 text-xs">
-                  <Navigation className="w-3 h-3 text-green-600 flex-shrink-0" />
-                  <span className="text-gray-700 dark:text-gray-300">
+                  <Navigation className="w-3 h-3 text-success-fg flex-shrink-0" />
+                  <span className="text-foreground">
                     {selectedLog.duration_text} • {selectedLog.distance_text}
                   </span>
                 </div>
@@ -863,23 +863,23 @@ export default function BodyshopMap() {
               {/* Certifications + Group badge */}
               <div className="flex flex-wrap gap-1">
                 {selectedBodyshop.acg_signed_up === 'Yes' && (
-                  <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-green-100 text-green-700">
+                  <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-success-bg text-success-fg">
                     <CheckCircle className="w-2.5 h-2.5 mr-0.5" /> ACG
                   </span>
                 )}
                 {selectedBodyshop.bs10125_certified === 'Yes' && (
-                  <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-green-100 text-green-700">
+                  <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-success-bg text-success-fg">
                     <CheckCircle className="w-2.5 h-2.5 mr-0.5" /> BS10125
                   </span>
                 )}
                 {selectedBodyshop.audatex_code && (
-                  <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-100 text-blue-700">
+                  <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-info-bg text-info-fg">
                     Audatex
                   </span>
                 )}
                 {selectedBodyshop.map_group && (
-                  <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium ${
-                    selectedBodyshop.map_group === 'Solution' ? 'bg-violet-100 text-violet-700' : 'bg-yellow-100 text-yellow-700'
+                  <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium ${
+                    selectedBodyshop.map_group === 'Solution' ? 'bg-violet-100 text-violet-700' : 'bg-warning-bg text-warning-fg'
                   }`}>
                     {selectedBodyshop.map_group}
                   </span>
@@ -888,16 +888,16 @@ export default function BodyshopMap() {
 
               {/* Group assignment */}
               <div className="flex items-center gap-1.5 pt-1">
-                <span className="text-[10px] font-medium text-muted-foreground">Group:</span>
+                <span className="text-xs font-medium text-muted-foreground">Group:</span>
                 {['Solution', 'QAC'].map(g => (
                   <button
                     key={g}
                     onClick={() => handleSetGroup(selectedBodyshop, g)}
-                    className={`px-2 py-0.5 rounded-full text-[10px] font-medium border transition-all ${
+                    className={`px-2 py-0.5 rounded-full text-xs font-medium border transition-all ${
                       selectedBodyshop.map_group === g
                         ? g === 'Solution'
                           ? 'bg-violet-500 text-white border-violet-500'
-                          : 'bg-yellow-400 text-white border-yellow-400'
+                          : 'bg-warning text-on-solid border-warning'
                         : 'bg-transparent text-muted-foreground border-border hover:bg-muted'
                     }`}
                   >
@@ -907,7 +907,7 @@ export default function BodyshopMap() {
                 {selectedBodyshop.map_group && (
                   <button
                     onClick={() => handleSetGroup(selectedBodyshop, selectedBodyshop.map_group)}
-                    className="px-2 py-0.5 rounded-full text-[10px] font-medium border border-border text-muted-foreground hover:bg-muted transition-all"
+                    className="px-2 py-0.5 rounded-full text-xs font-medium border border-border text-muted-foreground hover:bg-muted transition-all"
                   >
                     Clear
                   </button>

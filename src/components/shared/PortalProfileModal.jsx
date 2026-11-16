@@ -21,7 +21,7 @@ const getUserInitials = (user) => {
 
 const getAvatarColor = (email) => {
   if (!email) return 'bg-gray-500';
-  const colors = ['bg-blue-500', 'bg-green-500', 'bg-purple-500', 'bg-pink-500', 'bg-yellow-500', 'bg-indigo-500', 'bg-red-500', 'bg-teal-500'];
+  const colors = ['bg-info', 'bg-success', 'bg-purple-500', 'bg-pink-500', 'bg-warning', 'bg-info', 'bg-danger', 'bg-success'];
   const hash = email.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
   return colors[hash % colors.length];
 };
@@ -149,14 +149,14 @@ export default function PortalProfileModal({ open, onClose }) {
               <div className="space-y-2">
                 <div className="flex items-center gap-2 px-1 pb-1">
                   <div className="flex-1" />
-                  <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground w-12 text-center">In-App</span>
-                  <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground w-12 text-center">Email</span>
+                  <span className="text-xs font-semibold text-muted-foreground w-12 text-center">In-App</span>
+                  <span className="text-xs font-semibold text-muted-foreground w-12 text-center">Email</span>
                 </div>
                 {NOTIFICATION_PREFS.map(({ key, emailKey, label, desc }) => (
                   <div key={key} className="flex items-center gap-2 p-2.5 bg-muted/50 border rounded-md">
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-sm">{label}</p>
-                      <p className="text-[11px] text-muted-foreground">{desc}</p>
+                      <p className="text-xs text-muted-foreground">{desc}</p>
                     </div>
                     <Switch checked={!!formData.notification_preferences[key]} onCheckedChange={() => handleNotificationToggle(key)} className="flex-shrink-0" />
                     <Switch checked={!!formData.notification_preferences[emailKey]} onCheckedChange={() => handleNotificationToggle(emailKey)} className="flex-shrink-0" />

@@ -76,7 +76,7 @@ export default function PasskeyDevices({ userId }) {
             <li key={d.id} className="flex items-center justify-between gap-2 rounded-lg border border-border px-3 py-2">
               <div className="min-w-0">
                 <p className="text-sm font-medium truncate">{d.device_name}</p>
-                <p className="text-[11px] text-muted-foreground">
+                <p className="text-xs text-muted-foreground">
                   Added {fmt(d.created_date)}{d.last_used_at ? ` · last used ${fmt(d.last_used_at)}` : ''}
                 </p>
               </div>
@@ -92,7 +92,7 @@ export default function PasskeyDevices({ userId }) {
           {busy === 'add' ? (<><Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />Setting up</>) : `Set up ${word} on this device`}
         </Button>
       ) : (
-        <p className="text-[11px] text-muted-foreground">To add a device, open this page on it (at app.rcmautomotive.co.uk) and choose “Set up Face ID”.</p>
+        <p className="text-xs text-muted-foreground">To add a device, open this page on it (at app.rcmautomotive.co.uk) and choose “Set up Face ID”.</p>
       )}
     </div>
   );

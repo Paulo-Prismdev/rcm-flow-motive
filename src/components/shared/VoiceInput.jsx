@@ -65,8 +65,8 @@ export default function VoiceInput({ value, onChange, disabled }) {
       className={`
         flex items-center justify-center w-9 h-9 rounded-lg transition-all flex-shrink-0
         ${isListening
-          ? 'bg-red-500 text-white shadow-lg shadow-red-500/40 animate-pulse'
-          : 'glass-button text-foreground hover:text-red-500'
+          ? 'bg-danger text-on-solid shadow-lg shadow-red-500/40 animate-pulse'
+          : 'glass-button text-foreground hover:text-danger-fg'
         }
         disabled:opacity-40 disabled:cursor-not-allowed
       `}

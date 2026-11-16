@@ -197,7 +197,7 @@ export default function ItemSheet({
         </div>
 
         {state.variance && (
-          <p className="flex items-start gap-2 text-[11px] text-amber-600 dark:text-amber-400">
+          <p className="flex items-start gap-2 text-xs text-warning-fg">
             <AlertTriangle className="mt-px h-3.5 w-3.5 flex-shrink-0" strokeWidth={1.5} />
             <span className="flex-1">
               {state.variance.text}
@@ -208,7 +208,7 @@ export default function ItemSheet({
         )}
 
         {state.awaitingCorrected && (
-          <p className="text-[11px] text-mac-muted">
+          <p className="text-xs text-mac-muted">
             Awaiting a corrected invoice — invoiced {fmtGBP(state.reinvoice?.invoice_total || 0)} against{' '}
             {fmtGBP(state.reinvoice?.authority_amount || 0)}.
           </p>
@@ -276,14 +276,14 @@ export default function ItemSheet({
                   <MacButton onClick={() => onViewFile(order.file_url)}>Open</MacButton>
                 </>
               ) : (
-                <span className="text-[11px] text-mac-muted">
+                <span className="text-xs text-mac-muted">
                   No order issued yet — the PDF is generated against the job's figure.
                 </span>
               )}
             </MacRow>
           ) : files.length === 0 ? (
             <MacRow>
-              <span className="text-[11px] text-mac-muted">
+              <span className="text-xs text-mac-muted">
                 {isDocument ? 'No copy attached yet.' : 'No copy attached yet — upload one and the figures are read off it.'}
               </span>
             </MacRow>
@@ -308,7 +308,7 @@ export default function ItemSheet({
                     <span className="block truncate text-[13px] text-foreground">{name}</span>
                   )}
                   {doc.uploaded_at && (
-                    <span className="mt-0.5 block text-[11px] text-mac-muted">Uploaded {formatInvoiceDay(doc.uploaded_at)}</span>
+                    <span className="mt-0.5 block text-xs text-mac-muted">Uploaded {formatInvoiceDay(doc.uploaded_at)}</span>
                   )}
                 </span>
                 {renaming ? (
@@ -330,7 +330,7 @@ export default function ItemSheet({
 
         {naOpen && (
           <div className="space-y-1.5">
-            <p className="text-[11px] text-mac-muted">Why is there no {item.label}?</p>
+            <p className="text-xs text-mac-muted">Why is there no {item.label}?</p>
             <div className="flex items-center gap-1.5">
               <Input
                 value={naReason}

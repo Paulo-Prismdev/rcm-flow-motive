@@ -26,9 +26,9 @@ import { notify, warn } from '@/lib/dialogs';
 
 const RATING_CONFIG = {
   love: { icon: Heart, color: 'text-pink-500', bgColor: 'bg-pink-50 dark:bg-pink-900/20', label: 'Love Artura' },
-  good: { icon: Smile, color: 'text-green-500', bgColor: 'bg-green-50 dark:bg-green-900/20', label: 'Good' },
-  ok: { icon: Meh, color: 'text-yellow-500', bgColor: 'bg-yellow-50 dark:bg-yellow-900/20', label: 'Ok' },
-  hate: { icon: Frown, color: 'text-red-500', bgColor: 'bg-red-50 dark:bg-red-900/20', label: 'Hate' }
+  good: { icon: Smile, color: 'text-success-fg', bgColor: 'bg-success-bg', label: 'Good' },
+  ok: { icon: Meh, color: 'text-warning-fg', bgColor: 'bg-warning-bg', label: 'Ok' },
+  hate: { icon: Frown, color: 'text-danger-fg', bgColor: 'bg-danger-bg', label: 'Hate' }
 };
 
 export default function FeedbackHub() {
@@ -147,7 +147,7 @@ export default function FeedbackHub() {
     return (
       <div className="h-full flex items-center justify-center">
         <div className="neomorph p-8 text-center max-w-md">
-          <AlertTriangle className="w-16 h-16 mx-auto text-amber-500 mb-4" />
+          <AlertTriangle className="w-16 h-16 mx-auto text-warning-fg mb-4" />
           <h2 className="text-xl font-bold mb-2">Access Denied</h2>
           <p className="text-foreground-muted">
             This page is only accessible to internal staff.
@@ -193,21 +193,21 @@ export default function FeedbackHub() {
           </div>
           <div className="neomorph-flat p-4">
             <div className="flex items-center gap-2 mb-2">
-              <Smile className="w-5 h-5 text-green-500" />
+              <Smile className="w-5 h-5 text-success-fg" />
               <span className="text-xs text-foreground-muted">Good</span>
             </div>
             <p className="text-2xl font-bold">{stats.good}</p>
           </div>
           <div className="neomorph-flat p-4">
             <div className="flex items-center gap-2 mb-2">
-              <Meh className="w-5 h-5 text-yellow-500" />
+              <Meh className="w-5 h-5 text-warning-fg" />
               <span className="text-xs text-foreground-muted">Ok</span>
             </div>
             <p className="text-2xl font-bold">{stats.ok}</p>
           </div>
           <div className="neomorph-flat p-4">
             <div className="flex items-center gap-2 mb-2">
-              <Frown className="w-5 h-5 text-red-500" />
+              <Frown className="w-5 h-5 text-danger-fg" />
               <span className="text-xs text-foreground-muted">Hate</span>
             </div>
             <p className="text-2xl font-bold">{stats.hate}</p>

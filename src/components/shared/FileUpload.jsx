@@ -204,7 +204,7 @@ export default function FileUpload({
           onDrop={handleDrop}
         >
           <label htmlFor="file-upload" className="cursor-pointer">
-            <div className="flex flex-col items-center justify-center space-y-2 text-gray-600">
+            <div className="flex flex-col items-center justify-center space-y-2 text-muted-foreground">
               {isUploading ? (
                 <>
                   <Loader className="w-8 h-8 animate-spin" />
@@ -216,7 +216,7 @@ export default function FileUpload({
                   <p className={isDragging ? 'text-purple-600 font-semibold' : ''}>
                     {isDragging ? 'Drop files here!' : 'Drag & drop or click to upload'}
                   </p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-muted-foreground">
                     (Multiple files supported{enableAI ? ' • AI analysis available' : ''})
                   </p>
                 </>
@@ -242,7 +242,7 @@ export default function FileUpload({
         {(value || []).length > 0 && (
           <div className="space-y-2">
             <div className="flex items-center justify-between mb-1">
-              <h4 className="text-xs font-semibold uppercase tracking-wider text-gray-400">Uploaded Files</h4>
+              <h4 className="text-xs font-semibold text-muted-foreground">Uploaded Files</h4>
               {enableAI && onAIExtract && (
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-purple-50 dark:bg-purple-900/30 border border-purple-200 dark:border-purple-700 text-purple-700 dark:text-purple-300 text-xs font-medium">
                   <Sparkles className="w-3 h-3 animate-pulse" />
@@ -251,16 +251,16 @@ export default function FileUpload({
               )}
             </div>
             {(value || []).map((url, index) => (
-              <div key={index} className="flex items-center gap-2 px-3 py-2.5 bg-gray-50 dark:bg-gray-800/40 border border-gray-200 dark:border-gray-700 rounded-xl">
-                <FileText className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                <span className="text-sm text-gray-700 dark:text-gray-300 truncate flex-1 min-w-0">{getFileName(url)}</span>
+              <div key={index} className="flex items-center gap-2 px-3 py-2.5 bg-muted border border-border rounded-xl">
+                <FileText className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                <span className="text-sm text-foreground truncate flex-1 min-w-0">{getFileName(url)}</span>
                 <div className="flex items-center gap-1 flex-shrink-0">
                   {enableAI && onAIExtract && (
                     <Button
                       size="sm"
                       onClick={() => handleAIAnalysis(url)}
                       disabled={analyzingFile === url}
-                      className="h-7 gap-1.5 px-2.5 bg-purple-600 hover:bg-purple-700 text-white text-xs font-semibold rounded-lg shadow-sm disabled:opacity-60"
+                      className="h-7 gap-1.5 px-2.5 bg-purple-600 hover:bg-purple-700 text-white text-xs font-semibold rounded-lg shadow-card disabled:opacity-60"
                     >
                       {analyzingFile === url ? (
                         <><Loader className="w-3 h-3 animate-spin" />Analyzing...</>
@@ -269,10 +269,10 @@ export default function FileUpload({
                       )}
                     </Button>
                   )}
-                  <Button variant="ghost" size="icon" onClick={() => setViewingFile(url)} className="h-7 w-7 text-gray-400 hover:text-gray-600">
+                  <Button variant="ghost" size="icon" onClick={() => setViewingFile(url)} className="h-7 w-7 text-muted-foreground hover:text-muted-foreground">
                     <Eye className="w-3.5 h-3.5" />
                   </Button>
-                  <Button variant="ghost" size="icon" onClick={() => handleRemoveFile(url)} className="h-7 w-7 text-gray-400 hover:text-red-500">
+                  <Button variant="ghost" size="icon" onClick={() => handleRemoveFile(url)} className="h-7 w-7 text-muted-foreground hover:text-danger-fg">
                     <X className="w-3.5 h-3.5" />
                   </Button>
                 </div>

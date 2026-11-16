@@ -196,7 +196,7 @@ export default function AddSupplierModal({ isOpen, onClose, onSuccess, editingSu
     <div className="fixed inset-0 z-window fm-scrim flex items-center justify-center p-4">
       <div className="fm-glass-window rounded-2xl text-foreground p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-bold text-gray-700">
+          <h2 className="text-xl font-bold text-foreground">
             {editingSupplier ? 'Edit Supplier' : 'Add New Supplier'}
           </h2>
           <Button aria-label="Close" onClick={handleClose} variant="ghost" size="icon" disabled={createMutation.isPending}>
@@ -206,7 +206,7 @@ export default function AddSupplierModal({ isOpen, onClose, onSuccess, editingSu
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm text-gray-600 mb-2">Supplier Name *</label>
+            <label className="block text-sm text-muted-foreground mb-2">Supplier Name *</label>
             <Input
               value={formData.name}
               onChange={(e) => setFormData({...formData, name: e.target.value})}
@@ -217,7 +217,7 @@ export default function AddSupplierModal({ isOpen, onClose, onSuccess, editingSu
             />
           </div>
           <div>
-            <label className="block text-sm text-gray-600 mb-2">Contact Name *</label>
+            <label className="block text-sm text-muted-foreground mb-2">Contact Name *</label>
             <Input
               value={formData.contact_name}
               onChange={(e) => setFormData({...formData, contact_name: e.target.value})}
@@ -227,7 +227,7 @@ export default function AddSupplierModal({ isOpen, onClose, onSuccess, editingSu
             />
           </div>
           <div>
-            <label className="block text-sm text-gray-600 mb-2">Phone *</label>
+            <label className="block text-sm text-muted-foreground mb-2">Phone *</label>
             <Input
               value={formData.phone}
               onChange={(e) => setFormData({...formData, phone: e.target.value})}
@@ -237,7 +237,7 @@ export default function AddSupplierModal({ isOpen, onClose, onSuccess, editingSu
             />
           </div>
           <div>
-            <label className="block text-sm text-gray-600 mb-2">Email Addresses *</label>
+            <label className="block text-sm text-muted-foreground mb-2">Email Addresses *</label>
             <div className="neomorph-inset p-3 space-y-2">
               <div className="flex gap-2">
                 <Input
@@ -270,7 +270,7 @@ export default function AddSupplierModal({ isOpen, onClose, onSuccess, editingSu
                       <button
                         type="button"
                         onClick={() => handleRemoveEmail(email)}
-                        className="text-red-500 hover:text-red-700"
+                        className="text-danger-fg hover:text-danger-fg"
                       >
                         <X className="w-4 h-4" />
                       </button>
@@ -280,12 +280,12 @@ export default function AddSupplierModal({ isOpen, onClose, onSuccess, editingSu
               )}
               
               {formData.emails.length === 0 && (
-                <p className="text-xs text-gray-500">At least one email address is required</p>
+                <p className="text-xs text-muted-foreground">At least one email address is required</p>
               )}
             </div>
           </div>
           <div>
-            <label className="block text-sm text-gray-600 mb-2">Part Supply Type</label>
+            <label className="block text-sm text-muted-foreground mb-2">Part Supply Type</label>
             <select
               value={formData.part_supply_type}
               onChange={(e) => setFormData({...formData, part_supply_type: e.target.value})}
@@ -300,7 +300,7 @@ export default function AddSupplierModal({ isOpen, onClose, onSuccess, editingSu
             </select>
           </div>
           <div>
-            <label className="block text-sm text-gray-600 mb-2">Website</label>
+            <label className="block text-sm text-muted-foreground mb-2">Website</label>
             <Input
               value={formData.website}
               onChange={(e) => setFormData({...formData, website: e.target.value})}
@@ -309,7 +309,7 @@ export default function AddSupplierModal({ isOpen, onClose, onSuccess, editingSu
             />
           </div>
           <div>
-            <label className="block text-sm text-gray-600 mb-2">Account Number</label>
+            <label className="block text-sm text-muted-foreground mb-2">Account Number</label>
             <Input
               value={formData.account_number}
               onChange={(e) => setFormData({...formData, account_number: e.target.value})}
@@ -318,7 +318,7 @@ export default function AddSupplierModal({ isOpen, onClose, onSuccess, editingSu
             />
           </div>
           <div>
-            <label className="block text-sm text-gray-600 mb-2">Portal Username</label>
+            <label className="block text-sm text-muted-foreground mb-2">Portal Username</label>
             <Input
               value={formData.portal_username}
               onChange={(e) => setFormData({...formData, portal_username: e.target.value})}
@@ -328,7 +328,7 @@ export default function AddSupplierModal({ isOpen, onClose, onSuccess, editingSu
             />
           </div>
           <div>
-            <label className="block text-sm text-gray-600 mb-2">Portal Password</label>
+            <label className="block text-sm text-muted-foreground mb-2">Portal Password</label>
             <div className="relative">
               <Input
                 type={showPassword ? "text" : "password"}
@@ -341,7 +341,7 @@ export default function AddSupplierModal({ isOpen, onClose, onSuccess, editingSu
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
               >
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
@@ -349,18 +349,18 @@ export default function AddSupplierModal({ isOpen, onClose, onSuccess, editingSu
           </div>
 
           <div>
-            <label className="block text-sm text-gray-600 mb-2">Address Lookup</label>
+            <label className="block text-sm text-muted-foreground mb-2">Address Lookup</label>
             <AddressLookupInput
               value={formData.address_line_1} // Use address_line_1 to seed the lookup input
               onChange={handleAddressChange}
               placeholder="Start typing address or postcode..."
               className="neomorph-inset"
             />
-            <p className="text-xs text-gray-500 mt-1">Start typing to search, or fill in fields manually below</p>
+            <p className="text-xs text-muted-foreground mt-1">Start typing to search, or fill in fields manually below</p>
           </div>
 
           <div>
-            <label className="block text-sm text-gray-600 mb-2">Address Line 1</label>
+            <label className="block text-sm text-muted-foreground mb-2">Address Line 1</label>
             <Input
               value={formData.address_line_1}
               onChange={(e) => setFormData({...formData, address_line_1: e.target.value})}
@@ -369,7 +369,7 @@ export default function AddSupplierModal({ isOpen, onClose, onSuccess, editingSu
             />
           </div>
           <div>
-            <label className="block text-sm text-gray-600 mb-2">Address Line 2</label>
+            <label className="block text-sm text-muted-foreground mb-2">Address Line 2</label>
             <Input
               value={formData.address_line_2}
               onChange={(e) => setFormData({...formData, address_line_2: e.target.value})}
@@ -379,7 +379,7 @@ export default function AddSupplierModal({ isOpen, onClose, onSuccess, editingSu
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm text-gray-600 mb-2">Town</label>
+              <label className="block text-sm text-muted-foreground mb-2">Town</label>
               <Input
                 value={formData.town}
                 onChange={(e) => setFormData({...formData, town: e.target.value})}
@@ -388,7 +388,7 @@ export default function AddSupplierModal({ isOpen, onClose, onSuccess, editingSu
               />
             </div>
             <div>
-              <label className="block text-sm text-gray-600 mb-2">County</label>
+              <label className="block text-sm text-muted-foreground mb-2">County</label>
               <Input
                 value={formData.county}
                 onChange={(e) => setFormData({...formData, county: e.target.value})}
@@ -397,7 +397,7 @@ export default function AddSupplierModal({ isOpen, onClose, onSuccess, editingSu
               />
             </div>
             <div>
-              <label className="block text-sm text-gray-600 mb-2">Postcode</label>
+              <label className="block text-sm text-muted-foreground mb-2">Postcode</label>
               <Input
                 value={formData.postcode}
                 onChange={(e) => setFormData({...formData, postcode: e.target.value})}
@@ -407,7 +407,7 @@ export default function AddSupplierModal({ isOpen, onClose, onSuccess, editingSu
             </div>
           </div>
           <div>
-            <label className="block text-sm text-gray-600 mb-2">Notes</label>
+            <label className="block text-sm text-muted-foreground mb-2">Notes</label>
             <Textarea
               value={formData.notes}
               onChange={(e) => setFormData({...formData, notes: e.target.value})}
@@ -417,7 +417,7 @@ export default function AddSupplierModal({ isOpen, onClose, onSuccess, editingSu
           </div>
 
           <div>
-            <label className="block text-sm text-gray-600 mb-2">Manufacturer Associations</label>
+            <label className="block text-sm text-muted-foreground mb-2">Manufacturer Associations</label>
             <div className="neomorph-inset p-3">
               <div className="flex gap-2 mb-2">
                 <Button
@@ -479,7 +479,7 @@ export default function AddSupplierModal({ isOpen, onClose, onSuccess, editingSu
                       <button
                         type="button"
                         onClick={() => handleManufacturerToggle(mfr)}
-                        className="hover:text-red-600"
+                        className="hover:text-danger-fg"
                       >
                         <X className="w-3 h-3" />
                       </button>
@@ -488,7 +488,7 @@ export default function AddSupplierModal({ isOpen, onClose, onSuccess, editingSu
                 </div>
               )}
             </div>
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-muted-foreground mt-1">
               {(formData.part_supply_type === 'Green' || formData.part_supply_type === 'Aftermarket' || formData.part_supply_type === 'Reconditioned' || formData.part_supply_type === 'Glass')
                 ? 'All manufacturers automatically selected for this supplier type'
                 : 'Select which vehicle manufacturers this supplier can supply parts for'}

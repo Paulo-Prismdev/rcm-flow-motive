@@ -25,7 +25,7 @@ export default function PasswordExpiryBanner({ daysLeft, onChanged }) {
 
   return (
     <>
-      <div role="status" className="fixed top-0 inset-x-0 z-[60] flex items-center gap-3 bg-amber-50 text-amber-900 dark:bg-amber-950 dark:text-amber-100 border-b border-amber-200 dark:border-amber-900 px-4 py-2 text-sm">
+      <div role="status" className="fixed top-0 inset-x-0 z-[60] flex items-center gap-3 bg-warning-bg text-warning-fg border-b border-warning/30 px-4 py-2 text-sm">
         <KeyRound className="h-4 w-4 shrink-0" aria-hidden="true" />
         <p className="min-w-0 flex-1">Your password expires {when}.</p>
         <Button type="button" size="sm" variant="outline" className="h-9" onClick={() => setOpen(true)}>Change it now</Button>

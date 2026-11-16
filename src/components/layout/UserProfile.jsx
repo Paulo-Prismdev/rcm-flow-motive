@@ -33,14 +33,14 @@ export const getUserInitials = (user) => {
 export const getAvatarColor = (email) => {
   if (!email) return 'bg-gray-500';
   const colors = [
-    'bg-blue-500',
-    'bg-green-500',
+    'bg-info',
+    'bg-success',
     'bg-purple-500',
     'bg-pink-500',
-    'bg-yellow-500',
-    'bg-indigo-500',
-    'bg-red-500',
-    'bg-teal-500',
+    'bg-warning',
+    'bg-info',
+    'bg-danger',
+    'bg-success',
   ];
   const hash = email.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
   return colors[hash % colors.length];
@@ -111,7 +111,7 @@ export default function UserProfile({ customTrigger }) {
           </DropdownMenuItem>
         </Link>
         <DropdownMenuSeparator className="bg-border" />
-        <DropdownMenuItem onSelect={handleLogout} className="cursor-pointer text-red-500 focus:text-red-400">
+        <DropdownMenuItem onSelect={handleLogout} className="cursor-pointer text-danger-fg focus:text-red-400">
           <LogOut className="mr-2 h-4 w-4" />
           <span>Log out</span>
         </DropdownMenuItem>

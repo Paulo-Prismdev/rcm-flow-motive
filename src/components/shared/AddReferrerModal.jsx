@@ -100,7 +100,7 @@ export default function AddReferrerModal({ isOpen, onClose, onSuccess }) {
     <div className="fixed inset-0 z-window fm-scrim flex items-center justify-center p-4">
       <div className="fm-glass-window rounded-2xl text-foreground p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-bold text-gray-700">Add New Referrer</h2>
+          <h2 className="text-xl font-bold text-foreground">Add New Referrer</h2>
           <Button aria-label="Close" onClick={handleClose} variant="ghost" size="icon" disabled={createMutation.isPending}>
             <X className="w-5 h-5" />
           </Button>
@@ -108,7 +108,7 @@ export default function AddReferrerModal({ isOpen, onClose, onSuccess }) {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm text-gray-600 mb-2">Referrer Name *</label>
+            <label className="block text-sm text-muted-foreground mb-2">Referrer Name *</label>
             <Input
               value={formData.name}
               onChange={(e) => setFormData({...formData, name: e.target.value})}
@@ -119,7 +119,7 @@ export default function AddReferrerModal({ isOpen, onClose, onSuccess }) {
             />
           </div>
           <div>
-            <label className="block text-sm text-gray-600 mb-2">Contact Name *</label>
+            <label className="block text-sm text-muted-foreground mb-2">Contact Name *</label>
             <Input
               value={formData.contact_name}
               onChange={(e) => setFormData({...formData, contact_name: e.target.value})}
@@ -129,7 +129,7 @@ export default function AddReferrerModal({ isOpen, onClose, onSuccess }) {
             />
           </div>
           <div>
-            <label className="block text-sm text-gray-600 mb-2">Phone *</label>
+            <label className="block text-sm text-muted-foreground mb-2">Phone *</label>
             <Input
               value={formData.phone}
               onChange={(e) => setFormData({...formData, phone: e.target.value})}
@@ -139,7 +139,7 @@ export default function AddReferrerModal({ isOpen, onClose, onSuccess }) {
             />
           </div>
           <div>
-            <label className="block text-sm text-gray-600 mb-2">Email *</label>
+            <label className="block text-sm text-muted-foreground mb-2">Email *</label>
             <Input
               type="email"
               value={formData.email}
@@ -151,18 +151,18 @@ export default function AddReferrerModal({ isOpen, onClose, onSuccess }) {
           </div>
 
           <div>
-            <label className="block text-sm text-gray-600 mb-2">Address Lookup</label>
+            <label className="block text-sm text-muted-foreground mb-2">Address Lookup</label>
             <AddressLookupInput
               value={formData.address_line_1} // This passes current line 1 as the initial search value
               onChange={handleAddressChange}
               placeholder="Start typing address or postcode..."
               className="neomorph-inset"
             />
-            <p className="text-xs text-gray-500 mt-1">Start typing to search, or fill in fields manually below</p>
+            <p className="text-xs text-muted-foreground mt-1">Start typing to search, or fill in fields manually below</p>
           </div>
 
           <div>
-            <label className="block text-sm text-gray-600 mb-2">Address Line 1</label>
+            <label className="block text-sm text-muted-foreground mb-2">Address Line 1</label>
             <Input
               value={formData.address_line_1}
               onChange={(e) => setFormData({...formData, address_line_1: e.target.value})}
@@ -171,7 +171,7 @@ export default function AddReferrerModal({ isOpen, onClose, onSuccess }) {
             />
           </div>
           <div>
-            <label className="block text-sm text-gray-600 mb-2">Address Line 2</label>
+            <label className="block text-sm text-muted-foreground mb-2">Address Line 2</label>
             <Input
               value={formData.address_line_2}
               onChange={(e) => setFormData({...formData, address_line_2: e.target.value})}
@@ -181,7 +181,7 @@ export default function AddReferrerModal({ isOpen, onClose, onSuccess }) {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm text-gray-600 mb-2">Town</label>
+              <label className="block text-sm text-muted-foreground mb-2">Town</label>
               <Input
                 value={formData.town}
                 onChange={(e) => setFormData({...formData, town: e.target.value})}
@@ -190,7 +190,7 @@ export default function AddReferrerModal({ isOpen, onClose, onSuccess }) {
               />
             </div>
             <div>
-              <label className="block text-sm text-gray-600 mb-2">County</label>
+              <label className="block text-sm text-muted-foreground mb-2">County</label>
               <Input
                 value={formData.county}
                 onChange={(e) => setFormData({...formData, county: e.target.value})}
@@ -199,7 +199,7 @@ export default function AddReferrerModal({ isOpen, onClose, onSuccess }) {
               />
             </div>
             <div>
-              <label className="block text-sm text-gray-600 mb-2">Postcode</label>
+              <label className="block text-sm text-muted-foreground mb-2">Postcode</label>
               <Input
                 value={formData.postcode}
                 onChange={(e) => setFormData({...formData, postcode: e.target.value})}

@@ -14,15 +14,15 @@ function DetailCell({ label, value, isEmpty, isCurrency, meta }) {
   if (isEmpty) display = '-';
 
   return (
-    <div className={`py-2 px-3 rounded-[8px] transition-colors ${isEmpty ? 'bg-amber-50 dark:bg-amber-900/20 border border-amber-300 dark:border-amber-700' : 'hover:bg-muted/50'}`}>
-      <div className="text-[11px] font-medium text-muted-foreground mb-0.5 flex items-center gap-1.5">
+    <div className={`py-2 px-3 rounded-[8px] transition-colors ${isEmpty ? 'bg-warning-bg border border-warning/30' : 'hover:bg-muted/50'}`}>
+      <div className="text-xs font-medium text-muted-foreground mb-0.5 flex items-center gap-1.5">
         {label}
         {isEmpty && <Dot filled />}
       </div>
-      <div className={`text-sm font-medium ${isEmpty ? 'text-amber-500' : 'text-foreground'} ${isCurrency ? 'tabular-nums' : ''}`}>
+      <div className={`text-sm font-medium ${isEmpty ? 'text-warning-fg' : 'text-foreground'} ${isCurrency ? 'tabular-nums' : ''}`}>
         {display}
       </div>
-      {meta && <div className="text-[10px] text-muted-foreground/70 mt-0.5">{meta}</div>}
+      {meta && <div className="text-xs text-muted-foreground/70 mt-0.5">{meta}</div>}
     </div>
   );
 }
@@ -30,7 +30,7 @@ function DetailCell({ label, value, isEmpty, isCurrency, meta }) {
 function AddressBlock({ addressLine1, addressLine2, town, county, postcode, isEmpty }) {
   const hasAddress = addressLine1 || town || postcode;
   return (
-    <div className={`mt-2 py-3 px-4 rounded-lg ${isEmpty ? 'border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20' : 'bg-muted/40'}`}>
+    <div className={`mt-2 py-3 px-4 rounded-lg ${isEmpty ? 'border border-warning/30 bg-warning-bg' : 'bg-muted/40'}`}>
       <div className="text-xs font-semibold text-muted-foreground mb-2">Address</div>
       <div className="text-sm leading-relaxed space-y-0.5">
         {addressLine1 && <div>{addressLine1}</div>}
@@ -38,7 +38,7 @@ function AddressBlock({ addressLine1, addressLine2, town, county, postcode, isEm
         {(town || county || postcode) && (
           <div>{[town, county, postcode].filter(Boolean).join(', ')}</div>
         )}
-        {!hasAddress && <span className="text-amber-500">-</span>}
+        {!hasAddress && <span className="text-warning-fg">-</span>}
       </div>
     </div>
   );
@@ -53,8 +53,8 @@ const partyIcons = {
 
 const partyColors = {
   client: 'bg-primary',
-  driver: 'bg-emerald-500',
-  thirdParty: 'bg-orange-500',
+  driver: 'bg-success',
+  thirdParty: 'bg-warning',
 };
 
 /**
@@ -107,7 +107,7 @@ export default function PartyDisplayCard({
         <div className="flex justify-between items-center pb-3 mb-4 border-b border-border">
           <div className="flex items-center gap-2.5">
             <Icon className="w-4 h-4 text-muted-foreground" />
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{title}</h3>
+            <h3 className="text-xs font-semibold text-muted-foreground">{title}</h3>
           </div>
         </div>
         {children}
@@ -121,7 +121,7 @@ export default function PartyDisplayCard({
         <div className="flex justify-between items-center pb-3 mb-4 border-b border-border">
           <div className="flex items-center gap-2.5">
             <Icon className="w-4 h-4 text-muted-foreground" />
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{title}</h3>
+            <h3 className="text-xs font-semibold text-muted-foreground">{title}</h3>
           </div>
         </div>
         <div className="space-y-3">
@@ -187,7 +187,7 @@ export default function PartyDisplayCard({
           <div className="flex items-center gap-2.5">
             <div className={`w-1.5 h-1.5 rounded-full ${dotColor} flex-shrink-0`} />
             <Icon className="w-4 h-4 text-muted-foreground" />
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{title}</h3>
+            <h3 className="text-xs font-semibold text-muted-foreground">{title}</h3>
           </div>
           <div className="flex items-center gap-2">
             {headerRight}

@@ -121,16 +121,16 @@ export default function ImageAttachmentModal({ imageUrls = [], onAdd, onRemove, 
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-8 py-6 border-b border-gray-200 dark:border-gray-800 flex-shrink-0">
+          <div className="flex items-center justify-between px-8 py-6 border-b border-border flex-shrink-0">
             <div>
-              <h3 className="text-[18px] font-semibold text-gray-900 dark:text-white">Images & Videos</h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              <h3 className="text-[18px] font-semibold text-foreground">Images & Videos</h3>
+              <p className="text-sm text-muted-foreground mt-1">
                 {imageUrls.length} {imageUrls.length === 1 ? 'item' : 'items'}
               </p>
             </div>
             <button aria-label="Close"
               onClick={onClose}
-              className="w-6 h-6 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+              className="w-6 h-6 text-muted-foreground hover:text-muted-foreground transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
@@ -139,8 +139,8 @@ export default function ImageAttachmentModal({ imageUrls = [], onAdd, onRemove, 
           {/* Upload Area */}
           <div className="px-8 pt-6 flex-shrink-0">
             <div
-              className={`border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg p-8 text-center transition-all cursor-pointer ${
-                isDragging ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'hover:border-gray-400 dark:hover:border-gray-600'
+              className={`border-2 border-dashed border-border rounded-lg p-8 text-center transition-all cursor-pointer ${
+                isDragging ? 'border-info bg-info-bg' : 'hover:border-gray-400 dark:hover:border-gray-600'
               }`}
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
@@ -148,16 +148,16 @@ export default function ImageAttachmentModal({ imageUrls = [], onAdd, onRemove, 
               onClick={() => !isUploading && fileInputRef.current?.click()}
             >
               {isUploading ? (
-                <div className="flex flex-col items-center gap-2 text-gray-500 dark:text-gray-400">
+                <div className="flex flex-col items-center gap-2 text-muted-foreground">
                   <Loader className="w-6 h-6 animate-spin" />
                   <span className="text-sm">Uploading {uploads.filter(u => u.status === 'uploading').length} of {uploads.length}...</span>
                 </div>
               ) : (
-                <div className="flex flex-col items-center gap-3 text-gray-500 dark:text-gray-400">
-                  <Upload className={`w-8 h-8 ${isDragging ? 'text-blue-500' : ''}`} />
+                <div className="flex flex-col items-center gap-3 text-muted-foreground">
+                  <Upload className={`w-8 h-8 ${isDragging ? 'text-info-fg' : ''}`} />
                   <div>
                      <span className="text-sm font-medium">{isDragging ? 'Drop images or videos here!' : 'Click or drag & drop images or videos to upload'}</span>
-                     <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Images (JPG, PNG, GIF, WebP) and Videos (MP4, MOV, WebM) up to 25MB</p>
+                     <p className="text-xs text-muted-foreground mt-1">Images (JPG, PNG, GIF, WebP) and Videos (MP4, MOV, WebM) up to 25MB</p>
                    </div>
                 </div>
               )}
@@ -183,7 +183,7 @@ export default function ImageAttachmentModal({ imageUrls = [], onAdd, onRemove, 
           {/* Image Grid - Scrollable */}
           <div className="flex-1 overflow-y-auto px-8 py-6">
             {imageUrls.length === 0 ? (
-              <div className="text-center py-10 text-gray-500 dark:text-gray-400">
+              <div className="text-center py-10 text-muted-foreground">
                 <Image className="w-12 h-12 mx-auto mb-3 opacity-40" />
                 <p>No images uploaded yet</p>
               </div>
@@ -192,7 +192,7 @@ export default function ImageAttachmentModal({ imageUrls = [], onAdd, onRemove, 
                 {imageUrls.map((url, index) => (
                   <div
                     key={index}
-                    className="relative group rounded-lg overflow-hidden aspect-square bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 cursor-pointer"
+                    className="relative group rounded-lg overflow-hidden aspect-square bg-muted border border-border cursor-pointer"
                     onClick={() => setViewingImage(url)}
                   >
                     {isVideoUrl(url) ? (
@@ -217,14 +217,14 @@ export default function ImageAttachmentModal({ imageUrls = [], onAdd, onRemove, 
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-all flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto">
                       <button
                         onClick={(e) => { e.stopPropagation(); setViewingImage(url); }}
-                        className="bg-white/90 text-black rounded-full p-1.5 hover:bg-white transition-colors pointer-events-auto"
+                        className="bg-white/90 text-foreground rounded-full p-1.5 hover:bg-card transition-colors pointer-events-auto"
                         title={isVideoUrl(url) ? "Play video" : "View full size"}
                       >
                         {isVideoUrl(url) ? <Play className="w-4 h-4 fill-current" /> : <ZoomIn className="w-4 h-4" />}
                       </button>
                       <button
                         onClick={(e) => { e.stopPropagation(); handleDownloadImage(url); }}
-                        className="bg-white/90 text-black rounded-full p-1.5 hover:bg-white transition-colors pointer-events-auto"
+                        className="bg-white/90 text-foreground rounded-full p-1.5 hover:bg-card transition-colors pointer-events-auto"
                         title="Download image"
                       >
                         <Download className="w-4 h-4" />
@@ -232,7 +232,7 @@ export default function ImageAttachmentModal({ imageUrls = [], onAdd, onRemove, 
                       {onRemove && (
                         <button
                           onClick={(e) => { e.stopPropagation(); handleRemoveImage(url); }}
-                          className="bg-red-500/90 text-white rounded-full p-1.5 hover:bg-red-600 transition-colors pointer-events-auto"
+                          className="bg-danger/90 text-on-solid rounded-full p-1.5 hover:bg-danger transition-colors pointer-events-auto"
                           title="Remove image"
                         >
                           <X className="w-4 h-4" />
@@ -246,10 +246,10 @@ export default function ImageAttachmentModal({ imageUrls = [], onAdd, onRemove, 
           </div>
 
           {/* Footer */}
-          <div className="px-8 py-4 border-t border-gray-200 dark:border-gray-800 flex-shrink-0 flex justify-end gap-3">
+          <div className="px-8 py-4 border-t border-border flex-shrink-0 flex justify-end gap-3">
             <button
               onClick={onClose}
-              className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              className="px-4 py-2 text-sm font-medium text-foreground bg-card border border-border rounded-lg hover:bg-muted transition-colors"
             >
               Close
             </button>

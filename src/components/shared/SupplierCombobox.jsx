@@ -45,7 +45,7 @@ export default function SupplierCombobox({ value, onChange }) {
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-full justify-between neomorph-inset text-gray-700 border-0 focus:ring-0"
+          className="w-full justify-between neomorph-inset text-foreground border-0 focus:ring-0"
         >
           {selectedSupplierName || "Select supplier..."}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />

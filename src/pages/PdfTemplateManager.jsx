@@ -216,12 +216,12 @@ export default function PdfTemplateManager() {
                           </span>
                         )}
                         {!template.is_active && (
-                          <span className="text-xs px-2 py-1 rounded bg-gray-200 text-gray-600">
+                          <span className="text-xs px-2 py-1 rounded bg-accent text-muted-foreground">
                             Inactive
                           </span>
                         )}
                         {!isOwner && (
-                          <span className="text-xs px-2 py-1 rounded bg-blue-100 text-blue-600">
+                          <span className="text-xs px-2 py-1 rounded bg-info-bg text-info-fg">
                             Shared
                           </span>
                         )}
@@ -237,12 +237,12 @@ export default function PdfTemplateManager() {
                       <div>• Shared with {template.shared_with_users.length} user(s)</div>
                     )}
                     {template.visibility === 'organization' && (
-                      <div className="text-blue-600 font-medium">• Available to all users</div>
+                      <div className="text-info-fg font-medium">• Available to all users</div>
                     )}
                   </div>
 
                   {isOwner && (
-                    <div className="text-xs text-foreground-muted mb-3 pb-3 border-b border-gray-200">
+                    <div className="text-xs text-foreground-muted mb-3 pb-3 border-b border-border">
                       Created by you
                     </div>
                   )}
@@ -283,7 +283,7 @@ export default function PdfTemplateManager() {
                             deleteMutation.mutate(template.id);
                           }
                         }}
-                        className="neomorph-flat text-sm text-red-600"
+                        className="neomorph-flat text-sm text-danger-fg"
                         disabled={deleteMutation.isLoading}
                         title="Delete template"
                       >

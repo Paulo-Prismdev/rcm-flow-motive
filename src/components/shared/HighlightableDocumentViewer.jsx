@@ -215,10 +215,10 @@ function HighlightableDocumentViewerInner({ fileUrl, fileExt, highlightText, fit
 
   if (!fileUrl) {
     return (
-      <div className="flex items-center justify-center h-full bg-gray-100 dark:bg-gray-950">
+      <div className="flex items-center justify-center h-full bg-muted">
         <div className="text-center">
           <FileText className="w-10 h-10 mx-auto mb-2 opacity-40" />
-          <p className="text-xs text-gray-400">No document to display</p>
+          <p className="text-xs text-muted-foreground">No document to display</p>
         </div>
       </div>
     );
@@ -226,10 +226,10 @@ function HighlightableDocumentViewerInner({ fileUrl, fileExt, highlightText, fit
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-full bg-gray-100 dark:bg-gray-950">
+      <div className="flex items-center justify-center h-full bg-muted">
         <div className="text-center">
           <Loader2 className="w-6 h-6 animate-spin text-purple-500 mx-auto mb-2" />
-          <p className="text-xs text-gray-500">Loading document…</p>
+          <p className="text-xs text-muted-foreground">Loading document…</p>
         </div>
       </div>
     );
@@ -238,9 +238,9 @@ function HighlightableDocumentViewerInner({ fileUrl, fileExt, highlightText, fit
   // Fallback: native PDF viewer via iframe (no highlighting, but always works)
   if (useIframeFallback) {
     return (
-      <div className="h-full flex flex-col bg-gray-200 dark:bg-gray-950">
-        <div className="px-3 py-1.5 bg-amber-50 dark:bg-amber-900/20 border-b border-amber-200 dark:border-amber-700 flex-shrink-0">
-          <p className="text-[11px] text-amber-700 dark:text-amber-400">
+      <div className="h-full flex flex-col bg-accent">
+        <div className="px-3 py-1.5 bg-warning-bg border-b border-warning/30 flex-shrink-0">
+          <p className="text-xs text-warning-fg">
             Document loaded in basic mode — highlighting unavailable for this file type
           </p>
         </div>
@@ -251,7 +251,7 @@ function HighlightableDocumentViewerInner({ fileUrl, fileExt, highlightText, fit
 
   if (isImage) {
     return (
-      <div className="h-full overflow-auto bg-gray-100 dark:bg-gray-950" ref={containerRef}>
+      <div className="h-full overflow-auto bg-muted" ref={containerRef}>
         <img src={fileUrl} alt="Document" className="max-w-full mx-auto" />
       </div>
     );
@@ -259,22 +259,22 @@ function HighlightableDocumentViewerInner({ fileUrl, fileExt, highlightText, fit
 
   const viewer = (
     <div className={expanded
-      ? 'fixed inset-0 z-[10080] flex flex-col bg-gray-200 dark:bg-gray-950 p-2'
-      : 'h-full flex flex-col bg-gray-200 dark:bg-gray-950'}>
+      ? 'fixed inset-0 z-[10080] flex flex-col bg-accent p-2'
+      : 'h-full flex flex-col bg-accent'}>
       {/* Zoom controls */}
-      <div className="flex items-center justify-center gap-1.5 py-1 bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
-        <button onClick={zoomOut} title="Zoom out" className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-          <ZoomOut className="w-3.5 h-3.5 text-gray-500" />
+      <div className="flex items-center justify-center gap-1.5 py-1 bg-muted border-b border-border flex-shrink-0">
+        <button onClick={zoomOut} title="Zoom out" className="p-1 rounded hover:bg-accent transition-colors">
+          <ZoomOut className="w-3.5 h-3.5 text-muted-foreground" />
         </button>
-        <span className="text-xs text-gray-500 w-12 text-center tabular-nums">{Math.round(scale * 100)}%</span>
-        <button onClick={zoomIn} title="Zoom in" className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-          <ZoomIn className="w-3.5 h-3.5 text-gray-500" />
+        <span className="text-xs text-muted-foreground w-12 text-center tabular-nums">{Math.round(scale * 100)}%</span>
+        <button onClick={zoomIn} title="Zoom in" className="p-1 rounded hover:bg-accent transition-colors">
+          <ZoomIn className="w-3.5 h-3.5 text-muted-foreground" />
         </button>
         {fitWidth && (
           <button
             onClick={fitToWidth}
             title="Fit the whole page width in the viewer"
-            className="ml-1 px-1.5 py-0.5 rounded text-[11px] font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+            className="ml-1 px-1.5 py-0.5 rounded text-xs font-medium text-muted-foreground hover:bg-accent transition-colors"
           >
             Fit width
           </button>
@@ -283,7 +283,7 @@ function HighlightableDocumentViewerInner({ fileUrl, fileExt, highlightText, fit
           <button
             onClick={() => setExpanded(on => !on)}
             title={expanded ? 'Back to the review window' : 'Show the document full screen'}
-            className="ml-1 p-1 rounded text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+            className="ml-1 p-1 rounded text-muted-foreground hover:bg-accent transition-colors"
           >
             {expanded ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
           </button>
@@ -295,7 +295,7 @@ function HighlightableDocumentViewerInner({ fileUrl, fileExt, highlightText, fit
           <div
             key={idx}
             ref={el => pageRefs.current[idx] = el}
-            className="relative mx-auto mb-3 shadow-lg bg-white"
+            className="relative mx-auto mb-3 shadow-lg bg-card"
             style={{ width: page.width, height: page.height }}
           >
             <img src={page.dataUrl} alt={`Page ${idx + 1}`} className="block" style={{ width: page.width, height: page.height }} />

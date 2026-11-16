@@ -39,14 +39,14 @@ const getUserInitials = (user) => {
 const getAvatarColor = (email) => {
   if (!email) return 'bg-gray-500';
   const colors = [
-    'bg-blue-500',
-    'bg-green-500',
+    'bg-info',
+    'bg-success',
     'bg-purple-500',
     'bg-pink-500',
-    'bg-yellow-500',
-    'bg-indigo-500',
-    'bg-red-500',
-    'bg-teal-500',
+    'bg-warning',
+    'bg-info',
+    'bg-danger',
+    'bg-success',
   ];
   const hash = email.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
   return colors[hash % colors.length];
@@ -439,7 +439,7 @@ export default function FloatingMessenger({ currentUser, isOpen, onClose }) {
       
       {/* Panel */}
       <div 
-        className="messenger-panel fixed top-0 right-0 bottom-0 flex flex-col bg-white dark:bg-gray-900 shadow-2xl border-l border-gray-200 dark:border-gray-800"
+        className="messenger-panel fixed top-0 right-0 bottom-0 flex flex-col bg-card shadow-2xl border-l border-border"
         style={{ width: '100%', maxWidth: '380px', zIndex: 10002 }}
       >
         {/* Header */}
@@ -460,7 +460,7 @@ export default function FloatingMessenger({ currentUser, isOpen, onClose }) {
           {!selectedConversation ? (
             <>
               {/* Tab bar */}
-              <div className="flex items-center gap-1 px-3 py-2 border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50 flex-shrink-0">
+              <div className="flex items-center gap-1 px-3 py-2 border-b border-border bg-muted flex-shrink-0">
                 {[
                   { mode: 'direct', label: 'Direct', unread: directUnread },
                   { mode: 'channels', label: 'Channels', unread: channelUnread },
@@ -471,12 +471,12 @@ export default function FloatingMessenger({ currentUser, isOpen, onClose }) {
                     className={`flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 text-xs font-medium rounded-lg transition-colors ${
                       viewMode === mode
                         ? 'bg-primary text-primary-foreground'
-                        : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 dark:text-gray-400'
+                        : 'text-muted-foreground hover:bg-muted'
                     }`}
                   >
                     {label}
                     {unread > 0 && (
-                      <span className="bg-red-500 text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center flex-shrink-0">
+                      <span className="bg-danger text-on-solid text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center flex-shrink-0">
                         {unread > 9 ? '9+' : unread}
                       </span>
                     )}
@@ -484,14 +484,14 @@ export default function FloatingMessenger({ currentUser, isOpen, onClose }) {
                 ))}
                 <button
                   onClick={() => setShowNewDM(true)}
-                  className="p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 dark:text-gray-400 transition-colors"
+                  className="p-1.5 rounded-lg text-muted-foreground hover:bg-muted transition-colors"
                   title="New Direct Message"
                 >
                   <Plus className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => setShowCreateChannel(true)}
-                  className="p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 dark:text-gray-400 transition-colors"
+                  className="p-1.5 rounded-lg text-muted-foreground hover:bg-muted transition-colors"
                   title="New Channel"
                 >
                   <Hash className="w-4 h-4" />
@@ -501,16 +501,16 @@ export default function FloatingMessenger({ currentUser, isOpen, onClose }) {
               <div className="flex-1 overflow-y-auto">
                 {filteredConversations.length === 0 ? (
                   <div className="flex flex-col items-center justify-center h-full text-center p-6">
-                    <MessageSquare className="w-12 h-12 text-gray-300 dark:text-gray-600 mb-3" />
-                    <p className="text-sm text-gray-400">No conversations yet</p>
+                    <MessageSquare className="w-12 h-12 text-muted-foreground/70 mb-3" />
+                    <p className="text-sm text-muted-foreground">No conversations yet</p>
                   </div>
                 ) : (
-                  <div className="divide-y divide-gray-100 dark:divide-gray-800">
+                  <div className="divide-y divide-border">
                     {filteredConversations.map(conv => (
                       <button
                         key={conv.id}
                         onClick={() => setSelectedConversation(conv)}
-                        className="w-full px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors flex items-center gap-3 text-left"
+                        className="w-full px-4 py-3 hover:bg-muted transition-colors flex items-center gap-3 text-left"
                       >
                         {conv.type === 'channel' ? (
                           <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
@@ -525,7 +525,7 @@ export default function FloatingMessenger({ currentUser, isOpen, onClose }) {
                         )}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between mb-0.5">
-                            <p className="font-semibold text-sm text-gray-900 dark:text-white truncate">
+                            <p className="font-semibold text-sm text-foreground truncate">
                               {conv.type === 'channel' ? conv.name : conv.otherUser?.full_name}
                             </p>
                             {conv.unreadCount > 0 && (
@@ -534,7 +534,7 @@ export default function FloatingMessenger({ currentUser, isOpen, onClose }) {
                               </span>
                             )}
                           </div>
-                          <p className="text-xs text-gray-400 truncate">
+                          <p className="text-xs text-muted-foreground truncate">
                             {conv.lastMessage.content.substring(0, 45)}
                           </p>
                         </div>
@@ -547,17 +547,17 @@ export default function FloatingMessenger({ currentUser, isOpen, onClose }) {
           ) : (
             <>
               {/* Chat View Header */}
-              <div className="px-3 py-2.5 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between flex-shrink-0 bg-white dark:bg-gray-900">
+              <div className="px-3 py-2.5 border-b border-border flex items-center justify-between flex-shrink-0 bg-card">
                 <div className="flex items-center gap-2 min-w-0 flex-1">
-                  <button onClick={() => setSelectedConversation(null)} className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors flex-shrink-0">
-                    <X className="w-4 h-4 text-gray-500" />
+                  <button onClick={() => setSelectedConversation(null)} className="p-1.5 rounded-lg hover:bg-muted transition-colors flex-shrink-0">
+                    <X className="w-4 h-4 text-muted-foreground" />
                   </button>
                   {selectedConversation.type === 'channel' ? (
                     <>
                       <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
                         <Hash className="w-4 h-4 text-primary" />
                       </div>
-                      <span className="font-semibold text-sm text-gray-900 dark:text-white truncate">{selectedConversation.name}</span>
+                      <span className="font-semibold text-sm text-foreground truncate">{selectedConversation.name}</span>
                     </>
                   ) : (
                     <>
@@ -566,19 +566,19 @@ export default function FloatingMessenger({ currentUser, isOpen, onClose }) {
                           {getUserInitials(selectedConversation.otherUser)}
                         </span>
                       </div>
-                      <span className="font-semibold text-sm text-gray-900 dark:text-white truncate">{selectedConversation.otherUser?.full_name}</span>
+                      <span className="font-semibold text-sm text-foreground truncate">{selectedConversation.otherUser?.full_name}</span>
                     </>
                   )}
                 </div>
                 {selectedConversation.type === 'channel' && (
-                  <button onClick={() => setShowChannelSettings(true)} className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors flex-shrink-0">
-                    <Settings className="w-4 h-4 text-gray-400" />
+                  <button onClick={() => setShowChannelSettings(true)} className="p-1.5 rounded-lg hover:bg-muted transition-colors flex-shrink-0">
+                    <Settings className="w-4 h-4 text-muted-foreground" />
                   </button>
                 )}
               </div>
 
               {/* Messages */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50 dark:bg-gray-950">
+              <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-muted">
                 {conversationMessages.map(msg => {
                   const isMine = msg.sender_email === currentUser?.email;
                   const replyToMsg = msg.reply_to_message_id ? messages.find(m => m.id === msg.reply_to_message_id) : null;
@@ -588,14 +588,14 @@ export default function FloatingMessenger({ currentUser, isOpen, onClose }) {
                       <div className={`max-w-[80%] rounded-2xl px-3 py-2 group relative ${
                         isMine 
                           ? 'bg-primary text-primary-foreground'
-                          : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm border border-gray-100 dark:border-gray-700'
+                          : 'bg-card text-foreground shadow-card border border-border'
                       }`}>
                         {selectedConversation.type === 'channel' && !isMine && (
-                          <p className="text-[10px] font-semibold mb-1 text-[#00cc00]">{msg.sender_name}</p>
+                          <p className="text-xs font-semibold mb-1 text-[#00cc00]">{msg.sender_name}</p>
                         )}
                         
                         {replyToMsg && (
-                          <div className={`p-2 mb-2 text-xs rounded-lg border-l-2 ${isMine ? 'border-white/40 bg-white/10' : 'border-gray-300 bg-gray-50 dark:bg-gray-700'}`}>
+                          <div className={`p-2 mb-2 text-xs rounded-lg border-l-2 ${isMine ? 'border-white/40 bg-white/10' : 'border-border bg-muted'}`}>
                             <p className="font-semibold opacity-80">{replyToMsg.sender_name}</p>
                             <p className="truncate opacity-60">{replyToMsg.content}</p>
                           </div>
@@ -629,13 +629,13 @@ export default function FloatingMessenger({ currentUser, isOpen, onClose }) {
                         )}
 
                         <div className="flex items-center justify-between mt-1 gap-2">
-                          <p className={`text-[10px] ${isMine ? 'text-white/50' : 'text-gray-400'}`}>
+                          <p className={`text-xs ${isMine ? 'text-white/50' : 'text-muted-foreground'}`}>
                             {format(new Date(msg.created_date), 'HH:mm')}
                           </p>
                           <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                             <DropdownMenu open={showEmojiPicker === msg.id} onOpenChange={(open) => setShowEmojiPicker(open ? msg.id : null)}>
                               <DropdownMenuTrigger asChild>
-                                <button aria-label="Add emoji" className={`p-1 rounded ${isMine ? 'hover:bg-white/20' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
+                                <button aria-label="Add emoji" className={`p-1 rounded ${isMine ? 'hover:bg-white/20' : 'hover:bg-muted'}`}>
                                   <Smile className="w-3 h-3" />
                                 </button>
                               </DropdownMenuTrigger>
@@ -647,7 +647,7 @@ export default function FloatingMessenger({ currentUser, isOpen, onClose }) {
                                 ))}
                               </DropdownMenuContent>
                             </DropdownMenu>
-                            <button onClick={() => setReplyingTo(msg)} className={`p-1 rounded ${isMine ? 'hover:bg-white/20' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
+                            <button onClick={() => setReplyingTo(msg)} className={`p-1 rounded ${isMine ? 'hover:bg-white/20' : 'hover:bg-muted'}`}>
                               <Reply className="w-3 h-3" />
                             </button>
                           </div>
@@ -660,14 +660,14 @@ export default function FloatingMessenger({ currentUser, isOpen, onClose }) {
               </div>
 
               {/* Message Input */}
-              <div className="p-3 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 flex-shrink-0">
+              <div className="p-3 border-t border-border bg-card flex-shrink-0">
                 {replyingTo && (
-                  <div className="px-3 py-2 mb-2 flex items-center justify-between text-xs bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                  <div className="px-3 py-2 mb-2 flex items-center justify-between text-xs bg-muted rounded-lg border border-border">
                     <div className="flex-1 min-w-0 mr-2">
-                      <p className="font-semibold text-gray-700 dark:text-gray-300 truncate">Replying to {replyingTo.sender_name}</p>
-                      <p className="text-gray-400 truncate">{replyingTo.content}</p>
+                      <p className="font-semibold text-foreground truncate">Replying to {replyingTo.sender_name}</p>
+                      <p className="text-muted-foreground truncate">{replyingTo.content}</p>
                     </div>
-                    <button onClick={() => setReplyingTo(null)} className="flex-shrink-0 text-gray-400 hover:text-gray-600">
+                    <button onClick={() => setReplyingTo(null)} className="flex-shrink-0 text-muted-foreground hover:text-muted-foreground">
                       <X className="w-3 h-3" />
                     </button>
                   </div>
@@ -676,7 +676,7 @@ export default function FloatingMessenger({ currentUser, isOpen, onClose }) {
                   <input type="file" ref={fileInputRef} onChange={handleFileUpload} className="hidden" />
                   <button
                     onClick={() => fileInputRef.current?.click()}
-                    className="p-2 rounded-lg text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-600 transition-colors flex-shrink-0"
+                    className="p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-muted-foreground transition-colors flex-shrink-0"
                     disabled={isUploading}
                   >
                     <Paperclip className="w-4 h-4" />
@@ -686,14 +686,14 @@ export default function FloatingMessenger({ currentUser, isOpen, onClose }) {
                     onChange={(e) => setMessageText(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && handleSendMessage()}
                     placeholder="Type a message..."
-                    className="flex-1 text-sm h-9 rounded-xl bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700"
+                    className="flex-1 text-sm h-9 rounded-xl bg-muted border-border"
                     disabled={isUploading}
                   />
                   <button aria-label="Send"
                     onClick={handleSendMessage}
                     disabled={!messageText.trim() || sendMessageMutation.isPending || isUploading}
                     className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all flex-shrink-0 ${
-                      messageText.trim() ? 'bg-primary text-primary-foreground hover:bg-primary/90' : 'bg-gray-100 dark:bg-gray-800 text-gray-400'
+                      messageText.trim() ? 'bg-primary text-primary-foreground hover:bg-primary/90' : 'bg-muted text-muted-foreground'
                     } disabled:opacity-50`}
                   >
                     <Send className="w-4 h-4" />
@@ -893,7 +893,7 @@ function ChannelSettingsModal({ isOpen, onClose, channel, allUsers, currentUser,
             {!channel?.isDepartment && (
               <button
                 onClick={onLeaveChannel}
-                className="glass-button px-4 py-2 text-red-500 flex items-center gap-2"
+                className="glass-button px-4 py-2 text-danger-fg flex items-center gap-2"
               >
                 <LogOut className="w-4 h-4" />
                 Leave Channel

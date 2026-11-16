@@ -41,15 +41,15 @@ function EntityLinkRow({ label, icon: Icon, extractedName, candidates, nameKey, 
 
   if (linked) {
     return (
-      <div className="flex items-center gap-3 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
-        <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-800 flex items-center justify-center flex-shrink-0">
-          <Check className="w-4 h-4 text-green-600 dark:text-green-400" />
+      <div className="flex items-center gap-3 p-3 bg-success-bg border border-success/30 rounded-lg">
+        <div className="w-8 h-8 rounded-full bg-success-bg flex items-center justify-center flex-shrink-0">
+          <Check className="w-4 h-4 text-success-fg" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-xs text-green-600 dark:text-green-400 font-semibold uppercase tracking-wide">{label}</p>
-          <p className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate">{linked[nameKey]}</p>
+          <p className="text-xs text-success-fg font-semibold  ">{label}</p>
+          <p className="text-sm font-medium text-foreground truncate">{linked[nameKey]}</p>
         </div>
-        <button onClick={onSkip} className="text-xs text-gray-400 hover:text-red-500 transition-colors flex items-center gap-1">
+        <button onClick={onSkip} className="text-xs text-muted-foreground hover:text-danger-fg transition-colors flex items-center gap-1">
           <X className="w-3.5 h-3.5" /> Unlink
         </button>
       </div>
@@ -57,42 +57,42 @@ function EntityLinkRow({ label, icon: Icon, extractedName, candidates, nameKey, 
   }
 
   return (
-    <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+    <div className="border border-border rounded-lg overflow-hidden">
       {/* Header */}
-      <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800/50">
+      <div className="flex items-center gap-3 p-3 bg-muted">
         <div className="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-900/40 flex items-center justify-center flex-shrink-0">
           <Icon className="w-4 h-4 text-purple-600 dark:text-purple-400" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-xs text-gray-500 font-semibold uppercase tracking-wide">{label}</p>
-          <p className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate">AI found: "<span className="text-purple-600 dark:text-purple-400">{extractedName}</span>"</p>
+          <p className="text-xs text-muted-foreground font-semibold  ">{label}</p>
+          <p className="text-sm font-medium text-foreground truncate">AI found: "<span className="text-purple-600 dark:text-purple-400">{extractedName}</span>"</p>
         </div>
       </div>
 
       {/* Top match suggestion */}
       {topMatch && !open && (
-        <div className="p-3 border-t border-gray-100 dark:border-gray-700">
-          <p className="text-xs text-gray-500 mb-2">Best match found:</p>
+        <div className="p-3 border-t border-border">
+          <p className="text-xs text-muted-foreground mb-2">Best match found:</p>
           <div className="flex items-center gap-2">
-            <div className="flex-1 px-3 py-2 bg-white dark:bg-gray-800 border border-purple-200 dark:border-purple-700 rounded-lg">
-              <p className="text-sm font-medium text-gray-800 dark:text-gray-200">{topMatch[nameKey]}</p>
+            <div className="flex-1 px-3 py-2 bg-card border border-purple-200 dark:border-purple-700 rounded-lg">
+              <p className="text-sm font-medium text-foreground">{topMatch[nameKey]}</p>
               <p className="text-xs text-purple-600 dark:text-purple-400">{Math.round(topMatch.score * 100)}% match</p>
             </div>
-            <Button type="button" size="sm" onClick={() => onLink(topMatch)} className="bg-green-600 hover:bg-green-700 text-white gap-1">
+            <Button type="button" size="sm" onClick={() => onLink(topMatch)} className="bg-success hover:bg-success text-on-solid gap-1">
               <Check className="w-3.5 h-3.5" /> Link
             </Button>
           </div>
           <button
             type="button"
             onClick={() => setOpen(true)}
-            className="mt-2 text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400 flex items-center gap-1"
+            className="mt-2 text-xs text-info-fg hover:text-info-fg flex items-center gap-1"
           >
             Choose different <ChevronRight className="w-3 h-3" />
           </button>
           <button
             type="button"
             onClick={onSkip}
-            className="mt-1 text-xs text-gray-400 hover:text-gray-600 flex items-center gap-1"
+            className="mt-1 text-xs text-muted-foreground hover:text-muted-foreground flex items-center gap-1"
           >
             <X className="w-3 h-3" /> Skip — use as plain text
           </button>
@@ -101,22 +101,22 @@ function EntityLinkRow({ label, icon: Icon, extractedName, candidates, nameKey, 
 
       {/* No match found */}
       {!topMatch && !open && (
-        <div className="p-3 border-t border-gray-100 dark:border-gray-700">
+        <div className="p-3 border-t border-border">
           <div className="flex items-center gap-2 mb-2">
-            <AlertCircle className="w-4 h-4 text-amber-500 flex-shrink-0" />
-            <p className="text-xs text-amber-700 dark:text-amber-400">No close match found in the database</p>
+            <AlertCircle className="w-4 h-4 text-warning-fg flex-shrink-0" />
+            <p className="text-xs text-warning-fg">No close match found in the database</p>
           </div>
           <button
             type="button"
             onClick={() => setOpen(true)}
-            className="text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400 flex items-center gap-1"
+            className="text-xs text-info-fg hover:text-info-fg flex items-center gap-1"
           >
             Search manually <ChevronRight className="w-3 h-3" />
           </button>
           <button
             type="button"
             onClick={onSkip}
-            className="mt-1 text-xs text-gray-400 hover:text-gray-600 flex items-center gap-1 block"
+            className="mt-1 text-xs text-muted-foreground hover:text-muted-foreground flex items-center gap-1 block"
           >
             <X className="w-3 h-3" /> Skip — use as plain text
           </button>
@@ -125,13 +125,13 @@ function EntityLinkRow({ label, icon: Icon, extractedName, candidates, nameKey, 
 
       {/* Search/browse list */}
       {open && (
-        <div className="p-3 border-t border-gray-100 dark:border-gray-700">
+        <div className="p-3 border-t border-border">
           <input
             autoFocus
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder={`Search ${label.toLowerCase()}...`}
-            className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 mb-2"
+            className="w-full px-3 py-2 text-sm border border-border rounded-lg bg-card text-foreground mb-2"
           />
           <div className="max-h-40 overflow-y-auto space-y-1">
             {filtered.slice(0, 20).map(c => (
@@ -139,20 +139,20 @@ function EntityLinkRow({ label, icon: Icon, extractedName, candidates, nameKey, 
                 key={c.id}
                 type="button"
                 onClick={() => { onLink(c); setOpen(false); }}
-                className="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-purple-50 dark:hover:bg-purple-900/20 text-gray-800 dark:text-gray-200 flex items-center gap-2 transition-colors"
+                className="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-purple-50 dark:hover:bg-purple-900/20 text-foreground flex items-center gap-2 transition-colors"
               >
                 <Check className="w-3.5 h-3.5 text-transparent group-hover:text-purple-600" />
                 {c[nameKey]}
               </button>
             ))}
             {filtered.length === 0 && (
-              <p className="text-xs text-gray-400 px-2 py-2">No results found</p>
+              <p className="text-xs text-muted-foreground px-2 py-2">No results found</p>
             )}
           </div>
           <button
             type="button"
             onClick={onSkip}
-            className="mt-2 text-xs text-gray-400 hover:text-gray-600 flex items-center gap-1"
+            className="mt-2 text-xs text-muted-foreground hover:text-muted-foreground flex items-center gap-1"
           >
             <X className="w-3 h-3" /> Skip — use as plain text
           </button>
@@ -249,18 +249,18 @@ export default function AIEntityLinker({ isOpen, onClose, extractedData, onConfi
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center gap-3 p-5 border-b border-gray-100 dark:border-gray-800">
+        <div className="flex items-center gap-3 p-5 border-b border-border">
           <div className="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/40 flex items-center justify-center flex-shrink-0">
             <Link className="w-5 h-5 text-purple-600 dark:text-purple-400" />
           </div>
           <div className="flex-1">
-            <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">Link to Existing Records</h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+            <h3 className="text-base font-bold text-foreground">Link to Existing Records</h3>
+            <p className="text-xs text-muted-foreground mt-0.5">
               AI extracted these names — link them to your database to avoid duplicates
             </p>
           </div>
-          <button aria-label="Close" onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-            <X className="w-4 h-4 text-gray-400" />
+          <button aria-label="Close" onClick={onClose} className="p-1.5 rounded-lg hover:bg-muted transition-colors">
+            <X className="w-4 h-4 text-muted-foreground" />
           </button>
         </div>
 
@@ -279,10 +279,10 @@ export default function AIEntityLinker({ isOpen, onClose, extractedData, onConfi
             />
           )}
           {hasClient && skipped.client && (
-            <div className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-dashed border-gray-300 dark:border-gray-600">
-              <X className="w-4 h-4 text-gray-400" />
-              <span className="text-sm text-gray-500">Client — using as plain text</span>
-              <button type="button" onClick={() => setSkipped(prev => ({ ...prev, client: false }))} className="ml-auto text-xs text-blue-600 hover:underline">Undo</button>
+            <div className="flex items-center gap-2 p-3 bg-muted rounded-lg border border-dashed border-border">
+              <X className="w-4 h-4 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">Client — using as plain text</span>
+              <button type="button" onClick={() => setSkipped(prev => ({ ...prev, client: false }))} className="ml-auto text-xs text-info-fg hover:underline">Undo</button>
             </div>
           )}
 
@@ -299,10 +299,10 @@ export default function AIEntityLinker({ isOpen, onClose, extractedData, onConfi
             />
           )}
           {hasReferrer && skipped.referrer && (
-            <div className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-dashed border-gray-300 dark:border-gray-600">
-              <X className="w-4 h-4 text-gray-400" />
-              <span className="text-sm text-gray-500">Referrer — using as plain text</span>
-              <button type="button" onClick={() => setSkipped(prev => ({ ...prev, referrer: false }))} className="ml-auto text-xs text-blue-600 hover:underline">Undo</button>
+            <div className="flex items-center gap-2 p-3 bg-muted rounded-lg border border-dashed border-border">
+              <X className="w-4 h-4 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">Referrer — using as plain text</span>
+              <button type="button" onClick={() => setSkipped(prev => ({ ...prev, referrer: false }))} className="ml-auto text-xs text-info-fg hover:underline">Undo</button>
             </div>
           )}
 
@@ -319,16 +319,16 @@ export default function AIEntityLinker({ isOpen, onClose, extractedData, onConfi
             />
           )}
           {hasBodyshop && skipped.bodyshop && (
-            <div className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-dashed border-gray-300 dark:border-gray-600">
-              <X className="w-4 h-4 text-gray-400" />
-              <span className="text-sm text-gray-500">Bodyshop — using as plain text</span>
-              <button type="button" onClick={() => setSkipped(prev => ({ ...prev, bodyshop: false }))} className="ml-auto text-xs text-blue-600 hover:underline">Undo</button>
+            <div className="flex items-center gap-2 p-3 bg-muted rounded-lg border border-dashed border-border">
+              <X className="w-4 h-4 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">Bodyshop — using as plain text</span>
+              <button type="button" onClick={() => setSkipped(prev => ({ ...prev, bodyshop: false }))} className="ml-auto text-xs text-info-fg hover:underline">Undo</button>
             </div>
           )}
         </div>
 
         {/* Footer */}
-        <div className="flex gap-3 justify-end p-5 border-t border-gray-100 dark:border-gray-800">
+        <div className="flex gap-3 justify-end p-5 border-t border-border">
           <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
           <Button
             type="button"

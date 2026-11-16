@@ -11,7 +11,7 @@ export default function AuthLayout({ icon: Icon, title, subtitle, footer, childr
     <main className="min-h-screen flex flex-col items-center justify-center bg-[#151d44] px-4 py-8">
       <img src={RCM_LOGO} alt="RCM Automotive" className="h-14 w-auto object-contain mb-8" />
       <div className="w-full max-w-md">
-        <div className="bg-white dark:bg-[#1c1c1e] text-gray-900 dark:text-gray-100 rounded-2xl shadow-xl border border-white/10 p-6 sm:p-8">
+        <div className="bg-card dark:bg-[#1c1c1e] text-foreground rounded-2xl shadow-xl border border-white/10 p-6 sm:p-8">
           <div className="text-center mb-6">
             {Icon && (
               <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-[#151d44] mb-3">
@@ -19,7 +19,7 @@ export default function AuthLayout({ icon: Icon, title, subtitle, footer, childr
               </div>
             )}
             <h1 className="text-xl sm:text-2xl font-semibold tracking-tight">{title}</h1>
-            {subtitle && <p className="text-sm text-gray-500 dark:text-gray-400 mt-1.5 break-words">{subtitle}</p>}
+            {subtitle && <p className="text-sm text-muted-foreground mt-1.5 break-words">{subtitle}</p>}
           </div>
           {children}
         </div>

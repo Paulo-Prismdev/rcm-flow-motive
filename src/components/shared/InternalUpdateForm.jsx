@@ -284,7 +284,7 @@ export default function InternalUpdateForm({
                       <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-xs font-medium">{(getDisplayName(user))[0]?.toUpperCase()}</div>
                       <div className="flex flex-col min-w-0">
                         <span className="text-sm truncate">{getDisplayName(user)}</span>
-                        <span className="text-[10px] text-muted-foreground truncate">{user.email}</span>
+                        <span className="text-xs text-muted-foreground truncate">{user.email}</span>
                       </div>
                     </CommandItem>
                   ))}
@@ -367,7 +367,7 @@ export default function InternalUpdateForm({
               return (
                 <Badge key={email} variant="secondary" className="gap-1.5 px-2 py-1">
                   <span className="text-sm">{getDisplayName(user)}</span>
-                  <span className="text-[10px] text-muted-foreground">({email})</span>
+                  <span className="text-xs text-muted-foreground">({email})</span>
                   <X className="w-3 h-3 cursor-pointer" onClick={() => toggleUserTag(email)} />
                 </Badge>
               );
@@ -375,7 +375,7 @@ export default function InternalUpdateForm({
           </div>
         )}
 
-        {submitError && <div className="text-xs text-red-600 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg px-3 py-2">{submitError}</div>}
+        {submitError && <div className="text-xs text-danger-fg bg-danger-bg border border-danger/30 rounded-lg px-3 py-2">{submitError}</div>}
 
         <div className="flex justify-end gap-2">
           <Button type="button" onClick={resetForm} variant="outline" className="px-4 py-2 text-xs">Cancel</Button>

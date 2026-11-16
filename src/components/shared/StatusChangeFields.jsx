@@ -131,7 +131,7 @@ export default function StatusChangeFields({ value, onChange, claim }) {
 
   const selectCls = 'w-full px-3 py-2 text-sm bg-background border border-border rounded-lg';
   const labelCls = 'block text-xs text-muted-foreground mb-1';
-  const hintCls = 'text-[10px] text-muted-foreground mt-0.5';
+  const hintCls = 'text-xs text-muted-foreground mt-0.5';
 
   // If a current value isn't in the available options (for example a status that
   // was removed from Settings), include it so the dropdown still shows it.
@@ -203,13 +203,13 @@ export default function StatusChangeFields({ value, onChange, claim }) {
         {journeyLabelFor(journeyValue) && <p className={hintCls}>{journeyLabelFor(journeyValue)}</p>}
         {nextSteps.length > 0 && (
           <div className="flex items-center gap-2 flex-wrap mt-2">
-            <span className="text-[10px] text-muted-foreground">Next step:</span>
+            <span className="text-xs text-muted-foreground">Next step:</span>
             {nextSteps.map((step, i) => (
               <button
                 key={step}
                 type="button"
                 onClick={() => set('journey', step)}
-                className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold border transition-colors ${
+                className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold border transition-colors ${
                   i === 0
                     ? 'border-primary text-primary hover:bg-primary/10'
                     : 'border-border text-muted-foreground hover:bg-muted'

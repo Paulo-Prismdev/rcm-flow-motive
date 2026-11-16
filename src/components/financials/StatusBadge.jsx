@@ -13,7 +13,7 @@ const DOTS = {
 export default function StatusBadge({ tone = 'idle', children, className }) {
   if (!children) return null;
   return (
-    <span className={cn('inline-flex items-center gap-1.5 whitespace-nowrap text-[11px] text-mac-muted', className)}>
+    <span className={cn('inline-flex items-center gap-1.5 whitespace-nowrap text-xs text-mac-muted', className)}>
       <span className={cn('h-1.5 w-1.5 flex-shrink-0 rounded-full', DOTS[tone] || DOTS.idle)} />
       {children}
     </span>
