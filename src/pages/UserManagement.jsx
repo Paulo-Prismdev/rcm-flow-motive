@@ -1,3 +1,4 @@
+import LoadingRows from '@/components/shared/LoadingRows';
 import React, { useState, useMemo } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -151,7 +152,7 @@ export default function UserManagement() {
       {/* Table */}
       <div className="flex-1 overflow-auto min-h-0 bg-card rounded-lg border border-border">
         {isLoading ? (
-          <div className="text-center py-12 text-sm text-muted-foreground">Loading...</div>
+          <LoadingRows label="Loading users" />
         ) : filteredUsers.length === 0 ? (
           <div className="text-center py-12 text-sm text-muted-foreground">No users found.</div>
         ) : (

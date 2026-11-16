@@ -53,7 +53,7 @@ export default function TimeLogSection({ parentId, parentType }) {
       {isOpen && (
         <div className="mt-4 pt-4 border-t border-gray-300 border-opacity-50">
           <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
-            {isLoading && <p className="text-sm text-gray-500">Loading activity...</p>}
+            {isLoading && <p className="text-sm text-gray-500">Loading activity…</p>}
             {!isLoading && timeLogs.length === 0 && (
               <p className="text-sm text-center text-gray-500 py-4">No time logged yet.</p>
             )}

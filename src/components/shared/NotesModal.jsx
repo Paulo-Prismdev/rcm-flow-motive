@@ -285,7 +285,7 @@ export default function NotesModal({ parentId, parentType, isOpen, onClose }) {
               </div>
 
               {isLoading ? (
-                <div className="bg-muted/30 border border-border rounded-lg p-4 text-center text-sm text-muted-foreground">Loading internal updates...</div>
+                <div className="bg-muted/30 border border-border rounded-lg p-4 text-center text-sm text-muted-foreground">Loading internal updates…</div>
               ) : mainNotes.length === 0 ? (
                 <div className="bg-muted/30 border border-border rounded-lg p-4 text-center text-sm text-muted-foreground">No internal updates yet.</div>
               ) : (

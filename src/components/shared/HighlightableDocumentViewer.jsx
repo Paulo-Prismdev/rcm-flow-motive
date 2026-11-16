@@ -229,7 +229,7 @@ function HighlightableDocumentViewerInner({ fileUrl, fileExt, highlightText, fit
       <div className="flex items-center justify-center h-full bg-gray-100 dark:bg-gray-950">
         <div className="text-center">
           <Loader2 className="w-6 h-6 animate-spin text-purple-500 mx-auto mb-2" />
-          <p className="text-xs text-gray-500">Loading document...</p>
+          <p className="text-xs text-gray-500">Loading document…</p>
         </div>
       </div>
     );

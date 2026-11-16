@@ -408,7 +408,7 @@ export default function StatusManagementTab({ department }) {
       {/* Status List */}
       <div className="space-y-2">
         {isLoading ? (
-          <p>Loading statuses...</p>
+          <p>Loading statuses…</p>
         ) : (
           <DragDropContext onDragEnd={handleDragEnd}>
             <Droppable droppableId="statuses">

@@ -1,3 +1,4 @@
+import LoadingRows from '@/components/shared/LoadingRows';
 import React, { useState } from 'react';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
@@ -185,7 +186,7 @@ export default function ClaimUpdatesQuickView({ claim, isOpen, onClose }) {
           )}
 
           {isLoading ? (
-            <div className="text-center text-sm text-muted-foreground py-8">Loading updates...</div>
+            <LoadingRows label="Loading updates" />
           ) : topLevelUpdates.length === 0 ? (
             <div className="text-center py-8">
               <MessageSquare className="w-8 h-8 text-muted-foreground/40 mx-auto mb-2" />

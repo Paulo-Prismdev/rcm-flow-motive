@@ -1,3 +1,4 @@
+import LoadingRows from '@/components/shared/LoadingRows';
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
@@ -37,7 +38,7 @@ export default function WidgetUpdateTracking({ config, isEditMode }) {
       </div>
 
       {isLoading ? (
-        <div className="text-center py-8 text-foreground-muted text-sm">Loading...</div>
+        <LoadingRows label="Loading" />
       ) : (
         <div className="space-y-3">
           <div className="grid grid-cols-2 gap-3 m-keep-2">

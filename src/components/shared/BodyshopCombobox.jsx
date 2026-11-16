@@ -56,7 +56,7 @@ export default function BodyshopCombobox({ value, onChange }) {
           <CommandInput placeholder="Search bodyshops..." />
           <CommandList>
             {isLoading ? (
-              <CommandEmpty>Loading bodyshops...</CommandEmpty>
+              <CommandEmpty>Loading bodyshops…</CommandEmpty>
             ) : (
               <CommandEmpty>No bodyshop found.</CommandEmpty>
             )}

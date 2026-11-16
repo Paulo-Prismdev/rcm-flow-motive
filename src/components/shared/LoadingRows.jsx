@@ -2,7 +2,7 @@ import React from 'react';
 
 /**
  * The shape of a list while it loads (design system: skeleton). Screen readers hear
- * the label; everyone else sees soft placeholder rows instead of "Loading...".
+ * the label; everyone else sees soft placeholder rows instead of "Loading…".
  */
 export default function LoadingRows({ count = 3, height = 'h-14', label = 'Loading', className = '' }) {
   return (

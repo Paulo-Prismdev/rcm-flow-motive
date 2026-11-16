@@ -70,7 +70,7 @@ export default function ThirdPartyCombobox({ value, onChange, placeholder = "Sel
                 <CommandInput placeholder="Search the directory..." />
                 <CommandList>
                   {isLoading
-                    ? <CommandEmpty>Loading...</CommandEmpty>
+                    ? <CommandEmpty>Loading…</CommandEmpty>
                     : <CommandEmpty>Nothing found in the directory.</CommandEmpty>
                   }
                   <CommandGroup>

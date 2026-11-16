@@ -98,7 +98,7 @@ export default function UserProfile({ customTrigger }) {
                 {user?.full_name || 'User'}
               </p>
               <p className="text-xs leading-none text-foreground-muted truncate">
-                {user?.email || 'Loading...'}
+                {user?.email || 'Loading…'}
               </p>
             </div>
           </div>

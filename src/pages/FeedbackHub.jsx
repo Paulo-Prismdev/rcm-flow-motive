@@ -367,7 +367,7 @@ export default function FeedbackHub() {
           <div className="neomorph p-4">
             <div className="text-center py-8">
               <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-2"></div>
-              <p className="text-foreground-muted">Loading feedback...</p>
+              <p className="text-foreground-muted">Loading feedback…</p>
             </div>
           </div>
         ) : enrichedFeedback.length === 0 ? (

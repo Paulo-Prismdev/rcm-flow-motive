@@ -1,3 +1,4 @@
+import LoadingRows from '@/components/shared/LoadingRows';
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -177,7 +178,7 @@ export default function PdfTemplateManager() {
 
         {/* Templates List */}
         {isLoading ? (
-          <div className="text-center py-12">Loading templates...</div>
+          <LoadingRows label="Loading templates" />
         ) : templates.length === 0 ? (
           <div className="neomorph p-12 text-center">
             <FileText className="w-16 h-16 mx-auto mb-4 text-foreground-muted" />

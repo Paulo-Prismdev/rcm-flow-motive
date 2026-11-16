@@ -91,7 +91,7 @@ export default function BodyshopUpdateForm() {
       <div className="min-h-screen bg-muted flex items-center justify-center p-4">
         <div className="flex flex-col items-center gap-3 text-muted-foreground">
           <Loader className="w-8 h-8 animate-spin" />
-          <p className="text-sm">Loading...</p>
+          <p className="text-sm">Loading…</p>
         </div>
       </div>
     );

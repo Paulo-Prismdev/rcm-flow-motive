@@ -56,7 +56,7 @@ export default function SupplierCombobox({ value, onChange }) {
           <CommandInput placeholder="Search suppliers..." />
           <CommandList>
             {isLoading ? (
-              <CommandEmpty>Loading suppliers...</CommandEmpty>
+              <CommandEmpty>Loading suppliers…</CommandEmpty>
             ) : (
               <CommandEmpty>No supplier found.</CommandEmpty>
             )}

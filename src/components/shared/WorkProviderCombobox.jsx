@@ -56,7 +56,7 @@ export default function WorkProviderCombobox({ value, onChange }) {
           <CommandInput placeholder="Search work providers..." />
           <CommandList>
             {isLoading ? (
-              <CommandEmpty>Loading work providers...</CommandEmpty>
+              <CommandEmpty>Loading work providers…</CommandEmpty>
             ) : (
               <CommandEmpty>No work provider found.</CommandEmpty>
             )}

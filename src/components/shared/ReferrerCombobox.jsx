@@ -91,7 +91,7 @@ export default function ReferrerCombobox({ value, onChange, compact = false }) {
               <CommandInput placeholder="Search referrers..." />
               <CommandList>
                 {isLoading ? (
-                  <CommandEmpty>Loading...</CommandEmpty>
+                  <CommandEmpty>Loading…</CommandEmpty>
                 ) : companies.length === 0 ? (
                   <CommandEmpty>No referrer companies found.</CommandEmpty>
                 ) : (

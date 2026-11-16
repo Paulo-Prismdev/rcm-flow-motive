@@ -1,3 +1,4 @@
+import LoadingRows from '@/components/shared/LoadingRows';
 import React, { useState, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -181,7 +182,7 @@ export default function EmailTemplates() {
         </div>
 
         {isLoading ? (
-          <div className="text-center py-6 text-muted-foreground text-sm">Loading templates...</div>
+          <LoadingRows label="Loading templates" />
         ) : templates.length === 0 ? (
           <div className="text-center py-6 text-muted-foreground text-sm">
             No email templates yet. Create your first template to get started.

@@ -1,3 +1,4 @@
+import LoadingRows from '@/components/shared/LoadingRows';
 import React, { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
@@ -178,7 +179,7 @@ export default function RepairerDetailDrawer({ bodyshopId, onClose }) {
           </SheetHeader>
 
         {isLoading ? (
-          <div className="p-8 text-center text-sm text-muted-foreground">Loading...</div>
+          <LoadingRows label="Loading" />
         ) : bodyshop ? (
           <>
             <div className="px-1 pb-8">

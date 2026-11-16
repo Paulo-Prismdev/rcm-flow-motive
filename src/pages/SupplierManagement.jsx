@@ -278,7 +278,7 @@ export default function SupplierManagement() {
         {isLoading ?
         <div className="text-center py-12">
             <Loader className="w-8 h-8 animate-spin mx-auto mb-2 text-primary" />
-            <p className="text-foreground-muted">Loading suppliers...</p>
+            <p className="text-foreground-muted">Loading suppliers…</p>
           </div> :
         filteredSuppliers.length === 0 ?
         <div className="text-center py-12">

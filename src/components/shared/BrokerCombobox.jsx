@@ -61,7 +61,7 @@ export default function BrokerCombobox({ value, onChange, placeholder = "Select 
             <Command>
               <CommandInput placeholder="Search brokers..." />
               <CommandList>
-                {isLoading ? <CommandEmpty>Loading...</CommandEmpty> : <CommandEmpty>No broker found.</CommandEmpty>}
+                {isLoading ? <CommandEmpty>Loading…</CommandEmpty> : <CommandEmpty>No broker found.</CommandEmpty>}
                 <CommandGroup>
                   <CommandItem
                     value="__add_new__"

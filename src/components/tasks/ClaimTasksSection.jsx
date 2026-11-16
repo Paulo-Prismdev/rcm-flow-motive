@@ -1,3 +1,4 @@
+import LoadingRows from '@/components/shared/LoadingRows';
 import React, { useState } from 'react';
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -132,7 +133,7 @@ export default function ClaimTasksSection({ claimId, claimJobNumber, claimReg })
       </div>
 
       {isLoading ? (
-        <div className="text-center py-6 text-foreground-muted">Loading tasks...</div>
+        <LoadingRows label="Loading tasks" />
       ) : tasks.length === 0 ? (
         <div className="text-center py-8 neomorph-inset rounded-lg">
           <ListTodo className="w-10 h-10 mx-auto text-foreground-muted mb-2" />

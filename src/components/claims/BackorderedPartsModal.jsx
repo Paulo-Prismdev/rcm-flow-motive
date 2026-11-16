@@ -1,3 +1,4 @@
+import LoadingRows from '@/components/shared/LoadingRows';
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
@@ -84,7 +85,7 @@ export default function BackorderedPartsModal({ claim, currentUser, isOpen, onCl
         {/* Parts List */}
         <div className="overflow-y-auto max-h-[50vh] pb-4">
           {isLoading ? (
-            <div className="text-center py-6 text-muted-foreground text-sm">Loading...</div>
+            <LoadingRows label="Loading backordered parts" />
           ) : backorderedParts.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <Package className="w-10 h-10 mx-auto mb-2 opacity-40" />

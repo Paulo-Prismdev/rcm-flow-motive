@@ -1,3 +1,4 @@
+import LoadingRows from '@/components/shared/LoadingRows';
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -348,7 +349,7 @@ export default function PortalManagementTab() {
         </div>
 
         {isLoading ? (
-          <div className="text-center py-6 text-sm text-muted-foreground">Loading...</div>
+          <LoadingRows label="Loading" />
         ) : adverts.length === 0 ? (
           <div className="text-center py-6 text-sm text-muted-foreground">
             No adverts configured
@@ -426,7 +427,7 @@ export default function PortalManagementTab() {
         </div>
 
         {productsLoading ? (
-          <div className="text-center py-6 text-sm text-muted-foreground">Loading...</div>
+          <LoadingRows label="Loading" />
         ) : products.length === 0 ? (
           <div className="text-center py-6 text-sm text-muted-foreground">
             No products configured

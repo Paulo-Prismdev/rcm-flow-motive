@@ -1,3 +1,4 @@
+import LoadingRows from '@/components/shared/LoadingRows';
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
@@ -18,7 +19,7 @@ export default function ActivityLogSection({ parentId, parentType }) {
           <History className="w-5 h-5 text-gold" />
           <h3 className="font-bold">Activity Log</h3>
         </div>
-        <div className="text-center py-8 text-foreground-muted">Loading activity...</div>
+        <LoadingRows label="Loading activity" />
       </div>
     );
   }

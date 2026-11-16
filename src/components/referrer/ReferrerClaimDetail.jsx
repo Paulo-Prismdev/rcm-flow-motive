@@ -102,7 +102,7 @@ function isImageUrl(url) {
 }
 
 function BackorderedPartsSectionReadOnly({ parts = [], isLoading }) {
-  if (isLoading) return <div className="neomorph-flat p-6 text-center text-sm text-muted-foreground">Loading...</div>;
+  if (isLoading) return <div className="neomorph-flat p-6 text-center text-sm text-muted-foreground">Loading…</div>;
   return (
     <div className="neomorph-flat p-4 md:p-6">
       <div className="flex items-center gap-3 mb-4"><Package className="w-5 h-5 text-gold" /><h3 className="font-bold">Backordered Parts</h3></div>

@@ -57,7 +57,7 @@ export default function ClaimBodyshopInfo({ bodyshopId }) {
   if (isLoading) {
     return (
       <div className="mt-3 p-3 rounded-lg border border-border">
-        <div className="text-sm text-muted-foreground">Loading bodyshop details...</div>
+        <div className="text-sm text-muted-foreground">Loading bodyshop details…</div>
       </div>
     );
   }

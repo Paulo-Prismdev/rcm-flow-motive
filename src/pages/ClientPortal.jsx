@@ -1,3 +1,4 @@
+import LoadingRows from '@/components/shared/LoadingRows';
 import React, { useState, useEffect, useMemo } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -303,7 +304,7 @@ export default function ClientPortal() {
         {/* Table/List with status grouping */}
         <div className="flex-1 overflow-auto min-h-0" style={{ WebkitOverflowScrolling: 'touch' }}>
           {isLoading ? (
-            <div className="flex items-center justify-center h-32 text-sm text-muted-foreground">Loading claims...</div>
+            <LoadingRows label="Loading claims" />
           ) : filteredClaims.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-32 gap-2">
               <p className="text-sm text-muted-foreground">{search ? 'No claims match your search.' : 'No claims found.'}</p>

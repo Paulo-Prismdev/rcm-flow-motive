@@ -70,7 +70,7 @@ export default function ClientCombobox({ value, onChange, placeholder = "Select 
                 <CommandInput placeholder="Search the directory..." />
                 <CommandList>
                   {isLoading
-                    ? <CommandEmpty>Loading...</CommandEmpty>
+                    ? <CommandEmpty>Loading…</CommandEmpty>
                     : <CommandEmpty>Nothing found in the directory.</CommandEmpty>
                   }
                   <CommandGroup>
