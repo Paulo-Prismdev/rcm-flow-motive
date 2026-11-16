@@ -933,13 +933,22 @@ export default function ClaimsPage() {
       {/* List / Table */}
       <div ref={scrollRef} className="flex-1 overflow-auto min-h-0" data-list-body style={{WebkitOverflowScrolling: 'touch'}}>
         {isLoading ? (
-          <div className="flex items-center justify-center h-32 text-sm text-muted-foreground">Loading claims...</div>
+          <div className="p-4 space-y-2" aria-busy="true" aria-label="Loading claims">
+            {[0, 1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className="flex items-center gap-4 rounded-lg px-2 py-2.5">
+                <div className="h-4 w-20 rounded bg-muted animate-pulse" />
+                <div className="h-4 flex-1 rounded bg-muted animate-pulse" />
+                <div className="h-4 w-32 rounded bg-muted animate-pulse" />
+                <div className="h-5 w-24 rounded-full bg-muted animate-pulse" />
+              </div>
+            ))}
+          </div>
         ) : filteredClaims.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-32 gap-2">
             <p className="text-sm text-muted-foreground">{activeFiltersCount > 0 ? 'No claims match your filters' : 'No claims found'}</p>
             {activeFiltersCount > 0
-              ? <button onClick={clearAllFilters} className="text-xs text-info-fg hover:underline">Clear filters</button>
-              : <button onClick={() => setShowForm(true)} className="text-xs text-info-fg hover:underline">Create first claim</button>
+              ? <button onClick={clearAllFilters} className="text-[13px] text-link hover:underline">Clear filters</button>
+              : <button onClick={() => setShowForm(true)} className="text-[13px] text-link hover:underline">Create the first claim</button>
             }
           </div>
         ) : (
