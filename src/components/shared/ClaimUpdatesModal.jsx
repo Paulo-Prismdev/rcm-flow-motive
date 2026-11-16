@@ -354,10 +354,12 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2"><Clock className="w-5 h-5 text-primary" />Official Updates - Activity Log</DialogTitle>
-          <p className="text-xs text-muted-foreground mt-1">Client Communication updates reset the 48-hour tracking timer. All updates create an audit trail.</p>
+      {/* Phones: slides up from the bottom over the claim, so the claim stays in view behind it */}
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col max-md:top-auto max-md:bottom-0 max-md:h-[88dvh] max-md:max-h-[88dvh] max-md:rounded-t-2xl max-md:rounded-b-none max-md:pt-2 max-md:gap-3">
+        <div className="md:hidden mx-auto h-1.5 w-10 rounded-full bg-border" aria-hidden="true" />
+        <DialogHeader className="max-md:text-left">
+          <DialogTitle className="flex items-center gap-2"><Clock className="w-5 h-5 text-primary max-md:hidden" /><span className="md:hidden text-lg">Updates</span><span className="max-md:hidden">Official Updates - Activity Log</span>{updates.length > 0 && <span className="md:hidden text-xs font-medium text-muted-foreground bg-muted rounded-full px-2 py-0.5">{updates.filter(u => !u.parent_update_id).length}</span>}</DialogTitle>
+          <p className="text-xs text-muted-foreground mt-1 max-md:hidden">Client Communication updates reset the 48-hour tracking timer. All updates create an audit trail.</p>
         </DialogHeader>
 
         <div className="flex-1 overflow-y-auto overflow-x-hidden space-y-4 pr-2">
@@ -464,6 +466,19 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
                             <div className="text-xs text-muted-foreground flex items-center gap-1 mb-1.5">
                               <AtSign className="w-3 h-3 flex-shrink-0" />
                               <span className="truncate">{update.contacted_party_detail}</span>
+                            </div>
+                          )}
+                          {update.status_change?.changed?.length > 0 && (
+                            <div className="flex flex-col gap-1 mb-2">
+                              {update.status_change.changed.map(k => (
+                                <div key={k} className="flex items-center gap-1.5 flex-wrap text-xs">
+                                  <span className="text-muted-foreground w-[70px] flex-shrink-0">{{ outcome: 'Outcome', journey: 'Journey', secondary: 'Internal', tertiary: 'Additional' }[k] || k}</span>
+                                  <span className="px-1.5 py-0.5 rounded-md bg-muted text-muted-foreground line-through decoration-muted-foreground/50">{update.status_change.from?.[k] || 'None'}</span>
+                                  <span className="text-muted-foreground" aria-label="changed to">→</span>
+                                  <span className="px-1.5 py-0.5 rounded-md bg-info-bg text-info-fg font-medium">{update.status_change.to?.[k] || 'None'}</span>
+                                </div>
+                              ))}
+                              {update.status_change.source === 'auto' && <span className="text-xs text-muted-foreground">Changed automatically by Flowmotive</span>}
                             </div>
                           )}
                           {update.description && <div className="text-sm mb-2"><p className="text-foreground whitespace-pre-wrap"><Highlight text={update.description} query={q} /></p></div>}
