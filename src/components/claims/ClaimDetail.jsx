@@ -653,10 +653,12 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
         if (primaryChanged) parts.push(`Status changed from "${oldStatus}" to "${newStatus}"`);
         if (secondaryChanged) parts.push(`Secondary status changed from "${oldSec || 'None'}" to "${newSec || 'None'}"`);
 
+        const statusRecord = buildStatusChangeRecord(claim, updatedData);
         try {
         await base44.entities.ClaimUpdate.create({
             claim_id: claim.id,
             update_type: 'Status Change',
+            ...(statusRecord && { status_change: statusRecord }),
             description: parts.join(' · '),
             next_steps: '',
             due_date_for_next_action: ''
