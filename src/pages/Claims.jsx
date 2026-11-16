@@ -820,7 +820,7 @@ export default function ClaimsPage() {
   };
 
   const claimsListView = (
-    <div className="flex flex-col h-full min-h-0 bg-card lg:rounded-xl lg:border lg:border-border overflow-hidden lg:shadow-card" data-list-shell>
+    <div className="flex flex-col h-full min-h-0 bg-card max-md:bg-transparent lg:rounded-xl lg:border lg:border-border overflow-hidden lg:shadow-card" data-list-shell>
       <ImportClaimsModal isOpen={showImportModal} onClose={() => setShowImportModal(false)}
         onImportComplete={() => { queryClient.invalidateQueries({ queryKey: ['claims'] }); setShowImportModal(false); }} />
       <ClaimCardFieldsModal isOpen={showFieldsModal} onClose={() => setShowFieldsModal(false)}
