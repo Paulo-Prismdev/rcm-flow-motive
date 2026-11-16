@@ -773,11 +773,14 @@ export default function ClaimsPage() {
     const outcome = getClaimOutcome(claim);
     const line2 = [isExceptionOutcome(outcome) ? outcome : null, claim.secondary_status, claim.bodyshop].filter(Boolean).join(' · ');
     return (
+      <div
+        key={claim.id}
+        className="relative flex items-center [&+&]:before:absolute [&+&]:before:top-0 [&+&]:before:left-3.5 [&+&]:before:right-0 [&+&]:before:h-px [&+&]:before:bg-border"
+      >
       <button
         type="button"
-        key={claim.id}
         onClick={() => setSelectedClaim(claim)}
-        className="relative w-full flex items-center gap-3 px-3.5 py-3 text-left active:bg-muted [&+&]:before:absolute [&+&]:before:top-0 [&+&]:before:left-3.5 [&+&]:before:right-0 [&+&]:before:h-px [&+&]:before:bg-border"
+        className="flex-1 min-w-0 flex items-center gap-3 pl-3.5 pr-1 py-3 text-left active:bg-muted"
       >
         <span className="flex-1 min-w-0">
           <span className="flex flex-nowrap items-center gap-2 min-w-0">
@@ -795,8 +798,17 @@ export default function ClaimsPage() {
             </span>
           )}
         </span>
-        <ChevronRight className="w-4 h-4 text-muted-foreground/70 flex-shrink-0" aria-hidden="true" />
       </button>
+      <button
+        type="button"
+        onClick={() => setQuickInfoClaim(claim)}
+        aria-label={`Quick view ${claim.reg || 'claim'}`}
+        title="Quick view"
+        className="flex-shrink-0 self-stretch w-12 flex items-center justify-center text-muted-foreground active:bg-muted active:text-foreground"
+      >
+        <Eye className="w-5 h-5" />
+      </button>
+      </div>
     );
   };
   const phoneGroup = (label, claims, key, collapsible) => {
