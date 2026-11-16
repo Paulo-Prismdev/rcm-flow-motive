@@ -133,12 +133,15 @@ const Plate = ({ reg }) => (
 export function ClaimMobileSectionBar({ claim, title, onBack, onAction, isInternalUser }) {
   return (
     <div data-claim-header className="lg:hidden sticky top-0 flex-shrink-0 bg-card/90 backdrop-blur-md">
-      <div className="relative flex items-center justify-between gap-1 px-2 min-h-[48px]">
-        <button type="button" onClick={onBack} className="relative z-10 flex items-center gap-0.5 pr-2 py-2 text-link font-medium whitespace-nowrap">
-          <ChevronLeft className="w-6 h-6 flex-shrink-0" aria-hidden="true" /><span className="text-[15px]">{claim.reg || 'Claim'}</span>
+      <div className="flex flex-nowrap items-center gap-1 px-2 min-h-[52px]">
+        <button type="button" onClick={onBack} aria-label={`Back to ${claim.reg || 'the claim'}`} className="flex-1 min-w-0 flex flex-nowrap items-center gap-1 py-1.5 text-left">
+          <ChevronLeft className="w-6 h-6 flex-shrink-0 text-link" aria-hidden="true" />
+          <span className="min-w-0">
+            <span className="block text-xs font-medium text-link leading-tight">{claim.reg || 'Claim'}</span>
+            <span className="block text-base font-semibold leading-tight truncate">{title}</span>
+          </span>
         </button>
-        <h1 className="absolute inset-x-[110px] text-center text-[15px] font-semibold truncate pointer-events-none">{title}</h1>
-        <span className="relative z-10"><MoreMenu claim={claim} onAction={onAction} isInternalUser={isInternalUser} /></span>
+        <MoreMenu claim={claim} onAction={onAction} isInternalUser={isInternalUser} />
       </div>
     </div>
   );
