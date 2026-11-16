@@ -228,7 +228,7 @@ export default function AuthorityReviewModal({
           </div>
           <div className="min-w-0 flex-1">
             <h3 className="text-sm font-bold text-foreground">Check this authority before it's saved</h3>
-            <p className="text-[11px] text-muted-foreground truncate">
+            <p className="text-xs text-muted-foreground truncate">
               {item?.label} · {fileName}
             </p>
           </div>
@@ -239,7 +239,7 @@ export default function AuthorityReviewModal({
 
         <div className="flex-1 flex flex-col md:flex-row overflow-hidden min-h-0">
           <div className="md:w-[55%] h-52 md:h-full border-b md:border-b-0 md:border-r border-border flex flex-col min-h-0">
-            <div className="px-3 py-1.5 bg-muted/40 border-b border-border text-[10px] font-semibold uppercase tracking-wider text-muted-foreground flex-shrink-0">
+            <div className="px-3 py-1.5 bg-muted/40 border-b border-border text-xs font-semibold text-muted-foreground flex-shrink-0">
               The authority
             </div>
             <div className="flex-1 min-h-0">
@@ -251,16 +251,16 @@ export default function AuthorityReviewModal({
             {status === 'reading' && (
               <div className="flex items-center gap-2 rounded-lg border border-purple-300 dark:border-purple-800 bg-purple-50 dark:bg-purple-900/20 px-2.5 py-2">
                 <Loader2 className="w-4 h-4 animate-spin text-purple-600 dark:text-purple-400 flex-shrink-0" />
-                <p className="text-[11px] font-semibold text-purple-700 dark:text-purple-300">
+                <p className="text-xs font-semibold text-purple-700 dark:text-purple-300">
                   Reading the authority — the three figures will appear here.
                 </p>
               </div>
             )}
 
             {status === 'failed' && (
-              <div className="flex items-start gap-2 rounded-lg border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20 px-2.5 py-2">
-                <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-px" />
-                <p className="text-[11px] font-semibold text-amber-800 dark:text-amber-300">
+              <div className="flex items-start gap-2 rounded-lg border border-warning/30 bg-warning-bg px-2.5 py-2">
+                <AlertTriangle className="w-4 h-4 text-warning-fg flex-shrink-0 mt-px" />
+                <p className="text-xs font-semibold text-warning-fg">
                   We couldn't read this document. Enter the authorised amount and the vehicle registration yourself —
                   everything else on this screen still applies.
                 </p>
@@ -286,11 +286,11 @@ export default function AuthorityReviewModal({
             </div>
 
             {status !== 'reading' && (missingRequired.length > 0 || unreviewed.length > 0) && (
-              <div className="rounded-lg border border-red-300 dark:border-red-800 bg-red-50 dark:bg-red-900/20 p-2.5">
-                <p className="flex items-start gap-1.5 text-[11px] font-semibold text-red-700 dark:text-red-400">
+              <div className="rounded-lg border border-danger/30 bg-danger-bg p-2.5">
+                <p className="flex items-start gap-1.5 text-xs font-semibold text-danger-fg">
                   <ShieldAlert className="w-3.5 h-3.5 flex-shrink-0 mt-px" /> Before this can be saved
                 </p>
-                <ul className="mt-1 pl-5 space-y-0.5 list-disc text-[11px] leading-snug text-red-700/90 dark:text-red-400/90">
+                <ul className="mt-1 pl-5 space-y-0.5 list-disc text-xs leading-snug text-danger-fg">
                   {missingRequired.map((msg) => <li key={msg}>{msg}</li>)}
                   {unreviewed.length > 0 && (
                     <li>

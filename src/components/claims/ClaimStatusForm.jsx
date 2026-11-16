@@ -53,7 +53,7 @@ export default function ClaimStatusForm({ claim, onSave, onCancel }) {
         <div className="space-y-4 pt-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label className="text-sm text-gray-500">Job Status</label>
+                    <label className="text-sm text-muted-foreground">Job Status</label>
                     <StatusMultiSelect
                         selectedStatuses={formData.job_statuses}
                         onStatusesChange={(statuses) => handleChange('job_statuses', statuses)}
@@ -62,11 +62,11 @@ export default function ClaimStatusForm({ claim, onSave, onCancel }) {
                     />
                 </div>
                 <div>
-                    <label className="text-sm text-gray-500">Claim Type</label>
+                    <label className="text-sm text-muted-foreground">Claim Type</label>
                     <select 
                         value={formData.claim_type} 
                         onChange={e => handleChange('claim_type', e.target.value)} 
-                        className="neomorph-inset w-full px-4 py-3 text-gray-700 border-0 rounded-xl"
+                        className="neomorph-inset w-full px-4 py-3 text-foreground border-0 rounded-xl"
                     >
                         <option value="Credit Repair">Credit Repair</option>
                         <option value="Fault Claim">Fault Claim</option>
@@ -78,29 +78,29 @@ export default function ClaimStatusForm({ claim, onSave, onCancel }) {
                     </select>
                 </div>
                 <div>
-                    <label className="text-sm text-gray-500">Date of Loss</label>
+                    <label className="text-sm text-muted-foreground">Date of Loss</label>
                     <Input 
                         type="date" 
                         value={formData.loss_date} 
                         onChange={e => handleChange('loss_date', e.target.value)} 
-                        className="neomorph-inset px-4 py-3 text-gray-700 border-0" 
+                        className="neomorph-inset px-4 py-3 text-foreground border-0" 
                     />
                 </div>
                 <div>
-                    <label className="text-sm text-gray-500">Time of Loss</label>
+                    <label className="text-sm text-muted-foreground">Time of Loss</label>
                     <Input 
                         type="time" 
                         value={formData.loss_time} 
                         onChange={e => handleChange('loss_time', e.target.value)} 
-                        className="neomorph-inset px-4 py-3 text-gray-700 border-0" 
+                        className="neomorph-inset px-4 py-3 text-foreground border-0" 
                     />
                 </div>
                 <div>
-                    <label className="text-sm text-gray-500">Use of Vehicle</label>
+                    <label className="text-sm text-muted-foreground">Use of Vehicle</label>
                     <select 
                         value={formData.vehicle_use} 
                         onChange={e => handleChange('vehicle_use', e.target.value)} 
-                        className="neomorph-inset w-full px-4 py-3 text-gray-700 border-0 rounded-xl"
+                        className="neomorph-inset w-full px-4 py-3 text-foreground border-0 rounded-xl"
                     >
                         <option value="">Not specified</option>
                         <option value="Business">Business</option>
@@ -110,7 +110,7 @@ export default function ClaimStatusForm({ claim, onSave, onCancel }) {
                 </div>
             </div>
             <div>
-                <label className="text-sm text-gray-500">Incident Location</label>
+                <label className="text-sm text-muted-foreground">Incident Location</label>
                 <AddressLookupInput
                     value={formData.incident_location}
                     onChange={handleIncidentLocationChange}
@@ -120,31 +120,31 @@ export default function ClaimStatusForm({ claim, onSave, onCancel }) {
                 <Input 
                     value={formData.incident_location} 
                     onChange={e => handleChange('incident_location', e.target.value)} 
-                    className="neomorph-inset px-4 py-3 text-gray-700 border-0 mt-2" 
+                    className="neomorph-inset px-4 py-3 text-foreground border-0 mt-2" 
                     placeholder="Or enter manually"
                 />
             </div>
             <div>
-                <label className="text-sm text-gray-500">Circumstances</label>
+                <label className="text-sm text-muted-foreground">Circumstances</label>
                 <Textarea 
                     value={formData.circumstances} 
                     onChange={e => handleChange('circumstances', e.target.value)} 
-                    className="neomorph-inset px-4 py-3 text-gray-700 border-0 h-24" 
+                    className="neomorph-inset px-4 py-3 text-foreground border-0 h-24" 
                 />
             </div>
             <div>
-                <label className="text-sm text-gray-500">Courtesy Car Required</label>
+                <label className="text-sm text-muted-foreground">Courtesy Car Required</label>
                 <select
                     value={formData.courtesy_car_required || 'No'}
                     onChange={e => handleChange('courtesy_car_required', e.target.value)}
-                    className="neomorph-inset w-full px-4 py-3 text-gray-700 border-0 rounded-xl"
+                    className="neomorph-inset w-full px-4 py-3 text-foreground border-0 rounded-xl"
                 >
                     {COURTESY_CAR_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
                 </select>
             </div>
             <div className="flex justify-end gap-3 pt-4">
                 <Button onClick={onCancel} className="neomorph-flat">Cancel</Button>
-                <Button onClick={handleSave} className="neomorph-flat text-blue-600">Save Changes</Button>
+                <Button onClick={handleSave} className="neomorph-flat text-info-fg">Save Changes</Button>
             </div>
         </div>
     );

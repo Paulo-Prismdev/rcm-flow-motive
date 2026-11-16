@@ -1071,7 +1071,7 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
         )}
 
         {preparingRequest && (
-          <p className="text-[11px] text-muted-foreground">Preparing the accounts request…</p>
+          <p className="text-xs text-muted-foreground">Preparing the accounts request…</p>
         )}
 
         <input

@@ -18,14 +18,14 @@ export default function CustomerShareLines({ comparison, tone = 'neutral', class
   if (lines.length === 0) return null;
 
   const toneClass = {
-    match: 'text-green-700/90 dark:text-green-400/90',
-    over: 'text-red-700/90 dark:text-red-400/90',
-    under: 'text-amber-800/90 dark:text-amber-300/90',
+    match: 'text-success-fg',
+    over: 'text-danger-fg',
+    under: 'text-warning-fg',
     neutral: 'text-muted-foreground',
   }[tone] || 'text-muted-foreground';
 
   return (
-    <div className={`space-y-0.5 text-[11px] leading-snug ${toneClass} ${className}`}>
+    <div className={`space-y-0.5 text-xs leading-snug ${toneClass} ${className}`}>
       {lines.map((line) => <p key={line}>{line}</p>)}
     </div>
   );

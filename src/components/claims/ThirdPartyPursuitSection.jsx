@@ -292,7 +292,7 @@ export default function ThirdPartyPursuitSection({ claim, onUpdate }) {
     return (
       <div className="neomorph-flat p-4 md:p-6 border-l-4 border-gray-400">
         <div className="flex items-center gap-3 mb-4">
-          <XCircle className="w-5 h-5 text-gray-500" />
+          <XCircle className="w-5 h-5 text-muted-foreground" />
           <h3 className="font-bold">Third-Party Capture Not Required</h3>
         </div>
         <div className="neomorph-inset p-3 rounded-lg">
@@ -318,9 +318,9 @@ export default function ThirdPartyPursuitSection({ claim, onUpdate }) {
   // If a TP claim already exists, show the link
   if (claim.linked_third_party_claim_id && linkedTPClaim) {
     return (
-      <div className="neomorph-flat p-4 md:p-6 border-l-4 border-green-500">
+      <div className="neomorph-flat p-4 md:p-6 border-l-4 border-success">
         <div className="flex items-center gap-3 mb-4">
-          <Check className="w-5 h-5 text-green-500" />
+          <Check className="w-5 h-5 text-success-fg" />
           <h3 className="font-bold">Third-Party Claim Created</h3>
         </div>
         <p className="text-sm text-foreground-muted mb-4">
@@ -343,10 +343,10 @@ export default function ThirdPartyPursuitSection({ claim, onUpdate }) {
   // Show the creation form
   if (isCreatingClaim) {
     return (
-      <div className="neomorph-flat p-4 md:p-6 border-l-4 border-amber-500">
+      <div className="neomorph-flat p-4 md:p-6 border-l-4 border-warning">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <UserPlus className="w-5 h-5 text-amber-500" />
+            <UserPlus className="w-5 h-5 text-warning-fg" />
             <h3 className="font-bold">Third-Party Details</h3>
           </div>
           <Button 
@@ -493,53 +493,53 @@ export default function ThirdPartyPursuitSection({ claim, onUpdate }) {
                 </Button>
               </div>
               {vehicleLookupError && (
-                <div className="flex items-start gap-2 p-3 bg-orange-50 border border-orange-200 rounded-lg">
-                  <AlertCircle className="w-4 h-4 text-orange-600 flex-shrink-0 mt-0.5" />
-                  <p className="text-xs text-orange-800 whitespace-pre-line">{vehicleLookupError}</p>
+                <div className="flex items-start gap-2 p-3 bg-warning-bg border border-warning/30 rounded-lg">
+                  <AlertCircle className="w-4 h-4 text-warning-fg flex-shrink-0 mt-0.5" />
+                  <p className="text-xs text-warning-fg whitespace-pre-line">{vehicleLookupError}</p>
                 </div>
               )}
               {vehicleData && !vehicleLookupError && (
-                <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
-                  <p className="text-sm text-green-700 font-semibold mb-2">✓ Vehicle found</p>
+                <div className="p-3 bg-success-bg border border-success/30 rounded-lg">
+                  <p className="text-sm text-success-fg font-semibold mb-2">✓ Vehicle found</p>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-xs">
                     <div>
-                      <span className="text-green-600">Make/Model:</span>
-                      <p className="font-bold text-green-800">{vehicleData.make_model}</p>
+                      <span className="text-success-fg">Make/Model:</span>
+                      <p className="font-bold text-success-fg">{vehicleData.make_model}</p>
                     </div>
                     {vehicleData.colour && (
                       <div>
-                        <span className="text-green-600">Colour:</span>
-                        <p className="font-medium text-green-800">{vehicleData.colour}</p>
+                        <span className="text-success-fg">Colour:</span>
+                        <p className="font-medium text-success-fg">{vehicleData.colour}</p>
                       </div>
                     )}
                     {vehicleData.year_of_manufacture && (
                       <div>
-                        <span className="text-green-600">Year:</span>
-                        <p className="font-medium text-green-800">{vehicleData.year_of_manufacture}</p>
+                        <span className="text-success-fg">Year:</span>
+                        <p className="font-medium text-success-fg">{vehicleData.year_of_manufacture}</p>
                       </div>
                     )}
                     {vehicleData.fuel_type && (
                       <div>
-                        <span className="text-green-600">Fuel:</span>
-                        <p className="font-medium text-green-800">{vehicleData.fuel_type}</p>
+                        <span className="text-success-fg">Fuel:</span>
+                        <p className="font-medium text-success-fg">{vehicleData.fuel_type}</p>
                       </div>
                     )}
                     {vehicleData.engine_capacity && (
                       <div>
-                        <span className="text-green-600">Engine:</span>
-                        <p className="font-medium text-green-800">{vehicleData.engine_capacity}cc</p>
+                        <span className="text-success-fg">Engine:</span>
+                        <p className="font-medium text-success-fg">{vehicleData.engine_capacity}cc</p>
                       </div>
                     )}
                     {vehicleData.mot_status && (
                       <div>
-                        <span className="text-green-600">MOT:</span>
-                        <p className="font-medium text-green-800">{vehicleData.mot_status}</p>
+                        <span className="text-success-fg">MOT:</span>
+                        <p className="font-medium text-success-fg">{vehicleData.mot_status}</p>
                       </div>
                     )}
                     {vehicleData.tax_status && (
                       <div>
-                        <span className="text-green-600">Tax:</span>
-                        <p className="font-medium text-green-800">{vehicleData.tax_status}</p>
+                        <span className="text-success-fg">Tax:</span>
+                        <p className="font-medium text-success-fg">{vehicleData.tax_status}</p>
                       </div>
                     )}
                   </div>
@@ -627,9 +627,9 @@ export default function ThirdPartyPursuitSection({ claim, onUpdate }) {
 
   // Default: Show the prompt banner
   return (
-    <div className="neomorph-flat p-4 md:p-6 border-l-4 border-amber-500">
+    <div className="neomorph-flat p-4 md:p-6 border-l-4 border-warning">
       <div className="flex items-center gap-3 mb-3">
-        <AlertTriangle className="w-5 h-5 text-amber-500" />
+        <AlertTriangle className="w-5 h-5 text-warning-fg" />
         <h3 className="font-bold">Third-Party Pursuit Required</h3>
       </div>
       <p className="text-sm text-foreground-muted mb-4">
@@ -639,10 +639,10 @@ export default function ThirdPartyPursuitSection({ claim, onUpdate }) {
         <span className="text-xs font-semibold text-foreground-muted">Status:</span>
         <span className={`neomorph-flat px-2 py-1 text-xs font-medium ${
           claim.third_party_pursuit_status === 'Awaiting Details' 
-            ? 'text-amber-600' 
+            ? 'text-warning-fg' 
             : claim.third_party_pursuit_status === 'Details Obtained'
-            ? 'text-blue-600'
-            : 'text-gray-600'
+            ? 'text-info-fg'
+            : 'text-muted-foreground'
         }`}>
           {claim.third_party_pursuit_status || 'Awaiting Details'}
         </span>
@@ -663,7 +663,7 @@ export default function ThirdPartyPursuitSection({ claim, onUpdate }) {
         </Button>
         <Button
           onClick={() => setIsRejectingCapture(true)}
-          className="neomorph-flat px-4 py-2 flex items-center gap-2 text-gray-600"
+          className="neomorph-flat px-4 py-2 flex items-center gap-2 text-muted-foreground"
         >
           <XCircle className="w-4 h-4" />
           Not Applicable
@@ -692,7 +692,7 @@ export default function ThirdPartyPursuitSection({ claim, onUpdate }) {
                 setIsRejectingCapture(false);
                 setRejectReason('');
               }}
-              className="neomorph-flat px-4 py-2 text-sm text-gray-600"
+              className="neomorph-flat px-4 py-2 text-sm text-muted-foreground"
             >
               Cancel
             </Button>

@@ -28,7 +28,7 @@ export default function FinancialStatusLine({ status, currentStep, stepCount, mi
   const tone = TRACKER_TONES[meta.tone] || TRACKER_TONES.neutral;
 
   return (
-    <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 rounded-[10px] border border-border bg-card px-3 py-2">
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 rounded-lg border border-border bg-card px-3 py-2">
       <div className={`inline-flex items-center gap-1.5 rounded-lg border border-l-4 px-2.5 py-1 ${tone.card}`}>
         <span className={`w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0 ${tone.iconWrap}`}>
           {GLYPHS[meta.tone] || GLYPHS.neutral}
@@ -44,21 +44,21 @@ export default function FinancialStatusLine({ status, currentStep, stepCount, mi
       )}
 
       {missing.length > 0 && (
-        <p className="flex items-center gap-1.5 text-[11px] text-amber-600 dark:text-amber-400">
+        <p className="flex items-center gap-1.5 text-xs text-warning-fg">
           <Hourglass className="w-3.5 h-3.5 flex-shrink-0" />
           Needs {missing.map((m) => m.label).join(', ')} before every invoice can be raised.
         </p>
       )}
 
       {copies.length > 0 && (
-        <p className="flex items-center gap-1.5 text-[11px] text-amber-600 dark:text-amber-400">
+        <p className="flex items-center gap-1.5 text-xs text-warning-fg">
           <Paperclip className="w-3.5 h-3.5 flex-shrink-0" />
           Copy still needed: {shortList(copies)}
         </p>
       )}
 
       {payments.length > 0 && (
-        <p className="flex items-center gap-1.5 text-[11px] text-amber-600 dark:text-amber-400">
+        <p className="flex items-center gap-1.5 text-xs text-warning-fg">
           <PoundSterling className="w-3.5 h-3.5 flex-shrink-0" />
           Still to pay: {shortList(payments)}
         </p>

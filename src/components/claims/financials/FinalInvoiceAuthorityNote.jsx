@@ -25,9 +25,9 @@ export default function FinalInvoiceAuthorityNote({
 }) {
   if (awaitingCorrected) {
     return (
-      <div className="flex flex-wrap items-center gap-2 rounded-[10px] border border-amber-300 bg-amber-50 px-3 py-2 dark:border-amber-700 dark:bg-amber-900/20">
-        <AlertTriangle className="h-3.5 w-3.5 flex-shrink-0 text-amber-600 dark:text-amber-400" />
-        <p className="min-w-[200px] flex-1 text-[11px] text-amber-800 dark:text-amber-200">
+      <div className="flex flex-wrap items-center gap-2 rounded-lg border border-warning/30 bg-warning-bg px-3 py-2">
+        <AlertTriangle className="h-3.5 w-3.5 flex-shrink-0 text-warning-fg" />
+        <p className="min-w-[200px] flex-1 text-xs text-warning-fg">
           {comparison?.expected != null
             ? `Awaiting a corrected ${label} — invoiced ${fmtGBP(comparison.insurerPart)} against the ${fmtGBP(comparison.expected)} the insurer's share of this repair comes to. A corrected copy at that amount clears this.`
             : `Awaiting a corrected ${label} from the repairer. A corrected copy clears this.`}
@@ -36,7 +36,7 @@ export default function FinalInvoiceAuthorityNote({
           <button
             type="button"
             onClick={onReinvoice}
-            className="inline-flex items-center gap-1 text-[10px] font-semibold text-amber-800 dark:text-amber-300 hover:underline"
+            className="inline-flex items-center gap-1 text-xs font-semibold text-warning-fg hover:underline"
           >
             <Mail className="w-3 h-3" /> Email the repairer
           </button>
@@ -63,9 +63,9 @@ export default function FinalInvoiceAuthorityNote({
   // so the insurer's share of it — isn't known yet.
   if (tone === 'wait') {
     return (
-      <div className="flex flex-wrap items-center gap-2 rounded-[10px] border border-border bg-muted/30 px-3 py-2">
+      <div className="flex flex-wrap items-center gap-2 rounded-lg border border-border bg-muted/30 px-3 py-2">
         <Hourglass className="h-3.5 w-3.5 flex-shrink-0 text-muted-foreground" />
-        <p className="min-w-[200px] flex-1 text-[11px] text-muted-foreground">
+        <p className="min-w-[200px] flex-1 text-xs text-muted-foreground">
           {comparison.reason === 'no_final_authority'
             ? `${label} ${fmtGBP(insurerPart)} — waiting for the Final Authority. Only the Final Authority is used for this check, and none has been recorded on this claim yet. It is checked as soon as one arrives.`
             : <>{split ? 'Insurer’s share' : 'Insurer invoice'} {fmtGBP(insurerPart)} — waiting for the policy excess. The excess
@@ -78,9 +78,9 @@ export default function FinalInvoiceAuthorityNote({
 
   if (tone === 'ok') {
     return (
-      <div className="space-y-1 rounded-[10px] border border-green-300 dark:border-green-800 bg-green-50 dark:bg-green-900/20 px-3 py-2">
-        <p className="flex items-start gap-2 text-[11px] font-semibold text-green-700 dark:text-green-400">
-          <span className="mt-px w-4 h-4 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
+      <div className="space-y-1 rounded-lg border border-success/30 bg-success-bg px-3 py-2">
+        <p className="flex items-start gap-2 text-xs font-semibold text-success-fg">
+          <span className="mt-px w-4 h-4 rounded-full bg-success flex items-center justify-center flex-shrink-0">
             <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />
           </span>
           <span>{split ? headline.text : `${authorityWorkings(comparison)} — the ${label} total of ${fmtGBP(insurerPart)} matches.`}</span>
@@ -105,13 +105,13 @@ export default function FinalInvoiceAuthorityNote({
       : '';
 
   return (
-    <div className={`space-y-1 rounded-[10px] border px-3 py-2 ${over
-      ? 'border-red-300 bg-red-50 dark:border-red-800 dark:bg-red-900/20'
-      : 'border-amber-300 bg-amber-50 dark:border-amber-700 dark:bg-amber-900/20'}`}
+    <div className={`space-y-1 rounded-lg border px-3 py-2 ${over
+      ? 'border-danger/30 bg-danger-bg'
+      : 'border-warning/30 bg-warning-bg'}`}
     >
       <div className="flex flex-wrap items-center gap-2">
-        <AlertTriangle className={`h-3.5 w-3.5 flex-shrink-0 ${over ? 'text-red-600 dark:text-red-400' : 'text-amber-600 dark:text-amber-400'}`} />
-        <p className={`min-w-[200px] flex-1 text-[11px] ${over ? 'text-red-800 dark:text-red-200' : 'text-amber-800 dark:text-amber-200'}`}>
+        <AlertTriangle className={`h-3.5 w-3.5 flex-shrink-0 ${over ? 'text-danger-fg' : 'text-warning-fg'}`} />
+        <p className={`min-w-[200px] flex-1 text-xs ${over ? 'text-danger-fg' : 'text-warning-fg'}`}>
           <span className="font-semibold">
             {over ? `${workings} The ${label} is ${invoiced}.` : workings}
           </span>{' '}
@@ -121,7 +121,7 @@ export default function FinalInvoiceAuthorityNote({
           <button
             type="button"
             onClick={onReinvoice}
-            className={`inline-flex items-center gap-1 text-[10px] font-semibold hover:underline ${over ? 'text-red-700 dark:text-red-300' : 'text-amber-800 dark:text-amber-300'}`}
+            className={`inline-flex items-center gap-1 text-xs font-semibold hover:underline ${over ? 'text-danger-fg' : 'text-warning-fg'}`}
           >
             <Mail className="w-3 h-3" /> Email the repairer
           </button>

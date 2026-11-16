@@ -113,7 +113,7 @@ export default function SecondReferrerToggle({ claim, missing = [], onTrackerCha
   };
 
   const warns = (id, name) => sameAsMain(claim, id, name) && (
-    <p className="flex items-start gap-1.5 px-1 text-[11px] text-amber-600 dark:text-amber-400">
+    <p className="flex items-start gap-1.5 px-1 text-xs text-warning-fg">
       <AlertTriangle className="mt-px h-3.5 w-3.5 flex-shrink-0" strokeWidth={1.8} />
       <span>This is the same referrer as the main referrer on this claim.</span>
     </p>
@@ -151,17 +151,17 @@ export default function SecondReferrerToggle({ claim, missing = [], onTrackerCha
         title={enabled ? `Second referrer – ${storedName || 'not linked'}` : 'Second referrer'}
         action={editing ? (
           <span className="flex items-center gap-1">
-            <MacButton onClick={() => setEditingKey(null)} className="h-6 px-2 text-[11px]">Cancel</MacButton>
-            <MacPrimaryButton onClick={save} className="h-6 px-2 text-[11px]">Save</MacPrimaryButton>
+            <MacButton onClick={() => setEditingKey(null)} className="h-6 px-2 text-[10px]">Cancel</MacButton>
+            <MacPrimaryButton onClick={save} className="h-6 px-2 text-[10px]">Save</MacPrimaryButton>
           </span>
         ) : (
-          <MacButton onClick={() => setEditingKey('second_referrer')} className="h-6 px-2 text-[11px]">Edit</MacButton>
+          <MacButton onClick={() => setEditingKey('second_referrer')} className="h-6 px-2 text-[10px]">Edit</MacButton>
         )}
         footer={!editing && enabled && (!storedId || sameAsMain(claim, storedId, storedName))
           ? (
             <>
               {!storedId && (
-                <p className="flex items-start gap-1.5 px-1 text-[11px] text-amber-600 dark:text-amber-400">
+                <p className="flex items-start gap-1.5 px-1 text-xs text-warning-fg">
                   <AlertTriangle className="mt-px h-3.5 w-3.5 flex-shrink-0" strokeWidth={1.8} />
                   <span>
                     {storedName

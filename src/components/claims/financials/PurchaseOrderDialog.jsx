@@ -105,7 +105,7 @@ export default function PurchaseOrderDialog({ open, onClose, claim, onIssued }) 
               </p>
             )}
             {existing && (
-              <p className="text-[11px] text-muted-foreground mt-1">
+              <p className="text-xs text-muted-foreground mt-1">
                 The current order stands at {fmtGBP(Number(existing.total) || 0)}.
               </p>
             )}
@@ -118,7 +118,7 @@ export default function PurchaseOrderDialog({ open, onClose, claim, onIssued }) 
               { key: 'total', label: 'Total inc VAT' },
             ].map((field) => (
               <label key={field.key} className="space-y-1">
-                <span className="text-[11px] font-semibold text-muted-foreground block">{field.label}</span>
+                <span className="text-xs font-semibold text-muted-foreground block">{field.label}</span>
                 <Input
                   value={amounts[field.key]}
                   onChange={(e) => setAmount(field.key, e.target.value)}

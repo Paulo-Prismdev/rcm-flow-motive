@@ -87,10 +87,10 @@ export default function IntakeClientChoice({ values = {}, referrerLink = null, c
 
   return (
     <div className="space-y-1.5">
-      <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Client — who is it?</p>
+      <p className="text-xs font-semibold text-muted-foreground">Client — who is it?</p>
 
       {probable.yes && (
-        <p className="rounded-lg border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20 px-2.5 py-1.5 text-[11px] font-semibold text-amber-800 dark:text-amber-300">
+        <p className="rounded-lg border border-warning/30 bg-warning-bg px-2.5 py-1.5 text-xs font-semibold text-warning-fg">
           Likely a company: {probable.reason}.
         </p>
       )}
@@ -105,8 +105,8 @@ export default function IntakeClientChoice({ values = {}, referrerLink = null, c
         <IntakeClientSuggestions suggestions={suggestions} selectedId={choice?.record?.id} onPick={pick} />
         <ClientCombobox value={choice?.record?.name || ''} onChange={pick} placeholder="Search the client directory..." />
         {choice?.record && (
-          <p className="flex items-center gap-1 text-[11px] text-muted-foreground">
-            <Check className="w-3 h-3 text-green-600 flex-shrink-0" />
+          <p className="flex items-center gap-1 text-xs text-muted-foreground">
+            <Check className="w-3 h-3 text-success-fg flex-shrink-0" />
             Using “{choice.record.name}”{choice.suggested ? ' — suggested from the instruction' : ''}
           </p>
         )}
@@ -122,7 +122,7 @@ export default function IntakeClientChoice({ values = {}, referrerLink = null, c
         <Button type="button" variant="outline" size="sm" className="w-full gap-1.5 text-xs" onClick={() => setAdding(true)}>
           <Plus className="w-3.5 h-3.5" /> Add the client and their details
         </Button>
-        <p className="text-[10px] text-muted-foreground">
+        <p className="text-xs text-muted-foreground">
           {probable.yes && driverReady
             ? 'The driver is added as the first contact on the company.'
             : 'A company can carry the driver as its contact.'}
@@ -137,7 +137,7 @@ export default function IntakeClientChoice({ values = {}, referrerLink = null, c
         title="The driver is the client"
         subtitle={driverReady ? 'The driver becomes an individual client' : 'No driver details were read from this instruction'}
       >
-        <p className="text-[11px] text-muted-foreground">
+        <p className="text-xs text-muted-foreground">
           {values.driver_name || 'The driver'} becomes the claim's client, with their own phone, email and address.
         </p>
       </IntakeClientOption>

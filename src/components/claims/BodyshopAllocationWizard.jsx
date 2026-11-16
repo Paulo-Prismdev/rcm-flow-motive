@@ -415,7 +415,7 @@ export default function BodyshopAllocationWizard({ claim, isOpen, onClose, onAll
                 <React.Fragment key={step.id}>
                   <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-all flex-shrink-0 ${
                     isActive ? 'bg-primary text-primary-foreground' :
-                    isCompleted ? 'bg-green-100 text-green-700' :
+                    isCompleted ? 'bg-success-bg text-success-fg' :
                     'bg-muted text-muted-foreground'
                   }`}>
                     <StepIcon className="w-3.5 h-3.5" />

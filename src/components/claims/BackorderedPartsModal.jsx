@@ -50,27 +50,27 @@ export default function BackorderedPartsModal({ claim, currentUser, isOpen, onCl
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-[580px] bg-white dark:bg-gray-900 rounded-xl shadow-2xl p-8 border border-gray-200 dark:border-gray-800">
+      <DialogContent className="max-w-[580px] bg-card rounded-xl shadow-2xl p-8 border border-border">
         <div className="mb-6">
-          <h2 className="text-[18px] font-semibold text-gray-900 dark:text-white">Backordered Parts</h2>
+          <h2 className="text-[18px] font-semibold text-foreground">Backordered Parts</h2>
           {backorderedParts.length > 0 && (
-            <p className="text-[13px] text-gray-500 dark:text-gray-400 mt-1">
+            <p className="text-[13px] text-muted-foreground mt-1">
               {pendingCount} pending · {receivedCount} received
             </p>
           )}
         </div>
 
         {/* Link sharing area */}
-        <div className="mb-6 p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-          <p className="text-[13px] text-gray-600 dark:text-gray-400 mb-2">Send this link to the repairer to report backordered parts. It opens this claim only and lasts 14 days:</p>
+        <div className="mb-6 p-4 rounded-lg bg-muted border border-border">
+          <p className="text-[13px] text-muted-foreground mb-2">Send this link to the repairer to report backordered parts. It opens this claim only and lasts 14 days:</p>
           <div className="flex gap-2">
             <input
               readOnly
               value={formUrl || (linkError ? 'Could not create the link. Close and reopen to try again.' : 'Creating link…')}
-              className="flex-1 text-xs px-3 py-2 rounded-lg bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-400 truncate"
+              className="flex-1 text-xs px-3 py-2 rounded-lg bg-card border border-border text-muted-foreground truncate"
             />
             <Button size="sm" variant="outline" onClick={copyLink} disabled={!formUrl} className="flex-shrink-0 gap-1.5 h-9">
-              {copiedLink ? <Check className="w-3.5 h-3.5 text-green-500" /> : <Copy className="w-3.5 h-3.5" />}
+              {copiedLink ? <Check className="w-3.5 h-3.5 text-success-fg" /> : <Copy className="w-3.5 h-3.5" />}
               {copiedLink ? 'Copied' : 'Copy'}
             </Button>
             {onSendEmail && (
@@ -84,9 +84,9 @@ export default function BackorderedPartsModal({ claim, currentUser, isOpen, onCl
         {/* Parts List */}
         <div className="overflow-y-auto max-h-[50vh] pb-4">
           {isLoading ? (
-            <div className="text-center py-6 text-gray-500 dark:text-gray-400 text-sm">Loading...</div>
+            <div className="text-center py-6 text-muted-foreground text-sm">Loading...</div>
           ) : backorderedParts.length === 0 ? (
-            <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+            <div className="text-center py-8 text-muted-foreground">
               <Package className="w-10 h-10 mx-auto mb-2 opacity-40" />
               <p className="text-sm">No backordered parts reported yet.</p>
               <p className="text-xs mt-1 opacity-70">Send the link above to the repairer to log parts.</p>
@@ -98,8 +98,8 @@ export default function BackorderedPartsModal({ claim, currentUser, isOpen, onCl
                   key={part.id}
                   className={`border rounded-lg p-4 transition-all ${
                     part.received_by_repairer
-                      ? 'border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/10'
-                      : 'border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/10'
+                      ? 'border-success/30 bg-success-bg'
+                      : 'border-warning/30 bg-warning-bg'
                   }`}
                 >
                   <div className="flex items-start gap-3">
@@ -110,36 +110,36 @@ export default function BackorderedPartsModal({ claim, currentUser, isOpen, onCl
                       title={part.received_by_repairer ? 'Mark as not received' : 'Mark as received'}
                     >
                       {part.received_by_repairer
-                        ? <CheckCircle2 className="w-5 h-5 text-green-600" />
-                        : <Circle className="w-5 h-5 text-amber-500" />
+                        ? <CheckCircle2 className="w-5 h-5 text-success-fg" />
+                        : <Circle className="w-5 h-5 text-warning-fg" />
                       }
                     </button>
 
                     <div className="flex-1 min-w-0">
-                      <p className={`font-medium text-sm ${part.received_by_repairer ? 'line-through text-gray-500 dark:text-gray-400' : 'text-gray-900 dark:text-white'}`}>
+                      <p className={`font-medium text-sm ${part.received_by_repairer ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
                         {part.part_description}
                       </p>
                       <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1">
                         {part.part_number && (
-                          <span className="text-xs text-gray-500 dark:text-gray-400">Part #: {part.part_number}</span>
+                          <span className="text-xs text-muted-foreground">Part #: {part.part_number}</span>
                         )}
                         {part.supplier_name && (
-                          <span className="text-xs text-gray-500 dark:text-gray-400">Supplier: {part.supplier_name}</span>
+                          <span className="text-xs text-muted-foreground">Supplier: {part.supplier_name}</span>
                         )}
                         {part.expected_arrival_date && (
-                          <span className="text-xs text-gray-500 dark:text-gray-400">
+                          <span className="text-xs text-muted-foreground">
                             Expected: {format(new Date(part.expected_arrival_date), 'dd/MM/yyyy')}
                           </span>
                         )}
                         {part.submitted_by_name && (
-                          <span className="text-xs text-gray-500 dark:text-gray-400">Reported by: {part.submitted_by_name}</span>
+                          <span className="text-xs text-muted-foreground">Reported by: {part.submitted_by_name}</span>
                         )}
                       </div>
                       {part.additional_notes && (
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 italic">{part.additional_notes}</p>
+                        <p className="text-xs text-muted-foreground mt-1 italic">{part.additional_notes}</p>
                       )}
                       {part.received_by_repairer && part.received_date && (
-                        <p className="text-xs text-green-600 dark:text-green-400 mt-1 font-medium">
+                        <p className="text-xs text-success-fg mt-1 font-medium">
                           ✓ Received {format(new Date(part.received_date), 'dd/MM/yyyy')}
                         </p>
                       )}
@@ -151,7 +151,7 @@ export default function BackorderedPartsModal({ claim, currentUser, isOpen, onCl
                           deleteMutation.mutate(part.id);
                         }
                       }}
-                      className="flex-shrink-0 text-gray-400 hover:text-red-500 transition-colors"
+                      className="flex-shrink-0 text-muted-foreground hover:text-danger-fg transition-colors"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -163,10 +163,10 @@ export default function BackorderedPartsModal({ claim, currentUser, isOpen, onCl
         </div>
 
         {/* Footer */}
-        <div className="flex justify-end gap-3 mt-6 pt-6 border-t border-gray-200 dark:border-gray-800">
+        <div className="flex justify-end gap-3 mt-6 pt-6 border-t border-border">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors h-9"
+            className="px-4 py-2 text-sm font-medium text-foreground bg-card border border-border rounded-lg hover:bg-muted transition-colors h-9"
           >
             Close
           </button>

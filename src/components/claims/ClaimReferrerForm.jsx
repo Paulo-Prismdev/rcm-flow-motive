@@ -80,14 +80,14 @@ export default function ClaimReferrerForm({ claim, onSave, onCancel }) {
         <div className="space-y-4 pt-4">
             <div className="space-y-4">
                 <div>
-                    <label className="text-sm text-gray-500">Referrer</label>
+                    <label className="text-sm text-muted-foreground">Referrer</label>
                     <ReferrerCombobox 
                         value={formData.referrer} 
                         onChange={handleReferrerChange} 
                     />
                 </div>
                 <div>
-                    <label className="text-sm text-gray-500">Referrer Email</label>
+                    <label className="text-sm text-muted-foreground">Referrer Email</label>
                     <Input 
                         type="email"
                         value={formData.referrer_email} 
@@ -96,7 +96,7 @@ export default function ClaimReferrerForm({ claim, onSave, onCancel }) {
                     />
                 </div>
                 <div>
-                    <label className="text-sm text-gray-500">Referrer Reference</label>
+                    <label className="text-sm text-muted-foreground">Referrer Reference</label>
                     <Input 
                         value={formData.referrer_ref} 
                         onChange={e => handleChange('referrer_ref', e.target.value)} 
@@ -104,7 +104,7 @@ export default function ClaimReferrerForm({ claim, onSave, onCancel }) {
                     />
                 </div>
                 <div>
-                    <label className="text-sm text-gray-500">File Handler</label>
+                    <label className="text-sm text-muted-foreground">File Handler</label>
                     {handlerContacts.length > 0 ? (
                         <select
                             value={formData.file_handler}
@@ -126,7 +126,7 @@ export default function ClaimReferrerForm({ claim, onSave, onCancel }) {
                     )}
                 </div>
                 <div>
-                    <label className="text-sm text-gray-500">Percentage to Referrer (%)</label>
+                    <label className="text-sm text-muted-foreground">Percentage to Referrer (%)</label>
                     <Input 
                         type="number" 
                         value={formData.percent_to_referrer} 
@@ -135,7 +135,7 @@ export default function ClaimReferrerForm({ claim, onSave, onCancel }) {
                     />
                 </div>
                 <div>
-                    <label className="text-sm text-gray-500">Repairer Referral Fee (%)</label>
+                    <label className="text-sm text-muted-foreground">Repairer Referral Fee (%)</label>
                     <Input 
                         type="number" 
                         value={formData.referral_fee_repairer ?? ''} 
@@ -147,7 +147,7 @@ export default function ClaimReferrerForm({ claim, onSave, onCancel }) {
             </div>
             <div className="flex justify-end gap-3 pt-4">
                 <Button onClick={onCancel} className="neomorph-flat">Cancel</Button>
-                <Button onClick={handleSave} className="neomorph-flat text-blue-600">Save Changes</Button>
+                <Button onClick={handleSave} className="neomorph-flat text-info-fg">Save Changes</Button>
             </div>
         </div>
     );

@@ -26,18 +26,18 @@ const CopyTextButton = ({ text }) => {
       className="shrink-0 mt-0.5 text-muted-foreground/40 hover:text-primary transition-colors"
       title="Copy"
     >
-      {copied ? <Check className="w-3 h-3 text-green-600" /> : <Copy className="w-3 h-3" />}
+      {copied ? <Check className="w-3 h-3 text-success-fg" /> : <Copy className="w-3 h-3" />}
     </button>
   );
 };
 
 const UPDATE_TYPE_COLORS = {
-  "Status Change": "bg-purple-500", "Client Communication": "bg-blue-500",
-  "Bodyshop Communication": "bg-green-500", "Insurer Communication": "bg-orange-500",
-  "Referrer Response": "bg-amber-500", "Credit Repair Communication": "bg-rose-500", "Action Taken": "bg-indigo-500",
-  "Awaiting Information": "bg-yellow-500", "Documentation Received": "bg-teal-500",
-  "Parts Update": "bg-pink-500", "Repair Progress": "bg-cyan-500",
-  "Quality Check": "bg-emerald-500", "Other": "bg-gray-500"
+  "Status Change": "bg-purple-500", "Client Communication": "bg-info",
+  "Bodyshop Communication": "bg-success", "Insurer Communication": "bg-warning",
+  "Referrer Response": "bg-warning", "Credit Repair Communication": "bg-danger", "Action Taken": "bg-info",
+  "Awaiting Information": "bg-warning", "Documentation Received": "bg-success",
+  "Parts Update": "bg-pink-500", "Repair Progress": "bg-info",
+  "Quality Check": "bg-success", "Other": "bg-gray-500"
 };
 
 export default function ClaimUpdatesQuickView({ claim, isOpen, onClose }) {
@@ -201,7 +201,7 @@ export default function ClaimUpdatesQuickView({ claim, isOpen, onClose }) {
                 <div
                   key={update.id}
                   className={`border rounded-lg p-3 ${
-                    update.starred ? 'ring-2 ring-amber-400 border-amber-400' : ''
+                    update.starred ? 'ring-2 ring-amber-400 border-warning' : ''
                   } ${
                     isStatusChange
                       ? 'bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-700'
@@ -209,7 +209,7 @@ export default function ClaimUpdatesQuickView({ claim, isOpen, onClose }) {
                   }`}
                 >
                   <div className="flex items-center gap-2 flex-wrap mb-2">
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium text-white ${UPDATE_TYPE_COLORS[update.update_type] || 'bg-gray-500'}`}>
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium text-white ${UPDATE_TYPE_COLORS[update.update_type] || 'bg-gray-500'}`}>
                       {update.update_type}
                     </span>
                     {(() => {
@@ -222,7 +222,7 @@ export default function ClaimUpdatesQuickView({ claim, isOpen, onClose }) {
                         '';
                       if (!partyName) return null;
                       return (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-muted text-muted-foreground border border-border">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-muted text-muted-foreground border border-border">
                           <User className="w-3 h-3" />
                           {partyName}
                         </span>
@@ -230,18 +230,18 @@ export default function ClaimUpdatesQuickView({ claim, isOpen, onClose }) {
                     })()}
                     <UpdateDirectionBadges update={update} />
                     {update.starred && (
-                      <span className="inline-flex items-center gap-1 text-amber-500 text-[10px] font-semibold">
+                      <span className="inline-flex items-center gap-1 text-warning-fg text-xs font-semibold">
                         <Star className="w-3 h-3 fill-amber-400" />Flagged
                       </span>
                     )}
-                    <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                    <span className="text-xs text-muted-foreground flex items-center gap-1">
                       <Calendar className="w-3 h-3" />
                       {format(new Date(update.created_date), 'dd/MM/yyyy HH:mm')}
                     </span>
                   </div>
 
                   {update.contacted_party_detail && (
-                    <div className="text-[11px] text-muted-foreground flex items-center gap-1 mb-1.5">
+                    <div className="text-xs text-muted-foreground flex items-center gap-1 mb-1.5">
                       <AtSign className="w-3 h-3 flex-shrink-0" />
                       <span className="truncate">{update.contacted_party_detail}</span>
                     </div>
@@ -255,7 +255,7 @@ export default function ClaimUpdatesQuickView({ claim, isOpen, onClose }) {
 
                   {update.next_steps && (
                     <div className="text-sm mb-2 mt-2 bg-muted/50 rounded p-2">
-                      <p className="font-medium mb-1 text-foreground text-xs uppercase tracking-wide">Next Steps:</p>
+                      <p className="font-medium mb-1 text-foreground text-xs  ">Next Steps:</p>
                       <p className="text-muted-foreground whitespace-pre-wrap">{update.next_steps}</p>
                     </div>
                   )}
@@ -267,7 +267,7 @@ export default function ClaimUpdatesQuickView({ claim, isOpen, onClose }) {
                     </div>
                   )}
 
-                  <div className="flex items-center justify-between gap-1 text-[10px] text-muted-foreground mt-2 pt-2 border-t border-border/50">
+                  <div className="flex items-center justify-between gap-1 text-xs text-muted-foreground mt-2 pt-2 border-t border-border/50">
                     <div className="flex items-center gap-1">
                       <User className="w-3 h-3" />
                       {update.created_by || 'Unknown'}
@@ -277,7 +277,7 @@ export default function ClaimUpdatesQuickView({ claim, isOpen, onClose }) {
                       variant="ghost"
                       size="sm"
                       onClick={() => toggleStarMutation.mutate({ updateId: update.id, isStarred: update.starred })}
-                      className={`h-6 px-2 text-xs ${update.starred ? 'text-amber-500 hover:text-amber-600' : 'text-muted-foreground'}`}
+                      className={`h-6 px-2 text-xs ${update.starred ? 'text-warning-fg hover:text-warning-fg' : 'text-muted-foreground'}`}
                       title={update.starred ? 'Remove flag' : 'Flag as important'}
                     >
                       <Star className={`w-3 h-3 mr-1 ${update.starred ? 'fill-amber-400' : ''}`} />
@@ -290,11 +290,11 @@ export default function ClaimUpdatesQuickView({ claim, isOpen, onClose }) {
                       {replies.map(reply => (
                         <div key={reply.id} className="bg-muted/30 border border-border rounded-lg p-2.5">
                           <div className="flex items-center justify-between mb-1.5">
-                            <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                            <span className="text-xs text-muted-foreground flex items-center gap-1">
                               <User className="w-3 h-3" />
                               {reply.created_by || 'Unknown'}
                             </span>
-                            <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                            <span className="text-xs text-muted-foreground flex items-center gap-1">
                               <Calendar className="w-3 h-3" />
                               {format(new Date(reply.created_date), 'dd/MM/yyyy HH:mm')}
                             </span>

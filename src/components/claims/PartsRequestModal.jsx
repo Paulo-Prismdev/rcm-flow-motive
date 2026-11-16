@@ -53,63 +53,63 @@ export default function PartsRequestModal({ claim, isOpen, onClose, onPartCreate
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="max-w-[580px] bg-white dark:bg-gray-900 rounded-xl shadow-2xl p-8 border border-gray-200 dark:border-gray-800">
+            <DialogContent className="max-w-[580px] bg-card rounded-xl shadow-2xl p-8 border border-border">
                 <div className="mb-6">
-                    <h2 className="text-[18px] font-semibold text-gray-900 dark:text-white">Log Parts Issue</h2>
-                    <p className="text-[13px] text-gray-500 dark:text-gray-400 mt-1">
+                    <h2 className="text-[18px] font-semibold text-foreground">Log Parts Issue</h2>
+                    <p className="text-[13px] text-muted-foreground mt-1">
                         This will create a new job in the Parts department linked to claim for vehicle: {claim.reg}.
                     </p>
                 </div>
                 <div className="space-y-5">
                     <div>
-                        <label className="block text-[14px] font-medium text-gray-700 dark:text-gray-300 mb-[6px]">Part Description(s)</label>
+                        <label className="block text-[14px] font-medium text-foreground mb-[6px]">Part Description(s)</label>
                         <Textarea
                             placeholder="Part Description(s)"
                             value={partData.part_description}
                             onChange={(e) => handleChange('part_description', e.target.value)}
-                            className="min-h-[120px] w-full border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-[14px] text-gray-900 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                            className="min-h-[120px] w-full border border-border rounded-lg bg-card text-[14px] text-foreground focus:border-ring focus:ring-2 focus:ring-blue-500/20"
                             required
                         />
                     </div>
                     <div>
-                        <label className="block text-[14px] font-medium text-gray-700 dark:text-gray-300 mb-[6px]">Part Number(s) (if known)</label>
+                        <label className="block text-[14px] font-medium text-foreground mb-[6px]">Part Number(s) (if known)</label>
                         <Input
                             placeholder="Part Number(s) (if known)"
                             value={partData.part_number}
                             onChange={(e) => handleChange('part_number', e.target.value)}
-                            className="w-full h-10 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-[14px] text-gray-900 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                            className="w-full h-10 border border-border rounded-lg bg-card text-[14px] text-foreground focus:border-ring focus:ring-2 focus:ring-blue-500/20"
                         />
                     </div>
                     <div>
-                        <label className="block text-[14px] font-medium text-gray-700 dark:text-gray-300 mb-[6px]">Delay / Backorder Duration</label>
+                        <label className="block text-[14px] font-medium text-foreground mb-[6px]">Delay / Backorder Duration</label>
                         <Input
                             placeholder="Delay / Backorder Duration"
                             value={partData.backorder_duration}
                             onChange={(e) => handleChange('backorder_duration', e.target.value)}
-                            className="w-full h-10 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-[14px] text-gray-900 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                            className="w-full h-10 border border-border rounded-lg bg-card text-[14px] text-foreground focus:border-ring focus:ring-2 focus:ring-blue-500/20"
                         />
                     </div>
                     <div>
-                        <label className="block text-[14px] font-medium text-gray-700 dark:text-gray-300 mb-[6px]">Additional Notes for Parts Team</label>
+                        <label className="block text-[14px] font-medium text-foreground mb-[6px]">Additional Notes for Parts Team</label>
                         <Textarea
                             placeholder="Additional Notes for Parts Team"
                             value={partData.additional_comments}
                             onChange={(e) => handleChange('additional_comments', e.target.value)}
-                            className="min-h-[120px] w-full border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-[14px] text-gray-900 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                            className="min-h-[120px] w-full border border-border rounded-lg bg-card text-[14px] text-foreground focus:border-ring focus:ring-2 focus:ring-blue-500/20"
                         />
                     </div>
                 </div>
-                <div className="flex justify-end gap-3 mt-6 pt-6 border-t border-gray-200 dark:border-gray-800">
+                <div className="flex justify-end gap-3 mt-6 pt-6 border-t border-border">
                     <Button
                         onClick={onClose}
                         variant="outline"
-                        className="h-9 px-4 text-sm font-medium rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
+                        className="h-9 px-4 text-sm font-medium rounded-lg border border-border bg-card text-foreground hover:bg-muted"
                     >
                         Cancel
                     </Button>
                     <Button 
                         onClick={handleSubmit} 
-                        className="h-9 px-4 text-sm font-medium rounded-lg bg-blue-600 hover:bg-blue-700 text-white"
+                        className="h-9 px-4 text-sm font-medium rounded-lg bg-info hover:bg-info text-on-solid"
                         disabled={createPartMutation.isPending}
                     >
                         {createPartMutation.isPending ? <Loader className="animate-spin mr-2" /> : 'Create Request'}

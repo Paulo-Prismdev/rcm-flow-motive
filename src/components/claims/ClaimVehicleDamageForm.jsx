@@ -88,7 +88,7 @@ export default function ClaimVehicleDamageForm({ claim, onSave, onCancel, mode =
               type="checkbox"
               checked={formData.unroadworthy}
               onChange={(e) => setFormData({ ...formData, unroadworthy: e.target.checked })}
-              className="w-4 h-4 rounded border-gray-300" />
+              className="w-4 h-4 rounded border-border" />
             
               <span className="text-sm font-medium">Vehicle Unroadworthy / Undriveable</span>
             </label>

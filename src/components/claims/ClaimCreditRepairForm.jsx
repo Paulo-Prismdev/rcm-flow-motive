@@ -116,14 +116,14 @@ export default function ClaimCreditRepairForm({ claim, onSave, onCancel }) {
 
     return (
         <div className="space-y-4 pt-4">
-            <div className="p-3 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800">
-                <p className="text-sm font-medium text-indigo-700 dark:text-indigo-300">Credit Repair Claim</p>
-                <p className="text-xs text-indigo-600 dark:text-indigo-400 mt-0.5">
+            <div className="p-3 rounded-lg bg-info-bg border border-info/30">
+                <p className="text-sm font-medium text-info-fg">Credit Repair Claim</p>
+                <p className="text-xs text-info-fg mt-0.5">
                     This claim is handled via a credit repair company. The company details below will be passed to the repairer on the instruction instead of the client's insurer.
                 </p>
             </div>
             <div>
-                <label className="text-sm text-gray-500">Credit Repair Company</label>
+                <label className="text-sm text-muted-foreground">Credit Repair Company</label>
                 <CreditRepairCombobox
                     value={formData.credit_repair_company_name}
                     onChange={handleCreditRepairSelect}
@@ -131,31 +131,31 @@ export default function ClaimCreditRepairForm({ claim, onSave, onCancel }) {
                 />
             </div>
             <div>
-                <label className="text-sm text-gray-500">Credit Repair Contact Name</label>
+                <label className="text-sm text-muted-foreground">Credit Repair Contact Name</label>
                 <Input value={formData.credit_repair_company_contact_name} onChange={e => set('credit_repair_company_contact_name', e.target.value)} className="neomorph-inset" />
             </div>
             <div className="grid grid-cols-2 gap-3">
                 <div>
-                    <label className="text-sm text-gray-500">Credit Repair Phone</label>
+                    <label className="text-sm text-muted-foreground">Credit Repair Phone</label>
                     <Input value={formData.credit_repair_company_phone} onChange={e => set('credit_repair_company_phone', e.target.value)} className="neomorph-inset" />
                 </div>
                 <div>
-                    <label className="text-sm text-gray-500">Credit Repair Email</label>
+                    <label className="text-sm text-muted-foreground">Credit Repair Email</label>
                     <Input value={formData.credit_repair_company_email} onChange={e => set('credit_repair_company_email', e.target.value)} className="neomorph-inset" />
                 </div>
             </div>
             <div>
-                <label className="text-sm text-gray-500">Credit Repair Account Ref</label>
+                <label className="text-sm text-muted-foreground">Credit Repair Account Ref</label>
                 <Input value={formData.credit_repair_company_account_ref} onChange={e => set('credit_repair_company_account_ref', e.target.value)} className="neomorph-inset" />
             </div>
 
             {/* Hire category locks this partner's rates onto the claim */}
-            <div className="rounded-[10px] border border-purple-200 dark:border-purple-800/60 bg-purple-50/50 dark:bg-purple-900/10 p-3 space-y-3">
+            <div className="rounded-lg border border-purple-200 dark:border-purple-800/60 bg-purple-50/50 dark:bg-purple-900/10 p-3 space-y-3">
                 <div className="flex items-center gap-2 flex-wrap">
                     <Lock className="w-4 h-4 text-purple-600 dark:text-purple-400" />
                     <h4 className="text-sm font-semibold text-purple-700 dark:text-purple-300">Hire Category &amp; Rates</h4>
                     {isOverridden && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 text-[10px] font-semibold">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-warning-bg text-warning-fg text-xs font-semibold">
                             Adjusted on this claim
                         </span>
                     )}
@@ -163,7 +163,7 @@ export default function ClaimCreditRepairForm({ claim, onSave, onCancel }) {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div>
-                        <label className="text-sm text-gray-500">Hire Category</label>
+                        <label className="text-sm text-muted-foreground">Hire Category</label>
                         <select
                             className={SELECT_CLASS}
                             value={formData.hire_category}
@@ -177,11 +177,11 @@ export default function ClaimCreditRepairForm({ claim, onSave, onCancel }) {
                     </div>
                     <div className="grid grid-cols-2 gap-3">
                         <div className="rounded-lg bg-card/60 border border-border p-2">
-                            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Hire Fee Due</p>
+                            <p className="text-xs font-semibold text-muted-foreground">Hire Fee Due</p>
                             <p className="text-sm font-bold tabular-nums">{hireFee.awaiting ? '—' : fmtGBP(hireFee.amount)}</p>
                         </div>
                         <div className="rounded-lg bg-card/60 border border-border p-2">
-                            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Commission</p>
+                            <p className="text-xs font-semibold text-muted-foreground">Commission</p>
                             <p className="text-sm font-bold tabular-nums">
                                 {commission.awaiting ? '—' : `${locked?.commission_percent ?? 0}%`}
                             </p>
@@ -247,7 +247,7 @@ export default function ClaimCreditRepairForm({ claim, onSave, onCancel }) {
                             <Button type="button" variant="outline" size="sm" onClick={resetToPartnerRates} className="gap-1.5">
                                 <RotateCcw className="w-3.5 h-3.5" /> Reset to partner rates
                             </Button>
-                            <span className="text-xs text-amber-600 dark:text-amber-400 font-medium">
+                            <span className="text-xs text-warning-fg font-medium">
                                 Adjusted rates apply to this claim only.
                             </span>
                         </div>
@@ -255,7 +255,7 @@ export default function ClaimCreditRepairForm({ claim, onSave, onCancel }) {
                 )}
 
                 {company && missing.length > 0 && (
-                    <p className="flex items-start gap-1.5 text-xs text-amber-600 dark:text-amber-400">
+                    <p className="flex items-start gap-1.5 text-xs text-warning-fg">
                         <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
                         <span>{company.name}'s rates aren't fully set ({missing.join(', ')}). Add them in the credit repair directory.</span>
                     </p>

@@ -11,7 +11,7 @@ function InfoLine({ icon: Icon, label, value }) {
     <div className="flex items-start gap-2 py-1.5">
       <Icon className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0 mt-0.5" />
       <div className="min-w-0">
-        <div className="text-[11px] font-medium text-muted-foreground">{label}</div>
+        <div className="text-xs font-medium text-muted-foreground">{label}</div>
         <div className="text-sm text-foreground break-words">{value}</div>
       </div>
     </div>
@@ -23,12 +23,12 @@ function StatusPill({ label, value }) {
   const isYes = value === 'Yes';
   const isNo = value === 'No';
   const colorClass = isYes
-    ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 border-green-300 dark:border-green-700'
+    ? 'bg-success-bg text-success-fg border-success/30'
     : isNo
-    ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300 border-red-300 dark:border-red-700'
-    : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300 border-gray-300 dark:border-gray-600';
+    ? 'bg-danger-bg text-danger-fg border-danger/30'
+    : 'bg-muted text-foreground border-border';
   return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold border ${colorClass}`}>
+    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold border ${colorClass}`}>
       {label}: {value}
     </span>
   );
@@ -64,8 +64,8 @@ export default function ClaimBodyshopInfo({ bodyshopId }) {
   if (error) {
     console.error('Bodyshop query error:', error);
     return (
-      <div className="mt-3 p-3 rounded-lg border border-red-300 bg-red-50">
-        <div className="text-sm text-red-700">Error: {error.message || 'Failed to load'}</div>
+      <div className="mt-3 p-3 rounded-lg border border-danger/30 bg-danger-bg">
+        <div className="text-sm text-danger-fg">Error: {error.message || 'Failed to load'}</div>
       </div>
     );
   }
@@ -87,11 +87,11 @@ export default function ClaimBodyshopInfo({ bodyshopId }) {
       <div className="flex items-center justify-between mb-3">
         <div>
           <div className="text-sm font-semibold text-foreground">{bodyshop.name}</div>
-          {bodyshop.tier && <div className="text-[11px] text-muted-foreground">{bodyshop.tier}</div>}
+          {bodyshop.tier && <div className="text-xs text-muted-foreground">{bodyshop.tier}</div>}
         </div>
         <Link
           to={`${createPageUrl('BodyshopMap')}?bodyshop_id=${bodyshop.id}`}
-          className="text-[11px] text-primary hover:underline flex items-center gap-1"
+          className="text-xs text-primary hover:underline flex items-center gap-1"
         >
           <MapPin className="w-3 h-3" /> View on Map
         </Link>
@@ -111,7 +111,7 @@ export default function ClaimBodyshopInfo({ bodyshopId }) {
           <StatusPill label="ACG" value={bodyshop.acg_signed_up} />
           <StatusPill label="BS10125" value={bodyshop.bs10125_certified} />
           {bodyshop.bs10125_number && (
-            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold border bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 border-blue-300 dark:border-blue-700">
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold border bg-info-bg text-info-fg border-info/30">
               BS10125 #: {bodyshop.bs10125_number}
             </span>
           )}

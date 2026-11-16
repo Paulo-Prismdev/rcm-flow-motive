@@ -30,13 +30,13 @@ export default function WizardGeneratePdfBar({
         </div>
       </div>
       {generatedPdfUrl && !isGeneratingPdf && (
-        <div className="rounded-lg border border-green-200 bg-green-50 dark:bg-green-900/20 dark:border-green-800 p-2.5 space-y-2">
-          <div className="flex items-center gap-2 text-green-700 dark:text-green-400">
+        <div className="rounded-lg border border-success/30 bg-success-bg p-2.5 space-y-2">
+          <div className="flex items-center gap-2 text-success-fg">
             <CheckCircle className="w-4 h-4 flex-shrink-0" />
             <span className="text-sm">{savedToDocs ? 'Saved to claim docs.' : 'PDF generated — save it now or it saves at allocation.'}</span>
           </div>
           {!savedToDocs && (
-            <Button variant="outline" size="sm" onClick={onSaveToDocs} disabled={isSavingToDocs} className="w-full gap-2 border-green-300 text-green-700 hover:bg-green-100 dark:border-green-800 dark:text-green-400 dark:hover:bg-green-900/30">
+            <Button variant="outline" size="sm" onClick={onSaveToDocs} disabled={isSavingToDocs} className="w-full gap-2 border-success/30 text-success-fg hover:bg-success-bg">
               {isSavingToDocs ? <><Loader className="w-4 h-4 animate-spin" /> Saving...</> : <><Save className="w-4 h-4" /> Save to Claim Docs Now</>}
             </Button>
           )}

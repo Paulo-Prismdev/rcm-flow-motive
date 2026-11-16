@@ -50,7 +50,7 @@ export default function ClaimIntakePanel({ onRead, isReading = false, error = nu
               <>
                 <Upload className={`w-6 h-6 ${isDragging ? 'text-purple-600' : ''}`} />
                 <p className="text-sm font-medium text-foreground">{isDragging ? 'Drop the files here' : 'Upload the instruction'}</p>
-                <p className="text-[11px]">Claim form, emails saved as PDF, damage photos — as many as you have</p>
+                <p className="text-xs">Claim form, emails saved as PDF, damage photos — as many as you have</p>
               </>
             )}
           </div>
@@ -66,7 +66,7 @@ export default function ClaimIntakePanel({ onRead, isReading = false, error = nu
             <div key={url} className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-border bg-muted/30">
               <FileText className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
               <span className="text-xs truncate flex-1 min-w-0">{fileName(url)}</span>
-              <button type="button" onClick={() => setFileUrls((prev) => prev.filter((u) => u !== url))} className="p-1 rounded text-muted-foreground hover:text-red-500 flex-shrink-0">
+              <button type="button" onClick={() => setFileUrls((prev) => prev.filter((u) => u !== url))} className="p-1 rounded text-muted-foreground hover:text-danger-fg flex-shrink-0">
                 <X className="w-3.5 h-3.5" />
               </button>
             </div>
@@ -75,7 +75,7 @@ export default function ClaimIntakePanel({ onRead, isReading = false, error = nu
       )}
 
       <div className="space-y-1.5">
-        <label className="text-[11px] font-medium text-muted-foreground">and/or paste the text of the instruction email</label>
+        <label className="text-xs font-medium text-muted-foreground">and/or paste the text of the instruction email</label>
         <textarea
           rows={3}
           value={pastedText}
@@ -85,7 +85,7 @@ export default function ClaimIntakePanel({ onRead, isReading = false, error = nu
         />
       </div>
 
-      {error && <p className="text-[11px] text-red-600 dark:text-red-400">{error}</p>}
+      {error && <p className="text-xs text-danger-fg">{error}</p>}
 
       <Button
         type="button"
@@ -95,7 +95,7 @@ export default function ClaimIntakePanel({ onRead, isReading = false, error = nu
       >
         {isReading ? <><Loader className="w-4 h-4 animate-spin" /> Reading the instruction...</> : <><Sparkles className="w-4 h-4" /> Read &amp; set up the claim</>}
       </Button>
-      <p className="text-[10px] text-muted-foreground text-center">Nothing is added to the claim until you check the reading and confirm it.</p>
+      <p className="text-xs text-muted-foreground text-center">Nothing is added to the claim until you check the reading and confirm it.</p>
     </div>
   );
 }

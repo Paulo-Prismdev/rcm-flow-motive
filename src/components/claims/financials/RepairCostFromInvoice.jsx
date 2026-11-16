@@ -60,19 +60,19 @@ export default function RepairCostFromInvoice({ offer, useIt, onUse }) {
 
   return (
     <div className={`space-y-1.5 rounded-lg border px-2.5 py-2 ${differs
-      ? 'border-amber-300 bg-amber-50 dark:border-amber-800 dark:bg-amber-900/20'
+      ? 'border-warning/30 bg-warning-bg'
       : 'border-border bg-muted/30'}`}
     >
-      <p className="flex items-center gap-1.5 text-[11px] font-semibold text-foreground">
+      <p className="flex items-center gap-1.5 text-xs font-semibold text-foreground">
         <PoundSterling className="h-3.5 w-3.5" /> The claim's final repair cost
       </p>
 
       {withShare && (
-        <p className="text-[11px] text-muted-foreground">{customerShareWorkings(offer.basis.expectation)}</p>
+        <p className="text-xs text-muted-foreground">{customerShareWorkings(offer.basis.expectation)}</p>
       )}
 
       {offer.status === 'match' && (
-        <p className="flex items-center gap-1.5 text-[11px] text-green-700 dark:text-green-300">
+        <p className="flex items-center gap-1.5 text-xs text-success-fg">
           <Check className="h-3.5 w-3.5" />{' '}
           {withShare
             ? `The invoice and the customer's share come to the repair cost on file (${fmtGBP(offer.onFile)}).`
@@ -82,7 +82,7 @@ export default function RepairCostFromInvoice({ offer, useIt, onUse }) {
 
       {differs && (
         <>
-          <p className="flex items-start gap-1.5 text-[11px] font-medium text-amber-800 dark:text-amber-300">
+          <p className="flex items-start gap-1.5 text-xs font-medium text-warning-fg">
             <AlertTriangle className="mt-px h-3.5 w-3.5 flex-shrink-0" />
             <span>
               {onSplit
@@ -92,7 +92,7 @@ export default function RepairCostFromInvoice({ offer, useIt, onUse }) {
                   : `This invoice reads ${fmtGBP(offer.total)}, but the claim's final repair cost is ${fmtGBP(offer.onFile)} — a difference of ${fmtGBP(Math.abs(offer.difference))}.`}
             </span>
           </p>
-          <label className="flex cursor-pointer items-start gap-2 text-[11px]">
+          <label className="flex cursor-pointer items-start gap-2 text-xs">
             <input
               type="checkbox"
               checked={useIt}

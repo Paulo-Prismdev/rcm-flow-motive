@@ -65,7 +65,7 @@ export default function InvoiceRow({
       onAskPaid={onAskPaid}
     >
       {partyName && (
-        <p className="text-[11px] text-muted-foreground truncate">
+        <p className="text-xs text-muted-foreground truncate">
           {item.direction === 'out' ? 'To' : 'From'}{' '}
           <span className="font-semibold text-foreground">{partyName}</span>
         </p>
@@ -74,14 +74,14 @@ export default function InvoiceRow({
       {addressedToClient && (
         <span
           title={addressedNote || undefined}
-          className="inline-flex w-fit items-center rounded-full bg-sky-100 px-1.5 py-0.5 text-[10px] font-semibold text-sky-700 dark:bg-sky-900/30 dark:text-sky-300"
+          className="inline-flex w-fit items-center rounded-full bg-info-bg px-1.5 py-0.5 text-xs font-semibold text-info-fg"
         >
           Addressed to client — insurer's invoice
         </span>
       )}
 
       {!isDocument && (
-        <p className="text-[11px] text-muted-foreground tabular-nums">
+        <p className="text-xs text-muted-foreground tabular-nums">
           {hasAmount ? (
             <>
               {fmtGBP(state.ex)} + {fmtGBP(state.vat)} VAT ={' '}
@@ -91,7 +91,7 @@ export default function InvoiceRow({
             <span className="text-foreground">—</span>
           )}
           {state.adjusted && (
-            <span className="ml-2 align-middle text-[10px] font-semibold px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300">
+            <span className="ml-2 align-middle text-xs font-semibold px-1.5 py-0.5 rounded bg-warning-bg text-warning-fg">
               Adjusted
             </span>
           )}
@@ -102,15 +102,15 @@ export default function InvoiceRow({
           part of a total loss storage charge — the sum is shown as it was worked
           out, rather than left behind the calculator. */}
       {!isDocument && state.calculation && (
-        <p className="text-[10px] text-muted-foreground tabular-nums">{state.calculation}</p>
+        <p className="text-xs text-muted-foreground tabular-nums">{state.calculation}</p>
       )}
 
-      <div className="flex items-center gap-x-3 gap-y-1 flex-wrap text-[11px]">
+      <div className="flex items-center gap-x-3 gap-y-1 flex-wrap text-xs">
         {canMarkPaid && (
           <button
             type="button"
             onClick={() => onAskPaid?.('paid')}
-            className="font-semibold text-amber-700 dark:text-amber-300 hover:underline"
+            className="font-semibold text-warning-fg hover:underline"
           >
             Mark paid
           </button>
@@ -138,7 +138,7 @@ export default function InvoiceRow({
       </div>
 
       {state.variance && (
-        <p className="flex items-start gap-1.5 text-[11px] text-amber-700 dark:text-amber-300">
+        <p className="flex items-start gap-1.5 text-xs text-warning-fg">
           <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0 mt-px" />
           <span className="flex-1">
             {state.variance.text}
@@ -158,7 +158,7 @@ export default function InvoiceRow({
       )}
 
       {state.locked && !state.variance && (
-        <p className="text-[10px] text-muted-foreground">
+        <p className="text-xs text-muted-foreground">
           Amount locked at {fmtGBP(state.amount)} — the figure this invoice went out at.
         </p>
       )}

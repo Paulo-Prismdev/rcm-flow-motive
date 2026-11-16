@@ -33,19 +33,19 @@ const MILESTONE_STATUS_MAP = {
 // Exception / outcome banner styling — same treatment as the old Cancelled banner
 const EXCEPTION_CONFIG = {
   'Cancelled': {
-    bg: 'bg-red-50 dark:bg-red-900/20', border: 'border-red-200 dark:border-red-800',
-    iconBg: 'bg-red-500 border-red-500', title: 'Claim Cancelled',
-    titleColor: 'text-red-600 dark:text-red-400', Icon: X,
+    bg: 'bg-danger-bg', border: 'border-danger/30',
+    iconBg: 'bg-danger border-danger', title: 'Claim Cancelled',
+    titleColor: 'text-danger-fg', Icon: X,
   },
   'Potential Total Loss': {
-    bg: 'bg-orange-50 dark:bg-orange-900/20', border: 'border-orange-200 dark:border-orange-800',
-    iconBg: 'bg-orange-500 border-orange-500', title: 'Potential Total Loss',
-    titleColor: 'text-orange-600 dark:text-orange-400', Icon: AlertTriangle,
+    bg: 'bg-warning-bg', border: 'border-warning/30',
+    iconBg: 'bg-warning border-warning', title: 'Potential Total Loss',
+    titleColor: 'text-warning-fg', Icon: AlertTriangle,
   },
   'Total Loss': {
-    bg: 'bg-gray-100 dark:bg-gray-800/40', border: 'border-gray-300 dark:border-gray-700',
+    bg: 'bg-muted', border: 'border-border',
     iconBg: 'bg-gray-500 border-gray-500', title: 'Total Loss',
-    titleColor: 'text-gray-700 dark:text-gray-300', Icon: AlertTriangle,
+    titleColor: 'text-foreground', Icon: AlertTriangle,
   },
 };
 
@@ -96,11 +96,11 @@ export default function ClaimJourneyTimeline({ claim, updates = [] }) {
             collected is the date that matters: it is what puts the job on the
             invoicing radar in place of the hand-over. */}
         {outcome === TOTAL_LOSS_OUTCOME && (
-          <div className="mt-2 pt-2 border-t border-gray-300 dark:border-gray-700 flex items-center gap-3">
+          <div className="mt-2 pt-2 border-t border-border flex items-center gap-3">
             <div className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 border-2 ${
               claim.salvage_collected_date
-                ? 'bg-green-500 border-green-500 text-white'
-                : 'bg-white dark:bg-card border-border text-muted-foreground'
+                ? 'bg-success border-success text-on-solid'
+                : 'bg-card dark:bg-card border-border text-muted-foreground'
             }`}>
               {claim.salvage_collected_date
                 ? <Check className="w-4 h-4 stroke-[3]" />
@@ -183,7 +183,7 @@ export default function ClaimJourneyTimeline({ claim, updates = [] }) {
             return (
               <div
                 key={`segment-${index}`}
-                className={`absolute h-full transition-all duration-300 ${currentCompleted ? 'bg-green-500' : 'bg-border'}`}
+                className={`absolute h-full transition-all duration-300 ${currentCompleted ? 'bg-success' : 'bg-border'}`}
                 style={{ left: `${index * segmentWidth}%`, width: `${segmentWidth}%` }}
               />
             );
@@ -196,10 +196,10 @@ export default function ClaimJourneyTimeline({ claim, updates = [] }) {
             <div key={milestone.id} className="flex-1 flex flex-col items-center relative z-10">
               <div className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-300 border-2 ${
                 info.isCompleted
-                  ? 'bg-green-500 border-green-500 text-white'
+                  ? 'bg-success border-success text-on-solid'
                   : info.isActive
-                    ? 'bg-white dark:bg-card border-primary text-primary ring-4 ring-primary/20'
-                    : 'bg-white dark:bg-card border-border text-muted-foreground'
+                    ? 'bg-card dark:bg-card border-primary text-primary ring-4 ring-primary/20'
+                    : 'bg-card dark:bg-card border-border text-muted-foreground'
               }`}>
                 {info.isCompleted ? (
                   <Check className="w-4 h-4 stroke-[3]" />
@@ -210,16 +210,16 @@ export default function ClaimJourneyTimeline({ claim, updates = [] }) {
                 )}
               </div>
               <div className="text-center mt-1 px-1 max-w-[90px]">
-                <p className={`text-[11px] font-semibold leading-tight ${
+                <p className={`text-xs font-semibold leading-tight ${
                   info.isActive ? 'text-primary' : info.isCompleted ? 'text-foreground' : 'text-muted-foreground'
                 }`}>
                   {milestone.id === 'in_repair' ? (onSiteSet ? (claim.secondary_status || 'In Repair') : 'In Repair') : milestone.label}
                 </p>
                 {formatDate(info.date) && (
-                  <p className="text-[10px] text-muted-foreground mt-0.5">{formatDate(info.date)}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{formatDate(info.date)}</p>
                 )}
                 {info.user && (
-                  <p className="text-[10px] text-muted-foreground truncate" title={info.user}>
+                  <p className="text-xs text-muted-foreground truncate" title={info.user}>
                     {info.user.split('@')[0]}
                   </p>
                 )}

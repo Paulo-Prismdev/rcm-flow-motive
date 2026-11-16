@@ -135,17 +135,17 @@ function Row({ label, field, value, claim, onFieldChange, type = 'text', options
 
   return (
     <div className="flex items-center gap-1.5 py-0.5 px-1">
-      <div className="w-36 flex-shrink-0 text-[11px] font-semibold text-muted-foreground leading-tight">
+      <div className="w-36 flex-shrink-0 text-xs font-semibold text-muted-foreground leading-tight">
         {label}
-        {sourceLabel && <span className="block text-[9px] font-normal text-muted-foreground/60">via {sourceLabel}</span>}
+        {sourceLabel && <span className="block text-xs font-normal text-muted-foreground/60">via {sourceLabel}</span>}
       </div>
-      <div className={`flex-1 min-w-0 flex items-center rounded-md border px-2 py-1 ${isEmpty ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-300 dark:border-amber-700' : 'bg-muted/50 border-border'} ${editing ? 'ring-1 ring-primary/40 border-primary/50' : ''}`}>
+      <div className={`flex-1 min-w-0 flex items-center rounded-md border px-2 py-1 ${isEmpty ? 'bg-warning-bg border-warning/30' : 'bg-muted/50 border-border'} ${editing ? 'ring-1 ring-primary/40 border-primary/50' : ''}`}>
         <div className="flex-1 min-w-0">
           {editing ? control : (
-            <div className={`text-sm font-medium truncate ${isEmpty ? 'text-amber-500' : 'text-foreground'}`}>{displayValue}</div>
+            <div className={`text-sm font-medium truncate ${isEmpty ? 'text-warning-fg' : 'text-foreground'}`}>{displayValue}</div>
           )}
         </div>
-        {isEmpty && !editing && <AlertTriangle className="w-3 h-3 text-amber-500 flex-shrink-0 ml-1" />}
+        {isEmpty && !editing && <AlertTriangle className="w-3 h-3 text-warning-fg flex-shrink-0 ml-1" />}
       </div>
       {!readOnly && (
         <button
@@ -153,7 +153,7 @@ function Row({ label, field, value, claim, onFieldChange, type = 'text', options
           onClick={() => editing ? commit() : setEditing(true)}
           className="flex-shrink-0 p-1 rounded text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
           title={editing ? 'Save' : 'Edit'}>
-          {editing ? <Check className="w-3.5 h-3.5 text-green-600" /> : <Pencil className="w-3 h-3" />}
+          {editing ? <Check className="w-3.5 h-3.5 text-success-fg" /> : <Pencil className="w-3 h-3" />}
         </button>
       )}
     </div>
@@ -178,9 +178,9 @@ function ExcessRow({ claim, onFieldChange }) {
 
   return (
     <div className="flex items-start gap-1.5 py-0.5 px-1">
-      <div className="w-36 flex-shrink-0 text-[11px] font-semibold text-muted-foreground leading-tight pt-1">
+      <div className="w-36 flex-shrink-0 text-xs font-semibold text-muted-foreground leading-tight pt-1">
         Excess (£)
-        {unanswered && <span className="block text-[9px] font-normal text-amber-500">Not answered</span>}
+        {unanswered && <span className="block text-xs font-normal text-warning-fg">Not answered</span>}
       </div>
       <div className="flex-1 min-w-0">
         <ExcessModeField claim={claim} onChange={handleChange} compact />
@@ -192,7 +192,7 @@ function ExcessRow({ claim, onFieldChange }) {
 function Group({ title, children }) {
   return (
     <div className="mb-1.5">
-      <div className="text-[10px] font-bold uppercase tracking-wider text-primary px-2 py-1 border-b border-border">{title}</div>
+      <div className="text-xs font-bold text-primary px-2 py-1 border-b border-border">{title}</div>
       {children}
     </div>
   );
@@ -243,7 +243,7 @@ function InsuranceSection({ instructionType, claim, onUpdate }) {
   if (instructionType === 'private') {
     return (
       <Group title="Insurance Details">
-        <div className="px-2 py-1.5 text-[11px] italic text-muted-foreground">Paying Privately — no insurance section on the instruction.</div>
+        <div className="px-2 py-1.5 text-xs italic text-muted-foreground">Paying Privately — no insurance section on the instruction.</div>
       </Group>
     );
   }
@@ -317,9 +317,9 @@ export default function InstructionPreCheck({ claim, onUpdate, selectedBodyshop 
   return (
     <div className="rounded-lg border border-border bg-card p-2">
       <div className="flex items-center gap-2 px-1 pb-2 mb-1 border-b border-border">
-        <AlertTriangle className="w-3.5 h-3.5 text-amber-500" />
+        <AlertTriangle className="w-3.5 h-3.5 text-warning-fg" />
         <h3 className="text-xs font-semibold text-foreground">Instruction Pre-Check</h3>
-        <span className="text-[10px] text-muted-foreground">— fix any gaps before allocating</span>
+        <span className="text-xs text-muted-foreground">— fix any gaps before allocating</span>
       </div>
 
       <Group title="Client & Repairer Details">

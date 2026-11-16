@@ -7,7 +7,7 @@ export default function IntakeClientSuggestions({ suggestions = [], selectedId, 
 
   return (
     <div className="space-y-1">
-      <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Likely matches</p>
+      <p className="text-xs font-semibold text-muted-foreground">Likely matches</p>
       {suggestions.map((row) => (
         <button
           key={row.record.id}
@@ -25,7 +25,7 @@ export default function IntakeClientSuggestions({ suggestions = [], selectedId, 
               : <User className="w-3 h-3 text-muted-foreground flex-shrink-0" />}
             <span className="text-xs font-medium text-foreground truncate">{row.record.name}</span>
           </span>
-          <span className="block text-[10px] text-muted-foreground truncate">{row.reasons.join(' · ')}</span>
+          <span className="block text-xs text-muted-foreground truncate">{row.reasons.join(' · ')}</span>
         </button>
       ))}
     </div>

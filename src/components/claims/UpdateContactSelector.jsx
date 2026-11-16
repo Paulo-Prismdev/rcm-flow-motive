@@ -265,7 +265,7 @@ export default function UpdateContactSelector({ claim, updateType, platform, val
         })}
       </div>
       {selected.length > 0 && (
-        <p className="text-[10px] text-muted-foreground mt-1">
+        <p className="text-xs text-muted-foreground mt-1">
           {selected.length} selected: {selected.map((c) => c.detail).join(', ')}
         </p>
       )}

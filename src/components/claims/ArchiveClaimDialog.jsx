@@ -29,19 +29,19 @@ export default function ArchiveClaimDialog({ isOpen, claim, items = [], onClose,
       }
     >
       <div className="space-y-2.5">
-        <div className="flex items-start gap-2 rounded-[10px] border border-amber-500/40 bg-amber-50 dark:bg-amber-950/20 p-3">
-          <AlertTriangle className="w-4 h-4 shrink-0 text-amber-600 mt-0.5" />
-          <p className="text-[11px] text-amber-800 dark:text-amber-200">
+        <div className="flex items-start gap-2 rounded-lg border border-warning bg-warning-bg p-3">
+          <AlertTriangle className="w-4 h-4 shrink-0 text-warning-fg mt-0.5" />
+          <p className="text-xs text-warning-fg">
             Archiving takes the claim off the Repairs list. Anything still outstanding stays on the Invoicing page, so the money is still chased.
           </p>
         </div>
 
-        <div className="rounded-[10px] border border-border bg-muted/40 p-3">
-          <p className="mb-1.5 text-[11px] font-semibold text-foreground">Still outstanding</p>
+        <div className="rounded-lg border border-border bg-muted/40 p-3">
+          <p className="mb-1.5 text-xs font-semibold text-foreground">Still outstanding</p>
           <ul className="space-y-1">
             {items.map((item) => (
-              <li key={item.key} className="flex items-start gap-1.5 text-[11px] text-muted-foreground">
-                <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-amber-500" />
+              <li key={item.key} className="flex items-start gap-1.5 text-xs text-muted-foreground">
+                <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-warning" />
                 <span>{item.text}</span>
               </li>
             ))}

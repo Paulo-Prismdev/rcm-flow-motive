@@ -17,7 +17,7 @@ export default function AuthorityVatChoice({ check, choice, onChoice }) {
     return (
       <div className="flex items-start gap-2 rounded-lg border border-border bg-muted/30 px-2.5 py-2">
         <Check className="mt-px w-3.5 h-3.5 flex-shrink-0 text-muted-foreground" />
-        <p className="text-[11px] text-muted-foreground">
+        <p className="text-xs text-muted-foreground">
           This authority says the customer is <span className="font-semibold text-foreground">{label(check.shown)}</span>
           {check.stored && check.stored !== 'Unknown' ? '' : ', and the claim doesn\u2019t hold a VAT status for them'} — it will be
           filled in as the customer VAT status.
@@ -29,12 +29,12 @@ export default function AuthorityVatChoice({ check, choice, onChoice }) {
   if (!check.differs) return null;
 
   const optionClass = (selected) => `inline-flex items-center gap-1.5 px-2 py-1 rounded-md border text-[10px] font-semibold transition-colors ${selected
-    ? 'border-amber-500 bg-amber-100/70 dark:bg-amber-900/40 text-amber-900 dark:text-amber-200'
-    : 'border-amber-300 dark:border-amber-700 text-amber-800 dark:text-amber-300 hover:border-amber-400'}`;
+    ? 'border-warning bg-warning-bg text-warning-fg'
+    : 'border-warning/30 text-warning-fg hover:border-warning'}`;
 
   return (
-    <div className="space-y-1.5 rounded-lg border border-amber-400 dark:border-amber-600 bg-amber-50 dark:bg-amber-900/25 p-2.5">
-      <p className="flex items-start gap-1.5 text-[11px] font-semibold text-amber-800 dark:text-amber-300">
+    <div className="space-y-1.5 rounded-lg border border-warning bg-warning-bg p-2.5">
+      <p className="flex items-start gap-1.5 text-xs font-semibold text-warning-fg">
         <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0 mt-px" />
         <span>
           The customer's VAT status doesn't match — the claim holds {label(check.stored)}, this authority says they are{' '}

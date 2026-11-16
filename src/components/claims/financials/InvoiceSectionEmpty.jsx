@@ -13,7 +13,7 @@ export default function InvoiceSectionEmpty({ title, reasons = [] }) {
       </span>
       <p className="text-xs font-semibold text-foreground">{title}</p>
       {reasons.length > 0 && (
-        <p className="max-w-[38ch] text-[11px] leading-snug text-muted-foreground">{reasons.join(' · ')}</p>
+        <p className="max-w-[38ch] text-xs leading-snug text-muted-foreground">{reasons.join(' · ')}</p>
       )}
     </div>
   );

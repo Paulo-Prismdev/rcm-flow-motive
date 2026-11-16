@@ -114,14 +114,14 @@ export default function CreditRepairFigures({ claim, missing, onChange, editingK
   const footer = (
     <>
       {rates && (
-        <p className="px-1 text-[11px] text-mac-muted">
+        <p className="px-1 text-xs text-mac-muted">
           {rates.overridden
             ? 'Adjusted on this claim, against the rates agreed with the partner'
             : "The partner's agreed rates, locked to this claim"}
         </p>
       )}
       {partnerMissing.length > 0 && (
-        <p className="flex items-start gap-1.5 px-1 text-[11px] text-amber-600 dark:text-amber-400">
+        <p className="flex items-start gap-1.5 px-1 text-xs text-warning-fg">
           <AlertTriangle className="mt-px h-3.5 w-3.5 flex-shrink-0" strokeWidth={1.8} />
           <span>
             {company?.name}'s rates aren't fully set ({partnerMissing.join(', ')}). Add them in the credit repair

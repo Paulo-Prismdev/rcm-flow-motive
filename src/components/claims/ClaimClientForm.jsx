@@ -98,7 +98,7 @@ export default function ClaimClientForm({ claim, onSave, onCancel }) {
 
       {linkedContacts.length > 0 && (
         <div className="rounded-xl border border-border bg-muted/30 p-3 space-y-2">
-          <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          <div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
             <Users className="w-3.5 h-3.5" /> Contacts at this business
           </div>
           <div className="space-y-1.5">
@@ -108,8 +108,8 @@ export default function ClaimClientForm({ claim, onSave, onCancel }) {
                   <span className="text-sm font-medium">{c.name || '—'}</span>
                   {c.position && <span className="text-xs text-muted-foreground">· {c.position}</span>}
                   {c.is_primary && (
-                    <span className="inline-flex items-center gap-0.5 text-xs text-amber-600 font-medium">
-                      <Star className="w-3 h-3 fill-amber-500 text-amber-500" /> Primary
+                    <span className="inline-flex items-center gap-0.5 text-xs text-warning-fg font-medium">
+                      <Star className="w-3 h-3 fill-amber-500 text-warning-fg" /> Primary
                     </span>
                   )}
                 </div>

@@ -39,10 +39,10 @@ const InfoRow = ({ label, value, href, fullWidth }) => {
 
   return (
     <div className={fullWidth ? 'col-span-2' : ''}>
-      <div className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">{label}</div>
+      <div className="text-xs font-medium text-muted-foreground  ">{label}</div>
       <div className="flex items-start gap-1.5">
         {href && !isEmpty ? (
-          <a href={href} ref={valueRef} className="text-sm font-medium text-blue-600 hover:underline break-all flex-1">{value}</a>
+          <a href={href} ref={valueRef} className="text-sm font-medium text-info-fg hover:underline break-all flex-1">{value}</a>
         ) : (
           <div ref={valueRef} className={`text-sm font-medium flex-1 ${isEmpty ? 'text-muted-foreground/50' : 'text-foreground'} ${fullWidth ? 'whitespace-pre-wrap break-words' : ''}`}>{value || '—'}</div>
         )}
@@ -54,7 +54,7 @@ const InfoRow = ({ label, value, href, fullWidth }) => {
             title="Copy"
             aria-label={`Copy ${label}`}
           >
-            {copied ? <Check className="w-3 h-3 text-green-600" /> : <Copy className="w-3 h-3" />}
+            {copied ? <Check className="w-3 h-3 text-success-fg" /> : <Copy className="w-3 h-3" />}
           </button>
         )}
       </div>
@@ -127,7 +127,7 @@ export default function ClaimQuickViewModal({ claim, isOpen, onClose }) {
           </Section>
 
           {/* Client */}
-          <Section icon={User} title="Client" color="bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
+          <Section icon={User} title="Client" color="bg-info-bg text-info-fg">
             <InfoRow label="Name" value={claim.client_name} />
             <InfoRow label="Phone" value={claim.client_phone} href={claim.client_phone ? `tel:${claim.client_phone}` : null} />
             <InfoRow label="Email" value={claim.client_email} href={claim.client_email ? `mailto:${claim.client_email}` : null} />
@@ -144,7 +144,7 @@ export default function ClaimQuickViewModal({ claim, isOpen, onClose }) {
                 if (!legacyName && !legacyPhone && !legacyEmail) return null;
                 return (
                   <div className="col-span-2 mt-1 rounded-lg border border-border bg-muted/30 p-2.5 space-y-1.5">
-                    <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                    <div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
                       <Users className="w-3 h-3" /> Contacts at this business
                     </div>
                     <div className="rounded-md border border-border bg-card p-2">
@@ -159,7 +159,7 @@ export default function ClaimQuickViewModal({ claim, isOpen, onClose }) {
               }
               return (
                 <div className="col-span-2 mt-1 rounded-lg border border-border bg-muted/30 p-2.5 space-y-1.5">
-                  <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                  <div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
                     <Users className="w-3 h-3" /> Contacts at this business
                   </div>
                   <div className="space-y-1.5">
@@ -170,7 +170,7 @@ export default function ClaimQuickViewModal({ claim, isOpen, onClose }) {
                           <div className="flex items-center gap-2 flex-wrap">
                             <span className="text-sm font-medium">{c.name || '—'}</span>
                             {c.position && <span className="text-xs text-muted-foreground">· {c.position}</span>}
-                            {primary && <span className="inline-flex items-center gap-0.5 text-xs text-amber-600 font-medium"><Star className="w-3 h-3 fill-amber-500 text-amber-500" /> Primary</span>}
+                            {primary && <span className="inline-flex items-center gap-0.5 text-xs text-warning-fg font-medium"><Star className="w-3 h-3 fill-amber-500 text-warning-fg" /> Primary</span>}
                           </div>
                           <div className="flex flex-wrap gap-3 mt-0.5 text-xs text-muted-foreground">
                             {c.phone && <span className="flex items-center gap-1"><Phone className="w-3 h-3" /> {c.phone}</span>}
@@ -187,7 +187,7 @@ export default function ClaimQuickViewModal({ claim, isOpen, onClose }) {
 
           {/* Driver */}
           {(!claim.driver_same_as_client || claim.driver_name || claim.driver_phone || claim.driver_email || claim.driver_contact_name || claim.driver_contact_phone || claim.driver_contact_email) && (
-            <Section icon={User} title="Driver" color="bg-cyan-50 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-300">
+            <Section icon={User} title="Driver" color="bg-info-bg text-info-fg">
               <InfoRow label="Same as Client" value={claim.driver_same_as_client === false ? 'No' : 'Yes'} />
               <InfoRow label="Driver Name" value={claim.driver_name} />
               <InfoRow label="Driver Phone" value={claim.driver_phone} href={claim.driver_phone ? `tel:${claim.driver_phone}` : null} />
@@ -203,7 +203,7 @@ export default function ClaimQuickViewModal({ claim, isOpen, onClose }) {
 
           {/* Referrer */}
           {(claim.referrer || claim.referrer_ref || claim.referrer_email || claim.percent_to_referrer || claim.file_handler) && (
-            <Section icon={Building2} title="Referrer" color="bg-teal-50 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300">
+            <Section icon={Building2} title="Referrer" color="bg-success-bg text-link">
               <InfoRow label="Referrer" value={claim.referrer} />
               <InfoRow label="Referrer Ref" value={claim.referrer_ref} />
               <InfoRow label="Referrer Email" value={claim.referrer_email} href={claim.referrer_email ? `mailto:${claim.referrer_email}` : null} />
@@ -213,7 +213,7 @@ export default function ClaimQuickViewModal({ claim, isOpen, onClose }) {
           )}
 
           {/* Insurance */}
-          <Section icon={Shield} title="Client's Insurance" color="bg-orange-50 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300">
+          <Section icon={Shield} title="Client's Insurance" color="bg-warning-bg text-warning-fg">
             <InfoRow label="Insurer" value={claim.insurer} />
             <InfoRow label="Claim Reference" value={claim.claim_ref} />
             <InfoRow label="Policy Number" value={claim.policy_number} />
@@ -222,7 +222,7 @@ export default function ClaimQuickViewModal({ claim, isOpen, onClose }) {
           </Section>
 
           {/* Repairer */}
-          <Section icon={Wrench} title="Repairer / Bodyshop" color="bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-300">
+          <Section icon={Wrench} title="Repairer / Bodyshop" color="bg-success-bg text-success-fg">
             <InfoRow label="Bodyshop" value={claim.bodyshop} />
             <InfoRow label="Bodyshop Phone" value={bodyshopPhone} href={bodyshopPhone ? `tel:${bodyshopPhone}` : null} />
             <InfoRow label="Bodyshop Email" value={claim.bodyshop_email} href={claim.bodyshop_email ? `mailto:${claim.bodyshop_email}` : null} />
@@ -250,7 +250,7 @@ export default function ClaimQuickViewModal({ claim, isOpen, onClose }) {
 
           {/* Third Party Insurance */}
           {(claim.tp_insurer || claim.tp_policy_number || claim.tp_claim_ref || claim.tp_broker_name) && (
-            <Section icon={Shield} title="Third Party Insurance" color="bg-rose-50 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300">
+            <Section icon={Shield} title="Third Party Insurance" color="bg-danger-bg text-danger-fg">
               <InfoRow label="TP Insurer" value={claim.tp_insurer} />
               <InfoRow label="TP Claim Reference" value={claim.tp_claim_ref} />
               <InfoRow label="TP Policy Number" value={claim.tp_policy_number} />
@@ -259,7 +259,7 @@ export default function ClaimQuickViewModal({ claim, isOpen, onClose }) {
           )}
 
           {/* Vehicle */}
-          <Section icon={Car} title="Vehicle" color="bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300">
+          <Section icon={Car} title="Vehicle" color="bg-info-bg text-info-fg">
             <InfoRow label="Make / Model" value={claim.make_model} />
             <InfoRow label="Colour" value={claim.vehicle_colour} />
             <InfoRow label="Fuel Type" value={claim.vehicle_fuel_type} />
@@ -269,7 +269,7 @@ export default function ClaimQuickViewModal({ claim, isOpen, onClose }) {
           </Section>
 
           {/* Key Dates */}
-          <Section icon={Calendar} title="Key Dates" color="bg-gray-50 text-gray-700 dark:bg-gray-800 dark:text-gray-300">
+          <Section icon={Calendar} title="Key Dates" color="bg-muted text-foreground">
             <InfoRow label="Date Received" value={formatDate(claim.date_received)} />
             <InfoRow label="Loss Date" value={formatDate(claim.loss_date)} />
             <InfoRow label="Authority Received" value={formatDate(claim.authority_received)} />

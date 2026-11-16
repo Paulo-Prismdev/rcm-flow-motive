@@ -91,14 +91,14 @@ export default function ClaimBodyshopForm({ claim, onSave, onCancel }) {
             <Dialog open={isUnallocateOpen} onOpenChange={setIsUnallocateOpen}>
                 <DialogContent className="neomorph max-w-md">
                     <DialogHeader>
-                        <DialogTitle className="flex items-center gap-2 text-red-600">
+                        <DialogTitle className="flex items-center gap-2 text-danger-fg">
                             <UserX className="w-5 h-5" />
                             Unallocate Repairer
                         </DialogTitle>
                     </DialogHeader>
                     <div className="space-y-4">
-                        <div className="p-3 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-300">
-                            <p className="text-sm text-amber-700 dark:text-amber-300">
+                        <div className="p-3 rounded-lg bg-warning-bg border border-warning/30">
+                            <p className="text-sm text-warning-fg">
                                 This will remove <strong>{claim.bodyshop}</strong> from this claim. 
                                 The job will no longer appear in their repairer portal.
                             </p>
@@ -123,7 +123,7 @@ export default function ClaimBodyshopForm({ claim, onSave, onCancel }) {
                             <Button
                                 onClick={handleUnallocate}
                                 disabled={isUnallocating || !unallocateReason.trim()}
-                                className="flex-1 bg-red-600 hover:bg-red-700 text-white"
+                                className="flex-1 bg-danger hover:bg-danger text-on-solid"
                             >
                                 {isUnallocating ? 'Unallocating...' : 'Confirm Unallocate'}
                             </Button>
@@ -136,7 +136,7 @@ export default function ClaimBodyshopForm({ claim, onSave, onCancel }) {
                 {/* Allocate repairer — hidden once one is allocated (use Unallocate to change) */}
                 {!formData.bodyshop_id && (
                     <div>
-                        <label className="text-sm text-gray-500 mb-2 block">Allocate Repairer</label>
+                        <label className="text-sm text-muted-foreground mb-2 block">Allocate Repairer</label>
                         <ClaimBodyshopAllocateButton
                             claim={claim}
                             onAllocated={(data) => {
@@ -152,7 +152,7 @@ export default function ClaimBodyshopForm({ claim, onSave, onCancel }) {
                     <Button
                         type="button"
                         onClick={() => setIsUnallocateOpen(true)}
-                        className="w-full neomorph-flat py-3 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 border-red-300"
+                        className="w-full neomorph-flat py-3 text-danger-fg hover:bg-danger-bg border-danger/30"
                     >
                         <UserX className="w-4 h-4 mr-2" />
                         Unallocate Repairer
@@ -162,7 +162,7 @@ export default function ClaimBodyshopForm({ claim, onSave, onCancel }) {
                 {formData.bodyshop_id && (
                     <div className="space-y-4 pt-2 border-t border-border">
                         <div>
-                            <label className="text-sm text-gray-500 mb-2 block">Bodyshop</label>
+                            <label className="text-sm text-muted-foreground mb-2 block">Bodyshop</label>
                             <Input
                                 value={formData.bodyshop || ''}
                                 readOnly
@@ -170,7 +170,7 @@ export default function ClaimBodyshopForm({ claim, onSave, onCancel }) {
                             />
                         </div>
                         <div>
-                            <label className="text-sm text-gray-500 mb-2 block">Bodyshop Email</label>
+                            <label className="text-sm text-muted-foreground mb-2 block">Bodyshop Email</label>
                             <Input
                                 type="email"
                                 value={formData.bodyshop_email || ''}
@@ -186,7 +186,7 @@ export default function ClaimBodyshopForm({ claim, onSave, onCancel }) {
                 <div className="pt-2 border-t border-border">
                     <div className="grid grid-cols-2 gap-3">
                         <div>
-                            <label className="text-sm text-gray-500 mb-2 block">Repairer Referral Fee (%)</label>
+                            <label className="text-sm text-muted-foreground mb-2 block">Repairer Referral Fee (%)</label>
                             <Input
                                 type="number"
                                 step="0.01"
@@ -197,7 +197,7 @@ export default function ClaimBodyshopForm({ claim, onSave, onCancel }) {
                             />
                         </div>
                         <div>
-                            <label className="text-sm text-gray-500 mb-2 block">Repairer Referral Fee (£)</label>
+                            <label className="text-sm text-muted-foreground mb-2 block">Repairer Referral Fee (£)</label>
                             <Input
                                 type="number"
                                 step="0.01"

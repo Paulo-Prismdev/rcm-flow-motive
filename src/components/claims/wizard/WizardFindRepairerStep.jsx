@@ -69,12 +69,12 @@ function decodePolyline(encoded) {
 }
 
 function getTimeBadgeClass(seconds) {
-  if (!seconds) return 'bg-gray-100 text-gray-600';
+  if (!seconds) return 'bg-muted text-muted-foreground';
   const mins = seconds / 60;
-  if (mins < 15) return 'bg-green-100 text-green-700';
-  if (mins < 30) return 'bg-blue-100 text-blue-700';
-  if (mins < 45) return 'bg-amber-100 text-amber-700';
-  return 'bg-gray-100 text-gray-600';
+  if (mins < 15) return 'bg-success-bg text-success-fg';
+  if (mins < 30) return 'bg-info-bg text-info-fg';
+  if (mins < 45) return 'bg-warning-bg text-warning-fg';
+  return 'bg-muted text-muted-foreground';
 }
 
 function TravelBadge({ log }) {
@@ -251,32 +251,32 @@ export default function WizardFindRepairerStep({
     <div className="space-y-3">
       {/* Status messages */}
       {isGeocoding && (
-        <div className="p-3 rounded-lg border border-blue-500/30 bg-blue-50/50 flex items-center gap-2">
-          <Loader className="w-4 h-4 text-blue-500 animate-spin" />
+        <div className="p-3 rounded-lg border border-info bg-info-bg flex items-center gap-2">
+          <Loader className="w-4 h-4 text-info-fg animate-spin" />
           <p className="text-xs">Locating vehicle location...</p>
         </div>
       )}
       {!isGeocoding && geocodeMessage && (
         <div className={`p-3 rounded-lg border ${
-          geocodeMessage.type === 'success' ? 'border-green-500/30 bg-green-50/50' :
-          geocodeMessage.type === 'warning' ? 'border-orange-500/30 bg-orange-50/50' :
-          'border-blue-500/30 bg-blue-50/50'
+          geocodeMessage.type === 'success' ? 'border-success bg-success-bg' :
+          geocodeMessage.type === 'warning' ? 'border-warning bg-warning-bg' :
+          'border-info bg-info-bg'
         }`}>
           <div className="flex items-start gap-2">
-            {geocodeMessage.type === 'success' ? <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" /> : <AlertCircle className="w-4 h-4 text-orange-500 flex-shrink-0" />}
+            {geocodeMessage.type === 'success' ? <CheckCircle className="w-4 h-4 text-success-fg flex-shrink-0" /> : <AlertCircle className="w-4 h-4 text-warning-fg flex-shrink-0" />}
             <p className="text-xs">{geocodeMessage.text}</p>
           </div>
         </div>
       )}
       {isLoadingDistance && (
-        <div className="p-3 rounded-lg border border-blue-500/30 bg-blue-50/50 flex items-center gap-2">
-          <Navigation className="w-4 h-4 text-blue-500 animate-pulse" />
+        <div className="p-3 rounded-lg border border-info bg-info-bg flex items-center gap-2">
+          <Navigation className="w-4 h-4 text-info-fg animate-pulse" />
           <p className="text-xs">Calculating driving distance...</p>
         </div>
       )}
       {isGeocodingBodyshops && (
-        <div className="p-3 rounded-lg border border-blue-500/30 bg-blue-50/50 flex items-center gap-2">
-          <MapPinned className="w-4 h-4 text-blue-500 animate-pulse" />
+        <div className="p-3 rounded-lg border border-info bg-info-bg flex items-center gap-2">
+          <MapPinned className="w-4 h-4 text-info-fg animate-pulse" />
           <p className="text-xs">Locating repairers without coordinates...</p>
         </div>
       )}
@@ -304,7 +304,7 @@ export default function WizardFindRepairerStep({
               key={key}
               onClick={() => setPhonePane(key)}
               className={`flex-1 h-9 rounded-md text-xs font-semibold transition-colors ${
-                phonePane === key ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground'
+                phonePane === key ? 'bg-card text-foreground shadow-card' : 'text-muted-foreground'
               }`}
             >
               {label}
@@ -336,7 +336,7 @@ export default function WizardFindRepairerStep({
                     {log ? (
                       <TravelBadge log={log} />
                     ) : haversineMiles != null ? (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold flex-shrink-0 bg-gray-100 text-gray-500">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold flex-shrink-0 bg-muted text-muted-foreground">
                         <Navigation className="w-3 h-3" />
                         ≈{formatHaversineDistance(haversineMiles)}
                       </span>
@@ -391,7 +391,7 @@ export default function WizardFindRepairerStep({
                     <Tooltip sticky>
                       <div className="text-xs">
                         <p className="font-semibold">{bodyshop.name}</p>
-                        {log?.duration_text && <p className="text-green-600">{log.duration_text} • {log.distance_text}</p>}
+                        {log?.duration_text && <p className="text-success-fg">{log.duration_text} • {log.distance_text}</p>}
                       </div>
                     </Tooltip>
                   </Marker>

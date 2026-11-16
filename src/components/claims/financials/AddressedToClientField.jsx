@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 export default function AddressedToClientField({ checked, note, onToggle, onNote, footer }) {
   return (
     <div className="space-y-1.5 rounded-lg border border-border bg-muted/30 px-2.5 py-2">
-      <label className="flex cursor-pointer items-start gap-2 text-[11px]">
+      <label className="flex cursor-pointer items-start gap-2 text-xs">
         <input
           type="checkbox"
           checked={checked}
@@ -19,7 +19,7 @@ export default function AddressedToClientField({ checked, note, onToggle, onNote
         />
         <span className="font-semibold text-foreground">Addressed to the client at the insurer's request</span>
       </label>
-      <p className="text-[11px] leading-snug text-muted-foreground">
+      <p className="text-xs leading-snug text-muted-foreground">
         The insurer asked for this invoice to be raised in the client's name. The whole invoice is treated as the
         insurer's share and checked against what that share should be, whatever “payable by” lines the document prints.
       </p>

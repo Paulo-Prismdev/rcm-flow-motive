@@ -41,9 +41,9 @@ export default function ClaimAuthorisingPartyFields({ formData, handleChange }) 
   return (
     <div className="neomorph-inset p-4 space-y-3 rounded-xl">
       <div className="flex flex-wrap items-center gap-2">
-        <h4 className="font-semibold text-sm text-gray-700 dark:text-gray-200">Authorising Party</h4>
+        <h4 className="font-semibold text-sm text-foreground">Authorising Party</h4>
         {overridden && (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300 text-[10px] font-semibold">
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-warning-bg text-warning-fg text-xs font-semibold">
             <Lock className="w-3 h-3" /> Manually set
           </span>
         )}
@@ -59,28 +59,28 @@ export default function ClaimAuthorisingPartyFields({ formData, handleChange }) 
           </Button>
         )}
       </div>
-      <p className="text-xs text-gray-500">
+      <p className="text-xs text-muted-foreground">
         Follows the claim type automatically. Change these only for unusual cases.
       </p>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm text-gray-600 mb-2">Role</label>
+          <label className="block text-sm text-muted-foreground mb-2">Role</label>
           <select
             value={role}
             onChange={(e) => handleChange('authorised_by', e.target.value)}
-            className="neomorph-inset w-full px-4 py-3 text-gray-700 border-0 rounded-xl"
+            className="neomorph-inset w-full px-4 py-3 text-foreground border-0 rounded-xl"
           >
             <option value="">Not set</option>
             {ROLE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
           </select>
         </div>
         <div>
-          <label className="block text-sm text-gray-600 mb-2">Organisation / Name</label>
+          <label className="block text-sm text-muted-foreground mb-2">Organisation / Name</label>
           <Input
             value={name}
             onChange={(e) => handleChange('authorising_party_name', e.target.value)}
             placeholder="e.g. Admiral, ABC Credit Repair, John Smith"
-            className="neomorph-inset px-4 py-3 text-gray-700 border-0"
+            className="neomorph-inset px-4 py-3 text-foreground border-0"
           />
         </div>
       </div>

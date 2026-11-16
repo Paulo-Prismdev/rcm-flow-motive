@@ -48,57 +48,57 @@ export default function ClaimVehicleForm({ claim, onSave, onCancel }) {
         <div className="space-y-6 pt-4">
             {/* Basic Vehicle Info */}
             <div className="space-y-4">
-                <h4 className="font-semibold text-gray-700">Basic Vehicle Information</h4>
+                <h4 className="font-semibold text-foreground">Basic Vehicle Information</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <div>
-                        <label className="text-sm text-gray-500">Make (DVLA)</label>
+                        <label className="text-sm text-muted-foreground">Make (DVLA)</label>
                         <Input 
                             value={formData.vehicle_make} 
                             onChange={e => handleChange('vehicle_make', e.target.value)} 
-                            className="neomorph-inset px-4 py-3 text-gray-700 border-0"
+                            className="neomorph-inset px-4 py-3 text-foreground border-0"
                             placeholder="e.g. Ford"
                         />
                     </div>
                     <div>
-                        <label className="text-sm text-gray-500">Model (DVLA)</label>
+                        <label className="text-sm text-muted-foreground">Model (DVLA)</label>
                         <Input 
                             value={formData.vehicle_model} 
                             onChange={e => handleChange('vehicle_model', e.target.value)} 
-                            className="neomorph-inset px-4 py-3 text-gray-700 border-0"
+                            className="neomorph-inset px-4 py-3 text-foreground border-0"
                             placeholder="e.g. Fiesta"
                         />
                     </div>
                     <div>
-                        <label className="text-sm text-gray-500">Colour</label>
+                        <label className="text-sm text-muted-foreground">Colour</label>
                         <Input 
                             value={formData.vehicle_colour} 
                             onChange={e => handleChange('vehicle_colour', e.target.value)} 
-                            className="neomorph-inset px-4 py-3 text-gray-700 border-0"
+                            className="neomorph-inset px-4 py-3 text-foreground border-0"
                             placeholder="e.g. Red"
                         />
                     </div>
                     <div>
-                        <label className="text-sm text-gray-500">Fuel Type</label>
+                        <label className="text-sm text-muted-foreground">Fuel Type</label>
                         <Input 
                             value={formData.vehicle_fuel_type} 
                             onChange={e => handleChange('vehicle_fuel_type', e.target.value)} 
-                            className="neomorph-inset px-4 py-3 text-gray-700 border-0"
+                            className="neomorph-inset px-4 py-3 text-foreground border-0"
                             placeholder="e.g. Petrol"
                         />
                     </div>
                     <div>
-                        <label className="text-sm text-gray-500">Year of Manufacture</label>
+                        <label className="text-sm text-muted-foreground">Year of Manufacture</label>
                         <Input 
                             type="number"
                             value={formData.vehicle_year_of_manufacture || ''} 
                             onChange={e => handleChange('vehicle_year_of_manufacture', e.target.value ? parseInt(e.target.value) : null)} 
-                            className="neomorph-inset px-4 py-3 text-gray-700 border-0"
+                            className="neomorph-inset px-4 py-3 text-foreground border-0"
                             placeholder="e.g. 2020"
                         />
                     </div>
                     <div>
-                        <label className="text-sm text-gray-500">Vehicle Type</label>
-                        <select value={formData.vehicle_type} onChange={e => handleChange('vehicle_type', e.target.value)} className="neomorph-inset w-full px-4 py-3 text-gray-700 border-0 rounded-xl">
+                        <label className="text-sm text-muted-foreground">Vehicle Type</label>
+                        <select value={formData.vehicle_type} onChange={e => handleChange('vehicle_type', e.target.value)} className="neomorph-inset w-full px-4 py-3 text-foreground border-0 rounded-xl">
                             <option>Car</option>
                             <option>Van</option>
                             <option>Motorcycle</option>
@@ -111,53 +111,53 @@ export default function ClaimVehicleForm({ claim, onSave, onCancel }) {
 
             {/* Technical Details */}
             <div className="space-y-4">
-                <h4 className="font-semibold text-gray-700">Technical Details</h4>
+                <h4 className="font-semibold text-foreground">Technical Details</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <div>
-                        <label className="text-sm text-gray-500">Engine Capacity (CC)</label>
+                        <label className="text-sm text-muted-foreground">Engine Capacity (CC)</label>
                         <Input 
                             type="number"
                             value={formData.vehicle_engine_capacity || ''} 
                             onChange={e => handleChange('vehicle_engine_capacity', e.target.value ? parseInt(e.target.value) : null)} 
-                            className="neomorph-inset px-4 py-3 text-gray-700 border-0"
+                            className="neomorph-inset px-4 py-3 text-foreground border-0"
                             placeholder="e.g. 1600"
                         />
                     </div>
                     <div>
-                        <label className="text-sm text-gray-500">CO2 Emissions (g/km)</label>
+                        <label className="text-sm text-muted-foreground">CO2 Emissions (g/km)</label>
                         <Input 
                             type="number"
                             value={formData.vehicle_co2_emissions || ''} 
                             onChange={e => handleChange('vehicle_co2_emissions', e.target.value ? parseInt(e.target.value) : null)} 
-                            className="neomorph-inset px-4 py-3 text-gray-700 border-0"
+                            className="neomorph-inset px-4 py-3 text-foreground border-0"
                             placeholder="e.g. 120"
                         />
                     </div>
                     <div>
-                        <label className="text-sm text-gray-500">Euro Status</label>
+                        <label className="text-sm text-muted-foreground">Euro Status</label>
                         <Input 
                             value={formData.vehicle_euro_status} 
                             onChange={e => handleChange('vehicle_euro_status', e.target.value)} 
-                            className="neomorph-inset px-4 py-3 text-gray-700 border-0"
+                            className="neomorph-inset px-4 py-3 text-foreground border-0"
                             placeholder="e.g. EURO 6"
                         />
                     </div>
                     <div>
-                        <label className="text-sm text-gray-500">Wheelplan</label>
+                        <label className="text-sm text-muted-foreground">Wheelplan</label>
                         <Input 
                             value={formData.vehicle_wheelplan} 
                             onChange={e => handleChange('vehicle_wheelplan', e.target.value)} 
-                            className="neomorph-inset px-4 py-3 text-gray-700 border-0"
+                            className="neomorph-inset px-4 py-3 text-foreground border-0"
                             placeholder="e.g. 2-AXLE-RIGID BODY"
                         />
                     </div>
                     <div>
-                        <label className="text-sm text-gray-500">Revenue Weight (kg)</label>
+                        <label className="text-sm text-muted-foreground">Revenue Weight (kg)</label>
                         <Input 
                             type="number"
                             value={formData.vehicle_revenue_weight || ''} 
                             onChange={e => handleChange('vehicle_revenue_weight', e.target.value ? parseInt(e.target.value) : null)} 
-                            className="neomorph-inset px-4 py-3 text-gray-700 border-0"
+                            className="neomorph-inset px-4 py-3 text-foreground border-0"
                             placeholder="e.g. 1500"
                         />
                     </div>
@@ -166,51 +166,51 @@ export default function ClaimVehicleForm({ claim, onSave, onCancel }) {
 
             {/* Status & Dates */}
             <div className="space-y-4">
-                <h4 className="font-semibold text-gray-700">MOT & Tax Status</h4>
+                <h4 className="font-semibold text-foreground">MOT & Tax Status</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <div>
-                        <label className="text-sm text-gray-500">MOT Status</label>
+                        <label className="text-sm text-muted-foreground">MOT Status</label>
                         <Input 
                             value={formData.vehicle_mot_status} 
                             onChange={e => handleChange('vehicle_mot_status', e.target.value)} 
-                            className="neomorph-inset px-4 py-3 text-gray-700 border-0"
+                            className="neomorph-inset px-4 py-3 text-foreground border-0"
                             placeholder="e.g. VALID"
                         />
                     </div>
                     <div>
-                        <label className="text-sm text-gray-500">MOT Expiry Date</label>
+                        <label className="text-sm text-muted-foreground">MOT Expiry Date</label>
                         <Input 
                             type="date"
                             value={formData.vehicle_mot_expiry_date} 
                             onChange={e => handleChange('vehicle_mot_expiry_date', e.target.value)} 
-                            className="neomorph-inset px-4 py-3 text-gray-700 border-0"
+                            className="neomorph-inset px-4 py-3 text-foreground border-0"
                         />
                     </div>
                     <div>
-                        <label className="text-sm text-gray-500">Tax Status</label>
+                        <label className="text-sm text-muted-foreground">Tax Status</label>
                         <Input 
                             value={formData.vehicle_tax_status} 
                             onChange={e => handleChange('vehicle_tax_status', e.target.value)} 
-                            className="neomorph-inset px-4 py-3 text-gray-700 border-0"
+                            className="neomorph-inset px-4 py-3 text-foreground border-0"
                             placeholder="e.g. TAXED"
                         />
                     </div>
                     <div>
-                        <label className="text-sm text-gray-500">Tax Due Date</label>
+                        <label className="text-sm text-muted-foreground">Tax Due Date</label>
                         <Input 
                             type="date"
                             value={formData.vehicle_tax_due_date} 
                             onChange={e => handleChange('vehicle_tax_due_date', e.target.value)} 
-                            className="neomorph-inset px-4 py-3 text-gray-700 border-0"
+                            className="neomorph-inset px-4 py-3 text-foreground border-0"
                         />
                     </div>
                     <div>
-                        <label className="text-sm text-gray-500">Last V5C Issued</label>
+                        <label className="text-sm text-muted-foreground">Last V5C Issued</label>
                         <Input 
                             type="date"
                             value={formData.vehicle_date_of_last_v5c_issued} 
                             onChange={e => handleChange('vehicle_date_of_last_v5c_issued', e.target.value)} 
-                            className="neomorph-inset px-4 py-3 text-gray-700 border-0"
+                            className="neomorph-inset px-4 py-3 text-foreground border-0"
                         />
                     </div>
                 </div>
@@ -218,9 +218,9 @@ export default function ClaimVehicleForm({ claim, onSave, onCancel }) {
 
             {/* Location & Damage */}
             <div className="space-y-4">
-                <h4 className="font-semibold text-gray-700">Location & Damage</h4>
+                <h4 className="font-semibold text-foreground">Location & Damage</h4>
                 <div className="md:col-span-2">
-                    <label className="text-sm text-gray-500">Vehicle Location</label>
+                    <label className="text-sm text-muted-foreground">Vehicle Location</label>
                     <AddressLookupInput
                         value={formData.vehicle_location}
                         onChange={handleVehicleLocationChange}
@@ -229,24 +229,24 @@ export default function ClaimVehicleForm({ claim, onSave, onCancel }) {
                     />
                 </div>
                 <div className="md:col-span-2">
-                    <label className="text-sm text-gray-500">Vehicle Damage</label>
-                    <Textarea value={formData.vehicle_damage} onChange={e => handleChange('vehicle_damage', e.target.value)} className="neomorph-inset px-4 py-3 text-gray-700 border-0 h-20" />
+                    <label className="text-sm text-muted-foreground">Vehicle Damage</label>
+                    <Textarea value={formData.vehicle_damage} onChange={e => handleChange('vehicle_damage', e.target.value)} className="neomorph-inset px-4 py-3 text-foreground border-0 h-20" />
                 </div>
                 <div className="flex items-center gap-6">
                     <div className="flex items-center gap-2">
                         <input type="checkbox" id="unroadworthy" checked={formData.unroadworthy} onChange={e => handleChange('unroadworthy', e.target.checked)} />
-                        <label htmlFor="unroadworthy" className="text-sm text-gray-600">Unroadworthy</label>
+                        <label htmlFor="unroadworthy" className="text-sm text-muted-foreground">Unroadworthy</label>
                     </div>
                     <div className="flex items-center gap-2">
                         <input type="checkbox" id="recovery_required" checked={formData.recovery_required} onChange={e => handleChange('recovery_required', e.target.checked)} />
-                        <label htmlFor="recovery_required" className="text-sm text-gray-600">Recovery Required</label>
+                        <label htmlFor="recovery_required" className="text-sm text-muted-foreground">Recovery Required</label>
                     </div>
                 </div>
             </div>
 
             <div className="flex justify-end gap-3 pt-4">
                 <Button onClick={onCancel} className="neomorph-flat">Cancel</Button>
-                <Button onClick={handleSave} className="neomorph-flat text-blue-600">Save Changes</Button>
+                <Button onClick={handleSave} className="neomorph-flat text-info-fg">Save Changes</Button>
             </div>
         </div>
     );

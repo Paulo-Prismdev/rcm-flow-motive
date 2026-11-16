@@ -39,13 +39,13 @@ export default function AddressedToClientOption({ item, claim, onChange }) {
       onNote={setNote}
       footer={(
         <>
-          {saved && !dirty && <p className="text-[11px] text-mac-muted">Recorded: {savedNote}</p>}
+          {saved && !dirty && <p className="text-xs text-mac-muted">Recorded: {savedNote}</p>}
           {dirty && (
             <Button
               size="sm"
               onClick={save}
               disabled={checked && !note.trim()}
-              className="h-7 text-[11px]"
+              className="h-7 text-xs"
             >
               Save
             </Button>

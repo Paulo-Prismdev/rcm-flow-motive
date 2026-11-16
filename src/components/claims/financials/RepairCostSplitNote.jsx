@@ -16,15 +16,15 @@ export default function RepairCostSplitNote({ comparison }) {
   const differs = status === 'differs';
 
   return (
-    <div className={`flex items-start gap-2 rounded-[10px] border px-3 py-2 ${differs
-      ? 'border-amber-300 bg-amber-50 dark:border-amber-700 dark:bg-amber-900/20'
+    <div className={`flex items-start gap-2 rounded-lg border px-3 py-2 ${differs
+      ? 'border-warning/30 bg-warning-bg'
       : 'border-border bg-muted/30'}`}
     >
       {differs
-        ? <AlertTriangle className="mt-px h-3.5 w-3.5 flex-shrink-0 text-amber-600 dark:text-amber-400" />
-        : <Check className="mt-px h-3.5 w-3.5 flex-shrink-0 text-green-600 dark:text-green-400" />}
-      <p className={`flex-1 text-[11px] leading-snug ${differs
-        ? 'text-amber-800 dark:text-amber-200'
+        ? <AlertTriangle className="mt-px h-3.5 w-3.5 flex-shrink-0 text-warning-fg" />
+        : <Check className="mt-px h-3.5 w-3.5 flex-shrink-0 text-success-fg" />}
+      <p className={`flex-1 text-xs leading-snug ${differs
+        ? 'text-warning-fg'
         : 'text-muted-foreground'}`}
       >
         Final Insurer Invoice {fmtGBP(insurerPart)} + VAT &amp; Excess Invoice In {fmtGBP(vatExcessPart)} ={' '}

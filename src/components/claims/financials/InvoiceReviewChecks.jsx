@@ -4,13 +4,13 @@ import { fmtGBP } from '@/components/shared/creditRepairRates';
 
 export function AckRow({ title, detail, acked, onAck, onReject }) {
   return (
-    <div className="rounded-lg border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20 p-2.5">
-      <p className="flex items-start gap-1.5 text-[11px] font-semibold text-amber-800 dark:text-amber-300">
+    <div className="rounded-lg border border-warning/30 bg-warning-bg p-2.5">
+      <p className="flex items-start gap-1.5 text-xs font-semibold text-warning-fg">
         <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0 mt-px" /> {title}
       </p>
-      <p className="mt-1 pl-5 text-[11px] leading-snug text-amber-800/90 dark:text-amber-300/90">{detail}</p>
+      <p className="mt-1 pl-5 text-xs leading-snug text-warning-fg">{detail}</p>
       <div className="mt-1.5 pl-5 flex items-center gap-3 flex-wrap">
-        <label className="inline-flex items-center gap-1.5 text-[10px] font-semibold text-amber-800 dark:text-amber-300 cursor-pointer">
+        <label className="inline-flex items-center gap-1.5 text-xs font-semibold text-warning-fg cursor-pointer">
           <input
             type="checkbox"
             checked={!!acked}
@@ -20,7 +20,7 @@ export function AckRow({ title, detail, acked, onAck, onReject }) {
           Accept and continue
         </label>
         {onReject && (
-          <button type="button" onClick={onReject} className="inline-flex items-center gap-1 text-[10px] font-semibold text-red-600 dark:text-red-400 hover:underline">
+          <button type="button" onClick={onReject} className="inline-flex items-center gap-1 text-xs font-semibold text-danger-fg hover:underline">
             <X className="w-3 h-3" /> Reject the upload
           </button>
         )}
@@ -46,11 +46,11 @@ export default function InvoiceReviewChecks({
   return (
     <div className="space-y-2">
       {(requiredMissing.length > 0 || unreviewed.length > 0) && (
-        <div className="rounded-lg border border-red-300 dark:border-red-800 bg-red-50 dark:bg-red-900/20 p-2.5">
-          <p className="flex items-start gap-1.5 text-[11px] font-semibold text-red-700 dark:text-red-400">
+        <div className="rounded-lg border border-danger/30 bg-danger-bg p-2.5">
+          <p className="flex items-start gap-1.5 text-xs font-semibold text-danger-fg">
             <ShieldAlert className="w-3.5 h-3.5 flex-shrink-0 mt-px" /> Before this can be saved
           </p>
-          <ul className="mt-1 pl-5 space-y-0.5 list-disc text-[11px] leading-snug text-red-700/90 dark:text-red-400/90">
+          <ul className="mt-1 pl-5 space-y-0.5 list-disc text-xs leading-snug text-danger-fg">
             {requiredMissing.map((msg) => <li key={msg}>{msg}</li>)}
             {unreviewed.length > 0 && (
               <li>
@@ -62,11 +62,11 @@ export default function InvoiceReviewChecks({
       )}
 
       {mismatch && (
-        <div className="rounded-lg border border-amber-400 dark:border-amber-600 bg-amber-50 dark:bg-amber-900/25 p-2.5">
-          <p className="flex items-start gap-1.5 text-[11px] font-semibold text-amber-800 dark:text-amber-300">
+        <div className="rounded-lg border border-warning bg-warning-bg p-2.5">
+          <p className="flex items-start gap-1.5 text-xs font-semibold text-warning-fg">
             <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0 mt-px" /> The invoice total isn't what we calculated
           </p>
-          <p className="mt-1 pl-5 text-[11px] leading-snug text-amber-800/90 dark:text-amber-300/90">
+          <p className="mt-1 pl-5 text-xs leading-snug text-warning-fg">
             Invoice total <span className="font-semibold">{fmtGBP(mismatch.invoiceTotal)}</span>, expected{' '}
             <span className="font-semibold">{fmtGBP(mismatch.expected.amount)}</span>
             {mismatch.expected.note ? ` (${mismatch.expected.note})` : ''} — a difference of{' '}
@@ -75,7 +75,7 @@ export default function InvoiceReviewChecks({
 
           {accepted ? (
             <div className="mt-1.5 pl-5 space-y-1.5">
-              <p className="text-[10px] font-semibold text-green-700 dark:text-green-400">
+              <p className="text-xs font-semibold text-success-fg">
                 Accepting the invoice figure — give a reason for the record:
               </p>
               <textarea
@@ -83,23 +83,23 @@ export default function InvoiceReviewChecks({
                 onChange={(e) => onReason(e.target.value)}
                 rows={2}
                 placeholder="e.g. invoice includes a storage charge we agreed"
-                className="w-full px-2 py-1.5 rounded-md border border-border bg-card text-[11px]"
+                className="w-full px-2 py-1.5 rounded-md border border-border bg-card text-xs"
               />
-              {!reason.trim() && <p className="text-[10px] text-amber-700 dark:text-amber-400">A reason is needed before this can be saved.</p>}
+              {!reason.trim() && <p className="text-xs text-warning-fg">A reason is needed before this can be saved.</p>}
             </div>
           ) : (
             <div className="mt-1.5 pl-5 flex items-center gap-3 flex-wrap">
               <button
                 type="button"
                 onClick={onAcceptMismatch}
-                className="inline-flex items-center gap-1 text-[10px] font-semibold text-amber-800 dark:text-amber-300 hover:underline"
+                className="inline-flex items-center gap-1 text-xs font-semibold text-warning-fg hover:underline"
               >
                 <Check className="w-3 h-3" /> Accept the invoice figure (with a reason)
               </button>
               <button
                 type="button"
                 onClick={onReject}
-                className="inline-flex items-center gap-1 text-[10px] font-semibold text-red-600 dark:text-red-400 hover:underline"
+                className="inline-flex items-center gap-1 text-xs font-semibold text-danger-fg hover:underline"
               >
                 <X className="w-3 h-3" /> Reject the upload
               </button>
@@ -109,11 +109,11 @@ export default function InvoiceReviewChecks({
       )}
 
       {workings && (
-        <div className="rounded-lg border border-green-300 dark:border-green-800 bg-green-50 dark:bg-green-900/20 p-2.5">
-          <p className="flex items-start gap-1.5 text-[11px] font-semibold text-green-700 dark:text-green-400">
+        <div className="rounded-lg border border-success/30 bg-success-bg p-2.5">
+          <p className="flex items-start gap-1.5 text-xs font-semibold text-success-fg">
             <Check className="w-3.5 h-3.5 flex-shrink-0 mt-px" /> Excess and VAT checked against the claim
           </p>
-          <p className="mt-1 pl-5 text-[11px] leading-snug text-green-800/90 dark:text-green-300/90">{workings}</p>
+          <p className="mt-1 pl-5 text-xs leading-snug text-success-fg">{workings}</p>
         </div>
       )}
 
@@ -132,11 +132,11 @@ export default function InvoiceReviewChecks({
           accepted so it is recognised next time without a word. */}
       {nameVariations.map((v) => (
         <div key={`${v.printed}|${v.expected}`} className="rounded-lg border border-border bg-muted/40 p-2.5">
-          <p className="flex items-start gap-1.5 text-[11px] font-semibold text-foreground">
+          <p className="flex items-start gap-1.5 text-xs font-semibold text-foreground">
             <Info className="w-3.5 h-3.5 flex-shrink-0 mt-px text-muted-foreground" />
             Probably the same company, under another name
           </p>
-          <p className="mt-1 pl-5 text-[11px] leading-snug text-muted-foreground">
+          <p className="mt-1 pl-5 text-xs leading-snug text-muted-foreground">
             This invoice reads “{v.printed}”, which looks like the same firm as “{v.expected}” — a branch or
             trading name rather than a different company. Nothing needs correcting if it is.
           </p>
@@ -144,7 +144,7 @@ export default function InvoiceReviewChecks({
             <button
               type="button"
               onClick={() => onAcceptVariation(v)}
-              className="mt-1.5 ml-5 inline-flex items-center gap-1 text-[10px] font-semibold text-primary hover:underline"
+              className="mt-1.5 ml-5 inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
             >
               <Check className="w-3 h-3" /> Yes, same company — remember “{v.printed}”
             </button>
@@ -153,11 +153,11 @@ export default function InvoiceReviewChecks({
       ))}
 
       {remembered.length > 0 && (
-        <div className="rounded-lg border border-green-300 dark:border-green-800 bg-green-50 dark:bg-green-900/20 p-2.5">
-          <p className="flex items-start gap-1.5 text-[11px] font-semibold text-green-700 dark:text-green-400">
+        <div className="rounded-lg border border-success/30 bg-success-bg p-2.5">
+          <p className="flex items-start gap-1.5 text-xs font-semibold text-success-fg">
             <Check className="w-3.5 h-3.5 flex-shrink-0 mt-px" /> Name remembered
           </p>
-          <p className="mt-1 pl-5 text-[11px] leading-snug text-green-800/90 dark:text-green-300/90">
+          <p className="mt-1 pl-5 text-xs leading-snug text-success-fg">
             {remembered.join(', ')} {remembered.length === 1 ? 'is' : 'are'} now recognised as the same company on
             every invoice, without being questioned again.
           </p>

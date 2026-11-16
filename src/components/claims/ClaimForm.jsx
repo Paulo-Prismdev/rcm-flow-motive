@@ -42,8 +42,8 @@ function CopyLinkButton({ url }) {
   return (
     <button type="button"
       onClick={() => { navigator.clipboard.writeText(url); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
-      className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-lg border border-blue-300 bg-white text-blue-600 hover:bg-blue-50 whitespace-nowrap transition-colors">
-      {copied ? <Check className="w-3.5 h-3.5 text-green-500" /> : <Copy className="w-3.5 h-3.5" />}
+      className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-lg border border-info/30 bg-card text-info-fg hover:bg-info-bg whitespace-nowrap transition-colors">
+      {copied ? <Check className="w-3.5 h-3.5 text-success-fg" /> : <Copy className="w-3.5 h-3.5" />}
       {copied ? 'Copied!' : 'Copy Link'}
     </button>
   );
@@ -71,10 +71,10 @@ const StepIndicator = ({ steps, currentStep }) => (
       return (
         <React.Fragment key={s.key}>
           <div className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs transition-all flex-shrink-0 ${
-            isActive ? 'bg-primary text-primary-foreground shadow-sm' :
-            isDone ? 'bg-green-100 text-green-700' : 'bg-muted text-muted-foreground opacity-60'}`}>
+            isActive ? 'bg-primary text-primary-foreground shadow-card' :
+            isDone ? 'bg-success-bg text-success-fg' : 'bg-muted text-muted-foreground opacity-60'}`}>
             <span className="w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold
-              ${isDone ? 'bg-green-500 text-white' : isActive ? 'bg-accent-foreground/20' : 'bg-muted-foreground/20'}">
+              ${isDone ? 'bg-success text-on-solid' : isActive ? 'bg-accent-foreground/20' : 'bg-muted-foreground/20'}">
               {isDone ? <Check className="w-2.5 h-2.5" /> : s.number}
             </span>
             <span className="hidden sm:inline font-medium">{s.title}</span>
@@ -89,7 +89,7 @@ const StepIndicator = ({ steps, currentStep }) => (
 const ReviewRow = ({ label, value }) => (
   <div>
     <p className="text-xs text-muted-foreground">{label}</p>
-    <p className={`text-sm ${value ? 'font-medium' : 'text-amber-600 italic'}`}>{value || '—'}</p>
+    <p className={`text-sm ${value ? 'font-medium' : 'text-warning-fg italic'}`}>{value || '—'}</p>
   </div>
 );
 
@@ -193,7 +193,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
     [fieldErrors, liveErrors]
   );
   const FieldError = ({ field }) => (shownErrors[field]
-    ? <p role="alert" className="flex items-center gap-1 text-xs text-red-600"><AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />{shownErrors[field]}</p>
+    ? <p role="alert" className="flex items-center gap-1 text-xs text-danger-fg"><AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />{shownErrors[field]}</p>
     : null);
   const [referrerCompanyId, setReferrerCompanyId] = useState(claim?.referrer_id || null);
 
@@ -569,34 +569,34 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
         />
         <div className="neomorph p-6 flex-shrink-0">
           <div className="flex items-center gap-4">
-            <Button aria-label="Back" onClick={onCancel} className="neomorph-flat p-3"><ArrowLeft className="w-4 h-4 text-gray-600" /></Button>
-            <div><h1 className="text-2xl font-bold text-gray-700">New Claim</h1><p className="text-sm text-gray-500 mt-1">How would you like to create this claim?</p></div>
+            <Button aria-label="Back" onClick={onCancel} className="neomorph-flat p-3"><ArrowLeft className="w-4 h-4 text-muted-foreground" /></Button>
+            <div><h1 className="text-2xl font-bold text-foreground">New Claim</h1><p className="text-sm text-muted-foreground mt-1">How would you like to create this claim?</p></div>
           </div>
         </div>
         <div className="flex-1 flex flex-col md:flex-row gap-4 p-1">
-          <div className="flex-1 neomorph-flat p-6 flex flex-col items-center text-center gap-4 border-2 border-transparent hover:border-blue-300 transition-all rounded-2xl">
-            <div className="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center flex-shrink-0"><Send className="w-8 h-8 text-primary-foreground" /></div>
-            <div><h3 className="text-lg font-bold text-gray-700 mb-2">Send to Client</h3><p className="text-sm text-gray-500">Share a link so your client fills in their details and signs a Statement of Truth.</p></div>
+          <div className="flex-1 neomorph-flat p-6 flex flex-col items-center text-center gap-4 border-2 border-transparent hover:border-info/30 transition-all rounded-2xl">
+            <div className="w-16 h-16 rounded-full bg-info flex items-center justify-center flex-shrink-0"><Send className="w-8 h-8 text-primary-foreground" /></div>
+            <div><h3 className="text-lg font-bold text-foreground mb-2">Send to Client</h3><p className="text-sm text-muted-foreground">Share a link so your client fills in their details and signs a Statement of Truth.</p></div>
             <div className="w-full mt-auto space-y-3">
-              <div className="flex gap-2"><input readOnly value={formUrl} className="flex-1 text-xs px-3 py-2 rounded-lg bg-gray-50 border border-gray-200 text-gray-500 truncate" /><CopyLinkButton url={formUrl} /></div>
-              <p className="text-xs text-blue-600 font-medium">Close this once sent — nothing else to fill in.</p>
+              <div className="flex gap-2"><input readOnly value={formUrl} className="flex-1 text-xs px-3 py-2 rounded-lg bg-muted border border-border text-muted-foreground truncate" /><CopyLinkButton url={formUrl} /></div>
+              <p className="text-xs text-info-fg font-medium">Close this once sent — nothing else to fill in.</p>
             </div>
           </div>
-          <div className="flex items-center justify-center text-gray-400 font-bold text-sm">OR</div>
+          <div className="flex items-center justify-center text-muted-foreground font-bold text-sm">OR</div>
           <div className="flex-1 neomorph-flat p-6 flex flex-col items-center text-center gap-4 border-2 border-transparent hover:border-purple-300 transition-all rounded-2xl">
             <div className="w-16 h-16 rounded-full bg-purple-600 flex items-center justify-center flex-shrink-0"><Sparkles className="w-8 h-8 text-primary-foreground" /></div>
-            <div><h3 className="text-lg font-bold text-gray-700 mb-2">Upload & Set Up With AI</h3><p className="text-sm text-gray-500">Upload the instruction — the claim form, emails saved as PDF, damage photos — or paste the email. AI reads it all and fills the claim in for you to check.</p></div>
+            <div><h3 className="text-lg font-bold text-foreground mb-2">Upload & Set Up With AI</h3><p className="text-sm text-muted-foreground">Upload the instruction — the claim form, emails saved as PDF, damage photos — or paste the email. AI reads it all and fills the claim in for you to check.</p></div>
             <div className="w-full mt-auto text-left">
               <ClaimIntakePanel onRead={handleIntakeRead} isReading={intake.isReading} error={intake.error} />
             </div>
           </div>
-          <div className="flex items-center justify-center text-gray-400 font-bold text-sm">OR</div>
-          <div className="flex-1 neomorph-flat p-6 flex flex-col items-center text-center gap-4 cursor-pointer border-2 border-transparent hover:border-green-300 transition-all rounded-2xl"
+          <div className="flex items-center justify-center text-muted-foreground font-bold text-sm">OR</div>
+          <div className="flex-1 neomorph-flat p-6 flex flex-col items-center text-center gap-4 cursor-pointer border-2 border-transparent hover:border-success/30 transition-all rounded-2xl"
             onClick={() => { setEntryMode('manual'); setChoiceStep(false); }}>
-            <div className="w-16 h-16 rounded-full bg-green-600 flex items-center justify-center flex-shrink-0"><Check className="w-8 h-8 text-primary-foreground" /></div>
-            <div><h3 className="text-lg font-bold text-gray-700 mb-2">Fill In Manually</h3><p className="text-sm text-gray-500">You have all the information and want to create the claim yourself.</p></div>
+            <div className="w-16 h-16 rounded-full bg-success flex items-center justify-center flex-shrink-0"><Check className="w-8 h-8 text-primary-foreground" /></div>
+            <div><h3 className="text-lg font-bold text-foreground mb-2">Fill In Manually</h3><p className="text-sm text-muted-foreground">You have all the information and want to create the claim yourself.</p></div>
             <Button type="button" onClick={e => { e.preventDefault(); e.stopPropagation(); setEntryMode('manual'); setChoiceStep(false); }}
-              className="mt-auto neomorph-flat px-6 py-3 font-medium text-green-600 border border-green-300 hover:bg-green-50">Start Wizard →</Button>
+              className="mt-auto neomorph-flat px-6 py-3 font-medium text-success-fg border border-success/30 hover:bg-success-bg">Start Wizard →</Button>
           </div>
         </div>
       </div>
@@ -655,7 +655,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
       )}
 
       {/* Header + Step Indicator */}
-      <div className="bg-card border border-border rounded-[10px] p-4 flex-shrink-0 shadow-sm">
+      <div className="bg-card border border-border rounded-xl p-4 flex-shrink-0 shadow-card">
         <div className="flex items-center gap-4 mb-3">
           <Button aria-label="Back" onClick={onCancel} variant="ghost" size="icon" className="h-9 w-9"><ArrowLeft className="w-4 h-4" /></Button>
           <div className="flex-1">
@@ -717,7 +717,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
 
   function renderIncidentStep() {
     return (
-      <div className="bg-card border border-border rounded-[10px] p-4 md:p-6 space-y-5 shadow-sm">
+      <div className="bg-card border border-border rounded-xl p-4 md:p-6 space-y-5 shadow-card">
         <h3 className="font-bold text-lg">Vehicle & Incident</h3>
 
         {/* Reg lookup */}
@@ -730,8 +730,8 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
               className="whitespace-nowrap h-9">{isLookingUpVehicle ? <><Loader className="w-4 h-4 animate-spin mr-2" />Looking up...</> : <><Search className="w-4 h-4 mr-2" />Lookup</>}</Button>
           </div>
           <FieldError field="reg" />
-          {vehicleLookupError && <div className="flex gap-2 p-2 bg-orange-50 border border-orange-200 rounded text-xs text-orange-800"><AlertCircle className="w-4 h-4 flex-shrink-0" />{vehicleLookupError}</div>}
-          {formData.make_model && !vehicleLookupError && <div className="p-2 bg-green-50 border border-green-200 rounded text-sm text-green-700">✓ <span className="font-bold">{formData.make_model}</span>{formData.vehicle_colour && ` • ${formData.vehicle_colour}`}{formData.vehicle_year_of_manufacture && ` • ${formData.vehicle_year_of_manufacture}`}</div>}
+          {vehicleLookupError && <div className="flex gap-2 p-2 bg-warning-bg border border-warning/30 rounded text-xs text-warning-fg"><AlertCircle className="w-4 h-4 flex-shrink-0" />{vehicleLookupError}</div>}
+          {formData.make_model && !vehicleLookupError && <div className="p-2 bg-success-bg border border-success/30 rounded text-sm text-success-fg">✓ <span className="font-bold">{formData.make_model}</span>{formData.vehicle_colour && ` • ${formData.vehicle_colour}`}{formData.vehicle_year_of_manufacture && ` • ${formData.vehicle_year_of_manufacture}`}</div>}
         </div>
 
         {/* Claim type + dates */}
@@ -739,7 +739,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
           <div className="space-y-2">
             <label className="text-sm font-medium">Claim Type *</label>
             <select value={formData.claim_type} onChange={e => handleChange('claim_type', e.target.value)}
-              className="w-full px-3 py-2 text-sm rounded-[10px] border border-input bg-card text-foreground">
+              className="w-full px-3 py-2 text-sm rounded-lg border border-input bg-card text-foreground">
               <option value="">Select claim type...</option>
               {CLAIM_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
             </select>
@@ -749,7 +749,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
           <div className="space-y-2"><label className="text-sm font-medium">Time of Loss</label><Input type="time" value={formData.loss_time} onChange={e => handleChange('loss_time', e.target.value)} /></div>
           <div className="space-y-2"><label className="text-sm font-medium">Use of Vehicle</label>
             <select value={formData.vehicle_use} onChange={e => handleChange('vehicle_use', e.target.value)}
-              className="w-full px-3 py-2 text-sm rounded-[10px] border border-input bg-card text-foreground">
+              className="w-full px-3 py-2 text-sm rounded-lg border border-input bg-card text-foreground">
               <option value="">Select...</option><option>Business</option><option>Social</option><option>Commuting</option>
             </select>
           </div>
@@ -791,7 +791,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
 
   function renderClientStep() {
     return (
-      <div className="bg-card border border-border rounded-[10px] p-4 md:p-6 space-y-5 shadow-sm">
+      <div className="bg-card border border-border rounded-xl p-4 md:p-6 space-y-5 shadow-card">
         <h3 className="font-bold text-lg">Client Details</h3>
 
         <div className="space-y-2">
@@ -805,7 +805,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
 
         {linkedContacts.length > 0 && (
           <div className="rounded-xl border border-border bg-muted/30 p-3 space-y-2">
-            <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            <div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
               <Users className="w-3.5 h-3.5" /> Contacts at this business
             </div>
             <div className="space-y-1.5">
@@ -817,8 +817,8 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
                       <span className="text-sm font-medium">{c.name || '—'}</span>
                       {c.position && <span className="text-xs text-muted-foreground">· {c.position}</span>}
                       {primary && (
-                        <span className="inline-flex items-center gap-0.5 text-xs text-amber-600 font-medium">
-                          <Star className="w-3 h-3 fill-amber-500 text-amber-500" /> Primary
+                        <span className="inline-flex items-center gap-0.5 text-xs text-warning-fg font-medium">
+                          <Star className="w-3 h-3 fill-amber-500 text-warning-fg" /> Primary
                         </span>
                       )}
                     </div>
@@ -834,7 +834,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
         )}
 
         <div className="p-4 rounded-lg bg-muted/50 space-y-3">
-          {formData.client_id && <span className="text-xs px-2 py-1 rounded-full bg-green-100 text-green-700 font-medium inline-block mb-2">✓ Linked to Database</span>}
+          {formData.client_id && <span className="text-xs px-2 py-1 rounded-full bg-success-bg text-success-fg font-medium inline-block mb-2">✓ Linked to Database</span>}
           <div className="space-y-2"><label className="text-xs text-muted-foreground">Name *</label><Input value={formData.client_name} onChange={e => handleChange('client_name', e.target.value)} placeholder="Client name" /></div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5"><label className="text-xs text-muted-foreground">Phone</label><Input value={formData.client_phone} onChange={e => handleChange('client_phone', e.target.value)} /></div>
@@ -850,7 +850,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5"><label className="text-xs text-muted-foreground">VAT Status</label>
               <select value={formData.client_vat_status} onChange={e => handleChange('client_vat_status', e.target.value)}
-                className="w-full px-3 py-2 text-sm rounded-[10px] border border-input bg-card text-foreground">
+                className="w-full px-3 py-2 text-sm rounded-lg border border-input bg-card text-foreground">
                 <option>VAT Registered</option><option>Non-VAT</option><option>Unknown</option>
               </select>
             </div>
@@ -896,7 +896,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
 
   function renderInsuranceStep() {
     return (
-      <div className="bg-card border border-border rounded-[10px] p-4 md:p-6 space-y-5 shadow-sm">
+      <div className="bg-card border border-border rounded-xl p-4 md:p-6 space-y-5 shadow-card">
         <h3 className="font-bold text-lg">Insurance Details</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
@@ -916,7 +916,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
 
   function renderReferrerStep() {
     return (
-      <div className="bg-card border border-border rounded-[10px] p-4 md:p-6 space-y-5 shadow-sm">
+      <div className="bg-card border border-border rounded-xl p-4 md:p-6 space-y-5 shadow-card">
         <h3 className="font-bold text-lg">Referrer Details</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2"><label className="text-sm font-medium">Referrer</label><ReferrerCombobox value={formData.referrer} onChange={handleReferrerChange} /></div>
@@ -927,7 +927,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
             {handlerContacts.length > 0 ? (
               <select value={formData.file_handler} onChange={e => handleChange('file_handler', e.target.value)}
                 style={{ WebkitAppearance: 'menulist', appearance: 'menulist' }}
-                className="w-full px-3 py-2 text-sm rounded-[10px] border border-input bg-card text-foreground">
+                className="w-full px-3 py-2 text-sm rounded-lg border border-input bg-card text-foreground">
                 <option value="">Select file handler...</option>
                 {handlerContacts.map((c, i) => <option key={c.id || i} value={c.name}>{c.name}{c.position ? ` — ${c.position}` : ''}</option>)}
               </select>
@@ -946,7 +946,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
 
   function renderConditionStep() {
     return (
-      <div className="bg-card border border-border rounded-[10px] p-4 md:p-6 space-y-5 shadow-sm">
+      <div className="bg-card border border-border rounded-xl p-4 md:p-6 space-y-5 shadow-card">
         <h3 className="font-bold text-lg">Vehicle Condition & Location</h3>
 
         {/* Vehicle info from DVLA */}
@@ -962,7 +962,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
 
         <div className="space-y-2"><label className="text-sm font-medium">Vehicle Type</label>
           <select value={formData.vehicle_type} onChange={e => handleChange('vehicle_type', e.target.value)}
-            className="w-full px-3 py-2 text-sm rounded-[10px] border border-input bg-card text-foreground">
+            className="w-full px-3 py-2 text-sm rounded-lg border border-input bg-card text-foreground">
             <option>Car</option><option>Van</option><option>Motorcycle</option><option>HGV</option><option>Other</option>
           </select>
         </div>
@@ -987,7 +987,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
 
   function renderThirdPartyStep() {
     return (
-      <div className="bg-card border border-border rounded-[10px] p-4 md:p-6 space-y-5 shadow-sm">
+      <div className="bg-card border border-border rounded-xl p-4 md:p-6 space-y-5 shadow-card">
         <h3 className="font-bold text-lg">Third Party Details</h3>
 
         {/* Contact */}
@@ -1017,8 +1017,8 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
             <Button type="button" variant="outline" onClick={handleTPVehicleLookup} disabled={isLookingUpTPVehicle || !formData.tp_reg || formData.tp_reg.length < 3}
               className="whitespace-nowrap h-9">{isLookingUpTPVehicle ? <><Loader className="w-4 h-4 animate-spin mr-2" />Looking...</> : <><Search className="w-4 h-4 mr-2" />Lookup</>}</Button>
           </div>
-          {tpVehicleLookupError && <div className="flex gap-2 p-2 bg-orange-50 border border-orange-200 rounded text-xs text-orange-800"><AlertCircle className="w-4 h-4 flex-shrink-0" />{tpVehicleLookupError}</div>}
-          {formData.tp_make_model && !tpVehicleLookupError && <div className="p-2 bg-green-50 border border-green-200 rounded text-sm text-green-700">✓ <span className="font-bold">{formData.tp_make_model}</span>{formData.tp_vehicle_colour && ` • ${formData.tp_vehicle_colour}`}</div>}
+          {tpVehicleLookupError && <div className="flex gap-2 p-2 bg-warning-bg border border-warning/30 rounded text-xs text-warning-fg"><AlertCircle className="w-4 h-4 flex-shrink-0" />{tpVehicleLookupError}</div>}
+          {formData.tp_make_model && !tpVehicleLookupError && <div className="p-2 bg-success-bg border border-success/30 rounded text-sm text-success-fg">✓ <span className="font-bold">{formData.tp_make_model}</span>{formData.tp_vehicle_colour && ` • ${formData.tp_vehicle_colour}`}</div>}
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2"><label className="text-sm font-medium">Make/Model</label><Input value={formData.tp_make_model} onChange={e => handleChange('tp_make_model', e.target.value)} /></div>
             <div className="space-y-2"><label className="text-sm font-medium">Their Insurer</label><InsurerCombobox value={formData.tp_insurer} onChange={v => handleChange('tp_insurer', v)} /></div>
@@ -1033,7 +1033,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
 
   function renderIndemnityStep() {
     return (
-      <div className="bg-card border border-border rounded-[10px] p-4 md:p-6 shadow-sm">
+      <div className="bg-card border border-border rounded-xl p-4 md:p-6 shadow-card">
         <ClaimIndemnityFields formData={formData} handleChange={handleChange} />
       </div>
     );
@@ -1042,7 +1042,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
   function renderReviewStep() {
     return (
       <div className="space-y-4">
-        <div className="bg-card border border-border rounded-[10px] p-4 md:p-6 space-y-5 shadow-sm">
+        <div className="bg-card border border-border rounded-xl p-4 md:p-6 space-y-5 shadow-card">
           <h3 className="font-bold text-lg">Review & Create</h3>
           <p className="text-sm text-muted-foreground">Check everything below. Click Edit on any section to jump back and correct it.</p>
 
@@ -1140,7 +1140,7 @@ export default function ClaimForm({ claim, onSubmit, onCancel, isSubmitting, def
         </div>
 
         {/* File Upload */}
-        <div className="bg-card border border-border rounded-[10px] p-4 md:p-6 space-y-4 shadow-sm">
+        <div className="bg-card border border-border rounded-xl p-4 md:p-6 space-y-4 shadow-card">
           <h4 className="font-semibold">Upload Files (Optional)</h4>
           <div className="p-3 bg-purple-50 border border-purple-200 rounded-lg flex gap-2 text-xs text-purple-800">
             <Sparkles className="w-4 h-4 flex-shrink-0 mt-0.5" /><span><strong>AI Analysis:</strong> Upload documents and use the sparkle icon to auto-extract claim details.</span>

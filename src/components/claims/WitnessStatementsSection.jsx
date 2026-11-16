@@ -82,8 +82,8 @@ export default function WitnessStatementsSection({ claim }) {
               </div>
             </div>
             {s.status === 'Signed'
-              ? <span className="inline-flex items-center gap-1 text-xs font-medium text-green-700 bg-green-50 dark:bg-green-900/20 rounded-full px-2 py-0.5"><CheckCircle2 className="w-3.5 h-3.5" /> Signed {fmt(s.signed_at)}</span>
-              : <span className={`text-xs font-medium rounded-full px-2 py-0.5 ${s.link_expired ? 'text-red-700 bg-red-50' : 'text-amber-700 bg-amber-50'}`}>{s.link_expired ? 'Link expired' : `Waiting${s.link_emailed_at ? ` · emailed ${fmt(s.link_emailed_at)}` : ''}`}</span>}
+              ? <span className="inline-flex items-center gap-1 text-xs font-medium text-success-fg bg-success-bg rounded-full px-2 py-0.5"><CheckCircle2 className="w-3.5 h-3.5" /> Signed {fmt(s.signed_at)}</span>
+              : <span className={`text-xs font-medium rounded-full px-2 py-0.5 ${s.link_expired ? 'text-danger-fg bg-danger-bg' : 'text-warning-fg bg-warning-bg'}`}>{s.link_expired ? 'Link expired' : `Waiting${s.link_emailed_at ? ` · emailed ${fmt(s.link_emailed_at)}` : ''}`}</span>}
           </div>
 
           {s.status === 'Signed' ? (
@@ -96,7 +96,7 @@ export default function WitnessStatementsSection({ claim }) {
                 <div className="flex flex-col sm:flex-row gap-2">
                   <Input readOnly value={s.link} className="flex-1 text-xs" onClick={(e) => e.target.select()} aria-label={`Link for ${s.witness_name}`} />
                   <Button variant="outline" size="sm" className="gap-1.5" onClick={() => copy(s)}>
-                    {copiedId === s.id ? <Check className="w-3.5 h-3.5 text-green-600" /> : <Copy className="w-3.5 h-3.5" />}{copiedId === s.id ? 'Copied' : 'Copy'}
+                    {copiedId === s.id ? <Check className="w-3.5 h-3.5 text-success-fg" /> : <Copy className="w-3.5 h-3.5" />}{copiedId === s.id ? 'Copied' : 'Copy'}
                   </Button>
                 </div>
               )}
@@ -109,7 +109,7 @@ export default function WitnessStatementsSection({ claim }) {
                 <Button variant="ghost" size="sm" className="gap-1.5 text-xs" disabled={act.isPending} onClick={() => act.mutate({ action: 'regenerate', id: s.id })}>
                   <RefreshCw className="w-3.5 h-3.5" /> New link
                 </Button>
-                <Button variant="ghost" size="sm" className="gap-1.5 text-xs text-red-600 hover:text-red-700" disabled={act.isPending} onClick={() => remove(s)}>
+                <Button variant="ghost" size="sm" className="gap-1.5 text-xs text-danger-fg hover:text-danger-fg" disabled={act.isPending} onClick={() => remove(s)}>
                   <Trash2 className="w-3.5 h-3.5" /> Remove
                 </Button>
               </div>

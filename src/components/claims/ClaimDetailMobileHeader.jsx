@@ -93,7 +93,7 @@ export default function ClaimDetailMobileHeader({
   return (
     <div
       data-claim-header
-      className="lg:hidden sticky top-0 flex-shrink-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800"
+      className="lg:hidden sticky top-0 flex-shrink-0 bg-card border-b border-border"
       style={{ isolation: 'isolate' }}
     >
       {/* Row 1: back arrow, registration and claim number */}
@@ -102,7 +102,7 @@ export default function ClaimDetailMobileHeader({
           type="button"
           onClick={onClose}
           aria-label="Back"
-          className="tap-44 flex-shrink-0 flex items-center justify-center w-9 h-9 rounded-lg bg-gray-100 dark:bg-gray-800 transition-all active:scale-95 active:bg-gray-300 dark:active:bg-gray-700"
+          className="tap-44 flex-shrink-0 flex items-center justify-center w-9 h-9 rounded-lg bg-muted transition-all active:scale-95 active:bg-accent"
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
@@ -132,7 +132,7 @@ export default function ClaimDetailMobileHeader({
                 {claim.secondary_status && <StatusBadge status={claim.secondary_status} />}
                 {claim.tertiary_status && <StatusBadge status={claim.tertiary_status} variant="secondary" />}
                 {claim.archived && (
-                  <span className="px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-800 text-xs text-gray-600">Archived</span>
+                  <span className="px-2 py-0.5 rounded bg-muted text-xs text-muted-foreground">Archived</span>
                 )}
               </div>
             )}
@@ -164,12 +164,12 @@ export default function ClaimDetailMobileHeader({
         <button type="button" onClick={() => onAction('images')} className={`${actionBase} ${actionSize} border border-border bg-card text-foreground`}>
           <Image className="w-4 h-4" />
           {!collapsed && <span className="text-xs font-medium leading-none">Images</span>}
-          <CountBadge count={imagesCount} className="bg-blue-500 text-white" />
+          <CountBadge count={imagesCount} className="bg-info text-on-solid" />
         </button>
         <button type="button" onClick={() => onAction('docs')} className={`${actionBase} ${actionSize} border border-border bg-card text-foreground`}>
           <FileText className="w-4 h-4" />
           {!collapsed && <span className="text-xs font-medium leading-none">Docs</span>}
-          <CountBadge count={docsCount} className="bg-blue-500 text-white" />
+          <CountBadge count={docsCount} className="bg-info text-on-solid" />
         </button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -187,11 +187,11 @@ export default function ClaimDetailMobileHeader({
               <DropdownMenuItem
                 key={section.value}
                 onSelect={() => { onAction('section:' + section.value); }}
-                className={claim._selectedSection === section.value ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : ''}
+                className={claim._selectedSection === section.value ? 'bg-info-bg text-info-fg' : ''}
               >
                 <span className="flex-1">{section.label}</span>
                 {isEmpty(section.value, claim) && (
-                  <span className="w-2 h-2 rounded-full bg-amber-400 flex-shrink-0 ml-2" />
+                  <span className="w-2 h-2 rounded-full bg-warning flex-shrink-0 ml-2" />
                 )}
               </DropdownMenuItem>
             ))}
@@ -207,7 +207,7 @@ export default function ClaimDetailMobileHeader({
             <DropdownMenuItem onSelect={() => { onAction('backorders'); }}><Package className="w-4 h-4 mr-2" />Backordered Parts</DropdownMenuItem>
             <DropdownMenuItem onSelect={() => { onAction('duplicate'); }}><Copy className="w-4 h-4 mr-2" />Duplicate Claim</DropdownMenuItem>
             <DropdownMenuItem onSelect={() => { onAction('archive'); }}><Archive className="w-4 h-4 mr-2" />{claim.archived ? 'Unarchive' : 'Archive'}</DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => { onAction('delete'); }} className="text-red-600"><Trash2 className="w-4 h-4 mr-2" />Delete</DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => { onAction('delete'); }} className="text-danger-fg"><Trash2 className="w-4 h-4 mr-2" />Delete</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

@@ -144,13 +144,13 @@ export default function DuplicateClaimModal({ claim, isOpen, onClose, onDuplicat
 
         {createdClaim ? (
           <div className="py-4 space-y-3">
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
-              <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
+            <div className="flex items-center gap-3 p-3 rounded-lg bg-success-bg border border-success/30">
+              <CheckCircle className="w-5 h-5 text-success-fg flex-shrink-0" />
               <div>
-                <p className="font-medium text-green-800 dark:text-green-200 text-sm">
+                <p className="font-medium text-success-fg text-sm">
                   New claim created: {createdClaim.job_number}
                 </p>
-                <p className="text-xs text-green-700 dark:text-green-300 mt-0.5">
+                <p className="text-xs text-success-fg mt-0.5">
                   All details copied from {claim?.job_number}.
                 </p>
               </div>
@@ -171,7 +171,7 @@ export default function DuplicateClaimModal({ claim, isOpen, onClose, onDuplicat
               </p>
             </div>
             <div className="rounded-lg bg-muted/50 border border-border p-3 space-y-1.5">
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">What gets copied</p>
+              <p className="text-xs font-semibold text-muted-foreground  ">What gets copied</p>
               <ul className="text-xs text-muted-foreground space-y-0.5">
                 <li>• Client, driver & contact details</li>
                 <li>• Vehicle information & damage description</li>
@@ -180,7 +180,7 @@ export default function DuplicateClaimModal({ claim, isOpen, onClose, onDuplicat
                 <li>• Estimate settings & instruction defaults</li>
                 <li>• Indemnity requirements</li>
               </ul>
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mt-2 pt-2 border-t border-border">What resets</p>
+              <p className="text-xs font-semibold text-muted-foreground mt-2 pt-2 border-t border-border">What resets</p>
               <ul className="text-xs text-muted-foreground space-y-0.5">
                 <li>• New job number & status set to "New"</li>
                 <li>• Bodyshop allocation cleared</li>

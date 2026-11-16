@@ -3,10 +3,10 @@ import { AlertTriangle, Check, Eye } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 
 const CONFIDENCE_META = {
-  high: { label: 'Read', className: 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300', icon: Check },
-  medium: { label: 'Check', className: 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300', icon: AlertTriangle },
-  low: { label: 'Check', className: 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300', icon: AlertTriangle },
-  missing: { label: 'Not found', className: 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300', icon: AlertTriangle },
+  high: { label: 'Read', className: 'bg-success-bg text-success-fg', icon: Check },
+  medium: { label: 'Check', className: 'bg-warning-bg text-warning-fg', icon: AlertTriangle },
+  low: { label: 'Check', className: 'bg-warning-bg text-warning-fg', icon: AlertTriangle },
+  missing: { label: 'Not found', className: 'bg-warning-bg text-warning-fg', icon: AlertTriangle },
 };
 
 /**
@@ -31,10 +31,10 @@ export default function ExtractedFigureRow({
       className={`rounded-lg border px-2 py-1.5 cursor-pointer transition-colors ${focused ? 'border-purple-400 dark:border-purple-600 bg-purple-50/70 dark:bg-purple-900/10' : 'border-border hover:border-purple-300 dark:hover:border-purple-800'}`}
     >
       <div className="flex items-center gap-2">
-        <span className="flex-1 min-w-0 truncate text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+        <span className="flex-1 min-w-0 truncate text-xs font-semibold text-muted-foreground">
           {field.label}
         </span>
-        <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-semibold flex-shrink-0 ${meta.className}`}>
+        <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-xs font-semibold flex-shrink-0 ${meta.className}`}>
           <Icon className="w-2.5 h-2.5" strokeWidth={3} /> {meta.label}
         </span>
         <button
@@ -55,11 +55,11 @@ export default function ExtractedFigureRow({
         onChange={(e) => onChange(field.key, e.target.value)}
         onClick={(e) => e.stopPropagation()}
         onFocus={onFocus}
-        className={`mt-1 h-7 text-xs ${unchecked ? 'border-amber-300 dark:border-amber-700' : ''}`}
+        className={`mt-1 h-7 text-xs ${unchecked ? 'border-warning/30' : ''}`}
       />
 
       {unchecked && (
-        <label className="mt-1 inline-flex items-center gap-1.5 text-[10px] font-medium text-amber-700 dark:text-amber-400 cursor-pointer">
+        <label className="mt-1 inline-flex items-center gap-1.5 text-xs font-medium text-warning-fg cursor-pointer">
           <input
             type="checkbox"
             checked={!!reviewed}
@@ -72,7 +72,7 @@ export default function ExtractedFigureRow({
       )}
 
       {focused && (
-        <p className="mt-1 text-[10px] leading-snug text-muted-foreground">
+        <p className="mt-1 text-xs leading-snug text-muted-foreground">
           {snippet ? (
             <>
               Found in the document:{' '}

@@ -396,7 +396,7 @@ export default function InvoiceReviewModal({
           </div>
           <div className="min-w-0 flex-1">
             <h3 className="text-sm font-bold text-foreground">Check this invoice before it's saved</h3>
-            <p className="text-[11px] text-muted-foreground truncate">
+            <p className="text-xs text-muted-foreground truncate">
               {item?.label} · {fileName}
             </p>
           </div>
@@ -407,7 +407,7 @@ export default function InvoiceReviewModal({
 
         <div className="flex-1 flex flex-col md:flex-row overflow-hidden min-h-0">
           <div className="md:w-[55%] h-52 md:h-full border-b md:border-b-0 md:border-r border-border flex flex-col min-h-0">
-            <div className="px-3 py-1.5 bg-muted/40 border-b border-border text-[10px] font-semibold uppercase tracking-wider text-muted-foreground flex-shrink-0">
+            <div className="px-3 py-1.5 bg-muted/40 border-b border-border text-xs font-semibold text-muted-foreground flex-shrink-0">
               The document
             </div>
             <div className="flex-1 min-h-0">
@@ -419,14 +419,14 @@ export default function InvoiceReviewModal({
             {status === 'reading' && (
               <div className="flex items-center gap-2 rounded-lg border border-purple-300 dark:border-purple-800 bg-purple-50 dark:bg-purple-900/20 px-2.5 py-2">
                 <Loader2 className="w-4 h-4 animate-spin text-purple-600 dark:text-purple-400 flex-shrink-0" />
-                <p className="text-[11px] font-semibold text-purple-700 dark:text-purple-300">Reading the invoice — the figures will appear here.</p>
+                <p className="text-xs font-semibold text-purple-700 dark:text-purple-300">Reading the invoice — the figures will appear here.</p>
               </div>
             )}
 
             {status === 'failed' && (
-              <div className="flex items-start gap-2 rounded-lg border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20 px-2.5 py-2">
-                <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-px" />
-                <p className="text-[11px] font-semibold text-amber-800 dark:text-amber-300">
+              <div className="flex items-start gap-2 rounded-lg border border-warning/30 bg-warning-bg px-2.5 py-2">
+                <AlertTriangle className="w-4 h-4 text-warning-fg flex-shrink-0 mt-px" />
+                <p className="text-xs font-semibold text-warning-fg">
                   We couldn't read this document. Enter the figures from the invoice yourself — everything else on this screen still applies.
                 </p>
               </div>
@@ -454,15 +454,15 @@ export default function InvoiceReviewModal({
 
             {offerVatExcessFile && (
               <div className="space-y-1.5 rounded-lg border border-border bg-muted/30 px-2.5 py-2">
-                <p className="text-[11px] font-semibold text-foreground">
+                <p className="text-xs font-semibold text-foreground">
                   File this invoice as the VAT &amp; Excess Invoice In too
                 </p>
-                <p className="text-[11px] leading-snug text-muted-foreground">
+                <p className="text-xs leading-snug text-muted-foreground">
                   It carries {fmtGBP(splitCustomerShare)} payable by {claim?.client_name || 'the customer'}, which is what
                   that invoice bills. Filing it here puts that invoice on file at once, so no separate copy has to be
                   chased for it.
                 </p>
-                <label className="flex cursor-pointer items-start gap-2 text-[11px]">
+                <label className="flex cursor-pointer items-start gap-2 text-xs">
                   <input
                     type="checkbox"
                     checked={fileVatExcess}

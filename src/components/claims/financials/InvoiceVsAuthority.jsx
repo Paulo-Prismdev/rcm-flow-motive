@@ -37,7 +37,7 @@ export default function InvoiceVsAuthority({
   if (!comparison) {
     return emptyNote ? (
       <div className="rounded-lg border border-border bg-muted/30 px-2.5 py-2">
-        <p className="text-[11px] text-muted-foreground">{emptyNote}</p>
+        <p className="text-xs text-muted-foreground">{emptyNote}</p>
       </div>
     ) : null;
   }
@@ -54,21 +54,21 @@ export default function InvoiceVsAuthority({
     return (
       <div className="flex items-start gap-2 rounded-lg border border-border bg-muted/30 px-2.5 py-2">
         <Hourglass className="mt-px h-3.5 w-3.5 flex-shrink-0 text-muted-foreground" />
-        <p className="text-[11px] leading-snug text-muted-foreground">{headline?.text}</p>
+        <p className="text-xs leading-snug text-muted-foreground">{headline?.text}</p>
       </div>
     );
   }
 
   const tone = headline?.tone || (status === 'match' ? 'ok' : status === 'over' ? 'block' : 'warn');
   const BOX = {
-    ok: 'border-green-300 dark:border-green-800 bg-green-50 dark:bg-green-900/20',
-    warn: 'border-amber-400 dark:border-amber-600 bg-amber-50 dark:bg-amber-900/25',
-    block: 'border-red-300 dark:border-red-800 bg-red-50 dark:bg-red-900/20',
+    ok: 'border-success/30 bg-success-bg',
+    warn: 'border-warning bg-warning-bg',
+    block: 'border-danger/30 bg-danger-bg',
   };
   const TEXT = {
-    ok: 'text-green-700 dark:text-green-400',
-    warn: 'text-amber-800 dark:text-amber-300',
-    block: 'text-red-700 dark:text-red-400',
+    ok: 'text-success-fg',
+    warn: 'text-warning-fg',
+    block: 'text-danger-fg',
   };
   const boxClass = BOX[tone] || BOX.warn;
   const textClass = TEXT[tone] || TEXT.warn;
@@ -85,13 +85,13 @@ export default function InvoiceVsAuthority({
     : '';
 
   const optionClass = (selected) => `w-full flex items-start gap-2 rounded-md border px-2 py-1.5 text-left text-[11px] font-semibold transition-colors ${selected
-    ? 'border-amber-500 bg-amber-100/70 dark:bg-amber-900/40 text-amber-900 dark:text-amber-200'
-    : 'border-amber-300 dark:border-amber-700 bg-white/60 dark:bg-amber-950/20 text-amber-800 dark:text-amber-300 hover:border-amber-400'}`;
+    ? 'border-warning bg-warning-bg text-warning-fg'
+    : 'border-warning/30 bg-white/60 dark:bg-amber-950/20 text-warning-fg hover:border-warning'}`;
 
   return (
     <div className={`space-y-2 rounded-lg border px-2.5 py-2 ${boxClass}`}>
-      <p className={`flex items-start gap-2 text-[11px] font-semibold ${textClass}`}>
-        <span className={`mt-px flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full ${ok ? 'bg-green-500' : ''}`}>
+      <p className={`flex items-start gap-2 text-xs font-semibold ${textClass}`}>
+        <span className={`mt-px flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full ${ok ? 'bg-success' : ''}`}>
           {ok
             ? <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />
             : <AlertTriangle className="w-3.5 h-3.5" />}
@@ -106,8 +106,8 @@ export default function InvoiceVsAuthority({
       {checks.length > 0 && (
         <ul className="space-y-1 pl-6">
           {checks.map((c) => (
-            <li key={c.key} className="flex items-start gap-1.5 text-[11px] leading-snug">
-              <span className={`mt-px flex h-3.5 w-3.5 flex-shrink-0 items-center justify-center rounded-full ${c.ok ? 'bg-green-500' : 'bg-red-500'}`}>
+            <li key={c.key} className="flex items-start gap-1.5 text-xs leading-snug">
+              <span className={`mt-px flex h-3.5 w-3.5 flex-shrink-0 items-center justify-center rounded-full ${c.ok ? 'bg-success' : 'bg-danger'}`}>
                 {c.ok
                   ? <Check className="w-2 h-2 text-white" strokeWidth={3} />
                   : <X className="w-2 h-2 text-white" strokeWidth={3} />}
@@ -130,12 +130,12 @@ export default function InvoiceVsAuthority({
 
       {status === 'over' && (
         <div className="space-y-1.5 pl-6">
-          <p className={`text-[11px] leading-snug ${textClass}`}>{modeLine}</p>
+          <p className={`text-xs leading-snug ${textClass}`}>{modeLine}</p>
           {onReinvoiceEmail && overReason !== 'total' && (
             <button
               type="button"
               onClick={() => onReinvoiceEmail(comparison)}
-              className={`inline-flex items-center gap-1 text-[10px] font-semibold hover:underline ${textClass}`}
+              className={`inline-flex items-center gap-1 text-xs font-semibold hover:underline ${textClass}`}
             >
               <Mail className="w-3 h-3" />
               {mode === 'invoice' ? 'Reject it and email the repairer for a corrected invoice' : 'Email the repairer for a corrected invoice'}

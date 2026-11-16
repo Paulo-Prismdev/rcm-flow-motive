@@ -63,7 +63,7 @@ export default function IntakeSourcePane({ files = [], pastedText = '', highligh
               key={url}
               type="button"
               onClick={() => onActivate(index)}
-              className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-medium whitespace-nowrap transition-colors ${
+              className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium whitespace-nowrap transition-colors ${
                 activeIndex === index ? 'bg-purple-600 text-white' : 'bg-card border border-border text-muted-foreground hover:bg-muted'
               }`}
             >
@@ -74,7 +74,7 @@ export default function IntakeSourcePane({ files = [], pastedText = '', highligh
             <button
               type="button"
               onClick={() => onActivate(files.length)}
-              className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-medium whitespace-nowrap transition-colors ${
+              className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium whitespace-nowrap transition-colors ${
                 isPasted ? 'bg-purple-600 text-white' : 'bg-card border border-border text-muted-foreground hover:bg-muted'
               }`}
             >
@@ -87,7 +87,7 @@ export default function IntakeSourcePane({ files = [], pastedText = '', highligh
       <div className="flex-1 min-h-0">
         {isPasted ? (
           <div ref={scrollRef} className="h-full overflow-auto bg-muted/20 p-3">
-            <pre className="whitespace-pre-wrap break-words font-sans text-[11px] leading-relaxed text-foreground">{renderPasted()}</pre>
+            <pre className="whitespace-pre-wrap break-words font-sans text-xs leading-relaxed text-foreground">{renderPasted()}</pre>
           </div>
         ) : (
           <HighlightableDocumentViewer fileUrl={files[activeIndex]} highlightText={highlightText} fitWidth allowFullscreen />

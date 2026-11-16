@@ -1067,7 +1067,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
             </div>
             <CreditRepairRatesCard claim={claim} />
             {claim.credit_repair_company_name && (
-              <div className="mt-4 p-3 rounded-lg bg-info-bg dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800">
+              <div className="mt-4 p-3 rounded-lg bg-info-bg dark:bg-indigo-900/20 border border-info/30">
                 <div className="flex items-center justify-between gap-3 flex-wrap">
                   <div className="flex items-center gap-2">
                     <Mail className="w-4 h-4 text-info-fg flex-shrink-0" />
@@ -1401,7 +1401,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
 
       case 'repairPreference':
         return (
-          <div className="bg-card border border-border rounded-lg p-4 md:p-5 m-card-tight shadow-sm">
+          <div className="bg-card border border-border rounded-xl p-4 md:p-5 m-card-tight shadow-card">
             <div className="flex items-center gap-2.5 pb-3 mb-4 border-b border-border m-card-head">
               <FileText className="w-4 h-4 text-muted-foreground" />
               <h3 className="text-xs font-semibold text-muted-foreground">Statement of Repair Preference</h3>
@@ -1428,7 +1428,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
 
       case 'witnessStatements':
         return (
-          <div className="bg-card border border-border rounded-lg p-4 md:p-5 m-card-tight shadow-sm">
+          <div className="bg-card border border-border rounded-xl p-4 md:p-5 m-card-tight shadow-card">
             <div className="flex items-center gap-2.5 pb-3 mb-4 border-b border-border m-card-head">
               <FileText className="w-4 h-4 text-muted-foreground" />
               <h3 className="text-xs font-semibold text-muted-foreground">Witness statements</h3>
@@ -1439,7 +1439,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
 
       case 'declarationOfNeed':
         return (
-          <div className="bg-card border border-border rounded-lg p-4 md:p-5 m-card-tight shadow-sm">
+          <div className="bg-card border border-border rounded-xl p-4 md:p-5 m-card-tight shadow-card">
             <div className="flex items-center gap-2.5 pb-3 mb-4 border-b border-border m-card-head">
               <FileText className="w-4 h-4 text-muted-foreground" />
               <h3 className="text-xs font-semibold text-muted-foreground">Declaration of Need – Replacement Vehicle</h3>
@@ -1469,7 +1469,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
 
       case 'financials':
         return (
-          <div className="bg-card border border-border rounded-lg p-4 md:p-5 m-card-tight shadow-sm">
+          <div className="bg-card border border-border rounded-xl p-4 md:p-5 m-card-tight shadow-card">
             <div className="flex items-center gap-2.5 pb-3 mb-4 border-b border-border m-card-head">
               <DollarSign className="w-4 h-4 text-muted-foreground" />
               <h3 className="text-xs font-semibold text-muted-foreground">Financials</h3>
@@ -1529,7 +1529,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
             </div>
             {/* Repairer Acceptance Status Banner */}
             {claim.bodyshop_id && !claim.repairer_accepted && (
-              <div className="mb-4 p-3 rounded-lg border-2 border-amber-500 bg-warning-bg flex items-center gap-3">
+              <div className="mb-4 p-3 rounded-lg border-2 border-warning bg-warning-bg flex items-center gap-3">
                 <AlertTriangle className="w-5 h-5 text-warning-fg flex-shrink-0" />
                 <div>
                   <p className="font-medium text-warning-fg">Awaiting Repairer Acceptance</p>
@@ -1538,7 +1538,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
               </div>
             )}
             {claim.bodyshop_id && claim.repairer_accepted && (
-              <div className="mb-4 p-3 rounded-lg border-2 border-green-500 bg-success-bg flex items-center gap-3">
+              <div className="mb-4 p-3 rounded-lg border-2 border-success bg-success-bg flex items-center gap-3">
                 <div className="w-5 h-5 rounded-full bg-success flex items-center justify-center flex-shrink-0">
                   <span className="text-white text-xs">✓</span>
                 </div>

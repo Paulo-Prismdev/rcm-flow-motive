@@ -85,22 +85,22 @@ export default function ReinvoiceRequestModal({ isOpen, onClose, claim, comparis
         <div className="space-y-3">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">Repairer Email</label>
+              <label className="block text-xs font-semibold text-muted-foreground mb-1">Repairer Email</label>
               <Input value={to} onChange={(e) => setTo(e.target.value)} placeholder="repairer@example.com" className="h-9 text-sm" />
             </div>
             <div>
-              <label className="block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">CC</label>
+              <label className="block text-xs font-semibold text-muted-foreground mb-1">CC</label>
               <Input value={cc} onChange={(e) => setCc(e.target.value)} placeholder="Optional" className="h-9 text-sm" />
             </div>
           </div>
 
           <div>
-            <label className="block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">Subject</label>
+            <label className="block text-xs font-semibold text-muted-foreground mb-1">Subject</label>
             <Input value={subject} onChange={(e) => setSubject(e.target.value)} className="h-9 text-sm" />
           </div>
 
           <div>
-            <label className="block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">Email</label>
+            <label className="block text-xs font-semibold text-muted-foreground mb-1">Email</label>
             <textarea
               value={body}
               onChange={(e) => setBody(e.target.value)}

@@ -21,7 +21,7 @@ export default function FormLinkExpiry({ generatedAt, completed }) {
     <span>
       Generated {generatedAt ? new Date(generatedAt).toLocaleString('en-GB') : ''}
       {!completed && (expired
-        ? <span className="text-red-600 dark:text-red-400"> · Expired: regenerate to send a new link</span>
+        ? <span className="text-danger-fg"> · Expired: regenerate to send a new link</span>
         : <> · Expires {expires.toLocaleDateString('en-GB')}</>)}
     </span>
   );

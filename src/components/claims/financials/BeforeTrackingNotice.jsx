@@ -15,9 +15,9 @@ export default function BeforeTrackingNotice({ claim, trackingStart, onTrackerCh
   const pulledIn = claim?.invoice_tracker?.tracking_override === true;
 
   return (
-    <div className="flex flex-wrap items-center gap-2 rounded-[10px] border border-dashed border-border bg-muted/30 px-3 py-2">
+    <div className="flex flex-wrap items-center gap-2 rounded-lg border border-dashed border-border bg-muted/30 px-3 py-2">
       <Info className="w-3.5 h-3.5 shrink-0 text-muted-foreground" />
-      <p className="flex-1 min-w-[220px] text-[11px] text-muted-foreground">
+      <p className="flex-1 min-w-[220px] text-xs text-muted-foreground">
         <span className="font-semibold text-foreground">Invoiced before tracking started</span>
         {` — this job dates from before ${formatInvoiceDay(trackingStart)}, so ${
           pulledIn
@@ -28,7 +28,7 @@ export default function BeforeTrackingNotice({ claim, trackingStart, onTrackerCh
       <Button
         variant="outline"
         size="sm"
-        className="h-7 text-[11px]"
+        className="h-7 text-xs"
         onClick={() => onTrackerChange(
           buildTrackerMetaPatch(claim, { tracking_override: !pulledIn }),
           pulledIn

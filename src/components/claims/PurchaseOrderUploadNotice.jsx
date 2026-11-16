@@ -39,7 +39,7 @@ export default function PurchaseOrderUploadNotice({ claim, item, found, onClose 
           <p className="text-[12px] font-bold text-purple-800 dark:text-purple-200">
             This file is a purchase order, not {authority ? 'an' : 'an'} {what}
           </p>
-          <p className="text-[11px] text-purple-800/90 dark:text-purple-200/90">
+          <p className="text-xs text-purple-800/90 dark:text-purple-200/90">
             Nothing has been filed against "{item?.label}" and nothing has been saved to the claim.
           </p>
         </div>
@@ -47,7 +47,7 @@ export default function PurchaseOrderUploadNotice({ claim, item, found, onClose 
 
       {privateJob ? (
         <div className="rounded-lg border border-border bg-card px-3 py-2.5 space-y-1">
-          <p className="text-[11px] text-muted-foreground">
+          <p className="text-xs text-muted-foreground">
             A purchase order is issued from the system on a job the customer is paying for privately.
             It lives in Financials, under Job figures.
           </p>
@@ -62,13 +62,13 @@ export default function PurchaseOrderUploadNotice({ claim, item, found, onClose 
             </p>
           )}
           {found?.number && figures && found.number !== order.number && (
-            <p className="text-[10px] text-muted-foreground">
+            <p className="text-xs text-muted-foreground">
               The file's own number reads {found.number}.
             </p>
           )}
         </div>
       ) : (
-        <p className="text-[11px] text-muted-foreground px-1">
+        <p className="text-xs text-muted-foreground px-1">
           A purchase order isn't recorded as {authority ? 'an' : 'an'} {what} on this job type. If it belongs
           with this claim, file it under General Documents instead.
         </p>

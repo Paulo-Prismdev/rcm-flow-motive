@@ -65,7 +65,7 @@ export default function IntakeDirectoryLinks({ values = {}, onChange }) {
 
   return (
     <div className="space-y-1.5">
-      <p className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+      <p className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
         <Link2 className="w-3.5 h-3.5" /> Link to our directories
       </p>
 
@@ -76,7 +76,7 @@ export default function IntakeDirectoryLinks({ values = {}, onChange }) {
           <div key={row.key} className="rounded-lg border border-border px-2.5 py-1.5">
             <div className="flex items-center gap-2 flex-wrap">
               <Icon className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground w-[104px] flex-shrink-0">{row.label}</span>
+              <span className="text-xs font-semibold text-muted-foreground w-[104px] flex-shrink-0">{row.label}</span>
               <span className="text-xs font-medium text-foreground truncate max-w-[220px]">{row.match ? row.match.record.name : row.value}</span>
 
               {row.match ? (
@@ -84,27 +84,27 @@ export default function IntakeDirectoryLinks({ values = {}, onChange }) {
                   <button
                     type="button"
                     onClick={() => setLink(row.key, { mode: 'directory', record: row.match.record })}
-                    className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-semibold ${link.mode === 'directory' ? 'bg-green-600 text-white' : 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 border border-green-300 dark:border-green-700'}`}
+                    className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-semibold ${link.mode === 'directory' ? 'bg-success text-on-solid' : 'bg-success-bg text-success-fg border border-success/30'}`}
                   >
                     <Check className="w-3 h-3" /> Use {row.match.record.name}
                   </button>
                   <button
                     type="button"
                     onClick={() => setLink(row.key, { mode: 'raw' })}
-                    className={`px-2 py-1 rounded-md text-[10px] font-medium ${link.mode === 'raw' ? 'bg-muted text-foreground border border-border' : 'text-muted-foreground hover:bg-muted'}`}
+                    className={`px-2 py-1 rounded-md text-xs font-medium ${link.mode === 'raw' ? 'bg-muted text-foreground border border-border' : 'text-muted-foreground hover:bg-muted'}`}
                   >
                     Keep “{row.value}”
                   </button>
-                  <span className="text-[10px] text-muted-foreground">{Math.round(row.match.score * 100)}% match</span>
+                  <span className="text-xs text-muted-foreground">{Math.round(row.match.score * 100)}% match</span>
                 </div>
               ) : (
                 <div className="flex items-center gap-1 ml-auto">
-                  <span className="text-[10px] text-muted-foreground">Not in the {row.directory}</span>
+                  <span className="text-xs text-muted-foreground">Not in the {row.directory}</span>
                   {row.addLabel && (
                     <button
                       type="button"
                       onClick={() => setAdding(row)}
-                      className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-semibold border border-purple-300 dark:border-purple-700 text-purple-700 dark:text-purple-300 hover:bg-purple-50 dark:hover:bg-purple-900/30"
+                      className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-semibold border border-purple-300 dark:border-purple-700 text-purple-700 dark:text-purple-300 hover:bg-purple-50 dark:hover:bg-purple-900/30"
                     >
                       <Plus className="w-3 h-3" /> {row.addLabel}
                     </button>
@@ -113,7 +113,7 @@ export default function IntakeDirectoryLinks({ values = {}, onChange }) {
               )}
             </div>
             {link.mode === 'directory' && link.record && link.record.name !== row.value && (
-              <p className="text-[10px] text-muted-foreground mt-1 ml-[104px]">The claim will use “{link.record.name}” from the directory.</p>
+              <p className="text-xs text-muted-foreground mt-1 ml-[104px]">The claim will use “{link.record.name}” from the directory.</p>
             )}
           </div>
         );

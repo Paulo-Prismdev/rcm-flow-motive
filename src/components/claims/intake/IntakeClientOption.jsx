@@ -17,7 +17,7 @@ export default function IntakeClientOption({ selected, disabled = false, onClick
         {Icon && <Icon className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0 mt-px" />}
         <span className="min-w-0">
           <span className="block text-xs font-medium text-foreground">{title}</span>
-          {subtitle && <span className="block text-[10px] text-muted-foreground">{subtitle}</span>}
+          {subtitle && <span className="block text-xs text-muted-foreground">{subtitle}</span>}
         </span>
       </button>
       {selected && children && <div className="mt-2 space-y-1.5">{children}</div>}

@@ -24,7 +24,7 @@ export default function FigureField({
 
   const isEmpty = value === null || value === undefined || value === '';
   const multiline = type === 'textarea';
-  const amber = 'border-amber-300 dark:border-amber-700 bg-amber-50/60 dark:bg-amber-900/10';
+  const amber = 'border-warning/30 bg-warning-bg';
 
   const save = () => {
     const next = draft;
@@ -32,11 +32,11 @@ export default function FigureField({
     if (next !== toDraft(value)) onCommit(next);
   };
 
-  const labelTone = missing ? 'text-amber-600 dark:text-amber-400' : 'text-muted-foreground';
+  const labelTone = missing ? 'text-warning-fg' : 'text-muted-foreground';
 
   return (
     <div className={className}>
-      <label className={`block text-[10px] font-semibold uppercase tracking-wider mb-0.5 ${labelTone}`}>
+      <label className={`block text-xs font-semibold mb-0.5 ${labelTone}`}>
         {label}
       </label>
 
@@ -86,13 +86,13 @@ export default function FigureField({
           <button
             type="button"
             onClick={onEdit}
-            className={`inline-flex items-center gap-1 text-[11px] font-semibold hover:underline ${missing ? 'text-amber-600 dark:text-amber-400' : 'text-primary'}`}
+            className={`inline-flex items-center gap-1 text-xs font-semibold hover:underline ${missing ? 'text-warning-fg' : 'text-primary'}`}
           >
             <Plus className="w-3 h-3" /> Add
           </button>
           {missing && (
             <span title="Needed for invoicing">
-              <AlertTriangle className="w-3 h-3 text-amber-500" />
+              <AlertTriangle className="w-3 h-3 text-warning-fg" />
             </span>
           )}
         </div>
@@ -112,7 +112,7 @@ export default function FigureField({
         </div>
       )}
 
-      {hint && <p className="text-[10px] text-muted-foreground mt-0.5">{hint}</p>}
+      {hint && <p className="text-xs text-muted-foreground mt-0.5">{hint}</p>}
     </div>
   );
 }

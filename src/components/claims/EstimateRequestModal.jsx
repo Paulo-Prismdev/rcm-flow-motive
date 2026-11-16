@@ -59,20 +59,20 @@ export default function EstimateRequestModal({ claim, isOpen, onClose, onEstimat
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="max-w-[580px] bg-white dark:bg-gray-900 rounded-xl shadow-2xl p-8 border border-gray-200 dark:border-gray-800">
+            <DialogContent className="max-w-[580px] bg-card rounded-xl shadow-2xl p-8 border border-border">
                 <div className="mb-6">
-                    <h2 className="text-[18px] font-semibold text-gray-900 dark:text-white">Request Estimate</h2>
-                    <p className="text-[13px] text-gray-500 dark:text-gray-400 mt-1">
+                    <h2 className="text-[18px] font-semibold text-foreground">Request Estimate</h2>
+                    <p className="text-[13px] text-muted-foreground mt-1">
                         This will create a new job in the Estimating department linked to claim for vehicle: {claim.reg}.
                     </p>
                 </div>
                 <div className="space-y-5">
                     <div>
-                        <label className="block text-[14px] font-medium text-gray-700 dark:text-gray-300 mb-[6px]">Job Type</label>
+                        <label className="block text-[14px] font-medium text-foreground mb-[6px]">Job Type</label>
                         <select
                             value={estimateData.job_type}
                             onChange={(e) => handleChange('job_type', e.target.value)}
-                            className="w-full h-10 px-3 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-[14px] text-gray-900 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                            className="w-full h-10 px-3 border border-border rounded-lg bg-card text-[14px] text-foreground focus:border-ring focus:ring-2 focus:ring-blue-500/20"
                         >
                             <option value="">Select job type...</option>
                             <option value="Initial Estimate">Initial Estimate</option>
@@ -83,35 +83,35 @@ export default function EstimateRequestModal({ claim, isOpen, onClose, onEstimat
                         </select>
                     </div>
                     <div>
-                        <label className="block text-[14px] font-medium text-gray-700 dark:text-gray-300 mb-[6px]">Additional Instructions</label>
+                        <label className="block text-[14px] font-medium text-foreground mb-[6px]">Additional Instructions</label>
                         <Textarea
                             placeholder="Any special instructions for the estimator..."
                             value={estimateData.additional_notes}
                             onChange={(e) => handleChange('additional_notes', e.target.value)}
-                            className="min-h-[120px] w-full border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-[14px] text-gray-900 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                            className="min-h-[120px] w-full border border-border rounded-lg bg-card text-[14px] text-foreground focus:border-ring focus:ring-2 focus:ring-blue-500/20"
                         />
                     </div>
-                    <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-                        <p className="text-[12px] font-medium text-gray-500 dark:text-gray-400 uppercase mb-3">Auto-filled information</p>
-                        <div className="space-y-1.5 text-[14px] text-gray-900 dark:text-white">
-                            <p><span className="text-gray-500 dark:text-gray-400">Vehicle:</span> {claim.make_model || 'N/A'} ({claim.reg})</p>
-                            <p><span className="text-gray-500 dark:text-gray-400">Repairer:</span> {claim.bodyshop || 'N/A'}</p>
-                            <p><span className="text-gray-500 dark:text-gray-400">Insurer:</span> {claim.insurer || 'N/A'}</p>
-                            <p><span className="text-gray-500 dark:text-gray-400">Claim Ref:</span> {claim.claim_ref || 'N/A'}</p>
+                    <div className="bg-muted rounded-lg p-4 border border-border">
+                        <p className="text-[12px] font-medium text-muted-foreground uppercase mb-3">Auto-filled information</p>
+                        <div className="space-y-1.5 text-[14px] text-foreground">
+                            <p><span className="text-muted-foreground">Vehicle:</span> {claim.make_model || 'N/A'} ({claim.reg})</p>
+                            <p><span className="text-muted-foreground">Repairer:</span> {claim.bodyshop || 'N/A'}</p>
+                            <p><span className="text-muted-foreground">Insurer:</span> {claim.insurer || 'N/A'}</p>
+                            <p><span className="text-muted-foreground">Claim Ref:</span> {claim.claim_ref || 'N/A'}</p>
                         </div>
                     </div>
                 </div>
-                <div className="flex justify-end gap-3 mt-6 pt-6 border-t border-gray-200 dark:border-gray-800">
+                <div className="flex justify-end gap-3 mt-6 pt-6 border-t border-border">
                     <Button
                         onClick={onClose}
                         variant="outline"
-                        className="h-9 px-4 text-sm font-medium rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
+                        className="h-9 px-4 text-sm font-medium rounded-lg border border-border bg-card text-foreground hover:bg-muted"
                     >
                         Cancel
                     </Button>
                     <Button 
                         onClick={handleSubmit} 
-                        className="h-9 px-4 text-sm font-medium rounded-lg bg-blue-600 hover:bg-blue-700 text-white"
+                        className="h-9 px-4 text-sm font-medium rounded-lg bg-info hover:bg-info text-on-solid"
                         disabled={createEstimateMutation.isPending || !estimateData.job_type}
                     >
                         {createEstimateMutation.isPending ? <Loader className="animate-spin mr-2" /> : 'Create Estimate Request'}

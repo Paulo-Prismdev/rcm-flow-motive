@@ -175,14 +175,14 @@ export default function ReferrerInvoiceRequestModal({
         </DialogHeader>
 
         {hold && (
-          <div className="rounded-md border border-amber-300 dark:border-amber-700 bg-amber-50/70 dark:bg-amber-900/20 px-3 py-2">
-            <p className="text-xs font-semibold text-amber-800 dark:text-amber-200">Not yet — {hold}</p>
+          <div className="rounded-md border border-warning/30 bg-warning-bg px-3 py-2">
+            <p className="text-xs font-semibold text-warning-fg">Not yet — {hold}</p>
           </div>
         )}
 
         <div className="space-y-3">
           <div className="rounded-md border border-border bg-muted/30 px-3 py-2 space-y-1">
-            <p className="text-[11px] text-muted-foreground">
+            <p className="text-xs text-muted-foreground">
               Sending to <span className="font-semibold text-foreground">{party?.name || 'the referrer'}</span>. Your
               invoice has to be addressed to {RCM_INVOICE_ADDRESS[0]} and sent to {RCM_INVOICES_EMAIL} — both are in the
               email below.
@@ -190,13 +190,13 @@ export default function ReferrerInvoiceRequestModal({
 
             {contacts.length > 1 && (
               <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Contacts</span>
+                <span className="text-xs font-semibold text-muted-foreground">Contacts</span>
                 {contacts.map((contact) => (
                   <button
                     key={contact.email}
                     type="button"
                     onClick={() => { setEmailTouched(true); applyContact(party, contact); }}
-                    className={`rounded-full border px-2 py-0.5 text-[11px] transition-colors ${sameAddress(contact.email, to)
+                    className={`rounded-full border px-2 py-0.5 text-xs transition-colors ${sameAddress(contact.email, to)
                       ? 'border-primary bg-primary/10 font-semibold text-primary'
                       : 'border-border text-muted-foreground hover:border-primary/60 hover:text-foreground'}`}
                     title={contact.email}
@@ -209,7 +209,7 @@ export default function ReferrerInvoiceRequestModal({
             )}
 
             {party && !party.defaultEmail && (
-              <p className="text-[11px] font-semibold text-amber-700 dark:text-amber-300">
+              <p className="text-xs font-semibold text-warning-fg">
                 No email address is saved for {party.name || 'this referrer'} — enter one below.
               </p>
             )}
@@ -217,7 +217,7 @@ export default function ReferrerInvoiceRequestModal({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">
+              <label className="block text-xs font-semibold text-muted-foreground mb-1">
                 Referrer Email
               </label>
               <Input
@@ -228,13 +228,13 @@ export default function ReferrerInvoiceRequestModal({
               />
             </div>
             <div>
-              <label className="block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">CC</label>
+              <label className="block text-xs font-semibold text-muted-foreground mb-1">CC</label>
               <Input value={cc} onChange={(e) => setCc(e.target.value)} placeholder="Optional" className="h-9 text-sm" />
             </div>
           </div>
 
           {canSaveEmail && (
-            <label className="flex cursor-pointer items-start gap-2 text-[11px]">
+            <label className="flex cursor-pointer items-start gap-2 text-xs">
               <input
                 type="checkbox"
                 checked={saveEmail}
@@ -249,12 +249,12 @@ export default function ReferrerInvoiceRequestModal({
           )}
 
           <div>
-            <label className="block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">Subject</label>
+            <label className="block text-xs font-semibold text-muted-foreground mb-1">Subject</label>
             <Input value={subject} onChange={(e) => setSubject(e.target.value)} className="h-9 text-sm" />
           </div>
 
           <div>
-            <label className="block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">Email</label>
+            <label className="block text-xs font-semibold text-muted-foreground mb-1">Email</label>
             <textarea
               value={body}
               onChange={(e) => setBody(e.target.value)}

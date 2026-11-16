@@ -14,15 +14,15 @@ export default function RecommendedNudge({ action, onDo }) {
   const Icon = meta.icon;
 
   return (
-    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-lg border border-amber-200 dark:border-amber-900/50 bg-amber-50/70 dark:bg-amber-900/10 px-2.5 py-1.5">
-      <p className="min-w-0 flex-1 text-[11px] text-amber-800 dark:text-amber-300">
+    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-lg border border-warning/30 bg-warning-bg px-2.5 py-1.5">
+      <p className="min-w-0 flex-1 text-xs text-warning-fg">
         <span className="font-semibold">Recommended:</span> {action.label}
       </p>
       <Button
         size="sm"
         variant="outline"
         onClick={() => onDo(action)}
-        className="h-6 gap-1 border-amber-300 bg-transparent px-2 text-[11px] text-amber-800 hover:bg-amber-100 hover:text-amber-900 dark:border-amber-800 dark:text-amber-300 dark:hover:bg-amber-900/40"
+        className="h-6 gap-1 border-warning/30 bg-transparent px-2 text-[10px] text-warning-fg hover:bg-warning-bg hover:text-warning-fg"
       >
         <Icon className="h-3 w-3" /> {meta.label}
       </Button>

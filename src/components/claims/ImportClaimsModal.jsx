@@ -345,11 +345,11 @@ Only map columns that clearly correspond to a field. Be conservative - if unsure
               </div>
 
               {parseError && (
-                <div className="flex items-start gap-3 p-4 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
-                  <AlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
+                <div className="flex items-start gap-3 p-4 rounded-xl bg-danger-bg border border-danger/30">
+                  <AlertCircle className="w-5 h-5 text-danger-fg shrink-0 mt-0.5" />
                   <div>
-                    <p className="font-semibold text-red-700 dark:text-red-400 text-sm">Failed to import</p>
-                    <p className="text-red-600 dark:text-red-300 text-sm mt-1">{parseError}</p>
+                    <p className="font-semibold text-danger-fg text-sm">Failed to import</p>
+                    <p className="text-danger-fg text-sm mt-1">{parseError}</p>
                   </div>
                 </div>
               )}
@@ -422,7 +422,7 @@ Only map columns that clearly correspond to a field. Be conservative - if unsure
           {step === 'done' && results && (
             <div className="space-y-4">
               <div className="flex items-center gap-3">
-                <CheckCircle className="w-8 h-8 text-green-500" />
+                <CheckCircle className="w-8 h-8 text-success-fg" />
                 <div>
                   <p className="text-xl font-bold">Import Complete</p>
                   <p className="text-foreground-muted">{results.succeeded} imported successfully{results.failed > 0 ? `, ${results.failed} failed` : ''}</p>
@@ -430,7 +430,7 @@ Only map columns that clearly correspond to a field. Be conservative - if unsure
               </div>
               {results.errors.length > 0 && (
                 <div className="glass-flat p-4 rounded-xl space-y-1 max-h-48 overflow-y-auto">
-                  <p className="font-semibold text-sm text-red-500 mb-2">Errors:</p>
+                  <p className="font-semibold text-sm text-danger-fg mb-2">Errors:</p>
                   {results.errors.map((e, i) => (
                     <p key={i} className="text-xs text-foreground-muted">{e}</p>
                   ))}

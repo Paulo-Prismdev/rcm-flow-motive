@@ -70,7 +70,7 @@ export default function DocumentChecklistCard({
   const button = (
     <button
       type="button"
-      className={`w-full flex items-center gap-2 rounded-[10px] border border-l-4 px-2.5 py-2 text-left transition-all ${uploading ? 'opacity-60' : ''} ${tone.card}`}
+      className={`w-full flex items-center gap-2 rounded-lg border border-l-4 px-2.5 py-2 text-left transition-all ${uploading ? 'opacity-60' : ''} ${tone.card}`}
     >
       {(GLYPHS[status] || dateOnly) && (
         <span className={`w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0 ${tone.iconWrap}`}>
@@ -80,40 +80,40 @@ export default function DocumentChecklistCard({
       <span className="min-w-0 flex-1">
         <span className="block truncate text-xs font-semibold text-foreground">{item.label}</span>
         {dateOnly && (
-          <span className="block truncate text-[10px] font-normal text-amber-700 dark:text-amber-300">
+          <span className="block truncate text-xs font-normal text-warning-fg">
             Date recorded, copy not attached
           </span>
         )}
       </span>
       {status === 'not_required' && (
-        <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground flex-shrink-0">optional</span>
+        <span className="text-xs font-medium text-muted-foreground flex-shrink-0">optional</span>
       )}
       {status === 'not_applicable' && (
-        <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground flex-shrink-0">n/a</span>
+        <span className="text-xs font-medium text-muted-foreground flex-shrink-0">n/a</span>
       )}
       {dateRecorded && (
-        <span className="text-[10px] tabular-nums text-muted-foreground flex-shrink-0">{formatDay(dateRecorded)}</span>
+        <span className="text-xs tabular-nums text-muted-foreground flex-shrink-0">{formatDay(dateRecorded)}</span>
       )}
     </button>
   );
 
   const tooltip = (
     <>
-      <p className="text-[11px] font-semibold mb-1">{item.label}</p>
+      <p className="text-xs font-semibold mb-1">{item.label}</p>
       {files.length > 0 ? (
         <div className="space-y-1">
           {files.map((doc) => (
             <div key={doc.id}>
-              <p className="text-[11px] break-all leading-snug">{fileName(doc)}</p>
-              {doc.uploaded_at && <p className="text-[10px] opacity-70">Uploaded {formatDay(doc.uploaded_at)}</p>}
+              <p className="text-xs break-all leading-snug">{fileName(doc)}</p>
+              {doc.uploaded_at && <p className="text-xs opacity-70">Uploaded {formatDay(doc.uploaded_at)}</p>}
             </div>
           ))}
         </div>
       ) : (
-        <p className="text-[11px] opacity-80">{hint}</p>
+        <p className="text-xs opacity-80">{hint}</p>
       )}
       {keyDateLabel && keyDateValue && (
-        <p className="text-[10px] opacity-80 pt-1 mt-1 border-t border-white/20">
+        <p className="text-xs opacity-80 pt-1 mt-1 border-t border-white/20">
           {keyDateLabel}: {formatDay(keyDateValue)}
         </p>
       )}
@@ -122,7 +122,7 @@ export default function DocumentChecklistCard({
 
   return (
     <div
-      className={`group relative rounded-[10px] ${dragActive && !isDropTarget ? 'border-2 border-dashed border-amber-400/60' : 'border-2 border-transparent'}`}
+      className={`group relative rounded-lg ${dragActive && !isDropTarget ? 'border-2 border-dashed border-warning' : 'border-2 border-transparent'}`}
       onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }}
       onDragEnter={(e) => { e.preventDefault(); onDropTargetEnter(); }}
       onDragLeave={(e) => { if (!e.currentTarget.contains(e.relatedTarget)) onDropTargetLeave(); }}
@@ -156,7 +156,7 @@ export default function DocumentChecklistCard({
                 <div className="px-2 py-1.5">
                   <div className="flex items-center gap-1.5 mb-1">
                     <CalendarDays className="w-3 h-3 text-muted-foreground" />
-                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{keyDateLabel}</span>
+                    <span className="text-xs text-muted-foreground">{keyDateLabel}</span>
                   </div>
                   <Input
                     type="date"
@@ -166,7 +166,7 @@ export default function DocumentChecklistCard({
                     autoFocus={autoFocusKeyDate}
                     className="h-7 text-xs"
                   />
-                  <p className="text-[10px] text-muted-foreground mt-1">Sets this date on the Key Dates screen.</p>
+                  <p className="text-xs text-muted-foreground mt-1">Sets this date on the Key Dates screen.</p>
                 </div>
               </>
             )}
@@ -183,8 +183,8 @@ export default function DocumentChecklistCard({
       />
 
       {isDropTarget && (
-        <div className="pointer-events-none absolute inset-0 rounded-[10px] ring-2 ring-amber-400 bg-background/85 flex items-center justify-center">
-          <span className="text-[11px] font-bold text-amber-600 dark:text-amber-400">Drop to file here</span>
+        <div className="pointer-events-none absolute inset-0 rounded-lg ring-2 ring-amber-400 bg-background/85 flex items-center justify-center">
+          <span className="text-xs font-bold text-warning-fg">Drop to file here</span>
         </div>
       )}
     </div>

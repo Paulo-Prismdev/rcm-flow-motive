@@ -17,29 +17,29 @@ const calcAge = (dob) => {
 export default function ClaimIndemnityFields({ formData, handleChange }) {
   return (
     <div className="neomorph-flat p-6 space-y-4">
-      <h3 className="font-bold text-gray-700 mb-4">Indemnity Details</h3>
-      <p className="text-sm text-gray-500 mb-4">Please provide the following details for indemnity purposes.</p>
+      <h3 className="font-bold text-foreground mb-4">Indemnity Details</h3>
+      <p className="text-sm text-muted-foreground mb-4">Please provide the following details for indemnity purposes.</p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="md:col-span-2">
-          <label className="block text-sm text-gray-600 mb-2">Driver's Date of Birth</label>
+          <label className="block text-sm text-muted-foreground mb-2">Driver's Date of Birth</label>
           <Input type="date" value={formData.indemnity_driver_dob} onChange={(e) => {
             const dob = e.target.value;
             handleChange('indemnity_driver_dob', dob);
             handleChange('indemnity_driver_age', calcAge(dob));
-          }} className="neomorph-inset px-4 py-3 text-gray-700 border-0" />
+          }} className="neomorph-inset px-4 py-3 text-foreground border-0" />
           {(() => {
             const age = calcAge(formData.indemnity_driver_dob);
-            return age !== null ? <p className="text-xs text-gray-500 mt-1">Calculated age: <span className="font-semibold text-gray-700">{age} years</span></p> : null;
+            return age !== null ? <p className="text-xs text-muted-foreground mt-1">Calculated age: <span className="font-semibold text-foreground">{age} years</span></p> : null;
           })()}
         </div>
         <div>
-          <label className="block text-sm text-gray-600 mb-2">Registered Owner (Full Name)</label>
-          <Input value={formData.indemnity_registered_owner} onChange={(e) => handleChange('indemnity_registered_owner', e.target.value)} className="neomorph-inset px-4 py-3 text-gray-700 border-0" />
+          <label className="block text-sm text-muted-foreground mb-2">Registered Owner (Full Name)</label>
+          <Input value={formData.indemnity_registered_owner} onChange={(e) => handleChange('indemnity_registered_owner', e.target.value)} className="neomorph-inset px-4 py-3 text-foreground border-0" />
         </div>
         <div>
-          <label className="block text-sm text-gray-600 mb-2">Vehicle Use at Time of Incident</label>
-          <Input value={formData.indemnity_vehicle_use_at_incident} onChange={(e) => handleChange('indemnity_vehicle_use_at_incident', e.target.value)} className="neomorph-inset px-4 py-3 text-gray-700 border-0" placeholder="e.g., Personal, Commuting, Business" />
+          <label className="block text-sm text-muted-foreground mb-2">Vehicle Use at Time of Incident</label>
+          <Input value={formData.indemnity_vehicle_use_at_incident} onChange={(e) => handleChange('indemnity_vehicle_use_at_incident', e.target.value)} className="neomorph-inset px-4 py-3 text-foreground border-0" placeholder="e.g., Personal, Commuting, Business" />
         </div>
       </div>
 
@@ -56,8 +56,8 @@ export default function ClaimIndemnityFields({ formData, handleChange }) {
         ['indemnity_more_photos', 'Can you provide more photos of the damages to the vehicles involved?'],
       ].map(([field, label]) => (
         <div key={field}>
-          <label className="block text-sm text-gray-600 mb-2">{label}</label>
-          <select value={formData[field] || ''} onChange={(e) => handleChange(field, e.target.value)} className="neomorph-inset px-4 py-3 text-gray-700 border-0 w-full">
+          <label className="block text-sm text-muted-foreground mb-2">{label}</label>
+          <select value={formData[field] || ''} onChange={(e) => handleChange(field, e.target.value)} className="neomorph-inset px-4 py-3 text-foreground border-0 w-full">
             <option value="">Select...</option>
             <option value="Yes">Yes</option>
             <option value="No">No</option>
@@ -67,14 +67,14 @@ export default function ClaimIndemnityFields({ formData, handleChange }) {
 
       {formData.indemnity_vehicle_modifications === 'Yes' && (
         <div>
-          <label className="block text-sm text-gray-600 mb-2">If so, what modifications?</label>
-          <Textarea value={formData.indemnity_modification_details} onChange={(e) => handleChange('indemnity_modification_details', e.target.value)} className="neomorph-inset px-4 py-3 text-gray-700 border-0 h-24" placeholder="Please describe the modifications..." />
+          <label className="block text-sm text-muted-foreground mb-2">If so, what modifications?</label>
+          <Textarea value={formData.indemnity_modification_details} onChange={(e) => handleChange('indemnity_modification_details', e.target.value)} className="neomorph-inset px-4 py-3 text-foreground border-0 h-24" placeholder="Please describe the modifications..." />
         </div>
       )}
 
       <div>
-        <label className="block text-sm text-gray-600 mb-2">Any other information that you believe to be relevant and that will aid the claim?</label>
-        <Textarea value={formData.indemnity_other_info} onChange={(e) => handleChange('indemnity_other_info', e.target.value)} className="neomorph-inset px-4 py-3 text-gray-700 border-0 h-24" placeholder="Enter any other relevant information..." />
+        <label className="block text-sm text-muted-foreground mb-2">Any other information that you believe to be relevant and that will aid the claim?</label>
+        <Textarea value={formData.indemnity_other_info} onChange={(e) => handleChange('indemnity_other_info', e.target.value)} className="neomorph-inset px-4 py-3 text-foreground border-0 h-24" placeholder="Enter any other relevant information..." />
       </div>
     </div>
   );

@@ -44,9 +44,9 @@ function TrackerSection({ title, icon: Icon, lastUpdated, nextDue, status, hasOv
 
       {/* Override notice */}
       {hasOverride && (
-        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 border-l-4 border-l-blue-500">
+        <div className="bg-info-bg border border-info/30 rounded-lg p-3 border-l-4 border-l-blue-500">
           <div className="flex items-start gap-2">
-            <Pause className="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5" />
+            <Pause className="w-4 h-4 text-info-fg flex-shrink-0 mt-0.5" />
             <div className="flex-1">
               <p className="font-medium text-sm mb-0.5 text-foreground">Tracking Paused</p>
               <p className="text-xs text-muted-foreground mb-1">
@@ -88,16 +88,16 @@ function TrackerSection({ title, icon: Icon, lastUpdated, nextDue, status, hasOv
         <div>
           <div className="flex items-center justify-between mb-1.5">
             <span className="text-xs text-muted-foreground">Time Until Next</span>
-            <span className={`text-sm font-medium ${isOverdue ? 'text-red-600' : ''}`}>
+            <span className={`text-sm font-medium ${isOverdue ? 'text-danger-fg' : ''}`}>
               {getTimeRemaining()}
             </span>
           </div>
           <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
             <div
               className={`h-full transition-all duration-500 ${
-                isOverdue ? 'bg-red-500' :
-                progress > 75 ? 'bg-orange-500' :
-                'bg-green-500'
+                isOverdue ? 'bg-danger' :
+                progress > 75 ? 'bg-warning' :
+                'bg-success'
               }`}
               style={{ width: `${progress}%` }}
             />
@@ -109,7 +109,7 @@ function TrackerSection({ title, icon: Icon, lastUpdated, nextDue, status, hasOv
       {nextDue && !hasOverride && (
         <div className="flex items-center justify-between">
           <span className="text-xs text-muted-foreground">Next Due</span>
-          <span className={`text-sm font-medium ${isOverdue ? 'text-red-600' : ''}`}>
+          <span className={`text-sm font-medium ${isOverdue ? 'text-danger-fg' : ''}`}>
             {format(nextDue, 'dd/MM/yyyy HH:mm')}
           </span>
         </div>

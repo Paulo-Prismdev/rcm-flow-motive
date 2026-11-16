@@ -126,18 +126,18 @@ export default function UpdateOverrideModal({ isOpen, onClose, claim, onSave, tr
 
         <div className="space-y-4">
           {activeOverride && (
-            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 p-4 border-l-4 border-l-blue-500 rounded-lg">
+            <div className="bg-info-bg border border-info/30 p-4 border-l-4 border-l-blue-500 rounded-lg">
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="font-semibold text-sm mb-1 text-gray-900 dark:text-white">Current Override Active</p>
-                  <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">
+                  <p className="font-semibold text-sm mb-1 text-foreground">Current Override Active</p>
+                  <p className="text-xs text-muted-foreground mb-1">
                     <strong>Reason:</strong> {existingReason}
                   </p>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">
+                  <p className="text-xs text-muted-foreground">
                     <strong>Expires:</strong> {existingExpiry ? new Date(existingExpiry).toLocaleString() : 'N/A'}
                   </p>
                   {existingNotes && (
-                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                    <p className="text-xs text-muted-foreground mt-1">
                       <strong>Notes:</strong> {existingNotes}
                     </p>
                   )}
@@ -145,7 +145,7 @@ export default function UpdateOverrideModal({ isOpen, onClose, claim, onSave, tr
                 <Button
                   onClick={handleRemoveOverride}
                   variant="outline"
-                  className="text-red-600 border-red-300 hover:bg-red-50 px-3 py-1 text-xs"
+                  className="text-danger-fg border-danger/30 hover:bg-danger-bg px-3 py-1 text-xs"
                 >
                   Remove Override
                 </Button>
@@ -166,21 +166,21 @@ export default function UpdateOverrideModal({ isOpen, onClose, claim, onSave, tr
                   className={`p-3 text-left border rounded-lg transition-all ${
                     selectedPreset?.label === preset.label
                       ? 'ring-2 ring-primary bg-primary text-white border-primary'
-                      : 'border-gray-200 dark:border-gray-700 hover:border-primary bg-white dark:bg-gray-800'
+                      : 'border-border hover:border-primary bg-card'
                   }`}
                 >
-                  <p className={`font-medium text-sm ${selectedPreset?.label === preset.label ? 'text-white' : 'text-gray-800 dark:text-gray-200'}`}>{preset.label}</p>
-                  <p className={`text-xs mt-1 ${selectedPreset?.label === preset.label ? 'text-white/80' : 'text-gray-500 dark:text-gray-400'}`}>{preset.days} days</p>
+                  <p className={`font-medium text-sm ${selectedPreset?.label === preset.label ? 'text-white' : 'text-foreground'}`}>{preset.label}</p>
+                  <p className={`text-xs mt-1 ${selectedPreset?.label === preset.label ? 'text-white/80' : 'text-muted-foreground'}`}>{preset.days} days</p>
                 </button>
               ))}
             </div>
           </div>
 
-          <div className="bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-            <h3 className="text-sm font-semibold mb-3 text-gray-900 dark:text-white">Custom Duration</h3>
+          <div className="bg-muted border border-border rounded-lg p-4">
+            <h3 className="text-sm font-semibold mb-3 text-foreground">Custom Duration</h3>
             <div className="flex gap-3 items-end">
               <div className="flex-1">
-                <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">Number of Days</label>
+                <label className="block text-xs text-muted-foreground mb-1">Number of Days</label>
                 <Input
                   type="number"
                   min="1"
@@ -194,7 +194,7 @@ export default function UpdateOverrideModal({ isOpen, onClose, claim, onSave, tr
                 />
               </div>
               <div className="flex-1">
-                <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">Custom Reason</label>
+                <label className="block text-xs text-muted-foreground mb-1">Custom Reason</label>
                 <Input
                   value={!selectedPreset ? reason : ''}
                   onChange={(e) => setReason(e.target.value)}
@@ -206,7 +206,7 @@ export default function UpdateOverrideModal({ isOpen, onClose, claim, onSave, tr
           </div>
 
           <div>
-            <label className="block text-sm font-semibold mb-2 text-gray-900 dark:text-white">Reason *</label>
+            <label className="block text-sm font-semibold mb-2 text-foreground">Reason *</label>
             <Input
               value={reason}
               onChange={(e) => setReason(e.target.value)}
@@ -215,7 +215,7 @@ export default function UpdateOverrideModal({ isOpen, onClose, claim, onSave, tr
           </div>
 
           <div>
-            <label className="block text-sm font-semibold mb-2 text-gray-900 dark:text-white">Additional Notes (Optional)</label>
+            <label className="block text-sm font-semibold mb-2 text-foreground">Additional Notes (Optional)</label>
             <Textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
@@ -224,7 +224,7 @@ export default function UpdateOverrideModal({ isOpen, onClose, claim, onSave, tr
             />
           </div>
 
-          <div className="bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-xs text-gray-600 dark:text-gray-400">
+          <div className="bg-muted border border-border rounded-lg p-3 text-xs text-muted-foreground">
             <strong>Note:</strong> The 48-hour tracking will resume automatically after the override expires.
             You can log updates at any time, even during an override.
           </div>

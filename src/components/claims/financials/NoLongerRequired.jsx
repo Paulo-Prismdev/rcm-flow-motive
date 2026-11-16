@@ -29,7 +29,7 @@ export default function NoLongerRequired({ items = [], filesFor, onViewFile }) {
     <div className="space-y-2">
       <div>
         <h4 className="text-[15px] font-semibold text-foreground">No longer required</h4>
-        <p className="text-[11px] text-mac-muted">
+        <p className="text-xs text-mac-muted">
           This job changed type after these were recorded, so they no longer form part of its invoicing.
           The copies, figures and payments are kept here — nothing has been deleted.
         </p>
@@ -38,9 +38,9 @@ export default function NoLongerRequired({ items = [], filesFor, onViewFile }) {
         {items.map(({ item, state }) => {
           const files = filesFor(item.key);
           return (
-            <div key={item.key} className="space-y-1 rounded-[10px] border border-mac-line bg-mac-group px-3 py-2 shadow-mac">
+            <div key={item.key} className="space-y-1 rounded-lg border border-mac-line bg-mac-group px-3 py-2 shadow-mac">
               <p className="text-[13px] font-semibold text-foreground">{item.label}</p>
-              <p className="text-[11px] tabular-nums text-mac-muted">{recorded(item, state)}</p>
+              <p className="text-xs tabular-nums text-mac-muted">{recorded(item, state)}</p>
               {files.length > 0 && (
                 <div className="space-y-0.5">
                   {files.map((doc) => (
@@ -48,7 +48,7 @@ export default function NoLongerRequired({ items = [], filesFor, onViewFile }) {
                       key={doc.id}
                       type="button"
                       onClick={() => onViewFile(doc.file_url)}
-                      className="block max-w-full truncate text-[11px] text-mac-accent hover:underline"
+                      className="block max-w-full truncate text-xs text-mac-accent hover:underline"
                     >
                       {doc.file_name || doc.file_url.split('/').pop()}
                     </button>

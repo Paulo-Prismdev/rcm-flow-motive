@@ -46,8 +46,8 @@ export default function WizardConfirmStep({
         </div>
       </div>
 
-      <div className="p-3 rounded-lg bg-blue-50 border border-blue-200">
-        <p className="text-xs text-blue-800">
+      <div className="p-3 rounded-lg bg-info-bg border border-info/30">
+        <p className="text-xs text-info-fg">
           <strong>What happens next:</strong>
           <br />• The claim will be updated with the selected bodyshop
           <br />• A notification will be sent to the repairer's portal

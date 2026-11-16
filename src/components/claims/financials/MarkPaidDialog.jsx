@@ -51,7 +51,7 @@ export default function MarkPaidDialog({ prompt, byName, onClose, onConfirm }) {
     >
       {!unpaid && (
         <div className="space-y-2">
-          <label className="block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+          <label className="block text-xs font-semibold text-muted-foreground">
             Date paid
           </label>
           <div className="flex items-center gap-2">
@@ -65,24 +65,24 @@ export default function MarkPaidDialog({ prompt, byName, onClose, onConfirm }) {
             <button
               type="button"
               onClick={() => setDate(today())}
-              className="text-[11px] font-semibold text-primary hover:underline"
+              className="text-xs font-semibold text-primary hover:underline"
             >
               Today
             </button>
           </div>
 
           {future && (
-            <p className="text-[11px] text-red-600 dark:text-red-400">
+            <p className="text-xs text-danger-fg">
               The paid date can't be in the future.
             </p>
           )}
           {beforeInvoice && (
-            <p className="text-[11px] text-amber-700 dark:text-amber-300">
+            <p className="text-xs text-warning-fg">
               This is before the invoice date ({formatInvoiceDay(state.date)}). You can still confirm.
             </p>
           )}
           {byName && (
-            <p className="text-[11px] text-muted-foreground">Recorded as paid by {byName}.</p>
+            <p className="text-xs text-muted-foreground">Recorded as paid by {byName}.</p>
           )}
         </div>
       )}

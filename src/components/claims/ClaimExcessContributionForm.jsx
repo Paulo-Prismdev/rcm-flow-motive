@@ -64,11 +64,11 @@ export default function ClaimExcessContributionForm({ claim, onSave, onCancel })
       <div className="p-4 rounded-xl bg-muted/50 border border-border">
         <label className="block text-sm font-medium text-foreground mb-3">Is excess contribution applicable?</label>
         <div className="flex gap-3">
-          <label className={`flex items-center gap-2 px-4 py-2 rounded-lg border cursor-pointer transition-colors ${!applicable ? 'bg-red-50 border-red-300 dark:bg-red-900/20 dark:border-red-700' : 'bg-card border-border hover:bg-muted'}`}>
+          <label className={`flex items-center gap-2 px-4 py-2 rounded-lg border cursor-pointer transition-colors ${!applicable ? 'bg-danger-bg border-danger/30' : 'bg-card border-border hover:bg-muted'}`}>
             <input type="radio" name="applicable" checked={!applicable} onChange={() => { setApplicable(false); setFormData(prev => ({ ...prev, excess_contribution_method: 'None' })); }} className="w-4 h-4" />
             <span className="text-sm font-medium">No</span>
           </label>
-          <label className={`flex items-center gap-2 px-4 py-2 rounded-lg border cursor-pointer transition-colors ${applicable ? 'bg-green-50 border-green-300 dark:bg-green-900/20 dark:border-green-700' : 'bg-card border-border hover:bg-muted'}`}>
+          <label className={`flex items-center gap-2 px-4 py-2 rounded-lg border cursor-pointer transition-colors ${applicable ? 'bg-success-bg border-success/30' : 'bg-card border-border hover:bg-muted'}`}>
             <input type="radio" name="applicable" checked={applicable} onChange={() => { setApplicable(true); if (formData.excess_contribution_method === 'None') setFormData(prev => ({ ...prev, excess_contribution_method: 'Direct to Client' })); }} className="w-4 h-4" />
             <span className="text-sm font-medium">Yes</span>
           </label>
@@ -79,23 +79,23 @@ export default function ClaimExcessContributionForm({ claim, onSave, onCancel })
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm text-gray-600 mb-2">Contribution Amount (£)</label>
+              <label className="block text-sm text-muted-foreground mb-2">Contribution Amount (£)</label>
               <Input
                 type="number"
                 step="0.01"
                 min="0"
                 value={formData.excess_contribution_amount}
                 onChange={(e) => setFormData({ ...formData, excess_contribution_amount: parseFloat(e.target.value) || 0 })}
-                className="neomorph-inset px-4 py-3 text-gray-700 border-0"
+                className="neomorph-inset px-4 py-3 text-foreground border-0"
               />
             </div>
 
             <div>
-              <label className="block text-sm text-gray-600 mb-2">Payment Method</label>
+              <label className="block text-sm text-muted-foreground mb-2">Payment Method</label>
               <select
                 value={formData.excess_contribution_method}
                 onChange={(e) => setFormData({ ...formData, excess_contribution_method: e.target.value })}
-                className="neomorph-inset w-full px-4 py-3 text-gray-700 border-0 rounded-xl"
+                className="neomorph-inset w-full px-4 py-3 text-foreground border-0 rounded-xl"
               >
                 <option value="Direct to Client">Direct to Client (Client paid full excess, we reimburse)</option>
                 <option value="Via Repairer">Via Repairer (Repairer takes excess less our contribution)</option>
@@ -113,20 +113,20 @@ export default function ClaimExcessContributionForm({ claim, onSave, onCancel })
                 onChange={(e) => setPaidPrompt({ mode: e.target.checked ? 'paid' : 'unpaid' })}
                 className="w-5 h-5"
               />
-              <label htmlFor="excess_contribution_paid" className="text-sm text-gray-600">
+              <label htmlFor="excess_contribution_paid" className="text-sm text-muted-foreground">
                 Contribution Paid
               </label>
             </div>
 
             {formData.excess_contribution_paid && (
               <div>
-                <label className="block text-sm text-gray-600 mb-2">Date Paid</label>
+                <label className="block text-sm text-muted-foreground mb-2">Date Paid</label>
                 <Input
                   type="date"
                   value={formData.excess_contribution_paid_date}
                   max={today()}
                   onChange={(e) => setFormData({ ...formData, excess_contribution_paid_date: e.target.value })}
-                  className="neomorph-inset px-4 py-3 text-gray-700 border-0"
+                  className="neomorph-inset px-4 py-3 text-foreground border-0"
                 />
               </div>
             )}
@@ -141,18 +141,18 @@ export default function ClaimExcessContributionForm({ claim, onSave, onCancel })
                 onChange={(e) => setFormData({ ...formData, excess_contribution_invoice_received: e.target.checked })}
                 className="w-5 h-5"
               />
-              <label htmlFor="excess_contribution_invoice_received" className="text-sm text-gray-600">
+              <label htmlFor="excess_contribution_invoice_received" className="text-sm text-muted-foreground">
                 Invoice Received from Repairer
               </label>
             </div>
           )}
 
           <div>
-            <label className="block text-sm text-gray-600 mb-2">Notes</label>
+            <label className="block text-sm text-muted-foreground mb-2">Notes</label>
             <Textarea
               value={formData.excess_contribution_notes}
               onChange={(e) => setFormData({ ...formData, excess_contribution_notes: e.target.value })}
-              className="neomorph-inset px-4 py-3 text-gray-700 border-0 h-24"
+              className="neomorph-inset px-4 py-3 text-foreground border-0 h-24"
               placeholder="Any additional notes about the excess contribution..."
             />
           </div>
@@ -163,7 +163,7 @@ export default function ClaimExcessContributionForm({ claim, onSave, onCancel })
         <Button type="button" onClick={onCancel} className="neomorph-flat px-6 py-3">
           Cancel
         </Button>
-        <Button type="submit" className="neomorph-flat px-6 py-3 text-blue-600">
+        <Button type="submit" className="neomorph-flat px-6 py-3 text-info-fg">
           Save Changes
         </Button>
       </div>

@@ -284,7 +284,7 @@ export default function ClaimUpdateForm({
       <form onSubmit={handleSubmit} className="space-y-2">
         {isReferrer ? (
           <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/40 border border-border rounded-lg px-3 py-2">
-            <Badge className="bg-amber-500 rounded-full">{externalUpdateType}</Badge>
+            <Badge className="bg-warning rounded-full">{externalUpdateType}</Badge>
             <span>· Incoming from you</span>
           </div>
         ) : (
@@ -356,7 +356,7 @@ export default function ClaimUpdateForm({
                       <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-xs font-medium">{(getDisplayName(user))[0]?.toUpperCase()}</div>
                       <div className="flex flex-col min-w-0">
                         <span className="text-sm truncate">{getDisplayName(user)}</span>
-                        <span className="text-[10px] text-muted-foreground truncate">{user.email}</span>
+                        <span className="text-xs text-muted-foreground truncate">{user.email}</span>
                       </div>
                     </CommandItem>
                   ))}
@@ -405,12 +405,12 @@ export default function ClaimUpdateForm({
           <div className="flex flex-wrap gap-2">
             {taggedUsers.map(userId => {
                const user = allUsers.find(u => u.id === userId);
-               return user ? <Badge key={userId} variant="secondary" className="gap-1.5 px-2 py-1"><span className="text-sm">{getDisplayName(user)}</span><span className="text-[10px] text-muted-foreground">({user.email})</span><X className="w-3 h-3 cursor-pointer" onClick={() => toggleUserTag(userId)} /></Badge> : null;
+               return user ? <Badge key={userId} variant="secondary" className="gap-1.5 px-2 py-1"><span className="text-sm">{getDisplayName(user)}</span><span className="text-xs text-muted-foreground">({user.email})</span><X className="w-3 h-3 cursor-pointer" onClick={() => toggleUserTag(userId)} /></Badge> : null;
              })}
           </div>
         )}
 
-        {submitError && <div className="text-xs text-red-600 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg px-3 py-2">{submitError}</div>}
+        {submitError && <div className="text-xs text-danger-fg bg-danger-bg border border-danger/30 rounded-lg px-3 py-2">{submitError}</div>}
 
         <div className="flex justify-end gap-2">
           <Button type="button" onClick={resetForm} variant="outline" className="px-4 py-2 text-xs">Cancel</Button>

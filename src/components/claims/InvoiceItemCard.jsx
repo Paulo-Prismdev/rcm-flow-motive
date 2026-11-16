@@ -166,9 +166,9 @@ export default function InvoiceItemCard({
       </span>
       <span className="min-w-0 flex-1">
         <span className="block text-xs font-semibold text-foreground truncate">{item.label}</span>
-        <span className="block text-[10px] text-muted-foreground truncate">{subline || statusLabel}</span>
+        <span className="block text-xs text-muted-foreground truncate">{subline || statusLabel}</span>
         {state.keptDetailsWithoutCopy && !state.paid && (
-          <span className="block text-[10px] font-normal text-amber-700 dark:text-amber-300 truncate">
+          <span className="block text-xs font-normal text-warning-fg truncate">
             Details recorded, copy not attached
           </span>
         )}
@@ -178,22 +178,22 @@ export default function InvoiceItemCard({
 
   const tooltip = (
     <>
-      <p className="text-[11px] font-semibold mb-1">
+      <p className="text-xs font-semibold mb-1">
         {item.label}{state.amount > 0 ? ` · ${fmtGBP(state.amount)}` : ''}
       </p>
-      <p className="text-[10px] opacity-80 capitalize">{statusLabel}</p>
+      <p className="text-xs opacity-80 capitalize">{statusLabel}</p>
       {state.keptDetailsWithoutCopy && !state.paid && (
-        <p className="text-[10px] opacity-90">Details recorded, copy not attached</p>
+        <p className="text-xs opacity-90">Details recorded, copy not attached</p>
       )}
-      {state.date && <p className="text-[10px] opacity-80">{dateLabel} {formatDay(state.date)}</p>}
-      {state.requested && <p className="text-[10px] opacity-80">Requested {formatDay(state.requestedAt)}</p>}
+      {state.date && <p className="text-xs opacity-80">{dateLabel} {formatDay(state.date)}</p>}
+      {state.requested && <p className="text-xs opacity-80">Requested {formatDay(state.requestedAt)}</p>}
       {state.paid && state.paidDate && (
-        <p className="text-[10px] opacity-80">
+        <p className="text-xs opacity-80">
           Paid {formatDay(state.paidDate)}{state.paidBy ? ` by ${state.paidBy}` : ''}
         </p>
       )}
       {state.variance && (
-        <p className="text-[10px] opacity-90 pt-1 mt-1 border-t border-white/20">
+        <p className="text-xs opacity-90 pt-1 mt-1 border-t border-white/20">
           {state.variance.text}
         </p>
       )}
@@ -201,20 +201,20 @@ export default function InvoiceItemCard({
         <div className="space-y-1 pt-1 mt-1 border-t border-white/20">
           {files.map((doc) => (
             <div key={doc.id}>
-              <p className="text-[11px] break-all leading-snug">{doc.file_name || doc.file_url.split('/').pop()}</p>
-              {doc.uploaded_at && <p className="text-[10px] opacity-70">Uploaded {formatDay(doc.uploaded_at)}</p>}
+              <p className="text-xs break-all leading-snug">{doc.file_name || doc.file_url.split('/').pop()}</p>
+              {doc.uploaded_at && <p className="text-xs opacity-70">Uploaded {formatDay(doc.uploaded_at)}</p>}
             </div>
           ))}
         </div>
       ) : (
-        <p className="text-[11px] opacity-80 pt-1 mt-1 border-t border-white/20">{hint}</p>
+        <p className="text-xs opacity-80 pt-1 mt-1 border-t border-white/20">{hint}</p>
       )}
     </>
   );
 
   return (
     <div className="group h-full">
-      <div className={`h-full rounded-[10px] border border-l-4 transition-all ${isUploading ? 'opacity-60' : ''} ${tone.card}`}>
+      <div className={`h-full rounded-lg border border-l-4 transition-all ${isUploading ? 'opacity-60' : ''} ${tone.card}`}>
         <div className="flex items-stretch min-h-[44px]">
           <ItemActionMenu
             open={menuOpen}
@@ -269,7 +269,7 @@ export default function InvoiceItemCard({
                 {isRecommendedItem(item) ? (
                   naReasonOpen ? (
                     <div className="space-y-1 px-1.5 py-1">
-                      <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                      <p className="text-xs font-semibold text-muted-foreground">
                         Why is there no {item.label}?
                       </p>
                       <div className="flex items-center gap-1">
@@ -289,7 +289,7 @@ export default function InvoiceItemCard({
                           type="button"
                           onClick={saveNotAvailable}
                           disabled={!naReason.trim()}
-                          className="p-1 text-green-600 hover:bg-green-50 dark:hover:bg-green-950/40 rounded disabled:opacity-40 disabled:cursor-not-allowed"
+                          className="p-1 text-success-fg hover:bg-success-bg rounded disabled:opacity-40 disabled:cursor-not-allowed"
                           title="Save"
                         >
                           <Check className="w-3.5 h-3.5" />
@@ -358,7 +358,7 @@ export default function InvoiceItemCard({
                 )}
 
                 {state.variance && (
-                  <p className="flex items-start gap-1.5 px-2 py-1.5 text-[10px] text-amber-600 dark:text-amber-400">
+                  <p className="flex items-start gap-1.5 px-2 py-1.5 text-xs text-warning-fg">
                     <AlertTriangle className="w-3 h-3 flex-shrink-0 mt-px" />
                     <span>{state.variance.text}.</span>
                   </p>
@@ -369,7 +369,7 @@ export default function InvoiceItemCard({
 
           <div className="flex items-center pr-1.5">
             {amountText && (
-              <span className="self-center pr-0.5 text-[10px] font-semibold tabular-nums text-muted-foreground whitespace-nowrap">
+              <span className="self-center pr-0.5 text-xs font-semibold tabular-nums text-muted-foreground whitespace-nowrap">
                 {amountText}
               </span>
             )}

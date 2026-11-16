@@ -141,10 +141,10 @@ export default function IndemnityLinkManager({ claim, onUpdate }) {
   };
 
   return (
-    <div className="rounded-[10px] border border-border bg-card p-4 md:p-5 shadow-sm">
+    <div className="rounded-xl border border-border bg-card p-4 md:p-5 shadow-card">
       <div className="flex items-center gap-2.5 pb-3 mb-4 border-b border-border">
         <Link2 className="w-4 h-4 text-muted-foreground" />
-        <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Request Indemnity Details</h3>
+        <h3 className="text-xs font-semibold text-muted-foreground">Request Indemnity Details</h3>
       </div>
 
       {!hasToken ? (
@@ -158,7 +158,7 @@ export default function IndemnityLinkManager({ claim, onUpdate }) {
       ) : (
         <div className="space-y-3">
           {completed && (
-            <div className="flex items-center gap-2 text-sm text-green-600 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg px-3 py-2">
+            <div className="flex items-center gap-2 text-sm text-success-fg bg-success-bg border border-success/30 rounded-lg px-3 py-2">
               <CheckCircle2 className="w-4 h-4 shrink-0" />
               <span>Indemnity details received from client on {new Date(claim.indemnity_completed_at).toLocaleDateString('en-GB')}.</span>
             </div>
@@ -170,7 +170,7 @@ export default function IndemnityLinkManager({ claim, onUpdate }) {
               </Button>
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button variant="ghost" size="sm" disabled={generating} className="flex items-center gap-1.5 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20">
+                  <Button variant="ghost" size="sm" disabled={generating} className="flex items-center gap-1.5 text-danger-fg hover:text-danger-fg hover:bg-danger-bg">
                     {generating ? <Loader className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
                     Delete answers
                   </Button>
@@ -182,7 +182,7 @@ export default function IndemnityLinkManager({ claim, onUpdate }) {
                   </AlertDialogHeader>
                   <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700 text-white">Delete & reset</AlertDialogAction>
+                    <AlertDialogAction onClick={handleDelete} className="bg-danger hover:bg-danger text-on-solid">Delete & reset</AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
@@ -194,7 +194,7 @@ export default function IndemnityLinkManager({ claim, onUpdate }) {
               <Input readOnly value={linkUrl} className="flex-1 text-xs" onClick={(e) => e.target.select()} />
               <div className="flex gap-2">
                 <Button variant="outline" size="sm" onClick={handleCopy} className="flex items-center gap-1.5">
-                  {copied ? <Check className="w-3.5 h-3.5 text-green-600" /> : <Copy className="w-3.5 h-3.5" />}
+                  {copied ? <Check className="w-3.5 h-3.5 text-success-fg" /> : <Copy className="w-3.5 h-3.5" />}
                   {copied ? 'Copied' : 'Copy'}
                 </Button>
                 <a href={linkUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 h-9 px-3 rounded-md border border-input text-sm hover:bg-accent">

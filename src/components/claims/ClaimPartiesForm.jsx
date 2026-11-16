@@ -23,7 +23,7 @@ function Toggle({ checked, onChange, label }) {
         onClick={() => onChange(!checked)}
         className={`relative w-10 h-5 rounded-full transition-colors ${checked ? 'bg-primary' : 'bg-muted-foreground/30'}`}
       >
-        <div className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${checked ? 'translate-x-5' : 'translate-x-0'}`} />
+        <div className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-card shadow transition-transform ${checked ? 'translate-x-5' : 'translate-x-0'}`} />
       </div>
       {label && <span className="text-sm text-muted-foreground">{label}</span>}
     </label>
@@ -34,7 +34,7 @@ function SectionDivider({ label }) {
   return (
     <div className="flex items-center gap-3 my-4">
       <div className="flex-1 border-t border-border" />
-      <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</span>
+      <span className="text-xs font-semibold text-muted-foreground">{label}</span>
       <div className="flex-1 border-t border-border" />
     </div>
   );
@@ -439,7 +439,7 @@ export default function ClaimPartiesForm({ claim, onSave, onCancel, mode }) {
       <div className="border border-border rounded-xl p-4 space-y-4 bg-muted/20">
         <div className="flex items-center gap-2 mb-1">
           <div className="w-2 h-2 rounded-full bg-primary" />
-          <h4 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground">First Party — Client</h4>
+          <h4 className="font-semibold text-sm text-muted-foreground">First Party — Client</h4>
         </div>
         <div>
           <label className="block text-xs text-muted-foreground mb-1">Client *</label>
@@ -495,7 +495,7 @@ export default function ClaimPartiesForm({ claim, onSave, onCancel, mode }) {
       </div>
       <div className="border border-border rounded-xl p-4 space-y-4 bg-muted/20">
         <div className="flex items-center justify-between mb-1">
-          <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-orange-500" /><h4 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground">Third Party</h4></div>
+          <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-warning" /><h4 className="font-semibold text-sm text-muted-foreground">Third Party</h4></div>
           <Toggle checked={data.has_third_party} onChange={(v) => set('has_third_party', v)} label="Third party involved?" />
         </div>
         {data.has_third_party && (
