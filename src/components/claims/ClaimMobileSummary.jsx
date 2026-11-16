@@ -246,7 +246,7 @@ export default function ClaimMobileSummary({
           <span className={`flex-1 flex justify-center min-w-0 transition-opacity duration-200 ${plateInBar ? 'opacity-100' : 'opacity-0'}`} aria-hidden={!plateInBar}>
             <Plate reg={claim.reg} />
           </span>
-          {onQuickView && (
+          {onQuickView && plateInBar && (
             <button type="button" onClick={onQuickView} aria-label="Quick view" title="Quick view" className="tap-44 w-10 h-10 rounded-xl flex items-center justify-center active:bg-muted">
               <Eye className="w-[22px] h-[22px]" />
             </button>
