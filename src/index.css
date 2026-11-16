@@ -927,7 +927,6 @@ textarea::placeholder {
   --card: var(--mac-group);
   --popover: var(--mac-group);
   --border: var(--mac-line);
-  --ring: var(--mac-accent);
   --primary: var(--mac-accent);
   --accent: var(--mac-window);
   --accent-foreground: var(--mac-accent);
