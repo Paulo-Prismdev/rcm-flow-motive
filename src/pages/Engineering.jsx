@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Eye, Archive } from "lucide-react"; // Import Archive icon
+import { Plus, Eye, Archive, Search } from "lucide-react"; // Import Archive icon
 import PageHeader from '@/components/shared/PageHeader';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -192,7 +192,7 @@ export default function Engineering() {
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
-                      <h3 className="text-base font-bold text-gray-700">{job.reference || job.vehicle_reg || 'Untitled'}</h3>
+                      <h3 className="text-base font-bold text-foreground">{job.reference || job.vehicle_reg || 'Untitled'}</h3>
                       <StatusBadge status={job.status || 'New'} />
                       {job.archived && (
                         <span className="px-2 py-0.5 rounded-full bg-muted text-xs font-medium text-muted-foreground">
@@ -202,20 +202,20 @@ export default function Engineering() {
                     </div>
                     <div className="grid grid-cols-2 gap-2 text-xs m-keep-2">
                       <div>
-                        <p className="text-gray-500">Vehicle</p>
-                        <p className="font-medium text-gray-700">{job.make_model || '-'}</p>
+                        <p className="text-muted-foreground">Vehicle</p>
+                        <p className="font-medium text-foreground">{job.make_model || '-'}</p>
                       </div>
                       <div>
-                        <p className="text-gray-500">Inspection Type</p>
-                        <p className="font-medium text-gray-700">{job.inspection_type || '-'}</p>
+                        <p className="text-muted-foreground">Inspection Type</p>
+                        <p className="font-medium text-foreground">{job.inspection_type || '-'}</p>
                       </div>
                       <div>
-                        <p className="text-gray-500">Engineer</p>
-                        <p className="font-medium text-gray-700">{job.engineer_assigned || '-'}</p>
+                        <p className="text-muted-foreground">Engineer</p>
+                        <p className="font-medium text-foreground">{job.engineer_assigned || '-'}</p>
                       </div>
                       <div>
-                        <p className="text-gray-500">Requested</p>
-                        <p className="font-medium text-gray-700">
+                        <p className="text-muted-foreground">Requested</p>
+                        <p className="font-medium text-foreground">
                           {job.date_requested ? format(new Date(job.date_requested), 'dd/MM/yyyy') : '-'}
                         </p>
                       </div>
@@ -228,7 +228,7 @@ export default function Engineering() {
                     onClick={(e) => { e.stopPropagation(); setSelectedEngineering(job); }} // Updated state setter
                     className="ml-3 flex-shrink-0"
                   >
-                    <Eye className="w-4 h-4 text-gray-600" />
+                    <Eye className="w-4 h-4 text-muted-foreground" />
                   </Button>
                 </div>
               </div>

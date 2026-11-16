@@ -305,7 +305,7 @@ export default function EngineeringDetail({ job, onClose, onUpdate, isInternalUs
             <div className="flex items-center gap-2 flex-wrap">
               <StatusBadge status={job.status} />
               {job.archived && (
-                <span className="neomorph-flat px-2 md:px-3 py-0.5 md:py-1 text-xs font-medium text-gray-600">
+                <span className="neomorph-flat px-2 md:px-3 py-0.5 md:py-1 text-xs font-medium text-muted-foreground">
                   Archived
                 </span>
               )}
@@ -346,7 +346,7 @@ export default function EngineeringDetail({ job, onClose, onUpdate, isInternalUs
                       <Archive className="w-4 h-4 mr-2" />
                       {job.archived ? 'Unarchive' : 'Archive'}
                     </DropdownMenuItem>
-                    <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleDelete(); }} disabled={deleteMutation.isLoading} className="text-red-600">
+                    <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleDelete(); }} disabled={deleteMutation.isLoading} className="text-danger-fg">
                       <Trash2 className="w-4 h-4 mr-2" />
                       Delete
                     </DropdownMenuItem>

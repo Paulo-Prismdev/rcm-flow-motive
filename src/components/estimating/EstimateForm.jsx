@@ -120,11 +120,11 @@ export default function EstimateForm({ estimate, onSubmit, onCancel }) {
       <div className="neomorph p-6">
         <div className="flex items-center gap-4 mb-6">
           <Button aria-label="Back" onClick={onCancel} className="neomorph-flat p-3 transition-all active:neomorph-pressed">
-            <ArrowLeft className="w-4 h-4 text-gray-600" />
+            <ArrowLeft className="w-4 h-4 text-muted-foreground" />
           </Button>
           <div>
-            <h1 className="text-2xl font-bold text-gray-700">{estimate ? 'Edit Estimate' : 'New Estimate'}</h1>
-            <p className="text-sm text-gray-500 mt-1">Enter estimate details</p>
+            <h1 className="text-2xl font-bold text-foreground">{estimate ? 'Edit Estimate' : 'New Estimate'}</h1>
+            <p className="text-sm text-muted-foreground mt-1">Enter estimate details</p>
           </div>
         </div>
       </div>
@@ -134,11 +134,11 @@ export default function EstimateForm({ estimate, onSubmit, onCancel }) {
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* --- Basic Information --- */}
           <div className="neomorph-flat p-6 space-y-4">
-            <h3 className="font-bold text-gray-700 mb-4">Basic Information</h3>
+            <h3 className="font-bold text-foreground mb-4">Basic Information</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {estimate && estimate.job_number && (
                 <div>
-                  <label className="block text-sm text-gray-600 mb-2">Job Number</label>
+                  <label className="block text-sm text-muted-foreground mb-2">Job Number</label>
                   <div className="text-lg font-mono font-bold text-gold">{estimate.job_number}</div>
                 </div>
               )}
@@ -162,50 +162,50 @@ export default function EstimateForm({ estimate, onSubmit, onCancel }) {
 
           {/* --- Job Details --- */}
           <div className="neomorph-flat p-6 space-y-4">
-            <h3 className="font-bold text-gray-700 mb-4">Job Details</h3>
+            <h3 className="font-bold text-foreground mb-4">Job Details</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div>
-                    <label className="block text-sm text-gray-600 mb-2">Repairer</label>
+                    <label className="block text-sm text-muted-foreground mb-2">Repairer</label>
                     <BodyshopCombobox
                         value={formData.repairer}
                         onChange={handleBodyshopChange}
                     />
                 </div>
                 <div>
-                    <label className="block text-sm text-gray-600 mb-2">Email Address</label>
+                    <label className="block text-sm text-muted-foreground mb-2">Email Address</label>
                     <Input
                         type="email"
                         placeholder="Auto-filled from selection"
                         value={formData.email_address}
                         onChange={(e) => handleChange('email_address', e.target.value)}
-                        className="neomorph-inset px-4 py-3 text-gray-700 border-0"
+                        className="neomorph-inset px-4 py-3 text-foreground border-0"
                     />
                 </div>
-                <Input placeholder="VDA" value={formData.vda} onChange={(e) => handleChange('vda', e.target.value)} className="neomorph-inset px-4 py-3 text-gray-700 border-0" />
+                <Input placeholder="VDA" value={formData.vda} onChange={(e) => handleChange('vda', e.target.value)} className="neomorph-inset px-4 py-3 text-foreground border-0" />
                 <div>
-                    <label className="block text-sm text-gray-600 mb-2">Make/Model</label>
+                    <label className="block text-sm text-muted-foreground mb-2">Make/Model</label>
                     <ManufacturerModelCombobox
                       value={formData.make_model}
                       onChange={(value) => handleChange('make_model', value)}
                       placeholder="Select make & model..."
                     />
                 </div>
-                <Input placeholder="Insurer/Work Provider" value={formData.insurer_work_provider} onChange={(e) => handleChange('insurer_work_provider', e.target.value)} className="neomorph-inset px-4 py-3 text-gray-700 border-0" />
-                <Input placeholder="Claim Number" value={formData.claim_number} onChange={(e) => handleChange('claim_number', e.target.value)} className="neomorph-inset px-4 py-3 text-gray-700 border-0" />
-                <Input placeholder="Authorising Party" value={formData.authorising_party} onChange={(e) => handleChange('authorising_party', e.target.value)} className="neomorph-inset px-4 py-3 text-gray-700 border-0" />
-                <select value={formData.est_platform} onChange={(e) => handleChange('est_platform', e.target.value)} className="neomorph-inset w-full px-4 py-3 text-gray-700 border-0 rounded-xl">
+                <Input placeholder="Insurer/Work Provider" value={formData.insurer_work_provider} onChange={(e) => handleChange('insurer_work_provider', e.target.value)} className="neomorph-inset px-4 py-3 text-foreground border-0" />
+                <Input placeholder="Claim Number" value={formData.claim_number} onChange={(e) => handleChange('claim_number', e.target.value)} className="neomorph-inset px-4 py-3 text-foreground border-0" />
+                <Input placeholder="Authorising Party" value={formData.authorising_party} onChange={(e) => handleChange('authorising_party', e.target.value)} className="neomorph-inset px-4 py-3 text-foreground border-0" />
+                <select value={formData.est_platform} onChange={(e) => handleChange('est_platform', e.target.value)} className="neomorph-inset w-full px-4 py-3 text-foreground border-0 rounded-xl">
                     <option>Audatex</option>
                     <option>GT Estimate</option>
                     <option>Glassmatix</option>
                     <option>Other</option>
                 </select>
-                 <Input type="date" value={formData.date_received} onChange={(e) => handleChange('date_received', e.target.value)} className="neomorph-inset px-4 py-3 text-gray-700 border-0" />
+                 <Input type="date" value={formData.date_received} onChange={(e) => handleChange('date_received', e.target.value)} className="neomorph-inset px-4 py-3 text-foreground border-0" />
             </div>
           </div>
 
           {/* --- Financials --- */}
           <div className="neomorph-flat p-6 space-y-4">
-            <h3 className="font-bold text-gray-700 mb-4">Financials</h3>
+            <h3 className="font-bold text-foreground mb-4">Financials</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <Input type="number" placeholder="Estimate Value" value={formData.estimate_value || ''} onChange={(e) => handleChange('estimate_value', parseFloat(e.target.value))} />
               <Input type="number" placeholder="Authorised Value" value={formData.authorised_value || ''} onChange={(e) => handleChange('authorised_value', parseFloat(e.target.value))} />
@@ -219,7 +219,7 @@ export default function EstimateForm({ estimate, onSubmit, onCancel }) {
 
            {/* --- File Uploads --- */}
           <div className="neomorph-flat p-6 space-y-4">
-            <h3 className="font-bold text-gray-700 mb-4">File Uploads</h3>
+            <h3 className="font-bold text-foreground mb-4">File Uploads</h3>
             <div className="mb-3 p-3 bg-purple-50 border border-purple-200 rounded-lg">
               <div className="flex items-start gap-2">
                 <Sparkles className="w-4 h-4 text-purple-600 flex-shrink-0 mt-0.5" />
@@ -239,8 +239,8 @@ export default function EstimateForm({ estimate, onSubmit, onCancel }) {
 
           {/* Actions */}
           <div className="flex justify-end gap-4">
-            <Button type="button" onClick={onCancel} className="neomorph-flat px-6 py-3 font-medium text-gray-700">Cancel</Button>
-            <Button type="submit" className="neomorph-flat px-6 py-3 font-medium text-blue-600">{estimate ? 'Update Estimate' : 'Create Estimate'}</Button>
+            <Button type="button" onClick={onCancel} className="neomorph-flat px-6 py-3 font-medium text-foreground">Cancel</Button>
+            <Button type="submit" className="neomorph-flat px-6 py-3 font-medium text-info-fg">{estimate ? 'Update Estimate' : 'Create Estimate'}</Button>
           </div>
         </form>
       </div>

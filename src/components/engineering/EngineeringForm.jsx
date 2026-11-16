@@ -91,7 +91,7 @@ export default function EngineeringForm({ job, onSubmit, onCancel }) {
         <div className="flex items-center gap-4">
           <Button aria-label="Back" onClick={onCancel} className="neomorph-flat p-3"><ArrowLeft className="w-4 h-4" /></Button>
           <div>
-            <h1 className="text-2xl font-bold text-gray-700">{job ? 'Edit Job' : 'New Engineering Job'}</h1>
+            <h1 className="text-2xl font-bold text-foreground">{job ? 'Edit Job' : 'New Engineering Job'}</h1>
           </div>
         </div>
       </div>
@@ -102,7 +102,7 @@ export default function EngineeringForm({ job, onSubmit, onCancel }) {
           <div className="neomorph-flat p-6 grid grid-cols-1 md:grid-cols-3 gap-4">
             {job && job.job_number && (
               <div>
-                <label className="block text-sm text-gray-600 mb-2">Job Number</label>
+                <label className="block text-sm text-muted-foreground mb-2">Job Number</label>
                 <div className="text-lg font-mono font-bold text-gold">{job.job_number}</div>
               </div>
             )}
@@ -119,7 +119,7 @@ export default function EngineeringForm({ job, onSubmit, onCancel }) {
           </div>
 
           <div className="neomorph-flat p-6 space-y-4">
-            <h3 className="font-bold text-gray-700">Inspection Details</h3>
+            <h3 className="font-bold text-foreground">Inspection Details</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Input placeholder="Engineer Assigned" value={formData.engineer_assigned} onChange={(e) => handleChange('engineer_assigned', e.target.value)} />
               <select value={formData.inspection_type} onChange={(e) => handleChange('inspection_type', e.target.value)} className="neomorph-inset w-full px-4 py-3 rounded-xl">
@@ -134,11 +134,11 @@ export default function EngineeringForm({ job, onSubmit, onCancel }) {
           </div>
           
           <div className="neomorph-flat p-6 space-y-4">
-            <h3 className="font-bold text-gray-700">Vehicle & Client</h3>
+            <h3 className="font-bold text-foreground">Vehicle & Client</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              <Input placeholder="Vehicle Reg" value={formData.vehicle_reg} onChange={(e) => handleChange('vehicle_reg', e.target.value)} className="neomorph-inset px-4 py-3 text-gray-700 border-0" />
+              <Input placeholder="Vehicle Reg" value={formData.vehicle_reg} onChange={(e) => handleChange('vehicle_reg', e.target.value)} className="neomorph-inset px-4 py-3 text-foreground border-0" />
               <div>
-                <label className="block text-sm text-gray-600 mb-2">Make/Model</label>
+                <label className="block text-sm text-muted-foreground mb-2">Make/Model</label>
                 <ManufacturerModelCombobox
                   value={formData.make_model}
                   onChange={(value) => handleChange('make_model', value)}
@@ -146,7 +146,7 @@ export default function EngineeringForm({ job, onSubmit, onCancel }) {
                 />
               </div>
               <div>
-                <label className="block text-sm text-gray-600 mb-2">Vehicle Location</label>
+                <label className="block text-sm text-muted-foreground mb-2">Vehicle Location</label>
                 <AddressLookupInput
                   value={formData.vehicle_location}
                   onChange={handleVehicleLocationChange}
@@ -154,14 +154,14 @@ export default function EngineeringForm({ job, onSubmit, onCancel }) {
                   className="neomorph-inset"
                 />
               </div>
-              <Input placeholder="Client Name" value={formData.client_name} onChange={(e) => handleChange('client_name', e.target.value)} className="neomorph-inset px-4 py-3 text-gray-700 border-0" />
-              <Input placeholder="Client Phone" value={formData.client_phone} onChange={(e) => handleChange('client_phone', e.target.value)} className="neomorph-inset px-4 py-3 text-gray-700 border-0" />
-              <Input type="email" placeholder="Client Email" value={formData.client_email} onChange={(e) => handleChange('client_email', e.target.value)} className="neomorph-inset px-4 py-3 text-gray-700 border-0" />
+              <Input placeholder="Client Name" value={formData.client_name} onChange={(e) => handleChange('client_name', e.target.value)} className="neomorph-inset px-4 py-3 text-foreground border-0" />
+              <Input placeholder="Client Phone" value={formData.client_phone} onChange={(e) => handleChange('client_phone', e.target.value)} className="neomorph-inset px-4 py-3 text-foreground border-0" />
+              <Input type="email" placeholder="Client Email" value={formData.client_email} onChange={(e) => handleChange('client_email', e.target.value)} className="neomorph-inset px-4 py-3 text-foreground border-0" />
             </div>
           </div>
 
           <div className="neomorph-flat p-6 space-y-4">
-            <h3 className="font-bold text-gray-700">Report & Findings</h3>
+            <h3 className="font-bold text-foreground">Report & Findings</h3>
             <Textarea placeholder="Findings" value={formData.findings} onChange={(e) => handleChange('findings', e.target.value)} className="neomorph-inset h-24" />
             <Textarea placeholder="Recommendations" value={formData.recommendations} onChange={(e) => handleChange('recommendations', e.target.value)} className="neomorph-inset h-24" />
             <select value={formData.report_status} onChange={(e) => handleChange('report_status', e.target.value)} className="neomorph-inset w-full px-4 py-3 rounded-xl">
@@ -174,7 +174,7 @@ export default function EngineeringForm({ job, onSubmit, onCancel }) {
           
           {/* File Uploads */}
           <div className="neomorph-flat p-6 space-y-4">
-            <h3 className="font-bold text-gray-700 mb-4">File Uploads</h3>
+            <h3 className="font-bold text-foreground mb-4">File Uploads</h3>
             <div className="mb-3 p-3 bg-purple-50 border border-purple-200 rounded-lg">
               <div className="flex items-start gap-2">
                 <Sparkles className="w-4 h-4 text-purple-600 flex-shrink-0 mt-0.5" />
@@ -194,7 +194,7 @@ export default function EngineeringForm({ job, onSubmit, onCancel }) {
 
           <div className="flex justify-end gap-4">
             <Button type="button" onClick={onCancel} className="neomorph-flat px-6 py-3">Cancel</Button>
-            <Button type="submit" className="neomorph-flat px-6 py-3 text-blue-600">{job ? 'Update Job' : 'Create Job'}</Button>
+            <Button type="submit" className="neomorph-flat px-6 py-3 text-info-fg">{job ? 'Update Job' : 'Create Job'}</Button>
           </div>
         </form>
       </div>

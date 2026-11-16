@@ -39,8 +39,8 @@ const EditableSection = ({ title, icon: Icon, estimate, onUpdate, children, Edit
         <div className="neomorph-flat p-4 md:p-6">
             <div className="flex justify-between items-center mb-4">
                 <div className="flex items-center gap-3">
-                    <Icon className="w-5 h-5 text-gray-600" />
-                    <h3 className="font-bold text-gray-700">{title}</h3>
+                    <Icon className="w-5 h-5 text-muted-foreground" />
+                    <h3 className="font-bold text-foreground">{title}</h3>
                 </div>
                 {!isEditing && EditComponent && canEdit && (
                     <Button variant="ghost" size="icon" onClick={() => setIsEditing(true)} className="h-8 w-8 hover:text-gold">
@@ -66,12 +66,12 @@ const Section = ({ title, icon: Icon, children, defaultOpen = false }) => {
         <div className="neomorph-flat p-4 md:p-6">
             <button className="w-full flex justify-between items-center text-left" onClick={() => setIsOpen(!isOpen)}>
                 <div className="flex items-center gap-3">
-                    <Icon className="w-5 h-5 text-gray-600" />
-                    <h3 className="font-bold text-gray-700">{title}</h3>
+                    <Icon className="w-5 h-5 text-muted-foreground" />
+                    <h3 className="font-bold text-foreground">{title}</h3>
                 </div>
-                {isOpen ? <ChevronUp className="w-5 h-5 text-gray-600" /> : <ChevronDown className="w-5 h-5 text-gray-600" />}
+                {isOpen ? <ChevronUp className="w-5 h-5 text-muted-foreground" /> : <ChevronDown className="w-5 h-5 text-muted-foreground" />}
             </button>
-            {isOpen && <div className="mt-4 pt-4 border-t border-gray-300 border-opacity-50">{children}</div>}
+            {isOpen && <div className="mt-4 pt-4 border-t border-border border-opacity-50">{children}</div>}
         </div>
     );
 };
@@ -333,7 +333,7 @@ export default function EstimateDetail({ estimate, onClose, onUpdate, isInternal
                   <div className="flex items-center gap-2 flex-wrap">
                     <StatusBadge status={estimate.status || 'New'} />
                     {estimate.archived && (
-                      <span className="neomorph-flat px-2 md:px-3 py-0.5 md:py-1 text-xs font-medium text-gray-600">
+                      <span className="neomorph-flat px-2 md:px-3 py-0.5 md:py-1 text-xs font-medium text-muted-foreground">
                         Archived
                       </span>
                     )}
@@ -378,7 +378,7 @@ export default function EstimateDetail({ estimate, onClose, onUpdate, isInternal
                               <Archive className="w-4 h-4 mr-2" />
                               {estimate.archived ? 'Unarchive' : 'Archive'}
                             </DropdownMenuItem>
-                            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleDelete(); }} disabled={deleteMutation.isLoading} className="text-red-600">
+                            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleDelete(); }} disabled={deleteMutation.isLoading} className="text-danger-fg">
                               <Trash2 className="w-4 h-4 mr-2" />
                               Delete
                             </DropdownMenuItem>
@@ -395,10 +395,10 @@ export default function EstimateDetail({ estimate, onClose, onUpdate, isInternal
             <DropdownMenuTrigger asChild>
               <Button className="w-full neomorph-flat p-3 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  {React.createElement(DETAIL_SECTIONS.find(s => s.id === selectedSection)?.icon || Wrench, { className: "w-5 h-5 text-gray-600" })}
-                  <span className="font-medium text-gray-700">{DETAIL_SECTIONS.find(s => s.id === selectedSection)?.label || 'Select Section'}</span>
+                  {React.createElement(DETAIL_SECTIONS.find(s => s.id === selectedSection)?.icon || Wrench, { className: "w-5 h-5 text-muted-foreground" })}
+                  <span className="font-medium text-foreground">{DETAIL_SECTIONS.find(s => s.id === selectedSection)?.label || 'Select Section'}</span>
                 </div>
-                <ChevronDown className="w-4 h-4 text-gray-600" />
+                <ChevronDown className="w-4 h-4 text-muted-foreground" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-full" align="start">
@@ -408,7 +408,7 @@ export default function EstimateDetail({ estimate, onClose, onUpdate, isInternal
                   onSelect={() => setSelectedSection(section.id)}
                   className={selectedSection === section.id ? 'bg-glass-hover' : ''}
                 >
-                  <section.icon className="w-4 h-4 mr-2 text-gray-600" />
+                  <section.icon className="w-4 h-4 mr-2 text-muted-foreground" />
                   {section.label}
                 </DropdownMenuItem>
               ))}
