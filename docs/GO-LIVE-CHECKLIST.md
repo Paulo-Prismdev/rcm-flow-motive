@@ -94,3 +94,10 @@ Built to the "RCM Flowmotive" design system and the UI audit (all 17 changes app
 - Repairs list (Claims.jsx, under 768px): search behind an icon, stage chips (Needs action = case or client update overdue or due soon, All, each stage), List / Grouped switch (remembered per phone), cards in the chosen sort, floating New claim button.
 - Updates (ClaimUpdatesModal.jsx): bottom sheet on phones, short title, Add update first. Status changes now show before → after chips from the new status history (all screen sizes).
 - Test live on a phone: Call and WhatsApp open the right number; section dropdown and arrows; Grouped view still groups by stage; New claim button sits above the bottom bar on an iPhone with a home bar.
+
+## Calmer phone layout (16 Nov 2026) — replaces the phone claim header above; phones only
+- Claim opens on a summary (ClaimMobileSummary.jsx): Where it's at (stage in the client's words, overdue/due-soon case and client updates and flagged updates with Log update, internal status, expected back, authorising party, their claim no.), People (client, driver, repairer with Call and WhatsApp), Paperwork (photos, documents, internal updates, sections with details missing), All details (every section with a one-line preview). Update / Call / WhatsApp sit in a bar at the bottom.
+- Each section opens on its own page with Back to the claim (ClaimMobileSectionBar); fields and editing unchanged. ClaimDetailMobileHeader.jsx removed.
+- Repairs list on phones: title switches Repairs / Paying privately / include archived; chips All, Needs action, stages, Filters; rows are reg + client, internal status + repairer, and a red/amber line only when an update is overdue or due soon; "Needs action today" group first; layers icon switches to Grouped by stage.
+- Calls use tel: links (set Virtual Landline as the default calling app on Android). WhatsApp opens WhatsApp Business on Android (falls back to wa.me); iPhone uses wa.me (src/lib/contactLinks.js).
+- Test live on Paul's Android: WhatsApp opens Business at the right number; Call opens Virtual Landline once it's the default calling app. On Anthony's iPhone: Call and WhatsApp open.
