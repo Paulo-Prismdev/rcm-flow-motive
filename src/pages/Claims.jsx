@@ -784,11 +784,11 @@ export default function ClaimsPage() {
             <span className="flex-shrink-0 rounded-[5px] bg-primary text-primary-foreground px-1.5 py-0.5 text-xs font-bold tracking-wider tabular-nums whitespace-nowrap">
               {claim.reg ? formatUKRegistration(claim.reg) : 'No reg'}
             </span>
-            <span className="min-w-0 text-[15px] font-semibold truncate">{claim.client_name || 'No client name'}</span>
+            <span className="min-w-0 text-[15px] font-semibold truncate m-ellipsis">{claim.client_name || 'No client name'}</span>
             {claim.draft === true && <span className="flex-shrink-0 text-xs font-medium text-warning-fg">Draft</span>}
             {claim.unread_bodyshop_update && <span className="flex-shrink-0 w-2 h-2 rounded-full bg-info" title="New update from the repairer" aria-label="New update from the repairer" />}
           </span>
-          {line2 && <span className="block text-[13px] text-muted-foreground truncate mt-0.5">{line2}</span>}
+          {line2 && <span className="block text-[13px] text-muted-foreground truncate m-ellipsis mt-0.5">{line2}</span>}
           {flag && (
             <span className={`flex items-center gap-1.5 mt-1 text-xs font-semibold ${flag[0] === 'danger' ? 'text-danger-fg' : 'text-warning-fg'}`}>
               <span className={`w-[7px] h-[7px] rounded-full ${flag[0] === 'danger' ? 'bg-danger' : 'bg-warning'}`} aria-hidden="true" />{flag[1]}

@@ -74,8 +74,8 @@ const Row = ({ onClick, icon: Icon, label, sub, right, dot }) => (
   >
     {Icon && <Icon className="w-5 h-5 text-muted-foreground flex-shrink-0" aria-hidden="true" />}
     <span className="flex-1 min-w-0">
-      <span className="block text-[15px] font-medium truncate">{label}</span>
-      {sub && <span className="block text-[13px] text-muted-foreground truncate mt-px">{sub}</span>}
+      <span className="block text-[15px] font-medium truncate m-ellipsis">{label}</span>
+      {sub && <span className="block text-[13px] text-muted-foreground truncate m-ellipsis mt-px">{sub}</span>}
     </span>
     {dot && <span className="w-[7px] h-[7px] rounded-full bg-warning flex-shrink-0" aria-label="Has details still to fill in" />}
     {right}
@@ -138,7 +138,7 @@ export function ClaimMobileSectionBar({ claim, title, onBack, onAction, isIntern
           <ChevronLeft className="w-6 h-6 flex-shrink-0 text-link" aria-hidden="true" />
           <span className="min-w-0">
             <span className="block text-xs font-medium text-link leading-tight">{claim.reg || 'Claim'}</span>
-            <span className="block text-base font-semibold leading-tight truncate">{title}</span>
+            <span className="block text-base font-semibold leading-tight truncate m-ellipsis">{title}</span>
           </span>
         </button>
         <MoreMenu claim={claim} onAction={onAction} isInternalUser={isInternalUser} />
@@ -267,7 +267,7 @@ export default function ClaimMobileSummary({
             <div key={p.role} className={`flex items-center gap-3 py-2.5 ${i ? 'border-t border-border' : ''}`}>
               <button type="button" onClick={() => onOpenSection(p.section)} className="flex-1 min-w-0 text-left">
                 <span className="block text-xs text-muted-foreground">{p.role}</span>
-                <span className={`block text-[14.5px] font-semibold truncate ${p.name ? '' : 'text-warning-fg font-medium'}`}>{p.name || 'Not set'}</span>
+                <span className={`block text-[14.5px] font-semibold truncate m-ellipsis ${p.name ? '' : 'text-warning-fg font-medium'}`}>{p.name || 'Not set'}</span>
               </button>
               {p.phone && (
                 <>
