@@ -74,12 +74,10 @@ const Row = ({ onClick, icon: Icon, label, sub, right, dot }) => (
   >
     {Icon && <Icon className="w-5 h-5 text-muted-foreground flex-shrink-0" aria-hidden="true" />}
     <span className="flex-1 min-w-0">
-      <span className="flex items-center gap-2 text-[15px] font-medium truncate">
-        <span className="truncate">{label}</span>
-        {dot && <span className="w-[7px] h-[7px] rounded-full bg-warning flex-shrink-0" aria-label="Has details still to fill in" />}
-      </span>
+      <span className="block text-[15px] font-medium truncate">{label}</span>
       {sub && <span className="block text-[13px] text-muted-foreground truncate mt-px">{sub}</span>}
     </span>
+    {dot && <span className="w-[7px] h-[7px] rounded-full bg-warning flex-shrink-0" aria-label="Has details still to fill in" />}
     {right}
     <ChevronRight className="w-4 h-4 text-muted-foreground/70 flex-shrink-0" aria-hidden="true" />
   </button>
@@ -135,14 +133,13 @@ const Plate = ({ reg }) => (
 export function ClaimMobileSectionBar({ claim, title, onBack, onAction, isInternalUser }) {
   return (
     <div data-claim-header className="lg:hidden sticky top-0 flex-shrink-0 bg-card/90 backdrop-blur-md">
-      <div className="flex items-center gap-1 px-2 min-h-[48px]">
-        <button type="button" onClick={onBack} className="flex items-center gap-0.5 pr-2 py-2 text-link text-[15px] font-medium">
-          <ChevronLeft className="w-6 h-6" aria-hidden="true" />{claim.reg || 'Claim'}
+      <div className="grid grid-cols-[1fr_auto_1fr] m-keep-2 items-center gap-1 px-2 min-h-[48px]">
+        <button type="button" onClick={onBack} className="justify-self-start flex items-center gap-0.5 pr-2 py-2 text-link text-[15px] font-medium min-w-0">
+          <ChevronLeft className="w-6 h-6 flex-shrink-0" aria-hidden="true" /><span className="truncate">{claim.reg || 'Claim'}</span>
         </button>
-        <span className="flex-1" />
-        <MoreMenu claim={claim} onAction={onAction} isInternalUser={isInternalUser} />
+        <h1 className="text-[15px] font-semibold truncate max-w-[52vw] text-center">{title}</h1>
+        <span className="justify-self-end"><MoreMenu claim={claim} onAction={onAction} isInternalUser={isInternalUser} /></span>
       </div>
-      <h1 className="px-4 pb-3 text-[24px] font-bold tracking-tight leading-tight">{title}</h1>
     </div>
   );
 }
