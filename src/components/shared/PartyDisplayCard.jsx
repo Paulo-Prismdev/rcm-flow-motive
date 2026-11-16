@@ -14,7 +14,7 @@ function DetailCell({ label, value, isEmpty, isCurrency, meta }) {
   if (isEmpty) display = '-';
 
   return (
-    <div className={`py-2 px-3 rounded-[8px] transition-colors ${isEmpty ? 'bg-warning-bg border border-warning/30' : 'hover:bg-muted/50'}`}>
+    <div data-edit-label={typeof label === 'string' ? label : undefined} className={`py-2 px-3 rounded-lg transition-colors ${isEmpty ? 'bg-warning-bg/60 border border-warning/25' : 'hover:bg-muted/50'}`}>
       <div className="text-xs font-medium text-muted-foreground mb-0.5 flex items-center gap-1.5">
         {label}
         {isEmpty && <Dot filled />}
@@ -30,7 +30,7 @@ function DetailCell({ label, value, isEmpty, isCurrency, meta }) {
 function AddressBlock({ addressLine1, addressLine2, town, county, postcode, isEmpty }) {
   const hasAddress = addressLine1 || town || postcode;
   return (
-    <div className={`mt-2 py-3 px-4 rounded-lg ${isEmpty ? 'border border-warning/30 bg-warning-bg' : 'bg-muted/40'}`}>
+    <div data-edit-label="Address Line 1" className={`mt-2 py-3 px-4 rounded-lg ${isEmpty ? 'border border-warning/25 bg-warning-bg/60' : 'bg-muted/40'}`}>
       <div className="text-xs font-semibold text-muted-foreground mb-2">Address</div>
       <div className="text-sm leading-relaxed space-y-0.5">
         {addressLine1 && <div>{addressLine1}</div>}

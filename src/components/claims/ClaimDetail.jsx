@@ -1240,7 +1240,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
               <DetailRow label="Hire to Invoice" value={hireSummaryText(claim)} />
               <DetailRow label="Undriveable / Drivable" value={claim.unroadworthy ? 'Undriveable' : 'Drivable'} />
             </div>
-            <div className="mt-2 py-3 px-4 rounded-lg glass-inset">
+            <div data-edit-label="Damage Description" className="mt-2 py-3 px-4 rounded-lg glass-inset">
               <div className="text-xs font-semibold text-foreground-muted mb-2">Damage Description</div>
               <div className="text-sm leading-relaxed whitespace-pre-wrap">{claim.vehicle_damage || '-'}</div>
             </div>
