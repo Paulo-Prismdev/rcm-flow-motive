@@ -94,8 +94,10 @@
     --fm-glass-edge: rgba(255, 255, 255, 0.70);
     --fm-glass-outline: rgba(17, 24, 52, 0.10);
     --fm-scrim: rgba(10, 15, 36, 0.32);
-    --fm-glow-navy: rgba(36, 58, 160, 0.20);
-    --fm-glow-green: rgba(20, 147, 90, 0.14);
+    --fm-glow-navy: rgba(36, 58, 160, 0.26);
+    --fm-glow-green: rgba(20, 147, 90, 0.20);
+    --fm-chrome-glow-green: rgba(0, 214, 130, 0.30);
+    --fm-chrome-glow-blue: rgba(59, 108, 255, 0.36);
     --fm-on-chrome-muted: #B9C1DE;
 
     --fm-shadow-card: 0 1px 2px rgba(17, 24, 52, 0.06);
@@ -169,8 +171,10 @@
     --fm-glass-edge: rgba(255, 255, 255, 0.10);
     --fm-glass-outline: rgba(0, 0, 0, 0.40);
     --fm-scrim: rgba(0, 0, 0, 0.55);
-    --fm-glow-navy: rgba(64, 96, 255, 0.26);
-    --fm-glow-green: rgba(60, 203, 127, 0.14);
+    --fm-glow-navy: rgba(64, 96, 255, 0.32);
+    --fm-glow-green: rgba(60, 203, 127, 0.20);
+    --fm-chrome-glow-green: rgba(0, 224, 140, 0.24);
+    --fm-chrome-glow-blue: rgba(59, 108, 255, 0.32);
     --fm-on-chrome-muted: #AEB6D6;
 
     --fm-shadow-card: 0 1px 2px rgba(0, 0, 0, 0.40);
@@ -190,11 +194,18 @@
     hsl(var(--background));
   background-attachment: fixed;
 }
+/* Sidebar: the navy glass with two soft glows, the same idea as the Nimblii home header
+   (green glow in the top corner, blue glow lower down the other side), plus a thin light
+   edge so it reads as a pane of glass rather than a flat block. */
 .fm-glass-chrome {
-  background: var(--fm-glass-chrome);
+  background:
+    radial-gradient(120% 38% at 92% 0%, var(--fm-chrome-glow-green) 0%, transparent 70%),
+    radial-gradient(110% 40% at 0% 72%, var(--fm-chrome-glow-blue) 0%, transparent 72%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0) 30%),
+    var(--fm-glass-chrome);
   -webkit-backdrop-filter: blur(var(--fm-blur-chrome)) saturate(160%);
   backdrop-filter: blur(var(--fm-blur-chrome)) saturate(160%);
-  box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.08);
+  box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.10), inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 .fm-glass-bar {
   background: var(--fm-glass-bar);
