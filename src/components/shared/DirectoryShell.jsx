@@ -29,7 +29,7 @@ export default function DirectoryShell({
     <div className="h-full flex flex-col">
       {/* Header */}
       <PageHeader
-        className="px-3 sm:px-5 pt-4 pb-3"
+        className={`px-3 sm:px-5 pt-4 pb-3 ${hasSearch || filters ? '' : 'border-b border-border'}`}
         icon={Icon}
         title={title}
         subtitle={count}
