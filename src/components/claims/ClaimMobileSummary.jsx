@@ -249,7 +249,7 @@ export default function ClaimMobileSummary({
             </div>
           ))}
 
-          <div className="grid grid-cols-2 gap-x-4 gap-y-3 mt-2">
+          <div className="grid grid-cols-2 m-keep-2 gap-x-4 gap-y-3 mt-2">
             {fact('Internal status', claim.secondary_status || 'Not set', !claim.secondary_status)}
             {fact('Expected back', claim.ecd ? day(claim.ecd) : 'Not set', !claim.ecd)}
             {fact('Authorising party', [partyLabel, partyName].filter(Boolean).join(' · ') || 'Not set', !partyLabel)}
