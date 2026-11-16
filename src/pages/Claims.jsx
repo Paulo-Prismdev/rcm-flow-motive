@@ -833,8 +833,8 @@ export default function ClaimsPage() {
           {/* Phones: Repairs / Paying privately / archived live behind the title */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button type="button" className="md:hidden flex items-center gap-1 text-[26px] font-bold tracking-tight leading-tight">
-                {claimTab === 'private' ? 'Paying privately' : 'Repairs'}
+              <button type="button" className="md:hidden flex items-center gap-1">
+                <span className="text-[26px] font-bold tracking-tight leading-tight">{claimTab === 'private' ? 'Paying privately' : 'Repairs'}</span>
                 <ChevronDown className="w-5 h-5 mt-1 text-muted-foreground" aria-hidden="true" />
               </button>
             </DropdownMenuTrigger>
