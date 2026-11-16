@@ -222,7 +222,13 @@ const EditableSection = ({ title, icon: Icon, claim, onUpdate, children, EditCom
                     <h3 className="text-[15px] font-semibold text-foreground truncate">{title}</h3>
                 </div>
                 <div className='flex items-center gap-2'>
-                    {isEditing && <span className="text-xs font-medium text-primary">Editing</span>}
+                    {/* Same size as the Edit button, so the header keeps its height */}
+                    {isEditing && (
+                        <Button variant="ghost" size="sm" disabled className="gap-1.5 text-primary disabled:opacity-100" tabIndex={-1}>
+                            <Edit className="w-3.5 h-3.5" aria-hidden="true" />
+                            Editing
+                        </Button>
+                    )}
                     {!isEditing && EditComponent && canEdit && (
                         <Button variant="outline" size="sm" onClick={() => startEdit(null)} className="gap-1.5" aria-label={`Edit ${title}`}>
                             <Edit className="w-3.5 h-3.5" aria-hidden="true" />
