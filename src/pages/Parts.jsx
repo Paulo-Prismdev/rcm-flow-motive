@@ -144,7 +144,7 @@ export default function Parts() {
       <div className="flex-shrink-0 space-y-3 px-3 pt-3 md:px-0 md:pt-0">
         <PageHeader
           title={displayArchived ? "Archived parts" : "Parts"}
-          subtitle={`${filteredParts.length} ${displayArchived ? "archived" : "active"} part${filteredParts.length === 1 ? "" : "s"} requests`}
+          subtitle={`${filteredParts.length} ${displayArchived ? "archived" : "active"} request${filteredParts.length === 1 ? "" : "s"}`}
           actions={isInternalUser && (
             <>
               {!displayArchived && (
