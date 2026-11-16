@@ -424,7 +424,12 @@ export function checkRightInvoice(
   const printedParty = item?.direction === 'in' ? figures.party_from : figures.party_to;
   // An insurer's invoice raised in the client's name at the insurer's request is
   // addressed to the client on purpose: there is nothing to warn about there.
-  if (!addressedToClient && expectedParty && printedParty) {
+  // The insurer's own invoice is very often addressed to the customer, the
+  // policyholder, with the insurer's claim reference on it: that is the right
+  // invoice, and nothing to warn about.
+  const toPolicyholder = !!item?.setsRepairCost && item?.direction !== 'in' && !!claim?.client_name
+    && !!printedParty && partyMatch(printedParty, claim.client_name) !== 'different';
+  if (!addressedToClient && !toPolicyholder && expectedParty && printedParty) {
     const match = partyMatch(printedParty, expectedParty, alternatives);
     if (match === 'likely') {
       variations.push({ printed: printedParty, expected: expectedParty });
