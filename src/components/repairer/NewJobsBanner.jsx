@@ -422,7 +422,7 @@ export default function NewJobsBanner({ bodyshopId }) {
                         </p>
                         <Button
                           onClick={handleDownloadAndConfirm}
-                          className="w-full bg-primary hover:bg-accent-hover text-primary-foreground gap-2"
+                          className="w-full bg-primary hover:bg-primary/90 text-primary-foreground gap-2"
                         >
                           <Download className="w-4 h-4" />
                           Download & Continue
@@ -484,7 +484,7 @@ export default function NewJobsBanner({ bodyshopId }) {
 
                     <Button
                       onClick={handleFinalClose}
-                      className="w-full bg-primary hover:bg-accent-hover text-primary-foreground"
+                      className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
                     >
                       Close
                     </Button>
