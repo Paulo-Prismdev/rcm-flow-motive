@@ -812,13 +812,13 @@ export default function ClaimsPage() {
           </button>
         </div>
       </div>
-      <button
+      {!selectedClaim && <button
         type="button"
         onClick={() => setShowForm(true)}
         className="md:hidden fixed right-4 z-30 flex items-center gap-1.5 h-12 pl-3.5 pr-4 rounded-2xl bg-primary text-primary-foreground text-sm font-semibold shadow-raised active:scale-95 transition-transform"
         style={{ bottom: 'calc(72px + env(safe-area-inset-bottom, 0px))' }}>
         <Plus className="w-[18px] h-[18px]" />New claim
-      </button>
+      </button>}
 
       {/* Repairs / Paying Privately tabs */}
       <div className="flex items-center px-5 py-2 border-b border-border flex-shrink-0">
@@ -1046,10 +1046,19 @@ export default function ClaimsPage() {
           </div>
         ) : (
           <>
+            {/* ── PHONE flat list: one card per claim, in the chosen sort (most urgent first by default) ── */}
+            {isPhone && phoneView === 'list' && (
+              <div className="xl:hidden py-1 pb-24">
+                {cardClaims.length === 0
+                  ? <p className="text-sm text-muted-foreground text-center py-10">No claims in this view.</p>
+                  : cardClaims.map(renderMobileCard)}
+              </div>
+            )}
+
             {/* ── MOBILE / TABLET card list (< xl) ── */}
-            <div className="xl:hidden">
+            <div className={`xl:hidden ${isPhone ? 'pb-24' : ''}`} hidden={isPhone && phoneView === 'list'}>
               {availableStatuses.map(statusGroup => {
-                const claimsInGroup = filteredClaims.filter(c => getGroupKey(c) === statusGroup);
+                const claimsInGroup = cardClaims.filter(c => getGroupKey(c) === statusGroup);
                  if (claimsInGroup.length === 0) return null;
                  if (statusFilter.length > 0 && !statusFilter.includes(statusGroup)) return null;
                  const isCollapsed = collapsedGroups[statusGroup];
@@ -1090,7 +1099,7 @@ export default function ClaimsPage() {
                         })}
                     {(() => {
                     const known = new Set(availableStatuses);
-                    const ungrouped = filteredClaims.filter(c => {
+                    const ungrouped = cardClaims.filter(c => {
                     const st = getGroupKey(c);
                     return !known.has(st);
                     });
