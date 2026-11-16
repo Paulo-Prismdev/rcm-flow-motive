@@ -151,7 +151,7 @@ export default function TasksPage() {
   };
 
   return (
-    <div className="h-full flex flex-col gap-4">
+    <div className="h-full flex flex-col gap-4 px-3 pt-3 md:px-0 md:pt-0">
       {/* Header */}
       <div className="flex-shrink-0 space-y-3">
         <PageHeader
