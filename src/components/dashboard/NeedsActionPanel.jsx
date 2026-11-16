@@ -13,7 +13,7 @@ import {
 
 const TABS = [
   { key: 'all', label: 'All' },
-  { key: 'overdue', label: 'Overdue Comms' },
+  { key: 'overdue', label: 'Overdue comms' },
   { key: 'flagged', label: 'Flagged' },
   { key: 'inactive', label: 'Inactive 48h+' },
 ];

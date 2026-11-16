@@ -4,11 +4,11 @@ import { createPageUrl } from '@/utils';
 import { formatCompactGBP } from './opsDashboardHelpers';
 
 const TILES = [
-  { key: 'open', label: 'Open Claims', sub: 'total value', danger: false },
-  { key: 'overdue', label: 'Overdue Updates', sub: 'need action now', danger: true },
-  { key: 'invoice', label: 'Ready to Invoice', sub: 'ready to bill', danger: false },
-  { key: 'authority', label: 'Awaiting Authority', sub: 'pending auth', danger: false },
-  { key: 'onsite', label: 'On-Site', sub: 'in repair', danger: false },
+  { key: 'open', label: 'Open claims', sub: 'total value', danger: false },
+  { key: 'overdue', label: 'Overdue updates', sub: 'need action now', danger: true },
+  { key: 'invoice', label: 'Ready to invoice', sub: 'ready to bill', danger: false },
+  { key: 'authority', label: 'Awaiting authority', sub: 'pending auth', danger: false },
+  { key: 'onsite', label: 'On site', sub: 'in repair', danger: false },
 ];
 
 export default function AtAGlanceStrip({ stats, valueTotal }) {
