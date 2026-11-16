@@ -1,7 +1,8 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus } from "lucide-react";
+import { Plus, Search } from "lucide-react";
+import PageHeader from "./PageHeader";
 
 /**
  * Shared chrome for all directory pages.
@@ -27,34 +28,34 @@ export default function DirectoryShell({
   return (
     <div className="h-full flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between px-3 sm:px-4 py-3 border-b border-border bg-card">
-        <div className="min-w-0">
-          <h1 className="text-page-title flex items-center gap-2">
-            {Icon && <Icon className="w-5 h-5 text-primary flex-shrink-0" />}
-            <span className="truncate">{title}</span>
-          </h1>
-          {count !== undefined && (
-            <p className="text-xs text-muted-foreground mt-0.5">{count}</p>
-          )}
-        </div>
-        <div className="flex items-center gap-2 flex-shrink-0">
-          {headerExtra}
-          {onAdd && (
-            <Button onClick={onAdd} size="sm">
-              <Plus className="w-4 h-4" />
-              <span className="hidden sm:inline">{addLabel}</span>
-            </Button>
-          )}
-        </div>
-      </div>
+      <PageHeader
+        className="px-3 sm:px-5 pt-4 pb-3"
+        icon={Icon}
+        title={title}
+        subtitle={count}
+        actions={(headerExtra || onAdd) && (
+          <>
+            {headerExtra}
+            {onAdd && (
+              <Button onClick={onAdd} size="sm">
+                <Plus className="w-4 h-4" />
+                <span className="hidden sm:inline">{addLabel}</span>
+              </Button>
+            )}
+          </>
+        )}
+      />
 
       {/* Search + filters */}
       {(hasSearch || filters) && (
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 px-3 sm:px-4 py-2 border-b border-border bg-card">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 px-3 sm:px-5 pb-3 border-b border-border">
           {hasSearch && (
-            <div className="flex-1 min-w-0">
+            <div className="relative flex-1 min-w-0">
+              <Search className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-subtle" aria-hidden="true" />
               <Input
+                className="pl-8"
                 placeholder={searchPlaceholder}
+                aria-label={searchPlaceholder}
                 value={search}
                 onChange={(e) => onSearchChange(e.target.value)}
               />
