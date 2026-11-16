@@ -63,6 +63,6 @@ Built to the "RCM Flowmotive" design system and the UI audit (all 17 changes app
 
 - [x] Round 1 – design tokens (light and dark), shared buttons, fields, dialogs, sheets, menus, badges, cards, tabs, toasts; old neomorph / glass-inset / Mac classes re-pointed to the tokens.
 - [x] Round 2 – glass sidebar (own icon per item, green dot on the current item, arrow on items that open over the page), glass top bar with search field and Cmd+K, Refresh reloads data not the page, phone tab labels 12px, workspace window for Reports / Map / Directories / Settings, shared PageHeader (directories use it), theme follows the device until chosen.
-- [ ] Round 3 – the 45 hand-built overlays onto the shared window; eight named layers replace the z-index values.
+- [x] Round 3 – hand-built pop-ups (28 files) restyled as glass windows over the shared scrim; Escape closes every window, top-most first (useEscapeToClose); named layers in tailwind.config.js (raised, chrome, workspace, sheet, window, window-nested, menu, toast, tooltip) replace the ad-hoc z-index values in the shared components and pop-ups; comboboxes no longer open behind dialogs; toasts show above windows. Left as they are: the map's own layers, the full-screen document viewer and the image lightbox.
 - [ ] Round 4 – screens one by one: Repairs list, claim, Dashboard, Directories, Tasks, Invoicing, Estimating, Engineering, Parts and Tyres, Reports, Settings, portals and public forms.
 - [ ] Round 5 – one toast system, skeleton loading, empty states, status colours from one place.
