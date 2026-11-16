@@ -248,7 +248,7 @@ export default function Layout({ children, currentPageName }) {
 
         {/* ── SIDEBAR ── */}
         <aside className={`
-          fixed inset-y-0 left-0 z-[9999] flex flex-col
+          fixed inset-y-0 left-0 z-chrome flex flex-col
           w-56 fm-glass-chrome text-white
           transition-transform duration-300
           ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
@@ -441,7 +441,7 @@ export default function Layout({ children, currentPageName }) {
         {!desktopSidebarOpen && (
           <button
             onClick={() => setDesktopSidebarOpen(true)}
-            className="hidden md:flex fixed top-2.5 left-2 z-[9999] items-center justify-center w-8 h-8 rounded-lg fm-glass-chrome text-white shadow-raised hover:bg-[#1f2c63] transition-colors"
+            className="hidden md:flex fixed top-2.5 left-2 z-chrome items-center justify-center w-8 h-8 rounded-lg fm-glass-chrome text-white shadow-raised hover:bg-[#1f2c63] transition-colors"
             title="Show sidebar"
             aria-label="Show sidebar">
             <PanelLeftOpen className="w-4 h-4" />

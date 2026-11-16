@@ -139,7 +139,7 @@ export default function AddBodyshopModal({ isOpen, onClose, onSuccess, initialNa
       }}
     >
       <div 
-        className="neomorph p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto" // width and height changes
+        className="fm-glass-window rounded-2xl text-foreground p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-between items-center mb-6">

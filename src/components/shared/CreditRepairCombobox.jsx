@@ -58,7 +58,7 @@ export default function CreditRepairCombobox({ value, onChange, placeholder = "S
                 <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-[--radix-popover-trigger-width] p-0" style={{ zIndex: 9999 }}>
+            <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
               <Command>
                 <CommandInput placeholder="Search credit repair companies..." />
                 <CommandList>

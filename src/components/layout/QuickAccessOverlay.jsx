@@ -38,14 +38,14 @@ export default function QuickAccessOverlay({ pageName, onClose }) {
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 z-[10000] fm-scrim"
+        className="fixed inset-0 z-workspace fm-scrim"
         onClick={() => {
           if (document.querySelector('[data-custom-portal-modal="true"]')) return;
           onClose();
         }}
       />
       {/* The workspace window: a whole area opened over the page, in glass. */}
-      <div role="dialog" aria-modal="true" aria-label={config?.title} className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[10001] w-[95vw] h-[92vh] max-h-[92vh] fm-glass-window rounded-2xl text-foreground flex flex-col overflow-hidden max-md:w-screen max-md:h-[100dvh] max-md:max-h-[100dvh] max-md:rounded-none">
+      <div role="dialog" aria-modal="true" aria-label={config?.title} className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-workspace w-[95vw] h-[92vh] max-h-[92vh] fm-glass-window rounded-2xl text-foreground flex flex-col overflow-hidden max-md:w-screen max-md:h-[100dvh] max-md:max-h-[100dvh] max-md:rounded-none">
         <div className="flex items-center gap-3 px-4 py-2.5 border-b border-border flex-shrink-0">
           <button
             onClick={() => {

@@ -10,10 +10,10 @@ import * as DialogPrimitive from '@radix-ui/react-dialog';
  * a 24px margin on every side, and Radix keeps the window that opened it open
  * underneath — closing this one puts the user back exactly where they were.
  *
- * Its level sits above the app's dialogs (overlay 10000, card 10001) so the pop-up that
- * opened it stays behind and dimmed, yet below the pop-over layer (10005) and the
- * document viewer's full-screen mode (10080), so a menu or the zoomed document opened
- * from inside this window still comes out on top.
+ * Its layer (window-nested) sits above the app's dialogs (window) so the pop-up that
+ * opened it stays behind and dimmed, yet below menus (menu) and the document viewer's
+ * full-screen mode (10080), so a menu or the zoomed document opened from inside this
+ * window still comes out on top. The layers are named in tailwind.config.js.
  */
 export default function TopLevelReviewWindow({ isOpen, onClose, label, className = '', children }) {
   const contentRef = useRef(null);
@@ -23,7 +23,7 @@ export default function TopLevelReviewWindow({ isOpen, onClose, label, className
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay
           data-mobile-full-modal="true"
-          className="fixed inset-0 z-[10003] flex items-center justify-center bg-black/50 backdrop-blur-sm p-6"
+          className="fixed inset-0 z-window-nested flex items-center justify-center fm-scrim p-6"
         >
           <DialogPrimitive.Content
             ref={contentRef}
@@ -36,7 +36,7 @@ export default function TopLevelReviewWindow({ isOpen, onClose, label, className
             }}
             onPointerDownOutside={(event) => event.preventDefault()}
             onEscapeKeyDown={(event) => event.preventDefault()}
-            className={`bg-card border border-border rounded-xl shadow-2xl w-full h-full flex flex-col outline-none ${className}`}
+            className={`fm-glass-window rounded-2xl text-foreground w-full h-full flex flex-col outline-none ${className}`}
           >
             <DialogPrimitive.Title className="sr-only">{label}</DialogPrimitive.Title>
             {children}

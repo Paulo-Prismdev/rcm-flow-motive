@@ -18,7 +18,7 @@ const DialogOverlay = React.forwardRef(({ className, ...props }, ref) => (
   <DialogPrimitive.Overlay
     ref={ref}
     className={cn(
-      "fixed inset-0 z-[10000] fm-scrim data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+      "fixed inset-0 z-window fm-scrim data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
       className
     )}
     {...props} />
@@ -31,7 +31,7 @@ const DialogContent = React.forwardRef(({ className, children, ...props }, ref) 
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        "fixed left-[50%] top-[50%] z-[10001] grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 fm-glass-window p-6 text-foreground duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] max-h-[90vh] overflow-y-auto rounded-2xl max-md:h-[100dvh] max-md:max-h-[100dvh] max-md:max-w-[100vw] max-md:left-0 max-md:top-0 max-md:translate-x-0 max-md:translate-y-0 max-md:rounded-none max-md:p-4",
+        "fixed left-[50%] top-[50%] z-window grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 fm-glass-window p-6 text-foreground duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] max-h-[90vh] overflow-y-auto rounded-2xl max-md:h-[100dvh] max-md:max-h-[100dvh] max-md:max-w-[100vw] max-md:left-0 max-md:top-0 max-md:translate-x-0 max-md:translate-y-0 max-md:rounded-none max-md:p-4",
         className
       )}
       {...props}>
