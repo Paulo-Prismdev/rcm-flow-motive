@@ -52,7 +52,7 @@ export default function TyreRequests() {
   };
 
   const handleEmailClick = (req) => {
-    const subject = `${req.request_type === 'price' ? 'Price Request' : 'Order'} - ${req.tyre_make} (${req.tyre_size})`;
+    const subject = `${req.request_type === 'price' ? 'Price request' : 'Order'} - ${req.tyre_make} (${req.tyre_size})`;
     const body = `TYRE ${req.request_type === 'price' ? 'PRICE REQUEST' : 'ORDER'}
 
 Vehicle Details:
@@ -74,33 +74,32 @@ Customer Details:
 Additional Notes:
 ${req.notes || 'None'}
 
-Request Type: ${req.request_type === 'price' ? 'Price Request' : 'Order'}
+Request Type: ${req.request_type === 'price' ? 'Price request' : 'Order'}
 `;
     
     window.open(`mailto:paul@rcmautomotive.co.uk?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);
   };
 
   return (
-    <div className="h-full flex flex-col gap-3 overflow-hidden p-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Package className="w-6 h-6 text-primary" />
-          <h1 className="text-2xl font-bold">Tyre Requests</h1>
-        </div>
-      </div>
+    <div className="h-full flex flex-col gap-3 overflow-hidden p-3 lg:p-0">
+      <PageHeader
+        title="Tyre requests"
+        subtitle={isLoading ? 'Loading…' : `${filteredRequests.length} request${filteredRequests.length === 1 ? '' : 's'}`}
+      />
 
       {/* Filters */}
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex gap-3 flex-wrap">
+      <div>
+        <div>
+          <div className="flex gap-2 flex-wrap">
             <div className="flex-1 min-w-64">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Search className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-subtle" aria-hidden="true" />
                 <Input
-                  placeholder="Search by reg, repairer, or tyre..."
+                  placeholder="Search by reg, repairer or tyre…"
+                  aria-label="Search tyre requests"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
+                  className="pl-8"
                 />
               </div>
             </div>
@@ -110,7 +109,7 @@ Request Type: ${req.request_type === 'price' ? 'Price Request' : 'Order'}
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="all">All statuses</SelectItem>
                   <SelectItem value="Pending">Pending</SelectItem>
                   <SelectItem value="Processed">Processed</SelectItem>
                   <SelectItem value="Completed">Completed</SelectItem>
@@ -123,27 +122,27 @@ Request Type: ${req.request_type === 'price' ? 'Price Request' : 'Order'}
                   <SelectValue placeholder="Type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Types</SelectItem>
-                  <SelectItem value="price">Price Request</SelectItem>
+                  <SelectItem value="all">All types</SelectItem>
+                  <SelectItem value="price">Price request</SelectItem>
                   <SelectItem value="order">Order</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* List */}
       <div className="flex-1 overflow-y-auto min-h-0">
         {isLoading ? (
-          <div className="flex items-center justify-center h-full">
-            <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+          <div className="grid gap-3" aria-busy="true" aria-label="Loading tyre requests">
+            {[0, 1, 2].map((i) => <div key={i} className="h-36 rounded-xl bg-muted animate-pulse" />)}
           </div>
         ) : filteredRequests.length === 0 ? (
           <Card>
-            <CardContent className="p-8 text-center text-foreground-muted">
-              <Package className="w-12 h-12 mx-auto mb-3 opacity-50" />
-              <p>No tyre requests found</p>
+            <CardContent className="p-8 text-center text-muted-foreground">
+              <CircleDot className="w-10 h-10 mx-auto mb-3" aria-hidden="true" />
+              <p className="text-sm">{searchTerm || statusFilter !== 'all' || requestTypeFilter !== 'all' ? 'Nothing matches these filters.' : 'No tyre requests yet.'}</p>
             </CardContent>
           </Card>
         ) : (
@@ -158,7 +157,7 @@ Request Type: ${req.request_type === 'price' ? 'Price Request' : 'Order'}
                           {req.status}
                         </Badge>
                         <Badge variant="outline">
-                          {req.request_type === 'price' ? 'Price Request' : 'Order'}
+                          {req.request_type === 'price' ? 'Price request' : 'Order'}
                         </Badge>
                       </div>
                     </div>
@@ -176,7 +175,7 @@ Request Type: ${req.request_type === 'price' ? 'Price Request' : 'Order'}
                         value={req.status}
                         onValueChange={(value) => handleStatusChange(req.id, value)}
                       >
-                        <SelectTrigger className="w-32">
+                        <SelectTrigger className="w-32" aria-label="Change status">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -196,7 +195,7 @@ Request Type: ${req.request_type === 'price' ? 'Price Request' : 'Order'}
                       <p className="text-sm text-muted-foreground">{req.vehicle_make} {req.vehicle_model}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-muted-foreground mb-1">Tyre Details</p>
+                      <p className="text-xs text-muted-foreground mb-1">Tyre details</p>
                       <p className="font-semibold">{req.tyre_make}</p>
                       <p className="text-sm text-muted-foreground">{req.tyre_size} (Qty: {req.tyre_quantity || 1})</p>
                     </div>

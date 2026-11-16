@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Eye, Archive } from "lucide-react";
+import { Plus, Eye, Archive, Search } from "lucide-react";
+import PageHeader from '@/components/shared/PageHeader';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import StatusBadge from "../components/shared/StatusBadge";
@@ -139,63 +140,51 @@ export default function Parts() {
 
   return (
     <div className="h-full flex flex-col gap-3 md:gap-4">
-      {/* Header - Fixed */}
-      <div className="glass p-3 md:p-4 flex-shrink-0">
-        <div className="flex items-center justify-between mb-3 md:mb-4 flex-wrap gap-2">
-          <div>
-            <h1 className="text-lg md:text-xl font-bold">
-              {displayArchived ? "Archived Parts" : "Parts Management"}
-            </h1>
-            <p className="text-xs text-gray-500 mt-0.5">
-              {filteredParts.length} {displayArchived ? "archived parts" : "active parts"}
-            </p>
-          </div>
-          <div className="flex gap-2">
-            {!displayArchived && isInternalUser && (
+      {/* Header */}
+      <div className="flex-shrink-0 space-y-3 px-3 pt-3 md:px-0 md:pt-0">
+        <PageHeader
+          title={displayArchived ? "Archived parts" : "Parts"}
+          subtitle={`${filteredParts.length} ${displayArchived ? "archived" : "active"} part${filteredParts.length === 1 ? "" : "s"} requests`}
+          actions={isInternalUser && (
+            <>
+              {!displayArchived && (
+                <Button size="sm" onClick={() => setShowForm(true)} className="gap-1.5">
+                  <Plus className="w-4 h-4" aria-hidden="true" />
+                  <span className="hidden sm:inline">New part</span>
+                </Button>
+              )}
               <Button
-                onClick={() => setShowForm(true)}
-                className="glass-button px-3 md:px-4 py-2 text-xs md:text-sm flex items-center gap-2"
-              >
-                <Plus className="w-3.5 h-3.5 md:w-4 md:h-4" />
-                <span className="hidden sm:inline">New Part</span>
-              </Button>
-            )}
-            {isInternalUser && (
-              <Button
+                variant="outline"
+                size="sm"
                 onClick={() => setDisplayArchived(!displayArchived)}
-                className="glass-button px-3 md:px-4 py-2 text-xs md:text-sm flex items-center gap-2"
+                aria-pressed={displayArchived}
+                className="gap-1.5"
               >
-                {displayArchived ? (
-                  <>
-                    <Eye className="w-3.5 h-3.5 md:w-4 md:h-4" />
-                    <span className="hidden sm:inline">Active</span>
-                  </>
-                ) : (
-                  <>
-                    <Archive className="w-3.5 h-3.5 md:w-4 md:h-4" />
-                    <span className="hidden sm:inline">Archived</span>
-                  </>
-                )}
+                {displayArchived ? <Eye className="w-4 h-4" aria-hidden="true" /> : <Archive className="w-4 h-4" aria-hidden="true" />}
+                <span className="hidden sm:inline">{displayArchived ? "Show active" : "Archived"}</span>
               </Button>
-            )}
-          </div>
-        </div>
+            </>
+          )}
+        />
 
-        <div className="flex flex-col sm:flex-row gap-2 lg:gap-3">
-          <div className="flex-1">
+        <div className="flex flex-col sm:flex-row gap-2">
+          <div className="relative flex-1 min-w-0">
+            <Search className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-subtle" aria-hidden="true" />
             <Input
-              placeholder="Search by vehicle, part, or bodyshop..."
+              placeholder="Search by vehicle, part or bodyshop…"
+              aria-label="Search parts"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="neomorph-inset px-3 py-2 text-sm text-gray-700 border-0 focus:ring-0"
+              className="pl-8"
             />
           </div>
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="neomorph-inset px-3 py-2 text-sm text-gray-700 border-0 rounded-lg"
+            aria-label="Status"
+            className="h-9 rounded-lg border border-input bg-card px-2.5 text-[13px] text-foreground"
           >
-            <option value="all">All Statuses</option>
+            <option value="all">All statuses</option>
             {allStatuses.map(status => (
               <option key={status} value={status}>{status}</option>
             ))}
@@ -204,21 +193,23 @@ export default function Parts() {
       </div>
 
       {/* Parts List - Scrollable */}
-      <div className="flex-1 overflow-y-auto min-h-0 pr-1">
+      <div className="flex-1 overflow-y-auto min-h-0 px-3 pb-3 md:px-0 md:pb-0 md:pr-1">
         <div className="space-y-2">
           {isLoading ? (
-            <div className="neomorph p-6 text-center text-gray-500 text-sm">Loading parts requests...</div>
+            <div className="space-y-2" aria-busy="true" aria-label="Loading parts requests">
+              {[0, 1, 2, 3].map((i) => <div key={i} className="h-28 rounded-xl bg-muted animate-pulse" />)}
+            </div>
           ) : filteredParts.length === 0 ? (
-            <div className="neomorph p-6 text-center text-gray-500 text-sm">
-              No parts requests found.
+            <div className="rounded-xl border border-border bg-card shadow-card p-8 text-center text-sm text-muted-foreground">
+              {searchTerm || filterStatus !== "all" ? "Nothing matches your search." : "No parts requests found."}
             </div>
           ) : (
             filteredParts.map((part) => (
-              <div key={part.id} className="neomorph card-hover p-4">
+              <div key={part.id} onClick={() => setSelectedPart(part)} className="rounded-xl border border-border bg-card shadow-card hover:bg-muted/40 cursor-pointer transition-colors p-4">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
-                      <h3 className="text-base font-bold text-gray-700">{part.vehicle_ref || 'No Reference'}</h3>
+                      <h3 className="text-base font-bold text-gray-700">{part.vehicle_ref || 'No reference'}</h3>
                       <StatusBadge status={part.sourcing_status || 'New Request'} />
                     </div>
                     <div className="grid grid-cols-2 gap-2 text-xs m-keep-2">
@@ -243,8 +234,11 @@ export default function Parts() {
                     </div>
                   </div>
                   <Button
-                    onClick={() => setSelectedPart(part)}
-                    className="neomorph-flat p-2 transition-all active:neomorph-pressed ml-3"
+                    variant="ghost"
+                    size="icon"
+                    aria-label="Open"
+                    onClick={(e) => { e.stopPropagation(); setSelectedPart(part); }}
+                    className="ml-3 flex-shrink-0"
                   >
                     <Eye className="w-4 h-4 text-gray-600" />
                   </Button>
