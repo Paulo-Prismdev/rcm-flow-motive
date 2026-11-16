@@ -107,7 +107,7 @@ import AuthorisingPartyBanner from './AuthorisingPartyBanner';
 import ClaimJourneyTimeline from './ClaimJourneyTimeline';
 import { generateClaimOverviewPdf } from './claimOverviewPdf';
 import ClaimStatusEditForm from './ClaimStatusEditForm';
-import { isUpdateTrackingClosed, computeUpdateStatusFlag, computeClientCommStatusFlag } from '../shared/claimStatusUpdate';
+import { isUpdateTrackingClosed, computeUpdateStatusFlag, computeClientCommStatusFlag, buildStatusChangeRecord } from '../shared/claimStatusUpdate';
 import { saveTimeLogInBackground } from '../shared/saveTimeLogInBackground';
 
 import { askConfirm, notify, notifyError } from '@/lib/dialogs';
