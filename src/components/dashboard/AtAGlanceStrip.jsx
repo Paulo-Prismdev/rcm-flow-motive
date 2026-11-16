@@ -15,7 +15,7 @@ export default function AtAGlanceStrip({ stats, valueTotal }) {
   const navigate = useNavigate();
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+    <div className="grid grid-cols-2 m-keep-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
       {TILES.map((tile) => {
         const count = stats[tile.key] || 0;
         const isValue = tile.key === 'open';
@@ -23,7 +23,7 @@ export default function AtAGlanceStrip({ stats, valueTotal }) {
           <button
             key={tile.key}
             onClick={() => navigate(createPageUrl('Claims'))}
-            className="bg-card border border-border rounded-xl px-4 py-3.5 text-left hover:bg-muted transition-colors group min-h-[104px] flex flex-col justify-between shadow-card"
+            className={`${isValue ? 'col-span-2 md:col-span-1' : ''} bg-card border border-border rounded-xl px-4 py-3.5 text-left hover:bg-muted transition-colors group min-h-[104px] flex flex-col justify-between shadow-card`}
           >
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-muted-foreground">
