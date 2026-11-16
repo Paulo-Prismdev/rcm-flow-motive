@@ -85,11 +85,14 @@ const Row = ({ onClick, icon: Icon, label, sub, right, dot }) => (
   </button>
 );
 
-const RoundLink = ({ href, label, children, external }) => (
+// Web links (wa.me) open in a new tab; tel: and Android app links open in place.
+const newTab = (href) => (href && href.startsWith('https:') ? { target: '_blank', rel: 'noopener noreferrer' } : {});
+
+const RoundLink = ({ href, label, children }) => (
   <a
     href={href}
     aria-label={label}
-    {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+    {...newTab(href)}
     className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-foreground active:scale-95 transition-transform flex-shrink-0"
   >
     {children}
@@ -240,7 +243,7 @@ export default function ClaimMobileSummary({
             <div key={a.text} className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl mb-2 text-[13.5px] font-medium ${a.tone === 'Red' ? 'bg-danger-bg text-danger-fg' : 'bg-warning-bg text-warning-fg'}`}>
               <Clock className="w-[18px] h-[18px] flex-shrink-0" aria-hidden="true" />
               <span className="flex-1 min-w-0">{a.text}</span>
-              <button type="button" onClick={a.text.startsWith('Case') || a.text.startsWith('Client') ? onUpdates : onUpdates} className="font-bold flex-shrink-0">
+              <button type="button" onClick={onUpdates} className="font-bold flex-shrink-0">
                 {a.text.includes('flagged') ? 'View' : 'Log update'}
               </button>
             </div>
@@ -269,7 +272,7 @@ export default function ClaimMobileSummary({
               {p.phone && (
                 <>
                   <RoundLink href={telHref(p.phone)} label={`Call ${p.role.toLowerCase()} on ${p.phone}`}><Phone className="w-[18px] h-[18px]" /></RoundLink>
-                  <RoundLink href={whatsappHref(p.phone)} label={`WhatsApp the ${p.role.toLowerCase()}`} external><WhatsAppIcon className="w-[18px] h-[18px]" /></RoundLink>
+                  <RoundLink href={whatsappHref(p.phone)} label={`WhatsApp the ${p.role.toLowerCase()}`}><WhatsAppIcon className="w-[18px] h-[18px]" /></RoundLink>
                 </>
               )}
             </div>
@@ -317,8 +320,7 @@ export default function ClaimMobileSummary({
         </a>
         <a
           href={whatsappHref(mainPhone)}
-          target="_blank"
-          rel="noopener noreferrer"
+          {...newTab(whatsappHref(mainPhone))}
           aria-disabled={!mainPhone}
           aria-label={mainPhone ? `WhatsApp the ${mainWho}` : `No ${mainWho} phone number`}
           className={`w-[52px] h-12 rounded-2xl border border-border bg-card flex items-center justify-center ${mainPhone ? '' : 'opacity-40 pointer-events-none'}`}
