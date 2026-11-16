@@ -12,6 +12,9 @@ const sharedLayerOpen = () => !!document.querySelector(
   '[role="dialog"][data-state="open"], [role="alertdialog"][data-state="open"], [data-radix-popper-content-wrapper]'
 );
 
+/** How many hand-built windows are listening for Escape right now. */
+export const escapeWindowsOpen = () => stack.length;
+
 let listening = false;
 function onKeyDown(e) {
   if (e.key !== 'Escape' || e.defaultPrevented || stack.length === 0) return;
