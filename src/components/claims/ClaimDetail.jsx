@@ -236,7 +236,6 @@ const EditableSection = ({ title, icon: Icon, claim, onUpdate, children, EditCom
                         {isEditing ? (
                             <EditComponent key={`edit-${version}`} claim={claim} onSave={handleSave} onCancel={() => setIsEditing(false)} />
                         ) : (
-                            // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
                             <fieldset key={`view-${version}`} disabled className={`fm-readonly ${editable ? 'fm-click-edit' : ''}`} onClick={onLockedClick} title={editable ? 'Click a field to edit it' : undefined}>
                                 <EditComponent claim={claim} onSave={() => {}} onCancel={() => {}} />
                             </fieldset>
@@ -245,7 +244,6 @@ const EditableSection = ({ title, icon: Icon, claim, onUpdate, children, EditCom
                 ) : isEditing ? (
                     <EditComponent claim={claim} onSave={handleSave} onCancel={() => setIsEditing(false)} />
                 ) : (
-                    // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
                     <div className={editable ? 'fm-click-edit' : ''} onClick={onViewClick}>{children}</div>
                 )}
             </div>
