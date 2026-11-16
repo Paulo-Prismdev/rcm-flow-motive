@@ -101,3 +101,8 @@ Built to the "RCM Flowmotive" design system and the UI audit (all 17 changes app
 - Repairs list on phones: title switches Repairs / Paying privately / include archived; chips All, Needs action, stages, Filters; rows are reg + client, internal status + repairer, and a red/amber line only when an update is overdue or due soon; "Needs action today" group first; layers icon switches to Grouped by stage.
 - Calls use tel: links (set Virtual Landline as the default calling app on Android). WhatsApp opens WhatsApp Business on Android (falls back to wa.me); iPhone uses wa.me (src/lib/contactLinks.js).
 - Test live on Paul's Android: WhatsApp opens Business at the right number; Call opens Virtual Landline once it's the default calling app. On Anthony's iPhone: Call and WhatsApp open.
+
+## Phone follow-ups (16 Nov 2026)
+- Claim summary: the reg is a large plate at the top of the page (a small one appears in the bar once you scroll), with a Quick view button beside it.
+- All details grouped under bold headings — The job, People, The vehicle, The repair, Recovery and legal — each row with an icon and a "to fill in" count per group.
+- Quick view is back on phones: eye button on every claim in the Repairs list and on the claim summary. Restyled on all screen sizes: cards with icon headings, a copy button on every field (shows "Copied"), and a Copy all button that copies every filled-in field as "Label: value" lines. On phones it slides up from the bottom; desktop stays a side panel.
