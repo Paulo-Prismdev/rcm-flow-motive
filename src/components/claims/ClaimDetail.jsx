@@ -1855,24 +1855,35 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
 
       <div ref={rootRef} className="flex flex-col gap-2 md:gap-3 h-full" data-claim-root style={{touchAction: 'auto', isolation: 'isolate'}}>
 
-          {/* ── MOBILE header (< lg) ── */}
-          <ClaimDetailMobileHeader
-            claim={{...claim, _selectedSection: selectedSection}}
-            isClosedStatus={isClosedStatus}
-            collapsed={headerCollapsed}
-            onClose={handleClose}
-            onUpdates={() => setIsClaimUpdatesOpen(true)}
-            onUpdateTracking={() => setIsUpdateTrackingOpen(true)}
-            sections={DETAIL_SECTIONS
-              .filter(s => s.id !== 'creditRepair' || claim.claim_type === 'Credit Repair')
-              .map(s => ({ ...s, empty: isSectionEmpty(s.id, claim) }))}
-            selectedSection={selectedSection}
-            onSelectSection={setSelectedSection}
-            updatesCount={claimUpdates.length}
-            imagesCount={claim.image_urls?.length || 0}
-            docsCount={claim.file_urls?.length || 0}
+          {/* ── PHONE (< lg): the claim opens on a summary; each section opens on its own page ── */}
+          {mobilePage === 'summary' ? (
+            <ClaimMobileSummary
+              claim={claim}
+              sections={phoneSections}
+              isClosedStatus={isClosedStatus}
+              isInternalUser={isInternalUser}
+              onClose={handleClose}
+              onOpenSection={openPhoneSection}
+              onUpdates={() => setIsClaimUpdatesOpen(true)}
+              onUpdateTracking={() => setIsUpdateTrackingOpen(true)}
+              onAction={handlePhoneAction}
+              updatesCount={claimUpdates.filter(u => !u.parent_update_id).length}
+              imagesCount={claim.image_urls?.length || 0}
+              docsCount={claim.file_urls?.length || 0}
+              notesCount={notesTotalCount}
+              starredCount={starredUpdates.length}
+            />
+          ) : (
+            <ClaimMobileSectionBar
+              claim={claim}
+              title={(DETAIL_SECTIONS.find(s => s.id === selectedSection) || DETAIL_SECTIONS[0]).label}
+              onBack={() => setMobilePage('summary')}
+              onAction={handlePhoneAction}
+              isInternalUser={isInternalUser}
+            />
+          )}
+          {false && <ClaimDetailMobileHeader
             onAction={(val) => {
-              if (val.startsWith('section:')) { setSelectedSection(val.replace('section:', '')); return; }
               if (val === 'notes') setIsNotesOpen(true);
               else if (val === 'docs') setIsAttachmentsOpen(true);
               else if (val === 'images') setIsImagesOpen(true);
@@ -1889,7 +1900,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
               else if (val === 'archive') handleArchive();
               else if (val === 'delete') handleDelete();
             }}
-          />
+          />}
 
           {/* ── DESKTOP top bar (≥ lg) ── */}
           <div className="hidden lg:block bg-card border border-border rounded-xl p-3 flex-shrink-0 shadow-card">
