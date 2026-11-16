@@ -682,9 +682,7 @@ export default function ClaimsPage() {
       <div role="button" tabIndex={0} onKeyDown={activateOnKey}
         key={claim.id}
         onClick={() => setSelectedClaim(claim)}
-        className={isPhone
-          ? 'mx-3 my-2 p-3 rounded-2xl border border-border bg-card shadow-card cursor-pointer active:scale-[0.99] transition-transform'
-          : 'px-4 py-3 border-b border-border cursor-pointer active:bg-muted transition-colors'}
+        className="px-4 py-3 border-b border-border cursor-pointer active:bg-muted transition-colors"
       >
         <div className="flex items-center justify-between gap-2">
           <span
@@ -733,14 +731,13 @@ export default function ClaimsPage() {
           </div>
         </div>
         <div className="mt-1.5 flex flex-col gap-0.5">
-          <span className={`${isPhone ? 'text-[15px] font-semibold' : 'text-sm font-medium'} text-foreground truncate`}>{claim.client_name || 'No client name'}</span>
+          <span className="text-sm font-medium text-foreground truncate">{claim.client_name || 'No client name'}</span>
           {(claim.make_model || claim.loss_date) && (
             <span className="text-xs text-muted-foreground truncate">{[claim.make_model, claim.loss_date && `Loss ${formatDate(claim.loss_date)}`].filter(Boolean).join(' · ')}</span>
           )}
           {claim.referrer && <span className="text-xs text-muted-foreground truncate">{claim.referrer}</span>}
-          {(isException || claim.secondary_status || claim.tertiary_status || INVOICE_STATUS_ATTENTION[deriveInvoiceStatus(claim)] || (isPhone && journeyStatus)) && (
+          {(isException || claim.secondary_status || claim.tertiary_status || INVOICE_STATUS_ATTENTION[deriveInvoiceStatus(claim)]) && (
             <div className="mt-1 flex flex-wrap gap-1 items-center">
-              {isPhone && journeyStatus && !isException && <StatusBadge status={journeyStatus} variant="secondary" />}
               {isException && <StatusBadge status={getClaimOutcome(claim)} />}
               {claim.secondary_status && <StatusBadge status={claim.secondary_status} />}
               {claim.tertiary_status && <StatusBadge status={claim.tertiary_status} variant="secondary" />}
@@ -756,6 +753,68 @@ export default function ClaimsPage() {
             </div>
           )}
         </div>
+      </div>
+    );
+  };
+
+  // Phone row: two plain lines (reg and client; internal status and repairer) and a
+  // third only when an update is overdue or due soon. Everything else is on the claim.
+  const renderPhoneRow = (claim) => {
+    const caseFlag = calculateUpdateStatus(claim);
+    const clientFlag = computeClientCommStatusFlag(claim);
+    const closed = isUpdateTrackingClosed(claim);
+    let flag = null;
+    if (!closed) {
+      if (caseFlag === 'Red') flag = ['danger', 'Case update overdue'];
+      else if (clientFlag === 'Red') flag = ['danger', 'Client update overdue'];
+      else if (caseFlag === 'Amber') flag = ['warning', 'Case update due soon'];
+      else if (clientFlag === 'Amber') flag = ['warning', 'Client update due soon'];
+    }
+    const outcome = getClaimOutcome(claim);
+    const line2 = [isExceptionOutcome(outcome) ? outcome : null, claim.secondary_status, claim.bodyshop].filter(Boolean).join(' · ');
+    return (
+      <button
+        type="button"
+        key={claim.id}
+        onClick={() => setSelectedClaim(claim)}
+        className="relative w-full flex items-center gap-3 px-3.5 py-3 text-left active:bg-muted [&+&]:before:absolute [&+&]:before:top-0 [&+&]:before:left-3.5 [&+&]:before:right-0 [&+&]:before:h-px [&+&]:before:bg-border"
+      >
+        <span className="flex-1 min-w-0">
+          <span className="flex items-center gap-2 min-w-0">
+            <span className="flex-shrink-0 rounded-[5px] bg-primary text-primary-foreground px-1.5 py-0.5 text-xs font-bold tracking-wider tabular-nums whitespace-nowrap">
+              {claim.reg ? formatUKRegistration(claim.reg) : 'No reg'}
+            </span>
+            <span className="text-[15px] font-semibold truncate">{claim.client_name || 'No client name'}</span>
+            {claim.draft === true && <span className="flex-shrink-0 text-xs font-medium text-warning-fg">Draft</span>}
+            {claim.unread_bodyshop_update && <span className="flex-shrink-0 w-2 h-2 rounded-full bg-info" title="New update from the repairer" aria-label="New update from the repairer" />}
+          </span>
+          {line2 && <span className="block text-[13px] text-muted-foreground truncate mt-0.5">{line2}</span>}
+          {flag && (
+            <span className={`flex items-center gap-1.5 mt-1 text-xs font-semibold ${flag[0] === 'danger' ? 'text-danger-fg' : 'text-warning-fg'}`}>
+              <span className={`w-[7px] h-[7px] rounded-full ${flag[0] === 'danger' ? 'bg-danger' : 'bg-warning'}`} aria-hidden="true" />{flag[1]}
+            </span>
+          )}
+        </span>
+        <ChevronRight className="w-4 h-4 text-muted-foreground/70 flex-shrink-0" aria-hidden="true" />
+      </button>
+    );
+  };
+  const phoneGroup = (label, claims, key, collapsible) => {
+    if (!claims.length) return null;
+    const collapsed = collapsible && collapsedGroups[key];
+    return (
+      <div key={key}>
+        <div className="flex items-center justify-between px-5 pt-3.5 pb-1.5 text-[12.5px] font-medium text-muted-foreground">
+          {collapsible ? (
+            <button type="button" onClick={() => toggleGroup(key)} aria-expanded={!collapsed} className="flex items-center gap-1">
+              {collapsed ? <ChevronRight className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}{label}
+            </button>
+          ) : <span>{label}</span>}
+          <span className="tabular-nums">{claims.length}</span>
+        </div>
+        {!collapsed && (
+          <div className="mx-3 rounded-2xl bg-card shadow-card overflow-hidden">{claims.map(renderPhoneRow)}</div>
+        )}
       </div>
     );
   };
