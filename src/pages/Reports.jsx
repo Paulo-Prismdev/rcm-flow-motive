@@ -2,14 +2,18 @@ import React, { useState, useMemo } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { Input } from '@/components/ui/input';
+import PageHeader from '@/components/shared/PageHeader';
+import useThemeColors from '@/hooks/useThemeColors';
 import { Button } from '@/components/ui/button';
 import { Calendar, Download, Filter, TrendingUp, BarChart3, PieChart as PieChartIcon, X } from 'lucide-react';
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { format, differenceInDays, parseISO } from 'date-fns';
 
-const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'];
 
 export default function Reports() {
+  const theme = useThemeColors();
+  const COLORS = theme.series;
+  const tooltipStyle = { background: theme.surface, border: `1px solid ${theme.grid}`, borderRadius: 8, color: theme.text, fontSize: 12 };
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [filterClaimType, setFilterClaimType] = useState('all');
@@ -197,54 +201,54 @@ export default function Reports() {
   return (
     <div className="h-full flex flex-col gap-4">
       {/* Header */}
-      <div className="glass p-4 lg:p-6 flex-shrink-0">
-        <div className="flex items-start justify-between mb-4 gap-2">
-          <div>
-            <h1 className="text-base lg:text-2xl font-bold">Claims Reports & Analytics</h1>
-            <p className="text-xs lg:text-sm text-foreground-muted mt-1">Comprehensive insights into your claims data</p>
-          </div>
-          <div className="flex items-center gap-2 flex-shrink-0">
-            {hasActiveFilters && (
-              <Button onClick={clearFilters} size="sm" className="glass-button flex items-center gap-1.5 text-xs">
-                <X className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Clear Filters</span>
+      <div className="flex-shrink-0 space-y-3 px-3 pt-3 md:px-0 md:pt-0">
+        <PageHeader
+          title="Reports"
+          subtitle="Claims and invoices across the filters below"
+          actions={
+            <>
+              {hasActiveFilters && (
+                <Button onClick={clearFilters} size="sm" variant="ghost" className="gap-1.5">
+                  <X className="w-4 h-4" aria-hidden="true" />
+                  <span className="hidden sm:inline">Clear filters</span>
+                </Button>
+              )}
+              <Button onClick={handleExport} size="sm" variant="outline" className="gap-1.5">
+                <Download className="w-4 h-4" aria-hidden="true" />
+                <span className="hidden sm:inline">Export to Excel</span>
               </Button>
-            )}
-            <Button onClick={handleExport} size="sm" className="glass-button flex items-center gap-1.5 text-xs">
-              <Download className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Export Excel</span>
-            </Button>
-          </div>
-        </div>
+            </>
+          }
+        />
 
         {/* Filters */}
         <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-2 lg:gap-3">
           <div>
-            <label className="block text-xs text-foreground-muted mb-1">From Date</label>
+            <label className="block text-xs font-medium text-muted-foreground mb-1">From</label>
             <Input
               type="date"
               value={dateFrom}
               onChange={(e) => setDateFrom(e.target.value)}
-              className="glass-inset text-sm"
+              className="text-sm"
             />
           </div>
           <div>
-            <label className="block text-xs text-foreground-muted mb-1">To Date</label>
+            <label className="block text-xs font-medium text-muted-foreground mb-1">To</label>
             <Input
               type="date"
               value={dateTo}
               onChange={(e) => setDateTo(e.target.value)}
-              className="glass-inset text-sm"
+              className="text-sm"
             />
           </div>
           <div>
-            <label className="block text-xs text-foreground-muted mb-1">Claim Type</label>
+            <label className="block text-xs font-medium text-muted-foreground mb-1">Claim type</label>
             <select
               value={filterClaimType}
               onChange={(e) => setFilterClaimType(e.target.value)}
-              className="glass-inset w-full px-3 py-2 text-sm rounded-xl border-0"
+              className="w-full h-9 rounded-lg border border-input bg-card px-2.5 text-[13px] text-foreground"
             >
-              <option value="all">All Types</option>
+              <option value="all">All types</option>
               <option value="Own Damage">Own Damage</option>
               <option value="Third Party">Third Party</option>
               <option value="Fault Claim">Fault Claim</option>
@@ -259,9 +263,9 @@ export default function Reports() {
             <select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
-              className="glass-inset w-full px-3 py-2 text-sm rounded-xl border-0"
+              className="w-full h-9 rounded-lg border border-input bg-card px-2.5 text-[13px] text-foreground"
             >
-              <option value="all">All Statuses</option>
+              <option value="all">All statuses</option>
               {uniqueStatuses.map(s => <option key={s} value={s}>{s}</option>)}
             </select>
           </div>
@@ -270,9 +274,9 @@ export default function Reports() {
             <select
               value={filterReferrer}
               onChange={(e) => setFilterReferrer(e.target.value)}
-              className="glass-inset w-full px-3 py-2 text-sm rounded-xl border-0"
+              className="w-full h-9 rounded-lg border border-input bg-card px-2.5 text-[13px] text-foreground"
             >
-              <option value="all">All Referrers</option>
+              <option value="all">All referrers</option>
               {uniqueReferrers.map(r => <option key={r.key} value={r.key}>{r.label}</option>)}
             </select>
           </div>
@@ -281,49 +285,49 @@ export default function Reports() {
             <select
               value={filterInsurer}
               onChange={(e) => setFilterInsurer(e.target.value)}
-              className="glass-inset w-full px-3 py-2 text-sm rounded-xl border-0"
+              className="w-full h-9 rounded-lg border border-input bg-card px-2.5 text-[13px] text-foreground"
             >
-              <option value="all">All Insurers</option>
+              <option value="all">All insurers</option>
               {uniqueInsurers.map(i => <option key={i} value={i}>{i}</option>)}
             </select>
           </div>
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto min-h-0 pr-1">
+      <div className="flex-1 overflow-y-auto min-h-0 px-3 pb-3 md:px-0 md:pb-0 md:pr-1">
         <div className="space-y-4">
           {/* KPI Cards */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 m-keep-2">
-            <div className="glass p-4 lg:p-6">
+            <div className="rounded-xl border border-border bg-card shadow-card p-4 lg:p-5">
               <div className="flex items-center justify-between mb-2">
-                <h3 className="text-sm text-foreground-muted">Total Claims</h3>
-                <TrendingUp className="w-5 h-5 text-blue-500" />
+                <h3 className="text-sm text-muted-foreground">Total claims</h3>
+                <TrendingUp className="w-5 h-5 text-muted-foreground" aria-hidden="true" />
               </div>
               <p className="text-2xl lg:text-3xl font-bold">{metrics.total}</p>
             </div>
 
-            <div className="glass p-4 lg:p-6">
+            <div className="rounded-xl border border-border bg-card shadow-card p-4 lg:p-5">
               <div className="flex items-center justify-between mb-2">
-                <h3 className="text-xs lg:text-sm text-foreground-muted">Avg Repair Value</h3>
-                <TrendingUp className="w-4 h-4 lg:w-5 lg:h-5 text-green-500" />
+                <h3 className="text-xs lg:text-sm text-muted-foreground">Average repair value</h3>
+                <TrendingUp className="w-4 h-4 lg:w-5 lg:h-5 text-muted-foreground" aria-hidden="true" />
               </div>
               <p className="text-2xl lg:text-3xl font-bold">£{metrics.avgValue.toLocaleString(undefined, {maximumFractionDigits: 0})}</p>
               <p className="text-xs text-foreground-muted mt-1">Total: £{metrics.totalValue.toLocaleString(undefined, {maximumFractionDigits: 0})}</p>
             </div>
 
-            <div className="glass p-4 lg:p-6">
+            <div className="rounded-xl border border-border bg-card shadow-card p-4 lg:p-5">
               <div className="flex items-center justify-between mb-2">
-                <h3 className="text-xs lg:text-sm text-foreground-muted">Avg Resolution</h3>
-                <TrendingUp className="w-4 h-4 lg:w-5 lg:h-5 text-purple-500" />
+                <h3 className="text-xs lg:text-sm text-muted-foreground">Average time to close</h3>
+                <TrendingUp className="w-4 h-4 lg:w-5 lg:h-5 text-muted-foreground" aria-hidden="true" />
               </div>
               <p className="text-2xl lg:text-3xl font-bold">{metrics.avgResolutionTime.toFixed(1)}</p>
               <p className="text-xs text-foreground-muted mt-1">days</p>
             </div>
 
-            <div className="glass p-4 lg:p-6">
+            <div className="rounded-xl border border-border bg-card shadow-card p-4 lg:p-5">
               <div className="flex items-center justify-between mb-2">
-                <h3 className="text-xs lg:text-sm text-foreground-muted">Completed</h3>
-                <TrendingUp className="w-4 h-4 lg:w-5 lg:h-5 text-orange-500" />
+                <h3 className="text-xs lg:text-sm text-muted-foreground">Completed</h3>
+                <TrendingUp className="w-4 h-4 lg:w-5 lg:h-5 text-muted-foreground" aria-hidden="true" />
               </div>
               <p className="text-2xl lg:text-3xl font-bold">{metrics.completedClaims}</p>
               <p className="text-xs text-foreground-muted mt-1">{((metrics.completedClaims / metrics.total) * 100 || 0).toFixed(1)}% of total</p>
@@ -332,26 +336,26 @@ export default function Reports() {
 
           {/* Charts Row 1 */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className="glass p-6">
-              <h3 className="font-bold mb-4 flex items-center gap-2">
-                <BarChart3 className="w-5 h-5" />
-                Claims by Status
+            <div className="rounded-xl border border-border bg-card shadow-card p-5">
+              <h3 className="text-[15px] font-semibold mb-4 flex items-center gap-2">
+                <BarChart3 className="w-4 h-4 text-muted-foreground" aria-hidden="true" />
+                Claims by status
               </h3>
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={statusChartData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                  <XAxis dataKey="name" tick={{ fontSize: 12 }} stroke="var(--foreground-muted)" />
-                  <YAxis tick={{ fontSize: 12 }} stroke="var(--foreground-muted)" />
-                  <Tooltip contentStyle={{ background: 'var(--surface)', border: '1px solid var(--border)' }} />
-                  <Bar dataKey="value" fill="#3b82f6" />
+                  <CartesianGrid strokeDasharray="3 3" stroke={theme.grid} />
+                  <XAxis dataKey="name" tick={{ fontSize: 12 }} stroke={theme.axis} />
+                  <YAxis tick={{ fontSize: 12 }} stroke={theme.axis} />
+                  <Tooltip contentStyle={tooltipStyle} />
+                  <Bar dataKey="value" fill={COLORS[0]} radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
 
-            <div className="glass p-6">
-              <h3 className="font-bold mb-4 flex items-center gap-2">
-                <PieChartIcon className="w-5 h-5" />
-                Claims by Type
+            <div className="rounded-xl border border-border bg-card shadow-card p-5">
+              <h3 className="text-[15px] font-semibold mb-4 flex items-center gap-2">
+                <PieChartIcon className="w-4 h-4 text-muted-foreground" aria-hidden="true" />
+                Claims by type
               </h3>
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
@@ -362,14 +366,14 @@ export default function Reports() {
                     labelLine={false}
                     label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
                     outerRadius={80}
-                    fill="#8884d8"
+                    fill={COLORS[0]}
                     dataKey="value"
                   >
                     {typeChartData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip contentStyle={{ background: 'var(--surface)', border: '1px solid var(--border)' }} />
+                  <Tooltip contentStyle={tooltipStyle} />
                 </PieChart>
               </ResponsiveContainer>
             </div>
@@ -377,21 +381,21 @@ export default function Reports() {
 
           {/* Charts Row 2 */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className="glass p-6">
-              <h3 className="font-bold mb-4">Top 10 Referrers by Volume</h3>
+            <div className="rounded-xl border border-border bg-card shadow-card p-5">
+              <h3 className="text-[15px] font-semibold mb-4">Top 10 referrers by volume</h3>
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={referrerChartData} layout="vertical">
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                  <XAxis type="number" tick={{ fontSize: 12 }} stroke="var(--foreground-muted)" />
-                  <YAxis dataKey="name" type="category" width={120} tick={{ fontSize: 11 }} stroke="var(--foreground-muted)" />
-                  <Tooltip contentStyle={{ background: 'var(--surface)', border: '1px solid var(--border)' }} />
-                  <Bar dataKey="value" fill="#10b981" />
+                  <CartesianGrid strokeDasharray="3 3" stroke={theme.grid} />
+                  <XAxis type="number" tick={{ fontSize: 12 }} stroke={theme.axis} />
+                  <YAxis dataKey="name" type="category" width={120} tick={{ fontSize: 11 }} stroke={theme.axis} />
+                  <Tooltip contentStyle={tooltipStyle} />
+                  <Bar dataKey="value" fill={COLORS[1]} radius={[0, 4, 4, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
 
-            <div className="glass p-6">
-              <h3 className="font-bold mb-4">Invoice Status Breakdown</h3>
+            <div className="rounded-xl border border-border bg-card shadow-card p-5">
+              <h3 className="text-[15px] font-semibold mb-4">Invoice status</h3>
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
                   <Pie
@@ -401,14 +405,14 @@ export default function Reports() {
                     labelLine={false}
                     label={({ name, percent }) => `${(percent * 100).toFixed(0)}%`}
                     outerRadius={80}
-                    fill="#8884d8"
+                    fill={COLORS[0]}
                     dataKey="value"
                   >
                     {invoiceChartData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip contentStyle={{ background: 'var(--surface)', border: '1px solid var(--border)' }} />
+                  <Tooltip contentStyle={tooltipStyle} />
                   <Legend />
                 </PieChart>
               </ResponsiveContainer>
@@ -416,29 +420,29 @@ export default function Reports() {
           </div>
 
           {/* Monthly Trend */}
-          <div className="glass p-6">
-            <h3 className="font-bold mb-4">Claims Volume Trend</h3>
+          <div className="rounded-xl border border-border bg-card shadow-card p-5">
+            <h3 className="text-[15px] font-semibold mb-4">Claims each month</h3>
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={monthlyChartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                <XAxis dataKey="name" tick={{ fontSize: 12 }} stroke="var(--foreground-muted)" />
-                <YAxis tick={{ fontSize: 12 }} stroke="var(--foreground-muted)" />
-                <Tooltip contentStyle={{ background: 'var(--surface)', border: '1px solid var(--border)' }} />
+                <CartesianGrid strokeDasharray="3 3" stroke={theme.grid} />
+                <XAxis dataKey="name" tick={{ fontSize: 12 }} stroke={theme.axis} />
+                <YAxis tick={{ fontSize: 12 }} stroke={theme.axis} />
+                <Tooltip contentStyle={tooltipStyle} />
                 <Legend />
-                <Line type="monotone" dataKey="value" stroke="#8b5cf6" strokeWidth={2} name="Claims" />
+                <Line type="monotone" dataKey="value" stroke={COLORS[0]} strokeWidth={2} name="Claims" />
               </LineChart>
             </ResponsiveContainer>
           </div>
 
           {/* Detailed Breakdown Tables */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className="glass p-6">
-              <h3 className="font-bold mb-4">Status Breakdown</h3>
+            <div className="rounded-xl border border-border bg-card shadow-card p-5">
+              <h3 className="text-[15px] font-semibold mb-4">By status</h3>
               <div className="space-y-2">
                 {Object.entries(metrics.byStatus)
                   .sort((a, b) => b[1] - a[1])
                   .map(([status, count]) => (
-                    <div key={status} className="flex items-center justify-between p-3 glass-inset rounded-lg">
+                    <div key={status} className="flex items-center justify-between px-3 py-2.5 bg-muted rounded-lg">
                       <span className="text-sm font-medium">{status}</span>
                       <div className="flex items-center gap-3">
                         <span className="text-sm text-foreground-muted">{count} claims</span>
@@ -449,13 +453,13 @@ export default function Reports() {
               </div>
             </div>
 
-            <div className="glass p-6">
-              <h3 className="font-bold mb-4">Insurer Breakdown</h3>
+            <div className="rounded-xl border border-border bg-card shadow-card p-5">
+              <h3 className="text-[15px] font-semibold mb-4">By insurer</h3>
               <div className="space-y-2 max-h-96 overflow-y-auto">
                 {Object.entries(metrics.byInsurer)
                   .sort((a, b) => b[1] - a[1])
                   .map(([insurer, count]) => (
-                    <div key={insurer} className="flex items-center justify-between p-3 glass-inset rounded-lg">
+                    <div key={insurer} className="flex items-center justify-between px-3 py-2.5 bg-muted rounded-lg">
                       <span className="text-sm font-medium">{insurer}</span>
                       <div className="flex items-center gap-3">
                         <span className="text-sm text-foreground-muted">{count} claims</span>
