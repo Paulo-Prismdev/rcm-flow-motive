@@ -121,6 +121,21 @@ export default function Layout({ children, currentPageName }) {
   // scroll positions stay where they are.
   const refreshData = () => queryClient.invalidateQueries();
 
+  // Escape closes the top-most hand-built window (one whose backdrop is marked
+  // data-overlay-dismiss), the same as the shared windows already do. A shared window
+  // or menu that is open handles Escape itself, so nothing is closed twice.
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key !== 'Escape' || e.defaultPrevented) return;
+      if (document.querySelector('[role="dialog"][data-state="open"], [role="alertdialog"][data-state="open"], [data-radix-popper-content-wrapper]')) return;
+      const backdrops = document.querySelectorAll('[data-overlay-dismiss]');
+      const top = backdrops[backdrops.length - 1];
+      if (top) top.click();
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, []);
+
   // Cmd+K / Ctrl+K opens search from anywhere.
   useEffect(() => {
     const onKey = (e) => {
