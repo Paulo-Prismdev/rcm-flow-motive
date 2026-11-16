@@ -737,35 +737,45 @@ export default function ClaimsPage() {
   };
 
   const claimsListView = (
-    <div className="flex flex-col h-full min-h-0 bg-card lg:rounded-[10px] lg:border lg:border-border dark:lg:border-gray-800 overflow-hidden lg:shadow-sm" data-list-shell>
+    <div className="flex flex-col h-full min-h-0 bg-card lg:rounded-xl lg:border lg:border-border overflow-hidden lg:shadow-card" data-list-shell>
       <ImportClaimsModal isOpen={showImportModal} onClose={() => setShowImportModal(false)}
         onImportComplete={() => { queryClient.invalidateQueries({ queryKey: ['claims'] }); setShowImportModal(false); }} />
       <ClaimCardFieldsModal isOpen={showFieldsModal} onClose={() => setShowFieldsModal(false)}
         selectedFields={userCardFields} onSave={(fields) => updateUserFieldsMutation.mutate(fields)} />
 
       {/* Top bar */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-border flex-shrink-0">
-        <h1 className="text-base lg:text-lg font-semibold text-foreground">Repairs</h1>
-        <div className="flex items-center gap-1.5">
+      <div className="flex items-center justify-between gap-3 px-4 lg:px-5 py-3 border-b border-border flex-shrink-0">
+        <div className="min-w-0">
+          <h1 className="text-page-title">Repairs</h1>
+          {!isLoading && (
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {filteredClaims.length} {filteredClaims.length === 1 ? 'claim' : 'claims'}{showArchived ? ', archived included' : ''}
+            </p>
+          )}
+        </div>
+        <div className="flex items-center gap-2">
           {/* Desktop-only buttons */}
-          <button onClick={() => setShowFieldsModal(true)} className="hidden lg:flex p-1.5 text-muted-foreground hover:text-foreground transition-colors" title="Customise columns">
-            <Settings2 className="w-4 h-4" />
+          <button onClick={() => setShowFieldsModal(true)}
+            className="hidden lg:flex items-center gap-1.5 h-8 px-3 rounded-lg text-[13px] font-medium border border-input bg-card text-foreground shadow-card hover:bg-accent transition-colors"
+            title="Choose the columns shown">
+            <Settings2 className="w-4 h-4" />Columns
           </button>
           {isInternalUser && (
             <>
               <button onClick={() => setShowArchived(!showArchived)}
-                className={`hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${showArchived ? 'bg-muted border-input' : 'border-border text-muted-foreground hover:bg-accent'}`}>
-                <Archive className="w-3.5 h-3.5" />{showArchived ? 'Hide Archived' : 'Archived'}
+                aria-pressed={showArchived}
+                className={`hidden lg:flex items-center gap-1.5 h-8 px-3 rounded-lg text-[13px] font-medium border transition-colors ${showArchived ? 'bg-surface-selected border-input text-foreground' : 'border-input bg-card text-foreground shadow-card hover:bg-accent'}`}>
+                <Archive className="w-4 h-4" />{showArchived ? 'Hide archived' : 'Archived'}
               </button>
               <button onClick={() => setShowImportModal(true)}
-                className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-border text-muted-foreground hover:bg-accent transition-colors">
-                <Upload className="w-3.5 h-3.5" />Import
+                className="hidden lg:flex items-center gap-1.5 h-8 px-3 rounded-lg text-[13px] font-medium border border-input bg-card text-foreground shadow-card hover:bg-accent transition-colors">
+                <Upload className="w-4 h-4" />Import
               </button>
             </>
           )}
           <button onClick={() => setShowForm(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-primary text-primary-foreground hover:opacity-90 transition-colors shadow-sm">
-            <Plus className="w-3.5 h-3.5" /><span>New Claim</span>
+            className="flex items-center gap-1.5 h-8 px-3 rounded-lg text-[13px] font-semibold bg-primary text-primary-foreground hover:bg-primary/90 transition-colors shadow-card">
+            <Plus className="w-4 h-4" /><span>New claim</span>
           </button>
         </div>
       </div>
@@ -777,12 +787,14 @@ export default function ClaimsPage() {
 
       {/* Search + filters bar */}
       <div className="flex flex-col lg:flex-row lg:items-center gap-3 px-5 py-2.5 border-b border-border flex-shrink-0 bg-muted">
-        <div className="flex-1 w-full">
+        <div className="relative flex-1 w-full">
+          <Search className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-subtle" aria-hidden="true" />
           <input
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
             placeholder="Search by reg, client, job number, driver..."
-            className="w-full pl-3 pr-3 py-2 text-sm bg-card border border-border rounded-lg focus:outline-none focus:border-ring focus:ring-2 focus:ring-ring/20 text-foreground placeholder:text-ink-subtle transition-all"
+            aria-label="Search claims"
+            className="w-full pl-8 pr-3 py-2 text-sm bg-card border border-border rounded-lg focus:outline-none focus:border-ring focus:ring-2 focus:ring-ring/20 text-foreground placeholder:text-ink-subtle transition-all"
           />
         </div>
 
