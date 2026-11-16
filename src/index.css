@@ -1040,3 +1040,52 @@ fieldset.fm-readonly { border: 0; margin: 0; padding: 0; min-width: 0; }
   100% { box-shadow: 0 0 0 3px hsl(var(--ring) / 0); }
 }
 @media (prefers-reduced-motion: reduce) { .fm-flash { animation: none; box-shadow: 0 0 0 2px hsl(var(--ring) / 0.5); } }
+
+/* ── Loading screen (src/components/LoadingScreen.jsx) ──
+   RCM navy in both themes, drifting glows, glass logo panel with a light sweep,
+   real progress steps, fades into the page. */
+.fm-loading {
+  position: fixed; inset: 0; z-index: 10050;
+  display: grid; place-items: center; overflow: hidden;
+  background: #131D47; color: #F2F5FF;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  opacity: 0; transition: opacity .3s ease;
+}
+.fm-loading--visible { opacity: 1; }
+.fm-loading--leaving { opacity: 1; pointer-events: none; transition: opacity .55s ease; }
+.fm-loading--leaving.fm-loading--gone { opacity: 0; }
+.fm-loading__glow { position: absolute; border-radius: 50%; filter: blur(40px); will-change: transform; pointer-events: none; }
+.fm-loading__glow--green { width: 70vmax; height: 70vmax; right: -22vmax; top: -30vmax; background: radial-gradient(circle, rgba(0,214,130,0.40), transparent 65%); animation: fm-drift-1 14s ease-in-out infinite alternate; }
+.fm-loading__glow--blue { width: 75vmax; height: 75vmax; left: -26vmax; bottom: -32vmax; background: radial-gradient(circle, rgba(59,108,255,0.46), transparent 65%); animation: fm-drift-2 17s ease-in-out infinite alternate; }
+.fm-loading__glow--violet { width: 40vmax; height: 40vmax; left: 35%; top: 45%; background: radial-gradient(circle, rgba(110,90,255,0.20), transparent 65%); animation: fm-drift-3 20s ease-in-out infinite alternate; }
+@keyframes fm-drift-1 { to { transform: translate(-8%, 10%) scale(1.08); } }
+@keyframes fm-drift-2 { to { transform: translate(10%, -8%) scale(1.06); } }
+@keyframes fm-drift-3 { to { transform: translate(-12%, -10%) scale(1.15); } }
+.fm-loading__centre { position: relative; z-index: 1; width: min(360px, 82vw); display: flex; flex-direction: column; align-items: center; gap: 22px; }
+.fm-loading__glass {
+  position: relative; overflow: hidden; width: 100%; box-sizing: border-box; padding: 26px 30px;
+  border-radius: 22px; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.16);
+  -webkit-backdrop-filter: blur(18px) saturate(150%); backdrop-filter: blur(18px) saturate(150%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 24px 60px -24px rgba(0,0,0,0.6);
+  display: grid; place-items: center;
+}
+.fm-loading__glass::after {
+  content: ""; position: absolute; top: -50%; bottom: -50%; width: 38%; left: -60%;
+  background: linear-gradient(100deg, transparent, rgba(255,255,255,0.16), transparent);
+  transform: skewX(-12deg); animation: fm-sweep 2.8s ease-in-out infinite;
+}
+@keyframes fm-sweep { 0% { left: -60%; } 60%, 100% { left: 130%; } }
+.fm-loading__logo { width: 100%; max-width: 230px; height: auto; display: block; }
+.fm-loading__progress { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.fm-loading__track { width: 100%; height: 4px; border-radius: 99px; background: rgba(255,255,255,0.12); overflow: hidden; }
+.fm-loading__bar { height: 100%; border-radius: 99px; background: linear-gradient(90deg, #3B6CFF, #00D682); box-shadow: 0 0 12px rgba(0,214,130,0.55); transition: width .45s ease; }
+.fm-loading__step { font-size: 13px; font-weight: 500; color: #AEBBD6; min-height: 18px; text-align: center; }
+.fm-loading__slow { display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; }
+.fm-loading__slow p { margin: 0; font-size: 13px; line-height: 1.5; color: #AEBBD6; max-width: 300px; }
+.fm-loading__slow strong { display: block; margin-bottom: 2px; color: #F2F5FF; font-weight: 600; }
+.fm-loading__retry { font: inherit; font-size: 13px; font-weight: 600; padding: 8px 16px; border-radius: 10px; border: 0; background: #F2F5FF; color: #131D47; cursor: pointer; }
+.fm-loading__retry:focus-visible { outline: 2px solid #00D682; outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) {
+  .fm-loading__glow, .fm-loading__glass::after { animation: none; }
+  .fm-loading__bar { transition: none; }
+}

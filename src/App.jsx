@@ -75,7 +75,7 @@ const AuthenticatedApp = () => {
 
   // Show loading spinner while checking app public settings or auth
   if (isLoadingPublicSettings || isLoadingAuth) {
-    return <LoadingScreen />;
+    return <LoadingScreen stage="signin" />;
   }
 
   // Handle authentication errors
@@ -97,7 +97,7 @@ const AuthenticatedApp = () => {
     return null;
   }
   if (twofaStatus.loading) {
-    return <LoadingScreen />;
+    return <LoadingScreen stage="settings" />;
   }
   const needsCode = twofaStatus.required && !twofaStatus.verified
     && !(twofaStatus.failed && user?.user_type !== 'internal');
