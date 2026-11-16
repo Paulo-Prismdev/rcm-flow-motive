@@ -2,7 +2,7 @@ import React from 'react';
 import { AlertTriangle, Check, PoundSterling } from 'lucide-react';
 import { fmtGBP } from '@/components/shared/creditRepairRates';
 import { round2, toNum } from './invoiceReview';
-import { customerShareWorkings, hasSplit, splitFromFigures } from './invoiceAuthorityCheck';
+import { customerShareWorkings, effectiveSplit, hasSplit, splitFromFigures } from './invoiceAuthorityCheck';
 
 /**
  * The claim's final repair cost, set against the invoice being read.
@@ -29,7 +29,7 @@ export function repairCostOffer(item, claim, figures, expectation = null) {
   // what the customer pays is part of that total, not a figure to add to it again,
   // which is what counted their half twice. An invoice billing the insurer alone has
   // the customer's own share of the repair beside it.
-  const split = splitFromFigures(figures);
+  const split = effectiveSplit({ ...splitFromFigures(figures), total: insurerPart }, expectation);
   const onSplit = hasSplit(split);
   const customerShare = onSplit || !expectation || expectation.excessTbc ? 0 : expectation.customerShare;
   const total = onSplit ? insurerPart : round2(insurerPart + customerShare);
