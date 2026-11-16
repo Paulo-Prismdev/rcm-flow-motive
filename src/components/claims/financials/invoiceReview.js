@@ -157,6 +157,13 @@ export function buildExtractionPrompt({ item, claim, party, fields = INVOICE_FIG
   // This document can carry a split: the whole repair, with its own payable lines
   // beneath it (see ./invoiceAuthorityCheck).
   const splits = fields.some((f) => f.split);
+  // What the claim already knows about the customer's position, so the AI can tell a
+  // deduction from a split. Context only: it is never to put a figure on the page.
+  const vatReg = claim?.client_vat_status === 'VAT Registered';
+  const excess = toNum(claim?.policy_excess);
+  const context = splits && claim?.client_vat_status
+    ? `\n\nContext (for understanding the layout only — never use it to fill in or change a figure): on this claim the customer is ${vatReg ? 'VAT registered' : 'not VAT registered'}${excess ? ` and their excess is £${excess.toFixed(2)}` : ''}. ${vatReg ? 'With a VAT registered customer the repairer normally raises two invoices: one to the insurer for the repair excluding VAT less the excess (the VAT line may say "customer VAT registered" or similar instead of an amount), and a separate one to the customer for the VAT and excess. The invoice may be addressed to the customer/policyholder even when it is the insurer\'s invoice.' : 'The insurer\'s invoice normally bills the repair including VAT less the excess, which the customer pays the repairer themselves.'}`
+    : '';
 
   return `Read this document and extract the figures from it. It is filed against "${item?.label}" on claim ${claim?.job_number || ''} for vehicle ${claim?.reg || ''} — ${direction}.
 
@@ -168,16 +175,20 @@ Rules:
 - Only return what is actually printed. Use an empty string for anything that is not there.${money ? `
 - VAT: return only what the document shows. Where no VAT is mentioned on it at all, the invoice is not a VAT invoice — the amount excluding VAT is the total and the VAT amount is 0. Where it says VAT is included but the ex-VAT amount and the VAT amount are not printed separately, leave both of those figures empty for the user to fill in. Never work VAT out from the total yourself.` : ''}
 - Keep every figure separate, exactly as the document shows it: never add two of them together, and never split one figure between two of them.${splits ? `
-- Where the invoice splits its total between who pays what, read the full total AND each of those shares beside it, exactly as printed. The total is still the whole invoice: never read one of the shares as the total, and never add the shares together to make a total the invoice doesn't print.` : ''}
+- Where the invoice splits its total between who pays what, read the full total AND each of those shares beside it, exactly as printed. The total is still the whole invoice: never read one of the shares as the total, and never add the shares together to make a total the invoice doesn't print.
+- Where the invoice does NOT print separate amounts payable by each party, the total is the amount this invoice asks to be paid — the final figure at the bottom such as TOTAL DUE or BALANCE DUE, after any excess, contribution or customer VAT has been taken off — not the subtotal. An excess or contribution line taken off the subtotal is a deduction: it does not make the invoice a split, so leave both payable figures empty.
+- Where the VAT line says the customer is VAT registered (or similar wording) instead of an amount, the VAT on this invoice is 0 and the amount excluding VAT is the subtotal.` : ''}
 - For every figure, give a confidence of "high", "medium" or "low" ("low" for anything blurred, cut off, ambiguous or worked out).
 - For every figure, give the snippet of text from the document where you found it.
-- Set readable to false only if the document cannot be read at all.`;
+- Set readable to false only if the document cannot be read at all.${context}`;
 }
 
 const isEmpty = (v) => v === null || v === undefined || v === '';
 
 export const emptyFigures = (fields = INVOICE_FIGURES) =>
   Object.fromEntries(fields.map((f) => [f.key, '']));
+
+const MONTHS = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
 
 /** Day-first dates, because the documents are UK invoices. */
 export function normaliseDate(value) {
@@ -188,6 +199,17 @@ export function normaliseDate(value) {
   if (m) {
     const year = m[3].length === 2 ? `20${m[3]}` : m[3];
     return `${year}-${String(m[2]).padStart(2, '0')}-${String(m[1]).padStart(2, '0')}`;
+  }
+  // Written out the UK way: "13th NOVEMBER 2026", "1 Oct 2026", "3rd of March, 2026".
+  // Read by hand so the day never shifts with the time zone.
+  const w = s.toLowerCase().replace(/(\d)(st|nd|rd|th)\b/g, '$1').replace(/\bof\b|,/g, ' ')
+    .match(/^(\d{1,2})\s+([a-z]+)\.?\s+(\d{2,4})$/);
+  if (w) {
+    const month = MONTHS.findIndex((name) => w[2].startsWith(name)) + 1;
+    if (month > 0) {
+      const year = w[3].length === 2 ? `20${w[3]}` : w[3];
+      return `${year}-${String(month).padStart(2, '0')}-${String(w[1]).padStart(2, '0')}`;
+    }
   }
   const parsed = new Date(s);
   return Number.isNaN(parsed.getTime()) ? '' : parsed.toISOString().split('T')[0];
@@ -319,7 +341,7 @@ export function correctionsFromReview(figures, raw, derived = [], fields = INVOI
  * that is missing or nil shows up as the one thing it really is, the figures not
  * adding up, rather than as that and a second remark about the VAT.
  */
-export function checkArithmetic(figures) {
+export function checkArithmetic(figures, { excess = 0, contributions = 0 } = {}) {
   const issues = [];
   const ex = toNum(figures.amount_ex_vat);
   const vat = toNum(figures.vat_amount);
@@ -339,7 +361,14 @@ export function checkArithmetic(figures) {
 
   if (ex === null || vat === null || total === null) return issues;
 
-  if (Math.abs(round2(ex + vat) - round2(total)) > 0.01) {
+  // Insurer's invoices commonly take the customer's excess (and any contribution) off
+  // the subtotal to reach the amount due, and leave the VAT off where the customer is
+  // VAT registered. A total that is the figures less those is adding up correctly.
+  const deductions = [excess, contributions, round2((excess || 0) + (contributions || 0))]
+    .map((d) => toNum(d) || 0).filter((d) => d > 0);
+  const addsUp = [round2(ex + vat), ...deductions.flatMap((d) => [round2(ex + vat - d), round2(ex - d)])]
+    .some((sum) => Math.abs(sum - round2(total)) <= 0.01);
+  if (!addsUp) {
     issues.push(`The figures don't add up: ${fmtGBP(ex)} ex VAT + ${fmtGBP(vat)} VAT = ${fmtGBP(round2(ex + vat))}, but the invoice total reads ${fmtGBP(total)}.`);
   }
   // The rate is a separate thing from the sum: a VAT that is not 20% of the
