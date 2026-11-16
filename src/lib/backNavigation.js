@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 // Back navigation that matches what's on screen.
 //
@@ -11,6 +11,20 @@ import { useEffect, useRef } from 'react';
 // installBackGuard: once signed in, stepping back from the first screen used to
 // leave the app for the sign-in page. A spare history step now sits under the
 // first screen; landing on it puts you straight back where you were.
+
+// Matches the widths that show the phone layout of a claim (below Tailwind lg).
+export function usePhoneLayout(maxWidth = 1023) {
+  const query = `(max-width: ${maxWidth}px)`;
+  const [match, setMatch] = useState(() => typeof window !== 'undefined' && window.matchMedia(query).matches);
+  useEffect(() => {
+    const mql = window.matchMedia(query);
+    const onChange = () => setMatch(mql.matches);
+    mql.addEventListener('change', onChange);
+    onChange();
+    return () => mql.removeEventListener('change', onChange);
+  }, [query]);
+  return match;
+}
 
 let pendingBack = 0;
 let flushQueued = false;
@@ -45,7 +59,9 @@ export function useBackLayer(active, onClose, name) {
     window.addEventListener('popstate', onPop);
     return () => {
       window.removeEventListener('popstate', onPop);
-      if (mine) queueBack();
+      // Only take the step away while it is still the latest one: if the app has
+      // moved to another page since, going back would undo that move.
+      if (mine && window.history.state?.fmLayer === name) queueBack();
     };
   }, [active, name]);
 }
