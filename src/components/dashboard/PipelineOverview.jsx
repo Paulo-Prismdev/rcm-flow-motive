@@ -44,7 +44,7 @@ export default function PipelineOverview({ claims, persona }) {
   return (
     <div className="bg-card border border-border rounded-xl shadow-card flex flex-col h-full overflow-hidden">
       <div className="px-4 py-3 border-b border-border">
-        <h2 className="text-[15px] font-semibold text-foreground">Pipeline Overview</h2>
+        <h2 className="text-[15px] font-semibold text-foreground">Pipeline overview</h2>
       </div>
       <div className="flex-1 overflow-y-auto" style={{ maxHeight: '520px' }}>
         <div className="divide-y divide-border">
@@ -76,7 +76,7 @@ export default function PipelineOverview({ claims, persona }) {
 
         {persona === 'manager' && handlerOverdue.length > 0 && (
           <div className="border-t border-border px-4 py-3">
-            <p className="text-xs font-semibold text-muted-foreground mb-2">Handler Overdue Matrix</p>
+            <p className="text-xs font-semibold text-muted-foreground mb-2">Overdue by handler</p>
             <div className="space-y-1.5">
               {handlerOverdue.map(([name, count]) => (
                 <div key={name} className="flex items-center justify-between">
@@ -94,7 +94,7 @@ export default function PipelineOverview({ claims, persona }) {
         )}
 
         <div className="border-t border-border px-4 py-3">
-          <p className="text-xs font-semibold text-muted-foreground mb-2">Invoice Status</p>
+          <p className="text-xs font-semibold text-muted-foreground mb-2">Invoice status</p>
           <div className="grid grid-cols-2 gap-x-3 gap-y-1">
             {invoiceBreakdown.map((inv) => (
               <div key={inv.label} className="flex items-center justify-between">

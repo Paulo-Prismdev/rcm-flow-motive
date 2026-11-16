@@ -36,7 +36,7 @@ export default function TeamActivityFeed({ updates, claimsById, usersById }) {
   return (
     <div className="bg-card border border-border rounded-xl shadow-card flex flex-col overflow-hidden">
       <div className="px-4 py-3 border-b border-border">
-        <h2 className="text-[15px] font-semibold text-foreground">Recent Team Activity</h2>
+        <h2 className="text-[15px] font-semibold text-foreground">Recent team activity</h2>
       </div>
       <div className="overflow-x-auto">
         <div className="min-w-[700px] max-md:min-w-0">

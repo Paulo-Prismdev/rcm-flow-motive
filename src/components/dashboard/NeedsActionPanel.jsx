@@ -93,7 +93,7 @@ export default function NeedsActionPanel({ claims, starredClaimIds, emptyNote })
       <div className="flex items-center justify-between px-4 py-3 border-b border-border">
         <div className="flex items-center gap-2">
           <Clock className="w-4 h-4 text-muted-foreground" />
-          <h2 className="text-[15px] font-semibold text-foreground">Needs Action Today</h2>
+          <h2 className="text-[15px] font-semibold text-foreground">Needs action today</h2>
           <span className="text-[12px] text-muted-foreground">{filtered.length}</span>
         </div>
       </div>

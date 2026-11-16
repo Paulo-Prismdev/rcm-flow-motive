@@ -1,8 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
-import { createPageUrl } from '@/utils';
 import PageHeader from '@/components/shared/PageHeader';
 import { useIsMobile } from '@/hooks/use-mobile';
 import AtAGlanceStrip from '@/components/dashboard/AtAGlanceStrip';
@@ -14,7 +12,7 @@ import {
 } from '@/components/dashboard/opsDashboardHelpers';
 
 const MOBILE_TABS = [
-  { key: 'action', label: 'Needs Action' },
+  { key: 'action', label: 'Needs action' },
   { key: 'pipeline', label: 'Pipeline' },
   { key: 'activity', label: 'Activity' },
 ];
@@ -22,8 +20,6 @@ const MOBILE_TABS = [
 export default function Dashboard() {
   const [persona, setPersona] = useState('handler');
   const [mobileTab, setMobileTab] = useState('action');
-  const [search, setSearch] = useState('');
-  const navigate = useNavigate();
   const isMobile = useIsMobile();
 
   const { data: currentUser } = useQuery({
@@ -90,10 +86,6 @@ export default function Dashboard() {
     users.forEach((u) => map.set(u.id, u));
     return map;
   }, [users]);
-
-  const onSearch = (e) => {
-    if (e.key === 'Enter') navigate(createPageUrl('Claims'));
-  };
 
   if (claimsLoading) {
     // Shapes of the page while it loads, so nothing jumps when the numbers arrive.
