@@ -134,7 +134,7 @@ function findControlByLabel(container, wanted) {
 
 function focusAndFlash(el) {
     if (!el) return;
-    el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    el.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); // only scrolls if the field is off-screen
     try { el.focus({ preventScroll: true }); } catch { el.focus(); }
     el.classList.add('fm-flash');
     setTimeout(() => el.classList.remove('fm-flash'), 1400);
