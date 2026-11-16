@@ -284,7 +284,7 @@ export default function SupplierManagement() {
         <div className="text-center py-12">
             <Building2 className="w-12 h-12 mx-auto mb-4 text-foreground-muted" />
             <p className="text-foreground-muted mb-4">No suppliers found</p>
-            <Button onClick={() => setIsAddModalOpen(true)} className="neomorph-flat gap-2">
+            <Button onClick={() => setIsAddModalOpen(true)} size="sm" className="gap-1.5">
               <Plus className="w-4 h-4" />
               Add First Supplier
             </Button>
