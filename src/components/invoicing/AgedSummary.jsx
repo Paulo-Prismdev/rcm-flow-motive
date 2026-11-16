@@ -3,7 +3,7 @@ import { AGE_BANDS, agedTotals } from '@/components/shared/invoicingQueue';
 import { fmtGBP } from '@/components/shared/creditRepairRates';
 import { lightDot, lightText } from '@/components/shared/trafficLight';
 
-const plural = (count, word) => `${count} ${word}${count === 1 ? '' : 's'}`;
+const plural = (count, word, many = `${word}s`) => `${count} ${count === 1 ? word : many}`;
 
 // One bar, four bands, calm through to the same amber and red a status is read in as
 // the money ages.
@@ -28,14 +28,14 @@ export default function AgedSummary({ rows = [] }) {
   const totals = agedTotals(rows);
 
   return (
-    <div className="bg-card border border-border rounded-lg px-3 py-2.5 space-y-2">
+    <div className="bg-card border border-border rounded-xl shadow-card px-4 py-3 space-y-2">
       <div className="flex items-end justify-between gap-3">
         <div className="min-w-0">
           <p className="text-xs font-semibold text-muted-foreground">Outstanding</p>
           <p className="text-lg lg:text-xl font-bold tabular-nums leading-tight">{fmtGBP(totals.total)}</p>
         </div>
         <p className="text-xs text-muted-foreground text-right shrink-0">
-          {plural(totals.count, 'invoice')} · {plural(totals.parties, 'party')}
+          {plural(totals.count, 'invoice')} · {plural(totals.parties, 'party', 'parties')}
         </p>
       </div>
 
@@ -57,7 +57,7 @@ export default function AgedSummary({ rows = [] }) {
         {AGE_BANDS.map((band) => (
           <div key={band.key} className="min-w-0">
             <p className="text-xs font-medium text-muted-foreground truncate">{band.label}</p>
-            <p className={`text-xs font-semibold tabular-nums ${BAND_TEXT[band.key] || ''}`}>
+            <p className={`text-xs font-semibold tabular-nums ${(totals.bands[band.key] || 0) > 0 ? (BAND_TEXT[band.key] || '') : ''}`}>
               {fmtGBP(totals.bands[band.key] || 0)}
             </p>
           </div>
