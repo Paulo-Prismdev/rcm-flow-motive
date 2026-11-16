@@ -797,23 +797,40 @@ export default function ClaimsPage() {
               </button>
             </>
           )}
+          {/* Phones: search sits behind this icon; New claim floats above the bottom bar */}
+          <button
+            type="button"
+            onClick={() => setPhoneSearchOpen(o => !o)}
+            aria-label="Search claims"
+            aria-expanded={phoneSearchOpen || !!searchTerm}
+            className={`md:hidden flex items-center justify-center w-10 h-10 rounded-xl border transition-colors ${phoneSearchOpen || searchTerm ? 'bg-surface-selected border-input' : 'border-border bg-card'}`}>
+            <Search className="w-[18px] h-[18px]" />
+          </button>
           <button onClick={() => setShowForm(true)}
-            className="flex items-center gap-1.5 h-8 px-3 rounded-lg text-[13px] font-semibold bg-primary text-primary-foreground hover:bg-primary/90 transition-colors shadow-card">
+            className="hidden md:flex items-center gap-1.5 h-8 px-3 rounded-lg text-[13px] font-semibold bg-primary text-primary-foreground hover:bg-primary/90 transition-colors shadow-card">
             <Plus className="w-4 h-4" /><span>New claim</span>
           </button>
         </div>
       </div>
+      <button
+        type="button"
+        onClick={() => setShowForm(true)}
+        className="md:hidden fixed right-4 z-30 flex items-center gap-1.5 h-12 pl-3.5 pr-4 rounded-2xl bg-primary text-primary-foreground text-sm font-semibold shadow-raised active:scale-95 transition-transform"
+        style={{ bottom: 'calc(72px + env(safe-area-inset-bottom, 0px))' }}>
+        <Plus className="w-[18px] h-[18px]" />New claim
+      </button>
 
       {/* Repairs / Paying Privately tabs */}
       <div className="flex items-center px-5 py-2 border-b border-border flex-shrink-0">
         <ClaimTypeTabs activeTab={claimTab} onChange={setClaimTab} claimsCount={standardClaims.length} privateCount={privateClaims.length} />
       </div>
 
-      {/* Search + filters bar */}
-      <div className="flex flex-col lg:flex-row lg:items-center gap-3 px-5 py-2.5 border-b border-border flex-shrink-0 bg-muted">
+      {/* Search + filters bar (on phones only while search is open) */}
+      <div className={`${phoneSearchOpen || searchTerm ? 'flex' : 'hidden'} md:flex flex-col lg:flex-row lg:items-center gap-3 px-5 py-2.5 border-b border-border flex-shrink-0 bg-muted`}>
         <div className="relative flex-1 w-full">
           <Search className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-subtle" aria-hidden="true" />
           <input
+            autoFocus={isPhone && phoneSearchOpen && !searchTerm}
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
             placeholder="Search by reg, client, job number, driver..."
@@ -874,6 +891,58 @@ export default function ClaimsPage() {
           )}
         </div>
       </div>
+
+      {/* Phones: Filters, stage chips you swipe through, and the List / Grouped switch */}
+      {isPhone && (
+        <div className="md:hidden flex-shrink-0 border-b border-border">
+          <div className="flex gap-2 overflow-x-auto px-3 pt-2.5 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" role="group" aria-label="Filter by stage">
+            <button
+              type="button"
+              onClick={() => setShowFilters(s => !s)}
+              className={`flex-shrink-0 inline-flex items-center gap-1.5 h-9 px-3 rounded-full border text-[13px] font-medium ${activeFiltersCount > 0 || showFilters ? 'bg-info-bg border-info/30 text-info-fg' : 'border-border bg-card'}`}>
+              <Filter className="w-3.5 h-3.5" />Filters{activeFiltersCount > 0 ? ` (${activeFiltersCount})` : ''}
+            </button>
+            {[
+              { key: 'action', label: 'Needs action' },
+              { key: 'all', label: 'All' },
+              ...availableStatuses.map(s => ({ key: s, label: s })),
+            ].map(({ key, label }) => {
+              const n = filteredClaims.filter(c => chipMatches(c, key)).length;
+              if (key !== 'all' && key !== 'action' && n === 0) return null;
+              const on = phoneChip === key;
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => setPhoneChip(key)}
+                  aria-pressed={on}
+                  className={`flex-shrink-0 inline-flex items-center gap-1.5 h-9 px-3 rounded-full border text-[13px] font-medium whitespace-nowrap transition-colors ${on ? 'bg-primary border-primary text-primary-foreground' : 'border-border bg-card text-foreground'}`}>
+                  {key === 'action' && <span className="w-1.5 h-1.5 rounded-full bg-danger" aria-hidden="true" />}
+                  {label}
+                  <span className={`text-[11.5px] tabular-nums ${on ? 'opacity-75' : 'text-muted-foreground'}`}>{n}</span>
+                </button>
+              );
+            })}
+          </div>
+          <div className="flex items-center justify-between px-4 pb-2">
+            <span className="text-xs text-muted-foreground">
+              {phoneView === 'list' ? (sortBy === 'priority' ? 'Most urgent first' : (SORT_OPTIONS.find(o => o.value === sortBy) || {}).label?.replace('Sort: ', '')) : 'By stage'}
+            </span>
+            <div className="inline-flex rounded-lg bg-muted p-0.5" role="group" aria-label="View">
+              {[['list', 'List'], ['groups', 'Grouped']].map(([v, l]) => (
+                <button
+                  key={v}
+                  type="button"
+                  onClick={() => setPhoneView(v)}
+                  aria-pressed={phoneView === v}
+                  className={`h-7 px-3 rounded-md text-xs font-medium ${phoneView === v ? 'bg-card text-foreground shadow-card' : 'text-muted-foreground'}`}>
+                  {l}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Filter panel */}
       {showFilters && (
