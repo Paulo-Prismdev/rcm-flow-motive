@@ -169,7 +169,7 @@ export default function InvoicingSettingsTab() {
     <div className="max-w-2xl space-y-4">
       <div className="bg-card rounded-xl border border-border p-4 space-y-3">
         <div>
-          <h2 className="text-sm font-semibold text-foreground">Accounts Email</h2>
+          <h2 className="text-sm font-semibold text-foreground">Accounts email</h2>
           <p className="text-xs text-muted-foreground mt-0.5">
             The address "Request from accounts" emails by default when you ask accounts to raise an invoice. You can still change the recipient on any single request before sending it.
           </p>
@@ -191,7 +191,7 @@ export default function InvoicingSettingsTab() {
 
       <div className="bg-card rounded-xl border border-border p-4 space-y-3">
         <div>
-          <h2 className="text-sm font-semibold text-foreground">Invoicing Timings</h2>
+          <h2 className="text-sm font-semibold text-foreground">Invoicing timings</h2>
           <p className="text-xs text-muted-foreground mt-0.5">
             A job's invoices and close-out paperwork are worked on from the day the vehicle goes back to the customer, or from the day the salvage is collected on a total loss; these are the waits after which a request or a document reads as overdue on today's actions list. Working days count Monday to Friday only.
           </p>
@@ -225,7 +225,7 @@ export default function InvoicingSettingsTab() {
 
       <div className="bg-card rounded-xl border border-border p-4 space-y-3">
         <div>
-          <h2 className="text-sm font-semibold text-foreground">Total Loss — Storage Share</h2>
+          <h2 className="text-sm font-semibold text-foreground">Total loss — storage share</h2>
           <p className="text-xs text-muted-foreground mt-0.5">
             The share of the storage charge we invoice the repairer for on a total loss — storage only, never the salvage agent's admin charges, with VAT added on our share. The figure comes off the Salvage Agent Invoice, so the Storage Fee Invoice Out waits until that copy is uploaded. Any single claim can be set to a different share from its own job figures.
           </p>
@@ -249,7 +249,7 @@ export default function InvoicingSettingsTab() {
 
       <div className="bg-card rounded-xl border border-border p-4 space-y-3">
         <div>
-          <h2 className="text-sm font-semibold text-foreground">Invoicing Tracking Start Date</h2>
+          <h2 className="text-sm font-semibold text-foreground">Invoicing tracking start date</h2>
           <p className="text-xs text-muted-foreground mt-0.5">
             Jobs that left us before this date — the vehicle back with the customer, or the salvage collected on a total loss — were invoiced in the old system, so they are left out of Today's actions and the aged invoices instead of swamping them. Their own Financials still work, and any single claim can be pulled back in from its Financials if money is still owed on it. A job still with us is never left out, and neither is a job with no such date recorded.
           </p>

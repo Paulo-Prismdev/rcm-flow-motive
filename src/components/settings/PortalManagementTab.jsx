@@ -336,7 +336,7 @@ export default function PortalManagementTab() {
       <div>
         <div className="flex items-start justify-between gap-3 mb-3">
           <div className="flex-1">
-            <h2 className="text-base font-semibold text-foreground">Advert Banners</h2>
+            <h2 className="text-base font-semibold text-foreground">Advert banners</h2>
             <p className="text-xs text-muted-foreground mt-0.5">
               Recommended: 1200x150px
             </p>

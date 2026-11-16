@@ -304,7 +304,7 @@ export default function EmployeeManagement() {
       <div className="space-y-4">
         <div className="glass p-4">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold">Holiday Requests</h2>
+            <h2 className="text-xl font-bold">Holiday requests</h2>
             <div className="flex gap-2">
               {isAdmin && (
                 <Button onClick={() => setShowAllowanceModal(true)} className="glass-button px-4 py-2 flex items-center gap-2">
@@ -321,7 +321,7 @@ export default function EmployeeManagement() {
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
             <div className="glass-flat p-4">
-              <p className="text-sm text-foreground-muted">Annual Allowance</p>
+              <p className="text-sm text-foreground-muted">Annual allowance</p>
               <p className="text-2xl font-bold">{myAllowance} days</p>
             </div>
             <div className="glass-flat p-4">
