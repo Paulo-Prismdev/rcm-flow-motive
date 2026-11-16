@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Search, Archive, Filter, X, AlertTriangle, Clock, Upload, Package, ChevronDown, ChevronRight, Settings2, ArrowUpDown, MessageSquare, Eye, FileText } from 'lucide-react';
+import { Plus, Search, Archive, Filter, X, AlertTriangle, Clock, Upload, Package, ChevronDown, ChevronRight, Settings2, ArrowUpDown, MessageSquare, Eye, FileText, List, Layers, Check } from 'lucide-react';
 import ClaimDetail from '../components/claims/ClaimDetail';
 import ClaimFormWrapper from '../components/claims/ClaimFormWrapper';
 import ImportClaimsModal from '../components/claims/ImportClaimsModal';
@@ -827,9 +827,31 @@ export default function ClaimsPage() {
         selectedFields={userCardFields} onSave={(fields) => updateUserFieldsMutation.mutate(fields)} />
 
       {/* Top bar */}
-      <div className="flex items-center justify-between gap-3 px-4 lg:px-5 py-3 border-b border-border flex-shrink-0">
+      <div className="flex items-center justify-between gap-3 px-4 lg:px-5 py-3 md:border-b border-border flex-shrink-0">
         <div className="min-w-0">
-          <h1 className="text-page-title">Repairs</h1>
+          <h1 className="text-page-title hidden md:block">Repairs</h1>
+          {/* Phones: Repairs / Paying privately / archived live behind the title */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button type="button" className="md:hidden flex items-center gap-1 text-[26px] font-bold tracking-tight leading-tight">
+                {claimTab === 'private' ? 'Paying privately' : 'Repairs'}
+                <ChevronDown className="w-5 h-5 mt-1 text-muted-foreground" aria-hidden="true" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-60">
+              <DropdownMenuItem onSelect={() => setClaimTab('claims')}>
+                <span className="flex-1">Repairs</span><span className="text-xs text-muted-foreground mr-2">{standardClaims.length}</span>{claimTab !== 'private' && <Check className="w-4 h-4" />}
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => setClaimTab('private')}>
+                <span className="flex-1">Paying privately</span><span className="text-xs text-muted-foreground mr-2">{privateClaims.length}</span>{claimTab === 'private' && <Check className="w-4 h-4" />}
+              </DropdownMenuItem>
+              {isInternalUser && (
+                <DropdownMenuItem onSelect={() => setShowArchived(!showArchived)}>
+                  <span className="flex-1">Include archived</span>{showArchived && <Check className="w-4 h-4" />}
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
           {!isLoading && (
             <p className="text-xs text-muted-foreground mt-0.5">
               {filteredClaims.length} {filteredClaims.length === 1 ? 'claim' : 'claims'}{showArchived ? ', archived included' : ''}
@@ -856,14 +878,22 @@ export default function ClaimsPage() {
               </button>
             </>
           )}
-          {/* Phones: search sits behind this icon; New claim floats above the bottom bar */}
+          {/* Phones: list or grouped by stage; search sits behind the magnifier; New claim floats */}
+          <button
+            type="button"
+            onClick={() => setPhoneView(v => (v === 'list' ? 'groups' : 'list'))}
+            aria-label={phoneView === 'list' ? 'Show grouped by stage' : 'Show as one list'}
+            title={phoneView === 'list' ? 'Grouped by stage' : 'One list'}
+            className="md:hidden flex items-center justify-center w-10 h-10 rounded-xl active:bg-muted">
+            {phoneView === 'list' ? <Layers className="w-5 h-5" /> : <List className="w-5 h-5" />}
+          </button>
           <button
             type="button"
             onClick={() => setPhoneSearchOpen(o => !o)}
             aria-label="Search claims"
             aria-expanded={phoneSearchOpen || !!searchTerm}
-            className={`md:hidden flex items-center justify-center w-10 h-10 rounded-xl border transition-colors ${phoneSearchOpen || searchTerm ? 'bg-surface-selected border-input' : 'border-border bg-card'}`}>
-            <Search className="w-[18px] h-[18px]" />
+            className={`md:hidden flex items-center justify-center w-10 h-10 rounded-xl transition-colors ${phoneSearchOpen || searchTerm ? 'bg-surface-selected' : 'active:bg-muted'}`}>
+            <Search className="w-5 h-5" />
           </button>
           <button onClick={() => setShowForm(true)}
             className="hidden md:flex items-center gap-1.5 h-8 px-3 rounded-lg text-[13px] font-semibold bg-primary text-primary-foreground hover:bg-primary/90 transition-colors shadow-card">
@@ -879,8 +909,8 @@ export default function ClaimsPage() {
         <Plus className="w-[18px] h-[18px]" />New claim
       </button>}
 
-      {/* Repairs / Paying Privately tabs */}
-      <div className="flex items-center px-5 py-2 border-b border-border flex-shrink-0">
+      {/* Repairs / Paying Privately tabs (phones: behind the title) */}
+      <div className="hidden md:flex items-center px-5 py-2 border-b border-border flex-shrink-0">
         <ClaimTypeTabs activeTab={claimTab} onChange={setClaimTab} claimsCount={standardClaims.length} privateCount={privateClaims.length} />
       </div>
 
