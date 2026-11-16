@@ -79,10 +79,10 @@ export default function RepairerPortal() {
 
   if (!bodyshopId) {
     return (
-      <div className="h-full flex items-center justify-center">
+      <div className="h-full min-h-[60vh] flex items-center justify-center p-4">
         <div className="neomorph p-8 text-center max-w-md">
           <AlertCircle className="w-16 h-16 mx-auto text-warning-fg mb-4" />
-          <h2 className="text-xl font-bold mb-2">Account Not Linked</h2>
+          <h2 className="text-xl font-bold mb-2">Account not linked</h2>
           <p className="text-foreground-muted">
             Your account is not linked to a bodyshop. Please contact RCM Automotive to set up your repairer portal access.
           </p>

@@ -128,7 +128,7 @@ export default function ClientPortal() {
       <ClientLayout>
         <div className="h-full flex flex-col items-center justify-center gap-4 text-center p-8">
           <AlertCircle className="w-16 h-16 text-warning-fg" />
-          <h2 className="text-xl font-bold">Account Not Linked</h2>
+          <h2 className="text-xl font-bold">Account not linked</h2>
           <p className="text-muted-foreground max-w-sm">
             Your account is not linked to a client record. Please contact RCM Automotive to set up your client portal access.
           </p>

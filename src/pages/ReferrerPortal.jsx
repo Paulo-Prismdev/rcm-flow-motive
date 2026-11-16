@@ -147,9 +147,9 @@ export default function ReferrerPortal() {
 
   if (!isLinked) {
     return (
-      <div className="h-full flex items-center justify-center">
+      <div className="h-full min-h-[60vh] flex flex-col items-center justify-center text-center p-8 max-w-md mx-auto">
         <AlertCircle className="w-16 h-16 mx-auto text-warning-fg mb-4" />
-        <h2 className="text-xl font-bold mb-2">Account Not Linked</h2>
+        <h2 className="text-xl font-bold mb-2">Account not linked</h2>
         <p className="text-foreground-muted">
           Your account is not linked to a referrer. Please contact RCM Automotive to set up your referrer portal access.
         </p>
