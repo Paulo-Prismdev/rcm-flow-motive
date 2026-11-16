@@ -1925,20 +1925,6 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                         <Button onClick={() => setIsQuickViewOpen(true)} variant="outline" className="h-9 px-3 text-sm font-medium gap-1.5">
                           <Eye className="w-4 h-4" /> Quick view
                         </Button>
-                        <Button onClick={() => setIsImagesOpen(true)} variant="outline" className="h-9 px-3 text-sm font-medium gap-1.5">
-                          <Image className="w-4 h-4" /> Images
-                          {(claim.image_urls?.length > 0) && <InlineCount n={claim.image_urls.length} label="images" />}
-                        </Button>
-                        <Button onClick={() => setIsAttachmentsOpen(true)} variant="outline" className="h-9 px-3 text-sm font-medium gap-1.5">
-                          <FileText className="w-4 h-4" /> Docs
-                          {(claim.file_urls?.length > 0) && <InlineCount n={claim.file_urls.length} label="documents" />}
-                        </Button>
-                        {isInternalUser && (
-                          <Button onClick={() => setIsNotesOpen(true)} variant="outline" className="h-9 px-3 text-sm font-medium gap-1.5">
-                            <Edit className="w-4 h-4" /> Internal updates
-                            {notesTotalCount > 0 && <InlineCount n={notesTotalCount} tone="info" label="internal updates" />}
-                          </Button>
-                        )}
                         {canEdit && (
                           <Button onClick={() => setIsClaimUpdatesOpen(true)} className="h-9 px-3.5 text-sm font-medium gap-1.5">
                             {claim.unread_bodyshop_update && (
@@ -1952,6 +1938,20 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                           <Button onClick={() => setIsClaimUpdatesOpen(true)} className="h-9 px-3.5 text-sm font-medium gap-1.5">
                             Updates
                             {claimUpdates.length > 0 && <InlineCount n={claimUpdates.length} tone="onPrimary" label="updates" />}
+                          </Button>
+                        )}
+                        <Button onClick={() => setIsImagesOpen(true)} variant="outline" className="h-9 px-3 text-sm font-medium gap-1.5">
+                          <Image className="w-4 h-4" /> Images
+                          {(claim.image_urls?.length > 0) && <InlineCount n={claim.image_urls.length} label="images" />}
+                        </Button>
+                        <Button onClick={() => setIsAttachmentsOpen(true)} variant="outline" className="h-9 px-3 text-sm font-medium gap-1.5">
+                          <FileText className="w-4 h-4" /> Docs
+                          {(claim.file_urls?.length > 0) && <InlineCount n={claim.file_urls.length} label="documents" />}
+                        </Button>
+                        {isInternalUser && (
+                          <Button onClick={() => setIsNotesOpen(true)} variant="outline" className="h-9 px-3 text-sm font-medium gap-1.5">
+                            <Edit className="w-4 h-4" /> Internal updates
+                            {notesTotalCount > 0 && <InlineCount n={notesTotalCount} tone="info" label="internal updates" />}
                           </Button>
                         )}
                         {canEdit && (
@@ -2013,7 +2013,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
           )}
 
         {(linkedEstimate || linkedEngineering || linkedParts || linkedThirdPartyClaim || linkedOriginalClaim) && (
-          <div className="hidden lg:block bg-card border border-border rounded-lg p-3 flex-shrink-0 shadow-sm">
+          <div className="hidden lg:block bg-card border border-border rounded-xl p-3 flex-shrink-0 shadow-card">
             <div className="flex items-center gap-2 mb-3">
               <Link2 className="w-4 h-4 text-muted-foreground" aria-hidden="true" />
               <h3 className="text-sm font-semibold">Linked cases</h3>
