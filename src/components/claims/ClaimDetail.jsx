@@ -648,12 +648,15 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
       });
     }
     
-    if ((primaryChanged || secondaryChanged) && !options.skipClaimUpdateLog) {
+    // Outcome and tertiary changes are recorded too, not just journey and secondary.
+    const statusRecord = buildStatusChangeRecord(claim, updatedData);
+    if ((primaryChanged || secondaryChanged || statusRecord) && !options.skipClaimUpdateLog) {
         const parts = [];
         if (primaryChanged) parts.push(`Status changed from "${oldStatus}" to "${newStatus}"`);
         if (secondaryChanged) parts.push(`Secondary status changed from "${oldSec || 'None'}" to "${newSec || 'None'}"`);
+        if (statusRecord?.changed.includes('outcome')) parts.push(`Outcome changed from "${statusRecord.from.outcome || 'None'}" to "${statusRecord.to.outcome || 'None'}"`);
+        if (statusRecord?.changed.includes('tertiary')) parts.push(`Additional status changed from "${statusRecord.from.tertiary || 'None'}" to "${statusRecord.to.tertiary || 'None'}"`);
 
-        const statusRecord = buildStatusChangeRecord(claim, updatedData);
         try {
         await base44.entities.ClaimUpdate.create({
             claim_id: claim.id,
