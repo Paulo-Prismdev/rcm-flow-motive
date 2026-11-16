@@ -75,6 +75,9 @@ module.exports = {
   			neutral: { DEFAULT: 'hsl(var(--fm-neutral) / <alpha-value>)', bg: 'hsl(var(--fm-neutral-bg))', fg: 'hsl(var(--fm-neutral-fg))' },
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
+  			// Older screens use text-foreground-muted (321 places); it never existed, so that text
+  			// showed full strength. Pointing it at the muted grey fixes them all at once.
+  			'foreground-muted': 'hsl(var(--muted-foreground))',
   			card: {
   				DEFAULT: 'hsl(var(--card))',
   				foreground: 'hsl(var(--card-foreground))'
