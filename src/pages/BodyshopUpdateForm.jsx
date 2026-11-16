@@ -136,7 +136,7 @@ export default function BodyshopUpdateForm() {
       <div className="w-full bg-[#131d47] py-6 px-4 mb-8">
         <div className="flex items-center justify-center">
           <img
-            src="https://media.base44.com/images/public/68ee39fb8915b1b539e13c59/b2cb057e2_RCMAutomotiveLogoGreenAutomotivewithHLights.jpg"
+            src="/rcm-logo.png"
             alt="RCM Automotive"
             className="max-h-16 w-auto object-contain"
           />

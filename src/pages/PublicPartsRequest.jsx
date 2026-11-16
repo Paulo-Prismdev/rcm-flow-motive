@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Package, CheckCircle2 } from 'lucide-react';
 
-const companyLogo = 'https://media.base44.com/images/public/68ee39fb8915b1b539e13c59/b2cb057e2_RCMAutomotiveLogoGreenAutomotivewithHLights.jpg';
+const companyLogo = '/rcm-logo.png';
 
 export default function PublicPartsRequest() {
   // When the page opened, and the hidden field people never fill in: the server uses

@@ -22,7 +22,7 @@ export default function LoadingScreen() {
       {/* Logo */}
       <div className="absolute top-12 flex flex-col items-center" style={{ zIndex: 20 }}>
         <img
-          src="https://media.base44.com/images/public/68ee39fb8915b1b539e13c59/b2cb057e2_RCMAutomotiveLogoGreenAutomotivewithHLights.jpg"
+          src="/rcm-logo.png"
           alt="RCM Automotive"
           className="h-20 w-auto object-contain"
         />

@@ -169,7 +169,7 @@ export default function Layout({ children, currentPageName }) {
     queryFn: () => base44.auth.me()
   });
 
-  const companyLogo = 'https://media.base44.com/images/public/68ee39fb8915b1b539e13c59/b2cb057e2_RCMAutomotiveLogoGreenAutomotivewithHLights.jpg';
+  const companyLogo = '/rcm-logo.png';
 
   const { data: messages = [] } = useQuery({
     queryKey: ['messages'],

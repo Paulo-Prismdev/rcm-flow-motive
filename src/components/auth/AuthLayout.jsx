@@ -1,6 +1,6 @@
 import React from 'react';
 
-const RCM_LOGO = 'https://media.base44.com/images/public/68ee39fb8915b1b539e13c59/b2cb057e2_RCMAutomotiveLogoGreenAutomotivewithHLights.jpg';
+const RCM_LOGO = '/rcm-logo.png';
 
 /**
  * The frame every sign-in screen sits in: the RCM logo on navy, a title, and one card.

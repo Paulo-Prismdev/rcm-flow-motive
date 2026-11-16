@@ -6,7 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { CheckCircle2, Plus, Trash2, Package } from 'lucide-react';
 
-const companyLogo = 'https://media.base44.com/images/public/68ee39fb8915b1b539e13c59/b2cb057e2_RCMAutomotiveLogoGreenAutomotivewithHLights.jpg';
+const companyLogo = '/rcm-logo.png';
 
 const emptyPart = () => ({
   part_description: '',

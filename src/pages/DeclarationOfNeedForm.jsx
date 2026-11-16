@@ -270,7 +270,7 @@ export default function DeclarationOfNeedForm() {
   return (
     <div className="min-h-screen bg-muted">
       <div className="bg-[#151d44] px-4 py-4 flex items-center justify-center">
-        <img src="https://media.base44.com/images/public/68ee39fb8915b1b539e13c59/b2cb057e2_RCMAutomotiveLogoGreenAutomotivewithHLights.jpg" alt="RCM Automotive" className="h-14 w-auto object-contain" />
+        <img src="/rcm-logo.png" alt="RCM Automotive" className="h-14 w-auto object-contain" />
       </div>
 
       <div className="max-w-2xl mx-auto px-4 py-6">

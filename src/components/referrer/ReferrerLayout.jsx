@@ -49,7 +49,7 @@ export default function ReferrerLayout({ children }) {
       `}>
         {/* Logo */}
         <div className="flex items-center gap-3 px-4 py-3.5 border-b border-white/10">
-          <img src="https://media.base44.com/images/public/68ee39fb8915b1b539e13c59/b2cb057e2_RCMAutomotiveLogoGreenAutomotivewithHLights.jpg" alt="RCM" className="h-8 w-auto object-contain" />
+          <img src="/rcm-logo.png" alt="RCM" className="h-8 w-auto object-contain" />
           <button
             onClick={() => setMobileMenuOpen(false)}
             className="ml-auto lg:hidden text-white/60 hover:text-white">

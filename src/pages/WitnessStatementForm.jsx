@@ -4,7 +4,7 @@ import { serverMessage } from '@/lib/publicForm';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, Check, FileCheck2, Loader, PenLine, Trash2 } from 'lucide-react';
 
-const LOGO = 'https://media.base44.com/images/public/68ee39fb8915b1b539e13c59/b2cb057e2_RCMAutomotiveLogoGreenAutomotivewithHLights.jpg';
+const LOGO = '/rcm-logo.png';
 const POSITIONS = ['Pedestrian', 'Driver of another vehicle', 'Passenger in another vehicle', 'Cyclist', 'Other'];
 const WEATHER = ['Dry', 'Wet / raining', 'Snow or ice', 'Fog', 'Not sure'];
 const LIGHT = ['Daylight', 'Dark – street lights on', 'Dark – no street lights', 'Dusk or dawn', 'Not sure'];

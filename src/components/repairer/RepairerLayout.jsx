@@ -53,7 +53,7 @@ export default function RepairerLayout({ children }) {
     queryFn: () => base44.entities.AppConfig.list(),
   });
 
-  const companyLogo = 'https://media.base44.com/images/public/68ee39fb8915b1b539e13c59/b2cb057e2_RCMAutomotiveLogoGreenAutomotivewithHLights.jpg';
+  const companyLogo = '/rcm-logo.png';
 
   return (
     <StatusConfigProvider>
