@@ -197,7 +197,21 @@ function DetailRow({ label, value, isCurrency = false, isDate = false, isStatus 
     );
 }
 
-import { ListTodo, History, Timer } from "lucide-react";
+import { ListTodo, History, Timer, Link2 } from "lucide-react";
+
+// Counts sit inside their button (no floating bubbles), so nothing overlaps.
+const InlineCount = ({ n, tone = 'neutral', label }) => (
+  <span
+    aria-label={label ? `${n} ${label}` : undefined}
+    className={`min-w-[20px] h-5 px-1.5 rounded-full text-xs font-semibold inline-flex items-center justify-center leading-none tabular-nums ${
+      tone === 'onPrimary' ? 'bg-primary-foreground/20 text-primary-foreground'
+      : tone === 'info' ? 'bg-info-bg text-info-fg'
+      : 'bg-muted text-muted-foreground'
+    }`}
+  >
+    {n}
+  </span>
+);
 import ActivityLogSection from '../shared/ActivityLogSection';
 import TimeLogsModal from '../shared/TimeLogsModal';
 import ActivityLogModal from '../shared/ActivityLogModal';
@@ -1854,25 +1868,6 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
 
       <div ref={rootRef} className="flex flex-col gap-2 md:gap-3 h-full" data-claim-root style={{touchAction: 'auto', isolation: 'isolate'}}>
 
-          {/* ── Starred update notice ── */}
-          {starredUpdates.length > 0 && (
-            <div className="bg-warning-bg border-2 border-amber-500 rounded-lg p-3 flex items-start gap-3 flex-shrink-0 shadow-sm">
-              <Star className="w-5 h-5 text-warning fill-amber-400 flex-shrink-0 mt-0.5" />
-              <div className="flex-1 min-w-0">
-                <p className="font-semibold text-warning-fg text-sm">Flagged update requires attention</p>
-                <p className="text-xs text-warning-fg mt-0.5">
-                  {starredUpdates.length} update{starredUpdates.length !== 1 ? 's' : ''} flagged as important. This job cannot be completed until the star{starredUpdates.length !== 1 ? 's' : ''} {starredUpdates.length !== 1 ? 'are' : 'is'} removed.
-                </p>
-                <button onClick={() => setIsClaimUpdatesOpen(true)} className="mt-1 text-xs font-medium text-warning-fg underline hover:opacity-80">View & manage flagged updates</button>
-              </div>
-            </div>
-          )}
-
-          {/* ── Authorising Party banner (desktop; phones show it in the header) ── */}
-          <div className="hidden lg:block">
-            <AuthorisingPartyBanner claim={claim} />
-          </div>
-
           {/* ── MOBILE header (< lg) ── */}
           <ClaimDetailMobileHeader
             claim={{...claim, _selectedSection: selectedSection}}
@@ -1904,8 +1899,8 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
             }}
           />
 
-          {/* ── DESKTOP top bar (≥ lg) — unchanged Radix dropdown ── */}
-          <div className="hidden lg:block bg-card border border-border rounded-lg p-3 flex-shrink-0 shadow-sm">
+          {/* ── DESKTOP top bar (≥ lg) ── */}
+          <div className="hidden lg:block bg-card border border-border rounded-xl p-3 flex-shrink-0 shadow-card">
               <div className="flex flex-col gap-2">
                   <div className="flex items-center gap-2">
                       <button aria-label="Back"
@@ -1915,66 +1910,48 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                           <ArrowLeft className="w-4 h-4" />
                       </button>
                       <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-1.5 min-w-0">
-                            <h1 className="text-xl font-bold truncate">{claim.reg || 'Claim Details'}</h1>
+                          <div className="flex items-baseline gap-2 min-w-0">
+                            <h1 className="text-page-title truncate tracking-wide">{claim.reg || 'Claim details'}</h1>
                             {claim.job_number && (
-                              <span className="text-xs font-mono px-1.5 py-0.5 rounded bg-gold/20 text-gold font-semibold whitespace-nowrap flex-shrink-0">
+                              <span className="text-sm text-muted-foreground font-medium whitespace-nowrap flex-shrink-0 tabular-nums">
                                 {claim.job_number}
                               </span>
                             )}
                           </div>
+                          {/* Who it's for, who authorises, their claim number (was a coloured strip above) */}
+                          <AuthorisingPartyBanner claim={claim} caption />
                       </div>
                       <div className="flex items-center gap-1.5 flex-shrink-0">
-                        <Button onClick={() => setIsQuickViewOpen(true)} variant="outline" className="h-9 px-4 text-sm font-medium rounded-lg gap-1.5">
-                          <Eye className="w-4 h-4" /> Quick View
+                        <Button onClick={() => setIsQuickViewOpen(true)} variant="outline" className="h-9 px-3 text-sm font-medium gap-1.5">
+                          <Eye className="w-4 h-4" /> Quick view
                         </Button>
+                        <Button onClick={() => setIsImagesOpen(true)} variant="outline" className="h-9 px-3 text-sm font-medium gap-1.5">
+                          <Image className="w-4 h-4" /> Images
+                          {(claim.image_urls?.length > 0) && <InlineCount n={claim.image_urls.length} label="images" />}
+                        </Button>
+                        <Button onClick={() => setIsAttachmentsOpen(true)} variant="outline" className="h-9 px-3 text-sm font-medium gap-1.5">
+                          <FileText className="w-4 h-4" /> Docs
+                          {(claim.file_urls?.length > 0) && <InlineCount n={claim.file_urls.length} label="documents" />}
+                        </Button>
+                        {isInternalUser && (
+                          <Button onClick={() => setIsNotesOpen(true)} variant="outline" className="h-9 px-3 text-sm font-medium gap-1.5">
+                            <Edit className="w-4 h-4" /> Internal updates
+                            {notesTotalCount > 0 && <InlineCount n={notesTotalCount} tone="info" label="internal updates" />}
+                          </Button>
+                        )}
                         {canEdit && (
-                          <Button onClick={() => setIsClaimUpdatesOpen(true)} className="h-9 px-4 text-sm font-medium rounded-lg bg-success hover:bg-success/90 text-on-solid relative">
-                            Updates & Status
+                          <Button onClick={() => setIsClaimUpdatesOpen(true)} className="h-9 px-3.5 text-sm font-medium gap-1.5">
                             {claim.unread_bodyshop_update && (
-                              <span className="absolute -top-1.5 -right-1.5 w-3.5 h-3.5 rounded-full bg-info ring-2 ring-white flex-shrink-0" />
+                              <span className="w-2 h-2 rounded-full bg-info ring-2 ring-primary-foreground/70 flex-shrink-0" title="New update from the repairer" aria-label="New update from the repairer" />
                             )}
-                            {claimUpdates.length > 0 && (
-                              <span className="absolute -top-1.5 right-3 min-w-[18px] h-[18px] px-1 rounded-full bg-card text-success-fg text-xs font-bold flex items-center justify-center leading-none shadow">
-                                {claimUpdates.length}
-                              </span>
-                            )}
+                            Updates & status
+                            {claimUpdates.length > 0 && <InlineCount n={claimUpdates.length} tone="onPrimary" label="updates" />}
                           </Button>
                         )}
                         {!canEdit && (
-                          <Button onClick={() => setIsClaimUpdatesOpen(true)} variant="outline" className="h-9 px-4 text-sm font-medium rounded-lg relative">
+                          <Button onClick={() => setIsClaimUpdatesOpen(true)} className="h-9 px-3.5 text-sm font-medium gap-1.5">
                             Updates
-                            {claimUpdates.length > 0 && (
-                              <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-success text-on-solid text-xs font-bold flex items-center justify-center leading-none shadow">
-                                {claimUpdates.length}
-                              </span>
-                            )}
-                          </Button>
-                        )}
-                        <Button onClick={() => setIsImagesOpen(true)} variant="outline" className="h-9 px-3 text-sm font-medium rounded-lg gap-1.5 relative">
-                          <Image className="w-4 h-4" /> Images
-                          {(claim.image_urls?.length > 0) && (
-                            <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-info text-on-solid text-xs font-bold flex items-center justify-center leading-none shadow">
-                              {claim.image_urls.length}
-                            </span>
-                          )}
-                        </Button>
-                        <Button onClick={() => setIsAttachmentsOpen(true)} variant="outline" className="h-9 px-3 text-sm font-medium rounded-lg gap-1.5 relative">
-                          <FileText className="w-4 h-4" /> Docs
-                          {(claim.file_urls?.length > 0) && (
-                            <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-info text-on-solid text-xs font-bold flex items-center justify-center leading-none shadow">
-                              {claim.file_urls.length}
-                            </span>
-                          )}
-                        </Button>
-                        {isInternalUser && (
-                          <Button onClick={() => setIsNotesOpen(true)} variant="outline" className="h-9 px-3 text-sm font-medium rounded-lg gap-1.5 relative">
-                            <Edit className="w-4 h-4" /> Internal Updates
-                            {notesTotalCount > 0 && (
-                              <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-info text-on-solid text-xs font-bold flex items-center justify-center leading-none shadow">
-                                {notesTotalCount}
-                              </span>
-                            )}
+                            {claimUpdates.length > 0 && <InlineCount n={claimUpdates.length} tone="onPrimary" label="updates" />}
                           </Button>
                         )}
                         {canEdit && (
@@ -2022,6 +1999,18 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                   <ClaimJourneyTimeline claim={claim} updates={claimUpdates} />
               </div>
           </div>
+
+          {/* ── Starred update notice: one row under the header ── */}
+          {starredUpdates.length > 0 && (
+            <div role="status" className="bg-warning-bg border border-warning/40 rounded-xl px-3 py-2 flex items-center gap-2.5 flex-shrink-0">
+              <Star className="w-4 h-4 text-warning fill-current flex-shrink-0" aria-hidden="true" />
+              <p className="flex-1 min-w-0 text-sm text-warning-fg">
+                <span className="font-semibold">{starredUpdates.length} flagged update{starredUpdates.length !== 1 ? 's' : ''}.</span>{' '}
+                This job can't be completed until the star{starredUpdates.length !== 1 ? 's are' : ' is'} removed.
+              </p>
+              <button onClick={() => setIsClaimUpdatesOpen(true)} className="text-sm font-medium text-warning-fg underline underline-offset-2 hover:opacity-80 flex-shrink-0">View flagged updates</button>
+            </div>
+          )}
 
         {(linkedEstimate || linkedEngineering || linkedParts || linkedThirdPartyClaim || linkedOriginalClaim) && (
           <div className="hidden lg:block bg-card border border-border rounded-lg p-3 flex-shrink-0 shadow-sm">
