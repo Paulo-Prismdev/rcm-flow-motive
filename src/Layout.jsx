@@ -56,6 +56,7 @@ import {
 import { User } from "lucide-react";
 
 import { signOut } from '@/lib/signOut';
+import { escapeWindowsOpen } from '@/hooks/useEscapeToClose';
 const allDepartments = [
 { name: "Dashboard", url: createPageUrl("Dashboard"), icon: LayoutDashboard, permission: "Dashboard" },
 { name: "Repairs", url: createPageUrl("Claims"), icon: FileText, permission: "Claims" },
@@ -127,6 +128,8 @@ export default function Layout({ children, currentPageName }) {
   useEffect(() => {
     const onKey = (e) => {
       if (e.key !== 'Escape' || e.defaultPrevented) return;
+      // A window using useEscapeToClose closes itself.
+      if (escapeWindowsOpen() > 0) return;
       if (document.querySelector('[role="dialog"][data-state="open"], [role="alertdialog"][data-state="open"], [data-radix-popper-content-wrapper]')) return;
       const backdrops = document.querySelectorAll('[data-overlay-dismiss]');
       const top = backdrops[backdrops.length - 1];
