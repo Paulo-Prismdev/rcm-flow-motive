@@ -114,7 +114,7 @@ export default function Dashboard() {
   // Handler / manager switch as a segmented control (same two choices as before).
   const personaToggle = (
     <div role="group" aria-label="Whose claims to show" className="inline-flex items-center gap-0.5 rounded-lg bg-muted p-0.5">
-      {[['handler', 'My claims'], ['manager', 'Everyone']].map(([key, label]) => (
+      {[['handler', 'Handler view'], ['manager', 'Manager overview']].map(([key, label]) => (
         <button
           key={key}
           type="button"
