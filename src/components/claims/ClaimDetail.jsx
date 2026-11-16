@@ -1863,6 +1863,11 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
             onClose={handleClose}
             onUpdates={() => setIsClaimUpdatesOpen(true)}
             onUpdateTracking={() => setIsUpdateTrackingOpen(true)}
+            sections={DETAIL_SECTIONS
+              .filter(s => s.id !== 'creditRepair' || claim.claim_type === 'Credit Repair')
+              .map(s => ({ ...s, empty: isSectionEmpty(s.id, claim) }))}
+            selectedSection={selectedSection}
+            onSelectSection={setSelectedSection}
             updatesCount={claimUpdates.length}
             imagesCount={claim.image_urls?.length || 0}
             docsCount={claim.file_urls?.length || 0}
