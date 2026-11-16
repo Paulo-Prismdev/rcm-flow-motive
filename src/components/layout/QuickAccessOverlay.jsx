@@ -5,14 +5,14 @@ import PageLoader from '@/components/PageLoader';
 import { escapeWindowsOpen } from '@/hooks/useEscapeToClose';
 
 const PAGE_MAP = {
-  RepairerDirectory: { title: 'Repairer Directory', component: lazy(() => import('@/pages/RepairerDirectory')) },
-  InsurerDirectory: { title: 'Insurer Directory', component: lazy(() => import('@/pages/InsurerDirectory')) },
-  CreditRepairDirectory: { title: 'Credit Repair Companies', component: lazy(() => import('@/pages/CreditRepairDirectory')) },
-  ClientDirectory: { title: 'Clients & Third Parties', component: lazy(() => import('@/pages/ClientDirectory')) },
+  RepairerDirectory: { title: 'Repairers', component: lazy(() => import('@/pages/RepairerDirectory')) },
+  InsurerDirectory: { title: 'Insurers', component: lazy(() => import('@/pages/InsurerDirectory')) },
+  CreditRepairDirectory: { title: 'Credit repair companies', component: lazy(() => import('@/pages/CreditRepairDirectory')) },
+  ClientDirectory: { title: 'Clients & third parties', component: lazy(() => import('@/pages/ClientDirectory')) },
   SupplierManagement: { title: 'Suppliers', component: lazy(() => import('@/pages/SupplierManagement')) },
   CompanyManagement: { title: 'Referrers', component: lazy(() => import('@/pages/CompanyManagement')) },
   Settings: { title: 'Settings', component: lazy(() => import('@/pages/Settings')) },
-  BodyshopMap: { title: 'Repairer Map', component: lazy(() => import('@/pages/BodyshopMap')) },
+  BodyshopMap: { title: 'Repairer map', component: lazy(() => import('@/pages/BodyshopMap')) },
   Reports: { title: 'Reports', component: lazy(() => import('@/pages/Reports')) },
 };
 

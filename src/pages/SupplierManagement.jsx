@@ -293,11 +293,11 @@ export default function SupplierManagement() {
                       <h3 className="font-bold text-lg">{supplier.name}</h3>
                       {supplier.part_supply_type &&
                   <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                  supplier.part_supply_type === 'OEM' ? 'bg-amber-100 text-amber-700' :
-                  supplier.part_supply_type === 'Green' ? 'bg-green-100 text-green-700' :
-                  supplier.part_supply_type === 'Aftermarket' ? 'bg-blue-100 text-blue-700' :
+                  supplier.part_supply_type === 'OEM' ? 'bg-warning-bg text-warning-fg' :
+                  supplier.part_supply_type === 'Green' ? 'bg-success-bg text-success-fg' :
+                  supplier.part_supply_type === 'Aftermarket' ? 'bg-info-bg text-info-fg' :
                   supplier.part_supply_type === 'Reconditioned' ? 'bg-purple-100 text-purple-700' :
-                  'bg-gray-100 text-gray-700'}`
+                  'bg-muted text-foreground'}`
                   }>
                           {supplier.part_supply_type}
                         </span>
@@ -318,7 +318,7 @@ export default function SupplierManagement() {
                   variant="ghost"
                   size="icon"
                   onClick={() => handleDelete(supplier)}
-                  className="h-8 w-8 text-red-600 hover:text-red-700">
+                  className="h-8 w-8 text-danger-fg hover:text-danger-fg">
                   
                       <Trash2 className="w-4 h-4" />
                     </Button>
