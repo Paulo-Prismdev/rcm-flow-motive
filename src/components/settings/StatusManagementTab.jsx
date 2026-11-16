@@ -360,7 +360,7 @@ export default function StatusManagementTab({ department }) {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-lg font-bold">{department} Statuses</h2>
+      <h2 className="text-[15px] font-semibold">{department === "Part" ? "Parts" : department} statuses</h2>
       <div className="neomorph-inset p-4 bg-info-bg">
         <div className="flex items-start gap-2">
           <Lock className="w-4 h-4 text-info-fg mt-0.5 flex-shrink-0" />
@@ -372,16 +372,16 @@ export default function StatusManagementTab({ department }) {
 
       {/* Add New Status */}
       <div className="neomorph p-4 space-y-3">
-        <h3 className="text-md font-semibold">Add New Status</h3>
+        <h3 className="text-[15px] font-semibold">Add a status</h3>
         <div className="flex flex-col gap-3">
           <Input
-            placeholder="New status name..."
+            placeholder="New status name…"
             value={newStatusName}
             onChange={(e) => setNewStatusName(e.target.value)}
             className="neomorph-inset"
           />
           <div className="flex flex-col md:flex-row items-start md:items-center gap-3">
-            <span className="text-sm font-medium whitespace-nowrap">Select Color:</span>
+            <span className="text-sm font-medium whitespace-nowrap">Colour</span>
             <div className="flex gap-2 flex-wrap">
               {colorOptions.map(color => (
                 <button
@@ -400,7 +400,7 @@ export default function StatusManagementTab({ department }) {
             </div>
           </div>
           <Button onClick={handleAddStatus} className="neomorph-flat text-primary flex items-center gap-2 w-full md:w-auto">
-            <Plus className="w-4 h-4" /> Add Status
+            <Plus className="w-4 h-4" /> Add status
           </Button>
         </div>
       </div>
