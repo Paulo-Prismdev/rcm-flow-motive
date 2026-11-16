@@ -936,13 +936,13 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
         // Only show for fault claims
         if (claim.claim_type !== 'Fault Claim' && claim.claim_type !== 'Non-Fault - Own Insurer') {
           return (
-            <div className="neomorph-flat p-3 md:p-5">
-              <div className="flex items-center gap-3 mb-4">
-                <Users className="w-5 h-5 text-gold" />
-                <h3 className="font-bold">Third party pursuit</h3>
+            <div className="bg-card border border-border rounded-xl p-4 md:p-5 shadow-card">
+              <div className="flex items-center gap-2.5 pb-3 mb-4 border-b border-border">
+                <Users className="w-4 h-4 text-muted-foreground" aria-hidden="true" />
+                <h3 className="text-[15px] font-semibold text-foreground">Third party pursuit</h3>
               </div>
-              <div className="text-center py-12 text-muted-foreground">
-                <p>Third party pursuit is only applicable for Fault Claims.</p>
+              <div className="text-center py-12 text-sm text-muted-foreground">
+                <p>Third party pursuit only applies to fault claims.</p>
               </div>
             </div>
           );
