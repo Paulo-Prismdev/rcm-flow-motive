@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Loader2 } from 'lucide-react';
+import PageHeader from '@/components/shared/PageHeader';
 import { createPageUrl } from '@/utils';
 import useInvoicingData from '@/components/invoicing/useInvoicingData';
 import QueueTiles from '@/components/invoicing/QueueTiles';
@@ -38,13 +38,19 @@ export default function Invoicing() {
     navigate(`${createPageUrl('Claims')}?id=${claimId}&section=financials`);
 
   return (
-    <div className="p-3 lg:p-4 space-y-3">
-      <h1 className="text-base lg:text-lg font-bold">Invoicing</h1>
+    <div className="p-3 lg:p-0 space-y-4">
+      <PageHeader
+        title="Invoicing"
+        subtitle={isLoading ? 'Reading the invoices…' : `${actions} action${actions === 1 ? '' : 's'} waiting across every claim`}
+      />
 
       {isLoading ? (
-        <div className="flex items-center gap-2 text-sm text-muted-foreground py-8">
-          <Loader2 className="w-4 h-4 animate-spin" />
-          Reading the invoices...
+        <div className="space-y-4" aria-busy="true" aria-label="Reading the invoices">
+          <div className="h-[72px] rounded-xl bg-muted animate-pulse" />
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-2">
+            {Array.from({ length: 6 }).map((_, i) => <div key={i} className="h-20 rounded-xl bg-muted animate-pulse" />)}
+          </div>
+          <div className="h-64 rounded-xl bg-muted animate-pulse" />
         </div>
       ) : (
         <>
@@ -56,12 +62,12 @@ export default function Invoicing() {
           />
 
           <section className="space-y-2">
-            <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Today's actions</h2>
+            <h2 className="text-[15px] font-semibold text-foreground">Today's actions</h2>
             <QueueTiles sections={queues} onOpen={openClaim} />
           </section>
 
           <section className="space-y-2">
-            <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Aged invoices</h2>
+            <h2 className="text-[15px] font-semibold text-foreground">Aged invoices</h2>
             <AgedInvoices owedToUs={aged.owedToUs} weOwe={aged.weOwe} onOpen={openClaim} />
           </section>
         </>

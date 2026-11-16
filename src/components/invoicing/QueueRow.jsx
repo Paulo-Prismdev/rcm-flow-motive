@@ -20,7 +20,7 @@ export default function QueueRow({ row, onOpen }) {
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
           <span className="text-sm font-semibold flex-1 min-w-0 truncate">{row.invoice}</span>
-          {row.overdue && <LightPill lightKey="red" className="text-[10px]">Overdue</LightPill>}
+          {row.overdue && <LightPill lightKey="red" className="text-xs">Overdue</LightPill>}
           {row.archived && <ArchivedTag />}
           {row.amount > 0 && (
             <span className="text-sm font-semibold tabular-nums shrink-0">{fmtGBP(row.amount)}</span>
@@ -31,12 +31,12 @@ export default function QueueRow({ row, onOpen }) {
           <p className="text-xs text-muted-foreground truncate mt-0.5">{row.party}</p>
         )}
 
-        <p className="text-[11px] text-muted-foreground truncate mt-0.5">
+        <p className="text-xs text-muted-foreground truncate mt-0.5">
           {[row.reg, row.client, row.jobNumber].filter(Boolean).join(' · ')}
         </p>
 
         {(since || waited || row.note) && (
-          <p className="text-[11px] text-muted-foreground mt-1">
+          <p className="text-xs text-muted-foreground mt-1">
             {(since || waited) && (
               <span className="text-foreground/80 font-medium">
                 {since}

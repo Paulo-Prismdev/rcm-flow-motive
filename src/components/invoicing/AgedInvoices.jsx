@@ -52,7 +52,7 @@ export default function AgedInvoices({ owedToUs = [], weOwe = [], onOpen }) {
 
   return (
     <div className="space-y-2">
-      <div className="grid grid-cols-2 gap-1 rounded-[10px] border border-border bg-muted p-1">
+      <div className="grid grid-cols-2 gap-1 rounded-lg border border-border bg-muted p-1">
         {['out', 'in'].map((key) => {
           const count = key === 'out' ? owedToUs.length : weOwe.length;
           const active = tab === key;
@@ -61,10 +61,10 @@ export default function AgedInvoices({ owedToUs = [], weOwe = [], onOpen }) {
               key={key}
               type="button"
               onClick={() => switchTab(key)}
-              className={`flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold transition-colors ${active ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+              className={`flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold transition-colors ${active ? 'bg-card text-foreground shadow-card' : 'text-muted-foreground hover:text-foreground'}`}
             >
               {TAB_LABELS[key]}
-              <span className="rounded-full bg-muted px-1.5 text-[11px] font-semibold tabular-nums text-muted-foreground">{count}</span>
+              <span className="rounded-full bg-muted px-1.5 text-xs font-semibold tabular-nums text-muted-foreground">{count}</span>
             </button>
           );
         })}
@@ -85,7 +85,7 @@ export default function AgedInvoices({ owedToUs = [], weOwe = [], onOpen }) {
         </Button>
       </div>
 
-      <div className="bg-card border border-border rounded-[10px] overflow-hidden">
+      <div className="bg-card border border-border rounded-lg overflow-hidden">
         {groups.length === 0 ? (
           <p className="px-3 py-4 text-xs text-muted-foreground">
             {rows.length === 0

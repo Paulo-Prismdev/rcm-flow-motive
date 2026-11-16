@@ -24,10 +24,10 @@ export default function AgedInvoiceRow({ row, onOpen }) {
             {fmtGBP(row.amount)}
           </span>
         </div>
-        <p className="text-[11px] text-muted-foreground truncate mt-0.5">
+        <p className="text-xs text-muted-foreground truncate mt-0.5">
           {[row.reg, row.jobNumber, row.client].filter(Boolean).join(' · ')}
         </p>
-        <p className="text-[11px] text-muted-foreground mt-0.5">
+        <p className="text-xs text-muted-foreground mt-0.5">
           {formatInvoiceDay(row.date)} · {waitingLabel(row.days)}
         </p>
       </div>

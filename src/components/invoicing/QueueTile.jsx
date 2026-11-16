@@ -21,10 +21,10 @@ export default function QueueTile({ section, open, onToggle }) {
       <button
         type="button"
         onClick={onToggle}
-        className={`rounded-[10px] border flex items-center gap-1.5 px-2.5 py-1.5 text-left transition-colors ${open ? 'border-foreground/25 bg-muted' : 'border-border bg-muted/40 hover:bg-muted/70'}`}
+        className={`rounded-lg border flex items-center gap-1.5 px-2.5 py-1.5 text-left transition-colors ${open ? 'border-foreground/25 bg-muted' : 'border-border bg-muted/40 hover:bg-muted/70'}`}
       >
         <Check className={`w-3.5 h-3.5 shrink-0 ${lightText('green')}`} />
-        <span className="text-[11px] font-medium text-muted-foreground truncate">{section.label}</span>
+        <span className="text-xs font-medium text-muted-foreground truncate">{section.label}</span>
       </button>
     );
   }

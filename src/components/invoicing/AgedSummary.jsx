@@ -28,13 +28,13 @@ export default function AgedSummary({ rows = [] }) {
   const totals = agedTotals(rows);
 
   return (
-    <div className="bg-card border border-border rounded-[10px] px-3 py-2.5 space-y-2">
+    <div className="bg-card border border-border rounded-lg px-3 py-2.5 space-y-2">
       <div className="flex items-end justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Outstanding</p>
+          <p className="text-xs font-semibold text-muted-foreground">Outstanding</p>
           <p className="text-lg lg:text-xl font-bold tabular-nums leading-tight">{fmtGBP(totals.total)}</p>
         </div>
-        <p className="text-[11px] text-muted-foreground text-right shrink-0">
+        <p className="text-xs text-muted-foreground text-right shrink-0">
           {plural(totals.count, 'invoice')} · {plural(totals.parties, 'party')}
         </p>
       </div>
@@ -56,7 +56,7 @@ export default function AgedSummary({ rows = [] }) {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-3 gap-y-1">
         {AGE_BANDS.map((band) => (
           <div key={band.key} className="min-w-0">
-            <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground truncate">{band.label}</p>
+            <p className="text-xs font-medium text-muted-foreground truncate">{band.label}</p>
             <p className={`text-xs font-semibold tabular-nums ${BAND_TEXT[band.key] || ''}`}>
               {fmtGBP(totals.bands[band.key] || 0)}
             </p>

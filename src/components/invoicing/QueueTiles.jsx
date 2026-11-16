@@ -44,8 +44,8 @@ export default function QueueTiles({ sections = [], onOpen }) {
       )}
 
       {openSection && (
-        <div className="bg-card border border-border rounded-[10px] overflow-hidden">
-          <p className="px-3 py-2 text-[11px] text-muted-foreground border-b border-border">{openSection.hint}</p>
+        <div className="bg-card border border-border rounded-lg overflow-hidden">
+          <p className="px-3 py-2 text-xs text-muted-foreground border-b border-border">{openSection.hint}</p>
           {openSection.count === 0
             ? <p className="px-3 py-3 text-xs text-muted-foreground">Nothing here.</p>
             : openSection.rows.map((row) => <QueueRow key={row.id} row={row} onOpen={onOpen} />)}
