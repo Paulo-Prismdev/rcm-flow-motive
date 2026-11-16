@@ -14,7 +14,12 @@ export default function ThemeToggle() {
   const [isDark, setIsDark] = useState(true);
 
   useEffect(() => {
-    const savedTheme = localStorage.getItem('theme') || 'dark';
+    // Follows the device's light or dark setting until someone chooses one here.
+    let savedTheme = null;
+    try { savedTheme = localStorage.getItem('theme'); } catch { /* storage blocked */ }
+    if (!savedTheme) {
+      savedTheme = window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
     setIsDark(savedTheme === 'dark');
     applyTheme(savedTheme);
   }, []);
@@ -23,15 +28,17 @@ export default function ThemeToggle() {
     const newTheme = isDark ? 'light' : 'dark';
     setIsDark(!isDark);
     applyTheme(newTheme);
-    localStorage.setItem('theme', newTheme);
+    try { localStorage.setItem('theme', newTheme); } catch { /* storage blocked */ }
   };
 
   return (
     <button
+      type="button"
       onClick={toggleTheme}
-      className="flex items-center justify-center touch-manipulation text-gray-500 dark:text-gray-400"
+      aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+      className="flex items-center justify-center touch-manipulation text-current"
     >
-      {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+      {isDark ? <Sun className="w-5 h-5 md:w-4 md:h-4" /> : <Moon className="w-5 h-5 md:w-4 md:h-4" />}
     </button>
   );
 }
