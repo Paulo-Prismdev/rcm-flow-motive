@@ -17,6 +17,7 @@ import {
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import TaskCard from '../components/tasks/TaskCard';
+import PageHeader from '@/components/shared/PageHeader';
 import TaskModal from '../components/tasks/TaskModal';
 import { deleteAndLog } from "@/components/shared/useActivityLogger";
 import { askConfirm } from '@/lib/dialogs';
@@ -150,73 +151,63 @@ export default function TasksPage() {
   };
 
   return (
-    <div className="h-full flex flex-col gap-4 md:gap-6">
+    <div className="h-full flex flex-col gap-4">
       {/* Header */}
-      <div className="neomorph p-4 flex-shrink-0">
-        <div className="flex items-center justify-between gap-3">
-          <div>
-            <h1 className="text-base font-bold flex items-center gap-2 lg:text-2xl">
-              <ListTodo className="w-5 h-5 lg:w-7 lg:h-7 text-accent" />
-              My Tasks
-            </h1>
-            <p className="text-xs text-foreground-muted mt-0.5">
-              Track and manage your assigned tasks
-            </p>
-          </div>
+      <div className="flex-shrink-0 space-y-3">
+        <PageHeader
+          icon={ListTodo}
+          title="My tasks"
+          subtitle="Tasks assigned to you, soonest first"
+        />
+
+        {/* Counts */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 lg:gap-3 m-keep-2">
+          {[
+            { n: stats.total, label: 'Active', tone: '' },
+            { n: stats.overdue, label: 'Overdue', tone: stats.overdue > 0 ? 'danger' : '' },
+            { n: stats.today, label: 'Due today', tone: stats.today > 0 ? 'warning' : '' },
+            { n: stats.pending, label: 'Not started', tone: '' },
+          ].map(({ n, label, tone }) => (
+            <div key={label} className={`rounded-xl border p-3 shadow-card ${tone === 'danger' ? 'bg-danger-bg border-danger/30' : tone === 'warning' ? 'bg-warning-bg border-warning/30' : 'bg-card border-border'}`}>
+              <div className={`text-2xl font-semibold tabular-nums ${tone === 'danger' ? 'text-danger-fg' : tone === 'warning' ? 'text-warning-fg' : 'text-foreground'}`}>{n}</div>
+              <div className="text-xs text-muted-foreground">{label}</div>
+            </div>
+          ))}
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 lg:gap-3 mt-3 lg:mt-4 m-keep-2">
-          <div className="neomorph-flat p-3 rounded-xl">
-            <div className="text-2xl font-bold">{stats.total}</div>
-            <div className="text-xs text-foreground-muted">Active Tasks</div>
-          </div>
-          <div className={`neomorph-flat p-3 rounded-xl ${stats.overdue > 0 ? 'bg-red-50 border-red-200' : ''}`}>
-            <div className={`text-2xl font-bold ${stats.overdue > 0 ? 'text-red-600' : ''}`}>{stats.overdue}</div>
-            <div className="text-xs text-foreground-muted">Overdue</div>
-          </div>
-          <div className={`neomorph-flat p-3 rounded-xl ${stats.today > 0 ? 'bg-orange-50 border-orange-200' : ''}`}>
-            <div className={`text-2xl font-bold ${stats.today > 0 ? 'text-orange-600' : ''}`}>{stats.today}</div>
-            <div className="text-xs text-foreground-muted">Due Today</div>
-          </div>
-          <div className="neomorph-flat p-3 rounded-xl">
-            <div className="text-2xl font-bold">{stats.pending}</div>
-            <div className="text-xs text-foreground-muted">Pending</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Filters */}
-      <div className="neomorph p-3 lg:p-4 flex-shrink-0">
-        <div className="flex flex-col gap-2">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-foreground-muted" />
+        {/* Filters */}
+        <div className="flex flex-col lg:flex-row gap-2">
+          <div className="relative flex-1 min-w-0">
+            <Search className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-subtle" aria-hidden="true" />
             <Input
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search tasks..."
-              className="pl-10 neomorph-inset"
+              placeholder="Search tasks…"
+              aria-label="Search tasks"
+              className="pl-8"
             />
           </div>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 m-keep-2">
+          <div className="grid grid-cols-2 lg:flex gap-2 m-keep-2">
             <select
               value={viewFilter}
               onChange={(e) => setViewFilter(e.target.value)}
-              className="neomorph-inset px-3 py-2 rounded-lg border-0 text-sm"
+              aria-label="Whose tasks"
+              className="h-9 rounded-lg border border-input bg-card px-2.5 text-[13px] text-foreground"
             >
-              <option value="my">Assigned to Me</option>
-              <option value="created">Created by Me</option>
-              {isInternalUser && <option value="all">All Tasks</option>}
+              <option value="my">Assigned to me</option>
+              <option value="created">Created by me</option>
+              {isInternalUser && <option value="all">All tasks</option>}
             </select>
 
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="neomorph-inset px-3 py-2 rounded-lg border-0 text-sm"
+              aria-label="Status"
+              className="h-9 rounded-lg border border-input bg-card px-2.5 text-[13px] text-foreground"
             >
-              <option value="">All Statuses</option>
+              <option value="">All statuses</option>
               <option value="Pending">Pending</option>
-              <option value="In Progress">In Progress</option>
+              <option value="In Progress">In progress</option>
               <option value="Completed">Completed</option>
               <option value="Cancelled">Cancelled</option>
             </select>
@@ -224,9 +215,10 @@ export default function TasksPage() {
             <select
               value={priorityFilter}
               onChange={(e) => setPriorityFilter(e.target.value)}
-              className="neomorph-inset px-3 py-2 rounded-lg border-0 text-sm"
+              aria-label="Priority"
+              className="h-9 rounded-lg border border-input bg-card px-2.5 text-[13px] text-foreground"
             >
-              <option value="">All Priorities</option>
+              <option value="">All priorities</option>
               <option value="Urgent">Urgent</option>
               <option value="High">High</option>
               <option value="Medium">Medium</option>
@@ -234,12 +226,13 @@ export default function TasksPage() {
             </select>
 
             <Button
-              size="sm"
+              variant="outline"
               onClick={() => setShowCompleted(!showCompleted)}
-              className={`neomorph-flat px-3 text-xs ${showCompleted ? 'bg-accent/20' : ''}`}
+              aria-pressed={showCompleted}
+              className={`h-9 gap-1.5 ${showCompleted ? 'bg-surface-selected' : ''}`}
             >
-              <CheckCircle2 className="w-3.5 h-3.5 mr-1" />
-              {showCompleted ? 'Hide' : 'Show'} Done
+              <CheckCircle2 className="w-4 h-4" aria-hidden="true" />
+              {showCompleted ? 'Hide done' : 'Show done'}
             </Button>
           </div>
         </div>
@@ -248,22 +241,24 @@ export default function TasksPage() {
       {/* Tasks List */}
       <div className="flex-1 overflow-y-auto min-h-0 space-y-6">
         {isLoading ? (
-          <div className="text-center py-12">Loading tasks...</div>
+          <div className="space-y-3" aria-busy="true" aria-label="Loading tasks">
+            {[0, 1, 2].map((i) => <div key={i} className="h-24 rounded-xl bg-muted animate-pulse" />)}
+          </div>
         ) : filteredTasks.length === 0 ? (
-          <div className="neomorph p-12 text-center">
-            <ListTodo className="w-12 h-12 mx-auto text-foreground-muted mb-4" />
-            <p className="text-foreground-muted mb-2">No tasks found</p>
-            <p className="text-sm text-foreground-muted">
-              Tasks assigned to you will appear here
+          <div className="rounded-xl border border-border bg-card shadow-card p-12 text-center">
+            <ListTodo className="w-10 h-10 mx-auto text-muted-foreground mb-3" aria-hidden="true" />
+            <p className="text-sm font-medium text-foreground mb-1">No tasks here</p>
+            <p className="text-sm text-muted-foreground">
+              {searchTerm || statusFilter || priorityFilter ? 'Nothing matches these filters.' : 'Tasks assigned to you will appear here.'}
             </p>
           </div>
         ) : (
           <>
             {/* Overdue Tasks */}
             {overdueTasks.length > 0 && (
-              <div className="neomorph p-4 border-l-4 border-red-500">
-                <h2 className="font-bold text-red-600 flex items-center gap-2 mb-4">
-                  <AlertTriangle className="w-5 h-5" />
+              <div className="rounded-xl border border-border border-l-4 border-l-danger bg-card shadow-card p-4">
+                <h2 className="text-[15px] font-semibold text-danger-fg flex items-center gap-2 mb-3">
+                  <AlertTriangle className="w-4 h-4" aria-hidden="true" />
                   Overdue ({overdueTasks.length})
                 </h2>
                 <div className="space-y-3">
@@ -282,10 +277,10 @@ export default function TasksPage() {
 
             {/* Due Today */}
             {todayTasks.length > 0 && (
-              <div className="neomorph p-4 border-l-4 border-orange-500">
-                <h2 className="font-bold text-orange-600 flex items-center gap-2 mb-4">
-                  <Calendar className="w-5 h-5" />
-                  Due Today ({todayTasks.length})
+              <div className="rounded-xl border border-border border-l-4 border-l-warning bg-card shadow-card p-4">
+                <h2 className="text-[15px] font-semibold text-warning-fg flex items-center gap-2 mb-3">
+                  <Calendar className="w-4 h-4" aria-hidden="true" />
+                  Due today ({todayTasks.length})
                 </h2>
                 <div className="space-y-3">
                   {todayTasks.map(task => (
@@ -303,9 +298,9 @@ export default function TasksPage() {
 
             {/* Upcoming / No Due Date */}
             {upcomingTasks.length > 0 && (
-              <div className="neomorph p-4">
-                <h2 className="font-bold flex items-center gap-2 mb-4">
-                  <Clock className="w-5 h-5" />
+              <div className="rounded-xl border border-border bg-card shadow-card p-4">
+                <h2 className="text-[15px] font-semibold flex items-center gap-2 mb-3">
+                  <Clock className="w-4 h-4 text-muted-foreground" aria-hidden="true" />
                   Upcoming ({upcomingTasks.length})
                 </h2>
                 <div className="space-y-3">
@@ -324,9 +319,9 @@ export default function TasksPage() {
 
             {/* Completed */}
             {showCompleted && completedTasks.length > 0 && (
-              <div className="neomorph p-4 opacity-70">
-                <h2 className="font-bold flex items-center gap-2 mb-4 text-foreground-muted">
-                  <CheckCircle2 className="w-5 h-5" />
+              <div className="rounded-xl border border-border bg-card shadow-card p-4 opacity-80">
+                <h2 className="text-[15px] font-semibold flex items-center gap-2 mb-3 text-muted-foreground">
+                  <CheckCircle2 className="w-4 h-4" aria-hidden="true" />
                   Completed ({completedTasks.length})
                 </h2>
                 <div className="space-y-3">
@@ -372,10 +367,10 @@ function TaskCardWithClaim({ task, onEdit, onDelete, onStatusChange }) {
       {(task.claim_job_number || task.claim_reg) && (
         <Link 
           to={`${createPageUrl('Claims')}?id=${task.claim_id}`}
-          className="inline-flex items-center gap-1 text-xs text-accent hover:underline ml-2"
+          className="inline-flex items-center gap-1 text-xs font-medium text-link hover:underline ml-2"
         >
-          <ExternalLink className="w-3 h-3" />
-          View Claim: {task.claim_job_number || task.claim_reg}
+          <ExternalLink className="w-3 h-3" aria-hidden="true" />
+          Open claim {task.claim_job_number || task.claim_reg}
         </Link>
       )}
     </div>
