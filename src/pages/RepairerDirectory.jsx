@@ -138,7 +138,7 @@ export default function RepairerDirectory() {
       <button
         onClick={handleImportClick}
         disabled={importing}
-        className="inline-flex items-center justify-center gap-2 rounded-md text-[13px] font-medium border border-input bg-transparent shadow-sm hover:bg-accent hover:text-accent-foreground h-9 px-4"
+        className="inline-flex items-center justify-center gap-2 rounded-md text-[13px] font-medium border border-input bg-transparent shadow-card hover:bg-accent hover:text-accent-foreground h-9 px-4"
       >
         {importing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
         <span className="hidden sm:inline">{importing ? "Reading file..." : "Import spreadsheet"}</span>
@@ -184,10 +184,10 @@ export default function RepairerDirectory() {
                     </div>
                     {b.tier ? (
                       <Badge className={`text-xs flex-shrink-0 ${
-                        b.tier?.toUpperCase().includes("TIER 1") || b.tier?.toUpperCase() === "TIER1" ? "bg-green-100 text-green-700"
-                        : b.tier?.toUpperCase().includes("TIER 2") || b.tier?.toUpperCase() === "TIER2" ? "bg-amber-100 text-amber-700"
-                        : b.tier?.toLowerCase().includes("previously") ? "bg-red-100 text-red-700"
-                        : "bg-gray-100 text-gray-700"
+                        b.tier?.toUpperCase().includes("TIER 1") || b.tier?.toUpperCase() === "TIER1" ? "bg-success-bg text-success-fg"
+                        : b.tier?.toUpperCase().includes("TIER 2") || b.tier?.toUpperCase() === "TIER2" ? "bg-warning-bg text-warning-fg"
+                        : b.tier?.toLowerCase().includes("previously") ? "bg-danger-bg text-danger-fg"
+                        : "bg-muted text-foreground"
                       }`}>{b.tier}</Badge>
                     ) : null}
                   </div>
@@ -196,10 +196,10 @@ export default function RepairerDirectory() {
                     {b.contact_name || b.bodyshop_manager ? <span className="truncate">{b.contact_name || b.bodyshop_manager}</span> : null}
                   </div>
                   <div className="flex items-center gap-2 mt-1.5">
-                    {b.map_group && <Badge className="bg-violet-100 text-violet-700 text-[10px] px-1.5 py-0">{b.map_group}</Badge>}
-                    {b.acg_signed_up === "Yes" && <Badge className="bg-green-100 text-green-700 text-[10px] px-1.5 py-0">ACG: Yes</Badge>}
-                    {b.acg_signed_up === "No" && <Badge className="bg-red-100 text-red-700 text-[10px] px-1.5 py-0">ACG: No</Badge>}
-                    {b.bs10125_certified === "Yes" && <Badge className="bg-green-100 text-green-700 text-[10px] px-1.5 py-0">BS10125</Badge>}
+                    {b.map_group && <Badge className="bg-violet-100 text-violet-700 text-xs px-1.5 py-0">{b.map_group}</Badge>}
+                    {b.acg_signed_up === "Yes" && <Badge className="bg-success-bg text-success-fg text-xs px-1.5 py-0">ACG: Yes</Badge>}
+                    {b.acg_signed_up === "No" && <Badge className="bg-danger-bg text-danger-fg text-xs px-1.5 py-0">ACG: No</Badge>}
+                    {b.bs10125_certified === "Yes" && <Badge className="bg-success-bg text-success-fg text-xs px-1.5 py-0">BS10125</Badge>}
                   </div>
                 </div>
               ))}
@@ -209,12 +209,12 @@ export default function RepairerDirectory() {
             <table className="hidden sm:table w-full">
               <thead className="sticky top-0 bg-card border-b border-border z-10">
                 <tr>
-                  <th className="text-left p-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Name</th>
-                  <th className="text-left p-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground hidden md:table-cell">Location</th>
-                  <th className="text-left p-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground hidden lg:table-cell">Contact</th>
-                  <th className="text-left p-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Tier</th>
-                  <th className="text-left p-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground hidden sm:table-cell">ACG</th>
-                  <th className="text-left p-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground hidden sm:table-cell">BS10125</th>
+                  <th className="text-left p-3 text-xs font-semibold text-muted-foreground">Name</th>
+                  <th className="text-left p-3 text-xs font-semibold text-muted-foreground hidden md:table-cell">Location</th>
+                  <th className="text-left p-3 text-xs font-semibold text-muted-foreground hidden lg:table-cell">Contact</th>
+                  <th className="text-left p-3 text-xs font-semibold text-muted-foreground">Tier</th>
+                  <th className="text-left p-3 text-xs font-semibold text-muted-foreground hidden sm:table-cell">ACG</th>
+                  <th className="text-left p-3 text-xs font-semibold text-muted-foreground hidden sm:table-cell">BS10125</th>
                 </tr>
               </thead>
               <tbody>
@@ -233,23 +233,23 @@ export default function RepairerDirectory() {
                       <div className="flex flex-col gap-1 items-start">
                         {b.tier ? (
                           <Badge className={`text-xs ${
-                            b.tier?.toUpperCase().includes("TIER 1") || b.tier?.toUpperCase() === "TIER1" ? "bg-green-100 text-green-700"
-                            : b.tier?.toUpperCase().includes("TIER 2") || b.tier?.toUpperCase() === "TIER2" ? "bg-amber-100 text-amber-700"
-                            : b.tier?.toLowerCase().includes("previously") ? "bg-red-100 text-red-700"
-                            : "bg-gray-100 text-gray-700"
+                            b.tier?.toUpperCase().includes("TIER 1") || b.tier?.toUpperCase() === "TIER1" ? "bg-success-bg text-success-fg"
+                            : b.tier?.toUpperCase().includes("TIER 2") || b.tier?.toUpperCase() === "TIER2" ? "bg-warning-bg text-warning-fg"
+                            : b.tier?.toLowerCase().includes("previously") ? "bg-danger-bg text-danger-fg"
+                            : "bg-muted text-foreground"
                           }`}>{b.tier}</Badge>
                         ) : <span className="text-muted-foreground text-sm">—</span>}
                         {b.map_group && <Badge className="text-xs bg-violet-100 text-violet-700">{b.map_group}</Badge>}
                       </div>
                     </td>
                     <td className="p-3 hidden sm:table-cell">
-                      {b.acg_signed_up === "Yes" ? <Badge className="bg-green-100 text-green-700 text-xs">Yes</Badge>
-                        : b.acg_signed_up === "No" ? <Badge className="bg-red-100 text-red-700 text-xs">No</Badge>
+                      {b.acg_signed_up === "Yes" ? <Badge className="bg-success-bg text-success-fg text-xs">Yes</Badge>
+                        : b.acg_signed_up === "No" ? <Badge className="bg-danger-bg text-danger-fg text-xs">No</Badge>
                         : <span className="text-xs text-muted-foreground">{b.acg_signed_up || "—"}</span>}
                     </td>
                     <td className="p-3 hidden sm:table-cell">
-                      {b.bs10125_certified === "Yes" ? <Badge className="bg-green-100 text-green-700 text-xs">Yes</Badge>
-                        : b.bs10125_certified === "No" ? <Badge className="bg-red-100 text-red-700 text-xs">No</Badge>
+                      {b.bs10125_certified === "Yes" ? <Badge className="bg-success-bg text-success-fg text-xs">Yes</Badge>
+                        : b.bs10125_certified === "No" ? <Badge className="bg-danger-bg text-danger-fg text-xs">No</Badge>
                         : <span className="text-xs text-muted-foreground">{b.bs10125_certified || "—"}</span>}
                     </td>
                   </tr>

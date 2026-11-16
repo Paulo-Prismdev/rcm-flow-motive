@@ -102,7 +102,7 @@ export default function DirectoryTab() {
     return isClientTagged(r) ? primary?.name || r.company_contact_name || "" : "";
   };
 
-  const typeIcon = (r) => (r.client_type === "Company" ? <Building2 className="w-3.5 h-3.5 text-gray-400" /> : <User className="w-3.5 h-3.5 text-gray-400" />);
+  const typeIcon = (r) => (r.client_type === "Company" ? <Building2 className="w-3.5 h-3.5 text-muted-foreground" /> : <User className="w-3.5 h-3.5 text-muted-foreground" />);
 
   const filters = (
     <div className="flex items-center gap-1.5 overflow-x-auto">
@@ -158,12 +158,12 @@ export default function DirectoryTab() {
                       </div>
                       {clientLine(r) && <div className="text-xs text-muted-foreground truncate mt-0.5">{clientLine(r)}</div>}
                       {isClientTagged(r) && r.handles_vat_excess === true && (
-                        <span className="inline-flex items-center gap-0.5 mt-1 px-1.5 py-0.5 rounded-full bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 text-[10px] font-semibold">
+                        <span className="inline-flex items-center gap-0.5 mt-1 px-1.5 py-0.5 rounded-full bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 text-xs font-semibold">
                           <Receipt className="w-2.5 h-2.5" /> VAT &amp; Excess handled
                         </span>
                       )}
                     </div>
-                    <button onClick={(e) => { e.stopPropagation(); handleDelete(r); }} className="p-1.5 rounded-md text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 flex-shrink-0">
+                    <button onClick={(e) => { e.stopPropagation(); handleDelete(r); }} className="p-1.5 rounded-md text-muted-foreground hover:text-danger-fg hover:bg-danger-bg flex-shrink-0">
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
@@ -181,15 +181,15 @@ export default function DirectoryTab() {
             <table className="hidden sm:table w-full">
               <thead className="sticky top-0 bg-card border-b border-border z-10">
                 <tr>
-                  <th className="text-left p-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Name</th>
-                  <th className="text-left p-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Tags</th>
-                  <th className="text-left p-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground hidden md:table-cell">Type</th>
-                  <th className="text-left p-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground hidden lg:table-cell">Contact</th>
-                  <th className="text-left p-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground hidden md:table-cell">Phone</th>
-                  <th className="text-left p-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground hidden md:table-cell">Email</th>
-                  <th className="text-left p-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground hidden lg:table-cell">Vehicle</th>
-                  <th className="text-left p-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground hidden lg:table-cell">Postcode</th>
-                  <th className="text-right p-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Actions</th>
+                  <th className="text-left p-3 text-xs font-semibold text-muted-foreground">Name</th>
+                  <th className="text-left p-3 text-xs font-semibold text-muted-foreground">Tags</th>
+                  <th className="text-left p-3 text-xs font-semibold text-muted-foreground hidden md:table-cell">Type</th>
+                  <th className="text-left p-3 text-xs font-semibold text-muted-foreground hidden lg:table-cell">Contact</th>
+                  <th className="text-left p-3 text-xs font-semibold text-muted-foreground hidden md:table-cell">Phone</th>
+                  <th className="text-left p-3 text-xs font-semibold text-muted-foreground hidden md:table-cell">Email</th>
+                  <th className="text-left p-3 text-xs font-semibold text-muted-foreground hidden lg:table-cell">Vehicle</th>
+                  <th className="text-left p-3 text-xs font-semibold text-muted-foreground hidden lg:table-cell">Postcode</th>
+                  <th className="text-right p-3 text-xs font-semibold text-muted-foreground">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -200,7 +200,7 @@ export default function DirectoryTab() {
                         {typeIcon(r)}
                         {r.name}
                         {isClientTagged(r) && r.handles_vat_excess === true && (
-                          <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 text-[10px] font-semibold whitespace-nowrap">
+                          <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 text-xs font-semibold whitespace-nowrap">
                             <Receipt className="w-2.5 h-2.5" /> VAT&amp;Excess
                           </span>
                         )}
@@ -214,7 +214,7 @@ export default function DirectoryTab() {
                     <td className="p-3 text-sm text-muted-foreground hidden lg:table-cell">{isThirdPartyTagged(r) ? vehicleLine(r) || "—" : "—"}</td>
                     <td className="p-3 text-sm text-muted-foreground hidden lg:table-cell">{r.postcode || "—"}</td>
                     <td className="p-3 text-right" onClick={(e) => e.stopPropagation()}>
-                      <button onClick={() => handleDelete(r)} className="p-1.5 rounded-md text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20" title="Remove"><Trash2 className="w-4 h-4" /></button>
+                      <button onClick={() => handleDelete(r)} className="p-1.5 rounded-md text-muted-foreground hover:text-danger-fg hover:bg-danger-bg" title="Remove"><Trash2 className="w-4 h-4" /></button>
                     </td>
                   </tr>
                 ))}

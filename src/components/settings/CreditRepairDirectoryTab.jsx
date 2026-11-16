@@ -85,10 +85,10 @@ function CreditRepairDetailModal({ company, onClose, onUpdated }) {
                   {(formData.contacts || []).map((contact, idx) => (
                     <div key={idx} className="rounded-lg border border-border p-3 space-y-2 bg-muted/50">
                       <div className="flex items-center justify-between">
-                        <button type="button" onClick={() => setPrimaryContact(idx)} className={`flex items-center gap-1 text-xs font-medium ${contact.is_primary ? 'text-amber-600' : 'text-muted-foreground hover:text-amber-500'}`} title={contact.is_primary ? 'Primary contact' : 'Set as primary'}>
-                          <Star className={`w-3.5 h-3.5 ${contact.is_primary ? 'fill-amber-500 text-amber-500' : ''}`} />{contact.is_primary ? 'Primary' : 'Set primary'}
+                        <button type="button" onClick={() => setPrimaryContact(idx)} className={`flex items-center gap-1 text-xs font-medium ${contact.is_primary ? 'text-warning-fg' : 'text-muted-foreground hover:text-warning-fg'}`} title={contact.is_primary ? 'Primary contact' : 'Set as primary'}>
+                          <Star className={`w-3.5 h-3.5 ${contact.is_primary ? 'fill-amber-500 text-warning-fg' : ''}`} />{contact.is_primary ? 'Primary' : 'Set primary'}
                         </button>
-                        <button type="button" onClick={() => removeContact(idx)} className="p-1 text-muted-foreground hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
+                        <button type="button" onClick={() => removeContact(idx)} className="p-1 text-muted-foreground hover:text-danger-fg hover:bg-danger-bg rounded transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
                       </div>
                       <div className="grid grid-cols-2 gap-2">
                         <Input placeholder="Name" value={contact.name || ''} onChange={(e) => updateContact(idx, 'name', e.target.value)} className="neomorph-inset" />
@@ -118,9 +118,9 @@ function CreditRepairDetailModal({ company, onClose, onUpdated }) {
             <div><p className="text-xs text-muted-foreground">Account Reference</p><p className="text-sm font-medium">{company.account_reference || '—'}</p></div>
             <div className="border-t pt-3">
               <div className="flex items-center justify-between gap-2 mb-2">
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Our Agreed Rates</p>
+                <p className="text-xs font-semibold text-muted-foreground  ">Our Agreed Rates</p>
                 {missingRates.length > 0 && (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 text-[10px] font-semibold">
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-warning-bg text-warning-fg text-xs font-semibold">
                     <AlertTriangle className="w-3 h-3" /> Rates not set
                   </span>
                 )}
@@ -130,7 +130,7 @@ function CreditRepairDetailModal({ company, onClose, onUpdated }) {
                   const field = hireFeeField(category);
                   return (
                     <div key={category} className="rounded-lg border border-border bg-muted/30 p-2">
-                      <p className="text-[10px] text-muted-foreground">{category}</p>
+                      <p className="text-xs text-muted-foreground">{category}</p>
                       <p className="text-sm font-medium tabular-nums">{hasValue(company[field]) ? fmtGBP(company[field]) : '—'}</p>
                     </div>
                   );
@@ -138,29 +138,29 @@ function CreditRepairDetailModal({ company, onClose, onUpdated }) {
               </div>
               <div className="grid grid-cols-2 gap-2 mt-2">
                 <div>
-                  <p className="text-[10px] text-muted-foreground">Commission</p>
+                  <p className="text-xs text-muted-foreground">Commission</p>
                   <p className="text-sm font-medium">{hasValue(company.commission_percent) ? `${company.commission_percent}%` : '—'}</p>
                 </div>
                 <div>
-                  <p className="text-[10px] text-muted-foreground">Calculated on</p>
+                  <p className="text-xs text-muted-foreground">Calculated on</p>
                   <p className="text-sm font-medium">{company.commission_basis || '—'}</p>
                 </div>
               </div>
               {missingRates.length > 0 && (
-                <p className="text-[11px] text-amber-600 dark:text-amber-400 mt-2">Still to fill in: {missingRates.join(', ')}.</p>
+                <p className="text-xs text-warning-fg mt-2">Still to fill in: {missingRates.join(', ')}.</p>
               )}
             </div>
             {company.notes && <div><p className="text-xs text-muted-foreground">Notes</p><p className="text-sm font-medium whitespace-pre-wrap">{company.notes}</p></div>}
             {company.contacts?.length > 0 && (
               <div className="border-t pt-3">
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Contacts</p>
+                <p className="text-xs font-semibold text-muted-foreground mb-2">Contacts</p>
                 <div className="space-y-2">
                   {company.contacts.map((c, i) => (
                     <div key={i} className="rounded-lg border border-border p-2.5 bg-muted/30">
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-medium">{c.name || '—'}</span>
                         {c.position && <span className="text-xs text-muted-foreground">· {c.position}</span>}
-                        {c.is_primary && <span className="inline-flex items-center gap-0.5 text-xs text-amber-600 font-medium"><Star className="w-3 h-3 fill-amber-500 text-amber-500" /> Primary</span>}
+                        {c.is_primary && <span className="inline-flex items-center gap-0.5 text-xs text-warning-fg font-medium"><Star className="w-3 h-3 fill-amber-500 text-warning-fg" /> Primary</span>}
                       </div>
                       <div className="flex flex-wrap gap-3 mt-1 text-xs text-muted-foreground">
                         {c.phone && <span className="flex items-center gap-1"><Phone className="w-3 h-3" /> {c.phone}</span>}
@@ -244,7 +244,7 @@ export default function CreditRepairDirectoryTab() {
                       <div className="font-medium text-sm truncate">{c.name}</div>
                       {c.contact_name && <div className="text-xs text-muted-foreground truncate">{c.contact_name}</div>}
                     </div>
-                    <button onClick={(e) => { e.stopPropagation(); handleDelete(c); }} className="p-1.5 rounded-md text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 flex-shrink-0">
+                    <button onClick={(e) => { e.stopPropagation(); handleDelete(c); }} className="p-1.5 rounded-md text-muted-foreground hover:text-danger-fg hover:bg-danger-bg flex-shrink-0">
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
@@ -253,7 +253,7 @@ export default function CreditRepairDirectoryTab() {
                     {c.email && <span className="flex items-center gap-1.5 truncate"><Mail className="w-3.5 h-3.5" /> {c.email}</span>}
                     {c.account_reference && <span>Ref: {c.account_reference}</span>}
                     {missingPartnerRates(c).length > 0 && (
-                      <span className="inline-flex items-center gap-1 text-amber-600 dark:text-amber-400 font-medium">
+                      <span className="inline-flex items-center gap-1 text-warning-fg font-medium">
                         <AlertTriangle className="w-3.5 h-3.5" /> Rates not set
                       </span>
                     )}
@@ -266,13 +266,13 @@ export default function CreditRepairDirectoryTab() {
             <table className="hidden sm:table w-full">
               <thead className="sticky top-0 bg-card border-b border-border z-10">
                 <tr>
-                  <th className="text-left p-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Company</th>
-                  <th className="text-left p-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground hidden md:table-cell">Contact</th>
-                  <th className="text-left p-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground hidden lg:table-cell">Phone</th>
-                  <th className="text-left p-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground hidden md:table-cell">Email</th>
-                  <th className="text-left p-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Account Ref</th>
-                  <th className="text-left p-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground hidden md:table-cell">Our Rates</th>
-                  <th className="text-right p-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Actions</th>
+                  <th className="text-left p-3 text-xs font-semibold text-muted-foreground">Company</th>
+                  <th className="text-left p-3 text-xs font-semibold text-muted-foreground hidden md:table-cell">Contact</th>
+                  <th className="text-left p-3 text-xs font-semibold text-muted-foreground hidden lg:table-cell">Phone</th>
+                  <th className="text-left p-3 text-xs font-semibold text-muted-foreground hidden md:table-cell">Email</th>
+                  <th className="text-left p-3 text-xs font-semibold text-muted-foreground">Account Ref</th>
+                  <th className="text-left p-3 text-xs font-semibold text-muted-foreground hidden md:table-cell">Our Rates</th>
+                  <th className="text-right p-3 text-xs font-semibold text-muted-foreground">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -285,7 +285,7 @@ export default function CreditRepairDirectoryTab() {
                     <td className="p-3 text-sm text-muted-foreground">{c.account_reference || "—"}</td>
                     <td className="p-3 hidden md:table-cell">
                       {missingPartnerRates(c).length > 0 ? (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 text-[10px] font-semibold whitespace-nowrap">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-warning-bg text-warning-fg text-xs font-semibold whitespace-nowrap">
                           <AlertTriangle className="w-3 h-3" /> Rates not set
                         </span>
                       ) : (
@@ -293,7 +293,7 @@ export default function CreditRepairDirectoryTab() {
                       )}
                     </td>
                     <td className="p-3 text-right" onClick={(e) => e.stopPropagation()}>
-                      <button onClick={() => handleDelete(c)} className="p-1.5 rounded-md text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20" title="Remove"><Trash2 className="w-4 h-4" /></button>
+                      <button onClick={() => handleDelete(c)} className="p-1.5 rounded-md text-muted-foreground hover:text-danger-fg hover:bg-danger-bg" title="Remove"><Trash2 className="w-4 h-4" /></button>
                     </td>
                   </tr>
                 ))}

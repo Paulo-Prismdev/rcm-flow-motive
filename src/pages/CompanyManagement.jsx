@@ -22,9 +22,9 @@ import { activateOnKey } from '@/lib/a11y';
 const ALL_PORTAL_SECTIONS = ["Claims", "Parts"];
 
 const typeColors = {
-  platform_owner: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300",
+  platform_owner: "bg-info-bg text-info-fg",
   referrer: "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300",
-  repairer: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300",
+  repairer: "bg-success-bg text-success-fg",
 };
 
 function ReferrerDetailModal({ company, onClose, onUpdated }) {
@@ -136,14 +136,14 @@ function ReferrerDetailModal({ company, onClose, onUpdated }) {
                     <div key={idx} className="rounded-lg border border-border p-3 space-y-2 bg-muted/50">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <button type="button" onClick={() => setPrimaryContact(idx)} className={`flex items-center gap-1 text-xs font-medium ${contact.is_primary ? "text-amber-600" : "text-muted-foreground hover:text-amber-500"}`} title={contact.is_primary ? "Primary contact" : "Set as primary"}>
-                            <Star className={`w-3.5 h-3.5 ${contact.is_primary ? "fill-amber-500 text-amber-500" : ""}`} />{contact.is_primary ? "Primary" : "Set primary"}
+                          <button type="button" onClick={() => setPrimaryContact(idx)} className={`flex items-center gap-1 text-xs font-medium ${contact.is_primary ? "text-warning-fg" : "text-muted-foreground hover:text-warning-fg"}`} title={contact.is_primary ? "Primary contact" : "Set as primary"}>
+                            <Star className={`w-3.5 h-3.5 ${contact.is_primary ? "fill-amber-500 text-warning-fg" : ""}`} />{contact.is_primary ? "Primary" : "Set primary"}
                           </button>
-                          <button type="button" onClick={() => updateContact(idx, "is_handler", !contact.is_handler)} className={`flex items-center gap-1 text-xs font-medium ${contact.is_handler ? "text-blue-600" : "text-muted-foreground hover:text-blue-500"}`} title={contact.is_handler ? "File handler — selectable on claims and updates" : "Mark as file handler"}>
-                            <UserCog className={`w-3.5 h-3.5 ${contact.is_handler ? "fill-blue-500 text-blue-500" : ""}`} />{contact.is_handler ? "Handler" : "Set handler"}
+                          <button type="button" onClick={() => updateContact(idx, "is_handler", !contact.is_handler)} className={`flex items-center gap-1 text-xs font-medium ${contact.is_handler ? "text-info-fg" : "text-muted-foreground hover:text-info-fg"}`} title={contact.is_handler ? "File handler — selectable on claims and updates" : "Mark as file handler"}>
+                            <UserCog className={`w-3.5 h-3.5 ${contact.is_handler ? "fill-blue-500 text-info-fg" : ""}`} />{contact.is_handler ? "Handler" : "Set handler"}
                           </button>
                         </div>
-                        <button type="button" onClick={() => removeContact(idx)} className="p-1 text-muted-foreground hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
+                        <button type="button" onClick={() => removeContact(idx)} className="p-1 text-muted-foreground hover:text-danger-fg hover:bg-danger-bg rounded transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
                       </div>
                       <div className="grid grid-cols-2 gap-2">
                         <Input placeholder="Name" value={contact.name || ""} onChange={(e) => updateContact(idx, "name", e.target.value)} className="neomorph-inset" />
@@ -205,8 +205,8 @@ function ReferrerDetailModal({ company, onClose, onUpdated }) {
         ) : (
           <div className="space-y-3">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className={`text-xs px-1.5 py-0.5 rounded font-medium ${typeColors[company.company_type] || "bg-gray-100 text-gray-700"}`}>{company.company_type?.replace("_", " ")}</span>
-              {!company.is_active && <span className="text-xs px-1.5 py-0.5 rounded bg-red-100 text-red-600">Inactive</span>}
+              <span className={`text-xs px-1.5 py-0.5 rounded font-medium ${typeColors[company.company_type] || "bg-muted text-foreground"}`}>{company.company_type?.replace("_", " ")}</span>
+              {!company.is_active && <span className="text-xs px-1.5 py-0.5 rounded bg-danger-bg text-danger-fg">Inactive</span>}
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div><p className="text-xs text-muted-foreground">Contact</p><p className="text-sm font-medium">{company.contact_name || "—"}</p></div>
@@ -228,15 +228,15 @@ function ReferrerDetailModal({ company, onClose, onUpdated }) {
             )}
             {(company.contacts || []).length > 0 && (
               <div className="border-t pt-3">
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Contacts</p>
+                <p className="text-xs font-semibold text-muted-foreground mb-2">Contacts</p>
                 <div className="space-y-2">
                   {(company.contacts || []).map((c, i) => (
                     <div key={i} className="rounded-lg border border-border p-2.5 bg-muted/30">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-sm font-medium">{c.name || "—"}</span>
                         {c.position && <span className="text-xs text-muted-foreground">· {c.position}</span>}
-                        {c.is_primary && <span className="inline-flex items-center gap-0.5 text-xs text-amber-600 font-medium"><Star className="w-3 h-3 fill-amber-500 text-amber-500" /> Primary</span>}
-                        {c.is_handler && <span className="inline-flex items-center gap-0.5 text-xs text-blue-600 font-medium"><UserCog className="w-3 h-3 fill-blue-500 text-blue-500" /> Handler</span>}
+                        {c.is_primary && <span className="inline-flex items-center gap-0.5 text-xs text-warning-fg font-medium"><Star className="w-3 h-3 fill-amber-500 text-warning-fg" /> Primary</span>}
+                        {c.is_handler && <span className="inline-flex items-center gap-0.5 text-xs text-info-fg font-medium"><UserCog className="w-3 h-3 fill-blue-500 text-info-fg" /> Handler</span>}
                       </div>
                       <div className="flex flex-wrap gap-3 mt-1 text-xs text-muted-foreground">
                         {c.phone && <span className="flex items-center gap-1"><Phone className="w-3 h-3" /> {c.phone}</span>}
@@ -328,10 +328,10 @@ function AddReferrerModal({ onClose, onSuccess }) {
                   <div key={idx} className="rounded-lg border border-border p-3 space-y-2 bg-muted/50">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <button type="button" onClick={() => setPrimaryContact(idx)} className={`flex items-center gap-1 text-xs font-medium ${contact.is_primary ? "text-amber-600" : "text-muted-foreground hover:text-amber-500"}`}><Star className={`w-3.5 h-3.5 ${contact.is_primary ? "fill-amber-500 text-amber-500" : ""}`} />{contact.is_primary ? "Primary" : "Set primary"}</button>
-                        <button type="button" onClick={() => updateContact(idx, "is_handler", !contact.is_handler)} className={`flex items-center gap-1 text-xs font-medium ${contact.is_handler ? "text-blue-600" : "text-muted-foreground hover:text-blue-500"}`}><UserCog className={`w-3.5 h-3.5 ${contact.is_handler ? "fill-blue-500 text-blue-500" : ""}`} />{contact.is_handler ? "Handler" : "Set handler"}</button>
+                        <button type="button" onClick={() => setPrimaryContact(idx)} className={`flex items-center gap-1 text-xs font-medium ${contact.is_primary ? "text-warning-fg" : "text-muted-foreground hover:text-warning-fg"}`}><Star className={`w-3.5 h-3.5 ${contact.is_primary ? "fill-amber-500 text-warning-fg" : ""}`} />{contact.is_primary ? "Primary" : "Set primary"}</button>
+                        <button type="button" onClick={() => updateContact(idx, "is_handler", !contact.is_handler)} className={`flex items-center gap-1 text-xs font-medium ${contact.is_handler ? "text-info-fg" : "text-muted-foreground hover:text-info-fg"}`}><UserCog className={`w-3.5 h-3.5 ${contact.is_handler ? "fill-blue-500 text-info-fg" : ""}`} />{contact.is_handler ? "Handler" : "Set handler"}</button>
                       </div>
-                      <button type="button" onClick={() => removeContact(idx)} className="p-1 text-muted-foreground hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
+                      <button type="button" onClick={() => removeContact(idx)} className="p-1 text-muted-foreground hover:text-danger-fg hover:bg-danger-bg rounded transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
                     </div>
                     <div className="grid grid-cols-2 gap-2">
                       <Input placeholder="Name" value={contact.name} onChange={(e) => updateContact(idx, "name", e.target.value)} className="neomorph-inset" />
@@ -467,17 +467,17 @@ export default function CompanyManagement() {
                         <div className="font-medium text-sm truncate">{c.name}</div>
                         {c.contact_name && <div className="text-xs text-muted-foreground truncate">{c.contact_name}</div>}
                       </div>
-                      <button onClick={(e) => { e.stopPropagation(); handleDelete(c); }} className="p-1.5 rounded-md text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 flex-shrink-0"><Trash2 className="w-4 h-4" /></button>
+                      <button onClick={(e) => { e.stopPropagation(); handleDelete(c); }} className="p-1.5 rounded-md text-muted-foreground hover:text-danger-fg hover:bg-danger-bg flex-shrink-0"><Trash2 className="w-4 h-4" /></button>
                     </div>
                     <div className="flex flex-col gap-1 text-xs text-muted-foreground">
                       {c.contact_phone && <span className="flex items-center gap-1.5"><Phone className="w-3.5 h-3.5" /> {c.contact_phone}</span>}
                       {c.contact_email && <span className="flex items-center gap-1.5 truncate"><Mail className="w-3.5 h-3.5" /> {c.contact_email}</span>}
                     </div>
                     <div className="flex items-center gap-2 mt-1.5">
-                      <span className={`text-[10px] px-1.5 py-0 rounded font-medium ${typeColors[c.company_type] || "bg-gray-100 text-gray-700"}`}>{c.company_type?.replace("_", " ")}</span>
-                      {!c.is_active && <span className="text-[10px] px-1.5 py-0 rounded bg-red-100 text-red-600">Inactive</span>}
-                      {(c.contacts || []).length > 0 && <span className="inline-flex items-center gap-0.5 text-[10px] text-muted-foreground"><Users className="w-3 h-3" /> {c.contacts.length}</span>}
-                      {handlerCount > 0 && <span className="inline-flex items-center gap-0.5 text-[10px] text-blue-500"><UserCog className="w-3 h-3" /> {handlerCount}</span>}
+                      <span className={`text-xs px-1.5 py-0 rounded font-medium ${typeColors[c.company_type] || "bg-muted text-foreground"}`}>{c.company_type?.replace("_", " ")}</span>
+                      {!c.is_active && <span className="text-xs px-1.5 py-0 rounded bg-danger-bg text-danger-fg">Inactive</span>}
+                      {(c.contacts || []).length > 0 && <span className="inline-flex items-center gap-0.5 text-xs text-muted-foreground"><Users className="w-3 h-3" /> {c.contacts.length}</span>}
+                      {handlerCount > 0 && <span className="inline-flex items-center gap-0.5 text-xs text-info-fg"><UserCog className="w-3 h-3" /> {handlerCount}</span>}
                     </div>
                   </div>
                 );
@@ -488,13 +488,13 @@ export default function CompanyManagement() {
             <table className="hidden sm:table w-full">
               <thead className="sticky top-0 bg-card border-b border-border z-10">
                 <tr>
-                  <th className="text-left p-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Name</th>
-                  <th className="text-left p-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground hidden md:table-cell">Type</th>
-                  <th className="text-left p-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground hidden lg:table-cell">Contact</th>
-                  <th className="text-left p-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground hidden md:table-cell">Phone</th>
-                  <th className="text-left p-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground hidden md:table-cell">Email</th>
-                  <th className="text-left p-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground hidden lg:table-cell">Contacts</th>
-                  <th className="text-right p-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Actions</th>
+                  <th className="text-left p-3 text-xs font-semibold text-muted-foreground">Name</th>
+                  <th className="text-left p-3 text-xs font-semibold text-muted-foreground hidden md:table-cell">Type</th>
+                  <th className="text-left p-3 text-xs font-semibold text-muted-foreground hidden lg:table-cell">Contact</th>
+                  <th className="text-left p-3 text-xs font-semibold text-muted-foreground hidden md:table-cell">Phone</th>
+                  <th className="text-left p-3 text-xs font-semibold text-muted-foreground hidden md:table-cell">Email</th>
+                  <th className="text-left p-3 text-xs font-semibold text-muted-foreground hidden lg:table-cell">Contacts</th>
+                  <th className="text-right p-3 text-xs font-semibold text-muted-foreground">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -505,10 +505,10 @@ export default function CompanyManagement() {
                       <td className="p-3 text-sm font-medium">
                         <div className="flex items-center gap-2">
                           {c.name}
-                          {!c.is_active && <span className="text-[10px] px-1.5 py-0 rounded bg-red-100 text-red-600">Inactive</span>}
+                          {!c.is_active && <span className="text-xs px-1.5 py-0 rounded bg-danger-bg text-danger-fg">Inactive</span>}
                         </div>
                       </td>
-                      <td className="p-3 hidden md:table-cell"><span className={`text-xs px-1.5 py-0.5 rounded font-medium ${typeColors[c.company_type] || "bg-gray-100 text-gray-700"}`}>{c.company_type?.replace("_", " ")}</span></td>
+                      <td className="p-3 hidden md:table-cell"><span className={`text-xs px-1.5 py-0.5 rounded font-medium ${typeColors[c.company_type] || "bg-muted text-foreground"}`}>{c.company_type?.replace("_", " ")}</span></td>
                       <td className="p-3 text-sm text-muted-foreground hidden lg:table-cell">{c.contact_name || "—"}</td>
                       <td className="p-3 text-sm text-muted-foreground hidden md:table-cell">{c.contact_phone || "—"}</td>
                       <td className="p-3 text-sm text-muted-foreground hidden md:table-cell truncate max-w-[200px]">{c.contact_email || "—"}</td>
@@ -516,12 +516,12 @@ export default function CompanyManagement() {
                         {(c.contacts || []).length > 0 ? (
                           <div className="flex items-center gap-2 text-xs text-muted-foreground">
                             <span className="inline-flex items-center gap-0.5"><Users className="w-3 h-3" /> {c.contacts.length}</span>
-                            {handlerCount > 0 && <span className="inline-flex items-center gap-0.5 text-blue-500"><UserCog className="w-3 h-3" /> {handlerCount}</span>}
+                            {handlerCount > 0 && <span className="inline-flex items-center gap-0.5 text-info-fg"><UserCog className="w-3 h-3" /> {handlerCount}</span>}
                           </div>
                         ) : <span className="text-sm text-muted-foreground">—</span>}
                       </td>
                       <td className="p-3 text-right" onClick={(e) => e.stopPropagation()}>
-                        <button onClick={() => handleDelete(c)} className="p-1.5 rounded-md text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20" title="Remove"><Trash2 className="w-4 h-4" /></button>
+                        <button onClick={() => handleDelete(c)} className="p-1.5 rounded-md text-muted-foreground hover:text-danger-fg hover:bg-danger-bg" title="Remove"><Trash2 className="w-4 h-4" /></button>
                       </td>
                     </tr>
                   );

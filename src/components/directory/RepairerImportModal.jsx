@@ -63,9 +63,9 @@ export default function RepairerImportModal({ open, preview, applying, result, o
 
         <div className="flex-1 overflow-y-auto space-y-3 py-1">
           {result ? (
-            <div className="rounded-[10px] border border-border bg-card p-4">
+            <div className="rounded-lg border border-border bg-card p-4">
               <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                <CheckCircle2 className="w-4 h-4 text-success-fg" />
                 <p className="text-[13px] font-semibold text-foreground">
                   {result.created} created · {result.updated} updated
                 </p>
@@ -73,7 +73,7 @@ export default function RepairerImportModal({ open, preview, applying, result, o
               {(result.errors || []).length > 0 && (
                 <ul className="mt-2 space-y-1">
                   {result.errors.map((message) => (
-                    <li key={message} className="flex items-start gap-1.5 text-[11px] text-destructive">
+                    <li key={message} className="flex items-start gap-1.5 text-xs text-destructive">
                       <AlertTriangle className="w-3.5 h-3.5 mt-0.5 shrink-0" />
                       {message}
                     </li>
@@ -81,24 +81,24 @@ export default function RepairerImportModal({ open, preview, applying, result, o
                 </ul>
               )}
               {result.created === 0 && result.updated === 0 && (result.errors || []).length === 0 && (
-                <p className="mt-1 text-[11px] text-muted-foreground">There was nothing to change.</p>
+                <p className="mt-1 text-xs text-muted-foreground">There was nothing to change.</p>
               )}
             </div>
           ) : (
             <>
-              <div className="rounded-[10px] border border-border bg-card p-3">
+              <div className="rounded-lg border border-border bg-card p-3">
                 <div className="flex flex-wrap gap-1.5">
                   <Chip label="new" value={totals.create || 0} tone="create" />
                   <Chip label="existing" value={totals.update || 0} tone="update" />
                   <Chip label="to confirm" value={totals.possible || 0} tone="possible" />
                 </div>
-                <p className="mt-2 text-[11px] text-muted-foreground">
+                <p className="mt-2 text-xs text-muted-foreground">
                   {totals.rows || 0} rows in the file
                   {totals.skipped ? ` · ${totals.skipped} blank rows skipped` : ''}
                   {totals.unchanged ? ` · ${totals.unchanged} already up to date` : ''}
                 </p>
                 {(preview?.columns || []).length > 0 && (
-                  <p className="mt-0.5 text-[11px] text-muted-foreground">
+                  <p className="mt-0.5 text-xs text-muted-foreground">
                     Columns read: {preview.columns.map((column) => column.header).join(', ')}
                   </p>
                 )}
@@ -181,14 +181,14 @@ export default function RepairerImportModal({ open, preview, applying, result, o
 }
 
 const TONE = {
-  create: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300',
-  update: 'bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300',
-  possible: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
+  create: 'bg-success-bg text-success-fg',
+  update: 'bg-info-bg text-info-fg',
+  possible: 'bg-warning-bg text-warning-fg',
 };
 
 function Chip({ label, value, tone }) {
   return (
-    <span className={`rounded-full px-2.5 py-1 text-[11px] font-medium ${TONE[tone]}`}>
+    <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${TONE[tone]}`}>
       {value} {label}
     </span>
   );

@@ -91,7 +91,7 @@ export default function InsurerDirectoryTab() {
                       </div>
                       <button
                         onClick={(e) => { e.stopPropagation(); handleDelete(ins); }}
-                        className="p-1.5 rounded-md text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 flex-shrink-0"
+                        className="p-1.5 rounded-md text-muted-foreground hover:text-danger-fg hover:bg-danger-bg flex-shrink-0"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -104,7 +104,7 @@ export default function InsurerDirectoryTab() {
                     {codes.length > 0 && (
                       <div className="mt-1.5 flex flex-wrap gap-1">
                         {codes.map((c) => (
-                          <span key={c} className="inline-flex items-center bg-primary/10 text-primary px-2 py-0.5 rounded-full text-[10px] font-medium">{c}</span>
+                          <span key={c} className="inline-flex items-center bg-primary/10 text-primary px-2 py-0.5 rounded-full text-xs font-medium">{c}</span>
                         ))}
                       </div>
                     )}
@@ -117,12 +117,12 @@ export default function InsurerDirectoryTab() {
             <table className="hidden sm:table w-full">
               <thead className="sticky top-0 bg-card border-b border-border z-10">
                 <tr>
-                  <th className="text-left p-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Insurer</th>
-                  <th className="text-left p-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground hidden md:table-cell">Contact</th>
-                  <th className="text-left p-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground hidden lg:table-cell">Phone</th>
-                  <th className="text-left p-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground hidden md:table-cell">Email</th>
-                  <th className="text-left p-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Network Codes</th>
-                  <th className="text-right p-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Actions</th>
+                  <th className="text-left p-3 text-xs font-semibold text-muted-foreground">Insurer</th>
+                  <th className="text-left p-3 text-xs font-semibold text-muted-foreground hidden md:table-cell">Contact</th>
+                  <th className="text-left p-3 text-xs font-semibold text-muted-foreground hidden lg:table-cell">Phone</th>
+                  <th className="text-left p-3 text-xs font-semibold text-muted-foreground hidden md:table-cell">Email</th>
+                  <th className="text-left p-3 text-xs font-semibold text-muted-foreground">Network Codes</th>
+                  <th className="text-right p-3 text-xs font-semibold text-muted-foreground">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -149,7 +149,7 @@ export default function InsurerDirectoryTab() {
                         ) : <span className="text-sm text-muted-foreground">—</span>}
                       </td>
                       <td className="p-3 text-right" onClick={(e) => e.stopPropagation()}>
-                        <button onClick={() => handleDelete(ins)} className="p-1.5 rounded-md text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20" title="Remove">
+                        <button onClick={() => handleDelete(ins)} className="p-1.5 rounded-md text-muted-foreground hover:text-danger-fg hover:bg-danger-bg" title="Remove">
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </td>
