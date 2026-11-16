@@ -297,7 +297,7 @@ export default function EngineeringDetail({ job, onClose, onUpdate, isInternalUs
                 <ArrowLeft className="w-4 h-4" />
               </Button>
               <div className="flex-1 min-w-0">
-                <h1 className="text-lg md:text-page-title truncate">{job.reference || 'Job'}</h1>
+                <h1 className="text-lg md:text-[22px] font-semibold leading-tight truncate">{job.reference || 'Job'}</h1>
               </div>
             </div>
 
