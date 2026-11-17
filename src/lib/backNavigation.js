@@ -66,12 +66,20 @@ export function useBackLayer(active, onClose, name) {
   }, [active, name]);
 }
 
+// Android Chrome skips history steps that were added without a tap, so the spare
+// step is only added on the first tap in the app, and added again (inside the
+// back gesture's own event) whenever back lands on it.
 export function installBackGuard() {
   if (typeof window === 'undefined' || window.__fmBackGuard) return;
   window.__fmBackGuard = true;
-  const base = { ...(window.history.state || {}), fmBase: true };
-  window.history.replaceState(base, '');
-  window.history.pushState({ ...base, fmBase: false }, '');
+  const arm = () => {
+    window.removeEventListener('pointerdown', arm, true);
+    if (window.history.state?.fmBase === false) return;
+    const base = { ...(window.history.state || {}), fmBase: true };
+    window.history.replaceState(base, '');
+    window.history.pushState({ ...base, fmBase: false }, '');
+  };
+  window.addEventListener('pointerdown', arm, true);
   window.addEventListener('popstate', (e) => {
     if (e.state?.fmBase === true) {
       window.history.pushState({ ...e.state, fmBase: false }, '');
