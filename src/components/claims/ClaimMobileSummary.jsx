@@ -192,7 +192,7 @@ export function ClaimMobileSectionBar({ claim, title, onBack, onAction, isIntern
           <ChevronLeft className="w-6 h-6 flex-shrink-0 text-link" aria-hidden="true" />
           <span className="min-w-0">
             <span className="block text-xs font-medium text-link leading-tight">{claim.reg || 'Claim'}</span>
-            <span className="block text-base font-semibold leading-tight truncate m-ellipsis">{title}</span>
+            <span className="block text-base font-semibold leading-tight truncate m-ellipsis capitalize">{title}</span>
           </span>
         </button>
         <MoreMenu claim={claim} onAction={onAction} isInternalUser={isInternalUser} />
