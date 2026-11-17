@@ -37,7 +37,7 @@ export function daysSince(v: any): number | null {
 export function redact(text: string): string {
   return String(text || '')
     .replace(/[\w.+-]+@[\w-]+\.[\w.-]+/g, '[email]')
-    .replace(/(\+44\s?|0)(\d[\s-]?){9,10}\d?/g, '[phone]')
+    .replace(/(\+44\s?7|\b07|\b0[1238])\d(?:[\s-]?\d){7,8}\b/g, '[phone]')
     .replace(/\s+/g, ' ')
     .trim();
 }
