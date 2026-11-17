@@ -143,3 +143,12 @@ Built to the "RCM Flowmotive" design system and the UI audit (all 17 changes app
 - Removed the "Debug: bodyshop_id" line from Bodyshop.
 - Not changed inside: Financials, Bodyshop tools, Third party pursuit, Backordered parts (same frame, own content).
 - Check on the live app: picking a Client / Third party / Broker / Insurer record in the box; address look-up for Vehicle location; Fetch from DVLA; Hire to invoice Yes/No.
+
+## Linked contact details kept in line (Nov 2026)
+- src/components/shared/linkedRecords.js. Contact details only (name, phone, email, address, VAT status for clients; contact name, phone, email, account ref for credit repair companies; name + email for referrers). Claim-specific facts (insurer, policy/claim refs, vehicles) stay per claim.
+- Edited on a claim → directory record + every other claim linked to it (open and closed). A note says e.g. "Also updated Orkin UK and 46 other claims".
+- Edited in the directory (DirectoryDetailModal / CompanyManagement / CreditRepairDirectoryTab, all via updateAndLog) → every linked claim.
+- A client who is also a third party elsewhere (e.g. Orkin UK) is updated in both places.
+- Third parties now link by Claim.tp_client_id (new field, added to Claim.jsonc). Set when picked from the directory; older claims link themselves by exact name the first time they're synced. "UNKNOWN" is never matched.
+- Blank values never wipe a record or other claims. Picking a different person/company is a new link, not an edit.
+- Check after publishing: edit a client's phone on one claim, open another claim for the same client.
