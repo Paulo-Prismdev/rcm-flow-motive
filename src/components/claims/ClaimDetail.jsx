@@ -188,7 +188,6 @@ const EditableSection = ({ title, icon: Icon, claim, onUpdate, children, EditCom
     // single: only one field is unlocked (pencil → tick / cross); otherwise "Edit all".
     const [single, setSingle] = useState(false);
     const [version, setVersion] = useState(0);
-    const [actionsAt, setActionsAt] = useState(null); // where the tick / cross sit
     const [pencils, setPencils] = useState([]); // a pencil button at the end of each locked field
     const [, setMeasure] = useState(0);
     const bodyRef = useRef(null);
