@@ -124,3 +124,9 @@ Built to the "RCM Flowmotive" design system and the UI audit (all 17 changes app
 - Added public/manifest.webmanifest (navy #131D47 background + theme), icon-192/512 PNGs (full navy, logo inside the safe zone, marked "maskable"), and a full-navy apple-touch-icon.
 - index.html now links the manifest. Before this there was no manifest link, so Android made a plain shortcut (white ring) and a white launch screen.
 - After publishing: remove the app from the home screen and add it again (Chrome menu > Add to home screen / Install app). Check the live site still serves /manifest.webmanifest, not the Base44 /manifest.json (which has a white background).
+
+## One-field edit box (Nov 2026)
+- Fields never change look any more. The pencil opens an edit box (src/components/shared/FieldEditSheet.jsx): on phones/tablets a panel that sits just above the keyboard; on desktop a small box in the middle of the screen.
+- Save presses the section form's own Save, so saving works as before. Cancel, tapping outside, Escape and the phone's back button close it without saving (back no longer leaves the field in edit mode).
+- Used by EditableSection (ClaimDetail.jsx) and InlineField (Key dates, Estimate details).
+- To check on a real phone: keyboard pushes the box up (Android + iPhone); dropdown fields (Broker, Insurer) open and pick correctly inside the box; postcode look-up fields.
