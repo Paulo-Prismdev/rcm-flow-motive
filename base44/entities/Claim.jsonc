@@ -373,6 +373,10 @@
     "tp_name": {
       "type": "string"
     },
+    "tp_client_id": {
+      "type": "string",
+      "description": "ID of the Client directory record for the third party (keeps their contact details in line across claims)"
+    },
     "tp_phone": {
       "type": "string"
     },
