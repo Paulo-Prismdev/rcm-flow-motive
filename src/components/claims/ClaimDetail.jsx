@@ -2240,26 +2240,36 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
         {/* Sections: a source list down the left on desktop, the Mac way (phones open a
             section from ClaimMobileSummary). Same sections, same order. */}
         <div className={`flex-1 min-h-0 flex gap-3 ${mobilePage === 'summary' ? 'max-lg:hidden' : ''}`}>
-          <nav aria-label="Claim sections" className="hidden lg:flex w-56 flex-shrink-0 flex-col gap-0.5 min-h-0 overflow-y-auto rounded-xl border border-border bg-muted p-2">
-            {DETAIL_SECTIONS.filter(s => s.id !== 'creditRepair' || claim.claim_type === 'Credit Repair').map(section => {
-              const on = selectedSection === section.id;
-              const empty = isSectionEmpty(section.id, claim);
-              return (
-                <button
-                  key={section.id}
-                  type="button"
-                  onClick={() => setSelectedSection(section.id)}
-                  aria-current={on ? 'true' : undefined}
-                  className={`flex flex-shrink-0 items-center gap-2 h-8 px-2.5 rounded-lg text-left text-[13px] font-medium transition-colors ${on ? 'bg-primary text-primary-foreground' : 'text-foreground hover:bg-accent'}`}
-                >
-                  <section.icon className={`w-4 h-4 flex-shrink-0 ${on ? '' : 'text-muted-foreground'}`} aria-hidden="true" />
-                  <span className="flex-1 truncate">{section.label}</span>
-                  {empty && (
-                    <span className="w-2 h-2 rounded-full bg-warning flex-shrink-0" title="Has details still to fill in" aria-label="Has details still to fill in" />
-                  )}
-                </button>
-              );
-            })}
+          {/* Same groups and headings as the phone's All details list */}
+          <nav aria-label="Claim sections" className="hidden lg:flex w-60 flex-shrink-0 flex-col min-h-0 overflow-y-auto rounded-2xl bg-card shadow-card p-2">
+            {groupSections(phoneSections).map(([group, list]) => (
+              <div key={group} className="mb-1.5 last:mb-0">
+                <h3 className="flex items-center justify-between px-2.5 pt-2 pb-1 text-[13px] font-bold tracking-tight text-foreground">
+                  <span>{group}</span>
+                  {list.some(s => s.empty) && <span className="text-[11px] font-medium text-warning-fg">{list.filter(s => s.empty).length} to fill in</span>}
+                </h3>
+                {list.map(section => {
+                  const on = selectedSection === section.id;
+                  return (
+                    <button
+                      key={section.id}
+                      type="button"
+                      onClick={() => setSelectedSection(section.id)}
+                      aria-current={on ? 'true' : undefined}
+                      className={`w-full flex flex-shrink-0 items-center gap-2.5 h-9 px-2 rounded-xl text-left text-[13px] font-medium transition-colors ${on ? 'bg-primary text-primary-foreground' : 'text-foreground hover:bg-muted'}`}
+                    >
+                      <span className={`w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0 ${on ? 'bg-primary-foreground/15' : 'bg-muted'}`}>
+                        <section.icon className="w-3.5 h-3.5" aria-hidden="true" />
+                      </span>
+                      <span className="flex-1 truncate">{section.label}</span>
+                      {section.empty && (
+                        <span className="w-2 h-2 rounded-full bg-warning flex-shrink-0" title="Has details still to fill in" aria-label="Has details still to fill in" />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            ))}
           </nav>
 
           <div className="flex-1 min-w-0 overflow-y-auto min-h-0 pr-1 pb-4" data-claim-body style={{WebkitOverflowScrolling: 'touch'}}>
