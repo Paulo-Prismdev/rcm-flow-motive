@@ -2323,7 +2323,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
             section from ClaimMobileSummary). Same sections, same order. */}
         <div className={`flex-1 min-h-0 flex gap-3 ${mobilePage === 'summary' ? 'max-lg:hidden' : ''}`}>
           {/* Same groups and headings as the phone's All details list */}
-          <nav aria-label="Claim sections" className="hidden lg:flex w-60 flex-shrink-0 flex-col min-h-0 overflow-y-auto rounded-2xl bg-card shadow-card p-2">
+          <nav aria-label="Claim sections" className="hidden lg:flex w-[17.5rem] flex-shrink-0 flex-col min-h-0 overflow-y-auto rounded-2xl bg-card shadow-card p-2">
             {groupSections(phoneSections).map(([group, list]) => (
               <div key={group} className="mb-1.5 last:mb-0">
                 <h3 className="flex items-center justify-between px-2.5 pt-2 pb-1 text-[13px] font-bold tracking-tight text-foreground">
@@ -2343,7 +2343,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                       <span className={`w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0 ${on ? 'bg-primary-foreground/15' : 'bg-muted'}`}>
                         <section.icon className="w-3.5 h-3.5" aria-hidden="true" />
                       </span>
-                      <span className="flex-1 truncate">{section.label}</span>
+                      <span className="flex-1 truncate uppercase tracking-[0.03em]">{section.label}</span>
                       {section.empty && (
                         <span className="w-2 h-2 rounded-full bg-warning flex-shrink-0" title="Has details still to fill in" aria-label="Has details still to fill in" />
                       )}
