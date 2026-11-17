@@ -130,3 +130,16 @@ Built to the "RCM Flowmotive" design system and the UI audit (all 17 changes app
 - Save presses the section form's own Save, so saving works as before. Cancel, tapping outside, Escape and the phone's back button close it without saving (back no longer leaves the field in edit mode).
 - Used by EditableSection (ClaimDetail.jsx) and InlineField (Key dates, Estimate details).
 - To check on a real phone: keyboard pushes the box up (Android + iPhone); dropdown fields (Broker, Insurer) open and pick correctly inside the box; postcode look-up fields.
+
+## Claim detail screens re-laid out (Nov 2026)
+- One look on every screen: cards with a heading, each field a row (label | value | pencil). Tapping a row opens the edit box. Empty must-have fields say "Not set" in amber; optional ones show a grey dash. Each card shows "N to fill in".
+- New map (src/components/claims/claimScreens.jsx says which field goes where; layout in ClaimFieldCards.jsx):
+  The job: Overview (Claim + Accident), Key dates (Estimate & authority / Repair / Claim / Rectification), Estimate, Financials, Insurance & excess (NEW: client's policy + excess contribution).
+  People: Client, Repair contact (driver), Third party (Person / Their insurance / Their vehicle), Referrer.
+  The vehicle: Vehicle (Vehicle / Where it is & condition / DVLA, MOT & tax folded away), Courtesy car & hire (NEW; credit repair company shows on credit repair claims).
+  The repair: Bodyshop, Instruction defaults, Backordered parts.  Recovery & legal: Third party pursuit, Indemnity, Signed forms (NEW: repair preference + declaration of need + witness statements).
+- Old screen links (vehicleDamage, vehicleLocation, excessContribution, creditRepair, repairPreference, declarationOfNeed, witnessStatements) open the screen they moved into.
+- Simple fields save on their own. Excess contribution, Referrer, Credit repair company and Indemnity open their existing form in the box (their fields depend on each other).
+- Removed the "Debug: bodyshop_id" line from Bodyshop.
+- Not changed inside: Financials, Bodyshop tools, Third party pursuit, Backordered parts (same frame, own content).
+- Check on the live app: picking a Client / Third party / Broker / Insurer record in the box; address look-up for Vehicle location; Fetch from DVLA; Hire to invoice Yes/No.
