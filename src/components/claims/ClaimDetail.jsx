@@ -187,6 +187,7 @@ const EditableSection = ({ title, icon: Icon, claim, onUpdate, children, EditCom
     const pendingFocus = useRef(null); // { index } (same layout) or { label } (own view)
     const activeControl = useRef(null);
     const saveButton = useRef(null);
+    const lockedUnits = useRef(null); // the other fields, as they were when the pencil was tapped
 
     // Exit edit mode when claim is updated externally (e.g. wizard save), and redraw the
     // locked form from the fresh claim.
@@ -202,6 +203,7 @@ const EditableSection = ({ title, icon: Icon, claim, onUpdate, children, EditCom
         setActionsAt(null);
         activeControl.current = null;
         saveButton.current = null;
+        lockedUnits.current = null;
     };
 
     const handleSave = (updatedData) => {
@@ -227,9 +229,15 @@ const EditableSection = ({ title, icon: Icon, claim, onUpdate, children, EditCom
         const active = activeControl.current;
         if (!active) return;
         const activeUnit = fieldUnit(active, root);
-        controls.forEach((c) => {
-            const unit = fieldUnit(c, root);
-            if (unit === activeUnit) return;
+        // Only the fields there when the pencil was tapped are locked, so anything that
+        // opens afterwards (a dropdown's options, fields a switch reveals) stays usable.
+        if (!lockedUnits.current) {
+            lockedUnits.current = controls
+                .map((c) => ({ c, unit: fieldUnit(c, root) }))
+                .filter(({ unit }) => unit !== activeUnit && !unit.contains(active) && !active.contains(unit));
+        }
+        lockedUnits.current.forEach(({ c, unit }) => {
+            if (!unit.isConnected) return;
             unit.setAttribute('inert', '');
             unit.classList.add('fm-readonly');
             // Locked fields keep their amber "Not set" while another field is open.
@@ -368,6 +376,7 @@ const EditableSection = ({ title, icon: Icon, claim, onUpdate, children, EditCom
         pendingFocus.current = focus || null;
         activeControl.current = null;
         saveButton.current = null;
+        lockedUnits.current = null;
         setSingle(true);
         setIsEditing(true);
     };
