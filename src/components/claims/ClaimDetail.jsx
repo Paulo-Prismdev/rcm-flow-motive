@@ -508,6 +508,7 @@ function DetailRow({ label, value, isCurrency = false, isDate = false, isStatus 
 
 import { ListTodo, History, Timer, Link2, KeyRound, FileSignature } from "lucide-react";
 import { ClaimFieldsSection, SectionShell } from './ClaimFieldCards';
+import { syncClaimEditToRecords } from '../shared/linkedRecords';
 import { overviewCards, insuranceCards, datesCards, estimateCards, clientCards, driverCards, thirdPartyCards, tpInsuranceCards, referrerCards, hireCards, creditRepairCards, vehicleCards, instructionCards, indemnityCards, signedFormCards } from './claimScreens';
 
 // Counts sit inside their button (no floating bubbles), so nothing overlaps.
@@ -886,6 +887,13 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
       setClaim(previous);
       return false;
     }
+    // Contact details that belong to a directory record (client, third party, referrer,
+    // credit repair company) are kept the same on that record and on every other claim.
+    syncClaimEditToRecords(previous, updatedData).then((r) => {
+      if (!r?.records?.length) return;
+      queryClient.invalidateQueries({ queryKey: ['claims'] });
+      notify(`Also updated ${r.records.join(' and ')}${r.claims ? ` and ${r.claims} other claim${r.claims === 1 ? '' : 's'}` : ''}`);
+    }).catch(() => {});
     const oldStatus = claim.job_status || 'New';
     const newStatus = updatedData.job_status;
     const oldSec = claim.secondary_status || '';
