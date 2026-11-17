@@ -773,6 +773,9 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
     queryFn: () => base44.auth.me(),
   });
 
+  // Colleagues who have this claim open right now (staff only).
+  const othersInClaim = useClaimPresence(claim.id, currentUser, isInternalUser);
+
   const { data: linkedClient } = useQuery({
     queryKey: ['client', claim.client_id || claim.client_name],
     queryFn: async () => {
@@ -1827,6 +1830,8 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
               />
 
       <div ref={rootRef} className="flex flex-col gap-2 md:gap-3 h-full" data-claim-root style={{touchAction: 'auto', isolation: 'isolate'}}>
+
+          <ClaimPresenceBanner others={othersInClaim} />
 
           {/* ── PHONE (< lg): the claim opens on a summary; each section opens on its own page ── */}
           {mobilePage === 'summary' ? (
