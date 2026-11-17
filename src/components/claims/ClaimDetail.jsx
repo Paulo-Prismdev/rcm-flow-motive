@@ -760,7 +760,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
   useEffect(() => {
     if (urlSection && urlSection !== selectedSection) setSelectedSection(urlSection);
     if (!urlSection) sectionPushed.current = false;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [urlSection]);
   const phoneSections = DETAIL_SECTIONS
     .filter(s => s.id !== 'creditRepair' || claim.claim_type === 'Credit Repair')

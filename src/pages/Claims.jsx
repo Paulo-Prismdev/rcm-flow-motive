@@ -452,7 +452,7 @@ export default function ClaimsPage() {
     params.delete('section');
     navigate({ search: `?${params.toString()}` }, { replace: wasOpen });
     if (!wasOpen) claimPushed.current = true;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [selectedClaim?.id]);
   // Back (gesture or button) took the claim out of the address: close it.
   useEffect(() => {
@@ -462,7 +462,7 @@ export default function ClaimsPage() {
       setOpenSection('status');
     }
     prevUrlClaimId.current = urlClaimId;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [urlClaimId]);
   // Closed on screen: take its step (and an open section's) back off the history.
   useEffect(() => {
@@ -477,7 +477,7 @@ export default function ClaimsPage() {
       const s = params.toString();
       navigate({ search: s ? `?${s}` : '' }, { replace: true });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [selectedClaim]);
 
   // Hide the global layout header on mobile when a claim detail is open
