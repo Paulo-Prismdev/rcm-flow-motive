@@ -3,11 +3,12 @@ import { Button } from '@/components/ui/button';
 
 import { Edit, Save, X, Check, Pencil } from 'lucide-react';
 import { format } from 'date-fns';
+import FieldEditSheet from '../shared/FieldEditSheet';
 
 // A claim section made of label / value fields (Key dates, Estimate details).
-// Each field has its own pencil: tap it, change the value, green tick saves just
-// that field (plus anything worked out from it, such as a gross figure), the cross
-// puts it back. "Edit all" still opens every field at once.
+// Each field has its own pencil: tap it and an edit box opens (above the keyboard on
+// a phone). Save keeps just that field (plus anything worked out from it, such as a
+// gross figure); Cancel puts it back. The field itself never changes look.
 
 const toInputDate = (date) => {
     if (!date) return '';
@@ -25,19 +26,16 @@ const InlineEditContext = createContext({ isEditing: false, editingField: null, 
 export const useInlineEdit = () => useContext(InlineEditContext);
 
 export function InlineField({ label, name, type = 'text', isCurrency = false, isDate = false, placeholder, bare = false, readOnly = false, onChange }) {
-    const { isEditing: editingAll, editingField, draft, setField, startField, saveField, cancelField, canEdit } = useInlineEdit();
+    const { isEditing: editingAll, editingField, draft, setField, startField, saveField, cancelField, canEdit, savedValues } = useInlineEdit();
     const editingThis = editingField === name;
-    const isEditing = editingAll || editingThis;
+    const isEditing = editingAll; // the field only turns into a box when every field is open
     const inputRef = useRef(null);
     const value = draft[name];
     const isEmpty = !isEditing && (value === null || value === undefined || value === '' || value === 0);
     const display = isEmpty ? 'Not set' : formatDisplay(value, isDate, isCurrency);
     const inputType = isDate ? 'date' : (isCurrency || type === 'number' ? 'number' : type);
     const canPencil = canEdit && !readOnly && !editingAll && !editingThis;
-
-    useEffect(() => {
-        if (editingThis) inputRef.current?.focus({ preventScroll: true });
-    }, [editingThis]);
+    const claimValue = savedValues?.[name];
 
     const handleChange = (e) => {
         let v;
@@ -48,44 +46,40 @@ export function InlineField({ label, name, type = 'text', isCurrency = false, is
         if (onChange) onChange(v);
     };
 
-    const onKeyDown = (e) => {
-        if (!editingThis) return;
-        if (e.key === 'Enter') { e.preventDefault(); saveField(); }
-        if (e.key === 'Escape') { e.preventDefault(); cancelField(); }
-    };
-
     const inputVal = isDate ? toInputDate(value) : (value ?? '');
     const valueClass = `text-sm font-medium ${(isCurrency || typeof value === 'number') ? 'tabular-nums' : ''}`;
 
-    const content = isEditing ? (
+    const input = (big) => (
         <input
             ref={inputRef}
             type={inputType}
             step={isCurrency || type === 'number' ? '0.01' : undefined}
+            inputMode={isCurrency || type === 'number' ? 'decimal' : undefined}
             value={inputVal}
             onChange={handleChange}
-            onKeyDown={onKeyDown}
             placeholder={placeholder}
             readOnly={readOnly}
             aria-label={label}
-            className={`w-full min-w-0 h-9 px-2.5 ${valueClass} text-foreground bg-card border border-input rounded-lg outline-none focus:border-ring focus:ring-2 focus:ring-ring/30 ${readOnly ? 'cursor-not-allowed opacity-60' : ''}`}
+            className={`w-full min-w-0 ${big ? 'h-12 px-3.5 text-base rounded-xl bg-muted/40' : `h-9 px-2.5 ${valueClass} rounded-lg bg-card`} font-medium text-foreground border border-input outline-none focus:border-ring focus:ring-2 focus:ring-ring/30 ${readOnly ? 'cursor-not-allowed opacity-60' : ''}`}
         />
-    ) : (
-        <div className={`${valueClass} break-words min-w-0 ${isEmpty ? 'text-warning-fg !font-normal' : 'text-foreground'} ${readOnly ? 'opacity-60' : ''}`}>
-            {display}
+    );
+
+    // While this field's edit box is open the field still shows its saved value.
+    const shown = editingThis ? (claimValue ?? null) : value;
+    const shownEmpty = shown === null || shown === undefined || shown === '' || shown === 0;
+    const content = isEditing ? input(false) : (
+        <div className={`${valueClass} break-words min-w-0 ${(editingThis ? shownEmpty : isEmpty) ? 'text-warning-fg !font-normal' : 'text-foreground'} ${readOnly ? 'opacity-60' : ''}`}>
+            {editingThis ? (shownEmpty ? 'Not set' : formatDisplay(shown, isDate, isCurrency)) : display}
         </div>
     );
 
-    const tail = editingThis ? (
-        <span className="flex items-center gap-1 flex-shrink-0">
-            <button type="button" onClick={saveField} aria-label={`Save ${label}`} title="Save" className="w-9 h-9 rounded-lg bg-success text-on-solid flex items-center justify-center shadow-card">
-                <Check className="w-[18px] h-[18px]" aria-hidden="true" />
-            </button>
-            <button type="button" onClick={cancelField} aria-label="Cancel" title="Cancel" className="w-9 h-9 rounded-lg border border-border bg-card flex items-center justify-center">
-                <X className="w-[18px] h-[18px]" aria-hidden="true" />
-            </button>
-        </span>
-    ) : canPencil ? (
+    const box = (
+        <FieldEditSheet open={editingThis} title={label} onSave={saveField} onCancel={cancelField}>
+            {input(true)}
+        </FieldEditSheet>
+    );
+
+    const tail = canPencil || editingThis ? (
         <button
             type="button"
             onClick={() => startField(name)}
@@ -102,14 +96,16 @@ export function InlineField({ label, name, type = 'text', isCurrency = false, is
             <div>
                 <div className="text-xs font-medium text-muted-foreground mb-1">{label}</div>
                 <div className="flex items-center gap-2 min-h-[32px]"><div className="flex-1 min-w-0">{content}</div>{tail}</div>
+                {box}
             </div>
         );
     }
 
     return (
-        <div className={`py-2 px-3 rounded-lg transition-colors ${editingThis ? 'bg-card ring-2 ring-ring/30' : isEmpty ? 'bg-warning-bg/60 border border-warning/25' : isEditing ? 'bg-muted/30' : 'hover:bg-muted/50'}`}>
+        <div className={`py-2 px-3 rounded-lg transition-colors ${(editingThis ? shownEmpty : isEmpty) ? 'bg-warning-bg/60 border border-warning/25' : isEditing ? 'bg-muted/30' : 'hover:bg-muted/50'}`}>
             <div className="text-xs font-medium text-muted-foreground mb-0.5">{label}</div>
             <div className="flex items-center gap-2 min-h-[28px]"><div className="flex-1 min-w-0">{content}</div>{tail}</div>
+            {box}
         </div>
     );
 }
@@ -137,7 +133,7 @@ export default function InlineEditableSection({ title, icon: Icon, claim, onUpda
     const startField = (name) => { setDraft(claim); setIsEditing(false); setEditingField(name); };
 
     const ctx = {
-        isEditing, editingField, draft, setField, canEdit,
+        isEditing, editingField, draft, setField, canEdit, savedValues: claim,
         startField, saveField: handleSave, cancelField: handleCancel,
     };
 
