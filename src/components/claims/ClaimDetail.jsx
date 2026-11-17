@@ -236,16 +236,23 @@ const EditableSection = ({ title, icon: Icon, claim, onUpdate, children, EditCom
         activeUnit.classList.remove('fm-readonly');
         activeUnit.setAttribute('data-fm-active', '');
         // The form's own action buttons: remember Save, hide them all.
+        // A button with no type inside a form counts as "submit", Cancel included, so Save
+        // is found by its name first and only then by being the form's submit button.
         const SAVE = /^(save|update|confirm)\b/i;
         const ACTION = /^(save|cancel|update|confirm|close)\b/i;
+        const NOT_SAVE = /^(cancel|close|back)\b/i;
+        let byName = null; let bySubmit = null;
         root.querySelectorAll('button').forEach((b) => {
             if (activeUnit.contains(b) || b.closest('.fm-field-actions')) return;
             const text = (b.textContent || '').trim();
-            if (b.type === 'submit' || ACTION.test(text)) {
-                if (!saveButton.current && (b.type === 'submit' || SAVE.test(text))) saveButton.current = b;
+            const submitAttr = b.getAttribute('type') === 'submit';
+            if (submitAttr || ACTION.test(text)) {
+                if (!byName && SAVE.test(text)) byName = b;
+                if (!bySubmit && submitAttr && !NOT_SAVE.test(text)) bySubmit = b;
                 b.classList.add('fm-single-hide');
             }
         });
+        if (!saveButton.current) saveButton.current = byName || bySubmit;
         // Tick and cross: inside the end of a wide box, or just after a small one (a switch).
         const r = root.getBoundingClientRect();
         const a = active.getBoundingClientRect();
