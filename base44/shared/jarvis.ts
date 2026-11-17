@@ -21,10 +21,6 @@ export function jarvisAuthorised(req: Request): boolean {
 
 export function deny(req?: Request) {
   const reason = req ? jarvisAuthCheck(req) : 'unknown';
-  const sent = req ? (req.headers.get('x-jarvis-key') || '').trim() : '';
-  const exp = (Deno.env.get('JARVIS_TOOL_KEY') || '').trim();
-  const hdrNames = req ? [...req.headers.keys()].filter(k => !/auth|cookie|token|secret|key/i.test(k) || k === 'x-jarvis-key').join(',') : '';
-  console.log(`[jarvis] denied: ${reason}; sent_len=${sent.length} expected_len=${exp.length}; first2_match=${sent.slice(0,2) === exp.slice(0,2)}; last2_match=${sent.slice(-2) === exp.slice(-2)}; headers=${hdrNames}`);
   return Response.json({ error: 'Not authorised', reason }, { status: 401 });
 }
 
