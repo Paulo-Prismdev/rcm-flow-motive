@@ -1036,23 +1036,13 @@ fieldset.fm-readonly { border: 0; margin: 0; padding: 0; min-width: 0; }
 .fm-readonly input[type="date"].fm-empty, .fm-readonly input[type="time"].fm-empty { color: transparent !important; -webkit-text-fill-color: transparent; }
 .fm-readonly select { appearance: none; }
 /* ── Per-field editing ──
-   Locked fields show a small pencil; tapping one unlocks just that field, with a
-   green tick to save and a cross to cancel. The other fields stay locked. */
+   Each locked field has a pencil button at its end (drawn by EditableSection);
+   tapping it unlocks just that field, with a green tick to save and a cross to
+   cancel. Locked dropdowns and dates hide their arrows so only the pencil shows. */
 .fm-click-edit [data-fm-field],
 .fm-click-edit [data-edit-label] { position: relative; cursor: pointer; }
-.fm-click-edit [data-fm-field]::after,
-.fm-click-edit [data-edit-label]::after {
-  content: ''; position: absolute; top: 6px; right: 6px; width: 14px; height: 14px;
-  background-color: hsl(var(--muted-foreground)); opacity: 0.55; pointer-events: none;
-  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 20h4L19 9l-4-4L4 16z'/%3E%3Cpath d='m14 6 4 4'/%3E%3C/svg%3E") center / contain no-repeat;
-          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 20h4L19 9l-4-4L4 16z'/%3E%3Cpath d='m14 6 4 4'/%3E%3C/svg%3E") center / contain no-repeat;
-}
-@media (hover: hover) {
-  .fm-click-edit [data-fm-field]::after,
-  .fm-click-edit [data-edit-label]::after { opacity: 0; transition: opacity 120ms; }
-  .fm-click-edit [data-fm-field]:hover::after,
-  .fm-click-edit [data-edit-label]:hover::after { opacity: 0.85; }
-}
+.fm-readonly button[role="combobox"] > svg:last-child { display: none; }
+.fm-readonly input::-webkit-calendar-picker-indicator { display: none; }
 .fm-single [data-fm-active] { border-radius: 10px; box-shadow: 0 0 0 2px hsl(var(--ring) / 0.35); }
 .fm-single .fm-single-hide { display: none !important; }
 .fm-field-actions { position: absolute; z-index: 5; display: flex; gap: 4px; }
