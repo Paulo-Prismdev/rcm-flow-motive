@@ -36,6 +36,7 @@ export default function FieldEditSheet({ open, title, subtitle, onSave, onCancel
     const phone = usePhoneLayout();
     const { inset, height } = useKeyboardInset(open && phone);
     const innerRef = useRef(null);
+    const popupOpenAtTap = useRef(false);
     const cancelRef = useRef(onCancel);
     cancelRef.current = onCancel;
 
@@ -58,6 +59,8 @@ export default function FieldEditSheet({ open, title, subtitle, onSave, onCancel
     if (!open || typeof document === 'undefined') return null;
 
     const onKeyDown = (e) => {
+        // Keys typed in a dropdown's own search box (it sits outside the box) are the dropdown's.
+        if (!e.currentTarget.contains(e.target)) return;
         if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); onCancel?.(); }
         else if (e.key === 'Enter' && e.target.tagName === 'INPUT' && !['checkbox', 'radio', 'button', 'submit'].includes(e.target.type)) {
             e.preventDefault(); onSave?.();
@@ -102,7 +105,13 @@ export default function FieldEditSheet({ open, title, subtitle, onSave, onCancel
 
     return createPortal(
         <div className="fm-edit-sheet fixed inset-0 z-[48]" onKeyDown={onKeyDown} role="dialog" aria-modal="true" aria-label={title}>
-            <div className="absolute inset-0 bg-black/30" onClick={onCancel} aria-hidden="true" />
+            <div
+                className="absolute inset-0 bg-black/30"
+                aria-hidden="true"
+                // Tapping outside closes the box, unless the tap was just closing an open dropdown.
+                onPointerDown={() => { popupOpenAtTap.current = !!document.querySelector('[data-radix-popper-content-wrapper], [role="listbox"]'); }}
+                onClick={() => { if (!popupOpenAtTap.current) onCancel?.(); popupOpenAtTap.current = false; }}
+            />
             {phone ? (
                 <div
                     className="absolute left-0 right-0 bg-card rounded-t-2xl shadow-2xl px-4 pt-2 flex flex-col"
