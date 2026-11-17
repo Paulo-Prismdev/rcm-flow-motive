@@ -1448,8 +1448,8 @@ export default function ClaimsPage() {
       {/* Detail panel — full width, replacing the list */}
       {selectedClaim && (
         <div className="flex-1 min-w-0 min-h-0 flex flex-col w-full" data-claim-scroll>
-          {/* Desktop: no backing panel, so the page's background glows show between the claim's cards. */}
-          <div className="h-full bg-card lg:bg-transparent overflow-hidden lg:overflow-visible" data-claim-shell>
+          {/* No backing panel (phone or desktop), so the page's background glows show between the claim's cards. */}
+          <div className="h-full bg-transparent overflow-hidden lg:overflow-visible" data-claim-shell>
             <ClaimDetail
               key={selectedClaim.id}
               claim={selectedClaim}
