@@ -119,3 +119,8 @@ Built to the "RCM Flowmotive" design system and the UI audit (all 17 changes app
 - Claim summary (phone): Paperwork card removed; Quick view, Photos (count) and Docs (count) are three buttons under the client name. Internal updates stays in the ⋯ menu.
 - Pencils: a 36px boxed button at the end of every editable field (all section types, phone and desktop), including the custom dropdowns (plain buttons in some forms). Locked dropdowns and dates hide their arrow so only the pencil shows. While a field is open, only the fields that existed when the pencil was tapped are locked, so dropdown options and fields a switch reveals stay usable.
 - Edit all removed from every section header.
+
+## App icon and launch screen (Nov 2026)
+- Added public/manifest.webmanifest (navy #131D47 background + theme), icon-192/512 PNGs (full navy, logo inside the safe zone, marked "maskable"), and a full-navy apple-touch-icon.
+- index.html now links the manifest. Before this there was no manifest link, so Android made a plain shortcut (white ring) and a white launch screen.
+- After publishing: remove the app from the home screen and add it again (Chrome menu > Add to home screen / Install app). Check the live site still serves /manifest.webmanifest, not the Base44 /manifest.json (which has a white background).
