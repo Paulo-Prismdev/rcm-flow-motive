@@ -2017,7 +2017,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
             {groupSections(phoneSections).map(([group, list]) => (
               <div key={group} className="mb-1.5 last:mb-0">
                 <h3 className="flex items-center justify-between px-2.5 pt-2 pb-1 text-[13px] font-bold tracking-tight text-foreground">
-                  <span>{group}</span>
+                  <span className="capitalize">{group}</span>
                   {list.some(s => s.empty) && <span className="text-[11px] font-medium text-warning-fg">{list.filter(s => s.empty).length} to fill in</span>}
                 </h3>
                 {list.map(section => {

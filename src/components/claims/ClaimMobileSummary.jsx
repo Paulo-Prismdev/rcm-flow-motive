@@ -60,7 +60,7 @@ const sectionPreview = (id, c) => {
 
 const Card = ({ title, children }) => (
   <section className="mx-3 mb-3 rounded-[18px] bg-card shadow-card p-4" aria-label={title}>
-    <h2 className="text-[12.5px] font-semibold text-muted-foreground mb-2.5">{title}</h2>
+    <h2 className="text-[12.5px] font-semibold text-muted-foreground mb-2.5 capitalize">{title}</h2>
     {children}
   </section>
 );
@@ -375,11 +375,11 @@ export default function ClaimMobileSummary({
         </Card>
 
 
-        <h2 className="px-4 pt-3 pb-1 text-[19px] font-bold tracking-tight">All details</h2>
+        <h2 className="px-4 pt-3 pb-1 text-[19px] font-bold tracking-tight">All Details</h2>
         {grouped.map(([title, list]) => (
           <div key={title} className="mb-3">
             <h3 className="flex items-center justify-between px-4 pt-3 pb-2 text-base font-bold tracking-tight text-foreground">
-              <span>{title}</span>
+              <span className="capitalize">{title}</span>
               {list.some((s) => s.empty) && (
                 <span className="flex items-center gap-1.5 text-xs font-medium text-warning-fg">
                   <span className="w-1.5 h-1.5 rounded-full bg-warning" aria-hidden="true" />

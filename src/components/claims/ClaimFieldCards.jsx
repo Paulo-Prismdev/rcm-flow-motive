@@ -64,7 +64,7 @@ export function SectionShell({ title, icon: Icon, actions, children }) {
                         <Icon className="w-4 h-4 text-foreground" aria-hidden="true" />
                     </span>
                 )}
-                <h3 className="text-lg font-bold tracking-tight text-foreground flex-1 min-w-0 truncate">{title}</h3>
+                <h3 className="text-lg font-bold tracking-tight text-foreground flex-1 min-w-0 truncate capitalize">{title}</h3>
                 {actions}
             </div>
             {children}
@@ -76,7 +76,7 @@ export function FieldCard({ title, action, children, wide, todo = 0, collapsible
     const [open, setOpen] = useState(defaultOpen);
     const head = (
         <>
-            <h4 className="text-[14.5px] font-semibold text-foreground flex-1 min-w-0 truncate">{title}</h4>
+            <h4 className="text-[14.5px] font-semibold text-foreground flex-1 min-w-0 truncate capitalize">{title}</h4>
             {todo > 0 && <span className="text-xs font-medium text-warning-fg flex-shrink-0">{todo} to fill in</span>}
             {action && <span className="flex-shrink-0" onClick={(e) => e.stopPropagation()}>{action}</span>}
             {collapsible && <ChevronDown className={`w-4 h-4 text-muted-foreground flex-shrink-0 transition-transform ${open ? 'rotate-180' : ''}`} aria-hidden="true" />}
