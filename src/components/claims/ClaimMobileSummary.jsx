@@ -303,13 +303,13 @@ export default function ClaimMobileSummary({
             {[vehicle, claim.job_number, partyName].filter(Boolean).join(' · ')}
           </p>
           {/* Quick view, photos and documents, one tap from the top of the claim */}
-          <div className="grid grid-cols-3 m-keep-3 gap-2 mt-3.5">
+          <div className="flex flex-nowrap gap-2 mt-3.5">
             {[
               { key: 'qv', icon: Eye, label: 'Quick view', onClick: onQuickView },
               { key: 'images', icon: Image, label: 'Photos', count: imagesCount, onClick: () => onAction('images') },
               { key: 'docs', icon: FileText, label: 'Docs', count: docsCount, onClick: () => onAction('docs') },
             ].filter((b) => b.onClick).map(({ key, icon: BIcon, label, count, onClick }) => (
-              <button key={key} type="button" onClick={onClick} className="relative h-[58px] rounded-2xl bg-card shadow-card flex flex-col items-center justify-center gap-1 text-[13px] font-medium active:scale-[0.98] transition-transform">
+              <button key={key} type="button" onClick={onClick} className="relative flex-1 min-w-0 h-[58px] rounded-2xl bg-card shadow-card flex flex-col items-center justify-center gap-1 text-[13px] font-medium active:scale-[0.98] transition-transform">
                 <BIcon className="w-5 h-5" aria-hidden="true" />
                 {label}
                 {count > 0 && <span className="absolute top-1.5 right-2 min-w-[18px] h-[18px] px-1 rounded-full bg-info text-on-solid text-[11px] font-bold flex items-center justify-center">{count}</span>}
