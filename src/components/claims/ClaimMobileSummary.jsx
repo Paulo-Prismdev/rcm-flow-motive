@@ -67,13 +67,54 @@ const Card = ({ title, children }) => (
 );
 
 // The sections, grouped under headings so the list reads as a few short lists.
-const DETAIL_GROUPS = [
+// Shared with the desktop section list so both read the same.
+export const DETAIL_GROUPS = [
   ['The job', ['status', 'dates', 'estimate', 'financials', 'excessContribution']],
   ['People', ['client', 'creditRepair', 'driver', 'thirdParty', 'referrer']],
   ['The vehicle', ['vehicle', 'vehicleDamage', 'vehicleLocation']],
   ['The repair', ['bodyshop', 'instructionDefaults', 'repairPreference', 'backorderedParts']],
   ['Recovery and legal', ['thirdpartyPursuit', 'indemnity', 'declarationOfNeed', 'witnessStatements']],
 ];
+
+// Sections in their groups; anything not listed goes under "Other".
+export function groupSections(sections) {
+  const grouped = DETAIL_GROUPS
+    .map(([title, ids]) => [title, ids.map((id) => sections.find((s) => s.id === id)).filter(Boolean)])
+    .filter(([, list]) => list.length);
+  const placed = new Set(DETAIL_GROUPS.flatMap(([, ids]) => ids));
+  const others = sections.filter((s) => !placed.has(s.id));
+  if (others.length) grouped.push(['Other', others]);
+  return grouped;
+}
+
+// The stage in the client's words as a labelled track (desktop header).
+export function ClaimStageTrack({ claim }) {
+  const journey = clientJourney(claim);
+  if (journey.exception) {
+    return <p className="text-sm font-semibold text-danger-fg">{journey.label}</p>;
+  }
+  const n = journey.stages.length;
+  return (
+    <div>
+      <div className="flex items-baseline gap-2 mb-2">
+        <span className="text-xs text-muted-foreground">Stage {journey.index + 1} of {n}</span>
+        <span className="text-[15px] font-semibold">{journey.label}</span>
+      </div>
+      <ol className="grid gap-1.5" style={{ gridTemplateColumns: `repeat(${n}, minmax(0, 1fr))` }}>
+        {journey.stages.map((s, i) => {
+          const done = i < journey.index;
+          const now = i === journey.index;
+          return (
+            <li key={s} className="min-w-0" aria-current={now ? 'step' : undefined}>
+              <span className={`block h-[5px] rounded-full ${done ? 'bg-success' : now ? (journey.held || journey.rectification ? 'bg-warning' : 'bg-primary') : 'bg-border'}`} />
+              <span className={`block mt-1.5 text-xs leading-tight truncate ${now ? 'font-semibold text-foreground' : done ? 'text-muted-foreground' : 'text-muted-foreground/70'}`}>{s}</span>
+            </li>
+          );
+        })}
+      </ol>
+    </div>
+  );
+}
 
 const Row = ({ onClick, icon: Icon, tile: Tile, label, sub, right, dot }) => (
   <button
@@ -213,12 +254,7 @@ export default function ClaimMobileSummary({
     return () => io.disconnect();
   }, []);
 
-  const grouped = DETAIL_GROUPS
-    .map(([title, ids]) => [title, ids.map((id) => sections.find((s) => s.id === id)).filter(Boolean)])
-    .filter(([, list]) => list.length);
-  const placed = new Set(DETAIL_GROUPS.flatMap(([, ids]) => ids));
-  const others = sections.filter((s) => !placed.has(s.id));
-  if (others.length) grouped.push(['Other', others]);
+  const grouped = groupSections(sections);
 
   const people = [
     { role: 'Client', name: claim.client_name, phone: claim.client_phone, section: 'client' },
