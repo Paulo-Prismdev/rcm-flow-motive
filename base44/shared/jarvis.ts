@@ -1,4 +1,3 @@
-// key rotated 2026-11-17
 // Shared helpers for the Jarvis voice assistant tools (read-only).
 // Security: every Jarvis endpoint requires the x-jarvis-key header to match the
 // JARVIS_TOOL_KEY secret. If the secret is not set, every request is refused.
@@ -20,17 +19,9 @@ export function jarvisAuthorised(req: Request): boolean {
   return jarvisAuthCheck(req) === 'ok';
 }
 
-async function fp(v: string) {
-  if (!v) return 'none';
-  const h = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(v));
-  return [...new Uint8Array(h)].slice(0, 3).map(b => b.toString(16).padStart(2, '0')).join('') + ':' + v.length;
-}
-
-export async function deny(req?: Request) {
+export function deny(req?: Request) {
   const reason = req ? jarvisAuthCheck(req) : 'unknown';
-  const exp = (Deno.env.get('JARVIS_TOOL_KEY') || '').trim();
-  const got = req ? (req.headers.get('x-jarvis-key') || '').trim() : '';
-  return Response.json({ error: 'Not authorised', reason, server_fp: await fp(exp), sent_fp: await fp(got) }, { status: 401 });
+  return Response.json({ error: 'Not authorised', reason }, { status: 401 });
 }
 
 const CLOSED_SECONDARY = ['closed', 'cancelled'];

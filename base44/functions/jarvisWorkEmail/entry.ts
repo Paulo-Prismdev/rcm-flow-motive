@@ -1,4 +1,3 @@
-// redeploy 2026-11-17 19:58
 import { ImapFlow } from 'npm:imapflow@1.0.171';
 import { simpleParser } from 'npm:mailparser@3.7.1';
 import { jarvisAuthorised, deny } from '../../shared/jarvis.ts';
