@@ -90,7 +90,7 @@ Deno.serve(async (req) => {
             preview,
           });
         }
-        return Response.json({ account: 'work', filter, count: emails.length, more_available: uids.length > pick.length, emails });
+        return Response.json({ account: 'rcm', filter, count: emails.length, more_available: uids.length > pick.length, emails });
       } finally { lock.release(); }
     }
 
@@ -104,7 +104,7 @@ Deno.serve(async (req) => {
         const p: any = await simpleParser(msg.source);
         const text = stripQuoted(p.text || '');
         return Response.json({
-          account: 'work', id,
+          account: 'rcm', id,
           from: clip(addr(p.from), 150), to: clip(addr(p.to), 200), cc: p.cc ? clip(addr(p.cc), 200) : null,
           subject: clip(p.subject, 200), received: uk(p.date),
           attachments: (p.attachments || []).length,
@@ -142,7 +142,7 @@ Deno.serve(async (req) => {
         || boxes.find((b) => /(^|[./])drafts$/i.test(b.path))?.path || 'INBOX.Drafts';
       const raw = mime({ from: `Paul Goddard <${user}>`, to, subject: subject || '(no subject)', body: text, inReplyTo, references });
       await client.append(drafts, raw, ['\\Draft', '\\Seen']);
-      return Response.json({ saved_as_draft: true, account: 'work', to, subject, folder: drafts, note: 'Saved in your work Drafts folder. Not sent.' });
+      return Response.json({ saved_as_draft: true, account: 'rcm', to, subject, folder: drafts, note: 'Saved in your work Drafts folder. Not sent.' });
     }
 
     return Response.json({ error: 'Unknown action.' }, { status: 400 });
