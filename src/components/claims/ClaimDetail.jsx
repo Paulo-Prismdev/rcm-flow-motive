@@ -240,6 +240,7 @@ const EditableSection = ({ title, icon: Icon, claim, onUpdate, children, EditCom
             if (!unit.isConnected) return;
             unit.setAttribute('inert', '');
             unit.classList.add('fm-readonly');
+            if (c.tagName === 'BUTTON' && !c.matches(FIELD_SELECTOR)) c.setAttribute('data-fm-dropdown', '');
             // Locked fields keep their amber "Not set" while another field is open.
             if (c.matches('input:not([type="checkbox"]):not([type="radio"]), textarea, select')) {
                 const empty = c.value === '' || c.value == null;
