@@ -826,7 +826,8 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
   // Where the summary was scrolled to when a section was opened, so Back returns there.
   const summaryScroll = useRef(0);
   const openPhoneSection = (id) => {
-    summaryScroll.current = rootRef.current?.closest('[data-claim-scroll]')?.scrollTop || 0;
+    // (The claim column normally does the scrolling on phones; the page itself is a fallback.)
+    summaryScroll.current = rootRef.current?.closest('[data-claim-scroll]')?.scrollTop || window.scrollY || 0;
     setSelectedSection(id);
     const params = new URLSearchParams(routeLocation.search);
     params.set('section', id);
@@ -845,10 +846,11 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
     if (!scroller) return undefined;
     if (mobilePage !== 'summary') { scroller.scrollTop = 0; return undefined; }
     const to = summaryScroll.current;
-    scroller.scrollTop = to;
+    const put = () => { scroller.scrollTop = to; if (scroller.scrollTop < to - 4) window.scrollTo(0, to); };
+    put();
     // Once more after the summary has finished laying out (cards, counts, photos).
-    const f1 = requestAnimationFrame(() => { scroller.scrollTop = to; });
-    const t = setTimeout(() => { if (Math.abs(scroller.scrollTop - to) > 4) scroller.scrollTop = to; }, 120);
+    const f1 = requestAnimationFrame(put);
+    const t = setTimeout(put, 150);
     return () => { cancelAnimationFrame(f1); clearTimeout(t); };
   }, [mobilePage]);
   const handlePhoneAction = (val) => {
