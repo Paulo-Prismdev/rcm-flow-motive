@@ -6,6 +6,8 @@ const pick = (incoming, existing) =>
 export function claimPatchFromThirdParty(tp, existing = {}) {
   if (!tp) return {};
   return {
+    // The link to the directory record, so later changes to it reach this claim.
+    tp_client_id: tp.id || existing.tp_client_id || '',
     tp_name: pick(tp.name, existing.tp_name),
     tp_phone: pick(tp.phone, existing.tp_phone),
     tp_email: pick(tp.email, existing.tp_email),
