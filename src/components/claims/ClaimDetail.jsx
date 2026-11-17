@@ -2325,12 +2325,12 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                       type="button"
                       onClick={() => setSelectedSection(section.id)}
                       aria-current={on ? 'true' : undefined}
-                      className={`w-full flex flex-shrink-0 items-center gap-2.5 h-9 px-2 rounded-xl text-left text-[13px] font-medium transition-colors ${on ? 'bg-primary text-primary-foreground' : 'text-foreground hover:bg-muted'}`}
+                      className={`w-full flex flex-shrink-0 items-center gap-2.5 h-9 px-2 rounded-xl text-left text-[13.5px] font-semibold transition-colors ${on ? 'bg-primary text-primary-foreground' : 'text-foreground hover:bg-muted'}`}
                     >
                       <span className={`w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0 ${on ? 'bg-primary-foreground/15' : 'bg-muted'}`}>
                         <section.icon className="w-3.5 h-3.5" aria-hidden="true" />
                       </span>
-                      <span className="flex-1 truncate uppercase tracking-[0.03em]">{section.label}</span>
+                      <span className="flex-1 truncate capitalize">{section.label}</span>
                       {section.empty && (
                         <span className="w-2 h-2 rounded-full bg-warning flex-shrink-0" title="Has details still to fill in" aria-label="Has details still to fill in" />
                       )}
