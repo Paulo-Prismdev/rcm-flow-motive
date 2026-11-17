@@ -293,20 +293,29 @@ export default function ClaimMobileSummary({
 
       <div className="flex-1 pb-4">
         <div className="px-4 pt-2 pb-4">
-          <div ref={plateRef} className="flex items-center gap-2.5 mb-3">
-            <span className="rounded-lg bg-primary text-primary-foreground px-3 py-1 text-[22px] font-bold tracking-[0.08em] tabular-nums leading-tight shadow-card">
+          <div ref={plateRef} className="mb-3">
+            <span className="inline-block rounded-lg bg-primary text-primary-foreground px-3 py-1 text-[22px] font-bold tracking-[0.08em] tabular-nums leading-tight shadow-card">
               {claim.reg || 'No reg'}
             </span>
-            {onQuickView && (
-              <button type="button" onClick={onQuickView} className="h-9 px-3 rounded-xl border border-border bg-card text-[13px] font-medium flex items-center gap-1.5 active:bg-muted">
-                <Eye className="w-4 h-4" aria-hidden="true" />Quick view
-              </button>
-            )}
           </div>
           <p className="text-[22px] font-bold tracking-tight leading-tight break-words">{claim.client_name || 'No client name'}</p>
           <p className="text-[13.5px] text-muted-foreground mt-1">
             {[vehicle, claim.job_number, partyName].filter(Boolean).join(' · ')}
           </p>
+          {/* Quick view, photos and documents, one tap from the top of the claim */}
+          <div className="grid grid-cols-3 m-keep-3 gap-2 mt-3.5">
+            {[
+              { key: 'qv', icon: Eye, label: 'Quick view', onClick: onQuickView },
+              { key: 'images', icon: Image, label: 'Photos', count: imagesCount, onClick: () => onAction('images') },
+              { key: 'docs', icon: FileText, label: 'Docs', count: docsCount, onClick: () => onAction('docs') },
+            ].filter((b) => b.onClick).map(({ key, icon: BIcon, label, count, onClick }) => (
+              <button key={key} type="button" onClick={onClick} className="relative h-[58px] rounded-2xl bg-card shadow-card flex flex-col items-center justify-center gap-1 text-[13px] font-medium active:scale-[0.98] transition-transform">
+                <BIcon className="w-5 h-5" aria-hidden="true" />
+                {label}
+                {count > 0 && <span className="absolute top-1.5 right-2 min-w-[18px] h-[18px] px-1 rounded-full bg-info text-on-solid text-[11px] font-bold flex items-center justify-center">{count}</span>}
+              </button>
+            ))}
+          </div>
         </div>
 
         <Card title="Where it's at">
