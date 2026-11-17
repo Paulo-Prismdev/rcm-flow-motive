@@ -823,7 +823,10 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
   }, [urlSection]);
   const phoneSections = DETAIL_SECTIONS
     .map(s => ({ ...s, empty: isSectionEmpty(s.id, claim) }));
+  // Where the summary was scrolled to when a section was opened, so Back returns there.
+  const summaryScroll = useRef(0);
   const openPhoneSection = (id) => {
+    summaryScroll.current = rootRef.current?.closest('[data-claim-scroll]')?.scrollTop || 0;
     setSelectedSection(id);
     const params = new URLSearchParams(routeLocation.search);
     params.set('section', id);
@@ -836,10 +839,17 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
     params.delete('section');
     navigate({ search: `?${params.toString()}` }, { replace: true });
   };
-  // Going back to the summary starts it at the top, like opening a page.
+  // A section opens at its top; going back puts the summary exactly where you left it.
   React.useEffect(() => {
     const scroller = rootRef.current?.closest('[data-claim-scroll]');
-    if (scroller) scroller.scrollTop = 0;
+    if (!scroller) return undefined;
+    if (mobilePage !== 'summary') { scroller.scrollTop = 0; return undefined; }
+    const to = summaryScroll.current;
+    scroller.scrollTop = to;
+    // Once more after the summary has finished laying out (cards, counts, photos).
+    const f1 = requestAnimationFrame(() => { scroller.scrollTop = to; });
+    const t = setTimeout(() => { if (Math.abs(scroller.scrollTop - to) > 4) scroller.scrollTop = to; }, 120);
+    return () => { cancelAnimationFrame(f1); clearTimeout(t); };
   }, [mobilePage]);
   const handlePhoneAction = (val) => {
     if (val === 'notes') setIsNotesOpen(true);
