@@ -779,13 +779,18 @@ textarea::placeholder {
   .tap-44-up { position: relative; }
   .tap-44-up::before { content: ''; position: absolute; left: 0; right: 0; top: -18px; bottom: -8px; }
 
-  /* Two short label/value fields per row, with tighter cells */
+  /* Label/value fields on phones: one per row, full width, so long values
+     (emails, company names) never run into the next column. */
   .grid.m-fields-2 {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 1fr);
     gap: 0.375rem;
   }
   .grid.m-fields-2 > * {
-    padding: 0.375rem 0.5rem;
+    padding: 0.5rem 0.625rem;
+  }
+  .grid.m-fields-2 [data-edit-label] *,
+  .fm-click-edit [data-edit-label] * {
+    overflow-wrap: anywhere;
   }
 
   /* Content cards sit tighter on phones */
@@ -1030,6 +1035,34 @@ fieldset.fm-readonly { border: 0; margin: 0; padding: 0; min-width: 0; }
 /* Empty date boxes: amber, without the browser's dd/mm/yyyy pattern */
 .fm-readonly input[type="date"].fm-empty, .fm-readonly input[type="time"].fm-empty { color: transparent !important; -webkit-text-fill-color: transparent; }
 .fm-readonly select { appearance: none; }
+/* ── Per-field editing ──
+   Locked fields show a small pencil; tapping one unlocks just that field, with a
+   green tick to save and a cross to cancel. The other fields stay locked. */
+.fm-click-edit [data-fm-field],
+.fm-click-edit [data-edit-label] { position: relative; cursor: pointer; }
+.fm-click-edit [data-fm-field]::after,
+.fm-click-edit [data-edit-label]::after {
+  content: ''; position: absolute; top: 6px; right: 6px; width: 14px; height: 14px;
+  background-color: hsl(var(--muted-foreground)); opacity: 0.55; pointer-events: none;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 20h4L19 9l-4-4L4 16z'/%3E%3Cpath d='m14 6 4 4'/%3E%3C/svg%3E") center / contain no-repeat;
+          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 20h4L19 9l-4-4L4 16z'/%3E%3Cpath d='m14 6 4 4'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+@media (hover: hover) {
+  .fm-click-edit [data-fm-field]::after,
+  .fm-click-edit [data-edit-label]::after { opacity: 0; transition: opacity 120ms; }
+  .fm-click-edit [data-fm-field]:hover::after,
+  .fm-click-edit [data-edit-label]:hover::after { opacity: 0.85; }
+}
+.fm-single [data-fm-active] { border-radius: 10px; box-shadow: 0 0 0 2px hsl(var(--ring) / 0.35); }
+.fm-single .fm-single-hide { display: none !important; }
+.fm-field-actions { position: absolute; z-index: 5; display: flex; gap: 4px; }
+.fm-field-actions button {
+  width: 32px; height: 32px; border-radius: 9px; display: flex; align-items: center; justify-content: center;
+  box-shadow: var(--fm-shadow-card, 0 1px 2px rgba(0,0,0,.08));
+}
+.fm-field-actions .fm-tick { background: hsl(var(--fm-success)); color: hsl(var(--fm-on-solid)); }
+.fm-field-actions .fm-cross { background: hsl(var(--card)); color: hsl(var(--foreground)); border: 1px solid hsl(var(--border)); }
+
 .fm-click-edit { cursor: text; }
 .fm-click-edit [data-edit-label] { cursor: pointer; }
 .fm-click-edit [data-edit-label]:hover { box-shadow: inset 0 0 0 1px hsl(var(--ring) / 0.35); }
