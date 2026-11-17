@@ -225,6 +225,12 @@ const EditableSection = ({ title, icon: Icon, claim, onUpdate, children, EditCom
             if (unit === activeUnit) return;
             unit.setAttribute('inert', '');
             unit.classList.add('fm-readonly');
+            // Locked fields keep their amber "Not set" while another field is open.
+            if (c.matches('input:not([type="checkbox"]):not([type="radio"]), textarea, select')) {
+                const empty = c.value === '' || c.value == null;
+                c.classList.toggle('fm-empty', empty);
+                if (empty && !c.placeholder) c.placeholder = 'Not set';
+            }
         });
         activeUnit.removeAttribute('inert');
         activeUnit.classList.remove('fm-readonly');
