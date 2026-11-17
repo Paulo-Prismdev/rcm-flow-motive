@@ -5,7 +5,9 @@ import {
   Mail, ListTodo, Timer, History, Package, Download, Archive, Trash2, Calculator, Copy, NotebookPen, Eye,
 } from 'lucide-react';
 import { clientJourney } from '../shared/clientJourney';
-import { getClaimOutcome } from '../shared/claimOutcome';
+import { getClaimOutcome, isExceptionOutcome } from '../shared/claimOutcome';
+import StatusBadge from '../shared/StatusBadge';
+import UpdateStatusBadge from '../shared/UpdateStatusBadge';
 import { computeUpdateStatusFlag, computeClientCommStatusFlag } from '../shared/claimStatusUpdate';
 import { AUTHORISING_PARTY_LABELS, authorisingPartyClaimRef } from '../shared/authorisingParty';
 import { telHref, whatsappHref } from '@/lib/contactLinks';
@@ -225,12 +227,6 @@ export default function ClaimMobileSummary({
   const partyName = claim.authorising_party_name || '';
   const claimRef = authorisingPartyClaimRef(claim.authorised_by, claim);
 
-  // Who the Call / WhatsApp buttons ring: the driver, or the client when the
-  // driver is the client or has no number.
-  const useClient = claim.driver_same_as_client === true || !claim.driver_contact_phone;
-  const mainPhone = useClient ? claim.client_phone : claim.driver_contact_phone;
-  const mainWho = useClient ? 'client' : 'driver';
-
   // Only what needs doing today gets colour.
   const caseFlag = isClosedStatus ? null : computeUpdateStatusFlag(claim);
   const clientFlag = isClosedStatus ? null : computeClientCommStatusFlag(claim);
@@ -281,37 +277,50 @@ export default function ClaimMobileSummary({
           <span className={`flex-1 flex justify-center min-w-0 transition-opacity duration-200 ${plateInBar ? 'opacity-100' : 'opacity-0'}`} aria-hidden={!plateInBar}>
             <Plate reg={claim.reg} />
           </span>
-          {onQuickView && plateInBar && (
-            <button type="button" onClick={onQuickView} aria-label="Quick view" title="Quick view" className="tap-44 w-10 h-10 rounded-xl flex items-center justify-center active:bg-muted">
-              <Eye className="w-[22px] h-[22px]" />
-            </button>
-          )}
           <MoreMenu claim={claim} onAction={onAction} isInternalUser={isInternalUser} />
         </div>
       </div>
 
       <div className="flex-1 pb-4">
         <div className="px-4 pt-2 pb-4">
-          <div ref={plateRef} className="mb-3">
-            <span className="inline-block rounded-lg bg-primary text-primary-foreground px-3 py-1 text-[22px] font-bold tracking-[0.08em] tabular-nums leading-tight shadow-card">
-              {claim.reg || 'No reg'}
-            </span>
+          {/* The plate, with the claim's statuses beside it (as on the computer) */}
+          <div className="flex items-start justify-between gap-3 mb-3">
+            <div ref={plateRef} className="flex-shrink-0">
+              <span className="inline-block rounded-lg bg-primary text-primary-foreground px-3 py-1 text-[22px] font-bold tracking-[0.08em] tabular-nums leading-tight shadow-card">
+                {claim.reg || 'No reg'}
+              </span>
+            </div>
+            <div className="flex flex-wrap justify-end items-center gap-1.5 min-w-0 pt-0.5">
+              {isExceptionOutcome(outcome) && <StatusBadge status={outcome} />}
+              {claim.secondary_status && <StatusBadge status={claim.secondary_status} />}
+              {claim.tertiary_status && <StatusBadge status={claim.tertiary_status} variant="secondary" />}
+              {!isClosedStatus && claim.update_status_flag && (
+                <button type="button" onClick={onUpdateTracking} className="rounded-md active:opacity-70">
+                  <UpdateStatusBadge status={caseFlag} small labelPrefix="Updates" />
+                </button>
+              )}
+              {!isClosedStatus && claim.client_comm_status_flag && (
+                <button type="button" onClick={onUpdateTracking} className="rounded-md active:opacity-70">
+                  <UpdateStatusBadge status={clientFlag} small labelPrefix="Client" />
+                </button>
+              )}
+              {claim.archived && <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-muted text-muted-foreground">Archived</span>}
+            </div>
           </div>
           <p className="text-[22px] font-bold tracking-tight leading-tight break-words">{claim.client_name || 'No client name'}</p>
           <p className="text-[13.5px] text-muted-foreground mt-1">
             {[vehicle, claim.job_number, partyName].filter(Boolean).join(' · ')}
           </p>
-          {/* Quick view, photos and documents, one tap from the top of the claim */}
+          {/* Photos and documents, one tap from the top of the claim (Quick view sits at the bottom) */}
           <div className="flex flex-nowrap gap-2 mt-3.5">
             {[
-              { key: 'qv', icon: Eye, label: 'Quick view', onClick: onQuickView },
               { key: 'images', icon: Image, label: 'Photos', count: imagesCount, onClick: () => onAction('images') },
               { key: 'docs', icon: FileText, label: 'Docs', count: docsCount, onClick: () => onAction('docs') },
             ].filter((b) => b.onClick).map(({ key, icon: BIcon, label, count, onClick }) => (
-              <button key={key} type="button" onClick={onClick} className="relative flex-1 min-w-0 h-[58px] rounded-2xl bg-card shadow-card flex flex-col items-center justify-center gap-1 text-[13px] font-medium active:scale-[0.98] transition-transform">
+              <button key={key} type="button" onClick={onClick} className="relative flex-1 min-w-0 h-12 rounded-2xl bg-card shadow-card flex items-center justify-center gap-2 text-[14.5px] font-semibold active:scale-[0.98] transition-transform">
                 <BIcon className="w-5 h-5" aria-hidden="true" />
                 {label}
-                {count > 0 && <span className="absolute top-1.5 right-2 min-w-[18px] h-[18px] px-1 rounded-full bg-info text-on-solid text-[11px] font-bold flex items-center justify-center">{count}</span>}
+                {count > 0 && <span className="min-w-[20px] h-5 px-1.5 rounded-full bg-info text-on-solid text-[11.5px] font-bold flex items-center justify-center">{count}</span>}
               </button>
             ))}
           </div>
@@ -345,12 +354,9 @@ export default function ClaimMobileSummary({
           ))}
 
           <div className="grid grid-cols-2 m-keep-2 gap-x-4 gap-y-3 mt-2">
-            {fact('Internal status', claim.secondary_status || 'Not set', !claim.secondary_status)}
             {fact('Expected back', claim.ecd ? day(claim.ecd) : 'Not set', !claim.ecd)}
             {fact('Authorising party', [partyLabel, partyName].filter(Boolean).join(' · ') || 'Not set', !partyLabel)}
             {fact('Their claim no.', claimRef || 'Missing', !claimRef)}
-            {claim.tertiary_status && fact('Additional status', claim.tertiary_status)}
-            {claim.archived && fact('Archived', 'Yes')}
           </div>
           {!isClosedStatus && (claim.update_status_flag || claim.client_comm_status_flag) && (
             <button type="button" onClick={onUpdateTracking} className="mt-3 text-[13px] font-medium text-link">Update timers</button>
@@ -403,23 +409,16 @@ export default function ClaimMobileSummary({
           {updatesCount > 0 && <span className="text-xs font-medium opacity-75">{updatesCount}</span>}
           {claim.unread_bodyshop_update && <span className="absolute top-2 right-3 w-2 h-2 rounded-full bg-info ring-2 ring-primary" aria-label="New update from the repairer" />}
         </button>
-        <a
-          href={telHref(mainPhone)}
-          aria-disabled={!mainPhone}
-          aria-label={mainPhone ? `Call ${mainWho} on ${mainPhone}` : `No ${mainWho} phone number`}
-          className={`w-[52px] h-12 rounded-2xl border border-border bg-card flex items-center justify-center ${mainPhone ? '' : 'opacity-40 pointer-events-none'}`}
-        >
-          <Phone className="w-5 h-5" />
-        </a>
-        <a
-          href={whatsappHref(mainPhone)}
-          {...newTab(whatsappHref(mainPhone))}
-          aria-disabled={!mainPhone}
-          aria-label={mainPhone ? `WhatsApp the ${mainWho}` : `No ${mainWho} phone number`}
-          className={`w-[52px] h-12 rounded-2xl border border-border bg-card flex items-center justify-center ${mainPhone ? '' : 'opacity-40 pointer-events-none'}`}
-        >
-          <WhatsAppIcon className="w-5 h-5" />
-        </a>
+        {/* Quick view in the logo's green (calls and WhatsApp are on each person in People) */}
+        {onQuickView && (
+          <button
+            type="button"
+            onClick={onQuickView}
+            className="flex-1 h-12 rounded-2xl bg-[#00E600] text-[#131D47] font-semibold text-[15px] flex items-center justify-center gap-2 shadow-card active:scale-[0.99]"
+          >
+            <Eye className="w-5 h-5" aria-hidden="true" />Quick view
+          </button>
+        )}
       </div>
     </div>
   );
