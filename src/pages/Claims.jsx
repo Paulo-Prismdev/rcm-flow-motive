@@ -860,14 +860,25 @@ export default function ClaimsPage() {
     const collapsed = collapsible && collapsedGroups[key];
     return (
       <div key={key}>
-        <div className="flex items-center justify-between px-5 pt-3.5 pb-1.5 text-[12.5px] font-medium text-muted-foreground">
-          {collapsible ? (
-            <button type="button" onClick={() => toggleGroup(key)} aria-expanded={!collapsed} className="flex items-center gap-1">
-              {collapsed ? <ChevronRight className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}{label}
-            </button>
-          ) : <span>{label}</span>}
-          <span className="tabular-nums">{claims.length}</span>
-        </div>
+        {collapsible ? (
+          // The whole bar opens/closes the group, not just the word.
+          <button
+            type="button"
+            onClick={() => toggleGroup(key)}
+            aria-expanded={!collapsed}
+            className="w-full flex items-center justify-between gap-2 px-5 pt-3.5 pb-1.5 text-[12.5px] font-medium text-muted-foreground text-left active:bg-muted/60 rounded-lg"
+          >
+            <span className="flex items-center gap-1 min-w-0">
+              {collapsed ? <ChevronRight className="w-3.5 h-3.5 flex-shrink-0" /> : <ChevronDown className="w-3.5 h-3.5 flex-shrink-0" />}{label}
+            </span>
+            <span className="tabular-nums">{claims.length}</span>
+          </button>
+        ) : (
+          <div className="flex items-center justify-between px-5 pt-3.5 pb-1.5 text-[12.5px] font-medium text-muted-foreground">
+            <span>{label}</span>
+            <span className="tabular-nums">{claims.length}</span>
+          </div>
+        )}
         {!collapsed && (
           <div className="mx-3 rounded-2xl bg-card shadow-card overflow-hidden">{claims.map(renderPhoneRow)}</div>
         )}
