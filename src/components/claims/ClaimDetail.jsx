@@ -104,7 +104,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import ClaimMobileSummary, { ClaimMobileSectionBar } from './ClaimMobileSummary';
+import ClaimMobileSummary, { ClaimMobileSectionBar, ClaimStageTrack, groupSections } from './ClaimMobileSummary';
 import AuthorisingPartyBanner from './AuthorisingPartyBanner';
 import ClaimJourneyTimeline from './ClaimJourneyTimeline';
 import { generateClaimOverviewPdf } from './claimOverviewPdf';
@@ -2057,26 +2057,30 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
           )}
 
           {/* ── DESKTOP top bar (≥ lg) ── */}
-          <div className="hidden lg:block bg-card border border-border rounded-xl p-3 flex-shrink-0 shadow-card">
-              <div className="flex flex-col gap-2">
-                  <div className="flex items-center gap-2">
+          <div className="hidden lg:block bg-card rounded-2xl p-4 flex-shrink-0 shadow-card">
+              <div className="flex flex-col gap-3">
+                  <div className="flex items-start gap-3">
                       <button aria-label="Back"
                         onClick={handleClose}
-                        className="p-2 flex-shrink-0 rounded-lg border border-border bg-card hover:bg-muted transition-colors"
+                        className="mt-1 p-2 flex-shrink-0 rounded-xl border border-border bg-card hover:bg-muted transition-colors"
                       >
                           <ArrowLeft className="w-4 h-4" />
                       </button>
                       <div className="flex-1 min-w-0">
-                          <div className="flex items-baseline gap-2 min-w-0">
-                            <h1 className="text-page-title truncate tracking-wide">{claim.reg || 'Claim details'}</h1>
-                            {claim.job_number && (
-                              <span className="text-sm text-muted-foreground font-medium whitespace-nowrap flex-shrink-0 tabular-nums">
-                                {claim.job_number}
-                              </span>
-                            )}
+                          {/* Same identity block as the phone: the plate, then who the claim is for */}
+                          <div className="flex items-center gap-3 min-w-0">
+                            <h1 className="flex-shrink-0 rounded-lg bg-primary text-primary-foreground px-3 py-0.5 text-[22px] font-bold tracking-[0.08em] tabular-nums leading-tight shadow-card">
+                              {claim.reg || 'No reg'}
+                            </h1>
+                            <div className="min-w-0">
+                              <p className="text-[17px] font-semibold leading-tight truncate">{claim.client_name || 'No client name'}</p>
+                              <p className="text-[13px] text-muted-foreground truncate tabular-nums">
+                                {[claim.job_number, claim.make_model].filter(Boolean).join(' · ')}
+                              </p>
+                            </div>
                           </div>
-                          {/* Who it's for, who authorises, their claim number (was a coloured strip above) */}
-                          <AuthorisingPartyBanner claim={claim} caption />
+                          {/* Who it's for, who authorises, their claim number */}
+                          <div className="mt-2"><AuthorisingPartyBanner claim={claim} caption /></div>
                       </div>
                       <div className="flex items-center gap-1.5 flex-shrink-0">
                         <Button onClick={() => setIsQuickViewOpen(true)} variant="outline" className="h-9 px-3 text-sm font-medium gap-1.5">
@@ -2153,7 +2157,10 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                     )}
                     {claim.archived && <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-muted text-muted-foreground">Archived</span>}
                   </div>
-                  <ClaimJourneyTimeline claim={claim} updates={claimUpdates} />
+                  {/* Where it's at: the stage in the client's words, the same track as the phone */}
+                  <div className="rounded-xl bg-muted/50 px-4 py-3">
+                    <ClaimStageTrack claim={claim} />
+                  </div>
               </div>
           </div>
 
