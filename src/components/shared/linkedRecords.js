@@ -45,6 +45,8 @@ export const LINKS = [
 const norm = (v) => (v === null || v === undefined ? '' : String(v).trim());
 const blank = (v) => norm(v) === '' || norm(v) === 'Unknown';
 const same = (a, b) => norm(a).toLowerCase() === norm(b).toLowerCase();
+// "UNKNOWN" is a placeholder name, never a person to match on.
+const realName = (n) => norm(n) !== '' && norm(n).toUpperCase() !== 'UNKNOWN';
 
 /**
  * A directory record changed: copy the changed contact details onto every claim
@@ -65,7 +67,7 @@ export async function pushRecordToClaims(entityName, id, prior, data) {
     const differs = { $or: Object.entries(patch).map(([k, v]) => ({ [k]: { $ne: v } })) };
     const targets = [{ query: { $and: [{ [link.idField]: id }, differs] }, extra: {} }];
     // Claims from before third parties were linked: found by the record's name, and linked now.
-    if (link.key === 'thirdParty' && norm(prior?.name)) {
+    if (link.key === 'thirdParty' && realName(prior?.name)) {
       targets.push({
         query: { $and: [{ tp_name: norm(prior.name) }, { $or: [{ tp_client_id: null }, { tp_client_id: '' }] }] },
         extra: { tp_client_id: id },
@@ -109,7 +111,7 @@ export async function syncClaimEditToRecords(prev, next) {
     if (!Object.keys(changes).length) continue;
 
     // An older claim with no third-party link: find its directory record by name, then link it.
-    if (!id && link.key === 'thirdParty' && norm(prev.tp_name)) {
+    if (!id && link.key === 'thirdParty' && realName(prev.tp_name)) {
       try {
         const found = ((await base44.entities.Client.list('-created_date', 1000)) || []).filter((r) => same(r.name, prev.tp_name));
         const tps = found.filter((r) => r.is_third_party);
