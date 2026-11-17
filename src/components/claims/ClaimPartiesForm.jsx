@@ -76,6 +76,7 @@ export default function ClaimPartiesForm({ claim, onSave, onCancel, mode }) {
     client_driving_license: claim.client_driving_license || '',
     // Third party fields
     has_third_party: !!(claim.tp_name || claim.tp_reg),
+    tp_client_id: claim.tp_client_id || '',
     tp_name: claim.tp_name || '',
     tp_phone: claim.tp_phone || '',
     tp_email: claim.tp_email || '',
@@ -173,6 +174,7 @@ export default function ClaimPartiesForm({ claim, onSave, onCancel, mode }) {
       });
     } else if (mode === 'thirdParty') {
       onSave({
+        tp_client_id: data.tp_client_id || '',
         tp_name: data.tp_name,
         tp_phone: data.tp_phone,
         tp_email: data.tp_email,
