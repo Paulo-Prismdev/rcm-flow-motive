@@ -106,7 +106,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import ClaimMobileSummary, { ClaimMobileSectionBar, ClaimStageTrack, groupSections } from './ClaimMobileSummary';
 import AuthorisingPartyBanner from './AuthorisingPartyBanner';
-import ClaimJourneyTimeline from './ClaimJourneyTimeline';
 import { generateClaimOverviewPdf } from './claimOverviewPdf';
 import ClaimStatusEditForm from './ClaimStatusEditForm';
 import { isUpdateTrackingClosed, computeUpdateStatusFlag, computeClientCommStatusFlag, buildStatusChangeRecord } from '../shared/claimStatusUpdate';
@@ -354,14 +353,16 @@ const EditableSection = ({ title, icon: Icon, claim, onUpdate, children, EditCom
     );
 
     return (
-        <div className="bg-card border border-border rounded-xl p-4 md:p-5 m-card-tight shadow-card">
+        <div className="bg-card rounded-2xl p-4 md:p-5 m-card-tight shadow-card">
             {/* Fixed-height header so it doesn't shrink when the Edit button hides */}
             <div className="flex justify-between items-center min-h-[2.75rem] pb-3 mb-4 border-b border-border m-card-head">
                 <div
                     className="flex items-center gap-2.5 text-left flex-grow min-w-0"
                 >
-                    <Icon className="w-4 h-4 text-muted-foreground flex-shrink-0" aria-hidden="true" />
-                    <h3 className="text-[15px] font-semibold text-foreground truncate">{title}</h3>
+                    <span className="w-8 h-8 rounded-xl bg-muted flex items-center justify-center flex-shrink-0">
+                        <Icon className="w-4 h-4 text-foreground" aria-hidden="true" />
+                    </span>
+                    <h3 className="text-base font-bold tracking-tight text-foreground truncate">{title}</h3>
                 </div>
                 <div className='flex items-center gap-2'>
                     {/* Same size as the Edit all button, so the header keeps its height */}
