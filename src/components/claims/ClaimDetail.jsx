@@ -137,8 +137,15 @@ function findControlByLabel(container, wanted) {
 }
 
 // A real, visible control (not the hidden native inputs that dropdowns and switches carry).
-const isRealControl = (c) => c.getAttribute('aria-hidden') !== 'true' && !c.classList.contains('fm-hide') && !c.closest('.fm-hide') && !c.closest('[data-radix-popper-content-wrapper]');
-const realControls = (root) => Array.from(root.querySelectorAll(FIELD_SELECTOR)).filter(isRealControl);
+// Some forms use their own dropdowns: a plain wide button that shows the value. Those
+// count as fields too; small buttons (look-ups, add / remove) do not.
+const FIELD_LIKE = `${FIELD_SELECTOR}, button:not([type="submit"])`;
+const isRealControl = (c) => {
+    if (c.getAttribute('aria-hidden') === 'true' || c.classList.contains('fm-hide') || c.closest('.fm-hide') || c.closest('[data-radix-popper-content-wrapper]') || c.closest('.fm-field-actions')) return false;
+    if (c.tagName === 'BUTTON' && !c.matches(FIELD_SELECTOR)) return c.getBoundingClientRect().width >= 120;
+    return true;
+};
+const realControls = (root) => Array.from(root.querySelectorAll(FIELD_LIKE)).filter(isRealControl);
 
 // The block that belongs to one field: the control plus its label, climbing up the
 // page until the next level up holds another field.
@@ -146,7 +153,7 @@ function fieldUnit(control, root) {
     let el = control;
     while (el.parentElement && el.parentElement !== root) {
         const p = el.parentElement;
-        if (Array.from(p.querySelectorAll(FIELD_SELECTOR)).filter(isRealControl).length > 1) break;
+        if (realControls(p).length > 1) break;
         el = p;
     }
     return el;
@@ -286,6 +293,7 @@ const EditableSection = ({ title, icon: Icon, claim, onUpdate, children, EditCom
                     if (c.readOnly) return; // read-only boxes (Job status) can't be edited
                     const a = c.getBoundingClientRect();
                     if (!a.width || !a.height) return;
+                    if (c.tagName === 'BUTTON' && !c.matches(FIELD_SELECTOR)) c.setAttribute('data-fm-dropdown', '');
                     const narrow = a.width < 96; // a switch or tick box: pencil just before it
                     if (!narrow && c.style.paddingRight !== '52px') c.style.paddingRight = '52px';
                     const top = Math.round(a.top - r.top + (a.height > 60 ? 8 : (a.height - 36) / 2));
