@@ -1,3 +1,4 @@
+// key rotated 2026-11-17
 // Shared helpers for the Jarvis voice assistant tools (read-only).
 // Security: every Jarvis endpoint requires the x-jarvis-key header to match the
 // JARVIS_TOOL_KEY secret. If the secret is not set, every request is refused.
