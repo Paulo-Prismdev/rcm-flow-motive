@@ -57,6 +57,7 @@ import ArchiveClaimDialog from './ArchiveClaimDialog';
 import { claimOutstandingItems } from '@/components/shared/claimOutstandingItems';
 import { hireSummaryText } from '@/components/shared/hireCharge';
 import InlineEditableSection, { InlineField, useInlineEdit } from './InlineEditableSection';
+import FieldEditSheet from '../shared/FieldEditSheet';
 import ClaimBodyshopForm from './ClaimBodyshopForm';
 import ClaimBodyshopInfo from './ClaimBodyshopInfo.jsx';
 import ClaimBodyshopAllocateButton from './ClaimBodyshopAllocateButton';
