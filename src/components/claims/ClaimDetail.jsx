@@ -136,6 +136,22 @@ function findControlByLabel(container, wanted) {
     return best.querySelector(FIELD_SELECTOR) || best.parentElement?.querySelector(FIELD_SELECTOR) || null;
 }
 
+// A real, visible control (not the hidden native inputs that dropdowns and switches carry).
+const isRealControl = (c) => c.getAttribute('aria-hidden') !== 'true' && !c.classList.contains('fm-hide') && !c.closest('.fm-hide') && !c.closest('[data-radix-popper-content-wrapper]');
+const realControls = (root) => Array.from(root.querySelectorAll(FIELD_SELECTOR)).filter(isRealControl);
+
+// The block that belongs to one field: the control plus its label, climbing up the
+// page until the next level up holds another field.
+function fieldUnit(control, root) {
+    let el = control;
+    while (el.parentElement && el.parentElement !== root) {
+        const p = el.parentElement;
+        if (Array.from(p.querySelectorAll(FIELD_SELECTOR)).filter(isRealControl).length > 1) break;
+        el = p;
+    }
+    return el;
+}
+
 function focusAndFlash(el) {
     if (!el) return;
     el.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); // only scrolls if the field is off-screen
@@ -154,27 +170,105 @@ function focusAndFlash(el) {
  */
 const EditableSection = ({ title, icon: Icon, claim, onUpdate, children, EditComponent, canEdit = true, sameLayout = false }) => {
     const [isEditing, setIsEditing] = useState(false);
+    // single: only one field is unlocked (pencil → tick / cross); otherwise "Edit all".
+    const [single, setSingle] = useState(false);
     const [version, setVersion] = useState(0);
+    const [actionsAt, setActionsAt] = useState(null); // where the tick / cross sit
     const bodyRef = useRef(null);
     const pendingFocus = useRef(null); // { index } (same layout) or { label } (own view)
+    const activeControl = useRef(null);
+    const saveButton = useRef(null);
 
     // Exit edit mode when claim is updated externally (e.g. wizard save), and redraw the
     // locked form from the fresh claim.
     useEffect(() => {
         setIsEditing(false);
+        setSingle(false);
         setVersion((v) => v + 1);
     }, [claim]);
 
+    const stopEditing = () => {
+        setIsEditing(false);
+        setSingle(false);
+        setActionsAt(null);
+        activeControl.current = null;
+        saveButton.current = null;
+    };
+
     const handleSave = (updatedData) => {
         onUpdate({ ...claim, ...updatedData });
-        setIsEditing(false);
+        stopEditing();
     };
 
     const editable = !!(EditComponent && canEdit);
 
+    // One field unlocked: every other field is locked and can't be reached, the form's own
+    // Save / Cancel buttons are hidden, and a tick and a cross sit at the end of the field.
+    useLayoutEffect(() => {
+        const root = bodyRef.current;
+        if (!isEditing || !single || !root) return;
+        const controls = realControls(root);
+        if (!activeControl.current || !root.contains(activeControl.current)) {
+            const want = pendingFocus.current;
+            let el = null;
+            if (want?.index != null) el = root.querySelectorAll(ANY_CONTROL)[want.index];
+            else if (want?.label) el = findControlByLabel(root, want.label);
+            activeControl.current = (el && isRealControl(el) ? el : null) || controls[0] || null;
+        }
+        const active = activeControl.current;
+        if (!active) return;
+        const activeUnit = fieldUnit(active, root);
+        controls.forEach((c) => {
+            const unit = fieldUnit(c, root);
+            if (unit === activeUnit) return;
+            unit.setAttribute('inert', '');
+            unit.classList.add('fm-readonly');
+        });
+        activeUnit.removeAttribute('inert');
+        activeUnit.classList.remove('fm-readonly');
+        activeUnit.setAttribute('data-fm-active', '');
+        // The form's own action buttons: remember Save, hide them all.
+        const SAVE = /^(save|update|confirm)\b/i;
+        const ACTION = /^(save|cancel|update|confirm|close)\b/i;
+        root.querySelectorAll('button').forEach((b) => {
+            if (activeUnit.contains(b) || b.closest('.fm-field-actions')) return;
+            const text = (b.textContent || '').trim();
+            if (b.type === 'submit' || ACTION.test(text)) {
+                if (!saveButton.current && (b.type === 'submit' || SAVE.test(text))) saveButton.current = b;
+                b.classList.add('fm-single-hide');
+            }
+        });
+        // Tick and cross: inside the end of a wide box, or just after a small one (a switch).
+        const r = root.getBoundingClientRect();
+        const a = active.getBoundingClientRect();
+        const wide = a.width >= 140;
+        const tall = a.height > 56;
+        if (wide && active.style.paddingRight !== '80px') active.style.paddingRight = '80px';
+        const top = Math.round(a.top - r.top + (tall ? 6 : (a.height - 32) / 2));
+        const left = Math.round(wide ? a.right - r.left - 74 : a.right - r.left + 8);
+        if (!actionsAt || actionsAt.top !== top || actionsAt.left !== left) setActionsAt({ top, left });
+    });
+
+    const saveField = () => {
+        const btn = saveButton.current;
+        if (btn) { btn.click(); return; }
+        const form = activeControl.current?.closest('form');
+        if (form?.requestSubmit) form.requestSubmit();
+        else stopEditing();
+    };
+
+    const onSingleKey = (e) => {
+        if (!single) return;
+        if (e.key === 'Escape') { e.preventDefault(); stopEditing(); }
+        else if (e.key === 'Enter' && e.target.tagName === 'INPUT') { e.preventDefault(); saveField(); }
+    };
+
     // Locked view: mark empty fields (amber, "Not set") the way the old view did.
     useLayoutEffect(() => {
         if (!sameLayout || isEditing || !bodyRef.current) return;
+        // Each field block gets a pencil (CSS), so it's clear every field can be changed on its own.
+        const fs = bodyRef.current.querySelector('fieldset.fm-readonly');
+        if (fs && editable) realControls(fs).forEach((c) => fieldUnit(c, fs).setAttribute('data-fm-field', ''));
         bodyRef.current.querySelectorAll('input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]), textarea, select').forEach((el) => {
             const empty = el.value === '' || el.value == null;
             el.classList.toggle('fm-empty', empty);
@@ -203,7 +297,16 @@ const EditableSection = ({ title, icon: Icon, claim, onUpdate, children, EditCom
         });
     }, [isEditing]);
 
-    const startEdit = (focus) => { if (!editable) return; pendingFocus.current = focus || null; setIsEditing(true); };
+    const startEdit = (focus) => { if (!editable) return; pendingFocus.current = focus || null; setSingle(false); setIsEditing(true); };
+    // Pencil on one field: unlock only that field.
+    const startField = (focus) => {
+        if (!editable) return;
+        pendingFocus.current = focus || null;
+        activeControl.current = null;
+        saveButton.current = null;
+        setSingle(true);
+        setIsEditing(true);
+    };
 
     // Same layout: a click anywhere in a locked field opens editing on that field.
     const onLockedClick = (e) => {
@@ -214,15 +317,26 @@ const EditableSection = ({ title, icon: Icon, claim, onUpdate, children, EditCom
         const control = pick(block) || pick(e.target.closest('label')?.parentElement);
         const list = Array.from(root.querySelectorAll(ANY_CONTROL));
         const index = control ? list.indexOf(control) : -1;
-        startEdit(index >= 0 ? { index } : null);
+        if (index >= 0) startField({ index });
     };
 
-    // Own view: clicking a value (DetailRow etc.) opens editing on the matching field.
+    // Own view: clicking a value (DetailRow etc.) opens that one field for editing.
     const onViewClick = (e) => {
         if (!editable) return;
         const row = e.target.closest('[data-edit-label]');
-        if (row) startEdit({ label: row.getAttribute('data-edit-label') });
+        if (row) startField({ label: row.getAttribute('data-edit-label') });
     };
+
+    const fieldActions = isEditing && single && actionsAt && (
+        <div className="fm-field-actions" style={{ top: actionsAt.top, left: actionsAt.left }}>
+            <button type="button" className="fm-tick" onClick={saveField} aria-label="Save this field" title="Save">
+                <Check className="w-[18px] h-[18px]" aria-hidden="true" />
+            </button>
+            <button type="button" className="fm-cross" onClick={stopEditing} aria-label="Cancel" title="Cancel">
+                <X className="w-[18px] h-[18px]" aria-hidden="true" />
+            </button>
+        </div>
+    );
 
     return (
         <div className="bg-card border border-border rounded-xl p-4 md:p-5 m-card-tight shadow-card">
@@ -235,27 +349,33 @@ const EditableSection = ({ title, icon: Icon, claim, onUpdate, children, EditCom
                     <h3 className="text-[15px] font-semibold text-foreground truncate">{title}</h3>
                 </div>
                 <div className='flex items-center gap-2'>
-                    {/* Same size as the Edit button, so the header keeps its height */}
-                    {isEditing && (
+                    {/* Same size as the Edit all button, so the header keeps its height */}
+                    {isEditing && !single && (
                         <Button variant="ghost" size="sm" disabled className="gap-1.5 text-primary disabled:opacity-100" tabIndex={-1}>
                             <Edit className="w-3.5 h-3.5" aria-hidden="true" />
                             Editing
                         </Button>
                     )}
+                    {isEditing && single && (
+                        <Button variant="ghost" size="sm" onClick={() => startEdit(null)} className="gap-1.5 text-muted-foreground">
+                            Edit all
+                        </Button>
+                    )}
                     {!isEditing && EditComponent && canEdit && (
-                        <Button variant="outline" size="sm" onClick={() => startEdit(null)} className="gap-1.5" aria-label={`Edit ${title}`}>
+                        <Button variant="ghost" size="sm" onClick={() => startEdit(null)} className="gap-1.5 text-muted-foreground" aria-label={`Edit all of ${title}`} title="Edit every field at once (address and vehicle look-ups live here)">
                             <Edit className="w-3.5 h-3.5" aria-hidden="true" />
-                            Edit
+                            Edit all
                         </Button>
                     )}
                 </div>
             </div>
-            <div ref={bodyRef}>
+            <div ref={bodyRef} className={`relative ${isEditing && single ? 'fm-single' : ''}`} onKeyDown={onSingleKey}>
+                {fieldActions}
                 {sameLayout && EditComponent ? (
                     <>
                         {children}
                         {isEditing ? (
-                            <EditComponent key={`edit-${version}`} claim={claim} onSave={handleSave} onCancel={() => setIsEditing(false)} />
+                            <EditComponent key={`edit-${version}-${single ? 'one' : 'all'}`} claim={claim} onSave={handleSave} onCancel={stopEditing} />
                         ) : (
                             <fieldset key={`view-${version}`} disabled className={`fm-readonly ${editable ? 'fm-click-edit' : ''}`} onClick={onLockedClick} title={editable ? 'Click a field to edit it' : undefined}>
                                 <EditComponent claim={claim} onSave={() => {}} onCancel={() => {}} />
@@ -263,7 +383,7 @@ const EditableSection = ({ title, icon: Icon, claim, onUpdate, children, EditCom
                         )}
                     </>
                 ) : isEditing ? (
-                    <EditComponent claim={claim} onSave={handleSave} onCancel={() => setIsEditing(false)} />
+                    <EditComponent key={single ? 'one' : 'all'} claim={claim} onSave={handleSave} onCancel={stopEditing} />
                 ) : (
                     <div className={editable ? 'fm-click-edit' : ''} onClick={onViewClick}>{children}</div>
                 )}
