@@ -160,6 +160,20 @@ const isNewer = (a, b) => {
   return ta > tb;
 };
 
+// Only the fields this person actually changed. Saves are built from the whole claim
+// as it was on their screen, so sending all of it would put back anything a colleague
+// saved in the meantime (two people in one claim lost each other's work this way).
+const SKIP_KEYS = new Set(['id', 'created_date', 'updated_date', 'created_by']);
+const changedFields = (next, prev) => {
+  if (!next || !prev || prev.id !== next.id) return next;
+  const out = {};
+  for (const key of Object.keys(next)) {
+    if (SKIP_KEYS.has(key)) continue;
+    if (JSON.stringify(next[key]) !== JSON.stringify(prev[key])) out[key] = next[key];
+  }
+  return out;
+};
+
 export default function ClaimsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState([]);
@@ -346,13 +360,14 @@ export default function ClaimsPage() {
     },
   });
 
-  // updatedClaim = the minimal DB payload (only fields that changed).
+  // updatedClaim = the claim with this person's change applied (most callers pass the
+  // whole claim); only the fields that differ from the screen's copy are sent.
   // localClaim  = optional full object for immediate UI state before the
   // refetch lands; defaults to updatedClaim for backward compatibility.
   // Resolves true once the change is saved, false if it wasn't (the screen is put
   // back and a message shown by onError), so callers only record what really saved.
   const handleUpdate = async (updatedClaim, localClaim) => {
-    const data = sanitizeClaimData(updatedClaim, selectedClaim);
+    const data = sanitizeClaimData(changedFields(updatedClaim, selectedClaim), selectedClaim);
     setSelectedClaim(localClaim || updatedClaim);
     savesInFlight.current += 1;
     try {
