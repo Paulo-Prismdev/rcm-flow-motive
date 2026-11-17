@@ -508,7 +508,7 @@ function DetailRow({ label, value, isCurrency = false, isDate = false, isStatus 
 
 import { ListTodo, History, Timer, Link2, KeyRound, FileSignature } from "lucide-react";
 import { ClaimFieldsSection, SectionShell } from './ClaimFieldCards';
-import { overviewCards, insuranceCards, datesCards, estimateCards, clientCards, driverCards, thirdPartyCards, referrerCards, hireCards, vehicleCards, instructionCards, indemnityCards, signedFormCards } from './claimScreens';
+import { overviewCards, insuranceCards, datesCards, estimateCards, clientCards, driverCards, thirdPartyCards, tpInsuranceCards, referrerCards, hireCards, creditRepairCards, vehicleCards, instructionCards, indemnityCards, signedFormCards } from './claimScreens';
 
 // Counts sit inside their button (no floating bubbles), so nothing overlaps.
 const InlineCount = ({ n, tone = 'neutral', label }) => (
@@ -532,10 +532,11 @@ const SECTION_FIELDS = {
   status: ['reg', 'claim_type', 'loss_date', 'vehicle_use', 'incident_location', 'circumstances'],
   insurance: ['insurer', 'claim_ref', 'policy_number', 'policy_excess'],
   client: ['client_name', 'client_phone', 'client_email', 'client_address_line_1', 'client_town', 'client_postcode'],
-  hire: ['credit_repair_company_name', 'credit_repair_company_contact_name', 'credit_repair_company_phone', 'credit_repair_company_email', 'credit_repair_company_account_ref'],
+  creditRepair: ['credit_repair_company_name', 'credit_repair_company_contact_name', 'credit_repair_company_phone', 'credit_repair_company_email', 'credit_repair_company_account_ref'],
   driver: ['driver_contact_name', 'driver_contact_phone'],
   estimate: ['estimate_cost_net', 'authorising_party'],
-  thirdParty: ['tp_name', 'tp_phone', 'tp_reg', 'tp_insurer'],
+  thirdParty: ['tp_name', 'tp_phone', 'tp_reg'],
+  tpInsurance: ['tp_insurer'],
   vehicle: ['vehicle_colour', 'vehicle_fuel_type', 'vehicle_type', 'vehicle_location', 'vehicle_damage'],
   referrer: ['referrer', 'referrer_ref', 'file_handler'],
   bodyshop: ['bodyshop'],
@@ -549,7 +550,7 @@ const isSectionEmpty = (sectionId, claim) => {
   if (sectionId === 'referrer' && !claim.referrer_id) return false;
   // "None" excess contribution method means not applicable — not missing data
   // Hire / credit repair company details only matter on a credit repair claim.
-  if (sectionId === 'hire' && claim.claim_type !== 'Credit Repair') return false;
+  if (sectionId === 'creditRepair' && claim.claim_type !== 'Credit Repair') return false;
   // The repair contact is the client unless switched off.
   if (sectionId === 'driver' && claim.driver_same_as_client !== false) return false;
   // Indemnity only counts when checks are switched on.
@@ -568,11 +569,13 @@ const DETAIL_SECTIONS = [
   { id: 'dates', label: 'Key dates', icon: Calendar },
   { id: 'estimate', label: 'Estimate', icon: Calculator },
   { id: 'financials', label: 'Financials', icon: DollarSign },
-  { id: 'insurance', label: 'Insurance & excess', icon: BadgePercent },
-  { id: 'client', label: 'Client', icon: Users },
+  { id: 'client', label: 'Client details', icon: Users },
+  { id: 'insurance', label: 'Client insurance', icon: Shield },
   { id: 'driver', label: 'Repair contact (driver)', icon: User },
-  { id: 'thirdParty', label: 'Third party', icon: Users },
+  { id: 'thirdParty', label: 'Third party details', icon: Users },
+  { id: 'tpInsurance', label: 'Third party insurance', icon: Shield },
   { id: 'referrer', label: 'Referrer', icon: Briefcase },
+  { id: 'creditRepair', label: 'Credit repair company', icon: BadgePercent },
   { id: 'vehicle', label: 'Vehicle', icon: Car },
   { id: 'hire', label: 'Courtesy car & hire', icon: KeyRound },
   { id: 'bodyshop', label: 'Bodyshop', icon: Wrench },
@@ -585,7 +588,7 @@ const DETAIL_SECTIONS = [
 
 // Screens that were merged into another one: old links still land in the right place.
 const SECTION_ALIASES = {
-  excessContribution: 'insurance', vehicleDamage: 'vehicle', vehicleLocation: 'vehicle', creditRepair: 'hire',
+  excessContribution: 'insurance', vehicleDamage: 'vehicle', vehicleLocation: 'vehicle',
   repairPreference: 'signedForms', declarationOfNeed: 'signedForms', witnessStatements: 'signedForms',
 };
 const canonicalSection = (id) => SECTION_ALIASES[id] || id;
@@ -1334,7 +1337,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
         return <ClaimFieldsSection title="Overview" icon={Clock} claim={claim} onUpdate={handleUpdate} canEdit={canEdit} cards={overviewCards(claim)} />;
 
       case 'insurance':
-        return <ClaimFieldsSection title="Insurance & excess" icon={BadgePercent} claim={claim} onUpdate={handleUpdate} canEdit={canEdit} cards={insuranceCards(claim, { ExcessForm: ClaimExcessContributionForm })} />;
+        return <ClaimFieldsSection title="Client insurance" icon={Shield} claim={claim} onUpdate={handleUpdate} canEdit={canEdit} cards={insuranceCards(claim, { ExcessForm: ClaimExcessContributionForm })} />;
 
       case 'client': {
         const clientContacts = linkedClient?.contacts || [];
@@ -1362,15 +1365,18 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
             </div>
           ),
         };
-        return <ClaimFieldsSection title="Client" icon={Users} claim={claim} onUpdate={handleUpdate} canEdit={canEdit} cards={[...clientCards(claim, { linkedClient }), ...(clientContacts.length ? [contactsCard] : [])]} />;
+        return <ClaimFieldsSection title="Client details" icon={Users} claim={claim} onUpdate={handleUpdate} canEdit={canEdit} cards={[...clientCards(claim, { linkedClient }), ...(clientContacts.length ? [contactsCard] : [])]} />;
       }
 
       case 'hire':
+        return <ClaimFieldsSection title="Courtesy car & hire" icon={KeyRound} claim={claim} onUpdate={handleUpdate} canEdit={canEdit} cards={hireCards(claim)} />;
+
+      case 'creditRepair':
         return (
           <ClaimFieldsSection
-            title="Courtesy car & hire" icon={KeyRound} claim={claim} onUpdate={handleUpdate} canEdit={canEdit}
-            cards={hireCards(claim, { CreditRepairForm: ClaimCreditRepairForm })}
-            after={claim.claim_type === 'Credit Repair' && (
+            title="Credit repair company" icon={BadgePercent} claim={claim} onUpdate={handleUpdate} canEdit={canEdit}
+            cards={creditRepairCards(claim, { CreditRepairForm: ClaimCreditRepairForm })}
+            after={(
               <>
                 <CreditRepairRatesCard claim={claim} />
                 {claim.credit_repair_company_name && (
@@ -1396,7 +1402,10 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
         return <ClaimFieldsSection title="Repair contact (driver)" icon={User} claim={claim} onUpdate={handleUpdate} canEdit={canEdit} cards={driverCards(claim)} />;
 
       case 'thirdParty':
-        return <ClaimFieldsSection title="Third party" icon={Users} claim={claim} onUpdate={handleUpdate} canEdit={canEdit} cards={thirdPartyCards(claim)} />;
+        return <ClaimFieldsSection title="Third party details" icon={Users} claim={claim} onUpdate={handleUpdate} canEdit={canEdit} cards={thirdPartyCards(claim)} />;
+
+      case 'tpInsurance':
+        return <ClaimFieldsSection title="Third party insurance" icon={Shield} claim={claim} onUpdate={handleUpdate} canEdit={canEdit} cards={tpInsuranceCards(claim)} />;
 
       case 'vehicle':
         return (

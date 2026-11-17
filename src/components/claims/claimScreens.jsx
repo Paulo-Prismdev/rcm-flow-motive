@@ -236,19 +236,22 @@ export const thirdPartyCards = () => [
     ],
   },
   {
-    title: 'Their insurance',
+    title: 'Their vehicle',
+    fields: [
+      { key: 'tp_reg', label: 'Registration', upper: true },
+      { key: 'tp_make_model', label: 'Make / model', optional: true },
+    ],
+  },
+];
+
+export const tpInsuranceCards = () => [
+  {
+    title: "Third party's insurance",
     fields: [
       { key: 'tp_insurer', label: 'Insurer', type: 'insurer', placeholder: 'Select TP insurer...' },
       { key: 'tp_broker_name', label: 'Broker', type: 'broker', idKey: 'tp_broker_id', nameKey: 'tp_broker_name', placeholder: 'Select TP broker...', optional: true },
       { key: 'tp_claim_ref', label: 'Claim reference', optional: true },
       { key: 'tp_policy_number', label: 'Policy number', optional: true },
-    ],
-  },
-  {
-    title: 'Their vehicle',
-    fields: [
-      { key: 'tp_reg', label: 'Registration', upper: true },
-      { key: 'tp_make_model', label: 'Make / model', optional: true },
     ],
   },
 ];
@@ -277,14 +280,15 @@ export const referrerCards = (claim, { ReferrerForm }) => {
   ];
 };
 
-export const hireCards = (claim, { CreditRepairForm }) => {
-  const credit = claim.claim_type === 'Credit Repair';
-  const f = { form: CreditRepairForm };
+export const hireCards = () => [
+  { title: 'Courtesy car & hire', fields: [courtesyField, hireField] },
+];
+
+export const creditRepairCards = (claim, { CreditRepairForm }) => {
+  const f = { form: CreditRepairForm, optional: claim.claim_type !== 'Credit Repair' };
   return [
-    { title: 'Courtesy car & hire', fields: [courtesyField, hireField] },
     {
       title: 'Credit repair company',
-      hidden: !credit,
       fields: [
         { ...f, key: 'credit_repair_company_name', label: 'Company' },
         { ...f, key: 'credit_repair_company_contact_name', label: 'Contact' },
