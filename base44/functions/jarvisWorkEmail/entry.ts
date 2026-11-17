@@ -39,11 +39,12 @@ function mime(o: { from: string; to: string; subject: string; body: string; inRe
 
 Deno.serve(async (req) => {
   if (!jarvisAuthorised(req)) return deny(req);
+  const body = await req.clone().json().catch(() => ({}));
+  if (body?.action === 'ping') return Response.json({ ok: true });
   const user = (Deno.env.get('HOSTINGER_EMAIL_USER') || '').trim();
   const pass = Deno.env.get('HOSTINGER_EMAIL_PASSWORD') || '';
   if (!user || !pass) return Response.json({ error: 'The work inbox is not set up yet: add HOSTINGER_EMAIL_USER and HOSTINGER_EMAIL_PASSWORD to Flowmotive secrets.' }, { status: 503 });
 
-  const body = await req.json().catch(() => ({}));
   const action = String(body?.action || 'check');
   const client = new ImapFlow({
     host: 'imap.hostinger.com', port: 993, secure: true,
