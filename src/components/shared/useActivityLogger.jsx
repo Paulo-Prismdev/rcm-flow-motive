@@ -1,4 +1,5 @@
 import { base44 } from '@/api/base44Client';
+import { pushRecordToClaims } from './linkedRecords';
 
 // Audit log helpers. Lines are written by the recordActivity server function, which
 // stamps who made the change from the signed-in session — the browser can't write
@@ -108,6 +109,9 @@ export async function updateAndLog(entityName, id, data, { before } = {}) {
   if (prior && LOG_TYPES.has(entityName)) {
     logChanges({ parentId: id, parentType: entityName, oldData: prior, newData: data });
   }
+  // Contact details changed in the directory are copied onto every claim linked to
+  // the record (clients, third parties, referrers, credit repair companies).
+  pushRecordToClaims(entityName, id, prior, data).catch(() => {});
   return result;
 }
 
