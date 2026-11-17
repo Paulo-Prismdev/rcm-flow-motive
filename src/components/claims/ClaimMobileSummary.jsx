@@ -17,7 +17,7 @@ import {
 
 // Phone claim screens (desktop keeps its own layout in ClaimDetail).
 // ClaimMobileSummary: the claim opens here: where it's at, people, paperwork,
-//   and every section as a list. Update / Call / WhatsApp sit at the bottom.
+//   and every section as a list. Update and Quick view sit at the bottom.
 // ClaimMobileSectionBar: the bar over one section, with Back to the summary.
 
 const WhatsAppIcon = (props) => (
