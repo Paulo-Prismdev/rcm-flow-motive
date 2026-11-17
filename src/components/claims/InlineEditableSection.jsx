@@ -91,9 +91,9 @@ export function InlineField({ label, name, type = 'text', isCurrency = false, is
             onClick={() => startField(name)}
             aria-label={`Edit ${label}`}
             title={`Edit ${label}`}
-            className="flex-shrink-0 w-8 h-8 -my-1 -mr-1.5 rounded-lg flex items-center justify-center text-muted-foreground/70 hover:text-foreground hover:bg-muted active:bg-muted"
+            className="flex-shrink-0 w-9 h-9 -my-1 rounded-xl border border-border bg-card shadow-card flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-input active:scale-95 transition"
         >
-            <Pencil className="w-3.5 h-3.5" aria-hidden="true" />
+            <Pencil className="w-4 h-4" aria-hidden="true" />
         </button>
     ) : null;
 
@@ -152,12 +152,6 @@ export default function InlineEditableSection({ title, icon: Icon, claim, onUpda
                         <h3 className="text-base font-bold tracking-tight text-foreground truncate">{title}</h3>
                     </div>
                     <div className="flex items-center gap-2">
-                        {canEdit && !isEditing && (
-                            <Button variant="ghost" size="sm" onClick={() => { setEditingField(null); setDraft(claim); setIsEditing(true); }} className="gap-1.5 text-muted-foreground" aria-label={`Edit all of ${title}`}>
-                                <Edit className="w-3.5 h-3.5" aria-hidden="true" />
-                                Edit all
-                            </Button>
-                        )}
                         {isEditing && (
                             <div className="flex items-center gap-1">
                                 <Button variant="outline" size="sm" onClick={handleCancel} className="h-8 gap-1.5">
