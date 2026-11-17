@@ -129,7 +129,7 @@ const Row = ({ onClick, icon: Icon, tile: Tile, label, sub, right, dot }) => (
       </span>
     )}
     <span className="flex-1 min-w-0">
-      <span className={`block text-[15px] truncate m-ellipsis ${Tile ? 'font-semibold' : 'font-medium'}`}>{label}</span>
+      <span className={`block truncate m-ellipsis ${Tile ? 'text-[14.5px] font-semibold uppercase tracking-[0.03em]' : 'text-[15px] font-medium'}`}>{label}</span>
       {sub && <span className="block text-[13px] text-muted-foreground truncate m-ellipsis mt-px">{sub}</span>}
     </span>
     {dot && <span className="w-[7px] h-[7px] rounded-full bg-warning flex-shrink-0" aria-label="Has details still to fill in" />}
