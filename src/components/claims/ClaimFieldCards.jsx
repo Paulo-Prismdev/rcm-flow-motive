@@ -196,7 +196,7 @@ function FieldInput({ def, claim, draft, setDraft, showLabel }) {
             control = (
                 <ThirdPartyCombobox
                     value={merged.tp_name || ''} allowClear placeholder="Select or add third party..."
-                    onChange={(tp) => setDraft((d) => ({ ...d, ...(tp ? claimPatchFromThirdParty(tp, { ...claim, ...d }) : { tp_name: '' }) }))}
+                    onChange={(tp) => setDraft((d) => ({ ...d, ...(tp ? claimPatchFromThirdParty(tp, { ...claim, ...d }) : { tp_name: '', tp_client_id: '' }) }))}
                 />
             );
             break;
