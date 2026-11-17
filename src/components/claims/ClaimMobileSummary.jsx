@@ -74,9 +74,9 @@ const Card = ({ title, children }) => (
 export const DETAIL_GROUPS = [
   ['The job', ['status', 'dates', 'estimate', 'financials']],
   ['Client', ['client', 'insurance', 'driver']],
+  ['The vehicle', ['vehicle', 'hire']],
   ['Third party', ['thirdParty', 'tpInsurance', 'thirdpartyPursuit']],
   ['Other parties', ['referrer', 'creditRepair']],
-  ['The vehicle', ['vehicle', 'hire']],
   ['The repair', ['bodyshop', 'instructionDefaults', 'backorderedParts']],
   ['Recovery and legal', ['indemnity', 'signedForms']],
 ];
