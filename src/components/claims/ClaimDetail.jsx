@@ -1843,7 +1843,9 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
           {/* ── DESKTOP top bar (≥ lg) ── */}
           <div className="hidden lg:block bg-card rounded-2xl p-4 flex-shrink-0 shadow-card">
               <div className="flex flex-col gap-3">
-                  <div className="flex items-start gap-3">
+                  {/* Left: who and what, given the room to stand out. Right: actions, with the
+                      statuses tucked underneath them. */}
+                  <div className="flex items-start gap-4">
                       <button aria-label="Back"
                         onClick={handleClose}
                         className="mt-1 p-2 flex-shrink-0 rounded-xl border border-border bg-card hover:bg-muted transition-colors"
@@ -1851,27 +1853,27 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                           <ArrowLeft className="w-4 h-4" />
                       </button>
                       <div className="flex-1 min-w-0">
-                          {/* Same identity block as the phone: the plate, then who the claim is for */}
-                          <div className="flex items-center gap-3 min-w-0">
-                            <h1 className="flex-shrink-0 rounded-lg bg-primary text-primary-foreground px-3 py-0.5 text-[22px] font-bold tracking-[0.08em] tabular-nums leading-tight shadow-card">
+                          <div className="flex items-center gap-3.5 min-w-0">
+                            <h1 className="flex-shrink-0 rounded-lg bg-primary text-primary-foreground px-3.5 py-1 text-[26px] font-bold tracking-[0.08em] tabular-nums leading-tight shadow-card">
                               {claim.reg || 'No reg'}
                             </h1>
                             <div className="min-w-0">
-                              <p className="text-[17px] font-semibold leading-tight truncate">{claim.client_name || 'No client name'}</p>
-                              <p className="text-[13px] text-muted-foreground truncate tabular-nums">
+                              <p className="text-xl font-bold tracking-tight leading-tight truncate">{claim.client_name || 'No client name'}</p>
+                              <p className="text-[13px] text-muted-foreground truncate tabular-nums mt-0.5">
                                 {[claim.job_number, claim.make_model].filter(Boolean).join(' · ')}
                               </p>
                             </div>
                           </div>
-                          {/* Who it's for, who authorises, their claim number */}
-                          <div className="mt-2"><AuthorisingPartyBanner claim={claim} caption /></div>
+                          {/* Claim type, who authorises, their claim number */}
+                          <div className="mt-2.5"><AuthorisingPartyBanner claim={claim} caption /></div>
                       </div>
-                      <div className="flex items-center gap-1.5 flex-shrink-0">
-                        <Button onClick={() => setIsQuickViewOpen(true)} variant="outline" className="h-9 px-3 text-sm font-medium gap-1.5">
-                          <Eye className="w-4 h-4" /> Quick view
+                      <div className="flex flex-col items-end gap-2 flex-shrink-0">
+                        <div className="flex items-center gap-1.5 justify-end">
+                        <Button onClick={() => setIsQuickViewOpen(true)} title="Quick view" variant="outline" className="h-8 px-2.5 text-[13px] font-medium gap-1.5">
+                          <Eye className="w-3.5 h-3.5" /> <span className="max-2xl:sr-only">Quick view</span>
                         </Button>
                         {canEdit && (
-                          <Button onClick={() => setIsClaimUpdatesOpen(true)} className="h-9 px-3.5 text-sm font-medium gap-1.5">
+                          <Button onClick={() => setIsClaimUpdatesOpen(true)} className="h-8 px-3 text-[13px] font-medium gap-1.5">
                             {claim.unread_bodyshop_update && (
                               <span className="w-2 h-2 rounded-full bg-info ring-2 ring-primary-foreground/70 flex-shrink-0" title="New update from the repairer" aria-label="New update from the repairer" />
                             )}
@@ -1880,29 +1882,29 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                           </Button>
                         )}
                         {!canEdit && (
-                          <Button onClick={() => setIsClaimUpdatesOpen(true)} className="h-9 px-3.5 text-sm font-medium gap-1.5">
+                          <Button onClick={() => setIsClaimUpdatesOpen(true)} className="h-8 px-3 text-[13px] font-medium gap-1.5">
                             Updates
                             {claimUpdates.length > 0 && <InlineCount n={claimUpdates.length} tone="onPrimary" label="updates" />}
                           </Button>
                         )}
-                        <Button onClick={() => setIsImagesOpen(true)} variant="outline" className="h-9 px-3 text-sm font-medium gap-1.5">
-                          <Image className="w-4 h-4" /> Images
+                        <Button onClick={() => setIsImagesOpen(true)} title="Images" variant="outline" className="h-8 px-2.5 text-[13px] font-medium gap-1.5">
+                          <Image className="w-3.5 h-3.5" /> <span className="max-2xl:sr-only">Images</span>
                           {(claim.image_urls?.length > 0) && <InlineCount n={claim.image_urls.length} label="images" />}
                         </Button>
-                        <Button onClick={() => setIsAttachmentsOpen(true)} variant="outline" className="h-9 px-3 text-sm font-medium gap-1.5">
-                          <FileText className="w-4 h-4" /> Docs
+                        <Button onClick={() => setIsAttachmentsOpen(true)} title="Docs" variant="outline" className="h-8 px-2.5 text-[13px] font-medium gap-1.5">
+                          <FileText className="w-3.5 h-3.5" /> <span className="max-2xl:sr-only">Docs</span>
                           {(claim.file_urls?.length > 0) && <InlineCount n={claim.file_urls.length} label="documents" />}
                         </Button>
                         {isInternalUser && (
-                          <Button onClick={() => setIsNotesOpen(true)} variant="outline" className="h-9 px-3 text-sm font-medium gap-1.5">
-                            <Edit className="w-4 h-4" /> Internal updates
+                          <Button onClick={() => setIsNotesOpen(true)} title="Internal updates" variant="outline" className="h-8 px-2.5 text-[13px] font-medium gap-1.5">
+                            <Edit className="w-3.5 h-3.5" /> <span className="max-2xl:sr-only">Internal updates</span>
                             {notesTotalCount > 0 && <InlineCount n={notesTotalCount} tone="info" label="internal updates" />}
                           </Button>
                         )}
                         {canEdit && (
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button aria-label="Expand" variant="outline" className="p-2 h-9 w-9"><ChevronDown className="w-4 h-4" /></Button>
+                              <Button aria-label="Expand" variant="outline" className="p-0 h-8 w-8"><ChevronDown className="w-4 h-4" /></Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-56">
                               <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsAttachmentsOpen(true); }}><FileText className="w-4 h-4 mr-2" />Documents</DropdownMenuItem>
@@ -1916,16 +1918,15 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                               <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsEstimateModalOpen(true); }}><Calculator className="w-4 h-4 mr-2" />Request Estimate</DropdownMenuItem>
                               <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsPartsModalOpen(true); }}><Package className="w-4 h-4 mr-2" />Log Parts Issue</DropdownMenuItem>
                               <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsBackorderedPartsModalOpen(true); }}><Package className="w-4 h-4 mr-2" />Backordered parts</DropdownMenuItem>
-                              <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setSelectedSection('declarationOfNeed'); }}><FileText className="w-4 h-4 mr-2" />Declaration of need</DropdownMenuItem>
+                              <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setSelectedSection('signedForms'); }}><FileText className="w-4 h-4 mr-2" />Declaration of need</DropdownMenuItem>
                               <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsDuplicateModalOpen(true); }}><Copy className="w-4 h-4 mr-2" />Duplicate Claim</DropdownMenuItem>
                               <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleArchive(); }} disabled={archiveMutation.isLoading}><Archive className="w-4 h-4 mr-2" />{claim.archived ? 'Unarchive' : 'Archive'}</DropdownMenuItem>
                               <DropdownMenuItem onSelect={() => handleDelete()} disabled={deleteMutation.isLoading} className="text-danger-fg"><Trash2 className="w-4 h-4 mr-2" />Delete</DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
                         )}
-                      </div>
-                  </div>
-                  <div className="flex items-center gap-2 flex-wrap">
+                        </div>
+                        <div className="flex items-center gap-1.5 flex-wrap justify-end">
                     {isExceptionOutcome(getClaimOutcome(claim)) && <StatusBadge status={getClaimOutcome(claim)} />}
                     {claim.secondary_status && <StatusBadge status={claim.secondary_status} />}
                     {claim.tertiary_status && <StatusBadge status={claim.tertiary_status} variant="secondary" />}
@@ -1940,9 +1941,11 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                       </button>
                     )}
                     {claim.archived && <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-muted text-muted-foreground">Archived</span>}
+                        </div>
+                      </div>
                   </div>
                   {/* Where it's at: the stage in the client's words, the same track as the phone */}
-                  <div className="rounded-xl bg-muted/50 px-4 py-3">
+                  <div className="rounded-xl bg-muted/50 px-4 py-2.5">
                     <ClaimStageTrack claim={claim} />
                   </div>
               </div>
