@@ -2056,7 +2056,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
             ))}
           </nav>
 
-          <div className="flex-1 min-w-0 overflow-y-auto min-h-0 pr-1 pb-4" data-claim-body style={{WebkitOverflowScrolling: 'touch'}}>
+          <div className="flex-1 min-w-0 overflow-y-auto min-h-0 lg:px-1.5 lg:pt-0.5 pr-1 pb-4" data-claim-body style={{WebkitOverflowScrolling: 'touch'}}>
             {/* keyed by section, so switching sections never carries an open edit across */}
             <div key={selectedSection}>
               {renderSelectedSection()}
