@@ -1041,7 +1041,8 @@ fieldset.fm-readonly { border: 0; margin: 0; padding: 0; min-width: 0; }
    cancel. Locked dropdowns and dates hide their arrows so only the pencil shows. */
 .fm-click-edit [data-fm-field],
 .fm-click-edit [data-edit-label] { position: relative; cursor: pointer; }
-.fm-readonly button[role="combobox"] > svg:last-child { display: none; }
+.fm-readonly button[role="combobox"] > svg:last-child,
+.fm-readonly button[data-fm-dropdown] > svg:last-child { display: none; }
 .fm-readonly input::-webkit-calendar-picker-indicator { display: none; }
 .fm-single [data-fm-active] { border-radius: 10px; box-shadow: 0 0 0 2px hsl(var(--ring) / 0.35); }
 .fm-single .fm-single-hide { display: none !important; }
