@@ -159,6 +159,13 @@ function fieldUnit(control, root) {
     return el;
 }
 
+// The name of a field, for the edit box's heading.
+function unitLabel(control, root) {
+    const lab = fieldUnit(control, root).querySelector('label');
+    const text = (lab?.textContent || control.getAttribute('aria-label') || control.getAttribute('placeholder') || '').trim();
+    return text.replace(/\s*\*\s*$/, '').slice(0, 60);
+}
+
 function focusAndFlash(el) {
     if (!el) return;
     el.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); // only scrolls if the field is off-screen
@@ -254,6 +261,12 @@ const EditableSection = ({ title, icon: Icon, claim, onUpdate, children, EditCom
             Array.from(parent.children).forEach((sib) => { if (sib !== el) sib.classList.add('fm-sheet-hide'); });
             if (parent !== root) parent.classList.add('fm-sheet-path');
         }
+        // The field's own label repeats the box's heading, so it's hidden (unless the
+        // label wraps the control itself, like a tick box).
+        const norm = (s) => (s || '').replace(/\s*\*\s*$/, '').trim().toLowerCase();
+        if (sheet.label) activeUnit.querySelectorAll('label').forEach((l) => {
+            if (norm(l.textContent) === norm(sheet.label) && !l.querySelector(FIELD_LIKE)) l.classList.add('fm-sheet-hide');
+        });
     });
 
     // Re-measure the pencils when the card changes size (phone rotated, window resized).
