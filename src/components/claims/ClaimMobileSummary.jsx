@@ -375,21 +375,6 @@ export default function ClaimMobileSummary({
           ))}
         </Card>
 
-        <Card title="Paperwork">
-          <div className="rounded-xl border border-border overflow-hidden">
-            <Row icon={Image} label="Photos" onClick={() => onAction('images')} right={<span className="text-[13px] text-muted-foreground">{imagesCount}</span>} />
-            <Row icon={FileText} label="Documents" onClick={() => onAction('docs')} right={<span className="text-[13px] text-muted-foreground">{docsCount}</span>} />
-            {isInternalUser && <Row icon={NotebookPen} label="Internal updates" onClick={() => onAction('notes')} right={<span className="text-[13px] text-muted-foreground">{notesCount}</span>} />}
-            {missing.length > 0 && (
-              <Row
-                label={`${missing.length} section${missing.length === 1 ? '' : 's'} with details to fill in`}
-                sub={missing.slice(0, 3).map((s) => s.label).join(', ') + (missing.length > 3 ? '…' : '')}
-                dot
-                onClick={() => onOpenSection(missing[0].id)}
-              />
-            )}
-          </div>
-        </Card>
 
         <h2 className="px-4 pt-3 pb-1 text-[19px] font-bold tracking-tight">All details</h2>
         {grouped.map(([title, list]) => (
