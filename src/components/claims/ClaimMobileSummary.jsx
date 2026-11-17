@@ -49,12 +49,11 @@ const sectionPreview = (id, c) => {
     case 'client': return join(c.client_name, c.client_phone);
     case 'driver': return c.driver_same_as_client ? 'Same as client' : join(c.driver_contact_name, c.driver_contact_phone);
     case 'vehicle': return join(c.make_model, c.vehicle_colour);
-    case 'vehicleDamage': return c.vehicle_damage;
-    case 'vehicleLocation': return c.vehicle_location;
     case 'thirdParty': return join(c.tp_name, c.tp_reg);
     case 'bodyshop': return c.bodyshop;
     case 'referrer': return c.referrer;
-    case 'creditRepair': return c.credit_repair_company_name;
+    case 'insurance': return join(c.insurer, c.claim_ref);
+    case 'hire': return join(c.courtesy_car_required === true ? 'Courtesy car' : (c.courtesy_car_required && c.courtesy_car_required !== 'No' ? `Courtesy car: ${c.courtesy_car_required}` : ''), c.credit_repair_company_name);
     default: return '';
   }
 };
@@ -69,11 +68,11 @@ const Card = ({ title, children }) => (
 // The sections, grouped under headings so the list reads as a few short lists.
 // Shared with the desktop section list so both read the same.
 export const DETAIL_GROUPS = [
-  ['The job', ['status', 'dates', 'estimate', 'financials', 'excessContribution']],
-  ['People', ['client', 'creditRepair', 'driver', 'thirdParty', 'referrer']],
-  ['The vehicle', ['vehicle', 'vehicleDamage', 'vehicleLocation']],
-  ['The repair', ['bodyshop', 'instructionDefaults', 'repairPreference', 'backorderedParts']],
-  ['Recovery and legal', ['thirdpartyPursuit', 'indemnity', 'declarationOfNeed', 'witnessStatements']],
+  ['The job', ['status', 'dates', 'estimate', 'financials', 'insurance']],
+  ['People', ['client', 'driver', 'thirdParty', 'referrer']],
+  ['The vehicle', ['vehicle', 'hire']],
+  ['The repair', ['bodyshop', 'instructionDefaults', 'backorderedParts']],
+  ['Recovery and legal', ['thirdpartyPursuit', 'indemnity', 'signedForms']],
 ];
 
 // Sections in their groups; anything not listed goes under "Other".

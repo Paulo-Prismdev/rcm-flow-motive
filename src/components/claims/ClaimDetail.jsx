@@ -506,7 +506,9 @@ function DetailRow({ label, value, isCurrency = false, isDate = false, isStatus 
     );
 }
 
-import { ListTodo, History, Timer, Link2 } from "lucide-react";
+import { ListTodo, History, Timer, Link2, KeyRound, FileSignature } from "lucide-react";
+import { ClaimFieldsSection, SectionShell } from './ClaimFieldCards';
+import { overviewCards, insuranceCards, datesCards, estimateCards, clientCards, driverCards, thirdPartyCards, referrerCards, hireCards, vehicleCards, instructionCards, indemnityCards, signedFormCards } from './claimScreens';
 
 // Counts sit inside their button (no floating bubbles), so nothing overlaps.
 const InlineCount = ({ n, tone = 'neutral', label }) => (
@@ -528,29 +530,30 @@ import { logActivity, logChanges, deleteAndLog } from '../shared/useActivityLogg
 
 const SECTION_FIELDS = {
   status: ['reg', 'claim_type', 'loss_date', 'vehicle_use', 'incident_location', 'circumstances'],
-  client: ['client_name', 'client_phone', 'client_email', 'client_address_line_1', 'client_town', 'client_postcode', 'business_division', 'client_ref', 'broker_name', 'insurer', 'claim_ref', 'policy_number', 'policy_excess'],
-  creditRepair: ['credit_repair_company_name', 'credit_repair_company_contact_name', 'credit_repair_company_phone', 'credit_repair_company_email', 'credit_repair_company_account_ref'],
-  driver: ['driver_contact_name', 'driver_contact_phone', 'driver_contact_email'],
-  estimate: ['send_estimate_email', 'audatex_code', 'est_fee', 'authorising_party', 'estimate_cost_net', 'authority_cost_net', 'estimate_cost_gross', 'authority_cost_gross'],
+  insurance: ['insurer', 'claim_ref', 'policy_number', 'policy_excess'],
+  client: ['client_name', 'client_phone', 'client_email', 'client_address_line_1', 'client_town', 'client_postcode'],
+  hire: ['credit_repair_company_name', 'credit_repair_company_contact_name', 'credit_repair_company_phone', 'credit_repair_company_email', 'credit_repair_company_account_ref'],
+  driver: ['driver_contact_name', 'driver_contact_phone'],
+  estimate: ['estimate_cost_net', 'authorising_party'],
   thirdParty: ['tp_name', 'tp_phone', 'tp_reg', 'tp_insurer'],
-  vehicle: ['make_model', 'vehicle_colour', 'vehicle_fuel_type', 'vehicle_type'],
-  vehicleLocation: ['vehicle_location'],
-  vehicleDamage: ['vehicle_damage'],
+  vehicle: ['vehicle_colour', 'vehicle_fuel_type', 'vehicle_type', 'vehicle_location', 'vehicle_damage'],
   referrer: ['referrer', 'referrer_ref', 'file_handler'],
   bodyshop: ['bodyshop'],
   financials: ['estimate_cost_net', 'authority_cost_net', 'final_repair_cost'],
-  dates: ['date_received', 'loss_date', 'booking_in_date', 'completion_date', 'claim_complete_date'],
-  excessContribution: ['excess_contribution_amount', 'excess_contribution_method'],
+  dates: ['date_received'],
   indemnity: ['indemnity_driver_dob', 'indemnity_registered_owner'],
-  repairPreference: ['repair_preference_signed', 'repair_preference_pdf_url'],
-  declarationOfNeed: ['declaration_of_need_signed', 'declaration_of_need_pdf_url'],
 };
 
 const isSectionEmpty = (sectionId, claim) => {
   // "No Referrer" is a deliberate choice — not missing data
   if (sectionId === 'referrer' && !claim.referrer_id) return false;
   // "None" excess contribution method means not applicable — not missing data
-  if (sectionId === 'excessContribution' && (!claim.excess_contribution_method || claim.excess_contribution_method === 'None')) return false;
+  // Hire / credit repair company details only matter on a credit repair claim.
+  if (sectionId === 'hire' && claim.claim_type !== 'Credit Repair') return false;
+  // The repair contact is the client unless switched off.
+  if (sectionId === 'driver' && claim.driver_same_as_client !== false) return false;
+  // Indemnity only counts when checks are switched on.
+  if (sectionId === 'indemnity' && !claim.requires_indemnity) return false;
   // A figure, Waived or TBC on authority are all answers — never a gap.
   const fields = (SECTION_FIELDS[sectionId] || [])
     .filter(f => !(f === 'policy_excess' && excessAnswered(claim)));
@@ -561,28 +564,31 @@ const isSectionEmpty = (sectionId, claim) => {
 };
 
 const DETAIL_SECTIONS = [
-  { id: 'status', label: 'Job overview', icon: Clock },
+  { id: 'status', label: 'Overview', icon: Clock },
   { id: 'dates', label: 'Key dates', icon: Calendar },
-  { id: 'estimate', label: 'Estimate details', icon: Calculator },
-  { id: 'client', label: 'Client details', icon: Users },
-  { id: 'creditRepair', label: 'Credit repair', icon: Shield },
-  { id: 'driver', label: 'Repair contact (driver)', icon: Users },
-  { id: 'vehicle', label: 'Vehicle details', icon: Car },
-  { id: 'vehicleDamage', label: 'Vehicle damage', icon: AlertTriangle },
-  { id: 'vehicleLocation', label: 'Vehicle location', icon: MapPin },
-  { id: 'thirdParty', label: 'Third party details', icon: Users },
-  { id: 'bodyshop', label: 'Bodyshop details', icon: Wrench },
-  { id: 'referrer', label: 'Referrer details', icon: Briefcase },
-  { id: 'instructionDefaults', label: 'Instruction defaults', icon: FileText },
-  { id: 'excessContribution', label: 'Excess contribution', icon: BadgePercent },
+  { id: 'estimate', label: 'Estimate', icon: Calculator },
   { id: 'financials', label: 'Financials', icon: DollarSign },
-  { id: 'thirdpartyPursuit', label: 'Third party pursuit', icon: Users },
-  { id: 'indemnity', label: 'Indemnity details', icon: Shield },
-  { id: 'repairPreference', label: 'Repair preference', icon: FileText },
-  { id: 'declarationOfNeed', label: 'Declaration of need', icon: FileText },
-  { id: 'witnessStatements', label: 'Witness statements', icon: FileText },
+  { id: 'insurance', label: 'Insurance & excess', icon: BadgePercent },
+  { id: 'client', label: 'Client', icon: Users },
+  { id: 'driver', label: 'Repair contact (driver)', icon: User },
+  { id: 'thirdParty', label: 'Third party', icon: Users },
+  { id: 'referrer', label: 'Referrer', icon: Briefcase },
+  { id: 'vehicle', label: 'Vehicle', icon: Car },
+  { id: 'hire', label: 'Courtesy car & hire', icon: KeyRound },
+  { id: 'bodyshop', label: 'Bodyshop', icon: Wrench },
+  { id: 'instructionDefaults', label: 'Instruction defaults', icon: FileText },
   { id: 'backorderedParts', label: 'Backordered parts', icon: Package },
-  ];
+  { id: 'thirdpartyPursuit', label: 'Third party pursuit', icon: Users },
+  { id: 'indemnity', label: 'Indemnity', icon: Shield },
+  { id: 'signedForms', label: 'Signed forms', icon: FileSignature },
+];
+
+// Screens that were merged into another one: old links still land in the right place.
+const SECTION_ALIASES = {
+  excessContribution: 'insurance', vehicleDamage: 'vehicle', vehicleLocation: 'vehicle', creditRepair: 'hire',
+  repairPreference: 'signedForms', declarationOfNeed: 'signedForms', witnessStatements: 'signedForms',
+};
+const canonicalSection = (id) => SECTION_ALIASES[id] || id;
 
 export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInternalUser = true, initialSection = 'status' }) {
   const [claim, setClaim] = useState(claimProp);
@@ -603,7 +609,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
   const [startTime] = useState(new Date());
   const [currentDuration, setCurrentDuration] = useState(0);
-  const [selectedSection, setSelectedSection] = useState(initialSection);
+  const [selectedSection, setSelectedSection] = useState(canonicalSection(initialSection));
   const durationRef = React.useRef(0);
   const hasSavedRef = React.useRef(false);
   const queryClient = useQueryClient();
@@ -811,12 +817,11 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
   const mobilePage = urlSection ? 'section' : 'summary';
   const sectionPushed = useRef(false);
   useEffect(() => {
-    if (urlSection && urlSection !== selectedSection) setSelectedSection(urlSection);
+    if (urlSection && canonicalSection(urlSection) !== selectedSection) setSelectedSection(canonicalSection(urlSection));
     if (!urlSection) sectionPushed.current = false;
      
   }, [urlSection]);
   const phoneSections = DETAIL_SECTIONS
-    .filter(s => s.id !== 'creditRepair' || claim.claim_type === 'Credit Repair')
     .map(s => ({ ...s, empty: isSectionEmpty(s.id, claim) }));
   const openPhoneSection = (id) => {
     setSelectedSection(id);
@@ -1295,7 +1300,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
   };
 
   const renderSelectedSection = () => {
-        switch (selectedSection) {
+        switch (canonicalSection(selectedSection)) {
           case 'thirdpartyPursuit':
         // Only show for fault claims
         if (claim.claim_type !== 'Fault Claim' && claim.claim_type !== 'Non-Fault - Own Insurer') {
@@ -1314,441 +1319,146 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
         return <ThirdPartyPursuitSection claim={claim} onUpdate={handleUpdate} />;
 
       case 'status':
-        return (
-          <EditableSection 
-            sameLayout
-            title="Job overview" 
-            icon={Clock} 
-            claim={claim} 
-            onUpdate={handleUpdate}
-            EditComponent={ClaimStatusEditForm}
-            canEdit={canEdit}
-          >
-            {claim.created_date && (
-              <p className="text-xs text-muted-foreground mb-3">Created in the system {(() => { try { return format(new Date(claim.created_date), 'dd/MM/yyyy'); } catch { return ''; } })()}</p>
-            )}
-          </EditableSection>
-        );
+        return <ClaimFieldsSection title="Overview" icon={Clock} claim={claim} onUpdate={handleUpdate} canEdit={canEdit} cards={overviewCards(claim)} />;
+
+      case 'insurance':
+        return <ClaimFieldsSection title="Insurance & excess" icon={BadgePercent} claim={claim} onUpdate={handleUpdate} canEdit={canEdit} cards={insuranceCards(claim, { ExcessForm: ClaimExcessContributionForm })} />;
 
       case 'client': {
-        const clientName = claim.client_name || linkedClient?.name;
         const clientContacts = linkedClient?.contacts || [];
-        const primaryContact = clientContacts.find(c => c.is_primary) || clientContacts[0] || null;
-        const companyContactName = primaryContact?.name || linkedClient?.company_contact_name;
-        const companyContactPhone = primaryContact?.phone || linkedClient?.company_contact_phone;
-        const companyContactEmail = primaryContact?.email || linkedClient?.company_contact_email;
-        const clientPhone = claim.client_phone || linkedClient?.phone;
-        const clientEmail = claim.client_email || linkedClient?.email;
-        // Prefer the linked client's VAT status when the claim snapshot is empty/Unknown
-        const claimVat = claim.client_vat_status && claim.client_vat_status !== 'Unknown' ? claim.client_vat_status : null;
-        const vatStatus = claimVat || linkedClient?.vat_status || 'Unknown';
-        return (
-          <EditableSection title="Billing Party — Client" icon={Users} claim={claim} onUpdate={handleUpdate} EditComponent={ClientEditComponent} canEdit={canEdit}>
-            <div className="grid grid-cols-1 lg:grid-cols-2 m-fields-2 gap-2">
-              <div className="py-2 px-3 rounded-[8px] hover:bg-muted/50"><div className="text-xs font-medium text-muted-foreground mb-0.5">Name</div><div className="text-sm font-medium">{clientName || '-'}</div></div>
-              {companyContactName && <div className="py-2 px-3 rounded-[8px] hover:bg-muted/50"><div className="text-xs font-medium text-muted-foreground mb-0.5">Company Contact Name</div><div className="text-sm font-medium">{companyContactName}</div></div>}
-              {companyContactPhone && <div className="py-2 px-3 rounded-[8px] hover:bg-muted/50"><div className="text-xs font-medium text-muted-foreground mb-0.5">Company Contact Phone</div><div className="text-sm font-medium">{companyContactPhone}</div></div>}
-              {companyContactEmail && <div className="py-2 px-3 rounded-[8px] hover:bg-muted/50"><div className="text-xs font-medium text-muted-foreground mb-0.5">Company Contact Email</div><div className="text-sm font-medium">{companyContactEmail}</div></div>}
-              <div className={`py-2 px-3 rounded-[8px] ${!clientPhone ? 'bg-warning-bg border border-warning/50' : 'hover:bg-muted/50'}`}><div className="text-xs font-medium text-muted-foreground mb-0.5">Phone</div><div className={`text-sm font-medium ${!clientPhone ? 'text-warning' : ''}`}>{clientPhone || '-'}</div></div>
-              <div className={`py-2 px-3 rounded-[8px] ${!clientEmail ? 'bg-warning-bg border border-warning/50' : 'hover:bg-muted/50'}`}><div className="text-xs font-medium text-muted-foreground mb-0.5">Email</div><div className={`text-sm font-medium ${!clientEmail ? 'text-warning' : ''}`}>{clientEmail || '-'}</div></div>
-              <div className="py-2 px-3 rounded-[8px] hover:bg-muted/50"><div className="text-xs font-medium text-muted-foreground mb-0.5">VAT Status</div><div className="text-sm font-medium">{vatStatus}</div></div>
-              { claim.client_ref && <div className="py-2 px-3 rounded-[8px] hover:bg-muted/50"><div className="text-xs font-medium text-muted-foreground mb-0.5">Client Ref</div><div className="text-sm font-medium">{claim.client_ref}</div></div>}
-              {claim.business_division && <div className="py-2 px-3 rounded-[8px] hover:bg-muted/50"><div className="text-xs font-medium text-muted-foreground mb-0.5">Business Division</div><div className="text-sm font-medium">{claim.business_division}</div></div>}
-            </div>
-            {clientContacts.length > 0 && (
-              <div className="mt-3 rounded-lg border border-border bg-muted/30 p-3 space-y-2">
-                <div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
-                  <Users className="w-3.5 h-3.5" /> Contacts at this business
-                </div>
-                <div className="space-y-1.5">
-                  {clientContacts.map((c, i) => {
-                    const primary = c.is_primary || (i === 0 && !clientContacts.some(x => x.is_primary));
-                    return (
-                      <div key={i} className="rounded-lg border border-border bg-card p-2.5">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="text-sm font-medium">{c.name || '—'}</span>
-                          {c.position && <span className="text-xs text-muted-foreground">· {c.position}</span>}
-                          {primary && <span className="inline-flex items-center gap-0.5 text-xs text-warning-fg font-medium"><Star className="w-3 h-3 fill-amber-500 text-warning" /> Primary</span>}
-                        </div>
-                        <div className="flex flex-wrap gap-3 mt-1 text-xs text-muted-foreground">
-                          {c.phone && <span className="flex items-center gap-1"><Phone className="w-3 h-3" /> {c.phone}</span>}
-                          {c.email && <span className="flex items-center gap-1"><Mail className="w-3 h-3" /> {c.email}</span>}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-            <div className="mt-3 pt-3 border-t border-border">
-              <p className="text-xs font-semibold text-muted-foreground mb-2">Insurance Details</p>
-              <div className="grid grid-cols-1 lg:grid-cols-2 m-fields-2 gap-2">
-                <DetailRow label="Broker" value={claim.broker_name} />
-                <DetailRow label="Insurer" value={claim.insurer} />
-                <DetailRow label="Claim Reference" value={claim.claim_ref} />
-                <DetailRow label="Policy Number" value={claim.policy_number} />
-                <DetailRow label="Policy Excess" value={excessLabel(claim)} />
-              </div>
-            </div>
-            {(claim.client_address_line_1 || claim.client_town || claim.client_postcode) && (
-              <div className="mt-2 py-3 px-4 rounded-lg bg-muted/40">
-                <div className="text-xs font-semibold text-muted-foreground mb-2">Address</div>
-                <div className="text-sm leading-relaxed space-y-0.5">
-                  {claim.client_address_line_1 && <div>{claim.client_address_line_1}</div>}
-                  {claim.client_address_line_2 && <div>{claim.client_address_line_2}</div>}
-                  {(claim.client_town || claim.client_county || claim.client_postcode) && <div>{[claim.client_town, claim.client_county, claim.client_postcode].filter(Boolean).join(', ')}</div>}
-                </div>
-              </div>
-            )}
-          </EditableSection>
-        );
-      }
-
-      case 'creditRepair':
-        return (
-          <EditableSection title="Credit repair" icon={Shield} claim={claim} onUpdate={handleUpdate} EditComponent={ClaimCreditRepairForm} canEdit={canEdit}>
-            <div className="grid grid-cols-1 lg:grid-cols-2 m-fields-2 gap-2">
-              <DetailRow label="Company" value={claim.credit_repair_company_name} />
-              <DetailRow label="Contact Name" value={claim.credit_repair_company_contact_name} />
-              <DetailRow label="Phone" value={claim.credit_repair_company_phone} />
-              <DetailRow label="Email" value={claim.credit_repair_company_email} />
-              <DetailRow label="Account Ref" value={claim.credit_repair_company_account_ref} />
-              <DetailRow label="Hire Category" value={claim.hire_category} />
-            </div>
-            <CreditRepairRatesCard claim={claim} />
-            {claim.credit_repair_company_name && (
-              <div className="mt-4 p-3 rounded-lg bg-info-bg dark:bg-indigo-900/20 border border-info/30">
-                <div className="flex items-center justify-between gap-3 flex-wrap">
-                  <div className="flex items-center gap-2">
-                    <Mail className="w-4 h-4 text-info-fg flex-shrink-0" />
-                    <div>
-                      <span className="text-sm font-medium block">Credit Repair Instruction</span>
-                      <span className="text-xs text-muted-foreground">Generate a PDF instruction and email it to {claim.credit_repair_company_name}.</span>
+        const contactsCard = {
+          title: 'Contacts at this business',
+          wide: true,
+          after: (
+            <div className="px-4 pb-4 grid grid-cols-1 md:grid-cols-2 gap-2">
+              {clientContacts.map((c, i) => {
+                const primary = c.is_primary || (i === 0 && !clientContacts.some(x => x.is_primary));
+                return (
+                  <div key={i} className="rounded-xl border border-border p-3">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-sm font-semibold">{c.name || '—'}</span>
+                      {c.position && <span className="text-xs text-muted-foreground">· {c.position}</span>}
+                      {primary && <span className="inline-flex items-center gap-0.5 text-xs text-warning-fg font-medium"><Star className="w-3 h-3 fill-amber-500 text-warning" /> Primary</span>}
+                    </div>
+                    <div className="flex flex-wrap gap-3 mt-1 text-[13px] text-muted-foreground">
+                      {c.phone && <a href={`tel:${c.phone}`} className="flex items-center gap-1 hover:text-foreground"><Phone className="w-3.5 h-3.5" /> {c.phone}</a>}
+                      {c.email && <a href={`mailto:${c.email}`} className="flex items-center gap-1 hover:text-foreground break-all"><Mail className="w-3.5 h-3.5" /> {c.email}</a>}
                     </div>
                   </div>
-                  <Button size="sm" onClick={() => setIsCreditRepairInstructionOpen(true)} className="gap-2">
-                    <FileText className="w-4 h-4" /> Send Instruction
-                  </Button>
-                </div>
-              </div>
+                );
+              })}
+            </div>
+          ),
+        };
+        return <ClaimFieldsSection title="Client" icon={Users} claim={claim} onUpdate={handleUpdate} canEdit={canEdit} cards={[...clientCards(claim, { linkedClient }), ...(clientContacts.length ? [contactsCard] : [])]} />;
+      }
+
+      case 'hire':
+        return (
+          <ClaimFieldsSection
+            title="Courtesy car & hire" icon={KeyRound} claim={claim} onUpdate={handleUpdate} canEdit={canEdit}
+            cards={hireCards(claim, { CreditRepairForm: ClaimCreditRepairForm })}
+            after={claim.claim_type === 'Credit Repair' && (
+              <>
+                <CreditRepairRatesCard claim={claim} />
+                {claim.credit_repair_company_name && (
+                  <div className="rounded-2xl bg-card shadow-card p-4 flex items-center justify-between gap-3 flex-wrap">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <Mail className="w-4 h-4 text-muted-foreground flex-shrink-0" aria-hidden="true" />
+                      <div className="min-w-0">
+                        <span className="text-sm font-semibold block">Credit repair instruction</span>
+                        <span className="text-xs text-muted-foreground">Generate a PDF instruction and email it to {claim.credit_repair_company_name}.</span>
+                      </div>
+                    </div>
+                    <Button size="sm" onClick={() => setIsCreditRepairInstructionOpen(true)} className="gap-2">
+                      <FileText className="w-4 h-4" /> Send instruction
+                    </Button>
+                  </div>
+                )}
+              </>
             )}
-          </EditableSection>
+          />
         );
 
       case 'driver':
-        return (
-          <EditableSection sameLayout
-            title="Repair Contact — Driver" icon={User} claim={claim} onUpdate={handleUpdate} EditComponent={DriverEditComponent} canEdit={canEdit}>
-          </EditableSection>
-        );
+        return <ClaimFieldsSection title="Repair contact (driver)" icon={User} claim={claim} onUpdate={handleUpdate} canEdit={canEdit} cards={driverCards(claim)} />;
 
       case 'thirdParty':
-        return (
-          <EditableSection sameLayout
-            title="Third Party" icon={Users} claim={claim} onUpdate={handleUpdate} EditComponent={ThirdPartyEditComponent} canEdit={canEdit}>
-          </EditableSection>
-        );
+        return <ClaimFieldsSection title="Third party" icon={Users} claim={claim} onUpdate={handleUpdate} canEdit={canEdit} cards={thirdPartyCards(claim)} />;
 
       case 'vehicle':
         return (
-          <EditableSection sameLayout
-            title="Vehicle details" icon={Car} claim={claim} onUpdate={handleUpdate} EditComponent={ClaimVehicleForm} canEdit={canEdit}>
-            {/* DVLA Lookup Button */}
-            {claim.reg && (
-              <div className="mb-4 p-3 rounded-xl bg-info-bg border border-info/30">
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <p className="font-medium text-info-fg text-sm">DVLA Vehicle Lookup</p>
-                    <p className="text-xs text-info-fg">Fetch vehicle data from DVLA for {claim.reg}</p>
-                  </div>
-                  <Button
-                    onClick={handleFetchVehicleData}
-                    disabled={isFetchingVehicle}
-                    className="bg-info hover:bg-info/90 text-on-solid text-sm"
-                  >
-                    {isFetchingVehicle ? 'Fetching...' : 'Fetch from DVLA'}
-                  </Button>
-                </div>
-                {vehicleFetchError && (
-                  <p className="mt-2 text-xs text-danger-fg">{vehicleFetchError}</p>
-                )}
-              </div>
-            )}
-          </EditableSection>
-        );
-
-      case 'vehicleLocation':
-        return (
-          <EditableSection 
-            title="Vehicle location" 
-            icon={MapPin} 
-            claim={claim} 
-            onUpdate={handleUpdate} 
-            EditComponent={VehicleLocationEditComponent} 
-            canEdit={canEdit}
-          >
-            <DetailRow label="Vehicle Location" value={claim.vehicle_location} />
-          </EditableSection>
-        );
-
-      case 'vehicleDamage':
-        return (
-          <EditableSection 
-            title="Vehicle damage" 
-            icon={AlertTriangle} 
-            claim={claim} 
-            onUpdate={handleUpdate} 
-            EditComponent={VehicleDamageEditComponent} 
-            canEdit={canEdit}
-          >
-            <div className="grid grid-cols-1 lg:grid-cols-2 m-fields-2 gap-2">
-              <DetailRow label="Courtesy Car (CC) Needed" value={claim.courtesy_car_required === true ? 'Yes' : (claim.courtesy_car_required || 'No')} />
-              <DetailRow label="Hire to Invoice" value={hireSummaryText(claim)} />
-              <DetailRow label="Undriveable / Drivable" value={claim.unroadworthy ? 'Undriveable' : 'Drivable'} />
-            </div>
-            <div data-edit-label="Damage Description" className="mt-2 py-3 px-4 rounded-lg glass-inset">
-              <div className="text-xs font-semibold text-foreground-muted mb-2">Damage Description</div>
-              <div className="text-sm leading-relaxed whitespace-pre-wrap">{claim.vehicle_damage || '-'}</div>
-            </div>
-          </EditableSection>
-        );
-
-
-
-      case 'excessContribution':
-        return (
-          <EditableSection 
-            sameLayout
-            title="Excess contribution" 
-            icon={BadgePercent}
-            claim={claim} 
-            onUpdate={handleUpdate} 
-            EditComponent={ClaimExcessContributionForm} 
-            canEdit={canEdit}
-          >
-          </EditableSection>
+          <ClaimFieldsSection
+            title="Vehicle" icon={Car} claim={claim} onUpdate={handleUpdate} canEdit={canEdit}
+            before={vehicleFetchError ? <p className="text-xs text-danger-fg px-1">{vehicleFetchError}</p> : null}
+            cards={vehicleCards(claim, {
+              dvlaAction: claim.reg ? (
+                <Button size="sm" variant="outline" onClick={handleFetchVehicleData} disabled={isFetchingVehicle} className="h-8">
+                  {isFetchingVehicle ? 'Fetching…' : 'Fetch from DVLA'}
+                </Button>
+              ) : null,
+            })}
+          />
         );
 
       case 'instructionDefaults':
-        return (
-          <EditableSection 
-            sameLayout
-            title="Instruction defaults" 
-            icon={FileText}
-            claim={claim} 
-            onUpdate={handleUpdate} 
-            EditComponent={InstructionDefaultsForm}
-            canEdit={canEdit}
-          >
-          </EditableSection>
-        );
+        return <ClaimFieldsSection title="Instruction defaults" icon={FileText} claim={claim} onUpdate={handleUpdate} canEdit={canEdit} cards={instructionCards(claim)} />;
 
       case 'referrer':
-        return (
-          <EditableSection sameLayout
-            title="Referrer details" icon={Briefcase} claim={claim} onUpdate={handleUpdate} EditComponent={ClaimReferrerForm} canEdit={canEdit}>
-          </EditableSection>
-        );
+        return <ClaimFieldsSection title="Referrer" icon={Briefcase} claim={claim} onUpdate={handleUpdate} canEdit={canEdit} cards={referrerCards(claim, { ReferrerForm: ClaimReferrerForm })} />;
 
       case 'indemnity':
-        if (!claim.requires_indemnity) {
-          return (
-            <EditableSection 
-              title="Indemnity details" 
-              icon={Shield} 
-              claim={claim} 
-              onUpdate={handleUpdate} 
-              EditComponent={ClaimIndemnityForm} 
-              canEdit={canEdit}
-            >
-              <IndemnityLinkManager claim={claim} onUpdate={handleUpdate} />
-              <div className="text-center py-8 text-muted-foreground">
-                <p className="mb-4">This claim does not currently require indemnity checks.</p>
-                <p className="text-sm">Click the edit button to enable indemnity details if needed.</p>
-              </div>
-            </EditableSection>
-          );
-        }
-        
         return (
-          <EditableSection 
-            title="Indemnity details" 
-            icon={Shield} 
-            claim={claim} 
-            onUpdate={handleUpdate} 
-            EditComponent={ClaimIndemnityForm} 
-            canEdit={canEdit}
-          >
-            <IndemnityLinkManager claim={claim} onUpdate={handleUpdate} />
-            <div className="grid grid-cols-1 lg:grid-cols-2 m-fields-2 gap-2">
-              <DetailRow label="Driver's Age" value={(() => {
-                const dob = claim.indemnity_driver_dob;
-                if (!dob) return claim.indemnity_driver_age;
-                const d = new Date(dob);
-                if (isNaN(d.getTime())) return claim.indemnity_driver_age;
-                const now = new Date();
-                let age = now.getFullYear() - d.getFullYear();
-                const m = now.getMonth() - d.getMonth();
-                if (m < 0 || (m === 0 && now.getDate() < d.getDate())) age--;
-                return age;
-              })()} />
-              <DetailRow label="Driver's Date of Birth" value={claim.indemnity_driver_dob} isDate />
-              <DetailRow label="Registered Owner/Keeper" value={claim.indemnity_registered_owner} />
-              <DetailRow label="Pending Prosecutions?" value={claim.indemnity_pending_prosecutions} />
-              <DetailRow label="Told not to drive (DVLA/Medical)?" value={claim.indemnity_dvla_medical_restrictions} />
-              <DetailRow label="Convictions/points (5 yrs)?" value={claim.indemnity_convictions_last_5_years} />
-              <DetailRow label="Incidents/losses/thefts (5 yrs)?" value={claim.indemnity_incidents_last_5_years} />
-              <DetailRow label="Full UK/EU licence 12+ months?" value={claim.indemnity_full_license_12_months} />
-              <DetailRow label="Vehicle Use at Incident" value={claim.indemnity_vehicle_use_at_incident} />
-              <DetailRow label="Vehicle Modifications?" value={claim.indemnity_vehicle_modifications} />
-              <DetailRow label="Pre-existing Damages?" value={claim.indemnity_pre_existing_damage} />
-              <DetailRow label="CCTV / Dashcam Footage?" value={claim.indemnity_cctv_dashcam} />
-              <DetailRow label="Property Damaged?" value={claim.indemnity_property_damaged} />
-              <DetailRow label="More Photos Available?" value={claim.indemnity_more_photos} />
-            </div>
-            <div className="mt-2 space-y-3">
-              {claim.indemnity_modification_details && (
-                <div className="py-3 px-4 rounded-lg glass-inset">
-                  <div className="text-xs font-semibold text-foreground-muted mb-2">Modification Details</div>
-                  <div className="text-sm leading-relaxed whitespace-pre-wrap">{claim.indemnity_modification_details}</div>
-                </div>
-              )}
-              {claim.indemnity_other_info && (
-                <div className="py-3 px-4 rounded-lg glass-inset">
-                  <div className="text-xs font-semibold text-foreground-muted mb-2">Other Information</div>
-                  <div className="text-sm leading-relaxed whitespace-pre-wrap">{claim.indemnity_other_info}</div>
-                </div>
-              )}
-            </div>
-          </EditableSection>
+          <ClaimFieldsSection
+            title="Indemnity" icon={Shield} claim={claim} onUpdate={handleUpdate} canEdit={canEdit}
+            before={<IndemnityLinkManager claim={claim} onUpdate={handleUpdate} />}
+            cards={indemnityCards(claim, { IndemnityForm: ClaimIndemnityForm })}
+          />
         );
 
-
-
-      case 'repairPreference':
-        return (
-          <div className="bg-card border border-border rounded-xl p-4 md:p-5 m-card-tight shadow-card">
-            <div className="flex items-center gap-2.5 pb-3 mb-4 border-b border-border m-card-head">
-              <FileText className="w-4 h-4 text-muted-foreground" />
-              <h3 className="text-[15px] font-semibold text-foreground">Statement of Repair Preference</h3>
-            </div>
-            <RepairPreferenceLinkManager claim={claim} onUpdate={handleUpdate} />
-            <div className="grid grid-cols-1 lg:grid-cols-2 m-fields-2 gap-2 mt-4">
-              <DetailRow label="Signed" value={claim.repair_preference_signed ? 'Yes' : 'No'} />
-              <DetailRow label="Signed At" value={claim.repair_preference_signed_at} isDate />
-              <DetailRow label="Signed By" value={claim.repair_preference_client_name} />
-            </div>
-            {claim.repair_preference_pdf_url && (
-              <div className="mt-3 p-3 rounded-lg bg-primary/10 border border-primary/30 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <FileText className="w-4 h-4 text-primary" />
-                  <span className="text-sm font-medium">Signed PDF</span>
-                </div>
-                <Button variant="outline" size="sm" onClick={() => window.open(claim.repair_preference_pdf_url, '_blank')} className="gap-2">
-                  <Download className="w-4 h-4" /> View / Download
-                </Button>
-              </div>
-            )}
+      case 'signedForms': {
+        const [rp, don] = signedFormCards(claim);
+        const pdf = (url) => url ? (
+          <div className="px-4 py-2.5 border-t border-border flex items-center justify-between gap-3">
+            <span className="text-sm font-medium flex items-center gap-2"><FileText className="w-4 h-4 text-muted-foreground" /> Signed PDF</span>
+            <Button variant="outline" size="sm" onClick={() => window.open(url, '_blank')} className="gap-2 h-8"><Download className="w-4 h-4" /> View</Button>
           </div>
-        );
-
-      case 'witnessStatements':
+        ) : null;
         return (
-          <div className="bg-card border border-border rounded-xl p-4 md:p-5 m-card-tight shadow-card">
-            <div className="flex items-center gap-2.5 pb-3 mb-4 border-b border-border m-card-head">
-              <FileText className="w-4 h-4 text-muted-foreground" />
-              <h3 className="text-[15px] font-semibold text-foreground">Witness statements</h3>
-            </div>
-            <WitnessStatementsSection claim={claim} />
-          </div>
+          <ClaimFieldsSection
+            title="Signed forms" icon={FileSignature} claim={claim} onUpdate={handleUpdate} canEdit={canEdit}
+            cards={[
+              { ...rp, wide: true, before: <div className="px-4 pb-3"><RepairPreferenceLinkManager claim={claim} onUpdate={handleUpdate} /></div>, after: pdf(claim.repair_preference_pdf_url) },
+              { ...don, wide: true, before: <div className="px-4 pb-3"><DeclarationOfNeedLinkManager claim={claim} onUpdate={handleUpdate} /></div>, after: pdf(claim.declaration_of_need_pdf_url) },
+              { title: 'Witness statements', wide: true, after: <div className="px-4 pb-4"><WitnessStatementsSection claim={claim} /></div> },
+            ]}
+          />
         );
-
-      case 'declarationOfNeed':
-        return (
-          <div className="bg-card border border-border rounded-xl p-4 md:p-5 m-card-tight shadow-card">
-            <div className="flex items-center gap-2.5 pb-3 mb-4 border-b border-border m-card-head">
-              <FileText className="w-4 h-4 text-muted-foreground" />
-              <h3 className="text-[15px] font-semibold text-foreground">Declaration of Need – Replacement Vehicle</h3>
-            </div>
-            <DeclarationOfNeedLinkManager claim={claim} onUpdate={handleUpdate} />
-            <div className="grid grid-cols-1 lg:grid-cols-2 m-fields-2 gap-2 mt-4">
-              <DetailRow label="Signed" value={claim.declaration_of_need_signed ? 'Yes' : 'No'} />
-              <DetailRow label="Signed At" value={claim.declaration_of_need_signed_at} isDate />
-              <DetailRow label="Signed By" value={claim.declaration_of_need_client_name} />
-              <DetailRow label="Form Version" value={claim.declaration_of_need_form_version} />
-            </div>
-            {claim.declaration_of_need_pdf_url && (
-              <div className="mt-3 p-3 rounded-lg bg-primary/10 border border-primary/30 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <FileText className="w-4 h-4 text-primary" />
-                  <span className="text-sm font-medium">Signed PDF</span>
-                </div>
-                <Button variant="outline" size="sm" onClick={() => window.open(claim.declaration_of_need_pdf_url, '_blank')} className="gap-2">
-                  <Download className="w-4 h-4" /> View / Download
-                </Button>
-              </div>
-            )}
-          </div>
-        );
-
-
+      }
 
       case 'financials':
         return (
-          <div className="bg-card border border-border rounded-xl p-4 md:p-5 m-card-tight shadow-card">
-            <div className="flex items-center gap-2.5 pb-3 mb-4 border-b border-border m-card-head">
-              <DollarSign className="w-4 h-4 text-muted-foreground" />
-              <h3 className="text-[15px] font-semibold text-foreground">Financials</h3>
-              {isInternalUser && (
-                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground text-xs font-semibold">
-                  <Lock className="w-3 h-3" aria-hidden="true" /> Internal only
-                </span>
-              )}
+          <SectionShell
+            title="Financials" icon={DollarSign}
+            actions={isInternalUser && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-muted text-muted-foreground text-xs font-semibold">
+                <Lock className="w-3 h-3" aria-hidden="true" /> Internal only
+              </span>
+            )}
+          >
+            <div className="rounded-2xl bg-card shadow-card p-4 md:p-5">
+              <ClaimFinancials claim={claim} currentUser={currentUser} onUpdate={handleUpdate} showInvoicing={isInternalUser} />
             </div>
-            <ClaimFinancials
-              claim={claim}
-              currentUser={currentUser}
-              onUpdate={handleUpdate}
-              showInvoicing={isInternalUser}
-            />
-          </div>
+          </SectionShell>
         );
 
       case 'dates':
-        return (
-          <InlineEditableSection title="Key dates" icon={Calendar} claim={claim} onUpdate={handleUpdate} canEdit={canEdit}>
-            <div className="grid grid-cols-1 lg:grid-cols-2 m-fields-2 gap-2">
-              <InlineField label="Date Received" name="date_received" isDate />
-              <InlineField label="Loss Date" name="loss_date" isDate />
-              <InlineField label="Estimate Completed" name="estimate_completed" isDate />
-              <InlineField label="Supplementary Estimate Completed" name="supplementary_estimate_completed" isDate />
-              <InlineField label="Authority Received" name="authority_received" isDate />
-              <InlineField label="Supplementary Authority Received" name="supplementary_authority_received" isDate />
-              <InlineField label="Bodyshop Instructed" name="bs_instructed" isDate />
-              <InlineField label="Booking In Date (BID)" name="booking_in_date" isDate />
-              <InlineField label="On-Site Date" name="on_site_date" isDate />
-              <InlineField label="Hand Over Date" name="hand_over_date" isDate />
-              {totalLoss && <InlineField label="Salvage Collected" name="salvage_collected_date" isDate />}
-              <InlineField label="Est. Completion (ECD)" name="ecd" isDate />
-              <InlineField label="Completion Date" name="completion_date" isDate />
-              <InlineField label="Final Authority Received" name="final_authority_received" isDate />
-              {totalLoss && <InlineField label="Total Loss Marked" name="total_loss_marked_date" isDate />}
-              <InlineField label="Claim Complete Date" name="claim_complete_date" isDate />
-            </div>
-            <div className="mt-3 pt-3 border-t border-border">
-              <p className="text-xs text-muted-foreground mb-2">Rectification milestones — greyed out until the claim is on the Rectification journey.</p>
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
-                <InlineField label="Rectification Booking In" name="rectification_booking_in_date" isDate readOnly={!isRectification} />
-                <InlineField label="Rectification Completion" name="rectification_completion_date" isDate readOnly={!isRectification} />
-                <InlineField label="Rectification Hand-Over" name="rectification_hand_over_date" isDate readOnly={!isRectification} />
-              </div>
-            </div>
-          </InlineEditableSection>
-        );
+        return <ClaimFieldsSection title="Key dates" icon={Calendar} claim={claim} onUpdate={handleUpdate} canEdit={canEdit} cards={datesCards(claim, { totalLoss, isRectification })} />;
 
       case 'bodyshop':
         return (
-          <EditableSection title="Bodyshop details" icon={Wrench} claim={claim} onUpdate={handleUpdate} EditComponent={ClaimBodyshopForm} canEdit={canEdit}>
+          <SectionShell title="Bodyshop" icon={Wrench}>
+          <div className="rounded-2xl bg-card shadow-card p-4 md:p-5">
             {/* Find Repairer on Map — always visible, no edit mode needed */}
             <div className="mb-4">
               <ClaimBodyshopAllocateButton claim={claim} onAllocated={(data) => handleUpdate({ ...claim, ...data })} />
@@ -1779,7 +1489,6 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
             {/* Extended bodyshop information when allocated */}
             {claim.bodyshop_id && (
               <>
-                <div className="text-xs text-muted-foreground mt-2">Debug: bodyshop_id = {claim.bodyshop_id}</div>
                 <ClaimBodyshopInfo bodyshopId={claim.bodyshop_id} />
               </>
             )}
@@ -1897,44 +1606,38 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
                 </div>
               )}
             </div>
-          </EditableSection>
+          </div>
+          </SectionShell>
         );
 
       case 'estimate':
         return (
-          <InlineEditableSection title="Estimate details" icon={Calculator} claim={claim} onUpdate={handleUpdate} canEdit={canEdit}>
-            <EstimateInlineFields />
-            <EstimateAuthorityTotals claim={claim} className="mt-2" />
-            <div className="mt-2 py-3 px-4 rounded-lg glass-inset">
-              <InlineField label="Artura Estimate URL" name="artura_est_url" bare placeholder="Enter URL" />
-            </div>
-            {/* Purchase Order generation — uses estimate total as authority figure */}
-            <div className="mt-4 p-3 rounded-lg bg-primary/10 border border-primary/30">
-              <div className="flex items-center justify-between gap-3 flex-wrap">
-                <div className="flex items-center gap-2">
-                  <FileText className="w-4 h-4 text-primary" />
-                  <div>
-                    <span className="text-sm font-medium block">Purchase Order</span>
-                    <span className="text-xs text-muted-foreground">
-                      Authority figure: {(() => {
-                        const v = claim.authority_cost_gross ?? claim.estimate_cost_gross ?? claim.authority_cost_net ?? claim.estimate_cost_net;
-                        return v != null && v !== '' ? `£${Number(v).toLocaleString('en-GB', { minimumFractionDigits: 2 })}` : '—';
-                      })()}
-                    </span>
+          <ClaimFieldsSection
+            title="Estimate" icon={Calculator} claim={claim} onUpdate={handleUpdate} canEdit={canEdit}
+            cards={estimateCards(claim)}
+            after={
+              <>
+                <EstimateAuthorityTotals claim={claim} />
+                <div className="rounded-2xl bg-card shadow-card p-4 flex items-center justify-between gap-3 flex-wrap">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <FileText className="w-4 h-4 text-muted-foreground flex-shrink-0" aria-hidden="true" />
+                    <div className="min-w-0">
+                      <span className="text-sm font-semibold block">Purchase order</span>
+                      <span className="text-xs text-muted-foreground">
+                        Authority figure: {(() => {
+                          const v = claim.authority_cost_gross ?? claim.estimate_cost_gross ?? claim.authority_cost_net ?? claim.estimate_cost_net;
+                          return v != null && v !== '' ? `£${Number(v).toLocaleString('en-GB', { minimumFractionDigits: 2 })}` : '—';
+                        })()}
+                      </span>
+                    </div>
                   </div>
+                  <Button variant="outline" size="sm" onClick={() => setIsPoDialogOpen(true)} className="gap-2">
+                    <FileText className="w-4 h-4" /> Generate PO
+                  </Button>
                 </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setIsPoDialogOpen(true)}
-                  className="gap-2"
-                >
-                  <FileText className="w-4 h-4" />
-                  Generate PO
-                </Button>
-              </div>
-            </div>
-          </InlineEditableSection>
+              </>
+            }
+          />
         );
 
       case 'backorderedParts':
