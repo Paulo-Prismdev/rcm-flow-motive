@@ -95,7 +95,7 @@ import ClaimQuickViewModal from './ClaimQuickViewModal';
 import BackorderedPartsModal from './BackorderedPartsModal';
 import { formatUKRegistration } from '../shared/formatRegistration';
 import DuplicateClaimModal from './DuplicateClaimModal';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 
 import {
@@ -110,7 +110,6 @@ import { generateClaimOverviewPdf } from './claimOverviewPdf';
 import ClaimStatusEditForm from './ClaimStatusEditForm';
 import { isUpdateTrackingClosed, computeUpdateStatusFlag, computeClientCommStatusFlag, buildStatusChangeRecord } from '../shared/claimStatusUpdate';
 import { saveTimeLogInBackground } from '../shared/saveTimeLogInBackground';
-import { useBackLayer, usePhoneLayout } from '@/lib/backNavigation';
 
 import { askConfirm, notify, notifyError } from '@/lib/dialogs';
 // ── Editing without the fields moving ──
@@ -750,19 +749,35 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
 
   const starredUpdates = claimUpdates.filter(u => u.starred && !u.parent_update_id);
 
-  // Phones: the claim opens on its summary; a section opens on its own page.
-  const [mobilePage, setMobilePage] = useState('summary');
+  // Phones: the claim opens on its summary; a section opens on its own page. The
+  // open section lives in the page address (&section=<id>), so the phone's back
+  // gesture, the browser's back button and the on-screen Back all return to the
+  // summary the same way.
+  const routeLocation = useLocation();
+  const urlSection = new URLSearchParams(routeLocation.search).get('section');
+  const mobilePage = urlSection ? 'section' : 'summary';
+  const sectionPushed = useRef(false);
+  useEffect(() => {
+    if (urlSection && urlSection !== selectedSection) setSelectedSection(urlSection);
+    if (!urlSection) sectionPushed.current = false;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [urlSection]);
   const phoneSections = DETAIL_SECTIONS
     .filter(s => s.id !== 'creditRepair' || claim.claim_type === 'Credit Repair')
     .map(s => ({ ...s, empty: isSectionEmpty(s.id, claim) }));
   const openPhoneSection = (id) => {
     setSelectedSection(id);
-    setMobilePage('section');
+    const params = new URLSearchParams(routeLocation.search);
+    params.set('section', id);
+    navigate({ search: `?${params.toString()}` });
+    sectionPushed.current = true;
   };
-  // A section page on a phone is its own back step, so the back gesture returns
-  // to the claim summary rather than leaving the claim.
-  const isPhoneWidth = usePhoneLayout();
-  useBackLayer(isPhoneWidth && mobilePage === 'section', () => setMobilePage('summary'), 'claim-section');
+  const backToSummary = () => {
+    if (sectionPushed.current) { sectionPushed.current = false; navigate(-1); return; }
+    const params = new URLSearchParams(routeLocation.search);
+    params.delete('section');
+    navigate({ search: `?${params.toString()}` }, { replace: true });
+  };
   // Going back to the summary starts it at the top, like opening a page.
   React.useEffect(() => {
     const scroller = rootRef.current?.closest('[data-claim-scroll]');
@@ -2051,7 +2066,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
             <ClaimMobileSectionBar
               claim={claim}
               title={(DETAIL_SECTIONS.find(s => s.id === selectedSection) || DETAIL_SECTIONS[0]).label}
-              onBack={() => setMobilePage('summary')}
+              onBack={backToSummary}
               onAction={handlePhoneAction}
               isInternalUser={isInternalUser}
             />
