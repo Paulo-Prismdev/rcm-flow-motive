@@ -1113,3 +1113,14 @@ fieldset.fm-readonly { border: 0; margin: 0; padding: 0; min-width: 0; }
   .fm-loading__glow, .fm-loading__glass::after { animation: none; }
   .fm-loading__bar { transition: none; }
 }
+
+/* ═══ Edit box for one field (FieldEditSheet) ═══
+   The section's form sits in the box with only the chosen field showing. */
+.fm-edit-sheet .fm-sheet-hide { display: none !important; }
+.fm-edit-sheet .fm-sheet-path {
+  display: block !important;
+  padding: 0 !important; margin: 0 !important;
+  border: 0 !important; box-shadow: none !important; background: transparent !important;
+  max-height: none !important; overflow: visible !important;
+}
+.fm-edit-sheet input:not([type="checkbox"]):not([type="radio"]), .fm-edit-sheet textarea { font-size: 16px; } /* 16px stops iPhone zooming in */
