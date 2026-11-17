@@ -94,7 +94,7 @@ export default function FieldEditSheet({ open, title, subtitle, onSave, onCancel
     const head = (
         <div className="flex items-start gap-3 pb-3">
             <div className="flex-1 min-w-0">
-                <div className="text-[15px] font-bold text-foreground leading-tight">{title}</div>
+                <div className="text-[15px] font-bold text-foreground leading-tight capitalize">{title}</div>
                 {subtitle && <div className="text-xs text-muted-foreground mt-0.5 truncate">{subtitle}</div>}
             </div>
             <button type="button" onClick={onCancel} aria-label="Close without saving" className="-mr-1 -mt-1 w-9 h-9 rounded-xl flex items-center justify-center text-muted-foreground hover:bg-muted active:bg-muted">
