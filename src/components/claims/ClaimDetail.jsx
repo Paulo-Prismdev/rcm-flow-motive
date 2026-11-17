@@ -174,6 +174,8 @@ const EditableSection = ({ title, icon: Icon, claim, onUpdate, children, EditCom
     const [single, setSingle] = useState(false);
     const [version, setVersion] = useState(0);
     const [actionsAt, setActionsAt] = useState(null); // where the tick / cross sit
+    const [pencils, setPencils] = useState([]); // a pencil button at the end of each locked field
+    const [, setMeasure] = useState(0);
     const bodyRef = useRef(null);
     const pendingFocus = useRef(null); // { index } (same layout) or { label } (own view)
     const activeControl = useRef(null);
@@ -262,6 +264,47 @@ const EditableSection = ({ title, icon: Icon, claim, onUpdate, children, EditCom
         if (!actionsAt || actionsAt.top !== top || actionsAt.left !== left) setActionsAt({ top, left });
     });
 
+    // Re-measure the pencils when the card changes size (phone rotated, window resized).
+    useEffect(() => {
+        const el = bodyRef.current;
+        if (!el || typeof ResizeObserver === 'undefined') return undefined;
+        const ro = new ResizeObserver(() => setMeasure((m) => m + 1));
+        ro.observe(el);
+        return () => ro.disconnect();
+    }, []);
+
+    // Locked: a pencil button sits at the end of every field that can be changed.
+    useLayoutEffect(() => {
+        const root = bodyRef.current;
+        const next = [];
+        if (root && editable && !isEditing) {
+            const r = root.getBoundingClientRect();
+            const fs = root.querySelector('fieldset.fm-readonly');
+            if (sameLayout && fs) {
+                const all = Array.from(fs.querySelectorAll(ANY_CONTROL));
+                realControls(fs).forEach((c) => {
+                    if (c.readOnly) return; // read-only boxes (Job status) can't be edited
+                    const a = c.getBoundingClientRect();
+                    if (!a.width || !a.height) return;
+                    const narrow = a.width < 96; // a switch or tick box: pencil just before it
+                    if (!narrow && c.style.paddingRight !== '52px') c.style.paddingRight = '52px';
+                    const top = Math.round(a.top - r.top + (a.height > 60 ? 8 : (a.height - 36) / 2));
+                    const left = Math.round(narrow ? a.left - r.left - 44 : a.right - r.left - 42);
+                    next.push({ key: `i${all.indexOf(c)}`, top, left, focus: { index: all.indexOf(c) } });
+                });
+            } else if (!sameLayout) {
+                root.querySelectorAll('[data-edit-label]').forEach((cell, i) => {
+                    const a = cell.getBoundingClientRect();
+                    if (!a.width || !a.height) return;
+                    if (cell.style.paddingRight !== '52px') cell.style.paddingRight = '52px';
+                    next.push({ key: `l${i}`, top: Math.round(a.top - r.top + (a.height - 36) / 2), left: Math.round(a.right - r.left - 44), focus: { label: cell.getAttribute('data-edit-label') } });
+                });
+            }
+        }
+        const same = next.length === pencils.length && next.every((p, i) => p.key === pencils[i].key && p.top === pencils[i].top && p.left === pencils[i].left);
+        if (!same) setPencils(next);
+    });
+
     const saveField = () => {
         const btn = saveButton.current;
         if (btn) { btn.click(); return; }
@@ -340,6 +383,20 @@ const EditableSection = ({ title, icon: Icon, claim, onUpdate, children, EditCom
         if (row) startField({ label: row.getAttribute('data-edit-label') });
     };
 
+    const pencilButtons = !isEditing && pencils.map((p) => (
+        <button
+            key={p.key}
+            type="button"
+            onClick={(e) => { e.stopPropagation(); startField(p.focus); }}
+            className="absolute z-[4] w-9 h-9 rounded-xl border border-border bg-card shadow-card flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-input active:scale-95 transition"
+            style={{ top: p.top, left: p.left }}
+            aria-label="Edit this field"
+            title="Edit"
+        >
+            <Edit className="w-4 h-4" aria-hidden="true" />
+        </button>
+    ));
+
     const fieldActions = isEditing && single && actionsAt && (
         <div className="fm-field-actions" style={{ top: actionsAt.top, left: actionsAt.left }}>
             <button type="button" className="fm-tick" onClick={saveField} aria-label="Save this field" title="Save">
@@ -371,21 +428,12 @@ const EditableSection = ({ title, icon: Icon, claim, onUpdate, children, EditCom
                             Editing
                         </Button>
                     )}
-                    {isEditing && single && (
-                        <Button variant="ghost" size="sm" onClick={() => startEdit(null)} className="gap-1.5 text-muted-foreground">
-                            Edit all
-                        </Button>
-                    )}
-                    {!isEditing && EditComponent && canEdit && (
-                        <Button variant="ghost" size="sm" onClick={() => startEdit(null)} className="gap-1.5 text-muted-foreground" aria-label={`Edit all of ${title}`} title="Edit every field at once (address and vehicle look-ups live here)">
-                            <Edit className="w-3.5 h-3.5" aria-hidden="true" />
-                            Edit all
-                        </Button>
-                    )}
+
                 </div>
             </div>
             <div ref={bodyRef} className={`relative ${isEditing && single ? 'fm-single' : ''}`} onKeyDown={onSingleKey}>
                 {fieldActions}
+                {pencilButtons}
                 {sameLayout && EditComponent ? (
                     <>
                         {children}
