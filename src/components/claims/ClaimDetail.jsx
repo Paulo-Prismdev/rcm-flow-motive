@@ -187,23 +187,26 @@ const EditableSection = ({ title, icon: Icon, claim, onUpdate, children, EditCom
     const pendingFocus = useRef(null); // { index } (same layout) or { label } (own view)
     const activeControl = useRef(null);
     const saveButton = useRef(null);
-    const lockedUnits = useRef(null); // the other fields, as they were when the pencil was tapped
+    // One field being changed in the edit box: { focus, label }. The section itself
+    // stays exactly as it looks; the field is edited in the box and saved from there.
+    const [sheet, setSheet] = useState(null);
+    const sheetBody = useRef(null);
 
     // Exit edit mode when claim is updated externally (e.g. wizard save), and redraw the
     // locked form from the fresh claim.
     useEffect(() => {
         setIsEditing(false);
         setSingle(false);
+        setSheet(null);
         setVersion((v) => v + 1);
     }, [claim]);
 
     const stopEditing = () => {
         setIsEditing(false);
         setSingle(false);
-        setActionsAt(null);
+        setSheet(null);
         activeControl.current = null;
         saveButton.current = null;
-        lockedUnits.current = null;
     };
 
     const handleSave = (updatedData) => {
@@ -213,71 +216,44 @@ const EditableSection = ({ title, icon: Icon, claim, onUpdate, children, EditCom
 
     const editable = !!(EditComponent && canEdit);
 
-    // One field unlocked: every other field is locked and can't be reached, the form's own
-    // Save / Cancel buttons are hidden, and a tick and a cross sit at the end of the field.
+    // The edit box holds the section's form with only the chosen field showing. Everything
+    // else in the form (other fields, headings, its own Save / Cancel) is hidden; the box's
+    // Save presses the form's own Save, so the claim is saved exactly as before.
     useLayoutEffect(() => {
-        const root = bodyRef.current;
-        if (!isEditing || !single || !root) return;
-        const controls = realControls(root);
+        const root = sheetBody.current;
+        if (!sheet || !root) return;
         if (!activeControl.current || !root.contains(activeControl.current)) {
-            const want = pendingFocus.current;
+            const want = sheet.focus;
             let el = null;
             if (want?.index != null) el = root.querySelectorAll(ANY_CONTROL)[want.index];
             else if (want?.label) el = findControlByLabel(root, want.label);
-            activeControl.current = (el && isRealControl(el) ? el : null) || controls[0] || null;
+            activeControl.current = (el && isRealControl(el) ? el : null) || realControls(root)[0] || null;
+            saveButton.current = null;
         }
         const active = activeControl.current;
         if (!active) return;
         const activeUnit = fieldUnit(active, root);
-        // Only the fields there when the pencil was tapped are locked, so anything that
-        // opens afterwards (a dropdown's options, fields a switch reveals) stays usable.
-        if (!lockedUnits.current) {
-            lockedUnits.current = controls
-                .map((c) => ({ c, unit: fieldUnit(c, root) }))
-                .filter(({ unit }) => unit !== activeUnit && !unit.contains(active) && !active.contains(unit));
-        }
-        lockedUnits.current.forEach(({ c, unit }) => {
-            if (!unit.isConnected) return;
-            unit.setAttribute('inert', '');
-            unit.classList.add('fm-readonly');
-            if (c.tagName === 'BUTTON' && !c.matches(FIELD_SELECTOR)) c.setAttribute('data-fm-dropdown', '');
-            // Locked fields keep their amber "Not set" while another field is open.
-            if (c.matches('input:not([type="checkbox"]):not([type="radio"]), textarea, select')) {
-                const empty = c.value === '' || c.value == null;
-                c.classList.toggle('fm-empty', empty);
-                if (empty && !c.placeholder) c.placeholder = 'Not set';
-            }
-        });
-        activeUnit.removeAttribute('inert');
-        activeUnit.classList.remove('fm-readonly');
-        activeUnit.setAttribute('data-fm-active', '');
-        // The form's own action buttons: remember Save, hide them all.
-        // A button with no type inside a form counts as "submit", Cancel included, so Save
-        // is found by its name first and only then by being the form's submit button.
-        const SAVE = /^(save|update|confirm)\b/i;
-        const ACTION = /^(save|cancel|update|confirm|close)\b/i;
-        const NOT_SAVE = /^(cancel|close|back)\b/i;
-        let byName = null; let bySubmit = null;
-        root.querySelectorAll('button').forEach((b) => {
-            if (activeUnit.contains(b) || b.closest('.fm-field-actions')) return;
-            const text = (b.textContent || '').trim();
-            const submitAttr = b.getAttribute('type') === 'submit';
-            if (submitAttr || ACTION.test(text)) {
+        // Find the form's Save before hiding things. A button with no type inside a form
+        // counts as "submit", Cancel included, so Save is found by its name first.
+        if (!saveButton.current) {
+            const SAVE = /^(save|update|confirm)\b/i;
+            const NOT_SAVE = /^(cancel|close|back)\b/i;
+            let byName = null; let bySubmit = null;
+            root.querySelectorAll('button').forEach((b) => {
+                if (activeUnit.contains(b)) return;
+                const text = (b.textContent || '').trim();
                 if (!byName && SAVE.test(text)) byName = b;
-                if (!bySubmit && submitAttr && !NOT_SAVE.test(text)) bySubmit = b;
-                b.classList.add('fm-single-hide');
-            }
-        });
-        if (!saveButton.current) saveButton.current = byName || bySubmit;
-        // Tick and cross: inside the end of a wide box, or just after a small one (a switch).
-        const r = root.getBoundingClientRect();
-        const a = active.getBoundingClientRect();
-        const wide = a.width >= 140;
-        const tall = a.height > 56;
-        if (wide && active.style.paddingRight !== '80px') active.style.paddingRight = '80px';
-        const top = Math.round(a.top - r.top + (tall ? 6 : (a.height - 32) / 2));
-        const left = Math.round(wide ? a.right - r.left - 74 : a.right - r.left + 8);
-        if (!actionsAt || actionsAt.top !== top || actionsAt.left !== left) setActionsAt({ top, left });
+                if (!bySubmit && b.getAttribute('type') === 'submit' && !NOT_SAVE.test(text)) bySubmit = b;
+            });
+            saveButton.current = byName || bySubmit;
+        }
+        // Hide everything that isn't the chosen field (or one of the boxes it sits in).
+        for (let el = activeUnit; el && el !== root; el = el.parentElement) {
+            const parent = el.parentElement;
+            if (!parent) break;
+            Array.from(parent.children).forEach((sib) => { if (sib !== el) sib.classList.add('fm-sheet-hide'); });
+            if (parent !== root) parent.classList.add('fm-sheet-path');
+        }
     });
 
     // Re-measure the pencils when the card changes size (phone rotated, window resized).
@@ -307,7 +283,7 @@ const EditableSection = ({ title, icon: Icon, claim, onUpdate, children, EditCom
                     if (!narrow && c.style.paddingRight !== '52px') c.style.paddingRight = '52px';
                     const top = Math.round(a.top - r.top + (a.height > 60 ? 8 : (a.height - 36) / 2));
                     const left = Math.round(narrow ? a.left - r.left - 44 : a.right - r.left - 42);
-                    next.push({ key: `i${all.indexOf(c)}`, top, left, focus: { index: all.indexOf(c) } });
+                    next.push({ key: `i${all.indexOf(c)}`, top, left, focus: { index: all.indexOf(c) }, label: unitLabel(c, fs) });
                 });
             } else if (!sameLayout) {
                 root.querySelectorAll('[data-edit-label]').forEach((cell, i) => {
@@ -328,12 +304,6 @@ const EditableSection = ({ title, icon: Icon, claim, onUpdate, children, EditCom
         const form = activeControl.current?.closest('form');
         if (form?.requestSubmit) form.requestSubmit();
         else stopEditing();
-    };
-
-    const onSingleKey = (e) => {
-        if (!single) return;
-        if (e.key === 'Escape') { e.preventDefault(); stopEditing(); }
-        else if (e.key === 'Enter' && e.target.tagName === 'INPUT') { e.preventDefault(); saveField(); }
     };
 
     // Locked view: mark empty fields (amber, "Not set") the way the old view did.
@@ -371,27 +341,25 @@ const EditableSection = ({ title, icon: Icon, claim, onUpdate, children, EditCom
     }, [isEditing]);
 
     const startEdit = (focus) => { if (!editable) return; pendingFocus.current = focus || null; setSingle(false); setIsEditing(true); };
-    // Pencil on one field: unlock only that field.
-    const startField = (focus) => {
+    // Pencil on one field: open the edit box for that field. The section doesn't change.
+    const startField = (focus, label) => {
         if (!editable) return;
-        pendingFocus.current = focus || null;
         activeControl.current = null;
         saveButton.current = null;
-        lockedUnits.current = null;
-        setSingle(true);
-        setIsEditing(true);
+        setSheet({ focus: focus || null, label: label || focus?.label || '', n: Date.now() });
     };
 
     // Same layout: a click anywhere in a locked field opens editing on that field.
     const onLockedClick = (e) => {
         if (!editable) return;
         const root = bodyRef.current; if (!root) return;
+        const fs = root.querySelector('fieldset.fm-readonly'); if (!fs) return;
         const block = e.target.closest('div'); if (!block) return;
         const pick = (el) => el && Array.from(el.querySelectorAll(ANY_CONTROL)).find((c) => !c.classList.contains('fm-hide'));
         const control = pick(block) || pick(e.target.closest('label')?.parentElement);
-        const list = Array.from(root.querySelectorAll(ANY_CONTROL));
+        const list = Array.from(fs.querySelectorAll(ANY_CONTROL));
         const index = control ? list.indexOf(control) : -1;
-        if (index >= 0) startField({ index });
+        if (index >= 0) startField({ index }, unitLabel(control, fs));
     };
 
     // Own view: clicking a value (DetailRow etc.) opens that one field for editing.
@@ -405,7 +373,7 @@ const EditableSection = ({ title, icon: Icon, claim, onUpdate, children, EditCom
         <button
             key={p.key}
             type="button"
-            onClick={(e) => { e.stopPropagation(); startField(p.focus); }}
+            onClick={(e) => { e.stopPropagation(); startField(p.focus, p.label); }}
             className="absolute z-[4] w-9 h-9 rounded-xl border border-border bg-card shadow-card flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-input active:scale-95 transition"
             style={{ top: p.top, left: p.left }}
             aria-label="Edit this field"
@@ -415,15 +383,21 @@ const EditableSection = ({ title, icon: Icon, claim, onUpdate, children, EditCom
         </button>
     ));
 
-    const fieldActions = isEditing && single && actionsAt && (
-        <div className="fm-field-actions" style={{ top: actionsAt.top, left: actionsAt.left }}>
-            <button type="button" className="fm-tick" onClick={saveField} aria-label="Save this field" title="Save">
-                <Check className="w-[18px] h-[18px]" aria-hidden="true" />
-            </button>
-            <button type="button" className="fm-cross" onClick={stopEditing} aria-label="Cancel" title="Cancel">
-                <X className="w-[18px] h-[18px]" aria-hidden="true" />
-            </button>
-        </div>
+    const editBox = editable && (
+        <FieldEditSheet
+            open={!!sheet}
+            title={sheet?.label || title}
+            subtitle={sheet?.label ? title : undefined}
+            onSave={saveField}
+            onCancel={stopEditing}
+            bodyRef={sheetBody}
+        >
+            {sheet && (
+                <div className="fm-sheet-form">
+                    <EditComponent key={`sheet-${sheet.n}`} claim={claim} onSave={handleSave} onCancel={stopEditing} />
+                </div>
+            )}
+        </FieldEditSheet>
     );
 
     return (
@@ -449,8 +423,8 @@ const EditableSection = ({ title, icon: Icon, claim, onUpdate, children, EditCom
 
                 </div>
             </div>
-            <div ref={bodyRef} className={`relative ${isEditing && single ? 'fm-single' : ''}`} onKeyDown={onSingleKey}>
-                {fieldActions}
+            {editBox}
+            <div ref={bodyRef} className="relative">
                 {pencilButtons}
                 {sameLayout && EditComponent ? (
                     <>
