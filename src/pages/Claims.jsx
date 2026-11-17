@@ -27,7 +27,6 @@ import { hireFlagged } from '@/components/shared/hireCharge';
 import InvoiceStatusReviewBanner from '../components/claims/InvoiceStatusReviewBanner';
 import PullToRefresh from '../components/shared/PullToRefresh';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { useBackLayer } from '@/lib/backNavigation';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -437,9 +436,49 @@ export default function ClaimsPage() {
   const chipMatches = (c, chip) => chip === 'all' || (chip === 'action' ? needsAction(c) : getGroupKey(c) === chip);
   const cardClaims = isPhone ? filteredClaims.filter(c => chipMatches(c, phoneChip)) : filteredClaims;
 
-  // An open claim is one step in the back history: the phone's back gesture, the
-  // browser's back button and the claim's own Back all close it.
-  useBackLayer(!!selectedClaim, () => { setSelectedClaim(null); setOpenSection('status'); }, 'claim');
+  // An open claim lives in the page address (?claim=<id>), so it is an ordinary
+  // step in the browser's history: the phone's back gesture, the browser's back
+  // button and the claim's own Back all close it the same way.
+  const urlClaimId = new URLSearchParams(location.search).get('claim');
+  const prevUrlClaimId = useRef(urlClaimId);
+  const claimPushed = useRef(false);
+  // Opening a claim adds its step.
+  useEffect(() => {
+    if (!selectedClaim) return;
+    const params = new URLSearchParams(location.search);
+    if (params.get('claim') === selectedClaim.id) return;
+    const wasOpen = !!params.get('claim');
+    params.set('claim', selectedClaim.id);
+    params.delete('section');
+    navigate({ search: `?${params.toString()}` }, { replace: wasOpen });
+    if (!wasOpen) claimPushed.current = true;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedClaim?.id]);
+  // Back (gesture or button) took the claim out of the address: close it.
+  useEffect(() => {
+    if (prevUrlClaimId.current && !urlClaimId && selectedClaim) {
+      claimPushed.current = false;
+      setSelectedClaim(null);
+      setOpenSection('status');
+    }
+    prevUrlClaimId.current = urlClaimId;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [urlClaimId]);
+  // Closed on screen: take its step (and an open section's) back off the history.
+  useEffect(() => {
+    if (selectedClaim || !urlClaimId) return;
+    const params = new URLSearchParams(location.search);
+    if (claimPushed.current) {
+      claimPushed.current = false;
+      navigate(params.get('section') ? -2 : -1);
+    } else {
+      params.delete('claim');
+      params.delete('section');
+      const s = params.toString();
+      navigate({ search: s ? `?${s}` : '' }, { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedClaim]);
 
   // Hide the global layout header on mobile when a claim detail is open
   useEffect(() => {
