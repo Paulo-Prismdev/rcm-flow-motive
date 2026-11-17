@@ -9,7 +9,7 @@ import { jarvisAuthorised, deny, loadClaims, brief, isOpen, daysSince } from '..
 // Called by the ElevenLabs agent as a webhook. Requires the x-jarvis-key header.
 Deno.serve(async (req) => {
   try {
-    if (!jarvisAuthorised(req)) return deny();
+    if (!jarvisAuthorised(req)) return deny(req);
     const base44 = createClientFromRequest(req);
     const body = await req.json().catch(() => ({}));
     const status = String(body?.status ?? '').slice(0, 60).trim().toLowerCase();

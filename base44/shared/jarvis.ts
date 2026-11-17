@@ -4,17 +4,24 @@
 // Privacy: only claim summary fields are returned — never phone numbers, emails,
 // addresses, licence, date of birth, policy numbers or indemnity answers.
 
-export function jarvisAuthorised(req: Request): boolean {
-  const expected = Deno.env.get('JARVIS_TOOL_KEY') || '';
-  const given = req.headers.get('x-jarvis-key') || '';
-  if (expected.length < 16 || given.length !== expected.length) return false;
+export function jarvisAuthCheck(req: Request): string {
+  const expected = (Deno.env.get('JARVIS_TOOL_KEY') || '').trim();
+  const given = (req.headers.get('x-jarvis-key') || '').trim();
+  if (expected.length < 16) return 'server_key_missing_or_too_short';
+  if (!given) return 'no_key_sent';
+  if (given.length !== expected.length) return 'key_mismatch';
   let diff = 0;
   for (let i = 0; i < expected.length; i++) diff |= expected.charCodeAt(i) ^ given.charCodeAt(i);
-  return diff === 0;
+  return diff === 0 ? 'ok' : 'key_mismatch';
 }
 
-export function deny() {
-  return Response.json({ error: 'Not authorised' }, { status: 401 });
+export function jarvisAuthorised(req: Request): boolean {
+  return jarvisAuthCheck(req) === 'ok';
+}
+
+export function deny(req?: Request) {
+  const reason = req ? jarvisAuthCheck(req) : 'unknown';
+  return Response.json({ error: 'Not authorised', reason }, { status: 401 });
 }
 
 const CLOSED_SECONDARY = ['closed', 'cancelled'];
