@@ -22,21 +22,33 @@ export function jobProfit(summary) {
   const pending = [];
   let income = 0;
   let costs = 0;
+  // The same with VAT on: each invoice at the total it is raised or paid at.
+  let incomeGross = 0;
+  let costsGross = 0;
 
   for (const { item, state } of summary?.rows || []) {
     if (state.notApplicable || isInvoiceDocument(item) || isRecommendedItem(item)) continue;
     if (state.awaiting) { pending.push(item.label); continue; }
     const ex = round2((Number(state.ex) || 0) - (Number(state.deduction) || 0));
+    const gross = round2(Number(state.amount) || 0);
     if (item.direction === 'out') {
       income += ex;
-      lines.push({ key: item.key, label: item.label, value: ex, paid: !!state.paid });
+      incomeGross += gross;
+      lines.push({ key: item.key, label: item.label, value: ex, gross, paid: !!state.paid });
     } else {
       costs += ex;
-      lines.push({ key: item.key, label: item.label, value: -ex, paid: !!state.paid });
+      costsGross += gross;
+      lines.push({ key: item.key, label: item.label, value: -ex, gross: -gross, paid: !!state.paid });
     }
   }
 
   income = round2(income);
   costs = round2(costs);
-  return { income, costs, profit: round2(income - costs), lines, pending, hasAny: lines.length > 0 };
+  incomeGross = round2(incomeGross);
+  costsGross = round2(costsGross);
+  return {
+    income, costs, profit: round2(income - costs),
+    incomeGross, costsGross, profitGross: round2(incomeGross - costsGross),
+    lines, pending, hasAny: lines.length > 0,
+  };
 }
