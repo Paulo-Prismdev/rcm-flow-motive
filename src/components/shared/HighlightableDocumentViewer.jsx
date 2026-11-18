@@ -33,7 +33,7 @@ const clampScale = (value) => Math.min(MAX_SCALE, Math.max(MIN_SCALE, value));
  * checking fine detail. Both are opt-in, so the other review screens keep their own
  * framing.
  */
-function HighlightableDocumentViewerInner({ fileUrl, fileExt, highlightText, fitWidth = false, allowFullscreen = false }) {
+export function HighlightableDocumentViewerInner({ fileUrl, fileExt, highlightText, fitWidth = false, allowFullscreen = false, noIframe = false }) {
   const containerRef = useRef(null);
   const pageRefs = useRef([]);
   const [loading, setLoading] = useState(true);
@@ -230,6 +230,24 @@ function HighlightableDocumentViewerInner({ fileUrl, fileExt, highlightText, fit
         <div className="text-center">
           <Loader2 className="w-6 h-6 animate-spin text-purple-500 mx-auto mb-2" />
           <p className="text-xs text-muted-foreground">Loading document…</p>
+        </div>
+      </div>
+    );
+  }
+
+  // On a phone or tablet the browser can't show a PDF in a frame (Android hands it to
+  // another app, an iPhone shows it blank), so where the pages couldn't be drawn the
+  // document is offered to open or save instead.
+  if (useIframeFallback && noIframe) {
+    return (
+      <div className="h-full flex items-center justify-center bg-muted p-6 text-center">
+        <div>
+          <FileText className="w-10 h-10 mx-auto mb-3 opacity-40" />
+          <p className="text-sm text-foreground mb-1">This document couldn't be shown here.</p>
+          <p className="text-xs text-muted-foreground mb-4">Open it in your phone's viewer instead.</p>
+          <a href={fileUrl} target="_blank" rel="noopener noreferrer" className="inline-flex h-10 items-center rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground">
+            Open document
+          </a>
         </div>
       </div>
     );
