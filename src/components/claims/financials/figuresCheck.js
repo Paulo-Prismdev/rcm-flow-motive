@@ -10,6 +10,7 @@ import {
 import { excessMode } from '@/components/shared/excessState';
 import { NO_FEE_DISPLAY, feeState } from '@/components/shared/feeState';
 import { hireSetup } from '@/components/shared/hireCharge';
+import { contributionApplies, contributionSummary } from '@/components/shared/excessContribution';
 import { authorityTotals, finalInvoiceTotal } from './invoiceAuthorityCheck';
 
 /**
@@ -164,6 +165,15 @@ export function figureRows({ claim, ctx, storagePercentDefault }) {
         note: 'used ahead of the %',
       });
     }
+  }
+
+  // Our contribution towards the client's excess: paid to them by us, or taken off
+  // the referral fee where the repairer allowed it and we cover it. Checked as one
+  // line, so a change to the amount, the route or who covers it asks for the check
+  // again.
+  if (!ctx?.creditRepair && !ctx?.privatePaying && contributionApplies(claim)) {
+    const summaryLine = contributionSummary(claim);
+    add({ key: 'excess_contribution', label: 'Excess contribution', value: summaryLine, display: summaryLine });
   }
 
   // Hire to be invoiced: the day rate agreed with the insurer, the days hired and —
