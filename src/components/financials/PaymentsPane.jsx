@@ -5,6 +5,7 @@ import { itemLight } from '@/components/shared/trafficLight';
 import LightDot from '@/components/shared/LightDot';
 import LightPill from '@/components/shared/LightPill';
 import { MacGroup, MacRow } from './MacGroup';
+import JobProfitGroup from './JobProfitGroup';
 
 const HEADERS = ['Invoice', 'Party', 'Direction', 'Amount', 'Status', 'Paid'];
 
@@ -14,7 +15,7 @@ const HEADERS = ['Invoice', 'Party', 'Direction', 'Amount', 'Status', 'Paid'];
  * same traffic light the rows carry everywhere else. Any row opens the same sheet,
  * with Mark paid on it.
  */
-export default function PaymentsPane({ step, claim, onOpenItem }) {
+export default function PaymentsPane({ step, claim, ctx, summary, onOpenItem }) {
   const rows = step.rows || [];
 
   return (
@@ -77,6 +78,8 @@ export default function PaymentsPane({ step, claim, onOpenItem }) {
           </table>
         )}
       </MacGroup>
+
+      {summary && <JobProfitGroup claim={claim} ctx={ctx} summary={summary} />}
     </div>
   );
 }
