@@ -6,6 +6,7 @@ import { deriveAuthorisingParty, authorisingPartyNameForRole } from './authorisi
 const CLAIM_NUMBER_FIELDS = new Set([
   "policy_excess",
   "excess_contribution_amount",
+  "excess_contribution_rcm_amount",
   "percent_to_referrer",
   "client_lat",
   "client_lng",
