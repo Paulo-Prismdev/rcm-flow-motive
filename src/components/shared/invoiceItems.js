@@ -14,6 +14,8 @@
  * - status_field   → existing invoice_status-style field kept in sync with "paid"
  * - readFigures    → when set, only these figures are read off the document
  * - extraFigures   → further figures read off it besides the standard ones
+ * - payWithoutInvoice → a payment we make with no invoice behind it: payable at once
+ * - copyOptional   → a copy may be filed but is never required or chased
  *
  * A total loss job carries its own close-out papers in place of the Final Insurer
  * Invoice and the Final Authority (see ./totalLoss), so those items are gated on
@@ -379,6 +381,25 @@ export const INVOICE_ITEMS = [
     party: 'hire_split_party',
     amountSource: 'hire_share_payout',
     varianceReason: 'Hire day rate, days or split changed',
+  },
+  {
+    // Our contribution towards the client's excess, paid to the client ourselves
+    // (see ./excessContribution). There is no invoice behind it: it is a payment we
+    // make, so it is never chased for a copy — a receipt or remittance can be filed
+    // against it, stored as it is — and it is paid without waiting for a date. Its
+    // sheet carries the client's bank details, or a reminder where they are missing.
+    key: 'excess_contribution_payment',
+    label: 'Excess Contribution to Client',
+    section: 'in',
+    direction: 'in',
+    dateLabel: 'Received',
+    requires: 'excess_direct',
+    party: 'client',
+    amountSource: 'excess_contribution_payment',
+    payWithoutInvoice: true,
+    copyOptional: true,
+    storeOnly: true,
+    varianceReason: 'The excess contribution changed',
   },
   // Credit repair claims: we invoice the credit repair company for our cut, from
   // two separate invoices. Both amounts are derived (hire category rate and
