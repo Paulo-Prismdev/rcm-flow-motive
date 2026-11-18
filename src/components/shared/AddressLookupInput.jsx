@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { MapPin, Loader, Search, X } from 'lucide-react';
@@ -33,6 +34,11 @@ export default function AddressLookupInput({
   const [error, setError] = useState(null);
   const suggestionsTimeout = useRef(null);
   const inputRef = useRef(null);
+  const fieldRef = useRef(null);
+  const listRef = useRef(null);
+  // Where the suggestions list sits on screen. It is drawn on the page itself, not
+  // inside the field, so the scroll area of an edit box or window can't clip it.
+  const [listPos, setListPos] = useState(null);
   // Session-level cache: survives across form opens, dies on page reload.
   // Prevents repeat autocomplete API calls for the same input text.
   const sessionCache = useRef(new Map());
@@ -182,7 +188,9 @@ export default function AddressLookupInput({
   // Close suggestions when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (inputRef.current && !inputRef.current.contains(event.target)) {
+      const insideField = inputRef.current && inputRef.current.contains(event.target);
+      const insideList = listRef.current && listRef.current.contains(event.target);
+      if (!insideField && !insideList) {
         setShowSuggestions(false);
         setSuggestions([]);
       }
@@ -192,10 +200,39 @@ export default function AddressLookupInput({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  const listOpen = showSuggestions && (suggestions.length > 0 || isLoadingSuggestions);
+
+  // Keep the list under the field while it is open, following scrolling and resizing.
+  // It opens upwards when there isn't room below.
+  useLayoutEffect(() => {
+    if (!listOpen) { setListPos(null); return undefined; }
+    const place = () => {
+      const el = fieldRef.current;
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      const below = window.innerHeight - r.bottom;
+      const up = below < 260 && r.top > below;
+      setListPos({
+        left: r.left,
+        width: r.width,
+        top: up ? undefined : r.bottom + 8,
+        bottom: up ? window.innerHeight - r.top + 8 : undefined,
+        maxHeight: Math.max(120, Math.min(240, (up ? r.top : below) - 16)),
+      });
+    };
+    place();
+    window.addEventListener('resize', place);
+    window.addEventListener('scroll', place, true);
+    return () => {
+      window.removeEventListener('resize', place);
+      window.removeEventListener('scroll', place, true);
+    };
+  }, [listOpen, suggestions.length]);
+
   return (
     <div className="relative" ref={inputRef}>
       <div className={`flex gap-2 ${className}`}>
-        <div className="flex-1 relative" style={{ zIndex: 1000 }}>
+        <div className="flex-1 relative" ref={fieldRef}>
           <Input
             value={searchText}
             onChange={(e) => handleSearchChange(e.target.value)}
@@ -226,10 +263,14 @@ export default function AddressLookupInput({
           }
 
           {/* Suggestions Dropdown */}
-          {showSuggestions && (suggestions.length > 0 || isLoadingSuggestions) &&
+          {listOpen && listPos && createPortal(
           <div
-            className="absolute w-full mt-2 bg-card border border-border rounded-lg shadow-lg max-h-60 overflow-y-auto"
-            style={{ zIndex: 9999 }}>
+            ref={listRef}
+            // Above windows (10004) and menus (10010), so it shows in any edit box.
+            // pointer-events-auto: a modal window turns them off on the rest of the page.
+            className="fixed bg-card border border-border rounded-lg shadow-lg overflow-y-auto pointer-events-auto"
+            style={{ zIndex: 10015, left: listPos.left, width: listPos.width, top: listPos.top, bottom: listPos.bottom, maxHeight: listPos.maxHeight }}
+            onMouseDown={(e) => e.preventDefault()}>
 
               {isLoadingSuggestions &&
             <div className="p-3 text-center text-xs text-foreground-muted">
@@ -251,7 +292,8 @@ export default function AddressLookupInput({
                   </div>
                 </button>
             )}
-            </div>
+            </div>,
+          document.body)
           }
         </div>
 
