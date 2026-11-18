@@ -194,7 +194,14 @@ export default function ItemActionMenu({
           'aria-haspopup': 'dialog',
         })}
         <Sheet open={open} onOpenChange={onOpenChange}>
-          <SheetContent side="bottom" className="max-h-[85vh] gap-0 rounded-t-[10px] p-0">
+          {/* Menu layer, not sheet layer: this menu is often opened from inside a
+              window (e.g. the Documents window, full screen on a phone), and at the
+              sheet layer it slid up behind that window, so a tap seemed to do nothing. */}
+          <SheetContent
+            side="bottom"
+            overlayClassName="z-menu"
+            className="z-menu max-h-[85vh] gap-0 rounded-t-[10px] p-0"
+          >
             <SheetHeader className="px-4 pb-1 pr-14 pt-3 text-left">
               <SheetTitle className="text-sm font-semibold">{title}</SheetTitle>
             </SheetHeader>
