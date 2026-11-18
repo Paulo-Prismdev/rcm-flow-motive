@@ -258,7 +258,10 @@ export function buildFinancialFlow(summary, ctx, claim, options = {}) {
   // A payment can be recorded on an invoice that has gone out or come in, or one
   // that has only been asked for from accounts so far, even where its copy is not
   // attached yet — a payment is never held up by a missing piece of paper.
-  const payPending = payApplies.find((r) => !r.state.paid && (!!r.state.date || r.state.requested));
+  // A payment with no invoice behind it — our excess contribution to the client —
+  // can be paid as soon as it applies.
+  const payPending = payApplies.find((r) => !r.state.paid
+    && (!!r.state.date || r.state.requested || (r.item.payWithoutInvoice && !r.state.awaiting)));
 
   const payments = {
     ...STEP.payments,
@@ -274,7 +277,13 @@ export function buildFinancialFlow(summary, ctx, claim, options = {}) {
       : paidCount === payApplies.length ? 'everything paid'
         : `${paidCount} of ${payApplies.length} paid`,
     action: payPending
-      ? { kind: 'pay', item: payPending.item, state: payPending.state, label: `mark the ${payPending.item.label} as paid` }
+      ? {
+        kind: 'pay', item: payPending.item, state: payPending.state,
+        // The client's bank details are the reminder on a contribution we pay them.
+        label: payPending.state.payeeMissing
+          ? `add the client's bank details (Client insurance › Excess contribution), then mark the ${payPending.item.label} as paid`
+          : `mark the ${payPending.item.label} as paid`,
+      }
       : null,
   };
 
