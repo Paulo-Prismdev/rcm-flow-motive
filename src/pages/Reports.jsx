@@ -121,8 +121,9 @@ export default function Reports() {
     }, {});
 
     const claimsByMonth = filteredClaims.reduce((acc, claim) => {
-      if (claim.created_date) {
-        const month = format(new Date(claim.created_date), 'MMM yyyy');
+      const received = claim.date_received || claim.created_date;
+      if (received) {
+        const month = format(new Date(received), 'MMM yyyy');
         acc[month] = (acc[month] || 0) + 1;
       }
       return acc;
