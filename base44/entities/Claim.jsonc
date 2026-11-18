@@ -156,7 +156,8 @@
       "type": "string"
     },
     "excess_contribution_amount": {
-      "type": "number"
+      "type": "number",
+      "description": "The amount we contribute towards the client's policy excess, in pounds."
     },
     "excess_contribution_method": {
       "type": "string",
@@ -166,19 +167,52 @@
         "Direct to Client",
         "Waived"
       ],
-      "default": "None"
+      "default": "None",
+      "description": "How our excess contribution reaches the client: paid to them directly, or by the repairer collecting that much less of the excess from them. 'Waived' is an older value meaning no contribution."
+    },
+    "excess_contribution_covered_by": {
+      "type": "string",
+      "enum": [
+        "Repairer",
+        "RCM",
+        "Split"
+      ],
+      "description": "Via Repairer only: who bears the cost of the excess the repairer does not collect. Repairer = the repairer absorbs it in full; RCM = we cover it in full, taken off the referral fee we invoice the repairer; Split = we cover excess_contribution_rcm_amount of it and the repairer the rest."
+    },
+    "excess_contribution_rcm_amount": {
+      "type": "number",
+      "description": "Via Repairer, split: the part of the contribution we cover (taken off the referral fee invoice, after VAT). The repairer covers the rest."
+    },
+    "excess_contribution_payee_name": {
+      "type": "string",
+      "description": "Direct to Client: the account name the contribution is paid to."
+    },
+    "excess_contribution_sort_code": {
+      "type": "string",
+      "description": "Direct to Client: sort code of the account the contribution is paid to."
+    },
+    "excess_contribution_account_number": {
+      "type": "string",
+      "description": "Direct to Client: account number the contribution is paid to."
+    },
+    "excess_contribution_payment_reference": {
+      "type": "string",
+      "description": "Direct to Client: the reference to quote on the payment."
     },
     "excess_contribution_paid": {
       "type": "boolean",
-      "default": false
+      "default": false,
+      "description": "Paid flag of the VAT & Excess Invoice In (where we handle the client's VAT and excess). Despite its name it is not the excess contribution's own payment, which is tracked on the Excess Contribution to Client invoice item."
     },
     "excess_contribution_paid_date": {
       "type": "string",
-      "format": "date"
+      "format": "date",
+      "description": "Paid date of the VAT & Excess Invoice In (see excess_contribution_paid)."
     },
     "excess_contribution_invoice_received": {
       "type": "boolean",
-      "default": false
+      "default": false,
+      "description": "Received flag of the VAT & Excess Invoice In (see excess_contribution_paid)."
     },
     "excess_contribution_notes": {
       "type": "string"
