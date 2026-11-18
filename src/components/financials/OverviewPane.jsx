@@ -120,7 +120,12 @@ export default function OverviewPane({ claim, ctx, summary, steps, light, onSele
         />
         <MacValueRow
           label={<span className="text-[15px] font-semibold">Profit left in the job — inc VAT</span>}
-          caption={profit.hasAny ? `Includes ${signed(round2(profit.profitGross - profit.profit))} VAT to be paid over` : undefined}
+          caption={!profit.hasAny ? undefined : (() => {
+            const netVat = round2(profit.profitGross - profit.profit);
+            return netVat >= 0
+              ? `Includes ${fmtGBP(netVat)} VAT to be paid over to HMRC`
+              : `${fmtGBP(Math.abs(netVat))} less than ex VAT — VAT we can reclaim`;
+          })()}
           value={(
             <span className={`text-[15px] font-bold ${profit.profitGross < 0 ? 'text-danger-fg' : 'text-foreground'}`}>
               {profit.hasAny ? signed(profit.profitGross) : '—'}
