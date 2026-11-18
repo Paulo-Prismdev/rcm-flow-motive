@@ -82,11 +82,16 @@ export function HighlightableDocumentViewerInner({ fileUrl, fileExt, highlightTe
           const page = await pdf.getPage(i);
           if (i === 1) naturalWidthRef.current = page.getViewport({ scale: 1 }).width;
           const viewport = page.getViewport({ scale });
+          // Drawn at the screen's pixel density (capped at 2x to spare a phone's memory),
+          // so a page sized to a phone's width is still sharp; it is shown at `viewport`
+          // size, and the text positions below stay in those display units.
+          const density = Math.min(2, Math.max(1, window.devicePixelRatio || 1));
+          const renderViewport = page.getViewport({ scale: scale * density });
           const canvas = document.createElement('canvas');
           const ctx = canvas.getContext('2d');
-          canvas.width = viewport.width;
-          canvas.height = viewport.height;
-          await page.render({ canvasContext: ctx, viewport }).promise;
+          canvas.width = Math.floor(renderViewport.width);
+          canvas.height = Math.floor(renderViewport.height);
+          await page.render({ canvasContext: ctx, viewport: renderViewport }).promise;
 
           const textContent = await page.getTextContent();
           const textItems = textContent.items.map(item => {
