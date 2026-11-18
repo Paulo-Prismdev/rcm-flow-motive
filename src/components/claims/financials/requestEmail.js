@@ -38,7 +38,12 @@ export function buildInvoiceRequestEmail({ claim, item, state, party, user }) {
     'Amount:',
     `  Ex VAT:         ${fmtGBP(state.ex)}`,
     `  VAT (20%):      ${fmtGBP(state.vat)}`,
-    `  Total inc VAT:  ${fmtGBP(state.total)}`,
+    ...(state.deduction > 0
+      ? [
+        `  Less excess contribution we cover (no VAT): -${fmtGBP(state.deduction)}`,
+        `  Total due:      ${fmtGBP(state.total)}`,
+      ]
+      : [`  Total inc VAT:  ${fmtGBP(state.total)}`]),
     '',
     'How it was calculated:',
     ...state.workings.map((row) => `  ${row.label}: ${row.value}`),
