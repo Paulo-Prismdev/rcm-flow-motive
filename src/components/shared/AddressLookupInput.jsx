@@ -266,6 +266,7 @@ export default function AddressLookupInput({
           {listOpen && listPos && createPortal(
           <div
             ref={listRef}
+            data-keep-window-open=""
             // Above windows (10004) and menus (10010), so it shows in any edit box.
             // pointer-events-auto: a modal window turns them off on the rest of the page.
             className="fixed bg-card border border-border rounded-lg shadow-lg overflow-y-auto pointer-events-auto"

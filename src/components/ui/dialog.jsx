@@ -25,11 +25,23 @@ const DialogOverlay = React.forwardRef(({ className, ...props }, ref) => (
 ))
 DialogOverlay.displayName = DialogPrimitive.Overlay.displayName
 
-const DialogContent = React.forwardRef(({ className, children, ...props }, ref) => (
+// Floating lists drawn on the page rather than inside the window (e.g. address
+// suggestions) carry data-keep-window-open, so picking from them doesn't count as a
+// click outside the window and close it.
+const keepOpen = (handler) => (event) => {
+  const target = event.detail?.originalEvent?.target || event.target;
+  if (target?.closest?.('[data-keep-window-open]')) { event.preventDefault(); return; }
+  handler?.(event);
+};
+
+const DialogContent = React.forwardRef(({ className, children, onPointerDownOutside, onInteractOutside, onFocusOutside, ...props }, ref) => (
   <DialogPortal>
     <DialogOverlay />
     <DialogPrimitive.Content
       ref={ref}
+      onPointerDownOutside={keepOpen(onPointerDownOutside)}
+      onInteractOutside={keepOpen(onInteractOutside)}
+      onFocusOutside={keepOpen(onFocusOutside)}
       className={cn(
         "fixed left-[50%] top-[50%] z-window grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 fm-glass-window p-6 text-foreground duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] max-h-[90vh] overflow-y-auto rounded-2xl max-md:h-[100dvh] max-md:max-h-[100dvh] max-md:max-w-[100vw] max-md:left-0 max-md:top-0 max-md:translate-x-0 max-md:translate-y-0 max-md:rounded-none max-md:p-4",
         className
