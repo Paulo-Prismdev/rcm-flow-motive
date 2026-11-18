@@ -51,8 +51,13 @@ export default function Reports() {
     return claims.filter(claim => {
       if (claim.archived) return false;
       
-      if (dateFrom && claim.created_date && new Date(claim.created_date) < new Date(dateFrom)) return false;
-      if (dateTo && claim.created_date && new Date(claim.created_date) > new Date(dateTo)) return false;
+      // Same rule as the Claims list's Date Received filter: by the date the claim was
+      // received (falling back to when it was set up), both ends included. Compared as
+      // plain dates — a "To" date used to mean midnight at the start of that day, so
+      // every claim received on it was left out.
+      const received = (claim.date_received || claim.created_date || '').slice(0, 10);
+      if (dateFrom && (!received || received < dateFrom)) return false;
+      if (dateTo && (!received || received > dateTo)) return false;
       if (filterClaimType !== 'all' && claim.claim_type !== filterClaimType) return false;
       if (filterStatus !== 'all' && claim.job_status !== filterStatus) return false;
       if (filterReferrer !== 'all' && refKey(claim) !== filterReferrer) return false;
