@@ -908,6 +908,11 @@ export function getInvoiceItemState(item, claim, hasFiles = false) {
     // rows do — our share of a total loss storage charge.
     calculation: calc?.calculation || '',
     workings,
+    // An amount taken off after VAT: our part of the client's excess contribution on
+    // the referral fee invoice. The ex VAT and VAT figures are the fee's own.
+    deduction: calc?.deduction || 0,
+    // The client's bank details are still to be added for a contribution we pay them.
+    payeeMissing: !!calc?.payeeMissing,
     date,
     paid,
     paidDate,
@@ -916,8 +921,9 @@ export function getInvoiceItemState(item, claim, hasFiles = false) {
     // its date on its own is not enough.
     received: asDocument ? !!hasFiles : false,
     // The copy itself, on file. A raise or collect step finishes on this and
-    // nothing else, and a paid invoice that is still missing it says so.
-    copyAttached: !!hasFiles,
+    // nothing else, and a paid invoice that is still missing it says so. A payment
+    // with no invoice behind it (copyOptional) is never held up or chased for one.
+    copyAttached: !!hasFiles || item.copyOptional === true,
     dateRecordedNoCopy: asDocument && !hasFiles && !!date,
     // A copy is on file but is waiting to be replaced by a corrected one: the
     // item stays amber until the corrected copy lands.
