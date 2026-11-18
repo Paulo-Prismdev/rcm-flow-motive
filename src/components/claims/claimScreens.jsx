@@ -231,7 +231,9 @@ export const driverCards = (claim) => {
       title: 'Repair contact',
       before: <p className="px-4 pb-2 -mt-1 text-xs text-muted-foreground">The person the repairer contacts for drop-off, updates and collection.</p>,
       fields: [
-        { key: 'driver_same_as_client', label: 'Same as client', type: 'bool', value: () => same },
+        // Read from the claim it is given — the edit box passes the claim with the choice
+        // being made applied — so picking No shows No (unset still reads as Yes).
+        { key: 'driver_same_as_client', label: 'Same as client', type: 'bool', value: (c) => c.driver_same_as_client !== false },
         { key: 'driver_contact_name', label: 'Name', hidden: same },
         { key: 'driver_contact_phone', label: 'Phone', type: 'tel', hidden: same },
         { key: 'driver_contact_email', label: 'Email', type: 'email', hidden: same, optional: true },
