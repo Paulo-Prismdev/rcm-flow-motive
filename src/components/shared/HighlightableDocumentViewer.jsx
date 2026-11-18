@@ -91,6 +91,8 @@ export function HighlightableDocumentViewerInner({ fileUrl, fileExt, highlightTe
           const ctx = canvas.getContext('2d');
           canvas.width = Math.floor(renderViewport.width);
           canvas.height = Math.floor(renderViewport.height);
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
           await page.render({ canvasContext: ctx, viewport: renderViewport }).promise;
 
           const textContent = await page.getTextContent();
@@ -107,7 +109,8 @@ export function HighlightableDocumentViewerInner({ fileUrl, fileExt, highlightTe
           });
 
           pages.push({
-            dataUrl: canvas.toDataURL(),
+            // JPEG keeps a long document's pages light enough for a phone.
+            dataUrl: canvas.toDataURL('image/jpeg', 0.9),
             width: viewport.width,
             height: viewport.height,
             textItems,
