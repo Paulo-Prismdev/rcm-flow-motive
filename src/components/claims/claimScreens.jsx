@@ -3,6 +3,7 @@
 import { COURTESY_CAR_OPTIONS } from '../shared/courtesyCarOptions';
 import { hireInvoicedSwitch, hireInvoicedPatch, hireSummaryText } from '../shared/hireCharge';
 import { excessLabel } from '../shared/excessState';
+import { COVERED_BY_OPTIONS, contributionRoute, payeeDetails, viaRepairerShare } from '../shared/excessContribution';
 import { fmtDate, fmtMoney, joinLines } from './ClaimFieldCards';
 
 export const CLAIM_TYPES = [
@@ -88,7 +89,12 @@ export const overviewCards = (claim) => [
 ];
 
 export const insuranceCards = (claim, { ExcessForm }) => {
-  const applies = claim.excess_contribution_method && claim.excess_contribution_method !== 'None';
+  const route = contributionRoute(claim);
+  const applies = route !== 'none';
+  const share = viaRepairerShare(claim);
+  const payee = payeeDetails(claim);
+  // The payment to the client is tracked in Financials, on its own invoice item.
+  const payment = claim.invoice_tracker?.items?.excess_contribution_payment || {};
   const ex = { form: ExcessForm };
   return [
     {
@@ -105,10 +111,24 @@ export const insuranceCards = (claim, { ExcessForm }) => {
       title: 'Excess contribution',
       fields: [
         { ...ex, key: 'excess_contribution_method', label: 'Applicable?', display: () => (applies ? 'Yes' : 'No') },
-        { ...ex, key: 'excess_contribution_how', label: 'How it is paid', hidden: !applies, display: (c) => c.excess_contribution_method },
         { ...ex, key: 'excess_contribution_amount', label: 'Amount', hidden: !applies, display: (c) => fmtMoney(c.excess_contribution_amount) },
-        { ...ex, key: 'excess_contribution_paid', label: 'Paid', hidden: !applies, display: (c) => (c.excess_contribution_paid ? `Yes${c.excess_contribution_paid_date ? ` — ${fmtDate(c.excess_contribution_paid_date)}` : ''}` : 'No') },
-        { ...ex, key: 'excess_contribution_invoice_received', label: 'Invoice received', hidden: !applies, display: (c) => (c.excess_contribution_invoice_received ? 'Yes' : 'No') },
+        { ...ex, key: 'excess_contribution_how', label: 'How it reaches the client', hidden: !applies, display: () => (route === 'direct' ? 'We pay the client directly' : 'The repairer takes less excess') },
+        {
+          ...ex, key: 'excess_contribution_covered_by', label: 'Who covers it', hidden: route !== 'via_repairer',
+          display: () => (!share.decided ? '' : share.coveredBy === 'Split'
+            ? `Shared — us ${fmtMoney(share.ours)} (off the referral fee), repairer ${fmtMoney(share.repairers)}`
+            : COVERED_BY_OPTIONS.find((o) => o.value === share.coveredBy)?.short || ''),
+        },
+        {
+          ...ex, key: 'excess_contribution_payee_name', label: 'Pay to', hidden: route !== 'direct', optional: true, multiline: true,
+          display: () => (payee.complete
+            ? joinLines([payee.name, `${payee.sortCode} · ${payee.accountNumber}`, payee.reference ? `Ref ${payee.reference}` : ''])
+            : ''),
+        },
+        {
+          ...ex, key: 'excess_contribution_payment', label: 'Paid to client', hidden: route !== 'direct', readOnly: true,
+          display: () => (payment.paid ? `Yes${payment.paid_date ? ` — ${fmtDate(payment.paid_date)}` : ''}` : 'Not yet — mark it paid in Financials'),
+        },
         { ...ex, key: 'excess_contribution_notes', label: 'Notes', hidden: !applies, optional: true, multiline: true },
       ],
     },
