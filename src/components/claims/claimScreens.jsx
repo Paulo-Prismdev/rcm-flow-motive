@@ -122,7 +122,7 @@ export const insuranceCards = (claim, { ExcessForm }) => {
         {
           ...ex, key: 'excess_contribution_payee_name', label: 'Pay to', hidden: route !== 'direct', optional: true, multiline: true,
           display: () => (payee.complete
-            ? joinLines([payee.name, `${payee.sortCode} · ${payee.accountNumber}`, payee.reference ? `Ref ${payee.reference}` : ''])
+            ? joinLines(payee.name, `${payee.sortCode} · ${payee.accountNumber}`, payee.reference ? `Ref ${payee.reference}` : '')
             : ''),
         },
         {
