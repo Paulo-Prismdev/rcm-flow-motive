@@ -199,8 +199,8 @@ export default function ItemActionMenu({
               sheet layer it slid up behind that window, so a tap seemed to do nothing. */}
           <SheetContent
             side="bottom"
-            overlayClassName="z-menu"
-            className="z-menu max-h-[85vh] gap-0 rounded-t-[10px] p-0"
+            overlayClassName="!z-menu"
+            className="!z-menu max-h-[85vh] gap-0 rounded-t-[10px] p-0"
           >
             <SheetHeader className="px-4 pb-1 pr-14 pt-3 text-left">
               <SheetTitle className="text-sm font-semibold">{title}</SheetTitle>
