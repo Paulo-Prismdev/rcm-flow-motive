@@ -1047,7 +1047,7 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
             {activePane === 'figures' && <FiguresPane {...figuresProps} />}
 
             {activePane === 'payments' && (
-              <PaymentsPane step={payments} claim={claim} onOpenItem={(item) => setOpenItem({ key: item.key })} />
+              <PaymentsPane step={payments} claim={claim} ctx={ctx} summary={summary} onOpenItem={(item) => setOpenItem({ key: item.key })} />
             )}
 
             {['closeout', 'raise', 'collect'].includes(activePane) && (
