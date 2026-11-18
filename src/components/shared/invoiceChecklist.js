@@ -57,6 +57,7 @@ import {
   isRecommendedItem,
 } from './invoiceItems';
 import { ACG_PARTY, acgFeePercent, isAcgClaim, referralPercentAfterAcg } from './acgProcessing';
+import { contributionAmount, paysClientDirectly, payeeDetails, viaRepairerShare } from './excessContribution';
 import {
   hireChargeNet,
   hireFlagged,
@@ -253,6 +254,10 @@ export function invoiceContext(claim, vatExcess) {
     // to the client or repairer, which has its own invoice in.
     hire: hireFlagged(claim),
     hireSplit: hireSplitApplies(claim),
+    // Our contribution towards the client's excess, paid to them by us: a payment we
+    // make on its own item. A privately paid or credit repair job has no policy
+    // excess of the customer's to contribute to.
+    excessDirect: paysClientDirectly(claim) && !privatePaying && !creditRepair,
   };
 }
 
@@ -296,6 +301,7 @@ function matchesRequirement(requirement, ctx) {
     case 'has_repairer': return !!ctx.hasRepairer;
     case 'hire': return !!ctx.hire;
     case 'hire_split': return !!ctx.hireSplit;
+    case 'excess_direct': return !!ctx.excessDirect;
     default: return true;
   }
 }
@@ -434,6 +440,54 @@ const withoutVat = (ex, workings, hint) => {
   };
 };
 
+/**
+ * Our part of the client's excess contribution, where the repairer took that much
+ * less excess from the client and we cover it (see ./excessContribution): it comes
+ * off the referral fee invoice after VAT. The excess is the client's contribution,
+ * not a supply, so the fee and the VAT on it are unchanged and the deduction is its
+ * own line. While who covers it is still to be chosen, the invoice waits.
+ */
+function withContributionDeduction(result, claim) {
+  if (!result || result.awaiting) return result;
+  const share = viaRepairerShare(claim);
+  if (!share.applies) return result;
+  if (!share.decided) {
+    return awaiting(`${share.hint} (Client insurance › Excess contribution) — the referral invoice waits for it`);
+  }
+  if (!(share.ours > 0)) {
+    return {
+      ...result,
+      workings: [
+        ...result.workings.filter((row) => !row.total),
+        { label: 'Excess contribution', value: `${fmtGBP(share.amount)} — covered by the repairer` },
+        ...result.workings.filter((row) => row.total),
+      ],
+    };
+  }
+  const before = round2(result.total);
+  const total = round2(Math.max(0, before - share.ours));
+  const short = round2(share.ours - before);
+  return {
+    ...result,
+    amount: total,
+    total,
+    deduction: share.ours,
+    hint: `${result.hint} — less the ${fmtGBP(share.ours)} excess contribution we cover`,
+    workings: [
+      ...result.workings.filter((row) => !row.total),
+      { label: 'Fee inc VAT', value: fmtGBP(before) },
+      {
+        label: share.coveredBy === 'Split'
+          ? `Less our share of the excess contribution (no VAT) — repairer covers ${fmtGBP(share.repairers)}`
+          : 'Less the excess contribution we cover (no VAT)',
+        value: `−${fmtGBP(share.ours)}`,
+      },
+      ...(short > 0 ? [{ label: 'Contribution exceeds the fee — still owed to the repairer', value: fmtGBP(short) }] : []),
+      { label: 'Total', value: fmtGBP(total), total: true },
+    ],
+  };
+}
+
 const AMOUNT_RESOLVERS = {
   // The referrer invoices us their agreed share of the repair cost (ex VAT) — with
   // VAT on it only where the referrer is VAT registered. A fixed fee agreed with them
@@ -501,8 +555,33 @@ const AMOUNT_RESOLVERS = {
   },
   // The repairer pays us a referral fee: a fixed £ figure where one is set,
   // otherwise the agreed percentage of the repair cost ex VAT.
-  repairer_referral_fee: (claim) => {
-    if (noFeeOnJob(claim, 'repairer_referral')) return noFeeAmount();
+  repairer_referral_fee: (claim) => withContributionDeduction(repairerReferralFee(claim), claim),
+  // Our contribution towards the client's excess, paid to the client ourselves. No
+  // VAT: the excess is the client's own contribution, not a supply. The sheet shows
+  // the bank details it goes to — or says they are still to be added.
+  excess_contribution_payment: (claim) => {
+    const amount = contributionAmount(claim);
+    if (!(amount > 0)) return awaiting('Enter the excess contribution amount (Client insurance › Excess contribution)');
+    const payee = payeeDetails(claim);
+    const bank = payee.complete
+      ? [
+        { label: 'Pay to', value: payee.name },
+        { label: 'Sort code', value: payee.sortCode },
+        { label: 'Account number', value: payee.accountNumber },
+        ...(payee.reference ? [{ label: 'Reference', value: payee.reference }] : []),
+      ]
+      : [{ label: 'Bank details', value: 'Not recorded — add them under Client insurance › Excess contribution' }];
+    return {
+      ...withoutVat(amount, [
+        { label: 'Excess contribution (no VAT)', value: fmtGBP(amount) },
+        ...bank,
+        { label: 'Total', value: fmtGBP(amount), total: true },
+      ], payee.complete
+        ? `Our contribution towards the client's excess, paid to ${payee.name}`
+        : "Our contribution towards the client's excess — the client's bank details are still to be added"),
+      payeeMissing: !payee.complete,
+    };
+  },
     const fixed = toNum(claim.referral_fee_repairer_gbp);
     if (fixed > 0) {
       return withVat(fixed, [
