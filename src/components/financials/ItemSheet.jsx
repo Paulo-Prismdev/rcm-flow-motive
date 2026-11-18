@@ -234,7 +234,9 @@ export default function ItemSheet({
               value={state.awaiting ? '—' : fmtGBP(state.amount)}
               sub={state.awaiting ? undefined : (isVatExcessItem(item)
                 ? `Excess ${fmtGBP(state.ex)} + ${fmtGBP(state.vat)} VAT on repair`
-                : `${fmtGBP(state.ex)} + ${fmtGBP(state.vat)} VAT`)}
+                : state.deduction > 0
+                  ? `${fmtGBP(state.ex)} + ${fmtGBP(state.vat)} VAT − ${fmtGBP(state.deduction)} excess contribution`
+                  : `${fmtGBP(state.ex)} + ${fmtGBP(state.vat)} VAT`)}
               caption={state.locked ? `Locked at ${fmtGBP(state.amount)} — the figure it went out at` : undefined}
             />
           )}
