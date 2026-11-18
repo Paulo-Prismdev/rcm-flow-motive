@@ -4,6 +4,9 @@ import { fmtGBP } from '@/components/shared/creditRepairRates';
 import { repairNet, repairVat, salvageStorageCharge } from '@/components/shared/invoiceChecklist';
 import LightDot from '@/components/shared/LightDot';
 import { MacGroup, MacRow, MacValueRow } from './MacGroup';
+import { jobProfit } from './jobProfit';
+
+const signed = (n) => (n < 0 ? `−${fmtGBP(Math.abs(n))}` : fmtGBP(n));
 
 /**
  * The whole job at a glance: its status counted out in one line, what it comes to,
@@ -14,6 +17,9 @@ export default function OverviewPane({ claim, ctx, summary, steps, light, onSele
   const finalCost = ctx.totalLoss ? (salvageStorageCharge(claim) ?? 0) : (Number(claim.final_repair_cost) || 0);
   const net = ctx.totalLoss ? 0 : repairNet(claim);
   const vat = ctx.totalLoss ? 0 : repairVat(claim);
+  const profit = jobProfit(summary);
+  const [showBreakdown, setShowBreakdown] = React.useState(false);
+  const margin = !ctx.totalLoss && net > 0 && profit.hasAny ? Math.round((profit.profit / net) * 1000) / 10 : null;
 
   return (
     <div className="space-y-6">
@@ -66,6 +72,48 @@ export default function OverviewPane({ claim, ctx, summary, steps, light, onSele
             <ChevronRight className="h-4 w-4 flex-shrink-0 text-mac-muted" strokeWidth={1.5} />
           </MacRow>
         ))}
+      </MacGroup>
+
+      <MacGroup
+        title="Profit for RCM"
+        footer={(
+          <p className="px-1 text-xs text-mac-muted">
+            Ex VAT: what we invoice, less what we pay out. Money that only passes through us — the client's VAT &amp; excess, or a repair the customer pays for privately — nets off.
+          </p>
+        )}
+      >
+        <MacValueRow label="Income" caption="Invoices we raise, ex VAT" value={fmtGBP(profit.income)} />
+        <MacValueRow label="Costs" caption="Invoices and payments we make, ex VAT" value={profit.costs > 0 ? `−${fmtGBP(profit.costs)}` : fmtGBP(0)} />
+        {showBreakdown && profit.lines.map((line) => (
+          <MacValueRow
+            key={line.key}
+            label={<span className="pl-3 font-normal text-mac-muted">{line.label}</span>}
+            value={<span className="font-normal">{signed(line.value)}</span>}
+            sub={line.paid ? 'paid' : undefined}
+          />
+        ))}
+        {profit.pending.length > 0 && (
+          <MacValueRow
+            label="Not counted yet"
+            caption={`Still waiting on figures: ${profit.pending.join(', ')}`}
+            value="—"
+          />
+        )}
+        <MacValueRow
+          label={<span className="text-[15px] font-semibold">Profit left in the job</span>}
+          caption={profit.pending.length > 0 ? 'Provisional until every invoice can be worked out' : undefined}
+          value={(
+            <span className={`text-[15px] font-bold ${profit.profit < 0 ? 'text-danger-fg' : 'text-success-fg'}`}>
+              {profit.hasAny ? signed(profit.profit) : '—'}
+            </span>
+          )}
+          sub={margin !== null ? `${margin}% of the repair ex VAT` : undefined}
+          right={profit.lines.length > 0 && (
+            <button type="button" onClick={() => setShowBreakdown((v) => !v)} className="mt-1 block w-full text-right text-xs text-info-fg hover:underline">
+              {showBreakdown ? 'Hide breakdown' : 'Show breakdown'}
+            </button>
+          )}
+        />
       </MacGroup>
 
       {dormant}
