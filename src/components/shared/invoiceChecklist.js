@@ -440,6 +440,47 @@ const withoutVat = (ex, workings, hint) => {
   };
 };
 
+/** The repairer referral fee before any excess contribution comes off it. */
+function repairerReferralFee(claim) {
+  if (noFeeOnJob(claim, 'repairer_referral')) return noFeeAmount();
+  const fixed = toNum(claim.referral_fee_repairer_gbp);
+  if (fixed > 0) {
+    return withVat(fixed, [
+      { label: 'Fixed referral fee (ex VAT)', value: fmtGBP(fixed) },
+      { label: 'VAT (20%)', value: fmtGBP(round2(fixed * VAT_RATE)) },
+      { label: 'Total', value: fmtGBP(round2(fixed * (1 + VAT_RATE))), total: true },
+    ], 'Fixed referral fee');
+  }
+  if (toNum(claim.final_repair_cost) <= 0) return awaitingRepairCost(claim);
+  const pct = toNum(claim.referral_fee_repairer);
+  if (pct <= 0) return awaiting('Set the repairer referral fee');
+  const net = repairNet(claim);
+  // ACG processing payment: their charge comes off our percentage, and the invoice
+  // is raised to them.
+  if (isAcgClaim(claim)) {
+    const acgPct = acgFeePercent(claim);
+    const ours = referralPercentAfterAcg(claim);
+    const acgFee = round2(net * ours / 100);
+    const acgVat = round2(acgFee * VAT_RATE);
+    return withVat(acgFee, [
+      { label: 'Repair cost ex VAT', value: fmtGBP(net) },
+      { label: 'Referral fee agreed', value: `${pct}%` },
+      { label: 'Less ACG charge', value: `${acgPct}%` },
+      { label: `Our fee (${ours}%)`, value: fmtGBP(acgFee) },
+      { label: 'VAT (20%)', value: fmtGBP(acgVat) },
+      { label: 'Total (invoiced to ACG)', value: fmtGBP(round2(acgFee + acgVat)), total: true },
+    ], `${pct}% less ACG's ${acgPct}% = ${ours}% of the repair cost ex VAT, invoiced to ACG`);
+  }
+  const fee = round2(net * pct / 100);
+  const vat = round2(fee * VAT_RATE);
+  return withVat(fee, [
+    { label: 'Repair cost ex VAT', value: fmtGBP(net) },
+    { label: `Referral fee (${pct}%)`, value: fmtGBP(fee) },
+    { label: 'VAT (20%)', value: fmtGBP(vat) },
+    { label: 'Total', value: fmtGBP(round2(fee + vat)), total: true },
+  ], `${pct}% of the repair cost ex VAT`);
+}
+
 /**
  * Our part of the client's excess contribution, where the repairer took that much
  * less excess from the client and we cover it (see ./excessContribution): it comes
@@ -581,43 +622,6 @@ const AMOUNT_RESOLVERS = {
         : "Our contribution towards the client's excess — the client's bank details are still to be added"),
       payeeMissing: !payee.complete,
     };
-  },
-    const fixed = toNum(claim.referral_fee_repairer_gbp);
-    if (fixed > 0) {
-      return withVat(fixed, [
-        { label: 'Fixed referral fee (ex VAT)', value: fmtGBP(fixed) },
-        { label: 'VAT (20%)', value: fmtGBP(round2(fixed * VAT_RATE)) },
-        { label: 'Total', value: fmtGBP(round2(fixed * (1 + VAT_RATE))), total: true },
-      ], 'Fixed referral fee');
-    }
-    if (toNum(claim.final_repair_cost) <= 0) return awaitingRepairCost(claim);
-    const pct = toNum(claim.referral_fee_repairer);
-    if (pct <= 0) return awaiting('Set the repairer referral fee');
-    const net = repairNet(claim);
-    // ACG processing payment: their charge comes off our percentage, and the invoice
-    // is raised to them.
-    if (isAcgClaim(claim)) {
-      const acgPct = acgFeePercent(claim);
-      const ours = referralPercentAfterAcg(claim);
-      const acgFee = round2(net * ours / 100);
-      const acgVat = round2(acgFee * VAT_RATE);
-      return withVat(acgFee, [
-        { label: 'Repair cost ex VAT', value: fmtGBP(net) },
-        { label: 'Referral fee agreed', value: `${pct}%` },
-        { label: 'Less ACG charge', value: `${acgPct}%` },
-        { label: `Our fee (${ours}%)`, value: fmtGBP(acgFee) },
-        { label: 'VAT (20%)', value: fmtGBP(acgVat) },
-        { label: 'Total (invoiced to ACG)', value: fmtGBP(round2(acgFee + acgVat)), total: true },
-      ], `${pct}% less ACG's ${acgPct}% = ${ours}% of the repair cost ex VAT, invoiced to ACG`);
-    }
-    const fee = round2(net * pct / 100);
-    const vat = round2(fee * VAT_RATE);
-    return withVat(fee, [
-      { label: 'Repair cost ex VAT', value: fmtGBP(net) },
-      { label: `Referral fee (${pct}%)`, value: fmtGBP(fee) },
-      { label: 'VAT (20%)', value: fmtGBP(vat) },
-      { label: 'Total', value: fmtGBP(round2(fee + vat)), total: true },
-    ], `${pct}% of the repair cost ex VAT`);
   },
   // The VAT content of the repair plus the customer's policy excess. A non-VAT
   // customer has no VAT to recover, so only their excess is billed.
