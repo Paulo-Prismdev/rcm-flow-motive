@@ -7,7 +7,7 @@ import DocumentTracker from '@/components/claims/DocumentTracker';
 export default function DocumentTrackerModal({ isOpen, onClose, claim, currentUser, onUpdate }) {
   return (
     <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl max-md:content-start">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <span>Documents</span>
