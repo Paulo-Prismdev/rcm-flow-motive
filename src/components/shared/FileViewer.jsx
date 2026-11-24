@@ -41,7 +41,7 @@ export default function FileViewer({ fileUrl, onClose, claimId }) {
       if (e?.name === 'NotAllowedError') {
         // The phone wanted a fresh tap for the share sheet: the copy is ready now.
         prefetched.current = { ref: fileUrl, file, promise: Promise.resolve(file) };
-        toast({ title: 'Ready to save', description: 'Tap Download again to save the document.' });
+        toast({ title: 'Ready to save', description: 'Tap Save again to save or share the document.' });
       } else {
         downloadFileObject(file);
       }
