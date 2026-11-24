@@ -213,6 +213,28 @@ function FieldInput({ def, claim, draft, setDraft, showLabel }) {
                     className={inputCls} placeholder={def.placeholder}
                 />
             );
+            // Ready-made values to tap (e.g. the insurer's network codes from the directory).
+            if (def.suggestions?.length) {
+                const current = String(raw ?? '').trim().toUpperCase();
+                control = (
+                    <>
+                        {control}
+                        <div className="flex flex-wrap gap-1.5 mt-2">
+                            {def.suggestions.map((s) => (
+                                <button
+                                    key={s}
+                                    type="button"
+                                    onClick={() => put(s)}
+                                    aria-pressed={current === String(s).toUpperCase()}
+                                    className={`h-9 px-3 rounded-full border text-sm font-medium transition-colors ${current === String(s).toUpperCase() ? 'bg-primary text-primary-foreground border-primary' : 'bg-card border-border text-foreground hover:bg-muted'}`}
+                                >
+                                    {s}
+                                </button>
+                            ))}
+                        </div>
+                    </>
+                );
+            }
     }
     return <div>{label}{control}{def.editHint && <p className="text-xs text-muted-foreground mt-1.5">{def.editHint}</p>}</div>;
 }
