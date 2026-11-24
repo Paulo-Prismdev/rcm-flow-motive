@@ -969,7 +969,6 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
     codeFilledFor.current = claim.id;
     const patch = networkCodePatch(claim, insurers);
     if (patch) handleUpdate({ ...claim, ...patch }, { skipClaimUpdateLog: true });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [claim.id, insurers.length, isInternalUser]);
 
   const archiveMutation = useMutation({
