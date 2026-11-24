@@ -209,7 +209,6 @@ export const estimateCards = (claim, { networkCodes = [], insurerName = '' } = {
         {
           key: 'authorising_party', label: 'Authorising party', readOnly: true,
           display: (c) => formatAuthorisingParty(c) || c.authorising_party || '',
-          hint: 'Follows the claim type — change it on the claim if needed',
         },
         {
           key: 'audatex_code', label: 'Audatex network code', optional: true, upper: true,
