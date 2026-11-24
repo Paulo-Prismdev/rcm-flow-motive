@@ -96,3 +96,74 @@ export function useResolvedFileUrl(ref, { claimId = null, log = false, enabled =
 /** Resolves a list of stored file references (e.g. for reading a document with AI). */
 export const resolveFileUrls = (refs, opts) =>
   Promise.all((refs || []).map((ref) => resolveFileUrl(ref, { purpose: 'read', ...opts })));
+
+/* ── Saving a copy ─────────────────────────────────────────────────────────
+ * A browser only downloads a link it was told to download when the file is on the
+ * app's own address; a stored file lives on the storage service's, so the browser
+ * opens it instead — and the installed app on a phone sends it out to the browser
+ * altogether. So the file is fetched into the app first and saved from there: on a
+ * phone or tablet through the share sheet (Save to Files, Downloads, WhatsApp,
+ * email…), on a desktop as a real download into the Downloads folder.
+ */
+
+/** A phone or tablet, or the installed app: the share sheet is how a file is saved. */
+export const savesThroughShareSheet = () => {
+  if (typeof window === 'undefined' || !window.matchMedia) return false;
+  return window.matchMedia('(pointer: coarse)').matches
+    || window.matchMedia('(display-mode: standalone)').matches;
+};
+
+const MIME_BY_EXT = {
+  pdf: 'application/pdf', jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', gif: 'image/gif',
+  webp: 'image/webp', heic: 'image/heic', doc: 'application/msword',
+  docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  xls: 'application/vnd.ms-excel', xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  csv: 'text/csv', txt: 'text/plain', eml: 'message/rfc822', msg: 'application/vnd.ms-outlook',
+};
+
+/**
+ * The stored file as a File the app holds, named as it was uploaded. `log` records a
+ * download on the claim's audit trail (once per copy fetched).
+ */
+export async function fetchStoredFile(ref, { claimId = null, log = true } = {}) {
+  const url = await resolveFileUrl(ref, { claimId, log, purpose: 'download' });
+  const response = await fetch(url, { mode: 'cors' });
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  const blob = await response.blob();
+  const name = fileNameOf(ref) || 'document';
+  const type = blob.type && blob.type !== 'application/octet-stream'
+    ? blob.type
+    : (MIME_BY_EXT[fileExtensionOf(ref)] || 'application/octet-stream');
+  return { file: new File([blob], name, { type }), url };
+}
+
+/** A real download of a file the app already holds. */
+export function downloadFileObject(file) {
+  const href = URL.createObjectURL(file);
+  const a = document.createElement('a');
+  a.href = href;
+  a.download = file.name;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(href), 60000);
+}
+
+/**
+ * Saves a file the app already holds: the share sheet on a phone or tablet (where the
+ * device can share files), otherwise a download. Resolves 'shared', 'downloaded' or
+ * 'cancelled'; throws NotAllowedError where the share sheet needs a fresh tap.
+ */
+export async function saveFileObject(file) {
+  if (savesThroughShareSheet() && navigator.canShare?.({ files: [file] })) {
+    try {
+      await navigator.share({ files: [file], title: file.name });
+      return 'shared';
+    } catch (e) {
+      if (e?.name === 'AbortError') return 'cancelled';
+      throw e;
+    }
+  }
+  downloadFileObject(file);
+  return 'downloaded';
+}
