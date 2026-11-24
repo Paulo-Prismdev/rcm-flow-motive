@@ -1368,10 +1368,10 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
         return <ThirdPartyPursuitSection claim={claim} onUpdate={handleUpdate} />;
 
       case 'status':
-        return <ClaimFieldsSection title="Overview" icon={Clock} claim={claim} onUpdate={handleUpdate} canEdit={canEdit} cards={overviewCards(claim)} />;
+        return <ClaimFieldsSection title="Overview" icon={Clock} claim={claim} onUpdate={handleUpdate} canEdit={canEdit} cards={overviewCards(claim)} after={isInternalUser && authInsurerName ? <InsurerContactCard name={authInsurerName} title="Authorising insurer" canEdit={canEdit} /> : null} />;
 
       case 'insurance':
-        return <ClaimFieldsSection title="Client insurance" icon={Shield} claim={claim} onUpdate={handleUpdate} canEdit={canEdit} cards={insuranceCards(claim, { ExcessForm: ClaimExcessContributionForm })} />;
+        return <ClaimFieldsSection title="Client insurance" icon={Shield} claim={claim} onUpdate={handleUpdate} canEdit={canEdit} cards={insuranceCards(claim, { ExcessForm: ClaimExcessContributionForm })} after={isInternalUser && claim.insurer ? <InsurerContactCard name={claim.insurer} title={authInsurerName && authInsurerName === (claim.authorising_party_overridden ? authInsurerName : claim.insurer) && claim.authorised_by === 'Client Insurer' ? 'Authorising insurer' : 'Insurer contact'} canEdit={canEdit} /> : null} />;
 
       case 'client': {
         const clientContacts = linkedClient?.contacts || [];
@@ -1439,7 +1439,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
         return <ClaimFieldsSection title="Third party details" icon={Users} claim={claim} onUpdate={handleUpdate} canEdit={canEdit} cards={thirdPartyCards(claim)} />;
 
       case 'tpInsurance':
-        return <ClaimFieldsSection title="Third party insurance" icon={Shield} claim={claim} onUpdate={handleUpdate} canEdit={canEdit} cards={tpInsuranceCards(claim)} />;
+        return <ClaimFieldsSection title="Third party insurance" icon={Shield} claim={claim} onUpdate={handleUpdate} canEdit={canEdit} cards={tpInsuranceCards(claim)} after={isInternalUser && claim.tp_insurer ? <InsurerContactCard name={claim.tp_insurer} title={claim.authorised_by === 'Third Party Insurer' ? 'Authorising insurer' : 'Insurer contact'} canEdit={canEdit} /> : null} />;
 
       case 'vehicle':
         return (
@@ -1669,7 +1669,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
         return (
           <ClaimFieldsSection
             title="Estimate" icon={Calculator} claim={claim} onUpdate={handleUpdate} canEdit={canEdit}
-            cards={estimateCards(claim)}
+            cards={estimateCards(claim, { networkCodes: authInsurerCodes, insurerName: authInsurerName })}
             after={
               <>
                 <EstimateAuthorityTotals claim={claim} />
