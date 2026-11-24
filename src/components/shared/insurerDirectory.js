@@ -87,6 +87,8 @@ export function withNetworkCode(next, prev, insurers) {
   let base = next;
   const nextName = authorisingInsurerName(next);
   const prevName = prev ? authorisingInsurerName(prev) : '';
+  // Cleared by hand on purpose: leave it empty.
+  if (prev && prevName === nextName && !blankCode(prev.audatex_code) && blankCode(next.audatex_code)) return next;
   if (prev && prevName && prevName !== nextName && next.audatex_code) {
     const oldCodes = networkCodesOf(findInsurer(insurers, prevName)).map((c) => c.toUpperCase());
     if (oldCodes.includes(String(next.audatex_code).trim().toUpperCase())) base = { ...next, audatex_code: '' };
