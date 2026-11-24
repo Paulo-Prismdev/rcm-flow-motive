@@ -5,6 +5,7 @@ import { hireInvoicedSwitch, hireInvoicedPatch, hireSummaryText } from '../share
 import { excessLabel } from '../shared/excessState';
 import { COVERED_BY_OPTIONS, contributionRoute, payeeDetails, viaRepairerShare } from '../shared/excessContribution';
 import { fmtDate, fmtMoney, joinLines } from './ClaimFieldCards';
+import { formatAuthorisingParty } from '../shared/authorisingParty';
 
 export const CLAIM_TYPES = [
   'Fault Claim', 'Non-Fault - Own Insurer', '3rd Party Insurer Direct', '3rd Party Paying Privately',
@@ -181,7 +182,15 @@ export const datesCards = (claim, { totalLoss, isRectification }) => {
   ];
 };
 
-export const estimateCards = () => {
+export const estimateCards = (claim, { networkCodes = [], insurerName = '' } = {}) => {
+  const several = networkCodes.length > 1;
+  const codeHint = (c) => {
+    if (!insurerName) return undefined;
+    if (!networkCodes.length) return `No network code for ${insurerName} in the insurer directory`;
+    const code = String(c.audatex_code || '').trim().toUpperCase();
+    if (networkCodes.some((n) => n.toUpperCase() === code)) return `From the insurer directory (${insurerName})`;
+    return several ? `Directory codes for ${insurerName}: ${networkCodes.join(', ')}` : `Directory code for ${insurerName}: ${networkCodes[0]}`;
+  };
   const gross = (key) => (v) => ({ [key]: v, [`${key.replace('_net', '_gross')}`]: v == null ? null : +(v * 1.2).toFixed(2) });
   return [
     {
@@ -197,8 +206,16 @@ export const estimateCards = () => {
     {
       title: 'Estimate details',
       fields: [
-        { key: 'authorising_party', label: 'Authorising party' },
-        { key: 'audatex_code', label: 'Audatex code', optional: true },
+        {
+          key: 'authorising_party', label: 'Authorising party', readOnly: true,
+          display: (c) => formatAuthorisingParty(c) || c.authorising_party || '',
+          hint: 'Follows the claim type — change it on the claim if needed',
+        },
+        {
+          key: 'audatex_code', label: 'Audatex network code', optional: true, upper: true,
+          hint: codeHint, suggestions: networkCodes,
+          editHint: several ? 'This insurer has more than one network code — tap the one for this job.' : networkCodes.length ? 'Filled in from the insurer directory. Change it here if this job needs a different code.' : undefined,
+        },
         { key: 'send_estimate_email', label: 'Email estimate to', type: 'email', optional: true },
         { key: 'artura_est_url', label: 'Artura estimate', optional: true, href: (c) => c.artura_est_url || undefined, display: (c) => (c.artura_est_url ? 'Open estimate' : '') },
       ],
