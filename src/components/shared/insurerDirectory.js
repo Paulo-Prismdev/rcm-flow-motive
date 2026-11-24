@@ -21,6 +21,9 @@ export function findInsurer(insurers, name) {
   const target = normaliseInsurerName(name);
   if (!target || target === 'tbc') return null;
   const named = insurers.filter((i) => i?.name && normaliseInsurerName(i.name) !== 'tbc');
+  const raw = String(name).trim().toLowerCase();
+  const same = named.find((i) => i.name.trim().toLowerCase() === raw);
+  if (same) return same;
   const exact = named.find((i) => normaliseInsurerName(i.name) === target);
   if (exact) return exact;
   if (target.length < 3) return null;
