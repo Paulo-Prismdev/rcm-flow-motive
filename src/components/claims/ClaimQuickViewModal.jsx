@@ -9,6 +9,10 @@ import StatusBadge from '../shared/StatusBadge';
 import ClaimStatusBadges from '../shared/ClaimStatusBadges';
 import { excessLabel } from '../shared/excessState';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { AUTHORISING_PARTY_LABELS, authorisingPartyClaimRef } from '../shared/authorisingParty';
+import { authorisingInsurerName, findInsurer, networkCodesOf, useInsurerDirectory } from '../shared/insurerDirectory';
+
+const telHref = (v) => (v ? `tel:${String(v).replace(/\s+/g, '')}` : null);
 
 const formatDate = (val) => {
   if (!val) return '—';
@@ -116,7 +120,18 @@ export default function ClaimQuickViewModal({ claim, isOpen, onClose }) {
     staleTime: 5 * 60 * 1000,
   });
 
+  const insurers = useInsurerDirectory(isOpen && !!claim);
+
   if (!claim) return null;
+
+  // Who the job is for, with the insurer's directory details when it's an insurer.
+  const authRole = claim.authorised_by || '';
+  const authInsurerName = authorisingInsurerName(claim);
+  const authInsurer = findInsurer(insurers, authInsurerName);
+  const authCodes = networkCodesOf(authInsurer);
+  const authContacts = (authInsurer?.useful_contacts || []).filter((c) => c?.name || c?.phone || c?.email);
+  const authClaimsLine = String(authInsurer?.claims_line || '').trim();
+  const authPhone = String(authInsurer?.phone || '').trim();
 
   // Every filled-in field as "Label: value" lines, ready to paste.
   const copyAll = () => {
@@ -179,6 +194,43 @@ export default function ClaimQuickViewModal({ claim, isOpen, onClose }) {
             {claim.incident_location && <InfoRow label="Incident Location" value={claim.incident_location} fullWidth />}
             {claim.circumstances && <InfoRow label="Circumstances" value={claim.circumstances} fullWidth />}
           </Section>
+
+          {/* Authorising party */}
+          {(authRole || claim.authorising_party_name) && (
+            <Section icon={Shield} title="Authorising Party">
+              <InfoRow label="Role" value={AUTHORISING_PARTY_LABELS[authRole] || authRole} />
+              <InfoRow label="Name" value={authInsurer?.name?.trim() || claim.authorising_party_name} />
+              <InfoRow label="Their Claim No." value={authorisingPartyClaimRef(authRole, claim)} />
+              {authInsurerName && <InfoRow label="Audatex Network Code" value={claim.audatex_code || (authCodes.length ? `Directory: ${authCodes.join(', ')}` : '')} />}
+              {authInsurer && (
+                <>
+                  {authInsurer.contact_name && <InfoRow label="Contact" value={authInsurer.contact_name} />}
+                  <InfoRow label="Claims Line" value={authClaimsLine} href={telHref(authClaimsLine)} />
+                  {authPhone && authPhone !== authClaimsLine && <InfoRow label="Phone" value={authPhone} href={telHref(authPhone)} />}
+                  <InfoRow label="Email" value={authInsurer.email} href={authInsurer.email ? `mailto:${authInsurer.email}` : null} />
+                  {authContacts.length > 0 && (
+                    <div className="sm:col-span-2 mx-3.5 mb-3 mt-1 rounded-xl border border-border bg-muted/40 p-2.5 space-y-1.5">
+                      <div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
+                        <Users className="w-3 h-3" /> Useful contacts
+                      </div>
+                      {authContacts.map((c, i) => (
+                        <div key={i} className="rounded-md border border-border bg-card p-2">
+                          {c.name && <div className="text-sm font-medium">{c.name}</div>}
+                          <div className="flex flex-wrap gap-3 mt-0.5 text-xs text-muted-foreground">
+                            {c.phone && <a href={telHref(c.phone)} className="flex items-center gap-1"><Phone className="w-3 h-3" /> {c.phone}</a>}
+                            {c.email && <a href={`mailto:${c.email}`} className="flex items-center gap-1 break-all"><Mail className="w-3 h-3" /> {c.email}</a>}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </>
+              )}
+              {authInsurerName && !authInsurer && insurers.length > 0 && (
+                <p className="sm:col-span-2 px-3.5 pb-3 text-xs text-muted-foreground">{authInsurerName} isn't in the insurer directory yet.</p>
+              )}
+            </Section>
+          )}
 
           {/* Client */}
           <Section icon={User} title="Client" color="bg-info-bg text-info-fg">
