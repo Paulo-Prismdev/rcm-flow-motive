@@ -107,6 +107,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import ClaimMobileSummary, { ClaimMobileSectionBar, ClaimStageTrack, groupSections } from './ClaimMobileSummary';
 import AuthorisingPartyBanner from './AuthorisingPartyBanner';
+import InsurerContactCard from './InsurerContactCard';
+import { authorisingInsurerName, networkCodePatch, networkCodesOf, findInsurer, useInsurerDirectory, withNetworkCode } from '../shared/insurerDirectory';
 import { generateClaimOverviewPdf } from './claimOverviewPdf';
 import ClaimStatusEditForm from './ClaimStatusEditForm';
 import { isUpdateTrackingClosed, computeUpdateStatusFlag, computeClientCommStatusFlag, buildStatusChangeRecord } from '../shared/claimStatusUpdate';
@@ -778,6 +780,12 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
   // Colleagues who have this claim open right now (staff only).
   const othersInClaim = useClaimPresence(claim.id, currentUser, isInternalUser);
 
+  // The insurer directory: contact details for the authorising insurer, and its
+  // network code for the Audatex field.
+  const insurers = useInsurerDirectory(isInternalUser);
+  const authInsurerName = authorisingInsurerName(claim);
+  const authInsurerCodes = networkCodesOf(findInsurer(insurers, authInsurerName));
+
   const { data: linkedClient } = useQuery({
     queryKey: ['client', claim.client_id || claim.client_name],
     queryFn: async () => {
@@ -883,8 +891,10 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
   // Saves a change to the claim. The screen updates at once; the history is only
   // written once the save has gone through, and a failed save puts the screen back.
   // Resolves true when saved, false when not.
-  const handleUpdate = async (updatedData, options = {}) => {
+  const handleUpdate = async (incoming, options = {}) => {
     const previous = claim;
+    // Fill (or follow a change of insurer for) the Audatex network code from the directory.
+    const updatedData = isInternalUser ? withNetworkCode(incoming, previous, insurers) : incoming;
     // Update local state immediately for instant UI feedback
     setClaim(updatedData);
     const saved = await onUpdate(updatedData);
