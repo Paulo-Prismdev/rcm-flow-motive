@@ -961,6 +961,17 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
     return true;
   };
 
+  // A claim opened with no Audatex code, for an insurer whose directory entry has one
+  // network code: fill it in (once per claim per visit).
+  const codeFilledFor = useRef(null);
+  useEffect(() => {
+    if (!isInternalUser || !canEdit || !insurers.length || codeFilledFor.current === claim.id) return;
+    codeFilledFor.current = claim.id;
+    const patch = networkCodePatch(claim, insurers);
+    if (patch) handleUpdate({ ...claim, ...patch }, { skipClaimUpdateLog: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [claim.id, insurers.length, isInternalUser]);
+
   const archiveMutation = useMutation({
     mutationFn: () => base44.entities.Claim.update(claim.id, { archived: !claim.archived }),
     onSuccess: (updatedClaim) => {
