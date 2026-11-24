@@ -1371,7 +1371,7 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
         return <ClaimFieldsSection title="Overview" icon={Clock} claim={claim} onUpdate={handleUpdate} canEdit={canEdit} cards={overviewCards(claim)} after={isInternalUser && authInsurerName ? <InsurerContactCard name={authInsurerName} title="Authorising insurer" canEdit={canEdit} /> : null} />;
 
       case 'insurance':
-        return <ClaimFieldsSection title="Client insurance" icon={Shield} claim={claim} onUpdate={handleUpdate} canEdit={canEdit} cards={insuranceCards(claim, { ExcessForm: ClaimExcessContributionForm })} after={isInternalUser && claim.insurer ? <InsurerContactCard name={claim.insurer} title={authInsurerName && authInsurerName === (claim.authorising_party_overridden ? authInsurerName : claim.insurer) && claim.authorised_by === 'Client Insurer' ? 'Authorising insurer' : 'Insurer contact'} canEdit={canEdit} /> : null} />;
+        return <ClaimFieldsSection title="Client insurance" icon={Shield} claim={claim} onUpdate={handleUpdate} canEdit={canEdit} cards={insuranceCards(claim, { ExcessForm: ClaimExcessContributionForm })} after={isInternalUser && claim.insurer ? <InsurerContactCard name={claim.insurer} title={claim.authorised_by === 'Client Insurer' ? 'Authorising insurer' : 'Insurer contact'} canEdit={canEdit} /> : null} />;
 
       case 'client': {
         const clientContacts = linkedClient?.contacts || [];
