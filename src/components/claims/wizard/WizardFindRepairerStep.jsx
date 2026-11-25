@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { MapContainer, TileLayer, Marker, Circle, Polyline, Tooltip, useMap } from 'react-leaflet';
 import { Button } from '@/components/ui/button';
@@ -100,6 +100,14 @@ export default function WizardFindRepairerStep({
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('distance');
   const [quickFilters, setQuickFilters] = useState({});
+  const listRef = useRef(null);
+  // Picked on the map: bring its (now opened) list entry into view in the list.
+  useEffect(() => {
+    const list = listRef.current;
+    if (!list || !selectedBodyshop) return;
+    const el = list.querySelector(`[data-bodyshop-id="${selectedBodyshop.id}"]`);
+    if (el) list.scrollTo({ top: el.offsetTop - list.offsetTop - 4, behavior: 'smooth' });
+  }, [selectedBodyshop]);
   const [routePoints, setRoutePoints] = useState([]);
   // On phones the list and the map are shown one at a time, so the map is not
   // reduced to a thin strip underneath a long list.
@@ -325,7 +333,7 @@ export default function WizardFindRepairerStep({
       {/* Main content: List + Map */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-3">
         {/* Bodyshop list */}
-        <div className={`lg:col-span-2 space-y-1.5 max-h-[350px] max-md:max-h-[440px] lg:max-h-[450px] overflow-y-auto pr-1 ${isMobile && phonePane !== 'list' ? 'hidden' : ''}`}>
+        <div ref={listRef} className={`lg:col-span-2 space-y-1.5 max-h-[350px] max-md:max-h-[440px] lg:max-h-[450px] overflow-y-auto pr-1 ${isMobile && phonePane !== 'list' ? 'hidden' : ''}`}>
           {sortedBodyshops.length === 0 ? (
             <div className="text-center text-sm text-muted-foreground p-4">No repairers match your filters.</div>
           ) : (
@@ -336,7 +344,7 @@ export default function WizardFindRepairerStep({
                 ? haversineDistance(clientLocation.lat, clientLocation.lng, parseFloat(bodyshop.latitude), parseFloat(bodyshop.longitude))
                 : null;
               return (
-                <div role="button" tabIndex={0} onKeyDown={activateOnKey} key={bodyshop.id} onClick={() => onSelectBodyshop(bodyshop)}
+                <div role="button" tabIndex={0} onKeyDown={activateOnKey} key={bodyshop.id} data-bodyshop-id={bodyshop.id} onClick={() => onSelectBodyshop(bodyshop)}
                   className={`p-2.5 rounded-lg border-2 cursor-pointer transition-all ${
                     isSelected ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'
                   }`}>
@@ -357,6 +365,11 @@ export default function WizardFindRepairerStep({
                     {bodyshop.town && <p className="flex items-center gap-1 truncate"><MapPinned className="w-3 h-3 flex-shrink-0" />{bodyshop.town} {bodyshop.postcode}</p>}
                   </div>
                   <RepairerRowTags bodyshop={bodyshop} claim={claim} distanceMiles={haversineMiles} />
+                  {isSelected && (
+                    <div className="mt-2.5">
+                      <RepairerFitPanel bodyshop={bodyshop} claim={claim} distanceMiles={selectedMiles} compact />
+                    </div>
+                  )}
                 </div>
               );
             })
@@ -451,9 +464,6 @@ export default function WizardFindRepairerStep({
             <Button aria-label="Close" variant="ghost" size="icon" className="flex-shrink-0" onClick={onClearSelection}>
               <X className="w-4 h-4" />
             </Button>
-          </div>
-          <div className="mt-2.5">
-            <RepairerFitPanel bodyshop={selectedBodyshop} claim={claim} distanceMiles={selectedMiles} />
           </div>
         </div>
       ) : (

@@ -79,14 +79,17 @@ function useRepairerWorkload(bodyshopId) {
 function Row({ label, children }) {
   return (
     <div className="flex gap-2 py-1">
-      <span className="w-28 flex-shrink-0 text-muted-foreground">{label}</span>
+      <span className="w-24 flex-shrink-0 text-muted-foreground">{label}</span>
       <span className="min-w-0 flex-1 break-words font-medium">{children || <span className="font-normal text-muted-foreground">Not known</span>}</span>
     </div>
   );
 }
 
-/** Everything about the selected repairer that matters for placing this job. */
-export function RepairerFitPanel({ bodyshop: b, claim, distanceMiles }) {
+/**
+ * Everything about the selected repairer that matters for placing this job.
+ * `compact` stacks it in one column, to open inside the repairer's own list entry.
+ */
+export function RepairerFitPanel({ bodyshop: b, claim, distanceMiles, compact = false }) {
   const { data: work } = useRepairerWorkload(b?.id);
   if (!b) return null;
   const fit = repairerFit(b, claim, { distanceMiles });
@@ -94,9 +97,13 @@ export function RepairerFitPanel({ bodyshop: b, claim, distanceMiles }) {
   const cap = (v) => (v === 'In House' ? 'In house' : v === 'Outsourced' ? 'Outsourced' : '');
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+    <div
+      className={`grid grid-cols-1 gap-2 text-xs cursor-default ${compact ? '' : 'md:grid-cols-3 md:gap-3'}`}
+      onClick={(e) => e.stopPropagation()}
+      onKeyDown={(e) => e.stopPropagation()}
+    >
       {/* For this job */}
-      <div className="rounded-lg border border-border bg-card p-3">
+      <div className="rounded-lg border border-border bg-card p-2.5">
         <p className="font-semibold text-sm mb-1.5">For this job</p>
         <ul className="space-y-1.5">
           {fit.map((c) => {
@@ -118,7 +125,7 @@ export function RepairerFitPanel({ bodyshop: b, claim, distanceMiles }) {
       </div>
 
       {/* Capabilities & network */}
-      <div className="rounded-lg border border-border bg-card p-3">
+      <div className="rounded-lg border border-border bg-card p-2.5">
         <p className="font-semibold text-sm mb-1 flex items-center gap-1.5"><Wrench className="w-3.5 h-3.5" aria-hidden="true" /> Capabilities</p>
         <Row label="Network">{[b.tier, b.acg_signed_up === 'Yes' ? 'ACG' : '', b.bs10125_certified === 'Yes' ? 'BS 10125' : ''].filter(Boolean).join(' · ')}</Row>
         <Row label="ADAS">{cap(b.adas)}</Row>
@@ -131,7 +138,7 @@ export function RepairerFitPanel({ bodyshop: b, claim, distanceMiles }) {
       </div>
 
       {/* Contacts & our work with them */}
-      <div className="rounded-lg border border-border bg-card p-3">
+      <div className="rounded-lg border border-border bg-card p-2.5">
         <p className="font-semibold text-sm mb-1">Contacts</p>
         <Row label="Main contact">{b.contact_name}</Row>
         <Row label="Phone">

@@ -99,6 +99,14 @@ function TravelBadge({ log }) {
 export default function ClaimBodyshopMapModal({ claim, isOpen, onClose, onSelectBodyshop }) {
   const [selectedBodyshop, setSelectedBodyshop] = useState(null);
   const [quickFilters, setQuickFilters] = useState({});
+  const listRef = useRef(null);
+  // Picked on the map: bring its (now opened) list entry into view in the list.
+  useEffect(() => {
+    const list = listRef.current;
+    if (!list || !selectedBodyshop) return;
+    const el = list.querySelector(`[data-bodyshop-id="${selectedBodyshop.id}"]`);
+    if (el) list.scrollTo({ top: el.offsetTop - list.offsetTop - 4, behavior: 'smooth' });
+  }, [selectedBodyshop]);
   const [clientLocation, setClientLocation] = useState(null);
   const [isGeocoding, setIsGeocoding] = useState(false);
   const [geocodeMessage, setGeocodeMessage] = useState(null);
@@ -371,7 +379,7 @@ export default function ClaimBodyshopMapModal({ claim, isOpen, onClose, onSelect
           {/* Main content: List + Map */}
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-3">
             {/* Bodyshop list */}
-            <div className="lg:col-span-2 space-y-2 max-h-[400px] lg:max-h-[500px] overflow-y-auto pr-1">
+            <div ref={listRef} className="lg:col-span-2 space-y-2 max-h-[400px] lg:max-h-[500px] overflow-y-auto pr-1">
               {sortedBodyshops.length === 0 ? (
                 <div className="text-center text-sm text-muted-foreground p-4">No repairers match your filters.</div>
               ) : (
@@ -382,7 +390,7 @@ export default function ClaimBodyshopMapModal({ claim, isOpen, onClose, onSelect
                     ? haversineDistance(clientLocation.lat, clientLocation.lng, bodyshop.latitude, bodyshop.longitude)
                     : null;
                   return (
-                    <div role="button" tabIndex={0} onKeyDown={activateOnKey} key={bodyshop.id} onClick={() => handleBodyshopClick(bodyshop)}
+                    <div role="button" tabIndex={0} onKeyDown={activateOnKey} key={bodyshop.id} data-bodyshop-id={bodyshop.id} onClick={() => handleBodyshopClick(bodyshop)}
                       className={`p-3 rounded-lg border-2 cursor-pointer transition-all ${
                         isSelected ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'
                       }`}>
@@ -403,6 +411,11 @@ export default function ClaimBodyshopMapModal({ claim, isOpen, onClose, onSelect
                         {bodyshop.town && <p className="flex items-center gap-1 truncate"><MapPinned className="w-3 h-3 flex-shrink-0" />{bodyshop.town} {bodyshop.postcode}</p>}
                       </div>
                       <RepairerRowTags bodyshop={bodyshop} claim={claim} distanceMiles={haversineMiles} />
+                      {isSelected && (
+                        <div className="mt-2.5">
+                          <RepairerFitPanel bodyshop={bodyshop} claim={claim} distanceMiles={selectedMiles} compact />
+                        </div>
+                      )}
                     </div>
                   );
                 })
@@ -463,12 +476,6 @@ export default function ClaimBodyshopMapModal({ claim, isOpen, onClose, onSelect
             </div>
           </div>
 
-          {selectedBodyshop && (
-            <div>
-              <p className="text-sm font-semibold mb-2">{selectedBodyshop.name}</p>
-              <RepairerFitPanel bodyshop={selectedBodyshop} claim={claim} distanceMiles={selectedMiles} />
-            </div>
-          )}
         </div>
 
         {/* Selected repairer confirmation strip — fixed, always visible (outside scroll area) */}
