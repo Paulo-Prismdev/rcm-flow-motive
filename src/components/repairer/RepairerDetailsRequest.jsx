@@ -52,9 +52,18 @@ export default function RepairerDetailsRequest({ bodyshop }) {
     }
   };
 
+  // Copying can be refused (the desktop app, some browsers). Then the old way is
+  // tried, and if that fails too we SAY so: a silent failure leaves whatever was
+  // copied before on the clipboard, which once sent one repairer another's link.
   const copy = async () => {
-    try { await navigator.clipboard.writeText(link); setCopied(true); setTimeout(() => setCopied(false), 1500); }
-    catch { document.getElementById('repairer-details-link')?.select(); }
+    const done = () => { setCopied(true); setTimeout(() => setCopied(false), 2000); toast({ title: `Link for ${bodyshop.name} copied` }); };
+    try { await navigator.clipboard.writeText(link); done(); return; } catch { /* try the old way */ }
+    const input = document.getElementById('repairer-details-link');
+    input?.focus(); input?.select();
+    let ok = false;
+    try { ok = document.execCommand('copy'); } catch { ok = false; }
+    if (ok) done();
+    else toast({ title: "Couldn't copy automatically", description: 'The link is selected — press Ctrl+C (or ⌘C) to copy it.', variant: 'destructive' });
   };
 
   return (
@@ -100,6 +109,9 @@ export default function RepairerDetailsRequest({ bodyshop }) {
                 {busy === 'link' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Copy className="w-4 h-4" />} Get the link instead
               </Button>
             </div>
+            {link && (
+              <p className="text-xs text-muted-foreground">This link opens <strong className="text-foreground">{bodyshop.name}</strong>'s form only. Send it to them, not another repairer.</p>
+            )}
             {link && (
               <div className="flex gap-2">
                 <Input id="repairer-details-link" readOnly value={link} onFocus={(e) => e.target.select()} className="text-xs" />
