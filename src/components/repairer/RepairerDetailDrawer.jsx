@@ -25,6 +25,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { deleteAndLog, updateAndLog } from "@/components/shared/useActivityLogger";
 import RecordHistory from '@/components/shared/RecordHistory';
+import RepairerDetailsRequest from './RepairerDetailsRequest';
+import RepairerDetailsReview from './RepairerDetailsReview';
 
 const TIER_OPTIONS = ["TIER 1", "TIER 2", "Previously on Network", ""];
 const MAP_GROUP_OPTIONS = ["Solution", "QAC", ""];
@@ -183,6 +185,12 @@ export default function RepairerDetailDrawer({ bodyshopId, onClose }) {
         ) : bodyshop ? (
           <>
             <div className="px-1 pb-8">
+              {!isEditing && (
+                <div className="space-y-2 mt-3">
+                  <RepairerDetailsReview key={bodyshop.pending_details_update?.submitted_at || 'none'} bodyshop={bodyshop} />
+                  <RepairerDetailsRequest bodyshop={bodyshop} />
+                </div>
+              )}
               <Section title="Company Information" icon={Building2}>
                 {isEditing ? (
                   <>
