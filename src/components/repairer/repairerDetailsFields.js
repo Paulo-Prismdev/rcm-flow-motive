@@ -3,6 +3,13 @@
 // (which fields a repairer may send). Network-only fields — tier, map group, ACG,
 // coordinates, portal access — are never asked.
 
+// Keep in step with COURTESY_CAR_TYPES in base44/shared/repairerDetails.ts.
+export const COURTESY_CAR_TYPES = [
+  'Small car', 'Family car', 'Estate', 'SUV / 4x4', 'Prestige / executive', 'Electric', 'Hybrid',
+  'Automatic', '7-seater / MPV', 'Small van', 'Large van',
+];
+export const COURTESY_CAR_COUNTS = [{ value: '1-5', label: '1–5' }, { value: '6-10', label: '6–10' }, { value: '10+', label: 'More than 10' }];
+
 const IN_HOUSE = [{ value: 'In House', label: 'In house' }, { value: 'Outsourced', label: 'Outsourced' }];
 
 export const REPAIRER_DETAILS_SECTIONS = [
@@ -55,6 +62,21 @@ export const REPAIRER_DETAILS_SECTIONS = [
     ],
   },
   {
+    title: 'Courtesy vehicles',
+    fields: [
+      { key: 'courtesy_cars_offered', label: 'Do you provide courtesy vehicles?', options: [{ value: 'Yes', label: 'Yes' }, { value: 'No', label: 'No' }] },
+      {
+        key: 'courtesy_car_count', label: 'Roughly how many do you keep?', showIf: (d) => d.courtesy_cars_offered === 'Yes',
+        options: [{ value: '1-5', label: '1–5' }, { value: '6-10', label: '6–10' }, { value: '10+', label: 'More than 10' }],
+      },
+      {
+        key: 'courtesy_car_types', label: 'What types? Tick all that apply', multi: true, showIf: (d) => d.courtesy_cars_offered === 'Yes',
+        options: COURTESY_CAR_TYPES.map((t) => ({ value: t, label: t })),
+      },
+      { key: 'courtesy_car_notes', label: 'Anything else about your courtesy vehicles?', long: true, showIf: (d) => d.courtesy_cars_offered === 'Yes', placeholder: 'e.g. delivered to the customer, age limits, mostly automatics' },
+    ],
+  },
+  {
     title: 'Accreditations',
     fields: [
       { key: 'bs10125_certified', label: 'BS 10125 certified?', options: [{ value: 'Yes', label: 'Yes' }, { value: 'No', label: 'No' }] },
@@ -67,6 +89,13 @@ export const REPAIRER_DETAILS_SECTIONS = [
 
 export const REPAIRER_DETAILS_FIELDS = REPAIRER_DETAILS_SECTIONS.flatMap((s) => s.fields);
 export const fieldLabel = (key) => REPAIRER_DETAILS_FIELDS.find((f) => f.key === key)?.label || key;
+
+/** A value as people read it: lists joined, choices by their label. */
+export function displayValue(key, value) {
+  if (Array.isArray(value)) return value.join(', ');
+  const def = REPAIRER_DETAILS_FIELDS.find((f) => f.key === key);
+  return def?.options?.find((o) => o.value === value)?.label || (value == null ? '' : String(value));
+}
 
 const ADDRESS_KEYS = ['address_line_1', 'address_line_2', 'town', 'county', 'postcode'];
 export const touchesAddress = (changes) => ADDRESS_KEYS.some((k) => k in (changes || {}));
