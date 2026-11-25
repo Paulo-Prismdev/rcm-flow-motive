@@ -51,11 +51,69 @@ export const vatStatusKnown = (status) => status === VAT_REGISTERED || status ==
  * for the Final Authority. Null until a Final Authority has arrived, which is what makes
  * the invoice checks wait rather than measure themselves against an earlier figure.
  */
-export function authorityTotals(claim) {
+export function authorityTotals(claim, { invoiceFigures = null } = {}) {
   if (!claim) return null;
-  const final = toNum(claim?.invoice_tracker?.items?.final_authority?.amount);
-  if (final === null || final <= 0) return null;
-  return { gross: round2(final), final: true, source: 'final' };
+  const entry = claim?.invoice_tracker?.items?.final_authority || {};
+  const final = toNum(entry.amount);
+  if (final !== null && final > 0) return { gross: round2(final), final: true, source: 'final' };
+  // Parts agreed at list price with no figure: the authorised labour, paint and
+  // additional costs, plus the parts as the repairer's invoice prints them.
+  const fixed = toNum(entry.fixed_net);
+  if (entry.parts_at_list_price && fixed !== null) {
+    const parts = invoiceParts(claim, invoiceFigures);
+    if (parts === null) return null;
+    return { gross: round2((fixed + parts) * (1 + VAT_RATE)), net: round2(fixed + parts), final: true, source: 'final', partsAtListPrice: parts, fixedNet: fixed };
+  }
+  return null;
+}
+
+/** The parts total on the repairer's final invoice: the copy being read, or the one on file. */
+function invoiceParts(claim, invoiceFigures) {
+  const reading = toNum(invoiceFigures?.parts);
+  if (reading !== null) return reading;
+  return toNum(claim?.invoice_tracker?.items?.final_invoice?.figures?.parts);
+}
+
+/** Whether the Final Authority agrees parts at list price, so its total waits for the invoice's parts. */
+export const authorityPartsAtListPrice = (claim) => {
+  const entry = claim?.invoice_tracker?.items?.final_authority || {};
+  return !!entry.parts_at_list_price && toNum(entry.amount) === null;
+};
+
+const LINE_LABELS = { labour: 'Labour', paint_materials: 'Paint & materials', parts: 'Parts', additional_costs: 'Additional costs' };
+
+/**
+ * The invoice's own lines against the authority's, where both print them: each line
+ * can be no more than was authorised. Parts agreed at list price are taken as invoiced.
+ */
+export function authorityLineChecks(claim, invoiceFigures = null) {
+  const authLines = claim?.invoice_tracker?.items?.final_authority?.lines || {};
+  const saved = claim?.invoice_tracker?.items?.final_invoice?.figures || {};
+  const listPrice = !!claim?.invoice_tracker?.items?.final_authority?.parts_at_list_price;
+  const checks = [];
+  for (const key of Object.keys(LINE_LABELS)) {
+    const invoiced = toNum(invoiceFigures?.[key] ?? saved[key]);
+    if (invoiced === null) continue;
+    if (key === 'parts' && listPrice && toNum(authLines.parts) === null) {
+      checks.push({ key: `line_${key}`, label: 'Parts', ok: true, detail: `${fmtGBP(invoiced)} invoiced — the authority agrees parts at list price, so they are taken as invoiced.` });
+      continue;
+    }
+    const authorised = toNum(authLines[key]);
+    if (authorised === null) continue;
+    const diff = round2(invoiced - authorised);
+    const ok = diff <= AUTHORITY_TOLERANCE;
+    checks.push({
+      key: `line_${key}`,
+      label: LINE_LABELS[key],
+      ok,
+      detail: Math.abs(diff) <= AUTHORITY_TOLERANCE
+        ? `${fmtGBP(invoiced)} invoiced — matches the ${fmtGBP(authorised)} authorised.`
+        : diff > 0
+          ? `${fmtGBP(invoiced)} invoiced, ${fmtGBP(diff)} over the ${fmtGBP(authorised)} authorised.`
+          : `${fmtGBP(invoiced)} invoiced, ${fmtGBP(Math.abs(diff))} under the ${fmtGBP(authorised)} authorised.`,
+    });
+  }
+  return checks;
 }
 
 /**
@@ -111,21 +169,29 @@ export function authorityExpectation({ gross, net, excess, contributions, vatSta
  * Authority has arrived, so the invoice checks say they are waiting for it rather than
  * measuring themselves against an earlier figure.
  */
-export function claimAuthorityExpectation(claim) {
+export function claimAuthorityExpectation(claim, { invoiceFigures = null } = {}) {
   if (!claim) return null;
   // A job the customer pays for privately has no insurer, so no authority: the
   // purchase order we issue authorises the repair, and the repairer's invoice is
   // measured against it exactly as an insurer's is measured against the Final
   // Authority. Null until an order has been generated, so the check waits for it.
   if (isPrivatePayingClaim(claim)) return purchaseOrderExpectation(claim);
-  const authority = authorityTotals(claim);
+  const authority = authorityTotals(claim, { invoiceFigures });
   if (!authority) return null;
-  return authorityExpectation({
+  const expectation = authorityExpectation({
     gross: authority.gross,
+    net: authority.net,
     excess: excessMode(claim) === 'tbc' ? 'tbc' : round2(toNum(claim.policy_excess) ?? 0),
     contributions: authorityContributions(claim),
     vatStatus: claim.client_vat_status,
   });
+  if (!expectation) return null;
+  return {
+    ...expectation,
+    partsAtListPrice: authority.partsAtListPrice ?? null,
+    fixedNet: authority.fixedNet ?? null,
+    lineChecks: authorityLineChecks(claim, invoiceFigures),
+  };
 }
 
 /**
@@ -134,6 +200,9 @@ export function claimAuthorityExpectation(claim) {
  * purchase order that authorises the repair.
  */
 export function missingExpectationText(claim) {
+  if (!isPrivatePayingClaim(claim) && authorityPartsAtListPrice(claim)) {
+    return "Waiting for the invoice's parts figure. The Final Authority agrees parts at list price without giving a figure, so the authorised total is its labour, paint and additional costs plus the parts as invoiced — fill in the parts total from the invoice and it is checked.";
+  }
   return isPrivatePayingClaim(claim)
     ? "Waiting for the Purchase Order. This invoice is checked against the purchase order we issue to authorise a privately paid repair, and none has been generated on this claim yet — generate one from the Financials screen and the invoice is checked against it."
     : "Waiting for the Final Authority. This invoice is checked against the Final Authority, and none has been recorded on this claim yet — the initial and supplementary authorities are kept for the record and are not used for the check.";
@@ -199,9 +268,18 @@ export const hasSplit = (split) => toNum(split?.customer) !== null;
  * read as the insurer's invoice alone, whatever payable lines were read off it.
  */
 export function effectiveSplit(split, expectation) {
-  if (!hasSplit(split) || !expectation || expectation.excessTbc || expectation.expected === null) return split;
+  if (!hasSplit(split)) return split;
   const total = toNum(split?.total);
   if (total === null) return split;
+  // The amount due printed as the insurer's figure: the "customer" line beside it (an
+  // excess, or VAT, taken off the subtotal) is a deduction, not a share of this
+  // invoice. Read that way whatever the authority says, so a wrong or missing
+  // authority can't turn a deduction into a split.
+  const insurerPrinted = toNum(split?.insurer);
+  if (insurerPrinted !== null && Math.abs(round2(insurerPrinted - total)) <= AUTHORITY_TOLERANCE) {
+    return { insurer: null, customer: null, total };
+  }
+  if (!expectation || expectation.excessTbc || expectation.expected === null) return split;
   const insurerOnly = Math.abs(round2(total - expectation.expected)) <= AUTHORITY_TOLERANCE
     && Math.abs(round2(total - expectation.gross)) > AUTHORITY_TOLERANCE;
   return insurerOnly ? { insurer: null, customer: null, total } : split;
@@ -355,6 +433,11 @@ export function compareToAuthority(insurerPart, expectation, vatExcess = null, g
         : `The two shares come to ${fmtGBP(sharesSum)}, but the invoice total reads ${fmtGBP(invoiceTotal)} — ${fmtGBP(Math.abs(round2(sharesSum - invoiceTotal)))} apart.`,
     });
   }
+  // The invoice's own lines against the authority's, where both print them.
+  const lineChecks = expectation.lineChecks || [];
+  checks.push(...lineChecks);
+  const lineOver = lineChecks.some((c) => !c.ok);
+
   // A split invoice's own checks are what the screen lists, so the VAT & Excess
   // Invoice is one of them. On an invoice printed as a single amount it is said
   // beside the customer's share instead, as it always was.
@@ -372,7 +455,7 @@ export function compareToAuthority(insurerPart, expectation, vatExcess = null, g
   // One headline: a blocking result first, then the first check that doesn't hold,
   // and plain agreement only when there is nothing left to say.
   const failing = checks.filter((c) => !c.ok);
-  const tone = status === 'over' ? 'block' : (insurerStatus === 'under' || failing.length > 0) ? 'warn' : 'ok';
+  const tone = status === 'over' ? 'block' : (insurerStatus === 'under' || failing.length > 0 || lineOver) ? 'warn' : 'ok';
   const headline = {
     tone,
     text: status === 'over'
@@ -444,7 +527,9 @@ export function expectationWorkings(expectation) {
     return `Final Purchase Order ${po.number} — ${fmtGBP(expectation.gross)} ordered (${fmtGBP(expectation.net)} ex VAT plus ${fmtGBP(expectation.vat)} VAT)`;
   }
   if (expectation.excessTbc) return '';
-  const parts = [`Authorised ${fmtGBP(expectation.net)} ex VAT`];
+  const parts = [expectation.partsAtListPrice !== null && expectation.partsAtListPrice !== undefined
+    ? `Authorised ${fmtGBP(expectation.net)} ex VAT (${fmtGBP(expectation.fixedNet)} labour, paint & additional costs + ${fmtGBP(expectation.partsAtListPrice)} parts at list price, as invoiced)`
+    : `Authorised ${fmtGBP(expectation.net)} ex VAT`];
   if (!expectation.vatRegistered) parts.push(`+ ${fmtGBP(expectation.vat)} VAT`);
   if (expectation.excess) parts.push(`− ${fmtGBP(expectation.excess)} excess`);
   if (expectation.contributions) parts.push(`− ${fmtGBP(expectation.contributions)} contributions`);
