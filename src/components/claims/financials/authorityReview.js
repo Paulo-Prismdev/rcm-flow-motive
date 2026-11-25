@@ -26,6 +26,15 @@ import {
 export const AUTHORITY_FIGURES = [
   { key: 'reg', label: 'Vehicle reg' },
   { key: 'amount_total', label: 'Authorised amount (total inc VAT)', type: 'number' },
+  // The authorised lines, read where the authority prints them. Many (Audatex
+  // authorisation notes among them) print no total at all, and agree parts "@ M.L.P."
+  // (manufacturer's list price) with no parts figure: the total then comes from the
+  // lines here, and the parts from the repairer's invoice.
+  { key: 'labour', label: 'Labour (ex VAT)', type: 'number' },
+  { key: 'paint_materials', label: 'Paint & materials (ex VAT)', type: 'number' },
+  { key: 'parts', label: 'Parts (ex VAT)', type: 'number' },
+  { key: 'additional_costs', label: 'Additional costs (ex VAT)', type: 'number' },
+  { key: 'parts_list_price', label: 'Parts agreed at list price (no figure)' },
   { key: 'excess', label: 'Excess (customer responsible)', type: 'number' },
   { key: 'contributions', label: 'Contributions (customer responsible)', type: 'number' },
   { key: 'customer_vat', label: 'Customer VAT status' },
@@ -36,9 +45,35 @@ export const AUTHORITY_REQUIRED = {
   amount_total: 'Enter the final authorised amount',
 };
 
+const yes = (v) => /^(yes|true|y)$/i.test(String(v ?? '').trim());
+const lineSum = (figures, keys) => {
+  const vals = keys.map((k) => toNum(figures?.[k]));
+  return vals.some((v) => v !== null) ? round2(vals.reduce((a, v) => a + (v || 0), 0)) : null;
+};
+
+/**
+ * Parts agreed at list price with no parts figure: the authority fixes the labour,
+ * paint and additional costs, and the parts come from the repairer's invoice. No
+ * total can be read or worked out from the authority alone, so none is asked for.
+ */
+export function authorityPartsOpen(figures) {
+  return yes(figures?.parts_list_price) && toNum(figures?.parts) === null && !String(figures?.amount_total ?? '').trim()
+    && lineSum(figures, ['labour', 'paint_materials', 'additional_costs']) !== null;
+}
+
+/** What has to be filled in before the authority can be saved. */
+export function authorityRequired(figures) {
+  return authorityPartsOpen(figures) ? {} : AUTHORITY_REQUIRED;
+}
+
 const FIGURE_DESCRIPTIONS = {
   reg: 'The vehicle registration the authority covers, exactly as printed',
-  amount_total: 'The final authorised amount — the total the repair is authorised at, including VAT, as a number',
+  amount_total: 'The final authorised amount — the total the repair is authorised at, including VAT, as a number — ONLY where the document prints that total. Leave empty where it prints no total: never add the lines up yourself.',
+  labour: 'The authorised labour amount (excluding VAT), as a number, only where printed',
+  paint_materials: 'The authorised paint and materials amount (excluding VAT), as a number, only where printed',
+  parts: 'The authorised parts amount (excluding VAT), as a number, only where a parts figure is printed. Leave empty where parts are agreed at a price basis such as "M.L.P." or list price with no figure.',
+  additional_costs: 'The total of the authorised additional costs (specialist, sublet, corrosion protection and the like, excluding VAT), as a number, only where printed. Use the printed total of additional costs where there is one.',
+  parts_list_price: '"yes" where the authority agrees parts at a price basis — such as "Parts agreed to be charged @ M.L.P." or at list price — rather than giving a parts figure; otherwise empty.',
   excess: "The excess the authority says the customer is responsible for, as a number. Leave empty where it shows none.",
   contributions: "Any other amount the authority says the customer is responsible for (a contribution, betterment or similar), as a number, read on its own. Leave empty where it shows none.",
   customer_vat: 'Who accounts for the VAT on this repair, as the authority puts it: "VAT Registered" where it says the customer is VAT registered or responsible for the VAT, "Non-VAT" where it says they are not, and empty where the authority does not say.',
@@ -75,13 +110,16 @@ export function buildAuthorityPrompt({ item, claim }) {
 
 Return only these things:
 - the vehicle registration the authority covers
-- the final authorised amount: the total the repair is authorised at, including VAT
+- the final authorised amount: the total the repair is authorised at, including VAT — only where the document prints that total
+- the authorised lines where printed: labour, paint & materials, parts, and the total of the additional costs (each excluding VAT)
+- whether parts are agreed at a price basis such as "@ M.L.P." or list price rather than a parts figure ("yes" if so)
 - the excess the authority shows, read from its "customer is responsible for" section where it has one
 - any other amount the same section says the customer is responsible for (a contribution, betterment or similar), read on its own and never added to the excess
 - who accounts for the VAT: this is stated as the customer being VAT registered, or responsible for the VAT (return "VAT Registered"), or as VAT not applying to the customer (return "Non-VAT")
 
 Rules:
 - Only return what is actually printed. Use an empty string for anything that is not there.
+- Many authorisation notes print the separate lines but no overall total. Then leave the total empty — never add the lines together or work a total out yourself.
 - Amounts as numbers with no currency symbols. Keep each amount separate: never add two of them together, and never split one between two of them.
 - The VAT status is a choice of two answers exactly as written above, from what the document says about the customer. Leave it empty where the authority says nothing about it. Never work it out from an amount.
 - Nothing else is needed: no invoice number, no parties, no VAT split of the amounts.
@@ -93,11 +131,19 @@ export const emptyAuthorityFigures = () => Object.fromEntries(AUTHORITY_FIGURES.
 
 /** What the review screen starts with: the figures, the strings they are highlighted by, and the AI's confidence in each. */
 export function authorityFiguresForReview(extracted = {}) {
-  return {
-    figures: figuresFromExtraction(extracted, AUTHORITY_FIGURES),
-    raw: rawFromExtraction(extracted, AUTHORITY_FIGURES),
-    confidence: confidenceFromExtraction(extracted, AUTHORITY_FIGURES),
-  };
+  const figures = figuresFromExtraction(extracted, AUTHORITY_FIGURES);
+  const raw = rawFromExtraction(extracted, AUTHORITY_FIGURES);
+  const confidence = confidenceFromExtraction(extracted, AUTHORITY_FIGURES);
+  // No total printed, but every line is, parts included: the total is those lines
+  // plus VAT. Filled in and left for someone to check, never taken as read.
+  if (!String(figures.amount_total ?? '').trim() && !yes(figures.parts_list_price) && toNum(figures.parts) !== null) {
+    const net = lineSum(figures, ['labour', 'paint_materials', 'parts', 'additional_costs']);
+    if (net !== null && net > 0) {
+      figures.amount_total = String(round2(net * (1 + VAT_RATE)));
+      confidence.amount_total = 'low';
+    }
+  }
+  return { figures, raw, confidence };
 }
 
 export const authorityNeedsReview = (figures, confidence) =>
@@ -148,8 +194,15 @@ export function excessCheck(figures, claim) {
 export function authorityExpectationFromReview({ figures, claim, excessChoice, vatChoice }) {
   const excess = excessCheck(figures, claim);
   const vat = authorityVatCheck(figures, claim);
+  // Parts at list price: the authorised lines plus the parts on the invoice already filed.
+  let gross = toNum(figures?.amount_total);
+  if (gross === null && authorityPartsOpen(figures)) {
+    const invoiceParts = toNum(claim?.invoice_tracker?.items?.final_invoice?.figures?.parts);
+    const fixed = lineSum(figures, ['labour', 'paint_materials', 'additional_costs']);
+    gross = invoiceParts === null ? null : round2((fixed + invoiceParts) * (1 + VAT_RATE));
+  }
   return authorityExpectation({
-    gross: toNum(figures?.amount_total),
+    gross,
     excess: excess.tbc && excessChoice === 'waived'
       ? 0
       : (excess.fills || (excess.differs && excessChoice === 'authority'))
@@ -217,6 +270,24 @@ export function buildAuthorityReviewPatch(claim, figures, options = {}) {
   const items = { ...(source.items || {}) };
   const entry = { ...(items[AUTHORITY_ITEM_KEY] || {}) };
   const patch = {};
+
+  // The authorised lines are kept on the authority's own record, so the invoice's own
+  // lines can be checked against them; and parts agreed at list price with no figure
+  // are recorded as such, the total then coming from the invoice's parts.
+  const lines = {};
+  for (const key of ['labour', 'paint_materials', 'parts', 'additional_costs']) {
+    const v = toNum(figures?.[key]);
+    if (v !== null) lines[key] = round2(v);
+  }
+  entry.lines = Object.keys(lines).length ? lines : null;
+  entry.parts_at_list_price = yes(figures?.parts_list_price) && toNum(figures?.parts) === null;
+  if (authorityPartsOpen(figures)) {
+    entry.amount = null;
+    entry.net = null;
+    entry.fixed_net = lineSum(figures, ['labour', 'paint_materials', 'additional_costs']);
+  } else {
+    entry.fixed_net = null;
+  }
 
   const total = toNum(figures?.amount_total);
   if (total !== null) {

@@ -14,6 +14,7 @@ import {
   AUTHORITY_EXTRACTION_SCHEMA,
   AUTHORITY_FIGURES,
   AUTHORITY_REQUIRED,
+  authorityRequired,
   authorityCorrections,
   authorityExpectationFromReview,
   authorityFiguresForReview,
@@ -119,9 +120,10 @@ export default function AuthorityReviewModal({
     setTouched((prev) => ({ ...prev, [key]: true }));
   };
 
-  const missingRequired = Object.keys(AUTHORITY_REQUIRED)
+  const required = authorityRequired(figures);
+  const missingRequired = Object.keys(required)
     .filter((key) => !String(figures[key] ?? '').trim())
-    .map((key) => AUTHORITY_REQUIRED[key]);
+    .map((key) => required[key]);
 
   const needsReviewKeys = useMemo(() => authorityNeedsReview(figures, confidence), [figures, confidence]);
   const unreviewed = needsReviewKeys.filter((key) => !reviewed[key] && !touched[key]);
