@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import {
   Building2, MapPin, Globe, Users, Wrench,
-  Shield, Save, Loader2, Pencil, X, ExternalLink, Map as MapIcon, Trash2
+  Shield, Save, Loader2, Pencil, X, ExternalLink, Map as MapIcon, Trash2, Car
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -27,6 +27,7 @@ import { deleteAndLog, updateAndLog } from "@/components/shared/useActivityLogge
 import RecordHistory from '@/components/shared/RecordHistory';
 import RepairerDetailsRequest from './RepairerDetailsRequest';
 import RepairerDetailsReview from './RepairerDetailsReview';
+import { COURTESY_CAR_TYPES, COURTESY_CAR_COUNTS } from './repairerDetailsFields';
 
 const TIER_OPTIONS = ["TIER 1", "TIER 2", "Previously on Network", ""];
 const MAP_GROUP_OPTIONS = ["Solution", "QAC", ""];
@@ -170,6 +171,7 @@ export default function RepairerDetailDrawer({ bodyshopId, onClose }) {
           {data?.map_group && <Badge className="bg-violet-100 text-violet-700">{data.map_group}</Badge>}
           {data?.acg_signed_up === "Yes" && <Badge className="bg-success-bg text-success-fg">ACG</Badge>}
           {data?.bs10125_certified === "Yes" && <Badge className="bg-info-bg text-info-fg">BS10125</Badge>}
+          {data?.courtesy_cars_offered === "Yes" && <Badge className="bg-muted text-foreground">Courtesy cars{data.courtesy_car_count ? ` · ${data.courtesy_car_count}` : ""}</Badge>}
           </div>
           {!isEditing && (
             <div className="flex gap-2 mt-3 pb-3 border-b border-border">
@@ -302,6 +304,51 @@ export default function RepairerDetailDrawer({ bodyshopId, onClose }) {
                     <ViewField label="Wheel Alignment" value={bodyshop.wheel_alignment} />
                     <ViewField label="ADAS" value={bodyshop.adas} />
                     <ViewField label="JIG" value={bodyshop.jig} />
+                  </>
+                )}
+              </Section>
+
+              <Section title="Courtesy Vehicles" icon={Car}>
+                {isEditing ? (
+                  <>
+                    <DropdownField label="Provides Courtesy Vehicles" value={formData.courtesy_cars_offered} onChange={(v) => updateField("courtesy_cars_offered", v)} options={["Yes", "No", ""]} />
+                    {formData.courtesy_cars_offered === "Yes" && (
+                      <>
+                        <DropdownField label="How Many (roughly)" value={formData.courtesy_car_count} onChange={(v) => updateField("courtesy_car_count", v)} options={[...COURTESY_CAR_COUNTS.map((o) => o.value), ""]} />
+                        <div className="py-2">
+                          <span className="block text-xs text-muted-foreground mb-1.5">Types</span>
+                          <div className="flex flex-wrap gap-1.5">
+                            {COURTESY_CAR_TYPES.map((t) => {
+                              const list = Array.isArray(formData.courtesy_car_types) ? formData.courtesy_car_types : [];
+                              const on = list.includes(t);
+                              return (
+                                <button
+                                  key={t}
+                                  type="button"
+                                  aria-pressed={on}
+                                  onClick={() => updateField("courtesy_car_types", on ? list.filter((x) => x !== t) : [...list, t])}
+                                  className={`h-8 px-2.5 rounded-full border text-xs font-medium ${on ? "bg-primary text-primary-foreground border-primary" : "bg-card border-border"}`}
+                                >
+                                  {t}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                        <EditField label="Notes" value={formData.courtesy_car_notes} onChange={(v) => updateField("courtesy_car_notes", v)} />
+                      </>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <ViewField label="Provides Courtesy Vehicles" value={bodyshop.courtesy_cars_offered} />
+                    {bodyshop.courtesy_cars_offered === "Yes" && (
+                      <>
+                        <ViewField label="How Many (roughly)" value={COURTESY_CAR_COUNTS.find((o) => o.value === bodyshop.courtesy_car_count)?.label} />
+                        <ViewField label="Types" value={(bodyshop.courtesy_car_types || []).join(", ")} />
+                        <ViewField label="Notes" value={bodyshop.courtesy_car_notes} />
+                      </>
+                    )}
                   </>
                 )}
               </Section>
