@@ -16,7 +16,8 @@ export default function RepairerDirectory() {
   const [tierFilter, setTierFilter] = useState("all");
   const [acgFilter, setAcgFilter] = useState("all");
   const [vehicleFilter, setVehicleFilter] = useState("all");
-  const [selectedId, setSelectedId] = useState(null);
+  // Opened straight to a repairer from a link (e.g. "details received" notification).
+  const [selectedId, setSelectedId] = useState(() => new URLSearchParams(window.location.search).get("bodyshop_id"));
   const [importing, setImporting] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [preview, setPreview] = useState(null);
@@ -200,6 +201,7 @@ export default function RepairerDirectory() {
                     {b.acg_signed_up === "Yes" && <Badge className="bg-success-bg text-success-fg text-xs px-1.5 py-0">ACG: Yes</Badge>}
                     {b.acg_signed_up === "No" && <Badge className="bg-danger-bg text-danger-fg text-xs px-1.5 py-0">ACG: No</Badge>}
                     {b.bs10125_certified === "Yes" && <Badge className="bg-success-bg text-success-fg text-xs px-1.5 py-0">BS10125</Badge>}
+                    {b.pending_details_update?.submitted_at && <Badge className="bg-info-bg text-info-fg text-xs px-1.5 py-0">Details to review</Badge>}
                   </div>
                 </div>
               ))}
@@ -240,6 +242,7 @@ export default function RepairerDirectory() {
                           }`}>{b.tier}</Badge>
                         ) : <span className="text-muted-foreground text-sm">—</span>}
                         {b.map_group && <Badge className="text-xs bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300">{b.map_group}</Badge>}
+                        {b.pending_details_update?.submitted_at && <Badge className="bg-info-bg text-info-fg text-xs">Details to review</Badge>}
                       </div>
                     </td>
                     <td className="p-3 hidden sm:table-cell">
