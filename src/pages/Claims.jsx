@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Search, Archive, Filter, X, AlertTriangle, Clock, Upload, Package, ChevronDown, ChevronRight, Settings2, ArrowUpDown, MessageSquare, Eye, FileText, List, Layers, Check } from 'lucide-react';
+import { Plus, Search, Archive, Filter, X, AlertTriangle, Clock, Upload, Package, ChevronDown, ChevronRight, Settings2, ArrowUpDown, MessageSquare, Eye, FileText, List, Layers, Check, PoundSterling } from 'lucide-react';
 import ClaimDetail from '../components/claims/ClaimDetail';
 import ClaimFormWrapper from '../components/claims/ClaimFormWrapper';
 import ImportClaimsModal from '../components/claims/ImportClaimsModal';
