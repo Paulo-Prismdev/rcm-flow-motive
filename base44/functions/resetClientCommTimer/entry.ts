@@ -2,8 +2,21 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
 import { isCancelledClaim } from '../../shared/claimOutcome.ts';
 import { requireInternalUser } from '../../shared/internalAccess.ts';
 
+// An outgoing client communication also counts as a case update, so it moves the
+// case 48-hour timer on too — but never backwards past a later update.
+function caseTimerFields(claim: any, at: Date, isClosed: boolean) {
+  const last = claim.last_updated_at ? new Date(claim.last_updated_at).getTime() : 0;
+  if (last >= at.getTime()) return {};
+  return {
+    last_updated_at: at.toISOString(),
+    next_update_due_at: new Date(at.getTime() + 48 * 60 * 60 * 1000).toISOString(),
+    update_status_flag: isClosed ? 'Gray' : 'Green',
+  };
+}
+
 /**
- * Resets the 48-hour client communication tracker on a Claim.
+ * Resets the 48-hour client communication tracker on a Claim (and, as an
+ * outgoing client communication counts as a case update, the case timer too).
  *
  * Triggered by an entity automation on ClaimUpdate create (update_type ===
  * "Client Communication"). Also supports manual invocation:
@@ -94,6 +107,7 @@ export default async function(req: Request): Promise<Response> {
                 last_client_comm_at: new Date(updateDate).toISOString(),
                 next_client_comm_due_at: nextDue,
                 client_comm_status_flag: 'Green',
+                ...caseTimerFields(claim, new Date(updateDate), false),
               });
               updated++;
               continue;
@@ -209,6 +223,7 @@ export default async function(req: Request): Promise<Response> {
       last_client_comm_at: now.toISOString(),
       next_client_comm_due_at: nextDue.toISOString(),
       client_comm_status_flag: isClosed ? 'Gray' : 'Green',
+      ...caseTimerFields(claim, now, isClosed),
     };
 
     await base44.asServiceRole.entities.Claim.update(claimId, update);
