@@ -19,6 +19,8 @@ import L from 'leaflet';
 import { geocodeAddress } from '@/functions/geocodeAddress';
 import { haversineDistance, formatHaversineDistance } from '@/components/shared/haversine';
 import { activateOnKey } from '@/lib/a11y';
+import { RepairerFilterChips, RepairerFitPanel, RepairerRowTags } from './allocation/RepairerAllocationInfo';
+import { applyRepairerFilters } from './allocation/repairerFit';
 
 // ── Leaflet icon setup ──
 delete L.Icon.Default.prototype._getIconUrl;
@@ -96,6 +98,7 @@ function TravelBadge({ log }) {
 
 export default function ClaimBodyshopMapModal({ claim, isOpen, onClose, onSelectBodyshop }) {
   const [selectedBodyshop, setSelectedBodyshop] = useState(null);
+  const [quickFilters, setQuickFilters] = useState({});
   const [clientLocation, setClientLocation] = useState(null);
   const [isGeocoding, setIsGeocoding] = useState(false);
   const [geocodeMessage, setGeocodeMessage] = useState(null);
@@ -266,7 +269,7 @@ export default function ClaimBodyshopMapModal({ claim, isOpen, onClose, onSelect
   }, [validBodyshops]);
 
   const sortedBodyshops = useMemo(() => {
-    let list = [...validBodyshops];
+    let list = applyRepairerFilters([...validBodyshops], quickFilters);
 
     if (vehicleFilter !== 'all') {
       list = list.filter((b) => b.largest_vehicle_repairable === vehicleFilter);
@@ -293,7 +296,11 @@ export default function ClaimBodyshopMapModal({ claim, isOpen, onClose, onSelect
     }
 
     return list;
-  }, [validBodyshops, sortBy, searchQuery, clientLocation, vehicleFilter]);
+  }, [validBodyshops, sortBy, searchQuery, clientLocation, vehicleFilter, quickFilters]);
+
+  const selectedMiles = selectedBodyshop && clientLocation
+    ? haversineDistance(clientLocation.lat, clientLocation.lng, selectedBodyshop.latitude, selectedBodyshop.longitude)
+    : null;
 
   const radiusInMeters = 30 * 1609.34;
 
@@ -359,6 +366,8 @@ export default function ClaimBodyshopMapModal({ claim, isOpen, onClose, onSelect
             </div>
           </div>
 
+          <RepairerFilterChips active={quickFilters} onChange={setQuickFilters} />
+
           {/* Main content: List + Map */}
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-3">
             {/* Bodyshop list */}
@@ -393,6 +402,7 @@ export default function ClaimBodyshopMapModal({ claim, isOpen, onClose, onSelect
                         {bodyshop.phone && <p className="flex items-center gap-1 truncate"><Phone className="w-3 h-3 flex-shrink-0" />{bodyshop.phone}</p>}
                         {bodyshop.town && <p className="flex items-center gap-1 truncate"><MapPinned className="w-3 h-3 flex-shrink-0" />{bodyshop.town} {bodyshop.postcode}</p>}
                       </div>
+                      <RepairerRowTags bodyshop={bodyshop} claim={claim} distanceMiles={haversineMiles} />
                     </div>
                   );
                 })
@@ -453,6 +463,12 @@ export default function ClaimBodyshopMapModal({ claim, isOpen, onClose, onSelect
             </div>
           </div>
 
+          {selectedBodyshop && (
+            <div>
+              <p className="text-sm font-semibold mb-2">{selectedBodyshop.name}</p>
+              <RepairerFitPanel bodyshop={selectedBodyshop} claim={claim} distanceMiles={selectedMiles} />
+            </div>
+          )}
         </div>
 
         {/* Selected repairer confirmation strip — fixed, always visible (outside scroll area) */}
