@@ -10,7 +10,6 @@ import ClaimCardFieldsModal from '../components/claims/ClaimCardFieldsModal';
 import UpdateStatusBadge from '../components/shared/UpdateStatusBadge';
 import StatusBadge from '../components/shared/StatusBadge';
 import ClaimUpdatesQuickView from '../components/claims/ClaimUpdatesQuickView';
-import ClaimTypeTabs from '../components/shared/ClaimTypeTabs';
 import ClaimQuickViewModal from '../components/claims/ClaimQuickViewModal';
 import { formatUKRegistration } from '../components/shared/formatRegistration';
 import { format } from 'date-fns';
@@ -203,7 +202,8 @@ export default function ClaimsPage() {
   const [collapsedSubGroups, setCollapsedSubGroups] = useState({});
   const [quickViewClaim, setQuickViewClaim] = useState(null);
   const [quickInfoClaim, setQuickInfoClaim] = useState(null);
-  const [claimTab, setClaimTab] = useState('claims');
+  // Private jobs (client or third party paying) sit in the one list; this narrows to them.
+  const [privateOnly, setPrivateOnly] = useState(false);
   // Phones only: a flat list (most urgent first) or the stage groups, a stage chip
   // filter, and search tucked behind an icon. Tablets and desktop are unchanged.
   const isPhone = useIsMobile();
@@ -386,15 +386,15 @@ export default function ClaimsPage() {
     setUpdateStatusFilter(''); setRepairerAcceptanceFilter(''); setHasBackorderedPartsFilter(false);
     setBusinessDivisionFilter(''); setOverdueOnly(false);
     setDateReceivedFrom(''); setDateReceivedTo('');
-    setInvoiceFilter('');
+    setInvoiceFilter(''); setPrivateOnly(false);
   };
 
-  const activeFiltersCount = [(statusFilter?.length || 0) > 0, claimTypeFilter, insurerFilter, authorisingPartyFilter, referrerFilter, repairerFilter, businessDivisionFilter, updateStatusFilter, repairerAcceptanceFilter, hasBackorderedPartsFilter, overdueOnly, dateReceivedFrom, dateReceivedTo, invoiceFilter].filter(Boolean).length;
+  const activeFiltersCount = [(statusFilter?.length || 0) > 0, claimTypeFilter, insurerFilter, authorisingPartyFilter, referrerFilter, repairerFilter, businessDivisionFilter, updateStatusFilter, repairerAcceptanceFilter, hasBackorderedPartsFilter, overdueOnly, privateOnly, dateReceivedFrom, dateReceivedTo, invoiceFilter].filter(Boolean).length;
 
   const allClaims = showArchived ? claims : claims.filter(c => !c.archived);
-  const standardClaims = allClaims.filter(c => c.claim_type !== 'Paying Privately' && c.claim_type !== '3rd Party Paying Privately');
-  const privateClaims = allClaims.filter(c => c.claim_type === 'Paying Privately' || c.claim_type === '3rd Party Paying Privately');
-  const tabClaims = claimTab === 'private' ? privateClaims : standardClaims;
+  const isPrivateJob = (c) => c.claim_type === 'Paying Privately' || c.claim_type === '3rd Party Paying Privately';
+  const privateCount = allClaims.filter(isPrivateJob).length;
+  const tabClaims = privateOnly ? allClaims.filter(isPrivateJob) : allClaims;
 
   const filteredClaims = tabClaims.filter(c => {
     const s = searchTerm.toLowerCase();
@@ -592,7 +592,7 @@ export default function ClaimsPage() {
           onSubmit={(d) => { setCreateError(null); createMutation.mutate(sanitizeClaimData(d)); }}
           onCancel={() => { setShowForm(false); setCreateError(null); }}
           isSubmitting={createMutation.isPending}
-          defaultClaimType={claimTab === 'private' ? 'Paying Privately' : ''}
+          defaultClaimType={privateOnly ? 'Paying Privately' : ''}
         />
       </div>
     );
@@ -912,20 +912,17 @@ export default function ClaimsPage() {
       <div className="flex items-center justify-between gap-3 px-4 lg:px-5 py-3 md:border-b border-border flex-shrink-0">
         <div className="min-w-0">
           <h1 className="text-page-title hidden md:block">Repairs</h1>
-          {/* Phones: Repairs / Paying privately / archived live behind the title */}
+          {/* Phones: Paying privately filter / archived live behind the title */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button type="button" className="md:hidden flex items-center gap-1">
-                <span className="text-[26px] font-bold tracking-tight leading-tight">{claimTab === 'private' ? 'Paying privately' : 'Repairs'}</span>
+                <span className="text-[26px] font-bold tracking-tight leading-tight">{privateOnly ? 'Paying privately' : 'Repairs'}</span>
                 <ChevronDown className="w-5 h-5 mt-1 text-muted-foreground" aria-hidden="true" />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-60">
-              <DropdownMenuItem onSelect={() => setClaimTab('claims')}>
-                <span className="flex-1">Repairs</span><span className="text-xs text-muted-foreground mr-2">{standardClaims.length}</span>{claimTab !== 'private' && <Check className="w-4 h-4" />}
-              </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => setClaimTab('private')}>
-                <span className="flex-1">Paying privately</span><span className="text-xs text-muted-foreground mr-2">{privateClaims.length}</span>{claimTab === 'private' && <Check className="w-4 h-4" />}
+              <DropdownMenuItem onSelect={() => setPrivateOnly(!privateOnly)}>
+                <span className="flex-1">Paying privately only</span><span className="text-xs text-muted-foreground mr-2">{privateCount}</span>{privateOnly && <Check className="w-4 h-4" />}
               </DropdownMenuItem>
               {isInternalUser && (
                 <DropdownMenuItem onSelect={() => setShowArchived(!showArchived)}>
@@ -991,11 +988,6 @@ export default function ClaimsPage() {
         <Plus className="w-[18px] h-[18px]" />New claim
       </button>}
 
-      {/* Repairs / Paying Privately tabs (phones: behind the title) */}
-      <div className="hidden md:flex items-center px-5 py-2 border-b border-border flex-shrink-0">
-        <ClaimTypeTabs activeTab={claimTab} onChange={setClaimTab} claimsCount={standardClaims.length} privateCount={privateClaims.length} />
-      </div>
-
       {/* Search + filters bar (on phones only while search is open) */}
       <div className={`${phoneSearchOpen || searchTerm ? 'flex' : 'hidden'} md:flex flex-col lg:flex-row lg:items-center gap-3 px-5 py-2.5 border-b border-border flex-shrink-0 bg-muted`}>
         <div className="relative flex-1 w-full">
@@ -1024,6 +1016,22 @@ export default function ClaimsPage() {
             <AlertTriangle className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Overdue Only</span>
             <span className="sm:hidden">Overdue</span>
+          </button>
+          {/* Privately paying jobs only (client or third party paying) */}
+          <button
+            onClick={() => setPrivateOnly(!privateOnly)}
+            aria-pressed={privateOnly}
+            className={`flex items-center gap-1 lg:gap-1.5 px-2 lg:px-3 py-1.5 rounded-lg text-xs font-medium border transition-all flex-shrink-0 ${
+              privateOnly
+                ? 'bg-info-bg border-info/30 text-info-fg'
+                : 'border-border text-muted-foreground hover:bg-card hover:border-input'
+            }`}
+            title="Show only privately paying jobs (client or third party paying)"
+          >
+            <PoundSterling className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Paying Privately</span>
+            <span className="sm:hidden">Private</span>
+            <span className="opacity-70">{privateCount}</span>
           </button>
           {/* Sort — select on desktop, compact icon menu on phones */}
           <select value={sortBy} onChange={e => setSortBy(e.target.value)}
@@ -1432,7 +1440,7 @@ export default function ClaimsPage() {
 
       {/* Footer count — sits at the end of the list, not in a fixed bar */}
       <div className="px-5 py-2 border-t border-border text-xs text-muted-foreground flex-shrink-0 m-list-foot">
-        {filteredClaims.length} of {tabClaims.length} {claimTab === 'private' ? 'repairs' : 'claims'}
+        {filteredClaims.length} of {allClaims.length} claims{privateOnly ? ' · paying privately only' : ''}
       </div>
     </div>
   );
