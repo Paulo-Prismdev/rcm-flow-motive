@@ -41,7 +41,7 @@ const PAGE_NAMES = {
 function pageName() {
   const seg = (window.location.pathname.split("/").filter(Boolean)[0] || "").toLowerCase();
   if (seg in PAGE_NAMES) return PAGE_NAMES[seg];
-  if (seg.endsWith("-form") || seg === "parts-request" || seg === "bodyshop-update") return "your form";
+  if (seg.endsWith("-form") || seg === "parts-request" || seg === "bodyshop-update" || seg === "repairer-details") return "your form";
   if (seg.endsWith("directory") || seg === "admin") return "the directory";
   return "your page";
 }

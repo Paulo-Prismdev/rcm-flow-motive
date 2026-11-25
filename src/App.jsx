@@ -28,6 +28,7 @@ const RepairPreferenceForm = lazy(() => import('@/pages/RepairPreferenceForm'));
 const WitnessStatementForm = lazy(() => import('@/pages/WitnessStatementForm'));
 const DeclarationOfNeedForm = lazy(() => import('@/pages/DeclarationOfNeedForm'));
 const BodyshopUpdateForm = lazy(() => import('@/pages/BodyshopUpdateForm'));
+const RepairerDetailsForm = lazy(() => import('@/pages/RepairerDetailsForm'));
 const StatusMigrationReview = lazy(() => import('@/pages/StatusMigrationReview'));
 const Invoicing = lazy(() => import('@/pages/Invoicing'));
 const Login = lazy(() => import('@/pages/Login'));
@@ -45,7 +46,7 @@ const LayoutWrapper = ({ children, currentPageName }) => Layout ?
   <Layout currentPageName={currentPageName}>{children}</Layout>
   : <>{children}</>;
 
-const PUBLIC_PATHS = ['/backorder-form', '/parts-request', '/client-claim-form', '/indemnity-form', '/repair-preference-form', '/witness-statement-form', '/declaration-of-need-form', '/bodyshop-update', '/login', '/forgot-password', '/reset-password'];
+const PUBLIC_PATHS = ['/backorder-form', '/parts-request', '/client-claim-form', '/indemnity-form', '/repair-preference-form', '/witness-statement-form', '/declaration-of-need-form', '/bodyshop-update', '/repairer-details', '/login', '/forgot-password', '/reset-password'];
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, isAuthenticated, navigateToLogin, twofaStatus, user } = useAuth();
@@ -65,6 +66,7 @@ const AuthenticatedApp = () => {
           <Route path="/witness-statement-form" element={<WitnessStatementForm />} />
           <Route path="/declaration-of-need-form" element={<DeclarationOfNeedForm />} />
           <Route path="/bodyshop-update" element={<BodyshopUpdateForm />} />
+          <Route path="/repairer-details" element={<RepairerDetailsForm />} />
           <Route path="/login" element={<Login />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
@@ -201,6 +203,7 @@ function PublicApp() {
           <Route path="/witness-statement-form" element={<WitnessStatementForm />} />
         <Route path="/declaration-of-need-form" element={<DeclarationOfNeedForm />} />
         <Route path="/bodyshop-update" element={<BodyshopUpdateForm />} />
+          <Route path="/repairer-details" element={<RepairerDetailsForm />} />
         <Route path="/login" element={<Login />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
