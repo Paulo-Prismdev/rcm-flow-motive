@@ -101,10 +101,9 @@ export default function ClaimUpdatesQuickView({ claim, isOpen, onClose }) {
     const isClosedAfterUpdate = isUpdateTrackingClosed({ ...claim, journey_status: effectiveStatus, job_status: effectiveStatus, outcome: dates?.outcome || claim?.outcome, invoice_status: claim?.invoice_status });
     const fortyEightHoursFromNow = new Date(now.getTime() + 48 * 60 * 60 * 1000);
 
-    // General 48hr timer only resets on an Incoming update (any type).
-    // Client comm timer only resets on an Outgoing Client Communication.
-    const resetGeneral = direction === 'Incoming';
-    const resetClientComm = updateType === 'Client Communication' && direction === 'Outgoing';
+    // Which timers this update resets: see resetsCaseTimer / resetsClientTimer.
+    const resetGeneral = resetsCaseTimer(updateType, direction);
+    const resetClientComm = resetsClientTimer(updateType, direction);
 
     const updateData = {
       ...(resetGeneral && !isClosedAfterUpdate && {

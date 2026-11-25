@@ -149,15 +149,18 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
       // Best-effort timer reset — runs AFTER the update is saved, so a slow/
       // failed timer write must never make a successful update look like it failed.
       try {
-        if (updateData.update_type === 'Client Communication') {
-          const now = new Date();
-          const closed = isUpdateTrackingClosed({ ...claim, invoice_status: claim?.invoice_status });
-          await base44.entities.Claim.update(claimId, {
-            last_client_comm_at: now.toISOString(),
-            next_client_comm_due_at: new Date(now.getTime() + 48 * 60 * 60 * 1000).toISOString(),
-            client_comm_status_flag: closed ? 'Gray' : 'Green',
-          });
-        }
+        const now = new Date();
+        const due = new Date(now.getTime() + 48 * 60 * 60 * 1000).toISOString();
+        const closed = isUpdateTrackingClosed({ ...claim, invoice_status: claim?.invoice_status });
+        const timers = {
+          ...(resetsCaseTimer(updateData.update_type, updateData.direction) && {
+            last_updated_at: now.toISOString(), next_update_due_at: due, update_status_flag: closed ? 'Gray' : 'Green',
+          }),
+          ...(resetsClientTimer(updateData.update_type, updateData.direction) && {
+            last_client_comm_at: now.toISOString(), next_client_comm_due_at: due, client_comm_status_flag: closed ? 'Gray' : 'Green',
+          }),
+        };
+        if (Object.keys(timers).length) await base44.entities.Claim.update(claimId, timers);
       } catch (timerErr) {
         console.warn('Client comm timer reset failed (update was still saved):', timerErr);
       }
@@ -359,7 +362,7 @@ export default function ClaimUpdatesModal({ claimId, currentStatus, isOpen, onCl
         <div className="md:hidden mx-auto h-1.5 w-10 rounded-full bg-border" aria-hidden="true" />
         <DialogHeader className="max-md:text-left">
           <DialogTitle className="flex items-center gap-2"><Clock className="w-5 h-5 text-primary max-md:hidden" /><span className="md:hidden text-lg">Updates</span><span className="max-md:hidden">Official Updates - Activity Log</span>{updates.length > 0 && <span className="md:hidden text-xs font-medium text-muted-foreground bg-muted rounded-full px-2 py-0.5">{updates.filter(u => !u.parent_update_id).length}</span>}</DialogTitle>
-          <p className="text-xs text-muted-foreground mt-1 max-md:hidden">Client Communication updates reset the 48-hour tracking timer. All updates create an audit trail.</p>
+          <p className="text-xs text-muted-foreground mt-1 max-md:hidden">Outgoing client communications reset both 48-hour timers. All updates create an audit trail.</p>
         </DialogHeader>
 
         <div className="flex-1 overflow-y-auto overflow-x-hidden space-y-4 pr-2">

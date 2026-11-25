@@ -1036,10 +1036,9 @@ export default function ClaimDetail({ claim: claimProp, onClose, onUpdate, isInt
     const isClosedAfterUpdate = isUpdateTrackingClosed({ ...claim, job_status: effectiveStatus, journey_status: newStatus || claim.journey_status, outcome: dates?.outcome || claim.outcome, invoice_status: claim.invoice_status });
     const fortyEightHoursFromNow = new Date(now.getTime() + 48 * 60 * 60 * 1000);
 
-    // General 48hr timer only resets on an Incoming update (any type).
-    // Client comm timer only resets on an Outgoing Client Communication.
-    const resetGeneral = direction === 'Incoming';
-    const resetClientComm = updateType === 'Client Communication' && direction === 'Outgoing';
+    // Which timers this update resets: see resetsCaseTimer / resetsClientTimer.
+    const resetGeneral = resetsCaseTimer(updateType, direction);
+    const resetClientComm = resetsClientTimer(updateType, direction);
 
     // DB payload — only the fields that should actually change. Spreading the
     // entire claim here would overwrite the stored record with any stale prop

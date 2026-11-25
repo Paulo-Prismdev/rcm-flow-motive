@@ -127,7 +127,7 @@ export default function ClaimUpdateForm({
       // so a slow/failed timer write must never make a successful update look
       // like it failed. We catch and log; the update itself is already stored.
       try {
-        if (updateData.update_type === 'General Update' || (updateData.update_type !== 'Status Change' && updateData.direction === 'Incoming')) {
+        if (resetsCaseTimer(updateData.update_type, updateData.direction)) {
           const now = new Date();
           const closed = isUpdateTrackingClosed({ ...claim, invoice_status: claim?.invoice_status });
           await base44.entities.Claim.update(claimId, {
@@ -136,7 +136,7 @@ export default function ClaimUpdateForm({
             update_status_flag: closed ? 'Gray' : 'Green',
           });
         }
-        if (updateData.update_type === 'Client Communication' && updateData.direction === 'Outgoing') {
+        if (resetsClientTimer(updateData.update_type, updateData.direction)) {
           const now = new Date();
           const closed = isUpdateTrackingClosed({ ...claim, invoice_status: claim?.invoice_status });
           await base44.entities.Claim.update(claimId, {

@@ -1,5 +1,5 @@
 import { base44 } from '@/api/base44Client';
-import { isUpdateTrackingClosed } from './claimStatusUpdate';
+import { isUpdateTrackingClosed, resetsCaseTimer } from './claimStatusUpdate';
 
 // Recompute the claim's 48-hour update & client-communication timers from the
 // remaining ClaimUpdate records. Called after an update is deleted so the
@@ -24,8 +24,8 @@ export async function recomputeUpdateTimers(claimId) {
     updateData.update_status_flag = 'Gray';
     updateData.client_comm_status_flag = 'Gray';
   } else {
-    // General timer — latest Incoming update
-    const latestIncoming = updates.find((u) => u.direction === 'Incoming');
+    // Case timer — latest update that counts (see resetsCaseTimer)
+    const latestIncoming = updates.find((u) => resetsCaseTimer(u.update_type, u.direction));
     if (latestIncoming) {
       const ts = new Date(latestIncoming.created_date);
       updateData.last_updated_at = ts.toISOString();

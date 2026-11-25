@@ -85,6 +85,20 @@ export function computeUpdateStatusFlag(claim) {
 // Dynamically compute the client_comm_status_flag from timestamps so the badge
 // never shows "On Track" when the 48-hour client comm window has expired.
 // Mirrors computeUpdateStatusFlag but uses client_comm fields.
+// ── Which updates reset which 48-hour timer (one rule, used everywhere) ──
+// Client update timer: an OUTGOING Client Communication (we updated the client).
+// An incoming one doesn't, so a client message we haven't answered still shows due.
+export const resetsClientTimer = (updateType, direction) =>
+  updateType === 'Client Communication' && direction === 'Outgoing';
+
+// Case update timer: a General Update, anything incoming (other than a status
+// change), or an outgoing Client Communication — talking to the client counts as
+// progress on the case too.
+export const resetsCaseTimer = (updateType, direction) =>
+  updateType === 'General Update'
+  || (updateType !== 'Status Change' && direction === 'Incoming')
+  || resetsClientTimer(updateType, direction);
+
 export function computeClientCommStatusFlag(claim) {
   if (!claim) return null;
 
