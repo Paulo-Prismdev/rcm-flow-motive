@@ -17,6 +17,12 @@ import { isInvoiceDocument, isRecommendedItem } from '@/components/shared/invoic
  */
 const round2 = (n) => Math.round((Number(n) || 0) * 100) / 100;
 
+// The client's VAT & excess is billed on exactly as the repairer billed it to us, so
+// both invoices count at their full amount, VAT and all. Split ex VAT they don't
+// match (the repairer's shows the repair VAT, ours to the client often shows none),
+// which would turn money passing straight through into a false profit or loss.
+const PASS_THROUGH = new Set(['vat_excess_invoice_in', 'vat_excess_invoice_out']);
+
 export function jobProfit(summary) {
   const lines = [];
   const pending = [];
@@ -29,8 +35,10 @@ export function jobProfit(summary) {
   for (const { item, state } of summary?.rows || []) {
     if (state.notApplicable || isInvoiceDocument(item) || isRecommendedItem(item)) continue;
     if (state.awaiting) { pending.push(item.label); continue; }
-    const ex = round2((Number(state.ex) || 0) - (Number(state.deduction) || 0));
     const gross = round2(Number(state.amount) || 0);
+    const ex = PASS_THROUGH.has(item.key)
+      ? gross
+      : round2((Number(state.ex) || 0) - (Number(state.deduction) || 0));
     if (item.direction === 'out') {
       income += ex;
       incomeGross += gross;
