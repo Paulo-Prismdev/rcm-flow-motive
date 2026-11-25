@@ -19,7 +19,8 @@
 export const LINK_TTL_DAYS = 14;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-export type ClaimLinkPurpose = 'bodyshop_update' | 'backorder';
+// 'repairer_details' links carry a repairer (Bodyshop) id rather than a claim id.
+export type ClaimLinkPurpose = 'bodyshop_update' | 'backorder' | 'repairer_details';
 
 const encoder = new TextEncoder();
 
