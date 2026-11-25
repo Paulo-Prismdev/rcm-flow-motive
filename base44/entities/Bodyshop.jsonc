@@ -209,6 +209,22 @@
       "format": "date",
       "description": "Date when feedback was last requested from this company"
     },
+    "pending_details_update": {
+      "type": "object",
+      "description": "Answers the repairer sent through the details questionnaire, waiting for staff to review: submitted_at, submitted_by_name, submitted_by_role, submitted_by_email, changes (field -> new value), notes. Cleared once reviewed."
+    },
+    "details_form_sent_at": {
+      "type": "string",
+      "description": "When the details questionnaire was last emailed to the repairer"
+    },
+    "details_form_sent_to": {
+      "type": "string",
+      "description": "Who the details questionnaire was last emailed to"
+    },
+    "details_last_confirmed_at": {
+      "type": "string",
+      "description": "When the repairer last sent their details through the questionnaire"
+    },
     "portal_sections": {
       "type": "array",
       "items": {

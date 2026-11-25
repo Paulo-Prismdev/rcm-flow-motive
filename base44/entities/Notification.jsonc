@@ -25,6 +25,7 @@
         "parts_update",
         "engineering_update",
         "repair_update_received",
+        "repairer_details_received",
         "general"
       ],
       "description": "Type of notification"
@@ -35,7 +36,8 @@
         "Claim",
         "Estimate",
         "Engineering",
-        "Part"
+        "Part",
+        "Bodyshop"
       ],
       "description": "Type of related item"
     },
