@@ -17,17 +17,22 @@ function Field({ def, value, onChange, error }) {
   const id = `f-${def.key}`;
   let control;
   if (def.options) {
+    const picked = def.multi ? (Array.isArray(value) ? value : []) : null;
     control = (
-      <div className="flex flex-wrap gap-2" role="radiogroup" aria-labelledby={`${id}-l`}>
+      <div className="flex flex-wrap gap-2" role={def.multi ? 'group' : 'radiogroup'} aria-labelledby={`${id}-l`}>
         {def.options.map((o) => {
-          const on = value === o.value;
+          const on = def.multi ? picked.includes(o.value) : value === o.value;
+          const toggle = () => {
+            if (!def.multi) onChange(on ? '' : o.value);
+            else onChange(on ? picked.filter((v) => v !== o.value) : [...picked, o.value]);
+          };
           return (
             <button
               key={o.value}
               type="button"
-              role="radio"
+              role={def.multi ? 'checkbox' : 'radio'}
               aria-checked={on}
-              onClick={() => onChange(on ? '' : o.value)}
+              onClick={toggle}
               className={`h-11 px-4 rounded-xl border text-sm font-medium transition-colors ${on ? 'bg-[#131d47] text-white border-[#131d47]' : 'bg-white border-border text-foreground hover:bg-muted'}`}
             >
               {o.label}
@@ -193,7 +198,7 @@ export default function RepairerDetailsForm() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {section.fields.filter((f) => !f.showIf || f.showIf(details)).map((f) => (
                 <div key={f.key} className={f.long || f.options ? 'sm:col-span-2' : ''}>
-                  <Field def={f} value={details[f.key] ?? ''} onChange={(v) => set(f.key, v)} error={errors[f.key]} />
+                  <Field def={f} value={details[f.key] ?? (f.multi ? [] : '')} onChange={(v) => set(f.key, v)} error={errors[f.key]} />
                 </div>
               ))}
             </div>
