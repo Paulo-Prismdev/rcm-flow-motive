@@ -209,6 +209,26 @@
       "format": "date",
       "description": "Date when feedback was last requested from this company"
     },
+    "courtesy_cars_offered": {
+      "type": "string",
+      "enum": ["Yes", "No", ""],
+      "description": "Whether the repairer provides courtesy vehicles"
+    },
+    "courtesy_car_count": {
+      "type": "string",
+      "enum": ["1-5", "6-10", "10+", ""],
+      "description": "Roughly how many courtesy vehicles the repairer keeps"
+    },
+    "courtesy_car_types": {
+      "type": "array",
+      "items": { "type": "string" },
+      "default": [],
+      "description": "Kinds of courtesy vehicle the repairer has (small car, family car, estate, SUV, prestige, electric/hybrid, automatic, van...)"
+    },
+    "courtesy_car_notes": {
+      "type": "string",
+      "description": "Anything else about the repairer's courtesy vehicles"
+    },
     "pending_details_update": {
       "type": "object",
       "description": "Answers the repairer sent through the details questionnaire, waiting for staff to review: submitted_at, submitted_by_name, submitted_by_role, submitted_by_email, changes (field -> new value), notes. Cleared once reviewed."
