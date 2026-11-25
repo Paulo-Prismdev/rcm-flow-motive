@@ -18,7 +18,8 @@ Deno.serve(async (req) => {
 
     return Response.json({
       success: true,
-      details: currentDetails(bodyshop),
+      // What we hold, with any answers they've sent that we haven't reviewed yet on top.
+      details: { ...currentDetails(bodyshop), ...(bodyshop.pending_details_update?.changes || {}) },
       // Already sent answers that are still waiting for us to review.
       pending: bodyshop.pending_details_update?.submitted_at ? {
         submitted_at: bodyshop.pending_details_update.submitted_at,
