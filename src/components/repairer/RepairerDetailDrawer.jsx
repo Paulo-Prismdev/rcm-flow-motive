@@ -113,7 +113,13 @@ export default function RepairerDetailDrawer({ bodyshopId, onClose }) {
 
   const saveMutation = useMutation({
     mutationFn: (data) => {
-      const { id, created_date, updated_date, created_by_id, ...editable } = data;
+      // The details-form fields are kept out: a repairer can send their answers while
+      // someone has this open, and saving the edit must not wipe them.
+      const {
+        id, created_date, updated_date, created_by_id,
+        pending_details_update, details_form_sent_at, details_form_sent_to, details_last_confirmed_at,
+        ...editable
+      } = data;
       return updateAndLog('Bodyshop', bodyshopId, editable);
     },
     onSuccess: () => {
@@ -185,12 +191,10 @@ export default function RepairerDetailDrawer({ bodyshopId, onClose }) {
         ) : bodyshop ? (
           <>
             <div className="px-1 pb-8">
-              {!isEditing && (
-                <div className="space-y-2 mt-3">
-                  <RepairerDetailsReview key={bodyshop.pending_details_update?.submitted_at || 'none'} bodyshop={bodyshop} />
-                  <RepairerDetailsRequest bodyshop={bodyshop} />
-                </div>
-              )}
+              <div className="space-y-2 mt-3">
+                {!isEditing && <RepairerDetailsReview key={bodyshop.pending_details_update?.submitted_at || 'none'} bodyshop={bodyshop} />}
+                <RepairerDetailsRequest bodyshop={bodyshop} />
+              </div>
               <Section title="Company Information" icon={Building2}>
                 {isEditing ? (
                   <>
