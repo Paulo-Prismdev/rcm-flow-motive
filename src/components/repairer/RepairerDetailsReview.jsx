@@ -19,7 +19,9 @@ export default function RepairerDetailsReview({ bodyshop }) {
   const queryClient = useQueryClient();
   const pending = bodyshop?.pending_details_update;
   const changes = useMemo(() => Object.entries(pending?.changes || {}).sort(([a], [b]) => order(a) - order(b)), [pending]);
-  const [skip, setSkip] = useState({});
+  // A changed business name may mean the answers came from a different business (a
+  // link sent to the wrong repairer), so that one starts unticked.
+  const [skip, setSkip] = useState(() => ('name' in (pending?.changes || {}) ? { name: true } : {}));
   const [saving, setSaving] = useState(false);
   if (!pending?.submitted_at) return null;
 
@@ -63,6 +65,12 @@ export default function RepairerDetailsReview({ bodyshop }) {
           </p>
         </div>
       </div>
+
+      {'name' in (pending.changes || {}) && (
+        <p className="rounded-lg bg-warning-bg text-warning-fg text-xs p-2.5">
+          They changed the business name from <strong>{bodyshop.name}</strong> to <strong>{pending.changes.name}</strong>. Check these answers are really from this repairer before accepting — if the link went to the wrong business, dismiss them.
+        </p>
+      )}
 
       {changes.length === 0 ? (
         <p className="text-sm">They confirmed everything we hold is correct.</p>
