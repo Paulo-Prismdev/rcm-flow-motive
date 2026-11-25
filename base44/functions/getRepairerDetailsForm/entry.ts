@@ -18,6 +18,8 @@ Deno.serve(async (req) => {
 
     return Response.json({
       success: true,
+      // Who this link is for, as we hold them, so the wrong business can't fill it in unawares.
+      for_name: bodyshop.name || '',
       // What we hold, with any answers they've sent that we haven't reviewed yet on top.
       details: { ...currentDetails(bodyshop), ...(bodyshop.pending_details_update?.changes || {}) },
       // Already sent answers that are still waiting for us to review.
