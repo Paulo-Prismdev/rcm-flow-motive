@@ -440,7 +440,7 @@ export default function ClaimFinancials({ claim, currentUser, onUpdate, showInvo
     // that becomes the claim's final repair cost is the WHOLE repair: a split
     // invoice's own total, or the insurer's invoice plus the customer's share, which is
     // what every fee and invoice is worked out from.
-    const expectation = item.setsRepairCost ? claimAuthorityExpectation(claim) : null;
+    const expectation = item.setsRepairCost ? claimAuthorityExpectation(claim, { invoiceFigures: figures }) : null;
     const comparison = item.setsRepairCost
       ? compareToAuthority(total, expectation, vatExcessAuthority, split)
       : null;
