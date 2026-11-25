@@ -64,16 +64,16 @@ export const REPAIRER_DETAILS_SECTIONS = [
   {
     title: 'Courtesy vehicles',
     fields: [
-      { key: 'courtesy_cars_offered', label: 'Do you provide courtesy vehicles?', options: [{ value: 'Yes', label: 'Yes' }, { value: 'No', label: 'No' }] },
+      { key: 'courtesy_cars_offered', label: 'Do you provide courtesy vehicles?', short: 'Courtesy vehicles', options: [{ value: 'Yes', label: 'Yes' }, { value: 'No', label: 'No' }] },
       {
         key: 'courtesy_car_count', label: 'Roughly how many do you keep?', showIf: (d) => d.courtesy_cars_offered === 'Yes',
-        options: [{ value: '1-5', label: '1–5' }, { value: '6-10', label: '6–10' }, { value: '10+', label: 'More than 10' }],
+        short: 'Number of courtesy vehicles', options: COURTESY_CAR_COUNTS,
       },
       {
-        key: 'courtesy_car_types', label: 'What types? Tick all that apply', multi: true, showIf: (d) => d.courtesy_cars_offered === 'Yes',
+        key: 'courtesy_car_types', label: 'What types? Tick all that apply', short: 'Courtesy vehicle types', multi: true, showIf: (d) => d.courtesy_cars_offered === 'Yes',
         options: COURTESY_CAR_TYPES.map((t) => ({ value: t, label: t })),
       },
-      { key: 'courtesy_car_notes', label: 'Anything else about your courtesy vehicles?', long: true, showIf: (d) => d.courtesy_cars_offered === 'Yes', placeholder: 'e.g. delivered to the customer, age limits, mostly automatics' },
+      { key: 'courtesy_car_notes', label: 'Anything else about your courtesy vehicles?', short: 'Courtesy vehicle notes', long: true, showIf: (d) => d.courtesy_cars_offered === 'Yes', placeholder: 'e.g. delivered to the customer, age limits, mostly automatics' },
     ],
   },
   {
@@ -88,7 +88,7 @@ export const REPAIRER_DETAILS_SECTIONS = [
 ];
 
 export const REPAIRER_DETAILS_FIELDS = REPAIRER_DETAILS_SECTIONS.flatMap((s) => s.fields);
-export const fieldLabel = (key) => REPAIRER_DETAILS_FIELDS.find((f) => f.key === key)?.label || key;
+export const fieldLabel = (key) => { const f = REPAIRER_DETAILS_FIELDS.find((x) => x.key === key); return f?.short || f?.label || key; };
 
 /** A value as people read it: lists joined, choices by their label. */
 export function displayValue(key, value) {
