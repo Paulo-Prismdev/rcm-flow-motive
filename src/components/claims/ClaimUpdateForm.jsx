@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Command, CommandItem, CommandList } from "@/components/ui/command";
 import StatusChangeFields from "@/components/shared/StatusChangeFields";
 import { getClaimOutcome } from "@/components/shared/claimOutcome";
-import { buildStatusChangeClaimUpdate, buildStatusChangeRecord, isUpdateTrackingClosed } from "@/components/shared/claimStatusUpdate";
+import { buildStatusChangeClaimUpdate, buildStatusChangeRecord, isUpdateTrackingClosed, resetsCaseTimer, resetsClientTimer } from "@/components/shared/claimStatusUpdate";
 import { createTagNotifications } from "@/components/shared/createTagNotifications";
 import UpdateContactSelector from "@/components/claims/UpdateContactSelector";
 import { getAvailableUpdateTypes } from "@/components/shared/claimTypeLogic";

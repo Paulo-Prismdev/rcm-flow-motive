@@ -111,7 +111,7 @@ import InsurerContactCard from './InsurerContactCard';
 import { authorisingInsurerName, networkCodePatch, networkCodesOf, findInsurer, useInsurerDirectory, withNetworkCode } from '../shared/insurerDirectory';
 import { generateClaimOverviewPdf } from './claimOverviewPdf';
 import ClaimStatusEditForm from './ClaimStatusEditForm';
-import { isUpdateTrackingClosed, computeUpdateStatusFlag, computeClientCommStatusFlag, buildStatusChangeRecord } from '../shared/claimStatusUpdate';
+import { isUpdateTrackingClosed, computeUpdateStatusFlag, computeClientCommStatusFlag, buildStatusChangeRecord, resetsCaseTimer, resetsClientTimer } from '../shared/claimStatusUpdate';
 import { saveTimeLogInBackground } from '../shared/saveTimeLogInBackground';
 
 import { askConfirm, notify, notifyError } from '@/lib/dialogs';

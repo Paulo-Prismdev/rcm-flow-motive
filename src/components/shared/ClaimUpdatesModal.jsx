@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Badge } from "@/components/ui/badge";
 import ClaimUpdateForm from '../claims/ClaimUpdateForm';
 import UpdateDirectionBadges from '../claims/UpdateDirectionBadges';
-import { isUpdateTrackingClosed } from "@/components/shared/claimStatusUpdate";
+import { isUpdateTrackingClosed, resetsCaseTimer, resetsClientTimer } from "@/components/shared/claimStatusUpdate";
 import { withTotalLossMarker } from "@/components/shared/totalLoss";
 import { recomputeUpdateTimers } from "@/components/shared/recomputeUpdateTimers";
 import { createTagNotifications } from "@/components/shared/createTagNotifications";

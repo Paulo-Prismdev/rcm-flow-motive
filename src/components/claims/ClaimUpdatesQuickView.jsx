@@ -7,7 +7,7 @@ import { Clock, Calendar, User, MessageSquare, Plus, Star, Copy, Check, AtSign }
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import ClaimUpdateForm from './ClaimUpdateForm';
-import { buildStatusChangeClaimUpdate, isUpdateTrackingClosed } from '@/components/shared/claimStatusUpdate';
+import { buildStatusChangeClaimUpdate, isUpdateTrackingClosed, resetsCaseTimer, resetsClientTimer } from '@/components/shared/claimStatusUpdate';
 import UpdateDirectionBadges from './UpdateDirectionBadges';
 
 const CopyTextButton = ({ text }) => {
