@@ -1,3 +1,4 @@
+import PayingPrivatelyFilter, { isPrivateJob } from '@/components/shared/PayingPrivatelyFilter';
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { format } from 'date-fns';
@@ -7,7 +8,6 @@ import StatusBadge from '@/components/shared/StatusBadge';
 import ClaimStatusBadges from '@/components/shared/ClaimStatusBadges';
 import ClaimCardFieldsModal from '@/components/claims/ClaimCardFieldsModal';
 import { Settings2, FileText, ChevronRight, Filter, X } from 'lucide-react';
-import ClaimTypeTabs from '@/components/shared/ClaimTypeTabs';
 import { activateOnKey } from '@/lib/a11y';
 
 const FILTERS = ['active', 'completed', 'all'];
@@ -21,7 +21,7 @@ export default function RepairerClaimsList({ claims, onViewClaim }) {
   const [claimTypeFilter, setClaimTypeFilter] = useState('');
   const [businessDivisionFilter, setBusinessDivisionFilter] = useState('');
   const [showFilters, setShowFilters] = useState(false);
-  const [claimTypeTab, setClaimTypeTab] = useState('claims');
+  const [privateOnly, setPrivateOnly] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: currentUser } = useQuery({
@@ -93,9 +93,9 @@ export default function RepairerClaimsList({ claims, onViewClaim }) {
 
   const displayFields = userCardFields;
 
-  const standardClaims = claims.filter(c => c.claim_type !== 'Paying Privately' && c.claim_type !== '3rd Party Paying Privately');
-  const privateClaims = claims.filter(c => c.claim_type === 'Paying Privately' || c.claim_type === '3rd Party Paying Privately');
-  const tabClaims = claimTypeTab === 'private' ? privateClaims : standardClaims;
+  // All jobs in one list; the Paying Privately button narrows it to private jobs.
+  const privateCount = claims.filter(isPrivateJob).length;
+  const tabClaims = privateOnly ? claims.filter(isPrivateJob) : claims;
 
   const filteredClaims = tabClaims.filter(c => {
     if (filter === 'active') {
@@ -125,13 +125,12 @@ export default function RepairerClaimsList({ claims, onViewClaim }) {
 
   const uniqueInsurers = [...new Set(claims.map(c => c.insurer).filter(Boolean))].sort();
   const uniqueBusinessDivisions = [...new Set(claims.map(c => c.business_division).filter(Boolean))].sort();
-  const activeFiltersCount = [search, insurerFilter, claimTypeFilter, businessDivisionFilter].filter(Boolean).length;
+  const activeFiltersCount = [privateOnly, search, insurerFilter, claimTypeFilter, businessDivisionFilter].filter(Boolean).length;
 
   return (
     <div className="neomorph p-4 space-y-4">
       {/* Toolbar */}
       <div className="space-y-2">
-        <ClaimTypeTabs activeTab={claimTypeTab} onChange={setClaimTypeTab} claimsCount={standardClaims.length} privateCount={privateClaims.length} />
         <div className="flex items-center gap-2 flex-wrap">
           {FILTERS.map(f => (
             <button
@@ -174,13 +173,14 @@ export default function RepairerClaimsList({ claims, onViewClaim }) {
               </button>
             )}
           </div>
+<PayingPrivatelyFilter active={privateOnly} onChange={setPrivateOnly} count={privateCount} />
           <button onClick={() => setShowFilters(!showFilters)}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${activeFiltersCount > 0 ? 'bg-info-bg border-info/30 text-info-fg' : 'border-border text-muted-foreground hover:bg-card hover:border-border'}`}>
             <Filter className="w-3.5 h-3.5" />
             Filters{activeFiltersCount > 0 ? ` (${activeFiltersCount})` : ''}
           </button>
           {activeFiltersCount > 0 && (
-            <button onClick={() => { setSearch(''); setInsurerFilter(''); setClaimTypeFilter(''); setBusinessDivisionFilter(''); }}
+            <button onClick={() => { setSearch(''); setInsurerFilter(''); setClaimTypeFilter(''); setBusinessDivisionFilter(''); setPrivateOnly(false); }}
               className="p-1.5 text-muted-foreground hover:text-muted-foreground transition-colors"><X className="w-3.5 h-3.5" /></button>
           )}
         </div>

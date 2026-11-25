@@ -1,4 +1,5 @@
 import LoadingRows from '@/components/shared/LoadingRows';
+import PayingPrivatelyFilter, { isPrivateJob } from '@/components/shared/PayingPrivatelyFilter';
 import React, { useState, useEffect, useMemo } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -21,7 +22,6 @@ import ClientLayout from '../components/client/ClientLayout';
 import ReferrerClaimDetail from '../components/referrer/ReferrerClaimDetail';
 import ClientDashboard from '../components/client/ClientDashboard';
 import ClaimCardFieldsModal from '../components/claims/ClaimCardFieldsModal';
-import ClaimTypeTabs from '../components/shared/ClaimTypeTabs';
 import { activateOnKey } from '@/lib/a11y';
 
 export default function ClientPortal() {
@@ -36,7 +36,7 @@ export default function ClientPortal() {
   const [collapsedGroups, setCollapsedGroups] = useState({});
   const [showFieldsModal, setShowFieldsModal] = useState(false);
   const [sortBy, setSortBy] = useState('created_desc');
-  const [claimTypeTab, setClaimTypeTab] = useState('claims');
+  const [privateOnly, setPrivateOnly] = useState(false);
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -79,9 +79,9 @@ export default function ClientPortal() {
     return divisions.sort();
   }, [claims]);
 
-  const standardClaims = claims.filter(c => c.claim_type !== 'Paying Privately' && c.claim_type !== '3rd Party Paying Privately');
-  const privateClaims = claims.filter(c => c.claim_type === 'Paying Privately' || c.claim_type === '3rd Party Paying Privately');
-  const tabClaims = claimTypeTab === 'private' ? privateClaims : standardClaims;
+  // All jobs in one list; the Paying Privately button narrows it to private jobs.
+  const privateCount = claims.filter(isPrivateJob).length;
+  const tabClaims = privateOnly ? claims.filter(isPrivateJob) : claims;
 
   const filteredClaims = tabClaims.filter(c => {
     const q = search.toLowerCase();
@@ -104,7 +104,7 @@ export default function ClientPortal() {
     return new Date(b.created_date) - new Date(a.created_date);
   });
 
-  const activeFiltersCount = [statusFilter !== 'all', claimTypeFilter, businessDivisionFilter].filter(Boolean).length;
+  const activeFiltersCount = [privateOnly, statusFilter !== 'all', claimTypeFilter, businessDivisionFilter].filter(Boolean).length;
 
   const savedFields = currentUser?.claim_card_fields || [];
   const userCardFields = [...savedFields.filter(f => f !== 'referrer')];
@@ -218,10 +218,6 @@ export default function ClientPortal() {
   return (
     <ClientLayout>
       <div className="h-full flex flex-col min-h-0 bg-card rounded-xl border border-border overflow-hidden shadow-card m-4 mt-0 max-md:m-0">
-        {/* Repairs / Paying Privately tabs */}
-        <div className="flex items-center px-5 py-2 border-b border-border flex-shrink-0">
-          <ClaimTypeTabs activeTab={claimTypeTab} onChange={setClaimTypeTab} claimsCount={standardClaims.length} privateCount={privateClaims.length} />
-        </div>
         {/* Search bar with filters */}
         <div className="flex items-center gap-3 px-5 py-2.5 border-b border-border flex-shrink-0 bg-muted flex-wrap gap-y-2">
           <div className="flex-1 min-w-[200px] relative">
@@ -252,13 +248,14 @@ export default function ClientPortal() {
             >
               <Settings2 className="w-4 h-4" />
             </button>
+<PayingPrivatelyFilter active={privateOnly} onChange={setPrivateOnly} count={privateCount} />
             <button onClick={() => setShowFilters(!showFilters)}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${activeFiltersCount > 0 ? 'bg-info-bg border-info/30 text-info-fg' : 'border-border text-muted-foreground hover:bg-card hover:border-border'}`}>
               <Filter className="w-3.5 h-3.5" />
               Filters{activeFiltersCount > 0 ? ` (${activeFiltersCount})` : ''}
             </button>
             {activeFiltersCount > 0 && (
-              <button onClick={() => { setStatusFilter('all'); setClaimTypeFilter(''); setBusinessDivisionFilter(''); }}
+              <button onClick={() => { setStatusFilter('all'); setClaimTypeFilter(''); setBusinessDivisionFilter(''); setPrivateOnly(false); }}
                 className="p-1.5 text-muted-foreground hover:text-muted-foreground transition-colors"><X className="w-3.5 h-3.5" /></button>
             )}
           </div>
@@ -504,7 +501,7 @@ export default function ClientPortal() {
 
         {/* Footer count */}
         <div className="px-5 py-2 border-t border-border text-xs text-muted-foreground flex-shrink-0">
-          {filteredClaims.length} of {tabClaims.length} {claimTypeTab === 'private' ? 'repairs' : 'claims'}
+          {filteredClaims.length} of {claims.length} claims{privateOnly ? ' · paying privately only' : ''}
         </div>
       </div>
       <ClaimCardFieldsModal
