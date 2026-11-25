@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
@@ -24,6 +24,8 @@ export default function RepairerDetailsRequest({ bodyshop }) {
   const [link, setLink] = useState('');
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState('');
+  // Moving to another repairer in the same screen: never keep the last one's link.
+  useEffect(() => { setLink(''); setOpen(false); setCopied(false); }, [bodyshop.id]);
 
   const start = () => {
     setTo(bodyshop.email || bodyshop.bs_manager_email || '');
