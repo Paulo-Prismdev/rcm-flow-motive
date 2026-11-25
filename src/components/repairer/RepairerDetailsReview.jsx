@@ -5,7 +5,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { Inbox, Loader2 } from 'lucide-react';
 import { updateAndLog } from '@/components/shared/useActivityLogger';
 import { geocodeAddress } from '@/functions/geocodeAddress';
-import { REPAIRER_DETAILS_FIELDS, fieldLabel, fullAddressOf, touchesAddress } from './repairerDetailsFields';
+import { REPAIRER_DETAILS_FIELDS, displayValue, fieldLabel, fullAddressOf, touchesAddress } from './repairerDetailsFields';
 
 const fmt = (iso) => (iso ? new Date(iso).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '');
 const order = (key) => { const i = REPAIRER_DETAILS_FIELDS.findIndex((f) => f.key === key); return i < 0 ? 999 : i; };
@@ -69,15 +69,16 @@ export default function RepairerDetailsReview({ bodyshop }) {
       ) : (
         <ul className="rounded-lg border border-border bg-card divide-y divide-border">
           {changes.map(([key, value]) => {
-            const before = bodyshop[key];
+            const before = displayValue(key, bodyshop[key]);
+            const after = displayValue(key, value);
             return (
               <li key={key}>
                 <label className="flex items-start gap-3 p-2.5 cursor-pointer">
                   <input type="checkbox" checked={!skip[key]} onChange={(e) => setSkip((s) => ({ ...s, [key]: !e.target.checked }))} className="mt-1 w-4 h-4 flex-shrink-0" />
                   <span className="min-w-0 flex-1">
                     <span className="block text-xs text-muted-foreground">{fieldLabel(key)}</span>
-                    {before ? <span className="block text-xs text-muted-foreground line-through break-words">{String(before)}</span> : <span className="block text-xs text-muted-foreground italic">was empty</span>}
-                    <span className="block text-sm font-medium break-words whitespace-pre-line">{value || <em className="font-normal text-muted-foreground">cleared</em>}</span>
+                    {before ? <span className="block text-xs text-muted-foreground line-through break-words">{before}</span> : <span className="block text-xs text-muted-foreground italic">was empty</span>}
+                    <span className="block text-sm font-medium break-words whitespace-pre-line">{after || <em className="font-normal text-muted-foreground">cleared</em>}</span>
                   </span>
                 </label>
               </li>
