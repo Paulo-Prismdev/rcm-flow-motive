@@ -76,6 +76,7 @@ export default function RepairerDetailsForm() {
   const [linkMessage, setLinkMessage] = useState('');
   const [details, setDetails] = useState({});
   const [pending, setPending] = useState(null);
+  const [forName, setForName] = useState('');
   const [by, setBy] = useState({ name: '', role: '', email: '' });
   const [notes, setNotes] = useState('');
   const [confirmed, setConfirmed] = useState(false);
@@ -90,6 +91,7 @@ export default function RepairerDetailsForm() {
         if (!res.data?.success) throw new Error();
         setDetails(res.data.details || {});
         setPending(res.data.pending || null);
+        setForName(res.data.for_name || res.data.details?.name || '');
         setState('form');
       })
       .catch((e) => { setLinkMessage(serverMessage(e, '')); setState('invalid'); });
@@ -185,6 +187,13 @@ export default function RepairerDetailsForm() {
           <h1 className="text-2xl font-bold text-foreground">Your repairer details</h1>
           <p className="text-sm text-muted-foreground mt-1">Please check everything below and fill in anything missing. Anything we already hold is filled in for you.</p>
         </div>
+
+        {forName && (
+          <div className="rounded-2xl border-2 border-[#131d47] bg-white p-4 text-sm text-foreground" role="note">
+            <p>This form is for <strong>{forName}</strong>.</p>
+            <p className="text-muted-foreground mt-1">If that isn't your business, please don't fill it in. Contact RCM Automotive and we'll send you your own link.</p>
+          </div>
+        )}
 
         {pending && (
           <div className="rounded-2xl border border-info/30 bg-info-bg p-4 text-sm text-info-fg">
