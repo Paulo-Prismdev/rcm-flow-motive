@@ -14,6 +14,8 @@ import { haversineDistance, formatHaversineDistance } from '@/components/shared/
 import { sortAlphaNumeric } from '@/components/shared/sortAlphaNumeric';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { activateOnKey } from '@/lib/a11y';
+import { RepairerFilterChips, RepairerFitPanel, RepairerRowTags } from '../allocation/RepairerAllocationInfo';
+import { applyRepairerFilters } from '../allocation/repairerFit';
 
 // ── Leaflet icon setup ──
 delete L.Icon.Default.prototype._getIconUrl;
@@ -97,6 +99,7 @@ export default function WizardFindRepairerStep({
   const [isLoadingDistance, setIsLoadingDistance] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('distance');
+  const [quickFilters, setQuickFilters] = useState({});
   const [routePoints, setRoutePoints] = useState([]);
   // On phones the list and the map are shown one at a time, so the map is not
   // reduced to a thin strip underneath a long list.
@@ -221,7 +224,7 @@ export default function WizardFindRepairerStep({
 
   // ── Sorted + filtered bodyshops ──
   const sortedBodyshops = useMemo(() => {
-    let list = [...validBodyshops];
+    let list = applyRepairerFilters([...validBodyshops], quickFilters);
 
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
@@ -243,7 +246,11 @@ export default function WizardFindRepairerStep({
     }
 
     return list;
-  }, [validBodyshops, sortBy, searchQuery, clientLocation]);
+  }, [validBodyshops, sortBy, searchQuery, clientLocation, quickFilters]);
+
+  const selectedMiles = selectedBodyshop && clientLocation
+    ? haversineDistance(clientLocation.lat, clientLocation.lng, parseFloat(selectedBodyshop.latitude), parseFloat(selectedBodyshop.longitude))
+    : null;
 
   const radiusInMeters = 30 * 1609.34;
 
@@ -296,6 +303,8 @@ export default function WizardFindRepairerStep({
         </div>
       </div>
 
+      <RepairerFilterChips active={quickFilters} onChange={setQuickFilters} />
+
       {/* Phones: pick list or map, so whichever is open gets the room */}
       {isMobile && (
         <div className="flex gap-1 p-1 rounded-lg bg-muted">
@@ -347,6 +356,7 @@ export default function WizardFindRepairerStep({
                     {bodyshop.phone && <p className="flex items-center gap-1 truncate"><Phone className="w-3 h-3 flex-shrink-0" />{bodyshop.phone}</p>}
                     {bodyshop.town && <p className="flex items-center gap-1 truncate"><MapPinned className="w-3 h-3 flex-shrink-0" />{bodyshop.town} {bodyshop.postcode}</p>}
                   </div>
+                  <RepairerRowTags bodyshop={bodyshop} claim={claim} distanceMiles={haversineMiles} />
                 </div>
               );
             })
@@ -441,6 +451,9 @@ export default function WizardFindRepairerStep({
             <Button aria-label="Close" variant="ghost" size="icon" className="flex-shrink-0" onClick={onClearSelection}>
               <X className="w-4 h-4" />
             </Button>
+          </div>
+          <div className="mt-2.5">
+            <RepairerFitPanel bodyshop={selectedBodyshop} claim={claim} distanceMiles={selectedMiles} />
           </div>
         </div>
       ) : (
