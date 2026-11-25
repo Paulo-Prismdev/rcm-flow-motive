@@ -126,6 +126,13 @@ export const INVOICE_ITEMS = [
         split: true,
         prompt: 'only where the invoice prints TWO separate amounts payable — one by the insurer and one by the customer/policyholder — the whole amount the customer, client, owner or policyholder pays. Where the document lists the customer items separately (such as the excess and the VAT) and totals them as an amount payable by the customer, use that total, never just one of those lines. Never take the insurer share or the full repair as this figure. An excess or VAT line that is just taken off the subtotal to reach the amount due on this invoice is a deduction, not an amount payable by the customer here (the customer is billed for it on a separate invoice): leave this empty then. Leave it empty where the document prints one amount due only',
       },
+      // The repair's own lines, checked one by one against the Final Authority's —
+      // and, where the authority agrees parts at list price with no figure, the parts
+      // here are what its authorised total is completed with.
+      { key: 'labour', label: 'Labour (ex VAT)', type: 'number', prompt: 'the labour amount on the invoice, excluding VAT, as a number — only where printed as its own line' },
+      { key: 'paint_materials', label: 'Paint & materials (ex VAT)', type: 'number', prompt: 'the paint and materials amount on the invoice, excluding VAT, as a number — only where printed as its own line' },
+      { key: 'parts', label: 'Parts (ex VAT)', type: 'number', prompt: 'the parts amount on the invoice, excluding VAT, as a number — only where printed as its own line' },
+      { key: 'additional_costs', label: 'Additional costs (ex VAT)', type: 'number', prompt: 'the additional costs (specialist, sublet and the like) on the invoice, excluding VAT, as a number — only where printed as its own line; their total where they are listed separately' },
     ],
   },
   {

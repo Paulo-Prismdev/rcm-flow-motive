@@ -258,7 +258,7 @@ export default function InvoiceReviewModal({
   // pays the repairer themselves — the two together are the whole repair, which is
   // what the claim's final repair cost has to be. Nothing to work it out from until
   // a Final Authority is on the claim, or on a job with no insurer on it at all.
-  const expectation = item?.setsRepairCost ? claimAuthorityExpectation(claim) : null;
+  const expectation = item?.setsRepairCost ? claimAuthorityExpectation(claim, { invoiceFigures: figures }) : null;
 
   // The invoice's own split of the repair, where the document prints one: its two
   // shares are checked against their own halves of the authorisation, and the whole

@@ -297,6 +297,22 @@ export function figuresForReview(extracted = {}, fields = INVOICE_FIGURES) {
     derived.push('vat_amount');
   }
 
+  // An invoice whose amount due is printed as the insurer's figure, with a customer
+  // line beside it, is taking an excess (or the customer's VAT) off its subtotal: that
+  // line is a deduction billed to the customer on their own invoice, not a split of
+  // this one. Both payable figures are cleared so it is read as the insurer's invoice.
+  if (fields.some((f) => f.key === 'payable_customer')) {
+    const insurerShare = toNum(figures.payable_insurer);
+    const customerShare = toNum(figures.payable_customer);
+    if (customerShare !== null && insurerShare !== null && total !== null && Math.abs(round2(insurerShare - total)) <= 0.05) {
+      figures.payable_insurer = '';
+      figures.payable_customer = '';
+      confidence.payable_insurer = 'missing';
+      confidence.payable_customer = 'missing';
+      derived.push('payable_insurer', 'payable_customer');
+    }
+  }
+
   return { figures, raw, confidence, derived };
 }
 
